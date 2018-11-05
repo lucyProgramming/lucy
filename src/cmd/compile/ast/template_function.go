@@ -14,7 +14,7 @@ type TemplateFunctionInstance struct {
 	Function       *Function
 }
 
-func (t *TemplateFunction) instanceExists(parameterTypes []*Type) *TemplateFunctionInstance {
+func (this *TemplateFunction) instanceExists(parameterTypes []*Type) *TemplateFunctionInstance {
 	equal := func(instance *TemplateFunctionInstance) bool {
 		if len(instance.parameterTypes) != len(parameterTypes) {
 			return false
@@ -27,7 +27,7 @@ func (t *TemplateFunction) instanceExists(parameterTypes []*Type) *TemplateFunct
 		}
 		return true
 	}
-	for _, v := range t.instances {
+	for _, v := range this.instances {
 		if equal(v) {
 			return v
 		}
@@ -35,13 +35,13 @@ func (t *TemplateFunction) instanceExists(parameterTypes []*Type) *TemplateFunct
 	return nil
 }
 
-func (t *TemplateFunction) insert(parameterTypes []*Type) *TemplateFunctionInstance {
-	if t := t.instanceExists(parameterTypes); t != nil {
+func (this *TemplateFunction) insert(parameterTypes []*Type) *TemplateFunctionInstance {
+	if t := this.instanceExists(parameterTypes); t != nil {
 		return t
 	}
 	ret := &TemplateFunctionInstance{
 		parameterTypes: parameterTypes,
 	}
-	t.instances = append(t.instances, ret)
+	this.instances = append(this.instances, ret)
 	return ret
 }

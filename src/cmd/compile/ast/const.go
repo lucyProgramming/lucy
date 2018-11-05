@@ -15,29 +15,29 @@ type Constant struct {
 	Value                  interface{} // value base on type
 }
 
-func (c *Constant) isPublic() bool {
-	return c.AccessFlags|cg.AccFieldPublic != 0
+func (this *Constant) isPublic() bool {
+	return this.AccessFlags|cg.AccFieldPublic != 0
 }
 
-func (c *Constant) mkDefaultValue() {
-	switch c.Type.Type {
+func (this *Constant) mkDefaultValue() {
+	switch this.Type.Type {
 	case VariableTypeBool:
-		c.Value = false
+		this.Value = false
 	case VariableTypeByte:
-		c.Value = int64(0)
+		this.Value = int64(0)
 	case VariableTypeShort:
-		c.Value = int64(0)
+		this.Value = int64(0)
 	case VariableTypeChar:
-		c.Value = int64(0)
+		this.Value = int64(0)
 	case VariableTypeInt:
-		c.Value = int64(0)
+		this.Value = int64(0)
 	case VariableTypeLong:
-		c.Value = int64(0)
+		this.Value = int64(0)
 	case VariableTypeFloat:
-		c.Value = float32(0)
+		this.Value = float32(0)
 	case VariableTypeDouble:
-		c.Value = float64(0)
+		this.Value = float64(0)
 	case VariableTypeString:
-		c.Value = ""
+		this.Value = ""
 	}
 }

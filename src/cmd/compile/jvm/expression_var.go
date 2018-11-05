@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildVar(
+func (this *BuildExpression) buildVar(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -39,9 +39,9 @@ func (buildExpression *BuildExpression) buildVar(
 	index = 0
 	store := func(index int) {
 		if vs.Variables[index].IsGlobal {
-			buildExpression.BuildPackage.storeGlobalVariable(class, code, vs.Variables[index])
+			this.BuildPackage.storeGlobalVariable(class, code, vs.Variables[index])
 		} else {
-			buildExpression.BuildPackage.storeLocalVar(class, code, vs.Variables[index])
+			this.BuildPackage.storeLocalVar(class, code, vs.Variables[index])
 			if vs.Variables[index].BeenCapturedAsLeftValue > 0 {
 				copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
 					vs.Variables[index].LocalValOffset)...)
@@ -56,7 +56,7 @@ func (buildExpression *BuildExpression) buildVar(
 	}
 	for _, v := range vs.InitValues {
 		if v.HaveMultiValue() {
-			stack := buildExpression.build(class, code, v, context, state)
+			stack := this.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -72,7 +72,7 @@ func (buildExpression *BuildExpression) buildVar(
 			continue
 		}
 		//
-		stack := buildExpression.build(class, code, v, context, state)
+		stack := this.build(class, code, v, context, state)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}

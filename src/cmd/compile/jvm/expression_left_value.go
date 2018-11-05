@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) getCaptureIdentifierLeftValue(
+func (this *BuildExpression) getCaptureIdentifierLeftValue(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -41,7 +41,7 @@ func (buildExpression *BuildExpression) getCaptureIdentifierLeftValue(
 	return
 }
 
-func (buildExpression *BuildExpression) getMapLeftValue(
+func (this *BuildExpression) getMapLeftValue(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -50,9 +50,9 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 	maxStack, remainStack uint16, ops []byte,
 	leftValueType LeftValueKind) {
 	index := e.Data.(*ast.ExpressionIndex)
-	maxStack = buildExpression.build(class, code, index.Expression, context, state)
+	maxStack = this.build(class, code, index.Expression, context, state)
 	state.pushStack(class, state.newObjectVariableType(mapClass))
-	stack := buildExpression.build(class, code, index.Index, context, state)
+	stack := this.build(class, code, index.Index, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
@@ -79,7 +79,7 @@ func (buildExpression *BuildExpression) getMapLeftValue(
 	return
 }
 
-func (buildExpression *BuildExpression) getLeftValue(
+func (this *BuildExpression) getLeftValue(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -98,23 +98,23 @@ func (buildExpression *BuildExpression) getLeftValue(
 			leftValueType = LeftValueKindPutStatic
 			ops[0] = cg.OP_putstatic
 			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
-				Class:      buildExpression.BuildPackage.mainClass.Name,
+				Class:      this.BuildPackage.mainClass.Name,
 				Field:      identifier.Name,
 				Descriptor: Descriptor.typeDescriptor(identifier.Variable.Type),
 			}, ops[1:3])
 			return
 		}
 		if identifier.Variable.BeenCapturedAsLeftValue > 0 {
-			return buildExpression.getCaptureIdentifierLeftValue(class, code, e, context, state)
+			return this.getCaptureIdentifierLeftValue(class, code, e, context, state)
 		}
 		leftValueType = LeftValueKindLocalVar
 		ops = storeLocalVariableOps(identifier.Variable.Type.Type, identifier.Variable.LocalValOffset)
 	case ast.ExpressionTypeIndex:
 		index := e.Data.(*ast.ExpressionIndex)
 		if index.Expression.Value.Type == ast.VariableTypeArray {
-			maxStack = buildExpression.build(class, code, index.Expression, context, state)
+			maxStack = this.build(class, code, index.Expression, context, state)
 			state.pushStack(class, index.Expression.Value)
-			stack := buildExpression.build(class, code, index.Index, context, state)
+			stack := this.build(class, code, index.Index, context, state)
 			if t := stack + 1; t > maxStack {
 				maxStack = t
 			}
@@ -132,11 +132,11 @@ func (buildExpression *BuildExpression) getLeftValue(
 			leftValueType = LeftValueKindLucyArray
 			remainStack = 2 // [arrayref ,index]
 		} else if index.Expression.Value.Type == ast.VariableTypeMap { // map
-			return buildExpression.getMapLeftValue(class, code, e, context, state)
+			return this.getMapLeftValue(class, code, e, context, state)
 		} else { // java array
-			maxStack = buildExpression.build(class, code, index.Expression, context, state)
+			maxStack = this.build(class, code, index.Expression, context, state)
 			state.pushStack(class, index.Expression.Value)
-			stack := buildExpression.build(class, code, index.Index, context, state)
+			stack := this.build(class, code, index.Index, context, state)
 			if t := stack + 1; t > maxStack {
 				maxStack = t
 			}
@@ -232,7 +232,7 @@ func (buildExpression *BuildExpression) getLeftValue(
 			} else {
 				leftValueType = LeftValueKindPutField
 				ops[0] = cg.OP_putfield
-				maxStack = buildExpression.build(class, code, selection.Expression, context, state)
+				maxStack = this.build(class, code, selection.Expression, context, state)
 				remainStack = 1
 				state.pushStack(class, selection.Expression.Value)
 			}

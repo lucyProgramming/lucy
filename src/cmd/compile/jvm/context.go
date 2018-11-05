@@ -20,38 +20,38 @@ type Context struct {
 	stackMapOffsets         []int
 }
 
-func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapState, offset int) {
-	if context.lastStackMapOffset == offset {
+func (this *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapState, offset int) {
+	if this.lastStackMapOffset == offset {
 		code.AttributeStackMap.StackMaps =
 			code.AttributeStackMap.StackMaps[0 : len(code.AttributeStackMap.StackMaps)-1]
-		context.stackMapOffsets = context.stackMapOffsets[0 : len(context.stackMapOffsets)-1]
-		context.lastStackMapState = nil
-		if len(context.stackMapOffsets) > 0 {
-			context.lastStackMapOffset = context.stackMapOffsets[len(context.stackMapOffsets)-1]
+		this.stackMapOffsets = this.stackMapOffsets[0 : len(this.stackMapOffsets)-1]
+		this.lastStackMapState = nil
+		if len(this.stackMapOffsets) > 0 {
+			this.lastStackMapOffset = this.stackMapOffsets[len(this.stackMapOffsets)-1]
 		} else {
-			context.lastStackMapOffset = -1
+			this.lastStackMapOffset = -1
 		}
 	}
 	var delta uint16
-	if context.lastStackMapOffset == -1 {
+	if this.lastStackMapOffset == -1 {
 		/*
 			first one
 		*/
 		delta = uint16(offset)
 	} else {
-		delta = uint16(offset - context.lastStackMapOffset - 1)
+		delta = uint16(offset - this.lastStackMapOffset - 1)
 	}
 	defer func() {
-		context.lastStackMapOffset = offset // rewrite
-		context.lastStackMapState = state
-		context.lastStackMapStateLocals = make([]*cg.StackMapVerificationTypeInfo, len(state.Locals))
-		copy(context.lastStackMapStateLocals, state.Locals)
-		context.lastStackMapStateStacks = make([]*cg.StackMapVerificationTypeInfo, len(state.Stacks))
-		copy(context.lastStackMapStateStacks, state.Stacks)
-		context.stackMapOffsets = append(context.stackMapOffsets, offset)
+		this.lastStackMapOffset = offset // rewrite
+		this.lastStackMapState = state
+		this.lastStackMapStateLocals = make([]*cg.StackMapVerificationTypeInfo, len(state.Locals))
+		copy(this.lastStackMapStateLocals, state.Locals)
+		this.lastStackMapStateStacks = make([]*cg.StackMapVerificationTypeInfo, len(state.Stacks))
+		copy(this.lastStackMapStateStacks, state.Stacks)
+		this.stackMapOffsets = append(this.stackMapOffsets, offset)
 	}()
-	if state == context.lastStackMapState { // same state
-		if len(state.Locals) == len(context.lastStackMapStateLocals) && len(state.Stacks) == 0 {
+	if state == this.lastStackMapState { // same state
+		if len(state.Locals) == len(this.lastStackMapStateLocals) && len(state.Stacks) == 0 {
 			/*
 				same frame or same frame extended
 			*/
@@ -64,7 +64,7 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 			}
 			return
 		}
-		if len(context.lastStackMapStateLocals) == len(state.Locals) && len(state.Stacks) == 1 { // 1 stack or 1 stack extended
+		if len(this.lastStackMapStateLocals) == len(state.Locals) && len(state.Stacks) == 1 { // 1 stack or 1 stack extended
 			if delta <= 64 {
 				code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
 					&cg.StackMapSameLocals1StackItemFrame{
@@ -81,8 +81,8 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 			}
 			return
 		}
-		if len(context.lastStackMapStateLocals) < len(state.Locals) && len(state.Stacks) == 0 { // append frame
-			num := len(state.Locals) - len(context.lastStackMapStateLocals)
+		if len(this.lastStackMapStateLocals) < len(state.Locals) && len(state.Stacks) == 0 { // append frame
+			num := len(state.Locals) - len(this.lastStackMapStateLocals)
 			if num <= 3 {
 				appendFrame := &cg.StackMapAppendFrame{}
 				appendFrame.FrameType = byte(num + 251)
@@ -106,22 +106,22 @@ func (context *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapStat
 	return
 }
 
-func (context *Context) appendLimeNumberAndSourceFile(
+func (this *Context) appendLimeNumberAndSourceFile(
 	pos *ast.Pos,
 	code *cg.AttributeCode,
 	class *cg.ClassHighLevel) {
 	if pos == nil {
 		return
 	}
-	if pos.Filename != context.currentSourceFile {
+	if pos.Filename != this.currentSourceFile {
 		class.InsertSourceFile(pos.Filename)
-		context.currentSourceFile = pos.Filename
-		context.currentLineNumber = pos.Line
+		this.currentSourceFile = pos.Filename
+		this.currentLineNumber = pos.Line
 		code.MKLineNumber(pos.Line)
 		return
 	}
-	if context.currentLineNumber != pos.Line {
+	if this.currentLineNumber != pos.Line {
 		code.MKLineNumber(pos.Line)
-		context.currentLineNumber = pos.Line
+		this.currentLineNumber = pos.Line
 	}
 }

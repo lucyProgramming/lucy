@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildArithmetic(
+func (this *BuildExpression) buildArithmetic(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -19,9 +19,9 @@ func (buildExpression *BuildExpression) buildArithmetic(
 	if e.Type == ast.ExpressionTypeOr ||
 		e.Type == ast.ExpressionTypeAnd ||
 		e.Type == ast.ExpressionTypeXor {
-		maxStack = buildExpression.build(class, code, bin.Left, context, state)
+		maxStack = this.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
-		stack := buildExpression.build(class, code, bin.Right, context, state)
+		stack := this.build(class, code, bin.Right, context, state)
 		if t := stack + jvmSlotSize(bin.Left.Value); t > maxStack {
 			maxStack = t
 		}
@@ -60,11 +60,11 @@ func (buildExpression *BuildExpression) buildArithmetic(
 		//handle string first
 		if bin.Left.Value.Type == ast.VariableTypeString ||
 			bin.Right.Value.Type == ast.VariableTypeString {
-			return buildExpression.buildStrCat(class, code, e, context, state)
+			return this.buildStrCat(class, code, e, context, state)
 		}
-		maxStack = buildExpression.build(class, code, bin.Left, context, state)
+		maxStack = this.build(class, code, bin.Left, context, state)
 		state.pushStack(class, e.Value)
-		stack := buildExpression.build(class, code, bin.Right, context, state)
+		stack := this.build(class, code, bin.Right, context, state)
 		if t := jvmSlotSize(bin.Left.Value) + stack; t > maxStack {
 			maxStack = t
 		}
@@ -194,9 +194,9 @@ func (buildExpression *BuildExpression) buildArithmetic(
 
 	if e.Type == ast.ExpressionTypeLsh ||
 		e.Type == ast.ExpressionTypeRsh {
-		maxStack = buildExpression.build(class, code, bin.Left, context, state)
+		maxStack = this.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
-		stack := buildExpression.build(class, code, bin.Right, context, state)
+		stack := this.build(class, code, bin.Right, context, state)
 		if t := stack + jvmSlotSize(bin.Left.Value); t > maxStack {
 			maxStack = t
 		}

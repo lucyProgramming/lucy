@@ -5,10 +5,10 @@ type Exit struct {
 	BranchBytes       []byte //[2]byte
 }
 
-func (exit *Exit) Init(op byte, code *AttributeCode) *Exit {
-	exit.CurrentCodeLength = code.CodeLength
+func (this *Exit) Init(op byte, code *AttributeCode) *Exit {
+	this.CurrentCodeLength = code.CodeLength
 	code.Codes[code.CodeLength] = op
-	exit.BranchBytes = code.Codes[code.CodeLength+1 : code.CodeLength+3]
+	this.BranchBytes = code.Codes[code.CodeLength+1 : code.CodeLength+3]
 	code.CodeLength += 3
-	return exit
+	return this
 }

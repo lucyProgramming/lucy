@@ -6,7 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) buildBlock(
+func (this *BuildPackage) buildBlock(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	b *ast.Block,
@@ -27,7 +27,7 @@ func (buildPackage *BuildPackage) buildBlock(
 			// this statement is build before
 			continue
 		}
-		maxStack := buildPackage.buildStatement(class, code, b, s, context, state)
+		maxStack := this.buildStatement(class, code, b, s, context, state)
 		if maxStack > code.MaxStack {
 			code.MaxStack = maxStack
 		}
@@ -40,7 +40,7 @@ func (buildPackage *BuildPackage) buildBlock(
 			panic(fmt.Sprintf("stack is not empty:%d", len(state.Stacks)))
 		}
 		//unCondition goto
-		if buildPackage.statementIsUnConditionJump(s) {
+		if this.statementIsUnConditionJump(s) {
 			notToHere = true
 			continue
 		}
@@ -78,12 +78,12 @@ func (buildPackage *BuildPackage) buildBlock(
 	if b.IsFunctionBlock == false &&
 		len(b.Defers) > 0 &&
 		b.NotExecuteToLastStatement == false {
-		buildPackage.buildDefers(class, code, context, b.Defers, state)
+		this.buildDefers(class, code, context, b.Defers, state)
 	}
 	return
 }
 
-func (buildPackage *BuildPackage) statementIsUnConditionJump(s *ast.Statement) bool {
+func (this *BuildPackage) statementIsUnConditionJump(s *ast.Statement) bool {
 	return s.Type == ast.StatementTypeReturn ||
 		s.Type == ast.StatementTypeGoTo ||
 		s.Type == ast.StatementTypeContinue ||

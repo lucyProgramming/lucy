@@ -13,8 +13,8 @@ type Pos struct {
 	Offset int
 }
 
-func (pos *Pos) ErrMsgPrefix() string {
-	return fmt.Sprintf("%s:%d:%d:", pos.Filename, pos.Line, pos.Column)
+func (this *Pos) ErrMsgPrefix() string {
+	return fmt.Sprintf("%s:%d:%d:", this.Filename, this.Line, this.Column)
 }
 
 type NameWithPos struct {

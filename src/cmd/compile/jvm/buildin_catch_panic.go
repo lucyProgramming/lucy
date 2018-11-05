@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) mkBuildInPanic(
+func (this *BuildExpression) mkBuildInPanic(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -16,7 +16,7 @@ func (buildExpression *BuildExpression) mkBuildInPanic(
 	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionPanicMeta)
 	if meta.ArgThrowable {
 		if call.Args[0].Type == ast.ExpressionTypeNew { // not new expression
-			maxStack = buildExpression.build(class, code, call.Args[0], context, state)
+			maxStack = this.build(class, code, call.Args[0], context, state)
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_new
 			className := call.Args[0].Value.Class.Name
@@ -31,7 +31,7 @@ func (buildExpression *BuildExpression) mkBuildInPanic(
 				state.Stacks = append(state.Stacks, verificationTypeInfo)
 				state.Stacks = append(state.Stacks, verificationTypeInfo)
 			}
-			stack := buildExpression.build(class, code, call.Args[0], context, state)
+			stack := this.build(class, code, call.Args[0], context, state)
 			state.popStack(2)
 			maxStack = 2 + stack
 			code.Codes[code.CodeLength] = cg.OP_invokespecial
@@ -55,12 +55,12 @@ func (buildExpression *BuildExpression) mkBuildInPanic(
 			state.Stacks = append(state.Stacks, verificationTypeInfo)
 			state.Stacks = append(state.Stacks, verificationTypeInfo)
 		}
-		stack := buildExpression.build(class, code, call.Args[0], context, state)
+		stack := this.build(class, code, call.Args[0], context, state)
 		state.popStack(2)
 		if t := 2 + stack; t > maxStack {
 			maxStack = t
 		}
-		if t := 2 + buildExpression.stackTop2String(class, code, call.Args[0].Value, context, state); t > maxStack {
+		if t := 2 + this.stackTop2String(class, code, call.Args[0].Value, context, state); t > maxStack {
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
@@ -77,7 +77,7 @@ func (buildExpression *BuildExpression) mkBuildInPanic(
 	return
 }
 
-func (buildExpression *BuildExpression) mkBuildInCatch(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (this *BuildExpression) mkBuildInCatch(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context) (maxStack uint16) {
 	if e.IsStatementExpression { // statement call
 		maxStack = 1

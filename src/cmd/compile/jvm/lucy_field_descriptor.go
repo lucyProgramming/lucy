@@ -8,18 +8,18 @@ import (
 type LucyFieldSignature struct {
 }
 
-func (signature *LucyFieldSignature) Need(variableType *ast.Type) bool {
+func (this *LucyFieldSignature) Need(variableType *ast.Type) bool {
 	return variableType.Type == ast.VariableTypeMap ||
 		variableType.Type == ast.VariableTypeArray ||
 		variableType.Type == ast.VariableTypeEnum ||
 		variableType.Type == ast.VariableTypeFunction
 }
 
-func (signature *LucyFieldSignature) Encode(variableType *ast.Type) (d string) {
+func (this *LucyFieldSignature) Encode(variableType *ast.Type) (d string) {
 	if variableType.Type == ast.VariableTypeMap {
 		d = "M" // start token of map
-		d += signature.Encode(variableType.Map.K)
-		d += signature.Encode(variableType.Map.V)
+		d += this.Encode(variableType.Map.K)
+		d += this.Encode(variableType.Map.V)
 		return d
 	}
 	if variableType.Type == ast.VariableTypeEnum {
@@ -29,7 +29,7 @@ func (signature *LucyFieldSignature) Encode(variableType *ast.Type) (d string) {
 	}
 	if variableType.Type == ast.VariableTypeArray {
 		d = "]"
-		d += signature.Encode(variableType.Array)
+		d += this.Encode(variableType.Array)
 		return d
 	}
 	if variableType.Type == ast.VariableTypeFunction {
@@ -39,17 +39,17 @@ func (signature *LucyFieldSignature) Encode(variableType *ast.Type) (d string) {
 	return Descriptor.typeDescriptor(variableType)
 }
 
-func (signature *LucyFieldSignature) Decode(bs []byte) ([]byte, *ast.Type, error) {
+func (this *LucyFieldSignature) Decode(bs []byte) ([]byte, *ast.Type, error) {
 	var err error
 	if bs[0] == 'M' {
 		bs = bs[1:]
 		var kt *ast.Type
-		bs, kt, err = signature.Decode(bs)
+		bs, kt, err = this.Decode(bs)
 		if err != nil {
 			return bs, nil, err
 		}
 		var vt *ast.Type
-		bs, vt, err = signature.Decode(bs)
+		bs, vt, err = this.Decode(bs)
 		if err != nil {
 			return bs, nil, err
 		}
@@ -84,7 +84,7 @@ func (signature *LucyFieldSignature) Decode(bs []byte) ([]byte, *ast.Type, error
 		bs = bs[1:]
 		a := &ast.Type{}
 		a.Type = ast.VariableTypeArray
-		bs, a.Array, err = signature.Decode(bs)
+		bs, a.Array, err = this.Decode(bs)
 		return bs, a, err
 	}
 	return Descriptor.ParseType(bs)

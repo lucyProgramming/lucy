@@ -12,64 +12,64 @@ type Lexer struct {
 	offset, end          int
 }
 
-func (lex *Lexer) GetLineAndColumn() (int, int) {
-	return lex.line, lex.column
+func (this *Lexer) GetLineAndColumn() (int, int) {
+	return this.line, this.column
 }
-func (lex *Lexer) GetOffSet() int {
-	return lex.offset
+func (this *Lexer) GetOffSet() int {
+	return this.offset
 }
 
-func (lex *Lexer) getChar() (c byte, eof bool) {
-	if lex.offset == lex.end {
+func (this *Lexer) getChar() (c byte, eof bool) {
+	if this.offset == this.end {
 		eof = true
 		return
 	}
-	offset := lex.offset
-	lex.offset++ // next
-	c = lex.bs[offset]
-	lex.lastLine = lex.line
-	lex.lastColumn = lex.column
+	offset := this.offset
+	this.offset++ // next
+	c = this.bs[offset]
+	this.lastLine = this.line
+	this.lastColumn = this.column
 	if c == '\n' {
-		lex.line++
-		lex.column = 1
+		this.line++
+		this.column = 1
 	} else {
 		if c == '\t' {
-			lex.column += 4 // TODO:: 4 OR 8
+			this.column += 4 // TODO:: 4 OR 8
 		} else {
-			lex.column++
+			this.column++
 		}
 	}
 	return
 }
 
-func (lex *Lexer) unGetChar() {
-	lex.offset--
-	lex.line, lex.column = lex.lastLine, lex.lastColumn
+func (this *Lexer) unGetChar() {
+	this.offset--
+	this.line, this.column = this.lastLine, this.lastColumn
 }
 
-func (lex *Lexer) unGetChar2(offset int) {
-	lex.offset -= offset
-	lex.column -= offset
+func (this *Lexer) unGetChar2(offset int) {
+	this.offset -= offset
+	this.column -= offset
 }
 
-func (lex *Lexer) isLetter(c byte) bool {
+func (this *Lexer) isLetter(c byte) bool {
 	return ('a' <= c && c <= 'z') ||
 		('A' <= c && c <= 'Z')
 }
-func (lex *Lexer) isDigit(c byte) bool {
+func (this *Lexer) isDigit(c byte) bool {
 	return '0' <= c && c <= '9'
 }
-func (lex *Lexer) isOctal(c byte) bool {
+func (this *Lexer) isOctal(c byte) bool {
 	return '0' <= c && c <= '7'
 }
-func (lex *Lexer) isHex(c byte) bool {
+func (this *Lexer) isHex(c byte) bool {
 
 	return '0' <= c && c <= '9' ||
 		('a' <= c && c <= 'f') ||
 		('A' <= c && c <= 'F')
 }
 
-func (lex *Lexer) hexByte2ByteValue(c byte) byte {
+func (this *Lexer) hexByte2ByteValue(c byte) byte {
 	if 'a' <= c && c <= 'f' {
 		return c - 'a' + 10
 	}
@@ -79,7 +79,7 @@ func (lex *Lexer) hexByte2ByteValue(c byte) byte {
 	return c - '0' //also valid for digit
 }
 
-func (lex *Lexer) parseInt64(bs []byte) (int64, error) {
+func (this *Lexer) parseInt64(bs []byte) (int64, error) {
 	base := int64(10)
 	if bs[0] == '0' {
 		base = 8
@@ -93,7 +93,7 @@ func (lex *Lexer) parseInt64(bs []byte) (int64, error) {
 	var result int64 = 0
 	bit63is1 := false
 	for _, v := range bs {
-		result = result*base + int64(lex.hexByte2ByteValue(v))
+		result = result*base + int64(this.hexByte2ByteValue(v))
 		if false == bit63is1 {
 			if (result >> 63) != 0 {
 				bit63is1 = true
@@ -110,59 +110,59 @@ func (lex *Lexer) parseInt64(bs []byte) (int64, error) {
 	return result, nil
 }
 
-func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
+func (this *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	integerPart := []byte{c}
 	isHex := false
 	isOctal := false
 	if c == '0' { // enter when first char is '0'
-		c, eof = lex.getChar()
+		c, eof = this.getChar()
 		if c == 'x' || c == 'X' {
 			isHex = true
 			integerPart = append(integerPart, 'X')
 		} else {
 			isOctal = true
-			lex.unGetChar()
+			this.unGetChar()
 		}
 	}
-	c, eof = lex.getChar() //get next char
+	c, eof = this.getChar() //get next char
 	for eof == false {
 		ok := false
 		if isHex {
-			ok = lex.isHex(c)
+			ok = this.isHex(c)
 		} else if isOctal {
-			if lex.isDigit(c) == true && lex.isOctal(c) == false { // integer but not octal
+			if this.isDigit(c) == true && this.isOctal(c) == false { // integer but not octal
 				err = fmt.Errorf("octal number cannot be '8' and '9'")
 			}
-			ok = lex.isDigit(c)
+			ok = this.isDigit(c)
 		} else {
-			ok = lex.isDigit(c)
+			ok = this.isDigit(c)
 		}
 		if ok {
 			integerPart = append(integerPart, c)
-			c, eof = lex.getChar() // get next char
+			c, eof = this.getChar() // get next char
 			continue
 		} else { // something that I cannot handle
-			lex.unGetChar()
+			this.unGetChar()
 			break
 		}
 	}
-	c, eof = lex.getChar()
+	c, eof = this.getChar()
 	floatPart := []byte{}
 	haveFloatPart := false // float or double
 	if c == '.' {          // float numbers
 		haveFloatPart = true
-		c, eof = lex.getChar()
+		c, eof = this.getChar()
 		for eof == false {
-			if lex.isDigit(c) {
+			if this.isDigit(c) {
 				floatPart = append(floatPart, c)
-				c, eof = lex.getChar()
+				c, eof = this.getChar()
 			} else {
-				lex.unGetChar()
+				this.unGetChar()
 				break
 			}
 		}
 	} else {
-		lex.unGetChar()
+		this.unGetChar()
 	}
 	if isHex && haveFloatPart {
 		token.Type = TokenLiteralInt
@@ -170,54 +170,13 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 		err = fmt.Errorf("mix up float and hex")
 		return
 	}
-	isScientificNotation := false
-	power := []byte{}
-	powerPositive := true
-	c, eof = lex.getChar()
-	if (c == 'e' || c == 'E') && eof == false {
-		isScientificNotation = true
-		c, eof = lex.getChar()
-		if eof {
-			err = fmt.Errorf("unexpected EOF")
-		}
-		if c == '-' {
-			powerPositive = false
-			c, eof = lex.getChar()
-		} else if lex.isDigit(c) {
-			// nothing to do
-		} else if c == '+' { // default is true
-			c, eof = lex.getChar()
-		} else {
-			err = fmt.Errorf("wrong format scientific notation")
-		}
-		if lex.isDigit(c) == false {
-			lex.unGetChar() //
-			err = fmt.Errorf("wrong format scientific notation")
-		} else {
-			power = append(power, c)
-			c, eof = lex.getChar()
-			for eof == false && lex.isDigit(c) {
-				power = append(power, c)
-				c, eof = lex.getChar()
-			}
-			lex.unGetChar()
-		}
-	} else {
-		lex.unGetChar()
-	}
-	if isHex && isScientificNotation {
-		token.Type = TokenLiteralInt
-		token.Data = int64(0)
-		token.Description = "0"
-		err = fmt.Errorf("mix up hex and seientific notation")
-		return
-	}
+
 	isDouble := false
 	isLong := false
 	isShort := false
 	isByte := false
 	isFloat := false
-	c, eof = lex.getChar()
+	c, eof = this.getChar()
 	if c == 'l' || c == 'L' {
 		isLong = true
 	} else if c == 'f' || c == 'F' {
@@ -229,157 +188,61 @@ func (lex *Lexer) lexNumber(token *Token, c byte) (eof bool, err error) {
 	} else if c == 'b' || c == 'B' {
 		isByte = true
 	} else {
-		lex.unGetChar()
+		this.unGetChar()
 	}
-
-	token.EndLine = lex.line
-	token.EndColumn = lex.column
-	if isScientificNotation == false {
+	token.EndLine = this.line
+	token.EndColumn = this.column
+	if haveFloatPart {
 		integerPart = append(integerPart, '.')
 		floatValue, _ := strconv.ParseFloat(string(append(integerPart, floatPart...)), 64)
-		if haveFloatPart {
-			if isDouble {
-				token.Type = TokenLiteralDouble
-				token.Data = floatValue
-			} else {
-				token.Type = TokenLiteralFloat
-				token.Data = float32(floatValue)
-			}
-		} else {
-			if isDouble {
-				token.Type = TokenLiteralDouble
-				token.Data = float64(floatValue)
-			} else if isFloat {
-				token.Type = TokenLiteralFloat
-				token.Data = float32(floatValue)
-			} else if isLong {
-				token.Type = TokenLiteralLong
-				token.Data = int64(floatValue)
-			} else if isByte {
-				token.Type = TokenLiteralByte
-				token.Data = int64(floatValue)
-			} else if isShort {
-				token.Type = TokenLiteralShort
-				token.Data = int64(floatValue)
-			} else {
-				token.Type = TokenLiteralInt
-				token.Data = int64(floatValue)
-			}
-		}
-		return
-	}
-	//scientific notation
-	if t, _ := lex.parseInt64(integerPart); t > 10 && t < 1 {
-		err = fmt.Errorf("wrong format of scientific notation")
-		token.Type = TokenLiteralInt
-		token.Data = int64(0)
-		return
-	}
-	var p int
-	{
-		t, _ := lex.parseInt64(power)
-		p = int(t)
-	}
-	notationIsDouble := false
-	var notationDoubleValue float64
-	var notationLongValue int64
-	if powerPositive {
-		if p >= len(floatPart) { // int
-			integerPart = append(integerPart, floatPart...)
-			{
-				b := make([]byte, p-len(floatPart))
-				for k, _ := range b {
-					b[k] = '0'
-				}
-				integerPart = append(integerPart, b...)
-			}
-			var e error
-			notationLongValue, e = lex.parseInt64(integerPart)
-			if e != nil {
-				err = e
-			}
-		} else { // float
-			integerPart = append(integerPart, floatPart[:p]...)
-			integerPart = append(integerPart, '.')
-			integerPart = append(integerPart, floatPart[p:]...)
-			notationIsDouble = true
-			notationDoubleValue, _ = strconv.ParseFloat(string(integerPart), 64)
-		}
-	} else { // power is negative,must be float number
-		b := make([]byte, p-len(integerPart))
-		for k, _ := range b {
-			b[k] = '0'
-		}
-		b = append(b, integerPart...)
-		b = append(b, floatPart...)
-		notationIsDouble = true
-		notationDoubleValue, _ = strconv.ParseFloat("0."+string(integerPart), 64)
-	}
-	if isDouble == false &&
-		isFloat == false &&
-		isLong == false &&
-		isByte == false &&
-		isShort == false {
-		if notationIsDouble {
+		if isDouble {
 			token.Type = TokenLiteralDouble
-			token.Data = notationDoubleValue
+			token.Data = floatValue
 		} else {
-			token.Type = TokenLiteralLong
-			token.Data = notationLongValue
+			token.Type = TokenLiteralFloat
+			token.Data = float32(floatValue)
 		}
-		return
-	}
-	if isDouble {
-		token.Type = TokenLiteralDouble
-		token.Data = notationDoubleValue
-	} else if isFloat {
-		token.Type = TokenLiteralFloat
-		token.Data = float32(notationDoubleValue)
-	} else if isLong {
-		token.Type = TokenLiteralLong
-		if notationIsDouble {
-			err = fmt.Errorf("number literal defined as 'long' but notation is float")
-		}
-		token.Data = notationLongValue
-	} else if isByte {
-		token.Type = TokenLiteralByte
-		token.Data = notationLongValue
-		if notationIsDouble {
-			err = fmt.Errorf("number literal defined as 'byte' but notation is float")
-		}
-	} else if isShort {
-		token.Type = TokenLiteralShort
-		token.Data = notationLongValue
-		if notationIsDouble {
-			err = fmt.Errorf("number literal defined as 'short' but notation is float")
-		}
-
 	} else {
-		if notationIsDouble {
-			token.Type = TokenLiteralDouble
-			token.Data = notationDoubleValue
-		} else {
-			token.Type = TokenLiteralLong
-			token.Data = notationLongValue
+		int64Value, e := this.parseInt64(integerPart)
+		if err == nil && e != nil {
+			err = e
 		}
-		return
+		if isDouble {
+			token.Type = TokenLiteralDouble
+			token.Data = float64(int64Value)
+		} else if isFloat {
+			token.Type = TokenLiteralFloat
+			token.Data = float32(int64Value)
+		} else if isLong {
+			token.Type = TokenLiteralLong
+			token.Data = int64(int64Value)
+		} else if isByte {
+			token.Type = TokenLiteralByte
+			token.Data = int64(int64Value)
+		} else if isShort {
+			token.Type = TokenLiteralShort
+			token.Data = int64(int64Value)
+		} else {
+			token.Type = TokenLiteralInt
+			token.Data = int64(int64Value)
+		}
 	}
 	return
 }
 
-func (lex *Lexer) lexIdentifier(c byte) (token *Token, err error) {
+func (this *Lexer) lexIdentifier(c byte) (token *Token, err error) {
 	token = &Token{}
-	token.StartLine = lex.line
-	token.StartColumn = lex.column - 1 // c is read
-	token.Offset = lex.offset - 1      // c is read
+	token.StartLine = this.line
+	token.StartColumn = this.column - 1 // c is read
+	token.Offset = this.offset - 1      // c is read
 	bs := []byte{c}
-	c, eof := lex.getChar()
+	c, eof := this.getChar()
 	for eof == false {
-		if lex.isLetter(c) || c == '_' || lex.isDigit(c) || c == '$' {
+		if this.isLetter(c) || c == '_' || this.isDigit(c) || c == '$' {
 			bs = append(bs, c)
-			c, eof = lex.getChar()
+			c, eof = this.getChar()
 		} else {
-			lex.unGetChar()
+			this.unGetChar()
 			break
 		}
 	}
@@ -388,7 +251,7 @@ func (lex *Lexer) lexIdentifier(c byte) (token *Token, err error) {
 		token.Type = t
 		token.Description = identifier
 		if token.Type == TokenElse {
-			is := lex.tryLexElseIf()
+			is := this.tryLexElseIf()
 			if is {
 				token.Type = TokenElseif
 				token.Description = "else if"
@@ -399,54 +262,54 @@ func (lex *Lexer) lexIdentifier(c byte) (token *Token, err error) {
 		token.Data = identifier
 		token.Description = "identifier_" + identifier
 	}
-	token.EndLine = lex.line
-	token.EndColumn = lex.column
+	token.EndLine = this.line
+	token.EndColumn = this.column
 	return
 }
 
-func (lex *Lexer) tryLexElseIf() (is bool) {
-	c, eof := lex.getChar()
+func (this *Lexer) tryLexElseIf() (is bool) {
+	c, eof := this.getChar()
 	for c == ' ' || c == '\t' {
-		c, eof = lex.getChar()
+		c, eof = this.getChar()
 	}
 	if eof {
 		return
 	}
 	if c != 'i' {
-		lex.unGetChar()
+		this.unGetChar()
 		return
 	}
-	c, eof = lex.getChar()
+	c, eof = this.getChar()
 	if c != 'f' {
-		lex.unGetChar()
-		lex.unGetChar2(1)
+		this.unGetChar()
+		this.unGetChar2(1)
 		return
 	}
-	c, eof = lex.getChar()
+	c, eof = this.getChar()
 	if c != ' ' && c != '\t' { // white list expect ' ' or '\t'
-		lex.unGetChar()
-		lex.unGetChar2(2) // un get 'i' and 'f'
+		this.unGetChar()
+		this.unGetChar2(2) // un get 'i' and 'f'
 		return
 	}
 	is = true
 	return
 }
 
-func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
+func (this *Lexer) lexString(endChar byte) (token *Token, err error) {
 	token = &Token{}
-	token.StartLine = lex.line
-	token.StartColumn = lex.column - 1
+	token.StartLine = this.line
+	token.StartColumn = this.column - 1
 	token.Type = TokenLiteralString
 	bs := []byte{}
 	var c byte
-	c, eof := lex.getChar()
+	c, eof := this.getChar()
 	for c != endChar && c != '\n' && eof == false {
 		if c != '\\' {
 			bs = append(bs, c)
-			c, eof = lex.getChar()
+			c, eof = this.getChar()
 			continue
 		}
-		c, eof = lex.getChar() // get next char
+		c, eof = this.getChar() // get next char
 		if eof {
 			err = fmt.Errorf("unexpected EOF")
 			break
@@ -454,58 +317,58 @@ func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 		switch c {
 		case 'a':
 			bs = append(bs, '\a')
-			c, eof = lex.getChar()
+			c, eof = this.getChar()
 		case 'b':
 			bs = append(bs, '\b')
-			c, eof = lex.getChar()
+			c, eof = this.getChar()
 		case 'f':
 			bs = append(bs, '\f')
-			c, eof = lex.getChar()
+			c, eof = this.getChar()
 		case 'n':
 			bs = append(bs, '\n')
-			c, eof = lex.getChar()
+			c, eof = this.getChar()
 		case 'r':
 			bs = append(bs, '\r')
-			c, eof = lex.getChar()
+			c, eof = this.getChar()
 		case 't':
 			bs = append(bs, '\t')
-			c, eof = lex.getChar()
+			c, eof = this.getChar()
 		case 'v':
 			bs = append(bs, '\v')
-			c, eof = lex.getChar()
+			c, eof = this.getChar()
 		case '\\':
 			bs = append(bs, '\\')
-			c, eof = lex.getChar()
+			c, eof = this.getChar()
 		case '\'':
 			bs = append(bs, '\'')
-			c, eof = lex.getChar()
+			c, eof = this.getChar()
 		case '"':
 			bs = append(bs, '"')
-			c, eof = lex.getChar()
+			c, eof = this.getChar()
 		case 'x':
 			var c1, c2 byte
-			c1, eof = lex.getChar() //skip 'x'
+			c1, eof = this.getChar() //skip 'x'
 			if eof {
 				err = fmt.Errorf("unexpected EOF")
 				continue
 			}
-			if false == lex.isHex(c) {
+			if false == this.isHex(c) {
 				err = fmt.Errorf("unknown escape sequence")
 				continue
 			}
-			b := lex.hexByte2ByteValue(c1)
-			c2, eof = lex.getChar()
-			if lex.isHex(c2) {
-				if t := b*16 + lex.hexByte2ByteValue(c2); t <= 127 { // only support standard ascii
+			b := this.hexByte2ByteValue(c1)
+			c2, eof = this.getChar()
+			if this.isHex(c2) {
+				if t := b*16 + this.hexByte2ByteValue(c2); t <= 127 { // only support standard ascii
 					b = t
 				} else {
-					lex.unGetChar()
+					this.unGetChar()
 				}
 			} else { //not hex
-				lex.unGetChar()
+				this.unGetChar()
 			}
 			bs = append(bs, b)
-			c, eof = lex.getChar()
+			c, eof = this.getChar()
 		case '0', '1', '2', '3', '4', '5', '7':
 			// first char must be octal
 			b := byte(0)
@@ -513,20 +376,20 @@ func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 				if eof {
 					break
 				}
-				if lex.isOctal(c) == false {
-					lex.unGetChar()
+				if this.isOctal(c) == false {
+					this.unGetChar()
 					break
 				}
-				if t := b*8 + lex.hexByte2ByteValue(c); t > 127 { // only support standard ascii
-					lex.unGetChar()
+				if t := b*8 + this.hexByte2ByteValue(c); t > 127 { // only support standard ascii
+					this.unGetChar()
 					break
 				} else {
 					b = t
 				}
-				c, eof = lex.getChar()
+				c, eof = this.getChar()
 			}
 			bs = append(bs, b)
-			c, eof = lex.getChar()
+			c, eof = this.getChar()
 		case 'u', 'U':
 			var r rune
 			n := 4
@@ -534,27 +397,27 @@ func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 				n = 8
 			}
 			for i := 0; i < n; i++ {
-				c, eof = lex.getChar()
+				c, eof = this.getChar()
 				if eof {
 					err = fmt.Errorf("unexcepted EOF")
 					break
 				}
-				if lex.isHex(c) == false {
+				if this.isHex(c) == false {
 					err = fmt.Errorf("not enough hex number for unicode, expect '%d' , but '%d'",
 						n, i)
-					lex.unGetChar()
+					this.unGetChar()
 					break
 				}
-				r = (r << 4) | rune(lex.hexByte2ByteValue(c))
+				r = (r << 4) | rune(this.hexByte2ByteValue(c))
 			}
 			bs = append(bs, []byte(string([]rune{r}))...)
-			c, eof = lex.getChar()
+			c, eof = this.getChar()
 		default:
 			err = fmt.Errorf("unknown escape sequence")
 		}
 	}
-	token.EndLine = lex.line
-	token.EndColumn = lex.column
+	token.EndLine = this.line
+	token.EndColumn = this.column
 	if c == '\n' {
 		err = fmt.Errorf("string literal start new line")
 	}
@@ -563,20 +426,20 @@ func (lex *Lexer) lexString(endChar byte) (token *Token, err error) {
 	return
 }
 
-func (lex *Lexer) lexMultiLineComment() (string, error) {
+func (this *Lexer) lexMultiLineComment() (string, error) {
 	bs := []byte{}
 redo:
-	c, _ := lex.getChar()
+	c, _ := this.getChar()
 	var eof bool
 	for c != '*' &&
 		eof == false {
-		c, eof = lex.getChar()
+		c, eof = this.getChar()
 		bs = append(bs, c)
 	}
 	if eof {
 		return string(bs), fmt.Errorf("unexpect EOF")
 	}
-	c, eof = lex.getChar()
+	c, eof = this.getChar()
 	if eof {
 		return string(bs), fmt.Errorf("unexpect EOF")
 	}
@@ -590,32 +453,32 @@ redo:
 /*
 	one '.' is read
 */
-func (lex *Lexer) lexVArgs() (is bool) {
-	c, _ := lex.getChar()
+func (this *Lexer) lexVArgs() (is bool) {
+	c, _ := this.getChar()
 	if c != '.' {
-		lex.unGetChar()
+		this.unGetChar()
 		return
 	}
 	// current '..'
-	c, _ = lex.getChar()
+	c, _ = this.getChar()
 	if c != '.' {
-		lex.unGetChar()
-		lex.unGetChar2(1)
+		this.unGetChar()
+		this.unGetChar2(1)
 		return
 	}
 	is = true
 	return
 }
 
-func (lex *Lexer) isChar() bool {
-	if lex.offset+1 >= lex.end {
+func (this *Lexer) isChar() bool {
+	if this.offset+1 >= this.end {
 		return false
 	}
-	if '\\' != lex.bs[lex.offset] {
+	if '\\' != this.bs[this.offset] {
 		return false
 	}
 
-	if 'u' != lex.bs[lex.offset+1] && 'U' != lex.bs[lex.offset+1] {
+	if 'u' != this.bs[this.offset+1] && 'U' != this.bs[this.offset+1] {
 		return false
 	}
 	return true

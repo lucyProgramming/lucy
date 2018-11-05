@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildUnary(
+func (this *BuildExpression) buildUnary(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -14,7 +14,7 @@ func (buildExpression *BuildExpression) buildUnary(
 
 	if e.Type == ast.ExpressionTypeNegative {
 		ee := e.Data.(*ast.Expression)
-		maxStack = buildExpression.build(class, code, ee, context, state)
+		maxStack = this.build(class, code, ee, context, state)
 		switch e.Value.Type {
 		case ast.VariableTypeByte:
 			fallthrough
@@ -36,7 +36,7 @@ func (buildExpression *BuildExpression) buildUnary(
 	}
 	if e.Type == ast.ExpressionTypeBitwiseNot {
 		ee := e.Data.(*ast.Expression)
-		maxStack = buildExpression.build(class, code, ee, context, state)
+		maxStack = this.build(class, code, ee, context, state)
 		if t := jvmSlotSize(ee.Value) * 2; t > maxStack {
 			maxStack = t
 		}
@@ -81,7 +81,7 @@ func (buildExpression *BuildExpression) buildUnary(
 	}
 	if e.Type == ast.ExpressionTypeNot {
 		ee := e.Data.(*ast.Expression)
-		maxStack = buildExpression.build(class, code, ee, context, state)
+		maxStack = this.build(class, code, ee, context, state)
 		exit := (&cg.Exit{}).Init(cg.OP_ifeq, code)
 		code.Codes[code.CodeLength] = cg.OP_iconst_0
 		code.CodeLength++

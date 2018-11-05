@@ -6,7 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) mkBuildInLen(
+func (this *BuildExpression) mkBuildInLen(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -14,7 +14,7 @@ func (buildExpression *BuildExpression) mkBuildInLen(
 	state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	a0 := call.Args[0]
-	maxStack = buildExpression.build(class, code, a0, context, state)
+	maxStack = this.build(class, code, a0, context, state)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	if 2 > maxStack {

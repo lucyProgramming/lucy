@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildVarAssign(
+func (this *BuildExpression) buildVarAssign(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -29,15 +29,15 @@ func (buildExpression *BuildExpression) buildVarAssign(
 			state.pushStack(class, obj)
 			state.pushStack(class, obj)
 		}
-		stack := buildExpression.build(class, code, vs.InitValues[0], context, state)
+		stack := this.build(class, code, vs.InitValues[0], context, state)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
 		if v.IsGlobal {
-			buildExpression.BuildPackage.storeGlobalVariable(class, code, v)
+			this.BuildPackage.storeGlobalVariable(class, code, v)
 		} else {
 			v.LocalValOffset = code.MaxLocals
-			buildExpression.BuildPackage.storeLocalVar(class, code, v)
+			this.BuildPackage.storeLocalVar(class, code, v)
 			if v.BeenCapturedAsLeftValue > 0 {
 				code.MaxLocals++
 				copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
@@ -50,14 +50,14 @@ func (buildExpression *BuildExpression) buildVarAssign(
 		return
 	}
 	if len(vs.InitValues) == 1 {
-		maxStack = buildExpression.build(class, code, vs.InitValues[0], context, state)
+		maxStack = this.build(class, code, vs.InitValues[0], context, state)
 	} else {
-		maxStack = buildExpression.buildExpressions(class, code, vs.InitValues, context, state)
+		maxStack = this.buildExpressions(class, code, vs.InitValues, context, state)
 	}
 	autoVar := newMultiValueAutoVar(class, code, state)
 	for k, v := range vs.Lefts {
 		if v.Type != ast.ExpressionTypeIdentifier {
-			stack, remainStack, ops, _ := buildExpression.getLeftValue(class, code, v, context, state)
+			stack, remainStack, ops, _ := this.getLeftValue(class, code, v, context, state)
 			if stack > maxStack {
 				maxStack = stack
 			}
@@ -78,7 +78,7 @@ func (buildExpression *BuildExpression) buildVarAssign(
 			if stack > maxStack {
 				maxStack = stack
 			}
-			buildExpression.BuildPackage.storeGlobalVariable(class, code, variable)
+			this.BuildPackage.storeGlobalVariable(class, code, variable)
 			continue
 		}
 		//this variable not been captured,also not declared here
@@ -95,7 +95,7 @@ func (buildExpression *BuildExpression) buildVarAssign(
 					maxStack = stack
 				}
 			}
-			buildExpression.BuildPackage.storeLocalVar(class, code, variable)
+			this.BuildPackage.storeLocalVar(class, code, variable)
 		} else {
 			variable.LocalValOffset = code.MaxLocals
 			currentStack := uint16(0)
@@ -120,7 +120,7 @@ func (buildExpression *BuildExpression) buildVarAssign(
 			if t := currentStack + autoVar.unPack(class, code, k, variable.Type); t > maxStack {
 				maxStack = t
 			}
-			buildExpression.BuildPackage.storeLocalVar(class, code, variable)
+			this.BuildPackage.storeLocalVar(class, code, variable)
 		}
 	}
 	return

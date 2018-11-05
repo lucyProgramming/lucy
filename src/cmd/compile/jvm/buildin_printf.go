@@ -8,7 +8,7 @@ import (
 /*
 	function printf
 */
-func (buildExpression *BuildExpression) mkBuildInPrintf(
+func (this *BuildExpression) mkBuildInPrintf(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -29,7 +29,7 @@ func (buildExpression *BuildExpression) mkBuildInPrintf(
 	code.CodeLength += 3
 	maxStack = 1
 	state.pushStack(class, state.newObjectVariableType(javaPrintStreamClass))
-	stack := buildExpression.build(class, code, meta.Format, context, state)
+	stack := this.build(class, code, meta.Format, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
@@ -55,7 +55,7 @@ func (buildExpression *BuildExpression) mkBuildInPrintf(
 		currentStack += 2
 		state.pushStack(class, objectArray)
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-		stack := buildExpression.build(class, code, v, context, state)
+		stack := this.build(class, code, v, context, state)
 		state.popStack(2)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t

@@ -16,33 +16,33 @@ type StatementIf struct {
 	Exits               []*cg.Exit
 }
 
-func (s *StatementIf) check(father *Block) []error {
-	s.initExpressionBlock.inherit(father)
+func (this *StatementIf) check(father *Block) []error {
+	this.initExpressionBlock.inherit(father)
 	errs := []error{}
-	for _, v := range s.PrefixExpressions {
+	for _, v := range this.PrefixExpressions {
 		v.IsStatementExpression = true
-		_, es := v.check(&s.initExpressionBlock)
+		_, es := v.check(&this.initExpressionBlock)
 		errs = append(errs, es...)
 		if err := v.canBeUsedAsStatement(); err != nil {
 			errs = append(errs, err)
 		}
 	}
-	if s.Condition != nil {
-		conditionType, es := s.Condition.checkSingleValueContextExpression(&s.initExpressionBlock)
+	if this.Condition != nil {
+		conditionType, es := this.Condition.checkSingleValueContextExpression(&this.initExpressionBlock)
 		errs = append(errs, es...)
 		if conditionType != nil &&
 			conditionType.Type != VariableTypeBool {
 			errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
-				s.Condition.Pos.ErrMsgPrefix()))
+				this.Condition.Pos.ErrMsgPrefix()))
 		}
-		if err := s.Condition.canBeUsedAsCondition(); err != nil {
+		if err := this.Condition.canBeUsedAsCondition(); err != nil {
 			errs = append(errs, err)
 		}
 	}
-	s.Block.inherit(&s.initExpressionBlock)
-	errs = append(errs, s.Block.check()...)
-	for _, v := range s.ElseIfList {
-		v.Block.inherit(&s.initExpressionBlock)
+	this.Block.inherit(&this.initExpressionBlock)
+	errs = append(errs, this.Block.check()...)
+	for _, v := range this.ElseIfList {
+		v.Block.inherit(&this.initExpressionBlock)
 		if v.Condition != nil {
 			conditionType, es := v.Condition.checkSingleValueContextExpression(v.Block)
 			errs = append(errs, es...)
@@ -58,9 +58,9 @@ func (s *StatementIf) check(father *Block) []error {
 			errs = append(errs, v.Block.check()...)
 		}
 	}
-	if s.Else != nil {
-		s.Else.inherit(&s.initExpressionBlock)
-		errs = append(errs, s.Else.check()...)
+	if this.Else != nil {
+		this.Else.inherit(&this.initExpressionBlock)
+		errs = append(errs, this.Else.check()...)
 	}
 	return errs
 }

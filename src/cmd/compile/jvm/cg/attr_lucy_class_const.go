@@ -13,7 +13,7 @@ type LucyClassConst struct {
 	Comment    string
 }
 
-func (a *AttributeLucyClassConst) FromBs(class *Class, bs []byte) {
+func (this *AttributeLucyClassConst) FromBs(class *Class, bs []byte) {
 	for len(bs) > 0 {
 		constant := &LucyClassConst{}
 		constant.Name = string(class.ConstPool[binary.BigEndian.Uint16(bs)].Info)
@@ -21,18 +21,18 @@ func (a *AttributeLucyClassConst) FromBs(class *Class, bs []byte) {
 		constant.ValueIndex = binary.BigEndian.Uint16(bs[4:])
 		constant.Comment = string(class.ConstPool[binary.BigEndian.Uint16(bs[6:])].Info)
 		bs = bs[8:]
-		a.Constants = append(a.Constants, constant)
+		this.Constants = append(this.Constants, constant)
 	}
 }
 
-func (a *AttributeLucyClassConst) ToAttributeInfo(class *Class) *AttributeInfo {
-	if a == nil || len(a.Constants) == 0 {
+func (this *AttributeLucyClassConst) ToAttributeInfo(class *Class) *AttributeInfo {
+	if this == nil || len(this.Constants) == 0 {
 		return nil
 	}
 	ret := &AttributeInfo{}
 	ret.NameIndex = class.InsertUtf8Const(AttributeNameLucyClassConst)
-	ret.Info = make([]byte, len(a.Constants)*8)
-	for k, v := range a.Constants {
+	ret.Info = make([]byte, len(this.Constants)*8)
+	for k, v := range this.Constants {
 		b := ret.Info[k*8:]
 		binary.BigEndian.PutUint16(b, class.InsertUtf8Const(v.Name))
 		binary.BigEndian.PutUint16(b[2:], class.InsertUtf8Const(v.Descriptor))

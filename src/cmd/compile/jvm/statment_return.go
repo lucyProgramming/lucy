@@ -6,7 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) buildReturnStatement(
+func (this *BuildPackage) buildReturnStatement(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	statementReturn *ast.StatementReturn,
@@ -14,7 +14,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(
 	state *StackMapState) (maxStack uint16) {
 	if context.function.Type.VoidReturn() { // no return value
 		if statementReturn.Defers != nil && len(statementReturn.Defers) > 0 {
-			stack := buildPackage.buildDefersForReturn(class, code, context, state, statementReturn)
+			stack := this.buildDefersForReturn(class, code, context, state, statementReturn)
 			if stack > maxStack {
 				maxStack = stack
 			}
@@ -25,26 +25,26 @@ func (buildPackage *BuildPackage) buildReturnStatement(
 	}
 	if len(context.function.Type.ReturnList) == 1 {
 		if len(statementReturn.Expressions) > 0 {
-			maxStack = buildPackage.BuildExpression.build(class, code, statementReturn.Expressions[0], context, state)
+			maxStack = this.BuildExpression.build(class, code, statementReturn.Expressions[0], context, state)
 		}
 		// execute defer first
 		if len(statementReturn.Defers) > 0 {
 			//return value  is on stack,  store to local var
 			if len(statementReturn.Expressions) > 0 {
-				buildPackage.storeLocalVar(class, code, context.function.Type.ReturnList[0])
+				this.storeLocalVar(class, code, context.function.Type.ReturnList[0])
 			}
-			stack := buildPackage.buildDefersForReturn(class, code, context, state, statementReturn)
+			stack := this.buildDefersForReturn(class, code, context, state, statementReturn)
 			if stack > maxStack {
 				maxStack = stack
 			}
 			//restore the stack
 			if len(statementReturn.Expressions) > 0 { //restore stack
-				buildPackage.loadLocalVar(class, code, context.function.Type.ReturnList[0])
+				this.loadLocalVar(class, code, context.function.Type.ReturnList[0])
 			}
 		}
 		// in this case,load local var is not under exception handle,should be ok
 		if len(statementReturn.Expressions) == 0 {
-			buildPackage.loadLocalVar(class, code, context.function.Type.ReturnList[0])
+			this.loadLocalVar(class, code, context.function.Type.ReturnList[0])
 		}
 		switch context.function.Type.ReturnList[0].Type.Type {
 		case ast.VariableTypeBool:
@@ -74,10 +74,10 @@ func (buildPackage *BuildPackage) buildReturnStatement(
 	//multi returns
 	if len(statementReturn.Expressions) > 0 {
 		if len(statementReturn.Expressions) == 1 {
-			maxStack = buildPackage.BuildExpression.build(class, code,
+			maxStack = this.BuildExpression.build(class, code,
 				statementReturn.Expressions[0], context, state)
 		} else {
-			maxStack = buildPackage.BuildExpression.buildExpressions(class, code,
+			maxStack = this.BuildExpression.buildExpressions(class, code,
 				statementReturn.Expressions, context, state)
 		}
 	}
@@ -87,7 +87,7 @@ func (buildPackage *BuildPackage) buildReturnStatement(
 			copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
 				context.multiValueVarOffset)...)
 		}
-		stack := buildPackage.buildDefersForReturn(class, code, context, state, statementReturn)
+		stack := this.buildDefersForReturn(class, code, context, state, statementReturn)
 		if stack > maxStack {
 			maxStack = stack
 		}
@@ -104,20 +104,20 @@ func (buildPackage *BuildPackage) buildReturnStatement(
 		code.CodeLength++
 		return
 	}
-	stack := buildPackage.buildReturnFromReturnVars(class, code, context)
+	stack := this.buildReturnFromReturnVars(class, code, context)
 	if stack > maxStack {
 		maxStack = stack
 	}
 	return
 }
 
-func (buildPackage *BuildPackage) buildReturnFromReturnVars(class *cg.ClassHighLevel,
+func (this *BuildPackage) buildReturnFromReturnVars(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, context *Context) (maxStack uint16) {
 	if context.function.Type.VoidReturn() { // when has no return,should not call this function
 		return
 	}
 	if len(context.function.Type.ReturnList) == 1 {
-		buildPackage.loadLocalVar(class, code, context.function.Type.ReturnList[0])
+		this.loadLocalVar(class, code, context.function.Type.ReturnList[0])
 		maxStack = jvmSlotSize(context.function.Type.ReturnList[0].Type)
 		switch context.function.Type.ReturnList[0].Type.Type {
 		case ast.VariableTypeBool:
@@ -157,7 +157,7 @@ func (buildPackage *BuildPackage) buildReturnFromReturnVars(class *cg.ClassHighL
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		currentStack++
-		buildPackage.loadLocalVar(class, code, v)
+		this.loadLocalVar(class, code, v)
 		if t := currentStack + jvmSlotSize(v.Type); t > maxStack {
 			maxStack = t
 		}
@@ -178,7 +178,7 @@ func (buildPackage *BuildPackage) buildReturnFromReturnVars(class *cg.ClassHighL
 	return
 }
 
-func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (this *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	context *Context, from *StackMapState,
 	statementReturn *ast.StatementReturn) (maxStack uint16) {
 	if len(statementReturn.Defers) == 0 {
@@ -212,7 +212,7 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 		state.popStack(1)
 		// build block
 		context.Defer = statementReturn.Defers[index]
-		buildPackage.buildBlock(class, code, &statementReturn.Defers[index].Block, context, state)
+		this.buildBlock(class, code, &statementReturn.Defers[index].Block, context, state)
 		from.addTop(state)
 		context.Defer = nil
 		statementReturn.Defers[index].ResetLabels()
@@ -243,7 +243,7 @@ func (buildPackage *BuildPackage) buildDefersForReturn(class *cg.ClassHighLevel,
 				//load when function have multi returns if read to end
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.multiValueVarOffset)...)
 				exit := (&cg.Exit{}).Init(cg.OP_ifnonnull, code)
-				buildPackage.buildReturnFromReturnVars(class, code, context)
+				this.buildReturnFromReturnVars(class, code, context)
 				context.MakeStackMap(code, state, code.CodeLength)
 				writeExits([]*cg.Exit{exit}, code.CodeLength)
 			}

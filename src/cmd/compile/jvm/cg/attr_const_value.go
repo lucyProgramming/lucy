@@ -8,11 +8,11 @@ type AttributeConstantValue struct {
 	Index uint16
 }
 
-func (a *AttributeConstantValue) ToAttributeInfo(class *Class) *AttributeInfo {
+func (this *AttributeConstantValue) ToAttributeInfo(class *Class) *AttributeInfo {
 	info := &AttributeInfo{}
 	info.NameIndex = class.InsertUtf8Const(AttributeNameConstValue)
 	info.attributeLength = 2
 	info.Info = make([]byte, 2)
-	binary.BigEndian.PutUint16(info.Info, a.Index)
+	binary.BigEndian.PutUint16(info.Info, this.Index)
 	return info
 }

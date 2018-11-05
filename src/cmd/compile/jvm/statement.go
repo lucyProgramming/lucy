@@ -6,7 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) buildStatement(
+func (this *BuildPackage) buildStatement(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	block *ast.Block,
@@ -16,10 +16,10 @@ func (buildPackage *BuildPackage) buildStatement(
 	//fmt.Println(s.Pos)
 	switch s.Type {
 	case ast.StatementTypeExpression:
-		maxStack = buildPackage.BuildExpression.build(class, code, s.Expression, context, state)
+		maxStack = this.BuildExpression.build(class, code, s.Expression, context, state)
 	case ast.StatementTypeIf:
 		s.StatementIf.Exits = []*cg.Exit{} //could compile multi times
-		maxStack = buildPackage.buildIfStatement(class, code, s.StatementIf, context, state)
+		maxStack = this.buildIfStatement(class, code, s.StatementIf, context, state)
 		if len(s.StatementIf.Exits) > 0 {
 			writeExits(s.StatementIf.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
@@ -27,7 +27,7 @@ func (buildPackage *BuildPackage) buildStatement(
 	case ast.StatementTypeBlock:
 		blockState := (&StackMapState{}).initFromLast(state)
 		s.Block.Exits = []*cg.Exit{}
-		buildPackage.buildBlock(class, code, s.Block, context, blockState)
+		this.buildBlock(class, code, s.Block, context, blockState)
 		state.addTop(blockState)
 		if len(s.Block.Exits) > 0 {
 			writeExits(s.StatementIf.Exits, code.CodeLength)
@@ -35,14 +35,14 @@ func (buildPackage *BuildPackage) buildStatement(
 		}
 	case ast.StatementTypeFor:
 		s.StatementFor.Exits = []*cg.Exit{} //could compile multi times
-		maxStack = buildPackage.buildForStatement(class, code, s.StatementFor, context, state)
+		maxStack = this.buildForStatement(class, code, s.StatementFor, context, state)
 		writeExits(s.StatementFor.Exits, code.CodeLength)
 		context.MakeStackMap(code, state, code.CodeLength)
 	case ast.StatementTypeContinue:
-		buildPackage.buildDefers(class, code, context, s.StatementContinue.Defers, state)
+		this.buildDefers(class, code, context, s.StatementContinue.Defers, state)
 		jumpTo(code, s.StatementContinue.StatementFor.ContinueCodeOffset)
 	case ast.StatementTypeBreak:
-		buildPackage.buildDefers(class, code, context, s.StatementBreak.Defers, state)
+		this.buildDefers(class, code, context, s.StatementBreak.Defers, state)
 		exit := (&cg.Exit{}).Init(cg.OP_goto, code)
 		if s.StatementBreak.StatementFor != nil {
 			s.StatementBreak.StatementFor.Exits = append(s.StatementBreak.StatementFor.Exits, exit)
@@ -52,11 +52,11 @@ func (buildPackage *BuildPackage) buildStatement(
 			s.StatementBreak.SwitchTemplateBlock.Exits = append(s.StatementBreak.SwitchTemplateBlock.Exits, exit)
 		}
 	case ast.StatementTypeReturn:
-		maxStack = buildPackage.buildReturnStatement(class, code,
+		maxStack = this.buildReturnStatement(class, code,
 			s.StatementReturn, context, state)
 	case ast.StatementTypeSwitch:
 		s.StatementSwitch.Exits = []*cg.Exit{} //could compile multi times
-		maxStack = buildPackage.buildSwitchStatement(class, code, s.StatementSwitch, context, state)
+		maxStack = this.buildSwitchStatement(class, code, s.StatementSwitch, context, state)
 		if len(s.StatementSwitch.Exits) > 0 {
 			if code.CodeLength == context.lastStackMapOffset {
 				code.Codes[code.CodeLength] = cg.OP_nop
@@ -66,7 +66,7 @@ func (buildPackage *BuildPackage) buildStatement(
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
 	case ast.StatementTypeGoTo:
-		buildPackage.buildDefers(class, code, context, s.StatementGoTo.Defers, state)
+		this.buildDefers(class, code, context, s.StatementGoTo.Defers, state)
 		if s.StatementGoTo.StatementLabel.CodeOffsetGenerated {
 			jumpTo(code, s.StatementGoTo.StatementLabel.CodeOffset)
 		} else {
@@ -91,7 +91,7 @@ func (buildPackage *BuildPackage) buildStatement(
 		} else {
 			name = block.InheritedAttribute.ClassAndFunctionNames + "$" + s.Class.Name
 		}
-		s.Class.Name = buildPackage.newClassName(name)
+		s.Class.Name = this.newClassName(name)
 		innerClass := &cg.InnerClass{
 			InnerClass:  s.Class.Name,
 			OuterClass:  class.Name,
@@ -100,9 +100,9 @@ func (buildPackage *BuildPackage) buildStatement(
 		}
 		class.Class.AttributeInnerClasses.Classes =
 			append(class.Class.AttributeInnerClasses.Classes, innerClass)
-		c := buildPackage.buildClass(s.Class)
+		c := this.buildClass(s.Class)
 		c.Class.AttributeInnerClasses.Classes = append(c.Class.AttributeInnerClasses.Classes, innerClass)
-		buildPackage.putClass(c)
+		this.putClass(c)
 	case ast.StatementTypeNop:
 		// nop
 	case ast.StatementTypeTypeAlias:
@@ -111,7 +111,7 @@ func (buildPackage *BuildPackage) buildStatement(
 	return
 }
 
-func (buildPackage *BuildPackage) buildDefers(class *cg.ClassHighLevel,
+func (this *BuildPackage) buildDefers(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, context *Context, ds []*ast.StatementDefer, from *StackMapState) {
 	if len(ds) == 0 {
 		return
@@ -141,7 +141,7 @@ func (buildPackage *BuildPackage) buildDefers(class *cg.ClassHighLevel,
 		state.popStack(1)
 		// build block
 		context.Defer = ds[index]
-		buildPackage.buildBlock(class, code, &ds[index].Block, context, state)
+		this.buildBlock(class, code, &ds[index].Block, context, state)
 		from.addTop(state)
 		context.Defer = nil
 		ds[index].ResetLabels()

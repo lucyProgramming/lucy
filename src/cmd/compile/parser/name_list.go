@@ -7,29 +7,29 @@ import (
 )
 
 //at least one name
-func (parser *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
-	if parser.token.Type != lex.TokenIdentifier {
+func (this *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
+	if this.token.Type != lex.TokenIdentifier {
 		err = fmt.Errorf("%s expect identifier,but '%s'",
-			parser.errMsgPrefix(), parser.token.Description)
-		parser.errs = append(parser.errs, err)
+			this.errMsgPrefix(), this.token.Description)
+		this.errs = append(this.errs, err)
 		return nil, err
 	}
 	names = []*ast.NameWithPos{}
-	for parser.token.Type == lex.TokenIdentifier {
+	for this.token.Type == lex.TokenIdentifier {
 		names = append(names, &ast.NameWithPos{
-			Name: parser.token.Data.(string),
-			Pos:  parser.mkPos(),
+			Name: this.token.Data.(string),
+			Pos:  this.mkPos(),
 		})
-		parser.Next(lfIsToken)
-		if parser.token.Type != lex.TokenComma {
+		this.Next(lfIsToken)
+		if this.token.Type != lex.TokenComma {
 			// not a ,
 			break
 		} else {
-			parser.Next(lfNotToken) // skip comma
-			if parser.token.Type != lex.TokenIdentifier {
+			this.Next(lfNotToken) // skip comma
+			if this.token.Type != lex.TokenIdentifier {
 				err = fmt.Errorf("%s not a 'identifier' after a comma,but '%s'",
-					parser.errMsgPrefix(), parser.token.Description)
-				parser.errs = append(parser.errs, err)
+					this.errMsgPrefix(), this.token.Description)
+				this.errs = append(this.errs, err)
 				return names, err
 			}
 		}

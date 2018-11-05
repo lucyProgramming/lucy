@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildTypeConversion(
+func (this *BuildExpression) buildTypeConversion(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -47,10 +47,10 @@ func (buildExpression *BuildExpression) buildTypeConversion(
 		state.Stacks = append(state.Stacks, t, t)
 		code.CodeLength += 4
 	}
-	stack := buildExpression.build(class, code, conversion.Expression, context, state)
+	stack := this.build(class, code, conversion.Expression, context, state)
 	maxStack = currentStack + stack
 	if e.Value.IsNumber() {
-		buildExpression.numberTypeConverter(code, conversion.Expression.Value.Type, conversion.Type.Type)
+		this.numberTypeConverter(code, conversion.Expression.Value.Type, conversion.Type.Type)
 		if t := jvmSlotSize(conversion.Type); t > maxStack {
 			maxStack = t
 		}

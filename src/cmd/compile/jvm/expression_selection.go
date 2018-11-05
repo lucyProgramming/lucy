@@ -3,7 +3,7 @@ package jvm
 import "gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 
-func (buildExpression *BuildExpression) buildSelection(
+func (this *BuildExpression) buildSelection(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -13,7 +13,7 @@ func (buildExpression *BuildExpression) buildSelection(
 
 	// check cast to super class
 	if selection.Name == ast.SUPER {
-		maxStack = buildExpression.build(class, code, selection.Expression, context, state)
+		maxStack = this.build(class, code, selection.Expression, context, state)
 		return
 	}
 	if selection.Method != nil { // pack to method handle
@@ -55,7 +55,7 @@ func (buildExpression *BuildExpression) buildSelection(
 			maxStack = 4
 		}
 		if selection.Expression.Value.Type == ast.VariableTypeObject {
-			stack := buildExpression.build(class, code, selection.Expression, context, state)
+			stack := this.build(class, code, selection.Expression, context, state)
 			if t := 1 + stack; t > maxStack {
 				maxStack = t
 			}
@@ -209,7 +209,7 @@ func (buildExpression *BuildExpression) buildSelection(
 		return
 	case ast.VariableTypeObject:
 		// object
-		stack := buildExpression.build(class, code, selection.Expression, context, state)
+		stack := this.build(class, code, selection.Expression, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}

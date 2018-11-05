@@ -23,97 +23,97 @@ type Package struct {
 	statementLevelClass          []*Class
 }
 
-func (p *Package) isSame(compare *Package) bool {
-	return p.Name == compare.Name
+func (this *Package) isSame(compare *Package) bool {
+	return this.Name == compare.Name
 }
 
-func (p *Package) markBuildIn() {
-	for _, v := range p.Block.Variables {
+func (this *Package) markBuildIn() {
+	for _, v := range this.Block.Variables {
 		v.IsBuildIn = true
 	}
-	for _, v := range p.Block.Constants {
+	for _, v := range this.Block.Constants {
 		v.IsBuildIn = true
 	}
-	for _, v := range p.Block.Enums {
+	for _, v := range this.Block.Enums {
 		v.IsBuildIn = true
 	}
-	for _, v := range p.Block.Classes {
+	for _, v := range this.Block.Classes {
 		v.IsBuildIn = true
 	}
-	for _, v := range p.Block.Functions {
+	for _, v := range this.Block.Functions {
 		v.IsBuildIn = true
 		v.LoadedFromCorePackage = true
 	}
-	for _, v := range p.Block.TypeAliases {
+	for _, v := range this.Block.TypeAliases {
 		v.IsBuildIn = true
 	}
 }
-func (p *Package) loadCorePackage() error {
-	if p.Name == common.CorePackage {
+func (this *Package) loadCorePackage() error {
+	if this.Name == common.CorePackage {
 		return nil
 	}
-	pp, err := p.load(common.CorePackage)
+	pp, err := this.load(common.CorePackage)
 	if err != nil {
 		return err
 	}
 	lucyBuildInPackage = pp.(*Package)
 	lucyBuildInPackage.markBuildIn()
-	p.Block.Outer = &lucyBuildInPackage.Block
+	this.Block.Outer = &lucyBuildInPackage.Block
 	return nil
 }
 
-func (p *Package) getImport(file string, accessName string) *Import {
-	if p.files == nil {
+func (this *Package) getImport(file string, accessName string) *Import {
+	if this.files == nil {
 		return nil
 	}
-	if file, ok := p.files[file]; ok == false {
+	if file, ok := this.files[file]; ok == false {
 		return nil
 	} else {
 		return file.Imports[accessName]
 	}
 }
 
-func (p *Package) mkInitFunctions(bs []*Block) {
-	p.InitFunctions = make([]*Function, len(bs))
+func (this *Package) mkInitFunctions(bs []*Block) {
+	this.InitFunctions = make([]*Function, len(bs))
 	for k, b := range bs {
 		b.IsFunctionBlock = true
 		f := &Function{}
 		b.Fn = f
 		f.Pos = b.Pos
 		f.Block = *b
-		p.InitFunctions[k] = f
+		this.InitFunctions[k] = f
 		f.isPackageInitBlockFunction = true
 		f.Used = true
 	}
 }
 
-func (p *Package) shouldStop(errs []error) bool {
-	return len(p.errors)+len(errs) >= p.NErrors2Stop
+func (this *Package) shouldStop(errs []error) bool {
+	return len(this.errors)+len(errs) >= this.NErrors2Stop
 }
 
-func (p *Package) TypeCheck() []error {
-	if p.NErrors2Stop <= 2 {
-		p.NErrors2Stop = 10
+func (this *Package) TypeCheck() []error {
+	if this.NErrors2Stop <= 2 {
+		this.NErrors2Stop = 10
 	}
-	p.errors = []error{}
-	p.errors = append(p.errors, p.Block.checkConstants()...)
-	for _, v := range p.Block.Enums {
-		v.Name = p.Name + "/" + v.Name
-		p.errors = append(p.errors, v.check()...)
+	this.errors = []error{}
+	this.errors = append(this.errors, this.Block.checkConstants()...)
+	for _, v := range this.Block.Enums {
+		v.Name = this.Name + "/" + v.Name
+		this.errors = append(this.errors, v.check()...)
 	}
-	for _, v := range p.Block.TypeAliases {
+	for _, v := range this.Block.TypeAliases {
 		err := v.resolve(&PackageBeenCompile.Block)
 		if err != nil {
-			p.errors = append(p.errors, err)
+			this.errors = append(this.errors, err)
 		}
 	}
-	for _, v := range p.Block.Functions {
+	for _, v := range this.Block.Functions {
 		if v.IsBuildIn {
 			continue
 		}
-		v.Block.inherit(&p.Block)
+		v.Block.inherit(&this.Block)
 		v.Block.InheritedAttribute.Function = v
-		v.checkParametersAndReturns(&p.errors, false, false)
+		v.checkParametersAndReturns(&this.errors, false, false)
 		if v.IsGlobalMain() {
 			defineMainOK := false
 			if len(v.Type.ParameterList) == 1 {
@@ -121,112 +121,112 @@ func (p *Package) TypeCheck() []error {
 					v.Type.ParameterList[0].Type.Array.Type == VariableTypeString
 			}
 			if defineMainOK == false {
-				p.errors = append(p.errors,
+				this.errors = append(this.errors,
 					fmt.Errorf("%s function '%s' expect declared as 'main(args []string)'",
 						errMsgPrefix(v.Pos), MainFunctionName))
 			}
 		}
-		if p.shouldStop(nil) {
-			return p.errors
+		if this.shouldStop(nil) {
+			return this.errors
 		}
 	}
-	for _, v := range p.Block.Classes {
-		v.Name = p.Name + "/" + v.Name
-		p.errors = append(p.errors, v.Block.checkConstants()...)
+	for _, v := range this.Block.Classes {
+		v.Name = this.Name + "/" + v.Name
+		this.errors = append(this.errors, v.Block.checkConstants()...)
 		v.mkDefaultConstruction()
 		v.Block.inherit(&PackageBeenCompile.Block)
 		v.Block.InheritedAttribute.Class = v
 	}
 
-	for _, v := range p.Block.Classes {
+	for _, v := range this.Block.Classes {
 		err := v.resolveFather()
 		if err != nil {
-			p.errors = append(p.errors, err)
+			this.errors = append(this.errors, err)
 		}
-		p.errors = append(p.errors, v.resolveInterfaces()...)
-		p.errors = append(p.errors, v.resolveFieldsAndMethodsType()...)
+		this.errors = append(this.errors, v.resolveInterfaces()...)
+		this.errors = append(this.errors, v.resolveFieldsAndMethodsType()...)
 	}
 
-	for _, v := range p.Block.Classes {
+	for _, v := range this.Block.Classes {
 		es := v.checkPhase1()
-		p.errors = append(p.errors, es...)
-		if p.shouldStop(nil) {
-			return p.errors
+		this.errors = append(this.errors, es...)
+		if this.shouldStop(nil) {
+			return this.errors
 		}
 	}
-	for _, v := range p.Block.Functions {
+	for _, v := range this.Block.Functions {
 		if v.TemplateFunction != nil {
 			continue
 		}
-		p.errors = append(p.errors, v.checkReturnVarExpression()...)
+		this.errors = append(this.errors, v.checkReturnVarExpression()...)
 	}
-	for _, v := range p.InitFunctions {
-		p.errors = append(p.errors, v.check(&p.Block)...)
-		if p.shouldStop(nil) {
-			return p.errors
+	for _, v := range this.InitFunctions {
+		this.errors = append(this.errors, v.check(&this.Block)...)
+		if this.shouldStop(nil) {
+			return this.errors
 		}
 	}
-	for _, v := range p.Block.Classes {
-		p.errors = append(p.errors, v.checkPhase2()...)
-		if p.shouldStop(nil) {
-			return p.errors
+	for _, v := range this.Block.Classes {
+		this.errors = append(this.errors, v.checkPhase2()...)
+		if this.shouldStop(nil) {
+			return this.errors
 		}
 	}
-	for _, v := range p.Block.Functions {
+	for _, v := range this.Block.Functions {
 		if v.IsBuildIn {
 			continue
 		}
 		if v.TemplateFunction != nil {
 			continue
 		}
-		v.checkBlock(&p.errors)
+		v.checkBlock(&this.errors)
 		if PackageBeenCompile.shouldStop(nil) {
-			return p.errors
+			return this.errors
 		}
 	}
-	for _, v := range p.statementLevelFunctions {
+	for _, v := range this.statementLevelFunctions {
 		v.IsClosureFunction = v.Closure.CaptureCount(v) > 0
 	}
-	for _, v := range p.statementLevelClass {
+	for _, v := range this.statementLevelClass {
 		for f, meta := range v.closure.Functions {
 			if f.IsClosureFunction == false {
 				continue
 			}
-			p.errors = append(p.errors,
+			this.errors = append(this.errors,
 				fmt.Errorf("%s trying to access capture function '%s' from outside",
 					meta.pos.ErrMsgPrefix(), f.Name))
 		}
 	}
-	if p.shouldStop(nil) {
-		return p.errors
+	if this.shouldStop(nil) {
+		return this.errors
 	}
-	p.errors = append(p.errors, p.checkUnUsedPackage()...)
-	return p.errors
+	this.errors = append(this.errors, this.checkUnUsedPackage()...)
+	return this.errors
 }
 
 /*
 	load package or class
 */
-func (p *Package) load(resource string) (interface{}, error) {
+func (this *Package) load(resource string) (interface{}, error) {
 	if resource == "" {
 		panic("null string")
 	}
-	if p.loadedClasses == nil {
-		p.loadedClasses = make(map[string]*Class)
+	if this.loadedClasses == nil {
+		this.loadedClasses = make(map[string]*Class)
 	}
-	if t, ok := p.loadedClasses[resource]; ok {
+	if t, ok := this.loadedClasses[resource]; ok {
 		return t, nil
 	}
-	if p.LoadedPackages == nil {
-		p.LoadedPackages = make(map[string]*Package)
+	if this.LoadedPackages == nil {
+		this.LoadedPackages = make(map[string]*Package)
 	}
-	if t, ok := p.LoadedPackages[resource]; ok {
+	if t, ok := this.LoadedPackages[resource]; ok {
 		return t, nil
 	}
 	t, err := ImportsLoader.LoadImport(resource)
 	if pp, ok := t.(*Package); ok && pp != nil {
 		PackageBeenCompile.LoadedPackages[resource] = pp
-		p.mkClassCache(pp)
+		this.mkClassCache(pp)
 		if pp.Name == common.CorePackage {
 			pp.markBuildIn()
 		}
@@ -240,12 +240,12 @@ func (p *Package) load(resource string) (interface{}, error) {
 	return t, err
 }
 
-func (p *Package) checkUnUsedPackage() []error {
+func (this *Package) checkUnUsedPackage() []error {
 	if compileCommon.CompileFlags.DisableCheckUnUse {
 		return nil
 	}
 	errs := []error{}
-	for _, v := range p.files {
+	for _, v := range this.files {
 		for _, i := range v.Imports {
 			if i.Used == false {
 				errs = append(errs, fmt.Errorf("%s '%s' imported not used",
@@ -253,8 +253,8 @@ func (p *Package) checkUnUsedPackage() []error {
 			}
 		}
 	}
-	for _, i := range p.unUsedPackage {
-		pp, err := p.load(i.Import)
+	for _, i := range this.unUsedPackage {
+		pp, err := this.load(i.Import)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("%s %v",
 				errMsgPrefix(i.Pos), err))
@@ -275,11 +275,11 @@ func (p *Package) checkUnUsedPackage() []error {
 	return errs
 }
 
-func (p *Package) loadClass(className string) (*Class, error) {
-	if p.loadedClasses == nil {
-		p.loadedClasses = make(map[string]*Class)
+func (this *Package) loadClass(className string) (*Class, error) {
+	if this.loadedClasses == nil {
+		this.loadedClasses = make(map[string]*Class)
 	}
-	if c, ok := p.loadedClasses[className]; ok && c != nil {
+	if c, ok := this.loadedClasses[className]; ok && c != nil {
 		return c, nil
 	}
 	c, err := ImportsLoader.LoadImport(className)
@@ -290,24 +290,24 @@ func (p *Package) loadClass(className string) (*Class, error) {
 		return nil, fmt.Errorf("'%s' is not class", className)
 	}
 	cc := c.(*Class)
-	p.loadedClasses[className] = cc
+	this.loadedClasses[className] = cc
 	return cc, nil
 }
 
-func (p *Package) mkClassCache(loadedPackage *Package) {
+func (this *Package) mkClassCache(loadedPackage *Package) {
 	for _, v := range loadedPackage.Block.Classes {
-		p.loadedClasses[v.Name] = v // binary name
+		this.loadedClasses[v.Name] = v // binary name
 	}
 }
 
-func (p *Package) insertImport(i *Import) error {
-	if p.files == nil {
-		p.files = make(map[string]*SourceFile)
+func (this *Package) insertImport(i *Import) error {
+	if this.files == nil {
+		this.files = make(map[string]*SourceFile)
 	}
-	x, ok := p.files[i.Pos.Filename]
+	x, ok := this.files[i.Pos.Filename]
 	if ok == false {
 		x = &SourceFile{}
-		p.files[i.Pos.Filename] = x
+		this.files[i.Pos.Filename] = x
 	}
 	return x.insertImport(i)
 }

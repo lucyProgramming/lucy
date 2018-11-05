@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildArray(
+func (this *BuildExpression) buildArray(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -45,7 +45,7 @@ func (buildExpression *BuildExpression) buildArray(
 		loadInt32(class, code, index) // load index
 		state.pushStack(class, arrayObject)
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-		stack := buildExpression.build(class, code, v, context, state)
+		stack := this.build(class, code, v, context, state)
 		state.popStack(2)
 		if t := 5 + stack; t > maxStack {
 			maxStack = t

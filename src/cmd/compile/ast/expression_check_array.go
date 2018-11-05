@@ -7,12 +7,12 @@ import (
 /*
 	in array type must equal
 */
-func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
-	arr := e.Data.(*ExpressionArray)
+func (this *Expression) checkArray(block *Block, errs *[]error) *Type {
+	arr := this.Data.(*ExpressionArray)
 	if arr.Type == nil && len(arr.Expressions) == 0 {
 		*errs = append(*errs,
 			fmt.Errorf("%s array literal has no type and no expression, cannot inference it`s type ",
-				errMsgPrefix(e.Pos)))
+				errMsgPrefix(this.Pos)))
 		return nil
 	}
 	var noType = true
@@ -40,7 +40,7 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 				arr.Type = &Type{}
 				arr.Type.Type = VariableTypeArray
 				arr.Type.Array = eType.Clone()
-				arr.Type.Pos = e.Pos
+				arr.Type.Pos = this.Pos
 			} else {
 				*errs = append(*errs, err)
 			}
@@ -61,6 +61,6 @@ func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
 		return nil
 	}
 	result := arr.Type.Clone()
-	result.Pos = e.Pos
+	result.Pos = this.Pos
 	return result
 }

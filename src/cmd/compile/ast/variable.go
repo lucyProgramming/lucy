@@ -20,7 +20,7 @@ type Variable struct {
 	Comment                  string
 }
 
-func (v *Variable) isPublic() bool {
-	return v.AccessFlags&
+func (this *Variable) isPublic() bool {
+	return this.AccessFlags&
 		cg.AccFieldPublic != 0
 }

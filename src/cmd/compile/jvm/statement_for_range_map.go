@@ -12,14 +12,14 @@ type AutoVariableForRangeMap struct {
 	K, V                    uint16
 }
 
-func (buildPackage *BuildPackage) buildForRangeStatementForMap(
+func (this *BuildPackage) buildForRangeStatementForMap(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	s *ast.StatementFor,
 	context *Context,
 	state *StackMapState) (maxStack uint16) {
 	attr := s.RangeAttr
-	maxStack = buildPackage.BuildExpression.build(
+	maxStack = this.BuildExpression.build(
 		class,
 		code,
 		attr.RangeOn,
@@ -198,7 +198,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(
 				copyOPs(code,
 					loadLocalVariableOps(attr.IdentifierValue.Variable.Type.Type,
 						autoVar.V)...)
-				buildPackage.storeLocalVar(class, code, attr.IdentifierValue.Variable)
+				this.storeLocalVar(class, code, attr.IdentifierValue.Variable)
 			} else {
 				attr.IdentifierValue.Variable.LocalValOffset = autoVar.V
 			}
@@ -208,7 +208,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, attr.IdentifierKey.Variable.LocalValOffset)...)
 				copyOPs(code,
 					loadLocalVariableOps(attr.IdentifierKey.Variable.Type.Type, autoVar.K)...)
-				buildPackage.storeLocalVar(class, code, attr.IdentifierKey.Variable)
+				this.storeLocalVar(class, code, attr.IdentifierKey.Variable)
 			} else {
 				attr.IdentifierKey.Variable.LocalValOffset = autoVar.K
 			}
@@ -218,7 +218,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(
 		if attr.ExpressionValue != nil {
 			stackLength := len(blockState.Stacks)
 			stack, remainStack, op, _ :=
-				buildPackage.BuildExpression.getLeftValue(class, code, attr.ExpressionValue, context, blockState)
+				this.BuildExpression.getLeftValue(class, code, attr.ExpressionValue, context, blockState)
 			if stack > maxStack { // this means  current stack is 0
 				maxStack = stack
 			}
@@ -233,7 +233,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(
 		if attr.ExpressionKey != nil {
 			stackLength := len(blockState.Stacks)
 			stack, remainStack, op, _ :=
-				buildPackage.BuildExpression.getLeftValue(class, code, attr.ExpressionKey, context, blockState)
+				this.BuildExpression.getLeftValue(class, code, attr.ExpressionKey, context, blockState)
 			if stack > maxStack { // this means  current stack is 0
 				maxStack = stack
 			}
@@ -247,7 +247,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForMap(
 		}
 	}
 	// build block
-	buildPackage.buildBlock(class, code, s.Block, context, blockState)
+	this.buildBlock(class, code, s.Block, context, blockState)
 	forState.addTop(blockState)
 	if s.Block.NotExecuteToLastStatement == false {
 		jumpTo(code, s.ContinueCodeOffset)

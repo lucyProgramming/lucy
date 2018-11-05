@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) mkBuildInBlackHole(
+func (this *BuildExpression) mkBuildInBlackHole(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -13,7 +13,7 @@ func (buildExpression *BuildExpression) mkBuildInBlackHole(
 	state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	for _, v := range call.Args {
-		stack := buildExpression.build(class, code, v, context, state)
+		stack := this.build(class, code, v, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}

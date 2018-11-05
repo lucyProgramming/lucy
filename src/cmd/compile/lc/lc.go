@@ -34,53 +34,53 @@ func Main(files []string) {
 	compiler.compile()
 }
 
-func (compiler *Compiler) shouldExit() {
-	if len(compiler.Errs) > compiler.NErrs2StopCompile {
-		compiler.exit()
+func (this *Compiler) shouldExit() {
+	if len(this.Errs) > this.NErrs2StopCompile {
+		this.exit()
 	}
 }
 
-func (compiler *Compiler) exit() {
+func (this *Compiler) exit() {
 	code := 0
-	if len(compiler.Errs) > 0 {
+	if len(this.Errs) > 0 {
 		code = 2
 	}
-	for _, v := range compiler.Errs {
+	for _, v := range this.Errs {
 		fmt.Fprintln(os.Stderr, v)
 	}
 	os.Exit(code)
 }
 
-func (compiler *Compiler) Init() {
-	compiler.ClassPaths = common.GetClassPaths()
+func (this *Compiler) Init() {
+	this.ClassPaths = common.GetClassPaths()
 	var err error
-	compiler.lucyPaths, err = common.GetLucyPaths()
+	this.lucyPaths, err = common.GetLucyPaths()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(3)
 	}
 }
 
-func (compiler *Compiler) dumpImports() {
-	if len(compiler.Errs) > 0 {
-		compiler.exit()
+func (this *Compiler) dumpImports() {
+	if len(this.Errs) > 0 {
+		this.exit()
 	}
-	is := make([]string, len(compiler.Tops))
-	for k, v := range compiler.Tops {
+	is := make([]string, len(this.Tops))
+	for k, v := range this.Tops {
 		is[k] = v.Node.(*ast.Import).Import
 	}
 	bs, _ := json.Marshal(is)
 	fmt.Println(string(bs))
 }
 
-func (compiler *Compiler) compile() {
+func (this *Compiler) compile() {
 	fileNodes := make(map[string][]*ast.TopNode)
 
-	for _, v := range compiler.Files {
+	for _, v := range this.Files {
 
 		bs, err := ioutil.ReadFile(v)
 		if err != nil {
-			compiler.Errs = append(compiler.Errs, err)
+			this.Errs = append(this.Errs, err)
 			continue
 		}
 		//UTF-16 (BE)
@@ -123,15 +123,15 @@ func (compiler *Compiler) compile() {
 			// utf8 bom
 			bs = bs[3:]
 		}
-		length := len(compiler.Tops)
-		compiler.Errs = append(compiler.Errs, parser.Parse(&compiler.Tops, v, bs,
-			compileCommon.CompileFlags.OnlyImport, compiler.NErrs2StopCompile)...)
-		fileNodes[v] = compiler.Tops[length:len(compiler.Tops)]
-		compiler.shouldExit()
+		length := len(this.Tops)
+		this.Errs = append(this.Errs, parser.Parse(&this.Tops, v, bs,
+			compileCommon.CompileFlags.OnlyImport, this.NErrs2StopCompile)...)
+		fileNodes[v] = this.Tops[length:len(this.Tops)]
+		this.shouldExit()
 	}
 	// parse import only
 	if compileCommon.CompileFlags.OnlyImport {
-		compiler.dumpImports()
+		this.dumpImports()
 		return
 	}
 
@@ -141,18 +141,18 @@ func (compiler *Compiler) compile() {
 	}
 	c := ast.ConvertTops2Package{}
 	ast.PackageBeenCompile.Name = compileCommon.CompileFlags.PackageName
-	rs, errs := c.ConvertTops2Package(compiler.Tops)
-	compiler.Errs = append(compiler.Errs, errs...)
+	rs, errs := c.ConvertTops2Package(this.Tops)
+	this.Errs = append(this.Errs, errs...)
 	for _, v := range rs {
-		compiler.Errs = append(compiler.Errs, v.Error())
+		this.Errs = append(this.Errs, v.Error())
 	}
-	compiler.shouldExit()
+	this.shouldExit()
 
-	compiler.Errs = append(compiler.Errs, ast.PackageBeenCompile.TypeCheck()...)
-	if len(compiler.Errs) > 0 {
-		compiler.exit()
+	this.Errs = append(this.Errs, ast.PackageBeenCompile.TypeCheck()...)
+	if len(this.Errs) > 0 {
+		this.exit()
 	}
 	//optimizer.Optimize(&ast.PackageBeenCompile)
-	compiler.Maker.Make(&ast.PackageBeenCompile)
-	compiler.exit()
+	this.Maker.Make(&ast.PackageBeenCompile)
+	this.exit()
 }

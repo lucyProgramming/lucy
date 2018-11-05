@@ -163,10 +163,8 @@ func checkConst(block *Block, c *Constant) error {
 		if c.Type.assignAble(&es, t) == false {
 			if (c.Type.isInteger() && t.isInteger()) ||
 				(c.Type.isFloat() && t.isFloat()) {
-				fmt.Println(c.DefaultValueExpression.Data)
 				c.DefaultValueExpression.convertLiteralToNumberType(c.Type.Type)
 				c.Value = c.DefaultValueExpression.Data
-
 			} else {
 				err := fmt.Errorf("%s cannot use '%s' as '%s' for initialization value",
 					c.Pos.ErrMsgPrefix(), c.Type.TypeString(), t.TypeString())

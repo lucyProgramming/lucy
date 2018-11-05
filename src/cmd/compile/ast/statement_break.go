@@ -10,45 +10,45 @@ type StatementBreak struct {
 	Pos                 *Pos
 }
 
-func (b *StatementBreak) check(block *Block) []error {
+func (this *StatementBreak) check(block *Block) []error {
 	if block.InheritedAttribute.ForBreak == nil {
-		return []error{fmt.Errorf("%s 'break' cannot in this scope", b.Pos.ErrMsgPrefix())}
+		return []error{fmt.Errorf("%s 'break' cannot in this scope", this.Pos.ErrMsgPrefix())}
 	}
 	if block.InheritedAttribute.Defer != nil {
 		return []error{fmt.Errorf("%s cannot has 'break' in 'defer'",
-			b.Pos.ErrMsgPrefix())}
+			this.Pos.ErrMsgPrefix())}
 	}
 	if t, ok := block.InheritedAttribute.ForBreak.(*StatementFor); ok {
-		b.StatementFor = t
+		this.StatementFor = t
 	} else if t, ok := block.InheritedAttribute.ForBreak.(*StatementSwitch); ok {
-		b.StatementSwitch = t
+		this.StatementSwitch = t
 	} else {
-		b.SwitchTemplateBlock = block.InheritedAttribute.ForBreak.(*Block)
+		this.SwitchTemplateBlock = block.InheritedAttribute.ForBreak.(*Block)
 	}
-	b.mkDefers(block)
+	this.mkDefers(block)
 	return nil
 }
 
-func (b *StatementBreak) mkDefers(block *Block) {
-	if b.StatementFor != nil {
+func (this *StatementBreak) mkDefers(block *Block) {
+	if this.StatementFor != nil {
 		if block.IsForBlock {
-			b.Defers = append(b.Defers, block.Defers...)
+			this.Defers = append(this.Defers, block.Defers...)
 			return
 		}
-		b.mkDefers(block.Outer)
+		this.mkDefers(block.Outer)
 		return
-	} else if b.StatementSwitch != nil {
+	} else if this.StatementSwitch != nil {
 		//switch
 		if block.IsSwitchBlock {
-			b.Defers = append(b.Defers, block.Defers...)
+			this.Defers = append(this.Defers, block.Defers...)
 			return
 		}
-		b.mkDefers(block.Outer)
+		this.mkDefers(block.Outer)
 	} else { //s.SwitchTemplateBlock != nil
 		if block.IsWhenBlock {
-			b.Defers = append(b.Defers, block.Defers...)
+			this.Defers = append(this.Defers, block.Defers...)
 			return
 		}
-		b.mkDefers(block.Outer)
+		this.mkDefers(block.Outer)
 	}
 }

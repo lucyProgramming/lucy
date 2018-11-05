@@ -9,25 +9,25 @@ type ClosureMeta struct {
 	pos *Pos
 }
 
-func (c *Closure) ClosureVariableExist(v *Variable) bool {
-	if c.Variables == nil {
+func (this *Closure) ClosureVariableExist(v *Variable) bool {
+	if this.Variables == nil {
 		return false
 	}
-	_, ok := c.Variables[v]
+	_, ok := this.Variables[v]
 	return ok
 }
 
-func (c *Closure) ClosureFunctionExist(v *Function) bool {
-	if c.Functions == nil {
+func (this *Closure) ClosureFunctionExist(v *Function) bool {
+	if this.Functions == nil {
 		return false
 	}
-	_, ok := c.Functions[v]
+	_, ok := this.Functions[v]
 	return ok
 }
 
-func (c *Closure) CaptureCount(f *Function) int {
-	sum := len(c.Variables)
-	for v, _ := range c.Functions {
+func (this *Closure) CaptureCount(f *Function) int {
+	sum := len(this.Variables)
+	for v, _ := range this.Functions {
 		if f == v {
 			continue
 		}
@@ -38,29 +38,29 @@ func (c *Closure) CaptureCount(f *Function) int {
 	return sum
 }
 
-func (c *Closure) InsertVar(pos *Pos, v *Variable) {
-	if c.Variables == nil {
-		c.Variables = make(map[*Variable]*ClosureMeta)
+func (this *Closure) InsertVar(pos *Pos, v *Variable) {
+	if this.Variables == nil {
+		this.Variables = make(map[*Variable]*ClosureMeta)
 	}
-	c.Variables[v] = &ClosureMeta{
+	this.Variables[v] = &ClosureMeta{
 		pos: pos,
 	}
 }
 
-func (c *Closure) InsertFunction(pos *Pos, f *Function) {
-	if c == nil {
+func (this *Closure) InsertFunction(pos *Pos, f *Function) {
+	if this == nil {
 		panic(".........")
 	}
-	if c.Functions == nil {
-		c.Functions = make(map[*Function]*ClosureMeta)
+	if this.Functions == nil {
+		this.Functions = make(map[*Function]*ClosureMeta)
 	}
-	c.Functions[f] = &ClosureMeta{
+	this.Functions[f] = &ClosureMeta{
 		pos: pos,
 	}
 }
 
-func (c *Closure) Search(name string) interface{} {
-	for f, _ := range c.Functions {
+func (this *Closure) Search(name string) interface{} {
+	for f, _ := range this.Functions {
 		if f.Name == name {
 			return f
 		}

@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) loadLocalVar(class *cg.ClassHighLevel,
+func (this *BuildPackage) loadLocalVar(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, v *ast.Variable) (maxStack uint16) {
 	if v.BeenCapturedAsLeftValue > 0 {
 		return closure.loadLocalClosureVar(class, code, v)
@@ -15,7 +15,7 @@ func (buildPackage *BuildPackage) loadLocalVar(class *cg.ClassHighLevel,
 	return
 }
 
-func (buildPackage *BuildPackage) storeLocalVar(class *cg.ClassHighLevel,
+func (this *BuildPackage) storeLocalVar(class *cg.ClassHighLevel,
 	code *cg.AttributeCode, v *ast.Variable) (maxStack uint16) {
 	if v.BeenCapturedAsLeftValue > 0 {
 		closure.storeLocalClosureVar(class, code, v)

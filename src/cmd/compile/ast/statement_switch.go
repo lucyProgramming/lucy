@@ -22,24 +22,24 @@ type StatementSwitchCase struct {
 	Block   *Block
 }
 
-func (s *StatementSwitch) check(block *Block) []error {
+func (this *StatementSwitch) check(block *Block) []error {
 	errs := []error{}
-	if s.Condition == nil { // must be a error at parse stage
+	if this.Condition == nil { // must be a error at parse stage
 		return errs
 	}
-	s.initExpressionBlock.inherit(block)
-	for _, v := range s.PrefixExpressions {
+	this.initExpressionBlock.inherit(block)
+	for _, v := range this.PrefixExpressions {
 		v.IsStatementExpression = true
-		_, es := v.check(&s.initExpressionBlock)
+		_, es := v.check(&this.initExpressionBlock)
 		errs = append(errs, es...)
 		if err := v.canBeUsedAsStatement(); err != nil {
 			errs = append(errs, err)
 		}
 	}
-	if s.Condition == nil {
+	if this.Condition == nil {
 		return errs
 	}
-	conditionType, es := s.Condition.checkSingleValueContextExpression(&s.initExpressionBlock)
+	conditionType, es := this.Condition.checkSingleValueContextExpression(&this.initExpressionBlock)
 	errs = append(errs, es...)
 	if conditionType == nil {
 		return errs
@@ -53,9 +53,9 @@ func (s *StatementSwitch) check(block *Block) []error {
 			conditionType.Pos.ErrMsgPrefix()))
 		return errs
 	}
-	if len(s.StatementSwitchCases) == 0 {
+	if len(this.StatementSwitchCases) == 0 {
 		errs = append(errs, fmt.Errorf("%s switch statement has no cases",
-			s.EndPos.ErrMsgPrefix()))
+			this.EndPos.ErrMsgPrefix()))
 		return errs
 	}
 	longMap := make(map[int64]*Pos)
@@ -70,10 +70,10 @@ func (s *StatementSwitch) check(block *Block) []error {
 	var stringValue string
 	var enumName string
 	containsBool := false
-	for _, v := range s.StatementSwitchCases {
+	for _, v := range this.StatementSwitchCases {
 		for _, e := range v.Matches {
 			valueValid := false
-			t, es := e.checkSingleValueContextExpression(&s.initExpressionBlock)
+			t, es := e.checkSingleValueContextExpression(&this.initExpressionBlock)
 			errs = append(errs, es...)
 			if t == nil {
 				continue
@@ -187,23 +187,23 @@ func (s *StatementSwitch) check(block *Block) []error {
 			}
 		}
 		if v.Block != nil {
-			v.Block.inherit(&s.initExpressionBlock)
-			v.Block.InheritedAttribute.ForBreak = s
+			v.Block.inherit(&this.initExpressionBlock)
+			v.Block.InheritedAttribute.ForBreak = this
 			errs = append(errs, v.Block.check()...)
 		}
 	}
-	if s.Default != nil {
-		s.Default.inherit(&s.initExpressionBlock)
-		s.Default.InheritedAttribute.ForBreak = s
-		errs = append(errs, s.Default.check()...)
+	if this.Default != nil {
+		this.Default.inherit(&this.initExpressionBlock)
+		this.Default.InheritedAttribute.ForBreak = this
+		errs = append(errs, this.Default.check()...)
 	}
 	if conditionType.Type == VariableTypeEnum &&
 		len(enumNamesMap) < len(conditionType.Enum.Enums) &&
-		s.Default == nil &&
+		this.Default == nil &&
 		containsBool == false {
 		//some enum are missing, not allow
 		errMsg := fmt.Sprintf("%s switch for enum '%s' is not complete\n",
-			s.EndPos.ErrMsgPrefix(), conditionType.Enum.Name)
+			this.EndPos.ErrMsgPrefix(), conditionType.Enum.Name)
 		errMsg += "\tyou can use 'default:' or give missing enums,which are:\n"
 		for _, v := range conditionType.Enum.Enums {
 			_, ok := enumNamesMap[v.Name]

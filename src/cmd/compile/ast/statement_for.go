@@ -30,13 +30,13 @@ type ForRangeAttr struct {
 	RangeOn         *Expression
 }
 
-func (f *StatementFor) checkRange() []error {
+func (this *StatementFor) checkRange() []error {
 	errs := []error{}
 	//
 	var rangeExpression *Expression
-	bin := f.Condition.Data.(*ExpressionBinary)
+	bin := this.Condition.Data.(*ExpressionBinary)
 	if bin.Right.Type == ExpressionTypeRange {
-		rangeExpression = f.Condition.Data.(*Expression)
+		rangeExpression = this.Condition.Data.(*Expression)
 	} else if bin.Right.Type == ExpressionTypeList {
 		t := bin.Right.Data.([]*Expression)
 		if len(t) > 1 {
@@ -46,7 +46,7 @@ func (f *StatementFor) checkRange() []error {
 		}
 		rangeExpression = t[0].Data.(*Expression)
 	}
-	rangeOn, es := rangeExpression.checkSingleValueContextExpression(&f.initExpressionBlock)
+	rangeOn, es := rangeExpression.checkSingleValueContextExpression(&this.initExpressionBlock)
 	errs = append(errs, es...)
 	if rangeOn == nil {
 		return errs
@@ -92,10 +92,10 @@ func (f *StatementFor) checkRange() []error {
 		lefts = lefts[0:2]
 	}
 	modelKv := len(lefts) == 2
-	f.RangeAttr = &ForRangeAttr{}
-	f.RangeAttr.RangeOn = rangeExpression
+	this.RangeAttr = &ForRangeAttr{}
+	this.RangeAttr.RangeOn = rangeExpression
 	var err error
-	if f.Condition.Type == ExpressionTypeVarAssign {
+	if this.Condition.Type == ExpressionTypeVarAssign {
 		for _, v := range lefts {
 			if v.Type != ExpressionTypeIdentifier {
 				errs = append(errs,
@@ -126,12 +126,12 @@ func (f *StatementFor) checkRange() []error {
 			}
 			vd.Pos = posV
 			vd.Name = identifierV.Name
-			err = f.initExpressionBlock.Insert(identifierV.Name, f.Condition.Pos, vd)
+			err = this.initExpressionBlock.Insert(identifierV.Name, this.Condition.Pos, vd)
 			if err != nil {
 				errs = append(errs, err)
 			}
 			identifierV.Variable = vd
-			f.RangeAttr.IdentifierValue = identifierV
+			this.RangeAttr.IdentifierValue = identifierV
 		}
 		if modelKv &&
 			identifierK.Name != UnderScore {
@@ -148,36 +148,36 @@ func (f *StatementFor) checkRange() []error {
 			vd.Name = identifierK.Name
 			vd.Type = vt
 			vd.Pos = posK
-			err = f.initExpressionBlock.Insert(identifierK.Name, posK, vd)
+			err = this.initExpressionBlock.Insert(identifierK.Name, posK, vd)
 			if err != nil {
 				errs = append(errs, err)
 			}
 			identifierK.Variable = vd
-			f.RangeAttr.IdentifierKey = identifierK
+			this.RangeAttr.IdentifierKey = identifierK
 		}
 	} else { // k,v = range arr
 		if modelKv {
 			if false == lefts[0].IsIdentifier(UnderScore) {
-				f.RangeAttr.ExpressionKey = lefts[0]
+				this.RangeAttr.ExpressionKey = lefts[0]
 			}
 			if false == lefts[1].IsIdentifier(UnderScore) {
-				f.RangeAttr.ExpressionValue = lefts[1]
+				this.RangeAttr.ExpressionValue = lefts[1]
 			}
 		} else {
 			if false == lefts[0].IsIdentifier(UnderScore) {
-				f.RangeAttr.ExpressionValue = lefts[0]
+				this.RangeAttr.ExpressionValue = lefts[0]
 			}
 		}
 		var receiverKType *Type
-		if f.RangeAttr.ExpressionKey != nil {
-			receiverKType = f.RangeAttr.ExpressionKey.getLeftValue(&f.initExpressionBlock, &errs)
+		if this.RangeAttr.ExpressionKey != nil {
+			receiverKType = this.RangeAttr.ExpressionKey.getLeftValue(&this.initExpressionBlock, &errs)
 			if receiverKType == nil {
 				return errs
 			}
 		}
 		var receiverVType *Type
-		if f.RangeAttr.ExpressionValue != nil {
-			receiverVType = f.RangeAttr.ExpressionValue.getLeftValue(&f.initExpressionBlock, &errs)
+		if this.RangeAttr.ExpressionValue != nil {
+			receiverVType = this.RangeAttr.ExpressionValue.getLeftValue(&this.initExpressionBlock, &errs)
 			if receiverVType == nil {
 				return errs
 			}
@@ -196,7 +196,7 @@ func (f *StatementFor) checkRange() []error {
 		if receiverKType != nil {
 			if receiverKType.assignAble(&errs, kType) == false {
 				err = fmt.Errorf("%s cannot use '%s' as '%s' for index",
-					errMsgPrefix(f.RangeAttr.ExpressionKey.Pos),
+					errMsgPrefix(this.RangeAttr.ExpressionKey.Pos),
 					receiverKType.TypeString(), kType.TypeString())
 				errs = append(errs, err)
 				return errs
@@ -205,59 +205,59 @@ func (f *StatementFor) checkRange() []error {
 		if receiverVType != nil {
 			if receiverVType.assignAble(&errs, vType) == false {
 				err = fmt.Errorf("%s cannot use '%s' as '%s' for value destination",
-					errMsgPrefix(f.RangeAttr.ExpressionKey.Pos),
+					errMsgPrefix(this.RangeAttr.ExpressionKey.Pos),
 					receiverKType.TypeString(), kType.TypeString())
 				errs = append(errs, err)
 				return errs
 			}
 		}
 	}
-	errs = append(errs, f.Block.check()...)
+	errs = append(errs, this.Block.check()...)
 	return errs
 }
-func (f *StatementFor) check(block *Block) []error {
-	f.initExpressionBlock.inherit(block)
-	f.initExpressionBlock.InheritedAttribute.ForContinue = f
-	f.initExpressionBlock.InheritedAttribute.ForBreak = f
-	f.Block.inherit(&f.initExpressionBlock)
+func (this *StatementFor) check(block *Block) []error {
+	this.initExpressionBlock.inherit(block)
+	this.initExpressionBlock.InheritedAttribute.ForContinue = this
+	this.initExpressionBlock.InheritedAttribute.ForBreak = this
+	this.Block.inherit(&this.initExpressionBlock)
 	errs := []error{}
-	if f.Init == nil &&
-		f.Increment == nil &&
-		f.Condition != nil &&
-		f.Condition.canBeUsedForRange() {
+	if this.Init == nil &&
+		this.Increment == nil &&
+		this.Condition != nil &&
+		this.Condition.canBeUsedForRange() {
 		// for k,v := range arr
-		return f.checkRange()
+		return this.checkRange()
 	}
-	if f.Init != nil {
-		f.Init.IsStatementExpression = true
-		if err := f.Init.canBeUsedAsStatement(); err != nil {
+	if this.Init != nil {
+		this.Init.IsStatementExpression = true
+		if err := this.Init.canBeUsedAsStatement(); err != nil {
 			errs = append(errs, err)
 		}
-		_, es := f.Init.check(&f.initExpressionBlock)
+		_, es := this.Init.check(&this.initExpressionBlock)
 		errs = append(errs, es...)
 	}
-	if f.Condition != nil {
-		if err := f.Condition.canBeUsedAsCondition(); err != nil {
+	if this.Condition != nil {
+		if err := this.Condition.canBeUsedAsCondition(); err != nil {
 			errs = append(errs, err)
 		}
-		t, es := f.Condition.checkSingleValueContextExpression(&f.initExpressionBlock)
+		t, es := this.Condition.checkSingleValueContextExpression(&this.initExpressionBlock)
 		errs = append(errs, es...)
 		if t != nil && t.Type != VariableTypeBool {
 			errs = append(errs, fmt.Errorf("%s condition must be bool expression,but %s",
-				errMsgPrefix(f.Condition.Pos), t.TypeString()))
+				errMsgPrefix(this.Condition.Pos), t.TypeString()))
 		}
 	}
-	if f.Increment != nil {
-		f.Increment.IsStatementExpression = true
-		if err := f.Increment.canBeUsedAsStatement(); err != nil {
+	if this.Increment != nil {
+		this.Increment.IsStatementExpression = true
+		if err := this.Increment.canBeUsedAsStatement(); err != nil {
 			errs = append(errs, err)
 		}
-		_, es := f.Increment.check(&f.initExpressionBlock)
+		_, es := this.Increment.check(&this.initExpressionBlock)
 		errs = append(errs, es...)
 	}
 	if len(errs) > 0 {
 		return errs
 	}
-	errs = append(errs, f.Block.check()...)
+	errs = append(errs, this.Block.check()...)
 	return errs
 }

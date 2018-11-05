@@ -7,73 +7,73 @@ import (
 )
 
 //(a,b int)->(total int)
-func (parser *Parser) parseFunctionType() (functionType ast.FunctionType, err error) {
+func (this *Parser) parseFunctionType() (functionType ast.FunctionType, err error) {
 	functionType = ast.FunctionType{}
-	if parser.token.Type == lex.TokenLt {
-		parser.Next(lfNotToken)
+	if this.token.Type == lex.TokenLt {
+		this.Next(lfNotToken)
 		var err error
-		functionType.TemplateNames, err = parser.parseNameList()
+		functionType.TemplateNames, err = this.parseNameList()
 		if err != nil {
-			parser.consume(untilLp)
+			this.consume(untilLp)
 			goto skipTemplateNames
 		}
-		parser.errs = append(parser.errs, functionType.CheckTemplateNameDuplication()...)
-		parser.Next(lfIsToken)
+		this.errs = append(this.errs, functionType.CheckTemplateNameDuplication()...)
+		this.Next(lfIsToken)
 	}
-	parser.unExpectNewLineAndSkip()
+	this.unExpectNewLineAndSkip()
 skipTemplateNames:
-	if parser.token.Type != lex.TokenLp {
+	if this.token.Type != lex.TokenLp {
 		err = fmt.Errorf("%s fn declared wrong,missing '(',but '%s'",
-			parser.errMsgPrefix(), parser.token.Description)
-		parser.errs = append(parser.errs, err)
+			this.errMsgPrefix(), this.token.Description)
+		this.errs = append(this.errs, err)
 		return
 	}
-	parser.Next(lfNotToken)               // skip (
-	if parser.token.Type != lex.TokenRp { // not )
-		functionType.ParameterList, err = parser.parseParameterOrReturnList()
+	this.Next(lfNotToken)               // skip (
+	if this.token.Type != lex.TokenRp { // not )
+		functionType.ParameterList, err = this.parseParameterOrReturnList()
 		if err != nil {
-			parser.consume(untilRp)
-			parser.Next(lfNotToken)
+			this.consume(untilRp)
+			this.Next(lfNotToken)
 		}
 	}
-	parser.ifTokenIsLfThenSkip()
-	if parser.token.Type != lex.TokenRp { // not )
+	this.ifTokenIsLfThenSkip()
+	if this.token.Type != lex.TokenRp { // not )
 		err = fmt.Errorf("%s fn declared wrong,missing ')',but '%s'",
-			parser.errMsgPrefix(), parser.token.Description)
-		parser.errs = append(parser.errs, err)
+			this.errMsgPrefix(), this.token.Description)
+		this.errs = append(this.errs, err)
 		return
 	}
-	parser.Next(lfIsToken)                   // skip )
-	if parser.token.Type == lex.TokenArrow { // ->  parse return list
-		parser.Next(lfNotToken) // skip ->
-		if parser.token.Type != lex.TokenLp {
+	this.Next(lfIsToken)                   // skip )
+	if this.token.Type == lex.TokenArrow { // ->  parse return list
+		this.Next(lfNotToken) // skip ->
+		if this.token.Type != lex.TokenLp {
 			err = fmt.Errorf("%s fn declared wrong, not '(' after '->'",
-				parser.errMsgPrefix())
-			parser.errs = append(parser.errs, err)
+				this.errMsgPrefix())
+			this.errs = append(this.errs, err)
 			return
 		}
-		parser.Next(lfNotToken) // skip (
-		if parser.token.Type != lex.TokenRp {
-			functionType.ReturnList, err = parser.parseParameterOrReturnList()
+		this.Next(lfNotToken) // skip (
+		if this.token.Type != lex.TokenRp {
+			functionType.ReturnList, err = this.parseParameterOrReturnList()
 			if err != nil { // skip until next (,continue to analyse
-				parser.consume(untilRp)
-				parser.Next(lfIsToken)
+				this.consume(untilRp)
+				this.Next(lfIsToken)
 			}
 		}
-		parser.ifTokenIsLfThenSkip()
-		if parser.token.Type != lex.TokenRp {
+		this.ifTokenIsLfThenSkip()
+		if this.token.Type != lex.TokenRp {
 			err = fmt.Errorf("%s fn declared wrong,expected ')',but '%s'",
-				parser.errMsgPrefix(), parser.token.Description)
-			parser.errs = append(parser.errs, err)
+				this.errMsgPrefix(), this.token.Description)
+			this.errs = append(this.errs, err)
 			return
 		}
-		parser.Next(lfIsToken) // skip )
+		this.Next(lfIsToken) // skip )
 	} else {
 		functionType.ReturnList = make([]*ast.Variable, 1)
 		functionType.ReturnList[0] = &ast.Variable{}
-		functionType.ReturnList[0].Pos = parser.mkPos()
+		functionType.ReturnList[0].Pos = this.mkPos()
 		functionType.ReturnList[0].Type = &ast.Type{}
-		functionType.ReturnList[0].Type.Pos = parser.mkPos()
+		functionType.ReturnList[0].Type.Pos = this.mkPos()
 		functionType.ReturnList[0].Type.Type = ast.VariableTypeVoid
 	}
 	return functionType, err
@@ -85,47 +85,47 @@ skipTemplateNames:
 	int = 1
 
 */
-func (parser *Parser) parseTypedNameDefaultValue() (returnList []*ast.Variable, err error) {
-	returnList, err = parser.parseTypedName()
-	if parser.token.Type != lex.TokenAssign {
+func (this *Parser) parseTypedNameDefaultValue() (returnList []*ast.Variable, err error) {
+	returnList, err = this.parseTypedName()
+	if this.token.Type != lex.TokenAssign {
 		return
 	}
-	parser.Next(lfIsToken) // skip =
+	this.Next(lfIsToken) // skip =
 	for k, v := range returnList {
 		var er error
-		v.DefaultValueExpression, er = parser.ExpressionParser.parseExpression(false)
+		v.DefaultValueExpression, er = this.ExpressionParser.parseExpression(false)
 		if er != nil {
-			parser.consume(untilComma)
+			this.consume(untilComma)
 			err = er
-			parser.Next(lfNotToken)
+			this.Next(lfNotToken)
 			continue
 		}
-		if parser.token.Type != lex.TokenComma ||
+		if this.token.Type != lex.TokenComma ||
 			k == len(returnList)-1 {
 			break
 		} else {
-			parser.Next(lfNotToken) // skip ,
+			this.Next(lfNotToken) // skip ,
 		}
 	}
 	return returnList, err
 }
-func (parser *Parser) parseParameterOrReturnList() (returnList []*ast.Variable, err error) {
-	for parser.token.Type != lex.TokenRp {
-		if parser.token.Type == lex.TokenComma {
-			parser.errs = append(parser.errs, fmt.Errorf("%s extra comma",
-				parser.errMsgPrefix()))
-			parser.Next(lfNotToken)
+func (this *Parser) parseParameterOrReturnList() (returnList []*ast.Variable, err error) {
+	for this.token.Type != lex.TokenRp {
+		if this.token.Type == lex.TokenComma {
+			this.errs = append(this.errs, fmt.Errorf("%s extra comma",
+				this.errMsgPrefix()))
+			this.Next(lfNotToken)
 			continue
 		}
-		v, err := parser.parseTypedNameDefaultValue()
+		v, err := this.parseTypedNameDefaultValue()
 		if v != nil {
 			returnList = append(returnList, v...)
 		}
 		if err != nil {
 			break
 		}
-		if parser.token.Type == lex.TokenComma {
-			parser.Next(lfNotToken)
+		if this.token.Type == lex.TokenComma {
+			this.Next(lfNotToken)
 		} else {
 			break
 		}

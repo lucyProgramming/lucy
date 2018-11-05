@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildCapturedIdentifier(
+func (this *BuildExpression) buildCapturedIdentifier(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -47,7 +47,7 @@ func (buildExpression *BuildExpression) buildCapturedIdentifier(
 	return
 }
 
-func (buildExpression *BuildExpression) buildIdentifier(
+func (this *BuildExpression) buildIdentifier(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -62,11 +62,11 @@ func (buildExpression *BuildExpression) buildIdentifier(
 		maxStack = 1
 		return
 	case identifier.Function != nil:
-		return buildExpression.BuildPackage.packFunction2MethodHandle(class, code, identifier.Function, context)
+		return this.BuildPackage.packFunction2MethodHandle(class, code, identifier.Function, context)
 	case identifier.Variable.IsGlobal:
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
-			Class:      buildExpression.BuildPackage.mainClass.Name,
+			Class:      this.BuildPackage.mainClass.Name,
 			Field:      identifier.Name,
 			Descriptor: Descriptor.typeDescriptor(identifier.Variable.Type),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -74,7 +74,7 @@ func (buildExpression *BuildExpression) buildIdentifier(
 		maxStack = jvmSlotSize(identifier.Variable.Type)
 		return
 	case identifier.Variable.BeenCapturedAsLeftValue+identifier.Variable.BeenCapturedAsRightValue > 0:
-		return buildExpression.buildCapturedIdentifier(class, code, e, context)
+		return this.buildCapturedIdentifier(class, code, e, context)
 	default:
 		maxStack = jvmSlotSize(e.Value)
 		copyOPs(code, loadLocalVariableOps(e.Value.Type, identifier.Variable.LocalValOffset)...)

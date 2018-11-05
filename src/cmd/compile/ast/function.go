@@ -42,106 +42,106 @@ type Function struct {
 	IsClosureFunction                bool
 }
 
-func (f *Function) IsPublic() bool {
-	return f.AccessFlags&cg.AccMethodPublic != 0
+func (this *Function) IsPublic() bool {
+	return this.AccessFlags&cg.AccMethodPublic != 0
 }
 
-func (f *Function) NameLiteralFunction() string {
-	if f.Name != "" {
-		return f.Name
+func (this *Function) NameLiteralFunction() string {
+	if this.Name != "" {
+		return this.Name
 	}
 	var t string
-	if f.Name != "" {
-		t = f.Block.InheritedAttribute.ClassAndFunctionNames + f.Name
+	if this.Name != "" {
+		t = this.Block.InheritedAttribute.ClassAndFunctionNames + this.Name
 	}
 	return t
 }
 
-func (f *Function) readableMsg() string {
-	if f.Name == "" {
-		return "fn " + f.Type.TypeString()
+func (this *Function) readableMsg() string {
+	if this.Name == "" {
+		return "fn " + this.Type.TypeString()
 	} else {
-		return "fn " + f.Name + " " + f.Type.TypeString()
+		return "fn " + this.Name + " " + this.Type.TypeString()
 	}
 }
 
-func (f *Function) makeName() {
-	if f.Name == "" {
-		if f.Block.InheritedAttribute.ClassAndFunctionNames == "" {
-			f.Name = fmt.Sprintf("literal$%d", f.Pos.Line)
+func (this *Function) makeName() {
+	if this.Name == "" {
+		if this.Block.InheritedAttribute.ClassAndFunctionNames == "" {
+			this.Name = fmt.Sprintf("literal$%d", this.Pos.Line)
 		} else {
-			f.Name = fmt.Sprintf("%s$literal%d",
-				f.Block.InheritedAttribute.ClassAndFunctionNames, f.Pos.Line)
+			this.Name = fmt.Sprintf("%s$literal%d",
+				this.Block.InheritedAttribute.ClassAndFunctionNames, this.Pos.Line)
 		}
 	}
-	name := f.Name
+	name := this.Name
 	if name == SpecialMethodInit {
 		name = "init"
 	}
-	if f.Block.InheritedAttribute.ClassAndFunctionNames == "" {
-		f.Block.InheritedAttribute.ClassAndFunctionNames = name
+	if this.Block.InheritedAttribute.ClassAndFunctionNames == "" {
+		this.Block.InheritedAttribute.ClassAndFunctionNames = name
 	} else {
-		f.Block.InheritedAttribute.ClassAndFunctionNames += "$" + name
+		this.Block.InheritedAttribute.ClassAndFunctionNames += "$" + name
 	}
 }
 
-func (f *Function) checkBlock(errs *[]error) {
-	f.makeName()
-	f.makeLastReturnStatement()
-	*errs = append(*errs, f.Block.check()...)
+func (this *Function) checkBlock(errs *[]error) {
+	this.makeName()
+	this.makeLastReturnStatement()
+	*errs = append(*errs, this.Block.check()...)
 }
 
-func (f *Function) check(b *Block) []error {
+func (this *Function) check(b *Block) []error {
 	errs := make([]error, 0)
-	f.Block.inherit(b)
-	f.Block.InheritedAttribute.Function = f
-	f.checkParametersAndReturns(&errs, true, false)
-	if f.TemplateFunction == nil {
-		f.checkBlock(&errs)
+	this.Block.inherit(b)
+	this.Block.InheritedAttribute.Function = this
+	this.checkParametersAndReturns(&errs, true, false)
+	if this.TemplateFunction == nil {
+		this.checkBlock(&errs)
 	}
 	return errs
 }
 
-func (f *Function) clone() (ret *Function, es []error) {
-	ret, es = ParseFunctionHandler(f.SourceCode, f.Pos)
+func (this *Function) clone() (ret *Function, es []error) {
+	ret, es = ParseFunctionHandler(this.SourceCode, this.Pos)
 	if len(es) > 0 {
 		return ret, es
 	}
 	ret.TemplateClonedFunction = true
 	return ret, es
 }
-func (f *Function) makeLastReturnStatement() {
+func (this *Function) makeLastReturnStatement() {
 	s := &StatementReturn{}
-	f.Block.Statements = append(f.Block.Statements, &Statement{
+	this.Block.Statements = append(this.Block.Statements, &Statement{
 		Type:            StatementTypeReturn,
 		StatementReturn: s,
-		Pos:             f.Block.EndPos,
+		Pos:             this.Block.EndPos,
 	})
 }
 
-func (f *Function) IsGlobalMain() bool {
-	return f.IsGlobal &&
-		f.Name == MainFunctionName
+func (this *Function) IsGlobalMain() bool {
+	return this.IsGlobal &&
+		this.Name == MainFunctionName
 }
 
-func (f *Function) checkParametersAndReturns(
+func (this *Function) checkParametersAndReturns(
 	errs *[]error,
 	checkReturnVarExpression bool,
 	isAbstract bool) {
 	var err error
-	for k, v := range f.Type.ParameterList {
+	for k, v := range this.Type.ParameterList {
 		v.IsFunctionParameter = true
-		if len(v.Type.getParameterType(&f.Type)) > 0 {
-			if f.TemplateFunction == nil {
-				f.TemplateFunction = &TemplateFunction{}
+		if len(v.Type.getParameterType(&this.Type)) > 0 {
+			if this.TemplateFunction == nil {
+				this.TemplateFunction = &TemplateFunction{}
 			}
 		} else {
-			err = v.Type.resolve(&f.Block)
+			err = v.Type.resolve(&this.Block)
 			if err != nil {
 				*errs = append(*errs, err)
 			}
 			if isAbstract == false {
-				err = f.Block.Insert(v.Name, v.Pos, v)
+				err = this.Block.Insert(v.Name, v.Pos, v)
 				if err != nil {
 					*errs = append(*errs, err)
 					continue
@@ -153,24 +153,24 @@ func (f *Function) checkParametersAndReturns(
 				errMsgPrefix(v.Type.Pos)))
 		}
 		if v.Type.IsVariableArgs {
-			if k != len(f.Type.ParameterList)-1 {
+			if k != len(this.Type.ParameterList)-1 {
 				*errs = append(*errs, fmt.Errorf("%s only last parameter can be use as vargs",
 					errMsgPrefix(v.Type.Pos)))
 			} else {
-				f.Type.ParameterList = f.Type.ParameterList[0:k]
-				f.Type.VArgs = v
+				this.Type.ParameterList = this.Type.ParameterList[0:k]
+				this.Type.VArgs = v
 			}
 			continue
 		}
-		if f.TemplateFunction != nil {
+		if this.TemplateFunction != nil {
 			continue
 		}
 		if v.DefaultValueExpression != nil {
-			if f.HaveDefaultValue == false {
-				f.DefaultValueStartAt = k
+			if this.HaveDefaultValue == false {
+				this.DefaultValueStartAt = k
 			}
-			f.HaveDefaultValue = true
-			t, es := v.DefaultValueExpression.checkSingleValueContextExpression(&f.Block)
+			this.HaveDefaultValue = true
+			t, es := v.DefaultValueExpression.checkSingleValueContextExpression(&this.Block)
 			*errs = append(*errs, es...)
 			if t != nil {
 				if v.Type.assignAble(errs, t) == false {
@@ -190,28 +190,28 @@ func (f *Function) checkParametersAndReturns(
 			}
 		}
 	}
-	if f.Type.VoidReturn() == false {
+	if this.Type.VoidReturn() == false {
 		//handler return
-		for _, v := range f.Type.ReturnList {
+		for _, v := range this.Type.ReturnList {
 			v.IsReturn = true
-			if len(v.Type.getParameterType(&f.Type)) > 0 {
-				if f.TemplateFunction == nil {
-					f.TemplateFunction = &TemplateFunction{}
+			if len(v.Type.getParameterType(&this.Type)) > 0 {
+				if this.TemplateFunction == nil {
+					this.TemplateFunction = &TemplateFunction{}
 				}
 			} else {
-				err = v.Type.resolve(&f.Block)
+				err = v.Type.resolve(&this.Block)
 				if err != nil {
 					*errs = append(*errs, err)
 				}
 				if isAbstract == false {
-					err = f.Block.Insert(v.Name, v.Pos, v)
+					err = this.Block.Insert(v.Name, v.Pos, v)
 					if err != nil {
 						*errs = append(*errs, err)
 						continue
 					}
 				}
 			}
-			if f.TemplateFunction != nil {
+			if this.TemplateFunction != nil {
 				continue
 			}
 			if v.DefaultValueExpression == nil {
@@ -222,7 +222,7 @@ func (f *Function) checkParametersAndReturns(
 				// eval expression later
 				continue
 			}
-			t, es := v.DefaultValueExpression.checkSingleValueContextExpression(&f.Block)
+			t, es := v.DefaultValueExpression.checkSingleValueContextExpression(&this.Block)
 			if len(es) > 0 {
 				*errs = append(*errs, es...)
 				continue
@@ -236,13 +236,13 @@ func (f *Function) checkParametersAndReturns(
 	}
 }
 
-func (f *Function) checkReturnVarExpression() []error {
-	if f.Type.VoidReturn() {
+func (this *Function) checkReturnVarExpression() []error {
+	if this.Type.VoidReturn() {
 		return nil
 	}
 	var errs []error
-	for _, v := range f.Type.ReturnList {
-		t, es := v.DefaultValueExpression.checkSingleValueContextExpression(&f.Block)
+	for _, v := range this.Type.ReturnList {
+		t, es := v.DefaultValueExpression.checkSingleValueContextExpression(&this.Block)
 		if len(es) > 0 {
 			errs = append(errs, es...)
 			continue

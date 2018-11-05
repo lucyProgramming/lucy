@@ -37,44 +37,44 @@ type Block struct {
 	checkConstantsCalled      bool
 }
 
-func (b *Block) NameExists(name string) (interface{}, bool) {
-	if b.Functions != nil {
-		if t, ok := b.Functions[name]; ok {
+func (this *Block) NameExists(name string) (interface{}, bool) {
+	if this.Functions != nil {
+		if t, ok := this.Functions[name]; ok {
 			return t, true
 		}
 	}
-	if b.Variables != nil {
-		if t, ok := b.Variables[name]; ok {
+	if this.Variables != nil {
+		if t, ok := this.Variables[name]; ok {
 			return t, true
 		}
 	}
-	if b.Constants != nil {
-		if t, ok := b.Constants[name]; ok {
+	if this.Constants != nil {
+		if t, ok := this.Constants[name]; ok {
 			return t, true
 		}
 	}
-	if b.EnumNames != nil {
-		if t, ok := b.EnumNames[name]; ok {
+	if this.EnumNames != nil {
+		if t, ok := this.EnumNames[name]; ok {
 			return t, true
 		}
 	}
-	if b.Classes != nil {
-		if t, ok := b.Classes[name]; ok {
+	if this.Classes != nil {
+		if t, ok := this.Classes[name]; ok {
 			return t, true
 		}
 	}
-	if b.Enums != nil {
-		if t, ok := b.Enums[name]; ok {
+	if this.Enums != nil {
+		if t, ok := this.Enums[name]; ok {
 			return t, true
 		}
 	}
-	if b.TypeAliases != nil {
-		if t, ok := b.TypeAliases[name]; ok {
+	if this.TypeAliases != nil {
+		if t, ok := this.TypeAliases[name]; ok {
 			return t, true
 		}
 	}
-	if b.Labels != nil { // should be useless
-		if t, ok := b.Labels[name]; ok {
+	if this.Labels != nil { // should be useless
+		if t, ok := this.Labels[name]; ok {
 			return t, true
 		}
 	}
@@ -84,8 +84,8 @@ func (b *Block) NameExists(name string) (interface{}, bool) {
 /*
 	search label
 */
-func (b *Block) searchLabel(name string) *StatementLabel {
-	outer := b
+func (this *Block) searchLabel(name string) *StatementLabel {
+	outer := this
 	for {
 		if outer.Labels != nil {
 			if l, ok := outer.Labels[name]; ok {
@@ -104,8 +104,8 @@ func (b *Block) searchLabel(name string) *StatementLabel {
 /*
 	search type
 */
-func (b *Block) searchType(name string) interface{} {
-	bb := b
+func (this *Block) searchType(name string) interface{} {
+	bb := this
 	for bb != nil {
 		if bb.Classes != nil {
 			if t, ok := bb.Classes[name]; ok {
@@ -136,7 +136,7 @@ func (b *Block) searchType(name string) interface{} {
 	return nil
 }
 
-func (b *Block) identifierIsWhat(d interface{}) string {
+func (this *Block) identifierIsWhat(d interface{}) string {
 	switch d.(type) {
 	case *Function:
 		return "function"
@@ -162,73 +162,73 @@ func (b *Block) identifierIsWhat(d interface{}) string {
 /*
 	search identifier
 */
-func (b *Block) searchIdentifier(from *Pos, name string, isCaptureVar *bool) (interface{}, error) {
-	if b.Functions != nil {
-		if t, ok := b.Functions[name]; ok {
+func (this *Block) searchIdentifier(from *Pos, name string, isCaptureVar *bool) (interface{}, error) {
+	if this.Functions != nil {
+		if t, ok := this.Functions[name]; ok {
 			t.Used = true
 			return t, nil
 		}
 	}
-	if b.Variables != nil {
-		if t, ok := b.Variables[name]; ok {
+	if this.Variables != nil {
+		if t, ok := this.Variables[name]; ok {
 			return t, nil
 		}
 	}
-	if b.Constants != nil {
-		if t, ok := b.Constants[name]; ok {
+	if this.Constants != nil {
+		if t, ok := this.Constants[name]; ok {
 			t.Used = true
 			return t, nil
 		}
 	}
-	if b.EnumNames != nil {
-		if t, ok := b.EnumNames[name]; ok {
+	if this.EnumNames != nil {
+		if t, ok := this.EnumNames[name]; ok {
 			t.Enum.Used = true
 			return t, nil
 		}
 	}
-	if b.Enums != nil {
-		if t, ok := b.Enums[name]; ok {
+	if this.Enums != nil {
+		if t, ok := this.Enums[name]; ok {
 			t.Used = true
 			return t, nil
 		}
 	}
-	if b.Classes != nil {
-		if t, ok := b.Classes[name]; ok {
+	if this.Classes != nil {
+		if t, ok := this.Classes[name]; ok {
 			t.Used = true
 			return t, nil
 		}
 	}
-	if b.TypeAliases != nil {
-		if t, ok := b.TypeAliases[name]; ok {
+	if this.TypeAliases != nil {
+		if t, ok := this.TypeAliases[name]; ok {
 			return t, nil
 		}
 	}
-	if b.IsFunctionBlock && b.Fn != nil {
-		if b.Fn.parameterTypes != nil {
-			if t := b.Fn.parameterTypes[name]; t != nil {
+	if this.IsFunctionBlock && this.Fn != nil {
+		if this.Fn.parameterTypes != nil {
+			if t := this.Fn.parameterTypes[name]; t != nil {
 				return t, nil
 			}
 		}
 	}
 	// search closure
-	if b.InheritedAttribute.Function != nil {
-		v := b.InheritedAttribute.Function.Closure.Search(name)
+	if this.InheritedAttribute.Function != nil {
+		v := this.InheritedAttribute.Function.Closure.Search(name)
 		if v != nil {
 			return v, nil
 		}
 	}
-	if b.IsFunctionBlock &&
-		len(b.InheritedAttribute.Function.parameterTypes) > 0 {
+	if this.IsFunctionBlock &&
+		len(this.InheritedAttribute.Function.parameterTypes) > 0 {
 		return searchBuildIns(name), nil
 	}
-	if b.IsFunctionBlock &&
+	if this.IsFunctionBlock &&
 		name == ThisPointerName {
 		return nil, nil
 	}
-	if b.Outer == nil {
+	if this.Outer == nil {
 		return searchBuildIns(name), nil
 	}
-	t, err := b.Outer.searchIdentifier(from, name, isCaptureVar) // search by outer block
+	t, err := this.Outer.searchIdentifier(from, name, isCaptureVar) // search by outer block
 	if err != nil {
 		return t, err
 	}
@@ -237,15 +237,15 @@ func (b *Block) searchIdentifier(from *Pos, name string, isCaptureVar *bool) (in
 		case *Variable:
 			v := t.(*Variable)
 			if v.IsGlobal == false { // not a global variable
-				if b.IsFunctionBlock &&
-					b.InheritedAttribute.Function.IsGlobal == false {
-					b.InheritedAttribute.Function.Closure.InsertVar(from, v)
+				if this.IsFunctionBlock &&
+					this.InheritedAttribute.Function.IsGlobal == false {
+					this.InheritedAttribute.Function.Closure.InsertVar(from, v)
 					if isCaptureVar != nil {
 						*isCaptureVar = true
 					}
 				}
 				//cannot search variable from class body
-				if b.IsClassBlock {
+				if this.IsClassBlock {
 					return nil, fmt.Errorf("%s trying to access variable '%s' from class",
 						from.ErrMsgPrefix(), name)
 				}
@@ -253,11 +253,11 @@ func (b *Block) searchIdentifier(from *Pos, name string, isCaptureVar *bool) (in
 		case *Function:
 			f := t.(*Function)
 			if f.IsGlobal == false {
-				if b.IsClassBlock {
-					b.Class.closure.InsertFunction(from, f)
+				if this.IsClassBlock {
+					this.Class.closure.InsertFunction(from, f)
 				}
-				if b.IsFunctionBlock {
-					b.Fn.Closure.InsertFunction(from, f)
+				if this.IsFunctionBlock {
+					this.Fn.Closure.InsertFunction(from, f)
 				}
 			}
 		}
@@ -265,31 +265,31 @@ func (b *Block) searchIdentifier(from *Pos, name string, isCaptureVar *bool) (in
 	return t, nil
 }
 
-func (b *Block) inherit(father *Block) {
-	if b.Outer != nil {
+func (this *Block) inherit(father *Block) {
+	if this.Outer != nil {
 		return
 	}
-	if b == father {
+	if this == father {
 		panic("inherit from self")
 	}
-	b.InheritedAttribute = father.InheritedAttribute
-	b.Outer = father
-	if b.IsFunctionBlock || b.IsClassBlock {
-		b.InheritedAttribute.ForBreak = nil
-		b.InheritedAttribute.ForContinue = nil
-		b.InheritedAttribute.StatementOffset = 0
-		b.InheritedAttribute.IsConstructionMethod = false
-		b.InheritedAttribute.ClassMethod = nil
-		b.InheritedAttribute.Defer = nil
+	this.InheritedAttribute = father.InheritedAttribute
+	this.Outer = father
+	if this.IsFunctionBlock || this.IsClassBlock {
+		this.InheritedAttribute.ForBreak = nil
+		this.InheritedAttribute.ForContinue = nil
+		this.InheritedAttribute.StatementOffset = 0
+		this.InheritedAttribute.IsConstructionMethod = false
+		this.InheritedAttribute.ClassMethod = nil
+		this.InheritedAttribute.Defer = nil
 	}
 }
 
-func (b *Block) checkUnUsed() (es []error) {
+func (this *Block) checkUnUsed() (es []error) {
 	if common.CompileFlags.DisableCheckUnUse {
 		return nil
 	}
 	es = []error{}
-	for _, v := range b.Constants {
+	for _, v := range this.Constants {
 		if v.Used ||
 			v.IsGlobal {
 			continue
@@ -297,7 +297,7 @@ func (b *Block) checkUnUsed() (es []error) {
 		es = append(es, fmt.Errorf("%s const '%s' has declared,but not used",
 			v.Pos.ErrMsgPrefix(), v.Name))
 	}
-	for _, v := range b.Enums {
+	for _, v := range this.Enums {
 		if v.Used ||
 			v.IsGlobal {
 			continue
@@ -305,7 +305,7 @@ func (b *Block) checkUnUsed() (es []error) {
 		es = append(es, fmt.Errorf("%s enum '%s' has declared,but not used",
 			v.Pos.ErrMsgPrefix(), v.Name))
 	}
-	for _, v := range b.Classes {
+	for _, v := range this.Classes {
 		if v.Used ||
 			v.IsGlobal {
 			continue
@@ -313,7 +313,7 @@ func (b *Block) checkUnUsed() (es []error) {
 		es = append(es, fmt.Errorf("%s class '%s' has declared,but not used",
 			v.Pos.ErrMsgPrefix(), v.Name))
 	}
-	for _, v := range b.Functions {
+	for _, v := range this.Functions {
 		if v.Used ||
 			v.IsGlobal {
 			continue
@@ -321,14 +321,14 @@ func (b *Block) checkUnUsed() (es []error) {
 		es = append(es, fmt.Errorf("%s function '%s' has declared,but not used",
 			v.Pos.ErrMsgPrefix(), v.Name))
 	}
-	for _, v := range b.Labels {
+	for _, v := range this.Labels {
 		if v.Used {
 			continue
 		}
 		es = append(es, fmt.Errorf("%s enum '%s' has declared,but not used",
 			v.Pos.ErrMsgPrefix(), v.Name))
 	}
-	for _, v := range b.Variables {
+	for _, v := range this.Variables {
 		if v.Used ||
 			v.IsGlobal ||
 			v.IsFunctionParameter ||
@@ -342,107 +342,106 @@ func (b *Block) checkUnUsed() (es []error) {
 	return es
 }
 
-func (b *Block) check() []error {
+func (this *Block) check() []error {
 	errs := []error{}
-	for k, s := range b.Statements {
+	for k, s := range this.Statements {
 		if s.isStaticFieldDefaultValue {
 			// no need to check
 			// compile auto statement , checked before
 			continue
 		}
-		b.InheritedAttribute.StatementOffset = k
-		errs = append(errs, s.check(b)...)
+		this.InheritedAttribute.StatementOffset = k
+		errs = append(errs, s.check(this)...)
 		if PackageBeenCompile.shouldStop(errs) {
 			return errs
 		}
 	}
-	errs = append(errs, b.checkUnUsed()...)
-
+	errs = append(errs, this.checkUnUsed()...)
 	return errs
 }
 
-func (b *Block) checkConstants() []error {
-	if b.checkConstantsCalled {
+func (this *Block) checkConstants() []error {
+	if this.checkConstantsCalled {
 		return []error{}
 	}
-	b.checkConstantsCalled = true
+	this.checkConstantsCalled = true
 	errs := make([]error, 0)
-	for _, c := range b.Constants {
-		if err := b.nameIsValid(c.Name, c.Pos); err != nil {
+	for _, c := range this.Constants {
+		if err := this.nameIsValid(c.Name, c.Pos); err != nil {
 			errs = append(errs, err)
-			delete(b.Constants, c.Name)
+			delete(this.Constants, c.Name)
 			continue
 		}
-		err := checkConst(b, c)
+		err := checkConst(this, c)
 		if err != nil {
 			errs = append(errs, err)
 		}
 		if err != nil && c.Type == nil {
-			delete(b.Constants, c.Name)
+			delete(this.Constants, c.Name)
 		}
 	}
 	return errs
 }
 
-func (b *Block) checkNameExist(name string, pos *Pos) error {
-	if b.Variables == nil {
-		b.Variables = make(map[string]*Variable)
+func (this *Block) checkNameExist(name string, pos *Pos) error {
+	if this.Variables == nil {
+		this.Variables = make(map[string]*Variable)
 	}
-	if v, ok := b.Variables[name]; ok {
+	if v, ok := this.Variables[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
 			pos.ErrMsgPrefix(), name)
 		errMsg += fmt.Sprintf("\t%s", v.Pos.ErrMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
-	if b.Classes == nil {
-		b.Classes = make(map[string]*Class)
+	if this.Classes == nil {
+		this.Classes = make(map[string]*Class)
 	}
-	if c, ok := b.Classes[name]; ok {
+	if c, ok := this.Classes[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as class,first declared at:\n",
 			pos.ErrMsgPrefix(), name)
 		errMsg += fmt.Sprintf("\t%s", c.Pos.ErrMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
-	if b.Functions == nil {
-		b.Functions = make(map[string]*Function)
+	if this.Functions == nil {
+		this.Functions = make(map[string]*Function)
 	}
-	if f, ok := b.Functions[name]; ok {
+	if f, ok := this.Functions[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as function,first declared at:\n",
 			pos.ErrMsgPrefix(), name)
 		errMsg += fmt.Sprintf("\t%s", f.Pos.ErrMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
-	if b.Constants == nil {
-		b.Constants = make(map[string]*Constant)
+	if this.Constants == nil {
+		this.Constants = make(map[string]*Constant)
 	}
-	if c, ok := b.Constants[name]; ok {
+	if c, ok := this.Constants[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as const,first declared at:\n",
 			pos.ErrMsgPrefix(), name)
 		errMsg += fmt.Sprintf("\t%s", c.Pos.ErrMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
-	if b.EnumNames == nil {
-		b.EnumNames = make(map[string]*EnumName)
+	if this.EnumNames == nil {
+		this.EnumNames = make(map[string]*EnumName)
 	}
-	if en, ok := b.EnumNames[name]; ok {
+	if en, ok := this.EnumNames[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:\n",
 			pos.ErrMsgPrefix(), name)
 		errMsg += fmt.Sprintf("\t%s", en.Pos.ErrMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
-	if b.TypeAliases == nil {
-		b.TypeAliases = make(map[string]*Type)
+	if this.TypeAliases == nil {
+		this.TypeAliases = make(map[string]*Type)
 	}
-	if t, ok := b.TypeAliases[name]; ok {
+	if t, ok := this.TypeAliases[name]; ok {
 		errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:\n",
 			pos.ErrMsgPrefix(), name)
 		errMsg += fmt.Sprintf("\t%s", t.Pos.ErrMsgPrefix())
 		return fmt.Errorf(errMsg)
 	}
-	if b.Enums == nil {
-		b.Enums = make(map[string]*Enum)
+	if this.Enums == nil {
+		this.Enums = make(map[string]*Enum)
 	}
-	if e, ok := b.Enums[name]; ok {
+	if e, ok := this.Enums[name]; ok {
 		errMsg := fmt.Sprintf("%s name %s already declared as enum,first declared at:\n",
 			pos.ErrMsgPrefix(), name)
 		errMsg += fmt.Sprintf("\t%s", e.Pos.ErrMsgPrefix())
@@ -451,7 +450,7 @@ func (b *Block) checkNameExist(name string, pos *Pos) error {
 	return nil
 }
 
-func (b *Block) nameIsValid(name string, pos *Pos) error {
+func (this *Block) nameIsValid(name string, pos *Pos) error {
 	if name == "" {
 		return fmt.Errorf(`%s "" is not a valid name`, pos.ErrMsgPrefix())
 	}
@@ -470,57 +469,57 @@ func (b *Block) nameIsValid(name string, pos *Pos) error {
 	return nil
 }
 
-func (b *Block) Insert(name string, pos *Pos, d interface{}) error {
-	if err := b.nameIsValid(name, pos); err != nil {
+func (this *Block) Insert(name string, pos *Pos, d interface{}) error {
+	if err := this.nameIsValid(name, pos); err != nil {
 		return err
 	}
 	// handle label
 	if label, ok := d.(*StatementLabel); ok && label != nil {
-		if b.Labels == nil {
-			b.Labels = make(map[string]*StatementLabel)
+		if this.Labels == nil {
+			this.Labels = make(map[string]*StatementLabel)
 		}
-		if l, ok := b.Labels[name]; ok {
+		if l, ok := this.Labels[name]; ok {
 			errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
 				pos.ErrMsgPrefix(), name)
 			errMsg += fmt.Sprintf("\t%s", l.Statement.Pos.ErrMsgPrefix())
 			return fmt.Errorf(errMsg)
 		}
-		b.Labels[name] = label
+		this.Labels[name] = label
 		return nil
 	}
-	err := b.checkNameExist(name, pos)
+	err := this.checkNameExist(name, pos)
 	if err != nil {
 		return err
 	}
 	switch d.(type) {
 	case *Class:
-		b.Classes[name] = d.(*Class)
+		this.Classes[name] = d.(*Class)
 	case *Function:
 		t := d.(*Function)
 		if buildInFunctionsMap[t.Name] != nil {
 			return fmt.Errorf("%s function named '%s' is buildin",
 				pos.ErrMsgPrefix(), name)
 		}
-		b.Functions[name] = t
+		this.Functions[name] = t
 	case *Constant:
-		b.Constants[name] = d.(*Constant)
+		this.Constants[name] = d.(*Constant)
 	case *Variable:
 		t := d.(*Variable)
 		t.LocalValOffset = math.MaxUint16 // overflow
-		b.Variables[name] = t
+		this.Variables[name] = t
 	case *Enum:
 		e := d.(*Enum)
-		b.Enums[name] = e
+		this.Enums[name] = e
 		for _, v := range e.Enums {
-			err := b.Insert(v.Name, v.Pos, v)
+			err := this.Insert(v.Name, v.Pos, v)
 			if err != nil {
 				return err
 			}
 		}
 	case *EnumName:
-		b.EnumNames[name] = d.(*EnumName)
+		this.EnumNames[name] = d.(*EnumName)
 	case *Type:
-		b.TypeAliases[name] = d.(*Type)
+		this.TypeAliases[name] = d.(*Type)
 	}
 	return nil
 }

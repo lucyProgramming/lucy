@@ -80,8 +80,8 @@ const (
 )
 
 type Expression struct {
-	checkRangeCalled bool
-	Type             ExpressionTypeKind
+	//checkRangeCalled bool
+	Type ExpressionTypeKind
 	/*
 		only for global variable definition
 		public hello := "hai...."
@@ -99,10 +99,10 @@ type Expression struct {
 	AsSubForNegative      *Expression
 }
 
-func (e *Expression) binaryExpressionDependOnSub() *Expression {
-	switch e.Type {
+func (this *Expression) binaryExpressionDependOnSub() *Expression {
+	switch this.Type {
 	case ExpressionTypeAdd:
-		bin := e.Data.(*ExpressionBinary)
+		bin := this.Data.(*ExpressionBinary)
 		// 0 + a
 		if bin.Left.isNumber() && bin.Left.getDoubleValue() == 0 {
 			return bin.Right
@@ -113,14 +113,14 @@ func (e *Expression) binaryExpressionDependOnSub() *Expression {
 		}
 	case ExpressionTypeSub:
 		// a - 0
-		bin := e.Data.(*ExpressionBinary)
+		bin := this.Data.(*ExpressionBinary)
 		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
 			return bin.Left
 		}
 
 	case ExpressionTypeMul:
 		// a * 0 == 0
-		bin := e.Data.(*ExpressionBinary)
+		bin := this.Data.(*ExpressionBinary)
 		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
 			return bin.Right
 		}
@@ -138,12 +138,12 @@ func (e *Expression) binaryExpressionDependOnSub() *Expression {
 		}
 	case ExpressionTypeDiv:
 		// a / 1 == a
-		bin := e.Data.(*ExpressionBinary)
+		bin := this.Data.(*ExpressionBinary)
 		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 1 {
 			return bin.Left
 		}
 	case ExpressionTypeEq:
-		bin := e.Data.(*ExpressionBinary)
+		bin := this.Data.(*ExpressionBinary)
 		if bin.Left.Value.Type == VariableTypeBool {
 			// true == a
 			if bin.Left.isBoolLiteral(true) {
@@ -155,7 +155,7 @@ func (e *Expression) binaryExpressionDependOnSub() *Expression {
 			}
 		}
 	case ExpressionTypeNe:
-		bin := e.Data.(*ExpressionBinary)
+		bin := this.Data.(*ExpressionBinary)
 		if bin.Left.Value.Type == VariableTypeBool {
 			// false != a
 			if bin.Left.isBoolLiteral(false) {
@@ -167,7 +167,7 @@ func (e *Expression) binaryExpressionDependOnSub() *Expression {
 			}
 		}
 	case ExpressionTypeLogicalAnd:
-		bin := e.Data.(*ExpressionBinary)
+		bin := this.Data.(*ExpressionBinary)
 		// true && a
 		if bin.Left.isBoolLiteral(true) {
 			return bin.Right
@@ -177,7 +177,7 @@ func (e *Expression) binaryExpressionDependOnSub() *Expression {
 			return bin.Left
 		}
 	case ExpressionTypeLogicalOr:
-		bin := e.Data.(*ExpressionBinary)
+		bin := this.Data.(*ExpressionBinary)
 		// false || a
 		if bin.Left.isBoolLiteral(false) {
 			return bin.Right
@@ -190,20 +190,20 @@ func (e *Expression) binaryExpressionDependOnSub() *Expression {
 	return nil
 }
 
-func (e *Expression) isBoolLiteral(b bool) bool {
-	if e.Type != ExpressionTypeBool {
+func (this *Expression) isBoolLiteral(b bool) bool {
+	if this.Type != ExpressionTypeBool {
 		return false
 	}
-	return e.Data.(bool) == b
+	return this.Data.(bool) == b
 }
 
-func (e *Expression) isRelation() bool {
-	return e.Type == ExpressionTypeEq ||
-		e.Type == ExpressionTypeNe ||
-		e.Type == ExpressionTypeGe ||
-		e.Type == ExpressionTypeGt ||
-		e.Type == ExpressionTypeLe ||
-		e.Type == ExpressionTypeLt
+func (this *Expression) isRelation() bool {
+	return this.Type == ExpressionTypeEq ||
+		this.Type == ExpressionTypeNe ||
+		this.Type == ExpressionTypeGe ||
+		this.Type == ExpressionTypeGt ||
+		this.Type == ExpressionTypeLe ||
+		this.Type == ExpressionTypeLt
 }
 
 /*
@@ -211,11 +211,11 @@ func (e *Expression) isRelation() bool {
 	'a' > 'b'
 	1s > 2s
 */
-func (e *Expression) Is2IntCompare() bool {
-	if e.isRelation() == false {
+func (this *Expression) Is2IntCompare() bool {
+	if this.isRelation() == false {
 		return false
 	}
-	bin := e.Data.(*ExpressionBinary)
+	bin := this.Data.(*ExpressionBinary)
 	i1 := bin.Left.Value.isInteger() && bin.Left.Value.Type != VariableTypeLong
 	i2 := bin.Right.Value.isInteger() && bin.Right.Value.Type != VariableTypeLong
 	return i1 && i2
@@ -224,11 +224,11 @@ func (e *Expression) Is2IntCompare() bool {
 /*
 	a == null
 */
-func (e *Expression) IsCompare2Null() bool {
-	if e.isRelation() == false {
+func (this *Expression) IsCompare2Null() bool {
+	if this.isRelation() == false {
 		return false
 	}
-	bin := e.Data.(*ExpressionBinary)
+	bin := this.Data.(*ExpressionBinary)
 	return bin.Left.Type == ExpressionTypeNull ||
 		bin.Right.Type == ExpressionTypeNull
 }
@@ -236,11 +236,11 @@ func (e *Expression) IsCompare2Null() bool {
 /*
 	a > "b"
 */
-func (e *Expression) Is2StringCompare() bool {
-	if e.isRelation() == false {
+func (this *Expression) Is2StringCompare() bool {
+	if this.isRelation() == false {
 		return false
 	}
-	bin := e.Data.(*ExpressionBinary)
+	bin := this.Data.(*ExpressionBinary)
 	return bin.Left.Value.Type == VariableTypeString
 }
 
@@ -248,36 +248,36 @@ func (e *Expression) Is2StringCompare() bool {
 	var a ,b []int
 	a == b
 */
-func (e *Expression) Is2PointerCompare() bool {
-	if e.isRelation() == false {
+func (this *Expression) Is2PointerCompare() bool {
+	if this.isRelation() == false {
 		return false
 	}
-	bin := e.Data.(*ExpressionBinary)
+	bin := this.Data.(*ExpressionBinary)
 	return bin.Left.Value.IsPointer()
 }
 
-func (e *Expression) convertTo(to *Type) {
+func (this *Expression) convertTo(to *Type) {
 	c := &ExpressionTypeConversion{}
 	c.Expression = &Expression{}
 	c.Expression.Op = "checkcast"
-	*c.Expression = *e // copy
+	*c.Expression = *this // copy
 	c.Type = to
-	e.Value = to
-	e.Type = ExpressionTypeCheckCast
-	e.IsCompileAuto = true
-	e.Data = c
+	this.Value = to
+	this.Type = ExpressionTypeCheckCast
+	this.IsCompileAuto = true
+	this.Data = c
 }
 
-func (e *Expression) convertToNumberType(typ VariableTypeKind) {
-	if e.isLiteral() {
-		e.convertLiteralToNumberType(typ)
-		e.Value = &Type{
+func (this *Expression) convertToNumberType(typ VariableTypeKind) {
+	if this.isLiteral() {
+		this.convertLiteralToNumberType(typ)
+		this.Value = &Type{
 			Type: typ,
-			Pos:  e.Pos,
+			Pos:  this.Pos,
 		}
 	} else {
-		e.convertTo(&Type{
-			Pos:  e.Pos,
+		this.convertTo(&Type{
+			Pos:  this.Pos,
 			Type: typ,
 		})
 	}
@@ -291,36 +291,36 @@ type ExpressionTypeAssert struct {
 /*
 	const spread
 */
-func (e *Expression) fromConst(c *Constant) {
-	e.Op = c.Name
+func (this *Expression) fromConst(c *Constant) {
+	this.Op = c.Name
 	switch c.Type.Type {
 	case VariableTypeBool:
-		e.Type = ExpressionTypeBool
-		e.Data = c.Value.(bool)
+		this.Type = ExpressionTypeBool
+		this.Data = c.Value.(bool)
 	case VariableTypeByte:
-		e.Type = ExpressionTypeByte
-		e.Data = c.Value.(int64)
+		this.Type = ExpressionTypeByte
+		this.Data = c.Value.(int64)
 	case VariableTypeShort:
-		e.Type = ExpressionTypeShort
-		e.Data = c.Value.(int64)
+		this.Type = ExpressionTypeShort
+		this.Data = c.Value.(int64)
 	case VariableTypeChar:
-		e.Type = ExpressionTypeChar
-		e.Data = c.Value.(int64)
+		this.Type = ExpressionTypeChar
+		this.Data = c.Value.(int64)
 	case VariableTypeInt:
-		e.Type = ExpressionTypeInt
-		e.Data = c.Value.(int64)
+		this.Type = ExpressionTypeInt
+		this.Data = c.Value.(int64)
 	case VariableTypeLong:
-		e.Type = ExpressionTypeLong
-		e.Data = c.Value.(int64)
+		this.Type = ExpressionTypeLong
+		this.Data = c.Value.(int64)
 	case VariableTypeFloat:
-		e.Type = ExpressionTypeFloat
-		e.Data = c.Value.(float32)
+		this.Type = ExpressionTypeFloat
+		this.Data = c.Value.(float32)
 	case VariableTypeDouble:
-		e.Type = ExpressionTypeDouble
-		e.Data = c.Value.(float64)
+		this.Type = ExpressionTypeDouble
+		this.Data = c.Value.(float64)
 	case VariableTypeString:
-		e.Type = ExpressionTypeString
-		e.Data = c.Value.(string)
+		this.Type = ExpressionTypeString
+		this.Data = c.Value.(string)
 	}
 }
 
@@ -335,142 +335,142 @@ type ExpressionSlice struct {
 	Start, End   *Expression
 }
 
-func (e *Expression) isLiteral() bool {
-	return e.Type == ExpressionTypeBool ||
-		e.Type == ExpressionTypeString ||
-		e.isNumber()
+func (this *Expression) isLiteral() bool {
+	return this.Type == ExpressionTypeBool ||
+		this.Type == ExpressionTypeString ||
+		this.isNumber()
 }
 
 /*
 	valid for condition
 */
-func (e *Expression) canBeUsedAsCondition() error {
-	if e.Type == ExpressionTypeNull ||
-		e.Type == ExpressionTypeBool ||
-		e.Type == ExpressionTypeByte ||
-		e.Type == ExpressionTypeShort ||
-		e.Type == ExpressionTypeInt ||
-		e.Type == ExpressionTypeLong ||
-		e.Type == ExpressionTypeFloat ||
-		e.Type == ExpressionTypeDouble ||
-		e.Type == ExpressionTypeString ||
-		e.Type == ExpressionTypeArray ||
-		e.Type == ExpressionTypeLogicalOr ||
-		e.Type == ExpressionTypeLogicalAnd ||
-		e.Type == ExpressionTypeOr ||
-		e.Type == ExpressionTypeAnd ||
-		e.Type == ExpressionTypeXor ||
-		e.Type == ExpressionTypeLsh ||
-		e.Type == ExpressionTypeRsh ||
-		e.Type == ExpressionTypeAdd ||
-		e.Type == ExpressionTypeSub ||
-		e.Type == ExpressionTypeMul ||
-		e.Type == ExpressionTypeDiv ||
-		e.Type == ExpressionTypeMod ||
-		e.Type == ExpressionTypeEq ||
-		e.Type == ExpressionTypeNe ||
-		e.Type == ExpressionTypeGe ||
-		e.Type == ExpressionTypeGt ||
-		e.Type == ExpressionTypeLe ||
-		e.Type == ExpressionTypeLt ||
-		e.Type == ExpressionTypeIndex ||
-		e.Type == ExpressionTypeSelection ||
-		e.Type == ExpressionTypeMethodCall ||
-		e.Type == ExpressionTypeFunctionCall ||
-		e.Type == ExpressionTypeIncrement ||
-		e.Type == ExpressionTypeDecrement ||
-		e.Type == ExpressionTypePrefixIncrement ||
-		e.Type == ExpressionTypePrefixDecrement ||
-		e.Type == ExpressionTypeNegative ||
-		e.Type == ExpressionTypeNot ||
-		e.Type == ExpressionTypeBitwiseNot ||
-		e.Type == ExpressionTypeIdentifier ||
-		e.Type == ExpressionTypeNew ||
-		e.Type == ExpressionTypeCheckCast ||
-		e.Type == ExpressionTypeSlice ||
-		e.Type == ExpressionTypeMap ||
-		e.Type == ExpressionTypeQuestion {
+func (this *Expression) canBeUsedAsCondition() error {
+	if this.Type == ExpressionTypeNull ||
+		this.Type == ExpressionTypeBool ||
+		this.Type == ExpressionTypeByte ||
+		this.Type == ExpressionTypeShort ||
+		this.Type == ExpressionTypeInt ||
+		this.Type == ExpressionTypeLong ||
+		this.Type == ExpressionTypeFloat ||
+		this.Type == ExpressionTypeDouble ||
+		this.Type == ExpressionTypeString ||
+		this.Type == ExpressionTypeArray ||
+		this.Type == ExpressionTypeLogicalOr ||
+		this.Type == ExpressionTypeLogicalAnd ||
+		this.Type == ExpressionTypeOr ||
+		this.Type == ExpressionTypeAnd ||
+		this.Type == ExpressionTypeXor ||
+		this.Type == ExpressionTypeLsh ||
+		this.Type == ExpressionTypeRsh ||
+		this.Type == ExpressionTypeAdd ||
+		this.Type == ExpressionTypeSub ||
+		this.Type == ExpressionTypeMul ||
+		this.Type == ExpressionTypeDiv ||
+		this.Type == ExpressionTypeMod ||
+		this.Type == ExpressionTypeEq ||
+		this.Type == ExpressionTypeNe ||
+		this.Type == ExpressionTypeGe ||
+		this.Type == ExpressionTypeGt ||
+		this.Type == ExpressionTypeLe ||
+		this.Type == ExpressionTypeLt ||
+		this.Type == ExpressionTypeIndex ||
+		this.Type == ExpressionTypeSelection ||
+		this.Type == ExpressionTypeMethodCall ||
+		this.Type == ExpressionTypeFunctionCall ||
+		this.Type == ExpressionTypeIncrement ||
+		this.Type == ExpressionTypeDecrement ||
+		this.Type == ExpressionTypePrefixIncrement ||
+		this.Type == ExpressionTypePrefixDecrement ||
+		this.Type == ExpressionTypeNegative ||
+		this.Type == ExpressionTypeNot ||
+		this.Type == ExpressionTypeBitwiseNot ||
+		this.Type == ExpressionTypeIdentifier ||
+		this.Type == ExpressionTypeNew ||
+		this.Type == ExpressionTypeCheckCast ||
+		this.Type == ExpressionTypeSlice ||
+		this.Type == ExpressionTypeMap ||
+		this.Type == ExpressionTypeQuestion {
 		return nil
 	}
 	return fmt.Errorf("%s cannot use '%s' as condition",
-		e.Pos.ErrMsgPrefix(), e.Op)
+		this.Pos.ErrMsgPrefix(), this.Op)
 }
 
-func (e *Expression) canBeUsedAsStatement() error {
-	if e.Type == ExpressionTypeVarAssign ||
-		e.Type == ExpressionTypeAssign ||
-		e.Type == ExpressionTypeFunctionCall ||
-		e.Type == ExpressionTypeMethodCall ||
-		e.Type == ExpressionTypeFunctionLiteral ||
-		e.Type == ExpressionTypePlusAssign ||
-		e.Type == ExpressionTypeMinusAssign ||
-		e.Type == ExpressionTypeMulAssign ||
-		e.Type == ExpressionTypeDivAssign ||
-		e.Type == ExpressionTypeModAssign ||
-		e.Type == ExpressionTypeAndAssign ||
-		e.Type == ExpressionTypeOrAssign ||
-		e.Type == ExpressionTypeXorAssign ||
-		e.Type == ExpressionTypeLshAssign ||
-		e.Type == ExpressionTypeRshAssign ||
-		e.Type == ExpressionTypeIncrement ||
-		e.Type == ExpressionTypeDecrement ||
-		e.Type == ExpressionTypePrefixIncrement ||
-		e.Type == ExpressionTypePrefixDecrement ||
-		e.Type == ExpressionTypeVar ||
-		e.Type == ExpressionTypeConst {
+func (this *Expression) canBeUsedAsStatement() error {
+	if this.Type == ExpressionTypeVarAssign ||
+		this.Type == ExpressionTypeAssign ||
+		this.Type == ExpressionTypeFunctionCall ||
+		this.Type == ExpressionTypeMethodCall ||
+		this.Type == ExpressionTypeFunctionLiteral ||
+		this.Type == ExpressionTypePlusAssign ||
+		this.Type == ExpressionTypeMinusAssign ||
+		this.Type == ExpressionTypeMulAssign ||
+		this.Type == ExpressionTypeDivAssign ||
+		this.Type == ExpressionTypeModAssign ||
+		this.Type == ExpressionTypeAndAssign ||
+		this.Type == ExpressionTypeOrAssign ||
+		this.Type == ExpressionTypeXorAssign ||
+		this.Type == ExpressionTypeLshAssign ||
+		this.Type == ExpressionTypeRshAssign ||
+		this.Type == ExpressionTypeIncrement ||
+		this.Type == ExpressionTypeDecrement ||
+		this.Type == ExpressionTypePrefixIncrement ||
+		this.Type == ExpressionTypePrefixDecrement ||
+		this.Type == ExpressionTypeVar ||
+		this.Type == ExpressionTypeConst {
 		return nil
 	}
 	return fmt.Errorf("%s expression '%s' evaluate but not used",
-		e.Pos.ErrMsgPrefix(), e.Op)
+		this.Pos.ErrMsgPrefix(), this.Op)
 }
 
-func (e *Expression) isNumber() bool {
-	return e.isInteger() ||
-		e.isFloat()
+func (this *Expression) isNumber() bool {
+	return this.isInteger() ||
+		this.isFloat()
 }
 
-func (e *Expression) isInteger() bool {
-	return e.Type == ExpressionTypeByte ||
-		e.Type == ExpressionTypeShort ||
-		e.Type == ExpressionTypeInt ||
-		e.Type == ExpressionTypeLong ||
-		e.Type == ExpressionTypeChar
+func (this *Expression) isInteger() bool {
+	return this.Type == ExpressionTypeByte ||
+		this.Type == ExpressionTypeShort ||
+		this.Type == ExpressionTypeInt ||
+		this.Type == ExpressionTypeLong ||
+		this.Type == ExpressionTypeChar
 }
-func (e *Expression) isFloat() bool {
-	return e.Type == ExpressionTypeFloat ||
-		e.Type == ExpressionTypeDouble
+func (this *Expression) isFloat() bool {
+	return this.Type == ExpressionTypeFloat ||
+		this.Type == ExpressionTypeDouble
 }
 
-func (e *Expression) isEqOrNe() bool {
-	return e.Type == ExpressionTypeEq ||
-		e.Type == ExpressionTypeNe
+func (this *Expression) isEqOrNe() bool {
+	return this.Type == ExpressionTypeEq ||
+		this.Type == ExpressionTypeNe
 }
 
 /*
 	check out this expression is increment or decrement
 */
-func (e *Expression) IsIncrement() bool {
-	if e.Type == ExpressionTypeIncrement ||
-		e.Type == ExpressionTypePrefixIncrement ||
-		e.Type == ExpressionTypeDecrement ||
-		e.Type == ExpressionTypePrefixDecrement {
+func (this *Expression) IsIncrement() bool {
+	if this.Type == ExpressionTypeIncrement ||
+		this.Type == ExpressionTypePrefixIncrement ||
+		this.Type == ExpressionTypeDecrement ||
+		this.Type == ExpressionTypePrefixDecrement {
 	} else {
 		panic("not increment or decrement at all")
 	}
-	return e.Type == ExpressionTypeIncrement ||
-		e.Type == ExpressionTypePrefixIncrement
+	return this.Type == ExpressionTypeIncrement ||
+		this.Type == ExpressionTypePrefixIncrement
 }
 
 /*
 	k,v := range arr
 	k,v = range arr
 */
-func (e *Expression) canBeUsedForRange() bool {
-	if e.Type != ExpressionTypeAssign &&
-		e.Type != ExpressionTypeVarAssign {
+func (this *Expression) canBeUsedForRange() bool {
+	if this.Type != ExpressionTypeAssign &&
+		this.Type != ExpressionTypeVarAssign {
 		return false
 	}
-	bin := e.Data.(*ExpressionBinary)
+	bin := this.Data.(*ExpressionBinary)
 	if bin.Right.Type == ExpressionTypeRange {
 		return true
 	}
@@ -483,11 +483,11 @@ func (e *Expression) canBeUsedForRange() bool {
 	return false
 }
 
-func (e *Expression) HaveMultiValue() bool {
-	if e.Type == ExpressionTypeFunctionCall ||
-		e.Type == ExpressionTypeMethodCall ||
-		e.Type == ExpressionTypeTypeAssert {
-		return len(e.MultiValues) > 1
+func (this *Expression) HaveMultiValue() bool {
+	if this.Type == ExpressionTypeFunctionCall ||
+		this.Type == ExpressionTypeMethodCall ||
+		this.Type == ExpressionTypeTypeAssert {
+		return len(this.MultiValues) > 1
 	}
 	return false
 
@@ -596,9 +596,9 @@ type ExpressionArray struct {
 	Expressions []*Expression
 }
 
-func (e *Expression) IsIdentifier(identifier string) bool {
-	if e.Type != ExpressionTypeIdentifier {
+func (this *Expression) IsIdentifier(identifier string) bool {
+	if this.Type != ExpressionTypeIdentifier {
 		return false
 	}
-	return e.Data.(*ExpressionIdentifier).Name == identifier
+	return this.Data.(*ExpressionIdentifier).Name == identifier
 }

@@ -5,8 +5,8 @@ import (
 	"fmt"
 )
 
-func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
-	m := e.Data.(*ExpressionMap)
+func (this *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
+	m := this.Data.(*ExpressionMap)
 	if m.Type != nil {
 		if err := m.Type.resolve(block); err != nil {
 			*errs = append(*errs, err)
@@ -19,12 +19,12 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 		*errs = append(*errs,
 			fmt.Errorf("%s map literal has no type and no initiational values,"+
 				"cannot inference it`s type",
-				errMsgPrefix(e.Pos)))
+				errMsgPrefix(this.Pos)))
 		return nil
 	}
 	if m.Type == nil {
 		m.Type = &Type{}
-		m.Type.Pos = e.Pos
+		m.Type.Pos = this.Pos
 		m.Type.Type = VariableTypeMap
 	}
 	if m.Type.Map == nil {
@@ -148,13 +148,13 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 	if m.Type.Map.K == nil {
 		m.Type.Map.K = &Type{
 			Type: VariableTypeVoid,
-			Pos:  e.Pos,
+			Pos:  this.Pos,
 		}
 	}
 	if m.Type.Map.V == nil {
 		m.Type.Map.V = &Type{
 			Type: VariableTypeVoid,
-			Pos:  e.Pos,
+			Pos:  this.Pos,
 		}
 	}
 	return m.Type

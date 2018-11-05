@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) mkBuildInSprintf(
+func (this *BuildExpression) mkBuildInSprintf(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -18,7 +18,7 @@ func (buildExpression *BuildExpression) mkBuildInSprintf(
 	// format,must be string
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionSprintfMeta)
-	maxStack = buildExpression.build(class, code, meta.Format, context, state)
+	maxStack = this.build(class, code, meta.Format, context, state)
 	state.pushStack(class, state.newObjectVariableType(javaStringClass))
 	loadInt32(class, code, int32(meta.ArgsLength))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
@@ -41,7 +41,7 @@ func (buildExpression *BuildExpression) mkBuildInSprintf(
 		currentStack += 2
 		state.pushStack(class, objectArray)
 		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-		stack := buildExpression.build(class, code, v, context, state)
+		stack := this.build(class, code, v, context, state)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}

@@ -7,8 +7,8 @@ import (
 /*
 	in array type must equal
 */
-func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*Type {
-	assert := e.Data.(*ExpressionTypeAssert)
+func (this *Expression) checkTypeAssert(block *Block, errs *[]error) []*Type {
+	assert := this.Data.(*ExpressionTypeAssert)
 	object, es := assert.Expression.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
 	if object == nil {
@@ -36,18 +36,18 @@ func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*Type {
 		return nil
 	}
 	var result []*Type
-	if len(e.Lefts) > 1 {
+	if len(this.Lefts) > 1 {
 		assert.MultiValueContext = true
 		result = make([]*Type, 2)
 		result[0] = assert.Type.Clone()
-		result[0].Pos = e.Pos
+		result[0].Pos = this.Pos
 		result[1] = &Type{}
-		result[1].Pos = e.Pos
+		result[1].Pos = this.Pos
 		result[1].Type = VariableTypeBool // if  assert is ok
 	} else {
 		result = make([]*Type, 1)
 		result[0] = assert.Type.Clone()
-		result[0].Pos = e.Pos
+		result[0].Pos = this.Pos
 	}
 	return result
 }

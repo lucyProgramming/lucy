@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildTemplateFunctionCall(
+func (this *BuildExpression) buildTemplateFunctionCall(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -28,10 +28,10 @@ func (buildExpression *BuildExpression) buildTemplateFunctionCall(
 		class.AppendMethod(method)
 		call.TemplateFunctionCallPair.Function.Entrance = method
 		//build function
-		buildExpression.BuildPackage.buildFunction(class, nil, method, call.TemplateFunctionCallPair.Function)
+		this.BuildPackage.buildFunction(class, nil, method, call.TemplateFunctionCallPair.Function)
 		call.TemplateFunctionCallPair.Entrance = method
 	}
-	maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
+	maxStack = this.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 	code.Codes[code.CodeLength] = cg.OP_invokestatic
 	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      call.TemplateFunctionCallPair.Entrance.Class.Name,

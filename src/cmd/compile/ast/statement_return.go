@@ -10,35 +10,35 @@ type StatementReturn struct {
 	Pos         *Pos
 }
 
-func (r *StatementReturn) mkDefers(b *Block) {
+func (this *StatementReturn) mkDefers(b *Block) {
 	if b.IsFunctionBlock == false { // not top block
-		r.mkDefers(b.Outer) // recursive
+		this.mkDefers(b.Outer) // recursive
 	}
 	if b.Defers != nil {
-		r.Defers = append(r.Defers, b.Defers...)
+		this.Defers = append(this.Defers, b.Defers...)
 	}
 }
 
-func (r *StatementReturn) check(b *Block) []error {
+func (this *StatementReturn) check(b *Block) []error {
 	if b.InheritedAttribute.Defer != nil {
 		return []error{fmt.Errorf("%s cannot has 'return' in 'defer'",
-			r.Pos.ErrMsgPrefix())}
+			this.Pos.ErrMsgPrefix())}
 	}
 	errs := []error{}
-	r.mkDefers(b)
-	if len(r.Expressions) == 0 { // always ok
+	this.mkDefers(b)
+	if len(this.Expressions) == 0 { // always ok
 		return errs
 	}
-	returnValueTypes := checkExpressions(b, r.Expressions, &errs, false)
+	returnValueTypes := checkExpressions(b, this.Expressions, &errs, false)
 	rs := b.InheritedAttribute.Function.Type.ReturnList
-	pos := r.Expressions[len(r.Expressions)-1].Pos
+	pos := this.Expressions[len(this.Expressions)-1].Pos
 	if len(returnValueTypes) < len(rs) {
 		errs = append(errs, fmt.Errorf("%s too few arguments to return", pos.ErrMsgPrefix()))
 	} else if len(returnValueTypes) > len(rs) {
 		errs = append(errs, fmt.Errorf("%s too many arguments to return", pos.ErrMsgPrefix()))
 	}
-	convertExpressionsToNeeds(r.Expressions,
-		b.InheritedAttribute.Function.Type.mkCallReturnTypes(r.Expressions[0].Pos), returnValueTypes)
+	convertExpressionsToNeeds(this.Expressions,
+		b.InheritedAttribute.Function.Type.mkCallReturnTypes(this.Expressions[0].Pos), returnValueTypes)
 	for k, v := range rs {
 		if k < len(returnValueTypes) && returnValueTypes[k] != nil {
 			if false == v.Type.assignAble(&errs, returnValueTypes[k]) {

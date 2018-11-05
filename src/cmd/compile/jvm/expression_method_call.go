@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildMethodCall(
+func (this *BuildExpression) buildMethodCall(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -13,24 +13,24 @@ func (buildExpression *BuildExpression) buildMethodCall(
 	state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	if call.FieldMethodHandler != nil {
-		return buildExpression.buildMethodCallOnFieldHandler(class, code, e, context, state)
+		return this.buildMethodCallOnFieldHandler(class, code, e, context, state)
 	}
 	switch call.Expression.Value.Type {
 	case ast.VariableTypeArray:
-		return buildExpression.buildMethodCallOnArray(class, code, e, context, state)
+		return this.buildMethodCallOnArray(class, code, e, context, state)
 	case ast.VariableTypeMap:
-		return buildExpression.buildMethodCallOnMap(class, code, e, context, state)
+		return this.buildMethodCallOnMap(class, code, e, context, state)
 	case ast.VariableTypeJavaArray:
-		return buildExpression.buildMethodCallJavaOnArray(class, code, e, context, state)
+		return this.buildMethodCallJavaOnArray(class, code, e, context, state)
 	case ast.VariableTypePackage:
-		return buildExpression.buildMethodCallOnPackage(class, code, e, context, state)
+		return this.buildMethodCallOnPackage(class, code, e, context, state)
 	case ast.VariableTypeDynamicSelector:
-		return buildExpression.buildMethodCallOnDynamicSelector(class, code, e, context, state)
+		return this.buildMethodCallOnDynamicSelector(class, code, e, context, state)
 	case ast.VariableTypeClass:
 		if call.Method.Function.JvmDescriptor == "" {
 			call.Method.Function.JvmDescriptor = Descriptor.methodDescriptor(&call.Method.Function.Type)
 		}
-		maxStack = buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
+		maxStack = this.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
 		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      call.Class.Name,
@@ -38,7 +38,7 @@ func (buildExpression *BuildExpression) buildMethodCall(
 			Descriptor: call.Method.Function.JvmDescriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if t := buildExpression.jvmSize(e); t > maxStack {
+		if t := this.jvmSize(e); t > maxStack {
 			maxStack = t
 		}
 		if t := popCallResult(code, e, &call.Method.Function.Type); t > maxStack {
@@ -49,7 +49,7 @@ func (buildExpression *BuildExpression) buildMethodCall(
 		if call.Method.Function.JvmDescriptor == "" {
 			call.Method.Function.JvmDescriptor = Descriptor.methodDescriptor(&call.Method.Function.Type)
 		}
-		maxStack = buildExpression.build(class, code, call.Expression, context, state)
+		maxStack = this.build(class, code, call.Expression, context, state)
 		// object ref
 		state.pushStack(class, call.Expression.Value)
 		defer state.popStack(1)
@@ -60,11 +60,11 @@ func (buildExpression *BuildExpression) buildMethodCall(
 				Verify: v,
 			})
 		}
-		stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
+		stack := this.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 		if t := stack + 1; t > maxStack {
 			maxStack = t
 		}
-		if t := buildExpression.jvmSize(e); t > maxStack {
+		if t := this.jvmSize(e); t > maxStack {
 			maxStack = t
 		}
 		if call.Name == ast.SpecialMethodInit { // call father construction method
@@ -105,7 +105,7 @@ func (buildExpression *BuildExpression) buildMethodCall(
 	}
 	return
 }
-func (buildExpression *BuildExpression) buildMethodCallOnFieldHandler(
+func (this *BuildExpression) buildMethodCallOnFieldHandler(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -113,7 +113,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnFieldHandler(
 	state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	if call.FieldMethodHandler.IsStatic() == false {
-		stack := buildExpression.build(class, code, call.Expression, context, state)
+		stack := this.build(class, code, call.Expression, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
@@ -131,7 +131,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnFieldHandler(
 	code.CodeLength += 2
 	state.pushStack(class, state.newObjectVariableType(javaMethodHandleClass))
 	defer state.popStack(1)
-	stack := buildExpression.buildCallArgs(
+	stack := this.buildCallArgs(
 		class, code, call.Args, call.VArgs,
 		context, state)
 	if t := 1 + stack; t > maxStack {
@@ -149,7 +149,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnFieldHandler(
 	}
 	return
 }
-func (buildExpression *BuildExpression) buildMethodCallOnDynamicSelector(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (this *BuildExpression) buildMethodCallOnDynamicSelector(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	if call.FieldMethodHandler != nil {
@@ -173,7 +173,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnDynamicSelector(class *
 		code.CodeLength += 2
 		state.pushStack(class, state.newObjectVariableType(javaMethodHandleClass))
 		defer state.popStack(1)
-		stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs,
+		stack := this.buildCallArgs(class, code, call.Args, call.VArgs,
 			context, state)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
@@ -197,7 +197,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnDynamicSelector(class *
 			defer state.popStack(1)
 			currentStack = 1
 		}
-		stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs,
+		stack := this.buildCallArgs(class, code, call.Args, call.VArgs,
 			context, state)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
@@ -221,11 +221,11 @@ func (buildExpression *BuildExpression) buildMethodCallOnDynamicSelector(class *
 	}
 	return
 }
-func (buildExpression *BuildExpression) buildMethodCallOnPackage(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (this *BuildExpression) buildMethodCallOnPackage(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	if call.PackageFunction != nil {
-		stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
+		stack := this.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
@@ -250,7 +250,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnPackage(class *cg.Class
 		code.CodeLength += 3
 		state.pushStack(class, call.PackageGlobalVariableFunction.Type)
 		defer state.popStack(1)
-		stack := buildExpression.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
+		stack := this.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
 		}

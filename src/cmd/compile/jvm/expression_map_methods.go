@@ -6,14 +6,14 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildMethodCallOnMap(
+func (this *BuildExpression) buildMethodCallOnMap(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
 	context *Context,
 	state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	maxStack = buildExpression.build(class, code, call.Expression, context, state)
+	maxStack = this.build(class, code, call.Expression, context, state)
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
@@ -23,7 +23,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnMap(
 	switch call.Name {
 	case common.MapMethodKeyExist:
 		variableType := call.Args[0].Value
-		stack := buildExpression.build(class, code, call.Args[0], context, state)
+		stack := this.build(class, code, call.Args[0], context, state)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
 		}
@@ -54,7 +54,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnMap(
 				}
 				state.pushStack(class, hashMapVerifyType)
 			}
-			stack := buildExpression.build(class, code, v, context, state)
+			stack := this.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
 			}

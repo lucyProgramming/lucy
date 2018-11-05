@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) buildIfStatement(
+func (this *BuildPackage) buildIfStatement(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	s *ast.StatementIf,
@@ -14,18 +14,18 @@ func (buildPackage *BuildPackage) buildIfStatement(
 	ifState := (&StackMapState{}).initFromLast(state)
 	defer state.addTop(ifState)
 	for _, v := range s.PrefixExpressions {
-		stack := buildPackage.BuildExpression.build(class, code, v, context, ifState)
+		stack := this.BuildExpression.build(class, code, v, context, ifState)
 		if stack > maxStack {
 			maxStack = stack
 		}
 	}
 	trueBlockState := (&StackMapState{}).initFromLast(ifState)
 	stack, exit :=
-		buildPackage.BuildExpression.buildConditionNotOk(class, code, context, trueBlockState, s.Condition)
+		this.BuildExpression.buildConditionNotOk(class, code, context, trueBlockState, s.Condition)
 	if stack > maxStack {
 		maxStack = stack
 	}
-	buildPackage.buildBlock(class, code, &s.Block, context, trueBlockState)
+	this.buildBlock(class, code, &s.Block, context, trueBlockState)
 	ifState.addTop(trueBlockState)
 	if s.Else != nil || len(s.ElseIfList) > 0 {
 		if s.Block.NotExecuteToLastStatement == false {
@@ -37,11 +37,11 @@ func (buildPackage *BuildPackage) buildIfStatement(
 		writeExits([]*cg.Exit{exit}, code.CodeLength)
 		elseIfState := (&StackMapState{}).initFromLast(ifState)
 		stack, exit =
-			buildPackage.BuildExpression.buildConditionNotOk(class, code, context, elseIfState, v.Condition)
+			this.BuildExpression.buildConditionNotOk(class, code, context, elseIfState, v.Condition)
 		if stack > maxStack {
 			maxStack = stack
 		}
-		buildPackage.buildBlock(class, code, v.Block, context, elseIfState)
+		this.buildBlock(class, code, v.Block, context, elseIfState)
 		if s.Else != nil || k != len(s.ElseIfList)-1 {
 			if v.Block.NotExecuteToLastStatement == false {
 				s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
@@ -54,7 +54,7 @@ func (buildPackage *BuildPackage) buildIfStatement(
 	writeExits([]*cg.Exit{exit}, code.CodeLength)
 	if s.Else != nil {
 		elseBlockState := (&StackMapState{}).initFromLast(ifState)
-		buildPackage.buildBlock(class, code, s.Else, context, elseBlockState)
+		this.buildBlock(class, code, s.Else, context, elseBlockState)
 		ifState.addTop(elseBlockState)
 	}
 	return

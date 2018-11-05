@@ -1,6 +1,6 @@
 package ast
 
-func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool, err error) {
+func (this *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool, err error) {
 	if bin.Left.Type != bin.Right.Type {
 		return
 	}
@@ -8,32 +8,32 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 	case ExpressionTypeByte:
 		left := bin.Left.Data.(int64)
 		right := bin.Right.Data.(int64)
-		switch e.Type {
+		switch this.Type {
 		case ExpressionTypeAdd:
-			e.Data = left + right
+			this.Data = left + right
 		case ExpressionTypeSub:
-			e.Data = left - right
+			this.Data = left - right
 		case ExpressionTypeMul:
-			e.Data = left * right
+			this.Data = left * right
 		case ExpressionTypeDiv:
 			if right == 0 {
 				err = divisionByZeroErr(bin.Right.Pos)
 			}
-			e.Data = left
+			this.Data = left
 		case ExpressionTypeMod:
 			if right == 0 {
 				err = divisionByZeroErr(bin.Right.Pos)
 			}
-			e.Data = left
+			this.Data = left
 		default:
 			return false, nil
 		}
-		if e.Type == ExpressionTypeAdd || e.Type == ExpressionTypeSub {
-			if t := e.Data.(int64); (t >> 8) != 0 {
-				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.byteExceeds(t))
-			}
-		}
-		e.Type = ExpressionTypeByte
+		//if this.Type == ExpressionTypeAdd || this.Type == ExpressionTypeSub {
+		//	if t := this.Data.(int64); (t >> 8) != 0 {
+		//		PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.byteExceeds(t))
+		//	}
+		//}
+		this.Type = ExpressionTypeByte
 		is = true
 		return
 	case ExpressionTypeShort:
@@ -43,144 +43,144 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 	case ExpressionTypeInt:
 		left := bin.Left.Data.(int64)
 		right := bin.Right.Data.(int64)
-		switch e.Type {
+		switch this.Type {
 		case ExpressionTypeAdd:
-			e.Data = left + right
+			this.Data = left + right
 		case ExpressionTypeSub:
-			e.Data = left - right
+			this.Data = left - right
 		case ExpressionTypeMul:
-			e.Data = left * right
+			this.Data = left * right
 		case ExpressionTypeDiv:
 			if right == 0 {
 				err = divisionByZeroErr(bin.Right.Pos)
 			}
-			e.Data = left
+			this.Data = left
 		case ExpressionTypeMod:
 			if right == 0 {
 				err = divisionByZeroErr(bin.Right.Pos)
 			}
-			e.Data = left
+			this.Data = left
 		default:
 			return false, nil
 		}
-		switch e.Type {
-		case ExpressionTypeShort:
-			if t := e.Data.(int64); (t >> 16) != 0 {
-				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.shortExceeds(t))
-			}
-		case ExpressionTypeChar:
-			if t := e.Data.(int64); (t >> 16) != 0 {
-				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.charExceeds(t))
-			}
-		case ExpressionTypeInt:
-			if t := e.Data.(int64); (t >> 32) != 0 {
-				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.intExceeds(t))
-			}
-		}
-		e.Type = bin.Left.Type
+		//switch this.Type {
+		//case ExpressionTypeShort:
+		//	if t := this.Data.(int64); (t >> 16) != 0 {
+		//		PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.shortExceeds(t))
+		//	}
+		//case ExpressionTypeChar:
+		//	if t := this.Data.(int64); (t >> 16) != 0 {
+		//		PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.charExceeds(t))
+		//	}
+		//case ExpressionTypeInt:
+		//	if t := this.Data.(int64); (t >> 32) != 0 {
+		//		PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.intExceeds(t))
+		//	}
+		//}
+		this.Type = bin.Left.Type
 		is = true
 		return
 	case ExpressionTypeLong:
 		left := bin.Left.Data.(int64)
 		right := bin.Right.Data.(int64)
-		switch e.Type {
+		switch this.Type {
 		case ExpressionTypeAdd:
-			e.Data = left + right
+			this.Data = left + right
 
 		case ExpressionTypeSub:
-			e.Data = left - right
+			this.Data = left - right
 		case ExpressionTypeMul:
-			e.Data = left * right
+			this.Data = left * right
 		case ExpressionTypeDiv:
 			if right == 0 {
 				err = divisionByZeroErr(bin.Right.Pos)
 			}
-			e.Data = left
+			this.Data = left
 		case ExpressionTypeMod:
 			if right == 0 {
 				err = divisionByZeroErr(bin.Right.Pos)
 			}
-			e.Data = left
+			this.Data = left
 		default:
 			return false, nil
 		}
-		if e.Type == ExpressionTypeAdd || e.Type == ExpressionTypeSub {
-			if t := e.Data.(int64) < 0; t != (bin.Left.Data.(int64) < 0) && t != (bin.Left.Data.(int64) < 0) {
-				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.longExceeds(e.Data.(int64)))
-			}
-		}
-		e.Type = ExpressionTypeLong
+		//if this.Type == ExpressionTypeAdd || this.Type == ExpressionTypeSub {
+		//	if t := this.Data.(int64) < 0; t != (bin.Left.Data.(int64) < 0) && t != (bin.Left.Data.(int64) < 0) {
+		//		PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.longExceeds(this.Data.(int64)))
+		//	}
+		//}
+		this.Type = ExpressionTypeLong
 		is = true
 		return
 	case ExpressionTypeFloat:
 		left := bin.Left.Data.(float32)
 		right := bin.Right.Data.(float32)
-		switch e.Type {
+		switch this.Type {
 		case ExpressionTypeAdd:
-			e.Data = left + right
+			this.Data = left + right
 		case ExpressionTypeSub:
-			e.Data = left - right
+			this.Data = left - right
 		case ExpressionTypeMul:
-			e.Data = left * right
+			this.Data = left * right
 		case ExpressionTypeDiv:
 			if right == 0 {
 				err = divisionByZeroErr(bin.Right.Pos)
 			}
-			e.Data = left
+			this.Data = left
 		case ExpressionTypeMod:
 			if right == 0 {
 				err = divisionByZeroErr(bin.Right.Pos)
 			}
-			e.Data = left
+			this.Data = left
 		default:
 			return false, nil
 		}
-		if e.Type == ExpressionTypeAdd || e.Type == ExpressionTypeSub {
-			if t := e.Data.(float32) < 0; t != (bin.Left.Data.(float32) < 0) && t != (bin.Left.Data.(float32) < 0) {
-				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.floatExceeds())
-			}
-		}
-		e.Type = ExpressionTypeFloat
+		//if this.Type == ExpressionTypeAdd || this.Type == ExpressionTypeSub {
+		//	if t := this.Data.(float32) < 0; t != (bin.Left.Data.(float32) < 0) && t != (bin.Left.Data.(float32) < 0) {
+		//		PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.floatExceeds())
+		//	}
+		//}
+		this.Type = ExpressionTypeFloat
 		is = true
 		return
 	case ExpressionTypeDouble:
 		left := bin.Left.Data.(float64)
 		right := bin.Right.Data.(float64)
-		switch e.Type {
+		switch this.Type {
 		case ExpressionTypeAdd:
-			e.Data = left + right
+			this.Data = left + right
 		case ExpressionTypeSub:
-			e.Data = left - right
+			this.Data = left - right
 		case ExpressionTypeMul:
-			e.Data = left * right
+			this.Data = left * right
 		case ExpressionTypeDiv:
 			if right == 0 {
 				err = divisionByZeroErr(bin.Right.Pos)
 			}
-			e.Data = left
+			this.Data = left
 		case ExpressionTypeMod:
 			if right == 0 {
 				err = divisionByZeroErr(bin.Right.Pos)
 			}
-			e.Data = left
+			this.Data = left
 		default:
 			return false, nil
 		}
-		if e.Type == ExpressionTypeAdd || e.Type == ExpressionTypeSub {
-			if t := e.Data.(float64) < 0; t != (bin.Left.Data.(float64) < 0) && t != (bin.Left.Data.(float64) < 0) {
-				PackageBeenCompile.errors = append(PackageBeenCompile.errors, e.floatExceeds())
-			}
-		}
-		e.Type = ExpressionTypeDouble
+		//if this.Type == ExpressionTypeAdd || this.Type == ExpressionTypeSub {
+		//	if t := this.Data.(float64) < 0; t != (bin.Left.Data.(float64) < 0) && t != (bin.Left.Data.(float64) < 0) {
+		//		PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.floatExceeds())
+		//	}
+		//}
+		this.Type = ExpressionTypeDouble
 		is = true
 		return
 	case ExpressionTypeString:
 		left := bin.Left.Data.(string)
 		right := bin.Right.Data.(string)
-		if e.Type == ExpressionTypeAdd {
+		if this.Type == ExpressionTypeAdd {
 			if len(left)+len(right) < 65536 {
-				e.Type = ExpressionTypeString
-				e.Data = left + right
+				this.Type = ExpressionTypeString
+				this.Data = left + right
 			} else {
 				return false, nil
 			}
@@ -191,16 +191,16 @@ func (e *Expression) arithmeticBinaryConstFolder(bin *ExpressionBinary) (is bool
 	return
 }
 
-func (e *Expression) relationBinaryConstFolder(bin *ExpressionBinary) (is bool, err error) {
+func (this *Expression) relationBinaryConstFolder(bin *ExpressionBinary) (is bool, err error) {
 	if bin.Left.Type == ExpressionTypeBool &&
 		bin.Right.Type == ExpressionTypeBool &&
-		e.isEqOrNe() {
-		if e.Type == ExpressionTypeEq {
-			e.Data = bin.Left.Data.(bool) == bin.Right.Data.(bool)
+		this.isEqOrNe() {
+		if this.Type == ExpressionTypeEq {
+			this.Data = bin.Left.Data.(bool) == bin.Right.Data.(bool)
 		} else {
-			e.Data = bin.Left.Data.(bool) != bin.Right.Data.(bool)
+			this.Data = bin.Left.Data.(bool) != bin.Right.Data.(bool)
 		}
-		e.Type = ExpressionTypeBool
+		this.Type = ExpressionTypeBool
 		return
 	}
 	if bin.Left.Type != bin.Right.Type {
@@ -210,22 +210,22 @@ func (e *Expression) relationBinaryConstFolder(bin *ExpressionBinary) (is bool, 
 	case ExpressionTypeString:
 		left := bin.Left.Data.(string)
 		right := bin.Right.Data.(string)
-		switch e.Type {
+		switch this.Type {
 		case ExpressionTypeEq:
-			e.Data = left == right
+			this.Data = left == right
 		case ExpressionTypeNe:
-			e.Data = left != right
+			this.Data = left != right
 		case ExpressionTypeGe:
-			e.Data = left >= right
+			this.Data = left >= right
 		case ExpressionTypeGt:
-			e.Data = left > right
+			this.Data = left > right
 		case ExpressionTypeLe:
-			e.Data = left <= right
+			this.Data = left <= right
 		case ExpressionTypeLt:
-			e.Data = left < right
+			this.Data = left < right
 		}
 		is = true
-		e.Type = ExpressionTypeBool
+		this.Type = ExpressionTypeBool
 		return
 	case ExpressionTypeByte:
 		fallthrough
@@ -238,62 +238,62 @@ func (e *Expression) relationBinaryConstFolder(bin *ExpressionBinary) (is bool, 
 	case ExpressionTypeLong:
 		left := bin.Left.Data.(int64)
 		right := bin.Right.Data.(int64)
-		switch e.Type {
+		switch this.Type {
 		case ExpressionTypeEq:
-			e.Data = left == right
+			this.Data = left == right
 		case ExpressionTypeNe:
-			e.Data = left != right
+			this.Data = left != right
 		case ExpressionTypeGe:
-			e.Data = left >= right
+			this.Data = left >= right
 		case ExpressionTypeGt:
-			e.Data = left > right
+			this.Data = left > right
 		case ExpressionTypeLe:
-			e.Data = left <= right
+			this.Data = left <= right
 		case ExpressionTypeLt:
-			e.Data = left < right
+			this.Data = left < right
 		}
 		is = true
-		e.Type = ExpressionTypeBool
+		this.Type = ExpressionTypeBool
 		return
 	case ExpressionTypeFloat:
 		left := bin.Left.Data.(float32)
 		right := bin.Right.Data.(float32)
-		switch e.Type {
+		switch this.Type {
 		case ExpressionTypeEq:
-			e.Data = left == right
+			this.Data = left == right
 		case ExpressionTypeNe:
-			e.Data = left != right
+			this.Data = left != right
 		case ExpressionTypeGe:
-			e.Data = left >= right
+			this.Data = left >= right
 		case ExpressionTypeGt:
-			e.Data = left > right
+			this.Data = left > right
 		case ExpressionTypeLe:
-			e.Data = left <= right
+			this.Data = left <= right
 		case ExpressionTypeLt:
-			e.Data = left < right
+			this.Data = left < right
 		}
 		is = true
-		e.Type = ExpressionTypeBool
+		this.Type = ExpressionTypeBool
 		return
 	case ExpressionTypeDouble:
 		left := bin.Left.Data.(float64)
 		right := bin.Right.Data.(float64)
-		switch e.Type {
+		switch this.Type {
 		case ExpressionTypeEq:
-			e.Data = left == right
+			this.Data = left == right
 		case ExpressionTypeNe:
-			e.Data = left != right
+			this.Data = left != right
 		case ExpressionTypeGe:
-			e.Data = left >= right
+			this.Data = left >= right
 		case ExpressionTypeGt:
-			e.Data = left > right
+			this.Data = left > right
 		case ExpressionTypeLe:
-			e.Data = left <= right
+			this.Data = left <= right
 		case ExpressionTypeLt:
-			e.Data = left < right
+			this.Data = left < right
 		}
 		is = true
-		e.Type = ExpressionTypeBool
+		this.Type = ExpressionTypeBool
 		return
 	}
 	return

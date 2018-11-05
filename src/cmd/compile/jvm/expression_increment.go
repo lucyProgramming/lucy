@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (this *BuildExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	increment := e.Data.(*ast.Expression)
 	// identifier  and not captured and type`s int
@@ -45,18 +45,18 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	maxStack, remainStack, op, leftValueKind :=
-		buildExpression.getLeftValue(class, code, increment, context, state)
+		this.getLeftValue(class, code, increment, context, state)
 	/*
 		left value must can be used as right value
 	*/
-	stack := buildExpression.build(class, code, increment, context, state) // load it`s value
+	stack := this.build(class, code, increment, context, state) // load it`s value
 	if t := stack + remainStack; t > maxStack {
 		maxStack = t
 	}
 	currentStack := jvmSlotSize(e.Value) + remainStack
 	if e.IsStatementExpression == false {
 		if e.Type == ast.ExpressionTypeIncrement || e.Type == ast.ExpressionTypeDecrement {
-			currentStack += buildExpression.dupStackLeaveValueBelow(code, leftValueKind, e.Value)
+			currentStack += this.dupStackLeaveValueBelow(code, leftValueKind, e.Value)
 			if currentStack > maxStack {
 				maxStack = currentStack
 			}
@@ -139,7 +139,7 @@ func (buildExpression *BuildExpression) buildSelfIncrement(class *cg.ClassHighLe
 	if e.IsStatementExpression == false {
 		if e.Type == ast.ExpressionTypePrefixIncrement ||
 			e.Type == ast.ExpressionTypePrefixDecrement {
-			currentStack += buildExpression.dupStackLeaveValueBelow(code, leftValueKind, e.Value)
+			currentStack += this.dupStackLeaveValueBelow(code, leftValueKind, e.Value)
 			if currentStack > maxStack {
 				maxStack = currentStack
 			}

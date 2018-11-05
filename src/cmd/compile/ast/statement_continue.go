@@ -8,24 +8,24 @@ type StatementContinue struct {
 	Pos          *Pos
 }
 
-func (c *StatementContinue) check(block *Block) []error {
+func (this *StatementContinue) check(block *Block) []error {
 	if block.InheritedAttribute.ForContinue == nil {
 		return []error{fmt.Errorf("%s 'continue' can`t in this scope",
-			c.Pos.ErrMsgPrefix())}
+			this.Pos.ErrMsgPrefix())}
 	}
 	if block.InheritedAttribute.Defer != nil {
 		return []error{fmt.Errorf("%s cannot has 'continue' in 'defer'",
-			c.Pos.ErrMsgPrefix())}
+			this.Pos.ErrMsgPrefix())}
 	}
-	c.StatementFor = block.InheritedAttribute.ForContinue
-	c.mkDefers(block)
+	this.StatementFor = block.InheritedAttribute.ForContinue
+	this.mkDefers(block)
 	return nil
 }
 
-func (c *StatementContinue) mkDefers(block *Block) {
+func (this *StatementContinue) mkDefers(block *Block) {
 	if block.IsForBlock {
-		c.Defers = append(c.Defers, block.Defers...)
+		this.Defers = append(this.Defers, block.Defers...)
 		return
 	}
-	c.mkDefers(block.Outer)
+	this.mkDefers(block.Outer)
 }

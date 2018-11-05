@@ -44,11 +44,11 @@ type ConstantInfoString struct {
 	index uint16
 }
 
-func (c *ConstantInfoString) ToConstPool() *ConstPool {
+func (this *ConstantInfoString) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.Tag = ConstantPoolTagString
 	p.Info = make([]byte, 2)
-	binary.BigEndian.PutUint16(p.Info, c.index)
+	binary.BigEndian.PutUint16(p.Info, this.index)
 	return p
 }
 
@@ -56,11 +56,11 @@ type ConstantInfoInteger struct {
 	value int32
 }
 
-func (c *ConstantInfoInteger) ToConstPool() *ConstPool {
+func (this *ConstantInfoInteger) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.Tag = ConstantPoolTagInteger
 	p.Info = make([]byte, 4)
-	binary.BigEndian.PutUint32(p.Info, uint32(c.value))
+	binary.BigEndian.PutUint32(p.Info, uint32(this.value))
 	return p
 
 }
@@ -69,11 +69,11 @@ type ConstantInfoFloat struct {
 	value float32
 }
 
-func (c *ConstantInfoFloat) ToConstPool() *ConstPool {
+func (this *ConstantInfoFloat) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.Tag = ConstantPoolTagFloat
 	p.Info = make([]byte, 4)
-	binary.BigEndian.PutUint32(p.Info, math.Float32bits(c.value))
+	binary.BigEndian.PutUint32(p.Info, math.Float32bits(this.value))
 	return p
 }
 
@@ -84,11 +84,11 @@ type ConstantInfoLong struct {
 /*
 	big endian
 */
-func (c *ConstantInfoLong) ToConstPool() *ConstPool {
+func (this *ConstantInfoLong) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.Tag = ConstantPoolTagLong
 	p.Info = make([]byte, 8)
-	binary.BigEndian.PutUint64(p.Info, uint64(c.value))
+	binary.BigEndian.PutUint64(p.Info, uint64(this.value))
 	return p
 }
 
@@ -96,11 +96,11 @@ type ConstantInfoDouble struct {
 	value float64
 }
 
-func (c *ConstantInfoDouble) ToConstPool() *ConstPool {
+func (this *ConstantInfoDouble) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.Tag = ConstantPoolTagDouble
 	p.Info = make([]byte, 8)
-	binary.BigEndian.PutUint64(p.Info, math.Float64bits(c.value))
+	binary.BigEndian.PutUint64(p.Info, math.Float64bits(this.value))
 	return p
 }
 
@@ -108,12 +108,12 @@ type ConstantInfoNameAndType struct {
 	name, descriptor uint16
 }
 
-func (c *ConstantInfoNameAndType) ToConstPool() *ConstPool {
+func (this *ConstantInfoNameAndType) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.Tag = ConstantPoolTagNameAndType
 	p.Info = make([]byte, 4)
-	binary.BigEndian.PutUint16(p.Info, c.name)
-	binary.BigEndian.PutUint16(p.Info[2:], c.descriptor)
+	binary.BigEndian.PutUint16(p.Info, this.name)
+	binary.BigEndian.PutUint16(p.Info[2:], this.descriptor)
 	return p
 }
 
@@ -121,12 +121,12 @@ type ConstantInfoMethodref struct {
 	classIndex, nameAndTypeIndex uint16
 }
 
-func (c *ConstantInfoMethodref) ToConstPool() *ConstPool {
+func (this *ConstantInfoMethodref) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.Tag = ConstantPoolTagMethodref
 	p.Info = make([]byte, 4)
-	binary.BigEndian.PutUint16(p.Info, c.classIndex)
-	binary.BigEndian.PutUint16(p.Info[2:], c.nameAndTypeIndex)
+	binary.BigEndian.PutUint16(p.Info, this.classIndex)
+	binary.BigEndian.PutUint16(p.Info[2:], this.nameAndTypeIndex)
 	return p
 }
 
@@ -135,12 +135,12 @@ type ConstantInfoInterfaceMethodref struct {
 	nameAndTypeIndex uint16
 }
 
-func (c *ConstantInfoInterfaceMethodref) ToConstPool() *ConstPool {
+func (this *ConstantInfoInterfaceMethodref) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.Tag = ConstantPoolTagInterfaceMethodref
 	p.Info = make([]byte, 4)
-	binary.BigEndian.PutUint16(p.Info, uint16(c.classIndex))
-	binary.BigEndian.PutUint16(p.Info[2:], uint16(c.nameAndTypeIndex))
+	binary.BigEndian.PutUint16(p.Info, uint16(this.classIndex))
+	binary.BigEndian.PutUint16(p.Info[2:], uint16(this.nameAndTypeIndex))
 	return p
 }
 
@@ -149,12 +149,12 @@ type ConstantInfoFieldref struct {
 	nameAndTypeIndex uint16
 }
 
-func (c *ConstantInfoFieldref) ToConstPool() *ConstPool {
+func (this *ConstantInfoFieldref) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.Tag = ConstantPoolTagFieldref
 	p.Info = make([]byte, 4)
-	binary.BigEndian.PutUint16(p.Info, c.classIndex)
-	binary.BigEndian.PutUint16(p.Info[2:], c.nameAndTypeIndex)
+	binary.BigEndian.PutUint16(p.Info, this.classIndex)
+	binary.BigEndian.PutUint16(p.Info[2:], this.nameAndTypeIndex)
 	return p
 }
 
@@ -163,12 +163,12 @@ type ConstantInfoMethodHandle struct {
 	referenceIndex uint16
 }
 
-func (c *ConstantInfoMethodHandle) ToConstPool() *ConstPool {
+func (this *ConstantInfoMethodHandle) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.Tag = ConstantPoolTagMethodHandle
 	p.Info = make([]byte, 3)
-	p.Info[0] = byte(c.referenceKind)
-	binary.BigEndian.PutUint16(p.Info[1:], uint16(c.referenceIndex))
+	p.Info[0] = byte(this.referenceKind)
+	binary.BigEndian.PutUint16(p.Info[1:], uint16(this.referenceIndex))
 	return p
 }
 
@@ -177,12 +177,12 @@ type ConstantInfoUtf8 struct {
 	bs     []byte
 }
 
-func (c *ConstantInfoUtf8) ToConstPool() *ConstPool {
+func (this *ConstantInfoUtf8) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.Tag = ConstantPoolTagUtf8
 	p.Info = make([]byte, 2)
-	binary.BigEndian.PutUint16(p.Info, uint16(c.length))
-	p.Info = append(p.Info, c.bs...)
+	binary.BigEndian.PutUint16(p.Info, uint16(this.length))
+	p.Info = append(p.Info, this.bs...)
 	return p
 }
 
@@ -190,11 +190,11 @@ type ConstantInfoMethodType struct {
 	descriptorIndex uint16
 }
 
-func (c *ConstantInfoMethodType) ToConstPool() *ConstPool {
+func (this *ConstantInfoMethodType) ToConstPool() *ConstPool {
 	p := &ConstPool{}
 	p.Tag = ConstantPoolTagMethodType
 	p.Info = make([]byte, 2)
-	binary.BigEndian.PutUint16(p.Info, uint16(c.descriptorIndex))
+	binary.BigEndian.PutUint16(p.Info, uint16(this.descriptorIndex))
 	return p
 }
 
@@ -203,11 +203,11 @@ type ConstantInfoInvokeDynamic struct {
 	nameAndTypeIndex         uint16
 }
 
-func (c *ConstantInfoInvokeDynamic) ToConstPool() *ConstPool {
+func (this *ConstantInfoInvokeDynamic) ToConstPool() *ConstPool {
 	info := &ConstPool{}
 	info.Tag = ConstantPoolTagInvokeDynamic
 	info.Info = make([]byte, 4)
-	binary.BigEndian.PutUint16(info.Info, c.bootstrapMethodAttrIndex)
-	binary.BigEndian.PutUint16(info.Info[2:], c.nameAndTypeIndex)
+	binary.BigEndian.PutUint16(info.Info, this.bootstrapMethodAttrIndex)
+	binary.BigEndian.PutUint16(info.Info[2:], this.nameAndTypeIndex)
 	return info
 }

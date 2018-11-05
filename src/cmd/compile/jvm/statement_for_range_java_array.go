@@ -11,14 +11,14 @@ type AutoVariableForRangeJavaArray struct {
 	K, V     uint16
 }
 
-func (buildPackage *BuildPackage) buildForRangeStatementForJavaArray(
+func (this *BuildPackage) buildForRangeStatementForJavaArray(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	s *ast.StatementFor,
 	context *Context,
 	state *StackMapState) (maxStack uint16) {
 	//build array expression
-	maxStack = buildPackage.BuildExpression.build(class, code, s.RangeAttr.RangeOn, context, state) // array on stack
+	maxStack = this.BuildExpression.build(class, code, s.RangeAttr.RangeOn, context, state) // array on stack
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	noNullExit := (&cg.Exit{}).Init(cg.OP_ifnonnull, code)
@@ -156,7 +156,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForJavaArray(
 				copyOPs(code,
 					loadLocalVariableOps(attr.RangeOn.Value.Array.Type,
 						autoVar.V)...)
-				buildPackage.storeLocalVar(class, code, attr.IdentifierValue.Variable)
+				this.storeLocalVar(class, code, attr.IdentifierValue.Variable)
 			} else {
 				attr.IdentifierValue.Variable.LocalValOffset = autoVar.V
 			}
@@ -167,7 +167,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForJavaArray(
 					attr.IdentifierKey.Variable.LocalValOffset)...)
 				copyOPs(code,
 					loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
-				buildPackage.storeLocalVar(class, code, attr.IdentifierKey.Variable)
+				this.storeLocalVar(class, code, attr.IdentifierKey.Variable)
 			} else {
 				attr.IdentifierKey.Variable.LocalValOffset = autoVar.K
 			}
@@ -177,7 +177,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForJavaArray(
 		//get ops,make_node_objects ops ready
 		if attr.ExpressionValue != nil {
 			stackLength := len(blockState.Stacks)
-			stack, remainStack, ops, _ := buildPackage.BuildExpression.getLeftValue(class,
+			stack, remainStack, ops, _ := this.BuildExpression.getLeftValue(class,
 				code, attr.ExpressionValue, context, blockState)
 			if stack > maxStack {
 				maxStack = stack
@@ -193,7 +193,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForJavaArray(
 		}
 		if attr.ExpressionKey != nil { // set to k
 			stackLength := len(blockState.Stacks)
-			stack, remainStack, ops, _ := buildPackage.BuildExpression.getLeftValue(class,
+			stack, remainStack, ops, _ := this.BuildExpression.getLeftValue(class,
 				code, attr.ExpressionKey, context, blockState)
 			if stack > maxStack {
 				maxStack = stack
@@ -209,7 +209,7 @@ func (buildPackage *BuildPackage) buildForRangeStatementForJavaArray(
 	}
 
 	// build block
-	buildPackage.buildBlock(class, code, s.Block, context, blockState)
+	this.buildBlock(class, code, s.Block, context, blockState)
 	forState.addTop(blockState)
 	if s.Block.NotExecuteToLastStatement == false {
 		jumpTo(code, s.ContinueCodeOffset)

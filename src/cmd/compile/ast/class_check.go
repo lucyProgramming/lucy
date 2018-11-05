@@ -6,46 +6,46 @@ import (
 	"path/filepath"
 )
 
-func (c *Class) check(father *Block) []error {
-	c.Block.inherit(father)
-	c.Block.InheritedAttribute.Class = c
-	errs := c.checkPhase1()
-	errs = append(errs, c.checkPhase2()...)
+func (this *Class) check(father *Block) []error {
+	this.Block.inherit(father)
+	this.Block.InheritedAttribute.Class = this
+	errs := this.checkPhase1()
+	errs = append(errs, this.checkPhase2()...)
 	return errs
 }
 
-func (c *Class) checkPhase1() []error {
-	if c.Block.InheritedAttribute.ClassAndFunctionNames == "" {
-		c.Block.InheritedAttribute.ClassAndFunctionNames = filepath.Base(c.Name)
+func (this *Class) checkPhase1() []error {
+	if this.Block.InheritedAttribute.ClassAndFunctionNames == "" {
+		this.Block.InheritedAttribute.ClassAndFunctionNames = filepath.Base(this.Name)
 	} else {
-		c.Block.InheritedAttribute.ClassAndFunctionNames += "$" + filepath.Base(c.Name)
+		this.Block.InheritedAttribute.ClassAndFunctionNames += "$" + filepath.Base(this.Name)
 	}
-	c.mkDefaultConstruction()
-	errs := c.Block.checkConstants()
-	err := c.resolveFather()
+	this.mkDefaultConstruction()
+	errs := this.Block.checkConstants()
+	err := this.resolveFather()
 	if err != nil {
 		errs = append(errs, err)
 	} else {
-		err = c.checkIfClassHierarchyErr()
+		err = this.checkIfClassHierarchyErr()
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
-	errs = append(errs, c.checkModifierOk()...)
-	errs = append(errs, c.resolveFieldsAndMethodsType()...)
+	errs = append(errs, this.checkModifierOk()...)
+	errs = append(errs, this.resolveFieldsAndMethodsType()...)
 	return errs
 }
 
-func (c *Class) checkPhase2() []error {
+func (this *Class) checkPhase2() []error {
 	errs := []error{}
-	errs = append(errs, c.checkFields()...)
+	errs = append(errs, this.checkFields()...)
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
-	c.mkClassInitMethod()
-	for name, ms := range c.Methods {
-		if c.Fields != nil && c.Fields[name] != nil {
-			f := c.Fields[name]
+	this.mkClassInitMethod()
+	for name, ms := range this.Methods {
+		if this.Fields != nil && this.Fields[name] != nil {
+			f := this.Fields[name]
 			if f.Pos.Line < ms[0].Function.Pos.Line {
 				errMsg := fmt.Sprintf("%s method named '%s' already declared as field,at:\n",
 					errMsgPrefix(ms[0].Function.Pos), name)
@@ -69,29 +69,29 @@ func (c *Class) checkPhase2() []error {
 			errs = append(errs, errors.New(errMsg))
 		}
 	}
-	errs = append(errs, c.checkMethods()...)
+	errs = append(errs, this.checkMethods()...)
 	if PackageBeenCompile.shouldStop(errs) {
 		return errs
 	}
-	errs = append(errs, c.checkIfOverrideFinalMethod()...)
-	errs = append(errs, c.resolveInterfaces()...)
-	if c.IsInterface() {
-		errs = append(errs, c.checkOverrideInterfaceMethod()...)
+	errs = append(errs, this.checkIfOverrideFinalMethod()...)
+	errs = append(errs, this.resolveInterfaces()...)
+	if this.IsInterface() {
+		errs = append(errs, this.checkOverrideInterfaceMethod()...)
 	}
-	if c.IsAbstract() {
-		errs = append(errs, c.checkOverrideAbstractMethod()...)
+	if this.IsAbstract() {
+		errs = append(errs, this.checkOverrideAbstractMethod()...)
 	}
-	errs = append(errs, c.suitableForInterfaces()...)
-	if c.SuperClass != nil {
-		errs = append(errs, c.suitableSubClassForAbstract(c.SuperClass)...)
+	errs = append(errs, this.suitableForInterfaces()...)
+	if this.SuperClass != nil {
+		errs = append(errs, this.suitableSubClassForAbstract(this.SuperClass)...)
 	}
 	return errs
 }
 
-func (c *Class) suitableSubClassForAbstract(super *Class) []error {
+func (this *Class) suitableSubClassForAbstract(super *Class) []error {
 	errs := []error{}
 	if super.Name != JavaRootClass {
-		err := super.loadSuperClass(c.Pos)
+		err := super.loadSuperClass(this.Pos)
 		if err != nil {
 			errs = append(errs, err)
 			return errs
@@ -100,7 +100,7 @@ func (c *Class) suitableSubClassForAbstract(super *Class) []error {
 			return errs
 		}
 		length := len(errs)
-		errs = append(errs, c.suitableSubClassForAbstract(super.SuperClass)...)
+		errs = append(errs, this.suitableSubClassForAbstract(super.SuperClass)...)
 		if len(errs) > length {
 			return errs
 		}
@@ -112,13 +112,13 @@ func (c *Class) suitableSubClassForAbstract(super *Class) []error {
 				continue
 			}
 			var nameMatch *ClassMethod
-			implementation := c.implementMethod(c.Pos, m, &nameMatch, false, &errs)
+			implementation := this.implementMethod(this.Pos, m, &nameMatch, false, &errs)
 			if implementation != nil {
-				if err := m.implementationMethodIsOk(c.Pos, implementation); err != nil {
+				if err := m.implementationMethodIsOk(this.Pos, implementation); err != nil {
 					errs = append(errs, err)
 				}
 			} else {
-				pos := c.Pos
+				pos := this.Pos
 				if nameMatch != nil && nameMatch.Function.Pos != nil {
 					pos = nameMatch.Function.Pos
 				}
@@ -138,14 +138,14 @@ func (c *Class) suitableSubClassForAbstract(super *Class) []error {
 	return errs
 }
 
-func (c *Class) interfaceMethodExists(name string) *Class {
-	if c.IsInterface() == false {
+func (this *Class) interfaceMethodExists(name string) *Class {
+	if this.IsInterface() == false {
 		panic("not a interface")
 	}
-	if c.Methods != nil && len(c.Methods[name]) > 0 {
-		return c
+	if this.Methods != nil && len(this.Methods[name]) > 0 {
+		return this
 	}
-	for _, v := range c.Interfaces {
+	for _, v := range this.Interfaces {
 		if v.interfaceMethodExists(name) != nil {
 			return v
 		}
@@ -153,45 +153,45 @@ func (c *Class) interfaceMethodExists(name string) *Class {
 	return nil
 }
 
-func (c *Class) abstractMethodExists(pos *Pos, name string) (*Class, error) {
-	if c.IsAbstract() {
-		if c.Methods != nil && len(c.Methods[name]) > 0 {
-			method := c.Methods[name][0]
+func (this *Class) abstractMethodExists(pos *Pos, name string) (*Class, error) {
+	if this.IsAbstract() {
+		if this.Methods != nil && len(this.Methods[name]) > 0 {
+			method := this.Methods[name][0]
 			if method.IsAbstract() {
-				return c, nil
+				return this, nil
 			}
 		}
 	}
-	if c.Name == JavaRootClass {
+	if this.Name == JavaRootClass {
 		return nil, nil
 	}
-	err := c.loadSuperClass(pos)
+	err := this.loadSuperClass(pos)
 	if err != nil {
 		return nil, err
 	}
-	if c.SuperClass == nil {
+	if this.SuperClass == nil {
 		return nil, nil
 	}
-	return c.SuperClass.abstractMethodExists(pos, name)
+	return this.SuperClass.abstractMethodExists(pos, name)
 }
 
-func (c *Class) checkOverrideAbstractMethod() []error {
+func (this *Class) checkOverrideAbstractMethod() []error {
 	errs := []error{}
-	err := c.loadSuperClass(c.Pos)
+	err := this.loadSuperClass(this.Pos)
 	if err != nil {
 		errs = append(errs, err)
 		return errs
 	}
-	if c.SuperClass == nil {
+	if this.SuperClass == nil {
 		return errs
 	}
-	for _, v := range c.Methods {
+	for _, v := range this.Methods {
 		m := v[0]
 		name := m.Function.Name
 		if m.IsAbstract() == false {
 			continue
 		}
-		exist, err := c.SuperClass.abstractMethodExists(m.Function.Pos, name)
+		exist, err := this.SuperClass.abstractMethodExists(m.Function.Pos, name)
 		if err != nil {
 			errs = append(errs, err)
 			continue
@@ -204,11 +204,11 @@ func (c *Class) checkOverrideAbstractMethod() []error {
 	return errs
 }
 
-func (c *Class) checkOverrideInterfaceMethod() []error {
+func (this *Class) checkOverrideInterfaceMethod() []error {
 	errs := []error{}
-	for name, v := range c.Methods {
+	for name, v := range this.Methods {
 		var exist *Class
-		for _, vv := range c.Interfaces {
+		for _, vv := range this.Interfaces {
 			exist = vv.interfaceMethodExists(name)
 			if exist != nil {
 				break
@@ -222,22 +222,22 @@ func (c *Class) checkOverrideInterfaceMethod() []error {
 	return errs
 }
 
-func (c *Class) checkIfClassHierarchyErr() error {
+func (this *Class) checkIfClassHierarchyErr() error {
 	m := make(map[string]struct{})
 	arr := []string{}
 	is := false
-	class := c
-	pos := c.Pos
-	if err := c.loadSuperClass(pos); err != nil {
+	class := this
+	pos := this.Pos
+	if err := this.loadSuperClass(pos); err != nil {
 		return err
 	}
-	if c.SuperClass == nil {
+	if this.SuperClass == nil {
 		return nil
 	}
 
-	if c.SuperClass.IsFinal() {
+	if this.SuperClass.IsFinal() {
 		return fmt.Errorf("%s class name '%s' have super class  named '%s' that is final",
-			c.Pos.ErrMsgPrefix(), c.Name, c.SuperClass.Name)
+			this.Pos.ErrMsgPrefix(), this.Name, this.SuperClass.Name)
 	}
 	for class.Name != JavaRootClass {
 		_, ok := m[class.Name]
@@ -252,7 +252,7 @@ func (c *Class) checkIfClassHierarchyErr() error {
 		if err != nil {
 			return err
 		}
-		if c.SuperClass == nil {
+		if this.SuperClass == nil {
 			return nil
 		}
 		class = class.SuperClass
@@ -261,7 +261,7 @@ func (c *Class) checkIfClassHierarchyErr() error {
 		return nil
 	}
 	errMsg := fmt.Sprintf("%s class named '%s' detects a circularity in class hierarchy",
-		c.Pos.ErrMsgPrefix(), c.Name)
+		this.Pos.ErrMsgPrefix(), this.Name)
 	tab := "\t"
 	index := len(arr) - 1
 	for index >= 0 {
@@ -272,22 +272,22 @@ func (c *Class) checkIfClassHierarchyErr() error {
 	return fmt.Errorf(errMsg)
 }
 
-func (c *Class) checkIfOverrideFinalMethod() []error {
+func (this *Class) checkIfOverrideFinalMethod() []error {
 	errs := []error{}
-	if c.SuperClass != nil {
-		for name, v := range c.Methods {
+	if this.SuperClass != nil {
+		for name, v := range this.Methods {
 			if name == SpecialMethodInit {
 				continue
 			}
 			if len(v) == 0 {
 				continue
 			}
-			if len(c.SuperClass.Methods[name]) == 0 {
+			if len(this.SuperClass.Methods[name]) == 0 {
 				// this class not found at super
 				continue
 			}
 			m := v[0]
-			for _, v := range c.SuperClass.Methods[name] {
+			for _, v := range this.SuperClass.Methods[name] {
 				if v.IsFinal() == false {
 					continue
 				}
@@ -309,20 +309,20 @@ func (c *Class) checkIfOverrideFinalMethod() []error {
 	return errs
 }
 
-func (c *Class) suitableForInterfaces() []error {
+func (this *Class) suitableForInterfaces() []error {
 	errs := []error{}
-	if c.IsInterface() {
+	if this.IsInterface() {
 		return errs
 	}
-	for _, i := range c.Interfaces {
-		errs = append(errs, c.suitableForInterface(i)...)
+	for _, i := range this.Interfaces {
+		errs = append(errs, this.suitableForInterface(i)...)
 	}
 	return errs
 }
 
-func (c *Class) suitableForInterface(inter *Class) []error {
+func (this *Class) suitableForInterface(inter *Class) []error {
 	errs := []error{}
-	err := inter.loadSelf(c.Pos)
+	err := inter.loadSelf(this.Pos)
 	if err != nil {
 		errs = append(errs, err)
 		return errs
@@ -330,13 +330,13 @@ func (c *Class) suitableForInterface(inter *Class) []error {
 	for _, v := range inter.Methods {
 		m := v[0]
 		var nameMatch *ClassMethod
-		implementation := c.implementMethod(c.Pos, m, &nameMatch, false, &errs)
+		implementation := this.implementMethod(this.Pos, m, &nameMatch, false, &errs)
 		if implementation != nil {
-			if err := m.implementationMethodIsOk(c.Pos, implementation); err != nil {
+			if err := m.implementationMethodIsOk(this.Pos, implementation); err != nil {
 				errs = append(errs, err)
 			}
 		} else {
-			pos := c.Pos
+			pos := this.Pos
 			if nameMatch != nil && nameMatch.Function.Pos != nil {
 				pos = nameMatch.Function.Pos
 			}
@@ -345,26 +345,26 @@ func (c *Class) suitableForInterface(inter *Class) []error {
 		}
 	}
 	for _, v := range inter.Interfaces {
-		es := c.suitableForInterface(v)
+		es := this.suitableForInterface(v)
 		errs = append(errs, es...)
 	}
 	return errs
 }
 
-func (c *Class) checkFields() []error {
+func (this *Class) checkFields() []error {
 	errs := []error{}
-	if c.IsInterface() {
-		for _, v := range c.Fields {
+	if this.IsInterface() {
+		for _, v := range this.Fields {
 			errs = append(errs, fmt.Errorf("%s interface '%s' expect no field named '%s'",
-				errMsgPrefix(v.Pos), c.Name, v.Name))
+				errMsgPrefix(v.Pos), this.Name, v.Name))
 		}
 		return errs
 	}
 	staticFieldAssignStatements := []*Statement{}
-	for _, v := range c.Fields {
+	for _, v := range this.Fields {
 		if v.DefaultValueExpression != nil {
 			assignment, es := v.DefaultValueExpression.
-				checkSingleValueContextExpression(&c.Methods[SpecialMethodInit][0].Function.Block)
+				checkSingleValueContextExpression(&this.Methods[SpecialMethodInit][0].Function.Block)
 			errs = append(errs, es...)
 			if assignment == nil {
 				continue
@@ -400,7 +400,7 @@ func (c *Class) checkFields() []error {
 				selection.Expression.Op = "selection"
 				selection.Expression.Value = &Type{
 					Type:  VariableTypeClass,
-					Class: c,
+					Class: this,
 				}
 				selection.Name = v.Name
 				selection.Field = v
@@ -431,27 +431,27 @@ func (c *Class) checkFields() []error {
 	if len(staticFieldAssignStatements) > 0 {
 		b := &Block{}
 		b.Statements = staticFieldAssignStatements
-		if c.StaticBlocks != nil {
-			c.StaticBlocks = append([]*Block{b}, c.StaticBlocks...)
+		if this.StaticBlocks != nil {
+			this.StaticBlocks = append([]*Block{b}, this.StaticBlocks...)
 		} else {
-			c.StaticBlocks = []*Block{b}
+			this.StaticBlocks = []*Block{b}
 		}
 	}
 	return errs
 }
 
-func (c *Class) checkMethods() []error {
+func (this *Class) checkMethods() []error {
 	errs := []error{}
-	if c.IsInterface() {
+	if this.IsInterface() {
 		return errs
 	}
-	for name, methods := range c.Methods {
+	for name, methods := range this.Methods {
 		for _, method := range methods {
 			errs = append(errs, method.checkModifierOk()...)
 			if method.IsAbstract() {
 				//nothing
 			} else {
-				if c.IsInterface() {
+				if this.IsInterface() {
 					errs = append(errs, fmt.Errorf("%s interface method cannot have implementation",
 						errMsgPrefix(method.Function.Pos)))
 					continue
@@ -476,15 +476,15 @@ func (c *Class) checkMethods() []error {
 	return errs
 }
 
-func (c *Class) checkModifierOk() []error {
+func (this *Class) checkModifierOk() []error {
 	errs := []error{}
-	if c.IsInterface() && c.IsFinal() {
+	if this.IsInterface() && this.IsFinal() {
 		errs = append(errs, fmt.Errorf("%s interface '%s' cannot be final",
-			errMsgPrefix(c.FinalPos), c.Name))
+			errMsgPrefix(this.FinalPos), this.Name))
 	}
-	if c.IsAbstract() && c.IsFinal() {
+	if this.IsAbstract() && this.IsFinal() {
 		errs = append(errs, fmt.Errorf("%s abstract class '%s' cannot be final",
-			errMsgPrefix(c.FinalPos), c.Name))
+			errMsgPrefix(this.FinalPos), this.Name))
 	}
 	return errs
 }

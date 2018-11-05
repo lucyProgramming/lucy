@@ -7,48 +7,48 @@ import (
 )
 
 //atBeginningOfFile bool
-func (parser *Parser) parseImports() []*ast.Import {
+func (this *Parser) parseImports() []*ast.Import {
 	var ret []*ast.Import
-	for parser.token.Type == lex.TokenImport ||
-		parser.token.Type == lex.TokenComment ||
-		parser.token.Type == lex.TokenMultiLineComment {
-		if parser.token.Type == lex.TokenComment ||
-			parser.token.Type == lex.TokenMultiLineComment {
-			parser.Next(lfNotToken)
+	for this.token.Type == lex.TokenImport ||
+		this.token.Type == lex.TokenComment ||
+		this.token.Type == lex.TokenMultiLineComment {
+		if this.token.Type == lex.TokenComment ||
+			this.token.Type == lex.TokenMultiLineComment {
+			this.Next(lfNotToken)
 			continue
 		}
-		parser.Next(lfIsToken) // skip import key word
-		parser.unExpectNewLineAndSkip()
-		if parser.token.Type != lex.TokenLiteralString {
-			parser.errs = append(parser.errs, fmt.Errorf("%s expect 'package' after import,but '%s'",
-				parser.errMsgPrefix(), parser.token.Description))
-			parser.consume(untilSemicolonOrLf)
-			parser.Next(lfNotToken)
+		this.Next(lfIsToken) // skip import key word
+		this.unExpectNewLineAndSkip()
+		if this.token.Type != lex.TokenLiteralString {
+			this.errs = append(this.errs, fmt.Errorf("%s expect 'package' after import,but '%s'",
+				this.errMsgPrefix(), this.token.Description))
+			this.consume(untilSemicolonOrLf)
+			this.Next(lfNotToken)
 			continue
 		}
 		i := &ast.Import{}
-		i.Pos = parser.mkPos()
-		i.Import = parser.token.Data.(string)
+		i.Pos = this.mkPos()
+		i.Import = this.token.Data.(string)
 		ret = append(ret, i)
-		parser.Next(lfIsToken) // skip name
-		if parser.token.Type == lex.TokenAs {
+		this.Next(lfIsToken) // skip name
+		if this.token.Type == lex.TokenAs {
 			/*
 				import "xxxxxxxxxxx" as yyy
 			*/
-			parser.Next(lfNotToken) // skip as
-			if parser.token.Type != lex.TokenIdentifier {
-				parser.errs = append(parser.errs, fmt.Errorf("%s expect 'identifier' after 'as',but '%s'",
-					parser.errMsgPrefix(), parser.token.Description))
-				parser.consume(untilSemicolonOrLf)
-				parser.Next(lfNotToken)
+			this.Next(lfNotToken) // skip as
+			if this.token.Type != lex.TokenIdentifier {
+				this.errs = append(this.errs, fmt.Errorf("%s expect 'identifier' after 'as',but '%s'",
+					this.errMsgPrefix(), this.token.Description))
+				this.consume(untilSemicolonOrLf)
+				this.Next(lfNotToken)
 				continue
 			} else {
-				i.Alias = parser.token.Data.(string)
-				parser.Next(lfIsToken) // skip identifier
+				i.Alias = this.token.Data.(string)
+				this.Next(lfIsToken) // skip identifier
 			}
 		}
-		parser.validStatementEnding()
-		parser.Next(lfNotToken)
+		this.validStatementEnding()
+		this.Next(lfNotToken)
 	}
 	return ret
 }

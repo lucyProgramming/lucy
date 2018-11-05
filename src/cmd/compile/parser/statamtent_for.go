@@ -7,64 +7,64 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (bp *BlockParser) parseFor() (statementFor *ast.StatementFor, err error) {
+func (this *BlockParser) parseFor() (statementFor *ast.StatementFor, err error) {
 	statementFor = &ast.StatementFor{}
-	statementFor.Pos = bp.parser.mkPos()
+	statementFor.Pos = this.parser.mkPos()
 	statementFor.Block = &ast.Block{}
-	bp.Next(lfIsToken) // skip for
-	bp.parser.unExpectNewLineAndSkip()
-	if bp.parser.token.Type != lex.TokenLc &&
-		bp.parser.token.Type != lex.TokenSemicolon { // not '{' and not ';'
-		statementFor.Condition, err = bp.parser.ExpressionParser.parseExpression(true)
+	this.Next(lfIsToken) // skip for
+	this.parser.unExpectNewLineAndSkip()
+	if this.parser.token.Type != lex.TokenLc &&
+		this.parser.token.Type != lex.TokenSemicolon { // not '{' and not ';'
+		statementFor.Condition, err = this.parser.ExpressionParser.parseExpression(true)
 		if err != nil {
-			bp.consume(untilLc)
+			this.consume(untilLc)
 			goto parseBlock
 		}
 	}
-	if bp.parser.token.Type == lex.TokenSemicolon {
-		bp.Next(lfNotToken) // skip ;
+	if this.parser.token.Type == lex.TokenSemicolon {
+		this.Next(lfNotToken) // skip ;
 		statementFor.Init = statementFor.Condition
 		statementFor.Condition = nil // mk nil
 		//condition
 		var err error
-		if bp.parser.token.Type != lex.TokenSemicolon {
-			statementFor.Condition, err = bp.parser.ExpressionParser.parseExpression(false)
+		if this.parser.token.Type != lex.TokenSemicolon {
+			statementFor.Condition, err = this.parser.ExpressionParser.parseExpression(false)
 			if err != nil {
-				bp.consume(untilLc)
+				this.consume(untilLc)
 				goto parseBlock
 			}
-			if bp.parser.token.Type != lex.TokenSemicolon {
-				bp.parser.errs = append(bp.parser.errs, fmt.Errorf("%s missing semicolon after expression",
-					bp.parser.errMsgPrefix()))
-				bp.consume(untilLc)
+			if this.parser.token.Type != lex.TokenSemicolon {
+				this.parser.errs = append(this.parser.errs, fmt.Errorf("%s missing semicolon after expression",
+					this.parser.errMsgPrefix()))
+				this.consume(untilLc)
 				goto parseBlock
 			}
 		}
-		bp.Next(lfIsToken)
-		bp.parser.unExpectNewLineAndSkip()
-		if bp.parser.token.Type != lex.TokenLc {
-			statementFor.Increment, err = bp.parser.ExpressionParser.parseExpression(true)
+		this.Next(lfIsToken)
+		this.parser.unExpectNewLineAndSkip()
+		if this.parser.token.Type != lex.TokenLc {
+			statementFor.Increment, err = this.parser.ExpressionParser.parseExpression(true)
 			if err != nil {
-				bp.consume(untilLc)
+				this.consume(untilLc)
 				goto parseBlock
 			}
 		}
 	}
 parseBlock:
-	bp.parser.ifTokenIsLfThenSkip()
-	if bp.parser.token.Type != lex.TokenLc {
+	this.parser.ifTokenIsLfThenSkip()
+	if this.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{',but '%s'",
-			bp.parser.errMsgPrefix(), bp.parser.token.Description)
-		bp.parser.errs = append(bp.parser.errs, err)
+			this.parser.errMsgPrefix(), this.parser.token.Description)
+		this.parser.errs = append(this.parser.errs, err)
 		return
 	}
-	bp.Next(lfNotToken) // skip {
-	bp.parseStatementList(statementFor.Block, false)
-	if bp.parser.token.Type != lex.TokenRc {
-		bp.parser.errs = append(bp.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
-			bp.parser.errMsgPrefix(), bp.parser.token.Description))
-		bp.consume(untilRc)
+	this.Next(lfNotToken) // skip {
+	this.parseStatementList(statementFor.Block, false)
+	if this.parser.token.Type != lex.TokenRc {
+		this.parser.errs = append(this.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
+			this.parser.errMsgPrefix(), this.parser.token.Description))
+		this.consume(untilRc)
 	}
-	bp.Next(lfNotToken) // skip }
+	this.Next(lfNotToken) // skip }
 	return statementFor, nil
 }

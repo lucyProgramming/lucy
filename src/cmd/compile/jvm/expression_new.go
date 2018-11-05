@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildNew(
+func (this *BuildExpression) buildNew(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -13,11 +13,11 @@ func (buildExpression *BuildExpression) buildNew(
 	state *StackMapState) (maxStack uint16) {
 	switch e.Value.Type {
 	case ast.VariableTypeArray:
-		return buildExpression.buildNewArray(class, code, e, context, state)
+		return this.buildNewArray(class, code, e, context, state)
 	case ast.VariableTypeJavaArray:
-		return buildExpression.buildNewJavaArray(class, code, e, context, state)
+		return this.buildNewJavaArray(class, code, e, context, state)
 	case ast.VariableTypeMap:
-		return buildExpression.buildNewMap(class, code, e, context)
+		return this.buildNewMap(class, code, e, context)
 	}
 	stackLength := len(state.Stacks)
 	defer func() {
@@ -35,7 +35,7 @@ func (buildExpression *BuildExpression) buildNew(
 	state.Stacks = append(state.Stacks, t, t)
 	code.CodeLength += 4
 	maxStack = 2
-	maxStack += buildExpression.buildCallArgs(class, code, n.Args, n.VArgs, context, state)
+	maxStack += this.buildCallArgs(class, code, n.Args, n.VArgs, context, state)
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
 	d := n.Construction.Function.JvmDescriptor
 	if d == "" {
@@ -50,7 +50,7 @@ func (buildExpression *BuildExpression) buildNew(
 	return
 }
 
-func (buildExpression *BuildExpression) buildNewMap(
+func (this *BuildExpression) buildNewMap(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -70,7 +70,7 @@ func (buildExpression *BuildExpression) buildNewMap(
 	return
 }
 
-func (buildExpression *BuildExpression) buildNewJavaArray(
+func (this *BuildExpression) buildNewJavaArray(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -86,7 +86,7 @@ func (buildExpression *BuildExpression) buildNewJavaArray(
 		}
 	}
 	n := e.Data.(*ast.ExpressionNew)
-	maxStack = buildExpression.build(class, code, n.Args[0], context, state) // must be a integer
+	maxStack = this.build(class, code, n.Args[0], context, state) // must be a integer
 	currentStack := uint16(1)
 	for i := byte(0); i < dimensions-1; i++ {
 		loadInt32(class, code, 0)
@@ -108,7 +108,7 @@ func (buildExpression *BuildExpression) buildNewJavaArray(
 	}
 	return
 }
-func (buildExpression *BuildExpression) buildNewArray(
+func (this *BuildExpression) buildNewArray(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -131,7 +131,7 @@ func (buildExpression *BuildExpression) buildNewArray(
 		defer state.popStack(2)
 	}
 	// get amount
-	stack := buildExpression.build(class, code, n.Args[0], context, state) // must be a integer
+	stack := this.build(class, code, n.Args[0], context, state) // must be a integer
 	if t := 2 + stack; t > maxStack {
 		maxStack = t
 	}

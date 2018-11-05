@@ -8,7 +8,7 @@ import (
 /*
 	function print
 */
-func (buildExpression *BuildExpression) mkBuildInPrint(
+func (this *BuildExpression) mkBuildInPrint(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -41,7 +41,7 @@ func (buildExpression *BuildExpression) mkBuildInPrint(
 	}()
 	state.pushStack(class, state.newObjectVariableType(javaPrintStreamClass))
 	if len(call.Args) == 1 {
-		stack := buildExpression.build(class, code, call.Args[0], context, state)
+		stack := this.build(class, code, call.Args[0], context, state)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
 		}
@@ -128,11 +128,11 @@ func (buildExpression *BuildExpression) mkBuildInPrint(
 	defer state.popStack(1)
 	for k, v := range call.Args {
 		variableType := v.Value
-		stack := buildExpression.build(class, code, v, context, state)
+		stack := this.build(class, code, v, context, state)
 		if t := 2 + stack; t > maxStack {
 			maxStack = t
 		}
-		if t := 2 + buildExpression.stackTop2String(class, code, variableType, context, state); t > maxStack {
+		if t := 2 + this.stackTop2String(class, code, variableType, context, state); t > maxStack {
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual

@@ -7,55 +7,55 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
+func (this *Parser) parseEnum() (e *ast.Enum, err error) {
 	var enumName string
-	parser.Next(lfIsToken) // skip enum
-	parser.unExpectNewLineAndSkip()
-	if parser.token.Type != lex.TokenIdentifier {
+	this.Next(lfIsToken) // skip enum
+	this.unExpectNewLineAndSkip()
+	if this.token.Type != lex.TokenIdentifier {
 		err = fmt.Errorf("%s expect 'identifier' for enum name, but '%s'",
-			parser.errMsgPrefix(), parser.token.Description)
-		parser.errs = append(parser.errs, err)
+			this.errMsgPrefix(), this.token.Description)
+		this.errs = append(this.errs, err)
 		enumName = compileAutoName()
-		parser.consume(untilLc)
+		this.consume(untilLc)
 
 	} else {
-		enumName = parser.token.Data.(string)
-		parser.Next(lfNotToken) // skip enum name
+		enumName = this.token.Data.(string)
+		this.Next(lfNotToken) // skip enum name
 	}
 	e = &ast.Enum{}
 	e.Name = enumName
-	e.Pos = parser.mkPos()
+	e.Pos = this.mkPos()
 	comment := &CommentParser{
-		parser: parser,
+		parser: this,
 	}
 	reset := func() {
 		comment.reset()
 	}
-	if parser.token.Type != lex.TokenLc {
-		err = fmt.Errorf("%s expect '{',but '%s'", parser.errMsgPrefix(), parser.token.Description)
-		parser.errs = append(parser.errs, err)
-		parser.consume(untilLc)
+	if this.token.Type != lex.TokenLc {
+		err = fmt.Errorf("%s expect '{',but '%s'", this.errMsgPrefix(), this.token.Description)
+		this.errs = append(this.errs, err)
+		this.consume(untilLc)
 	}
-	parser.Next(lfNotToken)
-	for parser.token.Type != lex.TokenRc &&
-		parser.token.Type != lex.TokenEof {
-		switch parser.token.Type {
+	this.Next(lfNotToken)
+	for this.token.Type != lex.TokenRc &&
+		this.token.Type != lex.TokenEof {
+		switch this.token.Type {
 		case lex.TokenLf:
-			parser.Next(lfNotToken)
+			this.Next(lfNotToken)
 		case lex.TokenMultiLineComment,
 			lex.TokenComment:
 			comment.read()
 		case lex.TokenIdentifier:
-			name := parser.token.Data.(string)
-			pos := parser.mkPos()
+			name := this.token.Data.(string)
+			pos := this.mkPos()
 			var value *ast.Expression
 			var err error
-			parser.Next(lfIsToken)
-			if parser.token.Type == lex.TokenAssign {
-				parser.Next(lfNotToken)
-				value, err = parser.ExpressionParser.parseExpression(false)
+			this.Next(lfIsToken)
+			if this.token.Type == lex.TokenAssign {
+				this.Next(lfNotToken)
+				value, err = this.ExpressionParser.parseExpression(false)
 				if err != nil {
-					parser.consume(untilSemicolonOrLf)
+					this.consume(untilSemicolonOrLf)
 				}
 			}
 			enumComment := comment.Comment
@@ -74,32 +74,32 @@ func (parser *Parser) parseEnum() (e *ast.Enum, err error) {
 			e.Enums = append(e.Enums, enumName)
 			reset()
 		case lex.TokenComma:
-			parser.Next(lfNotToken)
+			this.Next(lfNotToken)
 		default:
-			parser.errs = append(parser.errs, fmt.Errorf("%s token '%s' is not except",
-				parser.errMsgPrefix(), parser.token.Description))
-			parser.Next(lfNotToken)
+			this.errs = append(this.errs, fmt.Errorf("%s token '%s' is not except",
+				this.errMsgPrefix(), this.token.Description))
+			this.Next(lfNotToken)
 			reset()
 		}
 	}
 	if len(e.Enums) == 0 {
 		enumName := &ast.EnumName{
 			Name: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", //easter egg
-			Pos:  parser.mkPos(),
+			Pos:  this.mkPos(),
 			Enum: e,
 		}
 		e.Enums = []*ast.EnumName{
 			enumName,
 		}
-		parser.errs = append(parser.errs, fmt.Errorf("%s enum expect at least 1 enumName",
-			parser.errMsgPrefix()))
+		this.errs = append(this.errs, fmt.Errorf("%s enum expect at least 1 enumName",
+			this.errMsgPrefix()))
 	}
-	parser.ifTokenIsLfThenSkip()
-	if parser.token.Type != lex.TokenRc {
-		err = fmt.Errorf("%s expect '}',but '%s'", parser.errMsgPrefix(), parser.token.Description)
-		parser.errs = append(parser.errs, err)
-		parser.consume(untilRc)
+	this.ifTokenIsLfThenSkip()
+	if this.token.Type != lex.TokenRc {
+		err = fmt.Errorf("%s expect '}',but '%s'", this.errMsgPrefix(), this.token.Description)
+		this.errs = append(this.errs, err)
+		this.consume(untilRc)
 	}
-	parser.Next(lfNotToken)
+	this.Next(lfNotToken)
 	return e, err
 }

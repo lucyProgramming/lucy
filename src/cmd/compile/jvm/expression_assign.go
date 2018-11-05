@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildExpressionAssign(
+func (this *BuildExpression) buildExpressionAssign(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -23,9 +23,9 @@ func (buildExpression *BuildExpression) buildExpressionAssign(
 	var leftValueKind LeftValueKind
 	if left.IsIdentifier(ast.UnderScore) == false {
 		maxStack, remainStack, op, leftValueKind =
-			buildExpression.getLeftValue(class, code, left, context, state)
+			this.getLeftValue(class, code, left, context, state)
 	}
-	stack := buildExpression.build(class, code, right, context, state)
+	stack := this.build(class, code, right, context, state)
 	if t := remainStack + stack; t > maxStack {
 		maxStack = t
 	}
@@ -39,7 +39,7 @@ func (buildExpression *BuildExpression) buildExpressionAssign(
 	} else {
 		currentStack := remainStack + jvmSlotSize(left.Value)
 		if e.IsStatementExpression == false {
-			currentStack += buildExpression.dupStackLeaveValueBelow(code, leftValueKind, left.Value)
+			currentStack += this.dupStackLeaveValueBelow(code, leftValueKind, left.Value)
 			if currentStack > maxStack {
 				maxStack = currentStack
 			}
@@ -50,7 +50,7 @@ func (buildExpression *BuildExpression) buildExpressionAssign(
 }
 
 // a,b,c = 122,fdfd2232,"hello";
-func (buildExpression *BuildExpression) buildAssign(
+func (this *BuildExpression) buildAssign(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -58,12 +58,12 @@ func (buildExpression *BuildExpression) buildAssign(
 	state *StackMapState) (maxStack uint16) {
 	assign := e.Data.(*ast.ExpressionAssign)
 	if e.IsStatementExpression == false || len(assign.Lefts) == 1 {
-		return buildExpression.buildExpressionAssign(class, code, e, context, state)
+		return this.buildExpressionAssign(class, code, e, context, state)
 	}
 	if len(assign.Values) == 1 {
-		maxStack = buildExpression.build(class, code, assign.Values[0], context, state)
+		maxStack = this.build(class, code, assign.Values[0], context, state)
 	} else {
-		maxStack = buildExpression.buildExpressions(class, code, assign.Values, context, state)
+		maxStack = this.buildExpressions(class, code, assign.Values, context, state)
 	}
 	autoVar := newMultiValueAutoVar(class, code, state)
 	for k, v := range assign.Lefts {
@@ -72,7 +72,7 @@ func (buildExpression *BuildExpression) buildAssign(
 		}
 		stackLength := len(state.Stacks)
 		stack, remainStack, op, _ :=
-			buildExpression.getLeftValue(class, code, v, context, state)
+			this.getLeftValue(class, code, v, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
@@ -86,7 +86,7 @@ func (buildExpression *BuildExpression) buildAssign(
 	return
 }
 
-func (buildExpression *BuildExpression) dupStackLeaveValueBelow(
+func (this *BuildExpression) dupStackLeaveValueBelow(
 	code *cg.AttributeCode,
 	leftValueKind LeftValueKind,
 	stackTopType *ast.Type) (increment uint16) {

@@ -24,17 +24,17 @@ type StatementLabel struct {
 	defer block could be compile multi times,
 	should reset the label
 */
-func (l *StatementLabel) Reset() {
-	l.CodeOffsetGenerated = false
-	l.CodeOffset = -1
-	l.Exits = []*cg.Exit{}
+func (this *StatementLabel) Reset() {
+	this.CodeOffsetGenerated = false
+	this.CodeOffset = -1
+	this.Exits = []*cg.Exit{}
 }
 
 // check this label is read to goto
-func (l *StatementLabel) Ready(from *Pos) error {
+func (this *StatementLabel) Ready(from *Pos) error {
 	ss := []*Statement{}
-	for _, v := range l.Block.Statements {
-		if v.StatementLabel == l { // this is me
+	for _, v := range this.Block.Statements {
+		if v.StatementLabel == this { // this is me
 			break
 		}
 		if v.isVariableDefinition() && v.Checked == false {

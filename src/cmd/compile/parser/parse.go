@@ -43,40 +43,40 @@ type Parser struct {
 /*
 	call before parse source file
 */
-func (parser *Parser) initParser() {
-	parser.ExpressionParser = &ExpressionParser{parser}
-	parser.FunctionParser = &FunctionParser{
-		parser: parser,
+func (this *Parser) initParser() {
+	this.ExpressionParser = &ExpressionParser{this}
+	this.FunctionParser = &FunctionParser{
+		parser: this,
 	}
-	parser.ClassParser = &ClassParser{
-		parser: parser,
+	this.ClassParser = &ClassParser{
+		parser: this,
 	}
-	parser.BlockParser = &BlockParser{
-		parser: parser,
+	this.BlockParser = &BlockParser{
+		parser: this,
 	}
 }
 
-func (parser *Parser) Parse() []error {
-	parser.initParser()
-	parser.lexer = lex.New(parser.bs, 1, 1)
-	parser.Next(lfNotToken) //
-	if parser.token.Type == lex.TokenEof {
+func (this *Parser) Parse() []error {
+	this.initParser()
+	this.lexer = lex.New(this.bs, 1, 1)
+	this.Next(lfNotToken) //
+	if this.token.Type == lex.TokenEof {
 		return nil
 	}
-	for _, t := range parser.parseImports() {
-		*parser.tops = append(*parser.tops, &ast.TopNode{
+	for _, t := range this.parseImports() {
+		*this.tops = append(*this.tops, &ast.TopNode{
 			Node: t,
 		})
 	}
-	if parser.onlyParseImport { // only parse imports
-		return parser.errs
+	if this.onlyParseImport { // only parse imports
+		return this.errs
 	}
 	var accessControlToken *lex.Token
 	isFinal := false
 	isAbstract := false
 	var finalPos *ast.Pos
 	comment := &CommentParser{
-		parser: parser,
+		parser: this,
 	}
 	resetProperty := func() {
 		accessControlToken = nil
@@ -88,36 +88,36 @@ func (parser *Parser) Parse() []error {
 	isPublic := func() bool {
 		return accessControlToken != nil && accessControlToken.Type == lex.TokenPublic
 	}
-	for parser.token.Type != lex.TokenEof {
-		if len(parser.errs) > parser.nErrors2Stop {
+	for this.token.Type != lex.TokenEof {
+		if len(this.errs) > this.nErrors2Stop {
 			break
 		}
 
-		switch parser.token.Type {
+		switch this.token.Type {
 		case lex.TokenComment, lex.TokenMultiLineComment:
 			comment.read()
 		case lex.TokenSemicolon, lex.TokenLf: // empty statement, no big deal
-			parser.Next(lfNotToken)
+			this.Next(lfNotToken)
 			continue
 		case lex.TokenPublic:
-			accessControlToken = parser.token
-			parser.Next(lfIsToken)
-			parser.unExpectNewLineAndSkip()
-			if err := parser.validAfterPublic(); err != nil {
+			accessControlToken = this.token
+			this.Next(lfIsToken)
+			this.unExpectNewLineAndSkip()
+			if err := this.validAfterPublic(); err != nil {
 				accessControlToken = nil
 			}
 			continue
 		case lex.TokenAbstract:
-			parser.Next(lfIsToken)
-			parser.unExpectNewLineAndSkip()
-			if err := parser.validAfterAbstract(); err == nil {
+			this.Next(lfIsToken)
+			this.unExpectNewLineAndSkip()
+			if err := this.validAfterAbstract(); err == nil {
 				isAbstract = true
 			}
 		case lex.TokenFinal:
-			pos := parser.mkPos()
-			parser.Next(lfIsToken)
-			parser.unExpectNewLineAndSkip()
-			if err := parser.validAfterFinal(); err != nil {
+			pos := this.mkPos()
+			this.Next(lfIsToken)
+			this.unExpectNewLineAndSkip()
+			if err := this.validAfterFinal(); err != nil {
 				isFinal = false
 			} else {
 				isFinal = true
@@ -125,12 +125,12 @@ func (parser *Parser) Parse() []error {
 			}
 			continue
 		case lex.TokenVar:
-			pos := parser.mkPos()
-			parser.Next(lfIsToken) // skip var key word
-			vs, err := parser.parseVar()
+			pos := this.mkPos()
+			this.Next(lfIsToken) // skip var key word
+			vs, err := this.parseVar()
 			if err != nil {
-				parser.consume(untilSemicolonOrLf)
-				parser.Next(lfNotToken)
+				this.consume(untilSemicolonOrLf)
+				this.Next(lfNotToken)
 				continue
 			}
 			isPublic := isPublic()
@@ -142,12 +142,12 @@ func (parser *Parser) Parse() []error {
 				IsGlobal: true,
 				Op:       "var",
 			}
-			*parser.tops = append(*parser.tops, &ast.TopNode{
+			*this.tops = append(*this.tops, &ast.TopNode{
 				Node: e,
 			})
 			resetProperty()
 		case lex.TokenEnum:
-			e, err := parser.parseEnum()
+			e, err := this.parseEnum()
 			if err != nil {
 				resetProperty()
 				continue
@@ -158,15 +158,15 @@ func (parser *Parser) Parse() []error {
 				e.AccessFlags |= cg.AccClassPublic
 			}
 			if e != nil {
-				*parser.tops = append(*parser.tops, &ast.TopNode{
+				*this.tops = append(*this.tops, &ast.TopNode{
 					Node: e,
 				})
 			}
 			resetProperty()
 		case lex.TokenFn:
-			f, err := parser.FunctionParser.parse(true, false)
+			f, err := this.FunctionParser.parse(true, false)
 			if err != nil {
-				parser.Next(lfNotToken)
+				this.Next(lfNotToken)
 				continue
 			}
 			f.Comment = comment.Comment
@@ -174,32 +174,32 @@ func (parser *Parser) Parse() []error {
 			if isPublic {
 				f.AccessFlags |= cg.AccMethodPublic
 			}
-			*parser.tops = append(*parser.tops, &ast.TopNode{
+			*this.tops = append(*this.tops, &ast.TopNode{
 				Node: f,
 			})
 			resetProperty()
 		case lex.TokenLc:
 			b := &ast.Block{}
-			parser.Next(lfNotToken) // skip {
-			parser.BlockParser.parseStatementList(b, true)
-			if parser.token.Type != lex.TokenRc {
-				parser.errs = append(parser.errs, fmt.Errorf("%s expect '}', but '%s'",
-					parser.errMsgPrefix(), parser.token.Description))
-				parser.consume(untilRc)
+			this.Next(lfNotToken) // skip {
+			this.BlockParser.parseStatementList(b, true)
+			if this.token.Type != lex.TokenRc {
+				this.errs = append(this.errs, fmt.Errorf("%s expect '}', but '%s'",
+					this.errMsgPrefix(), this.token.Description))
+				this.consume(untilRc)
 			}
-			parser.Next(lfNotToken) // skip }
-			*parser.tops = append(*parser.tops, &ast.TopNode{
+			this.Next(lfNotToken) // skip }
+			*this.tops = append(*this.tops, &ast.TopNode{
 				Node: b,
 			})
 
 		case lex.TokenClass, lex.TokenInterface:
-			c, err := parser.ClassParser.parse(isAbstract)
+			c, err := this.ClassParser.parse(isAbstract)
 			if err != nil {
 				resetProperty()
 				continue
 			}
 			c.Comment = comment.Comment
-			*parser.tops = append(*parser.tops, &ast.TopNode{
+			*this.tops = append(*this.tops, &ast.TopNode{
 				Node: c,
 			})
 			isPublic := isPublic()
@@ -215,11 +215,11 @@ func (parser *Parser) Parse() []error {
 			}
 			resetProperty()
 		case lex.TokenConst:
-			parser.Next(lfIsToken) // skip const key word
-			cs, err := parser.parseConst()
+			this.Next(lfIsToken) // skip const key word
+			cs, err := this.parseConst()
 			if err != nil {
-				parser.consume(untilSemicolonOrLf)
-				parser.Next(lfNotToken)
+				this.consume(untilSemicolonOrLf)
+				this.Next(lfNotToken)
 				resetProperty()
 				continue
 			}
@@ -228,124 +228,124 @@ func (parser *Parser) Parse() []error {
 				if isPublic {
 					v.AccessFlags |= cg.AccFieldPublic
 				}
-				*parser.tops = append(*parser.tops, &ast.TopNode{
+				*this.tops = append(*this.tops, &ast.TopNode{
 					Node: v,
 				})
 			}
 			resetProperty()
 			continue
 		case lex.TokenTypeAlias:
-			a, err := parser.parseTypeAlias(comment)
+			a, err := this.parseTypeAlias(comment)
 			if err != nil {
-				parser.consume(untilSemicolonOrLf)
-				parser.Next(lfNotToken)
+				this.consume(untilSemicolonOrLf)
+				this.Next(lfNotToken)
 				resetProperty()
 				continue
 			}
-			*parser.tops = append(*parser.tops, &ast.TopNode{
+			*this.tops = append(*this.tops, &ast.TopNode{
 				Node: a,
 			})
 		case lex.TokenImport:
-			pos := parser.mkPos()
-			parser.parseImports()
-			parser.errs = append(parser.errs, fmt.Errorf("%s cannot have import at this scope",
-				parser.errMsgPrefix(pos)))
+			pos := this.mkPos()
+			this.parseImports()
+			this.errs = append(this.errs, fmt.Errorf("%s cannot have import at this scope",
+				this.errMsgPrefix(pos)))
 		case lex.TokenEof:
 			break
 		default:
-			if parser.ExpressionParser.looksLikeExpression() {
-				e, err := parser.ExpressionParser.parseExpression(true)
+			if this.ExpressionParser.looksLikeExpression() {
+				e, err := this.ExpressionParser.parseExpression(true)
 				if err != nil {
 					continue
 				}
 				e.IsPublic = isPublic()
 				e.IsGlobal = true
-				*parser.tops = append(*parser.tops, &ast.TopNode{
+				*this.tops = append(*this.tops, &ast.TopNode{
 					Node: e,
 				})
 			} else {
-				parser.errs = append(parser.errs, fmt.Errorf("%s token '%s' is not except",
-					parser.errMsgPrefix(), parser.token.Description))
-				parser.Next(lfNotToken)
+				this.errs = append(this.errs, fmt.Errorf("%s token '%s' is not except",
+					this.errMsgPrefix(), this.token.Description))
+				this.Next(lfNotToken)
 			}
 		}
 	}
-	return parser.errs
+	return this.errs
 }
 
-func (parser *Parser) validAfterPublic() error {
-	if parser.token.Type == lex.TokenFn ||
-		parser.token.Type == lex.TokenClass ||
-		parser.token.Type == lex.TokenEnum ||
-		parser.token.Type == lex.TokenIdentifier ||
-		parser.token.Type == lex.TokenInterface ||
-		parser.token.Type == lex.TokenConst ||
-		parser.token.Type == lex.TokenVar ||
-		parser.token.Type == lex.TokenFinal ||
-		parser.token.Type == lex.TokenAbstract {
+func (this *Parser) validAfterPublic() error {
+	if this.token.Type == lex.TokenFn ||
+		this.token.Type == lex.TokenClass ||
+		this.token.Type == lex.TokenEnum ||
+		this.token.Type == lex.TokenIdentifier ||
+		this.token.Type == lex.TokenInterface ||
+		this.token.Type == lex.TokenConst ||
+		this.token.Type == lex.TokenVar ||
+		this.token.Type == lex.TokenFinal ||
+		this.token.Type == lex.TokenAbstract {
 		return nil
 	}
 	err := fmt.Errorf("%s cannot have token '%s' after 'public'",
-		parser.errMsgPrefix(), parser.token.Description)
-	parser.errs = append(parser.errs, err)
+		this.errMsgPrefix(), this.token.Description)
+	this.errs = append(this.errs, err)
 	return err
 }
-func (parser *Parser) validAfterAbstract() error {
-	if parser.token.Type == lex.TokenClass {
+func (this *Parser) validAfterAbstract() error {
+	if this.token.Type == lex.TokenClass {
 		return nil
 	}
 	err := fmt.Errorf("%s cannot have token '%s' after 'abstract'",
-		parser.errMsgPrefix(), parser.token.Description)
-	parser.errs = append(parser.errs, err)
+		this.errMsgPrefix(), this.token.Description)
+	this.errs = append(this.errs, err)
 	return err
 }
-func (parser *Parser) validAfterFinal() error {
-	if parser.token.Type == lex.TokenClass ||
-		parser.token.Type == lex.TokenInterface {
+func (this *Parser) validAfterFinal() error {
+	if this.token.Type == lex.TokenClass ||
+		this.token.Type == lex.TokenInterface {
 		return nil
 	}
 	err := fmt.Errorf("%s cannot have token '%s' after 'final'",
-		parser.errMsgPrefix(), parser.token.Description)
-	parser.errs = append(parser.errs, err)
+		this.errMsgPrefix(), this.token.Description)
+	this.errs = append(this.errs, err)
 	return err
 }
 
 /*
 	statement ending
 */
-func (parser *Parser) isStatementEnding() bool {
-	return parser.token.Type == lex.TokenSemicolon ||
-		parser.token.Type == lex.TokenLf ||
-		parser.token.Type == lex.TokenRc ||
-		parser.token.Type == lex.TokenComment ||
-		parser.token.Type == lex.TokenMultiLineComment
+func (this *Parser) isStatementEnding() bool {
+	return this.token.Type == lex.TokenSemicolon ||
+		this.token.Type == lex.TokenLf ||
+		this.token.Type == lex.TokenRc ||
+		this.token.Type == lex.TokenComment ||
+		this.token.Type == lex.TokenMultiLineComment
 }
-func (parser *Parser) validStatementEnding() error {
-	if parser.isStatementEnding() {
+func (this *Parser) validStatementEnding() error {
+	if this.isStatementEnding() {
 		return nil
 	}
-	token := parser.token
-	err := fmt.Errorf("%s expect semicolon or new line", parser.errMsgPrefix(&ast.Pos{
-		Filename: parser.filename,
+	token := this.token
+	err := fmt.Errorf("%s expect semicolon or new line", this.errMsgPrefix(&ast.Pos{
+		Filename: this.filename,
 		Line:     token.StartLine,
 		Column:   token.StartColumn,
 	}))
-	parser.errs = append(parser.errs, err)
+	this.errs = append(this.errs, err)
 	return nil
 }
 
-func (parser *Parser) mkPos() *ast.Pos {
-	if parser.token != nil {
+func (this *Parser) mkPos() *ast.Pos {
+	if this.token != nil {
 		return &ast.Pos{
-			Filename: parser.filename,
-			Line:     parser.token.EndLine,
-			Column:   parser.token.EndColumn,
-			Offset:   parser.lexer.GetOffSet(),
+			Filename: this.filename,
+			Line:     this.token.EndLine,
+			Column:   this.token.EndColumn,
+			Offset:   this.lexer.GetOffSet(),
 		}
 	} else {
-		line, column := parser.lexer.GetLineAndColumn()
+		line, column := this.lexer.GetLineAndColumn()
 		pos := &ast.Pos{
-			Filename: parser.filename,
+			Filename: this.filename,
 			Line:     line,
 			Column:   column,
 		}
@@ -353,26 +353,26 @@ func (parser *Parser) mkPos() *ast.Pos {
 	}
 }
 
-func (parser *Parser) mkEndPos() *ast.Pos {
-	if parser.lastToken == nil {
+func (this *Parser) mkEndPos() *ast.Pos {
+	if this.lastToken == nil {
 		return &ast.Pos{
-			Filename: parser.filename,
-			Line:     parser.token.EndLine,
-			Column:   parser.token.EndColumn,
-			Offset:   parser.lexer.GetOffSet(),
+			Filename: this.filename,
+			Line:     this.token.EndLine,
+			Column:   this.token.EndColumn,
+			Offset:   this.lexer.GetOffSet(),
 		}
 	} else {
 		return &ast.Pos{
-			Filename: parser.filename,
-			Line:     parser.lastToken.EndLine,
-			Column:   parser.lastToken.EndColumn,
+			Filename: this.filename,
+			Line:     this.lastToken.EndLine,
+			Column:   this.lastToken.EndColumn,
 		}
 	}
 }
 
 // str := "hello world"   a,b = 123 or a b ;
-func (parser *Parser) parseConst() (constants []*ast.Constant, err error) {
-	names, err := parser.parseNameList()
+func (this *Parser) parseConst() (constants []*ast.Constant, err error) {
+	names, err := this.parseNameList()
 	if err != nil {
 		return
 	}
@@ -384,8 +384,8 @@ func (parser *Parser) parseConst() (constants []*ast.Constant, err error) {
 		constants[k] = vd
 	}
 	var variableType *ast.Type
-	if parser.isValidTypeBegin() {
-		variableType, err = parser.parseType()
+	if this.isValidTypeBegin() {
+		variableType, err = this.parseType()
 		if err != nil {
 			return
 		}
@@ -395,20 +395,20 @@ func (parser *Parser) parseConst() (constants []*ast.Constant, err error) {
 			c.Type = variableType.Clone()
 		}
 	}
-	if parser.token.Type != lex.TokenAssign {
-		err = fmt.Errorf("%s missing assign", parser.errMsgPrefix())
-		parser.errs = append(parser.errs, err)
+	if this.token.Type != lex.TokenAssign {
+		err = fmt.Errorf("%s missing assign", this.errMsgPrefix())
+		this.errs = append(this.errs, err)
 		return
 	}
-	parser.Next(lfNotToken) // skip =
-	es, err := parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
+	this.Next(lfNotToken) // skip =
+	es, err := this.ExpressionParser.parseExpressions(lex.TokenSemicolon)
 	if err != nil {
 		return
 	}
 	if len(es) != len(constants) {
 		err = fmt.Errorf("%s cannot assign %d value to %d constant",
-			parser.errMsgPrefix(), len(es), len(constants))
-		parser.errs = append(parser.errs, err)
+			this.errMsgPrefix(), len(es), len(constants))
+		this.errs = append(this.errs, err)
 	}
 	for k, _ := range constants {
 		if k < len(es) {
@@ -419,8 +419,8 @@ func (parser *Parser) parseConst() (constants []*ast.Constant, err error) {
 }
 
 // str := "hello world"   a,b = 123 or a b ;
-func (parser *Parser) parseVar() (ret *ast.ExpressionVar, err error) {
-	names, err := parser.parseNameList()
+func (this *Parser) parseVar() (ret *ast.ExpressionVar, err error) {
+	names, err := this.parseNameList()
 	if err != nil {
 		return
 	}
@@ -432,15 +432,15 @@ func (parser *Parser) parseVar() (ret *ast.ExpressionVar, err error) {
 		vd.Pos = v.Pos
 		ret.Variables[k] = vd
 	}
-	if parser.token.Type != lex.TokenAssign {
-		ret.Type, err = parser.parseType()
+	if this.token.Type != lex.TokenAssign {
+		ret.Type, err = this.parseType()
 		if err != nil {
 			return
 		}
 	}
-	if parser.token.Type == lex.TokenAssign {
-		parser.Next(lfNotToken) // skip = or :=
-		ret.InitValues, err = parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
+	if this.token.Type == lex.TokenAssign {
+		this.Next(lfNotToken) // skip = or :=
+		ret.InitValues, err = this.ExpressionParser.parseExpressions(lex.TokenSemicolon)
 		if err != nil {
 			return
 		}
@@ -448,32 +448,32 @@ func (parser *Parser) parseVar() (ret *ast.ExpressionVar, err error) {
 	return
 }
 
-func (parser *Parser) Next(lfIsToken bool) {
-	if parser.consumeFoundValidToken {
-		parser.consumeFoundValidToken = false
+func (this *Parser) Next(lfIsToken bool) {
+	if this.consumeFoundValidToken {
+		this.consumeFoundValidToken = false
 		return
 	}
 	var err error
 	var tok *lex.Token
-	parser.lastToken = parser.token
+	this.lastToken = this.token
 	defer func() {
-		if parser.lastToken == nil {
-			parser.lastToken = parser.token
+		if this.lastToken == nil {
+			this.lastToken = this.token
 		}
 	}()
 	for {
-		tok, err = parser.lexer.Next()
+		tok, err = this.lexer.Next()
 		if tok != nil {
-			parser.token = tok
+			this.token = tok
 		}
 		if err != nil {
-			parser.errs = append(parser.errs,
-				fmt.Errorf("%s %s", parser.errMsgPrefix(), err.Error()))
+			this.errs = append(this.errs,
+				fmt.Errorf("%s %s", this.errMsgPrefix(), err.Error()))
 		}
 		if tok == nil {
 			continue
 		}
-		parser.token = tok
+		this.token = tok
 		if lfIsToken {
 			break
 		}
@@ -487,129 +487,129 @@ func (parser *Parser) Next(lfIsToken bool) {
 /*
 	pos.ErrMsgPrefix() only receive one argument
 */
-func (parser *Parser) errMsgPrefix(pos ...*ast.Pos) string {
+func (this *Parser) errMsgPrefix(pos ...*ast.Pos) string {
 	if len(pos) > 0 {
 		return pos[0].ErrMsgPrefix()
 	}
-	return parser.mkPos().ErrMsgPrefix()
+	return this.mkPos().ErrMsgPrefix()
 }
 
-func (parser *Parser) consume(until map[lex.TokenKind]bool) {
+func (this *Parser) consume(until map[lex.TokenKind]bool) {
 	if len(until) == 0 {
 		panic("no token to consume")
 	}
-	for parser.token.Type != lex.TokenEof {
-		if parser.token.Type == lex.TokenPublic ||
-			parser.token.Type == lex.TokenProtected ||
-			parser.token.Type == lex.TokenPrivate ||
-			parser.token.Type == lex.TokenClass ||
-			parser.token.Type == lex.TokenInterface ||
-			parser.token.Type == lex.TokenFn ||
-			parser.token.Type == lex.TokenFor ||
-			parser.token.Type == lex.TokenIf ||
-			parser.token.Type == lex.TokenSwitch ||
-			parser.token.Type == lex.TokenEnum ||
-			parser.token.Type == lex.TokenConst ||
-			parser.token.Type == lex.TokenVar ||
-			parser.token.Type == lex.TokenImport ||
-			parser.token.Type == lex.TokenTypeAlias ||
-			parser.token.Type == lex.TokenGoto ||
-			parser.token.Type == lex.TokenBreak ||
-			parser.token.Type == lex.TokenContinue ||
-			parser.token.Type == lex.TokenDefer ||
-			parser.token.Type == lex.TokenReturn ||
-			parser.token.Type == lex.TokenPass ||
-			parser.token.Type == lex.TokenExtends ||
-			parser.token.Type == lex.TokenImplements ||
-			parser.token.Type == lex.TokenGlobal ||
-			parser.token.Type == lex.TokenCase ||
-			parser.token.Type == lex.TokenDefault {
-			if _, ok := until[parser.token.Type]; ok == false {
-				parser.consumeFoundValidToken = true
+	for this.token.Type != lex.TokenEof {
+		if this.token.Type == lex.TokenPublic ||
+			this.token.Type == lex.TokenProtected ||
+			this.token.Type == lex.TokenPrivate ||
+			this.token.Type == lex.TokenClass ||
+			this.token.Type == lex.TokenInterface ||
+			this.token.Type == lex.TokenFn ||
+			this.token.Type == lex.TokenFor ||
+			this.token.Type == lex.TokenIf ||
+			this.token.Type == lex.TokenSwitch ||
+			this.token.Type == lex.TokenEnum ||
+			this.token.Type == lex.TokenConst ||
+			this.token.Type == lex.TokenVar ||
+			this.token.Type == lex.TokenImport ||
+			this.token.Type == lex.TokenTypeAlias ||
+			this.token.Type == lex.TokenGoto ||
+			this.token.Type == lex.TokenBreak ||
+			this.token.Type == lex.TokenContinue ||
+			this.token.Type == lex.TokenDefer ||
+			this.token.Type == lex.TokenReturn ||
+			this.token.Type == lex.TokenPass ||
+			this.token.Type == lex.TokenExtends ||
+			this.token.Type == lex.TokenImplements ||
+			this.token.Type == lex.TokenGlobal ||
+			this.token.Type == lex.TokenCase ||
+			this.token.Type == lex.TokenDefault {
+			if _, ok := until[this.token.Type]; ok == false {
+				this.consumeFoundValidToken = true
 				return
 			}
 		}
-		if parser.token.Type == lex.TokenLc {
+		if this.token.Type == lex.TokenLc {
 			if _, ok := until[lex.TokenLc]; ok == false {
-				parser.consumeFoundValidToken = true
+				this.consumeFoundValidToken = true
 				return
 			}
 		}
-		if parser.token.Type == lex.TokenRc {
+		if this.token.Type == lex.TokenRc {
 			if _, ok := until[lex.TokenRc]; ok == false {
-				parser.consumeFoundValidToken = true
+				this.consumeFoundValidToken = true
 				return
 			}
 		}
-		if _, ok := until[parser.token.Type]; ok {
+		if _, ok := until[this.token.Type]; ok {
 			return
 		}
-		parser.Next(lfIsToken)
+		this.Next(lfIsToken)
 	}
 }
 
-func (parser *Parser) ifTokenIsLfThenSkip() {
-	if parser.token.Type == lex.TokenLf {
-		parser.Next(lfNotToken)
+func (this *Parser) ifTokenIsLfThenSkip() {
+	if this.token.Type == lex.TokenLf {
+		this.Next(lfNotToken)
 	}
 }
 
-func (parser *Parser) unExpectNewLineAndSkip() {
-	if err := parser.unExpectNewLine(); err != nil {
-		parser.Next(lfNotToken)
+func (this *Parser) unExpectNewLineAndSkip() {
+	if err := this.unExpectNewLine(); err != nil {
+		this.Next(lfNotToken)
 	}
 }
-func (parser *Parser) unExpectNewLine() error {
+func (this *Parser) unExpectNewLine() error {
 	var err error
-	if parser.token.Type == lex.TokenLf {
+	if this.token.Type == lex.TokenLf {
 		err = fmt.Errorf("%s unexpected new line",
-			parser.errMsgPrefix(parser.mkPos()))
-		parser.errs = append(parser.errs, err)
+			this.errMsgPrefix(this.mkPos()))
+		this.errs = append(this.errs, err)
 	}
 	return err
 }
-func (parser *Parser) expectNewLineAndSkip() {
-	if err := parser.expectNewLine(); err == nil {
-		parser.Next(lfNotToken)
+func (this *Parser) expectNewLineAndSkip() {
+	if err := this.expectNewLine(); err == nil {
+		this.Next(lfNotToken)
 	}
 }
-func (parser *Parser) expectNewLine() error {
+func (this *Parser) expectNewLine() error {
 	var err error
-	if parser.token.Type != lex.TokenLf &&
-		parser.token.Type != lex.TokenComment {
+	if this.token.Type != lex.TokenLf &&
+		this.token.Type != lex.TokenComment {
 		err = fmt.Errorf("%s expect new line , but '%s'",
-			parser.errMsgPrefix(), parser.token.Description)
-		parser.errs = append(parser.errs, err)
+			this.errMsgPrefix(), this.token.Description)
+		this.errs = append(this.errs, err)
 	}
 	return err
 }
 
-func (parser *Parser) parseTypeAlias(comment *CommentParser) (*ast.TypeAlias, error) {
-	parser.Next(lfIsToken) // skip type key word
-	parser.unExpectNewLineAndSkip()
-	if parser.token.Type != lex.TokenIdentifier {
-		err := fmt.Errorf("%s expect identifer,but '%s'", parser.errMsgPrefix(), parser.token.Description)
-		parser.errs = append(parser.errs, err)
+func (this *Parser) parseTypeAlias(comment *CommentParser) (*ast.TypeAlias, error) {
+	this.Next(lfIsToken) // skip type key word
+	this.unExpectNewLineAndSkip()
+	if this.token.Type != lex.TokenIdentifier {
+		err := fmt.Errorf("%s expect identifer,but '%s'", this.errMsgPrefix(), this.token.Description)
+		this.errs = append(this.errs, err)
 		return nil, err
 	}
 	ret := &ast.TypeAlias{}
-	ret.Pos = parser.mkPos()
-	ret.Name = parser.token.Data.(string)
-	parser.Next(lfIsToken) // skip identifier
-	if parser.token.Type != lex.TokenAssign {
-		err := fmt.Errorf("%s expect '=',but '%s'", parser.errMsgPrefix(), parser.token.Description)
-		parser.errs = append(parser.errs, err)
+	ret.Pos = this.mkPos()
+	ret.Name = this.token.Data.(string)
+	this.Next(lfIsToken) // skip identifier
+	if this.token.Type != lex.TokenAssign {
+		err := fmt.Errorf("%s expect '=',but '%s'", this.errMsgPrefix(), this.token.Description)
+		this.errs = append(this.errs, err)
 		return nil, err
 	}
-	parser.Next(lfNotToken) // skip =
+	this.Next(lfNotToken) // skip =
 	var err error
-	ret.Type, err = parser.parseType()
+	ret.Type, err = this.parseType()
 	if err != nil {
 		return nil, err
 	}
 	ret.Comment = comment.Comment
-	if parser.token.Type == lex.TokenComment {
-		parser.Next(lfIsToken)
+	if this.token.Type == lex.TokenComment {
+		this.Next(lfIsToken)
 	}
 	return ret, err
 }
@@ -618,31 +618,31 @@ func (parser *Parser) parseTypeAlias(comment *CommentParser) (*ast.TypeAlias, er
 	a int
 	int
 */
-func (parser *Parser) parseTypedName() (vs []*ast.Variable, err error) {
-	if parser.token.Type != lex.TokenIdentifier {
+func (this *Parser) parseTypedName() (vs []*ast.Variable, err error) {
+	if this.token.Type != lex.TokenIdentifier {
 		/*
 			not identifier begin
 			must be type
 			// int
 		*/
-		t, err := parser.parseType()
+		t, err := this.parseType()
 		if err != nil {
 			return nil, err
 		}
 		v := &ast.Variable{}
 		v.Type = t
-		v.Pos = parser.mkPos()
+		v.Pos = this.mkPos()
 		return []*ast.Variable{v}, nil
 	}
-	names, err := parser.parseNameList()
+	names, err := this.parseNameList()
 	if err != nil {
 		return nil, err
 	}
-	if parser.isValidTypeBegin() {
+	if this.isValidTypeBegin() {
 		/*
 			a , b int
 		*/
-		t, err := parser.parseType()
+		t, err := this.parseType()
 		if err != nil {
 			return nil, err
 		}
@@ -679,14 +679,14 @@ func (parser *Parser) parseTypedName() (vs []*ast.Variable, err error) {
 }
 
 // a,b int or int,bool  c xxx
-func (parser *Parser) parseTypedNames() (vs []*ast.Variable, err error) {
+func (this *Parser) parseTypedNames() (vs []*ast.Variable, err error) {
 	vs = []*ast.Variable{}
-	for parser.token.Type != lex.TokenEof {
-		ns, err := parser.parseNameList()
+	for this.token.Type != lex.TokenEof {
+		ns, err := this.parseNameList()
 		if err != nil {
 			return vs, err
 		}
-		t, err := parser.parseType()
+		t, err := this.parseType()
 		if err != nil {
 			return vs, err
 		}
@@ -697,10 +697,10 @@ func (parser *Parser) parseTypedNames() (vs []*ast.Variable, err error) {
 			vd.Type = t.Clone()
 			vs = append(vs, vd)
 		}
-		if parser.token.Type != lex.TokenComma { // not a comma
+		if this.token.Type != lex.TokenComma { // not a comma
 			break
 		} else {
-			parser.Next(lfNotToken)
+			this.Next(lfNotToken)
 		}
 	}
 	return vs, nil

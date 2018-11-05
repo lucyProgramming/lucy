@@ -9,7 +9,7 @@ import (
 type DefaultValueParse struct {
 }
 
-func (fd *DefaultValueParse) Encode(
+func (this *DefaultValueParse) Encode(
 	class *cg.ClassHighLevel,
 	f *ast.Function) *cg.AttributeDefaultParameters {
 	ret := &cg.AttributeDefaultParameters{}
@@ -46,7 +46,7 @@ func (fd *DefaultValueParse) Encode(
 	return ret
 }
 
-func (fd *DefaultValueParse) Decode(class *cg.Class, f *ast.Function, dp *cg.AttributeDefaultParameters) {
+func (this *DefaultValueParse) Decode(class *cg.Class, f *ast.Function, dp *cg.AttributeDefaultParameters) {
 	f.HaveDefaultValue = true
 	f.DefaultValueStartAt = int(dp.Start)
 	for i := uint16(0); i < uint16(len(dp.Constants)); i++ {

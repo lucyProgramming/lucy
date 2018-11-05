@@ -34,30 +34,30 @@ func (f *ClassField) ableAccessFromSubClass() bool {
 		f.IsProtected()
 }
 
-func (c *Class) getField(pos *Pos, name string, fromSub bool) (*ClassField, error) {
-	err := c.loadSelf(pos)
+func (this *Class) getField(pos *Pos, name string, fromSub bool) (*ClassField, error) {
+	err := this.loadSelf(pos)
 	if err != nil {
 		return nil, err
 	}
 	notFoundErr := fmt.Errorf("%s field named '%s' not found",
 		pos.ErrMsgPrefix(), name)
-	if c.Fields != nil && nil != c.Fields[name] {
-		if fromSub && c.Fields[name].ableAccessFromSubClass() == false {
+	if this.Fields != nil && nil != this.Fields[name] {
+		if fromSub && this.Fields[name].ableAccessFromSubClass() == false {
 			// private field
 			return nil, notFoundErr
 		} else {
-			return c.Fields[name], nil
+			return this.Fields[name], nil
 		}
 	}
-	if c.Name == JavaRootClass { // root class
+	if this.Name == JavaRootClass { // root class
 		return nil, notFoundErr
 	}
-	err = c.loadSuperClass(pos)
+	err = this.loadSuperClass(pos)
 	if err != nil {
 		return nil, err
 	}
-	if c.SuperClass == nil {
+	if this.SuperClass == nil {
 		return nil, notFoundErr
 	}
-	return c.SuperClass.getField(pos, name, true)
+	return this.SuperClass.getField(pos, name, true)
 }

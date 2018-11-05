@@ -55,103 +55,103 @@ type Statement struct {
 	IsCallFatherConstructionStatement bool
 }
 
-func (s *Statement) isVariableDefinition() bool {
-	if s.Type != StatementTypeExpression {
+func (this *Statement) isVariableDefinition() bool {
+	if this.Type != StatementTypeExpression {
 		return false
 	}
-	return s.Expression.Type == ExpressionTypeVarAssign ||
-		s.Expression.Type == ExpressionTypeVar
+	return this.Expression.Type == ExpressionTypeVarAssign ||
+		this.Expression.Type == ExpressionTypeVar
 }
 
-func (s *Statement) simplifyIf() {
-	if len(s.StatementIf.ElseIfList) > 0 {
+func (this *Statement) simplifyIf() {
+	if len(this.StatementIf.ElseIfList) > 0 {
 		return
 	}
-	if len(s.StatementIf.PrefixExpressions) > 0 {
+	if len(this.StatementIf.PrefixExpressions) > 0 {
 		return
 	}
-	if s.StatementIf.Condition.Type != ExpressionTypeBool {
+	if this.StatementIf.Condition.Type != ExpressionTypeBool {
 		return
 	}
-	c := s.StatementIf.Condition.Data.(bool)
+	c := this.StatementIf.Condition.Data.(bool)
 	if c {
-		s.Type = StatementTypeBlock
-		s.Block = &s.StatementIf.Block
+		this.Type = StatementTypeBlock
+		this.Block = &this.StatementIf.Block
 	} else {
-		if s.StatementIf.Else != nil {
-			s.Type = StatementTypeBlock
-			s.Block = s.StatementIf.Else
+		if this.StatementIf.Else != nil {
+			this.Type = StatementTypeBlock
+			this.Block = this.StatementIf.Else
 		} else {
-			s.Type = StatementTypeNop
+			this.Type = StatementTypeNop
 		}
 	}
 }
 
-func (s *Statement) simplifyFor() {
-	if s.StatementFor.Init == nil &&
-		s.StatementFor.Increment == nil &&
-		s.StatementFor.Condition != nil &&
-		s.StatementFor.Condition.Type == ExpressionTypeBool &&
-		s.StatementFor.Condition.Data.(bool) == false {
-		s.Type = StatementTypeNop
-		s.StatementFor = nil
+func (this *Statement) simplifyFor() {
+	if this.StatementFor.Init == nil &&
+		this.StatementFor.Increment == nil &&
+		this.StatementFor.Condition != nil &&
+		this.StatementFor.Condition.Type == ExpressionTypeBool &&
+		this.StatementFor.Condition.Data.(bool) == false {
+		this.Type = StatementTypeNop
+		this.StatementFor = nil
 	}
 }
-func (s *Statement) check(block *Block) []error {
+func (this *Statement) check(block *Block) []error {
 	defer func() {
-		s.Checked = true
+		this.Checked = true
 	}()
 	errs := []error{}
-	switch s.Type {
+	switch this.Type {
 	case StatementTypeExpression:
-		return s.checkStatementExpression(block)
+		return this.checkStatementExpression(block)
 	case StatementTypeIf:
-		es := s.StatementIf.check(block)
-		s.simplifyIf()
+		es := this.StatementIf.check(block)
+		this.simplifyIf()
 		return es
 	case StatementTypeFor:
-		es := s.StatementFor.check(block)
-		s.simplifyFor()
+		es := this.StatementFor.check(block)
+		this.simplifyFor()
 		return es
 	case StatementTypeSwitch:
-		return s.StatementSwitch.check(block)
+		return this.StatementSwitch.check(block)
 	case StatementTypeBreak:
-		return s.StatementBreak.check(block)
+		return this.StatementBreak.check(block)
 	case StatementTypeContinue:
-		return s.StatementContinue.check(block)
+		return this.StatementContinue.check(block)
 	case StatementTypeReturn:
-		return s.StatementReturn.check(block)
+		return this.StatementReturn.check(block)
 	case StatementTypeGoTo:
-		err := s.StatementGoTo.checkStatementGoTo(block)
+		err := this.StatementGoTo.checkStatementGoTo(block)
 		if err != nil {
 			return []error{err}
 		}
 	case StatementTypeDefer:
 		block.InheritedAttribute.Function.HasDefer = true
-		s.Defer.Block.inherit(block)
-		s.Defer.Block.InheritedAttribute.Defer = s.Defer
-		es := s.Defer.Block.check()
-		block.Defers = append(block.Defers, s.Defer)
+		this.Defer.Block.inherit(block)
+		this.Defer.Block.InheritedAttribute.Defer = this.Defer
+		es := this.Defer.Block.check()
+		block.Defers = append(block.Defers, this.Defer)
 		return es
 	case StatementTypeBlock:
-		s.Block.inherit(block)
-		return s.Block.check()
+		this.Block.inherit(block)
+		return this.Block.check()
 	case StatementTypeLabel:
 		if block.InheritedAttribute.Defer != nil {
 			block.InheritedAttribute.Defer.Labels =
-				append(block.InheritedAttribute.Defer.Labels, s.StatementLabel)
+				append(block.InheritedAttribute.Defer.Labels, this.StatementLabel)
 		}
 	case StatementTypeClass:
 		PackageBeenCompile.statementLevelClass =
-			append(PackageBeenCompile.statementLevelClass, s.Class)
-		err := block.Insert(s.Class.Name, s.Class.Pos, s.Class)
+			append(PackageBeenCompile.statementLevelClass, this.Class)
+		err := block.Insert(this.Class.Name, this.Class.Pos, this.Class)
 		if err != nil {
 			errs = append(errs, err)
 		}
-		return append(errs, s.Class.check(block)...)
+		return append(errs, this.Class.check(block)...)
 	case StatementTypeEnum:
-		es := s.Enum.check()
-		err := block.Insert(s.Enum.Name, s.Enum.Pos, s.Enum)
+		es := this.Enum.check()
+		err := block.Insert(this.Enum.Name, this.Enum.Pos, this.Enum)
 		if err != nil {
 			es = append(es, err)
 		}
@@ -160,32 +160,32 @@ func (s *Statement) check(block *Block) []error {
 		//nop , should be never execute to here
 		//
 	case StatementTypeWhen:
-		return s.StatementWhen.check(block, s)
+		return this.StatementWhen.check(block, this)
 	case StatementTypeImport:
 		if block.InheritedAttribute.Function.TemplateClonedFunction == false {
 			errs = append(errs, fmt.Errorf("%s cannot have 'import' at this scope , non-template function",
-				errMsgPrefix(s.Import.Pos)))
+				errMsgPrefix(this.Import.Pos)))
 			return errs
 		}
-		err := s.Import.MkAccessName()
+		err := this.Import.MkAccessName()
 		if err != nil {
 			errs = append(errs, err)
 			return errs
 		}
-		if s.Import.Alias == UnderScore {
+		if this.Import.Alias == UnderScore {
 			errs = append(errs, fmt.Errorf("%s import at block scope , must be used",
-				errMsgPrefix(s.Import.Pos)))
+				errMsgPrefix(this.Import.Pos)))
 			return nil
 		}
-		if err := PackageBeenCompile.insertImport(s.Import); err != nil {
+		if err := PackageBeenCompile.insertImport(this.Import); err != nil {
 			errs = append(errs, err)
 		}
 	case StatementTypeTypeAlias:
-		err := s.TypeAlias.Type.resolve(block)
+		err := this.TypeAlias.Type.resolve(block)
 		if err != nil {
 			return []error{err}
 		}
-		err = block.Insert(s.TypeAlias.Name, s.TypeAlias.Pos, s.TypeAlias.Type)
+		err = block.Insert(this.TypeAlias.Name, this.TypeAlias.Pos, this.TypeAlias.Type)
 		if err != nil {
 			return []error{err}
 		}

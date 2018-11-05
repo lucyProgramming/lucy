@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildCallArgs(
+func (this *BuildExpression) buildCallArgs(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	args []*ast.Expression,
@@ -18,7 +18,7 @@ func (buildExpression *BuildExpression) buildCallArgs(
 		state.popStack(len(state.Stacks) - stackLength) // let`s pop
 	}()
 	for _, e := range args {
-		stack := buildExpression.build(class, code, e, context, state)
+		stack := this.build(class, code, e, context, state)
 		if t := stack + currentStack; t > maxStack {
 			maxStack = t
 		}
@@ -36,7 +36,7 @@ func (buildExpression *BuildExpression) buildCallArgs(
 		}
 	} else {
 		if vArgs.PackArray2VArgs {
-			stack := buildExpression.build(class, code, vArgs.Expressions[0], context, state)
+			stack := this.build(class, code, vArgs.Expressions[0], context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -56,7 +56,7 @@ func (buildExpression *BuildExpression) buildCallArgs(
 					Type: ast.VariableTypeInt,
 				})
 				currentStack += 2
-				stack := buildExpression.build(class, code, e, context, state)
+				stack := this.build(class, code, e, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}

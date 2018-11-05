@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) buildFunctionExpression(
+func (this *BuildPackage) buildFunctionExpression(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -16,7 +16,7 @@ func (buildPackage *BuildPackage) buildFunctionExpression(
 		if e.IsStatementExpression {
 			return
 		}
-		stack := buildPackage.packFunction2MethodHandle(class, code, function, context)
+		stack := this.packFunction2MethodHandle(class, code, function, context)
 		if stack > maxStack {
 			maxStack = stack
 		}
@@ -39,21 +39,21 @@ func (buildPackage *BuildPackage) buildFunctionExpression(
 		method.Class = class
 		method.Descriptor = Descriptor.methodDescriptor(&function.Type)
 		method.Code = &cg.AttributeCode{}
-		buildPackage.buildFunction(class, nil, method, function)
+		this.buildFunction(class, nil, method, function)
 		class.AppendMethod(method)
 		return
 	}
 
 	// function have captured vars
-	className := buildPackage.newClassName("closureFunction$" + function.Name)
+	className := this.newClassName("closureFunction$" + function.Name)
 	closureClass := &cg.ClassHighLevel{}
 	closureClass.Name = className
 	closureClass.SuperClass = ast.LucyRootClass
 	closureClass.AccessFlags = 0
 	closureClass.AccessFlags |= cg.AccClassSynthetic
 	closureClass.AccessFlags |= cg.AccClassFinal
-	buildPackage.mkClassDefaultConstruction(closureClass)
-	buildPackage.putClass(closureClass)
+	this.mkClassDefaultConstruction(closureClass)
+	this.putClass(closureClass)
 	method := &cg.MethodHighLevel{}
 	method.Name = function.Name
 	method.AccessFlags |= cg.AccMethodFinal
@@ -194,11 +194,11 @@ func (buildPackage *BuildPackage) buildFunctionExpression(
 	}
 	method.Code = &cg.AttributeCode{}
 	// build function
-	buildPackage.buildFunction(closureClass, nil, method, function)
+	this.buildFunction(closureClass, nil, method, function)
 	return
 
 }
-func (buildPackage *BuildPackage) packFunction2MethodHandle(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (this *BuildPackage) packFunction2MethodHandle(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	function *ast.Function, context *Context) (maxStack uint16) {
 	code.Codes[code.CodeLength] = cg.OP_invokestatic
 	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{

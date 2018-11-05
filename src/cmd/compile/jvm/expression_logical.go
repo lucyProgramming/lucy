@@ -5,14 +5,14 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildLogical(
+func (this *BuildExpression) buildLogical(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
 	context *Context,
 	state *StackMapState) (maxStack uint16) {
 	bin := e.Data.(*ast.ExpressionBinary)
-	maxStack = buildExpression.build(class, code, bin.Left, context, state)
+	maxStack = this.build(class, code, bin.Left, context, state)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	if 2 > maxStack { // dup increment stack
@@ -26,7 +26,7 @@ func (buildExpression *BuildExpression) buildLogical(
 	}
 	code.Codes[code.CodeLength] = cg.OP_pop
 	code.CodeLength++
-	stack := buildExpression.build(class, code, bin.Right, context, state)
+	stack := this.build(class, code, bin.Right, context, state)
 	if stack > maxStack {
 		maxStack = stack
 	}

@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildRelations(
+func (this *BuildExpression) buildRelations(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -18,9 +18,9 @@ func (buildExpression *BuildExpression) buildRelations(
 	}()
 	if bin.Left.Value.IsNumber() ||
 		bin.Left.Value.Type == ast.VariableTypeEnum { // in this case ,right must be a number type
-		maxStack = buildExpression.build(class, code, bin.Left, context, state)
+		maxStack = this.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
-		stack := buildExpression.build(class, code, bin.Right, context, state)
+		stack := this.build(class, code, bin.Right, context, state)
 		if t := jvmSlotSize(bin.Left.Value) + stack; t > maxStack {
 			maxStack = t
 		}
@@ -87,9 +87,9 @@ func (buildExpression *BuildExpression) buildRelations(
 	}
 	if bin.Left.Value.Type == ast.VariableTypeBool ||
 		bin.Right.Value.Type == ast.VariableTypeBool { // bool type
-		maxStack = buildExpression.build(class, code, bin.Left, context, state)
+		maxStack = this.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
-		stack := buildExpression.build(class, code, bin.Right, context, state)
+		stack := this.build(class, code, bin.Right, context, state)
 		if t := jvmSlotSize(bin.Left.Value) + stack; t > maxStack {
 			maxStack = t
 		}
@@ -123,7 +123,7 @@ func (buildExpression *BuildExpression) buildRelations(
 		} else {
 			notNullExpression = bin.Right
 		}
-		maxStack = buildExpression.build(class, code, notNullExpression, context, state)
+		maxStack = this.build(class, code, notNullExpression, context, state)
 		var exit *cg.Exit
 		if e.Type == ast.ExpressionTypeEq {
 			exit = (&cg.Exit{}).Init(cg.OP_ifnull, code)
@@ -148,9 +148,9 @@ func (buildExpression *BuildExpression) buildRelations(
 
 	//string compare
 	if bin.Left.Value.Type == ast.VariableTypeString {
-		maxStack = buildExpression.build(class, code, bin.Left, context, state)
+		maxStack = this.build(class, code, bin.Left, context, state)
 		state.pushStack(class, bin.Left.Value)
-		stack := buildExpression.build(class, code, bin.Right, context, state)
+		stack := this.build(class, code, bin.Right, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
@@ -194,12 +194,12 @@ func (buildExpression *BuildExpression) buildRelations(
 	}
 
 	if bin.Left.Value.IsPointer() && bin.Right.Value.IsPointer() { //
-		stack := buildExpression.build(class, code, bin.Left, context, state)
+		stack := this.build(class, code, bin.Left, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
 		state.pushStack(class, bin.Left.Value)
-		stack = buildExpression.build(class, code, bin.Right, context, state)
+		stack = this.build(class, code, bin.Right, context, state)
 		if t := stack + 1; t > maxStack {
 			maxStack = t
 		}

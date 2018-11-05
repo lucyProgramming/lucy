@@ -105,43 +105,43 @@ func (m *ClassMethod) IsFirstStatementCallFatherConstruction() bool {
 	}
 	return true
 }
-func (c *Class) accessInterfaceObjectMethod(
+func (this *Class) accessInterfaceObjectMethod(
 	pos *Pos,
 	errs *[]error,
 	name string,
 	call *ExpressionMethodCall,
 	callArgTypes []*Type,
 	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
-	ms, matched, err = c.accessInterfaceMethod(pos, errs, name, call, callArgTypes, fromSub)
+	ms, matched, err = this.accessInterfaceMethod(pos, errs, name, call, callArgTypes, fromSub)
 	if err != nil {
 		return nil, false, err
 	}
 	if matched {
 		return ms, matched, err
 	}
-	err = c.loadSuperClass(pos)
+	err = this.loadSuperClass(pos)
 	if err != nil {
 		return nil, false, err
 	}
-	if c.SuperClass == nil {
+	if this.SuperClass == nil {
 		return nil, false, nil
 	}
-	return c.SuperClass.accessMethod(pos, errs, call, callArgTypes, fromSub, nil)
+	return this.SuperClass.accessMethod(pos, errs, call, callArgTypes, fromSub, nil)
 }
 
-func (c *Class) accessInterfaceMethod(
+func (this *Class) accessInterfaceMethod(
 	pos *Pos,
 	errs *[]error,
 	name string,
 	call *ExpressionMethodCall,
 	callArgTypes []*Type,
 	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
-	err = c.loadSelf(pos)
+	err = this.loadSelf(pos)
 	if err != nil {
 		return nil, false, err
 	}
-	if nil != c.Methods {
-		for _, m := range c.Methods[name] {
+	if nil != this.Methods {
+		for _, m := range this.Methods[name] {
 			if fromSub && m.ableAccessFromSubClass() == false {
 				continue
 			}
@@ -153,7 +153,7 @@ func (c *Class) accessInterfaceMethod(
 			}
 		}
 	}
-	for _, v := range c.Interfaces {
+	for _, v := range this.Interfaces {
 		err := v.loadSelf(pos)
 		if err != nil {
 			return nil, false, err
@@ -172,28 +172,28 @@ func (c *Class) accessInterfaceMethod(
 /*
 	access method lucy style
 */
-func (c *Class) accessMethod(
+func (this *Class) accessMethod(
 	pos *Pos,
 	errs *[]error,
 	call *ExpressionMethodCall,
 	callArgTypes []*Type,
 	fromSub bool,
 	fieldMethodHandler **ClassField) (ms []*ClassMethod, matched bool, err error) {
-	err = c.loadSelf(pos)
+	err = this.loadSelf(pos)
 	if err != nil {
 		return nil, false, err
 	}
-	if c.IsJava {
-		return c.accessMethodAsJava(pos, errs, call, callArgTypes, false)
+	if this.IsJava {
+		return this.accessMethodAsJava(pos, errs, call, callArgTypes, false)
 	}
-	if c.Fields != nil {
-		if f := c.Fields[call.Name]; f != nil &&
+	if this.Fields != nil {
+		if f := this.Fields[call.Name]; f != nil &&
 			f.Type.Type == VariableTypeFunction &&
 			fieldMethodHandler != nil {
 			if fromSub && f.ableAccessFromSubClass() == false {
 				//cannot access this field
 			} else {
-				call.VArgs, err = c.Fields[call.Name].Type.FunctionType.fitArgs(pos, &call.Args,
+				call.VArgs, err = this.Fields[call.Name].Type.FunctionType.fitArgs(pos, &call.Args,
 					callArgTypes, nil)
 				if err == nil {
 					*fieldMethodHandler = f
@@ -205,9 +205,9 @@ func (c *Class) accessMethod(
 			}
 		}
 	}
-	if c.Methods != nil {
-		if len(c.Methods[call.Name]) > 0 {
-			for _, m := range c.Methods[call.Name] {
+	if this.Methods != nil {
+		if len(this.Methods[call.Name]) > 0 {
+			for _, m := range this.Methods[call.Name] {
 				if fromSub && m.ableAccessFromSubClass() == false {
 					return nil, false, fmt.Errorf("%s method '%s' not found",
 						pos.ErrMsgPrefix(), call.Name)
@@ -223,28 +223,28 @@ func (c *Class) accessMethod(
 		}
 	}
 
-	err = c.loadSuperClass(pos)
+	err = this.loadSuperClass(pos)
 	if err != nil {
 		return ms, false, err
 	}
-	if c.SuperClass == nil {
+	if this.SuperClass == nil {
 		return ms, false, nil
 	}
-	return c.SuperClass.accessMethod(pos, errs, call,
+	return this.SuperClass.accessMethod(pos, errs, call,
 		callArgTypes, true, fieldMethodHandler)
 }
 
 /*
 	access method java style
 */
-func (c *Class) accessMethodAsJava(
+func (this *Class) accessMethodAsJava(
 	pos *Pos,
 	errs *[]error,
 	call *ExpressionMethodCall,
 	callArgTypes []*Type,
 	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
-	if c.Methods != nil {
-		for _, m := range c.Methods[call.Name] {
+	if this.Methods != nil {
+		for _, m := range this.Methods[call.Name] {
 			if fromSub == true && m.ableAccessFromSubClass() == false {
 				//cannot access from sub
 				continue
@@ -257,17 +257,17 @@ func (c *Class) accessMethodAsJava(
 			}
 		}
 	}
-	if c.Name == JavaRootClass {
+	if this.Name == JavaRootClass {
 		return ms, false, nil
 	}
-	err = c.loadSuperClass(pos)
+	err = this.loadSuperClass(pos)
 	if err != nil {
 		return nil, false, err
 	}
-	if c.SuperClass == nil {
+	if this.SuperClass == nil {
 		return ms, false, nil
 	}
-	ms_, matched, err := c.SuperClass.accessMethodAsJava(pos, errs, call, callArgTypes, true)
+	ms_, matched, err := this.SuperClass.accessMethodAsJava(pos, errs, call, callArgTypes, true)
 	if err != nil {
 		return ms, false, err
 	}

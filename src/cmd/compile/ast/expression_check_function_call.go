@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []*Type {
-	call := e.Data.(*ExpressionFunctionCall)
+func (this *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []*Type {
+	call := this.Data.(*ExpressionFunctionCall)
 	if call.Expression.Type == ExpressionTypeIdentifier {
 		identifier := call.Expression.Data.(*ExpressionIdentifier)
 		var isCaptureVar bool
@@ -23,19 +23,19 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		case *Function:
 			f := d.(*Function)
 			call.Function = f
-			return e.checkFunctionCall(block, errs, f, call)
+			return this.checkFunctionCall(block, errs, f, call)
 		case *Type:
 			typeConversion := &ExpressionTypeConversion{}
 			typeConversion.Type = d.(*Type)
 			if len(call.Args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
-					e.Pos.ErrMsgPrefix()))
+					this.Pos.ErrMsgPrefix()))
 				return nil
 			}
-			e.Type = ExpressionTypeCheckCast
+			this.Type = ExpressionTypeCheckCast
 			typeConversion.Expression = call.Args[0]
-			e.Data = typeConversion
-			ret := e.checkTypeConversionExpression(block, errs)
+			this.Data = typeConversion
+			ret := this.checkTypeConversionExpression(block, errs)
 			if ret == nil {
 				return nil
 			}
@@ -45,16 +45,16 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 			typeConversion.Type = &Type{}
 			typeConversion.Type.Type = VariableTypeObject
 			typeConversion.Type.Class = d.(*Class)
-			typeConversion.Type.Pos = e.Pos
+			typeConversion.Type.Pos = this.Pos
 			if len(call.Args) != 1 {
 				*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
-					e.Pos.ErrMsgPrefix()))
+					this.Pos.ErrMsgPrefix()))
 				return nil
 			}
-			e.Type = ExpressionTypeCheckCast
+			this.Type = ExpressionTypeCheckCast
 			typeConversion.Expression = call.Args[0]
-			e.Data = typeConversion
-			ret := e.checkTypeConversionExpression(block, errs)
+			this.Data = typeConversion
+			ret := this.checkTypeConversionExpression(block, errs)
 			if ret == nil {
 				return nil
 			}
@@ -71,12 +71,12 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 				return nil
 			}
 			call.Expression.Value = &Type{
-				Pos:          e.Pos,
+				Pos:          this.Pos,
 				Type:         VariableTypeFunction,
 				FunctionType: v.Type.FunctionType,
 			}
 			identifier.Variable = v
-			return e.checkFunctionPointerCall(block, errs, v.Type.FunctionType, call)
+			return this.checkFunctionPointerCall(block, errs, v.Type.FunctionType, call)
 		default:
 			*errs = append(*errs, fmt.Errorf("%s cannot make_node_objects call on '%s'",
 				call.Expression.Pos.ErrMsgPrefix(), block.identifierIsWhat(d)))
@@ -90,7 +90,7 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 	}
 	if functionPointer.Type != VariableTypeFunction {
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function , but '%s'",
-			e.Pos.ErrMsgPrefix(),
+			this.Pos.ErrMsgPrefix(),
 			call.Expression.Op, functionPointer.TypeString()))
 		return nil
 	}
@@ -104,26 +104,26 @@ func (e *Expression) checkFunctionCallExpression(block *Block, errs *[]error) []
 		call.Function = call.Expression.Data.(*Function)
 		call.Expression.IsStatementExpression = true
 	}
-	return e.checkFunctionPointerCall(block, errs, functionPointer.FunctionType, call)
+	return this.checkFunctionPointerCall(block, errs, functionPointer.FunctionType, call)
 }
 
-func (e *Expression) checkFunctionPointerCall(block *Block, errs *[]error,
+func (this *Expression) checkFunctionPointerCall(block *Block, errs *[]error,
 	ft *FunctionType, call *ExpressionFunctionCall) []*Type {
 	length := len(*errs)
 	callArgsTypes := checkExpressions(block, call.Args, errs, true)
-	ret := ft.mkCallReturnTypes(e.Pos)
+	ret := ft.mkCallReturnTypes(this.Pos)
 	if len(*errs) > length {
 		return nil
 	}
 	var err error
-	call.VArgs, err = ft.fitArgs(e.Pos, &call.Args, callArgsTypes, nil)
+	call.VArgs, err = ft.fitArgs(this.Pos, &call.Args, callArgsTypes, nil)
 	if err != nil {
 		*errs = append(*errs, err)
 	}
 	return ret
 }
 
-func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, call *ExpressionFunctionCall) []*Type {
+func (this *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function, call *ExpressionFunctionCall) []*Type {
 	if f.TemplateFunction != nil {
 		errsLength := len(*errs)
 		callArgsTypes := checkExpressions(block, call.Args, errs, true)
@@ -132,19 +132,19 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		}
 		errsLength = len(*errs)
 		//rewrite
-		tf := e.checkTemplateFunctionCall(block, errs, callArgsTypes, f)
+		tf := this.checkTemplateFunctionCall(block, errs, callArgsTypes, f)
 		if len(*errs) != errsLength { // if no
 			return nil
 		}
-		ret := tf.Type.mkCallReturnTypes(e.Pos)
+		ret := tf.Type.mkCallReturnTypes(this.Pos)
 		var err error
-		call.VArgs, err = tf.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, tf)
+		call.VArgs, err = tf.Type.fitArgs(this.Pos, &call.Args, callArgsTypes, tf)
 		if err != nil {
 			*errs = append(*errs, err)
 		}
 		return ret
 	} else { // not template function
-		ret := f.Type.mkCallReturnTypes(e.Pos)
+		ret := f.Type.mkCallReturnTypes(this.Pos)
 		errsLength := len(*errs)
 		callArgsTypes := checkExpressions(block, call.Args, errs, true)
 		if len(*errs) > errsLength {
@@ -153,14 +153,14 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		if f.IsBuildIn {
 			if f.LoadedFromCorePackage {
 				var err error
-				call.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
+				call.VArgs, err = f.Type.fitArgs(this.Pos, &call.Args, callArgsTypes, f)
 				if err != nil {
 					*errs = append(*errs, err)
 				}
 				return ret
 			} else {
 				length := len(*errs)
-				f.buildInFunctionChecker(f, e.Data.(*ExpressionFunctionCall), block, errs, callArgsTypes, e.Pos)
+				f.buildInFunctionChecker(f, this.Data.(*ExpressionFunctionCall), block, errs, callArgsTypes, this.Pos)
 				if len(*errs) == length {
 					//special case ,avoid null pointer
 					return ret
@@ -170,10 +170,10 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 		} else {
 			if len(call.ParameterTypes) > 0 {
 				*errs = append(*errs, fmt.Errorf("%s function is not a template function",
-					errMsgPrefix(e.Pos)))
+					errMsgPrefix(this.Pos)))
 			}
 			var err error
-			call.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
+			call.VArgs, err = f.Type.fitArgs(this.Pos, &call.Args, callArgsTypes, f)
 			if err != nil {
 				*errs = append(*errs, err)
 			}
@@ -182,9 +182,9 @@ func (e *Expression) checkFunctionCall(block *Block, errs *[]error, f *Function,
 	}
 }
 
-func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
+func (this *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	argTypes []*Type, f *Function) (ret *Function) {
-	call := e.Data.(*ExpressionFunctionCall)
+	call := this.Data.(*ExpressionFunctionCall)
 	parameterTypes := make(map[string]*Type)
 	parameterTypeArray := []*Type{}
 	for k, v := range f.Type.ParameterList {
@@ -195,7 +195,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		}
 		if k >= len(argTypes) || argTypes[k] == nil {
 			*errs = append(*errs, fmt.Errorf("%s missing typed parameter,index at %d",
-				e.Pos.ErrMsgPrefix(), k))
+				this.Pos.ErrMsgPrefix(), k))
 			return
 		}
 		if err := v.Type.canBeBindWithType(&f.Type, parameterTypes, argTypes[k]); err != nil {
@@ -222,7 +222,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 				continue
 			}
 			*errs = append(*errs, fmt.Errorf("%s missing typed return value,index at %d",
-				e.Pos.ErrMsgPrefix(), k))
+				this.Pos.ErrMsgPrefix(), k))
 			return
 		}
 		if err := v.Type.canBeBindWithType(&f.Type, parameterTypes, tps[0]); err != nil {
@@ -272,7 +272,7 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	// when all ok ,ret is not a template function any more
 	if len(tps) > 0 {
 		*errs = append(*errs, fmt.Errorf("%s to many parameter type to call template function",
-			errMsgPrefix(e.Pos)))
+			errMsgPrefix(this.Pos)))
 	}
 	return ret
 }

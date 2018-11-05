@@ -19,9 +19,9 @@ type FileLoader struct {
 	caches map[string]interface{}
 }
 
-func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
-	if loader.caches != nil && loader.caches[importName] != nil {
-		return loader.caches[importName], nil
+func (this *FileLoader) LoadImport(importName string) (interface{}, error) {
+	if this.caches != nil && this.caches[importName] != nil {
+		return this.caches[importName], nil
 	}
 	var realPaths []*Resource
 	for _, v := range compiler.lucyPaths {
@@ -99,27 +99,27 @@ func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
 		}
 	}
 	if realPaths[0].kind == resourceKindJavaClass {
-		class, err := loader.loadClass(realPaths[0])
+		class, err := this.loadClass(realPaths[0])
 		if class != nil {
-			loader.caches[importName] = class
+			this.caches[importName] = class
 		}
 		return class, err
 	} else if realPaths[0].kind == resourceKindLucyClass {
-		t, err := loader.loadClass(realPaths[0])
+		t, err := this.loadClass(realPaths[0])
 		if t != nil {
-			loader.caches[importName] = t
+			this.caches[importName] = t
 		}
 		return t, err
 	} else if realPaths[0].kind == resourceKindJavaPackage {
-		p, err := loader.loadJavaPackage(realPaths[0])
+		p, err := this.loadJavaPackage(realPaths[0])
 		if p != nil {
-			loader.caches[importName] = p
+			this.caches[importName] = p
 		}
 		return p, err
 	} else { // lucy package
-		p, err := loader.loadLucyPackage(realPaths[0])
+		p, err := this.loadLucyPackage(realPaths[0])
 		if p != nil {
-			loader.caches[importName] = p
+			this.caches[importName] = p
 		}
 		return p, err
 	}
@@ -128,7 +128,7 @@ func (loader *FileLoader) LoadImport(importName string) (interface{}, error) {
 /*
 	lucy and java have no difference
 */
-func (loader *FileLoader) loadInterfaces(astClass *ast.Class, c *cg.Class) error {
+func (this *FileLoader) loadInterfaces(astClass *ast.Class, c *cg.Class) error {
 	astClass.InterfaceNames = make([]*ast.NameWithPos, len(c.Interfaces))
 	for k, v := range c.Interfaces {
 		astClass.InterfaceNames[k] = &ast.NameWithPos{
@@ -145,7 +145,7 @@ func (loader *FileLoader) loadInterfaces(astClass *ast.Class, c *cg.Class) error
 	return nil
 }
 
-func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
+func (this *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	if c.IsSynthetic() {
 		return nil, nil
 	}
@@ -167,7 +167,7 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 			}
 		}
 	}
-	loader.loadInterfaces(astClass, c)
+	this.loadInterfaces(astClass, c)
 	astClass.AccessFlags = c.AccessFlag
 	astClass.IsJava = true // class compiled from java
 	var err error
@@ -216,7 +216,7 @@ func (loader *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 	return astClass, nil
 }
 
-func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
+func (this *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 	if c.IsSynthetic() {
 		return nil, nil
 	}
@@ -235,7 +235,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			}
 		}
 	}
-	loader.loadInterfaces(astClass, c)
+	this.loadInterfaces(astClass, c)
 	astClass.AccessFlags = c.AccessFlag
 	astClass.LoadFromOutSide = true
 	var err error
@@ -253,7 +253,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			constant := &ast.Constant{}
 			constant.Name = v.Name
 			constant.Type = t
-			constant.Value = loader.loadConst(c, v.ValueIndex, t)
+			constant.Value = this.loadConst(c, v.ValueIndex, t)
 			if astClass.Block.Constants == nil {
 				astClass.Block.Constants = make(map[string]*ast.Constant)
 			}
@@ -341,7 +341,7 @@ func (loader *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 	return astClass, nil
 }
 
-func (loader *FileLoader) loadLucyEnum(c *cg.Class) (*ast.Enum, error) {
+func (this *FileLoader) loadLucyEnum(c *cg.Class) (*ast.Enum, error) {
 	e := &ast.Enum{}
 	{
 		nameIndex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
@@ -361,7 +361,7 @@ func (loader *FileLoader) loadLucyEnum(c *cg.Class) (*ast.Enum, error) {
 	return e, nil
 }
 
-func (loader *FileLoader) loadConst(c *cg.Class, nameIndex uint16, t *ast.Type) (value interface{}) {
+func (this *FileLoader) loadConst(c *cg.Class, nameIndex uint16, t *ast.Type) (value interface{}) {
 	switch t.Type {
 	case ast.VariableTypeBool:
 		return binary.BigEndian.Uint32(c.ConstPool[nameIndex].Info) != 0
@@ -386,7 +386,7 @@ func (loader *FileLoader) loadConst(c *cg.Class, nameIndex uint16, t *ast.Type) 
 	return nil
 }
 
-func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error {
+func (this *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error {
 	var err error
 	mainClassName := &cg.ClassHighLevel{}
 	mainClassName.Name = pack.Name + "/main"
@@ -414,7 +414,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 				return err
 			}
 			valueIndex := binary.BigEndian.Uint16(constValue[0].Info)
-			constant.Value = loader.loadConst(c, valueIndex, constant.Type)
+			constant.Value = this.loadConst(c, valueIndex, constant.Type)
 			pack.Block.Constants[name] = constant
 		} else {
 			//global vars
@@ -549,7 +549,7 @@ func (loader *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) erro
 	return nil
 }
 
-func (loader *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
+func (this *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 	fis, err := ioutil.ReadDir(r.realPath)
 	if err != nil {
 		return nil, err
@@ -575,7 +575,7 @@ func (loader *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 	}
 	p := &ast.Package{}
 	p.Name = r.name
-	err = loader.loadLucyMainClass(p, c)
+	err = this.loadLucyMainClass(p, c)
 	if err != nil {
 		return nil, fmt.Errorf("parse main class failed,err:%v", err)
 	}
@@ -603,14 +603,14 @@ func (loader *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 			return nil, fmt.Errorf("decode class failed,err:%v", err)
 		}
 		if len(c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyEnum)) > 0 {
-			e, err := loader.loadLucyEnum(c)
+			e, err := this.loadLucyEnum(c)
 			if err != nil {
 				return nil, err
 			}
 			mkEnums(e)
 			continue
 		}
-		class, err := loader.loadAsLucy(c)
+		class, err := this.loadAsLucy(c)
 		if err != nil {
 			return nil, fmt.Errorf("decode class failed,err:%v", err)
 		}
@@ -624,7 +624,7 @@ func (loader *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 	return p, nil
 }
 
-func (loader *FileLoader) loadJavaPackage(r *Resource) (*ast.Package, error) {
+func (this *FileLoader) loadJavaPackage(r *Resource) (*ast.Package, error) {
 	fis, err := ioutil.ReadDir(r.realPath)
 	if err != nil {
 		return nil, err
@@ -640,7 +640,7 @@ func (loader *FileLoader) loadJavaPackage(r *Resource) (*ast.Package, error) {
 			return nil, err
 		}
 		c, err := (&ClassDecoder{}).decode(bs)
-		class, err := loader.loadAsJava(c)
+		class, err := this.loadAsJava(c)
 		if err != nil {
 			return nil, err
 		}
@@ -655,7 +655,7 @@ func (loader *FileLoader) loadJavaPackage(r *Resource) (*ast.Package, error) {
 	return ret, nil
 }
 
-func (loader *FileLoader) loadClass(r *Resource) (interface{}, error) {
+func (this *FileLoader) loadClass(r *Resource) (interface{}, error) {
 	bs, err := ioutil.ReadFile(r.realPath)
 	if err != nil {
 		return nil, err
@@ -663,10 +663,10 @@ func (loader *FileLoader) loadClass(r *Resource) (interface{}, error) {
 	c, err := (&ClassDecoder{}).decode(bs)
 	if r.kind == resourceKindLucyClass {
 		if t := c.AttributeGroupedByName[cg.AttributeNameLucyEnum]; len(t) > 0 {
-			return loader.loadLucyEnum(c)
+			return this.loadLucyEnum(c)
 		} else {
-			return loader.loadAsLucy(c)
+			return this.loadAsLucy(c)
 		}
 	}
-	return loader.loadAsJava(c)
+	return this.loadAsJava(c)
 }

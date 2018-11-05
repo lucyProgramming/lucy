@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) mkBuildInAssert(
+func (this *BuildExpression) mkBuildInAssert(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -30,7 +30,7 @@ func (buildExpression *BuildExpression) mkBuildInAssert(
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, stepOffset)...)
 	exits := []*cg.Exit{}
 	for _, a := range call.Args {
-		stack := buildExpression.build(class, code, a, context, state)
+		stack := this.build(class, code, a, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}

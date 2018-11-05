@@ -7,24 +7,24 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (parser *Parser) parseType() (*ast.Type, error) {
+func (this *Parser) parseType() (*ast.Type, error) {
 	var err error
 	var ret *ast.Type
-	pos := parser.mkPos()
-	switch parser.token.Type {
+	pos := this.mkPos()
+	switch this.token.Type {
 	case lex.TokenLb:
-		parser.Next(lfIsToken)
-		parser.unExpectNewLineAndSkip()
-		if parser.token.Type != lex.TokenRb {
+		this.Next(lfIsToken)
+		this.unExpectNewLineAndSkip()
+		if this.token.Type != lex.TokenRb {
 			// [ and ] not match
-			err = fmt.Errorf("%s '[' and ']' not match", parser.errMsgPrefix())
-			parser.errs = append(parser.errs, err)
+			err = fmt.Errorf("%s '[' and ']' not match", this.errMsgPrefix())
+			this.errs = append(this.errs, err)
 			return nil, err
 		}
 		//lookahead
-		parser.Next(lfIsToken) //skip ]
-		parser.unExpectNewLineAndSkip()
-		array, err := parser.parseType()
+		this.Next(lfIsToken) //skip ]
+		this.unExpectNewLineAndSkip()
+		array, err := this.parseType()
 		if err != nil {
 			return nil, err
 		}
@@ -37,90 +37,90 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 			Type: ast.VariableTypeBool,
 			Pos:  pos,
 		}
-		parser.Next(lfIsToken)
+		this.Next(lfIsToken)
 	case lex.TokenByte:
 		ret = &ast.Type{
 			Type: ast.VariableTypeByte,
 			Pos:  pos,
 		}
-		parser.Next(lfIsToken)
+		this.Next(lfIsToken)
 
 	case lex.TokenShort:
 		ret = &ast.Type{
 			Type: ast.VariableTypeShort,
 			Pos:  pos,
 		}
-		parser.Next(lfIsToken)
+		this.Next(lfIsToken)
 	case lex.TokenChar:
 		ret = &ast.Type{
 			Type: ast.VariableTypeChar,
 			Pos:  pos,
 		}
-		parser.Next(lfIsToken)
+		this.Next(lfIsToken)
 	case lex.TokenInt:
 		ret = &ast.Type{
 			Type: ast.VariableTypeInt,
 			Pos:  pos,
 		}
-		parser.Next(lfIsToken)
+		this.Next(lfIsToken)
 	case lex.TokenFloat:
 		ret = &ast.Type{
 			Type: ast.VariableTypeFloat,
 			Pos:  pos,
 		}
-		parser.Next(lfIsToken)
+		this.Next(lfIsToken)
 
 	case lex.TokenDouble:
 		ret = &ast.Type{
 			Type: ast.VariableTypeDouble,
 			Pos:  pos,
 		}
-		parser.Next(lfIsToken)
+		this.Next(lfIsToken)
 	case lex.TokenLong:
 		ret = &ast.Type{
 			Type: ast.VariableTypeLong,
 			Pos:  pos,
 		}
-		parser.Next(lfIsToken)
+		this.Next(lfIsToken)
 	case lex.TokenString:
 		ret = &ast.Type{
 			Type: ast.VariableTypeString,
 			Pos:  pos,
 		}
-		parser.Next(lfIsToken)
+		this.Next(lfIsToken)
 	case lex.TokenIdentifier:
-		ret, err = parser.parseIdentifierType()
+		ret, err = this.parseIdentifierType()
 		if err != nil {
-			parser.errs = append(parser.errs, err)
+			this.errs = append(this.errs, err)
 		}
 	case lex.TokenMap:
-		parser.Next(lfNotToken) // skip map key word
-		if parser.token.Type != lex.TokenLc {
+		this.Next(lfNotToken) // skip map key word
+		if this.token.Type != lex.TokenLc {
 			return nil, fmt.Errorf("%s expect '{',but '%s'",
-				parser.errMsgPrefix(), parser.token.Description)
+				this.errMsgPrefix(), this.token.Description)
 		}
-		parser.Next(lfNotToken) // skip {
+		this.Next(lfNotToken) // skip {
 		var k, v *ast.Type
-		k, err = parser.parseType()
+		k, err = this.parseType()
 		if err != nil {
 			return nil, err
 		}
-		parser.ifTokenIsLfThenSkip()
-		if parser.token.Type != lex.TokenArrow {
+		this.ifTokenIsLfThenSkip()
+		if this.token.Type != lex.TokenArrow {
 			return nil, fmt.Errorf("%s expect '->',but '%s'",
-				parser.errMsgPrefix(), parser.token.Description)
+				this.errMsgPrefix(), this.token.Description)
 		}
-		parser.Next(lfNotToken) // skip ->
-		v, err := parser.parseType()
+		this.Next(lfNotToken) // skip ->
+		v, err := this.parseType()
 		if err != nil {
 			return nil, err
 		}
-		parser.ifTokenIsLfThenSkip()
-		if parser.token.Type != lex.TokenRc {
+		this.ifTokenIsLfThenSkip()
+		if this.token.Type != lex.TokenRc {
 			return nil, fmt.Errorf("%s expect '}',but '%s'",
-				parser.errMsgPrefix(), parser.token.Description)
+				this.errMsgPrefix(), this.token.Description)
 		}
-		parser.Next(lfIsToken)
+		this.Next(lfIsToken)
 		m := &ast.Map{
 			K: k,
 			V: v,
@@ -131,8 +131,8 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 			Pos:  pos,
 		}
 	case lex.TokenFn:
-		parser.Next(lfIsToken)
-		ft, err := parser.parseFunctionType()
+		this.Next(lfIsToken)
+		ft, err := this.parseFunctionType()
 		if err != nil {
 			return nil, err
 		}
@@ -142,60 +142,60 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 			FunctionType: &ft,
 		}
 	case lex.TokenGlobal:
-		parser.Next(lfIsToken)
-		parser.unExpectNewLineAndSkip()
-		if parser.token.Type != lex.TokenSelection {
+		this.Next(lfIsToken)
+		this.unExpectNewLineAndSkip()
+		if this.token.Type != lex.TokenSelection {
 			return nil, fmt.Errorf("%s expect '.' , but '%s'",
-				parser.errMsgPrefix(), parser.token.Description)
+				this.errMsgPrefix(), this.token.Description)
 		}
-		parser.Next(lfNotToken)
-		if parser.token.Type != lex.TokenIdentifier {
-			parser.errs = append(parser.errs, fmt.Errorf("%s expect identifier , but '%s'",
-				parser.errMsgPrefix(), parser.token.Description))
+		this.Next(lfNotToken)
+		if this.token.Type != lex.TokenIdentifier {
+			this.errs = append(this.errs, fmt.Errorf("%s expect identifier , but '%s'",
+				this.errMsgPrefix(), this.token.Description))
 		} else {
 			ret = &ast.Type{
 				Type: ast.VariableTypeGlobal,
 				Pos:  pos,
-				Name: parser.token.Data.(string),
+				Name: this.token.Data.(string),
 			}
-			parser.Next(lfIsToken)
+			this.Next(lfIsToken)
 		}
 	default:
 		err := fmt.Errorf("%s unkown begining '%s' token for a type",
-			parser.errMsgPrefix(), parser.token.Description)
-		parser.errs = append(parser.errs, err)
+			this.errMsgPrefix(), this.token.Description)
+		this.errs = append(this.errs, err)
 		return nil, err
 	}
 	if err != nil {
-		parser.errs = append(parser.errs, err)
+		this.errs = append(this.errs, err)
 		return nil, err
 	}
-	if parser.token.Type == lex.TokenVArgs {
+	if this.token.Type == lex.TokenVArgs {
 		newRet := &ast.Type{
-			Pos:            parser.mkPos(),
+			Pos:            this.mkPos(),
 			Type:           ast.VariableTypeJavaArray,
 			Array:          ret,
 			IsVariableArgs: true,
 		}
-		parser.Next(lfIsToken) // skip ...
+		this.Next(lfIsToken) // skip ...
 		ret = newRet
 		return ret, nil
 	}
-	for parser.token.Type == lex.TokenLb { // int [
-		parser.Next(lfIsToken) // skip [
-		parser.unExpectNewLineAndSkip()
-		if parser.token.Type != lex.TokenRb {
-			err = fmt.Errorf("%s '[' and ']' not match", parser.errMsgPrefix())
-			parser.errs = append(parser.errs, err)
+	for this.token.Type == lex.TokenLb { // int [
+		this.Next(lfIsToken) // skip [
+		this.unExpectNewLineAndSkip()
+		if this.token.Type != lex.TokenRb {
+			err = fmt.Errorf("%s '[' and ']' not match", this.errMsgPrefix())
+			this.errs = append(this.errs, err)
 			return ret, err
 		}
 		newRet := &ast.Type{
-			Pos:   parser.mkPos(),
+			Pos:   this.mkPos(),
 			Type:  ast.VariableTypeJavaArray,
 			Array: ret,
 		}
 		ret = newRet
-		parser.Next(lfIsToken) // skip ]
+		this.Next(lfIsToken) // skip ]
 	}
 	return ret, err
 }
@@ -203,63 +203,63 @@ func (parser *Parser) parseType() (*ast.Type, error) {
 /*
 	valid begin token of a type
 */
-func (parser *Parser) isValidTypeBegin() bool {
-	return parser.token.Type == lex.TokenLb ||
-		parser.token.Type == lex.TokenBool ||
-		parser.token.Type == lex.TokenByte ||
-		parser.token.Type == lex.TokenShort ||
-		parser.token.Type == lex.TokenChar ||
-		parser.token.Type == lex.TokenInt ||
-		parser.token.Type == lex.TokenFloat ||
-		parser.token.Type == lex.TokenDouble ||
-		parser.token.Type == lex.TokenLong ||
-		parser.token.Type == lex.TokenString ||
-		parser.token.Type == lex.TokenMap ||
-		parser.token.Type == lex.TokenIdentifier ||
-		parser.token.Type == lex.TokenFn
+func (this *Parser) isValidTypeBegin() bool {
+	return this.token.Type == lex.TokenLb ||
+		this.token.Type == lex.TokenBool ||
+		this.token.Type == lex.TokenByte ||
+		this.token.Type == lex.TokenShort ||
+		this.token.Type == lex.TokenChar ||
+		this.token.Type == lex.TokenInt ||
+		this.token.Type == lex.TokenFloat ||
+		this.token.Type == lex.TokenDouble ||
+		this.token.Type == lex.TokenLong ||
+		this.token.Type == lex.TokenString ||
+		this.token.Type == lex.TokenMap ||
+		this.token.Type == lex.TokenIdentifier ||
+		this.token.Type == lex.TokenFn
 }
 
-func (parser *Parser) parseIdentifierType() (*ast.Type, error) {
-	name := parser.token.Data.(string)
+func (this *Parser) parseIdentifierType() (*ast.Type, error) {
+	name := this.token.Data.(string)
 	ret := &ast.Type{
-		Pos:  parser.mkPos(),
+		Pos:  this.mkPos(),
 		Type: ast.VariableTypeName,
 	}
-	parser.Next(lfIsToken) // skip name identifier
-	for parser.token.Type == lex.TokenSelection {
-		parser.Next(lfNotToken) // skip .
-		if parser.token.Type != lex.TokenIdentifier {
+	this.Next(lfIsToken) // skip name identifier
+	for this.token.Type == lex.TokenSelection {
+		this.Next(lfNotToken) // skip .
+		if this.token.Type != lex.TokenIdentifier {
 			return nil, fmt.Errorf("%s not a identifier after dot",
-				parser.errMsgPrefix())
+				this.errMsgPrefix())
 		}
-		name += "." + parser.token.Data.(string)
-		ret.Pos = parser.mkPos() //  override pos
-		parser.Next(lfIsToken)   // skip identifier
+		name += "." + this.token.Data.(string)
+		ret.Pos = this.mkPos() //  override pos
+		this.Next(lfIsToken)   // skip identifier
 	}
 	ret.Name = name
 	return ret, nil
 }
 
-func (parser *Parser) parseTypes(endTokens ...lex.TokenKind) ([]*ast.Type, error) {
+func (this *Parser) parseTypes(endTokens ...lex.TokenKind) ([]*ast.Type, error) {
 	ret := []*ast.Type{}
-	for parser.token.Type != lex.TokenEof {
-		t, err := parser.parseType()
+	for this.token.Type != lex.TokenEof {
+		t, err := this.parseType()
 		if err != nil {
 			return ret, err
 		}
 		ret = append(ret, t)
-		if parser.token.Type != lex.TokenComma {
-			if parser.isValidTypeBegin() {
-				parser.errs = append(parser.errs, fmt.Errorf("%s missing comma",
-					parser.errMsgPrefix()))
+		if this.token.Type != lex.TokenComma {
+			if this.isValidTypeBegin() {
+				this.errs = append(this.errs, fmt.Errorf("%s missing comma",
+					this.errMsgPrefix()))
 				continue
 			}
 			break
 		}
-		parser.Next(lfNotToken) // skip ,
+		this.Next(lfNotToken) // skip ,
 		for _, v := range endTokens {
-			if v == parser.token.Type {
-				parser.errs = append(parser.errs, fmt.Errorf("%s extra comma", parser.errMsgPrefix()))
+			if v == this.token.Type {
+				this.errs = append(this.errs, fmt.Errorf("%s extra comma", this.errMsgPrefix()))
 				goto end
 			}
 		}

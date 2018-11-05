@@ -20,8 +20,8 @@ type Enum struct {
 	Comment         string
 }
 
-func (e *Enum) isPublic() bool {
-	return e.AccessFlags&cg.AccClassPublic != 0
+func (this *Enum) isPublic() bool {
+	return this.AccessFlags&cg.AccClassPublic != 0
 }
 
 type EnumName struct {
@@ -33,32 +33,32 @@ type EnumName struct {
 	NoNeed  *Expression
 }
 
-func (e *Enum) check() (errs []error) {
+func (this *Enum) check() (errs []error) {
 	var initV int32 = 0
 	errs = []error{}
-	if e.Init != nil {
-		if is, err := e.Init.constantFold(); err != nil {
+	if this.Init != nil {
+		if is, err := this.Init.constantFold(); err != nil {
 			errs = append(errs, err)
 		} else {
 			if is == false {
 				err := fmt.Errorf("%s enum type must inited by 'int' literal",
-					e.Pos.ErrMsgPrefix())
+					this.Pos.ErrMsgPrefix())
 				errs = append(errs, err)
 			} else {
-				initV = int32(e.Init.getLongValue())
+				initV = int32(this.Init.getLongValue())
 			}
 		}
 	}
-	e.DefaultValue = initV
-	for k, v := range e.Enums {
+	this.DefaultValue = initV
+	for k, v := range this.Enums {
 		if v.NoNeed != nil {
 			errs = append(errs, fmt.Errorf("%s enum only expect 1 init value",
 				v.Pos.ErrMsgPrefix()))
 		}
-		if k < e.FirstValueIndex {
-			v.Value = initV - int32(e.FirstValueIndex-k)
+		if k < this.FirstValueIndex {
+			v.Value = initV - int32(this.FirstValueIndex-k)
 		} else {
-			v.Value = initV + int32(k-e.FirstValueIndex)
+			v.Value = initV + int32(k-this.FirstValueIndex)
 		}
 	}
 	return errs

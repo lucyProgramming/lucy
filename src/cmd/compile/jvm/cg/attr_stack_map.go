@@ -12,15 +12,15 @@ type AttributeStackMap struct {
 	StackMaps []StackMap
 }
 
-func (a *AttributeStackMap) ToAttributeInfo(class *Class) *AttributeInfo {
-	if a == nil || len(a.StackMaps) == 0 {
+func (this *AttributeStackMap) ToAttributeInfo(class *Class) *AttributeInfo {
+	if this == nil || len(this.StackMaps) == 0 {
 		return nil
 	}
 	info := &AttributeInfo{}
 	info.NameIndex = class.InsertUtf8Const(AttributeNameStackMap)
 	bs := make([]byte, 2)
-	binary.BigEndian.PutUint16(bs, uint16(len(a.StackMaps)))
-	for _, v := range a.StackMaps {
+	binary.BigEndian.PutUint16(bs, uint16(len(this.StackMaps)))
+	for _, v := range this.StackMaps {
 		bs = append(bs, v.ToBytes()...)
 	}
 	info.Info = bs

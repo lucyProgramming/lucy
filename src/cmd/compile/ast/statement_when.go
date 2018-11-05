@@ -20,17 +20,17 @@ type StatementWhenCase struct {
 /*
 	switchStatement will be override
 */
-func (s *StatementWhen) check(block *Block, switchStatement *Statement) (errs []error) {
-	if s.Condition == nil { // must be a error must parse stage
+func (this *StatementWhen) check(block *Block, switchStatement *Statement) (errs []error) {
+	if this.Condition == nil { // must be a error must parse stage
 		return nil
 	}
 	errs = []error{}
-	if len(s.Condition.getParameterType(&block.InheritedAttribute.Function.Type)) == 0 {
+	if len(this.Condition.getParameterType(&block.InheritedAttribute.Function.Type)) == 0 {
 		errs = append(errs, fmt.Errorf("%s '%s' constains no parameter type",
-			s.Condition.Pos.ErrMsgPrefix(), s.Condition.TypeString()))
+			this.Condition.Pos.ErrMsgPrefix(), this.Condition.TypeString()))
 		return errs
 	}
-	if err := s.Condition.resolve(block); err != nil {
+	if err := this.Condition.resolve(block); err != nil {
 		errs = append(errs, err)
 		return
 	}
@@ -45,7 +45,7 @@ func (s *StatementWhen) check(block *Block, switchStatement *Statement) (errs []
 		}
 		return nil
 	}
-	for _, t := range s.Cases {
+	for _, t := range this.Cases {
 		for _, tt := range t.Matches {
 			if err := tt.resolve(block); err != nil {
 				errs = append(errs, err)
@@ -59,7 +59,7 @@ func (s *StatementWhen) check(block *Block, switchStatement *Statement) (errs []
 				return
 			}
 			typesChecked = append(typesChecked, tt)
-			if s.Condition.Equal(tt) == false {
+			if this.Condition.Equal(tt) == false {
 				//no match here
 				continue
 			}
@@ -74,13 +74,13 @@ func (s *StatementWhen) check(block *Block, switchStatement *Statement) (errs []
 		return errs
 	}
 	if match == nil {
-		if s.Default == nil {
+		if this.Default == nil {
 			errs = append(errs,
 				fmt.Errorf("%s condition resolve as '%s' has no match and no 'default block'",
-					errMsgPrefix(s.Condition.Pos), s.Condition.TypeString()))
+					errMsgPrefix(this.Condition.Pos), this.Condition.TypeString()))
 		} else {
 			switchStatement.Type = StatementTypeBlock
-			switchStatement.Block = s.Default
+			switchStatement.Block = this.Default
 			switchStatement.Block.inherit(block)
 			switchStatement.Block.IsWhenBlock = true
 			switchStatement.Block.InheritedAttribute.ForBreak = switchStatement.Block

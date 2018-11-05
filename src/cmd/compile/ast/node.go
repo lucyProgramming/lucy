@@ -19,7 +19,7 @@ type ConvertTops2Package struct {
 	TypeAlias []*TypeAlias
 }
 
-func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
+func (this *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 	redeclareErrors []*RedeclareError, errs []error) {
 	//
 	if len(nodes) == 0 {
@@ -33,29 +33,29 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 	}
 	errs = make([]error, 0)
 	PackageBeenCompile.files = make(map[string]*SourceFile)
-	conversion.Blocks = []*Block{}
-	conversion.Functions = make([]*Function, 0)
-	conversion.Classes = make([]*Class, 0)
-	conversion.Enums = make([]*Enum, 0)
-	conversion.Constants = make([]*Constant, 0)
+	this.Blocks = []*Block{}
+	this.Functions = make([]*Function, 0)
+	this.Classes = make([]*Class, 0)
+	this.Enums = make([]*Enum, 0)
+	this.Constants = make([]*Constant, 0)
 	expressions := []*Expression{}
 	for _, v := range nodes {
 		switch v.Node.(type) {
 		case *Block:
 			t := v.Node.(*Block)
-			conversion.Blocks = append(conversion.Blocks, t)
+			this.Blocks = append(this.Blocks, t)
 		case *Function:
 			t := v.Node.(*Function)
-			conversion.Functions = append(conversion.Functions, t)
+			this.Functions = append(this.Functions, t)
 		case *Enum:
 			t := v.Node.(*Enum)
-			conversion.Enums = append(conversion.Enums, t)
+			this.Enums = append(this.Enums, t)
 		case *Class:
 			t := v.Node.(*Class)
-			conversion.Classes = append(conversion.Classes, t)
+			this.Classes = append(this.Classes, t)
 		case *Constant:
 			t := v.Node.(*Constant)
-			conversion.Constants = append(conversion.Constants, t)
+			this.Constants = append(this.Constants, t)
 		case *Import:
 			i := v.Node.(*Import)
 			if i.Alias != UnderScore {
@@ -79,14 +79,14 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 			}
 		case *TypeAlias:
 			t := v.Node.(*TypeAlias)
-			conversion.TypeAlias = append(conversion.TypeAlias, t)
+			this.TypeAlias = append(this.TypeAlias, t)
 		default:
 			panic("tops have unKnow  type")
 		}
 	}
-	redeclareErrors = conversion.redeclareErrors()
+	redeclareErrors = this.redeclareErrors()
 	PackageBeenCompile.Block.Constants = make(map[string]*Constant)
-	for _, v := range conversion.Constants {
+	for _, v := range this.Constants {
 		v.IsGlobal = true
 		err := PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
 		if err != nil {
@@ -95,7 +95,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 	}
 	PackageBeenCompile.Block.Variables = make(map[string]*Variable)
 	PackageBeenCompile.Block.Functions = make(map[string]*Function)
-	for _, v := range conversion.Functions {
+	for _, v := range this.Functions {
 		v.IsGlobal = true
 		if err := PackageBeenCompile.Block.nameIsValid(v.Name, v.Pos); err != nil {
 			PackageBeenCompile.errors = append(PackageBeenCompile.errors, err)
@@ -103,7 +103,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 		PackageBeenCompile.Block.Functions[v.Name] = v
 	}
 	PackageBeenCompile.Block.Classes = make(map[string]*Class)
-	for _, v := range conversion.Classes {
+	for _, v := range this.Classes {
 		v.IsGlobal = true
 		if err := PackageBeenCompile.Block.nameIsValid(v.Name, v.Pos); err != nil {
 			PackageBeenCompile.errors = append(PackageBeenCompile.errors, err)
@@ -115,7 +115,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 	}
 	PackageBeenCompile.Block.Enums = make(map[string]*Enum)
 	PackageBeenCompile.Block.EnumNames = make(map[string]*EnumName)
-	for _, v := range conversion.Enums {
+	for _, v := range this.Enums {
 		v.IsGlobal = true
 		if err := PackageBeenCompile.Block.nameIsValid(v.Name, v.Pos); err != nil {
 			PackageBeenCompile.errors = append(PackageBeenCompile.errors, err)
@@ -126,7 +126,7 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 		}
 	}
 	PackageBeenCompile.Block.TypeAliases = make(map[string]*Type)
-	for _, v := range conversion.TypeAlias {
+	for _, v := range this.TypeAlias {
 		if err := PackageBeenCompile.Block.nameIsValid(v.Name, v.Pos); err != nil {
 			PackageBeenCompile.errors = append(PackageBeenCompile.errors, err)
 		}
@@ -145,17 +145,17 @@ func (conversion *ConvertTops2Package) ConvertTops2Package(nodes []*TopNode) (
 		b := &Block{}
 		b.Pos = expressions[0].Pos
 		b.Statements = s
-		conversion.Blocks = append([]*Block{b}, conversion.Blocks...)
+		this.Blocks = append([]*Block{b}, this.Blocks...)
 	}
-	PackageBeenCompile.mkInitFunctions(conversion.Blocks)
+	PackageBeenCompile.mkInitFunctions(this.Blocks)
 	return
 }
 
-func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
+func (this *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 	ret := []*RedeclareError{}
 	m := make(map[string][]interface{})
 	//enums
-	for _, v := range conversion.Enums {
+	for _, v := range this.Enums {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
@@ -170,7 +170,7 @@ func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 	//const
-	for _, v := range conversion.Constants {
+	for _, v := range this.Constants {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
@@ -178,7 +178,7 @@ func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 	//functions
-	for _, v := range conversion.Functions {
+	for _, v := range this.Functions {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
@@ -186,7 +186,7 @@ func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 	//classes
-	for _, v := range conversion.Classes {
+	for _, v := range this.Classes {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {
@@ -194,7 +194,7 @@ func (conversion *ConvertTops2Package) redeclareErrors() []*RedeclareError {
 		}
 	}
 	// type alias
-	for _, v := range conversion.TypeAlias {
+	for _, v := range this.TypeAlias {
 		if _, ok := m[v.Name]; ok {
 			m[v.Name] = append(m[v.Name], v)
 		} else {

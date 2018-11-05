@@ -8,30 +8,30 @@ type AttributeInnerClasses struct {
 	Classes []*InnerClass
 }
 
-func (a *AttributeInnerClasses) FromBs(class *Class, bs []byte) {
+func (this *AttributeInnerClasses) FromBs(class *Class, bs []byte) {
 	length := binary.BigEndian.Uint16(bs)
 	bs = bs[2:]
 	if int(length*8) != len(bs) {
 		panic("length not match")
 	}
-	a.Classes = nil
+	this.Classes = nil
 	for len(bs) > 0 {
 		inner := &InnerClass{}
 		inner.FromBs(class, bs[:8])
-		a.Classes = append(a.Classes, inner)
+		this.Classes = append(this.Classes, inner)
 		bs = bs[8:]
 	}
 }
 
-func (a *AttributeInnerClasses) ToAttributeInfo(class *Class) *AttributeInfo {
-	if a == nil || len(a.Classes) == 0 {
+func (this *AttributeInnerClasses) ToAttributeInfo(class *Class) *AttributeInfo {
+	if this == nil || len(this.Classes) == 0 {
 		return nil
 	}
 	ret := &AttributeInfo{}
 	ret.NameIndex = class.InsertUtf8Const(AttributeNameInnerClasses)
 	ret.Info = make([]byte, 2)
-	binary.BigEndian.PutUint16(ret.Info, uint16(len(a.Classes)))
-	for _, v := range a.Classes {
+	binary.BigEndian.PutUint16(ret.Info, uint16(len(this.Classes)))
+	for _, v := range this.Classes {
 		bs8 := make([]byte, 8)
 		binary.BigEndian.PutUint16(bs8, class.InsertClassConst(v.InnerClass))
 		binary.BigEndian.PutUint16(bs8[2:], class.InsertClassConst(v.OuterClass))

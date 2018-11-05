@@ -7,7 +7,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) buildSwitchStatement(
+func (this *BuildPackage) buildSwitchStatement(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	s *ast.StatementSwitch,
@@ -61,12 +61,12 @@ func (buildPackage *BuildPackage) buildSwitchStatement(
 		}
 	}
 	for _, v := range s.PrefixExpressions {
-		stack := buildPackage.BuildExpression.build(class, code, v, context, state)
+		stack := this.BuildExpression.build(class, code, v, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
 	}
-	stack := buildPackage.BuildExpression.build(class, code, s.Condition, context, state)
+	stack := this.BuildExpression.build(class, code, s.Condition, context, state)
 	if stack > maxStack {
 		maxStack = stack
 	}
@@ -84,7 +84,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(
 		for _, ee := range c.Matches {
 			if ee.Value.Type == ast.VariableTypeBool {
 				currentStack = size
-				stack := buildPackage.BuildExpression.build(class, code, ee, context, state)
+				stack := this.BuildExpression.build(class, code, ee, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
@@ -100,7 +100,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(
 				code.CodeLength++
 				currentStack += size
 				state.pushStack(class, s.Condition.Value)
-				stack := buildPackage.BuildExpression.build(class, code, ee, context, state)
+				stack := this.BuildExpression.build(class, code, ee, context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
@@ -124,7 +124,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(
 		//block is here
 		if c.Block != nil {
 			ss := (&StackMapState{}).initFromLast(state)
-			buildPackage.buildBlock(class, code, c.Block, context, ss)
+			this.buildBlock(class, code, c.Block, context, ss)
 			state.addTop(ss)
 		}
 		if c.Block == nil || c.Block.NotExecuteToLastStatement == false {
@@ -143,7 +143,7 @@ func (buildPackage *BuildPackage) buildSwitchStatement(
 	state.popStack(1)
 	if s.Default != nil {
 		ss := (&StackMapState{}).initFromLast(state)
-		buildPackage.buildBlock(class, code, s.Default, context, ss)
+		this.buildBlock(class, code, s.Default, context, ss)
 		state.addTop(ss)
 	}
 	return

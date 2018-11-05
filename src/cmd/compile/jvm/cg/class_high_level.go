@@ -23,22 +23,22 @@ type ClassHighLevel struct {
 	TemplateFunctions        []*AttributeTemplateFunction
 }
 
-func (classHighLevel *ClassHighLevel) InsertSourceFile(filename string) {
-	if classHighLevel.SourceFiles == nil {
-		classHighLevel.SourceFiles = make(map[string]struct{})
+func (this *ClassHighLevel) InsertSourceFile(filename string) {
+	if this.SourceFiles == nil {
+		this.SourceFiles = make(map[string]struct{})
 	}
-	classHighLevel.SourceFiles[filename] = struct{}{}
+	this.SourceFiles[filename] = struct{}{}
 }
 
-func (classHighLevel *ClassHighLevel) InsertMethodRefConst(mr ConstantInfoMethodrefHighLevel,
+func (this *ClassHighLevel) InsertMethodRefConst(mr ConstantInfoMethodrefHighLevel,
 	location []byte) {
-	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertMethodrefConst(mr))
+	binary.BigEndian.PutUint16(location, this.Class.InsertMethodrefConst(mr))
 }
 
-func (classHighLevel *ClassHighLevel) InsertMethodCall(code *AttributeCode, op byte,
+func (this *ClassHighLevel) InsertMethodCall(code *AttributeCode, op byte,
 	className, method, descriptor string) {
 	code.Codes[code.CodeLength] = op
-	classHighLevel.InsertMethodRefConst(ConstantInfoMethodrefHighLevel{
+	this.InsertMethodRefConst(ConstantInfoMethodrefHighLevel{
 		Class:      className,
 		Method:     method,
 		Descriptor: descriptor,
@@ -49,9 +49,9 @@ func (classHighLevel *ClassHighLevel) InsertMethodCall(code *AttributeCode, op b
 /*
 	new a method name,make_node_objects sure it does exists before
 */
-func (classHighLevel *ClassHighLevel) NewMethodName(prefix string) string {
-	if classHighLevel.Methods == nil ||
-		classHighLevel.Methods[prefix] == nil {
+func (this *ClassHighLevel) NewMethodName(prefix string) string {
+	if this.Methods == nil ||
+		this.Methods[prefix] == nil {
 		return prefix
 	}
 	for i := 0; i < math.MaxInt16; i++ {
@@ -61,98 +61,98 @@ func (classHighLevel *ClassHighLevel) NewMethodName(prefix string) string {
 		} else {
 			name = fmt.Sprintf("%s$%d", prefix, i)
 		}
-		if _, ok := classHighLevel.Methods[name]; ok == false {
+		if _, ok := this.Methods[name]; ok == false {
 			return name
 		}
 	}
 	panic("names over flow") // this is not happening
 }
 
-func (classHighLevel *ClassHighLevel) InsertStringConst(s string, location []byte) {
-	binary.BigEndian.PutUint16(location, classHighLevel.Class.InsertStringConst(s))
+func (this *ClassHighLevel) InsertStringConst(s string, location []byte) {
+	binary.BigEndian.PutUint16(location, this.Class.InsertStringConst(s))
 }
 
-func (classHighLevel *ClassHighLevel) AppendMethod(ms ...*MethodHighLevel) {
-	if classHighLevel.Methods == nil {
-		classHighLevel.Methods = make(map[string][]*MethodHighLevel)
+func (this *ClassHighLevel) AppendMethod(ms ...*MethodHighLevel) {
+	if this.Methods == nil {
+		this.Methods = make(map[string][]*MethodHighLevel)
 	}
 	for _, v := range ms {
 		if v.Name == "" {
 			panic("null name")
 		}
-		if _, ok := classHighLevel.Methods[v.Name]; ok {
-			classHighLevel.Methods[v.Name] = append(classHighLevel.Methods[v.Name], v)
+		if _, ok := this.Methods[v.Name]; ok {
+			this.Methods[v.Name] = append(this.Methods[v.Name], v)
 		} else {
-			classHighLevel.Methods[v.Name] = []*MethodHighLevel{v}
+			this.Methods[v.Name] = []*MethodHighLevel{v}
 		}
 	}
 }
 
-func (classHighLevel *ClassHighLevel) InsertInterfaceMethodrefConst(
+func (this *ClassHighLevel) InsertInterfaceMethodrefConst(
 	constant ConstantInfoInterfaceMethodrefHighLevel,
 	location []byte) {
 	binary.BigEndian.PutUint16(location,
-		classHighLevel.Class.InsertInterfaceMethodrefConst(constant))
+		this.Class.InsertInterfaceMethodrefConst(constant))
 }
 
-func (classHighLevel *ClassHighLevel) InsertMethodTypeConst(constant ConstantInfoMethodTypeHighLevel,
+func (this *ClassHighLevel) InsertMethodTypeConst(constant ConstantInfoMethodTypeHighLevel,
 	location []byte) {
 	binary.BigEndian.PutUint16(location,
-		classHighLevel.Class.InsertMethodTypeConst(constant))
+		this.Class.InsertMethodTypeConst(constant))
 }
 
-func (classHighLevel *ClassHighLevel) InsertFieldRefConst(constant ConstantInfoFieldrefHighLevel,
+func (this *ClassHighLevel) InsertFieldRefConst(constant ConstantInfoFieldrefHighLevel,
 	location []byte) {
 	binary.BigEndian.PutUint16(location,
-		classHighLevel.Class.InsertFieldRefConst(constant))
+		this.Class.InsertFieldRefConst(constant))
 }
 
-func (classHighLevel *ClassHighLevel) InsertClassConst(className string, location []byte) {
+func (this *ClassHighLevel) InsertClassConst(className string, location []byte) {
 	binary.BigEndian.PutUint16(location,
-		classHighLevel.Class.InsertClassConst(className))
+		this.Class.InsertClassConst(className))
 }
-func (classHighLevel *ClassHighLevel) InsertIntConst(i int32, location []byte) {
+func (this *ClassHighLevel) InsertIntConst(i int32, location []byte) {
 	binary.BigEndian.PutUint16(location,
-		classHighLevel.Class.InsertIntConst(i))
-}
-
-func (classHighLevel *ClassHighLevel) InsertLongConst(value int64, location []byte) {
-	binary.BigEndian.PutUint16(location,
-		classHighLevel.Class.InsertLongConst(value))
+		this.Class.InsertIntConst(i))
 }
 
-func (classHighLevel *ClassHighLevel) InsertFloatConst(value float32, location []byte) {
+func (this *ClassHighLevel) InsertLongConst(value int64, location []byte) {
 	binary.BigEndian.PutUint16(location,
-		classHighLevel.Class.InsertFloatConst(value))
+		this.Class.InsertLongConst(value))
 }
 
-func (classHighLevel *ClassHighLevel) InsertDoubleConst(value float64, location []byte) {
+func (this *ClassHighLevel) InsertFloatConst(value float32, location []byte) {
 	binary.BigEndian.PutUint16(location,
-		classHighLevel.Class.InsertDoubleConst(value))
+		this.Class.InsertFloatConst(value))
+}
+
+func (this *ClassHighLevel) InsertDoubleConst(value float64, location []byte) {
+	binary.BigEndian.PutUint16(location,
+		this.Class.InsertDoubleConst(value))
 }
 
 /*
 	source files
 */
-func (classHighLevel *ClassHighLevel) getSourceFile() string {
-	if len(classHighLevel.SourceFiles) == 0 {
+func (this *ClassHighLevel) getSourceFile() string {
+	if len(this.SourceFiles) == 0 {
 		return ""
 	}
-	if len(classHighLevel.SourceFiles) == 1 {
-		for k, _ := range classHighLevel.SourceFiles {
+	if len(this.SourceFiles) == 1 {
+		for k, _ := range this.SourceFiles {
 			return k
 		}
 	}
 	var s string
-	for k, _ := range classHighLevel.SourceFiles {
+	for k, _ := range this.SourceFiles {
 		s = filepath.Dir(k)
 		break
 	}
 	s += "\\{"
 	i := 0
-	for f, _ := range classHighLevel.SourceFiles {
+	for f, _ := range this.SourceFiles {
 		s += filepath.Base(f)
-		if i != len(classHighLevel.SourceFiles)-1 {
+		if i != len(this.SourceFiles)-1 {
 			s += ","
 		}
 		i++

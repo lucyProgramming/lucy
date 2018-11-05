@@ -8,7 +8,7 @@ import (
 /*
 	s += "456";
 */
-func (buildExpression *BuildExpression) buildStrPlusAssign(
+func (this *BuildExpression) buildStrPlusAssign(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -20,15 +20,15 @@ func (buildExpression *BuildExpression) buildStrPlusAssign(
 	}()
 	bin := e.Data.(*ast.ExpressionBinary)
 	maxStack, remainStack, op, leftValueKind :=
-		buildExpression.getLeftValue(class, code, bin.Left, context, state)
+		this.getLeftValue(class, code, bin.Left, context, state)
 	currentStack := remainStack
-	stack := buildExpression.build(class, code, bin.Left, context, state)
+	stack := this.build(class, code, bin.Left, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
 	state.pushStack(class, bin.Left.Value)
 	currentStack += jvmSlotSize(bin.Left.Value)
-	stack = buildExpression.build(class, code, bin.Right, context, state)
+	stack = this.build(class, code, bin.Right, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
@@ -41,7 +41,7 @@ func (buildExpression *BuildExpression) buildStrPlusAssign(
 	code.CodeLength += 3
 	if e.IsStatementExpression == false {
 		if t := currentStack +
-			buildExpression.dupStackLeaveValueBelow(code, leftValueKind, e.Value); t > maxStack {
+			this.dupStackLeaveValueBelow(code, leftValueKind, e.Value); t > maxStack {
 			maxStack = t
 		}
 	}
@@ -49,7 +49,7 @@ func (buildExpression *BuildExpression) buildStrPlusAssign(
 	copyOPs(code, op...)
 	return
 }
-func (buildExpression *BuildExpression) buildOpAssign(
+func (this *BuildExpression) buildOpAssign(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -61,17 +61,17 @@ func (buildExpression *BuildExpression) buildOpAssign(
 	}()
 	bin := e.Data.(*ast.ExpressionBinary)
 	if bin.Left.Value.Type == ast.VariableTypeString {
-		return buildExpression.buildStrPlusAssign(class, code, e, context, state)
+		return this.buildStrPlusAssign(class, code, e, context, state)
 	}
-	maxStack, remainStack, op, leftValueKind := buildExpression.getLeftValue(class, code, bin.Left, context, state)
+	maxStack, remainStack, op, leftValueKind := this.getLeftValue(class, code, bin.Left, context, state)
 	//left value must can be used as right value,
-	stack := buildExpression.build(class, code, bin.Left, context, state) // load it`s value
+	stack := this.build(class, code, bin.Left, context, state) // load it`s value
 	if t := stack + remainStack; t > maxStack {
 		maxStack = t
 	}
 	state.pushStack(class, e.Value)
 	currentStack := jvmSlotSize(e.Value) + remainStack // incase int -> long
-	stack = buildExpression.build(class, code, bin.Right, context, state)
+	stack = this.build(class, code, bin.Right, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}
@@ -258,7 +258,7 @@ func (buildExpression *BuildExpression) buildOpAssign(
 		code.CodeLength++
 	}
 	if e.IsStatementExpression == false {
-		currentStack += buildExpression.dupStackLeaveValueBelow(code, leftValueKind, bin.Left.Value)
+		currentStack += this.dupStackLeaveValueBelow(code, leftValueKind, bin.Left.Value)
 		if currentStack > maxStack {
 			maxStack = currentStack
 		}

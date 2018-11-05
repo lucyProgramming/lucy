@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildMapLiteral(
+func (this *BuildExpression) buildMapLiteral(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -32,7 +32,7 @@ func (buildExpression *BuildExpression) buildMapLiteral(
 		code.CodeLength++
 		currentStack := uint16(2)
 		state.pushStack(class, hashMapObject)
-		stack := buildExpression.build(class, code, v.Key, context, state)
+		stack := this.build(class, code, v.Key, context, state)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}
@@ -41,7 +41,7 @@ func (buildExpression *BuildExpression) buildMapLiteral(
 		}
 		state.pushStack(class, state.newObjectVariableType(javaRootClass))
 		currentStack = 3 // stack is ... mapref mapref kref
-		stack = buildExpression.build(class, code, v.Value, context, state)
+		stack = this.build(class, code, v.Value, context, state)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}

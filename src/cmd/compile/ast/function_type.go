@@ -13,10 +13,10 @@ type FunctionType struct {
 	VArgs            *Variable
 }
 
-func (ft *FunctionType) CheckTemplateNameDuplication() []error {
+func (this *FunctionType) CheckTemplateNameDuplication() []error {
 	errs := []error{}
 	m := make(map[string]*Pos)
-	for _, v := range ft.TemplateNames {
+	for _, v := range this.TemplateNames {
 		if p, ok := m[v.Name]; ok {
 			errMsg :=
 				fmt.Sprintf("%s duplicated name '%s' , first declaraed at:\n",
@@ -27,39 +27,39 @@ func (ft *FunctionType) CheckTemplateNameDuplication() []error {
 		}
 		m[v.Name] = v.Pos
 	}
-	ft.TemplateNamesMap = m
+	this.TemplateNamesMap = m
 	return errs
 }
 
-func (ft *FunctionType) haveTemplateName(name string) bool {
-	_, ok := ft.TemplateNamesMap[name]
+func (this *FunctionType) haveTemplateName(name string) bool {
+	_, ok := this.TemplateNamesMap[name]
 	return ok
 }
 
 type ParameterList []*Variable
 type ReturnList []*Variable
 
-func (ft *FunctionType) Clone() (ret *FunctionType) {
+func (this *FunctionType) Clone() (ret *FunctionType) {
 	ret = &FunctionType{}
-	ret.ParameterList = make(ParameterList, len(ft.ParameterList))
+	ret.ParameterList = make(ParameterList, len(this.ParameterList))
 	for k, _ := range ret.ParameterList {
 		p := &Variable{}
-		*p = *ft.ParameterList[k]
-		p.Type = ft.ParameterList[k].Type.Clone()
+		*p = *this.ParameterList[k]
+		p.Type = this.ParameterList[k].Type.Clone()
 		ret.ParameterList[k] = p
 	}
-	ret.ReturnList = make(ReturnList, len(ft.ReturnList))
+	ret.ReturnList = make(ReturnList, len(this.ReturnList))
 	for k, _ := range ret.ReturnList {
 		p := &Variable{}
-		*p = *ft.ReturnList[k]
-		p.Type = ft.ReturnList[k].Type.Clone()
+		*p = *this.ReturnList[k]
+		p.Type = this.ReturnList[k].Type.Clone()
 		ret.ReturnList[k] = p
 	}
 	return
 }
-func (ft *FunctionType) TypeString() string {
+func (this *FunctionType) TypeString() string {
 	s := "("
-	for k, v := range ft.ParameterList {
+	for k, v := range this.ParameterList {
 		if v.Name != "" {
 			s += v.Name + " "
 		}
@@ -67,28 +67,28 @@ func (ft *FunctionType) TypeString() string {
 		if v.DefaultValueExpression != nil {
 			s += " = " + v.DefaultValueExpression.Op
 		}
-		if k != len(ft.ParameterList)-1 {
+		if k != len(this.ParameterList)-1 {
 			s += ","
 		}
 	}
-	if ft.VArgs != nil {
-		if len(ft.ParameterList) > 0 {
+	if this.VArgs != nil {
+		if len(this.ParameterList) > 0 {
 			s += ","
 		}
-		if ft.VArgs.Name != "" {
-			s += ft.VArgs.Name + " "
+		if this.VArgs.Name != "" {
+			s += this.VArgs.Name + " "
 		}
-		s += ft.VArgs.Type.TypeString()
+		s += this.VArgs.Type.TypeString()
 	}
 	s += ")"
-	if ft.VoidReturn() == false {
+	if this.VoidReturn() == false {
 		s += "->( "
-		for k, v := range ft.ReturnList {
+		for k, v := range this.ReturnList {
 			if v.Name != "" {
 				s += v.Name + " "
 			}
 			s += v.Type.TypeString()
-			if k != len(ft.ReturnList)-1 {
+			if k != len(this.ReturnList)-1 {
 				s += ","
 			}
 		}
@@ -97,17 +97,17 @@ func (ft *FunctionType) TypeString() string {
 	return s
 }
 
-func (ft *FunctionType) searchName(name string) *Variable {
+func (this *FunctionType) searchName(name string) *Variable {
 	if name == "" {
 		return nil
 	}
-	for _, v := range ft.ParameterList {
+	for _, v := range this.ParameterList {
 		if name == v.Name {
 			return v
 		}
 	}
-	if ft.VoidReturn() == false {
-		for _, v := range ft.ReturnList {
+	if this.VoidReturn() == false {
+		for _, v := range this.ReturnList {
 			if name == v.Name {
 				return v
 			}
@@ -116,32 +116,32 @@ func (ft *FunctionType) searchName(name string) *Variable {
 	return nil
 }
 
-func (ft *FunctionType) equal(compare *FunctionType) bool {
+func (this *FunctionType) equal(compare *FunctionType) bool {
 
-	if len(ft.ParameterList) != len(compare.ParameterList) {
+	if len(this.ParameterList) != len(compare.ParameterList) {
 		return false
 	}
 
-	for k, v := range ft.ParameterList {
+	for k, v := range this.ParameterList {
 		if false == v.Type.Equal(compare.ParameterList[k].Type) {
 			return false
 		}
 	}
-	if (ft.VArgs == nil) != (compare.VArgs == nil) {
+	if (this.VArgs == nil) != (compare.VArgs == nil) {
 		return false
 	}
 
-	if ft.VArgs != nil {
-		if ft.VArgs.Type.Equal(compare.VArgs.Type) == false {
+	if this.VArgs != nil {
+		if this.VArgs.Type.Equal(compare.VArgs.Type) == false {
 			return false
 		}
 	}
-	if ft.VoidReturn() != compare.VoidReturn() {
+	if this.VoidReturn() != compare.VoidReturn() {
 		return false
 	}
 
-	if ft.VoidReturn() == false {
-		for k, v := range ft.ReturnList {
+	if this.VoidReturn() == false {
+		for k, v := range this.ReturnList {
 			if false == v.Type.Equal(compare.ReturnList[k].Type) {
 				return false
 			}
@@ -150,7 +150,7 @@ func (ft *FunctionType) equal(compare *FunctionType) bool {
 	return true
 }
 
-func (ft *FunctionType) callHave(ts []*Type) string {
+func (this *FunctionType) callHave(ts []*Type) string {
 	s := "("
 	for k, v := range ts {
 		if v == nil {
@@ -168,35 +168,35 @@ func (ft *FunctionType) callHave(ts []*Type) string {
 	return s
 }
 
-func (ft *FunctionType) VoidReturn() bool {
-	return len(ft.ReturnList) == 0 ||
-		ft.ReturnList[0].Type.Type == VariableTypeVoid
+func (this *FunctionType) VoidReturn() bool {
+	return len(this.ReturnList) == 0 ||
+		this.ReturnList[0].Type.Type == VariableTypeVoid
 }
 
-func (ft FunctionType) mkCallReturnTypes(pos *Pos) []*Type {
-	if ft.ReturnList == nil || len(ft.ReturnList) == 0 {
+func (this FunctionType) mkCallReturnTypes(pos *Pos) []*Type {
+	if this.ReturnList == nil || len(this.ReturnList) == 0 {
 		t := &Type{}
 		t.Type = VariableTypeVoid // means no return ;
 		t.Pos = pos
 		return []*Type{t}
 	}
-	ret := make([]*Type, len(ft.ReturnList))
-	for k, v := range ft.ReturnList {
+	ret := make([]*Type, len(this.ReturnList))
+	for k, v := range this.ReturnList {
 		ret[k] = v.Type.Clone()
 		ret[k].Pos = pos
 	}
 	return ret
 }
 
-func (ft FunctionType) getParameterTypes() []*Type {
-	ret := make([]*Type, len(ft.ParameterList))
-	for k, v := range ft.ParameterList {
+func (this FunctionType) getParameterTypes() []*Type {
+	ret := make([]*Type, len(this.ParameterList))
+	for k, v := range this.ParameterList {
 		ret[k] = v.Type
 	}
 	return ret
 }
 
-func (ft *FunctionType) callArgsHasNoNil(ts []*Type) bool {
+func (this *FunctionType) callArgsHasNoNil(ts []*Type) bool {
 	for _, t := range ts {
 		if t == nil {
 			return false
@@ -205,36 +205,36 @@ func (ft *FunctionType) callArgsHasNoNil(ts []*Type) bool {
 	return true
 }
 
-func (ft *FunctionType) fitArgs(
+func (this *FunctionType) fitArgs(
 	from *Pos,
 	args *CallArgs,
 	callArgsTypes []*Type,
 	f *Function) (vArgs *CallVariableArgs, err error) {
-	if ft.VArgs != nil {
+	if this.VArgs != nil {
 		vArgs = &CallVariableArgs{}
 		vArgs.NoArgs = true
-		vArgs.Type = ft.VArgs.Type
+		vArgs.Type = this.VArgs.Type
 	}
 	var haveAndWant string
-	if ft.callArgsHasNoNil(callArgsTypes) {
-		haveAndWant = fmt.Sprintf("\thave %s\n", ft.callHave(callArgsTypes))
-		haveAndWant += fmt.Sprintf("\twant %s\n", ft.wantArgs())
+	if this.callArgsHasNoNil(callArgsTypes) {
+		haveAndWant = fmt.Sprintf("\thave %s\n", this.callHave(callArgsTypes))
+		haveAndWant += fmt.Sprintf("\twant %s\n", this.wantArgs())
 	}
 	errs := []error{}
-	if len(callArgsTypes) > len(ft.ParameterList) {
-		if ft.VArgs == nil {
+	if len(callArgsTypes) > len(this.ParameterList) {
+		if this.VArgs == nil {
 			errMsg := fmt.Sprintf("%s too many paramaters to call\n", errMsgPrefix(from))
 			errMsg += haveAndWant
 			err = fmt.Errorf(errMsg)
 			return
 		}
-		v := ft.VArgs
-		for _, t := range callArgsTypes[len(ft.ParameterList):] {
+		v := this.VArgs
+		for _, t := range callArgsTypes[len(this.ParameterList):] {
 			if t == nil { // some error before
 				return
 			}
 			if t.IsVariableArgs {
-				if len(callArgsTypes[len(ft.ParameterList):]) > 1 {
+				if len(callArgsTypes[len(this.ParameterList):]) > 1 {
 					errMsg := fmt.Sprintf("%s too many argument to call\n",
 						errMsgPrefix(t.Pos))
 					errMsg += haveAndWant
@@ -258,13 +258,13 @@ func (ft *FunctionType) fitArgs(
 			}
 		}
 		vArgs.NoArgs = false
-		k := len(ft.ParameterList)
+		k := len(this.ParameterList)
 		vArgs.Length = len(callArgsTypes) - k
 		vArgs.Expressions = (*args)[k:]
 		*args = (*args)[:k]
 		vArgs.Length = len(callArgsTypes) - k
 	}
-	if len(callArgsTypes) < len(ft.ParameterList) {
+	if len(callArgsTypes) < len(this.ParameterList) {
 		if f != nil && f.HaveDefaultValue && len(callArgsTypes) >= f.DefaultValueStartAt {
 			for i := len(callArgsTypes); i < len(f.Type.ParameterList); i++ {
 				*args = append(*args, f.Type.ParameterList[i].DefaultValueExpression)
@@ -277,7 +277,7 @@ func (ft *FunctionType) fitArgs(
 		}
 	}
 
-	for k, v := range ft.ParameterList {
+	for k, v := range this.ParameterList {
 		if k < len(callArgsTypes) && callArgsTypes[k] != nil {
 			if v.Type.assignAble(&errs, callArgsTypes[k]) {
 				continue
@@ -306,21 +306,21 @@ type CallVariableArgs struct {
 	Type            *Type
 }
 
-func (ft *FunctionType) wantArgs() string {
+func (this *FunctionType) wantArgs() string {
 	s := "("
-	for k, v := range ft.ParameterList {
+	for k, v := range this.ParameterList {
 		s += v.Name + " "
 		s += v.Type.TypeString()
-		if k != len(ft.ParameterList)-1 {
+		if k != len(this.ParameterList)-1 {
 			s += ","
 		}
 	}
-	if ft.VArgs != nil {
-		if len(ft.ParameterList) > 0 {
+	if this.VArgs != nil {
+		if len(this.ParameterList) > 0 {
 			s += ","
 		}
-		s += ft.VArgs.Name + " "
-		s += ft.VArgs.Type.TypeString()
+		s += this.VArgs.Name + " "
+		s += this.VArgs.Type.TypeString()
 	}
 	s += ")"
 	return s

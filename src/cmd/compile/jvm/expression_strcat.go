@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildStrCat(
+func (this *BuildExpression) buildStrCat(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -16,16 +16,16 @@ func (buildExpression *BuildExpression) buildStrCat(
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	bin := e.Data.(*ast.ExpressionBinary)
-	maxStack = buildExpression.build(class, code, bin.Left, context, state)
-	if t := buildExpression.stackTop2String(class, code, bin.Left.Value, context, state); t > maxStack {
+	maxStack = this.build(class, code, bin.Left, context, state)
+	if t := this.stackTop2String(class, code, bin.Left.Value, context, state); t > maxStack {
 		maxStack = t
 	}
 	state.pushStack(class, state.newObjectVariableType(javaStringClass))
-	stack := buildExpression.build(class, code, bin.Right, context, state)
+	stack := this.build(class, code, bin.Right, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
-	if t := 1 + buildExpression.stackTop2String(class, code,
+	if t := 1 + this.stackTop2String(class, code,
 		bin.Right.Value, context, state); t > maxStack {
 		maxStack = t
 	}

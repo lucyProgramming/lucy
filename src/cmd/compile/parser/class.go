@@ -11,34 +11,34 @@ type ClassParser struct {
 	parser *Parser
 }
 
-func (cp *ClassParser) Next(lfIsToken bool) {
-	cp.parser.Next(lfIsToken)
+func (this *ClassParser) Next(lfIsToken bool) {
+	this.parser.Next(lfIsToken)
 }
 
-func (cp *ClassParser) consume(m map[lex.TokenKind]bool) {
-	cp.parser.consume(m)
+func (this *ClassParser) consume(m map[lex.TokenKind]bool) {
+	this.parser.consume(m)
 }
 
-func (cp *ClassParser) parseClassName() (*ast.NameWithPos, error) {
-	if cp.parser.token.Type != lex.TokenIdentifier {
+func (this *ClassParser) parseClassName() (*ast.NameWithPos, error) {
+	if this.parser.token.Type != lex.TokenIdentifier {
 		err := fmt.Errorf("%s expect identifier for class`s name,but '%s'",
-			cp.parser.errMsgPrefix(), cp.parser.token.Description)
-		cp.parser.errs = append(cp.parser.errs, err)
+			this.parser.errMsgPrefix(), this.parser.token.Description)
+		this.parser.errs = append(this.parser.errs, err)
 		return nil, err
 	}
-	name := cp.parser.token.Data.(string)
-	pos := cp.parser.mkPos()
-	cp.Next(lfNotToken)
-	if cp.parser.token.Type == lex.TokenSelection {
-		cp.Next(lfNotToken) // skip .
-		if cp.parser.token.Type != lex.TokenIdentifier {
+	name := this.parser.token.Data.(string)
+	pos := this.parser.mkPos()
+	this.Next(lfNotToken)
+	if this.parser.token.Type == lex.TokenSelection {
+		this.Next(lfNotToken) // skip .
+		if this.parser.token.Type != lex.TokenIdentifier {
 			err := fmt.Errorf("%s expect identifer for class`s name,but '%s'",
-				cp.parser.errMsgPrefix(),
-				cp.parser.token.Description)
-			cp.parser.errs = append(cp.parser.errs, err)
+				this.parser.errMsgPrefix(),
+				this.parser.token.Description)
+			this.parser.errs = append(this.parser.errs, err)
 		} else {
-			name += "." + cp.parser.token.Data.(string)
-			cp.Next(lfNotToken) // skip name identifier
+			name += "." + this.parser.token.Data.(string)
+			this.Next(lfNotToken) // skip name identifier
 		}
 	}
 	return &ast.NameWithPos{
@@ -47,10 +47,10 @@ func (cp *ClassParser) parseClassName() (*ast.NameWithPos, error) {
 	}, nil
 }
 
-func (cp *ClassParser) parseImplementsInterfaces() ([]*ast.NameWithPos, error) {
+func (this *ClassParser) parseImplementsInterfaces() ([]*ast.NameWithPos, error) {
 	ret := []*ast.NameWithPos{}
-	for cp.parser.token.Type != lex.TokenEof {
-		name, err := cp.parseClassName()
+	for this.parser.token.Type != lex.TokenEof {
+		name, err := this.parseClassName()
 		if err != nil {
 			return nil, err
 		}
@@ -58,8 +58,8 @@ func (cp *ClassParser) parseImplementsInterfaces() ([]*ast.NameWithPos, error) {
 			Name: name.Name,
 			Pos:  name.Pos,
 		})
-		if cp.parser.token.Type == lex.TokenComma {
-			cp.Next(lfNotToken)
+		if this.parser.token.Type == lex.TokenComma {
+			this.Next(lfNotToken)
 		} else {
 			break
 		}
@@ -67,8 +67,8 @@ func (cp *ClassParser) parseImplementsInterfaces() ([]*ast.NameWithPos, error) {
 	return ret, nil
 }
 
-func (cp *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err error) {
-	isInterface := cp.parser.token.Type == lex.TokenInterface
+func (this *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err error) {
+	isInterface := this.parser.token.Type == lex.TokenInterface
 	classDefinition = &ast.Class{}
 	if isInterface {
 		classDefinition.AccessFlags |= cg.AccClassInterface
@@ -77,9 +77,9 @@ func (cp *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err e
 	if isAbstract {
 		classDefinition.AccessFlags |= cg.AccClassAbstract
 	}
-	cp.Next(lfIsToken) // skip class key word
-	cp.parser.unExpectNewLineAndSkip()
-	t, err := cp.parseClassName()
+	this.Next(lfIsToken) // skip class key word
+	this.parser.unExpectNewLineAndSkip()
+	t, err := this.parseClassName()
 	if t != nil {
 		classDefinition.Name = t.Name
 	}
@@ -89,87 +89,87 @@ func (cp *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err e
 		if classDefinition.Name == "" {
 			compileAutoName()
 		}
-		cp.consume(untilLc)
+		this.consume(untilLc)
 	}
-	classDefinition.Pos = cp.parser.mkPos()
-	if cp.parser.token.Type == lex.TokenExtends { // parse father expression
-		cp.Next(lfNotToken) // skip extends
+	classDefinition.Pos = this.parser.mkPos()
+	if this.parser.token.Type == lex.TokenExtends { // parse father expression
+		this.Next(lfNotToken) // skip extends
 		var err error
-		classDefinition.SuperClassName, err = cp.parseClassName()
+		classDefinition.SuperClassName, err = this.parseClassName()
 		if err != nil {
-			cp.parser.errs = append(cp.parser.errs, err)
-			cp.consume(untilLc)
+			this.parser.errs = append(this.parser.errs, err)
+			this.consume(untilLc)
 		}
 	}
-	if cp.parser.token.Type == lex.TokenImplements {
-		cp.Next(lfNotToken) // skip key word
-		classDefinition.InterfaceNames, err = cp.parseImplementsInterfaces()
+	if this.parser.token.Type == lex.TokenImplements {
+		this.Next(lfNotToken) // skip key word
+		classDefinition.InterfaceNames, err = this.parseImplementsInterfaces()
 		if err != nil {
-			cp.parser.errs = append(cp.parser.errs, err)
-			cp.consume(untilLc)
+			this.parser.errs = append(this.parser.errs, err)
+			this.consume(untilLc)
 		}
 	}
-	cp.parser.ifTokenIsLfThenSkip()
-	if cp.parser.token.Type != lex.TokenLc {
+	this.parser.ifTokenIsLfThenSkip()
+	if this.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{' but '%s'",
-			cp.parser.errMsgPrefix(), cp.parser.token.Description)
-		cp.parser.errs = append(cp.parser.errs, err)
+			this.parser.errMsgPrefix(), this.parser.token.Description)
+		this.parser.errs = append(this.parser.errs, err)
 		return nil, err
 	}
 	validAfterAccessControlToken := func(keyWord string) error {
-		if cp.parser.token.Type == lex.TokenIdentifier ||
-			cp.parser.token.Type == lex.TokenFn ||
-			cp.parser.token.Type == lex.TokenStatic ||
-			cp.parser.token.Type == lex.TokenSynchronized ||
-			cp.parser.token.Type == lex.TokenFinal ||
-			cp.parser.token.Type == lex.TokenAbstract {
+		if this.parser.token.Type == lex.TokenIdentifier ||
+			this.parser.token.Type == lex.TokenFn ||
+			this.parser.token.Type == lex.TokenStatic ||
+			this.parser.token.Type == lex.TokenSynchronized ||
+			this.parser.token.Type == lex.TokenFinal ||
+			this.parser.token.Type == lex.TokenAbstract {
 			return nil
 		}
 		return fmt.Errorf("%s not a valid token after '%s'",
-			cp.parser.errMsgPrefix(), keyWord)
+			this.parser.errMsgPrefix(), keyWord)
 	}
 	validAfterVolatile := func(token *lex.Token) error {
 		if token.Type == lex.TokenIdentifier {
 			return nil
 		}
 		return fmt.Errorf("%s not a valid token after 'volatile'",
-			cp.parser.errMsgPrefix())
+			this.parser.errMsgPrefix())
 	}
 	validAfterAbstract := func() error {
-		if cp.parser.token.Type == lex.TokenFn {
+		if this.parser.token.Type == lex.TokenFn {
 			return nil
 		}
 		return fmt.Errorf("%s not a valid token after 'abstract'",
-			cp.parser.errMsgPrefix())
+			this.parser.errMsgPrefix())
 	}
 	validAfterSynchronized := func() error {
-		if cp.parser.token.Type == lex.TokenFn ||
-			cp.parser.token.Type == lex.TokenFinal {
+		if this.parser.token.Type == lex.TokenFn ||
+			this.parser.token.Type == lex.TokenFinal {
 			return nil
 		}
 		return fmt.Errorf("%s not a valid token after 'synchronized'",
-			cp.parser.errMsgPrefix())
+			this.parser.errMsgPrefix())
 	}
 	validAfterStatic := func() error {
-		if cp.parser.token.Type == lex.TokenIdentifier ||
-			cp.parser.token.Type == lex.TokenFn ||
-			cp.parser.token.Type == lex.TokenFinal {
+		if this.parser.token.Type == lex.TokenIdentifier ||
+			this.parser.token.Type == lex.TokenFn ||
+			this.parser.token.Type == lex.TokenFinal {
 			return nil
 		}
 		return fmt.Errorf("%s not a valid token after 'static'",
-			cp.parser.errMsgPrefix())
+			this.parser.errMsgPrefix())
 	}
 	validAfterFinal := func() error {
-		if cp.parser.token.Type == lex.TokenFn ||
-			cp.parser.token.Type == lex.TokenSynchronized {
+		if this.parser.token.Type == lex.TokenFn ||
+			this.parser.token.Type == lex.TokenSynchronized {
 			return nil
 		}
 		return fmt.Errorf("%s not a valid token after 'final'",
-			cp.parser.errMsgPrefix())
+			this.parser.errMsgPrefix())
 	}
-	cp.Next(lfNotToken) // skip {
+	this.Next(lfNotToken) // skip {
 	comment := &CommentParser{
-		parser: cp.parser,
+		parser: this.parser,
 	}
 	var (
 		isStatic           bool
@@ -186,110 +186,110 @@ func (cp *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err e
 		isAbstract = false
 		accessControlToken = nil
 	}
-	for cp.parser.token.Type != lex.TokenEof {
-		if len(cp.parser.errs) > cp.parser.nErrors2Stop {
+	for this.parser.token.Type != lex.TokenEof {
+		if len(this.parser.errs) > this.parser.nErrors2Stop {
 			break
 		}
-		switch cp.parser.token.Type {
+		switch this.parser.token.Type {
 		case lex.TokenComment, lex.TokenMultiLineComment:
 			comment.read()
 		case lex.TokenRc:
-			cp.Next(lfNotToken)
+			this.Next(lfNotToken)
 			return
 		case lex.TokenSemicolon, lex.TokenLf:
-			cp.Next(lfNotToken)
+			this.Next(lfNotToken)
 			continue
 		case lex.TokenStatic:
 			isStatic = true
-			cp.Next(lfIsToken)
-			cp.parser.unExpectNewLineAndSkip()
-			if cp.parser.token.Type == lex.TokenLc {
-				cp.Next(lfNotToken) // skip {
+			this.Next(lfIsToken)
+			this.parser.unExpectNewLineAndSkip()
+			if this.parser.token.Type == lex.TokenLc {
+				this.Next(lfNotToken) // skip {
 				block := &ast.Block{}
-				cp.parser.BlockParser.parseStatementList(block, false)
-				if cp.parser.token.Type != lex.TokenRc {
-					cp.parser.errs = append(cp.parser.errs,
-						fmt.Errorf("%s expect '}' , but '%s'", cp.parser.errMsgPrefix(),
-							cp.parser.token.Description))
+				this.parser.BlockParser.parseStatementList(block, false)
+				if this.parser.token.Type != lex.TokenRc {
+					this.parser.errs = append(this.parser.errs,
+						fmt.Errorf("%s expect '}' , but '%s'", this.parser.errMsgPrefix(),
+							this.parser.token.Description))
 				} else {
-					cp.Next(lfNotToken) // skip }
+					this.Next(lfNotToken) // skip }
 					classDefinition.StaticBlocks = append(classDefinition.StaticBlocks, block)
 				}
 				continue
 			}
 			err := validAfterStatic()
 			if err != nil {
-				cp.parser.errs = append(cp.parser.errs, err)
+				this.parser.errs = append(this.parser.errs, err)
 				isStatic = false
 			}
 		//access private
 		case lex.TokenPublic, lex.TokenProtected, lex.TokenPrivate:
-			accessControlToken = cp.parser.token
-			cp.Next(lfIsToken)
-			cp.parser.unExpectNewLineAndSkip()
+			accessControlToken = this.parser.token
+			this.Next(lfIsToken)
+			this.parser.unExpectNewLineAndSkip()
 			err = validAfterAccessControlToken(accessControlToken.Description)
 			if err != nil {
-				cp.parser.errs = append(cp.parser.errs, err)
+				this.parser.errs = append(this.parser.errs, err)
 				accessControlToken = nil // set to nil
 			}
 		case lex.TokenAbstract:
-			cp.Next(lfIsToken)
-			cp.parser.unExpectNewLineAndSkip()
+			this.Next(lfIsToken)
+			this.parser.unExpectNewLineAndSkip()
 			err = validAfterAbstract()
 			if err != nil {
-				cp.parser.errs = append(cp.parser.errs, err)
+				this.parser.errs = append(this.parser.errs, err)
 				accessControlToken = nil // set to nil
 			} else {
 				isAbstract = true
 			}
 		case lex.TokenVolatile:
 			isVolatile = true
-			cp.Next(lfIsToken)
-			if err := validAfterVolatile(cp.parser.token); err != nil {
-				cp.parser.errs = append(cp.parser.errs, err)
+			this.Next(lfIsToken)
+			if err := validAfterVolatile(this.parser.token); err != nil {
+				this.parser.errs = append(this.parser.errs, err)
 				isVolatile = false
 			}
 		case lex.TokenFinal:
 			isFinal = true
-			cp.Next(lfIsToken)
+			this.Next(lfIsToken)
 			if err := validAfterFinal(); err != nil {
-				cp.parser.errs = append(cp.parser.errs, err)
+				this.parser.errs = append(this.parser.errs, err)
 				isFinal = false
 			}
 		case lex.TokenIdentifier:
-			err = cp.parseField(classDefinition, &cp.parser.errs, isStatic, isVolatile, accessControlToken, comment)
+			err = this.parseField(classDefinition, &this.parser.errs, isStatic, isVolatile, accessControlToken, comment)
 			if err != nil {
-				cp.consume(untilSemicolonOrLf)
-				cp.Next(lfNotToken)
+				this.consume(untilSemicolonOrLf)
+				this.Next(lfNotToken)
 			}
 			resetProperty()
 		case lex.TokenConst: // const is for local use
-			cp.Next(lfIsToken)
-			err := cp.parseConst(classDefinition, comment)
+			this.Next(lfIsToken)
+			err := this.parseConst(classDefinition, comment)
 			if err != nil {
-				cp.consume(untilSemicolonOrLf)
-				cp.Next(lfNotToken)
+				this.consume(untilSemicolonOrLf)
+				this.Next(lfNotToken)
 				continue
 			}
 		case lex.TokenSynchronized:
 			isSynchronized = true
-			cp.Next(lfIsToken)
+			this.Next(lfIsToken)
 			if err := validAfterSynchronized(); err != nil {
-				cp.parser.errs = append(cp.parser.errs, err)
+				this.parser.errs = append(this.parser.errs, err)
 				isSynchronized = false
 			}
 		case lex.TokenFn:
 			if isAbstract &&
 				(classDefinition.IsAbstract() == false && classDefinition.IsInterface() == false) {
-				cp.parser.errs = append(cp.parser.errs,
+				this.parser.errs = append(this.parser.errs,
 					fmt.Errorf("%s cannot  abstact method is non-abstract class",
-						cp.parser.errMsgPrefix()))
+						this.parser.errMsgPrefix()))
 			}
 			isAbstract := isAbstract || isInterface
-			f, err := cp.parser.FunctionParser.parse(true, isAbstract)
+			f, err := this.parser.FunctionParser.parse(true, isAbstract)
 			if err != nil {
 				resetProperty()
-				cp.Next(lfNotToken)
+				this.Next(lfNotToken)
 				continue
 			}
 			f.Comment = comment.Comment
@@ -329,40 +329,40 @@ func (cp *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err e
 			classDefinition.Methods[f.Name] = append(classDefinition.Methods[f.Name], m)
 			resetProperty()
 		case lex.TokenImport:
-			pos := cp.parser.mkPos()
-			cp.parser.parseImports()
-			cp.parser.errs = append(cp.parser.errs,
+			pos := this.parser.mkPos()
+			this.parser.parseImports()
+			this.parser.errs = append(this.parser.errs,
 				fmt.Errorf("%s cannot have import at this scope",
-					cp.parser.errMsgPrefix(pos)))
+					this.parser.errMsgPrefix(pos)))
 		default:
-			cp.parser.errs = append(cp.parser.errs,
+			this.parser.errs = append(this.parser.errs,
 				fmt.Errorf("%s unexpected '%s'",
-					cp.parser.errMsgPrefix(), cp.parser.token.Description))
-			cp.Next(lfNotToken)
+					this.parser.errMsgPrefix(), this.parser.token.Description))
+			this.Next(lfNotToken)
 		}
 	}
 	return
 }
 
-func (cp *ClassParser) parseConst(classDefinition *ast.Class, comment *CommentParser) error {
-	cs, err := cp.parser.parseConst()
+func (this *ClassParser) parseConst(classDefinition *ast.Class, comment *CommentParser) error {
+	cs, err := this.parser.parseConst()
 	if err != nil {
 		return err
 	}
 	constComment := comment.Comment
-	if cp.parser.token.Type == lex.TokenComment {
-		cp.Next(lfIsToken)
+	if this.parser.token.Type == lex.TokenComment {
+		this.Next(lfIsToken)
 	} else {
-		cp.parser.validStatementEnding()
+		this.parser.validStatementEnding()
 	}
 	if classDefinition.Block.Constants == nil {
 		classDefinition.Block.Constants = make(map[string]*ast.Constant)
 	}
 	for _, v := range cs {
 		if _, ok := classDefinition.Block.Constants[v.Name]; ok {
-			cp.parser.errs = append(cp.parser.errs,
+			this.parser.errs = append(this.parser.errs,
 				fmt.Errorf("%s const %s alreay declared",
-					cp.parser.errMsgPrefix(), v.Name))
+					this.parser.errMsgPrefix(), v.Name))
 			continue
 		}
 		classDefinition.Block.Constants[v.Name] = v
@@ -371,43 +371,43 @@ func (cp *ClassParser) parseConst(classDefinition *ast.Class, comment *CommentPa
 	return nil
 }
 
-func (cp *ClassParser) parseField(
+func (this *ClassParser) parseField(
 	classDefinition *ast.Class,
 	errs *[]error,
 	isStatic bool,
 	isVolatile bool,
 	accessControlToken *lex.Token,
 	comment *CommentParser) error {
-	names, err := cp.parser.parseNameList()
+	names, err := this.parser.parseNameList()
 	if err != nil {
 		return err
 	}
-	t, err := cp.parser.parseType()
+	t, err := this.parser.parseType()
 	if err != nil {
 		return err
 	}
 	var initValues []*ast.Expression
-	if cp.parser.token.Type == lex.TokenAssign {
-		cp.parser.Next(lfNotToken) // skip = or :=
-		initValues, err = cp.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
+	if this.parser.token.Type == lex.TokenAssign {
+		this.parser.Next(lfNotToken) // skip = or :=
+		initValues, err = this.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
 		if err != nil {
-			cp.consume(untilSemicolonOrLf)
+			this.consume(untilSemicolonOrLf)
 		}
 	}
 	fieldComment := comment.Comment
-	if cp.parser.token.Type == lex.TokenComment {
-		cp.Next(lfIsToken)
+	if this.parser.token.Type == lex.TokenComment {
+		this.Next(lfIsToken)
 	} else {
-		cp.parser.validStatementEnding()
+		this.parser.validStatementEnding()
 	}
 	if classDefinition.Fields == nil {
 		classDefinition.Fields = make(map[string]*ast.ClassField)
 	}
 	for k, v := range names {
 		if _, ok := classDefinition.Fields[v.Name]; ok {
-			cp.parser.errs = append(cp.parser.errs,
+			this.parser.errs = append(this.parser.errs,
 				fmt.Errorf("%s field %s is alreay declared",
-					cp.parser.errMsgPrefix(), v.Name))
+					this.parser.errMsgPrefix(), v.Name))
 			continue
 		}
 		f := &ast.ClassField{}

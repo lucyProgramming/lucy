@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildIndex(
+func (this *BuildExpression) buildIndex(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -13,18 +13,18 @@ func (buildExpression *BuildExpression) buildIndex(
 	state *StackMapState) (maxStack uint16) {
 	index := e.Data.(*ast.ExpressionIndex)
 	if index.Expression.Value.Type == ast.VariableTypeMap {
-		return buildExpression.buildMapIndex(class, code, e, context, state)
+		return this.buildMapIndex(class, code, e, context, state)
 	}
 	if index.Expression.Value.Type == ast.VariableTypeString {
-		return buildExpression.buildStringIndex(class, code, e, context, state)
+		return this.buildStringIndex(class, code, e, context, state)
 	}
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-	maxStack = buildExpression.build(class, code, index.Expression, context, state)
+	maxStack = this.build(class, code, index.Expression, context, state)
 	state.pushStack(class, index.Expression.Value)
-	stack := buildExpression.build(class, code, index.Index, context, state)
+	stack := this.build(class, code, index.Index, context, state)
 	if t := stack + 1; t > maxStack {
 		maxStack = t
 	}
@@ -68,7 +68,7 @@ func (buildExpression *BuildExpression) buildIndex(
 	return
 }
 
-func (buildExpression *BuildExpression) buildStringIndex(
+func (this *BuildExpression) buildStringIndex(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -79,7 +79,7 @@ func (buildExpression *BuildExpression) buildStringIndex(
 		state.popStack(len(state.Stacks) - length)
 	}()
 	index := e.Data.(*ast.ExpressionIndex)
-	maxStack = buildExpression.build(class, code, index.Expression, context, state)
+	maxStack = this.build(class, code, index.Expression, context, state)
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      javaStringClass,
@@ -88,7 +88,7 @@ func (buildExpression *BuildExpression) buildStringIndex(
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	state.pushStack(class, state.newObjectVariableType("[B"))
-	stack := buildExpression.build(class, code, index.Index, context, state)
+	stack := this.build(class, code, index.Index, context, state)
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
@@ -96,7 +96,7 @@ func (buildExpression *BuildExpression) buildStringIndex(
 	code.CodeLength++
 	return
 }
-func (buildExpression *BuildExpression) buildMapIndex(
+func (this *BuildExpression) buildMapIndex(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -107,11 +107,11 @@ func (buildExpression *BuildExpression) buildMapIndex(
 		state.popStack(len(state.Stacks) - length)
 	}()
 	index := e.Data.(*ast.ExpressionIndex)
-	maxStack = buildExpression.build(class, code, index.Expression, context, state)
+	maxStack = this.build(class, code, index.Expression, context, state)
 	currentStack := uint16(1)
 	//build index
 	state.pushStack(class, index.Expression.Value)
-	stack := buildExpression.build(class, code, index.Index, context, state)
+	stack := this.build(class, code, index.Index, context, state)
 	if t := currentStack + stack; t > maxStack {
 		maxStack = t
 	}

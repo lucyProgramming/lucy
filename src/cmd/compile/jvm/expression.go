@@ -9,7 +9,7 @@ type BuildExpression struct {
 	BuildPackage *BuildPackage
 }
 
-func (buildExpression *BuildExpression) build(
+func (this *BuildExpression) build(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -93,7 +93,7 @@ func (buildExpression *BuildExpression) build(
 	case ast.ExpressionTypeLogicalOr:
 		fallthrough
 	case ast.ExpressionTypeLogicalAnd:
-		maxStack = buildExpression.buildLogical(class, code, e, context, state)
+		maxStack = this.buildLogical(class, code, e, context, state)
 	case ast.ExpressionTypeOr:
 		fallthrough
 	case ast.ExpressionTypeAnd:
@@ -113,12 +113,12 @@ func (buildExpression *BuildExpression) build(
 	case ast.ExpressionTypeDiv:
 		fallthrough
 	case ast.ExpressionTypeMod:
-		maxStack = buildExpression.buildArithmetic(class, code, e, context, state)
+		maxStack = this.buildArithmetic(class, code, e, context, state)
 	//
 	case ast.ExpressionTypeAssign:
-		maxStack = buildExpression.buildAssign(class, code, e, context, state)
+		maxStack = this.buildAssign(class, code, e, context, state)
 	case ast.ExpressionTypeVarAssign:
-		maxStack = buildExpression.buildVarAssign(class, code, e, context, state)
+		maxStack = this.buildVarAssign(class, code, e, context, state)
 	//
 	case ast.ExpressionTypePlusAssign:
 		fallthrough
@@ -139,7 +139,7 @@ func (buildExpression *BuildExpression) build(
 	case ast.ExpressionTypeRshAssign:
 		fallthrough
 	case ast.ExpressionTypeXorAssign:
-		maxStack = buildExpression.buildOpAssign(class, code, e, context, state)
+		maxStack = this.buildOpAssign(class, code, e, context, state)
 	//
 	case ast.ExpressionTypeEq:
 		fallthrough
@@ -152,17 +152,17 @@ func (buildExpression *BuildExpression) build(
 	case ast.ExpressionTypeLe:
 		fallthrough
 	case ast.ExpressionTypeLt:
-		maxStack = buildExpression.buildRelations(class, code, e, context, state)
+		maxStack = this.buildRelations(class, code, e, context, state)
 	//
 	case ast.ExpressionTypeIndex:
-		maxStack = buildExpression.buildIndex(class, code, e, context, state)
+		maxStack = this.buildIndex(class, code, e, context, state)
 	case ast.ExpressionTypeSelection:
-		maxStack = buildExpression.buildSelection(class, code, e, context, state)
+		maxStack = this.buildSelection(class, code, e, context, state)
 	//
 	case ast.ExpressionTypeMethodCall:
-		maxStack = buildExpression.buildMethodCall(class, code, e, context, state)
+		maxStack = this.buildMethodCall(class, code, e, context, state)
 	case ast.ExpressionTypeFunctionCall:
-		maxStack = buildExpression.buildFunctionCall(class, code, e, context, state)
+		maxStack = this.buildFunctionCall(class, code, e, context, state)
 	//
 	case ast.ExpressionTypeIncrement:
 		fallthrough
@@ -171,55 +171,55 @@ func (buildExpression *BuildExpression) build(
 	case ast.ExpressionTypePrefixIncrement:
 		fallthrough
 	case ast.ExpressionTypePrefixDecrement:
-		maxStack = buildExpression.buildSelfIncrement(class, code, e, context, state)
+		maxStack = this.buildSelfIncrement(class, code, e, context, state)
 	//
 	case ast.ExpressionTypeBitwiseNot:
 		fallthrough
 	case ast.ExpressionTypeNegative:
 		fallthrough
 	case ast.ExpressionTypeNot:
-		maxStack = buildExpression.buildUnary(class, code, e, context, state)
+		maxStack = this.buildUnary(class, code, e, context, state)
 	//
 	case ast.ExpressionTypeIdentifier:
-		maxStack = buildExpression.buildIdentifier(class, code, e, context)
+		maxStack = this.buildIdentifier(class, code, e, context)
 	case ast.ExpressionTypeNew:
-		maxStack = buildExpression.buildNew(class, code, e, context, state)
+		maxStack = this.buildNew(class, code, e, context, state)
 	case ast.ExpressionTypeFunctionLiteral:
-		maxStack = buildExpression.BuildPackage.buildFunctionExpression(class, code, e, context, state)
+		maxStack = this.BuildPackage.buildFunctionExpression(class, code, e, context, state)
 	case ast.ExpressionTypeCheckCast: // []byte(str)
-		maxStack = buildExpression.buildTypeConversion(class, code, e, context, state)
+		maxStack = this.buildTypeConversion(class, code, e, context, state)
 	case ast.ExpressionTypeConst:
 		/*
 		 analyse at ast stage
 		*/
 	case ast.ExpressionTypeSlice:
-		maxStack = buildExpression.buildSlice(class, code, e, context, state)
+		maxStack = this.buildSlice(class, code, e, context, state)
 	case ast.ExpressionTypeArray:
-		maxStack = buildExpression.buildArray(class, code, e, context, state)
+		maxStack = this.buildArray(class, code, e, context, state)
 	case ast.ExpressionTypeMap:
-		maxStack = buildExpression.buildMapLiteral(class, code, e, context, state)
+		maxStack = this.buildMapLiteral(class, code, e, context, state)
 	case ast.ExpressionTypeVar:
-		maxStack = buildExpression.buildVar(class, code, e, context, state)
+		maxStack = this.buildVar(class, code, e, context, state)
 	case ast.ExpressionTypeTypeAssert:
-		maxStack = buildExpression.buildTypeAssert(class, code, e, context, state)
+		maxStack = this.buildTypeAssert(class, code, e, context, state)
 	case ast.ExpressionTypeQuestion:
-		maxStack = buildExpression.buildQuestion(class, code, e, context, state)
+		maxStack = this.buildQuestion(class, code, e, context, state)
 	case ast.ExpressionTypeVArgs:
-		maxStack = buildExpression.build(class, code, e.Data.(*ast.Expression), context, state)
+		maxStack = this.build(class, code, e.Data.(*ast.Expression), context, state)
 	default:
 		panic("missing handle:" + e.Op)
 	}
 	return
 }
 
-func (buildExpression *BuildExpression) jvmSize(e *ast.Expression) (size uint16) {
+func (this *BuildExpression) jvmSize(e *ast.Expression) (size uint16) {
 	if len(e.MultiValues) > 1 {
 		return 1
 	}
 	return jvmSlotSize(e.Value)
 }
 
-func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (this *BuildExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	es []*ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
 	length := 0
 	for _, e := range es {
@@ -243,7 +243,7 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 	for _, v := range es {
 		currentStack := uint16(1)
 		if v.HaveMultiValue() {
-			stack := buildExpression.build(class, code, v, context, state)
+			stack := this.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
@@ -272,7 +272,7 @@ func (buildExpression *BuildExpression) buildExpressions(class *cg.ClassHighLeve
 		code.CodeLength++
 		state.pushStack(class, arrayListObject)
 		currentStack++
-		stack := buildExpression.build(class, code, v, context, state)
+		stack := this.build(class, code, v, context, state)
 		if t := currentStack + stack; t > maxStack {
 			maxStack = t
 		}

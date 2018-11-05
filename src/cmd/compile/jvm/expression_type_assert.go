@@ -6,7 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildTypeAssert(
+func (this *BuildExpression) buildTypeAssert(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -14,7 +14,7 @@ func (buildExpression *BuildExpression) buildTypeAssert(
 	state *StackMapState) (maxStack uint16) {
 	assert := e.Data.(*ast.ExpressionTypeAssert)
 	if assert.MultiValueContext {
-		maxStack = buildExpression.build(class, code, assert.Expression, context, state)
+		maxStack = this.build(class, code, assert.Expression, context, state)
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_instanceof
@@ -75,7 +75,7 @@ func (buildExpression *BuildExpression) buildTypeAssert(
 		code.Codes[code.CodeLength] = cg.OP_aastore
 		code.CodeLength++
 	} else {
-		maxStack = buildExpression.build(class, code, assert.Expression, context, state)
+		maxStack = this.build(class, code, assert.Expression, context, state)
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_instanceof

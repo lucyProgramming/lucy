@@ -6,14 +6,14 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildExpression *BuildExpression) buildMethodCallJavaOnArray(
+func (this *BuildExpression) buildMethodCallJavaOnArray(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
 	context *Context,
 	state *StackMapState) (maxStack uint16) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	maxStack = buildExpression.build(class, code, call.Expression, context, state)
+	maxStack = this.build(class, code, call.Expression, context, state)
 	switch call.Name {
 	case common.ArrayMethodSize:
 		code.Codes[code.CodeLength] = cg.OP_arraylength
@@ -26,7 +26,7 @@ func (buildExpression *BuildExpression) buildMethodCallJavaOnArray(
 	return
 }
 
-func (buildExpression *BuildExpression) buildMethodCallOnArray(
+func (this *BuildExpression) buildMethodCallOnArray(
 	class *cg.ClassHighLevel,
 	code *cg.AttributeCode,
 	e *ast.Expression,
@@ -37,7 +37,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnArray(
 		state.popStack(len(state.Stacks) - length) // ref type
 	}()
 	call := e.Data.(*ast.ExpressionMethodCall)
-	maxStack = buildExpression.build(class, code, call.Expression, context, state)
+	maxStack = this.build(class, code, call.Expression, context, state)
 	state.pushStack(class, call.Expression.Value)
 	switch call.Name {
 	case common.ArrayMethodSize,
@@ -66,7 +66,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnArray(
 				state.pushStack(class, call.Expression.Value)
 				currentStack++
 			}
-			stack := buildExpression.build(class, code, v, context, state)
+			stack := this.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
 			}
@@ -91,7 +91,7 @@ func (buildExpression *BuildExpression) buildMethodCallOnArray(
 				state.pushStack(class, call.Expression.Value)
 				currentStack++
 			}
-			stack := buildExpression.build(class, code, v, context, state)
+			stack := this.build(class, code, v, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
 			}

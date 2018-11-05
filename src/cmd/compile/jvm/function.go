@@ -5,7 +5,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (buildPackage *BuildPackage) mkParametersOffset(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (this *BuildPackage) mkParametersOffset(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	f *ast.Function, state *StackMapState) {
 	for _, v := range f.Type.ParameterList { // insert into locals
 		v.LocalValOffset = code.MaxLocals
@@ -19,7 +19,7 @@ func (buildPackage *BuildPackage) mkParametersOffset(class *cg.ClassHighLevel, c
 	}
 }
 
-func (buildPackage *BuildPackage) mkCapturedParameters(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (this *BuildPackage) mkCapturedParameters(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	f *ast.Function, state *StackMapState) (maxStack uint16) {
 	for _, v := range f.Type.ParameterList {
 		if v.BeenCapturedAsLeftValue == 0 { // not capture
@@ -35,7 +35,7 @@ func (buildPackage *BuildPackage) mkCapturedParameters(class *cg.ClassHighLevel,
 			maxStack = t
 		}
 		copyOPs(code, loadLocalVariableOps(v.Type.Type, v.LocalValOffset)...)
-		buildPackage.storeLocalVar(class, code, v)
+		this.storeLocalVar(class, code, v)
 		v.LocalValOffset = code.MaxLocals //rewrite offset
 		code.MaxLocals++
 		copyOPs(code, storeLocalVariableOps(v.Type.Type, v.LocalValOffset)...)
@@ -44,10 +44,10 @@ func (buildPackage *BuildPackage) mkCapturedParameters(class *cg.ClassHighLevel,
 	return
 }
 
-func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (this *BuildPackage) buildFunctionParameterAndReturnList(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
-	buildPackage.mkParametersOffset(class, code, f, state)
-	maxStack = buildPackage.mkCapturedParameters(class, code, f, state)
+	this.mkParametersOffset(class, code, f, state)
+	maxStack = this.mkCapturedParameters(class, code, f, state)
 	if f.Type.VoidReturn() == false {
 		for _, v := range f.Type.ReturnList {
 			currentStack := uint16(0)
@@ -72,11 +72,11 @@ func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.
 				v.LocalValOffset = code.MaxLocals
 				code.MaxLocals += jvmSlotSize(v.Type)
 			}
-			stack := buildPackage.BuildExpression.build(class, code, v.DefaultValueExpression, context, state)
+			stack := this.BuildExpression.build(class, code, v.DefaultValueExpression, context, state)
 			if t := currentStack + stack; t > maxStack {
 				maxStack = t
 			}
-			buildPackage.storeLocalVar(class, code, v)
+			this.storeLocalVar(class, code, v)
 			if v.BeenCapturedAsLeftValue > 0 {
 				state.popStack(1)
 				state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
@@ -88,7 +88,7 @@ func (buildPackage *BuildPackage) buildFunctionParameterAndReturnList(class *cg.
 	return
 }
 
-func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class, method *cg.MethodHighLevel,
+func (this *BuildPackage) buildFunction(class *cg.ClassHighLevel, astClass *ast.Class, method *cg.MethodHighLevel,
 	f *ast.Function) {
 	context := &Context{}
 	context.lastStackMapOffset = -1
@@ -106,15 +106,15 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 			t := &cg.StackMapVerificationTypeInfo{}
 			t.Verify = &cg.StackMapUninitializedThisVariableInfo{}
 			state.Locals = append(state.Locals, t)
-			buildPackage.mkParametersOffset(class, method.Code, f, state)
-			stack := buildPackage.BuildExpression.build(class, method.Code, f.CallFatherConstructionExpression,
+			this.mkParametersOffset(class, method.Code, f, state)
+			stack := this.BuildExpression.build(class, method.Code, f.CallFatherConstructionExpression,
 				context, state)
 			if stack > method.Code.MaxStack {
 				method.Code.MaxStack = stack
 			}
 			state.Locals[0] = state.newStackMapVerificationTypeInfo(class, state.newObjectVariableType(class.Name))
-			buildPackage.mkFieldDefaultValue(class, method.Code, astClass, context, state)
-			buildPackage.mkCapturedParameters(class, method.Code, f, state)
+			this.mkFieldDefaultValue(class, method.Code, astClass, context, state)
+			this.mkCapturedParameters(class, method.Code, f, state)
 		} else {
 			method.Code.MaxLocals = 1
 			state.appendLocals(class, state.newObjectVariableType(class.Name))
@@ -160,7 +160,7 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 		method.AttributeDefaultParameters = DefaultValueParser.Encode(class, f)
 	}
 	if method.IsConstruction == false {
-		if t := buildPackage.buildFunctionParameterAndReturnList(class, method.Code, f, context, state); t > method.Code.MaxStack {
+		if t := this.buildFunctionParameterAndReturnList(class, method.Code, f, context, state); t > method.Code.MaxStack {
 			method.Code.MaxStack = t
 		}
 	}
@@ -184,7 +184,7 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 		}
 	}
 	if len(f.Type.ReturnList) > 1 {
-		if t := buildPackage.buildFunctionMultiReturnOffset(class, method.Code,
+		if t := this.buildFunctionMultiReturnOffset(class, method.Code,
 			f, context, state); t > method.Code.MaxStack {
 			method.Code.MaxStack = t
 		}
@@ -197,10 +197,10 @@ func (buildPackage *BuildPackage) buildFunction(class *cg.ClassHighLevel, astCla
 		copyOPs(method.Code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)...)
 		state.appendLocals(class, state.newObjectVariableType(ast.JavaThrowableClass))
 	}
-	buildPackage.buildBlock(class, method.Code, &f.Block, context, state)
+	this.buildBlock(class, method.Code, &f.Block, context, state)
 	return
 }
-func (buildPackage *BuildPackage) buildFunctionMultiReturnOffset(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (this *BuildPackage) buildFunctionMultiReturnOffset(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	f *ast.Function, context *Context, state *StackMapState) (maxStack uint16) {
 	code.Codes[code.CodeLength] = cg.OP_aconst_null
 	code.CodeLength++
@@ -213,7 +213,7 @@ func (buildPackage *BuildPackage) buildFunctionMultiReturnOffset(class *cg.Class
 	return
 }
 
-func (buildPackage *BuildPackage) mkFieldDefaultValue(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (this *BuildPackage) mkFieldDefaultValue(class *cg.ClassHighLevel, code *cg.AttributeCode,
 	astClass *ast.Class, context *Context, state *StackMapState) {
 	for _, v := range astClass.Fields {
 		if v.IsStatic() || v.DefaultValueExpression == nil {
@@ -222,7 +222,7 @@ func (buildPackage *BuildPackage) mkFieldDefaultValue(class *cg.ClassHighLevel, 
 		code.Codes[code.CodeLength] = cg.OP_aload_0
 		code.CodeLength++
 		state.pushStack(class, state.newObjectVariableType(class.Name))
-		stack := buildPackage.BuildExpression.build(class, code, v.DefaultValueExpression, context, state)
+		stack := this.BuildExpression.build(class, code, v.DefaultValueExpression, context, state)
 		if t := 1 + stack; t > code.MaxStack {
 			code.MaxStack = t
 		}

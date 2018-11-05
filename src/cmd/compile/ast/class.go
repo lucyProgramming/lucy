@@ -37,51 +37,51 @@ type Class struct {
 	closure                           Closure
 }
 
-func (c *Class) HaveStaticsCodes() bool {
-	return len(c.StaticBlocks) > 0
+func (this *Class) HaveStaticsCodes() bool {
+	return len(this.StaticBlocks) > 0
 }
 
-func (c *Class) IsInterface() bool {
-	return c.AccessFlags&cg.AccClassInterface != 0
+func (this *Class) IsInterface() bool {
+	return this.AccessFlags&cg.AccClassInterface != 0
 }
-func (c *Class) IsAbstract() bool {
-	return c.AccessFlags&cg.AccClassAbstract != 0
+func (this *Class) IsAbstract() bool {
+	return this.AccessFlags&cg.AccClassAbstract != 0
 }
-func (c *Class) IsFinal() bool {
-	return c.AccessFlags&cg.AccClassFinal != 0
+func (this *Class) IsFinal() bool {
+	return this.AccessFlags&cg.AccClassFinal != 0
 }
-func (c *Class) IsPublic() bool {
-	return c.AccessFlags&cg.AccClassPublic != 0
+func (this *Class) IsPublic() bool {
+	return this.AccessFlags&cg.AccClassPublic != 0
 }
 
-func (c *Class) loadSelf(pos *Pos) error {
-	if c.NotImportedYet == false { // current compile class
+func (this *Class) loadSelf(pos *Pos) error {
+	if this.NotImportedYet == false { // current compile class
 		return nil
 	}
-	c.NotImportedYet = false
-	load, err := PackageBeenCompile.loadClass(c.Name)
+	this.NotImportedYet = false
+	load, err := PackageBeenCompile.loadClass(this.Name)
 	if err != nil {
 		return fmt.Errorf("%s %v", pos.ErrMsgPrefix(), err)
 	}
-	*c = *load
+	*this = *load
 	return nil
 }
 
-func (c *Class) mkDefaultConstruction() {
-	if c.IsInterface() {
+func (this *Class) mkDefaultConstruction() {
+	if this.IsInterface() {
 		return
 	}
-	if c.Methods == nil {
-		c.Methods = make(map[string][]*ClassMethod)
+	if this.Methods == nil {
+		this.Methods = make(map[string][]*ClassMethod)
 	}
-	if len(c.Methods[SpecialMethodInit]) > 0 {
+	if len(this.Methods[SpecialMethodInit]) > 0 {
 		return
 	}
 	m := &ClassMethod{}
 	m.IsCompilerAuto = true
 	m.Function = &Function{}
 	m.Function.AccessFlags |= cg.AccMethodPublic
-	m.Function.Pos = c.Pos
+	m.Function.Pos = this.Pos
 	m.Function.Block.IsFunctionBlock = true
 	m.Function.Block.Fn = m.Function
 	m.Function.Name = SpecialMethodInit
@@ -89,7 +89,7 @@ func (c *Class) mkDefaultConstruction() {
 		e := &Expression{}
 		e.Op = "methodCall"
 		e.Type = ExpressionTypeMethodCall
-		e.Pos = c.Pos
+		e.Pos = this.Pos
 		call := &ExpressionMethodCall{}
 		call.Name = SUPER
 		call.Expression = &Expression{
@@ -97,7 +97,7 @@ func (c *Class) mkDefaultConstruction() {
 			Data: &ExpressionIdentifier{
 				Name: ThisPointerName,
 			},
-			Pos: c.Pos,
+			Pos: this.Pos,
 			Op:  "methodCall",
 		}
 		e.Data = call
@@ -107,11 +107,11 @@ func (c *Class) mkDefaultConstruction() {
 			Expression: e,
 		}
 	}
-	c.Methods[SpecialMethodInit] = []*ClassMethod{m}
+	this.Methods[SpecialMethodInit] = []*ClassMethod{m}
 }
 
-func (c *Class) mkClassInitMethod() {
-	if c.HaveStaticsCodes() == false {
+func (this *Class) mkClassInitMethod() {
+	if this.HaveStaticsCodes() == false {
 		return // no need
 	}
 	method := &ClassMethod{}
@@ -119,12 +119,12 @@ func (c *Class) mkClassInitMethod() {
 	method.Function.Type.ParameterList = make(ParameterList, 0)
 	method.Function.Type.ReturnList = make(ReturnList, 0)
 	f := method.Function
-	f.Pos = c.Pos
-	f.Block.Statements = make([]*Statement, len(c.StaticBlocks))
+	f.Pos = this.Pos
+	f.Block.Statements = make([]*Statement, len(this.StaticBlocks))
 	for k, _ := range f.Block.Statements {
 		s := &Statement{}
 		s.Type = StatementTypeBlock
-		s.Block = c.StaticBlocks[k]
+		s.Block = this.StaticBlocks[k]
 		f.Block.Statements[k] = s
 	}
 	f.makeLastReturnStatement()
@@ -135,34 +135,34 @@ func (c *Class) mkClassInitMethod() {
 	f.Name = classInitMethod
 	f.Block.IsFunctionBlock = true
 	f.Block.Fn = method.Function
-	if c.Methods == nil {
-		c.Methods = make(map[string][]*ClassMethod)
+	if this.Methods == nil {
+		this.Methods = make(map[string][]*ClassMethod)
 	}
-	f.Block.inherit(&c.Block)
+	f.Block.inherit(&this.Block)
 	f.Block.InheritedAttribute.Function = f
 	f.Block.InheritedAttribute.ClassMethod = method
-	c.Methods[f.Name] = []*ClassMethod{method}
+	this.Methods[f.Name] = []*ClassMethod{method}
 }
 
-func (c *Class) resolveFieldsAndMethodsType() []error {
-	if c.resolveFieldsAndMethodsTypeCalled {
+func (this *Class) resolveFieldsAndMethodsType() []error {
+	if this.resolveFieldsAndMethodsTypeCalled {
 		return []error{}
 	}
-	c.resolveFieldsAndMethodsTypeCalled = true
+	this.resolveFieldsAndMethodsTypeCalled = true
 	errs := []error{}
 	var err error
-	for _, v := range c.Fields {
+	for _, v := range this.Fields {
 		if v.Name == SUPER {
 			errs = append(errs, fmt.Errorf("%s 'super' not allow for field name",
 				errMsgPrefix(v.Pos)))
 			continue
 		}
-		err = v.Type.resolve(&c.Block)
+		err = v.Type.resolve(&this.Block)
 		if err != nil {
 			errs = append(errs, err)
 		}
 	}
-	for _, ms := range c.Methods {
+	for _, ms := range this.Methods {
 		for _, m := range ms {
 			if m.IsAbstract() {
 				for _, v := range m.Function.Type.ParameterList {
@@ -180,7 +180,7 @@ func (c *Class) resolveFieldsAndMethodsType() []error {
 					}
 				}
 			}
-			m.Function.Block.inherit(&c.Block)
+			m.Function.Block.inherit(&this.Block)
 			m.Function.Block.InheritedAttribute.Function = m.Function
 			m.Function.Block.InheritedAttribute.ClassMethod = m
 			m.Function.checkParametersAndReturns(&errs, false, m.IsAbstract())
@@ -197,7 +197,7 @@ func (c *Class) resolveFieldsAndMethodsType() []error {
 				m.Function.Block.Variables[ThisPointerName].Pos = m.Function.Pos
 				m.Function.Block.Variables[ThisPointerName].Type = &Type{
 					Type:  VariableTypeObject,
-					Class: c,
+					Class: this,
 				}
 			}
 		}
@@ -205,45 +205,45 @@ func (c *Class) resolveFieldsAndMethodsType() []error {
 	return errs
 }
 
-func (c *Class) resolveFather() error {
-	if c.resolveFatherCalled {
+func (this *Class) resolveFather() error {
+	if this.resolveFatherCalled {
 		return nil
 	}
-	c.resolveFatherCalled = true
-	if c.SuperClassName == nil {
+	this.resolveFatherCalled = true
+	if this.SuperClassName == nil {
 		superClassName := ""
 		if PackageBeenCompile.Name == common.CorePackage {
 			superClassName = JavaRootClass
 		} else {
-			if c.IsInterface() {
+			if this.IsInterface() {
 				superClassName = JavaRootClass
 			} else {
 				superClassName = LucyRootClass
 			}
 		}
-		c.SuperClass = &Class{
+		this.SuperClass = &Class{
 			Name:           superClassName,
 			NotImportedYet: true,
 		}
 	} else {
 		variableType := Type{}
 		variableType.Type = VariableTypeName // naming
-		variableType.Name = c.SuperClassName.Name
-		variableType.Pos = c.SuperClassName.Pos
-		err := variableType.resolve(&c.Block)
+		variableType.Name = this.SuperClassName.Name
+		variableType.Pos = this.SuperClassName.Pos
+		err := variableType.resolve(&this.Block)
 		if err != nil {
 			return err
 		}
 		if variableType.Type != VariableTypeObject {
 			err := fmt.Errorf("%s '%s' is not a class",
-				c.Pos.ErrMsgPrefix(), c.SuperClassName.Name)
+				this.Pos.ErrMsgPrefix(), this.SuperClassName.Name)
 			return err
 		}
-		c.SuperClass = variableType.Class
-		if c.IsInterface() {
-			if c.SuperClass.Name != JavaRootClass {
+		this.SuperClass = variableType.Class
+		if this.IsInterface() {
+			if this.SuperClass.Name != JavaRootClass {
 				err := fmt.Errorf("%s interface`s super-class must be '%s'",
-					errMsgPrefix(c.SuperClassName.Pos), JavaRootClass)
+					errMsgPrefix(this.SuperClassName.Pos), JavaRootClass)
 
 				return err
 			}
@@ -252,18 +252,18 @@ func (c *Class) resolveFather() error {
 	return nil
 }
 
-func (c *Class) resolveInterfaces() []error {
-	if c.resolveInterfacesCalled {
+func (this *Class) resolveInterfaces() []error {
+	if this.resolveInterfacesCalled {
 		return nil
 	}
-	c.resolveInterfacesCalled = true
+	this.resolveInterfacesCalled = true
 	errs := []error{}
-	for _, i := range c.InterfaceNames {
+	for _, i := range this.InterfaceNames {
 		t := &Type{}
 		t.Type = VariableTypeName
 		t.Pos = i.Pos
 		t.Name = i.Name
-		err := t.resolve(&c.Block)
+		err := t.resolve(&this.Block)
 		if err != nil {
 			errs = append(errs, err)
 			continue
@@ -278,19 +278,19 @@ func (c *Class) resolveInterfaces() []error {
 				errMsgPrefix(i.Pos), i.Name))
 			continue
 		}
-		c.Interfaces = append(c.Interfaces, t.Class)
+		this.Interfaces = append(this.Interfaces, t.Class)
 	}
 	return errs
 }
 
-func (c *Class) implementMethod(
+func (this *Class) implementMethod(
 	pos *Pos,
 	m *ClassMethod,
 	nameMatched **ClassMethod,
 	fromSub bool,
 	errs *[]error) *ClassMethod {
-	if c.Methods != nil {
-		for _, v := range c.Methods[m.Function.Name] {
+	if this.Methods != nil {
+		for _, v := range this.Methods[m.Function.Name] {
 			if v.IsAbstract() {
 				continue
 			}
@@ -306,52 +306,52 @@ func (c *Class) implementMethod(
 		}
 	}
 	//no same name method at current class
-	if c.Name == JavaRootClass {
+	if this.Name == JavaRootClass {
 		return nil
 	}
-	err := c.loadSuperClass(pos)
+	err := this.loadSuperClass(pos)
 	if err != nil {
 		*errs = append(*errs, err)
 		return nil
 	}
 
-	if c.SuperClass == nil {
+	if this.SuperClass == nil {
 		return nil
 	}
 
-	return c.SuperClass.implementMethod(pos, m, nameMatched, true, errs)
+	return this.SuperClass.implementMethod(pos, m, nameMatched, true, errs)
 }
 
-func (c *Class) haveSuperClass(pos *Pos, superclassName string) (bool, error) {
-	err := c.loadSelf(pos)
+func (this *Class) haveSuperClass(pos *Pos, superclassName string) (bool, error) {
+	err := this.loadSelf(pos)
 	if err != nil {
 		return false, err
 	}
-	if c.Name == superclassName {
+	if this.Name == superclassName {
 		return true, nil
 	}
-	if c.Name == JavaRootClass {
+	if this.Name == JavaRootClass {
 		return false, nil
 	}
 
-	err = c.loadSuperClass(pos)
+	err = this.loadSuperClass(pos)
 	if err != nil {
 		return false, err
 	}
 
-	if c.SuperClass == nil {
+	if this.SuperClass == nil {
 		return false, nil
 	}
 
-	return c.SuperClass.haveSuperClass(pos, superclassName) // check father is implements
+	return this.SuperClass.haveSuperClass(pos, superclassName) // check father is implements
 }
 
-func (c *Class) implementedInterface(pos *Pos, inter string) (bool, error) {
-	err := c.loadSelf(pos)
+func (this *Class) implementedInterface(pos *Pos, inter string) (bool, error) {
+	err := this.loadSelf(pos)
 	if err != nil {
 		return false, err
 	}
-	for _, v := range c.Interfaces {
+	for _, v := range this.Interfaces {
 		if v.Name == inter {
 			return true, nil
 		}
@@ -360,54 +360,54 @@ func (c *Class) implementedInterface(pos *Pos, inter string) (bool, error) {
 			return im, nil
 		}
 	}
-	if c.Name == JavaRootClass {
+	if this.Name == JavaRootClass {
 		return false, nil
 	}
-	err = c.loadSuperClass(pos)
+	err = this.loadSuperClass(pos)
 	if err != nil {
 		return false, err
 	}
-	if c.SuperClass == nil {
+	if this.SuperClass == nil {
 		return false, nil
 	}
-	return c.SuperClass.implementedInterface(pos, inter) // check father is implements
+	return this.SuperClass.implementedInterface(pos, inter) // check father is implements
 }
 
-func (c *Class) loadSuperClass(pos *Pos) error {
-	if c.SuperClass != nil {
-		return c.SuperClass.loadSelf(pos)
+func (this *Class) loadSuperClass(pos *Pos) error {
+	if this.SuperClass != nil {
+		return this.SuperClass.loadSelf(pos)
 	}
-	if c.resolveFatherCalled ||
-		c.loadSuperClassCalled {
+	if this.resolveFatherCalled ||
+		this.loadSuperClassCalled {
 		return nil
 	}
-	c.loadSuperClassCalled = true
-	if c.Name == JavaRootClass {
+	this.loadSuperClassCalled = true
+	if this.Name == JavaRootClass {
 		err := fmt.Errorf("%s root class already", errMsgPrefix(pos))
 		return err
 	}
-	if c.SuperClassName == nil {
-		c.SuperClassName = &NameWithPos{
+	if this.SuperClassName == nil {
+		this.SuperClassName = &NameWithPos{
 			Name: JavaRootClass,
-			Pos:  c.Pos,
+			Pos:  this.Pos,
 		}
 	}
-	class, err := PackageBeenCompile.loadClass(c.SuperClassName.Name)
+	class, err := PackageBeenCompile.loadClass(this.SuperClassName.Name)
 	if err != nil {
 		err := fmt.Errorf("%s %v", pos.ErrMsgPrefix(), err)
 		return err
 	}
-	c.SuperClass = class
+	this.SuperClass = class
 	return nil
 }
 
-func (c *Class) accessConstructionMethod(
+func (this *Class) accessConstructionMethod(
 	pos *Pos,
 	errs *[]error,
 	newCase *ExpressionNew,
 	callFatherCase *ExpressionMethodCall,
 	callArgs []*Type) (ms []*ClassMethod, matched bool, err error) {
-	err = c.loadSelf(pos)
+	err = this.loadSelf(pos)
 	if err != nil {
 		return nil, false, err
 	}
@@ -417,7 +417,7 @@ func (c *Class) accessConstructionMethod(
 	} else {
 		args = &callFatherCase.Args
 	}
-	for _, v := range c.Methods[SpecialMethodInit] {
+	for _, v := range this.Methods[SpecialMethodInit] {
 		vArgs, err := v.Function.Type.fitArgs(pos, args, callArgs, v.Function)
 		if err == nil {
 			if newCase != nil {
@@ -427,7 +427,7 @@ func (c *Class) accessConstructionMethod(
 			}
 			return []*ClassMethod{v}, true, nil
 		} else {
-			if c.IsJava {
+			if this.IsJava {
 				ms = append(ms, v)
 			} else {
 				return nil, false, err
@@ -440,50 +440,50 @@ func (c *Class) accessConstructionMethod(
 /*
 	ret is *ClassField or *ClassMethod
 */
-func (c *Class) getFieldOrMethod(
+func (this *Class) getFieldOrMethod(
 	pos *Pos,
 	name string,
 	fromSub bool) (interface{}, error) {
-	err := c.loadSelf(pos)
+	err := this.loadSelf(pos)
 	if err != nil {
 		return nil, err
 	}
 	notFoundErr := fmt.Errorf("%s field or method named '%s' not found", pos.ErrMsgPrefix(), name)
-	if c.Fields != nil && nil != c.Fields[name] {
-		if fromSub && c.Fields[name].ableAccessFromSubClass() == false {
+	if this.Fields != nil && nil != this.Fields[name] {
+		if fromSub && this.Fields[name].ableAccessFromSubClass() == false {
 			// private field
 			// break find
 			return nil, notFoundErr
 		} else {
-			return c.Fields[name], nil
+			return this.Fields[name], nil
 		}
 	}
-	if c.Methods != nil && nil != c.Methods[name] {
-		m := c.Methods[name][0]
+	if this.Methods != nil && nil != this.Methods[name] {
+		m := this.Methods[name][0]
 		if fromSub && m.ableAccessFromSubClass() == false {
 			return nil, notFoundErr
 		} else {
 			return m, nil
 		}
 	}
-	if c.Name == JavaRootClass { // root class
+	if this.Name == JavaRootClass { // root class
 		return nil, notFoundErr
 	}
-	err = c.loadSuperClass(pos)
+	err = this.loadSuperClass(pos)
 	if err != nil {
 		return nil, err
 	}
-	if c.SuperClass == nil {
+	if this.SuperClass == nil {
 		return nil, notFoundErr
 	}
-	return c.SuperClass.getFieldOrMethod(pos, name, true)
+	return this.SuperClass.getFieldOrMethod(pos, name, true)
 }
 
-func (c *Class) constructionMethodAccessAble(pos *Pos, method *ClassMethod) error {
-	if c.LoadFromOutSide {
-		if c.IsPublic() == false {
+func (this *Class) constructionMethodAccessAble(pos *Pos, method *ClassMethod) error {
+	if this.LoadFromOutSide {
+		if this.IsPublic() == false {
 			return fmt.Errorf("%s class '%s' is not public",
-				pos.ErrMsgPrefix(), c.Name)
+				pos.ErrMsgPrefix(), this.Name)
 		}
 		if method.IsPublic() == false {
 			return fmt.Errorf("%s method '%s' is not public",
