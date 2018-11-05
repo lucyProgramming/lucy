@@ -9,7 +9,7 @@ import (
 func (ep *ExpressionParser) parseCallExpression(on *ast.Expression) (*ast.Expression, error) {
 	var err error
 	ep.Next(lfNotToken) // skip (
-	args := []*ast.Expression{}
+	var args []*ast.Expression
 	if ep.parser.token.Type != lex.TokenRp { //a(123)
 		args, err = ep.parseExpressions(lex.TokenRp)
 		if err != nil {
@@ -63,6 +63,7 @@ func (ep *ExpressionParser) parseCallExpression(on *ast.Expression) (*ast.Expres
 		if err != nil {
 			return result, err
 		}
+		ep.parser.ifTokenIsLfThenSkip()
 		if ep.parser.token.Type != lex.TokenGt {
 			ep.parser.errs = append(ep.parser.errs,
 				fmt.Errorf("%s '<' and '>' not match",

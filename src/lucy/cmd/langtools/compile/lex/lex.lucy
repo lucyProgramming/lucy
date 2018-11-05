@@ -1,0 +1,926 @@
+
+import "java/lang/Double"
+import "lucy/cmd/langtools/common"
+import "java/lang/String"
+
+public class Lexer {
+	bs                   []byte
+	lastLine, lastColumn int
+	line, column         int
+	offset, end          int
+	
+	public fn GetLineAndColumn() -> (line int, column int) {
+		return this.line, this.column
+	}
+	public fn GetOffSet() -> (offset int) {
+		return this.offset
+	}
+
+	fn getChar()-> (c byte, eof bool) {
+		if this.offset == this.end {
+			eof = true
+			return
+		}
+		offset := this.offset
+		this.offset++ // next
+		c = this.bs[offset]
+		this.lastLine = this.line
+		this.lastColumn = this.column
+		if c == '\n' {
+			this.line++
+			this.column = 1
+		} else {
+			if c == '\t' {
+				this.column += 4 // TODO:: 4 OR 8
+			} else {
+				this.column++
+			}
+		}
+		return
+	}
+
+	fn unGetChar() {
+		this.offset--
+		this.line, this.column = this.lastLine, this.lastColumn
+	}
+
+	fn unGetChar2(offset int) {
+		this.offset -= offset
+		this.column -= offset
+	}
+
+	fn isLetter(c byte) -> (is bool) {
+		return ('a' <= c && c <= 'z') ||
+			('A' <= c && c <= 'Z')
+	}
+	fn isDigit(c byte)-> (is bool) {
+		return '0' <= c && c <= '9'
+	}
+	fn isOctal(c byte) -> (is bool) {
+		return '0' <= c && c <= '7'
+	}
+	fn isHex(c byte) -> (is bool) {
+
+		return '0' <= c && c <= '9' ||
+			('a' <= c && c <= 'f') ||
+			('A' <= c && c <= 'F')
+	}
+
+	fn hexByte2ByteValue(c byte) -> (b byte)  {
+		if 'a' <= c && c <= 'f' {
+			return c - 'a' + 10
+		}
+		if 'A' <= c && c <= 'F' {
+			return c - 'A' + 10
+		}
+		return c - '0' //also valid for digit
+	}
+
+	fn parseInt64(bs []byte) ->(v long, err error) {
+		base := long(10)
+		if bs[0] == '0' {
+			base = 8
+		}
+		if len(bs) >= 2 &&
+			bs[0] == '0' &&
+			(bs[1] == 'X' || bs[1] == 'x') { // correct base to hex
+			base = 16
+			bs = bs[2:]
+		}
+		var result long = 0
+		bit63is1 := false
+		for _, v := range bs {
+			result = result*base + long(this.hexByte2ByteValue(v))
+			if false == bit63is1 {
+				if (result >> 63) != 0 {
+					bit63is1 = true
+					continue
+				}
+			}
+			if bit63is1 {
+				if (result >> 63) == 0 {
+					bit63is1 = true
+				}
+				return result, new error("exceed max long")
+			}
+		}
+		return result, null
+	}
+
+	fn lexNumber(token Token, c byte) -> (eof bool, err error) {
+	    defer {
+	        e := catch()
+	        if err == null && e != null {
+	            err = e
+	        }
+	    }
+		integerPart := []byte{c}
+		isHex := false
+		isOctal := false
+		if c == '0' { // enter when first char is '0'
+			c, eof = this.getChar()
+			if c == 'x' || c == 'X' {
+				isHex = true
+				integerPart.append('X')
+			} else {
+				isOctal = true
+				this.unGetChar()
+			}
+		}
+		c, eof = this.getChar() //get next char
+		for eof == false {
+			ok := false
+			if isHex {
+				ok = this.isHex(c)
+			} else if isOctal {
+				if this.isDigit(c) == true && this.isOctal(c) == false { // integer but not octal
+					err = new error("octal number cannot be '8' and '9'")
+				}
+				ok = this.isDigit(c)
+			} else {
+				ok = this.isDigit(c)
+			}
+			if ok {
+				integerPart.append( c)
+				c, eof = this.getChar() // get next char
+				continue
+			} else { // something that I cannot handle
+				this.unGetChar()
+				break
+			}
+		}
+		c, eof = this.getChar()
+		floatPart := []byte{}
+		haveFloatPart := false // float or double
+		if c == '.' {          // float numbers
+			haveFloatPart = true
+			c, eof = this.getChar()
+			for eof == false {
+				if this.isDigit(c) {
+					floatPart.append(c)
+					c, eof = this.getChar()
+				} else {
+					this.unGetChar()
+					break
+				}
+			}
+		} else {
+			this.unGetChar()
+		}
+		if isHex && haveFloatPart {
+			token.Type = TokenLiteralInt
+			token.Data = common.packLong2Object(0L)
+			err = new error("mix up float and hex")
+			return
+		}
+		isScientificNotation := false
+		power := []byte{}
+		powerPositive := true
+		c, eof = this.getChar()
+		if (c == 'e' || c == 'E') && eof == false {
+			isScientificNotation = true
+			c, eof = this.getChar()
+			if eof {
+				err = new error("unexpected EOF")
+			}
+			if c == '-' {
+				powerPositive = false
+				c, eof = this.getChar()
+			} else if this.isDigit(c) {
+				// nothing to do
+			} else if c == '+' { // default is true
+				c, eof = this.getChar()
+			} else {
+				err = new error("wrong format scientific notation")
+			}
+			if this.isDigit(c) == false {
+				this.unGetChar() //
+				err = new error("wrong format scientific notation")
+			} else {
+				power.append(c)
+				c, eof = this.getChar()
+				for eof == false && this.isDigit(c) {
+					power .append( c)
+					c, eof = this.getChar()
+				}
+				this.unGetChar()
+			}
+		} else {
+			this.unGetChar()
+		}
+		if isHex && isScientificNotation {
+			token.Type = TokenLiteralInt
+			token.Data = common.packLong2Object(0L)
+			token.Description = "0"
+			err = new error("mix up hex and seientific notation")
+			return
+		}
+		isDouble := false
+		isLong := false
+		isShort := false
+		isByte := false
+		isFloat := false
+		c, eof = this.getChar()
+		if c == 'l' || c == 'L' {
+			isLong = true
+		} else if c == 'f' || c == 'F' {
+			isFloat = true
+		} else if c == 's' || c == 'S' {
+			isShort = true
+		} else if c == 'd' || c == 'D' {
+			isDouble = true
+		} else if c == 'b' || c == 'B' {
+			isByte = true
+		} else {
+			this.unGetChar()
+		}
+
+		token.EndLine = this.line
+		token.EndColumn = this.column
+		if isScientificNotation == false {
+			integerPart.append('.')
+			integerPart.appendAll(floatPart )
+			floatValue := Double.parseDouble(string(integerPart))
+			if haveFloatPart {
+				if isDouble {
+					token.Type = TokenLiteralDouble
+					token.Data = common.packDouble2Object(floatValue)
+				} else {
+					token.Type = TokenLiteralFloat
+					token.Data = common.packFloat2Object( float(floatValue) )
+				}
+			} else {
+				if isDouble {
+					token.Type = TokenLiteralDouble
+					token.Data = common.packDouble2Object(floatValue)
+				} else if isFloat {
+					token.Type = TokenLiteralFloat
+					token.Data = common.packFloat2Object(float(floatValue))
+				} else if isLong {
+					token.Type = TokenLiteralLong
+					token.Data = common.packLong2Object( long(floatValue) )
+				} else if isByte {
+					token.Type = TokenLiteralByte
+					token.Data = common.packLong2Object(long(floatValue) )
+				} else if isShort {
+					token.Type = TokenLiteralShort
+					token.Data =common.packLong2Object( long(floatValue) )
+				} else {
+					token.Type = TokenLiteralInt
+					token.Data = common.packLong2Object(long(floatValue) )
+				}
+			}
+			return
+		}
+		//scientific notation
+		if t, _ := this.parseInt64(integerPart); t > 10 && t < 1 {
+			err = new error("wrong format of scientific notation")
+			token.Type = TokenLiteralInt
+			token.Data = common.packLong2Object(long(0))
+			return
+		}
+		var p int
+		{
+			t, _ := this.parseInt64(power)
+			p = int(t)
+		}
+		notationIsDouble := false
+		var notationDoubleValue double
+		var notationLongValue long
+		if powerPositive {
+			if p >= len(floatPart) { // int
+				integerPart.appendAll( floatPart)
+				{
+					b := new  []byte (p-len(floatPart) )
+					for k, _ := range b {
+						b[k] = '0'
+					}
+					integerPart.appendAll(b)
+				}
+				var e error
+				notationLongValue, e = this.parseInt64(integerPart)
+				if e != null {
+					err = e
+				}
+			} else { // float
+				integerPart . appendAll( floatPart[:p])
+				integerPart . append( '.')
+				integerPart . appendAll(floatPart[p:])
+				notationIsDouble = true
+				notationDoubleValue = Double.parseDouble(string(integerPart))
+			}
+		} else { // power is negative,must be float number
+			b := new []byte(p-len(integerPart))
+			for k, _ := range b {
+				b[k] = '0'
+			}
+			b.appendAll(integerPart)
+			b.appendAll(floatPart)
+			notationIsDouble = true
+			notationDoubleValue  = Double.parseDouble("0."+string(integerPart))
+		}
+		if isDouble == false &&
+			isFloat == false &&
+			isLong == false &&
+			isByte == false &&
+			isShort == false {
+			if notationIsDouble {
+				token.Type = TokenLiteralDouble
+				token.Data =  common.packDouble2Object(notationDoubleValue)
+			} else {
+				token.Type = TokenLiteralLong
+				token.Data = common.packLong2Object(notationLongValue)
+			}
+			return
+		}
+		if isDouble {
+			token.Type = TokenLiteralDouble
+			token.Data = common.packDouble2Object( notationDoubleValue )
+		} else if isFloat {
+			token.Type = TokenLiteralFloat
+			token.Data = common.packDouble2Object( notationDoubleValue )
+		} else if isLong {
+			token.Type = TokenLiteralLong
+			if notationIsDouble {
+				err = new error("number literal defined as 'long' but notation is float")
+			}
+			token.Data = common.packLong2Object(notationLongValue)
+		} else if isByte {
+			token.Type = TokenLiteralByte
+			token.Data = common.packLong2Object( notationLongValue )
+			if notationIsDouble {
+				err = new error("number literal defined as 'byte' but notation is float")
+			}
+		} else if isShort {
+			token.Type = TokenLiteralShort
+			token.Data =common.packLong2Object( notationLongValue)
+			if notationIsDouble {
+				err = new error("number literal defined as 'short' but notation is float")
+			}
+
+		} else {
+			if notationIsDouble {
+				token.Type = TokenLiteralDouble
+				token.Data =common.packDouble2Object( notationDoubleValue )
+			} else {
+				token.Type = TokenLiteralLong
+				token.Data =common.packLong2Object( notationLongValue)
+			}
+			return
+		}
+		return
+	}
+
+	fn lexIdentifier(c byte) -> (token Token, err error) {
+		token = new Token()
+		token.StartLine = this.line
+		token.StartColumn = this.column - 1 // c is read
+		token.Offset = this.offset - 1      // c is read
+		bs := []byte{c}
+		c, eof := this.getChar()
+		for eof == false {
+			if this.isLetter(c) || c == '_' || this.isDigit(c) || c == '$' {
+				bs.append(c)
+				c, eof = this.getChar()
+			} else {
+				this.unGetChar()
+				break
+			}
+		}
+		identifier := string(bs)
+		if ok := keywordsMap.keyExist(identifier); ok {
+			token.Type = keywordsMap[identifier]
+			token.Description = identifier
+			if token.Type == TokenElse {
+				is := this.tryLexElseIf()
+				if is {
+					token.Type = TokenElseif
+					token.Description = "else if"
+				}
+			}
+		} else {
+			token.Type = TokenIdentifier
+			token.Data = identifier
+			token.Description = "identifier_" + identifier
+		}
+		token.EndLine = this.line
+		token.EndColumn = this.column
+		return
+	}
+
+	fn tryLexElseIf() -> (is bool) {
+		c, eof := this.getChar()
+		for c == ' ' || c == '\t' {
+			c, eof = this.getChar()
+		}
+		if eof {
+			return
+		}
+		if c != 'i' {
+			this.unGetChar()
+			return
+		}
+		c, eof = this.getChar()
+		if c != 'f' {
+			this.unGetChar()
+			this.unGetChar2(1)
+			return
+		}
+		c, eof = this.getChar()
+		if c != ' ' && c != '\t' { // white list expect ' ' or '\t'
+			this.unGetChar()
+			this.unGetChar2(2) // un get 'i' and 'f'
+			return
+		}
+		is = true
+		return
+	}
+
+	fn lexString(endChar byte) -> (token Token, err error) {
+		token = new Token()
+		token.StartLine = this.line
+		token.StartColumn = this.column - 1
+		token.Type = TokenLiteralString
+		bs := []byte{}
+		var c byte
+		c, eof := this.getChar()
+		for c != endChar && c != '\n' && eof == false {
+			if c != '\\' {
+				bs.append( c)
+				c, eof = this.getChar()
+				continue
+			}
+			c, eof = this.getChar() // get next char
+			if eof {
+				err = new error("unexpected EOF")
+				break
+			}
+			switch c {
+			case 'a':
+				bs.append('\a')
+				c, eof = this.getChar()
+			case 'b':
+				bs.append( '\b')
+				c, eof = this.getChar()
+			case 'f':
+				bs.append( '\f')
+				c, eof = this.getChar()
+			case 'n':
+				bs.append( '\n')
+				c, eof = this.getChar()
+			case 'r':
+				bs.append( '\r')
+				c, eof = this.getChar()
+			case 't':
+				bs.append( '\t')
+				c, eof = this.getChar()
+			case 'v':
+				bs.append('\v')
+				c, eof = this.getChar()
+			case '\\':
+				bs.append( '\\')
+				c, eof = this.getChar()
+			case '\'':
+				bs.append('\'')
+				c, eof = this.getChar()
+			case '"':
+				bs.append( '"')
+				c, eof = this.getChar()
+			case 'x':
+				var c1, c2 byte
+				c1, eof = this.getChar() //skip 'x'
+				if eof {
+					err = new error("unexpected EOF")
+					continue
+				}
+				if false == this.isHex(c) {
+					err = new error("unknown escape sequence")
+					continue
+				}
+				b := this.hexByte2ByteValue(c1)
+				c2, eof = this.getChar()
+				if this.isHex(c2) {
+					if t := b*16 + this.hexByte2ByteValue(c2); t <= 127 { // only support standard ascii
+						b = t
+					} else {
+						this.unGetChar()
+					}
+				} else { //not hex
+					this.unGetChar()
+				}
+				bs . append( b)
+				c, eof = this.getChar()
+			case '0', '1', '2', '3', '4', '5', '7':
+				// first char must be octal
+				b := byte(0)
+				for i := 0; i < 3; i++ {
+					if eof {
+						break
+					}
+					if this.isOctal(c) == false {
+						this.unGetChar()
+						break
+					}
+					if t := b*8 + this.hexByte2ByteValue(c); t > 127 { // only support standard ascii
+						this.unGetChar()
+						break
+					} else {
+						b = t
+					}
+					c, eof = this.getChar()
+				}
+				bs.append( b)
+				c, eof = this.getChar()
+			case 'u':
+				var r char
+				n := 4
+				for i := 0; i < n; i++ {
+					c, eof = this.getChar()
+					if eof {
+						err = new error("unexcepted EOF")
+						break
+					}
+					if this.isHex(c) == false {
+						err = new error(sprintf( "not enough hex number for unicode, expect '%d' , but '%d'",
+							n, i))
+						this.unGetChar()
+						break
+					}
+					r = (r << 4) | char(this.hexByte2ByteValue(c))
+				}
+				cs := new char[](1)
+				cs[0] = r
+				for v := range new String(cs).getBytes("utf-8") {
+				    bs.append(v )
+				}
+				c, eof = this.getChar()
+			default:
+				err = new error("unknown escape sequence")
+			}
+		}
+		token.EndLine = this.line
+		token.EndColumn = this.column
+		if c == '\n' {
+			err = new error("string literal start new line")
+		}
+		token.Data = string(bs)
+		token.Description = string(bs)
+		return
+	}
+	
+	fn lexMultiLineComment() -> (comment string, err error) {
+		bs := []byte{}
+	redo:
+		c, _ := this.getChar()
+		var eof bool
+		for c != '*' &&
+			eof == false {
+			c, eof = this.getChar()
+			bs.append(c)
+		}
+		if eof {
+			return string(bs), new error("unexpect EOF")
+		}
+		c, eof = this.getChar()
+		if eof {
+			return string(bs), new error("unexpect EOF")
+		}
+		if eof || c == '/' {
+			return string(bs[:len(bs)-1]), // slice out '*'
+				null
+		}
+		goto redo
+	}
+
+	/*
+		one '.' is read
+	*/
+	fn lexVArgs() -> (is bool) {
+		c, _ := this.getChar()
+		if c != '.' {
+			this.unGetChar()
+			return
+		}
+		// current '..'
+		c, _ = this.getChar()
+		if c != '.' {
+			this.unGetChar()
+			this.unGetChar2(1)
+			return
+		}
+		is = true
+		return
+	}
+	
+	fn isChar() -> (is bool) {
+		if this.offset+1 >= this.end {
+			return false
+		}
+		if '\\' != this.bs[this.offset] {
+			return false
+		}
+
+		if 'u' != this.bs[this.offset+1] && 'U' != this.bs[this.offset+1] {
+			return false
+		}
+		return true
+	}
+	
+	public fn Next()  -> (token Token, err error) {
+		token = new Token()
+		var c byte
+		c, eof := this.getChar()
+		if eof {
+			token.Type = TokenEof
+			token.Description = "EOF"
+			return
+		}
+		for c == ' ' ||
+			c == '\t' ||
+			c == '\r' { // skip empty
+			c, eof = this.getChar()
+		}
+		token.StartLine = this.line
+		token.StartColumn = this.column - 1
+		if eof {
+			token.Type = TokenEof
+			token.Description = "EOF"
+			return
+		}
+		if this.isLetter(c) || c == '_' || c == '$' { // start of a identifier
+			return this.lexIdentifier(c)
+		}
+		if this.isDigit(c) {
+			eof, err = this.lexNumber(token, c)
+			return
+		}
+		token.Offset = this.offset
+		switch c {
+		case '?':
+			token.Type = TokenQuestion
+			token.Description = "?"
+		case '(':
+			token.Type = TokenLp
+			token.Description = "("
+		case ')':
+			token.Type = TokenRp
+			token.Description = ")"
+		case '{':
+			token.Type = TokenLc
+			token.Description = "{"
+		case '}':
+			token.Type = TokenRc
+			token.Description = "}"
+		case '[':
+			token.Type = TokenLb
+			token.Description = "["
+		case ']':
+			token.Type = TokenRb
+			token.Description = "]"
+		case ';':
+			token.Type = TokenSemicolon
+			token.Description = ";"
+		case ',':
+			token.Type = TokenComma
+			token.Description = ","
+		case '&':
+			c, eof = this.getChar()
+			if c == '&' {
+				token.Type = TokenLogicalAnd
+				token.Description = "&&"
+			} else if c == '=' {
+				token.Type = TokenAndAssign
+				token.Description = "&="
+			} else {
+				this.unGetChar()
+				token.Type = TokenAnd
+				token.Description = "&"
+			}
+		case '|':
+			c, eof = this.getChar()
+			if c == '|' {
+				token.Type = TokenLogicalOr
+				token.Description = "||"
+			} else if c == '=' {
+				token.Type = TokenOrAssign
+				token.Description = "|="
+			} else {
+				this.unGetChar()
+				token.Type = TokenOr
+				token.Description = "|"
+			}
+		case '=':
+			c, eof = this.getChar()
+			if c == '=' {
+				token.Type = TokenEqual
+				token.Description = "=="
+			} else {
+				this.unGetChar()
+				token.Type = TokenAssign
+				token.Description = "="
+			}
+		case '!':
+			c, eof = this.getChar()
+			if c == '=' {
+				token.Type = TokenNe
+				token.Description = "!="
+			} else {
+				this.unGetChar()
+				token.Type = TokenNot
+				token.Description = "!"
+			}
+		case '>':
+			c, eof = this.getChar()
+			if c == '=' {
+				token.Type = TokenGe
+				token.Description = ">="
+			} else if c == '>' {
+				c, eof = this.getChar()
+				if c == '=' {
+					token.Type = TokenRshAssign
+					token.Description = ">>="
+				} else {
+					this.unGetChar()
+					token.Type = TokenRsh
+					token.Description = ">>"
+				}
+			} else {
+				this.unGetChar()
+				token.Type = TokenGt
+				token.Description = ">"
+			}
+		case '<':
+			c, eof = this.getChar()
+			if c == '=' {
+				token.Type = TokenLe
+				token.Description = "<="
+			} else if c == '<' {
+				c, eof = this.getChar()
+				if c == '=' {
+					token.Type = TokenLshAssign
+					token.Description = "<<="
+				} else {
+					this.unGetChar()
+					token.Type = TokenLsh
+					token.Description = "<<"
+				}
+			} else {
+				this.unGetChar()
+				token.Type = TokenLt
+				token.Description = "<"
+			}
+		case '^':
+			c, eof = this.getChar()
+			if c == '=' {
+				token.Type = TokenXorAssign
+				token.Description = "^="
+			} else {
+				this.unGetChar()
+				token.Type = TokenXor
+				token.Description = "^"
+			}
+		case '~':
+			token.Type = TokenBitNot
+			token.Description = "~"
+		case '+':
+			c, eof = this.getChar()
+			if c == '+' {
+				token.Type = TokenIncrement
+				token.Description = "++"
+			} else if c == '=' {
+				token.Type = TokenAddAssign
+				token.Description = "+="
+			} else {
+				this.unGetChar()
+				token.Type = TokenAdd
+				token.Description = "+"
+			}
+		case '-':
+			c, eof = this.getChar()
+			if c == '-' {
+				token.Type = TokenDecrement
+				token.Description = "--"
+			} else if c == '=' {
+				token.Type = TokenSubAssign
+				token.Description = "-="
+			} else if c == '>' {
+				token.Type = TokenArrow
+				token.Description = "->"
+			} else {
+				this.unGetChar()
+				token.Type = TokenSub
+				token.Description = "-"
+			}
+		case '*':
+			c, eof = this.getChar()
+			if c == '=' {
+				token.Type = TokenMulAssign
+				token.Description = "*="
+			} else {
+				this.unGetChar()
+				token.Type = TokenMul
+				token.Description = "*"
+			}
+		case '%':
+			c, eof = this.getChar()
+			if c == '=' {
+				token.Type = TokenModAssign
+				token.Description = "%="
+			} else {
+				this.unGetChar()
+				token.Type = TokenMod
+				token.Description = "%"
+			}
+		case '/':
+			c, eof = this.getChar()
+			if c == '=' {
+				token.Type = TokenDivAssign
+				token.Description = "/="
+			} else if c == '/' {
+				bs := []byte{}
+				for c != '\n' && eof == false {
+					c, eof = this.getChar()
+					bs . append( c)
+				}
+				token.Type = TokenComment
+				token.Data = string(bs)
+				token.Description = string(bs)
+			} else if c == '*' {
+				comment, err := this.lexMultiLineComment()
+				if err != null {
+					return null, err
+				}
+				token.Type = TokenMultiLineComment
+				token.Data = comment
+				token.Description = comment
+			} else {
+				this.unGetChar()
+				token.Type = TokenDiv
+				token.Description = "/"
+			}
+		case '\n':
+			token.Type = TokenLf
+			token.Description = "\\n"
+		case '.':
+			if this.lexVArgs() {
+				token.Type = TokenVArgs
+				token.Description = "..."
+			} else {
+				token.Type = TokenSelection
+				token.Description = "."
+			}
+		case '`':
+			bs := []byte{}
+			c, eof = this.getChar()
+			for c != '`' && eof == false {
+				bs. append(c)
+				c, eof = this.getChar()
+			}
+			token.Type = TokenLiteralString
+			token.Data = string(bs)
+			token.Description = string(bs)
+		case '"':
+			return this.lexString('"')
+		case '\'':
+			isChar := this.isChar()
+			token, err = this.lexString('\'')
+			if err == null {
+				if t := []byte(token.Data.(string)); len(t) != 1 {
+					err = new error("expect one char")
+				} else { // correct token
+					if isChar {
+						token.Type = TokenLiteralChar
+						token.Data = common.packLong2Object(long(t[0]))
+					} else {
+						token.Type = TokenLiteralByte
+						token.Data = common.packLong2Object(long(t[0]))
+					}
+				}
+			}
+			return
+		case ':':
+			c, eof = this.getChar()
+			if c == '=' {
+				token.Type = TokenVarAssign
+				token.Description = ":="
+			} else if c == ':' {
+				token.Type = TokenSelectConst
+				token.Description = "::"
+			} else {
+				token.Type = TokenColon
+				token.Description = ":"
+				this.unGetChar()
+			}
+		default:
+			err = new error(sprintf("unkown beginning of token:%x", c))
+			return null, err
+		}
+		token.EndLine = this.line
+		token.EndColumn = this.column
+		return
+	}
+	
+}
+
+
+

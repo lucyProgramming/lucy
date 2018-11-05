@@ -12,6 +12,16 @@ import (
 	"os"
 )
 
+type Compiler struct {
+	Tops              []*ast.TopNode
+	Files             []string
+	Errs              []error
+	NErrs2StopCompile int
+	lucyPaths         []string
+	ClassPaths        []string
+	Maker             jvm.BuildPackage
+}
+
 func Main(files []string) {
 	if len(files) == 0 {
 		fmt.Println("no file specfied")
@@ -22,16 +32,6 @@ func Main(files []string) {
 	compiler.Files = files
 	compiler.Init()
 	compiler.compile()
-}
-
-type Compiler struct {
-	Tops              []*ast.TopNode
-	Files             []string
-	Errs              []error
-	NErrs2StopCompile int
-	lucyPaths         []string
-	ClassPaths        []string
-	Maker             jvm.BuildPackage
 }
 
 func (compiler *Compiler) shouldExit() {

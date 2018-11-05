@@ -3,9 +3,6 @@
 
 
 
-
-
-
 fn main(args []string) {
 	print("this command not support current now")
 }

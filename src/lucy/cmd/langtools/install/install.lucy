@@ -51,17 +51,13 @@ class Install {
         cmd := new os.Command(this.lucyRoot + "/bin/lucy", args  , null ,null)
         cmd.stdout = os.stdout 
         cmd.stderr = os.stderr  
-        if err :=  cmd.start() ; err != null {
-			printf("start program failed,err:%s\n" , err.toString())
-        	return 
-        }
+        cmd.start()
         if err := cmd.wait() ;  err != null {
 			printf("install failed,err:%s\n" ,err .toString())
 			os.exit(2)
-        } 
-		
+        }
 	}
-		
+
 	
 	
 

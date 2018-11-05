@@ -284,6 +284,8 @@ func (buildPackage *BuildPackage) insertDefaultValue(c *cg.ClassHighLevel, t *as
 		index = c.Class.InsertDoubleConst(v.(float64))
 	case ast.VariableTypeString:
 		index = c.Class.InsertStringConst(v.(string))
+	default:
+		panic("no match")
 	}
 	return
 }

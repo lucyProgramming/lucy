@@ -8,7 +8,6 @@ public fn getLucyRoot()->(path string  ){
 	envs := os.getEnvs()
 	if envs.keyExist("LUCYROOT") == false {
 		panic("env variable LUCYROOT is not set")
-
 	}
 	path = envs["LUCYROOT"]
 }

@@ -45,12 +45,15 @@ type Parser struct {
 */
 func (parser *Parser) initParser() {
 	parser.ExpressionParser = &ExpressionParser{parser}
-	parser.FunctionParser = &FunctionParser{}
-	parser.FunctionParser.parser = parser
-	parser.ClassParser = &ClassParser{}
-	parser.ClassParser.parser = parser
-	parser.BlockParser = &BlockParser{}
-	parser.BlockParser.parser = parser
+	parser.FunctionParser = &FunctionParser{
+		parser: parser,
+	}
+	parser.ClassParser = &ClassParser{
+		parser: parser,
+	}
+	parser.BlockParser = &BlockParser{
+		parser: parser,
+	}
 }
 
 func (parser *Parser) Parse() []error {

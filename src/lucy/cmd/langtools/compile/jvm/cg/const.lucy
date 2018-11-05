@@ -1,0 +1,22 @@
+
+const	ConstantPoolMaxSize                  = 65536
+const	ClassMagicNumber               		 = 0xcafebabe
+const	AttributeNameSourceFile              = "SourceFile"
+const	AttributeNameConstValue              = "ConstantValue"
+const	AttributeNameStackMap                = "StackMapTable"
+const	AttributeNameSignature               = "Signature"
+const	AttributeNameMethodParameters        = "MethodParameters"
+const	AttributeNameInnerClasses            = "InnerClasses"
+
+const	AttributeNameLucyFieldDescriptor    = "LucyFieldDescriptor"
+const	AttributeNameLucyMethodDescriptor   = "LucyMethodDescriptor"
+const	AttributeNameLucyTriggerPackageInit = "LucyTriggerPackageInitMethod"
+const	AttributeNameLucyDefaultParameters  = "LucyDefaultParameters"
+const	AttributeNameLucyTypeAlias          = "LucyTypeAlias"
+const	AttributeNameLucyEnum               = "LucyEnum"
+const	AttributeNameLucyConst              = "LucyConst" // indicate a package const
+const	AttributeNameLucyReturnListNames    = "LucyReturnListName"
+const	AttributeNameLucyTemplateFunction   = "LucyTemplateFunction"
+const	AttributeNameLucyComment            = "LucyComment"
+const	AttributeNameLucyClassConst         = "LucyClassConst"
+ 

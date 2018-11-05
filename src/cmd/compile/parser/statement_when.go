@@ -7,6 +7,9 @@ import (
 )
 
 func (bp *BlockParser) parseWhen() (*ast.StatementWhen, error) {
+	when := &ast.StatementWhen{
+		Pos: bp.parser.mkPos(),
+	}
 	bp.parser.Next(lfIsToken)
 	bp.parser.unExpectNewLineAndSkip()
 	condition, err := bp.parser.parseType()
@@ -14,6 +17,7 @@ func (bp *BlockParser) parseWhen() (*ast.StatementWhen, error) {
 		bp.parser.errs = append(bp.parser.errs, err)
 		bp.consume(untilLc)
 	}
+	when.Condition = condition
 	bp.parser.ifTokenIsLfThenSkip()
 	if bp.parser.token.Type != lex.TokenLc {
 		err = fmt.Errorf("%s expect '{',but '%s'",
@@ -28,8 +32,7 @@ func (bp *BlockParser) parseWhen() (*ast.StatementWhen, error) {
 		bp.parser.errs = append(bp.parser.errs, err)
 		return nil, err
 	}
-	when := &ast.StatementWhen{}
-	when.Condition = condition
+
 	for bp.parser.token.Type == lex.TokenCase {
 		bp.Next(lfIsToken) // skip case
 		bp.parser.unExpectNewLineAndSkip()

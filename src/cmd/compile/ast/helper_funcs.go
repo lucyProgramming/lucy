@@ -161,9 +161,17 @@ func checkConst(block *Block, c *Constant) error {
 	if c.Type != nil {
 		es := []error{}
 		if c.Type.assignAble(&es, t) == false {
-			err := fmt.Errorf("%s cannot use '%s' as '%s' for initialization value",
-				c.Pos.ErrMsgPrefix(), c.Type.TypeString(), t.TypeString())
-			return err
+			if (c.Type.isInteger() && t.isInteger()) ||
+				(c.Type.isFloat() && t.isFloat()) {
+				fmt.Println(c.DefaultValueExpression.Data)
+				c.DefaultValueExpression.convertLiteralToNumberType(c.Type.Type)
+				c.Value = c.DefaultValueExpression.Data
+
+			} else {
+				err := fmt.Errorf("%s cannot use '%s' as '%s' for initialization value",
+					c.Pos.ErrMsgPrefix(), c.Type.TypeString(), t.TypeString())
+				return err
+			}
 		}
 	} else { // means use old type
 		c.Type = t

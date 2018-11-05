@@ -388,7 +388,7 @@ func (e *Expression) getLongValue() int64 {
 	case ExpressionTypeDouble:
 		return int64(e.Data.(float64))
 	}
-	return 0
+	panic("no match")
 }
 
 func (e *Expression) getDoubleValue() float64 {
@@ -411,7 +411,7 @@ func (e *Expression) getDoubleValue() float64 {
 	case ExpressionTypeDouble:
 		return e.Data.(float64)
 	}
-	return 0
+	panic("no match")
 }
 
 func (e *Expression) convertLiteralToNumberType(to VariableTypeKind) {
