@@ -1,0 +1,11 @@
+package cg
+
+class AttributeLucyEnum {
+	fn ToAttributeInfo(class Class) -> (ret AttributeInfo) {
+		ret := &AttributeInfo{}
+		ret.NameIndex = class.InsertUtf8Const(AttributeNameLucyEnum)
+		return ret
+	}
+}
+
+

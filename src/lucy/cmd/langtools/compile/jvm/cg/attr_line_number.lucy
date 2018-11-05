@@ -1,0 +1,33 @@
+package cg
+
+import (
+	"encoding/binary"
+)
+
+class AttributeLineNumber  {
+	lineNumbers []*AttributeLinePc
+	fn ToAttributeInfo(class Class) -> (ret AttributeInfo)  {
+		if this == nil || len(this.lineNumbers) == 0 {
+			return nil
+		}
+		ret  = new AttributeInfo()
+		ret.NameIndex = class.InsertUtf8Const("LineNumberTable")
+		ret.Info = make([]byte, 2)
+		binary.BigEndian.PutUint16(ret.Info, uint16(len(this.lineNumbers)))
+		for _, v := range this.lineNumbers {
+			bs4 := make([]byte, 4)
+			binary.BigEndian.PutUint16(bs4[0:2], v.startPc)
+			binary.BigEndian.PutUint16(bs4[2:4], v.lineNumber)
+			ret.Info = append(ret.Info, bs4...)
+		}
+		ret.attributeLength = uint32(len(ret.Info))
+		return ret
+	}
+}
+
+
+
+class AttributeLinePc {
+	startPc    uint16
+	lineNumber uint16
+}

@@ -1,0 +1,11 @@
+package cg
+
+class AttributeLucyTriggerPackageInitMethod {
+	fn ToAttributeInfo(class Class) -> (ret AttributeInfo)  {
+		ret = new AttributeInfo()
+		ret.NameIndex = class.InsertUtf8Const(AttributeNameLucyTriggerPackageInit)
+		return ret
+	}
+}
+
+

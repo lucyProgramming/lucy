@@ -1,0 +1,189 @@
+package cg
+
+import (
+	"encoding/binary"
+	"fmt"
+)
+
+interface StackMap  {
+	ToBytes() []byte
+}
+
+type AttributeStackMap struct {
+	StackMaps []StackMap
+	fn ToAttributeInfo(class Class) -> (ret AttributeInfo) {
+		if this == nil || len(this.StackMaps) == 0 {
+			return nil
+		}
+		info := new AttributeInfo() 
+		info.NameIndex = class.InsertUtf8Const(AttributeNameStackMap)
+		bs := make([]byte, 2)
+		binary.BigEndian.PutUint16(bs, uint16(len(this.StackMaps)))
+		for _, v := range this.StackMaps {
+			bs = append(bs, v.ToBytes()...)
+		}
+		info.Info = bs
+		info.attributeLength = uint32(len(info.Info))
+		return info
+	}
+}
+
+
+
+class StackMapSameFrame {
+	FrameType byte
+	fn ToBytes() -> (bs []byte) {
+		return []byte{s.FrameType}
+	}
+}
+
+
+class StackMapSameLocals1StackItemFrame {
+	FrameType byte
+	Stack     *StackMapVerificationTypeInfo
+	fn ToBytes() -> (bs []byte) {
+		bs := []byte{s.FrameType}
+		bs = append(bs, s.Stack.ToBytes()...)
+		return bs
+	}
+}
+
+
+
+class StackMapSameLocals1StackItemFrameExtended {
+	FrameType byte
+	Delta     uint16
+	Stack     *StackMapVerificationTypeInfo
+	fn ToBytes() -> (bs []byte) {
+		bs := make([]byte, 3)
+		bs[0] = s.FrameType
+		binary.BigEndian.PutUint16(bs[1:], s.Delta)
+		return append(bs, s.Stack.ToBytes()...)
+	}
+}
+
+
+
+class StackMapChopFrame  {
+	FrameType byte
+	Delta     uint16
+	fn ToBytes() -> (bs []byte) {
+		bs := make([]byte, 3)
+		bs[0] = s.FrameType
+		binary.BigEndian.PutUint16(bs[1:], s.Delta)
+		return bs
+	}
+}
+
+
+
+class StackMapSameFrameExtended {
+	FrameType byte
+	Delta     uint16
+	fn ToBytes() -> (bs []byte) {
+		bs := make([]byte, 3)
+		bs[0] = s.FrameType
+		binary.BigEndian.PutUint16(bs[1:], s.Delta)
+		return bs
+	}
+}
+
+
+
+class StackMapAppendFrame {
+	FrameType byte
+	Delta     uint16
+	Locals    []StackMapVerificationTypeInfo
+	fn ToBytes() -> (bs []byte) {
+		bs := make([]byte, 3)
+		bs[0] = s.FrameType
+		binary.BigEndian.PutUint16(bs[1:], s.Delta)
+		for _, v := range s.Locals {
+			bs = append(bs, v.ToBytes()...)
+		}
+		return bs
+	}
+}
+
+
+
+class StackMapFullFrame {
+	FrameType byte
+	Delta     uint16
+	Locals    []StackMapVerificationTypeInfo
+	Stacks    []StackMapVerificationTypeInfo
+	fn ToBytes() -> (bs []byte) {
+		bs := make([]byte, 5)
+		bs[0] = s.FrameType
+		binary.BigEndian.PutUint16(bs[1:], s.Delta)
+		binary.BigEndian.PutUint16(bs[3:], uint16(len(s.Locals)))
+		for _, v := range s.Locals {
+			bs = append(bs, v.ToBytes()...)
+		}
+		bs2 := make([]byte, 2)
+		binary.BigEndian.PutUint16(bs2, uint16(len(s.Stacks)))
+		bs = append(bs, bs2...)
+		for _, v := range s.Stacks {
+			bs = append(bs, v.ToBytes()...)
+		}
+		return bs
+	}
+}
+
+
+
+type StackMapTopVariableInfo struct{}
+type StackMapIntegerVariableInfo struct{}
+type StackMapFloatVariableInfo struct{}
+type StackMapLongVariableInfo struct{}
+type StackMapDoubleVariableInfo struct{}
+type StackMapNullVariableInfo struct{}
+type StackMapUninitializedThisVariableInfo struct{}
+type StackMapObjectVariableInfo struct {
+	Index    uint16
+	Readable string
+}
+type StackMapUninitializedVariableInfo struct {
+	CodeOffset uint16
+}
+
+type StackMapVerificationTypeInfo struct {
+	Verify Object
+}
+
+
+func (s *StackMapVerificationTypeInfo) ToBytes() []byte {
+	if _,ok := s.Verify.(StackMapTopVariableInfo) ; ok {
+		return []byte{0}
+	}
+	if _,ok := s.Verify.(StackMapIntegerVariableInfo) ; ok {
+		return []byte{1}
+	}
+	if _,ok := s.Verify.(StackMapFloatVariableInfo) ; ok {
+		return []byte{2}
+	}
+	if _,ok := s.Verify.(StackMapDoubleVariableInfo) ; ok {
+		return []byte{3}
+	}
+	if _,ok := s.Verify.(StackMapLongVariableInfo) ; ok {
+		return []byte{4}
+	}
+	if _,ok := s.Verify.(StackMapNullVariableInfo) ; ok {
+		return []byte{5}
+	}
+	if _,ok := s.Verify.(StackMapUninitializedThisVariableInfo) ; ok {
+		return []byte{6}
+	}
+	if v,ok := s.Verify.(StackMapObjectVariableInfo) ; ok {
+		bs := new []byte(3)
+		bs[0] = 7
+		binary.BigEndian.PutUint16(bs[1:], v.Index)
+		return bs
+	}
+	if v,ok := s.Verify.(StackMapUninitializedVariableInfo) ; ok {
+		bs := new []byte (3)
+		bs[0] = 8
+		binary.BigEndian.PutUint16(bs[1:], v.CodeOffset)
+		return bs
+	}
+}

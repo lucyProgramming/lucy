@@ -1,0 +1,26 @@
+
+
+
+public class AttributeInfo {
+	NameIndex       char
+	attributeLength int
+	Info            []byte
+}
+
+typealias AttributeGroupedByName =  map[string][]*AttributeInfo
+
+
+fn GetAttributeByName(a AttributeGroupedByName , name string) []*AttributeInfo {
+	if a == nil {
+		return nil
+	}
+	return a[name]
+}
+
+
+
+
+
+
+
+
