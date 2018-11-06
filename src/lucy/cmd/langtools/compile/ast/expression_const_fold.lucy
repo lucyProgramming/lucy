@@ -1,7 +1,7 @@
  
 
 func (e *Expression) getBinaryExpressionConstValue(folder binaryConstFolder) (is bool, err error) {
-	bin := e.Data.(*ExpressionBinary)
+	bin := e.Data.(ExpressionBinary)
 	is1, err1 := bin.Left.constantFold()
 	is2, err2 := bin.Right.constantFold()
 	if err1 != null { //something is wrong

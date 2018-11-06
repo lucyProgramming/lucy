@@ -7,56 +7,57 @@ func init() {
 func registerBuildInFunctions() {
 	{
 		//print
-		buildInFunctionsMap[common.BuildInFunctionPrint] = &Function{
-			buildInFunctionChecker: func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos Pos) {
-				if len(e.ParameterTypes) > 0 {
-					*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
-						e.ParameterTypes[0].Pos.ErrMsgPrefix()))
-				}
-			},
-			IsBuildIn: true,
-		}
+		buildInFunctionsMap[common.BuildInFunctionPrint] = new Function()
+        buildInFunctionsMap[common.BuildInFunctionPrint].buildInFunctionChecker = fn(f Function, e ExpressionFunctionCall, block Block, errs []error, args []Type, pos Pos) {
+            if len(e.ParameterTypes) > 0 {
+                msg := sprintf("%s buildin function expect no typed parameter",
+                                          e.ParameterTypes[0].Pos.ErrMsgPrefix() )
+                errs . append( new error(msg))
+            }
+        }
+		 buildInFunctionsMap[common.BuildInFunctionPrint].IsBuildIn = true
+
 	}
 	{
 		//catch
-		catch := &Function{}
+		catch := new Function()
 		catch.IsBuildIn = true
 		buildInFunctionsMap[common.BuildInFunctionCatch] = catch
-		catch.Type.ReturnList = make([]*Variable, 1)
-		catch.Type.ReturnList[0] = &Variable{}
+		catch.Type.ReturnList = new []Variable(1)
+		catch.Type.ReturnList[0] = new Variable()
 		catch.Type.ReturnList[0].Name = "returnValue"
-		catch.Type.ReturnList[0].Type = &Type{}
+		catch.Type.ReturnList[0].Type = new Type()
 		catch.Type.ReturnList[0].Type.Type = VariableTypeObject
-		catch.Type.ReturnList[0].Type.Class = &Class{}
+		catch.Type.ReturnList[0].Type.Class = new Class()
 		catch.Type.ReturnList[0].Type.Class.Name = DefaultExceptionClass
 		catch.Type.ReturnList[0].Type.Class.NotImportedYet = true
-		catch.buildInFunctionChecker = func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error, args []*Type, pos Pos) {
+		catch.buildInFunctionChecker = fn(f Function, e ExpressionFunctionCall, block Block, errs []error, args []Type, pos Pos) {
 			if len(e.ParameterTypes) > 0 {
-				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
-					e.ParameterTypes[0].Pos.ErrMsgPrefix()))
+				errs . append(new error( sprintf("%s buildin function expect no typed parameter",
+					e.ParameterTypes[0].Pos.ErrMsgPrefix())) )
 			}
 			if block.InheritedAttribute.Defer == null {
-				*errs = append(*errs, fmt.Errorf("%s buildin function '%s' only allow in defer block",
-					pos.ErrMsgPrefix(), common.BuildInFunctionCatch))
+				errs.append(new error( sprintf("%s buildin function '%s' only allow in defer block",
+					pos.ErrMsgPrefix(), common.BuildInFunctionCatch)))
 				return
 			}
 			if len(e.Args) > 1 {
-				*errs = append(*errs, fmt.Errorf("%s build function '%s' expect at most 1 argument",
-					e.Args[1].Pos.ErrMsgPrefix(), common.BuildInFunctionCatch))
+				errs.append(new error( sprintf("%s build function '%s' expect at most 1 argument",
+					e.Args[1].Pos.ErrMsgPrefix(), common.BuildInFunctionCatch)))
 				return
 			}
 			if len(e.Args) == 0 {
 				if block.InheritedAttribute.Defer.ExceptionClass == null {
 					c, err := PackageBeenCompile.loadClass(DefaultExceptionClass)
 					if err != null {
-						*errs = append(*errs, fmt.Errorf("%s load exception class failed,err:%v",
-							pos.ErrMsgPrefix(), err))
+						errs . append(new error( sprintf("%s load exception class failed,err:%v",
+							pos.ErrMsgPrefix(), err)))
 						return
 					}
 					f.Type.ReturnList[0].Type.Class = c
 					err = block.InheritedAttribute.Defer.registerExceptionClass(c)
 					if err != null {
-						*errs = append(*errs, fmt.Errorf("%s %v", pos.ErrMsgPrefix(), err))
+						errs . append(new error( sprintf("%s %v", pos.ErrMsgPrefix(), err)))
 					}
 				} else {
 					f.Type.ReturnList[0].Type.Class = block.InheritedAttribute.Defer.ExceptionClass
@@ -64,24 +65,24 @@ func registerBuildInFunctions() {
 				return
 			}
 			if e.Args[0].Type != ExpressionTypeString {
-				*errs = append(*errs, fmt.Errorf("%s build function '%s' expect string argument",
-					errMsgPrefix(args[0].Pos), common.BuildInFunctionCatch))
+				errs . append(new error( sprintf("%s build function '%s' expect string argument",
+					errMsgPrefix(args[0].Pos), common.BuildInFunctionCatch)))
 			}
 			className := e.Args[0].Data.(string)
 			c, err := PackageBeenCompile.loadClass(className)
 			if err != null {
-				*errs = append(*errs, fmt.Errorf("%s %v", e.Args[0].Pos.ErrMsgPrefix(), err))
+				errs . append(new error(sprintf("%s %v", e.Args[0].Pos.ErrMsgPrefix(), err)))
 				return
 			}
 			have, _ := c.haveSuperClass(e.Args[0].Pos, JavaThrowableClass)
 			if have == false {
-				*errs = append(*errs, fmt.Errorf("%s '%s' does't have super class '%s'",
-					e.Args[0].Pos.ErrMsgPrefix(), className, JavaThrowableClass))
+				errs . append(new error( sprintf("%s '%s' does't have super class '%s'",
+					e.Args[0].Pos.ErrMsgPrefix(), className, JavaThrowableClass)))
 				return
 			}
 			err = block.InheritedAttribute.Defer.registerExceptionClass(c)
 			if err != null {
-				*errs = append(*errs, fmt.Errorf("%s %v", args[0].Pos.ErrMsgPrefix(), err))
+				errs. append(new error(sprintf("%s %v", args[0].Pos.ErrMsgPrefix(), err)))
 			}
 		}
 	}
@@ -89,8 +90,8 @@ func registerBuildInFunctions() {
 	{
 		//panic
 		buildInFunctionsMap[common.BuildInFunctionPanic] = &Function{
-			buildInFunctionChecker: func(f *Function, e *ExpressionFunctionCall,
-				block *Block, errs *[]error, args []*Type, pos Pos) {
+			buildInFunctionChecker: fn(f Function, e ExpressionFunctionCall,
+				block Block, errs []error, args []Type, pos Pos) {
 				if len(e.ParameterTypes) > 0 {
 					*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 						errMsgPrefix(e.ParameterTypes[0].Pos)))
@@ -284,8 +285,8 @@ func registerBuildInFunctions() {
 	}
 }
 
-func monitorChecker(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
-	args []*Type, pos Pos) {
+fn monitorChecker(f Function, e ExpressionFunctionCall, block Block, errs []error,
+	args []Type, pos Pos) {
 	if len(e.ParameterTypes) > 0 {
 		*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
 			errMsgPrefix(e.ParameterTypes[0].Pos)))

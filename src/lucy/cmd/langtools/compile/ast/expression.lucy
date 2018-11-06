@@ -1,85 +1,78 @@
-package ast
 
-import (
-	"fmt"
-)
 
-type ExpressionTypeKind int
-
-const (
-	_                             ExpressionTypeKind = iota // start with 1
-	ExpressionTypeNull                                      // null
-	ExpressionTypeBool                                      // true or false
-	ExpressionTypeByte                                      // 'a' or 97b
-	ExpressionTypeShort                                     // 100s
-	ExpressionTypeChar                                      // '\u0000'
-	ExpressionTypeInt                                       // 100
-	ExpressionTypeLong                                      // 100L
-	ExpressionTypeFloat                                     // 1.0
-	ExpressionTypeDouble                                    // 1.0d
-	ExpressionTypeString                                    // "hello world"
-	ExpressionTypeArray                                     // []bool{false,true}
-	ExpressionTypeLogicalOr                                 // a || b
-	ExpressionTypeLogicalAnd                                // a && b
-	ExpressionTypeOr                                        // a | b
-	ExpressionTypeAnd                                       // a & b
-	ExpressionTypeXor                                       // a ^b
-	ExpressionTypeLsh                                       // a << b
-	ExpressionTypeRsh                                       // a >> b
-	ExpressionTypeAdd                                       // a + b
-	ExpressionTypeSub                                       // a - b
-	ExpressionTypeMul                                       // a * b
-	ExpressionTypeDiv                                       // a / b
-	ExpressionTypeMod                                       // a % b
-	ExpressionTypeAssign                                    // a = b
-	ExpressionTypeVarAssign                                 // a := b
-	ExpressionTypePlusAssign                                // a += b
-	ExpressionTypeMinusAssign                               // a -= b
-	ExpressionTypeMulAssign                                 // a *= b
-	ExpressionTypeDivAssign                                 // a /= b
-	ExpressionTypeModAssign                                 // a %= b
-	ExpressionTypeAndAssign                                 // a &= b
-	ExpressionTypeOrAssign                                  // a |= b
-	ExpressionTypeXorAssign                                 // a ^= b
-	ExpressionTypeLshAssign                                 // a <<= b
-	ExpressionTypeRshAssign                                 // a >>= b
-	ExpressionTypeEq                                        // a == b
-	ExpressionTypeNe                                        // a != b
-	ExpressionTypeGe                                        // a >= b
-	ExpressionTypeGt                                        // a > b
-	ExpressionTypeLe                                        // a <= b
-	ExpressionTypeLt                                        // a < b
-	ExpressionTypeIndex                                     // a["b"]
-	ExpressionTypeSelection                                 // a.b
-	ExpressionTypeSelectionConst                            // ::
-	ExpressionTypeMethodCall                                // a.b()
-	ExpressionTypeFunctionCall                              // a()
-	ExpressionTypeIncrement                                 // a++
-	ExpressionTypeDecrement                                 // a--
-	ExpressionTypePrefixIncrement                           // ++ a
-	ExpressionTypePrefixDecrement                           // -- a
-	ExpressionTypeNegative                                  // -a
-	ExpressionTypeNot                                       // !a
-	ExpressionTypeBitwiseNot                                // ~a
-	ExpressionTypeIdentifier                                // a
-	ExpressionTypeNew                                       // new []int(10)
-	ExpressionTypeList                                      // a,b := "hello","world"
-	ExpressionTypeFunctionLiteral                           // fn() { print("hello world"); }
-	ExpressionTypeVar                                       // var a,b int
-	ExpressionTypeConst                                     // const a = "hello world"
-	ExpressionTypeCheckCast                                 // []byte(str)
-	ExpressionTypeRange                                     // for range
-	ExpressionTypeSlice                                     // arr[0:2]
-	ExpressionTypeMap                                       // map literal
-	ExpressionTypeTypeAssert                                // a.(Object)
-	ExpressionTypeQuestion                                  // true ? a : b
-	ExpressionTypeGlobal                                    // global.XXX
-	ExpressionTypeParenthesis                               // ( a )
-	ExpressionTypeVArgs                                     // a ...
+public enum  ExpressionTypeKind { 
+	ExpressionTypeNull  =1 ,                                     // null
+	ExpressionTypeBool,                                      // true or false
+	ExpressionTypeByte ,                                     // 'a' or 97b
+	ExpressionTypeShort  ,                                   // 100s
+	ExpressionTypeChar  ,                                    // '\u0000'
+	ExpressionTypeInt ,                                      // 100
+	ExpressionTypeLong ,                                     // 100L
+	ExpressionTypeFloat ,                                    // 1.0
+	ExpressionTypeDouble ,                                   // 1.0d
+	ExpressionTypeString ,                                  // "hello world"
+	ExpressionTypeArray ,                                    // []bool{false,true}
+	ExpressionTypeLogicalOr   ,                              // a || b
+	ExpressionTypeLogicalAnd  ,                              // a && b
+	ExpressionTypeOr     ,                                   // a | b
+	ExpressionTypeAnd  ,                                     // a & b
+	ExpressionTypeXor ,                                      // a ^b
+	ExpressionTypeLsh  ,                                     // a << b
+	ExpressionTypeRsh   ,                                    // a >> b
+	ExpressionTypeAdd  ,                                     // a + b
+	ExpressionTypeSub   ,                                    // a - b
+	ExpressionTypeMul  ,                                     // a * b
+	ExpressionTypeDiv   ,                                    // a / b
+	ExpressionTypeMod  ,                                     // a % b
+	ExpressionTypeAssign   ,                                 // a = b
+	ExpressionTypeVarAssign  ,                               // a := b
+	ExpressionTypePlusAssign   ,                             // a += b
+	ExpressionTypeMinusAssign  ,                             // a -= b
+	ExpressionTypeMulAssign   ,                              // a *= b
+	ExpressionTypeDivAssign  ,                               // a /= b
+	ExpressionTypeModAssign  ,                               // a %= b
+	ExpressionTypeAndAssign  ,                               // a &= b
+	ExpressionTypeOrAssign   ,                               // a |= b
+	ExpressionTypeXorAssign  ,                               // a ^= b
+	ExpressionTypeLshAssign  ,                               // a <<= b
+	ExpressionTypeRshAssign  ,                               // a >>= b
+	ExpressionTypeEq   ,                                     // a == b
+	ExpressionTypeNe ,                                       // a != b
+	ExpressionTypeGe ,                                       // a >= b
+	ExpressionTypeGt  ,                                      // a > b
+	ExpressionTypeLe  ,                                      // a <= b
+	ExpressionTypeLt  ,                                      // a < b
+	ExpressionTypeIndex  ,                                   // a["b"]
+	ExpressionTypeSelection ,                                // a.b
+	ExpressionTypeSelectionConst,                            // ::
+	ExpressionTypeMethodCall ,                               // a.b()
+	ExpressionTypeFunctionCall ,                             // a()
+	ExpressionTypeIncrement ,                               // a++
+	ExpressionTypeDecrement  ,                               // a--
+	ExpressionTypePrefixIncrement    ,                       // ++ a
+	ExpressionTypePrefixDecrement ,                          // -- a
+	ExpressionTypeNegative    ,                              // -a
+	ExpressionTypeNot    ,                                   // !a
+	ExpressionTypeBitwiseNot   ,                             // ~a
+	ExpressionTypeIdentifier,                                // a
+	ExpressionTypeNew    ,                                   // new []int(10)
+	ExpressionTypeList    ,                                  // a,b := "hello","world"
+	ExpressionTypeFunctionLiteral  ,                         // fn() { print("hello world"); }
+	ExpressionTypeVar    ,                                   // var a,b int
+	ExpressionTypeConst ,                                    // const a = "hello world"
+	ExpressionTypeCheckCast  ,                               // []byte(str)
+	ExpressionTypeRange    ,                                 // for range
+	ExpressionTypeSlice  ,                                   // arr[0:2]
+	ExpressionTypeMap   ,                                    // map literal
+	ExpressionTypeTypeAssert  ,                              // a.(Object)
+	ExpressionTypeQuestion ,                                 // true ? a : b
+	ExpressionTypeGlobal  ,                                  // global.XXX
+	ExpressionTypeParenthesis ,                              // ( a )
+	ExpressionTypeVArgs ,                                    // a ...
 	ExpressionTypeDot                                       // .
-)
+}
 
-type Expression struct {
+class Expression {
 	//checkRangeCalled bool
 	Type ExpressionTypeKind
 	/*
@@ -97,98 +90,15 @@ type Expression struct {
 	Op                    string
 	Lefts                 []*Expression // left values
 	AsSubForNegative      *Expression
-}
 
-func (e *Expression) binaryExpressionDependOnSub() *Expression {
-	switch e.Type {
-	case ExpressionTypeAdd:
-		bin := e.Data.(*ExpressionBinary)
-		// 0 + a
-		if bin.Left.isNumber() && bin.Left.getDoubleValue() == 0 {
-			return bin.Right
+	fn IsIdentifier(identifier string) bool {
+		if e.Type != ExpressionTypeIdentifier {
+			return false
 		}
-		// a + 0
-		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
-			return bin.Left
-		}
-	case ExpressionTypeSub:
-		// a - 0
-		bin := e.Data.(*ExpressionBinary)
-		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
-			return bin.Left
-		}
-
-	case ExpressionTypeMul:
-		// a * 0 == 0
-		bin := e.Data.(*ExpressionBinary)
-		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
-			return bin.Right
-		}
-		// 0 * a == 0
-		if bin.Left.isNumber() && bin.Left.getDoubleValue() == 0 {
-			return bin.Left
-		}
-		// a * 1 == a
-		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 1 {
-			return bin.Left
-		}
-		// 1 * a == a
-		if bin.Left.isNumber() && bin.Left.getDoubleValue() == 1 {
-			return bin.Right
-		}
-	case ExpressionTypeDiv:
-		// a / 1 == a
-		bin := e.Data.(*ExpressionBinary)
-		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 1 {
-			return bin.Left
-		}
-	case ExpressionTypeEq:
-		bin := e.Data.(*ExpressionBinary)
-		if bin.Left.Value.Type == VariableTypeBool {
-			// true == a
-			if bin.Left.isBoolLiteral(true) {
-				return bin.Right
-			}
-			// a == true
-			if bin.Right.isBoolLiteral(true) {
-				return bin.Left
-			}
-		}
-	case ExpressionTypeNe:
-		bin := e.Data.(*ExpressionBinary)
-		if bin.Left.Value.Type == VariableTypeBool {
-			// false != a
-			if bin.Left.isBoolLiteral(false) {
-				return bin.Right
-			}
-			// a != false
-			if bin.Right.isBoolLiteral(false) {
-				return bin.Left
-			}
-		}
-	case ExpressionTypeLogicalAnd:
-		bin := e.Data.(*ExpressionBinary)
-		// true && a
-		if bin.Left.isBoolLiteral(true) {
-			return bin.Right
-		}
-		// a && true
-		if bin.Right.isBoolLiteral(true) {
-			return bin.Left
-		}
-	case ExpressionTypeLogicalOr:
-		bin := e.Data.(*ExpressionBinary)
-		// false || a
-		if bin.Left.isBoolLiteral(false) {
-			return bin.Right
-		}
-		// a || false
-		if bin.Right.isBoolLiteral(false) {
-			return bin.Left
-		}
+		return e.Data.(*ExpressionIdentifier).Name == identifier
 	}
-	return null
 }
+
 
 func (e *Expression) isBoolLiteral(b bool) bool {
 	if e.Type != ExpressionTypeBool {
@@ -493,112 +403,213 @@ func (e *Expression) HaveMultiValue() bool {
 
 }
 
-type CallArgs []*Expression // f(1,2)
 
-type ExpressionFunctionCall struct {
-	BuildInFunctionMeta      interface{} // for build in function only
-	Expression               *Expression
+class ExpressionFunctionCall  {
+	BuildInFunctionMeta      Object // for build in function only
+	Expression               Expression
 	Args                     CallArgs
-	VArgs                    *CallVariableArgs
-	Function                 *Function
+	VArgs                    CallVariableArgs
+	Function                 Function
 	ParameterTypes           []*Type // for template function
 	TemplateFunctionCallPair *TemplateFunctionInstance
 }
 
-type ExpressionMethodCall struct {
-	Class              *Class // for object or class
-	Expression         *Expression
+class ExpressionMethodCall  {
+	Class              Class // for object or class
+	Expression         Expression
 	Args               CallArgs
-	VArgs              *CallVariableArgs
-	Name               string
-	Method             *ClassMethod
-	FieldMethodHandler *ClassField
+	VArgs              CallVariableArgs
+	Name               tring
+	Method             ClassMethod
+	FieldMethodHandler ClassField
 	/*
 		unSupport !!!!!!
 	*/
 	ParameterTypes                []*Type
 	PackageFunction               *Function
 	PackageGlobalVariableFunction *Variable
+
+	
 }
 
-type ExpressionVar struct {
-	Type       *Type
-	Variables  []*Variable
-	InitValues []*Expression
+class ExpressionVar  {
+	Type       Type
+	Variables  []Variable
+	InitValues []Expression
 }
 
-type ExpressionVarAssign struct {
-	Lefts            []*Expression
-	InitValues       []*Expression
+class ExpressionVarAssign  {
+	Lefts            []Expression
+	InitValues       []Expression
 	IfDeclaredBefore []bool // used for colon assign
 }
 
-type ExpressionTypeConversion struct {
-	Type       *Type
-	Expression *Expression
+class ExpressionTypeConversion  {
+	Type       Type
+	Expression Expression
 }
 
-type ExpressionIdentifier struct {
+class ExpressionIdentifier  {
 	Name     string
-	Variable *Variable
-	Function *Function
-	EnumName *EnumName
+	Variable Variable
+	Function Function
+	EnumName EnumName
 	Comment  string
 }
 
-type ExpressionIndex struct {
-	Expression *Expression
-	Index      *Expression
+class ExpressionIndex  {
+	Expression Expression
+	Index      Expression
 }
-type ExpressionSelection struct {
-	Expression      *Expression
+
+class ExpressionSelection  {
+	Expression      Expression
 	Name            string
-	Field           *ClassField  // expression is class or object
-	Method          *ClassMethod // pack to method handle
-	PackageFunction *Function    // expression is package , pack function to method handle
-	PackageVariable *Variable    // expression is package , get package variable
-	PackageEnumName *EnumName    // expression is package , get enumName
+	Field           ClassField  // expression is class or object
+	Method          ClassMethod // pack to method handle
+	PackageFunction Function    // expression is package , pack function to method handle
+	PackageVariable Variable    // expression is package , get package variable
+	PackageEnumName EnumName    // expression is package , get enumName
 }
 
-type ExpressionNew struct {
-	Type         *Type
+class ExpressionNew  {
+	Type         Type
 	Args         CallArgs
-	Construction *ClassMethod
-	VArgs        *CallVariableArgs
+	Construction ClassMethod
+	VArgs        CallVariableArgs
 }
 
-type ExpressionMap struct {
-	Type          *Type
-	KeyValuePairs []*ExpressionKV
+class ExpressionMap  {
+	Type          Type
+	KeyValuePairs []ExpressionKV
 }
 
-type ExpressionKV struct {
-	Key   *Expression
-	Value *Expression
+class ExpressionKV  {
+	Key   Expression
+	Value Expression
 }
 
 /*
 	for some general purpose
 */
-type ExpressionBinary struct {
-	Left  *Expression
-	Right *Expression
+class ExpressionBinary  {
+	Left  Expression
+	Right Expression
 }
 
 // for package jvm
-type ExpressionAssign struct {
-	Lefts  []*Expression
-	Values []*Expression
+class ExpressionAssign  {
+	Lefts  []Expression
+	Values []Expression
 }
 
-type ExpressionArray struct {
-	Type        *Type
-	Expressions []*Expression
+class ExpressionArray  {
+	Type        Type
+	Expressions []Expression
 }
 
-func (e *Expression) IsIdentifier(identifier string) bool {
-	if e.Type != ExpressionTypeIdentifier {
-		return false
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+func (e *Expression) binaryExpressionDependOnSub() *Expression {
+	switch e.Type {
+	case ExpressionTypeAdd:
+		bin := e.Data.(*ExpressionBinary)
+		// 0 + a
+		if bin.Left.isNumber() && bin.Left.getDoubleValue() == 0 {
+			return bin.Right
+		}
+		// a + 0
+		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
+			return bin.Left
+		}
+	case ExpressionTypeSub:
+		// a - 0
+		bin := e.Data.(*ExpressionBinary)
+		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
+			return bin.Left
+		}
+
+	case ExpressionTypeMul:
+		// a * 0 == 0
+		bin := e.Data.(*ExpressionBinary)
+		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
+			return bin.Right
+		}
+		// 0 * a == 0
+		if bin.Left.isNumber() && bin.Left.getDoubleValue() == 0 {
+			return bin.Left
+		}
+		// a * 1 == a
+		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 1 {
+			return bin.Left
+		}
+		// 1 * a == a
+		if bin.Left.isNumber() && bin.Left.getDoubleValue() == 1 {
+			return bin.Right
+		}
+	case ExpressionTypeDiv:
+		// a / 1 == a
+		bin := e.Data.(*ExpressionBinary)
+		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 1 {
+			return bin.Left
+		}
+	case ExpressionTypeEq:
+		bin := e.Data.(*ExpressionBinary)
+		if bin.Left.Value.Type == VariableTypeBool {
+			// true == a
+			if bin.Left.isBoolLiteral(true) {
+				return bin.Right
+			}
+			// a == true
+			if bin.Right.isBoolLiteral(true) {
+				return bin.Left
+			}
+		}
+	case ExpressionTypeNe:
+		bin := e.Data.(*ExpressionBinary)
+		if bin.Left.Value.Type == VariableTypeBool {
+			// false != a
+			if bin.Left.isBoolLiteral(false) {
+				return bin.Right
+			}
+			// a != false
+			if bin.Right.isBoolLiteral(false) {
+				return bin.Left
+			}
+		}
+	case ExpressionTypeLogicalAnd:
+		bin := e.Data.(*ExpressionBinary)
+		// true && a
+		if bin.Left.isBoolLiteral(true) {
+			return bin.Right
+		}
+		// a && true
+		if bin.Right.isBoolLiteral(true) {
+			return bin.Left
+		}
+	case ExpressionTypeLogicalOr:
+		bin := e.Data.(*ExpressionBinary)
+		// false || a
+		if bin.Left.isBoolLiteral(false) {
+			return bin.Right
+		}
+		// a || false
+		if bin.Right.isBoolLiteral(false) {
+			return bin.Left
+		}
 	}
-	return e.Data.(*ExpressionIdentifier).Name == identifier
+	return null
 }
+*/

@@ -8,7 +8,6 @@ class ConstantInfoNameAndTypeHighLevel {
 		this.Name = Name
 		this.Descriptor = Descriptor
 	}
-	
 	public fn toString() ->(s string) {
 		return this.Name + ";" + this.Descriptor
 	}

@@ -207,16 +207,12 @@ class Block {
             return t, err
         }
         if t != null { //
-            switch t.(type) {
-            case *Variable:
-                v := t.(*Variable)
+            if v,ok := t.(Variable) ; ok {
                 if v.IsGlobal == false { // not a global variable
                     if this.IsFunctionBlock &&
                         this.InheritedAttribute.Function.IsGlobal == false {
                         this.InheritedAttribute.Function.Closure.InsertVar(from, v)
-                        if isCaptureVar != null {
-                            *isCaptureVar = true
-                        }
+                            isCaptureVar[0] = true
                     }
                     //cannot search variable from class body
                     if this.IsClassBlock {
@@ -224,8 +220,8 @@ class Block {
                             from.ErrMsgPrefix(), name)
                     }
                 }
-            case *Function:
-                f := t.(*Function)
+            } 
+            if f,ok :=  t.(Function) ; ok {
                 if f.IsGlobal == false {
                     if this.IsClassBlock {
                         this.Class.closure.InsertFunction(from, f)
@@ -234,20 +230,34 @@ class Block {
                         this.Fn.Closure.InsertFunction(from, f)
                     }
                 }
-            }
+
+            } 
+               
         }
+
         return t, null
     }
 
-    fn inherit(father *Block) {
+    fn inherit(father Block) {
         if this.Outer != null {
             return
         }
         if this == father {
             panic("inherit from self")
         }
-        this.InheritedAttribute = father.InheritedAttribute
+
         this.Outer = father
+        this.InheritedAttribute.ForBreak = father.InheritedAttribute.ForBreak
+        this.InheritedAttribute.StatementOffset = father.InheritedAttribute.StatementOffset
+        this.InheritedAttribute.IsConstructionMethod = father.InheritedAttribute.IsConstructionMethod
+        this.InheritedAttribute.ForContinue = father.InheritedAttribute.ForContinue
+        this.InheritedAttribute.Function = father.InheritedAttribute.Function
+        this.InheritedAttribute.Class = father.InheritedAttribute.Class
+        this.InheritedAttribute.Defer = father.InheritedAttribute.Defer
+        this.InheritedAttribute.ClassMethod = father.InheritedAttribute.ClassMethod
+        this.InheritedAttribute.ClassAndFunctionNames = father.InheritedAttribute.ClassAndFunctionNames
+
+
         if this.IsFunctionBlock || this.IsClassBlock {
             this.InheritedAttribute.ForBreak = null
             this.InheritedAttribute.ForContinue = null
@@ -258,7 +268,7 @@ class Block {
         }
     }
 
-    fn checkUnUsed() (es []error) {
+    fn checkUnUsed() -> (es []error) {
         if common.CompileFlags.DisableCheckUnUse {
             return null
         }
@@ -339,7 +349,7 @@ class Block {
             return []error{}
         }
         this.checkConstantsCalled = true
-        errs := make([]error, 0)
+        errs := new []error(0)
         for _, c := range this.Constants {
             if err := this.nameIsValid(c.Name, c.Pos); err != null {
                 errs = append(errs, err)
@@ -359,7 +369,7 @@ class Block {
 
     fn checkNameExist(name string, pos Pos) -> (err error) {
         if this.Variables == null {
-            this.Variables = make(map[string]*Variable)
+            this.Variables = new map {string -> Variable } ()
         }
         if v, ok := this.Variables[name]; ok {
             errMsg := fmt.Sprintf("%s name '%s' already declared as variable,first declared at:\n",
@@ -368,7 +378,7 @@ class Block {
             return fmt.Errorf(errMsg)
         }
         if this.Classes == null {
-            this.Classes = make(map[string]*Class)
+            this.Classes = new map {string-> Class} ()
         }
         if c, ok := this.Classes[name]; ok {
             errMsg := fmt.Sprintf("%s name '%s' already declared as class,first declared at:\n",
@@ -377,7 +387,7 @@ class Block {
             return fmt.Errorf(errMsg)
         }
         if this.Functions == null {
-            this.Functions = make(map[string]*Function)
+            this.Functions = new map  { string -> Function } ()
         }
         if f, ok := this.Functions[name]; ok {
             errMsg := fmt.Sprintf("%s name '%s' already declared as function,first declared at:\n",
@@ -386,7 +396,7 @@ class Block {
             return fmt.Errorf(errMsg)
         }
         if this.Constants == null {
-            this.Constants = make(map[string]*Constant)
+            this.Constants = new map { string -> Constant } ()
         }
         if c, ok := this.Constants[name]; ok {
             errMsg := fmt.Sprintf("%s name '%s' already declared as const,first declared at:\n",
@@ -395,7 +405,7 @@ class Block {
             return fmt.Errorf(errMsg)
         }
         if this.EnumNames == null {
-            this.EnumNames = make(map[string]*EnumName)
+            this.EnumNames = new map { string->EnumName}()
         }
         if en, ok := this.EnumNames[name]; ok {
             errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:\n",
@@ -404,7 +414,7 @@ class Block {
             return fmt.Errorf(errMsg)
         }
         if this.TypeAliases == null {
-            this.TypeAliases = make(map[string]*Type)
+            this.TypeAliases = new map { string -> Type } ()
         }
         if t, ok := this.TypeAliases[name]; ok {
             errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:\n",
@@ -413,7 +423,7 @@ class Block {
             return fmt.Errorf(errMsg)
         }
         if this.Enums == null {
-            this.Enums = make(map[string]*Enum)
+            this.Enums = new map { string -> Enum } ()
         }
         if e, ok := this.Enums[name]; ok {
             errMsg := fmt.Sprintf("%s name %s already declared as enum,first declared at:\n",
@@ -443,14 +453,14 @@ class Block {
         return null
     }
 
-    fn Insert(name string, pos Pos, d interface{}) -> (err error) {
+    fn Insert(name string, pos Pos, d Object) -> (err error) {
         if err := this.nameIsValid(name, pos); err != null {
             return err
         }
         // handle label
-        if label, ok := d.(*StatementLabel); ok && label != null {
+        if label, ok := d.(StatementLabel); ok && label != null {
             if this.Labels == null {
-                this.Labels = make(map[string]*StatementLabel)
+                this.Labels = new map { string -> StatementLabel } ()
             }
             if l, ok := this.Labels[name]; ok {
                 errMsg := fmt.Sprintf("%s name '%s' already declared as enumName,first declared at:",
@@ -465,24 +475,24 @@ class Block {
         if err != null {
             return err
         }
-        switch d.(type) {
-        case *Class:
-            this.Classes[name] = d.(*Class)
-        case *Function:
-            t := d.(*Function)
+        if c := d.(Class) ; d != null {
+            this.Classes[name] = c
+        }
+        if f := d.(Function) ; f != null {
             if buildInFunctionsMap[t.Name] != null {
                 return fmt.Errorf("%s function named '%s' is buildin",
                     pos.ErrMsgPrefix(), name)
             }
-            this.Functions[name] = t
-        case *Constant:
-            this.Constants[name] = d.(*Constant)
-        case *Variable:
-            t := d.(*Variable)
-            t.LocalValOffset = math.MaxUint16 // overflow
-            this.Variables[name] = t
-        case *Enum:
-            e := d.(*Enum)
+            this.Functions[name] = f
+        }
+        if c := d.(Constant) ; c != null {
+             this.Constants[name] = c
+        }
+        if v := d.(Variable) ;  v != null {
+            v.LocalValOffset = math.MaxUint16 // overflow
+            this.Variables[name] = v
+        }
+        if e := d.(Enum) ; e != null {
             this.Enums[name] = e
             for _, v := range e.Enums {
                 err := this.Insert(v.Name, v.Pos, v)
@@ -490,10 +500,12 @@ class Block {
                     return err
                 }
             }
-        case *EnumName:
-            this.EnumNames[name] = d.(*EnumName)
-        case *Type:
-            this.TypeAliases[name] = d.(*Type)
+        }
+        if en := d.(EnumName) ; en != null {
+            this.EnumNames[name] = en
+        }
+        if t := d.(Type) ; d != null {
+             this.TypeAliases[name] = t
         }
         return null
     }

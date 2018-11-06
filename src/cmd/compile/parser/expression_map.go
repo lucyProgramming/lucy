@@ -17,7 +17,7 @@ func (ep *ExpressionParser) parseMapExpression() (*ast.Expression, error) {
 		ep.parser.ifTokenIsLfThenSkip()
 	}
 	if ep.parser.token.Type != lex.TokenLc {
-		err := fmt.Errorf("expect '{',but '%s'", ep.parser.token.Description)
+		err := fmt.Errorf("%s expect '{',but '%s'", ep.parser.errMsgPrefix(), ep.parser.token.Description)
 		ep.parser.errs = append(ep.parser.errs, err)
 		return nil, err
 	}
