@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-func (this *Expression) getBinaryExpressionConstValue(folder binaryConstFolder) (is bool, err error) {
-	bin := this.Data.(*ExpressionBinary)
+func (e *Expression) getBinaryExpressionConstValue(folder binaryConstFolder) (is bool, err error) {
+	bin := e.Data.(*ExpressionBinary)
 	is1, err1 := bin.Left.constantFold()
 	is2, err2 := bin.Right.constantFold()
 	if err1 != nil { //something is wrong
@@ -27,9 +27,9 @@ func (this *Expression) getBinaryExpressionConstValue(folder binaryConstFolder) 
 
 type binaryConstFolder func(bin *ExpressionBinary) (is bool, err error)
 
-func (this *Expression) binaryWrongOpErr() error {
+func (e *Expression) binaryWrongOpErr() error {
 	var typ1, typ2 string
-	bin := this.Data.(*ExpressionBinary)
+	bin := e.Data.(*ExpressionBinary)
 	if bin.Left.Value != nil {
 		typ1 = bin.Left.Value.TypeString()
 	} else {
@@ -41,8 +41,8 @@ func (this *Expression) binaryWrongOpErr() error {
 		typ2 = bin.Right.Op
 	}
 	return fmt.Errorf("%s cannot apply '%s' on '%s' and '%s'",
-		this.Pos.ErrMsgPrefix(),
-		this.Op,
+		e.Pos.ErrMsgPrefix(),
+		e.Op,
 		typ1,
 		typ2)
 }
@@ -76,8 +76,8 @@ func (this *Expression) binaryWrongOpErr() error {
 //	return fmt.Errorf("%s double constant exceeds", this.Pos.ErrMsgPrefix())
 //}
 
-func (this *Expression) constantFold() (is bool, err error) {
-	if this.isLiteral() {
+func (e *Expression) constantFold() (is bool, err error) {
+	if e.isLiteral() {
 		//if this.checkRangeCalled {
 		//	return true, nil
 		//}
@@ -146,50 +146,50 @@ func (this *Expression) constantFold() (is bool, err error) {
 		return true, nil
 	}
 	// ~
-	if this.Type == ExpressionTypeBitwiseNot {
-		ee := this.Data.(*Expression)
+	if e.Type == ExpressionTypeBitwiseNot {
+		ee := e.Data.(*Expression)
 		is, err = ee.constantFold()
 		if err != nil || is == false {
 			return
 		}
 		if ee.isInteger() == false {
 			err = fmt.Errorf("%s cannot apply '^' on a non-integer expression",
-				errMsgPrefix(this.Pos))
+				errMsgPrefix(e.Pos))
 			return
 		}
-		this.Type = ee.Type
+		e.Type = ee.Type
 		switch ee.Type {
 		case ExpressionTypeByte:
-			this.Data = ^ee.Data.(int64)
+			e.Data = ^ee.Data.(int64)
 		case ExpressionTypeChar:
-			this.Data = ^ee.Data.(int64)
+			e.Data = ^ee.Data.(int64)
 		case ExpressionTypeShort:
-			this.Data = ^ee.Data.(int64)
+			e.Data = ^ee.Data.(int64)
 		case ExpressionTypeInt:
-			this.Data = ^ee.Data.(int64)
+			e.Data = ^ee.Data.(int64)
 		case ExpressionTypeLong:
-			this.Data = ^ee.Data.(int64)
+			e.Data = ^ee.Data.(int64)
 		}
 	}
 	// !
-	if this.Type == ExpressionTypeNot {
-		ee := this.Data.(*Expression)
+	if e.Type == ExpressionTypeNot {
+		ee := e.Data.(*Expression)
 		is, err = ee.constantFold()
 		if err != nil || is == false {
 			return
 		}
 		if ee.Type != ExpressionTypeBool {
 			err = fmt.Errorf("%s cannot apply '!' on a non-bool expression",
-				errMsgPrefix(this.Pos))
+				errMsgPrefix(e.Pos))
 			return
 		}
-		this.Type = ExpressionTypeBool
-		this.Data = !ee.Data.(bool)
+		e.Type = ExpressionTypeBool
+		e.Data = !ee.Data.(bool)
 		return
 	}
 	// -
-	if this.Type == ExpressionTypeNegative {
-		ee := this.Data.(*Expression)
+	if e.Type == ExpressionTypeNegative {
+		ee := e.Data.(*Expression)
 		is, err = ee.constantFold()
 		if err != nil || is == false {
 			return
@@ -197,46 +197,46 @@ func (this *Expression) constantFold() (is bool, err error) {
 		switch ee.Type {
 		case ExpressionTypeFloat:
 			is = true
-			this.Data = -ee.Data.(float32)
-			this.Type = ExpressionTypeFloat
+			e.Data = -ee.Data.(float32)
+			e.Type = ExpressionTypeFloat
 			return
 		case ExpressionTypeDouble:
 			is = true
-			this.Data = -ee.Data.(float64)
-			this.Type = ExpressionTypeDouble
+			e.Data = -ee.Data.(float64)
+			e.Type = ExpressionTypeDouble
 			return
 		}
 	}
 	// && and ||
-	if this.Type == ExpressionTypeLogicalAnd || this.Type == ExpressionTypeLogicalOr {
+	if e.Type == ExpressionTypeLogicalAnd || e.Type == ExpressionTypeLogicalOr {
 		f := func(bin *ExpressionBinary) (is bool, err error) {
 			if bin.Left.Type != ExpressionTypeBool ||
 				bin.Right.Type != ExpressionTypeBool {
-				err = this.binaryWrongOpErr()
+				err = e.binaryWrongOpErr()
 				return
 			}
 			is = true
-			if this.Type == ExpressionTypeLogicalAnd {
-				this.Data = bin.Left.Data.(bool) && bin.Right.Data.(bool)
+			if e.Type == ExpressionTypeLogicalAnd {
+				e.Data = bin.Left.Data.(bool) && bin.Right.Data.(bool)
 			} else {
-				this.Data = bin.Left.Data.(bool) || bin.Right.Data.(bool)
+				e.Data = bin.Left.Data.(bool) || bin.Right.Data.(bool)
 			}
-			this.Type = ExpressionTypeBool
+			e.Type = ExpressionTypeBool
 			return
 		}
-		return this.getBinaryExpressionConstValue(f)
+		return e.getBinaryExpressionConstValue(f)
 	}
 	// + - * / % algebra arithmetic
-	if this.Type == ExpressionTypeAdd ||
-		this.Type == ExpressionTypeSub ||
-		this.Type == ExpressionTypeMul ||
-		this.Type == ExpressionTypeDiv ||
-		this.Type == ExpressionTypeMod {
-		is, err = this.getBinaryExpressionConstValue(this.arithmeticBinaryConstFolder)
+	if e.Type == ExpressionTypeAdd ||
+		e.Type == ExpressionTypeSub ||
+		e.Type == ExpressionTypeMul ||
+		e.Type == ExpressionTypeDiv ||
+		e.Type == ExpressionTypeMod {
+		is, err = e.getBinaryExpressionConstValue(e.arithmeticBinaryConstFolder)
 		return
 	}
 	// <<  >>
-	if this.Type == ExpressionTypeLsh || this.Type == ExpressionTypeRsh {
+	if e.Type == ExpressionTypeLsh || e.Type == ExpressionTypeRsh {
 		f := func(bin *ExpressionBinary) (is bool, err error) {
 			if bin.Left.isInteger() == false || bin.Right.isInteger() == false {
 				return
@@ -251,10 +251,10 @@ func (this *Expression) constantFold() (is bool, err error) {
 			case ExpressionTypeInt:
 				fallthrough
 			case ExpressionTypeLong:
-				if this.Type == ExpressionTypeLsh {
-					this.Data = bin.Left.Data.(int64) << byte(bin.Right.getLongValue())
+				if e.Type == ExpressionTypeLsh {
+					e.Data = bin.Left.Data.(int64) << byte(bin.Right.getLongValue())
 				} else {
-					this.Data = bin.Left.Data.(int64) >> byte(bin.Right.getLongValue())
+					e.Data = bin.Left.Data.(int64) >> byte(bin.Right.getLongValue())
 				}
 			}
 			//if this.Type == ExpressionTypeLsh {
@@ -277,15 +277,15 @@ func (this *Expression) constantFold() (is bool, err error) {
 			//		}
 			//	}
 			//}
-			this.Type = bin.Left.Type
+			e.Type = bin.Left.Type
 			return
 		}
-		return this.getBinaryExpressionConstValue(f)
+		return e.getBinaryExpressionConstValue(f)
 	}
 	// & | ^
-	if this.Type == ExpressionTypeAnd ||
-		this.Type == ExpressionTypeOr ||
-		this.Type == ExpressionTypeXor {
+	if e.Type == ExpressionTypeAnd ||
+		e.Type == ExpressionTypeOr ||
+		e.Type == ExpressionTypeXor {
 		f := func(bin *ExpressionBinary) (is bool, err error) {
 			if bin.Left.isInteger() == false || bin.Right.isInteger() == false ||
 				bin.Left.Type != bin.Right.Type {
@@ -293,54 +293,54 @@ func (this *Expression) constantFold() (is bool, err error) {
 			}
 			switch bin.Left.Type {
 			case ExpressionTypeByte:
-				if this.Type == ExpressionTypeAnd {
-					this.Data = bin.Left.Data.(int64) & bin.Right.Data.(int64)
-				} else if this.Type == ExpressionTypeOr {
-					this.Data = bin.Left.Data.(int64) | bin.Right.Data.(int64)
+				if e.Type == ExpressionTypeAnd {
+					e.Data = bin.Left.Data.(int64) & bin.Right.Data.(int64)
+				} else if e.Type == ExpressionTypeOr {
+					e.Data = bin.Left.Data.(int64) | bin.Right.Data.(int64)
 				} else {
-					this.Data = bin.Left.Data.(int64) ^ bin.Right.Data.(int64)
+					e.Data = bin.Left.Data.(int64) ^ bin.Right.Data.(int64)
 				}
 			case ExpressionTypeShort:
-				if this.Type == ExpressionTypeAnd {
-					this.Data = bin.Left.Data.(int64) & bin.Right.Data.(int64)
-				} else if this.Type == ExpressionTypeOr {
-					this.Data = bin.Left.Data.(int64) | bin.Right.Data.(int64)
+				if e.Type == ExpressionTypeAnd {
+					e.Data = bin.Left.Data.(int64) & bin.Right.Data.(int64)
+				} else if e.Type == ExpressionTypeOr {
+					e.Data = bin.Left.Data.(int64) | bin.Right.Data.(int64)
 				} else {
-					this.Data = bin.Left.Data.(int64) ^ bin.Right.Data.(int64)
+					e.Data = bin.Left.Data.(int64) ^ bin.Right.Data.(int64)
 				}
 			case ExpressionTypeChar:
-				if this.Type == ExpressionTypeAnd {
-					this.Data = bin.Left.Data.(int64) & bin.Right.Data.(int64)
-				} else if this.Type == ExpressionTypeOr {
-					this.Data = bin.Left.Data.(int64) | bin.Right.Data.(int64)
+				if e.Type == ExpressionTypeAnd {
+					e.Data = bin.Left.Data.(int64) & bin.Right.Data.(int64)
+				} else if e.Type == ExpressionTypeOr {
+					e.Data = bin.Left.Data.(int64) | bin.Right.Data.(int64)
 				} else {
-					this.Data = bin.Left.Data.(int64) ^ bin.Right.Data.(int64)
+					e.Data = bin.Left.Data.(int64) ^ bin.Right.Data.(int64)
 				}
 			case ExpressionTypeInt:
-				if this.Type == ExpressionTypeAnd {
-					this.Data = bin.Left.Data.(int64) & bin.Right.Data.(int64)
-				} else if this.Type == ExpressionTypeOr {
-					this.Data = bin.Left.Data.(int64) | bin.Right.Data.(int64)
+				if e.Type == ExpressionTypeAnd {
+					e.Data = bin.Left.Data.(int64) & bin.Right.Data.(int64)
+				} else if e.Type == ExpressionTypeOr {
+					e.Data = bin.Left.Data.(int64) | bin.Right.Data.(int64)
 				} else {
-					this.Data = bin.Left.Data.(int64) ^ bin.Right.Data.(int64)
+					e.Data = bin.Left.Data.(int64) ^ bin.Right.Data.(int64)
 				}
 			case ExpressionTypeLong:
-				if this.Type == ExpressionTypeAnd {
-					this.Data = bin.Left.Data.(int64) & bin.Right.Data.(int64)
-				} else if this.Type == ExpressionTypeOr {
-					this.Data = bin.Left.Data.(int64) | bin.Right.Data.(int64)
+				if e.Type == ExpressionTypeAnd {
+					e.Data = bin.Left.Data.(int64) & bin.Right.Data.(int64)
+				} else if e.Type == ExpressionTypeOr {
+					e.Data = bin.Left.Data.(int64) | bin.Right.Data.(int64)
 				} else {
-					this.Data = bin.Left.Data.(int64) ^ bin.Right.Data.(int64)
+					e.Data = bin.Left.Data.(int64) ^ bin.Right.Data.(int64)
 				}
 			}
 			is = true
-			this.Type = bin.Left.Type
+			e.Type = bin.Left.Type
 			return
 		}
-		return this.getBinaryExpressionConstValue(f)
+		return e.getBinaryExpressionConstValue(f)
 	}
-	if this.Type == ExpressionTypeNot {
-		ee := this.Data.(*Expression)
+	if e.Type == ExpressionTypeNot {
+		ee := e.Data.(*Expression)
 		is, err = ee.constantFold()
 		if err != nil {
 			return
@@ -352,27 +352,27 @@ func (this *Expression) constantFold() (is bool, err error) {
 			return false, fmt.Errorf("!(not) can only apply to bool expression")
 		}
 		is = true
-		this.Type = ExpressionTypeBool
-		this.Data = !ee.Data.(bool)
+		e.Type = ExpressionTypeBool
+		e.Data = !ee.Data.(bool)
 		return
 	}
 	//  == != > < >= <=
-	if this.Type == ExpressionTypeEq ||
-		this.Type == ExpressionTypeNe ||
-		this.Type == ExpressionTypeGe ||
-		this.Type == ExpressionTypeGt ||
-		this.Type == ExpressionTypeLe ||
-		this.Type == ExpressionTypeLt {
-		return this.getBinaryExpressionConstValue(this.relationBinaryConstFolder)
+	if e.Type == ExpressionTypeEq ||
+		e.Type == ExpressionTypeNe ||
+		e.Type == ExpressionTypeGe ||
+		e.Type == ExpressionTypeGt ||
+		e.Type == ExpressionTypeLe ||
+		e.Type == ExpressionTypeLt {
+		return e.getBinaryExpressionConstValue(e.relationBinaryConstFolder)
 	}
 	return
 }
 
-func (this *Expression) getLongValue() int64 {
-	if this.isNumber() == false {
+func (e *Expression) getLongValue() int64 {
+	if e.isNumber() == false {
 		panic("not number")
 	}
-	switch this.Type {
+	switch e.Type {
 	case ExpressionTypeByte:
 		fallthrough
 	case ExpressionTypeChar:
@@ -382,20 +382,20 @@ func (this *Expression) getLongValue() int64 {
 	case ExpressionTypeInt:
 		fallthrough
 	case ExpressionTypeLong:
-		return this.Data.(int64)
+		return e.Data.(int64)
 	case ExpressionTypeFloat:
-		return int64(this.Data.(float32))
+		return int64(e.Data.(float32))
 	case ExpressionTypeDouble:
-		return int64(this.Data.(float64))
+		return int64(e.Data.(float64))
 	}
 	panic("no match")
 }
 
-func (this *Expression) getDoubleValue() float64 {
-	if this.isNumber() == false {
+func (e *Expression) getDoubleValue() float64 {
+	if e.isNumber() == false {
 		panic("not number")
 	}
-	switch this.Type {
+	switch e.Type {
 	case ExpressionTypeByte:
 		fallthrough
 	case ExpressionTypeChar:
@@ -405,40 +405,40 @@ func (this *Expression) getDoubleValue() float64 {
 	case ExpressionTypeInt:
 		fallthrough
 	case ExpressionTypeLong:
-		return float64(this.Data.(int64))
+		return float64(e.Data.(int64))
 	case ExpressionTypeFloat:
-		return float64(this.Data.(float32))
+		return float64(e.Data.(float32))
 	case ExpressionTypeDouble:
-		return this.Data.(float64)
+		return e.Data.(float64)
 	}
 	panic("no match")
 }
 
-func (this *Expression) convertLiteralToNumberType(to VariableTypeKind) {
-	if this.isNumber() == false {
+func (e *Expression) convertLiteralToNumberType(to VariableTypeKind) {
+	if e.isNumber() == false {
 		panic("not a number")
 	}
 	switch to {
 	case VariableTypeByte:
-		this.Data = this.getLongValue()
-		this.Type = ExpressionTypeByte
+		e.Data = e.getLongValue()
+		e.Type = ExpressionTypeByte
 	case VariableTypeShort:
-		this.Data = this.getLongValue()
-		this.Type = ExpressionTypeShort
+		e.Data = e.getLongValue()
+		e.Type = ExpressionTypeShort
 	case VariableTypeChar:
-		this.Data = this.getLongValue()
-		this.Type = ExpressionTypeChar
+		e.Data = e.getLongValue()
+		e.Type = ExpressionTypeChar
 	case VariableTypeInt:
-		this.Data = this.getLongValue()
-		this.Type = ExpressionTypeInt
+		e.Data = e.getLongValue()
+		e.Type = ExpressionTypeInt
 	case VariableTypeLong:
-		this.Data = this.getLongValue()
-		this.Type = ExpressionTypeLong
+		e.Data = e.getLongValue()
+		e.Type = ExpressionTypeLong
 	case VariableTypeFloat:
-		this.Data = float32(this.getDoubleValue())
-		this.Type = ExpressionTypeFloat
+		e.Data = float32(e.getDoubleValue())
+		e.Type = ExpressionTypeFloat
 	case VariableTypeDouble:
-		this.Data = this.getDoubleValue()
-		this.Type = ExpressionTypeDouble
+		e.Data = e.getDoubleValue()
+		e.Type = ExpressionTypeDouble
 	}
 }

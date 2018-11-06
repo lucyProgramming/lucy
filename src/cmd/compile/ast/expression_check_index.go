@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-func (this *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
-	index := this.Data.(*ExpressionIndex)
+func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
+	index := e.Data.(*ExpressionIndex)
 	on, es := index.Expression.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
 	if on == nil {
@@ -36,11 +36,11 @@ func (this *Expression) checkIndexExpression(block *Block, errs *[]error) *Type 
 			}
 		}
 		result := on.Array.Clone()
-		result.Pos = this.Pos
+		result.Pos = e.Pos
 		return result
 	case VariableTypeMap:
 		result := on.Map.V.Clone()
-		result.Pos = this.Pos
+		result.Pos = e.Pos
 		indexType, es := index.Index.checkSingleValueContextExpression(block)
 		*errs = append(*errs, es...)
 		if indexType == nil {
@@ -66,7 +66,7 @@ func (this *Expression) checkIndexExpression(block *Block, errs *[]error) *Type 
 		}
 		result := &Type{
 			Type: VariableTypeByte,
-			Pos:  this.Pos,
+			Pos:  e.Pos,
 		}
 		return result
 	default:

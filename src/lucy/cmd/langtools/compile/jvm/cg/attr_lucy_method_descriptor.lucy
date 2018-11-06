@@ -1,15 +1,13 @@
-package cg
-
-import "encoding/binary"
+import "lucy/binary"
 
 class AttributeLucyMethodDescriptor {
 	Descriptor string
-	fn ToAttributeInfo(class Class) -> (ret AttributeInfo)  {
+	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
-		ret.NameIndex = class.InsertUtf8Const(AttributeNameLucyMethodDescriptor)
-		ret.Info = make([]byte, 2)
+		ret.NameIndex = c.InsertUtf8Const(AttributeNameLucyMethodDescriptor)
+		ret.Info = new []byte(2)
 		ret.attributeLength = 2
-		binary.BigEndian.PutUint16(ret.Info, class.InsertUtf8Const(this.Descriptor))
+		binary.BigEndian.putChar(ret.Info, c.InsertUtf8Const(this.Descriptor))
 		return ret
 	}
 }

@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-func (this *Expression) checkBinaryExpression(block *Block, errs *[]error) (result *Type) {
-	bin := this.Data.(*ExpressionBinary)
+func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result *Type) {
+	bin := e.Data.(*ExpressionBinary)
 	left, es := bin.Left.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
 	right, es := bin.Right.checkSingleValueContextExpression(block)
@@ -24,75 +24,75 @@ func (this *Expression) checkBinaryExpression(block *Block, errs *[]error) (resu
 	}
 
 	// &&  ||
-	if this.Type == ExpressionTypeLogicalOr ||
-		this.Type == ExpressionTypeLogicalAnd {
+	if e.Type == ExpressionTypeLogicalOr ||
+		e.Type == ExpressionTypeLogicalAnd {
 		result = &Type{
 			Type: VariableTypeBool,
-			Pos:  this.Pos,
+			Pos:  e.Pos,
 		}
 		if left == nil || right == nil {
 			return result
 		}
 		if left.Type != VariableTypeBool ||
 			right.Type != VariableTypeBool {
-			*errs = append(*errs, this.binaryWrongOpErr())
+			*errs = append(*errs, e.binaryWrongOpErr())
 		}
 		return result
 	}
 	// & |
-	if this.Type == ExpressionTypeOr ||
-		ExpressionTypeAnd == this.Type ||
-		ExpressionTypeXor == this.Type {
+	if e.Type == ExpressionTypeOr ||
+		ExpressionTypeAnd == e.Type ||
+		ExpressionTypeXor == e.Type {
 		if left == nil || right == nil {
 			if left != nil && left.IsNumber() {
 				result := left.Clone()
-				result.Pos = this.Pos
+				result.Pos = e.Pos
 				return result
 			}
 			if right != nil && right.IsNumber() {
 				result := right.Clone()
-				result.Pos = this.Pos
+				result.Pos = e.Pos
 				return result
 			}
 			return nil
 		}
 		if left.isInteger() == false || left.assignAble(errs, right) == false {
-			*errs = append(*errs, this.binaryWrongOpErr())
+			*errs = append(*errs, e.binaryWrongOpErr())
 		}
 		result = left.Clone()
-		result.Pos = this.Pos
+		result.Pos = e.Pos
 		return result
 	}
-	if this.Type == ExpressionTypeLsh ||
-		this.Type == ExpressionTypeRsh {
+	if e.Type == ExpressionTypeLsh ||
+		e.Type == ExpressionTypeRsh {
 		if left == nil || right == nil {
 			if left != nil && left.IsNumber() {
 				result := left.Clone()
-				result.Pos = this.Pos
+				result.Pos = e.Pos
 				return result
 			}
 			return nil
 		}
 		if false == left.isInteger() ||
 			right.isInteger() == false {
-			*errs = append(*errs, this.binaryWrongOpErr())
+			*errs = append(*errs, e.binaryWrongOpErr())
 		}
 		if right.Type == VariableTypeLong {
 			bin.Right.convertToNumberType(VariableTypeInt)
 		}
 		result = left.Clone()
-		result.Pos = this.Pos
+		result.Pos = e.Pos
 		return result
 	}
-	if this.Type == ExpressionTypeEq ||
-		this.Type == ExpressionTypeNe ||
-		this.Type == ExpressionTypeGe ||
-		this.Type == ExpressionTypeGt ||
-		this.Type == ExpressionTypeLe ||
-		this.Type == ExpressionTypeLt {
+	if e.Type == ExpressionTypeEq ||
+		e.Type == ExpressionTypeNe ||
+		e.Type == ExpressionTypeGe ||
+		e.Type == ExpressionTypeGt ||
+		e.Type == ExpressionTypeLe ||
+		e.Type == ExpressionTypeLt {
 		result = &Type{
 			Type: VariableTypeBool,
-			Pos:  this.Pos,
+			Pos:  e.Pos,
 		}
 		if left == nil || right == nil {
 			return result
@@ -100,12 +100,12 @@ func (this *Expression) checkBinaryExpression(block *Block, errs *[]error) (resu
 		//number
 		switch left.Type {
 		case VariableTypeBool:
-			if right.Type != VariableTypeBool || this.isEqOrNe() == false {
-				*errs = append(*errs, this.binaryWrongOpErr())
+			if right.Type != VariableTypeBool || e.isEqOrNe() == false {
+				*errs = append(*errs, e.binaryWrongOpErr())
 			}
 		case VariableTypeEnum:
 			if left.assignAble(errs, right) == false {
-				*errs = append(*errs, this.binaryWrongOpErr())
+				*errs = append(*errs, e.binaryWrongOpErr())
 			}
 		case VariableTypeByte:
 			fallthrough
@@ -130,24 +130,24 @@ func (this *Expression) checkBinaryExpression(block *Block, errs *[]error) (resu
 					}
 				}
 			} else {
-				*errs = append(*errs, this.binaryWrongOpErr())
+				*errs = append(*errs, e.binaryWrongOpErr())
 			}
 		case VariableTypeString:
 			if right.Type == VariableTypeNull {
-				if this.Type != ExpressionTypeEq && ExpressionTypeNe != this.Type {
-					*errs = append(*errs, this.binaryWrongOpErr())
+				if e.Type != ExpressionTypeEq && ExpressionTypeNe != e.Type {
+					*errs = append(*errs, e.binaryWrongOpErr())
 
 				}
 			} else {
 				if right.Type != VariableTypeString {
-					*errs = append(*errs, this.binaryWrongOpErr())
+					*errs = append(*errs, e.binaryWrongOpErr())
 				}
 			}
 		case VariableTypeNull:
-			if right.IsPointer() == false || this.isEqOrNe() == false {
+			if right.IsPointer() == false || e.isEqOrNe() == false {
 				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and '%s'",
-					this.Pos.ErrMsgPrefix(),
-					this.Op,
+					e.Pos.ErrMsgPrefix(),
+					e.Op,
 					right.TypeString()))
 			}
 		case VariableTypeMap:
@@ -159,29 +159,29 @@ func (this *Expression) checkBinaryExpression(block *Block, errs *[]error) (resu
 		case VariableTypeObject:
 			fallthrough
 		case VariableTypeFunction:
-			if left.assignAble(errs, right) == false || this.isEqOrNe() == false {
-				*errs = append(*errs, this.binaryWrongOpErr())
+			if left.assignAble(errs, right) == false || e.isEqOrNe() == false {
+				*errs = append(*errs, e.binaryWrongOpErr())
 			}
 		default:
-			*errs = append(*errs, this.binaryWrongOpErr())
+			*errs = append(*errs, e.binaryWrongOpErr())
 		}
 		return result
 	}
 	// + - * / %
-	if this.Type == ExpressionTypeAdd ||
-		this.Type == ExpressionTypeSub ||
-		this.Type == ExpressionTypeMul ||
-		this.Type == ExpressionTypeDiv ||
-		this.Type == ExpressionTypeMod {
+	if e.Type == ExpressionTypeAdd ||
+		e.Type == ExpressionTypeSub ||
+		e.Type == ExpressionTypeMul ||
+		e.Type == ExpressionTypeDiv ||
+		e.Type == ExpressionTypeMod {
 		if left == nil || right == nil {
 			if left != nil {
 				result := left.Clone()
-				result.Pos = this.Pos
+				result.Pos = e.Pos
 				return result
 			}
 			if right != nil {
 				result := right.Clone()
-				result.Pos = this.Pos
+				result.Pos = e.Pos
 				return result
 			}
 			return nil
@@ -189,12 +189,12 @@ func (this *Expression) checkBinaryExpression(block *Block, errs *[]error) (resu
 		//check string first
 		if left.Type == VariableTypeString ||
 			right.Type == VariableTypeString { // string is always ok
-			if this.Type != ExpressionTypeAdd {
-				*errs = append(*errs, this.binaryWrongOpErr())
+			if e.Type != ExpressionTypeAdd {
+				*errs = append(*errs, e.binaryWrongOpErr())
 			}
 			result = &Type{}
 			result.Type = VariableTypeString
-			result.Pos = this.Pos
+			result.Pos = e.Pos
 			return result
 		}
 		if (left.isInteger() && right.isInteger()) ||
@@ -207,10 +207,10 @@ func (this *Expression) checkBinaryExpression(block *Block, errs *[]error) (resu
 				}
 			}
 		} else {
-			*errs = append(*errs, this.binaryWrongOpErr())
+			*errs = append(*errs, e.binaryWrongOpErr())
 		}
 		result = left.Clone()
-		result.Pos = this.Pos
+		result.Pos = e.Pos
 		return result
 	}
 	return nil

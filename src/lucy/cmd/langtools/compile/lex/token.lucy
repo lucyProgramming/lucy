@@ -122,7 +122,7 @@ public enum  TokenKind {
 	TokenWhen  ,                     // when
 	TokenComment       ,             //
 	TokenMultiLineComment  ,         //
-	TokenEof     ,                   // end of file
+	TokenEof                        // end of file
 }
 
 

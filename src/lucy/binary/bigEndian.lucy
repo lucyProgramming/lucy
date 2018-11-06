@@ -1,19 +1,20 @@
 
 public class BigEndian {
 	
-	static fn putChar(bs []byte , v char) {
+	public static fn putChar(bs []byte , v char) {
 		_ = bs[1]
 		bs[0] = byte(v>>8)
 		bs[1] = byte(v)
 	} 
 
 
-	static fn getChar(bs []byte) ->(v char){
+	public static fn getChar(bs []byte) ->(v char){
 		_ = bs[1]
-		v =  char(bs[0]) << 8  | char(bs[1]) 
+		v =  char(bs[0]) << 8  | char(bs[1])
+		return v
 	}
 	
-	static fn putInt(bs []byte , v int) {
+	public static fn putInt(bs []byte , v int) {
 		_ = bs[3]
 		bs[0] = byte(v >> 24)
 		bs[1] = byte(v >> 16)
@@ -22,12 +23,12 @@ public class BigEndian {
 	} 
 
 	
-	static fn getInt(bs []byte) ->(v int){
+	public static fn getInt(bs []byte) ->(v int){
 		_ = bs[3]
 		v =  int(bs[0]) << 24 | int(bs[1]) << 16 | int(bs[2]) << 8 | int(bs[3]) 
 	}
 
-	static fn putLong(bs []byte , v long) {
+	public static fn putLong(bs []byte , v long) {
 		_ = bs[7]
 		bs[0] = byte(v >> 56)
 		bs[1] = byte(v >> 48)
@@ -40,7 +41,7 @@ public class BigEndian {
 	} 
 
 	
-	static fn getLong(bs []byte) ->(v long){
+	public static fn getLong(bs []byte) ->(v long){
 		_ = bs[7]
 		v =  long(bs[0]) << 56 | long(bs[1]) << 48 | long(bs[2]) << 40 | long(bs[3]) << 32  |
 			long(bs[4]) << 24 | long(bs[5]) << 16 | long(bs[6]) << 8 | long(bs[7])  

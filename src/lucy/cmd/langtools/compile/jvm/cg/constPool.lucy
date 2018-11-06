@@ -1,213 +1,273 @@
-package cg
+import "lucy/binary"
+import "java/lang/Float"
+import "java/lang/Double"
+ 
+const	ConstantPoolTagUtf8               byte = 1
+const	ConstantPoolTagInteger            byte = 3
+const	ConstantPoolTagFloat              byte = 4
+const	ConstantPoolTagLong               byte = 5
+const	ConstantPoolTagDouble             byte = 6
+const	ConstantPoolTagClass              byte = 7
+const	ConstantPoolTagString             byte = 8
+const	ConstantPoolTagFieldref           byte = 9
+const	ConstantPoolTagMethodref          byte = 10
+const	ConstantPoolTagInterfaceMethodref byte = 11
+const	ConstantPoolTagNameAndType        byte = 12
+const	ConstantPoolTagMethodHandle       byte = 15
+const	ConstantPoolTagMethodType         byte = 16
+const	ConstantPoolTagInvokeDynamic      byte = 18
+ 
 
-import (
-	"encoding/binary"
-	"math"
-)
-
-const (
-	ConstantPoolTagUtf8               uint8 = 1
-	ConstantPoolTagInteger            uint8 = 3
-	ConstantPoolTagFloat              uint8 = 4
-	ConstantPoolTagLong               uint8 = 5
-	ConstantPoolTagDouble             uint8 = 6
-	ConstantPoolTagClass              uint8 = 7
-	ConstantPoolTagString             uint8 = 8
-	ConstantPoolTagFieldref           uint8 = 9
-	ConstantPoolTagMethodref          uint8 = 10
-	ConstantPoolTagInterfaceMethodref uint8 = 11
-	ConstantPoolTagNameAndType        uint8 = 12
-	ConstantPoolTagMethodHandle       uint8 = 15
-	ConstantPoolTagMethodType         uint8 = 16
-	ConstantPoolTagInvokeDynamic      uint8 = 18
-)
-
-type ConstPool struct {
-	selfIndex uint16 // using when it`s self
-	Tag       uint8
+class ConstPool  {
+	selfIndex char // using when it`s self
+	Tag       byte
 	Info      []byte
 }
 
-type ConstantInfoClass struct {
-	nameIndex uint16
+class ConstantInfoClass  {
+	nameIndex char
+	fn ConstantInfoClass(nameIndex char){
+	    this.super()
+	    this.nameIndex = nameIndex
+	}
+	fn ToConstPool() -> (p ConstPool) {
+		p = new ConstPool()
+		p.Tag = ConstantPoolTagClass
+		p.Info = new []byte(2)
+		binary.BigEndian.putChar(p.Info, this.nameIndex)
+		return p
+	}
 }
 
-func (c *ConstantInfoClass) ToConstPool() *ConstPool {
-	p := &ConstPool{}
-	p.Tag = ConstantPoolTagClass
-	p.Info = make([]byte, 2)
-	binary.BigEndian.PutUint16(p.Info, c.nameIndex)
-	return p
+
+
+class ConstantInfoString {
+	index char
+	fn ConstantInfoString(index char) {
+	    this.super()
+	    this.index = index
+	}
+	fn ToConstPool() -> (p ConstPool) {
+		p = new ConstPool()
+		p.Tag = ConstantPoolTagString
+		p.Info = new []byte(2)
+		binary.BigEndian.putChar(p.Info, this.index)
+		return p
+	}
 }
 
-type ConstantInfoString struct {
-	index uint16
+
+
+class ConstantInfoInteger  {
+	value int
+	fn ConstantInfoInteger(value int) {
+	    this.super()
+	    this.value = value
+	}
+	fn ToConstPool() -> (p ConstPool) {
+		p = new ConstPool()
+		p.Tag = ConstantPoolTagInteger
+		p.Info = new []byte(4)
+		binary.BigEndian.putInt(p.Info, (this.value))
+		return p
+	}
 }
 
-func (this *ConstantInfoString) ToConstPool() *ConstPool {
-	p := &ConstPool{}
-	p.Tag = ConstantPoolTagString
-	p.Info = make([]byte, 2)
-	binary.BigEndian.PutUint16(p.Info, this.index)
-	return p
+
+
+class ConstantInfoFloat  {
+	value float
+	fn ConstantInfoFloat(value float){
+	    this.super()
+        this.value = value
+	}
+	fn ToConstPool() -> (p ConstPool) {
+		p = new ConstPool()
+		p.Tag = ConstantPoolTagFloat
+		p.Info = new []byte(4)
+		binary.BigEndian.putInt(p.Info, Float.floatToIntBits(this.value))
+		return p
+	}
 }
 
-type ConstantInfoInteger struct {
-	value int32
+
+
+class ConstantInfoLong  {
+	value long
+	fn ConstantInfoLong(value long) {
+	    this.super()
+	    this.value = value
+	}
+	fn ToConstPool() -> (p ConstPool) {
+		p = new ConstPool()
+		p.Tag = ConstantPoolTagLong
+		p.Info = new []byte(8)
+		binary.BigEndian.putLong(p.Info, (this.value))
+		return p
+	}	
 }
 
-func (this *ConstantInfoInteger) ToConstPool() *ConstPool {
-	p := &ConstPool{}
-	p.Tag = ConstantPoolTagInteger
-	p.Info = make([]byte, 4)
-	binary.BigEndian.PutUint32(p.Info, uint32(this.value))
-	return p
+ 
 
+class ConstantInfoDouble {
+	value double
+	fn ConstantInfoDouble(value double){
+	    this.super()
+	    this.value = value
+	}
+	fn ToConstPool() -> (p ConstPool) {
+		p = new ConstPool()
+		p.Tag = ConstantPoolTagDouble
+		p.Info = new []byte(8)
+		binary.BigEndian.putLong(p.Info, Double.doubleToLongBits(this.value))
+		return p
+	}
 }
 
-type ConstantInfoFloat struct {
-	value float32
+
+
+class ConstantInfoNameAndType {
+	nameIndex, descriptorIndex char
+    fn ConstantInfoNameAndType(nameIndex, descriptorIndex char) {
+        this.super()
+        this.nameIndex = nameIndex
+        this.descriptorIndex = descriptorIndex
+    }
+	fn ToConstPool() -> (p ConstPool) {
+		p = new ConstPool()
+		p.Tag = ConstantPoolTagNameAndType
+		p.Info = new []byte(4)
+		binary.BigEndian.putChar(p.Info, this.nameIndex)
+		binary.BigEndian.putChar(p.Info[2:], this.descriptorIndex)
+		return p
+	}
 }
 
-func (this *ConstantInfoFloat) ToConstPool() *ConstPool {
-	p := &ConstPool{}
-	p.Tag = ConstantPoolTagFloat
-	p.Info = make([]byte, 4)
-	binary.BigEndian.PutUint32(p.Info, math.Float32bits(this.value))
-	return p
+
+
+class ConstantInfoMethodref {
+	classIndex, nameAndTypeIndex char
+	fn ConstantInfoMethodref(classIndex, nameAndTypeIndex char){
+        this.super()
+        this.classIndex = classIndex
+        this.nameAndTypeIndex = nameAndTypeIndex
+	}
+	fn ToConstPool() -> (p ConstPool) {
+		p = new ConstPool()
+		p.Tag = ConstantPoolTagMethodref
+		p.Info = new []byte(4)
+		binary.BigEndian.putChar(p.Info, this.classIndex)
+		binary.BigEndian.putChar(p.Info[2:], this.nameAndTypeIndex)
+		return p
+	}
 }
 
-type ConstantInfoLong struct {
-	value int64
+
+
+class ConstantInfoInterfaceMethodref  {
+	classIndex       char
+	nameAndTypeIndex char
+	fn ConstantInfoInterfaceMethodref(classIndex , nameAndTypeIndex char) {
+        this.super()
+        this.classIndex = classIndex
+        this.nameAndTypeIndex = nameAndTypeIndex
+	}
+	fn ToConstPool() -> (p ConstPool) {
+		p = new ConstPool()
+		p.Tag = ConstantPoolTagInterfaceMethodref
+		p.Info = new []byte(4)
+		binary.BigEndian.putChar(p.Info, char(this.classIndex))
+		binary.BigEndian.putChar(p.Info[2:], char(this.nameAndTypeIndex))
+		return p
+	}
 }
+
+
+
+class ConstantInfoFieldref  {
+	classIndex       char
+	nameAndTypeIndex char
+	fn ConstantInfoFieldref(classIndex , nameAndTypeIndex char){
+	    this.super()
+        this.classIndex = classIndex
+        this.nameAndTypeIndex = nameAndTypeIndex
+	}
+	fn ToConstPool() -> (p ConstPool) {
+		p = new ConstPool()
+		p.Tag = ConstantPoolTagFieldref
+		p.Info = new []byte(4)
+		binary.BigEndian.putChar(p.Info, this.classIndex)
+		binary.BigEndian.putChar(p.Info[2:], this.nameAndTypeIndex)
+		return p
+	}
+}
+
+
+
+class ConstantInfoMethodHandle  {
+	referenceKind  byte
+	referenceIndex char
+	fn ToConstPool() -> (p ConstPool) {
+		p = new ConstPool()
+		p.Tag = ConstantPoolTagMethodHandle
+		p.Info = new []byte(3)
+		p.Info[0] = byte(this.referenceKind)
+		binary.BigEndian.putChar(p.Info[1:], char(this.referenceIndex))
+		return p
+	}	
+}
+
+
+
+class ConstantInfoUtf8  {
+	length char
+	bs     []byte
+	fn ConstantInfoUtf8(s string){
+	    this.super()
+        this.bs = []byte(s)
+        this.length = char(this.bs.size())
+	}
+	fn ToConstPool() -> (p ConstPool) {
+		p = new ConstPool()
+		p.Tag = ConstantPoolTagUtf8
+		p.Info = new []byte(2)
+		binary.BigEndian.putChar(p.Info, char(this.length))
+		p.Info . appendAll(this.bs)
+		return p
+	}
+}
+
+
+
+class ConstantInfoMethodType  {
+	descriptorIndex char
+	fn ConstantInfoMethodType(index char){ 
+		this.super()
+		this.descriptorIndex = index
+	}
+	fn ToConstPool() -> (p ConstPool) {
+		p = new ConstPool()
+		p.Tag = ConstantPoolTagMethodType
+		p.Info = new []byte(2)
+		binary.BigEndian.putChar(p.Info, char(this.descriptorIndex))
+		return p
+	}
+}
+
+
 
 /*
-	big endian
-*/
-func (this *ConstantInfoLong) ToConstPool() *ConstPool {
-	p := &ConstPool{}
-	p.Tag = ConstantPoolTagLong
-	p.Info = make([]byte, 8)
-	binary.BigEndian.PutUint64(p.Info, uint64(this.value))
-	return p
-}
-
-type ConstantInfoDouble struct {
-	value float64
-}
-
-func (this *ConstantInfoDouble) ToConstPool() *ConstPool {
-	p := &ConstPool{}
-	p.Tag = ConstantPoolTagDouble
-	p.Info = make([]byte, 8)
-	binary.BigEndian.PutUint64(p.Info, math.Float64bits(this.value))
-	return p
-}
-
-type ConstantInfoNameAndType struct {
-	name, descriptor uint16
-}
-
-func (this *ConstantInfoNameAndType) ToConstPool() *ConstPool {
-	p := &ConstPool{}
-	p.Tag = ConstantPoolTagNameAndType
-	p.Info = make([]byte, 4)
-	binary.BigEndian.PutUint16(p.Info, this.name)
-	binary.BigEndian.PutUint16(p.Info[2:], this.descriptor)
-	return p
-}
-
-type ConstantInfoMethodref struct {
-	classIndex, nameAndTypeIndex uint16
-}
-
-func (this *ConstantInfoMethodref) ToConstPool() *ConstPool {
-	p := &ConstPool{}
-	p.Tag = ConstantPoolTagMethodref
-	p.Info = make([]byte, 4)
-	binary.BigEndian.PutUint16(p.Info, this.classIndex)
-	binary.BigEndian.PutUint16(p.Info[2:], this.nameAndTypeIndex)
-	return p
-}
-
-type ConstantInfoInterfaceMethodref struct {
-	classIndex       uint16
-	nameAndTypeIndex uint16
-}
-
-func (this *ConstantInfoInterfaceMethodref) ToConstPool() *ConstPool {
-	p := &ConstPool{}
-	p.Tag = ConstantPoolTagInterfaceMethodref
-	p.Info = make([]byte, 4)
-	binary.BigEndian.PutUint16(p.Info, uint16(this.classIndex))
-	binary.BigEndian.PutUint16(p.Info[2:], uint16(this.nameAndTypeIndex))
-	return p
-}
-
-type ConstantInfoFieldref struct {
-	classIndex       uint16
-	nameAndTypeIndex uint16
-}
-
-func (this *ConstantInfoFieldref) ToConstPool() *ConstPool {
-	p := &ConstPool{}
-	p.Tag = ConstantPoolTagFieldref
-	p.Info = make([]byte, 4)
-	binary.BigEndian.PutUint16(p.Info, this.classIndex)
-	binary.BigEndian.PutUint16(p.Info[2:], this.nameAndTypeIndex)
-	return p
-}
-
-type ConstantInfoMethodHandle struct {
-	referenceKind  uint8
-	referenceIndex uint16
-}
-
-func (this *ConstantInfoMethodHandle) ToConstPool() *ConstPool {
-	p := &ConstPool{}
-	p.Tag = ConstantPoolTagMethodHandle
-	p.Info = make([]byte, 3)
-	p.Info[0] = byte(this.referenceKind)
-	binary.BigEndian.PutUint16(p.Info[1:], uint16(this.referenceIndex))
-	return p
-}
-
-type ConstantInfoUtf8 struct {
-	length uint16
-	bs     []byte
-}
-
-func (this *ConstantInfoUtf8) ToConstPool() *ConstPool {
-	p := &ConstPool{}
-	p.Tag = ConstantPoolTagUtf8
-	p.Info = make([]byte, 2)
-	binary.BigEndian.PutUint16(p.Info, uint16(this.length))
-	p.Info = append(p.Info, this.bs...)
-	return p
-}
-
-type ConstantInfoMethodType struct {
-	descriptorIndex uint16
-}
-
-func (this *ConstantInfoMethodType) ToConstPool() *ConstPool {
-	p := &ConstPool{}
-	p.Tag = ConstantPoolTagMethodType
-	p.Info = make([]byte, 2)
-	binary.BigEndian.PutUint16(p.Info, uint16(this.descriptorIndex))
-	return p
-}
-
-type ConstantInfoInvokeDynamic struct {
-	bootstrapMethodAttrIndex uint16
-	nameAndTypeIndex         uint16
+type ConstantInfoInvokeDynamic  {
+	bootstrapMethodAttrIndex char
+	nameAndTypeIndex         char
 }
 
 func (this *ConstantInfoInvokeDynamic) ToConstPool() *ConstPool {
 	info := &ConstPool{}
 	info.Tag = ConstantPoolTagInvokeDynamic
-	info.Info = make([]byte, 4)
-	binary.BigEndian.PutUint16(info.Info, this.bootstrapMethodAttrIndex)
-	binary.BigEndian.PutUint16(info.Info[2:], this.nameAndTypeIndex)
+	info.Info = new []byte(4)
+	binary.BigEndian.putChar(info.Info, this.bootstrapMethodAttrIndex)
+	binary.BigEndian.putChar(info.Info[2:], this.nameAndTypeIndex)
 	return info
 }
+*/

@@ -2,6 +2,7 @@ package jvm
 
 import (
 	"encoding/binary"
+	"fmt"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
@@ -59,11 +60,17 @@ func (this *DefaultValueParse) Decode(class *cg.Class, f *ast.Function, dp *cg.A
 			v.DefaultValueExpression.Data =
 				binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info) != 0
 		case ast.VariableTypeByte:
-			fallthrough
+			v.DefaultValueExpression.Type = ast.ExpressionTypeByte
+			v.DefaultValueExpression.Data =
+				int64(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
 		case ast.VariableTypeShort:
-			fallthrough
+			v.DefaultValueExpression.Type = ast.ExpressionTypeShort
+			v.DefaultValueExpression.Data =
+				int64(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
 		case ast.VariableTypeChar:
-			fallthrough
+			v.DefaultValueExpression.Type = ast.ExpressionTypeChar
+			v.DefaultValueExpression.Data =
+				int64(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
 		case ast.VariableTypeInt:
 			v.DefaultValueExpression.Type = ast.ExpressionTypeInt
 			v.DefaultValueExpression.Data =
@@ -86,5 +93,6 @@ func (this *DefaultValueParse) Decode(class *cg.Class, f *ast.Function, dp *cg.A
 			v.DefaultValueExpression.Data =
 				string(class.ConstPool[utf8Index].Info)
 		}
+		v.DefaultValueExpression.Op = fmt.Sprintf("%v", v.DefaultValueExpression.Data)
 	}
 }

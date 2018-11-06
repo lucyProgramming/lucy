@@ -1,0 +1,217 @@
+package ast
+
+import (
+	"fmt"
+)
+
+func (e *Expression) checkBinaryExpression(block *Block, errs *[]error) (result *Type) {
+	bin := e.Data.(*ExpressionBinary)
+	left, es := bin.Left.checkSingleValueContextExpression(block)
+	*errs = append(*errs, es...)
+	right, es := bin.Right.checkSingleValueContextExpression(block)
+	*errs = append(*errs, es...)
+	if left != null {
+		if err := left.rightValueValid(); err != null {
+			*errs = append(*errs, err)
+			return null
+		}
+	}
+	if right != null {
+		if err := right.rightValueValid(); err != null {
+			*errs = append(*errs, err)
+			return null
+		}
+	}
+
+	// &&  ||
+	if e.Type == ExpressionTypeLogicalOr ||
+		e.Type == ExpressionTypeLogicalAnd {
+		result = &Type{
+			Type: VariableTypeBool,
+			Pos:  e.Pos,
+		}
+		if left == null || right == null {
+			return result
+		}
+		if left.Type != VariableTypeBool ||
+			right.Type != VariableTypeBool {
+			*errs = append(*errs, e.binaryWrongOpErr())
+		}
+		return result
+	}
+	// & |
+	if e.Type == ExpressionTypeOr ||
+		ExpressionTypeAnd == e.Type ||
+		ExpressionTypeXor == e.Type {
+		if left == null || right == null {
+			if left != null && left.IsNumber() {
+				result := left.Clone()
+				result.Pos = e.Pos
+				return result
+			}
+			if right != null && right.IsNumber() {
+				result := right.Clone()
+				result.Pos = e.Pos
+				return result
+			}
+			return null
+		}
+		if left.isInteger() == false || left.assignAble(errs, right) == false {
+			*errs = append(*errs, e.binaryWrongOpErr())
+		}
+		result = left.Clone()
+		result.Pos = e.Pos
+		return result
+	}
+	if e.Type == ExpressionTypeLsh ||
+		e.Type == ExpressionTypeRsh {
+		if left == null || right == null {
+			if left != null && left.IsNumber() {
+				result := left.Clone()
+				result.Pos = e.Pos
+				return result
+			}
+			return null
+		}
+		if false == left.isInteger() ||
+			right.isInteger() == false {
+			*errs = append(*errs, e.binaryWrongOpErr())
+		}
+		if right.Type == VariableTypeLong {
+			bin.Right.convertToNumberType(VariableTypeInt)
+		}
+		result = left.Clone()
+		result.Pos = e.Pos
+		return result
+	}
+	if e.Type == ExpressionTypeEq ||
+		e.Type == ExpressionTypeNe ||
+		e.Type == ExpressionTypeGe ||
+		e.Type == ExpressionTypeGt ||
+		e.Type == ExpressionTypeLe ||
+		e.Type == ExpressionTypeLt {
+		result = &Type{
+			Type: VariableTypeBool,
+			Pos:  e.Pos,
+		}
+		if left == null || right == null {
+			return result
+		}
+		//number
+		switch left.Type {
+		case VariableTypeBool:
+			if right.Type != VariableTypeBool || e.isEqOrNe() == false {
+				*errs = append(*errs, e.binaryWrongOpErr())
+			}
+		case VariableTypeEnum:
+			if left.assignAble(errs, right) == false {
+				*errs = append(*errs, e.binaryWrongOpErr())
+			}
+		case VariableTypeByte:
+			fallthrough
+		case VariableTypeShort:
+			fallthrough
+		case VariableTypeChar:
+			fallthrough
+		case VariableTypeInt:
+			fallthrough
+		case VariableTypeFloat:
+			fallthrough
+		case VariableTypeLong:
+			fallthrough
+		case VariableTypeDouble:
+			if (left.isInteger() && right.isInteger()) ||
+				(left.isFloat() && right.isFloat()) {
+				if left.assignAble(errs, right) == false {
+					if left.Type < right.Type {
+						bin.Left.convertToNumberType(right.Type)
+					} else {
+						bin.Right.convertToNumberType(left.Type)
+					}
+				}
+			} else {
+				*errs = append(*errs, e.binaryWrongOpErr())
+			}
+		case VariableTypeString:
+			if right.Type == VariableTypeNull {
+				if e.Type != ExpressionTypeEq && ExpressionTypeNe != e.Type {
+					*errs = append(*errs, e.binaryWrongOpErr())
+
+				}
+			} else {
+				if right.Type != VariableTypeString {
+					*errs = append(*errs, e.binaryWrongOpErr())
+				}
+			}
+		case VariableTypeNull:
+			if right.IsPointer() == false || e.isEqOrNe() == false {
+				*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on 'null' and '%s'",
+					e.Pos.ErrMsgPrefix(),
+					e.Op,
+					right.TypeString()))
+			}
+		case VariableTypeMap:
+			fallthrough
+		case VariableTypeJavaArray:
+			fallthrough
+		case VariableTypeArray:
+			fallthrough
+		case VariableTypeObject:
+			fallthrough
+		case VariableTypeFunction:
+			if left.assignAble(errs, right) == false || e.isEqOrNe() == false {
+				*errs = append(*errs, e.binaryWrongOpErr())
+			}
+		default:
+			*errs = append(*errs, e.binaryWrongOpErr())
+		}
+		return result
+	}
+	// + - * / %
+	if e.Type == ExpressionTypeAdd ||
+		e.Type == ExpressionTypeSub ||
+		e.Type == ExpressionTypeMul ||
+		e.Type == ExpressionTypeDiv ||
+		e.Type == ExpressionTypeMod {
+		if left == null || right == null {
+			if left != null {
+				result := left.Clone()
+				result.Pos = e.Pos
+				return result
+			}
+			if right != null {
+				result := right.Clone()
+				result.Pos = e.Pos
+				return result
+			}
+			return null
+		}
+		//check string first
+		if left.Type == VariableTypeString ||
+			right.Type == VariableTypeString { // string is always ok
+			if e.Type != ExpressionTypeAdd {
+				*errs = append(*errs, e.binaryWrongOpErr())
+			}
+			result = &Type{}
+			result.Type = VariableTypeString
+			result.Pos = e.Pos
+			return result
+		}
+		if (left.isInteger() && right.isInteger()) ||
+			(left.isFloat() && right.isFloat()) {
+			if left.assignAble(errs, right) == false {
+				if left.Type < right.Type {
+					bin.Left.convertToNumberType(right.Type)
+				} else {
+					bin.Right.convertToNumberType(left.Type)
+				}
+			}
+		} else {
+			*errs = append(*errs, e.binaryWrongOpErr())
+		}
+		result = left.Clone()
+		result.Pos = e.Pos
+		return result
+	}
+	return null
+}

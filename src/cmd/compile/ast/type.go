@@ -97,10 +97,10 @@ func (this *Type) mkDefaultValueExpression() *Expression {
 		e.Type = ExpressionTypeByte
 		e.Data = int64(0)
 	case VariableTypeShort:
-		e.Type = ExpressionTypeInt
+		e.Type = ExpressionTypeShort
 		e.Data = int64(0)
 	case VariableTypeChar:
-		e.Type = ExpressionTypeInt
+		e.Type = ExpressionTypeChar
 		e.Data = int64(0)
 	case VariableTypeInt:
 		e.Type = ExpressionTypeInt

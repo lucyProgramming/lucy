@@ -5,28 +5,28 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (this *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
-	switch this.Type {
+func (e *Expression) getLeftValue(block *Block, errs *[]error) (result *Type) {
+	switch e.Type {
 	case ExpressionTypeIdentifier:
-		identifier := this.Data.(*ExpressionIdentifier)
+		identifier := e.Data.(*ExpressionIdentifier)
 		if identifier.Name == UnderScore {
 			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as left value",
-				this.Pos.ErrMsgPrefix(), identifier.Name))
+				e.Pos.ErrMsgPrefix(), identifier.Name))
 			return nil
 		}
 		if identifier.Name == ThisPointerName {
 			*errs = append(*errs, fmt.Errorf("%s '%s' cannot be used as left value",
-				this.Pos.ErrMsgPrefix(), ThisPointerName))
+				e.Pos.ErrMsgPrefix(), ThisPointerName))
 		}
 		isCaptureVar := false
-		d, err := block.searchIdentifier(this.Pos, identifier.Name, &isCaptureVar)
+		d, err := block.searchIdentifier(e.Pos, identifier.Name, &isCaptureVar)
 		if err != nil {
 			*errs = append(*errs, err)
 			return nil
 		}
 		if d == nil {
 			*errs = append(*errs, fmt.Errorf("%s '%s' not found",
-				this.Pos.ErrMsgPrefix(), identifier.Name))
+				e.Pos.ErrMsgPrefix(), identifier.Name))
 			return nil
 		}
 		switch d.(type) {
@@ -42,20 +42,20 @@ func (this *Expression) getLeftValue(block *Block, errs *[]error) (result *Type)
 			v.BeenCapturedAsRightValue = 0
 			identifier.Variable = v
 			result = identifier.Variable.Type.Clone()
-			result.Pos = this.Pos
-			this.Value = result
+			result.Pos = e.Pos
+			e.Value = result
 			return result
 		default:
 			*errs = append(*errs, fmt.Errorf("%s identifier '%s' is '%s' , cannot be used as left value",
-				this.Pos.ErrMsgPrefix(), identifier.Name, block.identifierIsWhat(d)))
+				e.Pos.ErrMsgPrefix(), identifier.Name, block.identifierIsWhat(d)))
 			return nil
 		}
 	case ExpressionTypeIndex:
-		result = this.checkIndexExpression(block, errs)
-		this.Value = result
+		result = e.checkIndexExpression(block, errs)
+		e.Value = result
 		return result
 	case ExpressionTypeSelection:
-		selection := this.Data.(*ExpressionSelection)
+		selection := e.Data.(*ExpressionSelection)
 		object, es := selection.Expression.checkSingleValueContextExpression(block)
 		*errs = append(*errs, es...)
 		if object == nil {
@@ -65,10 +65,10 @@ func (this *Expression) getLeftValue(block *Block, errs *[]error) (result *Type)
 		case VariableTypeDynamicSelector:
 			if selection.Name == SUPER {
 				*errs = append(*errs, fmt.Errorf("%s access '%s' at '%s' not allow",
-					this.Pos.ErrMsgPrefix(), SUPER, object.TypeString()))
+					e.Pos.ErrMsgPrefix(), SUPER, object.TypeString()))
 				return nil
 			}
-			field, err := object.Class.getField(this.Pos, selection.Name, false)
+			field, err := object.Class.getField(e.Pos, selection.Name, false)
 			if err != nil {
 				*errs = append(*errs, err)
 			}
@@ -77,11 +77,11 @@ func (this *Expression) getLeftValue(block *Block, errs *[]error) (result *Type)
 			}
 			selection.Field = field
 			result = field.Type.Clone()
-			result.Pos = this.Pos
-			this.Value = result
+			result.Pos = e.Pos
+			e.Value = result
 			return result
 		case VariableTypeObject, VariableTypeClass:
-			field, err := object.Class.getField(this.Pos, selection.Name, false)
+			field, err := object.Class.getField(e.Pos, selection.Name, false)
 			if err != nil {
 				*errs = append(*errs, err)
 			}
@@ -92,8 +92,8 @@ func (this *Expression) getLeftValue(block *Block, errs *[]error) (result *Type)
 					*errs = append(*errs, err)
 				}
 				result = field.Type.Clone()
-				result.Pos = this.Pos
-				this.Value = result
+				result.Pos = e.Pos
+				e.Value = result
 				return result
 			}
 			return nil
@@ -101,7 +101,7 @@ func (this *Expression) getLeftValue(block *Block, errs *[]error) (result *Type)
 			variable, exists := object.Package.Block.NameExists(selection.Name)
 			if exists == false {
 				*errs = append(*errs, fmt.Errorf("%s '%s.%s' not found",
-					this.Pos.ErrMsgPrefix(), object.Package.Name, selection.Name))
+					e.Pos.ErrMsgPrefix(), object.Package.Name, selection.Name))
 				return nil
 			}
 			switch variable.(type) {
@@ -110,44 +110,44 @@ func (this *Expression) getLeftValue(block *Block, errs *[]error) (result *Type)
 				if v.AccessFlags&cg.AccFieldPublic == 0 &&
 					object.Package.isSame(&PackageBeenCompile) == false {
 					*errs = append(*errs, fmt.Errorf("%s '%s.%s' is private",
-						this.Pos.ErrMsgPrefix(), object.Package.Name, selection.Name))
+						e.Pos.ErrMsgPrefix(), object.Package.Name, selection.Name))
 				}
 				selection.PackageVariable = v
 				result = v.Type.Clone()
-				result.Pos = this.Pos
-				this.Value = result
+				result.Pos = e.Pos
+				e.Value = result
 				return result
 			default:
 				*errs = append(*errs, fmt.Errorf("%s '%s' is not variable",
-					this.Pos.ErrMsgPrefix(), selection.Name))
+					e.Pos.ErrMsgPrefix(), selection.Name))
 				return nil
 			}
 		case VariableTypeMagicFunction:
 			v := object.Function.Type.searchName(selection.Name)
 			if v == nil {
-				err := fmt.Errorf("%s '%s' not found", this.Pos.ErrMsgPrefix(), selection.Name)
+				err := fmt.Errorf("%s '%s' not found", e.Pos.ErrMsgPrefix(), selection.Name)
 				*errs = append(*errs, err)
 				return nil
 			}
-			this.Value = v.Type.Clone()
-			this.Value.Pos = this.Pos
-			this.Type = ExpressionTypeIdentifier
+			e.Value = v.Type.Clone()
+			e.Value.Pos = e.Pos
+			e.Type = ExpressionTypeIdentifier
 			identifier := &ExpressionIdentifier{}
 			identifier.Name = selection.Name
 			identifier.Variable = v
-			this.Data = identifier
+			e.Data = identifier
 			result := v.Type.Clone()
-			result.Pos = this.Pos
+			result.Pos = e.Pos
 			return result
 		default:
 			*errs = append(*errs, fmt.Errorf("%s cannot access '%s' on '%s'",
-				this.Pos.ErrMsgPrefix(), selection.Name, object.TypeString()))
+				e.Pos.ErrMsgPrefix(), selection.Name, object.TypeString()))
 			return nil
 		}
 	default:
 		*errs = append(*errs, fmt.Errorf("%s '%s' cannot be used as left value",
-			this.Pos.ErrMsgPrefix(),
-			this.Op))
+			e.Pos.ErrMsgPrefix(),
+			e.Op))
 		return nil
 	}
 	return nil

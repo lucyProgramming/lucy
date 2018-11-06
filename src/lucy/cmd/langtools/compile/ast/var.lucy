@@ -1,0 +1,75 @@
+ 
+
+interface  LoadImport {
+	public fn LoadImport(importName string) (Object, error)
+}
+
+ 
+const	magicIdentifierFile     = "__FILE__"
+const	magicIdentifierLine     = "__LINE__"
+const	magicIdentifierTime     = "__TIME__"
+const	magicIdentifierClass    = "__CLASS__"
+const	magicIdentifierFunction = "__FUNCTION__"
+const	MainFunctionName        = "main"
+const	ThisPointerName         = "this"
+const	UnderScore              = "_"
+const	LucyRootClass           = "lucy/lang/Lucy"
+const	JavaRootClass           = "java/lang/Object"
+const	DefaultExceptionClass   = "java/lang/Exception"
+const	JavaThrowableClass      = "java/lang/Throwable"
+const	JavaStringClass         = "java/lang/String"
+const	SUPER                   = "super"
+const	SpecialMethodInit       = "<init>"
+const	classInitMethod         = "<clinit>"
+ 
+
+fn isMagicIdentifier(name string) ->(is bool)  {
+	return name == magicIdentifierFile ||
+		name == magicIdentifierLine ||
+		name == magicIdentifierTime ||
+		name == magicIdentifierClass ||
+		name == magicIdentifierFunction
+}
+
+ 
+var 	ImportsLoader       LoadImport
+var	 PackageBeenCompile = new  Package()
+var	buildInFunctionsMap = make map {string -> Function }()
+var	lucyBuildInPackage  Package
+	 
+var	ParseFunctionHandler func(bs []byte, pos Pos) (f *Function, es []error)
+var	javaStringClass      Class
+var	LucyBytesType       Type // []byte
+var	JavaBytesType        Type // byte[]
+ 
+{
+	LucyBytesType = &Type{
+		Type: VariableTypeArray,
+		Array: &Type{
+			Type: VariableTypeByte,
+		},
+	}
+	JavaBytesType = &Type{
+		Type: VariableTypeJavaArray,
+		Array: &Type{
+			Type: VariableTypeByte,
+		},
+	}
+}
+
+fn loadJavaStringClass(pos Pos) error {
+	if javaStringClass != null {
+		return null
+	}
+	c, err := ImportsLoader.LoadImport(JavaStringClass)
+	if err != null {
+		return err
+	}
+	if cc, ok := c.(Class); ok && cc != null {
+		javaStringClass = cc
+		return null
+	} else {
+		return fmt.Errorf("%s '%s' is not class",
+			pos.ErrMsgPrefix(), JavaStringClass)
+	}
+}

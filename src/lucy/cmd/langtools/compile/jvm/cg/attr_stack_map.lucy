@@ -1,29 +1,26 @@
-package cg
 
-import (
-	"encoding/binary"
-	"fmt"
-)
+import "java/lang/Object"
+import "lucy/binary"
 
 interface StackMap  {
-	ToBytes() []byte
+	fn ToBytes() -> ([]byte)
 }
 
-type AttributeStackMap struct {
+class AttributeStackMap {
 	StackMaps []StackMap
-	fn ToAttributeInfo(class Class) -> (ret AttributeInfo) {
-		if this == nil || len(this.StackMaps) == 0 {
-			return nil
+	fn ToAttributeInfo(c Class) -> (ret AttributeInfo) {
+		if this == null || len(this.StackMaps) == 0 {
+			return null
 		}
 		info := new AttributeInfo() 
-		info.NameIndex = class.InsertUtf8Const(AttributeNameStackMap)
-		bs := make([]byte, 2)
-		binary.BigEndian.PutUint16(bs, uint16(len(this.StackMaps)))
+		info.NameIndex = c.InsertUtf8Const(AttributeNameStackMap)
+		bs := new []byte(2)
+		binary.BigEndian.putChar(bs, char(len(this.StackMaps)))
 		for _, v := range this.StackMaps {
-			bs = append(bs, v.ToBytes()...)
+			bs . appendAll(v.ToBytes())
 		}
 		info.Info = bs
-		info.attributeLength = uint32(len(info.Info))
+		info.attributeLength = (len(info.Info))
 		return info
 	}
 }
@@ -33,17 +30,22 @@ type AttributeStackMap struct {
 class StackMapSameFrame {
 	FrameType byte
 	fn ToBytes() -> (bs []byte) {
-		return []byte{s.FrameType}
+		return []byte{this.FrameType}
 	}
 }
 
 
 class StackMapSameLocals1StackItemFrame {
 	FrameType byte
-	Stack     *StackMapVerificationTypeInfo
+	Stack     StackMapVerificationTypeInfo
+	fn StackMapSameLocals1StackItemFrame(FrameType byte ,Stack     StackMapVerificationTypeInfo ){
+        this.super()
+        this.FrameType = FrameType
+        this.Stack = Stack
+	}
 	fn ToBytes() -> (bs []byte) {
-		bs := []byte{s.FrameType}
-		bs = append(bs, s.Stack.ToBytes()...)
+		bs  = []byte{this.FrameType}
+		bs.appendAll(this.Stack.ToBytes())
 		return bs
 	}
 }
@@ -52,13 +54,14 @@ class StackMapSameLocals1StackItemFrame {
 
 class StackMapSameLocals1StackItemFrameExtended {
 	FrameType byte
-	Delta     uint16
-	Stack     *StackMapVerificationTypeInfo
+	Delta     char
+	Stack     StackMapVerificationTypeInfo
 	fn ToBytes() -> (bs []byte) {
-		bs := make([]byte, 3)
-		bs[0] = s.FrameType
-		binary.BigEndian.PutUint16(bs[1:], s.Delta)
-		return append(bs, s.Stack.ToBytes()...)
+		bs = new []byte(3)
+		bs[0] = this.FrameType
+		binary.BigEndian.putChar(bs[1:], this.Delta)
+		bs. appendAll(this.Stack.ToBytes())
+		return
 	}
 }
 
@@ -66,11 +69,16 @@ class StackMapSameLocals1StackItemFrameExtended {
 
 class StackMapChopFrame  {
 	FrameType byte
-	Delta     uint16
+	Delta     char
+	fn StackMapChopFrame(FrameType byte ,Delta     char ){
+        this.super()
+        this.FrameType = FrameType
+        this.Delta = Delta
+	}
 	fn ToBytes() -> (bs []byte) {
-		bs := make([]byte, 3)
-		bs[0] = s.FrameType
-		binary.BigEndian.PutUint16(bs[1:], s.Delta)
+		bs = new []byte(3)
+		bs[0] = this.FrameType
+		binary.BigEndian.putChar(bs[1:], this.Delta)
 		return bs
 	}
 }
@@ -79,11 +87,16 @@ class StackMapChopFrame  {
 
 class StackMapSameFrameExtended {
 	FrameType byte
-	Delta     uint16
+	Delta     char
+	fn StackMapSameFrameExtended(FrameType byte ,Delta char ){
+        this.super()
+        this.FrameType = FrameType
+        this.Delta = Delta
+	}
 	fn ToBytes() -> (bs []byte) {
-		bs := make([]byte, 3)
-		bs[0] = s.FrameType
-		binary.BigEndian.PutUint16(bs[1:], s.Delta)
+		bs  = new []byte(3)
+		bs[0] = this.FrameType
+		binary.BigEndian.putChar(bs[1:], this.Delta)
 		return bs
 	}
 }
@@ -92,14 +105,14 @@ class StackMapSameFrameExtended {
 
 class StackMapAppendFrame {
 	FrameType byte
-	Delta     uint16
+	Delta     char
 	Locals    []StackMapVerificationTypeInfo
 	fn ToBytes() -> (bs []byte) {
-		bs := make([]byte, 3)
-		bs[0] = s.FrameType
-		binary.BigEndian.PutUint16(bs[1:], s.Delta)
-		for _, v := range s.Locals {
-			bs = append(bs, v.ToBytes()...)
+		bs = new []byte(3)
+		bs[0] = this.FrameType
+		binary.BigEndian.putChar(bs[1:], this.Delta)
+		for _, v := range this.Locals {
+			bs .appendAll ( v.ToBytes())
 		}
 		return bs
 	}
@@ -109,22 +122,31 @@ class StackMapAppendFrame {
 
 class StackMapFullFrame {
 	FrameType byte
-	Delta     uint16
+	Delta     char
 	Locals    []StackMapVerificationTypeInfo
 	Stacks    []StackMapVerificationTypeInfo
+
+    fn StackMapFullFrame(FrameType byte , Delta     char ,Locals ,  Stacks []StackMapVerificationTypeInfo ){
+        this.super()
+        this.FrameType = FrameType
+        this.Delta = Delta
+        this.Locals = Locals
+        this.Stacks = Stacks
+    }
+
 	fn ToBytes() -> (bs []byte) {
-		bs := make([]byte, 5)
-		bs[0] = s.FrameType
-		binary.BigEndian.PutUint16(bs[1:], s.Delta)
-		binary.BigEndian.PutUint16(bs[3:], uint16(len(s.Locals)))
-		for _, v := range s.Locals {
-			bs = append(bs, v.ToBytes()...)
+		bs = new []byte(5)
+		bs[0] = this.FrameType
+		binary.BigEndian.putChar(bs[1:], this.Delta)
+		binary.BigEndian.putChar(bs[3:], char(len(this.Locals)))
+		for _, v := range this.Locals {
+			bs .appendAll( v.ToBytes())
 		}
-		bs2 := make([]byte, 2)
-		binary.BigEndian.PutUint16(bs2, uint16(len(s.Stacks)))
-		bs = append(bs, bs2...)
-		for _, v := range s.Stacks {
-			bs = append(bs, v.ToBytes()...)
+		bs2 := new []byte(2)
+		binary.BigEndian.putChar(bs2, char(len(this.Stacks)))
+		bs .appendAll(bs2)
+		for _, v := range this.Stacks {
+			bs .appendAll (v.ToBytes())
 		}
 		return bs
 	}
@@ -132,58 +154,59 @@ class StackMapFullFrame {
 
 
 
-type StackMapTopVariableInfo struct{}
-type StackMapIntegerVariableInfo struct{}
-type StackMapFloatVariableInfo struct{}
-type StackMapLongVariableInfo struct{}
-type StackMapDoubleVariableInfo struct{}
-type StackMapNullVariableInfo struct{}
-type StackMapUninitializedThisVariableInfo struct{}
-type StackMapObjectVariableInfo struct {
-	Index    uint16
+class StackMapTopVariableInfo {}
+class StackMapIntegerVariableInfo {}
+class StackMapFloatVariableInfo {}
+class StackMapLongVariableInfo {}
+class StackMapDoubleVariableInfo {}
+class StackMapNullVariableInfo {}
+class StackMapUninitializedThisVariableInfo {}
+class StackMapObjectVariableInfo  {
+	Index    char
 	Readable string
 }
-type StackMapUninitializedVariableInfo struct {
-	CodeOffset uint16
+class StackMapUninitializedVariableInfo  {
+	CodeOffset char
 }
 
-type StackMapVerificationTypeInfo struct {
+class StackMapVerificationTypeInfo  {
 	Verify Object
+	fn ToBytes() -> (bs []byte)  {
+		if _,ok := this.Verify.(StackMapTopVariableInfo) ; ok {
+			return []byte{0}
+		}
+		if _,ok := this.Verify.(StackMapIntegerVariableInfo) ; ok {
+			return []byte{1}
+		}
+		if _,ok := this.Verify.(StackMapFloatVariableInfo) ; ok {
+			return []byte{2}
+		}
+		if _,ok := this.Verify.(StackMapDoubleVariableInfo) ; ok {
+			return []byte{3}
+		}
+		if _,ok := this.Verify.(StackMapLongVariableInfo) ; ok {
+			return []byte{4}
+		}
+		if _,ok := this.Verify.(StackMapNullVariableInfo) ; ok {
+			return []byte{5}
+		}
+		if _,ok := this.Verify.(StackMapUninitializedThisVariableInfo) ; ok {
+			return []byte{6}
+		}
+		if v,ok := this.Verify.(StackMapObjectVariableInfo) ; ok {
+			bs := new []byte(3)
+			bs[0] = 7
+			binary.BigEndian.putChar(bs[1:], v.Index)
+			return bs
+		}
+		if v,ok := this.Verify.(StackMapUninitializedVariableInfo) ; ok {
+			bs := new []byte (3)
+			bs[0] = 8
+			binary.BigEndian.putChar(bs[1:], v.CodeOffset)
+			return bs
+		}
+	}	
 }
 
 
-func (s *StackMapVerificationTypeInfo) ToBytes() []byte {
-	if _,ok := s.Verify.(StackMapTopVariableInfo) ; ok {
-		return []byte{0}
-	}
-	if _,ok := s.Verify.(StackMapIntegerVariableInfo) ; ok {
-		return []byte{1}
-	}
-	if _,ok := s.Verify.(StackMapFloatVariableInfo) ; ok {
-		return []byte{2}
-	}
-	if _,ok := s.Verify.(StackMapDoubleVariableInfo) ; ok {
-		return []byte{3}
-	}
-	if _,ok := s.Verify.(StackMapLongVariableInfo) ; ok {
-		return []byte{4}
-	}
-	if _,ok := s.Verify.(StackMapNullVariableInfo) ; ok {
-		return []byte{5}
-	}
-	if _,ok := s.Verify.(StackMapUninitializedThisVariableInfo) ; ok {
-		return []byte{6}
-	}
-	if v,ok := s.Verify.(StackMapObjectVariableInfo) ; ok {
-		bs := new []byte(3)
-		bs[0] = 7
-		binary.BigEndian.PutUint16(bs[1:], v.Index)
-		return bs
-	}
-	if v,ok := s.Verify.(StackMapUninitializedVariableInfo) ; ok {
-		bs := new []byte (3)
-		bs[0] = 8
-		binary.BigEndian.PutUint16(bs[1:], v.CodeOffset)
-		return bs
-	}
-}
+

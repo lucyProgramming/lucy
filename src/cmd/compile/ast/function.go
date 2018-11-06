@@ -242,6 +242,10 @@ func (this *Function) checkReturnVarExpression() []error {
 	}
 	var errs []error
 	for _, v := range this.Type.ReturnList {
+		if v.DefaultValueExpression == nil {
+			v.DefaultValueExpression = v.Type.mkDefaultValueExpression()
+			continue
+		}
 		t, es := v.DefaultValueExpression.checkSingleValueContextExpression(&this.Block)
 		if len(es) > 0 {
 			errs = append(errs, es...)

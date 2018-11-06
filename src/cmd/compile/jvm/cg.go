@@ -274,6 +274,8 @@ func (this *BuildPackage) insertDefaultValue(c *cg.ClassHighLevel, t *ast.Type, 
 		index = c.Class.InsertIntConst(int32(v.(int64)))
 	case ast.VariableTypeShort:
 		index = c.Class.InsertIntConst(int32(v.(int64)))
+	case ast.VariableTypeChar:
+		index = c.Class.InsertIntConst(int32(v.(int64)))
 	case ast.VariableTypeInt:
 		index = c.Class.InsertIntConst(int32(v.(int64)))
 	case ast.VariableTypeLong:

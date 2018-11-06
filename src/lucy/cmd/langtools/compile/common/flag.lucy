@@ -1,0 +1,27 @@
+
+import "lucy/os/flag"
+
+
+public class Flags {
+	public OnlyImport        flag.BoolOption
+	public PackageName       flag.StringOption
+	public JvmMajorVersion   flag.IntOption
+	public JvmMinorVersion   flag.IntOption
+	public DisableCheckUnUse flag.BoolOption
+	public Release           flag.BoolOption
+	public parser 			flag.FlagParser
+
+	fn Flags(){
+		this.super()
+		this.parser = new flag.FlagParser()
+		this.OnlyImport = this.parser.boolOption("-only-import")
+		this.PackageName = this.parser.stringOption("-package-name")
+		this.JvmMajorVersion = this.parser.intOption("-jvm-major-version" , 52)
+		this.JvmMinorVersion = this.parser.intOption("-jvm-minor-version" , 0 )
+		this.DisableCheckUnUse = this.parser.boolOption("-disable-check-unuse")
+		this.Release = this.parser.boolOption("-release")
+	}
+}
+
+public var CompileFlags = new  Flags()
+ 

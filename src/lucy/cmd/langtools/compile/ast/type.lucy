@@ -86,25 +86,25 @@ pulic class Type {
 			e.Data = false
 		case VariableTypeByte:
 			e.Type = ExpressionTypeByte
-			e.Data = int64(0)
+			e.Data = int(0)
 		case VariableTypeShort:
 			e.Type = ExpressionTypeInt
-			e.Data = int64(0)
+			e.Data = int(0)
 		case VariableTypeChar:
 			e.Type = ExpressionTypeInt
-			e.Data = int64(0)
+			e.Data = int(0)
 		case VariableTypeInt:
 			e.Type = ExpressionTypeInt
-			e.Data = int64(0)
+			e.Data = int(0)
 		case VariableTypeLong:
 			e.Type = ExpressionTypeLong
-			e.Data = int64(0)
+			e.Data = int(0)
 		case VariableTypeFloat:
 			e.Type = ExpressionTypeFloat
-			e.Data = float32(0)
+			e.Data = float(0)
 		case VariableTypeDouble:
 			e.Type = ExpressionTypeDouble
-			e.Data = float64(0)
+			e.Data = double(0)
 		case VariableTypeEnum:
 			e.Type = ExpressionTypeInt
 			e.Data = this.Enum.DefaultValue
@@ -125,7 +125,7 @@ pulic class Type {
 			this.Type == VariableTypeJavaArray ||
 			this.Type == VariableTypeEnum ||
 			this.Type == VariableTypeFunction {
-			return nil
+			return null
 		}
 		switch this.Type {
 		case VariableTypePackage:
@@ -147,7 +147,7 @@ pulic class Type {
 		have type or not
 	*/
 	fn isTyped() error {
-		if err := this.rightValueValid(); err != nil {
+		if err := this.rightValueValid(); err != null {
 			return err
 		}
 		/*
@@ -157,7 +157,7 @@ pulic class Type {
 			return fmt.Errorf("%s '%s' is not typed",
 				this.Pos.ErrMsgPrefix(), this.TypeString())
 		}
-		return nil
+		return null
 	}
 
 	/*
@@ -183,23 +183,23 @@ pulic class Type {
 
 	fn resolve(block *Block) error {
 		if this.Resolved {
-			return nil
+			return null
 		}
 		this.Resolved = true // single threading
 		switch this.Type {
 		case VariableTypeTemplate:
-			if block.InheritedAttribute.Function.parameterTypes == nil {
+			if block.InheritedAttribute.Function.parameterTypes == null {
 				return fmt.Errorf("%s parameter type '%s' not in a template function",
 					errMsgPrefix(this.Pos), this.Name)
 			}
-			if block.InheritedAttribute.Function.parameterTypes[this.Name] == nil {
+			if block.InheritedAttribute.Function.parameterTypes[this.Name] == null {
 				return fmt.Errorf("%s parameter type '%s' not found",
 					errMsgPrefix(this.Pos), this.Name)
 			}
 			pos := this.Pos // keep pos
 			*typ = *block.InheritedAttribute.Function.parameterTypes[this.Name]
 			this.Pos = pos // keep pos
-			return nil
+			return null
 		case VariableTypeName:
 			return this.resolveName(block)
 		case VariableTypeGlobal:
@@ -213,28 +213,28 @@ pulic class Type {
 			return this.Array.resolve(block)
 		case VariableTypeMap:
 			var err error
-			if this.Map.K != nil {
+			if this.Map.K != null {
 				err = this.Map.K.resolve(block)
-				if err != nil {
+				if err != null {
 					return err
 				}
 			}
-			if this.Map.V != nil {
+			if this.Map.V != null {
 				return this.Map.V.resolve(block)
 			}
 		case VariableTypeFunction:
 			for _, v := range this.FunctionType.ParameterList {
-				if err := v.Type.resolve(block); err != nil {
+				if err := v.Type.resolve(block); err != null {
 					return err
 				}
 			}
 			for _, v := range this.FunctionType.ReturnList {
-				if err := v.Type.resolve(block); err != nil {
+				if err := v.Type.resolve(block); err != null {
 					return err
 				}
 			}
 		}
-		return nil
+		return null
 	}
 
 	fn resolveName(block *Block) error {
@@ -243,7 +243,7 @@ pulic class Type {
 		if strings.Contains(this.Name, ".") == false {
 			var loadFromImport bool
 			d = block.searchType(this.Name)
-			if d != nil {
+			if d != null {
 				switch d.(type) {
 				case *Class:
 					if t, ok := d.(*Class); ok &&
@@ -266,50 +266,50 @@ pulic class Type {
 			}
 			if loadFromImport {
 				d, err = this.getNameFromImport()
-				if err != nil {
+				if err != null {
 					return err
 				}
 			}
 		} else { // a.b  in type situation,must be package name
 			d, err = this.getNameFromImport()
-			if err != nil {
+			if err != null {
 				return err
 			}
 		}
-		if d == nil {
+		if d == null {
 			return fmt.Errorf("%s type named '%s' not found", errMsgPrefix(this.Pos), this.Name)
 		}
 		err = this.makeTypeFrom(d)
-		if err != nil {
+		if err != null {
 			return err
 		}
-		return nil
+		return null
 	}
 
 	fn getNameFromImport() (d interface{}, err error) {
 		if strings.Contains(this.Name, ".") == false {
 			i := PackageBeenCompile.getImport(this.Pos.Filename, this.Name)
-			if i != nil {
+			if i != null {
 				i.Used = true
 				return PackageBeenCompile.load(i.Import)
 			}
-			return nil, fmt.Errorf("%s type named '%s' not found",
+			return null, fmt.Errorf("%s type named '%s' not found",
 				errMsgPrefix(this.Pos), this.Name)
 		}
 		packageAndName := strings.Split(this.Name, ".")
 		i := PackageBeenCompile.getImport(this.Pos.Filename, packageAndName[0])
-		if nil == i {
-			return nil, fmt.Errorf("%s package '%s' not imported",
+		if null == i {
+			return null, fmt.Errorf("%s package '%s' not imported",
 				errMsgPrefix(this.Pos), packageAndName[0])
 		}
 		i.Used = true
 		p, err := PackageBeenCompile.load(i.Import)
-		if err != nil {
-			return nil, fmt.Errorf("%s %v",
+		if err != null {
+			return null, fmt.Errorf("%s %v",
 				errMsgPrefix(this.Pos), err)
 		}
 		if pp, ok := p.(*Package); ok &&
-			pp != nil {
+			pp != null {
 			var exists bool
 			d, exists = pp.Block.NameExists(packageAndName[1])
 			if exists == false {
@@ -318,7 +318,7 @@ pulic class Type {
 			}
 			return d, err
 		} else {
-			return nil, fmt.Errorf("%s '%s' is not a package",
+			return null, fmt.Errorf("%s '%s' is not a package",
 				errMsgPrefix(this.Pos), packageAndName[0])
 		}
 	}
@@ -334,7 +334,7 @@ pulic class Type {
 			}
 			this.Type = VariableTypeObject
 			this.Class = dd
-			return nil
+			return null
 		case *Type:
 			pos := this.Pos
 			alias := this.Alias
@@ -343,7 +343,7 @@ pulic class Type {
 			this.Pos = pos
 			this.Alias = alias
 			this.Resolved = resolved
-			return nil
+			return null
 		case *Enum:
 			dd := d.(*Enum)
 			if dd.LoadFromOutSide && dd.isPublic() == false {
@@ -353,7 +353,7 @@ pulic class Type {
 			}
 			this.Type = VariableTypeEnum
 			this.Enum = dd
-			return nil
+			return null
 		}
 		return fmt.Errorf("%s name '%s' is not a type",
 			errMsgPrefix(this.Pos), this.Name)
@@ -397,7 +397,7 @@ pulic class Type {
 	}
 
 	fn typeString(ret *string) {
-		if this.Alias != nil {
+		if this.Alias != null {
 			*ret += this.Alias.Name
 			return
 		}
@@ -488,7 +488,7 @@ pulic class Type {
 			ret = append(ret, this.Map.V.getParameterType(ft)...)
 			return ret
 		}
-		return nil
+		return null
 	}
 
 	fn canBeBindWithParameterTypes(parameterTypes map[string]*Type) error {
@@ -497,7 +497,7 @@ pulic class Type {
 			if ok == false {
 				return fmt.Errorf("typed parameter '%s' not found", this.Name)
 			}
-			return nil
+			return null
 		}
 		if this.Type == VariableTypeArray ||
 			this.Type == VariableTypeJavaArray {
@@ -505,12 +505,12 @@ pulic class Type {
 		}
 		if this.Type == VariableTypeMap {
 			err := this.Map.K.canBeBindWithParameterTypes(parameterTypes)
-			if err != nil {
+			if err != null {
 				return err
 			}
 			return this.Map.V.canBeBindWithParameterTypes(parameterTypes)
 		}
-		return nil
+		return null
 	}
 
 	/*
@@ -523,7 +523,7 @@ pulic class Type {
 				panic(fmt.Sprintf("typed parameter '%s' not found", this.Name))
 			}
 			*typ = *t.Clone() // real bind
-			return nil
+			return null
 		}
 		if this.Type == VariableTypeArray || this.Type == VariableTypeJavaArray {
 			return this.Array.bindWithParameterTypes(ft, parameterTypes)
@@ -531,7 +531,7 @@ pulic class Type {
 		if this.Type == VariableTypeMap {
 			if len(this.Map.K.getParameterType(ft)) > 0 {
 				err := this.Map.K.bindWithParameterTypes(ft, parameterTypes)
-				if err != nil {
+				if err != null {
 					return err
 				}
 			}
@@ -546,7 +546,7 @@ pulic class Type {
 
 	 */
 	fn canBeBindWithType(ft *FunctionType, mkParameterTypes map[string]*Type, bind *Type) error {
-		if err := bind.rightValueValid(); err != nil {
+		if err := bind.rightValueValid(); err != null {
 			return err
 		}
 		if bind.Type == VariableTypeNull {
@@ -554,7 +554,7 @@ pulic class Type {
 		}
 		if this.Type == VariableTypeTemplate {
 			mkParameterTypes[this.Name] = bind
-			return nil
+			return null
 		}
 		if this.Type == VariableTypeArray && bind.Type == VariableTypeArray {
 			return this.Array.canBeBindWithType(ft, mkParameterTypes, bind.Array)
@@ -565,7 +565,7 @@ pulic class Type {
 		if this.Type == VariableTypeMap && bind.Type == VariableTypeMap {
 			if len(this.Map.K.getParameterType(ft)) > 0 {
 				err := this.Map.K.canBeBindWithType(ft, mkParameterTypes, bind.Map.K)
-				if err != nil {
+				if err != null {
 					return err
 				}
 			}
@@ -617,23 +617,23 @@ pulic class Type {
 			return leftValue.FunctionType.equal(rightValue.FunctionType)
 		}
 		if leftValue.Type == VariableTypeObject && rightValue.Type == VariableTypeObject { // object
-			if err := leftValue.Class.loadSelf(leftValue.Pos); err != nil {
+			if err := leftValue.Class.loadSelf(leftValue.Pos); err != null {
 				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(rightValue.Pos), err))
 				return false
 			}
-			if err := rightValue.Class.loadSelf(rightValue.Pos); err != nil {
+			if err := rightValue.Class.loadSelf(rightValue.Pos); err != null {
 				*errs = append(*errs, err)
 				return false
 			}
 			if leftValue.Class.IsInterface() {
 				i, err := rightValue.Class.implementedInterface(leftValue.Pos, leftValue.Class.Name)
-				if err != nil {
+				if err != null {
 					*errs = append(*errs, err)
 				}
 				return i
 			} else { // class
 				has, err := rightValue.Class.haveSuperClass(rightValue.Pos, leftValue.Class.Name)
-				if err != nil {
+				if err != null {
 					*errs = append(*errs, err)
 				}
 				return has

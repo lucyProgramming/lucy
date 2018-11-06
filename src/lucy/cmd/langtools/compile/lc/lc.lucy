@@ -44,7 +44,7 @@ public class Compiler {
 		this.ClassPaths = common.GetClassPaths()
 		var err error
 		this.lucyPaths, err = common.GetLucyPaths()
-		if err != nil {
+		if err != null {
 			fmt.Println(err)
 			os.Exit(3)
 		}
@@ -68,7 +68,7 @@ public class Compiler {
 		for _, v := range this.Files {
 
 			bs, err := ioutil.ReadFile(v)
-			if err != nil {
+			if err != null {
 				this.Errs = append(this.Errs, err)
 				continue
 			}

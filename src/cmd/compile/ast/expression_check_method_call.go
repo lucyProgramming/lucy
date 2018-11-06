@@ -5,8 +5,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 )
 
-func (this *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*Type {
-	call := this.Data.(*ExpressionMethodCall)
+func (e *Expression) checkMethodCallExpression(block *Block, errs *[]error) []*Type {
+	call := e.Data.(*ExpressionMethodCall)
 	object, es := call.Expression.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
 	if object == nil {
@@ -14,30 +14,30 @@ func (this *Expression) checkMethodCallExpression(block *Block, errs *[]error) [
 	}
 	// call father`s construction method
 	if call.Name == SUPER && object.Type == VariableTypeObject {
-		this.checkMethodCallExpressionOnSuper(block, errs, object)
-		return []*Type{mkVoidType(this.Pos)}
+		e.checkMethodCallExpressionOnSuper(block, errs, object)
+		return []*Type{mkVoidType(e.Pos)}
 	}
 	switch object.Type {
 	case VariableTypePackage:
-		return this.checkMethodCallExpressionOnPackage(block, errs, object.Package)
+		return e.checkMethodCallExpressionOnPackage(block, errs, object.Package)
 	case VariableTypeMap:
-		return this.checkMethodCallExpressionOnMap(block, errs, object.Map)
+		return e.checkMethodCallExpressionOnMap(block, errs, object.Map)
 	case VariableTypeArray:
-		return this.checkMethodCallExpressionOnArray(block, errs, object)
+		return e.checkMethodCallExpressionOnArray(block, errs, object)
 	case VariableTypeJavaArray:
-		return this.checkMethodCallExpressionOnJavaArray(block, errs, object)
+		return e.checkMethodCallExpressionOnJavaArray(block, errs, object)
 	case VariableTypeDynamicSelector:
 		if call.Name == "finalize" {
-			*errs = append(*errs, fmt.Errorf("%s cannot call '%s'", this.Pos.ErrMsgPrefix(), call.Name))
+			*errs = append(*errs, fmt.Errorf("%s cannot call '%s'", e.Pos.ErrMsgPrefix(), call.Name))
 			return nil
 		}
-		return this.checkMethodCallExpressionOnDynamicSelector(block, errs, object)
+		return e.checkMethodCallExpressionOnDynamicSelector(block, errs, object)
 	case VariableTypeString:
 		if call.Name == "finalize" {
-			*errs = append(*errs, fmt.Errorf("%s cannot call '%s'", this.Pos.ErrMsgPrefix(), call.Name))
+			*errs = append(*errs, fmt.Errorf("%s cannot call '%s'", e.Pos.ErrMsgPrefix(), call.Name))
 			return nil
 		}
-		if err := loadJavaStringClass(this.Pos); err != nil {
+		if err := loadJavaStringClass(e.Pos); err != nil {
 			*errs = append(*errs, err)
 			return nil
 		}
@@ -46,7 +46,7 @@ func (this *Expression) checkMethodCallExpression(block *Block, errs *[]error) [
 		if len(*errs) > errsLength {
 			return nil
 		}
-		ms, matched, err := javaStringClass.accessMethod(this.Pos, errs, call, args,
+		ms, matched, err := javaStringClass.accessMethod(e.Pos, errs, call, args,
 			false, nil)
 		if err != nil {
 			*errs = append(*errs, err)
@@ -56,18 +56,18 @@ func (this *Expression) checkMethodCallExpression(block *Block, errs *[]error) [
 			call.Class = javaStringClass
 			if false == call.Expression.IsIdentifier(ThisPointerName) &&
 				ms[0].IsPublic() == false {
-				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", this.Pos.ErrMsgPrefix(), call.Name))
+				*errs = append(*errs, fmt.Errorf("%s method '%s' is not public", e.Pos.ErrMsgPrefix(), call.Name))
 			}
 			call.Method = ms[0]
-			return ms[0].Function.Type.mkCallReturnTypes(this.Pos)
+			return ms[0].Function.Type.mkCallReturnTypes(e.Pos)
 		} else {
-			*errs = append(*errs, methodsNotMatchError(this.Pos, call.Name, ms, args))
+			*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, args))
 			return nil
 		}
 
 	case VariableTypeObject, VariableTypeClass:
 		if call.Name == "finalize" {
-			*errs = append(*errs, fmt.Errorf("%s cannot call '%s'", this.Pos.ErrMsgPrefix(), call.Name))
+			*errs = append(*errs, fmt.Errorf("%s cannot call '%s'", e.Pos.ErrMsgPrefix(), call.Name))
 			return nil
 		}
 		call.Class = object.Class
@@ -79,11 +79,11 @@ func (this *Expression) checkMethodCallExpression(block *Block, errs *[]error) [
 		if object.Class.IsInterface() {
 			if object.Type == VariableTypeClass {
 				*errs = append(*errs, fmt.Errorf("%s cannot make_node_objects call on interface '%s'",
-					this.Pos.ErrMsgPrefix(), object.Class.Name))
+					e.Pos.ErrMsgPrefix(), object.Class.Name))
 				return nil
 			}
 			ms, matched, err :=
-				object.Class.accessInterfaceObjectMethod(this.Pos, errs, call.Name, call, callArgTypes, false)
+				object.Class.accessInterfaceObjectMethod(e.Pos, errs, call.Name, call, callArgTypes, false)
 			if err != nil {
 				*errs = append(*errs, err)
 				return nil
@@ -91,25 +91,25 @@ func (this *Expression) checkMethodCallExpression(block *Block, errs *[]error) [
 			if matched {
 				if ms[0].IsStatic() {
 					*errs = append(*errs, fmt.Errorf("%s method '%s' is static",
-						this.Pos.ErrMsgPrefix(), call.Name))
+						e.Pos.ErrMsgPrefix(), call.Name))
 				}
 				call.Method = ms[0]
-				return ms[0].Function.Type.mkCallReturnTypes(this.Pos)
+				return ms[0].Function.Type.mkCallReturnTypes(e.Pos)
 			}
-			*errs = append(*errs, methodsNotMatchError(this.Pos, call.Name, ms, callArgTypes))
+			*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
 			return nil
 		}
 		if len(call.ParameterTypes) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s method call expect no parameter types",
-				errMsgPrefix(this.Pos)))
+				errMsgPrefix(e.Pos)))
 		}
 		var fieldMethodHandler *ClassField
-		ms, matched, err := object.Class.accessMethod(this.Pos, errs, call, callArgTypes,
+		ms, matched, err := object.Class.accessMethod(e.Pos, errs, call, callArgTypes,
 			false, &fieldMethodHandler)
 		if err != nil {
 			*errs = append(*errs, err)
 			if len(ms) > 0 {
-				return ms[0].Function.Type.mkCallReturnTypes(this.Pos)
+				return ms[0].Function.Type.mkCallReturnTypes(e.Pos)
 			}
 			return nil
 		}
@@ -119,7 +119,7 @@ func (this *Expression) checkMethodCallExpression(block *Block, errs *[]error) [
 				*errs = append(*errs, err)
 			}
 			call.FieldMethodHandler = fieldMethodHandler
-			return fieldMethodHandler.Type.FunctionType.mkCallReturnTypes(this.Pos)
+			return fieldMethodHandler.Type.FunctionType.mkCallReturnTypes(e.Pos)
 		}
 		if matched {
 			m := ms[0]
@@ -128,13 +128,13 @@ func (this *Expression) checkMethodCallExpression(block *Block, errs *[]error) [
 				*errs = append(*errs, err)
 			}
 			call.Method = m
-			return m.Function.Type.mkCallReturnTypes(this.Pos)
+			return m.Function.Type.mkCallReturnTypes(e.Pos)
 		}
-		*errs = append(*errs, methodsNotMatchError(this.Pos, call.Name, ms, callArgTypes))
+		*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
 		return nil
 	default:
 		*errs = append(*errs, fmt.Errorf("%s cannot make_node_objects method call '%s' on '%s'",
-			this.Pos.ErrMsgPrefix(), call.Name, object.TypeString()))
+			e.Pos.ErrMsgPrefix(), call.Name, object.TypeString()))
 		return nil
 	}
 }
@@ -142,14 +142,14 @@ func (this *Expression) checkMethodCallExpression(block *Block, errs *[]error) [
 /*
 	this.super()
 */
-func (this *Expression) checkMethodCallExpressionOnSuper(
+func (e *Expression) checkMethodCallExpressionOnSuper(
 	block *Block,
 	errs *[]error,
 	object *Type) {
-	call := this.Data.(*ExpressionMethodCall)
+	call := e.Data.(*ExpressionMethodCall)
 	if call.Expression.IsIdentifier(ThisPointerName) == false {
 		*errs = append(*errs, fmt.Errorf("%s call father`s constuction must use 'thi.super()'",
-			this.Pos.ErrMsgPrefix()))
+			e.Pos.ErrMsgPrefix()))
 		return
 	}
 	if block.InheritedAttribute.IsConstructionMethod == false ||
@@ -157,11 +157,11 @@ func (this *Expression) checkMethodCallExpressionOnSuper(
 		block.InheritedAttribute.StatementOffset != 0 {
 		*errs = append(*errs,
 			fmt.Errorf("%s call father`s constuction on must first statement of a constructon method",
-				this.Pos.ErrMsgPrefix()))
+				e.Pos.ErrMsgPrefix()))
 		return
 	}
 	if object.Class.LoadFromOutSide {
-		err := object.Class.loadSuperClass(this.Pos)
+		err := object.Class.loadSuperClass(e.Pos)
 		if err != nil {
 			*errs = append(*errs, err)
 			return
@@ -179,32 +179,32 @@ func (this *Expression) checkMethodCallExpressionOnSuper(
 	if len(*errs) > errsLength {
 		return
 	}
-	ms, matched, err := object.Class.SuperClass.accessConstructionMethod(this.Pos, errs,
+	ms, matched, err := object.Class.SuperClass.accessConstructionMethod(e.Pos, errs,
 		nil, call, callArgsTypes)
 	if err != nil {
-		*errs = append(*errs, fmt.Errorf("%s %v", this.Pos.ErrMsgPrefix(), err))
+		*errs = append(*errs, fmt.Errorf("%s %v", e.Pos.ErrMsgPrefix(), err))
 		return
 	}
 	if matched {
 		m := ms[0]
-		if err := object.Class.SuperClass.constructionMethodAccessAble(this.Pos, m); err != nil {
+		if err := object.Class.SuperClass.constructionMethodAccessAble(e.Pos, m); err != nil {
 			*errs = append(*errs, err)
 		}
 		call.Name = "<init>"
 		call.Method = m
 		call.Class = object.Class.SuperClass
 		block.Statements[0].IsCallFatherConstructionStatement = true
-		block.InheritedAttribute.Function.CallFatherConstructionExpression = this
+		block.InheritedAttribute.Function.CallFatherConstructionExpression = e
 		return
 	}
-	*errs = append(*errs, methodsNotMatchError(this.Pos, object.TypeString(), ms, callArgsTypes))
+	*errs = append(*errs, methodsNotMatchError(e.Pos, object.TypeString(), ms, callArgsTypes))
 }
 
-func (this *Expression) checkMethodCallExpressionOnDynamicSelector(block *Block, errs *[]error, object *Type) []*Type {
-	call := this.Data.(*ExpressionMethodCall)
+func (e *Expression) checkMethodCallExpressionOnDynamicSelector(block *Block, errs *[]error, object *Type) []*Type {
+	call := e.Data.(*ExpressionMethodCall)
 	if call.Name == SUPER {
 		*errs = append(*errs, fmt.Errorf("%s access '%s' at '%s' not allow",
-			this.Pos.ErrMsgPrefix(), SUPER, object.TypeString()))
+			e.Pos.ErrMsgPrefix(), SUPER, object.TypeString()))
 		return nil
 	}
 	var fieldMethodHandler *ClassField
@@ -213,7 +213,7 @@ func (this *Expression) checkMethodCallExpressionOnDynamicSelector(block *Block,
 	if len(*errs) > errsLength {
 		return nil
 	}
-	ms, matched, err := object.Class.accessMethod(this.Pos, errs, call, callArgTypes, false, &fieldMethodHandler)
+	ms, matched, err := object.Class.accessMethod(e.Pos, errs, call, callArgTypes, false, &fieldMethodHandler)
 	if err != nil {
 		*errs = append(*errs, err)
 		return nil
@@ -221,24 +221,24 @@ func (this *Expression) checkMethodCallExpressionOnDynamicSelector(block *Block,
 	if matched {
 		if fieldMethodHandler != nil {
 			call.FieldMethodHandler = fieldMethodHandler
-			return fieldMethodHandler.Type.FunctionType.mkCallReturnTypes(this.Pos)
+			return fieldMethodHandler.Type.FunctionType.mkCallReturnTypes(e.Pos)
 		} else {
 			method := ms[0]
 			call.Method = method
-			return method.Function.Type.mkCallReturnTypes(this.Pos)
+			return method.Function.Type.mkCallReturnTypes(e.Pos)
 		}
 	} else {
-		*errs = append(*errs, methodsNotMatchError(this.Pos, call.Name, ms, callArgTypes))
+		*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
 	}
 	return nil
 }
-func (this *Expression) checkMethodCallExpressionOnJavaArray(block *Block, errs *[]error, array *Type) []*Type {
-	call := this.Data.(*ExpressionMethodCall)
+func (e *Expression) checkMethodCallExpressionOnJavaArray(block *Block, errs *[]error, array *Type) []*Type {
+	call := e.Data.(*ExpressionMethodCall)
 	switch call.Name {
 	case common.ArrayMethodSize:
 		result := &Type{}
 		result.Type = VariableTypeInt
-		result.Pos = this.Pos
+		result.Pos = e.Pos
 		if len(call.Args) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s method '%s' expect no arguments",
 				call.Args[0].Pos.ErrMsgPrefix(), call.Name))
@@ -246,19 +246,19 @@ func (this *Expression) checkMethodCallExpressionOnJavaArray(block *Block, errs 
 		return []*Type{result}
 	default:
 		*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on '%s'",
-			this.Pos.ErrMsgPrefix(), call.Name, array.TypeString()))
+			e.Pos.ErrMsgPrefix(), call.Name, array.TypeString()))
 	}
 	return nil
 }
 
-func (this *Expression) checkMethodCallExpressionOnPackage(
+func (e *Expression) checkMethodCallExpressionOnPackage(
 	block *Block,
 	errs *[]error,
 	p *Package) []*Type {
-	call := this.Data.(*ExpressionMethodCall)
+	call := e.Data.(*ExpressionMethodCall)
 	d, exists := p.Block.NameExists(call.Name)
 	if exists == false {
-		*errs = append(*errs, fmt.Errorf("%s function '%s' not found", this.Pos.ErrMsgPrefix(), call.Name))
+		*errs = append(*errs, fmt.Errorf("%s function '%s' not found", e.Pos.ErrMsgPrefix(), call.Name))
 		return nil
 	}
 	switch d.(type) {
@@ -267,29 +267,29 @@ func (this *Expression) checkMethodCallExpressionOnPackage(
 		if f.IsPublic() == false &&
 			p.isSame(&PackageBeenCompile) == false {
 			*errs = append(*errs, fmt.Errorf("%s function '%s' is not public",
-				this.Pos.ErrMsgPrefix(), call.Name))
+				e.Pos.ErrMsgPrefix(), call.Name))
 		}
 		if f.TemplateFunction != nil {
 			// better convert to function call
-			methodCall := this.Data.(*ExpressionMethodCall)
+			methodCall := e.Data.(*ExpressionMethodCall)
 			functionCall := &ExpressionFunctionCall{}
 			functionCall.Args = methodCall.Args
 			functionCall.Function = f
 			functionCall.ParameterTypes = methodCall.ParameterTypes
-			this.Type = ExpressionTypeFunctionCall
-			this.Data = functionCall
-			return this.checkFunctionCall(block, errs, f, functionCall)
+			e.Type = ExpressionTypeFunctionCall
+			e.Data = functionCall
+			return e.checkFunctionCall(block, errs, f, functionCall)
 		} else {
-			methodCall := this.Data.(*ExpressionMethodCall)
+			methodCall := e.Data.(*ExpressionMethodCall)
 			methodCall.PackageFunction = f
-			ret := f.Type.mkCallReturnTypes(this.Pos)
+			ret := f.Type.mkCallReturnTypes(e.Pos)
 			errsLength := len(*errs)
 			callArgsTypes := checkExpressions(block, methodCall.Args, errs, true)
 			if len(*errs) > errsLength {
 				return ret
 			}
 			var err error
-			methodCall.VArgs, err = f.Type.fitArgs(this.Pos, &call.Args, callArgsTypes, f)
+			methodCall.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
 			if err != nil {
 				*errs = append(*errs, err)
 			}
@@ -299,25 +299,25 @@ func (this *Expression) checkMethodCallExpressionOnPackage(
 		v := d.(*Variable)
 		if v.isPublic() == false && p.isSame(&PackageBeenCompile) == false {
 			*errs = append(*errs, fmt.Errorf("%s variable '%s' is not public",
-				this.Pos.ErrMsgPrefix(), call.Name))
+				e.Pos.ErrMsgPrefix(), call.Name))
 		}
 		if v.Type.Type != VariableTypeFunction {
 			*errs = append(*errs, fmt.Errorf("%s variable '%s' is not a function",
-				this.Pos.ErrMsgPrefix(), call.Name))
+				e.Pos.ErrMsgPrefix(), call.Name))
 			return nil
 		}
-		call := this.Data.(*ExpressionMethodCall)
+		call := e.Data.(*ExpressionMethodCall)
 		if len(call.ParameterTypes) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s variable '%s' cannot be a template fucntion",
 				errMsgPrefix(call.ParameterTypes[0].Pos), call.Name))
 		}
-		ret := v.Type.FunctionType.mkCallReturnTypes(this.Pos)
+		ret := v.Type.FunctionType.mkCallReturnTypes(e.Pos)
 		errsLength := len(*errs)
 		callArgsTypes := checkExpressions(block, call.Args, errs, true)
 		if len(*errs) > errsLength {
 			return ret
 		}
-		vArgs, err := v.Type.FunctionType.fitArgs(this.Pos, &call.Args, callArgsTypes, nil)
+		vArgs, err := v.Type.FunctionType.fitArgs(e.Pos, &call.Args, callArgsTypes, nil)
 		if err != nil {
 			*errs = append(*errs, err)
 		}
@@ -330,50 +330,50 @@ func (this *Expression) checkMethodCallExpressionOnPackage(
 		class := d.(*Class)
 		if class.IsPublic() == false && p.isSame(&PackageBeenCompile) == false {
 			*errs = append(*errs, fmt.Errorf("%s class '%s' is not public",
-				this.Pos.ErrMsgPrefix(), call.Name))
+				e.Pos.ErrMsgPrefix(), call.Name))
 		}
 		conversion := &ExpressionTypeConversion{}
 		conversion.Type = &Type{}
 		conversion.Type.Type = VariableTypeObject
-		conversion.Type.Pos = this.Pos
+		conversion.Type.Pos = e.Pos
 		conversion.Type.Class = class
-		this.Type = ExpressionTypeCheckCast
+		e.Type = ExpressionTypeCheckCast
 		if len(call.Args) >= 1 {
 			conversion.Expression = call.Args[0]
 		}
-		this.Data = conversion
+		e.Data = conversion
 		if len(call.Args) != 1 {
-			*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument", this.Pos.ErrMsgPrefix()))
+			*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument", e.Pos.ErrMsgPrefix()))
 			return []*Type{conversion.Type.Clone()}
 		}
-		return []*Type{this.checkTypeConversionExpression(block, errs)}
+		return []*Type{e.checkTypeConversionExpression(block, errs)}
 	case *Type:
 		if len(call.Args) != 1 {
 			*errs = append(*errs, fmt.Errorf("%s cast type expect 1 argument",
-				this.Pos.ErrMsgPrefix()))
+				e.Pos.ErrMsgPrefix()))
 			result := p.Block.TypeAliases[call.Name].Clone()
-			result.Pos = this.Pos
+			result.Pos = e.Pos
 			return []*Type{result}
 		}
 		conversion := &ExpressionTypeConversion{}
 		conversion.Type = p.Block.TypeAliases[call.Name]
-		this.Type = ExpressionTypeCheckCast
+		e.Type = ExpressionTypeCheckCast
 		if len(call.Args) >= 1 {
 			conversion.Expression = call.Args[0]
 		}
-		this.Data = conversion
-		return []*Type{this.checkTypeConversionExpression(block, errs)}
+		e.Data = conversion
+		return []*Type{e.checkTypeConversionExpression(block, errs)}
 	default:
 		*errs = append(*errs, fmt.Errorf("%s '%s' is not a function",
-			this.Pos.ErrMsgPrefix(), call.Name))
+			e.Pos.ErrMsgPrefix(), call.Name))
 		return nil
 	}
 }
-func (this *Expression) checkMethodCallExpressionOnArray(
+func (e *Expression) checkMethodCallExpressionOnArray(
 	block *Block,
 	errs *[]error,
 	array *Type) []*Type {
-	call := this.Data.(*ExpressionMethodCall)
+	call := e.Data.(*ExpressionMethodCall)
 	switch call.Name {
 	case common.ArrayMethodSize,
 		common.ArrayMethodCap,
@@ -381,7 +381,7 @@ func (this *Expression) checkMethodCallExpressionOnArray(
 		common.ArrayMethodEnd:
 		result := &Type{}
 		result.Type = VariableTypeInt
-		result.Pos = this.Pos
+		result.Pos = e.Pos
 		if len(call.Args) > 0 {
 			*errs = append(*errs,
 				fmt.Errorf("%s too mamy argument to call,method '%s' expect no arguments",
@@ -393,7 +393,7 @@ func (this *Expression) checkMethodCallExpressionOnArray(
 		if len(call.Args) == 0 {
 			*errs = append(*errs,
 				fmt.Errorf("%s too few arguments to call %s,expect at least one argument",
-					this.Pos.ErrMsgPrefix(), call.Name))
+					e.Pos.ErrMsgPrefix(), call.Name))
 		}
 		ts := checkExpressions(block, call.Args, errs, true)
 		for _, t := range ts {
@@ -414,36 +414,36 @@ func (this *Expression) checkMethodCallExpressionOnArray(
 		}
 		result := &Type{}
 		result.Type = VariableTypeVoid
-		result.Pos = this.Pos
+		result.Pos = e.Pos
 		return []*Type{result}
 	case common.ArrayMethodGetUnderlyingArray:
 		result := &Type{}
 		result.Type = VariableTypeJavaArray
-		result.Pos = this.Pos
+		result.Pos = e.Pos
 		result.Array = array.Array.Clone()
-		result.Array.Pos = this.Pos
+		result.Array.Pos = e.Pos
 		if len(call.Args) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s too mamy argument to call,method '%s' expect no arguments",
 				call.Args[0].Pos.ErrMsgPrefix(), call.Name))
 		}
 		return []*Type{result}
 	default:
-		*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on array", this.Pos.ErrMsgPrefix(), call.Name))
+		*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on array", e.Pos.ErrMsgPrefix(), call.Name))
 	}
 	return nil
 }
-func (this *Expression) checkMethodCallExpressionOnMap(
+func (e *Expression) checkMethodCallExpressionOnMap(
 	block *Block,
 	errs *[]error,
 	m *Map) []*Type {
-	call := this.Data.(*ExpressionMethodCall)
+	call := e.Data.(*ExpressionMethodCall)
 	switch call.Name {
 	case common.MapMethodKeyExist:
 		ret := &Type{}
-		ret.Pos = this.Pos
+		ret.Pos = e.Pos
 		ret.Type = VariableTypeBool
 		if len(call.Args) != 1 {
-			pos := this.Pos
+			pos := e.Pos
 			if len(call.Args) != 0 {
 				pos = call.Args[1].Pos
 			}
@@ -463,11 +463,11 @@ func (this *Expression) checkMethodCallExpressionOnMap(
 		return []*Type{ret}
 	case common.MapMethodRemove:
 		ret := &Type{}
-		ret.Pos = this.Pos
+		ret.Pos = e.Pos
 		ret.Type = VariableTypeVoid
 		if len(call.Args) == 0 {
 			*errs = append(*errs, fmt.Errorf("%s remove expect at last 1 argement",
-				this.Pos.ErrMsgPrefix()))
+				e.Pos.ErrMsgPrefix()))
 			return []*Type{ret}
 		}
 		ts := checkExpressions(block, call.Args, errs, true)
@@ -483,16 +483,16 @@ func (this *Expression) checkMethodCallExpressionOnMap(
 		return []*Type{ret}
 	case common.MapMethodRemoveAll:
 		ret := &Type{}
-		ret.Pos = this.Pos
+		ret.Pos = e.Pos
 		ret.Type = VariableTypeVoid
 		if len(call.Args) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s '%s' expect no arguments",
-				this.Pos.ErrMsgPrefix(), common.MapMethodRemoveAll))
+				e.Pos.ErrMsgPrefix(), common.MapMethodRemoveAll))
 		}
 		return []*Type{ret}
 	case common.MapMethodSize:
 		ret := &Type{}
-		ret.Pos = this.Pos
+		ret.Pos = e.Pos
 		ret.Type = VariableTypeInt
 		if len(call.Args) > 0 {
 			*errs = append(*errs, fmt.Errorf("%s too many argument to call '%s''",
@@ -501,7 +501,7 @@ func (this *Expression) checkMethodCallExpressionOnMap(
 		return []*Type{ret}
 	default:
 		*errs = append(*errs, fmt.Errorf("%s unkown call '%s' on map",
-			this.Pos.ErrMsgPrefix(), call.Name))
+			e.Pos.ErrMsgPrefix(), call.Name))
 		return nil
 	}
 	return nil

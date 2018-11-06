@@ -5,8 +5,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (this *Expression) checkVarExpression(block *Block, errs *[]error) {
-	ev := this.Data.(*ExpressionVar)
+func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
+	ev := e.Data.(*ExpressionVar)
 	if ev.Type != nil {
 		if err := ev.Type.resolve(block); err != nil {
 			*errs = append(*errs, err)
@@ -24,7 +24,7 @@ func (this *Expression) checkVarExpression(block *Block, errs *[]error) {
 		// looks impossible
 		*errs = append(*errs,
 			fmt.Errorf("%s expression var have not type and no initValues",
-				errMsgPrefix(this.Pos)))
+				errMsgPrefix(e.Pos)))
 		return
 	}
 	var err error
@@ -69,7 +69,7 @@ func (this *Expression) checkVarExpression(block *Block, errs *[]error) {
 			if v.Type == nil {
 				continue
 			}
-			if this.IsGlobal {
+			if e.IsGlobal {
 				err = PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
 			} else {
 				err = block.Insert(v.Name, v.Pos, v)
@@ -82,7 +82,7 @@ func (this *Expression) checkVarExpression(block *Block, errs *[]error) {
 	} else {
 		for _, v := range ev.Variables {
 			var err error
-			if this.IsGlobal {
+			if e.IsGlobal {
 				err = PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
 			} else {
 				err = block.Insert(v.Name, v.Pos, v)
@@ -95,11 +95,11 @@ func (this *Expression) checkVarExpression(block *Block, errs *[]error) {
 				v.Type.mkDefaultValueExpression())
 		}
 	}
-	if this.IsGlobal {
+	if e.IsGlobal {
 		for _, v := range ev.Variables {
 			v.IsGlobal = true
 		}
-		if this.IsPublic {
+		if e.IsPublic {
 			for _, v := range ev.Variables {
 				v.AccessFlags |= cg.AccFieldPublic
 			}

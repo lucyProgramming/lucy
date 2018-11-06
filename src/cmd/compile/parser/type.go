@@ -96,8 +96,10 @@ func (this *Parser) parseType() (*ast.Type, error) {
 	case lex.TokenMap:
 		this.Next(lfNotToken) // skip map key word
 		if this.token.Type != lex.TokenLc {
-			return nil, fmt.Errorf("%s expect '{',but '%s'",
+			err := fmt.Errorf("%s expect '{',but '%s'",
 				this.errMsgPrefix(), this.token.Description)
+			this.errs = append(this.errs, err)
+			return nil, err
 		}
 		this.Next(lfNotToken) // skip {
 		var k, v *ast.Type
@@ -107,8 +109,10 @@ func (this *Parser) parseType() (*ast.Type, error) {
 		}
 		this.ifTokenIsLfThenSkip()
 		if this.token.Type != lex.TokenArrow {
-			return nil, fmt.Errorf("%s expect '->',but '%s'",
+			err := fmt.Errorf("%s expect '->',but '%s'",
 				this.errMsgPrefix(), this.token.Description)
+			this.errs = append(this.errs, err)
+			return nil, err
 		}
 		this.Next(lfNotToken) // skip ->
 		v, err := this.parseType()
@@ -117,8 +121,10 @@ func (this *Parser) parseType() (*ast.Type, error) {
 		}
 		this.ifTokenIsLfThenSkip()
 		if this.token.Type != lex.TokenRc {
-			return nil, fmt.Errorf("%s expect '}',but '%s'",
+			err := fmt.Errorf("%s expect '}',but '%s'",
 				this.errMsgPrefix(), this.token.Description)
+			this.errs = append(this.errs, err)
+			return nil, err
 		}
 		this.Next(lfIsToken)
 		m := &ast.Map{

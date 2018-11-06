@@ -1,0 +1,289 @@
+ 
+
+type ClassMethod struct {
+	IsCompilerAuto bool
+	Function       *Function
+}
+
+func (m *ClassMethod) narrowDownAccessRange(implementation *ClassMethod) bool {
+	if m.IsPublic() {
+		return !implementation.IsPublic()
+	}
+	if m.IsProtected() {
+		return implementation.IsPrivate() ||
+			implementation.isAccessFlagDefault()
+	}
+	if m.isAccessFlagDefault() {
+		return implementation.IsPrivate()
+	}
+	return false
+}
+
+func (m *ClassMethod) accessString() string {
+	if m.IsPublic() {
+		return "public"
+	}
+	if m.IsProtected() {
+		return "protected"
+	}
+	if m.IsPrivate() {
+		return "private"
+	}
+	return `default ""`
+}
+
+func (m *ClassMethod) isAccessFlagDefault() bool {
+	return m.Function.AccessFlags&
+		(cg.AccMethodPublic|
+			cg.AccMethodPrivate|
+			cg.AccMethodProtected) == 0
+}
+
+func (m *ClassMethod) IsPublic() bool {
+	return (m.Function.AccessFlags & cg.AccMethodPublic) != 0
+}
+func (m *ClassMethod) IsProtected() bool {
+	return (m.Function.AccessFlags & cg.AccMethodProtected) != 0
+}
+
+func (m *ClassMethod) IsStatic() bool {
+	return (m.Function.AccessFlags & cg.AccMethodStatic) != 0
+}
+
+func (m *ClassMethod) IsPrivate() bool {
+	return (m.Function.AccessFlags & cg.AccMethodPrivate) != 0
+}
+func (m *ClassMethod) IsFinal() bool {
+	return (m.Function.AccessFlags & cg.AccMethodFinal) != 0
+}
+func (m *ClassMethod) IsAbstract() bool {
+	return (m.Function.AccessFlags & cg.AccMethodAbstract) != 0
+}
+
+func (m *ClassMethod) ableAccessFromSubClass() bool {
+	return m.IsPublic() ||
+		m.IsProtected()
+}
+
+func (m *ClassMethod) checkModifierOk() []error {
+	errs := []error{}
+	if m.IsAbstract() && m.IsFinal() {
+		errs = append(errs, fmt.Errorf("%s abstract method cannot be final",
+			errMsgPrefix(m.Function.Pos)))
+	}
+	if m.IsAbstract() && m.IsPrivate() {
+		errs = append(errs, fmt.Errorf("%s abstract method cannot be private",
+			errMsgPrefix(m.Function.Pos)))
+	}
+	if m.IsAbstract() && m.Function.Name == SpecialMethodInit {
+		errs = append(errs, fmt.Errorf("%s construction method cannot be abstract",
+			errMsgPrefix(m.Function.Pos)))
+	}
+	return errs
+}
+
+func (m *ClassMethod) IsFirstStatementCallFatherConstruction() bool {
+	if len(m.Function.Block.Statements) == 0 {
+		return false
+	}
+	s := m.Function.Block.Statements[0]
+	if s.Type != StatementTypeExpression {
+		return false
+	}
+	e := s.Expression
+	if e.Type != ExpressionTypeMethodCall {
+		return false
+	}
+	call := s.Expression.Data.(*ExpressionMethodCall)
+	if call.Expression.IsIdentifier(ThisPointerName) == false || call.Name != SUPER {
+		return false
+	}
+	return true
+}
+func (this *Class) accessInterfaceObjectMethod(
+	pos Pos,
+	errs *[]error,
+	name string,
+	call *ExpressionMethodCall,
+	callArgTypes []*Type,
+	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
+	ms, matched, err = this.accessInterfaceMethod(pos, errs, name, call, callArgTypes, fromSub)
+	if err != null {
+		return null, false, err
+	}
+	if matched {
+		return ms, matched, err
+	}
+	err = this.loadSuperClass(pos)
+	if err != null {
+		return null, false, err
+	}
+	if this.SuperClass == null {
+		return null, false, null
+	}
+	return this.SuperClass.accessMethod(pos, errs, call, callArgTypes, fromSub, null)
+}
+
+func (this *Class) accessInterfaceMethod(
+	pos Pos,
+	errs *[]error,
+	name string,
+	call *ExpressionMethodCall,
+	callArgTypes []*Type,
+	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
+	err = this.loadSelf(pos)
+	if err != null {
+		return null, false, err
+	}
+	if null != this.Methods {
+		for _, m := range this.Methods[name] {
+			if fromSub && m.ableAccessFromSubClass() == false {
+				continue
+			}
+			call.VArgs, err = m.Function.Type.fitArgs(pos, &call.Args, callArgTypes, null)
+			if err == null {
+				return []*ClassMethod{m}, true, null
+			} else {
+				return null, false, err
+			}
+		}
+	}
+	for _, v := range this.Interfaces {
+		err := v.loadSelf(pos)
+		if err != null {
+			return null, false, err
+		}
+		ms2, matched2, err2 := v.accessInterfaceMethod(pos, errs, name, call, callArgTypes, true)
+		if err2 != null {
+			return null, false, err2
+		}
+		if matched {
+			return ms2, matched2, null
+		}
+	}
+	return null, false, null // no found , no error
+}
+
+/*
+	access method lucy style
+*/
+func (this *Class) accessMethod(
+	pos Pos,
+	errs *[]error,
+	call *ExpressionMethodCall,
+	callArgTypes []*Type,
+	fromSub bool,
+	fieldMethodHandler **ClassField) (ms []*ClassMethod, matched bool, err error) {
+	err = this.loadSelf(pos)
+	if err != null {
+		return null, false, err
+	}
+	if this.IsJava {
+		return this.accessMethodAsJava(pos, errs, call, callArgTypes, false)
+	}
+	if this.Fields != null {
+		if f := this.Fields[call.Name]; f != null &&
+			f.Type.Type == VariableTypeFunction &&
+			fieldMethodHandler != null {
+			if fromSub && f.ableAccessFromSubClass() == false {
+				//cannot access this field
+			} else {
+				call.VArgs, err = this.Fields[call.Name].Type.FunctionType.fitArgs(pos, &call.Args,
+					callArgTypes, null)
+				if err == null {
+					*fieldMethodHandler = f
+					matched = true
+					return
+				} else {
+					return null, false, err
+				}
+			}
+		}
+	}
+	if this.Methods != null {
+		if len(this.Methods[call.Name]) > 0 {
+			for _, m := range this.Methods[call.Name] {
+				if fromSub && m.ableAccessFromSubClass() == false {
+					return null, false, fmt.Errorf("%s method '%s' not found",
+						pos.ErrMsgPrefix(), call.Name)
+				}
+				call.VArgs, err = m.Function.Type.fitArgs(pos, &call.Args,
+					callArgTypes, m.Function)
+				if err == null {
+					return []*ClassMethod{m}, true, null
+				} else {
+					return []*ClassMethod{m}, false, err
+				}
+			}
+		}
+	}
+
+	err = this.loadSuperClass(pos)
+	if err != null {
+		return ms, false, err
+	}
+	if this.SuperClass == null {
+		return ms, false, null
+	}
+	return this.SuperClass.accessMethod(pos, errs, call,
+		callArgTypes, true, fieldMethodHandler)
+}
+
+/*
+	access method java style
+*/
+func (this *Class) accessMethodAsJava(
+	pos Pos,
+	errs *[]error,
+	call *ExpressionMethodCall,
+	callArgTypes []*Type,
+	fromSub bool) (ms []*ClassMethod, matched bool, err error) {
+	if this.Methods != null {
+		for _, m := range this.Methods[call.Name] {
+			if fromSub == true && m.ableAccessFromSubClass() == false {
+				//cannot access from sub
+				continue
+			}
+			call.VArgs, err = m.Function.Type.fitArgs(pos, &call.Args, callArgTypes, m.Function)
+			if err == null {
+				return []*ClassMethod{m}, true, null
+			} else {
+				ms = append(ms, m)
+			}
+		}
+	}
+	if this.Name == JavaRootClass {
+		return ms, false, null
+	}
+	err = this.loadSuperClass(pos)
+	if err != null {
+		return null, false, err
+	}
+	if this.SuperClass == null {
+		return ms, false, null
+	}
+	ms_, matched, err := this.SuperClass.accessMethodAsJava(pos, errs, call, callArgTypes, true)
+	if err != null {
+		return ms, false, err
+	}
+	if matched { // perfect match in father
+		return ms_, matched, null
+	}
+	return append(ms, ms_...), false, null // methods have the same name
+}
+
+func (m *ClassMethod) implementationMethodIsOk(
+	pos Pos,
+	implementation *ClassMethod) error {
+	if implementation.Function.Pos != null {
+		pos = implementation.Function.Pos
+	}
+	if implementation.IsStatic() {
+		return fmt.Errorf("%s method '%s' is static", pos.ErrMsgPrefix(), m.Function.Name)
+	}
+	if m.narrowDownAccessRange(implementation) {
+		return fmt.Errorf("%s implementation of method '%s' should not narrow down access range, '%s' -> '%s'",
+			pos.ErrMsgPrefix(), m.Function.Name, m.accessString(), implementation.accessString())
+	}
+	return null
+}

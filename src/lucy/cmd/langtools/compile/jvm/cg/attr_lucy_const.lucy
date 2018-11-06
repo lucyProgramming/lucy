@@ -1,9 +1,9 @@
-package cg
+
 
 class AttributeLucyConst {
-	fn ToAttributeInfo(class Class) -> (ret AttributeInfo)  {
-		ret := new AttributeInfo()
-		ret.NameIndex = class.InsertUtf8Const(AttributeNameLucyConst)
+	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
+		ret = new AttributeInfo()
+		ret.NameIndex = c.InsertUtf8Const(AttributeNameLucyConst)
 		return ret
 	}
 }

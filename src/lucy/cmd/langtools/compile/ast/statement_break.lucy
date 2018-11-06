@@ -1,0 +1,53 @@
+ 
+
+public class StatementBreak {
+	Defers              []StatementDefer
+	StatementFor        StatementFor
+	StatementSwitch     StatementSwitch
+	SwitchTemplateBlock Block
+	Pos                 Pos
+
+	fn check(block Block) []error {
+		if block.InheritedAttribute.ForBreak == null {
+			return []error{fmt.Errorf("%s 'break' cannot in this scope", this.Pos.ErrMsgPrefix())}
+		}
+		if block.InheritedAttribute.Defer != null {
+			return []error{fmt.Errorf("%s cannot has 'break' in 'defer'",
+				this.Pos.ErrMsgPrefix())}
+		}
+		if t, ok := block.InheritedAttribute.ForBreak.(*StatementFor); ok {
+			this.StatementFor = t
+		} else if t, ok := block.InheritedAttribute.ForBreak.(*StatementSwitch); ok {
+			this.StatementSwitch = t
+		} else {
+			this.SwitchTemplateBlock = block.InheritedAttribute.ForBreak.(*Block)
+		}
+		this.mkDefers(block)
+		return null
+	}
+
+	fn mkDefers(block Block) {
+		if this.StatementFor != null {
+			if block.IsForBlock {
+				this.Defers = append(this.Defers, block.Defers...)
+				return
+			}
+			this.mkDefers(block.Outer)
+			return
+		} else if this.StatementSwitch != null {
+			//switch
+			if block.IsSwitchBlock {
+				this.Defers = append(this.Defers, block.Defers...)
+				return
+			}
+			this.mkDefers(block.Outer)
+		} else { //s.SwitchTemplateBlock != null
+			if block.IsWhenBlock {
+				this.Defers = append(this.Defers, block.Defers...)
+				return
+			}
+			this.mkDefers(block.Outer)
+		}
+	}
+}
+

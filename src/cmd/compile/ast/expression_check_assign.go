@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-func (this *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
-	bin := this.Data.(*ExpressionBinary)
+func (e *Expression) checkAssignExpression(block *Block, errs *[]error) *Type {
+	bin := e.Data.(*ExpressionBinary)
 	lefts := make([]*Expression, 1)
 	if bin.Left.Type == ExpressionTypeList {
 		lefts = bin.Left.Data.([]*Expression)
@@ -57,18 +57,18 @@ func (this *Expression) checkAssignExpression(block *Block, errs *[]error) *Type
 				valueTypes[k].TypeString(), leftTypes[k].TypeString()))
 		}
 	}
-	this.Data = &ExpressionAssign{
+	e.Data = &ExpressionAssign{
 		Lefts:  lefts,
 		Values: values,
 	}
-	voidReturn := mkVoidType(this.Pos)
+	voidReturn := mkVoidType(e.Pos)
 	if len(lefts) > 1 {
 		return voidReturn
 	}
 	if len(lefts) == 0 || leftTypes[0] == nil {
 		return voidReturn
 	}
-	if this.IsStatementExpression == false {
+	if e.IsStatementExpression == false {
 		left := lefts[0]
 		if left.Type == ExpressionTypeIdentifier {
 			t := left.Data.(*ExpressionIdentifier)
@@ -83,6 +83,6 @@ func (this *Expression) checkAssignExpression(block *Block, errs *[]error) *Type
 	}
 	// here is safe
 	result := leftTypes[0].Clone()
-	result.Pos = this.Pos
+	result.Pos = e.Pos
 	return result
 }

@@ -4,16 +4,16 @@ import (
 	"fmt"
 )
 
-func (this *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
-	ee := this.Data.(*Expression)
+func (e *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type {
+	ee := e.Data.(*Expression)
 	unary, es := ee.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
 	if unary == nil {
 		// !a , looks like a bool
-		if this.Type == ExpressionTypeNot {
+		if e.Type == ExpressionTypeNot {
 			return &Type{
 				Type: VariableTypeBool,
-				Pos:  this.Pos,
+				Pos:  e.Pos,
 			}
 		}
 		return nil
@@ -22,37 +22,37 @@ func (this *Expression) checkUnaryExpression(block *Block, errs *[]error) *Type 
 		*errs = append(*errs, err)
 		return nil
 	}
-	if this.Type == ExpressionTypeNot {
+	if e.Type == ExpressionTypeNot {
 		if unary.Type != VariableTypeBool {
 			*errs = append(*errs, fmt.Errorf("%s not a bool expression , but '%s'",
 				unary.Pos.ErrMsgPrefix(), unary.TypeString()))
 		}
 	}
-	if this.Type == ExpressionTypeNegative {
+	if e.Type == ExpressionTypeNegative {
 		if unary.IsNumber() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply '-' on '%s'",
 				unary.Pos.ErrMsgPrefix(), unary.TypeString()))
 		}
 	}
-	if this.Type == ExpressionTypeBitwiseNot {
+	if e.Type == ExpressionTypeBitwiseNot {
 		if unary.isInteger() == false {
 			*errs = append(*errs, fmt.Errorf("%s cannot apply '~' on '%s'",
 				unary.Pos.ErrMsgPrefix(), unary.TypeString()))
 		}
 	}
 	result := unary.Clone()
-	result.Pos = this.Pos
+	result.Pos = e.Pos
 	return result
 }
 
-func (this *Expression) checkIncrementExpression(block *Block, errs *[]error) *Type {
-	on := this.Data.(*Expression)
+func (e *Expression) checkIncrementExpression(block *Block, errs *[]error) *Type {
+	on := e.Data.(*Expression)
 	increment := on.getLeftValue(block, errs)
 	if increment == nil {
 		return nil
 	}
 	if on.Type == ExpressionTypeIdentifier &&
-		this.IsStatementExpression == false {
+		e.IsStatementExpression == false {
 		/*
 			special case
 			fn1(a++)
@@ -68,6 +68,6 @@ func (this *Expression) checkIncrementExpression(block *Block, errs *[]error) *T
 				on.Pos.ErrMsgPrefix(), on.Op, increment.TypeString()))
 	}
 	result := increment.Clone()
-	result.Pos = this.Pos
+	result.Pos = e.Pos
 	return result
 }

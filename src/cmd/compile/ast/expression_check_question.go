@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-func (this *Expression) checkQuestionExpression(block *Block, errs *[]error) *Type {
-	question := this.Data.(*ExpressionQuestion)
+func (e *Expression) checkQuestionExpression(block *Block, errs *[]error) *Type {
+	question := e.Data.(*ExpressionQuestion)
 	condition, es := question.Selection.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
 	if condition != nil {
@@ -32,7 +32,7 @@ func (this *Expression) checkQuestionExpression(block *Block, errs *[]error) *Ty
 		return nil
 	}
 	ret := tType.Clone()
-	ret.Pos = this.Pos
+	ret.Pos = e.Pos
 	fType, es := question.False.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
 	if fType != nil &&

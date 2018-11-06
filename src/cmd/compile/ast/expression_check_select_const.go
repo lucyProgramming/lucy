@@ -2,8 +2,8 @@ package ast
 
 import "fmt"
 
-func (this *Expression) checkSelectConstExpression(block *Block, errs *[]error) *Type {
-	selection := this.Data.(*ExpressionSelection)
+func (e *Expression) checkSelectConstExpression(block *Block, errs *[]error) *Type {
+	selection := e.Data.(*ExpressionSelection)
 	object, es := selection.Expression.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
 	if object == nil {
@@ -17,12 +17,12 @@ func (this *Expression) checkSelectConstExpression(block *Block, errs *[]error) 
 	if object.Class.Block.Constants == nil ||
 		object.Class.Block.Constants[selection.Name] == nil {
 		*errs = append(*errs, fmt.Errorf("%s const '%s' not found",
-			this.Pos.ErrMsgPrefix(), selection.Name))
+			e.Pos.ErrMsgPrefix(), selection.Name))
 		return nil
 	}
 	c := object.Class.Block.Constants[selection.Name]
-	this.fromConst(c)
+	e.fromConst(c)
 	result := c.Type.Clone()
-	result.Pos = this.Pos
+	result.Pos = e.Pos
 	return result
 }

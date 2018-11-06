@@ -4,21 +4,21 @@ import (
 	"fmt"
 )
 
-func (this *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
-	no := this.Data.(*ExpressionNew)
+func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
+	no := e.Data.(*ExpressionNew)
 	err := no.Type.resolve(block)
 	if err != nil {
 		*errs = append(*errs, err)
 		return nil
 	}
 	if no.Type.Type == VariableTypeMap {
-		return this.checkNewMapExpression(block, no, errs)
+		return e.checkNewMapExpression(block, no, errs)
 	}
 	if no.Type.Type == VariableTypeArray {
-		return this.checkNewArrayExpression(block, no, errs)
+		return e.checkNewArrayExpression(block, no, errs)
 	}
 	if no.Type.Type == VariableTypeJavaArray {
-		return this.checkNewJavaArrayExpression(block, no, errs)
+		return e.checkNewJavaArrayExpression(block, no, errs)
 	}
 	// new object
 	if no.Type.Type != VariableTypeObject {
@@ -27,7 +27,7 @@ func (this *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 				no.Type.Pos.ErrMsgPrefix(), no.Type.TypeString()))
 		return nil
 	}
-	err = no.Type.Class.loadSelf(this.Pos)
+	err = no.Type.Class.loadSelf(e.Pos)
 	if err != nil {
 		*errs = append(*errs, fmt.Errorf("%s %v",
 			no.Type.Pos.ErrMsgPrefix(), err))
@@ -46,20 +46,20 @@ func (this *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	ret := &Type{}
 	*ret = *no.Type
 	ret.Type = VariableTypeObject
-	ret.Pos = this.Pos
+	ret.Pos = e.Pos
 	errsLength := len(*errs)
 	callArgTypes := checkExpressions(block, no.Args, errs, true)
 	if len(*errs) > errsLength {
 		return ret
 	}
-	ms, matched, err := no.Type.Class.accessConstructionMethod(this.Pos, errs, no, nil, callArgTypes)
+	ms, matched, err := no.Type.Class.accessConstructionMethod(e.Pos, errs, no, nil, callArgTypes)
 	if err != nil {
-		*errs = append(*errs, fmt.Errorf("%s %v", this.Pos.ErrMsgPrefix(), err))
+		*errs = append(*errs, fmt.Errorf("%s %v", e.Pos.ErrMsgPrefix(), err))
 		return ret
 	}
 	if matched {
 		m := ms[0]
-		if err := no.Type.Class.constructionMethodAccessAble(this.Pos, m); err != nil {
+		if err := no.Type.Class.constructionMethodAccessAble(e.Pos, m); err != nil {
 			*errs = append(*errs, err)
 		}
 		no.Construction = m
@@ -69,7 +69,7 @@ func (this *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	return ret
 }
 
-func (this *Expression) checkNewMapExpression(block *Block, newMap *ExpressionNew,
+func (e *Expression) checkNewMapExpression(block *Block, newMap *ExpressionNew,
 	errs *[]error) *Type {
 	if len(newMap.Args) > 0 {
 		*errs = append(*errs,
@@ -77,23 +77,23 @@ func (this *Expression) checkNewMapExpression(block *Block, newMap *ExpressionNe
 				errMsgPrefix(newMap.Args[0].Pos)))
 	}
 	ret := newMap.Type.Clone()
-	ret.Pos = this.Pos
+	ret.Pos = e.Pos
 	return ret
 }
 
-func (this *Expression) checkNewJavaArrayExpression(block *Block, newArray *ExpressionNew,
+func (e *Expression) checkNewJavaArrayExpression(block *Block, newArray *ExpressionNew,
 	errs *[]error) *Type {
-	return this.checkNewArrayExpression(block, newArray, errs)
+	return e.checkNewArrayExpression(block, newArray, errs)
 }
 
-func (this *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionNew,
+func (e *Expression) checkNewArrayExpression(block *Block, newArray *ExpressionNew,
 	errs *[]error) *Type {
 	ret := newArray.Type.Clone() // clone the type
-	ret.Pos = this.Pos
+	ret.Pos = e.Pos
 	if len(newArray.Args) != 1 { //
 		*errs = append(*errs,
 			fmt.Errorf("%s new array expect at least 1 argument",
-				errMsgPrefix(this.Pos)))
+				errMsgPrefix(e.Pos)))
 		return ret
 	}
 	amount, es := newArray.Args[0].checkSingleValueContextExpression(block)

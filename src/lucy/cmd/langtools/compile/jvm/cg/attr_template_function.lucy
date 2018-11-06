@@ -1,42 +1,40 @@
-package cg
 
-import (
-	"encoding/binary"
-)
+import "lucy/binary"
 
-type AttributeTemplateFunction struct {
+class AttributeTemplateFunction {
 	Name string
 	/*
 		reGenerate pos
 	*/
 	Filename    string
-	StartLine   uint16
-	StartColumn uint16
+	StartLine   char
+	StartColumn char
 	Code        string
-	AccessFlag  uint16
+	AccessFlag  char
 	Comment     string
+	fn FromBytes(c Class, bs []byte) {
+		this.Name = string(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
+		this.Filename = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].Info)
+		this.StartLine = binary.BigEndian.getChar(bs[4:])
+		this.StartColumn = binary.BigEndian.getChar(bs[6:])
+		this.Code = string(c.ConstPool[binary.BigEndian.getChar(bs[8:])].Info)
+		this.AccessFlag = binary.BigEndian.getChar(bs[10:])
+	}
+	
+	fn ToAttributeInfo(c Class) -> (ret AttributeInfo) {
+		info := new AttributeInfo()
+		info.NameIndex = c.InsertUtf8Const(AttributeNameLucyTemplateFunction)
+		info.attributeLength = 14
+		info.Info = new []byte(info.attributeLength)
+		binary.BigEndian.putChar(info.Info, c.InsertUtf8Const(this.Name))
+		binary.BigEndian.putChar(info.Info[2:], c.InsertUtf8Const(this.Filename))
+		binary.BigEndian.putChar(info.Info[4:], this.StartLine)
+		binary.BigEndian.putChar(info.Info[6:], this.StartColumn)
+		binary.BigEndian.putChar(info.Info[8:], c.InsertUtf8Const(this.Code))
+		binary.BigEndian.putChar(info.Info[10:], this.AccessFlag)
+		binary.BigEndian.putChar(info.Info[12:], c.InsertUtf8Const(this.Comment))
+		return info
+	}	
 }
 
-func (a *AttributeTemplateFunction) FromBytes(class *Class, bs []byte) {
-	a.Name = string(class.ConstPool[binary.BigEndian.Uint16(bs)].Info)
-	a.Filename = string(class.ConstPool[binary.BigEndian.Uint16(bs[2:])].Info)
-	a.StartLine = binary.BigEndian.Uint16(bs[4:])
-	a.StartColumn = binary.BigEndian.Uint16(bs[6:])
-	a.Code = string(class.ConstPool[binary.BigEndian.Uint16(bs[8:])].Info)
-	a.AccessFlag = binary.BigEndian.Uint16(bs[10:])
-}
 
-func (a *AttributeTemplateFunction) ToAttributeInfo(class *Class) *AttributeInfo {
-	info := &AttributeInfo{}
-	info.NameIndex = class.InsertUtf8Const(AttributeNameLucyTemplateFunction)
-	info.attributeLength = 14
-	info.Info = make([]byte, info.attributeLength)
-	binary.BigEndian.PutUint16(info.Info, class.InsertUtf8Const(a.Name))
-	binary.BigEndian.PutUint16(info.Info[2:], class.InsertUtf8Const(a.Filename))
-	binary.BigEndian.PutUint16(info.Info[4:], a.StartLine)
-	binary.BigEndian.PutUint16(info.Info[6:], a.StartColumn)
-	binary.BigEndian.PutUint16(info.Info[8:], class.InsertUtf8Const(a.Code))
-	binary.BigEndian.PutUint16(info.Info[10:], a.AccessFlag)
-	binary.BigEndian.PutUint16(info.Info[12:], class.InsertUtf8Const(a.Comment))
-	return info
-}

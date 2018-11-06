@@ -38,7 +38,7 @@ public class Lexer {
 		}
 		return
 	}
-
+	
 	fn unGetChar() {
 		this.offset--
 		this.line, this.column = this.lastLine, this.lastColumn

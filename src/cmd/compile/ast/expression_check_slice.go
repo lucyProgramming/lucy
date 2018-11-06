@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-func (this *Expression) checkSlice(block *Block, errs *[]error) *Type {
-	on := this.Data.(*ExpressionSlice)
+func (e *Expression) checkSlice(block *Block, errs *[]error) *Type {
+	on := e.Data.(*ExpressionSlice)
 	sliceOn, es := on.ExpressionOn.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
 	if sliceOn == nil {
@@ -19,7 +19,7 @@ func (this *Expression) checkSlice(block *Block, errs *[]error) *Type {
 	//start
 	if on.Start == nil {
 		on.Start = &Expression{}
-		on.Start.Pos = this.Pos
+		on.Start.Pos = e.Pos
 		on.Start.Op = "intLiteral"
 		on.Start.Type = ExpressionTypeInt
 		on.Start.Data = int64(0)
@@ -76,6 +76,6 @@ func (this *Expression) checkSlice(block *Block, errs *[]error) *Type {
 		}
 	}
 	result := sliceOn.Clone()
-	result.Pos = this.Pos
+	result.Pos = e.Pos
 	return result
 }

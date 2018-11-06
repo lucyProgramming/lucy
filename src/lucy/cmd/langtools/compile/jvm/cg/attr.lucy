@@ -7,12 +7,12 @@ public class AttributeInfo {
 	Info            []byte
 }
 
-typealias AttributeGroupedByName =  map[string][]*AttributeInfo
+typealias AttributeGroupedByName =  map {string -> []AttributeInfo }
 
 
-fn GetAttributeByName(a AttributeGroupedByName , name string) []*AttributeInfo {
-	if a == nil {
-		return nil
+fn GetAttributeByName(a AttributeGroupedByName , name string) -> (attrs []AttributeInfo) {
+	if a == null {
+		return null
 	}
 	return a[name]
 }

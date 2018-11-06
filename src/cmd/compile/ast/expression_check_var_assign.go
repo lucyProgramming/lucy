@@ -5,8 +5,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (this *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
-	bin := this.Data.(*ExpressionBinary)
+func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
+	bin := e.Data.(*ExpressionBinary)
 	var lefts []*Expression
 	if bin.Left.Type == ExpressionTypeList {
 		lefts = bin.Left.Data.([]*Expression)
@@ -83,11 +83,11 @@ func (this *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 			}
 			vd.Comment = identifier.Comment
 			vd.Type = variableType.Clone()
-			vd.Type.Pos = this.Pos
+			vd.Type.Pos = e.Pos
 			if err := variableType.isTyped(); err != nil {
 				*errs = append(*errs, err)
 			}
-			if this.IsGlobal {
+			if e.IsGlobal {
 				err = PackageBeenCompile.Block.Insert(vd.Name, v.Pos, vd)
 				vd.IsGlobal = true
 			} else {
@@ -98,13 +98,13 @@ func (this *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 				*errs = append(*errs, err)
 				continue
 			}
-			if this.IsPublic { // only use when is is global
+			if e.IsPublic { // only use when is is global
 				vd.AccessFlags |= cg.AccFieldPublic
 			}
 		}
 	}
 	if noNewVariable {
-		*errs = append(*errs, fmt.Errorf("%s no new variables to create", errMsgPrefix(this.Pos)))
+		*errs = append(*errs, fmt.Errorf("%s no new variables to create", errMsgPrefix(e.Pos)))
 	}
-	this.Data = assign
+	e.Data = assign
 }

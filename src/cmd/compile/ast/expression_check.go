@@ -4,115 +4,115 @@ import (
 	"fmt"
 )
 
-func (this *Expression) check(block *Block) (returnValueTypes []*Type, errs []error) {
-	if this == nil {
+func (e *Expression) check(block *Block) (returnValueTypes []*Type, errs []error) {
+	if e == nil {
 		return nil, []error{}
 	}
-	_, err := this.constantFold()
+	_, err := e.constantFold()
 	if err != nil {
 		return nil, []error{err}
 	}
 	errs = []error{}
-	switch this.Type {
+	switch e.Type {
 	case ExpressionTypeNull:
 		returnValueTypes = []*Type{
 			{
 				Type: VariableTypeNull,
-				Pos:  this.Pos,
+				Pos:  e.Pos,
 			},
 		}
-		this.Value = returnValueTypes[0]
+		e.Value = returnValueTypes[0]
 	case ExpressionTypeDot:
 		if block.InheritedAttribute.Class == nil {
 			errs = []error{fmt.Errorf("%s '%s' must in class scope",
-				this.Pos.ErrMsgPrefix(), this.Op)}
+				e.Pos.ErrMsgPrefix(), e.Op)}
 		} else {
 			returnValueTypes = []*Type{
 				{
 					Type:  VariableTypeDynamicSelector,
-					Pos:   this.Pos,
+					Pos:   e.Pos,
 					Class: block.InheritedAttribute.Class,
 				},
 			}
-			this.Value = returnValueTypes[0]
+			e.Value = returnValueTypes[0]
 		}
 	case ExpressionTypeBool:
 		returnValueTypes = []*Type{
 			{
 				Type: VariableTypeBool,
-				Pos:  this.Pos,
+				Pos:  e.Pos,
 			},
 		}
-		this.Value = returnValueTypes[0]
+		e.Value = returnValueTypes[0]
 	case ExpressionTypeByte:
 		returnValueTypes = []*Type{{
 			Type: VariableTypeByte,
-			Pos:  this.Pos,
+			Pos:  e.Pos,
 		},
 		}
-		this.Value = returnValueTypes[0]
+		e.Value = returnValueTypes[0]
 	case ExpressionTypeShort:
 		returnValueTypes = []*Type{
 			{
 				Type: VariableTypeShort,
-				Pos:  this.Pos,
+				Pos:  e.Pos,
 			},
 		}
-		this.Value = returnValueTypes[0]
+		e.Value = returnValueTypes[0]
 	case ExpressionTypeInt:
 		returnValueTypes = []*Type{
 			{
 				Type: VariableTypeInt,
-				Pos:  this.Pos,
+				Pos:  e.Pos,
 			},
 		}
-		this.Value = returnValueTypes[0]
+		e.Value = returnValueTypes[0]
 	case ExpressionTypeChar:
 		returnValueTypes = []*Type{
 			{
 				Type: VariableTypeChar,
-				Pos:  this.Pos,
+				Pos:  e.Pos,
 			},
 		}
-		this.Value = returnValueTypes[0]
+		e.Value = returnValueTypes[0]
 	case ExpressionTypeFloat:
 		returnValueTypes = []*Type{
 			{
 				Type: VariableTypeFloat,
-				Pos:  this.Pos,
+				Pos:  e.Pos,
 			},
 		}
-		this.Value = returnValueTypes[0]
+		e.Value = returnValueTypes[0]
 	case ExpressionTypeDouble:
 		returnValueTypes = []*Type{
 			{
 				Type: VariableTypeDouble,
-				Pos:  this.Pos,
+				Pos:  e.Pos,
 			},
 		}
-		this.Value = returnValueTypes[0]
+		e.Value = returnValueTypes[0]
 	case ExpressionTypeLong:
 		returnValueTypes = []*Type{
 			{
 				Type: VariableTypeLong,
-				Pos:  this.Pos,
+				Pos:  e.Pos,
 			},
 		}
-		this.Value = returnValueTypes[0]
+		e.Value = returnValueTypes[0]
 	case ExpressionTypeString:
 		returnValueTypes = []*Type{
 			{
 				Type: VariableTypeString,
-				Pos:  this.Pos,
+				Pos:  e.Pos,
 			}}
-		this.Value = returnValueTypes[0]
+		e.Value = returnValueTypes[0]
 	case ExpressionTypeIdentifier:
-		tt, err := this.checkIdentifierExpression(block)
+		tt, err := e.checkIdentifierExpression(block)
 		if err != nil {
 			errs = append(errs, err)
 		}
 		if tt != nil {
-			this.Value = tt
+			e.Value = tt
 			returnValueTypes = []*Type{tt}
 		}
 		//binaries
@@ -152,32 +152,32 @@ func (this *Expression) check(block *Block) (returnValueTypes []*Type, errs []er
 		fallthrough
 	case ExpressionTypeMod:
 		length := len(errs)
-		tt := this.checkBinaryExpression(block, &errs)
+		tt := e.checkBinaryExpression(block, &errs)
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
 		}
 		if len(errs) == length { // no error
-			if ee := this.binaryExpressionDependOnSub(); ee != nil {
-				*this = *ee
+			if ee := e.binaryExpressionDependOnSub(); ee != nil {
+				*e = *ee
 			}
 		}
-		this.Value = tt
+		e.Value = tt
 	case ExpressionTypeMap:
-		tt := this.checkMapExpression(block, &errs)
+		tt := e.checkMapExpression(block, &errs)
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
 		}
-		this.Value = tt
+		e.Value = tt
 	case ExpressionTypeVarAssign:
-		this.checkVarAssignExpression(block, &errs)
-		this.Value = mkVoidType(this.Pos)
-		returnValueTypes = []*Type{this.Value}
+		e.checkVarAssignExpression(block, &errs)
+		e.Value = mkVoidType(e.Pos)
+		returnValueTypes = []*Type{e.Value}
 	case ExpressionTypeAssign:
-		tt := this.checkAssignExpression(block, &errs)
+		tt := e.checkAssignExpression(block, &errs)
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
 		}
-		this.Value = tt
+		e.Value = tt
 	case ExpressionTypeIncrement:
 		fallthrough
 	case ExpressionTypeDecrement:
@@ -185,82 +185,82 @@ func (this *Expression) check(block *Block) (returnValueTypes []*Type, errs []er
 	case ExpressionTypePrefixIncrement:
 		fallthrough
 	case ExpressionTypePrefixDecrement:
-		tt := this.checkIncrementExpression(block, &errs)
+		tt := e.checkIncrementExpression(block, &errs)
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
 		}
-		this.Value = tt
+		e.Value = tt
 	case ExpressionTypeConst: // no return value
-		errs = this.checkConstant(block)
-		returnValueTypes = []*Type{mkVoidType(this.Pos)}
-		this.Value = returnValueTypes[0]
+		errs = e.checkConstant(block)
+		returnValueTypes = []*Type{mkVoidType(e.Pos)}
+		e.Value = returnValueTypes[0]
 	case ExpressionTypeVar:
-		this.checkVarExpression(block, &errs)
-		returnValueTypes = []*Type{mkVoidType(this.Pos)}
-		this.Value = returnValueTypes[0]
+		e.checkVarExpression(block, &errs)
+		returnValueTypes = []*Type{mkVoidType(e.Pos)}
+		e.Value = returnValueTypes[0]
 	case ExpressionTypeFunctionCall:
-		returnValueTypes = this.checkFunctionCallExpression(block, &errs)
-		this.MultiValues = returnValueTypes
+		returnValueTypes = e.checkFunctionCallExpression(block, &errs)
+		e.MultiValues = returnValueTypes
 		if len(returnValueTypes) > 0 {
-			this.Value = returnValueTypes[0]
+			e.Value = returnValueTypes[0]
 		}
 	case ExpressionTypeMethodCall:
-		returnValueTypes = this.checkMethodCallExpression(block, &errs)
-		this.MultiValues = returnValueTypes
+		returnValueTypes = e.checkMethodCallExpression(block, &errs)
+		e.MultiValues = returnValueTypes
 		if len(returnValueTypes) > 0 {
-			this.Value = returnValueTypes[0]
+			e.Value = returnValueTypes[0]
 		}
 	case ExpressionTypeTypeAssert:
-		returnValueTypes = this.checkTypeAssert(block, &errs)
-		this.MultiValues = returnValueTypes
+		returnValueTypes = e.checkTypeAssert(block, &errs)
+		e.MultiValues = returnValueTypes
 		if len(returnValueTypes) > 0 {
-			this.Value = returnValueTypes[0]
+			e.Value = returnValueTypes[0]
 		}
 	case ExpressionTypeNot:
 		fallthrough
 	case ExpressionTypeNegative:
 		fallthrough
 	case ExpressionTypeBitwiseNot:
-		tt := this.checkUnaryExpression(block, &errs)
+		tt := e.checkUnaryExpression(block, &errs)
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
 		}
-		this.Value = tt
+		e.Value = tt
 	case ExpressionTypeQuestion:
-		tt := this.checkQuestionExpression(block, &errs)
+		tt := e.checkQuestionExpression(block, &errs)
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
 		}
-		this.Value = tt
+		e.Value = tt
 	case ExpressionTypeIndex:
-		tt := this.checkIndexExpression(block, &errs)
+		tt := e.checkIndexExpression(block, &errs)
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
-			this.Value = tt
+			e.Value = tt
 		}
 	case ExpressionTypeSelection:
-		tt := this.checkSelectionExpression(block, &errs)
+		tt := e.checkSelectionExpression(block, &errs)
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
-			this.Value = tt
+			e.Value = tt
 		}
 	case ExpressionTypeSelectionConst:
-		tt := this.checkSelectConstExpression(block, &errs)
+		tt := e.checkSelectConstExpression(block, &errs)
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
-			this.Value = tt
+			e.Value = tt
 		}
 	case ExpressionTypeCheckCast:
-		tt := this.checkTypeConversionExpression(block, &errs)
+		tt := e.checkTypeConversionExpression(block, &errs)
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
-			this.Value = tt
+			e.Value = tt
 		}
 	case ExpressionTypeNew:
-		tt := this.checkNewExpression(block, &errs)
+		tt := e.checkNewExpression(block, &errs)
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
-			this.Value = tt
+			e.Value = tt
 		}
 	case ExpressionTypePlusAssign:
 		fallthrough
@@ -281,31 +281,31 @@ func (this *Expression) check(block *Block) (returnValueTypes []*Type, errs []er
 	case ExpressionTypeRshAssign:
 		fallthrough
 	case ExpressionTypeXorAssign:
-		tt := this.checkOpAssignExpression(block, &errs)
+		tt := e.checkOpAssignExpression(block, &errs)
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
 		}
-		this.Value = tt
+		e.Value = tt
 	case ExpressionTypeRange:
 		errs = append(errs, fmt.Errorf("%s range is only work with 'for' statement",
-			errMsgPrefix(this.Pos)))
+			errMsgPrefix(e.Pos)))
 	case ExpressionTypeSlice:
-		tt := this.checkSlice(block, &errs)
-		this.Value = tt
+		tt := e.checkSlice(block, &errs)
+		e.Value = tt
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
 		}
 	case ExpressionTypeArray:
-		tt := this.checkArray(block, &errs)
-		this.Value = tt
+		tt := e.checkArray(block, &errs)
+		e.Value = tt
 		if tt != nil {
 			returnValueTypes = []*Type{tt}
 		}
 	case ExpressionTypeFunctionLiteral:
-		f := this.Data.(*Function)
+		f := e.Data.(*Function)
 		PackageBeenCompile.statementLevelFunctions =
 			append(PackageBeenCompile.statementLevelFunctions, f)
-		if this.IsStatementExpression {
+		if e.IsStatementExpression {
 			err := block.Insert(f.Name, f.Pos, f)
 			if err != nil {
 				errs = append(errs, err)
@@ -316,63 +316,63 @@ func (this *Expression) check(block *Block) (returnValueTypes []*Type, errs []er
 		returnValueTypes = make([]*Type, 1)
 		returnValueTypes[0] = &Type{
 			Type:         VariableTypeFunction,
-			Pos:          this.Pos,
+			Pos:          e.Pos,
 			FunctionType: &f.Type,
 		}
-		this.Value = returnValueTypes[0]
+		e.Value = returnValueTypes[0]
 	case ExpressionTypeList:
 		errs = append(errs,
 			fmt.Errorf("%s cannot have expression '%s' at this scope,"+
 				"this may be cause by the compiler error,please contact the author",
-				this.Pos.ErrMsgPrefix(), this.Op))
+				e.Pos.ErrMsgPrefix(), e.Op))
 	case ExpressionTypeGlobal:
 		returnValueTypes = make([]*Type, 1)
 		returnValueTypes[0] = &Type{
 			Type:    VariableTypePackage,
-			Pos:     this.Pos,
+			Pos:     e.Pos,
 			Package: &PackageBeenCompile,
 		}
-		this.Value = returnValueTypes[0]
+		e.Value = returnValueTypes[0]
 	case ExpressionTypeParenthesis:
-		*this = *this.Data.(*Expression) // override
-		return this.check(block)
+		*e = *e.Data.(*Expression) // override
+		return e.check(block)
 	case ExpressionTypeVArgs:
 		var t *Type
-		t, errs = this.Data.(*Expression).checkSingleValueContextExpression(block)
+		t, errs = e.Data.(*Expression).checkSingleValueContextExpression(block)
 		if len(errs) > 0 {
 			return returnValueTypes, errs
 		}
-		this.Value = t
+		e.Value = t
 		returnValueTypes = []*Type{t}
 		if t == nil {
 			return
 		}
 		if t.Type != VariableTypeJavaArray {
 			errs = append(errs, fmt.Errorf("%s cannot pack non java array to variable-length arguments",
-				errMsgPrefix(this.Pos)))
+				errMsgPrefix(e.Pos)))
 			return
 		}
 		t.IsVariableArgs = true
 	default:
-		panic(fmt.Sprintf("unhandled type:%v", this.Op))
+		panic(fmt.Sprintf("unhandled type:%v", e.Op))
 	}
 	return returnValueTypes, errs
 }
 
-func (this *Expression) mustBeOneValueContext(ts []*Type) (*Type, error) {
+func (e *Expression) mustBeOneValueContext(ts []*Type) (*Type, error) {
 	if len(ts) == 0 {
 		return nil, nil // no-type,no error
 	}
 	var err error
 	if len(ts) > 1 {
-		err = fmt.Errorf("%s multi value in single value context", errMsgPrefix(this.Pos))
+		err = fmt.Errorf("%s multi value in single value context", errMsgPrefix(e.Pos))
 	}
 	return ts[0], err
 }
 
-func (this *Expression) checkSingleValueContextExpression(block *Block) (*Type, []error) {
-	ts, es := this.check(block)
-	ret, err := this.mustBeOneValueContext(ts)
+func (e *Expression) checkSingleValueContextExpression(block *Block) (*Type, []error) {
+	ts, es := e.check(block)
+	ret, err := e.mustBeOneValueContext(ts)
 	if err != nil {
 		if es == nil {
 			es = []error{err}
@@ -383,48 +383,48 @@ func (this *Expression) checkSingleValueContextExpression(block *Block) (*Type, 
 	return ret, es
 }
 
-func (this *Expression) methodAccessAble(block *Block, method *ClassMethod) error {
-	if this.Value.Type == VariableTypeObject {
+func (e *Expression) methodAccessAble(block *Block, method *ClassMethod) error {
+	if e.Value.Type == VariableTypeObject {
 		if method.IsStatic() {
 			return fmt.Errorf("%s method '%s' is static",
-				this.Pos.ErrMsgPrefix(), method.Function.Name)
+				e.Pos.ErrMsgPrefix(), method.Function.Name)
 		}
-		if false == this.IsIdentifier(ThisPointerName) {
-			if this.Value.Class.LoadFromOutSide {
-				if this.Value.Class.IsPublic() == false {
+		if false == e.IsIdentifier(ThisPointerName) {
+			if e.Value.Class.LoadFromOutSide {
+				if e.Value.Class.IsPublic() == false {
 					return fmt.Errorf("%s class '%s' is not public",
-						this.Pos.ErrMsgPrefix(), this.Value.Class.Name)
+						e.Pos.ErrMsgPrefix(), e.Value.Class.Name)
 				}
 				if method.IsPublic() == false {
 					return fmt.Errorf("%s method '%s' is not public",
-						this.Pos.ErrMsgPrefix(), method.Function.Name)
+						e.Pos.ErrMsgPrefix(), method.Function.Name)
 				}
 			} else {
 				if method.IsPrivate() {
 					return fmt.Errorf("%s method '%s' is private",
-						this.Pos.ErrMsgPrefix(), method.Function.Name)
+						e.Pos.ErrMsgPrefix(), method.Function.Name)
 				}
 			}
 		}
 	} else {
 		if method.IsStatic() == false {
 			return fmt.Errorf("%s method '%s' is a instance method",
-				this.Pos.ErrMsgPrefix(), method.Function.Name)
+				e.Pos.ErrMsgPrefix(), method.Function.Name)
 		}
-		if this.Value.Class != block.InheritedAttribute.Class {
-			if this.Value.Class.LoadFromOutSide {
-				if this.Value.Class.IsPublic() == false {
+		if e.Value.Class != block.InheritedAttribute.Class {
+			if e.Value.Class.LoadFromOutSide {
+				if e.Value.Class.IsPublic() == false {
 					return fmt.Errorf("%s class '%s' is not public",
-						this.Pos.ErrMsgPrefix(), this.Value.Class.Name)
+						e.Pos.ErrMsgPrefix(), e.Value.Class.Name)
 				}
 				if method.IsPublic() == false {
 					return fmt.Errorf("%s method '%s' is not public",
-						this.Pos.ErrMsgPrefix(), method.Function.Name)
+						e.Pos.ErrMsgPrefix(), method.Function.Name)
 				}
 			} else {
 				if method.IsPrivate() {
 					return fmt.Errorf("%s method '%s' is private",
-						this.Pos.ErrMsgPrefix(), method.Function.Name)
+						e.Pos.ErrMsgPrefix(), method.Function.Name)
 				}
 			}
 		}
@@ -432,48 +432,48 @@ func (this *Expression) methodAccessAble(block *Block, method *ClassMethod) erro
 	return nil
 }
 
-func (this *Expression) fieldAccessAble(block *Block, field *ClassField) error {
-	if this.Value.Type == VariableTypeObject {
+func (e *Expression) fieldAccessAble(block *Block, field *ClassField) error {
+	if e.Value.Type == VariableTypeObject {
 		if field.IsStatic() {
 			return fmt.Errorf("%s field '%s' is static",
-				this.Pos.ErrMsgPrefix(), field.Name)
+				e.Pos.ErrMsgPrefix(), field.Name)
 		}
-		if false == this.IsIdentifier(ThisPointerName) {
-			if this.Value.Class.LoadFromOutSide {
-				if this.Value.Class.IsPublic() == false {
+		if false == e.IsIdentifier(ThisPointerName) {
+			if e.Value.Class.LoadFromOutSide {
+				if e.Value.Class.IsPublic() == false {
 					return fmt.Errorf("%s class '%s' is not public",
-						this.Pos.ErrMsgPrefix(), this.Value.Class.Name)
+						e.Pos.ErrMsgPrefix(), e.Value.Class.Name)
 				}
 				if field.IsPublic() == false {
 					return fmt.Errorf("%s field '%s' is not public",
-						this.Pos.ErrMsgPrefix(), field.Name)
+						e.Pos.ErrMsgPrefix(), field.Name)
 				}
 			} else {
 				if field.IsPrivate() {
 					return fmt.Errorf("%s field '%s' is private",
-						this.Pos.ErrMsgPrefix(), field.Name)
+						e.Pos.ErrMsgPrefix(), field.Name)
 				}
 			}
 		}
 	} else { // class
 		if field.IsStatic() == false {
 			return fmt.Errorf("%s field '%s' is not static",
-				this.Pos.ErrMsgPrefix(), field.Name)
+				e.Pos.ErrMsgPrefix(), field.Name)
 		}
-		if this.Value.Class != block.InheritedAttribute.Class {
-			if this.Value.Class.LoadFromOutSide {
-				if this.Value.Class.IsPublic() == false {
+		if e.Value.Class != block.InheritedAttribute.Class {
+			if e.Value.Class.LoadFromOutSide {
+				if e.Value.Class.IsPublic() == false {
 					return fmt.Errorf("%s class '%s' is not public",
-						this.Pos.ErrMsgPrefix(), this.Value.Class.Name)
+						e.Pos.ErrMsgPrefix(), e.Value.Class.Name)
 				}
 				if field.IsPublic() == false {
 					return fmt.Errorf("%s field '%s' is not public",
-						this.Pos.ErrMsgPrefix(), field.Name)
+						e.Pos.ErrMsgPrefix(), field.Name)
 				}
 			} else {
 				if field.IsPrivate() {
 					return fmt.Errorf("%s field '%s' is private",
-						this.Pos.ErrMsgPrefix(), field.Name)
+						e.Pos.ErrMsgPrefix(), field.Name)
 				}
 			}
 		}

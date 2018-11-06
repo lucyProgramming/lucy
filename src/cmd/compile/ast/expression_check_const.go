@@ -1,8 +1,8 @@
 package ast
 
-func (this *Expression) checkConstant(block *Block) []error {
+func (e *Expression) checkConstant(block *Block) []error {
 	errs := []error{}
-	cs := this.Data.([]*Constant)
+	cs := e.Data.([]*Constant)
 	for _, c := range cs {
 		err := checkConst(block, c)
 		if err != nil {

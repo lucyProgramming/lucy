@@ -1,28 +1,72 @@
-package cg
 
-type ConstantInfoNameAndTypeHighLevel struct {
+
+class ConstantInfoNameAndTypeHighLevel {
 	Name       string
 	Descriptor string
+	public fn ConstantInfoNameAndTypeHighLevel(Name ,Descriptor string  ){
+		this.super()
+		this.Name = Name
+		this.Descriptor = Descriptor
+	}
+	
+	public fn toString() ->(s string) {
+		return this.Name + ";" + this.Descriptor
+	}
 }
 
-type ConstantInfoMethodrefHighLevel struct {
+class ConstantInfoMethodrefHighLevel {
 	Class      string
 	Method     string
 	Descriptor string
+	fn ConstantInfoMethodrefHighLevel(Class , Method ,Descriptor string  ){
+		this.super()
+		this.Class = Class
+		this.Method = Method
+		this.Descriptor = Descriptor
+	}
+	public fn toString() ->(s string) {
+		return this.Class + ";" + this.Method + ";" + this.Descriptor
+	}
 }
 
-type ConstantInfoInterfaceMethodrefHighLevel struct {
+class ConstantInfoInterfaceMethodrefHighLevel {
 	Class      string
 	Method     string
 	Descriptor string
+	fn ConstantInfoInterfaceMethodrefHighLevel(Class , Method ,Descriptor string){
+		this.super()
+		this.Class = Class
+		this.Method = Method
+		this.Descriptor = Descriptor
+	}
+	public fn toString() ->(s string) {
+		return this.Class + ";" + this.Method + ";" + this.Descriptor
+	}
 }
 
-type ConstantInfoFieldrefHighLevel struct {
+class ConstantInfoFieldrefHighLevel {
 	Class      string
 	Field      string
 	Descriptor string
+	fn ConstantInfoFieldrefHighLevel(Class , Field , Descriptor string){
+		this.super()
+		this.Class = Class
+		this.Field = Field
+		this.Descriptor = Descriptor
+	}
+	public fn toString() ->(s string) {
+		return this.Class + ";" + this.Field + ";" + this.Descriptor
+	}
 }
 
-type ConstantInfoMethodTypeHighLevel struct {
+class ConstantInfoMethodTypeHighLevel {
 	Descriptor string
+	fn ConstantInfoMethodTypeHighLevel(Descriptor string) {
+	    this.super()
+		this.Descriptor = Descriptor
+	}
+	public fn toString() ->(s string) {
+		return this.Descriptor
+	}
+
 }

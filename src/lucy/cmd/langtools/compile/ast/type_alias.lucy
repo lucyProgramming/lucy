@@ -1,0 +1,8 @@
+ 
+
+class TypeAlias {
+	Name    string
+	Type    Type
+	Pos     Pos
+	Comment string
+}

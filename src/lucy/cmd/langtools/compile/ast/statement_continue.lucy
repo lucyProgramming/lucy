@@ -1,0 +1,31 @@
+ 
+
+class StatementContinue {
+	StatementFor StatementFor
+	Defers       []StatementDefer
+	Pos          Pos
+	
+	fn check(block Block) []error {
+		if block.InheritedAttribute.ForContinue == null {
+			return []error{fmt.Errorf("%s 'continue' can`t in this scope",
+				this.Pos.ErrMsgPrefix())}
+		}
+		if block.InheritedAttribute.Defer != null {
+			return []error{fmt.Errorf("%s cannot has 'continue' in 'defer'",
+				this.Pos.ErrMsgPrefix())}
+		}
+		this.StatementFor = block.InheritedAttribute.ForContinue
+		this.mkDefers(block)
+		return null
+	}
+
+	fn mkDefers(block Block) {
+		if block.IsForBlock {
+			this.Defers = append(this.Defers, block.Defers...)
+			return
+		}
+		this.mkDefers(block.Outer)
+	}
+
+}
+

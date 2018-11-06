@@ -1,14 +1,18 @@
-
+ import "lucy/binary"
  
 
 class AttributeConstantValue {
 	Index char
-	fn ToAttributeInfo(class Class) -> (info AttributeInfo) {
-		info := new AttributeInfo()
-		info.NameIndex = class.InsertUtf8Const(AttributeNameConstValue)
+	fn AttributeConstantValue(Index char){
+		this.super()
+		this.Index = Index 
+	}
+	fn ToAttributeInfo(c Class) -> (info AttributeInfo) {
+		info = new AttributeInfo()
+		info.NameIndex = c.InsertUtf8Const(AttributeNameConstValue)
 		info.attributeLength = 2
-		info.Info = make([]byte, 2)
-		binary.BigEndian.PutUint16(info.Info, this.Index)
+		info.Info = new []byte(2)
+		binary.BigEndian.putChar(info.Info, this.Index)
 		return info
 	}
 }

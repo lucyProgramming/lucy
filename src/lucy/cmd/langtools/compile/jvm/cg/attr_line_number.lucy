@@ -1,26 +1,26 @@
-package cg
-
-import (
-	"encoding/binary"
-)
+import "lucy/binary"
 
 class AttributeLineNumber  {
-	lineNumbers []*AttributeLinePc
-	fn ToAttributeInfo(class Class) -> (ret AttributeInfo)  {
-		if this == nil || len(this.lineNumbers) == 0 {
-			return nil
+	lineNumbers []AttributeLinePc
+	fn AttributeLineNumber (){
+	    this.super()
+		this.lineNumbers = []AttributeLinePc{}
+	}
+	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
+		if this == null || len(this.lineNumbers) == 0 {
+			return null
 		}
 		ret  = new AttributeInfo()
-		ret.NameIndex = class.InsertUtf8Const("LineNumberTable")
-		ret.Info = make([]byte, 2)
-		binary.BigEndian.PutUint16(ret.Info, uint16(len(this.lineNumbers)))
+		ret.NameIndex = c.InsertUtf8Const("LineNumberTable")
+		ret.Info = new []byte (2)
+		binary.BigEndian.putChar(ret.Info, char(len(this.lineNumbers)))
 		for _, v := range this.lineNumbers {
-			bs4 := make([]byte, 4)
-			binary.BigEndian.PutUint16(bs4[0:2], v.startPc)
-			binary.BigEndian.PutUint16(bs4[2:4], v.lineNumber)
-			ret.Info = append(ret.Info, bs4...)
+			bs4 := new []byte( 4)
+			binary.BigEndian.putChar(bs4[0:2], v.startPc)
+			binary.BigEndian.putChar(bs4[2:4], v.lineNumber)
+			ret.Info . appendAll( bs4)
 		}
-		ret.attributeLength = uint32(len(ret.Info))
+		ret.attributeLength = (len(ret.Info))
 		return ret
 	}
 }
@@ -28,6 +28,6 @@ class AttributeLineNumber  {
 
 
 class AttributeLinePc {
-	startPc    uint16
-	lineNumber uint16
+	startPc    char
+	lineNumber char
 }

@@ -1,37 +1,36 @@
-package cg
-
-import "encoding/binary"
+ import "lucy/binary"
 
 class AttributeLucyClassConst {
 	Constants []LucyClassConst
 
-	fn FromBs(class Class, bs []byte) {
+	fn FromBs(c Class, bs []byte) {
+	    this.Constants = []LucyClassConst{}
 		for len(bs) > 0 {
-			constant := &LucyClassConst{}
-			constant.Name = string(class.ConstPool[binary.BigEndian.Uint16(bs)].Info)
-			constant.Descriptor = string(class.ConstPool[binary.BigEndian.Uint16(bs[2:])].Info)
-			constant.ValueIndex = binary.BigEndian.Uint16(bs[4:])
-			constant.Comment = string(class.ConstPool[binary.BigEndian.Uint16(bs[6:])].Info)
+			constant := new LucyClassConst()
+			constant.Name = string(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
+			constant.Descriptor = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].Info)
+			constant.ValueIndex = binary.BigEndian.getChar(bs[4:])
+			constant.Comment = string(c.ConstPool[binary.BigEndian.getChar(bs[6:])].Info)
 			bs = bs[8:]
-			this.Constants = append(this.Constants, constant)
+			this.Constants.append(constant)
 		}
 	}
 
-	fn ToAttributeInfo(class Class) -> (ret AttributeInfo)   {
-		if this == nil || len(this.Constants) == 0 {
-			return nil
+	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)   {
+		if this == null || len(this.Constants) == 0 {
+			return null
 		}
-		ret := &AttributeInfo{}
-		ret.NameIndex = class.InsertUtf8Const(AttributeNameLucyClassConst)
-		ret.Info = make([]byte, len(this.Constants)*8)
+		ret = new AttributeInfo()
+		ret.NameIndex = c.InsertUtf8Const(AttributeNameLucyClassConst)
+		ret.Info = new []byte(len(this.Constants)*8)
 		for k, v := range this.Constants {
 			b := ret.Info[k*8:]
-			binary.BigEndian.PutUint16(b, class.InsertUtf8Const(v.Name))
-			binary.BigEndian.PutUint16(b[2:], class.InsertUtf8Const(v.Descriptor))
-			binary.BigEndian.PutUint16(b[4:], v.ValueIndex)
-			binary.BigEndian.PutUint16(b[6:], class.InsertUtf8Const(v.Comment))
+			binary.BigEndian.putChar(b, c.InsertUtf8Const(v.Name))
+			binary.BigEndian.putChar(b[2:], c.InsertUtf8Const(v.Descriptor))
+			binary.BigEndian.putChar(b[4:], v.ValueIndex)
+			binary.BigEndian.putChar(b[6:], c.InsertUtf8Const(v.Comment))
 		}
-		ret.attributeLength = uint32(len(ret.Info))
+		ret.attributeLength = (len(ret.Info))
 		return ret
 	}	
 }
@@ -39,7 +38,7 @@ class AttributeLucyClassConst {
 class LucyClassConst {
 	Name       string
 	Descriptor string
-	ValueIndex uint16
+	ValueIndex char
 	Comment    string
 }
 

@@ -2,14 +2,14 @@ package ast
 
 import "fmt"
 
-func (this *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Type) {
-	bin := this.Data.(*ExpressionBinary)
+func (e *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t *Type) {
+	bin := e.Data.(*ExpressionBinary)
 	if bin.Left.Type == ExpressionTypeList {
 		list := bin.Left.Data.([]*Expression)
 		if len(list) > 1 {
 			*errs = append(*errs,
 				fmt.Errorf("%s expect 1 expression on left",
-					errMsgPrefix(this.Pos)))
+					errMsgPrefix(e.Pos)))
 		}
 		bin.Left = list[0]
 	}
@@ -20,13 +20,13 @@ func (this *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t 
 		return
 	}
 	result := left.Clone()
-	result.Pos = this.Pos
+	result.Pos = e.Pos
 	if err := right.rightValueValid(); err != nil {
 		*errs = append(*errs, err)
 		return result
 	}
 	if bin.Left.Type == ExpressionTypeIdentifier &&
-		this.IsStatementExpression == false {
+		e.IsStatementExpression == false {
 		/*
 			var a = 1
 			print(a += 1)
@@ -43,16 +43,16 @@ func (this *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t 
 	*/
 	if left.Type == VariableTypeString {
 		if right.Type == VariableTypeString &&
-			(this.Type == ExpressionTypePlusAssign) {
+			(e.Type == ExpressionTypePlusAssign) {
 			return result
 		}
 	}
 	//number
-	if this.Type == ExpressionTypePlusAssign ||
-		this.Type == ExpressionTypeMinusAssign ||
-		this.Type == ExpressionTypeMulAssign ||
-		this.Type == ExpressionTypeDivAssign ||
-		this.Type == ExpressionTypeModAssign {
+	if e.Type == ExpressionTypePlusAssign ||
+		e.Type == ExpressionTypeMinusAssign ||
+		e.Type == ExpressionTypeMulAssign ||
+		e.Type == ExpressionTypeDivAssign ||
+		e.Type == ExpressionTypeModAssign {
 		if left.assignAble(errs, right) {
 			return result
 		}
@@ -65,15 +65,15 @@ func (this *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t 
 			return result
 		}
 	}
-	if this.Type == ExpressionTypeAndAssign ||
-		this.Type == ExpressionTypeOrAssign ||
-		this.Type == ExpressionTypeXorAssign {
+	if e.Type == ExpressionTypeAndAssign ||
+		e.Type == ExpressionTypeOrAssign ||
+		e.Type == ExpressionTypeXorAssign {
 		if left.isInteger() && left.assignAble(errs, right) {
 			return result
 		}
 	}
-	if this.Type == ExpressionTypeLshAssign ||
-		this.Type == ExpressionTypeRshAssign {
+	if e.Type == ExpressionTypeLshAssign ||
+		e.Type == ExpressionTypeRshAssign {
 		if left.isInteger() && right.isInteger() {
 			if right.Type == VariableTypeLong {
 				bin.Right.convertToNumberType(VariableTypeInt)
@@ -82,8 +82,8 @@ func (this *Expression) checkOpAssignExpression(block *Block, errs *[]error) (t 
 		}
 	}
 	*errs = append(*errs, fmt.Errorf("%s cannot apply algorithm '%s' on '%s' and '%s'",
-		this.Pos.ErrMsgPrefix(),
-		this.Op,
+		e.Pos.ErrMsgPrefix(),
+		e.Op,
 		left.TypeString(),
 		right.TypeString()))
 

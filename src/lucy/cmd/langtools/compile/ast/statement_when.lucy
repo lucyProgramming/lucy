@@ -1,0 +1,101 @@
+ 
+
+class StatementWhenCase {
+	Matches []Type
+	Block   Block
+}
+
+
+class StatementWhen {
+	Pos       Pos
+	Condition Type
+	Cases     []StatementWhenCase
+	Default   Block
+	/*
+		switchStatement will be override
+	*/
+	fn check(block Block, switchStatement Statement) (errs []error) {
+		if this.Condition == null { // must be a error must parse stage
+			return null
+		}
+		errs = []error{}
+		if len(this.Condition.getParameterType(&block.InheritedAttribute.Function.Type)) == 0 {
+			errs = append(errs, fmt.Errorf("%s '%s' constains no parameter type",
+				this.Condition.Pos.ErrMsgPrefix(), this.Condition.TypeString()))
+			return errs
+		}
+		if err := this.Condition.resolve(block); err != null {
+			errs = append(errs, err)
+			return
+		}
+		var match Type
+		var matchBlock Block
+		typesChecked := []Type{}
+		checkExists := func(ts []Type, t Type) *Type {
+			for _, v := range ts {
+				if v.Equal(t) {
+					return v
+				}
+			}
+			return null
+		}
+		for _, t := range this.Cases {
+			for _, tt := range t.Matches {
+				if err := tt.resolve(block); err != null {
+					errs = append(errs, err)
+					continue
+				}
+				if exist := checkExists(typesChecked, tt); exist != null {
+					errMsg := fmt.Sprintf("%s match '%s' already exist,first declared at:\n",
+						errMsgPrefix(tt.Pos), tt.TypeString())
+					errMsg += fmt.Sprintf("\t %s", errMsgPrefix(exist.Pos))
+					errs = append(errs, errors.New(errMsg))
+					return
+				}
+				typesChecked = append(typesChecked, tt)
+				if this.Condition.Equal(tt) == false {
+					//no match here
+					continue
+				}
+				// found
+				if match == null {
+					match = tt
+					matchBlock = t.Block
+				}
+			}
+		}
+		if len(errs) > 0 {
+			return errs
+		}
+		if match == null {
+			if this.Default == null {
+				errs = append(errs,
+					fmt.Errorf("%s condition resolve as '%s' has no match and no 'default block'",
+						errMsgPrefix(this.Condition.Pos), this.Condition.TypeString()))
+			} else {
+				switchStatement.Type = StatementTypeBlock
+				switchStatement.Block = this.Default
+				switchStatement.Block.inherit(block)
+				switchStatement.Block.IsWhenBlock = true
+				switchStatement.Block.InheritedAttribute.ForBreak = switchStatement.Block
+				errs = append(errs, switchStatement.Block.check()...)
+			}
+			return
+		}
+		// let`s reWrite
+		if matchBlock == null {
+			switchStatement.Type = StatementTypeNop
+			return errs
+		} else {
+			switchStatement.Type = StatementTypeBlock
+			switchStatement.Block = matchBlock
+			switchStatement.Block.inherit(block)
+			switchStatement.Block.IsWhenBlock = true
+			switchStatement.Block.InheritedAttribute.ForBreak = switchStatement.Block
+			return append(errs, switchStatement.Block.check()...)
+		}
+	}	
+}
+
+
+

@@ -10,13 +10,13 @@
 //
 //func (a *AttributeSignature) ToAttributeInfo(class *Class) *AttributeInfo {
 //	if a.Signature == "" {
-//		return nil
+//		return null
 //	}
 //	ret := &AttributeInfo{}
 //	ret.attributeLength = 2
 //	ret.NameIndex = class.InsertUtf8Const("Signature")
-//	ret.Info = make([]byte, 2)
+//	ret.Info = new []byte(2)
 //	index := class.InsertUtf8Const(a.Signature)
-//	binary.BigEndian.PutUint16(ret.Info, index)
+//	binary.BigEndian.putChar(ret.Info, index)
 //	return ret
 //}

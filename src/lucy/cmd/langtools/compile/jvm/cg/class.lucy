@@ -1,407 +1,499 @@
-package cg
 
-import (
-	"encoding/binary"
-	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
-	"io"
-)
+import "java/io"
+import "lucy/binary"
+import "lucy/cmd/langtools/compile/common"
 
-const (
-	AccClassPublic     uint16 = 0x0001 // 可以被包的类外访问。
-	AccClassFinal      uint16 = 0x0010 //不允许有子类。
-	AccClassSuper      uint16 = 0x0020 //当用到invokespecial指令时，需要特殊处理③的父类方法。
-	AccClassInterface  uint16 = 0x0200 // 标识定义的是接口而不是类。
-	AccClassAbstract   uint16 = 0x0400 //  不能被实例化。
-	AccClassSynthetic  uint16 = 0x1000 //标识并非Java源码生成的代码。
-	AccClassAnnotation uint16 = 0x2000 // 标识注解类型
-	AccClassEnum       uint16 = 0x4000 // 标识枚举类型
-)
+const	AccClassPublic     char = 0x0001 // 可以被包的类外访问。
+const	AccClassFinal      char = 0x0010 //不允许有子类。
+const	AccClassSuper      char = 0x0020 //当用到invokespecial指令时，需要特殊处理③的父类方法。
+const	AccClassInterface  char = 0x0200 // 标识定义的是接口而不是类。
+const	AccClassAbstract   char = 0x0400 //  不能被实例化。
+const	AccClassSynthetic  char = 0x1000 //标识并非Java源码生成的代码。
+const	AccClassAnnotation char = 0x2000 // 标识注解类型
+const	AccClassEnum       char = 0x4000 // 标识枚举类型
 
-type Class struct {
-	writer                  io.Writer
-	magic                   uint32 //0xCAFEBABE
-	MinorVersion            uint16
-	MajorVersion            uint16
-	ConstPool               []*ConstPool
-	AccessFlag              uint16
-	ThisClass               uint16
-	SuperClass              uint16
-	Interfaces              []uint16
-	Fields                  []*FieldInfo
-	Methods                 []*MethodInfo
-	Attributes              []*AttributeInfo
+
+class Class {
+	writer                  io.FileOutputStream
+	magic                   int //0xCAFEBABE
+	MinorVersion            char
+	MajorVersion            char
+	ConstPool               []ConstPool
+	AccessFlag              char
+	ThisClass               char
+	SuperClass              char
+	Interfaces              []char
+	Fields                  []FieldInfo
+	Methods                 []MethodInfo
+	Attributes              []AttributeInfo
 	AttributeGroupedByName  AttributeGroupedByName
-	TypeAlias               []*AttributeLucyTypeAlias
-	AttributeLucyEnum       *AttributeLucyEnum
-	AttributeLucyComment    *AttributeLucyComment
-	AttributeLucyClassConst *AttributeLucyClassConst
+	TypeAlias               []AttributeLucyTypeAlias
+	AttributeLucyEnum       AttributeLucyEnum
+	AttributeLucyComment    AttributeLucyComment
+	AttributeLucyClassConst AttributeLucyClassConst
 	AttributeInnerClasses   AttributeInnerClasses
 	//const caches
-	Utf8Constants               map[string]*ConstPool
-	IntConstants                map[int32]*ConstPool
-	LongConstants               map[int64]*ConstPool
-	FloatConstants              map[float32]*ConstPool
-	DoubleConstants             map[float64]*ConstPool
-	ClassConstants              map[string]*ConstPool
-	StringConstants             map[string]*ConstPool
-	FieldRefConstants           map[ConstantInfoFieldrefHighLevel]*ConstPool
-	NameAndTypeConstants        map[ConstantInfoNameAndTypeHighLevel]*ConstPool
-	MethodrefConstants          map[ConstantInfoMethodrefHighLevel]*ConstPool
-	InterfaceMethodrefConstants map[ConstantInfoInterfaceMethodrefHighLevel]*ConstPool
-	MethodTypeConstants         map[ConstantInfoMethodTypeHighLevel]*ConstPool
-}
+	Utf8Constants               map{string -> ConstPool }
+	IntConstants                map{int-> ConstPool }
+	LongConstants               map{long-> ConstPool }
+	FloatConstants              map{float-> ConstPool }
+	DoubleConstants             map{double-> ConstPool }
+	ClassConstants              map{string-> ConstPool }
+	StringConstants             map{string-> ConstPool }
+	FieldRefConstants           map{string-> ConstPool }
+	NameAndTypeConstants        map{string-> ConstPool }
+	MethodrefConstants          map{string-> ConstPool }
+	InterfaceMethodrefConstants map{string-> ConstPool }
+	MethodTypeConstants         map{string-> ConstPool }
 
-func (this *Class) IsSynthetic() bool {
-	return (this.AccessFlag & AccClassSynthetic) != 0
-}
+	fn IsSynthetic() -> (b bool) {
+		return (this.AccessFlag & AccClassSynthetic) != 0
+	}
 
-func (this *Class) InsertMethodTypeConst(n ConstantInfoMethodTypeHighLevel) uint16 {
-	if this.MethodTypeConstants == nil {
-		this.MethodTypeConstants = make(map[ConstantInfoMethodTypeHighLevel]*ConstPool)
-	}
-	if len(this.ConstPool) == 0 {
-		this.ConstPool = []*ConstPool{nil}
-	}
-	if con, ok := this.MethodTypeConstants[n]; ok {
-		return con.selfIndex
-	}
-	info := (&ConstantInfoMethodType{
-		descriptorIndex: this.InsertUtf8Const(n.Descriptor),
-	}).ToConstPool()
-	info.selfIndex = this.constPoolUint16Length()
-	this.ConstPool = append(this.ConstPool, info)
-	this.MethodTypeConstants[n] = info
-	return info.selfIndex
-}
-
-func (this *Class) InsertInterfaceMethodrefConst(n ConstantInfoInterfaceMethodrefHighLevel) uint16 {
-	if this.InterfaceMethodrefConstants == nil {
-		this.InterfaceMethodrefConstants = make(map[ConstantInfoInterfaceMethodrefHighLevel]*ConstPool)
-	}
-	if len(this.ConstPool) == 0 {
-		this.ConstPool = []*ConstPool{nil}
-	}
-	if con, ok := this.InterfaceMethodrefConstants[n]; ok {
-		return con.selfIndex
-	}
-	info := (&ConstantInfoInterfaceMethodref{
-		classIndex: this.InsertClassConst(n.Class),
-		nameAndTypeIndex: this.InsertNameAndType(ConstantInfoNameAndTypeHighLevel{
-			Name:       n.Method,
-			Descriptor: n.Descriptor,
-		}),
-	}).ToConstPool()
-	info.selfIndex = this.constPoolUint16Length()
-	this.ConstPool = append(this.ConstPool, info)
-	this.InterfaceMethodrefConstants[n] = info
-	return info.selfIndex
-}
-
-func (this *Class) InsertMethodrefConst(n ConstantInfoMethodrefHighLevel) uint16 {
-	if this.MethodrefConstants == nil {
-		this.MethodrefConstants = make(map[ConstantInfoMethodrefHighLevel]*ConstPool)
-	}
-	if len(this.ConstPool) == 0 {
-		this.ConstPool = []*ConstPool{nil}
-	}
-	if con, ok := this.MethodrefConstants[n]; ok {
-		return con.selfIndex
-	}
-	info := (&ConstantInfoMethodref{
-		classIndex: this.InsertClassConst(n.Class),
-		nameAndTypeIndex: this.InsertNameAndType(ConstantInfoNameAndTypeHighLevel{
-			Name:       n.Method,
-			Descriptor: n.Descriptor,
-		}),
-	}).ToConstPool()
-	info.selfIndex = this.constPoolUint16Length()
-	this.ConstPool = append(this.ConstPool, info)
-	this.MethodrefConstants[n] = info
-	return info.selfIndex
-}
-
-func (this *Class) InsertNameAndType(n ConstantInfoNameAndTypeHighLevel) uint16 {
-	if this.NameAndTypeConstants == nil {
-		this.NameAndTypeConstants = make(map[ConstantInfoNameAndTypeHighLevel]*ConstPool)
-	}
-	if len(this.ConstPool) == 0 {
-		this.ConstPool = []*ConstPool{nil}
-	}
-	if con, ok := this.NameAndTypeConstants[n]; ok {
-		return con.selfIndex
-	}
-	info := (&ConstantInfoNameAndType{
-		name:       this.InsertUtf8Const(n.Name),
-		descriptor: this.InsertUtf8Const(n.Descriptor),
-	}).ToConstPool()
-	info.selfIndex = this.constPoolUint16Length()
-	this.ConstPool = append(this.ConstPool, info)
-	this.NameAndTypeConstants[n] = info
-	return info.selfIndex
-}
-func (this *Class) InsertFieldRefConst(f ConstantInfoFieldrefHighLevel) uint16 {
-	if this.FieldRefConstants == nil {
-		this.FieldRefConstants = make(map[ConstantInfoFieldrefHighLevel]*ConstPool)
-	}
-	if len(this.ConstPool) == 0 {
-		this.ConstPool = []*ConstPool{nil}
-	}
-	if con, ok := this.FieldRefConstants[f]; ok {
-		return con.selfIndex
-	}
-	info := (&ConstantInfoFieldref{
-		classIndex: this.InsertClassConst(f.Class),
-		nameAndTypeIndex: this.InsertNameAndType(ConstantInfoNameAndTypeHighLevel{
-			Name:       f.Field,
-			Descriptor: f.Descriptor,
-		}),
-	}).ToConstPool()
-	info.selfIndex = this.constPoolUint16Length()
-	this.ConstPool = append(this.ConstPool, info)
-	this.FieldRefConstants[f] = info
-	return info.selfIndex
-}
-func (this *Class) InsertUtf8Const(s string) uint16 {
-	if this.Utf8Constants == nil {
-		this.Utf8Constants = make(map[string]*ConstPool)
-	}
-	if len(this.ConstPool) == 0 {
-		this.ConstPool = []*ConstPool{nil}
-	}
-	if con, ok := this.Utf8Constants[s]; ok {
-		return con.selfIndex
-	}
-	info := (&ConstantInfoUtf8{uint16(len(s)), []byte(s)}).ToConstPool()
-	info.selfIndex = this.constPoolUint16Length()
-	this.ConstPool = append(this.ConstPool, info)
-	this.Utf8Constants[s] = info
-	return info.selfIndex
-}
-
-func (this *Class) InsertIntConst(i int32) uint16 {
-	if this.IntConstants == nil {
-		this.IntConstants = make(map[int32]*ConstPool)
-	}
-	if len(this.ConstPool) == 0 {
-		this.ConstPool = []*ConstPool{nil}
-	}
-	if con, ok := this.IntConstants[i]; ok {
-		return con.selfIndex
-	}
-	info := (&ConstantInfoInteger{i}).ToConstPool()
-	info.selfIndex = this.constPoolUint16Length()
-	this.ConstPool = append(this.ConstPool, info)
-	this.IntConstants[i] = info
-	return info.selfIndex
-}
-func (this *Class) InsertLongConst(i int64) uint16 {
-	if this.LongConstants == nil {
-		this.LongConstants = make(map[int64]*ConstPool)
-	}
-	if len(this.ConstPool) == 0 {
-		this.ConstPool = []*ConstPool{nil}
-	}
-	if con, ok := this.LongConstants[i]; ok {
-		return con.selfIndex
-	}
-	info := (&ConstantInfoLong{i}).ToConstPool()
-	info.selfIndex = this.constPoolUint16Length()
-	this.ConstPool = append(this.ConstPool, info, nil)
-	this.LongConstants[i] = info
-	return info.selfIndex
-}
-
-func (this *Class) InsertFloatConst(f float32) uint16 {
-	if this.FloatConstants == nil {
-		this.FloatConstants = make(map[float32]*ConstPool)
-	}
-	if len(this.ConstPool) == 0 {
-		this.ConstPool = []*ConstPool{nil}
-	}
-	if con, ok := this.FloatConstants[f]; ok {
-		return con.selfIndex
-	}
-	info := (&ConstantInfoFloat{f}).ToConstPool()
-	info.selfIndex = this.constPoolUint16Length()
-	this.ConstPool = append(this.ConstPool, info)
-	this.FloatConstants[f] = info
-	return info.selfIndex
-}
-
-func (this *Class) InsertDoubleConst(f float64) uint16 {
-	if this.DoubleConstants == nil {
-		this.DoubleConstants = make(map[float64]*ConstPool)
-	}
-	if len(this.ConstPool) == 0 {
-		this.ConstPool = []*ConstPool{nil}
-	}
-	if con, ok := this.DoubleConstants[f]; ok {
-		return con.selfIndex
-	}
-	info := (&ConstantInfoDouble{f}).ToConstPool()
-	info.selfIndex = this.constPoolUint16Length()
-	this.ConstPool = append(this.ConstPool, info, nil)
-	this.DoubleConstants[f] = info
-	return info.selfIndex
-}
-
-func (this *Class) InsertClassConst(name string) uint16 {
-	if this.ClassConstants == nil {
-		this.ClassConstants = make(map[string]*ConstPool)
-	}
-	if len(this.ConstPool) == 0 {
-		this.ConstPool = []*ConstPool{nil}
-	}
-	if con, ok := this.ClassConstants[name]; ok {
-		return con.selfIndex
-	}
-	info := (&ConstantInfoClass{this.InsertUtf8Const(name)}).ToConstPool()
-	info.selfIndex = this.constPoolUint16Length()
-	this.ConstPool = append(this.ConstPool, info)
-	this.ClassConstants[name] = info
-	return info.selfIndex
-}
-
-func (this *Class) InsertStringConst(s string) uint16 {
-	if this.StringConstants == nil {
-		this.StringConstants = make(map[string]*ConstPool)
-	}
-	if len(this.ConstPool) == 0 {
-		this.ConstPool = []*ConstPool{nil}
-	}
-	if con, ok := this.StringConstants[s]; ok {
-		return con.selfIndex
-	}
-	info := (&ConstantInfoString{this.InsertUtf8Const(s)}).ToConstPool()
-	info.selfIndex = this.constPoolUint16Length()
-	this.ConstPool = append(this.ConstPool, info)
-	this.StringConstants[s] = info
-	return info.selfIndex
-}
-
-func (this *ClassHighLevel) ToLow() *Class {
-	this.Class.fromHighLevel(this)
-	return &this.Class
-}
-
-func (this *Class) fromHighLevel(high *ClassHighLevel) {
-	this.MajorVersion = uint16(common.CompileFlags.JvmMajorVersion)
-	this.MinorVersion = uint16(common.CompileFlags.JvmMajorVersion)
-	if len(this.ConstPool) == 0 {
-		this.ConstPool = []*ConstPool{nil} // jvm const pool index begin at 1
-	}
-	this.AccessFlag = high.AccessFlags
-	this.ThisClass = this.InsertClassConst(high.Name)
-	this.SuperClass = this.InsertClassConst(high.SuperClass)
-	for _, i := range high.Interfaces {
-		inter := (&ConstantInfoClass{this.InsertUtf8Const(i)}).ToConstPool()
-		index := this.constPoolUint16Length()
-		this.Interfaces = append(this.Interfaces, index)
-		this.ConstPool = append(this.ConstPool, inter)
-	}
-	for _, f := range high.Fields {
-		field := &FieldInfo{}
-		field.AccessFlags = f.AccessFlags
-		field.NameIndex = this.InsertUtf8Const(f.Name)
-		if f.AttributeConstantValue != nil {
-			field.Attributes = append(field.Attributes, f.AttributeConstantValue.ToAttributeInfo(this))
+	fn InsertMethodTypeConst(n ConstantInfoMethodTypeHighLevel) -> (index char) {
+		if this.MethodTypeConstants == null {
+			this.MethodTypeConstants = new  map{string -> ConstPool}()
 		}
-		field.DescriptorIndex = this.InsertUtf8Const(f.Descriptor)
-		if f.AttributeLucyFieldDescriptor != nil {
-			field.Attributes = append(field.Attributes, f.AttributeLucyFieldDescriptor.ToAttributeInfo(this))
+		if len(this.ConstPool) == 0 {
+			this.ConstPool = []ConstPool{null}
 		}
-		if f.AttributeLucyConst != nil {
-			field.Attributes = append(field.Attributes, f.AttributeLucyConst.ToAttributeInfo(this))
+		if con := this.MethodTypeConstants[n.toString()]; con != null {
+			return con.selfIndex
 		}
-		if f.AttributeLucyComment != nil {
-			field.Attributes = append(field.Attributes, f.AttributeLucyComment.ToAttributeInfo(this))
-		}
-		this.Fields = append(this.Fields, field)
+		info := new ConstantInfoMethodType ( this.InsertUtf8Const(n.Descriptor) ).ToConstPool()
+		info.selfIndex = this.constPoolUint16Length()
+		this.ConstPool.append(info)
+		this.MethodTypeConstants[n.toString()] = info
+		return info.selfIndex
 	}
-	for _, ms := range high.Methods {
-		for _, m := range ms {
-			info := &MethodInfo{}
-			info.AccessFlags = m.AccessFlags
-			info.NameIndex = this.InsertUtf8Const(m.Name)
-			info.DescriptorIndex = this.InsertUtf8Const(m.Descriptor)
-			if m.Code != nil {
-				info.Attributes = append(info.Attributes, m.Code.ToAttributeInfo(this))
-			}
 
-			if m.AttributeLucyMethodDescriptor != nil {
-				info.Attributes = append(info.Attributes, m.AttributeLucyMethodDescriptor.ToAttributeInfo(this))
+	fn InsertInterfaceMethodrefConst(n ConstantInfoInterfaceMethodrefHighLevel) -> (index char) {
+		if this.InterfaceMethodrefConstants == null {
+			this.InterfaceMethodrefConstants = new map {string -> ConstPool} ()
+		}
+		if len(this.ConstPool) == 0 {
+			this.ConstPool = []ConstPool{null}
+		}
+		if con := this.InterfaceMethodrefConstants[n.toString()]; con != null {
+			return con.selfIndex
+		}
+		info :=  new ConstantInfoInterfaceMethodref(
+			this.InsertClassConst(n.Class),
+			this.InsertNameAndType( new ConstantInfoNameAndTypeHighLevel(     n.Method,  n.Descriptor ) )
+		).ToConstPool()
+		info.selfIndex = this.constPoolUint16Length()
+		this.ConstPool.append(info)
+		this.InterfaceMethodrefConstants[n.toString()] = info
+		return info.selfIndex
+	}
+
+	fn InsertMethodrefConst(n ConstantInfoMethodrefHighLevel) -> (index char) {
+		if this.MethodrefConstants == null {
+			this.MethodrefConstants = new map{string -> ConstPool} ()
+		}
+		if len(this.ConstPool) == 0 {
+			this.ConstPool = []ConstPool{null}
+		}
+		if con := this.MethodrefConstants[n.toString()]; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoMethodref(
+                    this.InsertClassConst(n.Class),
+                    this.InsertNameAndType( new ConstantInfoNameAndTypeHighLevel (
+                       n.Method,
+                       n.Descriptor) )
+			) .ToConstPool()
+		info.selfIndex = this.constPoolUint16Length()
+		this.ConstPool.append(info)
+		this.MethodrefConstants[n.toString()] = info
+		return info.selfIndex
+	}
+
+	fn InsertNameAndType(n ConstantInfoNameAndTypeHighLevel) -> (index char) {
+		if this.NameAndTypeConstants == null {
+			this.NameAndTypeConstants = new map{string -> ConstPool} ()
+		}
+		if len(this.ConstPool) == 0 {
+			this.ConstPool = []ConstPool{null}
+		}
+		if con := this.NameAndTypeConstants[n.toString()]; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoNameAndType(
+			       this.InsertUtf8Const(n.Name),
+			    this.InsertUtf8Const(n.Descriptor)
+		    ).ToConstPool()
+		info.selfIndex = this.constPoolUint16Length()
+		this.ConstPool.append(info)
+		this.NameAndTypeConstants[n.toString()] = info
+		return info.selfIndex
+	}
+	fn InsertFieldRefConst(f ConstantInfoFieldrefHighLevel) -> (index char) {
+		if this.FieldRefConstants == null {
+			this.FieldRefConstants = new map{string -> ConstPool}()
+		}
+		if len(this.ConstPool) == 0 {
+			this.ConstPool = []ConstPool{null}
+		}
+		if con := this.FieldRefConstants[f.toString()]; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoFieldref(
+			this.InsertClassConst(f.Class),
+			this.InsertNameAndType(new ConstantInfoNameAndTypeHighLevel(   f.Field,  f.Descriptor)
+			)
+		).ToConstPool()
+		info.selfIndex = this.constPoolUint16Length()
+		this.ConstPool.append(info)
+		this.FieldRefConstants[f.toString()] = info
+		return info.selfIndex
+	}
+	fn InsertUtf8Const(s string) -> (index char) {
+		if this.Utf8Constants == null {
+			this.Utf8Constants = new map {string -> ConstPool}( )
+		}
+		if len(this.ConstPool) == 0 {
+			this.ConstPool = []ConstPool{null}
+		}
+		if con := this.Utf8Constants[s]; con != null  {
+			return con.selfIndex
+		}
+		info := (new ConstantInfoUtf8(s)).ToConstPool()
+		info.selfIndex = this.constPoolUint16Length()
+		this.ConstPool.append(info)
+		this.Utf8Constants[s] = info
+		return info.selfIndex
+	}
+
+	fn InsertIntConst(i int) -> (index char) {
+		if this.IntConstants == null {
+			this.IntConstants = new map{ int -> ConstPool }()
+		}
+		if len(this.ConstPool) == 0 {
+			this.ConstPool = []ConstPool{null}
+		}
+		if con := this.IntConstants[i];   con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoInteger(i).ToConstPool()
+		info.selfIndex = this.constPoolUint16Length()
+		this.ConstPool.append(info)
+		this.IntConstants[i] = info
+		return info.selfIndex
+	}
+	fn InsertLongConst(i long) -> (index char) {
+		if this.LongConstants == null {
+			this.LongConstants = new map{ long -> ConstPool } ()
+		}
+		if len(this.ConstPool) == 0 {
+			this.ConstPool = []ConstPool{null}
+		}
+		if con := this.LongConstants[i]; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoLong(i).ToConstPool()
+		info.selfIndex = this.constPoolUint16Length()
+		this.ConstPool.append(info , null )
+		this.LongConstants[i] = info
+		return info.selfIndex
+	}
+
+	fn InsertFloatConst(f float) -> (index char) {
+		if this.FloatConstants == null {
+			this.FloatConstants = new map {float -> ConstPool} ()
+		}
+		if len(this.ConstPool) == 0 {
+			this.ConstPool = []ConstPool{null}
+		}
+		if con := this.FloatConstants[f]; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoFloat(f).ToConstPool()
+		info.selfIndex = this.constPoolUint16Length()
+		this.ConstPool.append(info)
+		this.FloatConstants[f] = info
+		return info.selfIndex
+	}
+
+	fn InsertDoubleConst(f double) -> (index char) {
+		if this.DoubleConstants == null {
+			this.DoubleConstants = new map{double -> ConstPool}()
+		}
+		if len(this.ConstPool) == 0 {
+			this.ConstPool = []ConstPool{null}
+		}
+		if con := this.DoubleConstants[f]; con != null {
+			return con.selfIndex
+		}
+		info := (new ConstantInfoDouble(f)).ToConstPool()
+		info.selfIndex = this.constPoolUint16Length()
+		this.ConstPool.append(info , null )
+		this.DoubleConstants[f] = info
+		return info.selfIndex
+	}
+
+	fn InsertClassConst(name string) -> (index char) {
+		if this.ClassConstants == null {
+			this.ClassConstants = new map {string -> ConstPool} ()
+		}
+		if len(this.ConstPool) == 0 {
+			this.ConstPool = []ConstPool{null}
+		}
+		if con := this.ClassConstants[name]; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoClass(this.InsertUtf8Const(name)).ToConstPool()
+		info.selfIndex = this.constPoolUint16Length()
+		this.ConstPool.append(info  )
+		this.ClassConstants[name] = info
+		return info.selfIndex
+	}
+
+	fn InsertStringConst(s string) -> (index char) {
+		if this.StringConstants == null {
+			this.StringConstants = new map{string -> ConstPool }()
+		}
+		if len(this.ConstPool) == 0 {
+			this.ConstPool = []ConstPool{null}
+		}
+		if con := this.StringConstants[s]; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoString(this.InsertUtf8Const(s)).ToConstPool()
+		info.selfIndex = this.constPoolUint16Length()
+		this.ConstPool . append( info)
+		this.StringConstants[s] = info
+		return info.selfIndex
+	}
+
+
+
+	fn fromHighLevel(high ClassHighLevel) {
+		this.MajorVersion = char(common.CompileFlags.JvmMajorVersion.getValue())
+		this.MinorVersion = char(common.CompileFlags.JvmMajorVersion.getValue())
+		if len(this.ConstPool) == 0 {
+			this.ConstPool = []ConstPool{null} // jvm const pool index begin at 1
+		}
+		this.AccessFlag = high.AccessFlags
+		this.ThisClass = this.InsertClassConst(high.Name)
+		this.SuperClass = this.InsertClassConst(high.SuperClass)
+		this.Interfaces = []char {}
+		for _, i := range high.Interfaces {
+			inter := (new ConstantInfoClass(this.InsertUtf8Const(i))).ToConstPool()
+			index := this.constPoolUint16Length()
+			this.Interfaces . append(index)
+			this.ConstPool . append(inter)
+		}
+		this.Fields = []FieldInfo{}
+		for _, f := range high.Fields {
+			field := new FieldInfo()
+			field.AccessFlags = f.AccessFlags
+			field.NameIndex = this.InsertUtf8Const(f.Name)
+            field.Attributes = []AttributeInfo{}
+			if f.AttributeConstantValue != null {
+				field.Attributes . append(  f.AttributeConstantValue.ToAttributeInfo(this))
 			}
-			if m.AttributeLucyTriggerPackageInitMethod != nil {
-				info.Attributes = append(info.Attributes, m.AttributeLucyTriggerPackageInitMethod.ToAttributeInfo(this))
+			field.DescriptorIndex = this.InsertUtf8Const(f.Descriptor)
+			if f.AttributeLucyFieldDescriptor != null {
+				field.Attributes . append(  f.AttributeLucyFieldDescriptor.ToAttributeInfo(this))
 			}
-			if m.AttributeDefaultParameters != nil {
-				info.Attributes = append(info.Attributes, m.AttributeDefaultParameters.ToAttributeInfo(this))
+			if f.AttributeLucyConst != null {
+				field.Attributes . append(  f.AttributeLucyConst.ToAttributeInfo(this))
 			}
-			if m.AttributeLucyComment != nil {
-				info.Attributes = append(info.Attributes, m.AttributeLucyComment.ToAttributeInfo(this))
+			if f.AttributeLucyComment != null {
+				field.Attributes . append(  f.AttributeLucyComment.ToAttributeInfo(this))
 			}
-			if m.AttributeMethodParameters != nil {
-				t := m.AttributeMethodParameters.ToAttributeInfo(this)
-				if t != nil {
-					info.Attributes = append(info.Attributes, t)
+			this.Fields.append(field)
+		}
+		this.Methods = []MethodInfo{}
+		for _, ms := range high.Methods {
+			for _, m := range ms {
+				info := new MethodInfo()
+				info.AccessFlags = m.AccessFlags
+				info.NameIndex = this.InsertUtf8Const(m.Name)
+				info.DescriptorIndex = this.InsertUtf8Const(m.Descriptor)
+				info.Attributes = []AttributeInfo{}
+				if m.Code != null {
+					info.Attributes . append( m.Code.ToAttributeInfo(this))
 				}
-			}
-			if m.AttributeLucyReturnListNames != nil {
-				t := m.AttributeLucyReturnListNames.ToAttributeInfo(this, AttributeNameLucyReturnListNames)
-				if t != nil {
-					info.Attributes = append(info.Attributes, t)
+				if m.AttributeLucyMethodDescriptor != null {
+					info.Attributes . append( m.AttributeLucyMethodDescriptor.ToAttributeInfo(this))
 				}
+				if m.AttributeLucyTriggerPackageInitMethod != null {
+					info.Attributes . append(  m.AttributeLucyTriggerPackageInitMethod.ToAttributeInfo(this))
+				}
+				if m.AttributeDefaultParameters != null {
+					info.Attributes . append(  m.AttributeDefaultParameters.ToAttributeInfo(this))
+				}
+				if m.AttributeLucyComment != null {
+					info.Attributes . append(  m.AttributeLucyComment.ToAttributeInfo(this))
+				}
+				if m.AttributeMethodParameters != null {
+					t := m.AttributeMethodParameters.ToAttributeInfo(this)
+					if t != null {
+						info.Attributes . append(t)
+					}
+				}
+				if m.AttributeLucyReturnListNames != null {
+					t := m.AttributeLucyReturnListNames.ToAttributeInfo(this, AttributeNameLucyReturnListNames)
+					if t != null {
+						info.Attributes.append(t)
+					}
+				}
+				this.Methods . append(info)
 			}
-			this.Methods = append(this.Methods, info)
 		}
-	}
-	//source file
-	this.Attributes = append(this.Attributes,
-		(&AttributeSourceFile{high.getSourceFile()}).ToAttributeInfo(this))
-	for _, v := range this.TypeAlias {
-		this.Attributes = append(this.Attributes, v.ToAttributeInfo(this))
-	}
-	if this.AttributeLucyEnum != nil {
-		this.Attributes = append(this.Attributes, this.AttributeLucyEnum.ToAttributeInfo(this))
-	}
-	if this.AttributeLucyComment != nil {
-		this.Attributes = append(this.Attributes, this.AttributeLucyComment.ToAttributeInfo(this))
-	}
-	if this.AttributeLucyClassConst != nil {
-		this.Attributes = append(this.Attributes, this.AttributeLucyClassConst.ToAttributeInfo(this))
-	}
-	if a := this.AttributeInnerClasses.ToAttributeInfo(this); a != nil {
-		this.Attributes = append(this.Attributes, a)
-	}
-	for _, v := range high.TemplateFunctions {
-		this.Attributes = append(this.Attributes, v.ToAttributeInfo(this))
-	}
-	this.ifConstPoolOverMaxSize()
-	return
-}
-
-func (this *Class) constPoolUint16Length() uint16 {
-	return uint16(len(this.ConstPool))
-}
-func (this *Class) ifConstPoolOverMaxSize() {
-	if len(this.ConstPool) > ConstantPoolMaxSize {
-		panic(fmt.Sprintf("const pool max size is:%d", ConstantPoolMaxSize))
-	}
-}
-
-func (this *Class) IsInnerClass() (is bool) {
-	if len(this.AttributeGroupedByName[AttributeNameInnerClasses]) == 0 {
+		if this.Attributes == null {
+			this.Attributes = []AttributeInfo{}
+		}
+		//source file
+		this.Attributes . append(new AttributeSourceFile(high.getSourceFile()).ToAttributeInfo(this))
+		for _, v := range this.TypeAlias {
+			this.Attributes . append( v.ToAttributeInfo(this))
+		}
+		if this.AttributeLucyEnum != null {
+			this.Attributes . append( this.AttributeLucyEnum.ToAttributeInfo(this))
+		}
+		if this.AttributeLucyComment != null {
+			this.Attributes . append(  this.AttributeLucyComment.ToAttributeInfo(this))
+		}
+		if this.AttributeLucyClassConst != null {
+			this.Attributes . append( this.AttributeLucyClassConst.ToAttributeInfo(this))
+		}
+		if a := this.AttributeInnerClasses.ToAttributeInfo(this); a != null {
+			this.Attributes . append(  a)
+		}
+		for _, v := range high.TemplateFunctions {
+			this.Attributes.append(  v.ToAttributeInfo(this))
+		}
+		this.ifConstPoolOverMaxSize()
 		return
 	}
-	innerClass := this.AttributeGroupedByName[AttributeNameInnerClasses][0]
-	var attr AttributeInnerClasses
-	thisClassName := string(this.ConstPool[binary.BigEndian.Uint16(this.ConstPool[this.ThisClass].Info)].Info)
-	attr.FromBs(this, innerClass.Info)
-	for _, v := range attr.Classes {
-		if thisClassName == v.InnerClass {
-			return true
+
+	fn constPoolUint16Length() -> (length char){
+		return char(len(this.ConstPool))
+	}
+	fn ifConstPoolOverMaxSize() {
+		if len(this.ConstPool) > ConstantPoolMaxSize {
+			panic(sprintf("const pool max size is:%d", ConstantPoolMaxSize))
 		}
 	}
-	return
+
+	fn IsInnerClass() -> (is bool) {
+		if len(this.AttributeGroupedByName[AttributeNameInnerClasses]) == 0 {
+			return
+		}
+		innerClass := this.AttributeGroupedByName[AttributeNameInnerClasses][0]
+		var attr AttributeInnerClasses
+		thisClassName := string(this.ConstPool[binary.BigEndian.getChar(this.ConstPool[this.ThisClass].Info)].Info)
+		attr.FromBs(this, innerClass.Info)
+		for _, v := range attr.Classes {
+			if thisClassName == v.InnerClass {
+				return true
+			}
+		}
+		return
+	}
+
+
+	fn OutPut(writer io.FileOutputStream)  {
+		this.writer = writer
+		//magic number
+		{
+		    bs := new byte[](4)
+		    bs[0] = 0xca
+		    bs[1] = 0xfe
+		    bs[2] = 0xba
+		    bs[3] = 0xbe
+		    writer.write(bs)
+		}
+
+		// minor version
+		bs2 := new []byte(2)
+		binary.BigEndian.putChar(bs2, char(this.MinorVersion))
+		writer.write(bs2.getUnderlyingArray())
+		// major version
+		binary.BigEndian.putChar(bs2, char(this.MajorVersion))
+		writer.write(bs2.getUnderlyingArray())
+		//const pool
+		binary.BigEndian.putChar(bs2, this.constPoolUint16Length())
+		writer.write(bs2.getUnderlyingArray())
+		for _, v := range this.ConstPool {
+			if v == null {
+				continue
+			}
+			writer.write([]byte{byte(v.Tag)}.getUnderlyingArray())
+			writer.write(v.Info.getUnderlyingArray())
+		}
+		//access flag
+		binary.BigEndian.putChar(bs2, char(this.AccessFlag))
+		writer.write(bs2.getUnderlyingArray())
+
+		binary.BigEndian.putChar(bs2, this.ThisClass)
+		//this class
+		writer.write(bs2.getUnderlyingArray())
+
+		//super Class
+		binary.BigEndian.putChar(bs2, this.SuperClass)
+		writer.write(bs2.getUnderlyingArray())
+
+		// interface
+		binary.BigEndian.putChar(bs2, char(len(this.Interfaces)))
+		writer.write(bs2.getUnderlyingArray())
+
+		for _, v := range this.Interfaces {
+			binary.BigEndian.putChar(bs2, char(v))
+			writer.write(bs2.getUnderlyingArray())
+		}
+		this.writeFields()
+		//methods
+		this.writeMethods()
+		// attribute
+		this.writeAttributeInfo(this.Attributes)
+	}
+
+	fn writeMethods()  {
+		bs2 := new []byte(2)
+		binary.BigEndian.putChar(bs2, char(len(this.Methods)))
+		this.writer.write(bs2.getUnderlyingArray())
+		for _, v := range this.Methods {
+			binary.BigEndian.putChar(bs2, char(v.AccessFlags))
+			this.writer.write(bs2.getUnderlyingArray())
+			binary.BigEndian.putChar(bs2, v.NameIndex)
+			this.writer.write(bs2.getUnderlyingArray())
+			binary.BigEndian.putChar(bs2, v.DescriptorIndex)
+			this.writer.write(bs2.getUnderlyingArray())
+			this.writeAttributeInfo(v.Attributes)
+		}
+	}
+
+	fn writeFields()  {
+		bs2 := new []byte(2)
+		binary.BigEndian.putChar(bs2, char(len(this.Fields)))
+		this.writer.write(bs2.getUnderlyingArray())
+		for _, v := range this.Fields {
+			binary.BigEndian.putChar(bs2, char(v.AccessFlags))
+			this.writer.write(bs2.getUnderlyingArray())
+			binary.BigEndian.putChar(bs2, v.NameIndex)
+			this.writer.write(bs2.getUnderlyingArray())
+			binary.BigEndian.putChar(bs2, v.DescriptorIndex)
+			this.writer.write(bs2.getUnderlyingArray())
+			this.writeAttributeInfo(v.Attributes)
+		}
+	}
+
+	fn writeAttributeInfo(attrs []AttributeInfo)   {
+		bs2 := new []byte(2)
+		binary.BigEndian.putChar(bs2, char(len(attrs)))
+		this.writer.write(bs2.getUnderlyingArray())
+		bs4 := new []byte(4)
+		for _, v := range attrs {
+			binary.BigEndian.putChar(bs2 , v.NameIndex)
+			this.writer.write(bs2.getUnderlyingArray())
+			binary.BigEndian.putInt(bs4 , v.attributeLength)
+			this.writer.write(bs4.getUnderlyingArray())
+			this.writer.write(v.Info.getUnderlyingArray())
+		}
+	}	
 }
+

@@ -1,0 +1,70 @@
+ 
+class ClosureMeta {
+	pos Pos
+}
+
+class Closure {
+	Variables map{ Variable -> ClosureMeta }
+	Functions map{ Function -> ClosureMeta }
+	func (this *Closure) ClosureVariableExist(v *Variable) bool {
+		if this.Variables == null {
+			return false
+		}
+		_, ok := this.Variables[v]
+		return ok
+	}
+
+	fn ClosureFunctionExist(v *Function) bool {
+		if this.Functions == null {
+			return false
+		}
+		_, ok := this.Functions[v]
+		return ok
+	}
+
+	fn CaptureCount(f *Function) int {
+		sum := len(this.Variables)
+		for v, _ := range this.Functions {
+			if f == v {
+				continue
+			}
+			if v.IsClosureFunction {
+				sum++
+			}
+		}
+		return sum
+	}
+
+	fn InsertVar(pos Pos, v *Variable) {
+		if this.Variables == null {
+			this.Variables = make(map[*Variable]*ClosureMeta)
+		}
+		this.Variables[v] = &ClosureMeta{
+			pos: pos,
+		}
+	}
+
+	fn InsertFunction(pos Pos, f *Function) {
+		if this == null {
+			panic(".........")
+		}
+		if this.Functions == null {
+			this.Functions = make(map[*Function]*ClosureMeta)
+		}
+		this.Functions[f] = &ClosureMeta{
+			pos: pos,
+		}
+	}
+
+	fn Search(name string) Object {
+		for f, _ := range this.Functions {
+			if f.Name == name {
+				return f
+			}
+		}
+		return null
+	}
+}
+
+
+

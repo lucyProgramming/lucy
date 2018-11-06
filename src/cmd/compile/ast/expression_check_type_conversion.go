@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-func (this *Expression) checkTypeConversionExpression(block *Block, errs *[]error) *Type {
-	conversion := this.Data.(*ExpressionTypeConversion)
+func (e *Expression) checkTypeConversionExpression(block *Block, errs *[]error) *Type {
+	conversion := e.Data.(*ExpressionTypeConversion)
 	on, es := conversion.Expression.checkSingleValueContextExpression(block)
 	*errs = append(*errs, es...)
 	if on == nil {
@@ -21,14 +21,14 @@ func (this *Expression) checkTypeConversionExpression(block *Block, errs *[]erro
 		return nil
 	}
 	ret := conversion.Type.Clone()
-	ret.Pos = this.Pos
+	ret.Pos = e.Pos
 	if on.IsNumber() && conversion.Type.IsNumber() {
 		if conversion.Expression.isLiteral() {
 			conversion.Expression.convertToNumberType(conversion.Type.Type)
 			//rewrite
-			pos := this.Pos
-			*this = *conversion.Expression
-			this.Pos = pos // keep pos
+			pos := e.Pos
+			*e = *conversion.Expression
+			e.Pos = pos // keep pos
 		}
 		return ret
 	}

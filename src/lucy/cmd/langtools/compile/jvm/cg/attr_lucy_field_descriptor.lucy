@@ -1,26 +1,31 @@
+import "lucy/binary"
  
-
-import "encoding/binary"
 
 class AttributeLucyFieldDescriptor {
 	Descriptor       string
-	MethodAccessFlag uint16
+	MethodAccessFlag char
 
-	fn FromBs(class Class, bs []byte) {
+	fn FromBs(c Class, bs []byte) {
 		if len(bs) != 4 {
 			panic("length is not 4")
 		}
-		this.Descriptor = string(class.ConstPool[binary.BigEndian.Uint16(bs[0:2])].Info)
-		this.MethodAccessFlag = binary.BigEndian.Uint16(bs[2:4])
+		this.Descriptor = string(c.ConstPool[binary.BigEndian.getChar(bs[0:2])].Info)
+		this.MethodAccessFlag = binary.BigEndian.getChar(bs[2:4])
 	}
 
-	fn ToAttributeInfo(class Class) -> (ret AttributeInfo)  {
-		ret := new AttributeInfo()
-		ret.NameIndex = class.InsertUtf8Const(AttributeNameLucyFieldDescriptor)
-		ret.Info = make([]byte, 4)
+	fn AttributeLucyFieldDescriptor(Descriptor string , MethodAccessFlag char){
+		this.super()
+		this.Descriptor = Descriptor
+		this.MethodAccessFlag = MethodAccessFlag
+	}
+
+	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
+		ret = new AttributeInfo()
+		ret.NameIndex = c.InsertUtf8Const(AttributeNameLucyFieldDescriptor)
+		ret.Info = new []byte(4)
 		ret.attributeLength = 4
-		binary.BigEndian.PutUint16(ret.Info, class.InsertUtf8Const(this.Descriptor))
-		binary.BigEndian.PutUint16(ret.Info[2:], this.MethodAccessFlag)
+		binary.BigEndian.putChar(ret.Info, c.InsertUtf8Const(this.Descriptor))
+		binary.BigEndian.putChar(ret.Info[2:], this.MethodAccessFlag)
 		return ret
 	}
 }

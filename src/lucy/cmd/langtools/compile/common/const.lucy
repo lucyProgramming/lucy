@@ -1,0 +1,26 @@
+
+ 
+const	ArrayMethodSize               = "size"
+const	ArrayMethodCap                = "cap"
+const	ArrayMethodStart              = "start"
+const	ArrayMethodEnd                = "end"
+const	ArrayMethodGetUnderlyingArray = "getUnderlyingArray"
+const	ArrayMethodAppend             = "append"
+const	ArrayMethodAppendAll          = "appendAll"
+	// map
+const	MapMethodRemove    = "remove"
+const	MapMethodRemoveAll = "removeAll"
+const	MapMethodKeyExist  = "keyExist"
+const	MapMethodSize      = "size"
+	// buildIn function
+const	BuildInFunctionPanic        = "panic"
+const	BuildInFunctionCatch        = "catch"
+const	BuildInFunctionPrint        = "print"
+const	BuildInFunctionPrintf       = "printf"
+const	BuildInFunctionSprintf      = "sprintf"
+const	BuildInFunctionLen          = "len"
+const	BuildInFunctionMonitorEnter = "monitorEnter"
+const	BuildInFunctionMonitorExit  = "monitorExit"
+const	BuildInFunctionBlockHole    = "blackHole"
+const	BuildInFunctionAssert       = "assert"
+ 
