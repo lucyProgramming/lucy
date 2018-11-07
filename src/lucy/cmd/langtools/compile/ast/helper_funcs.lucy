@@ -4,13 +4,12 @@ func divisionByZeroErr(pos Pos) error {
 	return fmt.Errorf("%s division by zero", pos.ErrMsgPrefix())
 }
 
-func checkExpressions(block *Block, es []*Expression, errs *[]error, singleValueContext bool) []*Type {
-	ret := []*Type{}
+fn checkExpressions(block Block, es []Expression, errs []error, singleValueContext bool) -> (valueTypes []Type = []Type{}) {
 	for _, v := range es {
 		ts, es := v.check(block)
-		*errs = append(*errs, es...)
+		errs.appendAll(es)
 		if ts == null {
-			ret = append(ret, null)
+			valueTypes.append(null)
 		} else {
 			if len(ts) > 1 && singleValueContext {
 				*errs = append(*errs, fmt.Errorf("%s multi value in single value context",
@@ -21,16 +20,15 @@ func checkExpressions(block *Block, es []*Expression, errs *[]error, singleValue
 					continue
 				}
 				if err := t.rightValueValid(); err != null {
-					*errs = append(*errs, err)
+					errs.append(err)
 				}
 			}
-			ret = append(ret, ts...)
+			valueTypes.appendAll(ts)
 		}
 	}
-	return ret
 }
 
-func getExtraExpressionPos(args []*Expression, n int) Pos {
+fn getExtraExpressionPos(args []Expression, n int) -> (pos Pos) {
 	i := 0
 	for _, a := range args {
 		if a.HaveMultiValue() {
@@ -45,7 +43,7 @@ func getExtraExpressionPos(args []*Expression, n int) Pos {
 	return null
 }
 
-func mkVoidType(pos Pos) *Type {
+fn mkVoidType(pos Pos) -> (voidType Type) {
 	result := &Type{}
 	result.Type = VariableTypeVoid // means no return;
 	result.Pos = pos
@@ -55,7 +53,7 @@ func mkVoidType(pos Pos) *Type {
 /*
 	when access from global,should check if access from package
 */
-func shouldAccessFromImports(name string, from Pos, alreadyHave Pos) (*Import, bool) {
+fn shouldAccessFromImports(name string, from Pos, alreadyHave Pos) -> (i Import, should bool) {
 	//fmt.Println(name, from, alreadyHave)
 	// different file
 	// should access from import
@@ -78,14 +76,14 @@ func shouldAccessFromImports(name string, from Pos, alreadyHave Pos) (*Import, b
 		from
 		alreadyHave
 	*/
-	should := from.Line < alreadyHave.Line
+	should = from.Line < alreadyHave.Line
 	if should {
 		i.Used = true
 	}
 	return i, should
 }
 
-func methodsNotMatchError(pos Pos, name string, ms []*ClassMethod, want []*Type) error {
+fn methodsNotMatchError(pos Pos, name string, ms []ClassMethod, want []Type) ->(err error)  {
 	if len(ms) == 0 {
 		return fmt.Errorf("%s method '%s' not found", pos.ErrMsgPrefix(), name)
 	}
@@ -115,7 +113,7 @@ func methodsNotMatchError(pos Pos, name string, ms []*ClassMethod, want []*Type)
 	return fmt.Errorf(errMsg)
 }
 
-func searchBuildIns(name string) interface{} {
+fn searchBuildIns(name string) ->(x Object) {
 	var t interface{}
 	var ok bool
 	t, ok = buildInFunctionsMap[name]
@@ -134,7 +132,7 @@ func searchBuildIns(name string) interface{} {
 	return null
 }
 
-func checkConst(block *Block, c *Constant) error {
+fn checkConst(block *Block, c *Constant) error {
 	if c.Type != null {
 		c.mkDefaultValue()
 	}
@@ -172,10 +170,10 @@ func checkConst(block *Block, c *Constant) error {
 	return null
 }
 
-func convertExpressionToNeed(e *Expression, need *Type, eval *Type) {
+fn convertExpressionToNeed(e *Expression, need *Type, eval *Type) {
 	convertExpressionsToNeeds([]*Expression{e}, []*Type{need}, []*Type{eval})
 }
-func convertExpressionsToNeeds(es []*Expression, needs []*Type, eval []*Type) {
+fn convertExpressionsToNeeds(es []*Expression, needs []*Type, eval []*Type) {
 	errs := []error{} // no return
 	if len(es) == 0 {
 		return
@@ -209,30 +207,8 @@ func convertExpressionsToNeeds(es []*Expression, needs []*Type, eval []*Type) {
 }
 
 // check out package name is valid or not
-func PackageNameIsValid(name string) bool {
-	if strings.HasPrefix(name, `/`) || strings.HasSuffix(name, `/`) {
-		return false
-	}
-	t := strings.Split(name, `/`)
-	if len(t) == 1 {
-		return true
-	}
-	for _, v := range t {
-		allOK := true
-		for _, vv := range []byte(v) {
-			if (vv >= '0' && vv <= '9') ||
-				(vv >= 'a' && vv <= 'z') ||
-				(vv >= 'A' && vv <= 'Z') ||
-				vv == '$' ||
-				vv == '_' {
-			} else {
-				allOK = false
-				break
-			}
-		}
-		if allOK == false {
-			return false
-		}
-	}
-	return true
+fn PackageNameIsValid(name string) ->(ok bool) {
+	ok = true
+	return 
+	//TODO :: check 
 }

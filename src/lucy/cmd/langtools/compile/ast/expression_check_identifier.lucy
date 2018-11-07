@@ -1,172 +1,171 @@
-package ast
 
-import (
-	"fmt"
-	"time"
-)
+class ExpressionCheckIdentifier {
 
-func (e *Expression) checkIdentifierExpression(block *Block) (*Type, error) {
-	identifier := e.Data.(*ExpressionIdentifier)
-	if identifier.Name == UnderScore {
-		//_ is not valid
-		return null, fmt.Errorf("%s '%s' is not a valid name",
-			e.Pos.ErrMsgPrefix(), identifier.Name)
-	}
-	//handle magic identifier
-	switch identifier.Name {
-	case magicIdentifierFile:
-		e.Type = ExpressionTypeString
-		e.Data = e.Pos.Filename
-		result, _ := e.checkSingleValueContextExpression(block)
-		return result, null
-	case magicIdentifierLine:
-		e.Type = ExpressionTypeInt
-		e.Data = int64(e.Pos.Line)
-		result, _ := e.checkSingleValueContextExpression(block)
-		return result, null
-	case magicIdentifierTime:
-		e.Type = ExpressionTypeLong
-		e.Data = int64(time.Now().UnixNano())
-		result, _ := e.checkSingleValueContextExpression(block)
-		return result, null
-	case magicIdentifierClass:
-		if block.InheritedAttribute.Class == null {
-			return null,
-				fmt.Errorf("%s '%s' must in class scope", e.Pos.ErrMsgPrefix(), identifier.Name)
+	static fn check(e Expresssion , block Block) -> (valueType Type,err  error) {
+		identifier := e.Data.(ExpressionIdentifier)
+		if identifier.Name == UnderScore {
+			//_ is not valid
+			return null, new error(sprintf("%s '%s' is not a valid name",
+				e.Pos.ErrMsgPrefix(), identifier.Name))
 		}
-		result := &Type{}
-		result.Type = VariableTypeClass
-		result.Pos = e.Pos
-		result.Class = block.InheritedAttribute.Class
-		return result, null
-	case magicIdentifierFunction:
-		if block.InheritedAttribute.Function.isPackageInitBlockFunction {
-			return null, fmt.Errorf("%s '%s' must in function scope", e.Pos.ErrMsgPrefix(), identifier.Name)
+		//handle magic identifier
+		switch identifier.Name {
+		case magicIdentifierFile:
+			e.Type = ExpressionTypeString
+			e.Data = e.Pos.Filename
+			result, _ := e.checkSingleValueContextExpression(block)
+			return result, null
+		case magicIdentifierLine:
+			e.Type = ExpressionTypeInt
+			e.Data = int64(e.Pos.Line)
+			result, _ := e.checkSingleValueContextExpression(block)
+			return result, null
+		case magicIdentifierTime:
+			e.Type = ExpressionTypeLong
+			e.Data = int64(time.Now().UnixNano())
+			result, _ := e.checkSingleValueContextExpression(block)
+			return result, null
+		case magicIdentifierClass:
+			if block.InheritedAttribute.Class == null {
+				return null,
+					new error(sprintf("%s '%s' must in class scope", e.Pos.ErrMsgPrefix(), identifier.Name))
+			}
+			result := new Type()
+			result.Type = VariableTypeClass
+			result.Pos = e.Pos
+			result.Class = block.InheritedAttribute.Class
+			return result, null
+		case magicIdentifierFunction:
+			if block.InheritedAttribute.Function.isPackageInitBlockFunction {
+				return null,new error(sprintf("%s '%s' must in function scope", e.Pos.ErrMsgPrefix(), identifier.Name))
+			}
+			result := new Type()
+			result.Type = VariableTypeMagicFunction
+			result.Pos = e.Pos
+			result.Function = block.InheritedAttribute.Function
+			return result, null
 		}
-		result := &Type{}
-		result.Type = VariableTypeMagicFunction
-		result.Pos = e.Pos
-		result.Function = block.InheritedAttribute.Function
-		return result, null
-	}
-	isCaptureVar := false
-	d, err := block.searchIdentifier(e.Pos, identifier.Name, &isCaptureVar)
-	if err != null {
-		return null, err
-	}
-	if d == null {
-		i := PackageBeenCompile.getImport(e.Pos.Filename, identifier.Name)
-		if i != null {
-			i.Used = true
-			return e.checkIdentifierThroughImports(i)
+		isCaptureVar := [false]
+		d, err := block.searchIdentifier(e.Pos, identifier.Name, isCaptureVar)
+		if err != null {
+			return null, err
 		}
-	}
-	if d == null {
-		return null, fmt.Errorf("%s '%s' not found", e.Pos.ErrMsgPrefix(), identifier.Name)
-	}
-	switch d.(type) {
-	case *Function:
-		f := d.(*Function)
-		if f.IsGlobalMain() {
-			// not allow
-			return null, fmt.Errorf("%s fucntion is global main", errMsgPrefix(e.Pos))
-		}
-		if f.IsBuildIn {
-			return null, fmt.Errorf("%s fucntion '%s' is buildin",
-				e.Pos.ErrMsgPrefix(), f.Name)
-		}
-		if f.TemplateFunction != null {
-			return null, fmt.Errorf("%s fucntion '%s' a template function",
-				e.Pos.ErrMsgPrefix(), f.Name)
-		}
-		// try from import
-		if f.IsBuildIn == false {
-			i, should := shouldAccessFromImports(identifier.Name, e.Pos, f.Pos)
-			if should {
+		if d == null {
+			i := PackageBeenCompile.getImport(e.Pos.Filename, identifier.Name)
+			if i != null {
+				i.Used = true
 				return e.checkIdentifierThroughImports(i)
 			}
 		}
-		result := &Type{}
-		result.Type = VariableTypeFunction
-		result.FunctionType = &f.Type
-		result.Pos = e.Pos
-		identifier.Function = f
-		return result, null
-	case *Variable:
-		t := d.(*Variable)
-		if t.IsBuildIn == false { // try from import
-			i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
-			if should {
-				return e.checkIdentifierThroughImports(i)
-			}
+		if d == null {
+			return null, new error(sprintf("%s '%s' not found", e.Pos.ErrMsgPrefix(), identifier.Name))
 		}
-		if isCaptureVar {
-			t.BeenCapturedAsRightValue++
-		}
-		t.Used = true
-		result := t.Type.Clone()
-		result.Pos = e.Pos
-		identifier.Variable = t
-		return result, null
-	case *Constant:
-		t := d.(*Constant)
-		if t.IsBuildIn == false { // try from import
-			i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
-			if should {
-				return e.checkIdentifierThroughImports(i)
-			}
-		}
-		t.Used = true
-		e.fromConst(t)
-		result := t.Type.Clone()
-		result.Pos = e.Pos
-		return result, null
-	case *Class:
-		c := d.(*Class)
-		if c.IsBuildIn == false { // try from import
-			i, should := shouldAccessFromImports(identifier.Name, e.Pos, c.Pos)
-			if should {
-				return e.checkIdentifierThroughImports(i)
-			}
-		}
-		result := &Type{}
-		result.Type = VariableTypeClass
-		result.Pos = e.Pos
-		result.Class = c
-		return result, null
-	case *EnumName:
-		enumName := d.(*EnumName)
-		if enumName.Enum.IsBuildIn == false { // try from import
-			i, should := shouldAccessFromImports(identifier.Name, e.Pos, enumName.Pos)
-			if should {
-				return e.checkIdentifierThroughImports(i)
-			}
-		}
-		result := &Type{}
-		result.Pos = enumName.Pos
-		result.Type = VariableTypeEnum
-		result.EnumName = enumName
-		result.Enum = enumName.Enum
-		identifier.EnumName = enumName
-		return result, null
-	}
-	return null, fmt.Errorf("%s identifier '%s' is not a expression , but '%s'",
-		e.Pos.ErrMsgPrefix(), identifier.Name, block.identifierIsWhat(d))
-}
 
-func (e *Expression) checkIdentifierThroughImports(it *Import) (*Type, error) {
-	p, err := PackageBeenCompile.load(it.Import)
-	if err != null {
-		return null, fmt.Errorf("%s %v", e.Pos.ErrMsgPrefix(), err)
+		if f := d.(Function) ;f != null {
+			f := d.(*Function)
+			if f.IsGlobalMain() {
+				// not allow
+				return null, new error(sprintf("%s fucntion is global main", errMsgPrefix(e.Pos)))
+			}
+			if f.IsBuildIn {
+				return null, new error(sprintf("%s fucntion '%s' is buildin",
+					e.Pos.ErrMsgPrefix(), f.Name))
+			}
+			if f.TemplateFunction != null {
+				return null, new error(sprintf("%s fucntion '%s' a template function",
+					e.Pos.ErrMsgPrefix(), f.Name))
+			}
+			// try from import
+			if f.IsBuildIn == false {
+				i, should := shouldAccessFromImports(identifier.Name, e.Pos, f.Pos)
+				if should {
+					return e.checkIdentifierThroughImports(i)
+				}
+			}
+			result := new Type()
+			result.Type = VariableTypeFunction
+			result.FunctionType = &f.Type
+			result.Pos = e.Pos
+			identifier.Function = f
+			return result, null
+		}
+		if t := d.(Variable) ;t != null {
+			if t.IsBuildIn == false { // try from import
+				i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
+				if should {
+					return e.checkIdentifierThroughImports(i)
+				}
+			}
+			if isCaptureVar {
+				t.BeenCapturedAsRightValue++
+			}
+			t.Used = true
+			result := t.Type.Clone()
+			result.Pos = e.Pos
+			identifier.Variable = t
+			return result, null
+		}
+		if t := d.(Constant) ;t != null {
+			if t.IsBuildIn == false { // try from import
+				i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
+				if should {
+					return e.checkIdentifierThroughImports(i)
+				}
+			}
+			t.Used = true
+			e.fromConst(t)
+			result := t.Type.Clone()
+			result.Pos = e.Pos
+			return result, null
+		}
+		if c := d.(Class) ; c != null {
+			if c.IsBuildIn == false { // try from import
+				i, should := shouldAccessFromImports(identifier.Name, e.Pos, c.Pos)
+				if should {
+					return e.checkIdentifierThroughImports(i)
+				}
+			}
+			result := &Type{}
+			result.Type = VariableTypeClass
+			result.Pos = e.Pos
+			result.Class = c
+			return result, null
+		}
+		if enumName := d.(EnumName) ; enumName != null {
+			if enumName.Enum.IsBuildIn == false { // try from import
+				i, should := shouldAccessFromImports(identifier.Name, e.Pos, enumName.Pos)
+				if should {
+					return e.checkIdentifierThroughImports(i)
+				}
+			}
+			result := &Type{}
+			result.Pos = enumName.Pos
+			result.Type = VariableTypeEnum
+			result.EnumName = enumName
+			result.Enum = enumName.Enum
+			identifier.EnumName = enumName
+			return result, null
+		}
+		err = new error(sprintf("%s identifier '%s' is not a expression , but '%s'",
+			e.Pos.ErrMsgPrefix(), identifier.Name, block.identifierIsWhat(d)))
 	}
-	result := &Type{}
-	result.Pos = e.Pos
-	if pp, ok := p.(*Package); ok {
-		result.Package = pp
-		result.Type = VariableTypePackage
-	} else {
-		result.Class = p.(*Class)
-		result.Type = VariableTypeClass
+	
+	static fn checkIdentifierThroughImports(it Import) -> (valueType Type,err  error) {
+		p, err := PackageBeenCompile.load(it.Import)
+		if err != nul	l {
+			return null, new error(sprintf("%s %s", e.Pos.ErrMsgPrefix(), err.getMessage()))
+		}
+		valueType = new Type()
+		valueType.Pos = e.Pos
+		if pp, ok := p.(*Package); ok {
+			valueType.Package = pp
+			valueType.Type = VariableTypePackage
+		} else {
+			valueType.Class = p.(*Class)
+			valueType.Type = VariableTypeClass
+		}
 	}
-	return result, null
-}
+} 
+
+
+

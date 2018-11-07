@@ -1,9 +1,10 @@
- 
-type InheritedAttribute struct {
+import "java/lang/Object"
+
+class InheritedAttribute {
 	StatementOffset       int // should not inherite
 	IsConstructionMethod  bool
 	ForContinue           StatementFor // if this statement is in for or not
-	ForBreak              interface{}   // for or switch statement
+	ForBreak              Object
 	Function              Function
 	Class                 Class
 	Defer                 StatementDefer

@@ -1,6 +1,6 @@
  
 
-class Variable {
+public class Variable {
 	IsBuildIn                bool
 	IsGlobal                 bool
 	IsFunctionParameter      bool
@@ -10,9 +10,9 @@ class Variable {
 	Used                     bool   // use as right value
 	AccessFlags              uint16 // public private or protected
 	Pos                      Pos
-	DefaultValueExpression   *Expression
+	DefaultValueExpression   Expression
 	Name                     string
-	Type                     *Type
+	Type                     Type
 	LocalValOffset           uint16 // offset in stack frame
 	JvmDescriptor            string // jvm
 	Comment                  string

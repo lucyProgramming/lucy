@@ -1,6 +1,6 @@
  
 
-type Package struct {
+class Package {
 	Name                         string
 	LoadedPackages               map[string]*Package
 	loadedClasses                map[string]*Class
@@ -11,11 +11,11 @@ type Package struct {
 	errors                       []error
 	TriggerPackageInitMethodName string //
 	unUsedPackage                map[string]*Import
-	statementLevelFunctions      []*Function
-	statementLevelClass          []*Class
+	statementLevelFunctions      []Function
+	statementLevelClass          []Class
 }
 
-func (this *Package) isSame(compare *Package) bool {
+func (this *Package) isSame(compare Package) bool {
 	return this.Name == compare.Name
 }
 
@@ -94,7 +94,7 @@ func (this *Package) TypeCheck() []error {
 		this.errors = append(this.errors, v.check()...)
 	}
 	for _, v := range this.Block.TypeAliases {
-		err := v.resolve(&PackageBeenCompile.Block)
+		err := v.resolve(PackageBeenCompile.Block)
 		if err != null {
 			this.errors = append(this.errors, err)
 		}
@@ -248,8 +248,8 @@ func (this *Package) checkUnUsedPackage() []error {
 	for _, i := range this.unUsedPackage {
 		pp, err := this.load(i.Import)
 		if err != null {
-			errs = append(errs, fmt.Errorf("%s %v",
-				errMsgPrefix(i.Pos), err))
+			errs = append(errs, fmt.Errorf("%s %s",
+				errMsgPrefix(i.Pos), err.getMessage()))
 			continue
 		}
 		if ppp, ok := pp.(*Package); ok == false {

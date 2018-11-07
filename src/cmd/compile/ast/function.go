@@ -24,7 +24,6 @@ type Function struct {
 	Closure                          Closure
 	Name                             string // if name is nil string,means no name function
 	Block                            Block
-	Function                         *Function
 	Pos                              *Pos
 	JvmDescriptor                    string
 	ClosureVariableOffSet            uint16 // for closure

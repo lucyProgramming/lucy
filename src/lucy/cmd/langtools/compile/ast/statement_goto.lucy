@@ -1,32 +1,34 @@
  
 
-type StatementGoTo struct {
-	Defers         []*StatementDefer
+class StatementGoTo {
+	Defers         []StatementDefer
 	LabelName      string
-	StatementLabel *StatementLabel
+	StatementLabel StatementLabel
 	Pos            Pos
-}
-
-func (this *StatementGoTo) checkStatementGoTo(b *Block) error {
-	label := b.searchLabel(this.LabelName)
-	if label == null {
-		return fmt.Errorf("%s label named '%s' not found",
-			this.Pos.ErrMsgPrefix(), this.LabelName)
-	}
-	this.StatementLabel = label
-	this.mkDefers(b)
-	return this.StatementLabel.Ready(this.Pos)
-}
-
-func (this *StatementGoTo) mkDefers(currentBlock *Block) {
-	bs := []*Block{}
-	for this.StatementLabel.Block != currentBlock {
-		bs = append(bs, currentBlock)
-		currentBlock = currentBlock.Outer
-	}
-	for _, b := range bs {
-		if b.Defers != null {
-			this.Defers = append(this.Defers, b.Defers...)
+	fn checkStatementGoTo(b Block) -> (err error) {
+		label := b.searchLabel(this.LabelName)
+		if label == null {
+			return new error(sprintf("%s label named '%s' not found",
+				this.Pos.ErrMsgPrefix(), this.LabelName))
 		}
+		this.StatementLabel = label
+		this.Defers = []StatementDefer{}
+		this.mkDefers(b)
+		return this.StatementLabel.Ready(this.Pos)
 	}
+
+	fn mkDefers(currentBlock Block) {
+		bs := []Block{}
+		for this.StatementLabel.Block != currentBlock {
+			bs = append(bs, currentBlock)
+			currentBlock = currentBlock.Outer
+		}
+		for _, b := range bs {
+			if b.Defers != null {
+				this.Defers = append(this.Defers, b.Defers...)
+			}
+		}
+	}	
 }
+
+

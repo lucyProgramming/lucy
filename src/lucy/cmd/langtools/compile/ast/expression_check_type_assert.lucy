@@ -1,48 +1,46 @@
  
-/*
-	in array type must equal
-*/
-func (e *Expression) checkTypeAssert(block *Block, errs *[]error) []*Type {
-	assert := e.Data.(*ExpressionTypeAssert)
-	object, es := assert.Expression.checkSingleValueContextExpression(block)
-	*errs = append(*errs, es...)
-	if object == null {
-		return null
+class ExpressionCheckTypeAssert {
+	
+	
+	static fn checkTypeAssert(e Expression , block Block, errs []error) -> (valueTypes []Type) {
+		assert := e.Data.(ExpressionTypeAssert)
+		object, es := assert.Expression.checkSingleValueContextExpression(block)
+		errs.appendAll(es)
+		if object == null {
+			return null
+		}
+		if err := object.rightValueValid(); err != null {
+			errs.append(err)
+			return null
+		}
+		if object.IsPointer() == false {
+			errs . append(new error( sprintf("%s expression is not pointer",
+					errMsgPrefix(object.Pos))))
+			return null
+		}
+		err := assert.Type.resolve(block)
+		if err != null {
+			errs.append(err)
+			return null
+		}
+		if assert.Type.validForTypeAssertOrConversion() == false {
+			errs . append(new error( sprintf("%s cannot use '%s' for type assertion",
+					errMsgPrefix(assert.Type.Pos), assert.Type.TypeString())))
+			return null
+		}
+		if len(e.Lefts) > 1 {
+			assert.MultiValueContext = true
+			valueTypes = new []Type(2)
+			valueTypes[0] = assert.Type.Clone()
+			valueTypes[0].Pos = e.Pos
+			valueTypes[1] = new Type()
+			valueTypes[1].Pos = e.Pos
+			valueTypes[1].Type = VariableTypeBool // if  assert is ok
+		} else {
+			valueTypes = new []Type(1)
+			valueTypes[0] = assert.Type.Clone()
+			valueTypes[0].Pos = e.Pos
+		}
 	}
-	if err := object.rightValueValid(); err != null {
-		*errs = append(*errs, err)
-		return null
-	}
-	if object.IsPointer() == false {
-		*errs = append(*errs,
-			fmt.Errorf("%s expression is not pointer",
-				errMsgPrefix(object.Pos)))
-		return null
-	}
-	err := assert.Type.resolve(block)
-	if err != null {
-		*errs = append(*errs, err)
-		return null
-	}
-	if assert.Type.validForTypeAssertOrConversion() == false {
-		*errs = append(*errs,
-			fmt.Errorf("%s cannot use '%s' for type assertion",
-				errMsgPrefix(assert.Type.Pos), assert.Type.TypeString()))
-		return null
-	}
-	var result []*Type
-	if len(e.Lefts) > 1 {
-		assert.MultiValueContext = true
-		result = make([]*Type, 2)
-		result[0] = assert.Type.Clone()
-		result[0].Pos = e.Pos
-		result[1] = &Type{}
-		result[1].Pos = e.Pos
-		result[1].Type = VariableTypeBool // if  assert is ok
-	} else {
-		result = make([]*Type, 1)
-		result[0] = assert.Type.Clone()
-		result[0].Pos = e.Pos
-	}
-	return result
 }
+

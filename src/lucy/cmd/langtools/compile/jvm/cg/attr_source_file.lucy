@@ -15,6 +15,5 @@ class AttributeSourceFile {
 		binary.BigEndian.putChar(ret.Info, c.InsertUtf8Const(this.file))
 		return ret
 	}
-
 }
 

@@ -1,66 +1,66 @@
-package ast
 
-import (
-	"fmt"
-)
 
-/*
-	in array type must equal
-*/
-func (e *Expression) checkArray(block *Block, errs *[]error) *Type {
-	arr := e.Data.(*ExpressionArray)
-	if arr.Type == null && len(arr.Expressions) == 0 {
-		*errs = append(*errs,
-			fmt.Errorf("%s array literal has no type and no expression, cannot inference it`s type ",
-				errMsgPrefix(e.Pos)))
-		return null
-	}
-	var noType = true
-	if arr.Type != null {
-		noType = false
-		err := arr.Type.resolve(block)
-		if err != null {
-			*errs = append(*errs, err)
+
+class ExprssionCheckArray {
+	 
+	/*
+		in array type must equal
+	*/
+	static fn check(e Expression , block Block, errs []error) ->(valueType Type)  {
+		arr := e.Data.(ExpressionArray)
+		if arr.Type == null && len(arr.Expressions) == 0 {
+			errs.append(new error(sprintf("%s array literal has no type and no expression, cannot inference it`s type ",
+					errMsgPrefix(e.Pos))))
 			return null
 		}
-	}
-	for _, v := range arr.Expressions {
-		eType, es := v.checkSingleValueContextExpression(block)
-		*errs = append(*errs, es...)
-		if eType == null {
-			continue
-		}
-		if arr.Type != null &&
-			noType == false {
-			convertExpressionToNeed(v, arr.Type.Array, eType)
-			eType = v.Value
-		}
-		if noType && arr.Type == null {
-			if err := eType.isTyped(); err == null {
-				arr.Type = &Type{}
-				arr.Type.Type = VariableTypeArray
-				arr.Type.Array = eType.Clone()
-				arr.Type.Pos = e.Pos
-			} else {
-				*errs = append(*errs, err)
+		var noType = true
+		if arr.Type != null {
+			noType = false
+			err := arr.Type.resolve(block)
+			if err != null {
+				errs.append(err)
+				return null
 			}
 		}
-		if arr.Type != null {
-			if arr.Type.Array.assignAble(errs, eType) == false {
-				if noType {
-					*errs = append(*errs, fmt.Errorf("%s array literal mix up '%s' and '%s'",
-						errMsgPrefix(eType.Pos), arr.Type.Array.TypeString(), eType.TypeString()))
+		for _, v := range arr.Expressions {
+			eType, es := v.checkSingleValueContextExpression(block)
+			errs.appendAll(es)
+			if eType == null {
+				continue
+			}
+			if arr.Type != null &&
+				noType == false {
+				convertExpressionToNeed(v, arr.Type.Array, eType)
+				eType = v.Value
+			}
+			if noType && arr.Type == null {
+				if err := eType.isTyped(); err == null {
+					arr.Type = &Type{}
+					arr.Type.Type = VariableTypeArray
+					arr.Type.Array = eType.Clone()
+					arr.Type.Pos = e.Pos
 				} else {
-					*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-						errMsgPrefix(eType.Pos), eType.TypeString(), arr.Type.Array.TypeString()))
+					errs.append(err)
+				}
+			}
+			if arr.Type != null {
+				if arr.Type.Array.assignAble(errs, eType) == false {
+					if noType {
+						errs.append(new error(sprintf("%s array literal mix up '%s' and '%s'",
+							errMsgPrefix(eType.Pos), arr.Type.Array.TypeString(), eType.TypeString())))
+					} else {
+						errs.append(new error( sprintf("%s cannot use '%s' as '%s'",
+							errMsgPrefix(eType.Pos), eType.TypeString(), arr.Type.Array.TypeString())))
+					}
 				}
 			}
 		}
+		if arr.Type == null {
+			return null
+		}
+		valueType = arr.Type.Clone()
+		valueType.Pos = e.Pos
 	}
-	if arr.Type == null {
-		return null
-	}
-	result := arr.Type.Clone()
-	result.Pos = e.Pos
-	return result
-}
+} 
+
+

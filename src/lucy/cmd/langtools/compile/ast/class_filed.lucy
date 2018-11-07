@@ -1,58 +1,34 @@
  
 
-type ClassField struct {
-	Class                  *Class
-	DefaultValueExpression *Expression
+class ClassField {
+	Class                  Class
+	DefaultValueExpression Expression
 	Name                   string
-	Type                   *Type
+	Type                   Type
 	Pos                    Pos
 	Comment                string
 	AccessFlags            uint16
 	JvmDescriptor          string      // jvm
-	DefaultValue           interface{} // value base on type
+	DefaultValue           Object // value base on type
+	
+	fn IsStatic() ->(is bool) {
+		return (f.AccessFlags & cg.AccFieldStatic) != 0
+	}
+	fn IsPublic() ->(is bool) {
+		return (f.AccessFlags & cg.AccFieldPublic) != 0
+	}
+	fn IsProtected() ->(is bool) {
+		return (f.AccessFlags & cg.AccFieldProtected) != 0
+	}
+	fn IsPrivate() ->(is bool) {
+		return (f.AccessFlags & cg.AccFieldPrivate) != 0
+	}
+	fn ableAccessFromSubClass() ->(accessable bool) {
+		return f.IsPublic() ||
+			f.IsProtected()
+	}
+
+	
 }
 
-func (f *ClassField) IsStatic() bool {
-	return (f.AccessFlags & cg.AccFieldStatic) != 0
-}
-func (f *ClassField) IsPublic() bool {
-	return (f.AccessFlags & cg.AccFieldPublic) != 0
-}
-func (f *ClassField) IsProtected() bool {
-	return (f.AccessFlags & cg.AccFieldProtected) != 0
-}
-func (f *ClassField) IsPrivate() bool {
-	return (f.AccessFlags & cg.AccFieldPrivate) != 0
-}
-func (f *ClassField) ableAccessFromSubClass() bool {
-	return f.IsPublic() ||
-		f.IsProtected()
-}
 
-func (this *Class) getField(pos Pos, name string, fromSub bool) (*ClassField, error) {
-	err := this.loadSelf(pos)
-	if err != null {
-		return null, err
-	}
-	notFoundErr := fmt.Errorf("%s field named '%s' not found",
-		pos.ErrMsgPrefix(), name)
-	if this.Fields != null && null != this.Fields[name] {
-		if fromSub && this.Fields[name].ableAccessFromSubClass() == false {
-			// private field
-			return null, notFoundErr
-		} else {
-			return this.Fields[name], null
-		}
-	}
-	if this.Name == JavaRootClass { // root class
-		return null, notFoundErr
-	}
-	err = this.loadSuperClass(pos)
-	if err != null {
-		return null, err
-	}
-	if this.SuperClass == null {
-		return null, notFoundErr
-	}
-	return this.SuperClass.getField(pos, name, true)
-}

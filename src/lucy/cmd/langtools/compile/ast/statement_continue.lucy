@@ -5,7 +5,7 @@ class StatementContinue {
 	Defers       []StatementDefer
 	Pos          Pos
 	
-	fn check(block Block) []error {
+	fn check(block Block) -> (errs []error) {
 		if block.InheritedAttribute.ForContinue == null {
 			return []error{fmt.Errorf("%s 'continue' can`t in this scope",
 				this.Pos.ErrMsgPrefix())}
@@ -15,6 +15,7 @@ class StatementContinue {
 				this.Pos.ErrMsgPrefix())}
 		}
 		this.StatementFor = block.InheritedAttribute.ForContinue
+		this.Defers = []StatementDefer{}
 		this.mkDefers(block)
 		return null
 	}

@@ -3,27 +3,26 @@ class ClosureMeta {
 	pos Pos
 }
 
-class Closure {
+
+
+public class Closure {
 	Variables map{ Variable -> ClosureMeta }
-	Functions map{ Function -> ClosureMeta }
-	func (this *Closure) ClosureVariableExist(v *Variable) bool {
+	Functions map{ Function -> ClosureMeta }	
+	public fn ClosureVariableExist(v Variable) ->(exists bool) {
 		if this.Variables == null {
 			return false
 		}
-		_, ok := this.Variables[v]
-		return ok
+		return this.Variables.keyExist(v)
 	}
 
-	fn ClosureFunctionExist(v *Function) bool {
+	public fn ClosureFunctionExist(v Function)  ->(exists bool)  {
 		if this.Functions == null {
 			return false
 		}
-		_, ok := this.Functions[v]
-		return ok
+		return this.Functions.keyExist(v)
 	}
 
-	fn CaptureCount(f *Function) int {
-		sum := len(this.Variables)
+	fn CaptureCount(f Function) ->(sum int = len(this.Variables)) {
 		for v, _ := range this.Functions {
 			if f == v {
 				continue
@@ -35,28 +34,23 @@ class Closure {
 		return sum
 	}
 
-	fn InsertVar(pos Pos, v *Variable) {
+	fn InsertVar(pos Pos, v Variable) {
 		if this.Variables == null {
-			this.Variables = make(map[*Variable]*ClosureMeta)
+			this.Variables = new map{Variable->ClosureMeta}()
 		}
-		this.Variables[v] = &ClosureMeta{
-			pos: pos,
-		}
+		this.Variables[v] = new ClosureMeta()
+		this.Variables[v].pos = pos
 	}
 
-	fn InsertFunction(pos Pos, f *Function) {
-		if this == null {
-			panic(".........")
-		}
+	fn InsertFunction(pos Pos, f Function) {
 		if this.Functions == null {
-			this.Functions = make(map[*Function]*ClosureMeta)
+			this.Functions = new map { Function -> ClosureMeta }()
 		}
-		this.Functions[f] = &ClosureMeta{
-			pos: pos,
-		}
+		this.Functions[f] = new ClosureMeta()
+		this.Functions[f].pos = pos 
 	}
 
-	fn Search(name string) Object {
+	fn Search(name string) -> ( x Object) {
 		for f, _ := range this.Functions {
 			if f.Name == name {
 				return f

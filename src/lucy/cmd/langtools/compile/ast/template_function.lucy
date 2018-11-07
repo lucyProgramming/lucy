@@ -1,43 +1,46 @@
  
-
-type TemplateFunction struct {
-	instances []*TemplateFunctionInstance
+class TemplateFunctionInstance  {
+	parameterTypes []Type
+	Entrance       cg.MethodHighLevel
+	Function       Function
 }
 
-type TemplateFunctionInstance struct {
-	parameterTypes []*Type
-	Entrance       *cg.MethodHighLevel
-	Function       *Function
-}
 
-func (this *TemplateFunction) instanceExists(parameterTypes []*Type) *TemplateFunctionInstance {
-	equal := func(instance *TemplateFunctionInstance) bool {
-		if len(instance.parameterTypes) != len(parameterTypes) {
-			return false
-		}
-		for k, tType := range parameterTypes {
-			if tType.Equal(instance.parameterTypes[k]) == false {
-				//not equal
+class TemplateFunction  {
+	instances []TemplateFunctionInstance
+
+	fn instanceExists(parameterTypes []Type) -> (instance TemplateFunctionInstance) {
+		fn equal(instance TemplateFunctionInstance) ->(isEqual bool) {
+			if len(instance.parameterTypes) != len(parameterTypes) {
 				return false
 			}
+			for k, tType := range parameterTypes {
+				if tType.Equal(instance.parameterTypes[k]) == false {
+					//not equal
+					return false
+				}
+			}
+			return true
 		}
-		return true
-	}
-	for _, v := range this.instances {
-		if equal(v) {
-			return v
+		for _, v := range this.instances {
+			if equal(v) {
+				return v
+			}
 		}
+		return null
 	}
-	return null
+
+	fn insert(parameterTypes []Type) -> (template TemplateFunctionInstance) {
+		if t := this.instanceExists(parameterTypes); t != null {
+			return t
+		}
+		ret := new TemplateFunctionInstance ()
+		ret.parameterTypes = parameterTypes 
+		this.instances = append(this.instances, ret)
+		return ret
+	}
+
 }
 
-func (this *TemplateFunction) insert(parameterTypes []*Type) *TemplateFunctionInstance {
-	if t := this.instanceExists(parameterTypes); t != null {
-		return t
-	}
-	ret := &TemplateFunctionInstance{
-		parameterTypes: parameterTypes,
-	}
-	this.instances = append(this.instances, ret)
-	return ret
-}
+
+

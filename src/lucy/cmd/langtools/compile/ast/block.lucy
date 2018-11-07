@@ -326,8 +326,7 @@ class Block {
         return es
     }
 
-    fn check()  -> (errs []error) {
-        errs := []error{}
+    fn check()  -> (errs []error = []error{}) {
         for k, s := range this.Statements {
             if s.isStaticFieldDefaultValue {
                 // no need to check
@@ -352,13 +351,13 @@ class Block {
         errs := new []error(0)
         for _, c := range this.Constants {
             if err := this.nameIsValid(c.Name, c.Pos); err != null {
-                errs = append(errs, err)
+                errs.append(err)
                 delete(this.Constants, c.Name)
                 continue
             }
             err := checkConst(this, c)
             if err != null {
-                errs = append(errs, err)
+                errs.append(err)
             }
             if err != null && c.Type == null {
                 delete(this.Constants, c.Name)

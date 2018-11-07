@@ -3,7 +3,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 	ev := e.Data.(*ExpressionVar)
 	if ev.Type != null {
 		if err := ev.Type.resolve(block); err != null {
-			*errs = append(*errs, err)
+			errs.append(err)
 			return
 		}
 		if len(ev.Variables) == 1 {
@@ -52,7 +52,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 							errMsgPrefix(valueTypes[k].Pos),
 							valueTypes[k].TypeString(),
 							v.Type.TypeString())
-						*errs = append(*errs, err)
+						errs.append(err)
 						continue
 					}
 				} else {
@@ -69,7 +69,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				err = block.Insert(v.Name, v.Pos, v)
 			}
 			if err != null {
-				*errs = append(*errs, err)
+				errs.append(err)
 				continue
 			}
 		}
@@ -82,7 +82,7 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 				err = block.Insert(v.Name, v.Pos, v)
 			}
 			if err != null {
-				*errs = append(*errs, err)
+				errs.append(err)
 				continue
 			}
 			ev.InitValues = append(ev.InitValues,

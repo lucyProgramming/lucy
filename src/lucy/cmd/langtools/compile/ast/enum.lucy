@@ -1,65 +1,63 @@
-package ast
+ 
+class EnumName {
+	Enum    Enum
+	Name    string
+	Pos     Pos
+	Value   int32 // int32 is bigger enough
+	Comment string
+	NoNeed  Expression
+}
 
-import (
-	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
-type Enum struct {
+class Enum   {
 	IsGlobal        bool
 	IsBuildIn       bool
 	AccessFlags     uint16
 	Name            string
 	Pos             Pos
-	Enums           []*EnumName
-	Init            *Expression //should be a int expression
+	Enums           []EnumName
+	Init            Expression //should be a int expression
 	Used            bool
 	DefaultValue    int32
 	LoadFromOutSide bool
 	FirstValueIndex int
 	Comment         string
-}
+	
+	fn isPublic() -> (is bool) {
+		return this.AccessFlags&cg.AccClassPublic != 0
+	}
 
-func (this *Enum) isPublic() bool {
-	return this.AccessFlags&cg.AccClassPublic != 0
-}
+	
 
-type EnumName struct {
-	Enum    *Enum
-	Name    string
-	Pos     Pos
-	Value   int32 // int32 is bigger enough
-	Comment string
-	NoNeed  *Expression
-}
-
-func (this *Enum) check() (errs []error) {
-	var initV int32 = 0
-	errs = []error{}
-	if this.Init != null {
-		if is, err := this.Init.constantFold(); err != null {
-			errs = append(errs, err)
-		} else {
-			if is == false {
-				err := fmt.Errorf("%s enum type must inited by 'int' literal",
-					this.Pos.ErrMsgPrefix())
-				errs = append(errs, err)
+	fn check() -> (errs []error = []error{}) {
+		var initV int32 = 0
+		if this.Init != null {
+			if is, err := this.Init.constantFold(); err != null {
+				errs.append(err)
 			} else {
-				initV = int32(this.Init.getLongValue())
+				if is == false {
+					err := new error(sprintf("%s enum type must inited by 'int' literal",
+						this.Pos.ErrMsgPrefix()))
+					errs.append(err)
+				} else {
+					initV = int32(this.Init.getLongValue())
+				}
 			}
 		}
-	}
-	this.DefaultValue = initV
-	for k, v := range this.Enums {
-		if v.NoNeed != null {
-			errs = append(errs, fmt.Errorf("%s enum only expect 1 init value",
-				v.Pos.ErrMsgPrefix()))
+		this.DefaultValue = initV
+		for k, v := range this.Enums {
+			if v.NoNeed != null {
+				errs.append(new error(sprintf("%s enum only expect 1 init value",
+					v.Pos.ErrMsgPrefix())))
+			}
+			if k < this.FirstValueIndex {
+				v.Value = initV - int32(this.FirstValueIndex-k)
+			} else {
+				v.Value = initV + int32(k-this.FirstValueIndex)
+			}
 		}
-		if k < this.FirstValueIndex {
-			v.Value = initV - int32(this.FirstValueIndex-k)
-		} else {
-			v.Value = initV + int32(k-this.FirstValueIndex)
-		}
-	}
-	return errs
+		return errs
+	}	
 }
+
+

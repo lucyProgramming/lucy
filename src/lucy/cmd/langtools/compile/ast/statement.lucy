@@ -1,191 +1,202 @@
  
 
-type StatementTypeKind int
+public enum StatementTypeKind {
+	StatementTypeExpression = 1 ,
+	StatementTypeIf,
+	StatementTypeBlock,
+	StatementTypeFor,
+	StatementTypeContinue,
+	StatementTypeReturn,
+	StatementTypeBreak,
+	StatementTypeSwitch,
+	StatementTypeWhen,
+	StatementTypeLabel,
+	StatementTypeGoTo,
+	StatementTypeDefer,
+	StatementTypeClass,
+	StatementTypeEnum,
+	StatementTypeNop,
+	StatementTypeImport,
+	StatementTypeTypeAlias 
+}
 
-const (
-	_ StatementTypeKind = iota
-	StatementTypeExpression
-	StatementTypeIf
-	StatementTypeBlock
-	StatementTypeFor
-	StatementTypeContinue
-	StatementTypeReturn
-	StatementTypeBreak
-	StatementTypeSwitch
-	StatementTypeWhen
-	StatementTypeLabel
-	StatementTypeGoTo
-	StatementTypeDefer
-	StatementTypeClass
-	StatementTypeEnum
-	StatementTypeNop
-	StatementTypeImport
-	StatementTypeTypeAlias
-)
-
-type Statement struct {
+class Statement {
 	Type                      StatementTypeKind
 	Checked                   bool // if checked
 	Pos                       Pos
-	StatementIf               *StatementIf
-	Expression                *Expression
-	TypeAlias                 *TypeAlias
-	StatementFor              *StatementFor
-	StatementReturn           *StatementReturn
-	StatementSwitch           *StatementSwitch
-	StatementWhen             *StatementWhen
-	StatementBreak            *StatementBreak
-	Block                     *Block
-	StatementContinue         *StatementContinue
-	StatementLabel            *StatementLabel
-	StatementGoTo             *StatementGoTo
-	Defer                     *StatementDefer
-	Class                     *Class
-	Enum                      *Enum
-	Import                    *Import
+	StatementIf               StatementIf
+	Expression                Expression
+	TypeAlias                 TypeAlias
+	StatementFor              StatementFor
+	StatementReturn           StatementReturn
+	StatementSwitch           StatementSwitch
+	StatementWhen             StatementWhen
+	StatementBreak            StatementBreak
+	Block                     Block
+	StatementContinue         StatementContinue
+	StatementLabel            StatementLabel
+	StatementGoTo             StatementGoTo
+	Defer                     StatementDefer
+	Class                     Class
+	Enum                      Enum
+	Import                    Import
 	isStaticFieldDefaultValue bool
 	/*
 		this.super()
 		special case
 	*/
 	IsCallFatherConstructionStatement bool
-}
 
-func (this *Statement) isVariableDefinition() bool {
-	if this.Type != StatementTypeExpression {
-		return false
+	fn isVariableDefinition() ->(is bool)  {
+		if this.Type != StatementTypeExpression {
+			return false
+		}
+		return this.Expression.Type == ExpressionTypeVarAssign ||
+			this.Expression.Type == ExpressionTypeVar
 	}
-	return this.Expression.Type == ExpressionTypeVarAssign ||
-		this.Expression.Type == ExpressionTypeVar
-}
-
-func (this *Statement) simplifyIf() {
-	if len(this.StatementIf.ElseIfList) > 0 {
-		return
-	}
-	if len(this.StatementIf.PrefixExpressions) > 0 {
-		return
-	}
-	if this.StatementIf.Condition.Type != ExpressionTypeBool {
-		return
-	}
-	c := this.StatementIf.Condition.Data.(bool)
-	if c {
-		this.Type = StatementTypeBlock
-		this.Block = &this.StatementIf.Block
-	} else {
-		if this.StatementIf.Else != null {
+	
+	fn simplifyIf() {
+		if len(this.StatementIf.ElseIfList) > 0 {
+			return
+		}
+		if len(this.StatementIf.PrefixExpressions) > 0 {
+			return
+		}
+		if this.StatementIf.Condition.Type != ExpressionTypeBool {
+			return
+		}
+		c := this.StatementIf.Condition.Data.(bool)
+		if c {
 			this.Type = StatementTypeBlock
-			this.Block = this.StatementIf.Else
+			this.Block = this.StatementIf.Block
 		} else {
-			this.Type = StatementTypeNop
+			if this.StatementIf.Else != null {
+				this.Type = StatementTypeBlock
+				this.Block = this.StatementIf.Else
+			} else {
+				this.Type = StatementTypeNop
+			}
 		}
 	}
-}
 
-func (this *Statement) simplifyFor() {
-	if this.StatementFor.Init == null &&
-		this.StatementFor.Increment == null &&
-		this.StatementFor.Condition != null &&
-		this.StatementFor.Condition.Type == ExpressionTypeBool &&
-		this.StatementFor.Condition.Data.(bool) == false {
-		this.Type = StatementTypeNop
-		this.StatementFor = null
+	fn simplifyFor() {
+		if this.StatementFor.Init == null &&
+			this.StatementFor.Increment == null &&
+			this.StatementFor.Condition != null &&
+			this.StatementFor.Condition.Type == ExpressionTypeBool &&
+			this.StatementFor.Condition.Data.(bool) == false {
+			this.Type = StatementTypeNop
+			this.StatementFor = null
+		}
 	}
-}
-func (this *Statement) check(block *Block) []error {
-	defer func() {
+
+	fn check(block Block) -> (errs []error) {
 		this.Checked = true
-	}()
-	errs := []error{}
-	switch this.Type {
-	case StatementTypeExpression:
-		return this.checkStatementExpression(block)
-	case StatementTypeIf:
-		es := this.StatementIf.check(block)
-		this.simplifyIf()
-		return es
-	case StatementTypeFor:
-		es := this.StatementFor.check(block)
-		this.simplifyFor()
-		return es
-	case StatementTypeSwitch:
-		return this.StatementSwitch.check(block)
-	case StatementTypeBreak:
-		return this.StatementBreak.check(block)
-	case StatementTypeContinue:
-		return this.StatementContinue.check(block)
-	case StatementTypeReturn:
-		return this.StatementReturn.check(block)
-	case StatementTypeGoTo:
-		err := this.StatementGoTo.checkStatementGoTo(block)
-		if err != null {
-			return []error{err}
-		}
-	case StatementTypeDefer:
-		block.InheritedAttribute.Function.HasDefer = true
-		this.Defer.Block.inherit(block)
-		this.Defer.Block.InheritedAttribute.Defer = this.Defer
-		es := this.Defer.Block.check()
-		block.Defers = append(block.Defers, this.Defer)
-		return es
-	case StatementTypeBlock:
-		this.Block.inherit(block)
-		return this.Block.check()
-	case StatementTypeLabel:
-		if block.InheritedAttribute.Defer != null {
-			block.InheritedAttribute.Defer.Labels =
-				append(block.InheritedAttribute.Defer.Labels, this.StatementLabel)
-		}
-	case StatementTypeClass:
-		PackageBeenCompile.statementLevelClass =
-			append(PackageBeenCompile.statementLevelClass, this.Class)
-		err := block.Insert(this.Class.Name, this.Class.Pos, this.Class)
-		if err != null {
-			errs = append(errs, err)
-		}
-		return append(errs, this.Class.check(block)...)
-	case StatementTypeEnum:
-		es := this.Enum.check()
-		err := block.Insert(this.Enum.Name, this.Enum.Pos, this.Enum)
-		if err != null {
-			es = append(es, err)
-		}
-		return es
-	case StatementTypeNop:
-		//nop , should be never execute to here
-		//
-	case StatementTypeWhen:
-		return this.StatementWhen.check(block, this)
-	case StatementTypeImport:
-		if block.InheritedAttribute.Function.TemplateClonedFunction == false {
-			errs = append(errs, fmt.Errorf("%s cannot have 'import' at this scope , non-template function",
-				errMsgPrefix(this.Import.Pos)))
-			return errs
-		}
-		err := this.Import.MkAccessName()
-		if err != null {
-			errs = append(errs, err)
-			return errs
-		}
-		if this.Import.Alias == UnderScore {
-			errs = append(errs, fmt.Errorf("%s import at block scope , must be used",
-				errMsgPrefix(this.Import.Pos)))
+		errs = []error{}
+		switch this.Type {
+		case StatementTypeExpression:
+			return this.checkStatementExpression(block)
+		case StatementTypeIf:
+			es := this.StatementIf.check(block)
+			this.simplifyIf()
+			return es
+		case StatementTypeFor:
+			es := this.StatementFor.check(block)
+			this.simplifyFor()
+			return es
+		case StatementTypeSwitch:
+			return this.StatementSwitch.check(block)
+		case StatementTypeBreak:
+			return this.StatementBreak.check(block)
+		case StatementTypeContinue:
+			return this.StatementContinue.check(block)
+		case StatementTypeReturn:
+			return this.StatementReturn.check(block)
+		case StatementTypeGoTo:
+			err := this.StatementGoTo.checkStatementGoTo(block)
+			if err != null {
+				return []error{err}
+			}
+		case StatementTypeDefer:
+			if block.Defers == null {
+				block.Defers = []StatementDefer{this.Defer}
+			}else {
+				block.Defers.append(this.Defer)
+			}
+			block.InheritedAttribute.Function.HasDefer = true
+			this.Defer.Block.inherit(block)
+			this.Defer.Block.InheritedAttribute.Defer = this.Defer
+			es := this.Defer.Block.check()
+			return es
+		case StatementTypeBlock:
+			this.Block.inherit(block)
+			return this.Block.check()
+		case StatementTypeLabel:
+			if block.InheritedAttribute.Defer != null {
+				block.InheritedAttribute.Defer.Labels =
+					append(block.InheritedAttribute.Defer.Labels, this.StatementLabel)
+			}
+		case StatementTypeClass:
+			PackageBeenCompile.statementLevelClass =
+				append(PackageBeenCompile.statementLevelClass, this.Class)
+			err := block.Insert(this.Class.Name, this.Class.Pos, this.Class)
+			if err != null {
+				errs.append(err)
+			}
+			return append(errs, this.Class.check(block)...)
+		case StatementTypeEnum:
+			es := this.Enum.check()
+			err := block.Insert(this.Enum.Name, this.Enum.Pos, this.Enum)
+			if err != null {
+				es = append(es, err)
+			}
+			return es
+		case StatementTypeNop:
+			//nop , should be never execute to here
+			//
+		case StatementTypeWhen:
+			return this.StatementWhen.check(block, this)
+		case StatementTypeImport:
+			if block.InheritedAttribute.Function.TemplateClonedFunction == false {
+				errs = append(errs, fmt.Errorf("%s cannot have 'import' at this scope , non-template function",
+					errMsgPrefix(this.Import.Pos)))
+				return errs
+			}
+			err := this.Import.MkAccessName()
+			if err != null {
+				errs.append(err)
+				return errs
+			}
+			if this.Import.Alias == UnderScore {
+				errs = append(errs, fmt.Errorf("%s import at block scope , must be used",
+					errMsgPrefix(this.Import.Pos)))
+				return null
+			}
+			if err := PackageBeenCompile.insertImport(this.Import); err != null {
+				errs.append(err)
+			}
+		case StatementTypeTypeAlias:
+			err := this.TypeAlias.Type.resolve(block)
+			if err != null {
+				return []error{err}
+			}
+			err = block.Insert(this.TypeAlias.Name, this.TypeAlias.Pos, this.TypeAlias.Type)
+			if err != null {
+				return []error{err}
+			}
 			return null
-		}
-		if err := PackageBeenCompile.insertImport(this.Import); err != null {
-			errs = append(errs, err)
-		}
-	case StatementTypeTypeAlias:
-		err := this.TypeAlias.Type.resolve(block)
-		if err != null {
-			return []error{err}
-		}
-		err = block.Insert(this.TypeAlias.Name, this.TypeAlias.Pos, this.TypeAlias.Type)
-		if err != null {
-			return []error{err}
 		}
 		return null
 	}
-	return null
+	
+	fn checkStatementExpression(block Block) ->(errs []error = []error{})  {
+		this.Expression.IsStatementExpression = true
+		if err := this.Expression.canBeUsedAsStatement(); err != null {
+			errs.append(err)
+		}
+		_, es := this.Expression.check(block)
+		errs.appendAll(es)
+		return errs
+	}
 }
+

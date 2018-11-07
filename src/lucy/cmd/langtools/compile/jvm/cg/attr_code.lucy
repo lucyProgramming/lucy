@@ -58,11 +58,11 @@ class AttributeCode  {
 				binary.BigEndian.putChar(bb, v.NameIndex)
 				bs4 := new []byte(4)
 				binary.BigEndian.putInt(bs4, (v.attributeLength))
-				bb . appendAll(bs4)
-				bb . appendAll(v.Info)
-				b . appendAll(bb)
+				bb.appendAll(bs4)
+				bb.appendAll(v.Info)
+				b.appendAll(bb)
 			}
-			bs .appendAll(b)
+			bs.appendAll(b)
 		}
 		return bs
 	}

@@ -1,76 +1,5 @@
 
 
-public enum  ExpressionTypeKind { 
-	ExpressionTypeNull  =1 ,                                     // null
-	ExpressionTypeBool,                                      // true or false
-	ExpressionTypeByte ,                                     // 'a' or 97b
-	ExpressionTypeShort  ,                                   // 100s
-	ExpressionTypeChar  ,                                    // '\u0000'
-	ExpressionTypeInt ,                                      // 100
-	ExpressionTypeLong ,                                     // 100L
-	ExpressionTypeFloat ,                                    // 1.0
-	ExpressionTypeDouble ,                                   // 1.0d
-	ExpressionTypeString ,                                  // "hello world"
-	ExpressionTypeArray ,                                    // []bool{false,true}
-	ExpressionTypeLogicalOr   ,                              // a || b
-	ExpressionTypeLogicalAnd  ,                              // a && b
-	ExpressionTypeOr     ,                                   // a | b
-	ExpressionTypeAnd  ,                                     // a & b
-	ExpressionTypeXor ,                                      // a ^b
-	ExpressionTypeLsh  ,                                     // a << b
-	ExpressionTypeRsh   ,                                    // a >> b
-	ExpressionTypeAdd  ,                                     // a + b
-	ExpressionTypeSub   ,                                    // a - b
-	ExpressionTypeMul  ,                                     // a * b
-	ExpressionTypeDiv   ,                                    // a / b
-	ExpressionTypeMod  ,                                     // a % b
-	ExpressionTypeAssign   ,                                 // a = b
-	ExpressionTypeVarAssign  ,                               // a := b
-	ExpressionTypePlusAssign   ,                             // a += b
-	ExpressionTypeMinusAssign  ,                             // a -= b
-	ExpressionTypeMulAssign   ,                              // a *= b
-	ExpressionTypeDivAssign  ,                               // a /= b
-	ExpressionTypeModAssign  ,                               // a %= b
-	ExpressionTypeAndAssign  ,                               // a &= b
-	ExpressionTypeOrAssign   ,                               // a |= b
-	ExpressionTypeXorAssign  ,                               // a ^= b
-	ExpressionTypeLshAssign  ,                               // a <<= b
-	ExpressionTypeRshAssign  ,                               // a >>= b
-	ExpressionTypeEq   ,                                     // a == b
-	ExpressionTypeNe ,                                       // a != b
-	ExpressionTypeGe ,                                       // a >= b
-	ExpressionTypeGt  ,                                      // a > b
-	ExpressionTypeLe  ,                                      // a <= b
-	ExpressionTypeLt  ,                                      // a < b
-	ExpressionTypeIndex  ,                                   // a["b"]
-	ExpressionTypeSelection ,                                // a.b
-	ExpressionTypeSelectionConst,                            // ::
-	ExpressionTypeMethodCall ,                               // a.b()
-	ExpressionTypeFunctionCall ,                             // a()
-	ExpressionTypeIncrement ,                               // a++
-	ExpressionTypeDecrement  ,                               // a--
-	ExpressionTypePrefixIncrement    ,                       // ++ a
-	ExpressionTypePrefixDecrement ,                          // -- a
-	ExpressionTypeNegative    ,                              // -a
-	ExpressionTypeNot    ,                                   // !a
-	ExpressionTypeBitwiseNot   ,                             // ~a
-	ExpressionTypeIdentifier,                                // a
-	ExpressionTypeNew    ,                                   // new []int(10)
-	ExpressionTypeList    ,                                  // a,b := "hello","world"
-	ExpressionTypeFunctionLiteral  ,                         // fn() { print("hello world"); }
-	ExpressionTypeVar    ,                                   // var a,b int
-	ExpressionTypeConst ,                                    // const a = "hello world"
-	ExpressionTypeCheckCast  ,                               // []byte(str)
-	ExpressionTypeRange    ,                                 // for range
-	ExpressionTypeSlice  ,                                   // arr[0:2]
-	ExpressionTypeMap   ,                                    // map literal
-	ExpressionTypeTypeAssert  ,                              // a.(Object)
-	ExpressionTypeQuestion ,                                 // true ? a : b
-	ExpressionTypeGlobal  ,                                  // global.XXX
-	ExpressionTypeParenthesis ,                              // ( a )
-	ExpressionTypeVArgs ,                                    // a ...
-	ExpressionTypeDot                                       // .
-}
 
 class Expression {
 	//checkRangeCalled bool
@@ -92,421 +21,789 @@ class Expression {
 	AsSubForNegative      *Expression
 
 	fn IsIdentifier(identifier string) bool {
-		if e.Type != ExpressionTypeIdentifier {
+		if this.Type != ExpressionTypeIdentifier {
 			return false
 		}
-		return e.Data.(*ExpressionIdentifier).Name == identifier
+		return this.Data.(*ExpressionIdentifier).Name == identifier
 	}
-}
-
-
-func (e *Expression) isBoolLiteral(b bool) bool {
-	if e.Type != ExpressionTypeBool {
-		return false
-	}
-	return e.Data.(bool) == b
-}
-
-func (e *Expression) isRelation() bool {
-	return e.Type == ExpressionTypeEq ||
-		e.Type == ExpressionTypeNe ||
-		e.Type == ExpressionTypeGe ||
-		e.Type == ExpressionTypeGt ||
-		e.Type == ExpressionTypeLe ||
-		e.Type == ExpressionTypeLt
-}
-
-/*
-	1 > 2
-	'a' > 'b'
-	1s > 2s
-*/
-func (e *Expression) Is2IntCompare() bool {
-	if e.isRelation() == false {
-		return false
-	}
-	bin := e.Data.(*ExpressionBinary)
-	i1 := bin.Left.Value.isInteger() && bin.Left.Value.Type != VariableTypeLong
-	i2 := bin.Right.Value.isInteger() && bin.Right.Value.Type != VariableTypeLong
-	return i1 && i2
-}
-
-/*
-	a == null
-*/
-func (e *Expression) IsCompare2Null() bool {
-	if e.isRelation() == false {
-		return false
-	}
-	bin := e.Data.(*ExpressionBinary)
-	return bin.Left.Type == ExpressionTypeNull ||
-		bin.Right.Type == ExpressionTypeNull
-}
-
-/*
-	a > "b"
-*/
-func (e *Expression) Is2StringCompare() bool {
-	if e.isRelation() == false {
-		return false
-	}
-	bin := e.Data.(*ExpressionBinary)
-	return bin.Left.Value.Type == VariableTypeString
-}
-
-/*
-	var a ,b []int
-	a == b
-*/
-func (e *Expression) Is2PointerCompare() bool {
-	if e.isRelation() == false {
-		return false
-	}
-	bin := e.Data.(*ExpressionBinary)
-	return bin.Left.Value.IsPointer()
-}
-
-func (e *Expression) convertTo(to *Type) {
-	c := &ExpressionTypeConversion{}
-	c.Expression = &Expression{}
-	c.Expression.Op = "checkcast"
-	*c.Expression = *e // copy
-	c.Type = to
-	e.Value = to
-	e.Type = ExpressionTypeCheckCast
-	e.IsCompileAuto = true
-	e.Data = c
-}
-
-func (e *Expression) convertToNumberType(typ VariableTypeKind) {
-	if e.isLiteral() {
-		e.convertLiteralToNumberType(typ)
-		e.Value = &Type{
-			Type: typ,
-			Pos:  e.Pos,
+	fn isBoolLiteral(b bool) bool {
+		if this.Type != ExpressionTypeBool {
+			return false
 		}
-	} else {
-		e.convertTo(&Type{
-			Pos:  e.Pos,
-			Type: typ,
-		})
+		return this.Data.(bool) == b
 	}
-}
 
-type ExpressionTypeAssert struct {
-	ExpressionTypeConversion
-	MultiValueContext bool
-}
-
-/*
-	const spread
-*/
-func (e *Expression) fromConst(c *Constant) {
-	e.Op = c.Name
-	switch c.Type.Type {
-	case VariableTypeBool:
-		e.Type = ExpressionTypeBool
-		e.Data = c.Value.(bool)
-	case VariableTypeByte:
-		e.Type = ExpressionTypeByte
-		e.Data = c.Value.(int64)
-	case VariableTypeShort:
-		e.Type = ExpressionTypeShort
-		e.Data = c.Value.(int64)
-	case VariableTypeChar:
-		e.Type = ExpressionTypeChar
-		e.Data = c.Value.(int64)
-	case VariableTypeInt:
-		e.Type = ExpressionTypeInt
-		e.Data = c.Value.(int64)
-	case VariableTypeLong:
-		e.Type = ExpressionTypeLong
-		e.Data = c.Value.(int64)
-	case VariableTypeFloat:
-		e.Type = ExpressionTypeFloat
-		e.Data = c.Value.(float32)
-	case VariableTypeDouble:
-		e.Type = ExpressionTypeDouble
-		e.Data = c.Value.(float64)
-	case VariableTypeString:
-		e.Type = ExpressionTypeString
-		e.Data = c.Value.(string)
+	fn isRelation() bool {
+		return this.Type == ExpressionTypeEq ||
+			this.Type == ExpressionTypeNe ||
+			this.Type == ExpressionTypeGe ||
+			this.Type == ExpressionTypeGt ||
+			this.Type == ExpressionTypeLe ||
+			this.Type == ExpressionTypeLt
 	}
-}
 
-type ExpressionQuestion struct {
-	Selection *Expression
-	True      *Expression
-	False     *Expression
-}
-
-type ExpressionSlice struct {
-	ExpressionOn *Expression
-	Start, End   *Expression
-}
-
-func (e *Expression) isLiteral() bool {
-	return e.Type == ExpressionTypeBool ||
-		e.Type == ExpressionTypeString ||
-		e.isNumber()
-}
-
-/*
-	valid for condition
-*/
-func (e *Expression) canBeUsedAsCondition() error {
-	if e.Type == ExpressionTypeNull ||
-		e.Type == ExpressionTypeBool ||
-		e.Type == ExpressionTypeByte ||
-		e.Type == ExpressionTypeShort ||
-		e.Type == ExpressionTypeInt ||
-		e.Type == ExpressionTypeLong ||
-		e.Type == ExpressionTypeFloat ||
-		e.Type == ExpressionTypeDouble ||
-		e.Type == ExpressionTypeString ||
-		e.Type == ExpressionTypeArray ||
-		e.Type == ExpressionTypeLogicalOr ||
-		e.Type == ExpressionTypeLogicalAnd ||
-		e.Type == ExpressionTypeOr ||
-		e.Type == ExpressionTypeAnd ||
-		e.Type == ExpressionTypeXor ||
-		e.Type == ExpressionTypeLsh ||
-		e.Type == ExpressionTypeRsh ||
-		e.Type == ExpressionTypeAdd ||
-		e.Type == ExpressionTypeSub ||
-		e.Type == ExpressionTypeMul ||
-		e.Type == ExpressionTypeDiv ||
-		e.Type == ExpressionTypeMod ||
-		e.Type == ExpressionTypeEq ||
-		e.Type == ExpressionTypeNe ||
-		e.Type == ExpressionTypeGe ||
-		e.Type == ExpressionTypeGt ||
-		e.Type == ExpressionTypeLe ||
-		e.Type == ExpressionTypeLt ||
-		e.Type == ExpressionTypeIndex ||
-		e.Type == ExpressionTypeSelection ||
-		e.Type == ExpressionTypeMethodCall ||
-		e.Type == ExpressionTypeFunctionCall ||
-		e.Type == ExpressionTypeIncrement ||
-		e.Type == ExpressionTypeDecrement ||
-		e.Type == ExpressionTypePrefixIncrement ||
-		e.Type == ExpressionTypePrefixDecrement ||
-		e.Type == ExpressionTypeNegative ||
-		e.Type == ExpressionTypeNot ||
-		e.Type == ExpressionTypeBitwiseNot ||
-		e.Type == ExpressionTypeIdentifier ||
-		e.Type == ExpressionTypeNew ||
-		e.Type == ExpressionTypeCheckCast ||
-		e.Type == ExpressionTypeSlice ||
-		e.Type == ExpressionTypeMap ||
-		e.Type == ExpressionTypeQuestion {
-		return null
+	/*
+		1 > 2
+		'a' > 'b'
+		1s > 2s
+	*/
+	fn Is2IntCompare() bool {
+		if this.isRelation() == false {
+			return false
+		}
+		bin := this.Data.(*ExpressionBinary)
+		i1 := bin.Left.Value.isInteger() && bin.Left.Value.Type != VariableTypeLong
+		i2 := bin.Right.Value.isInteger() && bin.Right.Value.Type != VariableTypeLong
+		return i1 && i2
 	}
-	return fmt.Errorf("%s cannot use '%s' as condition",
-		e.Pos.ErrMsgPrefix(), e.Op)
-}
 
-func (e *Expression) canBeUsedAsStatement() error {
-	if e.Type == ExpressionTypeVarAssign ||
-		e.Type == ExpressionTypeAssign ||
-		e.Type == ExpressionTypeFunctionCall ||
-		e.Type == ExpressionTypeMethodCall ||
-		e.Type == ExpressionTypeFunctionLiteral ||
-		e.Type == ExpressionTypePlusAssign ||
-		e.Type == ExpressionTypeMinusAssign ||
-		e.Type == ExpressionTypeMulAssign ||
-		e.Type == ExpressionTypeDivAssign ||
-		e.Type == ExpressionTypeModAssign ||
-		e.Type == ExpressionTypeAndAssign ||
-		e.Type == ExpressionTypeOrAssign ||
-		e.Type == ExpressionTypeXorAssign ||
-		e.Type == ExpressionTypeLshAssign ||
-		e.Type == ExpressionTypeRshAssign ||
-		e.Type == ExpressionTypeIncrement ||
-		e.Type == ExpressionTypeDecrement ||
-		e.Type == ExpressionTypePrefixIncrement ||
-		e.Type == ExpressionTypePrefixDecrement ||
-		e.Type == ExpressionTypeVar ||
-		e.Type == ExpressionTypeConst {
-		return null
+	/*
+		a == null
+	*/
+	fn IsCompare2Null() bool {
+		if this.isRelation() == false {
+			return false
+		}
+		bin := this.Data.(*ExpressionBinary)
+		return bin.Left.Type == ExpressionTypeNull ||
+			bin.Right.Type == ExpressionTypeNull
 	}
-	return fmt.Errorf("%s expression '%s' evaluate but not used",
-		e.Pos.ErrMsgPrefix(), e.Op)
-}
 
-func (e *Expression) isNumber() bool {
-	return e.isInteger() ||
-		e.isFloat()
-}
-
-func (e *Expression) isInteger() bool {
-	return e.Type == ExpressionTypeByte ||
-		e.Type == ExpressionTypeShort ||
-		e.Type == ExpressionTypeInt ||
-		e.Type == ExpressionTypeLong ||
-		e.Type == ExpressionTypeChar
-}
-func (e *Expression) isFloat() bool {
-	return e.Type == ExpressionTypeFloat ||
-		e.Type == ExpressionTypeDouble
-}
-
-func (e *Expression) isEqOrNe() bool {
-	return e.Type == ExpressionTypeEq ||
-		e.Type == ExpressionTypeNe
-}
-
-/*
-	check out this expression is increment or decrement
-*/
-func (e *Expression) IsIncrement() bool {
-	if e.Type == ExpressionTypeIncrement ||
-		e.Type == ExpressionTypePrefixIncrement ||
-		e.Type == ExpressionTypeDecrement ||
-		e.Type == ExpressionTypePrefixDecrement {
-	} else {
-		panic("not increment or decrement at all")
+	/*
+		a > "b"
+	*/
+	fn Is2StringCompare() bool {
+		if this.isRelation() == false {
+			return false
+		}
+		bin := this.Data.(*ExpressionBinary)
+		return bin.Left.Value.Type == VariableTypeString
 	}
-	return e.Type == ExpressionTypeIncrement ||
-		e.Type == ExpressionTypePrefixIncrement
-}
 
-/*
-	k,v := range arr
-	k,v = range arr
-*/
-func (e *Expression) canBeUsedForRange() bool {
-	if e.Type != ExpressionTypeAssign &&
-		e.Type != ExpressionTypeVarAssign {
-		return false
+	/*
+		var a ,b []int
+		a == b
+	*/
+	fn Is2PointerCompare() bool {
+		if this.isRelation() == false {
+			return false
+		}
+		bin := this.Data.(*ExpressionBinary)
+		return bin.Left.Value.IsPointer()
 	}
-	bin := e.Data.(*ExpressionBinary)
-	if bin.Right.Type == ExpressionTypeRange {
-		return true
+
+	fn convertTo(to *Type) {
+		c := &ExpressionTypeConversion{}
+		c.Expression = &Expression{}
+		c.Expression.Op = "checkcast"
+		*c.Expression = *e // copy
+		c.Type = to
+		this.Value = to
+		this.Type = ExpressionTypeCheckCast
+		this.IsCompileAuto = true
+		this.Data = c
 	}
-	if bin.Right.Type == ExpressionTypeList {
-		t := bin.Right.Data.([]*Expression)
-		if len(t) == 1 && t[0].Type == ExpressionTypeRange {
+
+	fn convertToNumberType(typ VariableTypeKind) {
+		if this.isLiteral() {
+			this.convertLiteralToNumberType(typ)
+			this.Value = &Type{
+				Type: typ,
+				Pos:  this.Pos,
+			}
+		} else {
+			this.convertTo(&Type{
+				Pos:  this.Pos,
+				Type: typ,
+			})
+		}
+	}
+
+	/*
+		const spread
+	*/
+	fn fromConst(c *Constant) {
+		this.Op = c.Name
+		switch c.Type.Type {
+		case VariableTypeBool:
+			this.Type = ExpressionTypeBool
+			this.Data = c.Value.(bool)
+		case VariableTypeByte:
+			this.Type = ExpressionTypeByte
+			this.Data = c.Value.(int64)
+		case VariableTypeShort:
+			this.Type = ExpressionTypeShort
+			this.Data = c.Value.(int64)
+		case VariableTypeChar:
+			this.Type = ExpressionTypeChar
+			this.Data = c.Value.(int64)
+		case VariableTypeInt:
+			this.Type = ExpressionTypeInt
+			this.Data = c.Value.(int64)
+		case VariableTypeLong:
+			this.Type = ExpressionTypeLong
+			this.Data = c.Value.(int64)
+		case VariableTypeFloat:
+			this.Type = ExpressionTypeFloat
+			this.Data = c.Value.(float32)
+		case VariableTypeDouble:
+			this.Type = ExpressionTypeDouble
+			this.Data = c.Value.(float64)
+		case VariableTypeString:
+			this.Type = ExpressionTypeString
+			this.Data = c.Value.(string)
+		}
+	}
+
+
+
+	fn isLiteral() bool {
+		return this.Type == ExpressionTypeBool ||
+			this.Type == ExpressionTypeString ||
+			this.isNumber()
+	}
+
+	/*
+		valid for condition
+	*/
+	fn canBeUsedAsCondition() error {
+		if this.Type == ExpressionTypeNull ||
+			this.Type == ExpressionTypeBool ||
+			this.Type == ExpressionTypeByte ||
+			this.Type == ExpressionTypeShort ||
+			this.Type == ExpressionTypeInt ||
+			this.Type == ExpressionTypeLong ||
+			this.Type == ExpressionTypeFloat ||
+			this.Type == ExpressionTypeDouble ||
+			this.Type == ExpressionTypeString ||
+			this.Type == ExpressionTypeArray ||
+			this.Type == ExpressionTypeLogicalOr ||
+			this.Type == ExpressionTypeLogicalAnd ||
+			this.Type == ExpressionTypeOr ||
+			this.Type == ExpressionTypeAnd ||
+			this.Type == ExpressionTypeXor ||
+			this.Type == ExpressionTypeLsh ||
+			this.Type == ExpressionTypeRsh ||
+			this.Type == ExpressionTypeAdd ||
+			this.Type == ExpressionTypeSub ||
+			this.Type == ExpressionTypeMul ||
+			this.Type == ExpressionTypeDiv ||
+			this.Type == ExpressionTypeMod ||
+			this.Type == ExpressionTypeEq ||
+			this.Type == ExpressionTypeNe ||
+			this.Type == ExpressionTypeGe ||
+			this.Type == ExpressionTypeGt ||
+			this.Type == ExpressionTypeLe ||
+			this.Type == ExpressionTypeLt ||
+			this.Type == ExpressionTypeIndex ||
+			this.Type == ExpressionTypeSelection ||
+			this.Type == ExpressionTypeMethodCall ||
+			this.Type == ExpressionTypeFunctionCall ||
+			this.Type == ExpressionTypeIncrement ||
+			this.Type == ExpressionTypeDecrement ||
+			this.Type == ExpressionTypePrefixIncrement ||
+			this.Type == ExpressionTypePrefixDecrement ||
+			this.Type == ExpressionTypeNegative ||
+			this.Type == ExpressionTypeNot ||
+			this.Type == ExpressionTypeBitwiseNot ||
+			this.Type == ExpressionTypeIdentifier ||
+			this.Type == ExpressionTypeNew ||
+			this.Type == ExpressionTypeCheckCast ||
+			this.Type == ExpressionTypeSlice ||
+			this.Type == ExpressionTypeMap ||
+			this.Type == ExpressionTypeQuestion {
+			return null
+		}
+		return fmt.Errorf("%s cannot use '%s' as condition",
+			this.Pos.ErrMsgPrefix(), this.Op)
+	}
+
+	fn canBeUsedAsStatement() error {
+		if this.Type == ExpressionTypeVarAssign ||
+			this.Type == ExpressionTypeAssign ||
+			this.Type == ExpressionTypeFunctionCall ||
+			this.Type == ExpressionTypeMethodCall ||
+			this.Type == ExpressionTypeFunctionLiteral ||
+			this.Type == ExpressionTypePlusAssign ||
+			this.Type == ExpressionTypeMinusAssign ||
+			this.Type == ExpressionTypeMulAssign ||
+			this.Type == ExpressionTypeDivAssign ||
+			this.Type == ExpressionTypeModAssign ||
+			this.Type == ExpressionTypeAndAssign ||
+			this.Type == ExpressionTypeOrAssign ||
+			this.Type == ExpressionTypeXorAssign ||
+			this.Type == ExpressionTypeLshAssign ||
+			this.Type == ExpressionTypeRshAssign ||
+			this.Type == ExpressionTypeIncrement ||
+			this.Type == ExpressionTypeDecrement ||
+			this.Type == ExpressionTypePrefixIncrement ||
+			this.Type == ExpressionTypePrefixDecrement ||
+			this.Type == ExpressionTypeVar ||
+			this.Type == ExpressionTypeConst {
+			return null
+		}
+		return fmt.Errorf("%s expression '%s' evaluate but not used",
+			this.Pos.ErrMsgPrefix(), this.Op)
+	}
+
+	fn isNumber() bool {
+		return this.isInteger() ||
+			this.isFloat()
+	}
+
+	fn isInteger() bool {
+		return this.Type == ExpressionTypeByte ||
+			this.Type == ExpressionTypeShort ||
+			this.Type == ExpressionTypeInt ||
+			this.Type == ExpressionTypeLong ||
+			this.Type == ExpressionTypeChar
+	}
+	fn isFloat() bool {
+		return this.Type == ExpressionTypeFloat ||
+			this.Type == ExpressionTypeDouble
+	}
+
+	fn isEqOrNe() bool {
+		return this.Type == ExpressionTypeEq ||
+			this.Type == ExpressionTypeNe
+	}
+
+	/*
+		check out this expression is increment or decrement
+	*/
+	fn IsIncrement() bool {
+		if this.Type == ExpressionTypeIncrement ||
+			this.Type == ExpressionTypePrefixIncrement ||
+			this.Type == ExpressionTypeDecrement ||
+			this.Type == ExpressionTypePrefixDecrement {
+		} else {
+			panic("not increment or decrement at all")
+		}
+		return this.Type == ExpressionTypeIncrement ||
+			this.Type == ExpressionTypePrefixIncrement
+	}
+
+	/*
+		k,v := range arr
+		k,v = range arr
+	*/
+	fn canBeUsedForRange() bool {
+		if this.Type != ExpressionTypeAssign &&
+			this.Type != ExpressionTypeVarAssign {
+			return false
+		}
+		bin := this.Data.(*ExpressionBinary)
+		if bin.Right.Type == ExpressionTypeRange {
 			return true
 		}
+		if bin.Right.Type == ExpressionTypeList {
+			t := bin.Right.Data.([]*Expression)
+			if len(t) == 1 && t[0].Type == ExpressionTypeRange {
+				return true
+			}
+		}
+		return false
 	}
-	return false
-}
 
-func (e *Expression) HaveMultiValue() bool {
-	if e.Type == ExpressionTypeFunctionCall ||
-		e.Type == ExpressionTypeMethodCall ||
-		e.Type == ExpressionTypeTypeAssert {
-		return len(e.MultiValues) > 1
+	fn HaveMultiValue() bool {
+		if this.Type == ExpressionTypeFunctionCall ||
+			this.Type == ExpressionTypeMethodCall ||
+			this.Type == ExpressionTypeTypeAssert {
+			return len(this.MultiValues) > 1
+		}
+		return false
+
 	}
-	return false
 
-}
+	
 
+	fn check(block *Block) (returnValueTypes []*Type, errs []error) {
+		if e == null {
+			return null, []error{}
+		}
+		_, err := this.constantFold()
+		if err != null {
+			return null, []error{err}
+		}
+		errs = []error{}
+		switch this.Type {
+		case ExpressionTypeNull:
+			returnValueTypes = []*Type{
+				{
+					Type: VariableTypeNull,
+					Pos:  this.Pos,
+				},
+			}
+			this.Value = returnValueTypes[0]
+		case ExpressionTypeDot:
+			if block.InheritedAttribute.Class == null {
+				errs = []error{fmt.Errorf("%s '%s' must in class scope",
+					this.Pos.ErrMsgPrefix(), this.Op)}
+			} else {
+				returnValueTypes = []*Type{
+					{
+						Type:  VariableTypeDynamicSelector,
+						Pos:   this.Pos,
+						Class: block.InheritedAttribute.Class,
+					},
+				}
+				this.Value = returnValueTypes[0]
+			}
+		case ExpressionTypeBool:
+			returnValueTypes = []*Type{
+				{
+					Type: VariableTypeBool,
+					Pos:  this.Pos,
+				},
+			}
+			this.Value = returnValueTypes[0]
+		case ExpressionTypeByte:
+			returnValueTypes = []*Type{{
+				Type: VariableTypeByte,
+				Pos:  this.Pos,
+			},
+			}
+			this.Value = returnValueTypes[0]
+		case ExpressionTypeShort:
+			returnValueTypes = []*Type{
+				{
+					Type: VariableTypeShort,
+					Pos:  this.Pos,
+				},
+			}
+			this.Value = returnValueTypes[0]
+		case ExpressionTypeInt:
+			returnValueTypes = []*Type{
+				{
+					Type: VariableTypeInt,
+					Pos:  this.Pos,
+				},
+			}
+			this.Value = returnValueTypes[0]
+		case ExpressionTypeChar:
+			returnValueTypes = []*Type{
+				{
+					Type: VariableTypeChar,
+					Pos:  this.Pos,
+				},
+			}
+			this.Value = returnValueTypes[0]
+		case ExpressionTypeFloat:
+			returnValueTypes = []*Type{
+				{
+					Type: VariableTypeFloat,
+					Pos:  this.Pos,
+				},
+			}
+			this.Value = returnValueTypes[0]
+		case ExpressionTypeDouble:
+			returnValueTypes = []*Type{
+				{
+					Type: VariableTypeDouble,
+					Pos:  this.Pos,
+				},
+			}
+			this.Value = returnValueTypes[0]
+		case ExpressionTypeLong:
+			returnValueTypes = []*Type{
+				{
+					Type: VariableTypeLong,
+					Pos:  this.Pos,
+				},
+			}
+			this.Value = returnValueTypes[0]
+		case ExpressionTypeString:
+			returnValueTypes = []*Type{
+				{
+					Type: VariableTypeString,
+					Pos:  this.Pos,
+				}}
+			this.Value = returnValueTypes[0]
+		case ExpressionTypeIdentifier:
+			tt, err := this.checkIdentifierExpression(block)
+			if err != null {
+				errs.append(err)
+			}
+			if tt != null {
+				this.Value = tt
+				returnValueTypes = []*Type{tt}
+			}
+			//binaries
+		case ExpressionTypeLogicalOr:
+			fallthrough
+		case ExpressionTypeLogicalAnd:
+			fallthrough
+		case ExpressionTypeOr:
+			fallthrough
+		case ExpressionTypeAnd:
+			fallthrough
+		case ExpressionTypeXor:
+			fallthrough
+		case ExpressionTypeLsh:
+			fallthrough
+		case ExpressionTypeRsh:
+			fallthrough
+		case ExpressionTypeEq:
+			fallthrough
+		case ExpressionTypeNe:
+			fallthrough
+		case ExpressionTypeGe:
+			fallthrough
+		case ExpressionTypeGt:
+			fallthrough
+		case ExpressionTypeLe:
+			fallthrough
+		case ExpressionTypeLt:
+			fallthrough
+		case ExpressionTypeAdd:
+			fallthrough
+		case ExpressionTypeSub:
+			fallthrough
+		case ExpressionTypeMul:
+			fallthrough
+		case ExpressionTypeDiv:
+			fallthrough
+		case ExpressionTypeMod:
+			length := len(errs)
+			tt := this.checkBinaryExpression(block, &errs)
+			if tt != null {
+				returnValueTypes = []*Type{tt}
+			}
+			if len(errs) == length { // no error
+				if ee := this.binaryExpressionDependOnSub(); ee != null {
+					*e = *ee
+				}
+			}
+			this.Value = tt
+		case ExpressionTypeMap:
+			tt := this.checkMapExpression(block, &errs)
+			if tt != null {
+				returnValueTypes = []*Type{tt}
+			}
+			this.Value = tt
+		case ExpressionTypeVarAssign:
+			this.checkVarAssignExpression(block, &errs)
+			this.Value = mkVoidType(this.Pos)
+			returnValueTypes = []*Type{this.Value}
+		case ExpressionTypeAssign:
+			tt := this.checkAssignExpression(block, &errs)
+			if tt != null {
+				returnValueTypes = []*Type{tt}
+			}
+			this.Value = tt
+		case ExpressionTypeIncrement:
+			fallthrough
+		case ExpressionTypeDecrement:
+			fallthrough
+		case ExpressionTypePrefixIncrement:
+			fallthrough
+		case ExpressionTypePrefixDecrement:
+			tt := this.checkIncrementExpression(block, &errs)
+			if tt != null {
+				returnValueTypes = []*Type{tt}
+			}
+			this.Value = tt
+		case ExpressionTypeConst: // no return value
+			errs = this.checkConstant(block)
+			returnValueTypes = []*Type{mkVoidType(this.Pos)}
+			this.Value = returnValueTypes[0]
+		case ExpressionTypeVar:
+			this.checkVarExpression(block, &errs)
+			returnValueTypes = []*Type{mkVoidType(this.Pos)}
+			this.Value = returnValueTypes[0]
+		case ExpressionTypeFunctionCall:
+			returnValueTypes = this.checkFunctionCallExpression(block, &errs)
+			this.MultiValues = returnValueTypes
+			if len(returnValueTypes) > 0 {
+				this.Value = returnValueTypes[0]
+			}
+		case ExpressionTypeMethodCall:
+			returnValueTypes = this.checkMethodCallExpression(block, &errs)
+			this.MultiValues = returnValueTypes
+			if len(returnValueTypes) > 0 {
+				this.Value = returnValueTypes[0]
+			}
+		case ExpressionTypeTypeAssert:
+			returnValueTypes = this.checkTypeAssert(block, &errs)
+			this.MultiValues = returnValueTypes
+			if len(returnValueTypes) > 0 {
+				this.Value = returnValueTypes[0]
+			}
+		case ExpressionTypeNot:
+			fallthrough
+		case ExpressionTypeNegative:
+			fallthrough
+		case ExpressionTypeBitwiseNot:
+			tt := this.checkUnaryExpression(block, &errs)
+			if tt != null {
+				returnValueTypes = []*Type{tt}
+			}
+			this.Value = tt
+		case ExpressionTypeQuestion:
+			tt := this.checkQuestionExpression(block, &errs)
+			if tt != null {
+				returnValueTypes = []*Type{tt}
+			}
+			this.Value = tt
+		case ExpressionTypeIndex:
+			tt := this.checkIndexExpression(block, &errs)
+			if tt != null {
+				returnValueTypes = []*Type{tt}
+				this.Value = tt
+			}
+		case ExpressionTypeSelection:
+			tt := this.checkSelectionExpression(block, &errs)
+			if tt != null {
+				returnValueTypes = []*Type{tt}
+				this.Value = tt
+			}
+		case ExpressionTypeSelectionConst:
+			tt := this.checkSelectConstExpression(block, &errs)
+			if tt != null {
+				returnValueTypes = []*Type{tt}
+				this.Value = tt
+			}
+		case ExpressionTypeCheckCast:
+			tt := this.checkTypeConversionExpression(block, &errs)
+			if tt != null {
+				returnValueTypes = []*Type{tt}
+				this.Value = tt
+			}
+		case ExpressionTypeNew:
+			tt := this.checkNewExpression(block, &errs)
+			if tt != null {
+				returnValueTypes = []*Type{tt}
+				this.Value = tt
+			}
+		case ExpressionTypePlusAssign:
+			fallthrough
+		case ExpressionTypeMinusAssign:
+			fallthrough
+		case ExpressionTypeMulAssign:
+			fallthrough
+		case ExpressionTypeDivAssign:
+			fallthrough
+		case ExpressionTypeModAssign:
+			fallthrough
+		case ExpressionTypeAndAssign:
+			fallthrough
+		case ExpressionTypeOrAssign:
+			fallthrough
+		case ExpressionTypeLshAssign:
+			fallthrough
+		case ExpressionTypeRshAssign:
+			fallthrough
+		case ExpressionTypeXorAssign:
+			tt := this.checkOpAssignExpression(block, &errs)
+			if tt != null {
+				returnValueTypes = []*Type{tt}
+			}
+			this.Value = tt
+		case ExpressionTypeRange:
+			errs = append(errs, fmt.Errorf("%s range is only work with 'for' statement",
+				errMsgPrefix(this.Pos)))
+		case ExpressionTypeSlice:
+			tt := this.checkSlice(block, &errs)
+			this.Value = tt
+			if tt != null {
+				returnValueTypes = []*Type{tt}
+			}
+		case ExpressionTypeArray:
+			tt := this.checkArray(block, &errs)
+			this.Value = tt
+			if tt != null {
+				returnValueTypes = []*Type{tt}
+			}
+		case ExpressionTypeFunctionLiteral:
+			f := this.Data.(*Function)
+			PackageBeenCompile.statementLevelFunctions =
+				append(PackageBeenCompile.statementLevelFunctions, f)
+			if this.IsStatementExpression {
+				err := block.Insert(f.Name, f.Pos, f)
+				if err != null {
+					errs.append(err)
+				}
+			}
+			es := f.check(block)
+			errs.appendAll(es)
+			returnValueTypes = make([]*Type, 1)
+			returnValueTypes[0] = &Type{
+				Type:         VariableTypeFunction,
+				Pos:          this.Pos,
+				FunctionType: &f.Type,
+			}
+			this.Value = returnValueTypes[0]
+		case ExpressionTypeList:
+			errs = append(errs,
+				fmt.Errorf("%s cannot have expression '%s' at this scope,"+
+					"this may be cause by the compiler error,please contact the author",
+					this.Pos.ErrMsgPrefix(), this.Op))
+		case ExpressionTypeGlobal:
+			returnValueTypes = make([]*Type, 1)
+			returnValueTypes[0] = &Type{
+				Type:    VariableTypePackage,
+				Pos:     this.Pos,
+				Package: &PackageBeenCompile,
+			}
+			this.Value = returnValueTypes[0]
+		case ExpressionTypeParenthesis:
+			*e = *this.Data.(*Expression) // override
+			return this.check(block)
+		case ExpressionTypeVArgs:
+			var t *Type
+			t, errs = this.Data.(*Expression).checkSingleValueContextExpression(block)
+			if len(errs) > 0 {
+				return returnValueTypes, errs
+			}
+			this.Value = t
+			returnValueTypes = []*Type{t}
+			if t == null {
+				return
+			}
+			if t.Type != VariableTypeJavaArray {
+				errs = append(errs, fmt.Errorf("%s cannot pack non java array to variable-length arguments",
+					errMsgPrefix(this.Pos)))
+				return
+			}
+			t.IsVariableArgs = true
+		default:
+			panic(fmt.Sprintf("unhandled type:%s", this.Op))
+		}
+		return returnValueTypes, errs
+	}
 
-class ExpressionFunctionCall  {
-	BuildInFunctionMeta      Object // for build in function only
-	Expression               Expression
-	Args                     CallArgs
-	VArgs                    CallVariableArgs
-	Function                 Function
-	ParameterTypes           []*Type // for template function
-	TemplateFunctionCallPair *TemplateFunctionInstance
-}
+	fn mustBeOneValueContext(ts []*Type) (*Type, error) {
+		if len(ts) == 0 {
+			return null, null // no-type,no error
+		}
+		var err error
+		if len(ts) > 1 {
+			err = fmt.Errorf("%s multi value in single value context", errMsgPrefix(this.Pos))
+		}
+		return ts[0], err
+	}
 
-class ExpressionMethodCall  {
-	Class              Class // for object or class
-	Expression         Expression
-	Args               CallArgs
-	VArgs              CallVariableArgs
-	Name               tring
-	Method             ClassMethod
-	FieldMethodHandler ClassField
-	/*
-		unSupport !!!!!!
-	*/
-	ParameterTypes                []*Type
-	PackageFunction               *Function
-	PackageGlobalVariableFunction *Variable
+	fn checkSingleValueContextExpression(block *Block) (*Type, []error) {
+		ts, es := this.check(block)
+		ret, err := this.mustBeOneValueContext(ts)
+		if err != null {
+			if es == null {
+				es = []error{err}
+			} else {
+				es = append(es, err)
+			}
+		}
+		return ret, es
+	}
 
+	fn methodAccessAble(block *Block, method *ClassMethod) error {
+		if this.Value.Type == VariableTypeObject {
+			if method.IsStatic() {
+				return fmt.Errorf("%s method '%s' is static",
+					this.Pos.ErrMsgPrefix(), method.Function.Name)
+			}
+			if false == this.IsIdentifier(ThisPointerName) {
+				if this.Value.Class.LoadFromOutSide {
+					if this.Value.Class.IsPublic() == false {
+						return fmt.Errorf("%s class '%s' is not public",
+							this.Pos.ErrMsgPrefix(), this.Value.Class.Name)
+					}
+					if method.IsPublic() == false {
+						return fmt.Errorf("%s method '%s' is not public",
+							this.Pos.ErrMsgPrefix(), method.Function.Name)
+					}
+				} else {
+					if method.IsPrivate() {
+						return fmt.Errorf("%s method '%s' is private",
+							this.Pos.ErrMsgPrefix(), method.Function.Name)
+					}
+				}
+			}
+		} else {
+			if method.IsStatic() == false {
+				return fmt.Errorf("%s method '%s' is a instance method",
+					this.Pos.ErrMsgPrefix(), method.Function.Name)
+			}
+			if this.Value.Class != block.InheritedAttribute.Class {
+				if this.Value.Class.LoadFromOutSide {
+					if this.Value.Class.IsPublic() == false {
+						return fmt.Errorf("%s class '%s' is not public",
+							this.Pos.ErrMsgPrefix(), this.Value.Class.Name)
+					}
+					if method.IsPublic() == false {
+						return fmt.Errorf("%s method '%s' is not public",
+							this.Pos.ErrMsgPrefix(), method.Function.Name)
+					}
+				} else {
+					if method.IsPrivate() {
+						return fmt.Errorf("%s method '%s' is private",
+							this.Pos.ErrMsgPrefix(), method.Function.Name)
+					}
+				}
+			}
+		}
+		return null
+	}
+
+	fn fieldAccessAble(block *Block, field *ClassField) error {
+		if this.Value.Type == VariableTypeObject {
+			if field.IsStatic() {
+				return fmt.Errorf("%s field '%s' is static",
+					this.Pos.ErrMsgPrefix(), field.Name)
+			}
+			if false == this.IsIdentifier(ThisPointerName) {
+				if this.Value.Class.LoadFromOutSide {
+					if this.Value.Class.IsPublic() == false {
+						return fmt.Errorf("%s class '%s' is not public",
+							this.Pos.ErrMsgPrefix(), this.Value.Class.Name)
+					}
+					if field.IsPublic() == false {
+						return fmt.Errorf("%s field '%s' is not public",
+							this.Pos.ErrMsgPrefix(), field.Name)
+					}
+				} else {
+					if field.IsPrivate() {
+						return fmt.Errorf("%s field '%s' is private",
+							this.Pos.ErrMsgPrefix(), field.Name)
+					}
+				}
+			}
+		} else { // class
+			if field.IsStatic() == false {
+				return fmt.Errorf("%s field '%s' is not static",
+					this.Pos.ErrMsgPrefix(), field.Name)
+			}
+			if this.Value.Class != block.InheritedAttribute.Class {
+				if this.Value.Class.LoadFromOutSide {
+					if this.Value.Class.IsPublic() == false {
+						return fmt.Errorf("%s class '%s' is not public",
+							this.Pos.ErrMsgPrefix(), this.Value.Class.Name)
+					}
+					if field.IsPublic() == false {
+						return fmt.Errorf("%s field '%s' is not public",
+							this.Pos.ErrMsgPrefix(), field.Name)
+					}
+				} else {
+					if field.IsPrivate() {
+						return fmt.Errorf("%s field '%s' is private",
+							this.Pos.ErrMsgPrefix(), field.Name)
+					}
+				}
+			}
+		}
+		return null
+	}
 	
 }
 
-class ExpressionVar  {
-	Type       Type
-	Variables  []Variable
-	InitValues []Expression
-}
 
-class ExpressionVarAssign  {
-	Lefts            []Expression
-	InitValues       []Expression
-	IfDeclaredBefore []bool // used for colon assign
-}
 
-class ExpressionTypeConversion  {
-	Type       Type
-	Expression Expression
-}
 
-class ExpressionIdentifier  {
-	Name     string
-	Variable Variable
-	Function Function
-	EnumName EnumName
-	Comment  string
-}
 
-class ExpressionIndex  {
-	Expression Expression
-	Index      Expression
-}
 
-class ExpressionSelection  {
-	Expression      Expression
-	Name            string
-	Field           ClassField  // expression is class or object
-	Method          ClassMethod // pack to method handle
-	PackageFunction Function    // expression is package , pack function to method handle
-	PackageVariable Variable    // expression is package , get package variable
-	PackageEnumName EnumName    // expression is package , get enumName
-}
 
-class ExpressionNew  {
-	Type         Type
-	Args         CallArgs
-	Construction ClassMethod
-	VArgs        CallVariableArgs
-}
 
-class ExpressionMap  {
-	Type          Type
-	KeyValuePairs []ExpressionKV
-}
 
-class ExpressionKV  {
-	Key   Expression
-	Value Expression
-}
-
-/*
-	for some general purpose
-*/
-class ExpressionBinary  {
-	Left  Expression
-	Right Expression
-}
-
-// for package jvm
-class ExpressionAssign  {
-	Lefts  []Expression
-	Values []Expression
-}
-
-class ExpressionArray  {
-	Type        Type
-	Expressions []Expression
-}
 
 
 
@@ -522,10 +819,10 @@ class ExpressionArray  {
 
 
 /*
-func (e *Expression) binaryExpressionDependOnSub() *Expression {
-	switch e.Type {
+fn binaryExpressionDependOnSub() *Expression {
+	switch this.Type {
 	case ExpressionTypeAdd:
-		bin := e.Data.(*ExpressionBinary)
+		bin := this.Data.(*ExpressionBinary)
 		// 0 + a
 		if bin.Left.isNumber() && bin.Left.getDoubleValue() == 0 {
 			return bin.Right
@@ -536,14 +833,14 @@ func (e *Expression) binaryExpressionDependOnSub() *Expression {
 		}
 	case ExpressionTypeSub:
 		// a - 0
-		bin := e.Data.(*ExpressionBinary)
+		bin := this.Data.(*ExpressionBinary)
 		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
 			return bin.Left
 		}
 
 	case ExpressionTypeMul:
 		// a * 0 == 0
-		bin := e.Data.(*ExpressionBinary)
+		bin := this.Data.(*ExpressionBinary)
 		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
 			return bin.Right
 		}
@@ -561,12 +858,12 @@ func (e *Expression) binaryExpressionDependOnSub() *Expression {
 		}
 	case ExpressionTypeDiv:
 		// a / 1 == a
-		bin := e.Data.(*ExpressionBinary)
+		bin := this.Data.(*ExpressionBinary)
 		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 1 {
 			return bin.Left
 		}
 	case ExpressionTypeEq:
-		bin := e.Data.(*ExpressionBinary)
+		bin := this.Data.(*ExpressionBinary)
 		if bin.Left.Value.Type == VariableTypeBool {
 			// true == a
 			if bin.Left.isBoolLiteral(true) {
@@ -578,7 +875,7 @@ func (e *Expression) binaryExpressionDependOnSub() *Expression {
 			}
 		}
 	case ExpressionTypeNe:
-		bin := e.Data.(*ExpressionBinary)
+		bin := this.Data.(*ExpressionBinary)
 		if bin.Left.Value.Type == VariableTypeBool {
 			// false != a
 			if bin.Left.isBoolLiteral(false) {
@@ -590,7 +887,7 @@ func (e *Expression) binaryExpressionDependOnSub() *Expression {
 			}
 		}
 	case ExpressionTypeLogicalAnd:
-		bin := e.Data.(*ExpressionBinary)
+		bin := this.Data.(*ExpressionBinary)
 		// true && a
 		if bin.Left.isBoolLiteral(true) {
 			return bin.Right
@@ -600,7 +897,7 @@ func (e *Expression) binaryExpressionDependOnSub() *Expression {
 			return bin.Left
 		}
 	case ExpressionTypeLogicalOr:
-		bin := e.Data.(*ExpressionBinary)
+		bin := this.Data.(*ExpressionBinary)
 		// false || a
 		if bin.Left.isBoolLiteral(false) {
 			return bin.Right

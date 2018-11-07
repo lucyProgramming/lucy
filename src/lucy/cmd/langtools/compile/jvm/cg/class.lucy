@@ -46,7 +46,7 @@ class Class {
 	InterfaceMethodrefConstants map{string-> ConstPool }
 	MethodTypeConstants         map{string-> ConstPool }
 
-	fn IsSynthetic() -> (b bool) {
+	fn IsSynthetic() -> (is bool) {
 		return (this.AccessFlag & AccClassSynthetic) != 0
 	}
 

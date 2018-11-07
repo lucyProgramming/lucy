@@ -75,7 +75,7 @@ pulic class Type {
 	}
 
 	fn mkDefaultValueExpression() *Expression {
-		e := &Expression{}
+		e := new Expression()
 		e.Op = "defaultValueByCompiler"
 		e.IsCompileAuto = true
 		e.Pos = this.Pos
@@ -114,7 +114,7 @@ pulic class Type {
 		return e
 	}
 
-	fn rightValueValid() error {
+	fn rightValueValid() -> (err error) {
 		if this.Type == VariableTypeBool ||
 			this.IsNumber() ||
 			this.Type == VariableTypeString ||
@@ -129,24 +129,24 @@ pulic class Type {
 		}
 		switch this.Type {
 		case VariableTypePackage:
-			return fmt.Errorf("%s use package '%s' without selector",
-				this.Pos.ErrMsgPrefix(), this.Package.Name)
+			return new error(sprinf("%s use package '%s' without selector",
+				this.Pos.ErrMsgPrefix(), this.Package.Name))
 		case VariableTypeClass:
-			return fmt.Errorf("%s use class '%s' without selector",
-				this.Pos.ErrMsgPrefix(), this.Class.Name)
+			return new error(sprinf("%s use class '%s' without selector",
+				this.Pos.ErrMsgPrefix(), this.Class.Name))
 		case VariableTypeMagicFunction:
-			return fmt.Errorf("%s use '%s' without selector",
-				this.Pos.ErrMsgPrefix(), magicIdentifierFunction)
+			return new error(sprinf("%s use '%s' without selector",
+				this.Pos.ErrMsgPrefix(), magicIdentifierFunction))
 		default:
-			return fmt.Errorf("%s '%s' is not right value valid",
-				this.Pos.ErrMsgPrefix(), this.TypeString())
+			return new error(sprinf("%s '%s' is not right value valid",
+				this.Pos.ErrMsgPrefix(), this.TypeString()))
 		}
 	}
 
 	/*
 		have type or not
 	*/
-	fn isTyped() error {
+	fn isTyped() -> (err error) {
 		if err := this.rightValueValid(); err != null {
 			return err
 		}
@@ -154,8 +154,8 @@ pulic class Type {
 			null is only untyped right value
 		*/
 		if this.Type == VariableTypeNull {
-			return fmt.Errorf("%s '%s' is not typed",
-				this.Pos.ErrMsgPrefix(), this.TypeString())
+			return new error(sprinf("%s '%s' is not typed",
+				this.Pos.ErrMsgPrefix(), this.TypeString()))
 		}
 		return null
 	}
@@ -163,22 +163,23 @@ pulic class Type {
 	/*
 		deep clone
 	*/
-	fn Clone() *Type {
-		ret := &Type{}
-		*ret = *typ
-		if ret.Type == VariableTypeArray ||
-			ret.Type == VariableTypeJavaArray {
-			ret.Array = this.Array.Clone()
+	fn Clone() ->(cloned Type) {
+		cloned = new Type()
+		cloned.Type = this.Type
+
+		//TODO:: 
+		if cloned.Type == VariableTypeArray ||
+			cloned.Type == VariableTypeJavaArray {
+			cloned.Array = this.Array.Clone()
 		}
-		if ret.Type == VariableTypeMap {
-			ret.Map = &Map{}
-			ret.Map.K = this.Map.K.Clone()
-			ret.Map.V = this.Map.V.Clone()
+		if cloned.Type == VariableTypeMap {
+			cloned.Map = new Map()
+			cloned.Map.K = this.Map.K.Clone()
+			cloned.Map.V = this.Map.V.Clone()
 		}
 		if this.Type == VariableTypeFunction {
-			ret.FunctionType = this.FunctionType.Clone()
+			cloned.FunctionType = this.FunctionType.Clone()
 		}
-		return ret
 	}
 
 	fn resolve(block *Block) error {
@@ -305,8 +306,8 @@ pulic class Type {
 		i.Used = true
 		p, err := PackageBeenCompile.load(i.Import)
 		if err != null {
-			return null, fmt.Errorf("%s %v",
-				errMsgPrefix(this.Pos), err)
+			return null, fmt.Errorf("%s %.getMessage()",
+				errMsgPrefix(this.Pos), err.getMessage())
 		}
 		if pp, ok := p.(*Package); ok &&
 			pp != null {
@@ -396,81 +397,75 @@ pulic class Type {
 			this.Type == VariableTypeBool
 	}
 
-	fn typeString(ret *string) {
+	fn typeString(prefix string = "") ->(ret string) {
 		if this.Alias != null {
-			*ret += this.Alias.Name
-			return
+			return prefix + this.Alias.Name
 		}
 		switch this.Type {
 		case VariableTypeBool:
-			*ret += "bool"
+			return prefix +  "bool"
 		case VariableTypeByte:
-			*ret += "byte"
+			return prefix +  "byte"
 		case VariableTypeChar:
-			*ret += "char"
+			return prefix +  "char"
 		case VariableTypeShort:
-			*ret += "short"
+			return prefix +  "short"
 		case VariableTypeInt:
-			*ret += "int"
+			return prefix +  "int"
 		case VariableTypeLong:
-			*ret += "long"
+			return prefix +  "long"
 		case VariableTypeFloat:
-			*ret += "float"
+			return prefix +  "float"
 		case VariableTypeDouble:
-			*ret += "double"
+			return prefix +  "double"
 		case VariableTypeString:
-			*ret += "string"
+			return prefix +  "string"
 		case VariableTypeObject: // class name
-			*ret += "object@" + this.Class.Name
+			return prefix +  "object@" + this.Class.Name
 		case VariableTypeMap:
-			*ret += "map{"
-			*ret += this.Map.K.TypeString()
-			*ret += " -> "
-			*ret += this.Map.V.TypeString()
-			*ret += "}"
+			ret =prefix + "map{"
+			ret += this.Map.K.typeString()
+			ret += " -> "
+			ret += this.Map.V.typeString()
+			ret += "}"
+			return ret 
 		case VariableTypeArray:
-			*ret += "[]"
-			this.Array.typeString(ret)
+			return this.Array.typeString(prefix + "[]")
 		case VariableTypeJavaArray:
 			if this.IsVariableArgs {
-				*ret += this.Array.TypeString() + "..."
+				ret = prefix + this.Array.typeString() + "..."
+				return ret 
 			} else {
-				*ret += this.Array.TypeString() + "[]"
+				ret = prefix + this.Array.typeString() + "[]"
+				return ret 
 			}
 		case VariableTypeFunction:
-			*ret += "fn " + this.FunctionType.TypeString()
+			ret = prefix + "fn " + this.FunctionType.typeString()
+			return 
 		case VariableTypeEnum:
-			*ret += "enum(" + this.Enum.Name + ")"
+			ret = prefix + "enum(" + this.Enum.Name + ")"
 		case VariableTypeClass:
-			*ret += fmt.Sprintf("class@%s", this.Class.Name)
+			ret = prefix + fmt.Sprintf("class@%s", this.Class.Name)
 		case VariableTypeName:
-			*ret += this.Name // resolve wrong, but TypeString is ok to return
+			ret = prefix + this.Name // resolve wrong, but TypeString is ok to return
 		case VariableTypeTemplate:
-			*ret += this.Name
+			ret = prefix + this.Name
 		case VariableTypeDynamicSelector:
-			*ret += "dynamicSelector@" + this.Class.Name
+			ret = prefix + "dynamicSelector@" + this.Class.Name
 		case VariableTypeVoid:
-			*ret += "void"
+			ret = prefix + "void"
 		case VariableTypePackage:
-			*ret += "package@" + this.Package.Name
+			ret = prefix + "package@" + this.Package.Name
 		case VariableTypeNull:
-			*ret += "null"
+			ret = prefix + "null"
 		case VariableTypeGlobal:
-			*ret += this.Name
+			ret = prefix + this.Name
 		case VariableTypeMagicFunction:
-			*ret = magicIdentifierFunction
-		default:
-			panic(this.Type)
+			ret = prefix + magicIdentifierFunction
 		}
 	}
 
-	//可读的类型信息
-	fn TypeString() string {
-		t := ""
-		this.typeString(&t)
-		return t
-	}
-	fn getParameterType(ft *FunctionType) []string {
+	fn getParameterType(ft FunctionType) []string {
 		if this.Type == VariableTypeName &&
 			ft.haveTemplateName(this.Name) {
 			this.Type = VariableTypeTemplate // convert to type
@@ -491,7 +486,7 @@ pulic class Type {
 		return null
 	}
 
-	fn canBeBindWithParameterTypes(parameterTypes map[string]*Type) error {
+	fn canBeBindWithParameterTypes(parameterTypes map[string]Type) error {
 		if this.Type == VariableTypeTemplate {
 			_, ok := parameterTypes[this.Name]
 			if ok == false {
@@ -516,7 +511,7 @@ pulic class Type {
 	/*
 		if there is error,this function will crash
 	*/
-	fn bindWithParameterTypes(ft *FunctionType, parameterTypes map[string]*Type) error {
+	fn bindWithParameterTypes(ft FunctionType, parameterTypes map[string]Type) error {
 		if this.Type == VariableTypeTemplate {
 			t, ok := parameterTypes[this.Name]
 			if ok == false {
@@ -545,7 +540,7 @@ pulic class Type {
 	/*
 
 	 */
-	fn canBeBindWithType(ft *FunctionType, mkParameterTypes map[string]*Type, bind *Type) error {
+	fn canBeBindWithType(ft FunctionType, mkParameterTypes map[string]Type, bind Type) error {
 		if err := bind.rightValueValid(); err != null {
 			return err
 		}
@@ -576,8 +571,8 @@ pulic class Type {
 		return fmt.Errorf("cannot bind '%s' to '%s'", bind.TypeString(), this.TypeString())
 	}
 
-	fn assignAble(errs *[]error, rightValue *Type) bool {
-		leftValue := typ
+	fn assignAble(errs []error, rightValue Type) bool {
+		leftValue := this
 		if leftValue == rightValue { // equal
 			return true
 		}
@@ -618,23 +613,23 @@ pulic class Type {
 		}
 		if leftValue.Type == VariableTypeObject && rightValue.Type == VariableTypeObject { // object
 			if err := leftValue.Class.loadSelf(leftValue.Pos); err != null {
-				*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(rightValue.Pos), err))
+				*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(rightValue.Pos), err.getMessage()))
 				return false
 			}
 			if err := rightValue.Class.loadSelf(rightValue.Pos); err != null {
-				*errs = append(*errs, err)
+				errs.append(err)
 				return false
 			}
 			if leftValue.Class.IsInterface() {
 				i, err := rightValue.Class.implementedInterface(leftValue.Pos, leftValue.Class.Name)
 				if err != null {
-					*errs = append(*errs, err)
+					errs.append(err)
 				}
 				return i
 			} else { // class
 				has, err := rightValue.Class.haveSuperClass(rightValue.Pos, leftValue.Class.Name)
 				if err != null {
-					*errs = append(*errs, err)
+					errs.append(err)
 				}
 				return has
 			}
@@ -642,7 +637,7 @@ pulic class Type {
 		return false
 	}
 
-	fn Equal(compareTo *Type) bool {
+	fn Equal(compareTo Type) bool {
 		leftValue := this
 		if leftValue.Type != compareTo.Type {
 			return false //early check

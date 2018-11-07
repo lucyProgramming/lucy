@@ -1,66 +1,67 @@
  
 
-type StatementIf struct {
-	PrefixExpressions   []*Expression
-	Condition           *Expression
+class StatementIf {
+	PrefixExpressions   []Expression
+	Condition           Expression
 	Pos                 Pos
-	initExpressionBlock Block
+	initExpressionBlock Block = new Block()
 	Block               Block
-	ElseIfList          []*StatementElseIf
-	Else                *Block
-	Exits               []*cg.Exit
-}
-
-func (this *StatementIf) check(father *Block) []error {
-	this.initExpressionBlock.inherit(father)
-	errs := []error{}
-	for _, v := range this.PrefixExpressions {
-		v.IsStatementExpression = true
-		_, es := v.check(&this.initExpressionBlock)
-		errs = append(errs, es...)
-		if err := v.canBeUsedAsStatement(); err != null {
-			errs = append(errs, err)
-		}
-	}
-	if this.Condition != null {
-		conditionType, es := this.Condition.checkSingleValueContextExpression(&this.initExpressionBlock)
-		errs = append(errs, es...)
-		if conditionType != null &&
-			conditionType.Type != VariableTypeBool {
-			errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
-				this.Condition.Pos.ErrMsgPrefix()))
-		}
-		if err := this.Condition.canBeUsedAsCondition(); err != null {
-			errs = append(errs, err)
-		}
-	}
-	this.Block.inherit(&this.initExpressionBlock)
-	errs = append(errs, this.Block.check()...)
-	for _, v := range this.ElseIfList {
-		v.Block.inherit(&this.initExpressionBlock)
-		if v.Condition != null {
-			conditionType, es := v.Condition.checkSingleValueContextExpression(v.Block)
-			errs = append(errs, es...)
-			if err := v.Condition.canBeUsedAsCondition(); err != null {
-				errs = append(errs, err)
+	ElseIfList          []StatementElseIf
+	Else               	Block
+	Exits               []cg.Exit
+	
+	fn check(father Block) -> (errs []error = []error{})  {
+		this.initExpressionBlock.inherit(father)
+		for _, v := range this.PrefixExpressions {
+			v.IsStatementExpression = true
+			_, es := v.check(&this.initExpressionBlock)
+			errs.appendAll(es)
+			if err := v.canBeUsedAsStatement(); err != null {
+				errs.append(err)
 			}
+		}
+		if this.Condition != null {
+			conditionType, es := this.Condition.checkSingleValueContextExpression(&this.initExpressionBlock)
+			errs.appendAll(es)
 			if conditionType != null &&
 				conditionType.Type != VariableTypeBool {
-				errs = append(errs,
-					fmt.Errorf("%s condition is not a bool expression",
-						conditionType.Pos.ErrMsgPrefix()))
+				errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
+					this.Condition.Pos.ErrMsgPrefix()))
 			}
-			errs = append(errs, v.Block.check()...)
+			if err := this.Condition.canBeUsedAsCondition(); err != null {
+				errs.append(err)
+			}
 		}
+		this.Block.inherit(&this.initExpressionBlock)
+		errs = append(errs, this.Block.check()...)
+		for _, v := range this.ElseIfList {
+			v.Block.inherit(&this.initExpressionBlock)
+			if v.Condition != null {
+				conditionType, es := v.Condition.checkSingleValueContextExpression(v.Block)
+				errs.appendAll(es)
+				if err := v.Condition.canBeUsedAsCondition(); err != null {
+					errs.append(err)
+				}
+				if conditionType != null &&
+					conditionType.Type != VariableTypeBool {
+					errs = append(errs,
+						fmt.Errorf("%s condition is not a bool expression",
+							conditionType.Pos.ErrMsgPrefix()))
+				}
+				errs = append(errs, v.Block.check()...)
+			}
+		}
+		if this.Else != null {
+			this.Else.inherit(&this.initExpressionBlock)
+			errs = append(errs, this.Else.check()...)
+		}
+		return errs
 	}
-	if this.Else != null {
-		this.Else.inherit(&this.initExpressionBlock)
-		errs = append(errs, this.Else.check()...)
-	}
-	return errs
 }
 
+
+
 type StatementElseIf struct {
-	Condition *Expression
-	Block     *Block
+	Condition Expression
+	Block     Block
 }

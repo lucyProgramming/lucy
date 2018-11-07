@@ -1,0 +1,213 @@
+
+
+
+
+public enum  ExpressionTypeKind { 
+	ExpressionTypeNull  =1 ,                                     // null
+	ExpressionTypeBool,                                      // true or false
+	ExpressionTypeByte ,                                     // 'a' or 97b
+	ExpressionTypeShort  ,                                   // 100s
+	ExpressionTypeChar  ,                                    // '\u0000'
+	ExpressionTypeInt ,                                      // 100
+	ExpressionTypeLong ,                                     // 100L
+	ExpressionTypeFloat ,                                    // 1.0
+	ExpressionTypeDouble ,                                   // 1.0d
+	ExpressionTypeString ,                                  // "hello world"
+	ExpressionTypeArray ,                                    // []bool{false,true}
+	ExpressionTypeLogicalOr   ,                              // a || b
+	ExpressionTypeLogicalAnd  ,                              // a && b
+	ExpressionTypeOr     ,                                   // a | b
+	ExpressionTypeAnd  ,                                     // a & b
+	ExpressionTypeXor ,                                      // a ^b
+	ExpressionTypeLsh  ,                                     // a << b
+	ExpressionTypeRsh   ,                                    // a >> b
+	ExpressionTypeAdd  ,                                     // a + b
+	ExpressionTypeSub   ,                                    // a - b
+	ExpressionTypeMul  ,                                     // a * b
+	ExpressionTypeDiv   ,                                    // a / b
+	ExpressionTypeMod  ,                                     // a % b
+	ExpressionTypeAssign   ,                                 // a = b
+	ExpressionTypeVarAssign  ,                               // a := b
+	ExpressionTypePlusAssign   ,                             // a += b
+	ExpressionTypeMinusAssign  ,                             // a -= b
+	ExpressionTypeMulAssign   ,                              // a *= b
+	ExpressionTypeDivAssign  ,                               // a /= b
+	ExpressionTypeModAssign  ,                               // a %= b
+	ExpressionTypeAndAssign  ,                               // a &= b
+	ExpressionTypeOrAssign   ,                               // a |= b
+	ExpressionTypeXorAssign  ,                               // a ^= b
+	ExpressionTypeLshAssign  ,                               // a <<= b
+	ExpressionTypeRshAssign  ,                               // a >>= b
+	ExpressionTypeEq   ,                                     // a == b
+	ExpressionTypeNe ,                                       // a != b
+	ExpressionTypeGe ,                                       // a >= b
+	ExpressionTypeGt  ,                                      // a > b
+	ExpressionTypeLe  ,                                      // a <= b
+	ExpressionTypeLt  ,                                      // a < b
+	ExpressionTypeIndex  ,                                   // a["b"]
+	ExpressionTypeSelection ,                                // a.b
+	ExpressionTypeSelectionConst,                            // ::
+	ExpressionTypeMethodCall ,                               // a.b()
+	ExpressionTypeFunctionCall ,                             // a()
+	ExpressionTypeIncrement ,                               // a++
+	ExpressionTypeDecrement  ,                               // a--
+	ExpressionTypePrefixIncrement    ,                       // ++ a
+	ExpressionTypePrefixDecrement ,                          // -- a
+	ExpressionTypeNegative    ,                              // -a
+	ExpressionTypeNot    ,                                   // !a
+	ExpressionTypeBitwiseNot   ,                             // ~a
+	ExpressionTypeIdentifier,                                // a
+	ExpressionTypeNew    ,                                   // new []int(10)
+	ExpressionTypeList    ,                                  // a,b := "hello","world"
+	ExpressionTypeFunctionLiteral  ,                         // fn() { print("hello world"); }
+	ExpressionTypeVar    ,                                   // var a,b int
+	ExpressionTypeConst ,                                    // const a = "hello world"
+	ExpressionTypeCheckCast  ,                               // []byte(str)
+	ExpressionTypeRange    ,                                 // for range
+	ExpressionTypeSlice  ,                                   // arr[0:2]
+	ExpressionTypeMap   ,                                    // map literal
+	ExpressionTypeTypeAssert  ,                              // a.(Object)
+	ExpressionTypeQuestion ,                                 // true ? a : b
+	ExpressionTypeGlobal  ,                                  // global.XXX
+	ExpressionTypeParenthesis ,                              // ( a )
+	ExpressionTypeVArgs ,                                    // a ...
+	ExpressionTypeDot                                       // .
+}
+
+
+
+
+
+
+
+public class ExpressionTypeAssert extends ExpressionTypeConversion{
+	public MultiValueContext bool
+}
+
+
+
+public class ExpressionQuestion  {
+	public Selection Expression
+	public True      Expression
+	public False     Expression
+}
+
+public class ExpressionSlice  {
+	public ExpressionOn Expression
+	public Start, End   Expression
+}
+
+
+public class ExpressionFunctionCall  {
+	public BuildInFunctionMeta      Object // for build in function only
+	public Expression               Expression
+	public Args                     []Expression
+	public VArgs                    CallVariableArgs
+	public Function                 Function
+	public ParameterTypes           []Type // for template function
+	public TemplateFunctionCallPair TemplateFunctionInstance
+}
+
+public class ExpressionMethodCall  {
+	public Class              Class // for object or class
+	public Expression         Expression
+	public Args               []Expression
+	public VArgs              CallVariableArgs
+	public Name               tring
+	public Method             ClassMethod
+	public FieldMethodHandler ClassField
+	/*
+		unSupport !!!!!!
+	*/
+	public ParameterTypes                []*Type
+	public PackageFunction               *Function
+	public PackageGlobalVariableFunction *Variable
+
+	
+}
+
+
+public class ExpressionVar  {
+	public Type       Type
+	public Variables  []Variable
+	public InitValues []Expression
+}
+
+public class ExpressionVarAssign  {
+	public Lefts            []Expression
+	public InitValues       []Expression
+	public IfDeclaredBefore []bool // used for colon assign
+}
+
+public class ExpressionTypeConversion  {
+	public Type       Type
+	public Expression Expression
+}
+
+public class ExpressionIdentifier  {
+	public Name     string
+	public Variable Variable
+	public Function Function
+	public EnumName EnumName
+	public Comment  string
+}
+
+public class ExpressionIndex  {
+	public Expression Expression
+	public Index      Expression
+}
+
+public class ExpressionSelection  {
+	public Expression      Expression
+	public Name            string
+	public Field           ClassField  // expression is class or object
+	public Method          ClassMethod // pack to method handle
+	public PackageFunction Function    // expression is package , pack function to method handle
+	public PackageVariable Variable    // expression is package , get package variable
+	public PackageEnumName EnumName    // expression is package , get enumName
+}
+
+
+public class ExpressionNew  {
+	public Type         Type
+	public Args         CallArgs
+	public Construction ClassMethod
+	public VArgs        CallVariableArgs
+}
+
+public class ExpressionMap  {
+	public Type          Type
+	public KeyValuePairs []ExpressionKV
+}
+
+public class ExpressionKV  {
+	public Key   Expression
+	public Value Expression
+}
+
+/*
+	for some general purpose
+*/
+public class ExpressionBinary  {
+	public Left  Expression
+	public Right Expression
+}
+
+// for package jvm
+public class ExpressionAssign  {
+	public Lefts  []Expression
+	public Values []Expression
+}
+
+public class ExpressionArray  {
+	public Type        Type
+	public Expressions []Expression
+}
+
+
+
+
+
+
+
+

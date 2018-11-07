@@ -7,13 +7,13 @@ public class StatementBreak {
 	SwitchTemplateBlock Block
 	Pos                 Pos
 
-	fn check(block Block) []error {
+	fn check(block Block) ->(errs []error)  {
 		if block.InheritedAttribute.ForBreak == null {
-			return []error{fmt.Errorf("%s 'break' cannot in this scope", this.Pos.ErrMsgPrefix())}
+			return []error{new error(sprintf("%s 'break' cannot in this scope", this.Pos.ErrMsgPrefix()))}
 		}
 		if block.InheritedAttribute.Defer != null {
-			return []error{fmt.Errorf("%s cannot has 'break' in 'defer'",
-				this.Pos.ErrMsgPrefix())}
+			return []error{new error(sprintf("%s cannot has 'break' in 'defer'",
+				this.Pos.ErrMsgPrefix()))}
 		}
 		if t, ok := block.InheritedAttribute.ForBreak.(*StatementFor); ok {
 			this.StatementFor = t
@@ -22,6 +22,7 @@ public class StatementBreak {
 		} else {
 			this.SwitchTemplateBlock = block.InheritedAttribute.ForBreak.(*Block)
 		}
+		this.Defers = []StatementDefer{}
 		this.mkDefers(block)
 		return null
 	}
@@ -29,7 +30,7 @@ public class StatementBreak {
 	fn mkDefers(block Block) {
 		if this.StatementFor != null {
 			if block.IsForBlock {
-				this.Defers = append(this.Defers, block.Defers...)
+				this.Defers.appendAll(block.Defers)
 				return
 			}
 			this.mkDefers(block.Outer)
@@ -37,13 +38,13 @@ public class StatementBreak {
 		} else if this.StatementSwitch != null {
 			//switch
 			if block.IsSwitchBlock {
-				this.Defers = append(this.Defers, block.Defers...)
+				this.Defers.appendAll(block.Defers)
 				return
 			}
 			this.mkDefers(block.Outer)
 		} else { //s.SwitchTemplateBlock != null
 			if block.IsWhenBlock {
-				this.Defers = append(this.Defers, block.Defers...)
+				this.Defers.appendAll(block.Defers)
 				return
 			}
 			this.mkDefers(block.Outer)

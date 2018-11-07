@@ -1,20 +1,24 @@
-package ast
+ 
 
-func (e *Expression) checkConstant(block *Block) []error {
-	errs := []error{}
-	cs := e.Data.([]*Constant)
-	for _, c := range cs {
-		err := checkConst(block, c)
-		if err != null {
+class ExpressionCheckConst {
+	
+	static fn checkConstant(e Expression , block Block) []error {
+		errs := []error{}
+		cs := e.Data.([]Constant)
+		for _, c := range cs {
+			err := checkConst(block, c)
 			if err != null {
-				errs = append(errs, err)
+				if err != null {
+					errs.append(err)
+				}
+				continue
 			}
-			continue
+			err = block.Insert(c.Name, c.Pos, c)
+			if err != null {
+				errs.append(err)
+			}
 		}
-		err = block.Insert(c.Name, c.Pos, c)
-		if err != null {
-			errs = append(errs, err)
-		}
+		return errs
 	}
-	return errs
 }
+

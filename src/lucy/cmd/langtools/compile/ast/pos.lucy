@@ -1,6 +1,6 @@
  
 
-type Pos struct {
+class Pos {
 	Filename string
 	Line     int
 	Column   int
@@ -9,13 +9,14 @@ type Pos struct {
 		for template function only currently
 	*/
 	Offset int
+	fn ErrMsgPrefix() -> (prefix string) {
+		return sprintf("%s:%d:%d:", this.Filename, this.Line, this.Column)
+	}
 }
 
-func (this Pos) ErrMsgPrefix() string {
-	return fmt.Sprintf("%s:%d:%d:", this.Filename, this.Line, this.Column)
-}
 
-type NameWithPos struct {
+
+class NameWithPos {
 	Name string
 	Pos  Pos
 }

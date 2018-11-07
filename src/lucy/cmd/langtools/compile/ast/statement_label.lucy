@@ -1,62 +1,57 @@
-package ast
+ 
 
-import (
-	"errors"
-	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
-
-type StatementLabel struct {
+class StatementLabel {
 	Used                bool
 	CodeOffsetGenerated bool
 	CodeOffset          int
-	Block               *Block
+	Block               Block
 	Name                string
-	Exits               []*cg.Exit
-	Statement           *Statement
+	Exits               []cg.Exit
+	Statement           Statement
 	Pos                 Pos
-}
-
-/*
+	/*
 	defer {
 		xxx:
 	}
 	defer block could be compile multi times,
 	should reset the label
-*/
-func (this *StatementLabel) Reset() {
-	this.CodeOffsetGenerated = false
-	this.CodeOffset = -1
-	this.Exits = []*cg.Exit{}
-}
-
-// check this label is read to goto
-func (this *StatementLabel) Ready(from Pos) error {
-	ss := []*Statement{}
-	for _, v := range this.Block.Statements {
-		if v.StatementLabel == this { // this is me
-			break
-		}
-		if v.isVariableDefinition() && v.Checked == false {
-			ss = append(ss, v)
-		}
+	*/
+	fn Reset() {
+		this.CodeOffsetGenerated = false
+		this.CodeOffset = -1
+		this.Exits = []*cg.Exit{}
 	}
-	if len(ss) == 0 {
-		return null
-	}
-	/*
-		if false {
-			if true {
-				// jump over variable definition not allow
-				goto some ;
+	
+	// check this label is read to goto
+	fn Ready(from Pos) ->(err error) {
+		ss := []Statement{}
+		for _, v := range this.Block.Statements {
+			if v.StatementLabel == this { // this is me
+				break
+			}
+			if v.isVariableDefinition() && v.Checked == false {
+				ss = append(ss, v)
 			}
 		}
-		a := false ;
-		some:
-	*/
-	errMsg := fmt.Sprintf("%s cannot jump over variable definition:\n", from.ErrMsgPrefix())
-	for _, v := range ss {
-		errMsg += fmt.Sprintf("\t%s constains variable definition\n", v.Pos.ErrMsgPrefix())
+		if len(ss) == 0 {
+			return null
+		}
+		/*
+			if false {
+				if true {
+					// jump over variable definition not allow
+					goto some ;
+				}
+			}
+			a := false ;
+			some:
+		*/
+		errMsg := sprintf("%s cannot jump over variable definition:\n", from.ErrMsgPrefix())
+		for _, v := range ss {
+			errMsg += sprintf("\t%s constains variable definition\n", v.Pos.ErrMsgPrefix())
+		}
+		return new error(errMsg)
 	}
-	return errors.New(errMsg)
 }
+
+

@@ -1,9 +1,4 @@
-package ast
-
-import (
-	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
+ 
 
 func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 	bin := e.Data.(*ExpressionBinary)
@@ -85,7 +80,7 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 			vd.Type = variableType.Clone()
 			vd.Type.Pos = e.Pos
 			if err := variableType.isTyped(); err != null {
-				*errs = append(*errs, err)
+				errs.append(err)
 			}
 			if e.IsGlobal {
 				err = PackageBeenCompile.Block.Insert(vd.Name, v.Pos, vd)
@@ -95,7 +90,7 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 			}
 			identifier.Variable = vd
 			if err != null {
-				*errs = append(*errs, err)
+				errs.append(err)
 				continue
 			}
 			if e.IsPublic { // only use when is is global

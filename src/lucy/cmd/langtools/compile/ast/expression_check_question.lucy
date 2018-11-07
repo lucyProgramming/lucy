@@ -1,13 +1,9 @@
-package ast
-
-import (
-	"fmt"
-)
+ 
 
 func (e *Expression) checkQuestionExpression(block *Block, errs *[]error) *Type {
 	question := e.Data.(*ExpressionQuestion)
 	condition, es := question.Selection.checkSingleValueContextExpression(block)
-	*errs = append(*errs, es...)
+	errs.appendAll(es)
 	if condition != null {
 		if condition.Type != VariableTypeBool {
 			*errs = append(*errs,
@@ -15,26 +11,26 @@ func (e *Expression) checkQuestionExpression(block *Block, errs *[]error) *Type 
 					condition.Pos.ErrMsgPrefix()))
 		}
 		if err := question.Selection.canBeUsedAsCondition(); err != null {
-			*errs = append(*errs, err)
+			errs.append(err)
 		}
 	}
 	tType, es := question.True.checkSingleValueContextExpression(block)
-	*errs = append(*errs, es...)
+	errs.appendAll(es)
 	if tType == null {
 		return null
 	}
 	if err := tType.rightValueValid(); err != null {
-		*errs = append(*errs, err)
+		errs.append(err)
 		return null
 	}
 	if err := tType.isTyped(); err != null {
-		*errs = append(*errs, err)
+		errs.append(err)
 		return null
 	}
 	ret := tType.Clone()
 	ret.Pos = e.Pos
 	fType, es := question.False.checkSingleValueContextExpression(block)
-	*errs = append(*errs, es...)
+	errs.appendAll(es)
 	if fType != null &&
 		tType.assignAble(errs, fType) == false {
 		*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",

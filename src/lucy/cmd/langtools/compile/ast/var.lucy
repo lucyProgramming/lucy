@@ -32,7 +32,7 @@ fn isMagicIdentifier(name string) ->(is bool)  {
 }
 
  
-var 	ImportsLoader       LoadImport
+var ImportsLoader       LoadImport
 var	 PackageBeenCompile = new  Package()
 var	buildInFunctionsMap = make map {string -> Function }()
 var	lucyBuildInPackage  Package
@@ -43,18 +43,14 @@ var	LucyBytesType       Type // []byte
 var	JavaBytesType        Type // byte[]
  
 {
-	LucyBytesType = &Type{
-		Type: VariableTypeArray,
-		Array: &Type{
-			Type: VariableTypeByte,
-		},
-	}
-	JavaBytesType = &Type{
-		Type: VariableTypeJavaArray,
-		Array: &Type{
-			Type: VariableTypeByte,
-		},
-	}
+	LucyBytesType = new Type()
+	LucyBytesType.Type = VariableTypeArray
+	LucyBytesType.Array = new Type()
+	LucyBytesType.Array.Type = VariableTypeByte
+	JavaBytesType = new Type()
+	JavaBytesType.Type = VariableTypeJavaArray
+	JavaBytesType.Array = new Type()
+	JavaBytesType.Array.Type = VariableTypeByte
 }
 
 fn loadJavaStringClass(pos Pos) error {
@@ -69,7 +65,6 @@ fn loadJavaStringClass(pos Pos) error {
 		javaStringClass = cc
 		return null
 	} else {
-		return fmt.Errorf("%s '%s' is not class",
-			pos.ErrMsgPrefix(), JavaStringClass)
+		panic("loaded java string class is not a class")
 	}
 }

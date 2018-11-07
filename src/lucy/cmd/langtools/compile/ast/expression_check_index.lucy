@@ -1,77 +1,74 @@
-package ast
 
-import (
-	"fmt"
-)
+ class ExpressionCheckIndex {
 
-func (e *Expression) checkIndexExpression(block *Block, errs *[]error) *Type {
-	index := e.Data.(*ExpressionIndex)
-	on, es := index.Expression.checkSingleValueContextExpression(block)
-	*errs = append(*errs, es...)
-	if on == null {
-		return null
-	}
-	switch on.Type {
-	case VariableTypeArray,
-		VariableTypeJavaArray:
-		indexType, es := index.Index.checkSingleValueContextExpression(block)
-		*errs = append(*errs, es...)
-		if indexType != null {
-			if indexType.isInteger() {
-				if indexType.Type == VariableTypeLong {
-					index.Index.convertToNumberType(VariableTypeInt) //  convert to int
-				}
-				if index.Index.isLiteral() {
-					indexValue := index.Index.getLongValue()
-					if indexValue < 0 {
-						*errs = append(*errs,
-							fmt.Errorf("%s index '%d' is negative",
-								index.Index.Pos.ErrMsgPrefix(), indexValue))
+	static fn check(e Expression , block Block, errs []error) -> (valueType Type) {
+		index := e.Data.(ExpressionIndex)
+		on, es := index.Expression.checkSingleValueContextExpression(block)
+		errs.appendAll(es)
+		if on == null {
+			return null
+		}
+		switch on.Type {
+		case VariableTypeArray,
+			VariableTypeJavaArray:
+			indexType, es := index.Index.checkSingleValueContextExpression(block)
+			errs.appendAll(es)
+			if indexType != null {
+				if indexType.isInteger() {
+					if indexType.Type == VariableTypeLong {
+						index.Index.convertToNumberType(VariableTypeInt) //  convert to int
 					}
+					if index.Index.isLiteral() {
+						indexValue := index.Index.getLongValue()
+						if indexValue < 0 {
+							errs.append(new error(sprintf("%s index '%d' is negative",
+									index.Index.Pos.ErrMsgPrefix(), indexValue)))
+						}
+					}
+				} else {
+					errs.append(new error(sprintf("%s only integer can be used as index,but '%s'",
+							index.Index.Pos.ErrMsgPrefix(), indexType.TypeString())))
 				}
-			} else {
-				*errs = append(*errs,
-					fmt.Errorf("%s only integer can be used as index,but '%s'",
-						index.Index.Pos.ErrMsgPrefix(), indexType.TypeString()))
 			}
-		}
-		result := on.Array.Clone()
-		result.Pos = e.Pos
-		return result
-	case VariableTypeMap:
-		result := on.Map.V.Clone()
-		result.Pos = e.Pos
-		indexType, es := index.Index.checkSingleValueContextExpression(block)
-		*errs = append(*errs, es...)
-		if indexType == null {
-			return result
-		}
-		if on.Map.K.assignAble(errs, indexType) == false {
-			*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s' for index",
-				index.Index.Pos.ErrMsgPrefix(), indexType.TypeString(), on.Map.K.TypeString()))
-		}
-		return result
-	case VariableTypeString:
-		indexType, es := index.Index.checkSingleValueContextExpression(block)
-		*errs = append(*errs, es...)
-		if indexType != null {
-			if indexType.isInteger() {
-				if indexType.Type == VariableTypeLong {
-					index.Index.convertToNumberType(VariableTypeInt) //  convert to int
+			valueType = on.Array.Clone()
+			valueType.Pos = e.Pos
+			return  
+		case VariableTypeMap:
+			valueType = on.Map.V.Clone()
+			valueType.Pos = e.Pos
+			indexType, es := index.Index.checkSingleValueContextExpression(block)
+			errs.appendAll(es)
+			if indexType == null {
+				return  
+			}
+			if on.Map.K.assignAble(errs, indexType) == false {
+				errs.append(new error(sprintf("%s cannot use '%s' as '%s' for index",
+					index.Index.Pos.ErrMsgPrefix(), indexType.TypeString(), on.Map.K.TypeString())))
+			}
+			return  
+		case VariableTypeString:
+			indexType, es := index.Index.checkSingleValueContextExpression(block)
+			errs.appendAll(es)
+			if indexType != null {
+				if indexType.isInteger() {
+					if indexType.Type == VariableTypeLong {
+						index.Index.convertToNumberType(VariableTypeInt) //  convert to int
+					}
+				} else {
+					errs.append(new error(sprintf("%s only integer can be used as index,but '%s'",
+						index.Index.Pos.ErrMsgPrefix(), indexType.TypeString())))
 				}
-			} else {
-				*errs = append(*errs, fmt.Errorf("%s only integer can be used as index,but '%s'",
-					index.Index.Pos.ErrMsgPrefix(), indexType.TypeString()))
 			}
+			valueType = new Type()
+			valueType.Type = VariableTypeByte,
+			valueType.Pos =   e.Pos,
+			return 
+		default:
+			errs.append(new error(sprintf("%s cannot index '%s'",
+				on.Pos.ErrMsgPrefix(), on.TypeString())))
+			return null
 		}
-		result := &Type{
-			Type: VariableTypeByte,
-			Pos:  e.Pos,
-		}
-		return result
-	default:
-		*errs = append(*errs, fmt.Errorf("%s cannot index '%s'",
-			on.Pos.ErrMsgPrefix(), on.TypeString()))
-		return null
-	}
+	}	
+	
 }
+

@@ -14,24 +14,23 @@ class StatementWhen {
 	/*
 		switchStatement will be override
 	*/
-	fn check(block Block, switchStatement Statement) (errs []error) {
+	fn check(block Block, switchStatement Statement) -> (errs []error = []error{}) {
 		if this.Condition == null { // must be a error must parse stage
-			return null
+			return  
 		}
-		errs = []error{}
-		if len(this.Condition.getParameterType(&block.InheritedAttribute.Function.Type)) == 0 {
-			errs = append(errs, fmt.Errorf("%s '%s' constains no parameter type",
-				this.Condition.Pos.ErrMsgPrefix(), this.Condition.TypeString()))
+		if len(this.Condition.getParameterType(block.InheritedAttribute.Function.Type)) == 0 {
+			errs.append(new error(sprintf("%s '%s' constains no parameter type",
+				this.Condition.Pos.ErrMsgPrefix(), this.Condition.TypeString())))
 			return errs
 		}
 		if err := this.Condition.resolve(block); err != null {
-			errs = append(errs, err)
+			errs.append(err)
 			return
 		}
 		var match Type
 		var matchBlock Block
 		typesChecked := []Type{}
-		checkExists := func(ts []Type, t Type) *Type {
+		checkExists := fn(ts []Type, t Type) ->(t Type) {
 			for _, v := range ts {
 				if v.Equal(t) {
 					return v
@@ -42,17 +41,17 @@ class StatementWhen {
 		for _, t := range this.Cases {
 			for _, tt := range t.Matches {
 				if err := tt.resolve(block); err != null {
-					errs = append(errs, err)
+					errs.append(err)
 					continue
 				}
 				if exist := checkExists(typesChecked, tt); exist != null {
-					errMsg := fmt.Sprintf("%s match '%s' already exist,first declared at:\n",
+					errMsg := sprintf("%s match '%s' already exist,first declared at:\n",
 						errMsgPrefix(tt.Pos), tt.TypeString())
-					errMsg += fmt.Sprintf("\t %s", errMsgPrefix(exist.Pos))
-					errs = append(errs, errors.New(errMsg))
+					errMsg += sprintf("\t %s", errMsgPrefix(exist.Pos))
+					errs = append(errs, new error(errMsg))
 					return
 				}
-				typesChecked = append(typesChecked, tt)
+				typesChecked.append(tt)
 				if this.Condition.Equal(tt) == false {
 					//no match here
 					continue
@@ -69,16 +68,15 @@ class StatementWhen {
 		}
 		if match == null {
 			if this.Default == null {
-				errs = append(errs,
-					fmt.Errorf("%s condition resolve as '%s' has no match and no 'default block'",
-						errMsgPrefix(this.Condition.Pos), this.Condition.TypeString()))
+				errs.append(new error(("%s condition resolve as '%s' has no match and no 'default block'",
+						errMsgPrefix(this.Condition.Pos), this.Condition.TypeString())))
 			} else {
 				switchStatement.Type = StatementTypeBlock
 				switchStatement.Block = this.Default
 				switchStatement.Block.inherit(block)
 				switchStatement.Block.IsWhenBlock = true
 				switchStatement.Block.InheritedAttribute.ForBreak = switchStatement.Block
-				errs = append(errs, switchStatement.Block.check()...)
+				errs.appendAll (switchStatement.Block.check())
 			}
 			return
 		}
@@ -92,7 +90,8 @@ class StatementWhen {
 			switchStatement.Block.inherit(block)
 			switchStatement.Block.IsWhenBlock = true
 			switchStatement.Block.InheritedAttribute.ForBreak = switchStatement.Block
-			return append(errs, switchStatement.Block.check()...)
+			errs.appendAll(switchStatement.Block.check())
+			return 
 		}
 	}	
 }

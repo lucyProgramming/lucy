@@ -1,11 +1,9 @@
-package ast
-
-import "fmt"
+ 
 
 func (e *Expression) checkSelectConstExpression(block *Block, errs *[]error) *Type {
 	selection := e.Data.(*ExpressionSelection)
 	object, es := selection.Expression.checkSingleValueContextExpression(block)
-	*errs = append(*errs, es...)
+	errs.appendAll(es)
 	if object == null {
 		return null
 	}
