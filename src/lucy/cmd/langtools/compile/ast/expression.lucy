@@ -99,7 +99,6 @@ class Expression {
 		c.Expression.Value = this.Value
 		c.Expression.Type = this.Type
 		c.Expression.Data = this.Data
-
 		c.Type = to
 		this.Value = to
 		this.Type = ExpressionTypeCheckCast
