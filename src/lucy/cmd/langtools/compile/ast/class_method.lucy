@@ -3,7 +3,7 @@ class ClassMethod {
 	IsCompilerAuto bool
 	Function       Function
 
-	fn narrowDownAccessRange(implementation *ClassMethod) ->(is bool ) {
+	fn narrowDownAccessRange(implementation ClassMethod) ->(is bool ) {
 		if m.IsPublic() {
 			return !implementation.IsPublic()
 		}
@@ -102,7 +102,7 @@ class ClassMethod {
 
 	fn implementationMethodIsOk(
 		pos Pos,
-		implementation *ClassMethod) ->(err error) {
+		implementation ClassMethod) ->(err error) {
 		if implementation.Function.Pos != null {
 			pos = implementation.Function.Pos
 		}
