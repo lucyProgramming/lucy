@@ -47,7 +47,7 @@ class Class {
     fn IsPublic() -> (is bool)  {
         return this.AccessFlags&cg.AccClassPublic != 0
     }
-
+    
     fn loadSelf(pos Pos) -> (err error) {
         if this.NotImportedYet == false { // current compile class
             return null

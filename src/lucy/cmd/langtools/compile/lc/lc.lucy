@@ -23,7 +23,7 @@ public class Compiler {
 	lucyPaths         []string
 	ClassPaths        []string
 	Maker             jvm.BuildPackage = new jvm.BuildPackage()
-
+	
 	fn shouldExit() {
 		if len(compiler.Errs) > compiler.NErrs2StopCompile {
 			this.exit()
