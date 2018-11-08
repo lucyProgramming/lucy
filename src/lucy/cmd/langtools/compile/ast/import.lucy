@@ -1,0 +1,51 @@
+
+class Import {
+	Alias  string
+	Import string // full name
+	Pos    Pos
+	Used   bool
+	/*
+		import "github.com/lucy" should access by lucy.doSomething()
+		import "github.com/std" as std2 should access by std2.doSomething()
+	*/
+	fn MkAccessName() -> (err error) {
+		if this.Alias != "" {
+			return null
+		}
+		if false == PackageNameIsValid(this.Import) {
+			return new error(sprintf("%s '%s' is not a valid name",
+				this.Pos.ErrMsgPrefix(), this.Import))
+		}
+		this.Alias = filepath.Base(this.Import)
+		return null
+	}
+}
+
+//different from different source file
+class SourceFile {
+	Imports            map { string -> Import }  // accessName -> *Import
+	ImportsByResources map { string -> Import }  // resourceName -> *Import
+	fn insertImport(i Import) ->(err error)  {
+		if this.Imports == null {
+			this.Imports = new  map { string -> Import }()
+		}
+		if this.ImportsByResources == null {
+			this.ImportsByResources =new map { string -> Import }()
+		}
+		if err := i.MkAccessName(); err != null {
+			return err
+		}
+		if this.Imports.keyExist(i.Import){
+			return new error(sprintf("%s '%s' reimported",
+				i.Pos.ErrMsgPrefix(), i.Import))
+		}
+		if this.ImportsByResources.keyExist(i.Alias) {
+			return new error(sprintf("%s '%s' reimported",
+				i.Pos.ErrMsgPrefix(), i.Alias))
+		}
+		this.Imports[i.Import] = i
+		this.Imports[i.Alias] = i
+		return null
+	}
+}
+

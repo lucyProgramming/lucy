@@ -4,11 +4,11 @@ import "gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 
 func (this *BuildExpression) buildSelection(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	selection := e.Data.(*ast.ExpressionSelection)
 
 	// check cast to super class

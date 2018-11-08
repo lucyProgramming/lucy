@@ -17,17 +17,16 @@ class ExpressionCheckMap {
 			return null
 		}
 		if m.Type == null {
-			m.Type = &Type{}
+			m.Type = new Type()
 			m.Type.Pos = e.Pos
 			m.Type.Type = VariableTypeMap
 		}
 		if m.Type.Map == null {
-			m.Type.Map = &Map{}
+			m.Type.Map = new Map()
 		}
-		longMap := make(map[int64]Pos)
-		floatMap := make(map[float32]Pos)
-		doubleMap := make(map[float64]Pos)
-		stringMap := make(map[string]Pos)
+		longMap := new map { long -> Pos }  ()
+		doubleMap := new map { double -> Pos } ()
+		stringMap := new map { string-> Pos }()
 		for _, v := range m.KeyValuePairs {
 			// map k
 			kType, es := v.Key.checkSingleValueContextExpression(block)
@@ -62,49 +61,35 @@ class ExpressionCheckMap {
 			if m.Type.Map.K != null &&
 				v.Key.isLiteral() &&
 				m.Type.Map.K.Type == v.Key.Value.Type {
-				errMsg := func(pos Pos, first Pos, which interface{}) error {
-					errMsg := fmt.Sprintf("%s  '%v' duplicate key,first declared at:\n",
+				fn errMsg (pos Pos, first Pos, which string) -> (err error) {
+					errMsg := sprintf("%s  '%s' duplicate key,first declared at:\n",
 						pos.ErrMsgPrefix(), which)
-					errMsg += fmt.Sprintf("\t%s", errMsgPrefix(first))
+					errMsg += sprintf("\t%s", errMsgPrefix(first))
 					return new error(errMsg)
 				}
 				switch m.Type.Map.K.Type {
-				case VariableTypeByte:
-					fallthrough
-				case VariableTypeChar:
-					fallthrough
-				case VariableTypeShort:
-					fallthrough
-				case VariableTypeInt:
-					fallthrough
-				case VariableTypeLong:
-					value := v.Key.Data.(int64)
-					if first, ok := longMap[value]; ok {
-						errs.append(errMsg(v.Key.Pos, first, v.Key.Data))
+				case VariableTypeByte ,VariableTypeChar , VariableTypeShort , VariableTypeInt , VariableTypeLong:
+					value := v.Key.longValue
+					if first := longMap[value]; first != null {
+						errs.append(errMsg(v.Key.Pos, first, ""+value))
 					} else {
 						longMap[value] = v.Key.Pos
 					}
-				case VariableTypeFloat:
-					value := v.Key.Data.(float32)
-					if first, ok := floatMap[value]; ok {
-						errs.append(errMsg(v.Key.Pos, first, v.Key.Data))
-					} else {
-						floatMap[value] = v.Key.Pos
-					}
-				case VariableTypeDouble:
-					value := v.Key.Data.(float64)
-					if first, ok := doubleMap[value]; ok {
-						errs.append(errMsg(v.Key.Pos, first, v.Key.Data))
+				case VariableTypeFloat ,VariableTypeDouble :
+					value := v.Key.doubleValue
+					if first := doubleMap[value]; first != null {
+						errs.append(errMsg(v.Key.Pos, first, value + ""))
 					} else {
 						doubleMap[value] = v.Key.Pos
 					}
 				case VariableTypeString:
 					value := v.Key.Data.(string)
-					if first, ok := stringMap[value]; ok {
-						errs.append(errMsg(v.Key.Pos, first, v.Key.Data))
+					if first := stringMap[value]; first != null {
+						errs.append(errMsg(v.Key.Pos, first, value))
 					} else {
 						stringMap[value] = v.Key.Pos
 					}
+				default:
 				}
 			}
 			// map v
@@ -140,16 +125,14 @@ class ExpressionCheckMap {
 			}
 		}
 		if m.Type.Map.K == null {
-			m.Type.Map.K = &Type{
-				Type: VariableTypeVoid,
-				Pos:  e.Pos,
-			}
+			m.Type.Map.K = new Type ()
+			m.Type.Map.K.Type = VariableTypeVoid
+			m.Type.Map.K.Pos = e.Pos
 		}
 		if m.Type.Map.V == null {
-			m.Type.Map.V = &Type{
-				Type: VariableTypeVoid,
-				Pos:  e.Pos,
-			}
+			m.Type.Map.V = new Type()
+			m.Type.Map.V.Type = VariableTypeVoid
+			m.Type.Map.V.Pos = e.Pos
 		}
 		return m.Type
 	}

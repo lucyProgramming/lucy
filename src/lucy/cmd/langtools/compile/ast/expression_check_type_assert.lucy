@@ -3,8 +3,8 @@ class ExpressionCheckTypeAssert {
 	
 	
 	static fn checkTypeAssert(e Expression , block Block, errs []error) -> (valueTypes []Type) {
-		assert := e.Data.(ExpressionTypeAssert)
-		object, es := assert.Expression.checkSingleValueContextExpression(block)
+		assertion := e.Data.(ExpressionTypeAssert)
+		object, es := assertion.Expression.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if object == null {
 			return null
@@ -18,27 +18,27 @@ class ExpressionCheckTypeAssert {
 					errMsgPrefix(object.Pos))))
 			return null
 		}
-		err := assert.Type.resolve(block)
+		err := assertion.Type.resolve(block)
 		if err != null {
 			errs.append(err)
 			return null
 		}
-		if assert.Type.validForTypeAssertOrConversion() == false {
+		if assertion.Type.validForTypeAssertOrConversion() == false {
 			errs . append(new error( sprintf("%s cannot use '%s' for type assertion",
-					errMsgPrefix(assert.Type.Pos), assert.Type.TypeString())))
+					errMsgPrefix(assertion.Type.Pos), assertion.Type.TypeString())))
 			return null
 		}
 		if len(e.Lefts) > 1 {
-			assert.MultiValueContext = true
+			assertion.MultiValueContext = true
 			valueTypes = new []Type(2)
-			valueTypes[0] = assert.Type.Clone()
+			valueTypes[0] = assertion.Type.Clone()
 			valueTypes[0].Pos = e.Pos
 			valueTypes[1] = new Type()
 			valueTypes[1].Pos = e.Pos
 			valueTypes[1].Type = VariableTypeBool // if  assert is ok
 		} else {
 			valueTypes = new []Type(1)
-			valueTypes[0] = assert.Type.Clone()
+			valueTypes[0] = assertion.Type.Clone()
 			valueTypes[0].Pos = e.Pos
 		}
 	}

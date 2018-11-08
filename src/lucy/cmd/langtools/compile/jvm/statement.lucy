@@ -7,12 +7,12 @@ import (
 )
 
 func (this *BuildPackage) buildStatement(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
 	block *ast.Block,
 	s *ast.Statement,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	context Context,
+	state StackMapState) (maxStack char) {
 	//fmt.Println(s.Pos)
 	switch s.Type {
 	case ast.StatementTypeExpression:
@@ -111,8 +111,8 @@ func (this *BuildPackage) buildStatement(
 	return
 }
 
-func (this *BuildPackage) buildDefers(class *cg.ClassHighLevel,
-	code *cg.AttributeCode, context *Context, ds []*ast.StatementDefer, from *StackMapState) {
+func (this *BuildPackage) buildDefers(class cg.ClassHighLevel,
+	code cg.AttributeCode, context Context, ds []*ast.StatementDefer, from StackMapState) {
 	if len(ds) == 0 {
 		return
 	}
@@ -120,15 +120,15 @@ func (this *BuildPackage) buildDefers(class *cg.ClassHighLevel,
 	code.CodeLength++
 	index := len(ds) - 1
 	for index >= 0 { // build defer,cannot have return statement is defer
-		state := ds[index].StackMapState.(*StackMapState)
+		state := ds[index].StackMapState.(StackMapState)
 		state = (&StackMapState{}).initFromLast(state) // clone
 		state.addTop(from)
 		state.pushStack(class, state.newObjectVariableType(throwableClass))
 		context.MakeStackMap(code, state, code.CodeLength)
 		e := &cg.ExceptionTable{}
-		e.StartPc = uint16(ds[index].StartPc)
-		e.EndPc = uint16(code.CodeLength)
-		e.HandlerPc = uint16(code.CodeLength)
+		e.StartPc = char(ds[index].StartPc)
+		e.EndPc = char(code.CodeLength)
+		e.HandlerPc = char(code.CodeLength)
 		if ds[index].ExceptionClass == nil {
 			e.CatchType = class.Class.InsertClassConst(ast.DefaultExceptionClass)
 		} else {

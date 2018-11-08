@@ -8,19 +8,19 @@ import (
 type Context struct {
 	class                   *ast.Class
 	function                *ast.Function
-	exceptionVarOffset      uint16
-	multiValueVarOffset     uint16
+	exceptionVarOffset      char
+	multiValueVarOffset     char
 	currentSourceFile       string
 	currentLineNumber       int
 	Defer                   *ast.StatementDefer
-	lastStackMapState       *StackMapState
+	lastStackMapState       StackMapState
 	lastStackMapStateLocals []*cg.StackMapVerificationTypeInfo
 	lastStackMapStateStacks []*cg.StackMapVerificationTypeInfo
 	lastStackMapOffset      int
 	stackMapOffsets         []int
 }
 
-func (this *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapState, offset int) {
+func (this Context) MakeStackMap(code cg.AttributeCode, state StackMapState, offset int) {
 	if this.lastStackMapOffset == offset {
 		code.AttributeStackMap.StackMaps =
 			code.AttributeStackMap.StackMaps[0 : len(code.AttributeStackMap.StackMaps)-1]
@@ -32,14 +32,14 @@ func (this *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapState, 
 			this.lastStackMapOffset = -1
 		}
 	}
-	var delta uint16
+	var delta char
 	if this.lastStackMapOffset == -1 {
 		/*
 			first one
 		*/
-		delta = uint16(offset)
+		delta = char(offset)
 	} else {
-		delta = uint16(offset - this.lastStackMapOffset - 1)
+		delta = char(offset - this.lastStackMapOffset - 1)
 	}
 	defer func() {
 		this.lastStackMapOffset = offset // rewrite
@@ -106,10 +106,10 @@ func (this *Context) MakeStackMap(code *cg.AttributeCode, state *StackMapState, 
 	return
 }
 
-func (this *Context) appendLimeNumberAndSourceFile(
+func (this Context) appendLimeNumberAndSourceFile(
 	pos *ast.Pos,
-	code *cg.AttributeCode,
-	class *cg.ClassHighLevel) {
+	code cg.AttributeCode,
+	class cg.ClassHighLevel) {
 	if pos == nil {
 		return
 	}

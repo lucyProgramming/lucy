@@ -1,4 +1,5 @@
- 
+import "java/lang/Object"
+
 class ClosureMeta {
 	pos Pos
 }

@@ -44,7 +44,7 @@ func (this *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			this.parser.token.Type == lex.TokenLc {
 			return nil
 		}
-		return fmt.Errorf("%s not valid token '%s' after defer",
+		return new error(sprintf("%s not valid token '%s' after defer",
 			this.parser.errMsgPrefix(), this.parser.token.Description)
 	}
 	var err error
@@ -191,7 +191,7 @@ func (this *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 		case lex.TokenReturn:
 			if isGlobal {
 				this.parser.errs = append(this.parser.errs,
-					fmt.Errorf("%s 'return' cannot used in packge init block",
+					new error(sprintf("%s 'return' cannot used in packge init block",
 						this.parser.errMsgPrefix()))
 			}
 			st := &ast.StatementReturn{
@@ -214,7 +214,7 @@ func (this *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 				this.Next(lfNotToken)
 				continue
 			}
-			var es []*ast.Expression
+			var es []ast.Expression
 			es, err = this.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
 			if err != nil {
 				this.consume(untilSemicolonOrLf)
@@ -231,7 +231,7 @@ func (this *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			this.parseStatementList(&newBlock, false)
 			this.parser.ifTokenIsLfThenSkip()
 			if this.parser.token.Type != lex.TokenRc {
-				this.parser.errs = append(this.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
+				this.parser.errs = append(this.parser.errs, new error(sprintf("%s expect '}', but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.Description))
 				this.consume(untilRc)
 			}
@@ -257,7 +257,7 @@ func (this *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 		case lex.TokenPass:
 			if isGlobal == false {
 				this.parser.errs = append(this.parser.errs,
-					fmt.Errorf("%s 'pass' can only be used in package init block",
+					new error(sprintf("%s 'pass' can only be used in package init block",
 						this.parser.errMsgPrefix()))
 			}
 			pos := this.parser.mkPos()
@@ -297,7 +297,7 @@ func (this *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			this.Next(lfIsToken) // skip goto key word
 			if this.parser.token.Type != lex.TokenIdentifier {
 				this.parser.errs = append(this.parser.errs,
-					fmt.Errorf("%s  missing identifier after goto statement, but '%s'",
+					new error(sprintf("%s  missing identifier after goto statement, but '%s'",
 						this.parser.errMsgPrefix(), this.parser.token.Description))
 				this.consume(untilSemicolonOrLf)
 				this.Next(lfNotToken)
@@ -368,7 +368,7 @@ func (this *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
 			}
 		case lex.TokenElse, lex.TokenElseif:
 			this.parser.errs = append(this.parser.errs,
-				fmt.Errorf("%s unexpected '%s'", this.parser.errMsgPrefix(), this.parser.token.Description))
+				new error(sprintf("%s unexpected '%s'", this.parser.errMsgPrefix(), this.parser.token.Description))
 			this.Next(lfIsToken)
 
 		default:
@@ -392,7 +392,7 @@ func (this *BlockParser) parseExpressionStatement(block *ast.Block, isDefer bool
 		//lable found , good...
 		if isDefer {
 			this.parser.errs = append(this.parser.errs,
-				fmt.Errorf("%s defer mixup with statement lable has no meaning",
+				new error(sprintf("%s defer mixup with statement lable has no meaning",
 					this.parser.errMsgPrefix()))
 		}
 		isLabel = true
@@ -400,7 +400,7 @@ func (this *BlockParser) parseExpressionStatement(block *ast.Block, isDefer bool
 		this.Next(lfIsToken) // skip :
 		if this.parser.token.Type != lex.TokenLf {
 			this.parser.errs = append(this.parser.errs,
-				fmt.Errorf("%s expect new line",
+				new error(sprintf("%s expect new line",
 					this.parser.errMsgPrefix()))
 		}
 		statement := &ast.Statement{}

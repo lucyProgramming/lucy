@@ -12,7 +12,7 @@ func (this *BlockParser) parseIf() (statementIf *ast.StatementIf, err error) {
 		Pos: this.parser.mkPos(),
 	}
 	this.Next(lfIsToken) // skip if
-	var condition *ast.Expression
+	var condition ast.Expression
 	this.parser.unExpectNewLineAndSkip()
 	condition, err = this.parser.ExpressionParser.parseExpression(true)
 	if err != nil {
@@ -34,7 +34,7 @@ func (this *BlockParser) parseIf() (statementIf *ast.StatementIf, err error) {
 	}
 	this.parser.ifTokenIsLfThenSkip()
 	if this.parser.token.Type != lex.TokenLc {
-		err = fmt.Errorf("%s missing '{' after condtion,but '%s'",
+		err = new error(sprintf("%s missing '{' after condtion,but '%s'",
 			this.parser.errMsgPrefix(), this.parser.token.Description)
 		this.parser.errs = append(this.parser.errs, err)
 		this.consume(untilLc)
@@ -42,7 +42,7 @@ func (this *BlockParser) parseIf() (statementIf *ast.StatementIf, err error) {
 	this.Next(lfNotToken) //skip {
 	this.parseStatementList(&statementIf.Block, false)
 	if this.parser.token.Type != lex.TokenRc {
-		this.parser.errs = append(this.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
+		this.parser.errs = append(this.parser.errs, new error(sprintf("%s expect '}', but '%s'",
 			this.parser.errMsgPrefix(), this.parser.token.Description))
 		this.consume(untilRc)
 	}
@@ -52,7 +52,7 @@ func (this *BlockParser) parseIf() (statementIf *ast.StatementIf, err error) {
 		this.Next(lfNotToken)
 		if this.parser.token.Type == lex.TokenElseif ||
 			this.parser.token.Type == lex.TokenElse {
-			this.parser.errs = append(this.parser.errs, fmt.Errorf("%s unexpected new line",
+			this.parser.errs = append(this.parser.errs, new error(sprintf("%s unexpected new line",
 				this.parser.errMsgPrefix(pos)))
 		}
 	}
@@ -66,14 +66,14 @@ func (this *BlockParser) parseIf() (statementIf *ast.StatementIf, err error) {
 		pos := this.parser.mkPos()
 		this.Next(lfNotToken)
 		if this.parser.token.Type == lex.TokenElse {
-			this.parser.errs = append(this.parser.errs, fmt.Errorf("%s unexpected new line",
+			this.parser.errs = append(this.parser.errs, new error(sprintf("%s unexpected new line",
 				this.parser.errMsgPrefix(pos)))
 		}
 	}
 	if this.parser.token.Type == lex.TokenElse {
 		this.Next(lfNotToken)
 		if this.parser.token.Type != lex.TokenLc {
-			err = fmt.Errorf("%s missing '{' after else", this.parser.errMsgPrefix())
+			err = new error(sprintf("%s missing '{' after else", this.parser.errMsgPrefix())
 			this.parser.errs = append(this.parser.errs, err)
 			this.consume(untilLc)
 		}
@@ -81,7 +81,7 @@ func (this *BlockParser) parseIf() (statementIf *ast.StatementIf, err error) {
 		statementIf.Else = &ast.Block{}
 		this.parseStatementList(statementIf.Else, false)
 		if this.parser.token.Type != lex.TokenRc {
-			err = fmt.Errorf("%s expect '}', but '%s'",
+			err = new error(sprintf("%s expect '}', but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.Description)
 			this.parser.errs = append(this.parser.errs, err)
 			this.consume(untilRc)
@@ -93,7 +93,7 @@ func (this *BlockParser) parseIf() (statementIf *ast.StatementIf, err error) {
 
 func (this *BlockParser) parseElseIfList() (elseIfList []*ast.StatementElseIf, err error) {
 	elseIfList = []*ast.StatementElseIf{}
-	var condition *ast.Expression
+	var condition ast.Expression
 	for this.parser.token.Type == lex.TokenElseif {
 		this.Next(lfIsToken) // skip elseif token
 		this.parser.unExpectNewLineAndSkip()
@@ -102,7 +102,7 @@ func (this *BlockParser) parseElseIfList() (elseIfList []*ast.StatementElseIf, e
 			this.consume(untilLc)
 		}
 		if this.parser.token.Type != lex.TokenLc {
-			err = fmt.Errorf("%s not '{' after a expression,but '%s'",
+			err = new error(sprintf("%s not '{' after a expression,but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.Description)
 			this.parser.errs = append(this.parser.errs)
 			this.consume(untilLc)
@@ -115,7 +115,7 @@ func (this *BlockParser) parseElseIfList() (elseIfList []*ast.StatementElseIf, e
 			Block:     block,
 		})
 		if this.parser.token.Type != lex.TokenRc {
-			err = fmt.Errorf("%s expect '}', but '%s'",
+			err = new error(sprintf("%s expect '}', but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.Description)
 			this.parser.errs = append(this.parser.errs)
 			this.consume(untilRc)

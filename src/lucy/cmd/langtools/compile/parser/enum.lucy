@@ -12,7 +12,7 @@ func (this *Parser) parseEnum() (e *ast.Enum, err error) {
 	this.Next(lfIsToken) // skip enum
 	this.unExpectNewLineAndSkip()
 	if this.token.Type != lex.TokenIdentifier {
-		err = fmt.Errorf("%s expect 'identifier' for enum name, but '%s'",
+		err = new error(sprintf("%s expect 'identifier' for enum name, but '%s'",
 			this.errMsgPrefix(), this.token.Description)
 		this.errs = append(this.errs, err)
 		enumName = compileAutoName()
@@ -32,7 +32,7 @@ func (this *Parser) parseEnum() (e *ast.Enum, err error) {
 		comment.reset()
 	}
 	if this.token.Type != lex.TokenLc {
-		err = fmt.Errorf("%s expect '{',but '%s'", this.errMsgPrefix(), this.token.Description)
+		err = new error(sprintf("%s expect '{',but '%s'", this.errMsgPrefix(), this.token.Description)
 		this.errs = append(this.errs, err)
 		this.consume(untilLc)
 	}
@@ -48,7 +48,7 @@ func (this *Parser) parseEnum() (e *ast.Enum, err error) {
 		case lex.TokenIdentifier:
 			name := this.token.Data.(string)
 			pos := this.mkPos()
-			var value *ast.Expression
+			var value ast.Expression
 			var err error
 			this.Next(lfIsToken)
 			if this.token.Type == lex.TokenAssign {
@@ -76,7 +76,7 @@ func (this *Parser) parseEnum() (e *ast.Enum, err error) {
 		case lex.TokenComma:
 			this.Next(lfNotToken)
 		default:
-			this.errs = append(this.errs, fmt.Errorf("%s token '%s' is not except",
+			this.errs = append(this.errs, new error(sprintf("%s token '%s' is not except",
 				this.errMsgPrefix(), this.token.Description))
 			this.Next(lfNotToken)
 			reset()
@@ -91,12 +91,12 @@ func (this *Parser) parseEnum() (e *ast.Enum, err error) {
 		e.Enums = []*ast.EnumName{
 			enumName,
 		}
-		this.errs = append(this.errs, fmt.Errorf("%s enum expect at least 1 enumName",
+		this.errs = append(this.errs, new error(sprintf("%s enum expect at least 1 enumName",
 			this.errMsgPrefix()))
 	}
 	this.ifTokenIsLfThenSkip()
 	if this.token.Type != lex.TokenRc {
-		err = fmt.Errorf("%s expect '}',but '%s'", this.errMsgPrefix(), this.token.Description)
+		err = new error(sprintf("%s expect '}',but '%s'", this.errMsgPrefix(), this.token.Description)
 		this.errs = append(this.errs, err)
 		this.consume(untilRc)
 	}

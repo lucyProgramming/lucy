@@ -1,7 +1,9 @@
+import "java/lang/Long"
+import "java/util/Date"
 
 class ExpressionCheckIdentifier {
 
-	static fn check(e Expresssion , block Block) -> (valueType Type,err  error) {
+	static fn check(e Expression , block Block) -> (valueType Type,err  error) {
 		identifier := e.Data.(ExpressionIdentifier)
 		if identifier.Name == UnderScore {
 			//_ is not valid
@@ -17,12 +19,12 @@ class ExpressionCheckIdentifier {
 			return result, null
 		case magicIdentifierLine:
 			e.Type = ExpressionTypeInt
-			e.Data = int64(e.Pos.Line)
+			e.Data = Long.valueOf(long(0))
 			result, _ := e.checkSingleValueContextExpression(block)
 			return result, null
 		case magicIdentifierTime:
 			e.Type = ExpressionTypeLong
-			e.Data = int64(time.Now().UnixNano())
+			e.Data = Long.valueOf(new Date().getTime())
 			result, _ := e.checkSingleValueContextExpression(block)
 			return result, null
 		case magicIdentifierClass:
@@ -54,7 +56,7 @@ class ExpressionCheckIdentifier {
 			i := PackageBeenCompile.getImport(e.Pos.Filename, identifier.Name)
 			if i != null {
 				i.Used = true
-				return e.checkIdentifierThroughImports(i)
+				return .checkIdentifierThroughImports(e , i)
 			}
 		}
 		if d == null {
@@ -62,7 +64,7 @@ class ExpressionCheckIdentifier {
 		}
 
 		if f := d.(Function) ;f != null {
-			f := d.(*Function)
+			f := d.(Function)
 			if f.IsGlobalMain() {
 				// not allow
 				return null, new error(sprintf("%s fucntion is global main", errMsgPrefix(e.Pos)))
@@ -79,12 +81,12 @@ class ExpressionCheckIdentifier {
 			if f.IsBuildIn == false {
 				i, should := shouldAccessFromImports(identifier.Name, e.Pos, f.Pos)
 				if should {
-					return e.checkIdentifierThroughImports(i)
+					return .checkIdentifierThroughImports(e , i)
 				}
 			}
 			result := new Type()
 			result.Type = VariableTypeFunction
-			result.FunctionType = &f.Type
+			result.FunctionType = f.Type
 			result.Pos = e.Pos
 			identifier.Function = f
 			return result, null
@@ -93,10 +95,10 @@ class ExpressionCheckIdentifier {
 			if t.IsBuildIn == false { // try from import
 				i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
 				if should {
-					return e.checkIdentifierThroughImports(i)
+					return .checkIdentifierThroughImports(e , i)
 				}
 			}
-			if isCaptureVar {
+			if isCaptureVar[0] {
 				t.BeenCapturedAsRightValue++
 			}
 			t.Used = true
@@ -109,7 +111,7 @@ class ExpressionCheckIdentifier {
 			if t.IsBuildIn == false { // try from import
 				i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
 				if should {
-					return e.checkIdentifierThroughImports(i)
+					return .checkIdentifierThroughImports(e , i)
 				}
 			}
 			t.Used = true
@@ -122,10 +124,10 @@ class ExpressionCheckIdentifier {
 			if c.IsBuildIn == false { // try from import
 				i, should := shouldAccessFromImports(identifier.Name, e.Pos, c.Pos)
 				if should {
-					return e.checkIdentifierThroughImports(i)
+					return .checkIdentifierThroughImports(e , i)
 				}
 			}
-			result := &Type{}
+			result := new Type()
 			result.Type = VariableTypeClass
 			result.Pos = e.Pos
 			result.Class = c
@@ -135,10 +137,10 @@ class ExpressionCheckIdentifier {
 			if enumName.Enum.IsBuildIn == false { // try from import
 				i, should := shouldAccessFromImports(identifier.Name, e.Pos, enumName.Pos)
 				if should {
-					return e.checkIdentifierThroughImports(i)
+					return .checkIdentifierThroughImports(e , i)
 				}
 			}
-			result := &Type{}
+			result := new Type()
 			result.Pos = enumName.Pos
 			result.Type = VariableTypeEnum
 			result.EnumName = enumName
@@ -150,18 +152,18 @@ class ExpressionCheckIdentifier {
 			e.Pos.ErrMsgPrefix(), identifier.Name, block.identifierIsWhat(d)))
 	}
 	
-	static fn checkIdentifierThroughImports(it Import) -> (valueType Type,err  error) {
+	static fn checkIdentifierThroughImports(e Expression , it Import) -> (valueType Type,err  error) {
 		p, err := PackageBeenCompile.load(it.Import)
-		if err != nul	l {
+		if err != null {
 			return null, new error(sprintf("%s %s", e.Pos.ErrMsgPrefix(), err.getMessage()))
 		}
 		valueType = new Type()
 		valueType.Pos = e.Pos
-		if pp, ok := p.(*Package); ok {
+		if pp, ok := p.(Package); ok {
 			valueType.Package = pp
 			valueType.Type = VariableTypePackage
 		} else {
-			valueType.Class = p.(*Class)
+			valueType.Class = p.(Class)
 			valueType.Type = VariableTypeClass
 		}
 	}

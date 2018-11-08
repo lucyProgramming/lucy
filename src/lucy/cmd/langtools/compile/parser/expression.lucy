@@ -16,8 +16,8 @@ func (ep *ExpressionParser) Next(lfIsToken bool) {
 	ep.parser.Next(lfIsToken)
 }
 
-func (ep *ExpressionParser) parseExpressions(endTokens ...lex.TokenKind) ([]*ast.Expression, error) {
-	es := []*ast.Expression{}
+func (ep *ExpressionParser) parseExpressions(endTokens ...lex.TokenKind) ([]ast.Expression, error) {
+	es := []ast.Expression{}
 	for ep.parser.token.Type != lex.TokenEof {
 		if ep.parser.token.Type == lex.TokenComment ||
 			ep.parser.token.Type == lex.TokenMultiLineComment {
@@ -35,7 +35,7 @@ func (ep *ExpressionParser) parseExpressions(endTokens ...lex.TokenKind) ([]*ast
 					missing comma
 					a(1 2)
 				*/
-				ep.parser.errs = append(ep.parser.errs, fmt.Errorf("%s missing comma",
+				ep.parser.errs = append(ep.parser.errs, new error(sprintf("%s missing comma",
 					ep.parser.errMsgPrefix()))
 				continue
 			}
@@ -45,14 +45,14 @@ func (ep *ExpressionParser) parseExpressions(endTokens ...lex.TokenKind) ([]*ast
 		ep.Next(lfNotToken) // skip ,
 		for ep.parser.token.Type == lex.TokenComma {
 			ep.parser.errs = append(ep.parser.errs,
-				fmt.Errorf("%s missing expression", ep.parser.errMsgPrefix()))
+				new error(sprintf("%s missing expression", ep.parser.errMsgPrefix()))
 			ep.Next(lfNotToken) // skip ,
 		}
 		for _, v := range endTokens {
 			if v == ep.parser.token.Type {
 				// found end token
 				ep.parser.errs = append(ep.parser.errs,
-					fmt.Errorf("%s extra comma", ep.parser.errMsgPrefix()))
+					new error(sprintf("%s extra comma", ep.parser.errMsgPrefix()))
 				goto end
 			}
 		}
@@ -64,7 +64,7 @@ end:
 /*
 	parse assign expression
 */
-func (ep *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expression, error) {
+func (ep *ExpressionParser) parseExpression(statementLevel bool) (ast.Expression, error) {
 	left, err := ep.parseQuestionExpression() //
 	if err != nil {
 		return nil, err
@@ -76,18 +76,18 @@ func (ep *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expressio
 			return nil, err
 		}
 		if left.Type == ast.ExpressionTypeList {
-			left.Data = append(left.Data.([]*ast.Expression), left2)
+			left.Data = append(left.Data.([]ast.Expression), left2)
 		} else {
 			newExpression := &ast.Expression{}
 			newExpression.Type = ast.ExpressionTypeList
 			newExpression.Pos = left.Pos
 			newExpression.Op = "list"
-			list := []*ast.Expression{left, left2}
+			list := []ast.Expression{left, left2}
 			newExpression.Data = list
 			left = newExpression
 		}
 	}
-	parseRight := func(expressionType ast.ExpressionTypeKind, isMulti bool) (*ast.Expression, error) {
+	parseRight := func(expressionType ast.ExpressionTypeKind, isMulti bool) (ast.Expression, error) {
 		pos := ep.parser.mkPos()
 		opName := ep.parser.token.Description
 		ep.Next(lfNotToken) // skip = :=
@@ -144,7 +144,7 @@ func (ep *ExpressionParser) parseExpression(statementLevel bool) (*ast.Expressio
 	return left, nil
 }
 
-func (ep *ExpressionParser) parseTypeConversionExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseTypeConversionExpression() (ast.Expression, error) {
 	to, err := ep.parser.parseType()
 	if err != nil {
 		return nil, err
@@ -152,7 +152,7 @@ func (ep *ExpressionParser) parseTypeConversionExpression() (*ast.Expression, er
 	pos := ep.parser.mkPos()
 	ep.parser.unExpectNewLineAndSkip()
 	if ep.parser.token.Type != lex.TokenLp {
-		err := fmt.Errorf("%s not '(' after a type",
+		err := new error(sprintf("%s not '(' after a type",
 			ep.parser.errMsgPrefix())
 		ep.parser.errs = append(ep.parser.errs, err)
 		return nil, err
@@ -164,7 +164,7 @@ func (ep *ExpressionParser) parseTypeConversionExpression() (*ast.Expression, er
 	}
 	ep.parser.ifTokenIsLfThenSkip()
 	if ep.parser.token.Type != lex.TokenRp {
-		err := fmt.Errorf("%s '(' and ')' not match", ep.parser.errMsgPrefix())
+		err := new error(sprintf("%s '(' and ')' not match", ep.parser.errMsgPrefix())
 		ep.parser.errs = append(ep.parser.errs, err)
 		return nil, err
 	}

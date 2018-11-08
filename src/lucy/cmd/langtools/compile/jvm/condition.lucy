@@ -9,11 +9,11 @@ import (
 	compile condition for false  &&  generate exit
 */
 func (this *BuildExpression) buildConditionNotOk(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	context *Context,
-	state *StackMapState,
-	condition *ast.Expression) (maxStack uint16, exit *cg.Exit) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	context Context,
+	state StackMapState,
+	condition ast.Expression) (maxStack char, exit *cg.Exit) {
 	if condition.Is2IntCompare() {
 		return this.build2IntCompareConditionNotOk(class, code, context, state, condition)
 	} else if condition.IsCompare2Null() {
@@ -30,11 +30,11 @@ func (this *BuildExpression) buildConditionNotOk(
 }
 
 func (this *BuildExpression) build2IntCompareConditionNotOk(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	context *Context,
-	state *StackMapState,
-	condition *ast.Expression) (maxStack uint16, exit *cg.Exit) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	context Context,
+	state StackMapState,
+	condition ast.Expression) (maxStack char, exit *cg.Exit) {
 	bin := condition.Data.(*ast.ExpressionBinary)
 	stack := this.build(class, code, bin.Left, context, state)
 	if stack > maxStack {
@@ -63,12 +63,12 @@ func (this *BuildExpression) build2IntCompareConditionNotOk(
 	return
 }
 func (this *BuildExpression) buildNullCompareConditionNotOk(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	context *Context,
-	state *StackMapState,
-	condition *ast.Expression) (maxStack uint16, exit *cg.Exit) {
-	var noNullExpression *ast.Expression
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	context Context,
+	state StackMapState,
+	condition ast.Expression) (maxStack char, exit *cg.Exit) {
+	var noNullExpression ast.Expression
 	bin := condition.Data.(*ast.ExpressionBinary)
 	if bin.Left.Type != ast.ExpressionTypeNull {
 		noNullExpression = bin.Left
@@ -88,11 +88,11 @@ func (this *BuildExpression) buildNullCompareConditionNotOk(
 	return
 }
 func (this *BuildExpression) buildStringCompareConditionNotOk(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	context *Context,
-	state *StackMapState,
-	condition *ast.Expression) (maxStack uint16, exit *cg.Exit) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	context Context,
+	state StackMapState,
+	condition ast.Expression) (maxStack char, exit *cg.Exit) {
 	bin := condition.Data.(*ast.ExpressionBinary)
 	stack := this.build(class, code, bin.Left, context, state)
 	if stack > maxStack {
@@ -128,11 +128,11 @@ func (this *BuildExpression) buildStringCompareConditionNotOk(
 	return
 }
 func (this *BuildExpression) buildPointerCompareConditionNotOk(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	context *Context,
-	state *StackMapState,
-	condition *ast.Expression) (maxStack uint16, exit *cg.Exit) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	context Context,
+	state StackMapState,
+	condition ast.Expression) (maxStack char, exit *cg.Exit) {
 	bin := condition.Data.(*ast.ExpressionBinary)
 	stack := this.build(class, code, bin.Left, context, state)
 	if stack > maxStack {

@@ -1,7 +1,7 @@
  
 class ExpressionCheckTypeConversion {
-	static fn checkTypeConversionExpression(e Expression , block Block, errs []error)  ->(valueType Type){
-		conversion := e.Data.(*ExpressionTypeConversion)
+	static fn check(e Expression , block Block, errs []error)  ->(valueType Type){
+		conversion := e.Data.(ExpressionTypeConversion)
 		on, es := conversion.Expression.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if on == null {
@@ -22,8 +22,9 @@ class ExpressionCheckTypeConversion {
 			if conversion.Expression.isLiteral() {
 				conversion.Expression.convertToNumberType(conversion.Type.Type)
 				e.Type = conversion.Expression.Type
-				e.Type.Data = conversion.Expression.Data
-				e.Type.Value = conversion.Expression.Value
+				e.longValue = conversion.Expression.longValue
+				e.doubleValue = conversion.Expression.doubleValue
+				e.Value = conversion.Expression.Value
 			}
 			return valueType
 		}

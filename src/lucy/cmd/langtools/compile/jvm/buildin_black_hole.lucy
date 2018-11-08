@@ -6,11 +6,11 @@ import (
 )
 
 func (this *BuildExpression) mkBuildInBlackHole(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	for _, v := range call.Args {
 		stack := this.build(class, code, v, context, state)

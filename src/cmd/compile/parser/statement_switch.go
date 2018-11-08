@@ -85,11 +85,11 @@ func (this *BlockParser) parseSwitch() (*ast.StatementSwitch, error) {
 			this.Next(lfIsToken)
 		}
 		this.parser.expectNewLineAndSkip()
+		block := &ast.Block{}
+		block.IsSwitchBlock = true
+		statementSwitch.Default = block
 		if this.parser.token.Type != lex.TokenRc {
-			block := ast.Block{}
-			block.IsSwitchBlock = true
-			this.parseStatementList(&block, false)
-			statementSwitch.Default = &block
+			this.parseStatementList(block, false)
 		}
 	}
 	if this.parser.token.Type != lex.TokenRc {

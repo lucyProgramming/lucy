@@ -1,4 +1,10 @@
- 
+import "java/lang/Object"
+import "java/lang/Long"
+import "java/lang/Double"
+import "java/lang/Float"
+import "java/lang/Boolean"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 
 class Constant {
 	IsGlobal               bool
@@ -8,9 +14,11 @@ class Constant {
 	Type                   Type
 	Name                   string
 	DefaultValueExpression Expression
-	AccessFlags            uint16
+	AccessFlags            char
 	Comment                string
 	Value                  Object
+	longValue long
+	doubleValue double 
 	
 	fn isPublic() -> (is bool) {
 		return this.AccessFlags|cg.AccFieldPublic != 0
@@ -19,21 +27,13 @@ class Constant {
 	fn mkDefaultValue() {
 		switch this.Type.Type {
 		case VariableTypeBool:
-			this.Value = false
-		case VariableTypeByte:
-			this.Value = int64(0)
-		case VariableTypeShort:
-			this.Value = int64(0)
-		case VariableTypeChar:
-			this.Value = int64(0)
-		case VariableTypeInt:
-			this.Value = int64(0)
-		case VariableTypeLong:
-			this.Value = int64(0)
+			this.Value = Boolean.valueOf(false)
+		case this.Type.isInteger():
+			this.Value = Long.valueOf(long(0))
 		case VariableTypeFloat:
-			this.Value = float32(0)
+			this.Value = Float.valueOf(float(0))
 		case VariableTypeDouble:
-			this.Value = float64(0)
+			this.Value = Double.valueOf(double(0))
 		case VariableTypeString:
 			this.Value = ""
 		default:

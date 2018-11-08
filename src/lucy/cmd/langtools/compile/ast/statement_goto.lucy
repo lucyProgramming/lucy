@@ -20,12 +20,12 @@ class StatementGoTo {
 	fn mkDefers(currentBlock Block) {
 		bs := []Block{}
 		for this.StatementLabel.Block != currentBlock {
-			bs = append(bs, currentBlock)
+			bs.append(currentBlock)
 			currentBlock = currentBlock.Outer
 		}
 		for _, b := range bs {
 			if b.Defers != null {
-				this.Defers = append(this.Defers, b.Defers...)
+				this.Defers.appendAll(b.Defers)
 			}
 		}
 	}	

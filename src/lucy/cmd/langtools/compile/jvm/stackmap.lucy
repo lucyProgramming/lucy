@@ -10,12 +10,12 @@ type StackMapState struct {
 	Stacks []*cg.StackMapVerificationTypeInfo
 }
 
-func (this *StackMapState) appendLocals(class *cg.ClassHighLevel, v *ast.Type) {
+func (this StackMapState) appendLocals(class cg.ClassHighLevel, v *ast.Type) {
 	this.Locals = append(this.Locals,
 		this.newStackMapVerificationTypeInfo(class, v))
 }
 
-func (this *StackMapState) addTop(absent *StackMapState) {
+func (this StackMapState) addTop(absent StackMapState) {
 	if this == absent {
 		return
 	}
@@ -38,7 +38,7 @@ func (this *StackMapState) addTop(absent *StackMapState) {
 	}
 }
 
-func (this *StackMapState) newObjectVariableType(name string) *ast.Type {
+func (this StackMapState) newObjectVariableType(name string) *ast.Type {
 	ret := &ast.Type{}
 	ret.Type = ast.VariableTypeObject
 	ret.Class = &ast.Class{}
@@ -46,7 +46,7 @@ func (this *StackMapState) newObjectVariableType(name string) *ast.Type {
 	return ret
 }
 
-func (this *StackMapState) popStack(pop int) {
+func (this StackMapState) popStack(pop int) {
 	if pop == 0 {
 		return
 	}
@@ -58,19 +58,19 @@ func (this *StackMapState) popStack(pop int) {
 	}
 	this.Stacks = this.Stacks[:len(this.Stacks)-pop]
 }
-func (this *StackMapState) pushStack(class *cg.ClassHighLevel, v *ast.Type) {
+func (this StackMapState) pushStack(class cg.ClassHighLevel, v *ast.Type) {
 	if this == nil {
 		panic("s is nil")
 	}
 	this.Stacks = append(this.Stacks, this.newStackMapVerificationTypeInfo(class, v))
 }
-func (this *StackMapState) initFromLast(last *StackMapState) *StackMapState {
+func (this StackMapState) initFromLast(last StackMapState) StackMapState {
 	this.Locals = make([]*cg.StackMapVerificationTypeInfo, len(last.Locals))
 	copy(this.Locals, last.Locals)
 	return this
 }
 
-func (this *StackMapState) newStackMapVerificationTypeInfo(class *cg.ClassHighLevel,
+func (this StackMapState) newStackMapVerificationTypeInfo(class cg.ClassHighLevel,
 	t *ast.Type) (ret *cg.StackMapVerificationTypeInfo) {
 	ret = &cg.StackMapVerificationTypeInfo{}
 	switch t.Type {

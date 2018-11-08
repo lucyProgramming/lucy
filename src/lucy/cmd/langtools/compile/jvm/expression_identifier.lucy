@@ -6,10 +6,10 @@ import (
 )
 
 func (this *BuildExpression) buildCapturedIdentifier(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context) (maxStack char) {
 	identifier := e.Data.(*ast.ExpressionIdentifier)
 	//fmt.Println(identifier.Name, identifier.Variable.BeenCapturedAsLeftValue,
 	//	context.function.Closure.ClosureVariableExist(identifier.Variable))
@@ -48,10 +48,10 @@ func (this *BuildExpression) buildCapturedIdentifier(
 }
 
 func (this *BuildExpression) buildIdentifier(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context) (maxStack char) {
 	if e.Value.Type == ast.VariableTypeClass {
 		panic("this is not happening")
 	}

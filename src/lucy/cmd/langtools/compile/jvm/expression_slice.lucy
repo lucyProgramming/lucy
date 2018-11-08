@@ -6,11 +6,11 @@ import (
 )
 
 func (this *BuildExpression) buildStringSlice(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
@@ -48,8 +48,8 @@ func (this *BuildExpression) buildStringSlice(
 	return
 }
 
-func (this *BuildExpression) buildSlice(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (this *BuildExpression) buildSlice(class cg.ClassHighLevel, code cg.AttributeCode,
+	e ast.Expression, context Context, state StackMapState) (maxStack char) {
 	slice := e.Data.(*ast.ExpressionSlice)
 	if slice.ExpressionOn.Value.Type == ast.VariableTypeString {
 		return this.buildStringSlice(class, code, e, context, state)

@@ -60,8 +60,8 @@
 				}
 			}
 			valueType = new Type()
-			valueType.Type = VariableTypeByte,
-			valueType.Pos =   e.Pos,
+			valueType.Type = VariableTypeByte
+			valueType.Pos =   e.Pos
 			return 
 		default:
 			errs.append(new error(sprintf("%s cannot index '%s'",

@@ -85,10 +85,9 @@ class ExpressionCheckBinary {
 			e.Type == ExpressionTypeGt ||
 			e.Type == ExpressionTypeLe ||
 			e.Type == ExpressionTypeLt {
-			result = &Type{
-				Type: VariableTypeBool,
-				Pos:  e.Pos,
-			}
+			result = new Type()
+			result.Type = VariableTypeBool
+			result.Pos = e.Pos
 			if left == null || right == null {
 				return result
 			}
@@ -102,19 +101,7 @@ class ExpressionCheckBinary {
 				if left.assignAble(errs, right) == false {
 					errs.append(e.binaryWrongOpErr())
 				}
-			case VariableTypeByte:
-				fallthrough
-			case VariableTypeShort:
-				fallthrough
-			case VariableTypeChar:
-				fallthrough
-			case VariableTypeInt:
-				fallthrough
-			case VariableTypeFloat:
-				fallthrough
-			case VariableTypeLong:
-				fallthrough
-			case VariableTypeDouble:
+			case left.IsNumber():
 				if (left.isInteger() && right.isInteger()) ||
 					(left.isFloat() && right.isFloat()) {
 					if left.assignAble(errs, right) == false {
@@ -127,30 +114,7 @@ class ExpressionCheckBinary {
 				} else {
 					errs.append(e.binaryWrongOpErr())
 				}
-			case VariableTypeString:
-				if right.Type == VariableTypeNull {
-					if e.Type != ExpressionTypeEq && ExpressionTypeNe != e.Type {
-						errs.append(e.binaryWrongOpErr())
-
-					}
-				} else {
-					if right.Type != VariableTypeString {
-						errs.append(e.binaryWrongOpErr())
-					}
-				}
-			case VariableTypeNull:
-				if right.IsPointer() == false || e.isEqOrNe() == false {
-					errs.append(e.binaryWrongOpErr())
-				}
-			case VariableTypeMap:
-				fallthrough
-			case VariableTypeJavaArray:
-				fallthrough
-			case VariableTypeArray:
-				fallthrough
-			case VariableTypeObject:
-				fallthrough
-			case VariableTypeFunction:
+			case left.IsPointer():
 				if left.assignAble(errs, right) == false || e.isEqOrNe() == false {
 					errs.append(e.binaryWrongOpErr())
 				}
@@ -184,7 +148,7 @@ class ExpressionCheckBinary {
 				if e.Type != ExpressionTypeAdd {
 					errs.append(e.binaryWrongOpErr())
 				}
-				result = &Type{}
+				result = new Type()
 				result.Type = VariableTypeString
 				result.Pos = e.Pos
 				return result

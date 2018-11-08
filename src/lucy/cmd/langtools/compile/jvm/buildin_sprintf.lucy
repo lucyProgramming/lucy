@@ -6,11 +6,11 @@ import (
 )
 
 func (this *BuildExpression) mkBuildInSprintf(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length)
@@ -20,11 +20,11 @@ func (this *BuildExpression) mkBuildInSprintf(
 	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionSprintfMeta)
 	maxStack = this.build(class, code, meta.Format, context, state)
 	state.pushStack(class, state.newObjectVariableType(javaStringClass))
-	loadInt32(class, code, int32(meta.ArgsLength))
+	loadInt32(class, code, int(meta.ArgsLength))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
 	class.InsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	currentStack := uint16(2)
+	currentStack := char(2)
 	if currentStack > maxStack {
 		maxStack = currentStack
 	}
@@ -32,7 +32,7 @@ func (this *BuildExpression) mkBuildInSprintf(
 	objectArray.Type = ast.VariableTypeJavaArray
 	objectArray.Array = state.newObjectVariableType(javaRootClass)
 	state.pushStack(class, objectArray)
-	index := int32(0)
+	index := int(0)
 	for _, v := range call.Args {
 		currentStack = 2
 		code.Codes[code.CodeLength] = cg.OP_dup

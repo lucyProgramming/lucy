@@ -1,6 +1,7 @@
+import "lucy/cmd/langtools/compile/jvm/cg"
 
 
-type buildInFunctionChecker func(
+typealias buildInFunctionChecker = fn(
 	f Function,
 	e ExpressionFunctionCall,
 	block Block,
@@ -11,17 +12,17 @@ type buildInFunctionChecker func(
 class Function {
 	CallFatherConstructionExpression Expression
 	TemplateFunction                 TemplateFunction
-	parameterTypes                   map { string- > Type }     //typed parameters
+	parameterTypes                   map { string -> Type }     //typed parameters
 	Entrance                         cg.MethodHighLevel // make_node_objects call from
 	buildInFunctionChecker           buildInFunctionChecker
-	AccessFlags                      uint16
+	AccessFlags                      char
 	Type                             FunctionType
 	Closure                          Closure = new Closure()
 	Name                             string // if name is null string,means no name function
 	Block                            Block
 	Pos                              Pos
 	JvmDescriptor                    string
-	ClosureVariableOffSet            uint16 // for closure
+	ClosureVariableOffSet            char // for closure
 	SourceCode                       []byte // source code for template function
 	HasDefer                         bool
 	HaveDefaultValue                 bool
@@ -35,11 +36,11 @@ class Function {
 	Comment                          string
 	IsClosureFunction                bool
 
-	fn IsPublic() bool {
+	fn IsPublic() -> (is bool) {
 		return this.AccessFlags&cg.AccMethodPublic != 0
 	}
 
-	fn NameLiteralFunction() string {
+	fn NameLiteralFunction() -> (name string) {
 		if this.Name != "" {
 			return this.Name
 		}
@@ -50,7 +51,7 @@ class Function {
 		return t
 	}
 
-	fn readableMsg() string {
+	fn readableMsg() -> (r string)  {
 		if this.Name == "" {
 			return "fn " + this.Type.TypeString()
 		} else {
@@ -61,9 +62,9 @@ class Function {
 	fn makeName() {
 		if this.Name == "" {
 			if this.Block.InheritedAttribute.ClassAndFunctionNames == "" {
-				this.Name = fmt.Sprintf("literal$%d", this.Pos.Line)
+				this.Name = sprintf("literal$%d", this.Pos.Line)
 			} else {
-				this.Name = fmt.Sprintf("%s$literal%d",
+				this.Name = sprintf("%s$literal%d",
 					this.Block.InheritedAttribute.ClassAndFunctionNames, this.Pos.Line)
 			}
 		}
@@ -81,21 +82,20 @@ class Function {
 	fn checkBlock(errs []error) {
 		this.makeName()
 		this.makeLastReturnStatement()
-		*errs = append(*errs, this.Block.check()...)
+		errs.appendAll(this.Block.check())
 	}
 
-	fn check(b Block) []error {
-		errs := make([]error, 0)
+	fn check(b Block) -> (errs []error= []error{}) {
 		this.Block.inherit(b)
 		this.Block.InheritedAttribute.Function = this
-		this.checkParametersAndReturns(&errs, true, false)
+		this.checkParametersAndReturns(errs, true, false)
 		if this.TemplateFunction == null {
-			this.checkBlock(&errs)
+			this.checkBlock(errs)
 		}
 		return errs
 	}
 	
-	fn clone() (ret Function, es []error) {
+	fn clone() -> (ret Function, es []error) {
 		ret, es = ParseFunctionHandler(this.SourceCode, this.Pos)
 		if len(es) > 0 {
 			return ret, es
@@ -104,32 +104,32 @@ class Function {
 		return ret, es
 	}
 	fn makeLastReturnStatement() {
-		s := &StatementReturn{}
-		this.Block.Statements = append(this.Block.Statements, &Statement{
-			Type:            StatementTypeReturn,
-			StatementReturn: s,
-			Pos:             this.Block.EndPos,
-		})
+		s := new StatementReturn()
+		t := new Statement()
+		t.Type = StatementTypeReturn
+		t.StatementReturn = s
+		t.Pos =  this.Block.EndPos
+		this.Block.Statements.append( t)
 	}
 
-	fn IsGlobalMain() bool {
+	fn IsGlobalMain() -> (is bool) {
 		return this.IsGlobal &&
 			this.Name == MainFunctionName
 	}
 
 	fn checkParametersAndReturns(
-		errs *[]error,
+		errs []error,
 		checkReturnVarExpression bool,
 		isAbstract bool) {
 		var err error
 		for k, v := range this.Type.ParameterList {
 			v.IsFunctionParameter = true
-			if len(v.Type.getParameterType(&this.Type)) > 0 {
+			if len(v.Type.getParameterType(this.Type)) > 0 {
 				if this.TemplateFunction == null {
-					this.TemplateFunction = &TemplateFunction{}
+					this.TemplateFunction = new TemplateFunction()
 				}
 			} else {
-				err = v.Type.resolve(&this.Block)
+				err = v.Type.resolve(this.Block)
 				if err != null {
 					errs.append(err)
 				}
@@ -142,13 +142,13 @@ class Function {
 				}
 			}
 			if v.Type.IsVariableArgs && v.DefaultValueExpression != null {
-				*errs = append(*errs, fmt.Errorf("%s vargs cannot have default value",
-					errMsgPrefix(v.Type.Pos)))
+				errs.append(new error( sprintf("%s vargs cannot have default value",
+					errMsgPrefix(v.Type.Pos))))
 			}
 			if v.Type.IsVariableArgs {
 				if k != len(this.Type.ParameterList)-1 {
-					*errs = append(*errs, fmt.Errorf("%s only last parameter can be use as vargs",
-						errMsgPrefix(v.Type.Pos)))
+					errs.append(new error( sprintf("%s only last parameter can be use as vargs",
+						errMsgPrefix(v.Type.Pos))))
 				} else {
 					this.Type.ParameterList = this.Type.ParameterList[0:k]
 					this.Type.VArgs = v
@@ -163,23 +163,23 @@ class Function {
 					this.DefaultValueStartAt = k
 				}
 				this.HaveDefaultValue = true
-				t, es := v.DefaultValueExpression.checkSingleValueContextExpression(&this.Block)
+				t, es := v.DefaultValueExpression.checkSingleValueContextExpression(this.Block)
 				errs.appendAll(es)
 				if t != null {
 					if v.Type.assignAble(errs, t) == false {
-						*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-							errMsgPrefix(v.DefaultValueExpression.Pos), t.TypeString(), v.Type.TypeString()))
+						errs.append(new error( sprintf("%s cannot use '%s' as '%s'",
+							errMsgPrefix(v.DefaultValueExpression.Pos), t.TypeString(), v.Type.TypeString())))
 						continue
 					}
 				}
 				if v.DefaultValueExpression.isLiteral() == false {
-					*errs = append(*errs, fmt.Errorf("%s default value must be literal",
-						errMsgPrefix(v.DefaultValueExpression.Pos)))
+					errs.append(new error( sprintf("%s default value must be literal",
+						errMsgPrefix(v.DefaultValueExpression.Pos))))
 					continue
 				}
 				if v.DefaultValueExpression.Type == ExpressionTypeNull {
-					*errs = append(*errs, fmt.Errorf("%s cannot use 'null' as default value",
-						errMsgPrefix(v.DefaultValueExpression.Pos)))
+					errs.append(new error( sprintf("%s cannot use 'null' as default value",
+						errMsgPrefix(v.DefaultValueExpression.Pos))))
 				}
 			}
 		}
@@ -187,12 +187,12 @@ class Function {
 			//handler return
 			for _, v := range this.Type.ReturnList {
 				v.IsReturn = true
-				if len(v.Type.getParameterType(&this.Type)) > 0 {
+				if len(v.Type.getParameterType(this.Type)) > 0 {
 					if this.TemplateFunction == null {
-						this.TemplateFunction = &TemplateFunction{}
+						this.TemplateFunction = new TemplateFunction()
 					}
 				} else {
-					err = v.Type.resolve(&this.Block)
+					err = v.Type.resolve(this.Block)
 					if err != null {
 						errs.append(err)
 					}
@@ -215,38 +215,37 @@ class Function {
 					// eval expression later
 					continue
 				}
-				t, es := v.DefaultValueExpression.checkSingleValueContextExpression(&this.Block)
+				t, es := v.DefaultValueExpression.checkSingleValueContextExpression(this.Block)
 				if len(es) > 0 {
 					errs.appendAll(es)
 					continue
 				}
 				if t != null && v.Type.assignAble(errs, t) == false {
-					err = fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.DefaultValueExpression.Pos),
-						t.TypeString(), v.Type.TypeString())
+					err = new error(sprintf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.DefaultValueExpression.Pos),
+						t.TypeString(), v.Type.TypeString()))
 					errs.append(err)
 				}
 			}
 		}
 	}
 
-	fn checkReturnVarExpression() []error {
+	fn checkReturnVarExpression() -> (errs []error= []error{}) {
 		if this.Type.VoidReturn() {
 			return null
 		}
-		var errs []error
 		for _, v := range this.Type.ReturnList {
 			if v.DefaultValueExpression == null {
 				v.DefaultValueExpression = v.Type.mkDefaultValueExpression()
 				continue
 			}
-			t, es := v.DefaultValueExpression.checkSingleValueContextExpression(&this.Block)
+			t, es := v.DefaultValueExpression.checkSingleValueContextExpression(this.Block)
 			if len(es) > 0 {
 				errs.appendAll(es)
 				continue
 			}
-			if t != null && v.Type.assignAble(&errs, t) == false {
-				err := fmt.Errorf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.DefaultValueExpression.Pos),
-					t.TypeString(), v.Type.TypeString())
+			if t != null && v.Type.assignAble(errs, t) == false {
+				err := new error(sprintf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.DefaultValueExpression.Pos),
+					t.TypeString(), v.Type.TypeString()))
 				errs.append(err)
 			}
 		}

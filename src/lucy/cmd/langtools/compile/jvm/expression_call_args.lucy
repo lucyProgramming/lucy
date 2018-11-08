@@ -6,13 +6,13 @@ import (
 )
 
 func (this *BuildExpression) buildCallArgs(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	args []*ast.Expression,
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	args []ast.Expression,
 	vArgs *ast.CallVariableArgs,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
-	currentStack := uint16(0)
+	context Context,
+	state StackMapState) (maxStack char) {
+	currentStack := char(0)
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength) // let`s pop
@@ -41,12 +41,12 @@ func (this *BuildExpression) buildCallArgs(
 				maxStack = t
 			}
 		} else {
-			loadInt32(class, code, int32(vArgs.Length))
+			loadInt32(class, code, int(vArgs.Length))
 			newArrayBaseOnType(class, code, vArgs.Type.Array)
 			state.pushStack(class, vArgs.Type)
 			currentStack++
 			op := storeArrayElementOp(vArgs.Type.Array.Type)
-			index := int32(0)
+			index := int(0)
 			for _, e := range vArgs.Expressions {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++

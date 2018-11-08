@@ -32,7 +32,7 @@ func (this *BlockParser) parseSwitch() (*ast.StatementSwitch, error) {
 		this.parser.ifTokenIsLfThenSkip()
 	}
 	if this.parser.token.Type != lex.TokenLc {
-		err = fmt.Errorf("%s expect '{',but '%s'",
+		err = new error(sprintf("%s expect '{',but '%s'",
 			this.parser.errMsgPrefix(), this.parser.token.Description)
 		this.parser.errs = append(this.parser.errs, err)
 		this.consume(untilLc)
@@ -40,7 +40,7 @@ func (this *BlockParser) parseSwitch() (*ast.StatementSwitch, error) {
 	this.Next(lfIsToken) // skip {  , must be case
 	this.parser.expectNewLineAndSkip()
 	if this.parser.token.Type != lex.TokenCase {
-		err = fmt.Errorf("%s expect 'case',but '%s'",
+		err = new error(sprintf("%s expect 'case',but '%s'",
 			this.parser.errMsgPrefix(), this.parser.token.Description)
 		this.parser.errs = append(this.parser.errs, err)
 		return nil, err
@@ -53,7 +53,7 @@ func (this *BlockParser) parseSwitch() (*ast.StatementSwitch, error) {
 			return statementSwitch, err
 		}
 		if this.parser.token.Type != lex.TokenColon {
-			err = fmt.Errorf("%s expect ':',but '%s'",
+			err = new error(sprintf("%s expect ':',but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.Description)
 			this.parser.errs = append(this.parser.errs, err)
 			return statementSwitch, err
@@ -78,22 +78,23 @@ func (this *BlockParser) parseSwitch() (*ast.StatementSwitch, error) {
 		this.Next(lfIsToken) // skip default key word
 		this.parser.unExpectNewLineAndSkip()
 		if this.parser.token.Type != lex.TokenColon {
-			err = fmt.Errorf("%s missing colon after 'default'",
+			err = new error(sprintf("%s missing colon after 'default'",
 				this.parser.errMsgPrefix())
 			this.parser.errs = append(this.parser.errs, err)
 		} else {
 			this.Next(lfIsToken)
 		}
 		this.parser.expectNewLineAndSkip()
+		block := &ast.Block{}
+		block.IsSwitchBlock = true
+		statementSwitch.Default = block
 		if this.parser.token.Type != lex.TokenRc {
-			block := ast.Block{}
-			block.IsSwitchBlock = true
-			this.parseStatementList(&block, false)
+			this.parseStatementList(block, false)
 			statementSwitch.Default = &block
 		}
 	}
 	if this.parser.token.Type != lex.TokenRc {
-		err = fmt.Errorf("%s expect '}',but '%s'",
+		err = new error(sprintf("%s expect '}',but '%s'",
 			this.parser.errMsgPrefix(), this.parser.token.Description)
 		this.parser.errs = append(this.parser.errs, err)
 		return statementSwitch, err

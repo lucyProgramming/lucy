@@ -1,40 +1,41 @@
- 
-
-func (e *Expression) checkQuestionExpression(block *Block, errs *[]error) *Type {
-	question := e.Data.(*ExpressionQuestion)
-	condition, es := question.Selection.checkSingleValueContextExpression(block)
-	errs.appendAll(es)
-	if condition != null {
-		if condition.Type != VariableTypeBool {
-			*errs = append(*errs,
-				fmt.Errorf("%s not a bool expression",
-					condition.Pos.ErrMsgPrefix()))
+class ExpressionCheckQuestion {
+	
+	static fn check(e Expression , block Block, errs []error) ->(valueType Type) {
+		question := e.Data.(ExpressionQuestion)
+		condition, es := question.Selection.checkSingleValueContextExpression(block)
+		errs.appendAll(es)
+		if condition != null {
+			if condition.Type != VariableTypeBool {
+				errs.append(new error(sprintf("%s not a bool expression",
+						condition.Pos.ErrMsgPrefix())))
+			}
+			if err := question.Selection.canBeUsedAsCondition(); err != null {
+				errs.append(err)
+			}
 		}
-		if err := question.Selection.canBeUsedAsCondition(); err != null {
+		tType, es := question.True.checkSingleValueContextExpression(block)
+		errs.appendAll(es)
+		if tType == null {
+			return null
+		}
+		if err := tType.rightValueValid(); err != null {
 			errs.append(err)
+			return null
+		}
+		if err := tType.isTyped(); err != null {
+			errs.append(err)
+			return null
+		}
+		valueType = tType.Clone()
+		valueType.Pos = e.Pos
+		fType, es := question.False.checkSingleValueContextExpression(block)
+		errs.appendAll(es)
+		if fType != null &&
+			tType.assignAble(errs, fType) == false {
+			errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
+				fType.Pos.ErrMsgPrefix(), fType.TypeString(), tType.TypeString())))
 		}
 	}
-	tType, es := question.True.checkSingleValueContextExpression(block)
-	errs.appendAll(es)
-	if tType == null {
-		return null
-	}
-	if err := tType.rightValueValid(); err != null {
-		errs.append(err)
-		return null
-	}
-	if err := tType.isTyped(); err != null {
-		errs.append(err)
-		return null
-	}
-	ret := tType.Clone()
-	ret.Pos = e.Pos
-	fType, es := question.False.checkSingleValueContextExpression(block)
-	errs.appendAll(es)
-	if fType != null &&
-		tType.assignAble(errs, fType) == false {
-		*errs = append(*errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-			fType.Pos.ErrMsgPrefix(), fType.TypeString(), tType.TypeString()))
-	}
-	return ret
-}
+} 
+
+

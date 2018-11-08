@@ -9,7 +9,7 @@ import (
 /*
 	store local var according on type and offset
 */
-func storeLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []byte {
+func storeLocalVariableOps(variableType ast.VariableTypeKind, offset char) []byte {
 	if offset == math.MaxUint16 {
 		panic("local variable missing assign offset ," +
 			" this is cause by serious compiler error")
@@ -96,7 +96,7 @@ func storeLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []b
 	}
 }
 
-func loadLocalVariableOps(variableType ast.VariableTypeKind, offset uint16) []byte {
+func loadLocalVariableOps(variableType ast.VariableTypeKind, offset char) []byte {
 	if offset == math.MaxUint16 {
 		panic("local variable missing assign offset , " +
 			"this is cause by serious compiler error")

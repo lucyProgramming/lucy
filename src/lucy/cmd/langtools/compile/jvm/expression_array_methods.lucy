@@ -7,11 +7,11 @@ import (
 )
 
 func (this *BuildExpression) buildMethodCallJavaOnArray(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	maxStack = this.build(class, code, call.Expression, context, state)
 	switch call.Name {
@@ -27,11 +27,11 @@ func (this *BuildExpression) buildMethodCallJavaOnArray(
 }
 
 func (this *BuildExpression) buildMethodCallOnArray(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length) // ref type
@@ -59,7 +59,7 @@ func (this *BuildExpression) buildMethodCallOnArray(
 	case common.ArrayMethodAppend:
 		meta := ArrayMetas[call.Expression.Value.Array.Type]
 		for k, v := range call.Args {
-			currentStack := uint16(1)
+			currentStack := char(1)
 			if k != len(call.Args)-1 {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
@@ -84,7 +84,7 @@ func (this *BuildExpression) buildMethodCallOnArray(
 	case common.ArrayMethodAppendAll:
 		meta := ArrayMetas[call.Expression.Value.Array.Type]
 		for k, v := range call.Args {
-			currentStack := uint16(1)
+			currentStack := char(1)
 			if k != len(call.Args)-1 {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++

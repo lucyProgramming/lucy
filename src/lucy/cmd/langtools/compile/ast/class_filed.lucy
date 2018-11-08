@@ -1,4 +1,5 @@
- 
+import "lucy/cmd/langtools/compile/jvm/cg"
+import "java/lang/Object"
 
 class ClassField {
 	Class                  Class
@@ -7,25 +8,25 @@ class ClassField {
 	Type                   Type
 	Pos                    Pos
 	Comment                string
-	AccessFlags            uint16
+	AccessFlags            char
 	JvmDescriptor          string      // jvm
 	DefaultValue           Object // value base on type
 	
 	fn IsStatic() ->(is bool) {
-		return (f.AccessFlags & cg.AccFieldStatic) != 0
+		return (this.AccessFlags & cg.AccFieldStatic) != 0
 	}
 	fn IsPublic() ->(is bool) {
-		return (f.AccessFlags & cg.AccFieldPublic) != 0
+		return (this.AccessFlags & cg.AccFieldPublic) != 0
 	}
 	fn IsProtected() ->(is bool) {
-		return (f.AccessFlags & cg.AccFieldProtected) != 0
+		return (this.AccessFlags & cg.AccFieldProtected) != 0
 	}
 	fn IsPrivate() ->(is bool) {
-		return (f.AccessFlags & cg.AccFieldPrivate) != 0
+		return (this.AccessFlags & cg.AccFieldPrivate) != 0
 	}
 	fn ableAccessFromSubClass() ->(accessable bool) {
-		return f.IsPublic() ||
-			f.IsProtected()
+		return this.IsPublic() ||
+			this.IsProtected()
 	}
 
 	

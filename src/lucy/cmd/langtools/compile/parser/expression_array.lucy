@@ -7,7 +7,7 @@ import (
 )
 
 // []int{1,2,3}
-func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseArrayExpression() (ast.Expression, error) {
 	ep.parser.Next(lfIsToken) // skip [
 	ep.parser.unExpectNewLineAndSkip()
 	var err error
@@ -19,7 +19,7 @@ func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
 		arr.Expressions, err = ep.parseExpressions(lex.TokenRb)
 		ep.parser.ifTokenIsLfThenSkip()
 		if ep.parser.token.Type != lex.TokenRb {
-			err = fmt.Errorf("%s '[' and ']' not match", ep.parser.errMsgPrefix())
+			err = new error(sprintf("%s '[' and ']' not match", ep.parser.errMsgPrefix())
 			return nil, err
 		}
 		pos := ep.parser.mkPos()
@@ -48,7 +48,7 @@ func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
 			return nil, err
 		}
 		if ep.parser.token.Type != lex.TokenRp {
-			err = fmt.Errorf("%s '(' and  ')' not match",
+			err = new error(sprintf("%s '(' and  ')' not match",
 				ep.parser.errMsgPrefix())
 			ep.parser.errs = append(ep.parser.errs, err)
 			return nil, err
@@ -90,15 +90,15 @@ func (ep *ExpressionParser) parseArrayExpression() (*ast.Expression, error) {
 }
 
 //{1,2,3}  {{1,2,3},{456}}
-func (ep *ExpressionParser) parseArrayValues() ([]*ast.Expression, error) {
+func (ep *ExpressionParser) parseArrayValues() ([]ast.Expression, error) {
 	if ep.parser.token.Type != lex.TokenLc {
-		err := fmt.Errorf("%s expect '{',but '%s'",
+		err := new error(sprintf("%s expect '{',but '%s'",
 			ep.parser.errMsgPrefix(), ep.parser.token.Description)
 		ep.parser.errs = append(ep.parser.errs, err)
 		return nil, err
 	}
 	ep.Next(lfNotToken) // skip {
-	es := []*ast.Expression{}
+	es := []ast.Expression{}
 	for ep.parser.token.Type != lex.TokenEof &&
 		ep.parser.token.Type != lex.TokenRc {
 		if ep.parser.token.Type == lex.TokenComment ||
@@ -137,7 +137,7 @@ func (ep *ExpressionParser) parseArrayValues() ([]*ast.Expression, error) {
 	}
 	ep.parser.ifTokenIsLfThenSkip()
 	if ep.parser.token.Type != lex.TokenRc {
-		err := fmt.Errorf("%s expect '}',but '%s'",
+		err := new error(sprintf("%s expect '}',but '%s'",
 			ep.parser.errMsgPrefix(), ep.parser.token.Description)
 		ep.parser.errs = append(ep.parser.errs, err)
 		ep.parser.consume(untilRc)

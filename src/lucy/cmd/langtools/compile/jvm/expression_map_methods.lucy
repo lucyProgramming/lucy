@@ -7,11 +7,11 @@ import (
 )
 
 func (this *BuildExpression) buildMethodCallOnMap(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	maxStack = this.build(class, code, call.Expression, context, state)
 	stackLength := len(state.Stacks)
@@ -42,7 +42,7 @@ func (this *BuildExpression) buildMethodCallOnMap(
 			code.CodeLength++
 		}
 	case common.MapMethodRemove:
-		currentStack := uint16(1)
+		currentStack := char(1)
 		for k, v := range call.Args {
 			currentStack = 1
 			variableType := v.Value

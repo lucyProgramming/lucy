@@ -6,11 +6,11 @@ import (
 )
 
 func (this *BuildExpression) buildMapLiteral(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	code.Codes[code.CodeLength] = cg.OP_new
 	class.InsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -30,7 +30,7 @@ func (this *BuildExpression) buildMapLiteral(
 	for _, v := range values {
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
-		currentStack := uint16(2)
+		currentStack := char(2)
 		state.pushStack(class, hashMapObject)
 		stack := this.build(class, code, v.Key, context, state)
 		if t := currentStack + stack; t > maxStack {

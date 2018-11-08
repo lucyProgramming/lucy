@@ -1,4 +1,6 @@
- 
+import "lucy/cmd/langtools/compile/jvm/cg"
+
+
 class ForRangeAttr {
 	IdentifierKey   ExpressionIdentifier
 	IdentifierValue ExpressionIdentifier
@@ -26,8 +28,7 @@ class StatementFor {
 	Block     Block
 
 
-	fn checkRange() ->(errs []error)  {
-		errs := []error{}
+	fn checkRange() ->(errs []error= []error{})  {
 		//
 		var rangeExpression Expression
 		bin := this.Condition.Data.(ExpressionBinary)
@@ -36,34 +37,31 @@ class StatementFor {
 		} else if bin.Right.Type == ExpressionTypeList {
 			t := bin.Right.Data.([]Expression)
 			if len(t) > 1 {
-				errs = append(errs,
-					fmt.Errorf("%s for range statement only allow one argument on the right",
-						errMsgPrefix(t[1].Pos)))
+				errs.append(
+					new error(sprintf("%s for range statement only allow one argument on the right",
+						errMsgPrefix(t[1].Pos))))
 			}
 			rangeExpression = t[0].Data.(Expression)
 		}
-		rangeOn, es := rangeExpression.checkSingleValueContextExpression(&this.initExpressionBlock)
+		rangeOn, es := rangeExpression.checkSingleValueContextExpression(this.initExpressionBlock)
 		errs.appendAll(es)
 		if rangeOn == null {
 			return errs
 		}
 		if rangeOn.Type == VariableTypeString {
 			// byte[]("")
-			conversion := &ExpressionTypeConversion{}
-			conversion.Type = &Type{
-				Type: VariableTypeJavaArray,
-				Array: &Type{
-					Type: VariableTypeByte,
-					Pos:  rangeOn.Pos,
-				},
-				Pos: rangeOn.Pos,
-			}
+			conversion := new ExpressionTypeConversion()
+			conversion.Type = new Type()
+			conversion.Type.Type = VariableTypeJavaArray
+			conversion.Type.Pos = rangeOn.Pos
+			conversion.Type.Array = new Type()
+			conversion.Type.Array.Type = VariableTypeByte
+			conversion.Type.Array.Pos = rangeOn.Pos
 			conversion.Expression = rangeExpression
-			bs := &Expression{
-				Type: ExpressionTypeCheckCast,
-				Data: conversion,
-				Pos:  rangeOn.Pos,
-			}
+			bs := new Expression()
+			bs.Type = ExpressionTypeCheckCast
+			bs.Data = conversion
+			bs.Pos = rangeOn.Pos
 			bs.Value = conversion.Type
 			rangeExpression = bs
 			rangeOn = conversion.Type
@@ -71,49 +69,49 @@ class StatementFor {
 		if rangeOn.Type != VariableTypeArray &&
 			rangeOn.Type != VariableTypeJavaArray &&
 			rangeOn.Type != VariableTypeMap {
-			errs = append(errs, fmt.Errorf("%s cannot range on '%s'",
-				errMsgPrefix(rangeExpression.Pos), rangeOn.TypeString()))
+			errs.append( new error(sprintf("%s cannot range on '%s'",
+				errMsgPrefix(rangeExpression.Pos), rangeOn.TypeString())))
 			return errs
 		}
-		var lefts []*Expression
+		var lefts []Expression
 		if bin.Left.Type == ExpressionTypeList {
-			lefts = bin.Left.Data.([]*Expression)
+			lefts = bin.Left.Data.([]Expression)
 		} else {
-			lefts = []*Expression{bin.Left}
+			lefts = []Expression{bin.Left}
 		}
 		if len(lefts) > 2 {
-			errs = append(errs,
-				fmt.Errorf("%s cannot have more than 2 expressions on the left",
-					errMsgPrefix(lefts[2].Pos)))
+			errs.append(
+				new error(sprintf("%s cannot have more than 2 expressions on the left",
+					errMsgPrefix(lefts[2].Pos))))
 			lefts = lefts[0:2]
 		}
 		modelKv := len(lefts) == 2
-		this.RangeAttr = &ForRangeAttr{}
+		this.RangeAttr = new ForRangeAttr()
 		this.RangeAttr.RangeOn = rangeExpression
 		var err error
 		if this.Condition.Type == ExpressionTypeVarAssign {
 			for _, v := range lefts {
 				if v.Type != ExpressionTypeIdentifier {
-					errs = append(errs,
-						fmt.Errorf("%s not a identifier on left",
-							errMsgPrefix(v.Pos)))
+					errs.append(
+						new error(sprintf("%s not a identifier on left",
+							errMsgPrefix(v.Pos))))
 					return errs
 				}
 			}
-			var identifierK *ExpressionIdentifier
-			var identifierV *ExpressionIdentifier
+			var identifierK ExpressionIdentifier
+			var identifierV ExpressionIdentifier
 			var posK, posV Pos
 			if modelKv {
-				identifierK = lefts[0].Data.(*ExpressionIdentifier)
-				identifierV = lefts[1].Data.(*ExpressionIdentifier)
+				identifierK = lefts[0].Data.(ExpressionIdentifier)
+				identifierV = lefts[1].Data.(ExpressionIdentifier)
 				posK = lefts[0].Pos
 				posV = lefts[1].Pos
 			} else {
-				identifierV = lefts[0].Data.(*ExpressionIdentifier)
+				identifierV = lefts[0].Data.(ExpressionIdentifier)
 				posV = lefts[0].Pos
 			}
 			if identifierV.Name != UnderScore {
-				vd := &Variable{}
+				vd := new Variable()
 				if rangeOn.Type == VariableTypeArray ||
 					rangeOn.Type == VariableTypeJavaArray {
 					vd.Type = rangeOn.Array.Clone()
@@ -131,11 +129,11 @@ class StatementFor {
 			}
 			if modelKv &&
 				identifierK.Name != UnderScore {
-				vd := &Variable{}
-				var vt *Type
+				vd := new Variable()
+				var vt Type
 				if rangeOn.Type == VariableTypeArray ||
 					rangeOn.Type == VariableTypeJavaArray {
-					vt = &Type{}
+					vt = new Type()
 					vt.Type = VariableTypeInt
 				} else {
 					vt = rangeOn.Map.K.Clone()
@@ -164,59 +162,58 @@ class StatementFor {
 					this.RangeAttr.ExpressionValue = lefts[0]
 				}
 			}
-			var receiverKType *Type
+			var receiverKType Type
 			if this.RangeAttr.ExpressionKey != null {
-				receiverKType = this.RangeAttr.ExpressionKey.getLeftValue(&this.initExpressionBlock, &errs)
+				receiverKType = this.RangeAttr.ExpressionKey.getLeftValue(this.initExpressionBlock, errs)
 				if receiverKType == null {
 					return errs
 				}
 			}
-			var receiverVType *Type
+			var receiverVType Type
 			if this.RangeAttr.ExpressionValue != null {
-				receiverVType = this.RangeAttr.ExpressionValue.getLeftValue(&this.initExpressionBlock, &errs)
+				receiverVType = this.RangeAttr.ExpressionValue.getLeftValue(this.initExpressionBlock, errs)
 				if receiverVType == null {
 					return errs
 				}
 			}
-			var kType, vType *Type
+			var kType, vType Type
 			if rangeOn.Type == VariableTypeArray ||
 				rangeOn.Type == VariableTypeJavaArray {
-				kType = &Type{
-					Type: VariableTypeInt,
-				}
+				kType = new Type()
+				kType.Type = VariableTypeInt
+
 				vType = rangeOn.Array
 			} else {
 				kType = rangeOn.Map.K
 				vType = rangeOn.Map.V
 			}
 			if receiverKType != null {
-				if receiverKType.assignAble(&errs, kType) == false {
-					err = fmt.Errorf("%s cannot use '%s' as '%s' for index",
+				if receiverKType.assignAble(errs, kType) == false {
+					err = new error(sprintf("%s cannot use '%s' as '%s' for index",
 						errMsgPrefix(this.RangeAttr.ExpressionKey.Pos),
-						receiverKType.TypeString(), kType.TypeString())
+						receiverKType.TypeString(), kType.TypeString()))
 					errs.append(err)
 					return errs
 				}
 			}
 			if receiverVType != null {
-				if receiverVType.assignAble(&errs, vType) == false {
-					err = fmt.Errorf("%s cannot use '%s' as '%s' for value destination",
+				if receiverVType.assignAble(errs, vType) == false {
+					err = new error(sprintf("%s cannot use '%s' as '%s' for value destination",
 						errMsgPrefix(this.RangeAttr.ExpressionKey.Pos),
-						receiverKType.TypeString(), kType.TypeString())
+						receiverKType.TypeString(), kType.TypeString()))
 					errs.append(err)
 					return errs
 				}
 			}
 		}
-		errs = append(errs, this.Block.check()...)
+		errs.appendAll( this.Block.check())
 		return errs
 	}
-	fn check(block *Block) ->(errs []error)  {
+	fn check(block Block) ->(errs []error = []error{})  {
 		this.initExpressionBlock.inherit(block)
 		this.initExpressionBlock.InheritedAttribute.ForContinue = this
 		this.initExpressionBlock.InheritedAttribute.ForBreak = this
-		this.Block.inherit(&this.initExpressionBlock)
-		errs := []error{}
+		this.Block.inherit(this.initExpressionBlock)
 		if this.Init == null &&
 			this.Increment == null &&
 			this.Condition != null &&
@@ -229,18 +226,18 @@ class StatementFor {
 			if err := this.Init.canBeUsedAsStatement(); err != null {
 				errs.append(err)
 			}
-			_, es := this.Init.check(&this.initExpressionBlock)
+			_, es := this.Init.check(this.initExpressionBlock)
 			errs.appendAll(es)
 		}
 		if this.Condition != null {
 			if err := this.Condition.canBeUsedAsCondition(); err != null {
 				errs.append(err)
 			}
-			t, es := this.Condition.checkSingleValueContextExpression(&this.initExpressionBlock)
+			t, es := this.Condition.checkSingleValueContextExpression(this.initExpressionBlock)
 			errs.appendAll(es)
 			if t != null && t.Type != VariableTypeBool {
-				errs = append(errs, fmt.Errorf("%s condition must be bool expression,but %s",
-					errMsgPrefix(this.Condition.Pos), t.TypeString()))
+				errs.append( new error(sprintf("%s condition must be bool expression,but %s",
+					errMsgPrefix(this.Condition.Pos), t.TypeString())))
 			}
 		}
 		if this.Increment != null {
@@ -248,13 +245,13 @@ class StatementFor {
 			if err := this.Increment.canBeUsedAsStatement(); err != null {
 				errs.append(err)
 			}
-			_, es := this.Increment.check(&this.initExpressionBlock)
+			_, es := this.Increment.check(this.initExpressionBlock)
 			errs.appendAll(es)
 		}
 		if len(errs) > 0 {
 			return errs
 		}
-		errs = append(errs, this.Block.check()...)
+		errs.appendAll( this.Block.check())
 		return errs
 	}	
 }

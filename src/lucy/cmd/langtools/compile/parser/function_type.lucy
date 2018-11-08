@@ -23,7 +23,7 @@ func (this *Parser) parseFunctionType() (functionType ast.FunctionType, err erro
 	this.unExpectNewLineAndSkip()
 skipTemplateNames:
 	if this.token.Type != lex.TokenLp {
-		err = fmt.Errorf("%s fn declared wrong,missing '(',but '%s'",
+		err = new error(sprintf("%s fn declared wrong,missing '(',but '%s'",
 			this.errMsgPrefix(), this.token.Description)
 		this.errs = append(this.errs, err)
 		return
@@ -38,7 +38,7 @@ skipTemplateNames:
 	}
 	this.ifTokenIsLfThenSkip()
 	if this.token.Type != lex.TokenRp { // not )
-		err = fmt.Errorf("%s fn declared wrong,missing ')',but '%s'",
+		err = new error(sprintf("%s fn declared wrong,missing ')',but '%s'",
 			this.errMsgPrefix(), this.token.Description)
 		this.errs = append(this.errs, err)
 		return
@@ -47,7 +47,7 @@ skipTemplateNames:
 	if this.token.Type == lex.TokenArrow { // ->  parse return list
 		this.Next(lfNotToken) // skip ->
 		if this.token.Type != lex.TokenLp {
-			err = fmt.Errorf("%s fn declared wrong, not '(' after '->'",
+			err = new error(sprintf("%s fn declared wrong, not '(' after '->'",
 				this.errMsgPrefix())
 			this.errs = append(this.errs, err)
 			return
@@ -62,7 +62,7 @@ skipTemplateNames:
 		}
 		this.ifTokenIsLfThenSkip()
 		if this.token.Type != lex.TokenRp {
-			err = fmt.Errorf("%s fn declared wrong,expected ')',but '%s'",
+			err = new error(sprintf("%s fn declared wrong,expected ')',but '%s'",
 				this.errMsgPrefix(), this.token.Description)
 			this.errs = append(this.errs, err)
 			return
@@ -112,7 +112,7 @@ func (this *Parser) parseTypedNameDefaultValue() (returnList []*ast.Variable, er
 func (this *Parser) parseParameterOrReturnList() (returnList []*ast.Variable, err error) {
 	for this.token.Type != lex.TokenRp {
 		if this.token.Type == lex.TokenComma {
-			this.errs = append(this.errs, fmt.Errorf("%s extra comma",
+			this.errs = append(this.errs, new error(sprintf("%s extra comma",
 				this.errMsgPrefix()))
 			this.Next(lfNotToken)
 			continue

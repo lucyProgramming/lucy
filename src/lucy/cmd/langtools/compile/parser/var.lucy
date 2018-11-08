@@ -60,7 +60,7 @@ var (
 )
 
 func compileAutoName() string {
-	s := fmt.Sprintf("autoName$%d", autoNameIndex)
+	s := sprintf("autoName$%d", autoNameIndex)
 	autoNameIndex++
 	return s
 }

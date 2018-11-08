@@ -16,7 +16,7 @@ func writeExits(es []*cg.Exit, to int) {
 	}
 }
 
-func jumpTo(code *cg.AttributeCode, to int) {
+func jumpTo(code cg.AttributeCode, to int) {
 	if to < 0 {
 		panic("to is negative")
 	}
@@ -24,34 +24,34 @@ func jumpTo(code *cg.AttributeCode, to int) {
 	writeExits([]*cg.Exit{exit}, to)
 }
 
-func copyOPs(code *cg.AttributeCode, op ...byte) {
+func copyOPs(code cg.AttributeCode, op ...byte) {
 	for k, v := range op {
 		code.Codes[code.CodeLength+k] = v
 	}
 	code.CodeLength += len(op)
 }
 
-func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
+func loadInt32(class cg.ClassHighLevel, code cg.AttributeCode, value int) {
 	switch value {
-	case int32(-1):
+	case int(-1):
 		code.Codes[code.CodeLength] = cg.OP_iconst_m1
 		code.CodeLength++
-	case int32(0):
+	case int(0):
 		code.Codes[code.CodeLength] = cg.OP_iconst_0
 		code.CodeLength++
-	case int32(1):
+	case int(1):
 		code.Codes[code.CodeLength] = cg.OP_iconst_1
 		code.CodeLength++
-	case int32(2):
+	case int(2):
 		code.Codes[code.CodeLength] = cg.OP_iconst_2
 		code.CodeLength++
-	case int32(3):
+	case int(3):
 		code.Codes[code.CodeLength] = cg.OP_iconst_3
 		code.CodeLength++
-	case int32(4):
+	case int(4):
 		code.Codes[code.CodeLength] = cg.OP_iconst_4
 		code.CodeLength++
-	case int32(5):
+	case int(5):
 		code.Codes[code.CodeLength] = cg.OP_iconst_5
 		code.CodeLength++
 	default:
@@ -73,7 +73,7 @@ func loadInt32(class *cg.ClassHighLevel, code *cg.AttributeCode, value int32) {
 }
 
 func interfaceMethodArgsCount(functionType *ast.FunctionType) byte {
-	var count uint16
+	var count char
 	count = 1
 	for _, v := range functionType.ParameterList {
 		count += jvmSlotSize(v.Type)
@@ -84,7 +84,7 @@ func interfaceMethodArgsCount(functionType *ast.FunctionType) byte {
 	return byte(count)
 }
 
-func jvmSlotSize(typ *ast.Type) uint16 {
+func jvmSlotSize(typ *ast.Type) char {
 	if typ.Type == ast.VariableTypeDouble ||
 		typ.Type == ast.VariableTypeLong {
 		return 2
@@ -97,12 +97,12 @@ func nameTemplateFunction(function *ast.Function) string {
 	s := function.Name
 	for _, v := range function.Type.ParameterList {
 		if v.Type.IsPrimitive() {
-			s += fmt.Sprintf("$%s", v.Type.TypeString())
+			s += sprintf("$%s", v.Type.TypeString())
 			continue
 		}
 		switch v.Type.Type {
 		case ast.VariableTypeObject:
-			s += fmt.Sprintf("$%s", strings.Replace(v.Type.Class.Name, "/", "$", -1))
+			s += sprintf("$%s", strings.Replace(v.Type.Class.Name, "/", "$", -1))
 		case ast.VariableTypeMap:
 			s += "_map"
 		case ast.VariableTypeArray:
@@ -110,13 +110,13 @@ func nameTemplateFunction(function *ast.Function) string {
 		case ast.VariableTypeJavaArray:
 			s += "_java_array"
 		case ast.VariableTypeEnum:
-			s += fmt.Sprintf("$%s", strings.Replace(v.Type.Enum.Name, "/", "$", -1))
+			s += sprintf("$%s", strings.Replace(v.Type.Enum.Name, "/", "$", -1))
 		}
 	}
 	return s
 }
 
-func insertTypeAssertClass(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.Type) {
+func insertTypeAssertClass(class cg.ClassHighLevel, code cg.AttributeCode, t *ast.Type) {
 	if t.Type == ast.VariableTypeObject {
 		class.InsertClassConst(t.Class.Name, code.Codes[code.CodeLength:code.CodeLength+2])
 	} else if t.Type == ast.VariableTypeArray { // arrays
@@ -128,7 +128,7 @@ func insertTypeAssertClass(class *cg.ClassHighLevel, code *cg.AttributeCode, t *
 	code.CodeLength += 2
 }
 
-func newArrayBaseOnType(class *cg.ClassHighLevel, code *cg.AttributeCode, typ *ast.Type) {
+func newArrayBaseOnType(class cg.ClassHighLevel, code cg.AttributeCode, typ *ast.Type) {
 	switch typ.Type {
 	case ast.VariableTypeBool:
 		code.Codes[code.CodeLength] = cg.OP_newarray
@@ -220,7 +220,7 @@ func storeArrayElementOp(typ ast.VariableTypeKind) (op byte) {
 /*
 	return function call result stack size , this value should be proper handled
 */
-func popCallResult(code *cg.AttributeCode, e *ast.Expression, ft *ast.FunctionType) (stackSize uint16) {
+func popCallResult(code cg.AttributeCode, e ast.Expression, ft *ast.FunctionType) (stackSize char) {
 	stackSize = functionReturnJvmSize(ft)
 	if ft.VoidReturn() == false && e.IsStatementExpression {
 		if len(ft.ReturnList) == 1 {
@@ -239,7 +239,7 @@ func popCallResult(code *cg.AttributeCode, e *ast.Expression, ft *ast.FunctionTy
 	return
 }
 
-func functionReturnJvmSize(ft *ast.FunctionType) uint16 {
+func functionReturnJvmSize(ft *ast.FunctionType) char {
 	if ft.VoidReturn() {
 		return 0
 	}
@@ -250,14 +250,14 @@ func functionReturnJvmSize(ft *ast.FunctionType) uint16 {
 	}
 }
 
-func setEnumArray(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	state *StackMapState, context *Context, e *ast.Enum) (maxStack uint16) {
+func setEnumArray(class cg.ClassHighLevel, code cg.AttributeCode,
+	state StackMapState, context Context, e *ast.Enum) (maxStack char) {
 	if e.DefaultValue == 0 {
 		return
 	}
 	type autoVar = struct {
-		k      uint16
-		length uint16
+		k      char
+		length char
 	}
 	var a autoVar
 	a.k = code.MaxLocals

@@ -9,6 +9,8 @@ public class Token {
 	EndColumn   int
 	Description string
 	Data        Object
+	longValue long 
+	doubleValue double 
 }
 
 

@@ -20,7 +20,7 @@ func (this *Parser) parseImports() []*ast.Import {
 		this.Next(lfIsToken) // skip import key word
 		this.unExpectNewLineAndSkip()
 		if this.token.Type != lex.TokenLiteralString {
-			this.errs = append(this.errs, fmt.Errorf("%s expect 'package' after import,but '%s'",
+			this.errs = append(this.errs, new error(sprintf("%s expect 'package' after import,but '%s'",
 				this.errMsgPrefix(), this.token.Description))
 			this.consume(untilSemicolonOrLf)
 			this.Next(lfNotToken)
@@ -37,7 +37,7 @@ func (this *Parser) parseImports() []*ast.Import {
 			*/
 			this.Next(lfNotToken) // skip as
 			if this.token.Type != lex.TokenIdentifier {
-				this.errs = append(this.errs, fmt.Errorf("%s expect 'identifier' after 'as',but '%s'",
+				this.errs = append(this.errs, new error(sprintf("%s expect 'identifier' after 'as',but '%s'",
 					this.errMsgPrefix(), this.token.Description))
 				this.consume(untilSemicolonOrLf)
 				this.Next(lfNotToken)

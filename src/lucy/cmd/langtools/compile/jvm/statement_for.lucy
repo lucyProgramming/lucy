@@ -6,11 +6,11 @@ import (
 )
 
 func (this *BuildPackage) buildForStatement(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
 	s *ast.StatementFor,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	context Context,
+	state StackMapState) (maxStack char) {
 	if s.RangeAttr != nil {
 		if s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeArray {
 			return this.buildForRangeStatementForArray(class, code, s, context, state)

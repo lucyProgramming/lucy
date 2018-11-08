@@ -9,7 +9,7 @@ import (
 /*
 	true ? 1 : 2
 */
-func (ep *ExpressionParser) parseQuestionExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseQuestionExpression() (ast.Expression, error) {
 	left, err := ep.parseLogicalOrExpression()
 	if err != nil {
 		return left, err
@@ -24,7 +24,7 @@ func (ep *ExpressionParser) parseQuestionExpression() (*ast.Expression, error) {
 	}
 	ep.parser.unExpectNewLineAndSkip()
 	if ep.parser.token.Type != lex.TokenColon {
-		err := fmt.Errorf("%s expect ':' ,but '%s'",
+		err := new error(sprintf("%s expect ':' ,but '%s'",
 			ep.parser.errMsgPrefix(), ep.parser.token.Description)
 		ep.parser.errs = append(ep.parser.errs, err)
 		return left, err

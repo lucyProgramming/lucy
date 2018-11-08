@@ -195,6 +195,31 @@ func (e *Expression) constantFold() (is bool, err error) {
 			return
 		}
 		switch ee.Type {
+		case ExpressionTypeByte:
+			is = true
+			e.Data = -ee.Data.(int64)
+			e.Type = ExpressionTypeByte
+			return
+		case ExpressionTypeShort:
+			is = true
+			e.Data = -ee.Data.(int64)
+			e.Type = ExpressionTypeShort
+			return
+		case ExpressionTypeChar:
+			is = true
+			e.Data = -ee.Data.(int64)
+			e.Type = ExpressionTypeChar
+			return
+		case ExpressionTypeInt:
+			is = true
+			e.Data = -ee.Data.(int64)
+			e.Type = ExpressionTypeInt
+			return
+		case ExpressionTypeLong:
+			is = true
+			e.Data = -ee.Data.(int64)
+			e.Type = ExpressionTypeLong
+			return
 		case ExpressionTypeFloat:
 			is = true
 			e.Data = -ee.Data.(float32)

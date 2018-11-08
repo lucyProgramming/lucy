@@ -27,7 +27,7 @@ func (this *FunctionParser) parse(needName bool, isAbstract bool) (f *ast.Functi
 	this.Next(lfIsToken) // skip fn key word
 	this.parser.unExpectNewLineAndSkip()
 	if needName && this.parser.token.Type != lex.TokenIdentifier {
-		err := fmt.Errorf("%s expect function name,but '%s'",
+		err := new error(sprintf("%s expect function name,but '%s'",
 			this.parser.errMsgPrefix(), this.parser.token.Description)
 		this.parser.errs = append(this.parser.errs, err)
 		this.consume(untilLp)
@@ -50,7 +50,7 @@ func (this *FunctionParser) parse(needName bool, isAbstract bool) (f *ast.Functi
 	}
 	this.parser.ifTokenIsLfThenSkip()
 	if this.parser.token.Type != lex.TokenLc {
-		err = fmt.Errorf("%s except '{' but '%s'",
+		err = new error(sprintf("%s except '{' but '%s'",
 			this.parser.errMsgPrefix(), this.parser.token.Description)
 		this.parser.errs = append(this.parser.errs, err)
 		this.consume(untilLc)
@@ -60,7 +60,7 @@ func (this *FunctionParser) parse(needName bool, isAbstract bool) (f *ast.Functi
 	this.Next(lfNotToken) // skip {
 	this.parser.BlockParser.parseStatementList(&f.Block, false)
 	if this.parser.token.Type != lex.TokenRc {
-		err = fmt.Errorf("%s expect '}', but '%s'",
+		err = new error(sprintf("%s expect '}', but '%s'",
 			this.parser.errMsgPrefix(), this.parser.token.Description)
 		this.parser.errs = append(this.parser.errs, err)
 		this.consume(untilRc)

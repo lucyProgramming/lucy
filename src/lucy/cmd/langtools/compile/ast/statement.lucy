@@ -1,4 +1,5 @@
  
+import "java/lang/Boolean"
 
 public enum StatementTypeKind {
 	StatementTypeExpression = 1 ,
@@ -65,7 +66,7 @@ class Statement {
 		if this.StatementIf.Condition.Type != ExpressionTypeBool {
 			return
 		}
-		c := this.StatementIf.Condition.Data.(bool)
+		c := this.StatementIf.Condition.Data.(Boolean).booleanValue()
 		if c {
 			this.Type = StatementTypeBlock
 			this.Block = this.StatementIf.Block
@@ -84,7 +85,7 @@ class Statement {
 			this.StatementFor.Increment == null &&
 			this.StatementFor.Condition != null &&
 			this.StatementFor.Condition.Type == ExpressionTypeBool &&
-			this.StatementFor.Condition.Data.(bool) == false {
+			this.StatementFor.Condition.longValue == 0 {
 			this.Type = StatementTypeNop
 			this.StatementFor = null
 		}
@@ -133,22 +134,29 @@ class Statement {
 			return this.Block.check()
 		case StatementTypeLabel:
 			if block.InheritedAttribute.Defer != null {
-				block.InheritedAttribute.Defer.Labels =
-					append(block.InheritedAttribute.Defer.Labels, this.StatementLabel)
+			    if block.InheritedAttribute.Defer.Labels != null {
+			        block.InheritedAttribute.Defer.Labels.append(this.StatementLabel)
+			    }else {
+			        block.InheritedAttribute.Defer.Labels = [this.StatementLabel]
+			    }
 			}
 		case StatementTypeClass:
-			PackageBeenCompile.statementLevelClass =
-				append(PackageBeenCompile.statementLevelClass, this.Class)
+		    if PackageBeenCompile.statementLevelClass == null {
+                PackageBeenCompile.statementLevelClass = []Class{this.Class}
+		    }else {
+                PackageBeenCompile.statementLevelClass.append(this.Class)
+		    }
 			err := block.Insert(this.Class.Name, this.Class.Pos, this.Class)
 			if err != null {
 				errs.append(err)
 			}
-			return append(errs, this.Class.check(block)...)
+			errs.appendAll(this.Class.check(block))
+			return errs
 		case StatementTypeEnum:
 			es := this.Enum.check()
 			err := block.Insert(this.Enum.Name, this.Enum.Pos, this.Enum)
 			if err != null {
-				es = append(es, err)
+				es.append(err)
 			}
 			return es
 		case StatementTypeNop:
@@ -158,8 +166,8 @@ class Statement {
 			return this.StatementWhen.check(block, this)
 		case StatementTypeImport:
 			if block.InheritedAttribute.Function.TemplateClonedFunction == false {
-				errs = append(errs, fmt.Errorf("%s cannot have 'import' at this scope , non-template function",
-					errMsgPrefix(this.Import.Pos)))
+				errs.append(new error(sprintf("%s cannot have 'import' at this scope , non-template function",
+					errMsgPrefix(this.Import.Pos))))
 				return errs
 			}
 			err := this.Import.MkAccessName()
@@ -168,8 +176,8 @@ class Statement {
 				return errs
 			}
 			if this.Import.Alias == UnderScore {
-				errs = append(errs, fmt.Errorf("%s import at block scope , must be used",
-					errMsgPrefix(this.Import.Pos)))
+				errs.append(new error(sprintf("%s import at block scope , must be used",
+					errMsgPrefix(this.Import.Pos))))
 				return null
 			}
 			if err := PackageBeenCompile.insertImport(this.Import); err != null {

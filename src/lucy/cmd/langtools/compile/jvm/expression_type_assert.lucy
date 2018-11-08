@@ -7,11 +7,11 @@ import (
 )
 
 func (this *BuildExpression) buildTypeAssert(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	assert := e.Data.(*ast.ExpressionTypeAssert)
 	if assert.MultiValueContext {
 		maxStack = this.build(class, code, assert.Expression, context, state)

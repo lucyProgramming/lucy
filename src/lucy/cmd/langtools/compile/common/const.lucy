@@ -24,3 +24,4 @@ const	BuildInFunctionMonitorExit  = "monitorExit"
 const	BuildInFunctionBlockHole    = "blackHole"
 const	BuildInFunctionAssert       = "assert"
  
+const CorePackage = "lucy/lang"

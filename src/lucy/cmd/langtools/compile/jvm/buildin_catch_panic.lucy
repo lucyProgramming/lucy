@@ -6,12 +6,12 @@ import (
 )
 
 func (this *BuildExpression) mkBuildInPanic(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (
-	maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (
+	maxStack char) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionPanicMeta)
 	if meta.ArgThrowable {
@@ -26,7 +26,7 @@ func (this *BuildExpression) mkBuildInPanic(
 			{
 				verificationTypeInfo := &cg.StackMapVerificationTypeInfo{}
 				uninitializedVariableInfo := &cg.StackMapUninitializedVariableInfo{}
-				uninitializedVariableInfo.CodeOffset = uint16(code.CodeLength - 4)
+				uninitializedVariableInfo.CodeOffset = char(code.CodeLength - 4)
 				verificationTypeInfo.Verify = uninitializedVariableInfo
 				state.Stacks = append(state.Stacks, verificationTypeInfo)
 				state.Stacks = append(state.Stacks, verificationTypeInfo)
@@ -50,7 +50,7 @@ func (this *BuildExpression) mkBuildInPanic(
 		{
 			verificationTypeInfo := &cg.StackMapVerificationTypeInfo{}
 			uninitializedVariableInfo := &cg.StackMapUninitializedVariableInfo{}
-			uninitializedVariableInfo.CodeOffset = uint16(code.CodeLength - 4)
+			uninitializedVariableInfo.CodeOffset = char(code.CodeLength - 4)
 			verificationTypeInfo.Verify = uninitializedVariableInfo
 			state.Stacks = append(state.Stacks, verificationTypeInfo)
 			state.Stacks = append(state.Stacks, verificationTypeInfo)
@@ -77,8 +77,8 @@ func (this *BuildExpression) mkBuildInPanic(
 	return
 }
 
-func (this *BuildExpression) mkBuildInCatch(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context) (maxStack uint16) {
+func (this *BuildExpression) mkBuildInCatch(class cg.ClassHighLevel, code cg.AttributeCode,
+	e ast.Expression, context Context) (maxStack char) {
 	if e.IsStatementExpression { // statement call
 		maxStack = 1
 		code.Codes[code.CodeLength] = cg.OP_aconst_null

@@ -17,7 +17,7 @@ func (this *Parser) parseType() (*ast.Type, error) {
 		this.unExpectNewLineAndSkip()
 		if this.token.Type != lex.TokenRb {
 			// [ and ] not match
-			err = fmt.Errorf("%s '[' and ']' not match", this.errMsgPrefix())
+			err = new error(sprintf("%s '[' and ']' not match", this.errMsgPrefix())
 			this.errs = append(this.errs, err)
 			return nil, err
 		}
@@ -96,7 +96,7 @@ func (this *Parser) parseType() (*ast.Type, error) {
 	case lex.TokenMap:
 		this.Next(lfNotToken) // skip map key word
 		if this.token.Type != lex.TokenLc {
-			err := fmt.Errorf("%s expect '{',but '%s'",
+			err := new error(sprintf("%s expect '{',but '%s'",
 				this.errMsgPrefix(), this.token.Description)
 			this.errs = append(this.errs, err)
 			return nil, err
@@ -109,7 +109,7 @@ func (this *Parser) parseType() (*ast.Type, error) {
 		}
 		this.ifTokenIsLfThenSkip()
 		if this.token.Type != lex.TokenArrow {
-			err := fmt.Errorf("%s expect '->',but '%s'",
+			err := new error(sprintf("%s expect '->',but '%s'",
 				this.errMsgPrefix(), this.token.Description)
 			this.errs = append(this.errs, err)
 			return nil, err
@@ -121,7 +121,7 @@ func (this *Parser) parseType() (*ast.Type, error) {
 		}
 		this.ifTokenIsLfThenSkip()
 		if this.token.Type != lex.TokenRc {
-			err := fmt.Errorf("%s expect '}',but '%s'",
+			err := new error(sprintf("%s expect '}',but '%s'",
 				this.errMsgPrefix(), this.token.Description)
 			this.errs = append(this.errs, err)
 			return nil, err
@@ -151,12 +151,12 @@ func (this *Parser) parseType() (*ast.Type, error) {
 		this.Next(lfIsToken)
 		this.unExpectNewLineAndSkip()
 		if this.token.Type != lex.TokenSelection {
-			return nil, fmt.Errorf("%s expect '.' , but '%s'",
+			return nil, new error(sprintf("%s expect '.' , but '%s'",
 				this.errMsgPrefix(), this.token.Description)
 		}
 		this.Next(lfNotToken)
 		if this.token.Type != lex.TokenIdentifier {
-			this.errs = append(this.errs, fmt.Errorf("%s expect identifier , but '%s'",
+			this.errs = append(this.errs, new error(sprintf("%s expect identifier , but '%s'",
 				this.errMsgPrefix(), this.token.Description))
 		} else {
 			ret = &ast.Type{
@@ -167,7 +167,7 @@ func (this *Parser) parseType() (*ast.Type, error) {
 			this.Next(lfIsToken)
 		}
 	default:
-		err := fmt.Errorf("%s unkown begining '%s' token for a type",
+		err := new error(sprintf("%s unkown begining '%s' token for a type",
 			this.errMsgPrefix(), this.token.Description)
 		this.errs = append(this.errs, err)
 		return nil, err
@@ -191,7 +191,7 @@ func (this *Parser) parseType() (*ast.Type, error) {
 		this.Next(lfIsToken) // skip [
 		this.unExpectNewLineAndSkip()
 		if this.token.Type != lex.TokenRb {
-			err = fmt.Errorf("%s '[' and ']' not match", this.errMsgPrefix())
+			err = new error(sprintf("%s '[' and ']' not match", this.errMsgPrefix())
 			this.errs = append(this.errs, err)
 			return ret, err
 		}
@@ -235,7 +235,7 @@ func (this *Parser) parseIdentifierType() (*ast.Type, error) {
 	for this.token.Type == lex.TokenSelection {
 		this.Next(lfNotToken) // skip .
 		if this.token.Type != lex.TokenIdentifier {
-			return nil, fmt.Errorf("%s not a identifier after dot",
+			return nil, new error(sprintf("%s not a identifier after dot",
 				this.errMsgPrefix())
 		}
 		name += "." + this.token.Data.(string)
@@ -256,7 +256,7 @@ func (this *Parser) parseTypes(endTokens ...lex.TokenKind) ([]*ast.Type, error) 
 		ret = append(ret, t)
 		if this.token.Type != lex.TokenComma {
 			if this.isValidTypeBegin() {
-				this.errs = append(this.errs, fmt.Errorf("%s missing comma",
+				this.errs = append(this.errs, new error(sprintf("%s missing comma",
 					this.errMsgPrefix()))
 				continue
 			}
@@ -265,7 +265,7 @@ func (this *Parser) parseTypes(endTokens ...lex.TokenKind) ([]*ast.Type, error) 
 		this.Next(lfNotToken) // skip ,
 		for _, v := range endTokens {
 			if v == this.token.Type {
-				this.errs = append(this.errs, fmt.Errorf("%s extra comma", this.errMsgPrefix()))
+				this.errs = append(this.errs, new error(sprintf("%s extra comma", this.errMsgPrefix()))
 				goto end
 			}
 		}

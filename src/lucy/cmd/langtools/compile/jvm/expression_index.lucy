@@ -6,11 +6,11 @@ import (
 )
 
 func (this *BuildExpression) buildIndex(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	index := e.Data.(*ast.ExpressionIndex)
 	if index.Expression.Value.Type == ast.VariableTypeMap {
 		return this.buildMapIndex(class, code, e, context, state)
@@ -69,11 +69,11 @@ func (this *BuildExpression) buildIndex(
 }
 
 func (this *BuildExpression) buildStringIndex(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length)
@@ -97,18 +97,18 @@ func (this *BuildExpression) buildStringIndex(
 	return
 }
 func (this *BuildExpression) buildMapIndex(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length)
 	}()
 	index := e.Data.(*ast.ExpressionIndex)
 	maxStack = this.build(class, code, index.Expression, context, state)
-	currentStack := uint16(1)
+	currentStack := char(1)
 	//build index
 	state.pushStack(class, index.Expression.Value)
 	stack := this.build(class, code, index.Index, context, state)

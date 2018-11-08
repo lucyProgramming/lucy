@@ -1,4 +1,8 @@
- 
+import "lucy/cmd/langtools/compile/jvm/cg"
+import "java/lang/Long"
+import "java/lang/Float"
+import "java/lang/Double"
+
 class StatementSwitchCase  {
 	Matches []Expression
 	Block   Block
@@ -21,7 +25,7 @@ class StatementSwitch  {
 		this.initExpressionBlock.inherit(block)
 		for _, v := range this.PrefixExpressions {
 			v.IsStatementExpression = true
-			_, es := v.check(&this.initExpressionBlock)
+			_, es := v.check(this.initExpressionBlock)
 			errs.appendAll(es)
 			if err := v.canBeUsedAsStatement(); err != null {
 				errs.append(err)
@@ -30,7 +34,7 @@ class StatementSwitch  {
 		if this.Condition == null {
 			return errs
 		}
-		conditionType, es := this.Condition.checkSingleValueContextExpression(&this.initExpressionBlock)
+		conditionType, es := this.Condition.checkSingleValueContextExpression(this.initExpressionBlock)
 		errs.appendAll(es)
 		if conditionType == null {
 			return errs
@@ -49,22 +53,20 @@ class StatementSwitch  {
 				this.EndPos.ErrMsgPrefix())))
 			return errs
 		}
-		longMap :=  new map { int64 -> Pos } ()  
-		floatMap := new map { float32 -> Pos } ()
-		doubleMap := new map { float64 -> Pos }()
+		longMap :=  new map { long -> Pos } ()
+		doubleMap := new map { double -> Pos }()
 		stringMap := new map{ string -> Pos }()
 		enumNamesMap := new map {string -> Pos }()
 		enumPackageName := ""
-		var longValue int64
-		var floatValue float32
-		var doubleValue float64
+		var longValue long
+		var doubleValue double
 		var stringValue string
 		var enumName string
 		containsBool := false
 		for _, v := range this.StatementSwitchCases {
 			for _, e := range v.Matches {
 				valueValid := false
-				t, es := e.checkSingleValueContextExpression(&this.initExpressionBlock)
+				t, es := e.checkSingleValueContextExpression(this.initExpressionBlock)
 				errs.appendAll(es)
 				if t == null {
 					continue
@@ -74,14 +76,14 @@ class StatementSwitch  {
 					continue
 				}
 				if conditionType.assignAble(errs, t) == false {
-					errs = append(errs, fmt.Errorf("%s cannot use '%s' as '%s'",
-						e.Pos.ErrMsgPrefix(), t.TypeString(), conditionType.TypeString()))
+					errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
+						e.Pos.ErrMsgPrefix(), t.TypeString(), conditionType.TypeString())))
 					continue
 				}
 				if conditionType.Type == VariableTypeEnum {
 					if t.EnumName == null {
-						errs = append(errs, fmt.Errorf("%s enum value is not literal",
-							errMsgPrefix(e.Pos)))
+						errs.append(new error(sprintf("%s enum value is not literal",
+							errMsgPrefix(e.Pos))))
 						continue
 					} else {
 						if e.Value.Type == VariableTypePackage &&
@@ -95,22 +97,14 @@ class StatementSwitch  {
 				if conditionType.IsPrimitive() {
 					if e.isLiteral() {
 						switch e.Type {
-						case ExpressionTypeByte:
-							fallthrough
-						case ExpressionTypeShort:
-							fallthrough
-						case ExpressionTypeChar:
-							fallthrough
-						case ExpressionTypeInt:
-							fallthrough
-						case ExpressionTypeLong:
-							longValue = e.Data.(int64)
-						case ExpressionTypeFloat:
-							floatValue = e.Data.(float32)
-						case ExpressionTypeDouble:
-							doubleValue = e.Data.(float64)
+						case ExpressionTypeByte , ExpressionTypeShort,
+							ExpressionTypeChar,ExpressionTypeInt , ExpressionTypeLong:
+							longValue = e.longValue
+						case ExpressionTypeFloat , ExpressionTypeDouble:
+							doubleValue = e.doubleValue
 						case ExpressionTypeString:
 							stringValue = e.Data.(string)
+						default:
 						}
 						valueValid = true
 					} else {
@@ -124,69 +118,55 @@ class StatementSwitch  {
 					continue
 				}
 				if valueValid {
-					fn errMsg(first Pos, which string) error {
-						errMsg := fmt.Sprintf("%s  '%s' duplicate case,first declared at:\n",
+					fn errMsg(first Pos, which string) -> (err error) {
+						errMsg := sprintf("%s  '%s' duplicate case,first declared at:\n",
 							e.Pos.ErrMsgPrefix(), which)
-						errMsg += fmt.Sprintf("\t%s", first.ErrMsgPrefix())
-						return errors.New(errMsg)
+						errMsg += sprintf("\t%s", first.ErrMsgPrefix())
+						return new error(errMsg)
 					}
 					switch conditionType.Type {
-					case VariableTypeByte:
-						fallthrough
-					case VariableTypeShort:
-						fallthrough
-					case VariableTypeChar:
-						fallthrough
-					case VariableTypeInt:
-						fallthrough
-					case VariableTypeLong:
-						if first, ok := longMap[longValue]; ok {
+					case VariableTypeByte , VariableTypeShort ,VariableTypeChar ,  VariableTypeInt , VariableTypeLong:
+						if first := longMap[longValue]; first != null {
 							errs . append(errMsg(first, longValue + ""))
 							continue // no check body
 						} else {
 							longMap[longValue] = e.Pos
 						}
-					case VariableTypeFloat:
-						if first, found := floatMap[floatValue]; found {
-							errs . append(errMsg(first, floatValue + ""))
-							continue // no check body
-						} else {
-							floatMap[floatValue] = e.Pos
-						}
 					case VariableTypeDouble:
-						if first, found := doubleMap[doubleValue]; found {
-							errs . append( errMsg(first, doubleValue + ""))
+						if first := doubleMap[doubleValue]; first != null {
+							errs.append( errMsg(first, doubleValue + ""))
 							continue // no check body
 						} else {
 							doubleMap[doubleValue] = e.Pos
 						}
 					case VariableTypeString:
-						if first, ok := stringMap[stringValue]; ok {
+						if first := stringMap[stringValue]; first != null {
 							errs . append( errMsg(first, stringValue ))
 							continue // no check body
 						} else {
 							stringMap[stringValue] = e.Pos
 						}
 					case VariableTypeEnum:
-						if first, ok := enumNamesMap[enumName]; ok {
+						if first := enumNamesMap[enumName]; first != null {
 							errs . append(errMsg(first, enumName))
 							continue // no check body
 						} else {
 							enumNamesMap[enumName] = e.Pos
 						}
+					default:
 					}
 				}
 			}
 			if v.Block != null {
-				v.Block.inherit(&this.initExpressionBlock)
+				v.Block.inherit(this.initExpressionBlock)
 				v.Block.InheritedAttribute.ForBreak = this
-				errs = append(errs, v.Block.check()...)
+				errs.appendAll(v.Block.check())
 			}
 		}
 		if this.Default != null {
-			this.Default.inherit(&this.initExpressionBlock)
+			this.Default.inherit(this.initExpressionBlock)
 			this.Default.InheritedAttribute.ForBreak = this
-			errs = append(errs, this.Default.check()...)
+			errs.appendAll(this.Default.check())
 		}
 		if conditionType.Type == VariableTypeEnum &&
 			len(enumNamesMap) < len(conditionType.Enum.Enums) &&
@@ -197,7 +177,7 @@ class StatementSwitch  {
 				this.EndPos.ErrMsgPrefix(), conditionType.Enum.Name)
 			errMsg += "\tyou can use 'default:' or give missing enums,which are:\n"
 			for _, v := range conditionType.Enum.Enums {
-				_, ok := enumNamesMap[v.Name]
+				ok := enumNamesMap.keyExist(v.Name)
 				if ok {
 					//handled
 					continue

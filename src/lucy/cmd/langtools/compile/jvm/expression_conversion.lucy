@@ -6,7 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (this *BuildExpression) stackTop2Byte(code *cg.AttributeCode, on ast.VariableTypeKind) {
+func (this *BuildExpression) stackTop2Byte(code cg.AttributeCode, on ast.VariableTypeKind) {
 	switch on {
 	case ast.VariableTypeByte:
 		// already is
@@ -32,7 +32,7 @@ func (this *BuildExpression) stackTop2Byte(code *cg.AttributeCode, on ast.Variab
 	}
 }
 
-func (this *BuildExpression) stackTop2Short(code *cg.AttributeCode, on ast.VariableTypeKind) {
+func (this *BuildExpression) stackTop2Short(code cg.AttributeCode, on ast.VariableTypeKind) {
 	switch on {
 	case ast.VariableTypeByte:
 		// already is
@@ -60,7 +60,7 @@ func (this *BuildExpression) stackTop2Short(code *cg.AttributeCode, on ast.Varia
 	}
 }
 
-func (this *BuildExpression) stackTop2Char(code *cg.AttributeCode, on ast.VariableTypeKind) {
+func (this *BuildExpression) stackTop2Char(code cg.AttributeCode, on ast.VariableTypeKind) {
 	switch on {
 	case ast.VariableTypeByte:
 		// already is
@@ -89,7 +89,7 @@ func (this *BuildExpression) stackTop2Char(code *cg.AttributeCode, on ast.Variab
 
 	}
 }
-func (this *BuildExpression) stackTop2Int(code *cg.AttributeCode, on ast.VariableTypeKind) {
+func (this *BuildExpression) stackTop2Int(code cg.AttributeCode, on ast.VariableTypeKind) {
 	switch on {
 	case ast.VariableTypeByte:
 		// already is
@@ -112,7 +112,7 @@ func (this *BuildExpression) stackTop2Int(code *cg.AttributeCode, on ast.Variabl
 	}
 }
 
-func (this *BuildExpression) stackTop2Float(code *cg.AttributeCode, on ast.VariableTypeKind) {
+func (this *BuildExpression) stackTop2Float(code cg.AttributeCode, on ast.VariableTypeKind) {
 	switch on {
 	case ast.VariableTypeByte:
 		fallthrough
@@ -135,7 +135,7 @@ func (this *BuildExpression) stackTop2Float(code *cg.AttributeCode, on ast.Varia
 	}
 }
 
-func (this *BuildExpression) stackTop2Long(code *cg.AttributeCode, on ast.VariableTypeKind) {
+func (this *BuildExpression) stackTop2Long(code cg.AttributeCode, on ast.VariableTypeKind) {
 	switch on {
 	case ast.VariableTypeByte:
 		fallthrough
@@ -158,7 +158,7 @@ func (this *BuildExpression) stackTop2Long(code *cg.AttributeCode, on ast.Variab
 	}
 }
 
-func (this *BuildExpression) stackTop2Double(code *cg.AttributeCode, on ast.VariableTypeKind) {
+func (this *BuildExpression) stackTop2Double(code cg.AttributeCode, on ast.VariableTypeKind) {
 	switch on {
 	case ast.VariableTypeByte:
 		fallthrough
@@ -183,7 +183,7 @@ func (this *BuildExpression) stackTop2Double(code *cg.AttributeCode, on ast.Vari
 /*
 	convert stack top to target
 */
-func (this *BuildExpression) numberTypeConverter(code *cg.AttributeCode,
+func (this *BuildExpression) numberTypeConverter(code cg.AttributeCode,
 	on ast.VariableTypeKind, target ast.VariableTypeKind) {
 	if on == target {
 		return
@@ -206,8 +206,8 @@ func (this *BuildExpression) numberTypeConverter(code *cg.AttributeCode,
 	}
 }
 
-func (this *BuildExpression) stackTop2String(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	typ *ast.Type, context *Context, state *StackMapState) (maxStack uint16) {
+func (this *BuildExpression) stackTop2String(class cg.ClassHighLevel, code cg.AttributeCode,
+	typ *ast.Type, context Context, state StackMapState) (maxStack char) {
 	if typ.Type == ast.VariableTypeString {
 		return
 	}

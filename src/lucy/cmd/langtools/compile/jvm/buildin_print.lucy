@@ -9,11 +9,11 @@ import (
 	function print
 */
 func (this *BuildExpression) mkBuildInPrint(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	// get stream from stdout
 	code.Codes[code.CodeLength] = cg.OP_getstatic

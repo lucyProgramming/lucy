@@ -372,7 +372,7 @@ func (this *FileLoader) loadConst(c *cg.Class, nameIndex uint16, t *ast.Type) (v
 	case ast.VariableTypeChar:
 		fallthrough
 	case ast.VariableTypeInt:
-		fallthrough
+		return int64(binary.BigEndian.Uint32(c.ConstPool[nameIndex].Info))
 	case ast.VariableTypeLong:
 		return int64(binary.BigEndian.Uint64(c.ConstPool[nameIndex].Info))
 	case ast.VariableTypeFloat:

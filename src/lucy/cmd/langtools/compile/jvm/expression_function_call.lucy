@@ -6,11 +6,11 @@ import (
 )
 
 func (this *BuildExpression) buildFunctionPointerCall(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	maxStack = this.build(class, code, call.Expression, context, state)
 	stack := this.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
@@ -30,11 +30,11 @@ func (this *BuildExpression) buildFunctionPointerCall(
 	return
 }
 func (this *BuildExpression) buildFunctionCall(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	if call.Function == nil {
 		return this.buildFunctionPointerCall(class, code, e, context, state)

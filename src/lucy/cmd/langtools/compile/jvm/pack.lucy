@@ -9,8 +9,8 @@ type TypeConverterAndPrimitivePacker struct {
 }
 
 func (TypeConverterAndPrimitivePacker) unPackPrimitives(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
 	t *ast.Type) {
 	switch t.Type {
 	case ast.VariableTypeBool:
@@ -111,14 +111,14 @@ func (TypeConverterAndPrimitivePacker) unPackPrimitives(
 }
 
 func (c *TypeConverterAndPrimitivePacker) packPrimitives(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
 	t *ast.Type) {
 	copyOPs(code, c.packPrimitivesBytes(class, t)...)
 }
 
 func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(
-	class *cg.ClassHighLevel,
+	class cg.ClassHighLevel,
 	t *ast.Type) (bs []byte) {
 	bs = make([]byte, 3)
 	bs[0] = cg.OP_invokestatic
@@ -180,8 +180,8 @@ func (TypeConverterAndPrimitivePacker) packPrimitivesBytes(
 }
 
 func (TypeConverterAndPrimitivePacker) castPointer(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
 	t *ast.Type) {
 	if t.IsPointer() == false {
 		panic("not pointer at all , compiler error")

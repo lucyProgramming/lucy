@@ -1,4 +1,4 @@
- 
+import "lucy/cmd/langtools/compile/jvm/cg"
 
 class StatementIf {
 	PrefixExpressions   []Expression
@@ -14,28 +14,28 @@ class StatementIf {
 		this.initExpressionBlock.inherit(father)
 		for _, v := range this.PrefixExpressions {
 			v.IsStatementExpression = true
-			_, es := v.check(&this.initExpressionBlock)
+			_, es := v.check(this.initExpressionBlock)
 			errs.appendAll(es)
 			if err := v.canBeUsedAsStatement(); err != null {
 				errs.append(err)
 			}
 		}
 		if this.Condition != null {
-			conditionType, es := this.Condition.checkSingleValueContextExpression(&this.initExpressionBlock)
+			conditionType, es := this.Condition.checkSingleValueContextExpression(this.initExpressionBlock)
 			errs.appendAll(es)
 			if conditionType != null &&
 				conditionType.Type != VariableTypeBool {
-				errs = append(errs, fmt.Errorf("%s condition is not a bool expression",
-					this.Condition.Pos.ErrMsgPrefix()))
+				errs.append(new error(sprintf("%s condition is not a bool expression",
+					this.Condition.Pos.ErrMsgPrefix())))
 			}
 			if err := this.Condition.canBeUsedAsCondition(); err != null {
 				errs.append(err)
 			}
 		}
-		this.Block.inherit(&this.initExpressionBlock)
-		errs = append(errs, this.Block.check()...)
+		this.Block.inherit(this.initExpressionBlock)
+		errs.appendAll(this.Block.check())
 		for _, v := range this.ElseIfList {
-			v.Block.inherit(&this.initExpressionBlock)
+			v.Block.inherit(this.initExpressionBlock)
 			if v.Condition != null {
 				conditionType, es := v.Condition.checkSingleValueContextExpression(v.Block)
 				errs.appendAll(es)
@@ -44,16 +44,15 @@ class StatementIf {
 				}
 				if conditionType != null &&
 					conditionType.Type != VariableTypeBool {
-					errs = append(errs,
-						fmt.Errorf("%s condition is not a bool expression",
-							conditionType.Pos.ErrMsgPrefix()))
+					errs.append(new error(sprintf("%s condition is not a bool expression",
+							conditionType.Pos.ErrMsgPrefix())))
 				}
 				errs = append(errs, v.Block.check()...)
 			}
 		}
 		if this.Else != null {
-			this.Else.inherit(&this.initExpressionBlock)
-			errs = append(errs, this.Else.check()...)
+			this.Else.inherit(this.initExpressionBlock)
+			errs.appendAll(this.Else.check())
 		}
 		return errs
 	}
@@ -61,7 +60,7 @@ class StatementIf {
 
 
 
-type StatementElseIf struct {
+class StatementElseIf {
 	Condition Expression
 	Block     Block
 }

@@ -1,18 +1,11 @@
 class ExpressionCheckUnary {
 	
 
-	static fn checkUnaryExpression(e Expression ， block Block, errs []error)  ->(valueType Type) {
+	static fn checkUnaryExpression(e Expression , block Block, errs []error)  ->(valueType Type) {
 		ee := e.Data.(Expression)
 		unary, es := ee.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if unary == null {
-			// !a , looks like a bool
-			if e.Type == ExpressionTypeNot {
-				return &Type{
-					Type: VariableTypeBool,
-					Pos:  e.Pos,
-				}
-			}
 			return null
 		}
 		if err := unary.rightValueValid(); err != null {
@@ -21,7 +14,7 @@ class ExpressionCheckUnary {
 		}
 		if e.Type == ExpressionTypeNot {
 			if unary.Type != VariableTypeBool {
-				errs . append(new error( sprintf("%s not a bool expression , but '%s'",
+				errs.append(new error( sprintf("%s not a bool expression , but '%s'",
 					unary.Pos.ErrMsgPrefix(), unary.TypeString())))
 			}
 		}
@@ -42,7 +35,7 @@ class ExpressionCheckUnary {
 		return result
 	}
 
-	static fn checkIncrementExpression(e Expression ， block Block, errs []error) ->(valueType Type) {
+	static fn checkIncrementExpression(e Expression  , block Block, errs []error) ->(valueType Type) {
 		on := e.Data.(Expression)
 		increment := on.getLeftValue(block, errs)
 		if increment == null {
@@ -54,7 +47,7 @@ class ExpressionCheckUnary {
 				special case
 				fn1(a++)
 			*/
-			t := on.Data.(*ExpressionIdentifier)
+			t := on.Data.(ExpressionIdentifier)
 			if t.Variable != null {
 				t.Variable.Used = true
 			}

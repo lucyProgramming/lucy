@@ -1,8 +1,10 @@
 
+import "lucy/cmd/langtools/compile/common"
+
 class ExpressionCheckMethodCall {
 	
 	
-	static fn checkMethodCallExpr	ession(e Expression , block Block, errs []error) -> (valueTypes []Type) {
+	static fn check(e Expression , block Block, errs []error) -> (valueTypes []Type) {
 		call := e.Data.(ExpressionMethodCall)
 		object, es := call.Expression.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
@@ -11,24 +13,24 @@ class ExpressionCheckMethodCall {
 		}
 		// call father`s construction method
 		if call.Name == SUPER && object.Type == VariableTypeObject {
-			e.checkMethodCallExpressionOnSuper(block, errs, object)
+			.checkMethodCallExpressionOnSuper(e , block, errs, object)
 			return []Type{mkVoidType(e.Pos)}
 		}
 		switch object.Type {
 		case VariableTypePackage:
-			return e.checkMethodCallExpressionOnPackage(block, errs, object.Package)
+			return .checkMethodCallExpressionOnPackage(e , block, errs, object.Package)
 		case VariableTypeMap:
-			return e.checkMethodCallExpressionOnMap(block, errs, object.Map)
+			return .checkMethodCallExpressionOnMap(e , block, errs, object.Map)
 		case VariableTypeArray:
-			return e.checkMethodCallExpressionOnArray(block, errs, object)
+			return .checkMethodCallExpressionOnArray(e , block, errs, object)
 		case VariableTypeJavaArray:
-			return e.checkMethodCallExpressionOnJavaArray(block, errs, object)
+			return .checkMethodCallExpressionOnJavaArray(e , block, errs, object)
 		case VariableTypeDynamicSelector:
 			if call.Name == "finalize" {
 				errs.append(new error(sprintf("%s cannot call '%s'", e.Pos.ErrMsgPrefix(), call.Name)))
 				return null
 			}
-			return e.checkMethodCallExpressionOnDynamicSelector(block, errs, object)
+			return .checkMethodCallExpressionOnDynamicSelector(e , block, errs, object)
 		case VariableTypeString:
 			if call.Name == "finalize" {
 				errs.append(new error(sprintf("%s cannot call '%s'", e.Pos.ErrMsgPrefix(), call.Name)))
@@ -38,9 +40,9 @@ class ExpressionCheckMethodCall {
 				errs.append(err)
 				return null
 			}
-			errsLength := len(*errs)
+			errsLength := len(errs)
 			args := checkExpressions(block, call.Args, errs, true)
-			if len(*errs) > errsLength {
+			if len(errs) > errsLength {
 				return null
 			}
 			ms, matched, err := javaStringClass.accessMethod(e.Pos, errs, call, args,
@@ -68,9 +70,9 @@ class ExpressionCheckMethodCall {
 				return null
 			}
 			call.Class = object.Class
-			errsLength := len(*errs)
+			errsLength := len(errs)
 			callArgTypes := checkExpressions(block, call.Args, errs, true)
-			if len(*errs) > errsLength {
+			if len(errs) > errsLength {
 				return null
 			}
 			if object.Class.IsInterface() {
@@ -93,16 +95,16 @@ class ExpressionCheckMethodCall {
 					call.Method = ms[0]
 					return ms[0].Function.Type.mkCallReturnTypes(e.Pos)
 				}
-				*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
+				errs.append(methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
 				return null
 			}
 			if len(call.ParameterTypes) > 0 {
 				errs.append(new error(sprintf("%s method call expect no parameter types",
 					errMsgPrefix(e.Pos))))
 			}
-			var fieldMethodHandler *ClassField
+			fieldMethodHandler := []ClassField{null}
 			ms, matched, err := object.Class.accessMethod(e.Pos, errs, call, callArgTypes,
-				false, &fieldMethodHandler)
+				false, fieldMethodHandler)
 			if err != null {
 				errs.append(err)
 				if len(ms) > 0 {
@@ -110,13 +112,13 @@ class ExpressionCheckMethodCall {
 				}
 				return null
 			}
-			if fieldMethodHandler != null {
-				err := call.Expression.fieldAccessAble(block, fieldMethodHandler)
+			if fieldMethodHandler[0] != null {
+				err := call.Expression.fieldAccessAble(block, fieldMethodHandler[0])
 				if err != null {
 					errs.append(err)
 				}
-				call.FieldMethodHandler = fieldMethodHandler
-				return fieldMethodHandler.Type.FunctionType.mkCallReturnTypes(e.Pos)
+				call.FieldMethodHandler = fieldMethodHandler[0]
+				return fieldMethodHandler[0].Type.FunctionType.mkCallReturnTypes(e.Pos)
 			}
 			if matched {
 				m := ms[0]
@@ -127,7 +129,7 @@ class ExpressionCheckMethodCall {
 				call.Method = m
 				return m.Function.Type.mkCallReturnTypes(e.Pos)
 			}
-			*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
+			errs.append(methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
 			return null
 		default:
 			errs.append(new error(sprintf("%s cannot make_node_objects method call '%s' on '%s'",
@@ -144,7 +146,7 @@ class ExpressionCheckMethodCall {
 		block Block,
 		errs []error,
 		object Type) {
-		call := e.Data.(*ExpressionMethodCall)
+		call := e.Data.(ExpressionMethodCall)
 		if call.Expression.IsIdentifier(ThisPointerName) == false {
 			errs.append(new error(sprintf("%s call father`s constuction must use 'thi.super()'",
 				e.Pos.ErrMsgPrefix())))
@@ -171,15 +173,15 @@ class ExpressionCheckMethodCall {
 				return
 			}
 		}
-		errsLength := len(*errs)
+		errsLength := len(errs)
 		callArgsTypes := checkExpressions(block, call.Args, errs, true)
-		if len(*errs) > errsLength {
+		if len(errs) > errsLength {
 			return
 		}
 		ms, matched, err := object.Class.SuperClass.accessConstructionMethod(e.Pos, errs,
 			null, call, callArgsTypes)
 		if err != null {
-			*errs.append(new error(sprintf("%s %s", e.Pos.ErrMsgPrefix(), err.getMessage())))
+			errs.append(new error(sprintf("%s %s", e.Pos.ErrMsgPrefix(), err.getMessage())))
 			return
 		}
 		if matched {
@@ -194,29 +196,29 @@ class ExpressionCheckMethodCall {
 			block.InheritedAttribute.Function.CallFatherConstructionExpression = e
 			return
 		}
-		*errs = append(*errs, methodsNotMatchError(e.Pos, object.TypeString(), ms, callArgsTypes))
+		errs.append(methodsNotMatchError(e.Pos, object.TypeString(), ms, callArgsTypes))
 	}
 
-	static fn checkMethodCallExpressionOnDynamicSelector(e Expression , block Block, errs []error, object Type) -> (valueTypes []*Type) {
-		call := e.Data.(*ExpressionMethodCall)
+	static fn checkMethodCallExpressionOnDynamicSelector(e Expression , block Block, errs []error, object Type) -> (valueTypes []Type) {
+		call := e.Data.(ExpressionMethodCall)
 		if call.Name == SUPER {
 			errs.append(new error(sprintf("%s access '%s' at '%s' not allow",
 				e.Pos.ErrMsgPrefix(), SUPER, object.TypeString())))
 			return null
 		}
-		var fieldMethodHandler *ClassField
-		errsLength := len(*errs)
+		fieldMethodHandler :=[]ClassField{null}
+		errsLength := len(errs)
 		callArgTypes := checkExpressions(block, call.Args, errs, true)
-		if len(*errs) > errsLength {
+		if len(errs) > errsLength {
 			return null
 		}
-		ms, matched, err := object.Class.accessMethod(e.Pos, errs, call, callArgTypes, false, &fieldMethodHandler)
+		ms, matched, err := object.Class.accessMethod(e.Pos, errs, call, callArgTypes, false, fieldMethodHandler)
 		if err != null {
 			errs.append(err)
 			return null
 		}
 		if matched {
-			if fieldMethodHandler != null {
+			if fieldMethodHandler[0] != null {
 				call.FieldMethodHandler = fieldMethodHandler
 				return fieldMethodHandler.Type.FunctionType.mkCallReturnTypes(e.Pos)
 			} else {
@@ -225,12 +227,12 @@ class ExpressionCheckMethodCall {
 				return method.Function.Type.mkCallReturnTypes(e.Pos)
 			}
 		} else {
-			*errs = append(*errs, methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
+			errs.append(methodsNotMatchError(e.Pos, call.Name, ms, callArgTypes))
 		}
 		return null
 	}
-	static fn checkMethodCallExpressionOnJavaArray(block *Block, errs *[]error, array *Type) []*Type {
-		call := e.Data.(*ExpressionMethodCall)
+	static fn checkMethodCallExpressionOnJavaArray(e Expression , block Block, errs []error, array Type) -> (valueTypes []Type) {
+		call := e.Data.(ExpressionMethodCall)
 		switch call.Name {
 		case common.ArrayMethodSize:
 			result := new Type()
@@ -252,89 +254,85 @@ class ExpressionCheckMethodCall {
 	    e Expression ,
 		block Block,
 		errs []error,
-		p Package) -> (valueTypes []*Type) {
-		call := e.Data.(*ExpressionMethodCall)
+		p Package) -> (valueTypes []Type) {
+		call := e.Data.(ExpressionMethodCall)
 		d, exists := p.Block.NameExists(call.Name)
 		if exists == false {
 			errs.append(new error(sprintf("%s function '%s' not found", e.Pos.ErrMsgPrefix(), call.Name)))
 			return null
 		}
-		switch d.(type) {
-		case *Function:
-			f := d.(*Function)
+		if f := d.(Function) ;f != null {
 			if f.IsPublic() == false &&
-				p.isSame(&PackageBeenCompile) == false {
+				p.isSame(PackageBeenCompile) == false {
 				errs.append(new error(sprintf("%s function '%s' is not public",
 					e.Pos.ErrMsgPrefix(), call.Name)))
 			}
 			if f.TemplateFunction != null {
 				// better convert to function call
-				methodCall := e.Data.(*ExpressionMethodCall)
-				functionCall := &ExpressionFunctionCall{}
+				methodCall := e.Data.(ExpressionMethodCall)
+				functionCall := new ExpressionFunctionCall()
 				functionCall.Args = methodCall.Args
 				functionCall.Function = f
 				functionCall.ParameterTypes = methodCall.ParameterTypes
 				e.Type = ExpressionTypeFunctionCall
 				e.Data = functionCall
-				return e.checkFunctionCall(block, errs, f, functionCall)
+				return ExpressionCheckFunctionCall.checkFunctionCall(e , block, errs, f, functionCall)
 			} else {
-				methodCall := e.Data.(*ExpressionMethodCall)
+				methodCall := e.Data.(ExpressionMethodCall)
 				methodCall.PackageFunction = f
 				ret := f.Type.mkCallReturnTypes(e.Pos)
-				errsLength := len(*errs)
+				errsLength := len(errs)
 				callArgsTypes := checkExpressions(block, methodCall.Args, errs, true)
-				if len(*errs) > errsLength {
+				if len(errs) > errsLength {
 					return ret
 				}
 				var err error
-				methodCall.VArgs, err = f.Type.fitArgs(e.Pos, &call.Args, callArgsTypes, f)
+				methodCall.VArgs, err = f.Type.fitArgs(e.Pos, call.Args, callArgsTypes, f)
 				if err != null {
 					errs.append(err)
 				}
 				return ret
 			}
-		case *Variable:
-			v := d.(*Variable)
-			if v.isPublic() == false && p.isSame(&PackageBeenCompile) == false {
-				*errs = append(*errs, fmt.Errorf("%s variable '%s' is not public",
-					e.Pos.ErrMsgPrefix(), call.Name))
+		}
+		if v := d.(Variable) ; v != null {
+			if v.isPublic() == false && p.isSame(PackageBeenCompile) == false {
+				errs . append(new error( sprintf("%s variable '%s' is not public",
+					e.Pos.ErrMsgPrefix(), call.Name)))
 			}
 			if v.Type.Type != VariableTypeFunction {
 				errs.append(new error(sprintf("%s variable '%s' is not a function",
 					e.Pos.ErrMsgPrefix(), call.Name)))
 				return null
 			}
-			call := e.Data.(*ExpressionMethodCall)
+			call := e.Data.(ExpressionMethodCall)
 			if len(call.ParameterTypes) > 0 {
 				errs.append(new error(sprintf("%s variable '%s' cannot be a template fucntion",
 					errMsgPrefix(call.ParameterTypes[0].Pos), call.Name)))
 			}
 			ret := v.Type.FunctionType.mkCallReturnTypes(e.Pos)
-			errsLength := len(*errs)
+			errsLength := len(errs)
 			callArgsTypes := checkExpressions(block, call.Args, errs, true)
-			if len(*errs) > errsLength {
+			if len(errs) > errsLength {
 				return ret
 			}
-			vArgs, err := v.Type.FunctionType.fitArgs(e.Pos, &call.Args, callArgsTypes, null)
+			vArgs, err := v.Type.FunctionType.fitArgs(e.Pos, call.Args, callArgsTypes, null)
 			if err != null {
 				errs.append(err)
 			}
-
 			call.PackageGlobalVariableFunction = v
 			call.VArgs = vArgs
 			return ret
-		case *Class:
-			//object cast
-			class := d.(*Class)
-			if class.IsPublic() == false && p.isSame(&PackageBeenCompile) == false {
+		}
+		if c := d.(Class) ; c != null {
+			if c.IsPublic() == false && p.isSame(PackageBeenCompile) == false {
 				errs.append(new error(sprintf("%s class '%s' is not public",
 					e.Pos.ErrMsgPrefix(), call.Name)))
 			}
-			conversion := &ExpressionTypeConversion{}
+			conversion := new ExpressionTypeConversion()
 			conversion.Type = new Type()
 			conversion.Type.Type = VariableTypeObject
 			conversion.Type.Pos = e.Pos
-			conversion.Type.Class = class
+			conversion.Type.Class = c
 			e.Type = ExpressionTypeCheckCast
 			if len(call.Args) >= 1 {
 				conversion.Expression = call.Args[0]
@@ -345,7 +343,8 @@ class ExpressionCheckMethodCall {
 				return []Type{conversion.Type.Clone()}
 			}
 			return []Type{e.checkTypeConversionExpression(block, errs)}
-		case *Type:
+		}
+		if t := d.(Type) ; t != null {
 			if len(call.Args) != 1 {
 				errs.append(new error(sprintf("%s cast type expect 1 argument",
 					e.Pos.ErrMsgPrefix())))
@@ -353,7 +352,7 @@ class ExpressionCheckMethodCall {
 				result.Pos = e.Pos
 				return []Type{result}
 			}
-			conversion := &ExpressionTypeConversion{}
+			conversion := new ExpressionTypeConversion()
 			conversion.Type = p.Block.TypeAliases[call.Name]
 			e.Type = ExpressionTypeCheckCast
 			if len(call.Args) >= 1 {
@@ -361,18 +360,18 @@ class ExpressionCheckMethodCall {
 			}
 			e.Data = conversion
 			return []Type{e.checkTypeConversionExpression(block, errs)}
-		default:
-			errs.append(new error(sprintf"%s '%s' is not a function",
-				e.Pos.ErrMsgPrefix(), call.Name)))
-			return null
 		}
+		errs.append(new error(sprintf("%s '%s' is not a function",
+			e.Pos.ErrMsgPrefix(), call.Name)))
+		return null
+		 
 	}
 	static fn checkMethodCallExpressionOnArray(
 	    e Expression,
 		block Block,
 		errs []error,
-		array Type) -> (valueTypes []*Type)  {
-		call := e.Data.(*ExpressionMethodCall)
+		array Type) -> (valueTypes []Type)  {
+		call := e.Data.(ExpressionMethodCall)
 		switch call.Name {
 		case common.ArrayMethodSize,
 			common.ArrayMethodCap,
@@ -430,6 +429,7 @@ class ExpressionCheckMethodCall {
 		return null
 	}
 	static fn checkMethodCallExpressionOnMap(
+	    e Expression ,
 		block Block,
 		errs []error,
 		m Map)->(valueTypes []Type)  {

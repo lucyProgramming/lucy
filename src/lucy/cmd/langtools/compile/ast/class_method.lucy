@@ -1,89 +1,90 @@
- 
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 class ClassMethod {
 	IsCompilerAuto bool
 	Function       Function
 
 	fn narrowDownAccessRange(implementation ClassMethod) ->(is bool ) {
-		if m.IsPublic() {
+		if this.IsPublic() {
 			return !implementation.IsPublic()
 		}
-		if m.IsProtected() {
+		if this.IsProtected() {
 			return implementation.IsPrivate() ||
 				implementation.isAccessFlagDefault()
 		}
-		if m.isAccessFlagDefault() {
+		if this.isAccessFlagDefault() {
 			return implementation.IsPrivate()
 		}
 		return false
 	}
 	
 	fn accessString() ->(s string) {
-		if m.IsPublic() {
+		if this.IsPublic() {
 			return "public"
 		}
-		if m.IsProtected() {
+		if this.IsProtected() {
 			return "protected"
 		}
-		if m.IsPrivate() {
+		if this.IsPrivate() {
 			return "private"
 		}
 		return `default ""`
 	}
 
 	fn isAccessFlagDefault() ->(is bool ) {
-		return m.Function.AccessFlags&
+		return this.Function.AccessFlags&
 			(cg.AccMethodPublic|
 				cg.AccMethodPrivate|
 				cg.AccMethodProtected) == 0
 	}
 
 	fn IsPublic() ->(is bool ) {
-		return (m.Function.AccessFlags & cg.AccMethodPublic) != 0
+		return (this.Function.AccessFlags & cg.AccMethodPublic) != 0
 	}
 	fn IsProtected() ->(is bool ) {
-		return (m.Function.AccessFlags & cg.AccMethodProtected) != 0
+		return (this.Function.AccessFlags & cg.AccMethodProtected) != 0
 	}
 
 	fn IsStatic() ->(is bool ) {
-		return (m.Function.AccessFlags & cg.AccMethodStatic) != 0
+		return (this.Function.AccessFlags & cg.AccMethodStatic) != 0
 	}
 
 	fn IsPrivate() ->(is bool ) {
-		return (m.Function.AccessFlags & cg.AccMethodPrivate) != 0
+		return (this.Function.AccessFlags & cg.AccMethodPrivate) != 0
 	}
 	fn IsFinal() ->(is bool ) {
-		return (m.Function.AccessFlags & cg.AccMethodFinal) != 0
+		return (this.Function.AccessFlags & cg.AccMethodFinal) != 0
 	}
 	fn IsAbstract() ->(is bool ) {
-		return (m.Function.AccessFlags & cg.AccMethodAbstract) != 0
+		return (this.Function.AccessFlags & cg.AccMethodAbstract) != 0
 	}
 
 	fn ableAccessFromSubClass() ->(is bool ) {
-		return m.IsPublic() ||
-			m.IsProtected()
+		return this.IsPublic() ||
+			this.IsProtected()
 	}
 
 	fn checkModifierOk() ->(errs []error = []error{}) {
-		if m.IsAbstract() && m.IsFinal() {
-			errs = append(errs, fmt.Errorf("%s abstract method cannot be final",
-				errMsgPrefix(m.Function.Pos)))
+		if this.IsAbstract() && this.IsFinal() {
+			errs = append(errs, new error(sprintf("%s abstract method cannot be final",
+				errMsgPrefix(this.Function.Pos))))
 		}
-		if m.IsAbstract() && m.IsPrivate() {
-			errs = append(errs, fmt.Errorf("%s abstract method cannot be private",
-				errMsgPrefix(m.Function.Pos)))
+		if this.IsAbstract() && this.IsPrivate() {
+			errs = append(errs, new error(sprintf("%s abstract method cannot be private",
+				errMsgPrefix(this.Function.Pos))))
 		}
-		if m.IsAbstract() && m.Function.Name == SpecialMethodInit {
-			errs = append(errs, fmt.Errorf("%s construction method cannot be abstract",
-				errMsgPrefix(m.Function.Pos)))
+		if this.IsAbstract() && this.Function.Name == SpecialMethodInit {
+			errs = append(errs, new error(sprintf("%s construction method cannot be abstract",
+				errMsgPrefix(this.Function.Pos))))
 		}
 		return errs
 	}
 
 	fn IsFirstStatementCallFatherConstruction() ->(is bool ) {
-		if len(m.Function.Block.Statements) == 0 {
+		if len(this.Function.Block.Statements) == 0 {
 			return false
 		}
-		s := m.Function.Block.Statements[0]
+		s := this.Function.Block.Statements[0]
 		if s.Type != StatementTypeExpression {
 			return false
 		}
@@ -107,11 +108,11 @@ class ClassMethod {
 			pos = implementation.Function.Pos
 		}
 		if implementation.IsStatic() {
-			return fmt.Errorf("%s method '%s' is static", pos.ErrMsgPrefix(), m.Function.Name)
+			return new error(sprintf("%s method '%s' is static", pos.ErrMsgPrefix(), this.Function.Name))
 		}
-		if m.narrowDownAccessRange(implementation) {
-			return fmt.Errorf("%s implementation of method '%s' should not narrow down access range, '%s' -> '%s'",
-				pos.ErrMsgPrefix(), m.Function.Name, m.accessString(), implementation.accessString())
+		if this.narrowDownAccessRange(implementation) {
+			return new error(sprintf("%s implementation of method '%s' should not narrow down access range, '%s' -> '%s'",
+				pos.ErrMsgPrefix(), this.Function.Name, this.accessString(), implementation.accessString()))
 		}
 		return null
 	}	

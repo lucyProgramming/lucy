@@ -6,11 +6,11 @@ import (
 )
 
 func (this *BuildPackage) buildFunctionExpression(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	function := e.Data.(*ast.Function)
 	defer func(function *ast.Function) {
 		if e.IsStatementExpression {
@@ -198,8 +198,8 @@ func (this *BuildPackage) buildFunctionExpression(
 	return
 
 }
-func (this *BuildPackage) packFunction2MethodHandle(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	function *ast.Function, context *Context) (maxStack uint16) {
+func (this *BuildPackage) packFunction2MethodHandle(class cg.ClassHighLevel, code cg.AttributeCode,
+	function *ast.Function, context Context) (maxStack char) {
 	code.Codes[code.CodeLength] = cg.OP_invokestatic
 	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      "java/lang/invoke/MethodHandles",

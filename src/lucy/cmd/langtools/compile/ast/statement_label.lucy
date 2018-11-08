@@ -1,4 +1,5 @@
- 
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 
 class StatementLabel {
 	Used                bool
@@ -9,6 +10,7 @@ class StatementLabel {
 	Exits               []cg.Exit
 	Statement           Statement
 	Pos                 Pos
+
 	/*
 	defer {
 		xxx:
@@ -16,10 +18,12 @@ class StatementLabel {
 	defer block could be compile multi times,
 	should reset the label
 	*/
+
+	
 	fn Reset() {
 		this.CodeOffsetGenerated = false
 		this.CodeOffset = -1
-		this.Exits = []*cg.Exit{}
+		this.Exits = []cg.Exit{}
 	}
 	
 	// check this label is read to goto
@@ -30,7 +34,7 @@ class StatementLabel {
 				break
 			}
 			if v.isVariableDefinition() && v.Checked == false {
-				ss = append(ss, v)
+				ss.append(v)
 			}
 		}
 		if len(ss) == 0 {

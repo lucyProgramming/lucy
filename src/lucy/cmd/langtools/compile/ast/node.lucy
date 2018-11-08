@@ -1,4 +1,5 @@
- 
+import "java/lang/Object"
+import "lucy/os"
 
 class TopNode  {
 	Node Object
@@ -6,15 +7,15 @@ class TopNode  {
 
 class ConvertTops2Package {
 	
-	static fn ConvertTops2Package(nodes []TopNode) -> ( errs []error = []error{}) {
+	static fn Convert(nodes []TopNode) -> ( errs []error = []error{}) {
 		//
 		if len(nodes) == 0 {
 			errs = []error{new error("nothing to compile")}
 			return
 		}
 		if err := PackageBeenCompile.loadCorePackage(); err != null {
-			fmt.Printf("load lucy buildin package failed,err:%s\n", err.getMessage())
-			os.Exit(1)
+			printf("load lucy buildin package failed,err:%s\n", err.getMessage())
+			os.exit(1)
 		}
 		bs := []Block{}
 		expressions := []Expression{}
@@ -25,7 +26,7 @@ class ConvertTops2Package {
 			}
 			if t := v.Node.(Function) ; t != null {
 				t.IsGlobal = true
-				err := PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
+				err := PackageBeenCompile.Block.Insert(t.Name, t.Pos, t)
 				if err != null {
 					errs.append(err)
 				}
@@ -33,7 +34,7 @@ class ConvertTops2Package {
 			}
 			if t := v.Node.(Enum) ; t != null {
 				t.IsGlobal = true
-				err := PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
+				err := PackageBeenCompile.Block.Insert(t.Name, t.Pos,t)
 				if err != null {
 					errs.append(err)
 				}
@@ -41,7 +42,7 @@ class ConvertTops2Package {
 			}
 			if t := v.Node.(Class) ; t != null {
 				t.IsGlobal = true
-				err := PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
+				err := PackageBeenCompile.Block.Insert(t.Name, t.Pos, t)
 				if err != null {
 					errs.append(err)
 				}
@@ -49,7 +50,7 @@ class ConvertTops2Package {
 			}
 
 			if t := v.Node.(TypeAlias) ; t != null {
-				err := PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
+				err := PackageBeenCompile.Block.Insert(t.Name, t.Pos, t)
 				if err != null {
 					errs.append(err)
 				}
@@ -57,7 +58,7 @@ class ConvertTops2Package {
 			}
 			if t := v.Node.(Constant) ; t != null {
 				t.IsGlobal = true
-				err := PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
+				err := PackageBeenCompile.Block.Insert(t.Name, t.Pos, t)
 				if err != null {
 					errs.append(err)
 				}
@@ -71,7 +72,7 @@ class ConvertTops2Package {
 					}
 				} else {
 					if PackageBeenCompile.unUsedPackage == null {
-						PackageBeenCompile.unUsedPackage = make(map[string]*Import)
+						PackageBeenCompile.unUsedPackage = new map { string -> Import}()
 					}
 					PackageBeenCompile.unUsedPackage[t.Import] = t
 				}
@@ -79,28 +80,30 @@ class ConvertTops2Package {
 			}
 			if t := v.Node.(Expression) ; t != null {
 				if t.Type == ExpressionTypeVar || t.Type == ExpressionTypeVarAssign {
-					expressions = append(expressions, t)
+					expressions.append(t)
 				} else {
-					errs = append(errs, fmt.Errorf("%s cannot have '%s' in top",
-						t.Pos.ErrMsgPrefix(), t.Op))
+					errs.append(new error(sprintf("%s cannot have '%s' in top",
+						t.Pos.ErrMsgPrefix(), t.Op)))
 				}	
 			}
 		}
 		
 		if len(expressions) > 0 {
 			s := new []Statement(len(expressions))
-			for k, v = new  Statement()
+			for k, v := range expressions {
+			    s[k] = new  Statement()
 				s[k].Type = StatementTypeExpression
 				s[k].Expression = v
 				s[k].Pos = v.Pos
 			}
 			b := new Block()
-			b.Pos = expressions:= range expressions {
-				s[k] [0].Pos
+			b.Pos = expressions[0].Pos
 			b.Statements = s
-			this.Blocks = append([]*Block{b}, this.Blocks...)
+			t := []Block{b}
+			t.appendAll(bs)
+			bs = t
 		}
-		PackageBeenCompile.mkInitFunctions(this.Blocks)
+		PackageBeenCompile.mkInitFunctions(bs)
 		return
 	}
 }

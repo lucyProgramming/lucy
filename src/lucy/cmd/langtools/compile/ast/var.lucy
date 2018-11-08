@@ -1,7 +1,7 @@
- 
+import "java/lang/Object"
 
 interface  LoadImport {
-	public fn LoadImport(importName string) (Object, error)
+	public fn LoadImport(importName string) -> (Object, error)
 }
 
  
@@ -34,10 +34,10 @@ fn isMagicIdentifier(name string) ->(is bool)  {
  
 var ImportsLoader       LoadImport
 var	 PackageBeenCompile = new  Package()
-var	buildInFunctionsMap = make map {string -> Function }()
+var	buildInFunctionsMap = new map {string -> Function }()
 var	lucyBuildInPackage  Package
 	 
-var	ParseFunctionHandler func(bs []byte, pos Pos) (f *Function, es []error)
+var	ParseFunctionHandler fn(bs []byte, pos Pos) -> (f Function, es []error)
 var	javaStringClass      Class
 var	LucyBytesType       Type // []byte
 var	JavaBytesType        Type // byte[]
@@ -53,7 +53,7 @@ var	JavaBytesType        Type // byte[]
 	JavaBytesType.Array.Type = VariableTypeByte
 }
 
-fn loadJavaStringClass(pos Pos) error {
+fn loadJavaStringClass(pos Pos) ->(err error) {
 	if javaStringClass != null {
 		return null
 	}

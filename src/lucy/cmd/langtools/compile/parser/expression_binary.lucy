@@ -6,7 +6,7 @@ import (
 )
 
 // ||
-func (ep *ExpressionParser) parseLogicalOrExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseLogicalOrExpression() (ast.Expression, error) {
 	left, err := ep.parseLogicalAndExpression()
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func (ep *ExpressionParser) parseLogicalOrExpression() (*ast.Expression, error) 
 }
 
 // &&
-func (ep *ExpressionParser) parseLogicalAndExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseLogicalAndExpression() (ast.Expression, error) {
 	left, err := ep.parseEqualExpression()
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (ep *ExpressionParser) parseLogicalAndExpression() (*ast.Expression, error)
 }
 
 // == and !=
-func (ep *ExpressionParser) parseEqualExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseEqualExpression() (ast.Expression, error) {
 	left, err := ep.parseRelationExpression()
 	if err != nil {
 		return nil, err
@@ -93,7 +93,7 @@ func (ep *ExpressionParser) parseEqualExpression() (*ast.Expression, error) {
 }
 
 // > < >= <=
-func (ep *ExpressionParser) parseRelationExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseRelationExpression() (ast.Expression, error) {
 	left, err := ep.parseOrExpression()
 	if err != nil {
 		return nil, err
@@ -136,7 +136,7 @@ func (ep *ExpressionParser) parseRelationExpression() (*ast.Expression, error) {
 }
 
 //  |
-func (ep *ExpressionParser) parseOrExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseOrExpression() (ast.Expression, error) {
 	left, err := ep.parseXorExpression()
 	if err != nil {
 		return nil, err
@@ -163,7 +163,7 @@ func (ep *ExpressionParser) parseOrExpression() (*ast.Expression, error) {
 }
 
 // ^
-func (ep *ExpressionParser) parseXorExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseXorExpression() (ast.Expression, error) {
 	left, err := ep.parseAndExpression()
 	if err != nil {
 		return nil, err
@@ -190,7 +190,7 @@ func (ep *ExpressionParser) parseXorExpression() (*ast.Expression, error) {
 }
 
 // &
-func (ep *ExpressionParser) parseAndExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseAndExpression() (ast.Expression, error) {
 	left, err := ep.parseShiftExpression()
 	if err != nil {
 		return nil, err
@@ -217,7 +217,7 @@ func (ep *ExpressionParser) parseAndExpression() (*ast.Expression, error) {
 }
 
 // << >>
-func (ep *ExpressionParser) parseShiftExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseShiftExpression() (ast.Expression, error) {
 	left, err := ep.parseAddExpression()
 	if err != nil {
 		return nil, err
@@ -252,7 +252,7 @@ func (ep *ExpressionParser) parseShiftExpression() (*ast.Expression, error) {
 }
 
 // + -
-func (ep *ExpressionParser) parseAddExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseAddExpression() (ast.Expression, error) {
 	left, err := ep.parseMulExpression()
 	if err != nil {
 		return nil, err
@@ -285,7 +285,7 @@ func (ep *ExpressionParser) parseAddExpression() (*ast.Expression, error) {
 }
 
 // * / %
-func (ep *ExpressionParser) parseMulExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseMulExpression() (ast.Expression, error) {
 	left, err := ep.parseSuffixExpression()
 	if err != nil {
 		return nil, err

@@ -6,24 +6,34 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (ep *ExpressionParser) parseCallExpression(on *ast.Expression) (*ast.Expression, error) {
+func (ep *ExpressionParser) parseCallExpression(on ast.Expression) (ast.Expression, error) {
 	var err error
 	ep.Next(lfNotToken) // skip (
-	var args []*ast.Expression
+	var args []ast.Expression
 	if ep.parser.token.Type != lex.TokenRp { //a(123)
 		args, err = ep.parseExpressions(lex.TokenRp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	ep.parser.ifTokenIsLfThenSkip()
-	if ep.parser.token.Type != lex.TokenRp {
-		err := fmt.Errorf("%s except ')' ,but '%s'",
-			ep.parser.errMsgPrefix(),
-			ep.parser.token.Description)
-		ep.parser.errs = append(ep.parser.errs, err)
-		return nil, err
-	}
+	{
+
+    		pos := ep.parser.mkPos()
+    		if ep.parser.lastToken != nil {
+    			pos = new(ast.Pos)
+    			pos.Filename = ep.parser.filename
+    			pos.Line = ep.parser.lastToken.EndLine
+    			pos.Column = ep.parser.lastToken.EndColumn
+    		}
+    		ep.parser.ifTokenIsLfThenSkip()
+    		if ep.parser.token.Type != lex.TokenRp {
+    			err := new error(sprintf("%s except ')' ,but '%s'",
+    				ep.parser.errMsgPrefix(pos),
+    				ep.parser.token.Description)
+    			ep.parser.errs = append(ep.parser.errs, err)
+    			return nil, err
+    		}
+    }
 	pos := ep.parser.mkPos()
 	ep.Next(lfIsToken) // skip )
 	result := &ast.Expression{}
@@ -66,7 +76,7 @@ func (ep *ExpressionParser) parseCallExpression(on *ast.Expression) (*ast.Expres
 		ep.parser.ifTokenIsLfThenSkip()
 		if ep.parser.token.Type != lex.TokenGt {
 			ep.parser.errs = append(ep.parser.errs,
-				fmt.Errorf("%s '<' and '>' not match",
+				new error(sprintf("%s '<' and '>' not match",
 					ep.parser.errMsgPrefix()))
 			ep.parser.consume(untilGt)
 		}

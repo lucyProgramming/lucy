@@ -4,16 +4,16 @@ import "gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 
 type MultiValueAutoVar struct {
-	localVarOffset uint16
+	localVarOffset char
 }
 
 /*
 	stack is 1 ,expect value on stack
 */
 func newMultiValueAutoVar(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	state *StackMapState) *MultiValueAutoVar {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	state StackMapState) *MultiValueAutoVar {
 
 	ret := &MultiValueAutoVar{}
 	ret.localVarOffset = code.MaxLocals
@@ -24,8 +24,8 @@ func newMultiValueAutoVar(
 	return ret
 }
 
-func (this *MultiValueAutoVar) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	valueIndex int, typ *ast.Type) (maxStack uint16) {
+func (this *MultiValueAutoVar) unPack(class cg.ClassHighLevel, code cg.AttributeCode,
+	valueIndex int, typ *ast.Type) (maxStack char) {
 	maxStack = this.unPack2Object(class, code, valueIndex)
 	if typ.IsPointer() == false {
 		typeConverter.unPackPrimitives(class, code, typ)
@@ -42,9 +42,9 @@ func (this *MultiValueAutoVar) unPack(class *cg.ClassHighLevel, code *cg.Attribu
 	object is all i need
 */
 func (this *MultiValueAutoVar) unPack2Object(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	valueIndex int) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	valueIndex int) (maxStack char) {
 	if valueIndex > 127 {
 		panic("over 127")
 	}
@@ -52,7 +52,7 @@ func (this *MultiValueAutoVar) unPack2Object(
 	//a.buildLoadArrayListAutoVar(code, context) // local array list on stack
 	copyOPs(code,
 		loadLocalVariableOps(ast.VariableTypeObject, this.localVarOffset)...)
-	loadInt32(class, code, int32(valueIndex))
+	loadInt32(class, code, int(valueIndex))
 	code.Codes[code.CodeLength] = cg.OP_aaload
 	code.CodeLength++
 	return

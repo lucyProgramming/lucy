@@ -15,12 +15,12 @@ public class StatementBreak {
 			return []error{new error(sprintf("%s cannot has 'break' in 'defer'",
 				this.Pos.ErrMsgPrefix()))}
 		}
-		if t, ok := block.InheritedAttribute.ForBreak.(*StatementFor); ok {
+		if t, ok := block.InheritedAttribute.ForBreak.(StatementFor); ok {
 			this.StatementFor = t
-		} else if t, ok := block.InheritedAttribute.ForBreak.(*StatementSwitch); ok {
+		} else if t, ok := block.InheritedAttribute.ForBreak.(StatementSwitch); ok {
 			this.StatementSwitch = t
 		} else {
-			this.SwitchTemplateBlock = block.InheritedAttribute.ForBreak.(*Block)
+			this.SwitchTemplateBlock = block.InheritedAttribute.ForBreak.(Block)
 		}
 		this.Defers = []StatementDefer{}
 		this.mkDefers(block)

@@ -1,7 +1,6 @@
 class ExpressionCheckLeftValue {
 	
-
-	static fn getLeftValue(e Expression, block Block, errs []error) (result Type) {
+	static fn getLeftValue(e Expression, block Block, errs []error) -> (result Type) {
 		switch e.Type {
 		case ExpressionTypeIdentifier:
 			identifier := e.Data.(ExpressionIdentifier)
@@ -14,8 +13,8 @@ class ExpressionCheckLeftValue {
 				errs.append(new error(sprintf("%s '%s' cannot be used as left value",
 					e.Pos.ErrMsgPrefix(), ThisPointerName)))
 			}
-			isCaptureVar := false
-			d, err := block.searchIdentifier(e.Pos, identifier.Name, &isCaptureVar)
+			isCaptureVar := [false]
+			d, err := block.searchIdentifier(e.Pos, identifier.Name, isCaptureVar)
 			if err != null {
 				errs.append(err)
 				return null
@@ -25,29 +24,25 @@ class ExpressionCheckLeftValue {
 					e.Pos.ErrMsgPrefix(), identifier.Name)))
 				return null
 			}
-			switch d.(type) {
-			case *Variable:
-				v := d.(*Variable)
-				if isCaptureVar {
-
-					v.BeenCapturedAsLeftValue++
-				}
-				// variable is modifying , capture right value should not be ok
-				// if no variable not change,after been captured, right value should ok too
-				v.BeenCapturedAsLeftValue += v.BeenCapturedAsRightValue
-				v.BeenCapturedAsRightValue = 0
-				identifier.Variable = v
-				result = identifier.Variable.Type.Clone()
-				result.Pos = e.Pos
-				e.Value = result
-				return result
-			default:
-				errs.append(new error(sprintf("%s identifier '%s' is '%s' , cannot be used as left value",
-					e.Pos.ErrMsgPrefix(), identifier.Name, block.identifierIsWhat(d))))
-				return null
+			if v := d.(Variable) ; v != null {
+                if isCaptureVar[0] {
+                    v.BeenCapturedAsLeftValue++
+                }
+                // variable is modifying , capture right value should not be ok
+                // if no variable not change,after been captured, right value should ok too
+                v.BeenCapturedAsLeftValue += v.BeenCapturedAsRightValue
+                v.BeenCapturedAsRightValue = 0
+                identifier.Variable = v
+                result = identifier.Variable.Type.Clone()
+                result.Pos = e.Pos
+                e.Value = result
+                return result
 			}
+            errs.append(new error(sprintf("%s identifier '%s' is '%s' , cannot be used as left value",
+                e.Pos.ErrMsgPrefix(), identifier.Name, block.identifierIsWhat(d))))
+            return null
 		case ExpressionTypeIndex:
-			result = e.checkIndexExpression(block, errs)
+			result = ExpressionCheckIndex.check(this , block, errs)
 			e.Value = result
 			return result
 		case ExpressionTypeSelection:
@@ -60,7 +55,7 @@ class ExpressionCheckLeftValue {
 			switch object.Type {
 			case VariableTypeDynamicSelector:
 				if selection.Name == SUPER {
-					errs.append(new error(sprintf fmt.Errorf("%s access '%s' at '%s' not allow",
+					errs.append(new error(sprintf("%s access '%s' at '%s' not allow",
 						e.Pos.ErrMsgPrefix(), SUPER, object.TypeString())))
 					return null
 				}
@@ -100,24 +95,23 @@ class ExpressionCheckLeftValue {
 						e.Pos.ErrMsgPrefix(), object.Package.Name, selection.Name)))
 					return null
 				}
-				switch variable.(type) {
-				case *Variable:
-					v := variable.(*Variable)
-					if v.AccessFlags&cg.AccFieldPublic == 0 &&
-						object.Package.isSame(&PackageBeenCompile) == false {
-						errs.append(new error(sprintf("%s '%s.%s' is private",
-							e.Pos.ErrMsgPrefix(), object.Package.Name, selection.Name)))
-					}
-					selection.PackageVariable = v
-					result = v.Type.Clone()
-					result.Pos = e.Pos
-					e.Value = result
-					return result
-				default:
-					errs.append(new error(sprintf("%s '%s' is not variable",
-						e.Pos.ErrMsgPrefix(), selection.Name)))
-					return null
+				if v := variable.(Variable) ;v != null {
+				    if v.AccessFlags&cg.AccFieldPublic == 0 &&
+                        object.Package.isSame(PackageBeenCompile) == false {
+                        errs.append(new error(sprintf("%s '%s.%s' is private",
+                            e.Pos.ErrMsgPrefix(), object.Package.Name, selection.Name)))
+                    }
+                    selection.PackageVariable = v
+                    result = v.Type.Clone()
+                    result.Pos = e.Pos
+                    e.Value = result
+                    return result
 				}
+
+                errs.append(new error(sprintf("%s '%s' is not variable",
+                    e.Pos.ErrMsgPrefix(), selection.Name)))
+                return null
+
 			case VariableTypeMagicFunction:
 				v := object.Function.Type.searchName(selection.Name)
 				if v == null {
@@ -128,7 +122,7 @@ class ExpressionCheckLeftValue {
 				e.Value = v.Type.Clone()
 				e.Value.Pos = e.Pos
 				e.Type = ExpressionTypeIdentifier
-				identifier := &ExpressionIdentifier{}
+				identifier := new ExpressionIdentifier()
 				identifier.Name = selection.Name
 				identifier.Variable = v
 				e.Data = identifier

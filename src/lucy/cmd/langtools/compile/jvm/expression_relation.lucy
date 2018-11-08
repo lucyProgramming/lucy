@@ -6,11 +6,11 @@ import (
 )
 
 func (this *BuildExpression) buildRelations(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	bin := e.Data.(*ast.ExpressionBinary)
 	stackLength := len(state.Stacks)
 	defer func() {
@@ -117,7 +117,7 @@ func (this *BuildExpression) buildRelations(
 	}
 	if bin.Left.Value.Type == ast.VariableTypeNull ||
 		bin.Right.Value.Type == ast.VariableTypeNull { // must not null-null
-		var notNullExpression *ast.Expression
+		var notNullExpression ast.Expression
 		if bin.Left.Value.Type != ast.VariableTypeNull {
 			notNullExpression = bin.Left
 		} else {

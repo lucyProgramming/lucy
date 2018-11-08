@@ -67,7 +67,7 @@ func (this *LucyMethodSignature) Decode(ft *ast.FunctionType, bs []byte) ([]byte
 		ft.ParameterList = append(ft.ParameterList, vd)
 	}
 	if bs[0] != ')' {
-		return bs, fmt.Errorf("function type format wrong")
+		return bs, new error(sprintf("function type format wrong")
 	}
 	bs = bs[1:] // skip )
 	if bs[0] == '(' {
@@ -94,7 +94,7 @@ func (this *LucyMethodSignature) Decode(ft *ast.FunctionType, bs []byte) ([]byte
 			},
 		}
 	} else {
-		return bs, fmt.Errorf("function type format wrong")
+		return bs, new error(sprintf("function type format wrong")
 	}
 	return bs, nil
 }

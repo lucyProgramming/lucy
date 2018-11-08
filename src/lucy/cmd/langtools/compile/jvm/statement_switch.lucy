@@ -8,11 +8,11 @@ import (
 )
 
 func (this *BuildPackage) buildSwitchStatement(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
 	s *ast.StatementSwitch,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	context Context,
+	state StackMapState) (maxStack char) {
 	// if equal,leave 0 on stack
 	compare := func(t *ast.Type) {
 		switch t.Type {

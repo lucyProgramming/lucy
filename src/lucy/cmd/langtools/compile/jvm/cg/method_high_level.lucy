@@ -1,16 +1,16 @@
 
 
-class MethodHighLevel {
-	IsConstruction                        bool
-	Class                                 ClassHighLevel
-	Name                                  string
-	Descriptor                            string
-	AccessFlags                           char
-	Code                                  AttributeCode
-	AttributeLucyMethodDescriptor         AttributeLucyMethodDescriptor
-	AttributeLucyTriggerPackageInitMethod AttributeLucyTriggerPackageInitMethod
-	AttributeDefaultParameters            AttributeDefaultParameters
-	AttributeMethodParameters             AttributeMethodParameters
-	AttributeLucyReturnListNames          AttributeMethodParameters
-	AttributeLucyComment                  AttributeLucyComment
+public class MethodHighLevel {
+	public	IsConstruction                        bool
+	public	Class                                 ClassHighLevel
+	public	Name                                  string
+	public	Descriptor                            string
+	public	AccessFlags                           char
+	public	Code                                  AttributeCode
+	public	AttributeLucyMethodDescriptor         AttributeLucyMethodDescriptor
+	public	AttributeLucyTriggerPackageInitMethod AttributeLucyTriggerPackageInitMethod
+	public	AttributeDefaultParameters            AttributeDefaultParameters
+	public	AttributeMethodParameters             AttributeMethodParameters
+	public	AttributeLucyReturnListNames          AttributeMethodParameters
+	public	AttributeLucyComment                  AttributeLucyComment
 }

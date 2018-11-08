@@ -10,11 +10,11 @@ type BuildExpression struct {
 }
 
 func (this *BuildExpression) build(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	if e.IsCompileAuto == false {
 		context.appendLimeNumberAndSourceFile(e.Pos, code, class)
 	}
@@ -33,51 +33,51 @@ func (this *BuildExpression) build(
 		maxStack = 1
 	case ast.ExpressionTypeByte:
 		code.Codes[code.CodeLength] = cg.OP_bipush
-		code.Codes[code.CodeLength+1] = byte(e.Data.(int64))
+		code.Codes[code.CodeLength+1] = byte(e.Data.(long))
 		code.CodeLength += 2
 		maxStack = 1
 	case ast.ExpressionTypeInt, ast.ExpressionTypeShort, ast.ExpressionTypeChar:
-		loadInt32(class, code, int32(e.Data.(int64)))
+		loadInt32(class, code, int(e.Data.(long)))
 		maxStack = 1
 	case ast.ExpressionTypeLong:
-		if e.Data.(int64) == 0 {
+		if e.Data.(long) == 0 {
 			code.Codes[code.CodeLength] = cg.OP_lconst_0
 			code.CodeLength++
-		} else if e.Data.(int64) == 1 {
+		} else if e.Data.(long) == 1 {
 			code.Codes[code.CodeLength] = cg.OP_lconst_1
 			code.CodeLength++
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_ldc2_w
-			class.InsertLongConst(e.Data.(int64), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertLongConst(e.Data.(long), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 		maxStack = 2
 	case ast.ExpressionTypeFloat:
-		if e.Data.(float32) == 0.0 {
+		if e.Data.(float) == 0.0 {
 			code.Codes[code.CodeLength] = cg.OP_fconst_0
 			code.CodeLength++
-		} else if e.Data.(float32) == 1.0 {
+		} else if e.Data.(float) == 1.0 {
 			code.Codes[code.CodeLength] = cg.OP_fconst_1
 			code.CodeLength++
-		} else if e.Data.(float32) == 2.0 {
+		} else if e.Data.(float) == 2.0 {
 			code.Codes[code.CodeLength] = cg.OP_fconst_2
 			code.CodeLength++
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertFloatConst(e.Data.(float32), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertFloatConst(e.Data.(float), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 		maxStack = 1
 	case ast.ExpressionTypeDouble:
-		if e.Data.(float64) == 0.0 {
+		if e.Data.(double) == 0.0 {
 			code.Codes[code.CodeLength] = cg.OP_dconst_0
 			code.CodeLength++
-		} else if e.Data.(float64) == 1.0 {
+		} else if e.Data.(double) == 1.0 {
 			code.Codes[code.CodeLength] = cg.OP_dconst_1
 			code.CodeLength++
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_ldc2_w
-			class.InsertDoubleConst(e.Data.(float64), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			class.InsertDoubleConst(e.Data.(double), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 		maxStack = 2
@@ -205,22 +205,22 @@ func (this *BuildExpression) build(
 	case ast.ExpressionTypeQuestion:
 		maxStack = this.buildQuestion(class, code, e, context, state)
 	case ast.ExpressionTypeVArgs:
-		maxStack = this.build(class, code, e.Data.(*ast.Expression), context, state)
+		maxStack = this.build(class, code, e.Data.(ast.Expression), context, state)
 	default:
 		panic("missing handle:" + e.Op)
 	}
 	return
 }
 
-func (this *BuildExpression) jvmSize(e *ast.Expression) (size uint16) {
+func (this *BuildExpression) jvmSize(e ast.Expression) (size char) {
 	if len(e.MultiValues) > 1 {
 		return 1
 	}
 	return jvmSlotSize(e.Value)
 }
 
-func (this *BuildExpression) buildExpressions(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	es []*ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (this *BuildExpression) buildExpressions(class cg.ClassHighLevel, code cg.AttributeCode,
+	es []ast.Expression, context Context, state StackMapState) (maxStack char) {
 	length := 0
 	for _, e := range es {
 		if e.HaveMultiValue() {
@@ -229,7 +229,7 @@ func (this *BuildExpression) buildExpressions(class *cg.ClassHighLevel, code *cg
 			length++
 		}
 	}
-	loadInt32(class, code, int32(length))
+	loadInt32(class, code, int(length))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
 	class.InsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
@@ -239,9 +239,9 @@ func (this *BuildExpression) buildExpressions(class *cg.ClassHighLevel, code *cg
 	arrayListObject := state.newObjectVariableType(javaRootObjectArray)
 	state.pushStack(class, arrayListObject)
 	defer state.popStack(1)
-	index := int32(0)
+	index := int(0)
 	for _, v := range es {
-		currentStack := uint16(1)
+		currentStack := char(1)
 		if v.HaveMultiValue() {
 			stack := this.build(class, code, v, context, state)
 			if t := currentStack + stack; t > maxStack {

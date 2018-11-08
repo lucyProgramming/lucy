@@ -100,8 +100,8 @@ func (this *Closure) getMeta(t ast.VariableTypeKind) (meta *ClosureObjectMeta) {
 /*
 	create a closure var, init and leave on stack
 */
-func (this *Closure) createClosureVar(class *cg.ClassHighLevel,
-	code *cg.AttributeCode, v *ast.Type) (maxStack uint16) {
+func (this *Closure) createClosureVar(class cg.ClassHighLevel,
+	code cg.AttributeCode, v *ast.Type) (maxStack char) {
 	maxStack = 2
 	var meta *ClosureObjectMeta
 	switch v.Type {
@@ -150,7 +150,7 @@ func (this *Closure) createClosureVar(class *cg.ClassHighLevel,
 	return
 }
 
-func (this *Closure) storeLocalClosureVar(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.Variable) {
+func (this *Closure) storeLocalClosureVar(class cg.ClassHighLevel, code cg.AttributeCode, v *ast.Variable) {
 	var meta *ClosureObjectMeta
 	switch v.Type.Type {
 	case ast.VariableTypeBool:
@@ -196,8 +196,8 @@ func (this *Closure) storeLocalClosureVar(class *cg.ClassHighLevel, code *cg.Att
 /*
 	create a closure var on stack
 */
-func (this *Closure) loadLocalClosureVar(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	v *ast.Variable) (maxStack uint16) {
+func (this *Closure) loadLocalClosureVar(class cg.ClassHighLevel, code cg.AttributeCode,
+	v *ast.Variable) (maxStack char) {
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
 	this.unPack(class, code, v.Type)
 	maxStack = jvmSlotSize(v.Type)
@@ -207,7 +207,7 @@ func (this *Closure) loadLocalClosureVar(class *cg.ClassHighLevel, code *cg.Attr
 /*
 	closure object is on stack
 */
-func (this *Closure) unPack(class *cg.ClassHighLevel, code *cg.AttributeCode, v *ast.Type) {
+func (this *Closure) unPack(class cg.ClassHighLevel, code cg.AttributeCode, v *ast.Type) {
 	var meta *ClosureObjectMeta
 	switch v.Type {
 	case ast.VariableTypeBool:

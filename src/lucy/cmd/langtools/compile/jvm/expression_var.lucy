@@ -6,11 +6,11 @@ import (
 )
 
 func (this *BuildExpression) buildVar(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	vs := e.Data.(*ast.ExpressionVar)
 	//
 	for _, v := range vs.Variables {
@@ -22,7 +22,7 @@ func (this *BuildExpression) buildVar(
 		}
 	}
 	index := len(vs.Variables) - 1
-	currentStack := uint16(0)
+	currentStack := char(0)
 	for index >= 0 {
 		if vs.Variables[index].BeenCapturedAsLeftValue > 0 {
 			v := vs.Variables[index]

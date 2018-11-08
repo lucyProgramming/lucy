@@ -6,18 +6,18 @@ import (
 )
 
 type AutoVariableForRangeMap struct {
-	MapObject               uint16
-	KeySets                 uint16
-	KeySetsK, KeySetsLength uint16
-	K, V                    uint16
+	MapObject               char
+	KeySets                 char
+	KeySetsK, KeySetsLength char
+	K, V                    char
 }
 
 func (this *BuildPackage) buildForRangeStatementForMap(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
 	s *ast.StatementFor,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	context Context,
+	state StackMapState) (maxStack char) {
 	attr := s.RangeAttr
 	maxStack = this.BuildExpression.build(
 		class,

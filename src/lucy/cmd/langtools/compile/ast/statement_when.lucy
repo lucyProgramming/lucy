@@ -30,7 +30,7 @@ class StatementWhen {
 		var match Type
 		var matchBlock Block
 		typesChecked := []Type{}
-		checkExists := fn(ts []Type, t Type) ->(t Type) {
+		checkExists := fn(ts []Type, t Type) ->(exists Type) {
 			for _, v := range ts {
 				if v.Equal(t) {
 					return v
@@ -48,7 +48,7 @@ class StatementWhen {
 					errMsg := sprintf("%s match '%s' already exist,first declared at:\n",
 						errMsgPrefix(tt.Pos), tt.TypeString())
 					errMsg += sprintf("\t %s", errMsgPrefix(exist.Pos))
-					errs = append(errs, new error(errMsg))
+					errs.append(new error(errMsg))
 					return
 				}
 				typesChecked.append(tt)
@@ -68,7 +68,7 @@ class StatementWhen {
 		}
 		if match == null {
 			if this.Default == null {
-				errs.append(new error(("%s condition resolve as '%s' has no match and no 'default block'",
+				errs.append(new error(sprintf("%s condition resolve as '%s' has no match and no 'default block'",
 						errMsgPrefix(this.Condition.Pos), this.Condition.TypeString())))
 			} else {
 				switchStatement.Type = StatementTypeBlock

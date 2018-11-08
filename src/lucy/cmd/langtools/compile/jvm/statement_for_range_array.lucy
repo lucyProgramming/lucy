@@ -7,15 +7,15 @@ import (
 
 type AutoVariableForRangeArray struct {
 	AutoVariableForRangeJavaArray
-	Start uint16
+	Start char
 }
 
 func (this *BuildPackage) buildForRangeStatementForArray(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
 	s *ast.StatementFor,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	context Context,
+	state StackMapState) (maxStack char) {
 	//build array expression
 	attr := s.RangeAttr
 	maxStack = this.BuildExpression.build(class, code, attr.RangeOn, context, state) // array on stack

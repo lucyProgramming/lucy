@@ -6,7 +6,7 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (ep *ExpressionParser) parseMapExpression() (*ast.Expression, error) {
+func (ep *ExpressionParser) parseMapExpression() (ast.Expression, error) {
 	var typ *ast.Type
 	var err error
 	if ep.parser.token.Type == lex.TokenMap {
@@ -17,7 +17,7 @@ func (ep *ExpressionParser) parseMapExpression() (*ast.Expression, error) {
 		ep.parser.ifTokenIsLfThenSkip()
 	}
 	if ep.parser.token.Type != lex.TokenLc {
-		err := fmt.Errorf("%s expect '{',but '%s'", ep.parser.errMsgPrefix(), ep.parser.token.Description)
+		err := new error(sprintf("%s expect '{',but '%s'", ep.parser.errMsgPrefix(), ep.parser.token.Description)
 		ep.parser.errs = append(ep.parser.errs, err)
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (ep *ExpressionParser) parseMapExpression() (*ast.Expression, error) {
 		ep.parser.unExpectNewLineAndSkip()
 		// arrow
 		if ep.parser.token.Type != lex.TokenArrow {
-			err := fmt.Errorf("%s expect '->',but '%s'",
+			err := new error(sprintf("%s expect '->',but '%s'",
 				ep.parser.errMsgPrefix(), ep.parser.token.Description)
 			ep.parser.errs = append(ep.parser.errs, err)
 			return ret, err
@@ -63,7 +63,7 @@ func (ep *ExpressionParser) parseMapExpression() (*ast.Expression, error) {
 	}
 	ep.parser.ifTokenIsLfThenSkip()
 	if ep.parser.token.Type != lex.TokenRc {
-		err := fmt.Errorf("%s expect '}',but '%s'",
+		err := new error(sprintf("%s expect '}',but '%s'",
 			ep.parser.errMsgPrefix(), ep.parser.token.Description)
 		ep.parser.errs = append(ep.parser.errs, err)
 		ep.parser.consume(untilRc)

@@ -183,7 +183,7 @@ func (this *Parser) Parse() []error {
 			this.Next(lfNotToken) // skip {
 			this.BlockParser.parseStatementList(b, true)
 			if this.token.Type != lex.TokenRc {
-				this.errs = append(this.errs, fmt.Errorf("%s expect '}', but '%s'",
+				this.errs = append(this.errs, new error(sprintf("%s expect '}', but '%s'",
 					this.errMsgPrefix(), this.token.Description))
 				this.consume(untilRc)
 			}
@@ -248,7 +248,7 @@ func (this *Parser) Parse() []error {
 		case lex.TokenImport:
 			pos := this.mkPos()
 			this.parseImports()
-			this.errs = append(this.errs, fmt.Errorf("%s cannot have import at this scope",
+			this.errs = append(this.errs, new error(sprintf("%s cannot have import at this scope",
 				this.errMsgPrefix(pos)))
 		case lex.TokenEof:
 			break
@@ -264,7 +264,7 @@ func (this *Parser) Parse() []error {
 					Node: e,
 				})
 			} else {
-				this.errs = append(this.errs, fmt.Errorf("%s token '%s' is not except",
+				this.errs = append(this.errs, new error(sprintf("%s token '%s' is not except",
 					this.errMsgPrefix(), this.token.Description))
 				this.Next(lfNotToken)
 			}
@@ -285,7 +285,7 @@ func (this *Parser) validAfterPublic() error {
 		this.token.Type == lex.TokenAbstract {
 		return nil
 	}
-	err := fmt.Errorf("%s cannot have token '%s' after 'public'",
+	err := new error(sprintf("%s cannot have token '%s' after 'public'",
 		this.errMsgPrefix(), this.token.Description)
 	this.errs = append(this.errs, err)
 	return err
@@ -294,7 +294,7 @@ func (this *Parser) validAfterAbstract() error {
 	if this.token.Type == lex.TokenClass {
 		return nil
 	}
-	err := fmt.Errorf("%s cannot have token '%s' after 'abstract'",
+	err := new error(sprintf("%s cannot have token '%s' after 'abstract'",
 		this.errMsgPrefix(), this.token.Description)
 	this.errs = append(this.errs, err)
 	return err
@@ -304,7 +304,7 @@ func (this *Parser) validAfterFinal() error {
 		this.token.Type == lex.TokenInterface {
 		return nil
 	}
-	err := fmt.Errorf("%s cannot have token '%s' after 'final'",
+	err := new error(sprintf("%s cannot have token '%s' after 'final'",
 		this.errMsgPrefix(), this.token.Description)
 	this.errs = append(this.errs, err)
 	return err
@@ -325,7 +325,7 @@ func (this *Parser) validStatementEnding() error {
 		return nil
 	}
 	token := this.token
-	err := fmt.Errorf("%s expect semicolon or new line", this.errMsgPrefix(&ast.Pos{
+	err := new error(sprintf("%s expect semicolon or new line", this.errMsgPrefix(&ast.Pos{
 		Filename: this.filename,
 		Line:     token.StartLine,
 		Column:   token.StartColumn,
@@ -396,7 +396,7 @@ func (this *Parser) parseConst() (constants []*ast.Constant, err error) {
 		}
 	}
 	if this.token.Type != lex.TokenAssign {
-		err = fmt.Errorf("%s missing assign", this.errMsgPrefix())
+		err = new error(sprintf("%s missing assign", this.errMsgPrefix())
 		this.errs = append(this.errs, err)
 		return
 	}
@@ -406,7 +406,7 @@ func (this *Parser) parseConst() (constants []*ast.Constant, err error) {
 		return
 	}
 	if len(es) != len(constants) {
-		err = fmt.Errorf("%s cannot assign %d value to %d constant",
+		err = new error(sprintf("%s cannot assign %d value to %d constant",
 			this.errMsgPrefix(), len(es), len(constants))
 		this.errs = append(this.errs, err)
 	}
@@ -468,7 +468,7 @@ func (this *Parser) Next(lfIsToken bool) {
 		}
 		if err != nil {
 			this.errs = append(this.errs,
-				fmt.Errorf("%s %s", this.errMsgPrefix(), err.Error()))
+				new error(sprintf("%s %s", this.errMsgPrefix(), err.Error()))
 		}
 		if tok == nil {
 			continue
@@ -562,7 +562,7 @@ func (this *Parser) unExpectNewLineAndSkip() {
 func (this *Parser) unExpectNewLine() error {
 	var err error
 	if this.token.Type == lex.TokenLf {
-		err = fmt.Errorf("%s unexpected new line",
+		err = new error(sprintf("%s unexpected new line",
 			this.errMsgPrefix(this.mkPos()))
 		this.errs = append(this.errs, err)
 	}
@@ -577,7 +577,7 @@ func (this *Parser) expectNewLine() error {
 	var err error
 	if this.token.Type != lex.TokenLf &&
 		this.token.Type != lex.TokenComment {
-		err = fmt.Errorf("%s expect new line , but '%s'",
+		err = new error(sprintf("%s expect new line , but '%s'",
 			this.errMsgPrefix(), this.token.Description)
 		this.errs = append(this.errs, err)
 	}
@@ -588,7 +588,7 @@ func (this *Parser) parseTypeAlias(comment *CommentParser) (*ast.TypeAlias, erro
 	this.Next(lfIsToken) // skip type key word
 	this.unExpectNewLineAndSkip()
 	if this.token.Type != lex.TokenIdentifier {
-		err := fmt.Errorf("%s expect identifer,but '%s'", this.errMsgPrefix(), this.token.Description)
+		err := new error(sprintf("%s expect identifer,but '%s'", this.errMsgPrefix(), this.token.Description)
 		this.errs = append(this.errs, err)
 		return nil, err
 	}
@@ -597,7 +597,7 @@ func (this *Parser) parseTypeAlias(comment *CommentParser) (*ast.TypeAlias, erro
 	ret.Name = this.token.Data.(string)
 	this.Next(lfIsToken) // skip identifier
 	if this.token.Type != lex.TokenAssign {
-		err := fmt.Errorf("%s expect '=',but '%s'", this.errMsgPrefix(), this.token.Description)
+		err := new error(sprintf("%s expect '=',but '%s'", this.errMsgPrefix(), this.token.Description)
 		this.errs = append(this.errs, err)
 		return nil, err
 	}

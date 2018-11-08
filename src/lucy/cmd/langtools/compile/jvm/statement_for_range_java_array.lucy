@@ -6,17 +6,17 @@ import (
 )
 
 type AutoVariableForRangeJavaArray struct {
-	Elements uint16
-	End      uint16
-	K, V     uint16
+	Elements char
+	End      char
+	K, V     char
 }
 
 func (this *BuildPackage) buildForRangeStatementForJavaArray(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
 	s *ast.StatementFor,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	context Context,
+	state StackMapState) (maxStack char) {
 	//build array expression
 	maxStack = this.BuildExpression.build(class, code, s.RangeAttr.RangeOn, context, state) // array on stack
 	code.Codes[code.CodeLength] = cg.OP_dup

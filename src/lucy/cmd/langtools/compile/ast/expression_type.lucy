@@ -1,4 +1,4 @@
-
+import "java/lang/Object"
 
 
 
@@ -113,15 +113,15 @@ public class ExpressionMethodCall  {
 	public Expression         Expression
 	public Args               []Expression
 	public VArgs              CallVariableArgs
-	public Name               tring
+	public Name               string
 	public Method             ClassMethod
 	public FieldMethodHandler ClassField
 	/*
 		unSupport !!!!!!
 	*/
-	public ParameterTypes                []*Type
-	public PackageFunction               *Function
-	public PackageGlobalVariableFunction *Variable
+	public ParameterTypes                []Type
+	public PackageFunction               Function
+	public PackageGlobalVariableFunction Variable
 
 	
 }
@@ -170,7 +170,7 @@ public class ExpressionSelection  {
 
 public class ExpressionNew  {
 	public Type         Type
-	public Args         CallArgs
+	public Args         []Expression
 	public Construction ClassMethod
 	public VArgs        CallVariableArgs
 }

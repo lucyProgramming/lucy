@@ -21,7 +21,7 @@ func (this *ClassParser) consume(m map[lex.TokenKind]bool) {
 
 func (this *ClassParser) parseClassName() (*ast.NameWithPos, error) {
 	if this.parser.token.Type != lex.TokenIdentifier {
-		err := fmt.Errorf("%s expect identifier for class`s name,but '%s'",
+		err := new error(sprintf("%s expect identifier for class`s name,but '%s'",
 			this.parser.errMsgPrefix(), this.parser.token.Description)
 		this.parser.errs = append(this.parser.errs, err)
 		return nil, err
@@ -32,7 +32,7 @@ func (this *ClassParser) parseClassName() (*ast.NameWithPos, error) {
 	if this.parser.token.Type == lex.TokenSelection {
 		this.Next(lfNotToken) // skip .
 		if this.parser.token.Type != lex.TokenIdentifier {
-			err := fmt.Errorf("%s expect identifer for class`s name,but '%s'",
+			err := new error(sprintf("%s expect identifer for class`s name,but '%s'",
 				this.parser.errMsgPrefix(),
 				this.parser.token.Description)
 			this.parser.errs = append(this.parser.errs, err)
@@ -111,7 +111,7 @@ func (this *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err
 	}
 	this.parser.ifTokenIsLfThenSkip()
 	if this.parser.token.Type != lex.TokenLc {
-		err = fmt.Errorf("%s expect '{' but '%s'",
+		err = new error(sprintf("%s expect '{' but '%s'",
 			this.parser.errMsgPrefix(), this.parser.token.Description)
 		this.parser.errs = append(this.parser.errs, err)
 		return nil, err
@@ -125,21 +125,21 @@ func (this *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err
 			this.parser.token.Type == lex.TokenAbstract {
 			return nil
 		}
-		return fmt.Errorf("%s not a valid token after '%s'",
+		return new error(sprintf("%s not a valid token after '%s'",
 			this.parser.errMsgPrefix(), keyWord)
 	}
 	validAfterVolatile := func(token *lex.Token) error {
 		if token.Type == lex.TokenIdentifier {
 			return nil
 		}
-		return fmt.Errorf("%s not a valid token after 'volatile'",
+		return new error(sprintf("%s not a valid token after 'volatile'",
 			this.parser.errMsgPrefix())
 	}
 	validAfterAbstract := func() error {
 		if this.parser.token.Type == lex.TokenFn {
 			return nil
 		}
-		return fmt.Errorf("%s not a valid token after 'abstract'",
+		return new error(sprintf("%s not a valid token after 'abstract'",
 			this.parser.errMsgPrefix())
 	}
 	validAfterSynchronized := func() error {
@@ -147,7 +147,7 @@ func (this *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err
 			this.parser.token.Type == lex.TokenFinal {
 			return nil
 		}
-		return fmt.Errorf("%s not a valid token after 'synchronized'",
+		return new error(sprintf("%s not a valid token after 'synchronized'",
 			this.parser.errMsgPrefix())
 	}
 	validAfterStatic := func() error {
@@ -156,7 +156,7 @@ func (this *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err
 			this.parser.token.Type == lex.TokenFinal {
 			return nil
 		}
-		return fmt.Errorf("%s not a valid token after 'static'",
+		return new error(sprintf("%s not a valid token after 'static'",
 			this.parser.errMsgPrefix())
 	}
 	validAfterFinal := func() error {
@@ -164,7 +164,7 @@ func (this *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err
 			this.parser.token.Type == lex.TokenSynchronized {
 			return nil
 		}
-		return fmt.Errorf("%s not a valid token after 'final'",
+		return new error(sprintf("%s not a valid token after 'final'",
 			this.parser.errMsgPrefix())
 	}
 	this.Next(lfNotToken) // skip {
@@ -209,7 +209,7 @@ func (this *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err
 				this.parser.BlockParser.parseStatementList(block, false)
 				if this.parser.token.Type != lex.TokenRc {
 					this.parser.errs = append(this.parser.errs,
-						fmt.Errorf("%s expect '}' , but '%s'", this.parser.errMsgPrefix(),
+						new error(sprintf("%s expect '}' , but '%s'", this.parser.errMsgPrefix(),
 							this.parser.token.Description))
 				} else {
 					this.Next(lfNotToken) // skip }
@@ -282,7 +282,7 @@ func (this *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err
 			if isAbstract &&
 				(classDefinition.IsAbstract() == false && classDefinition.IsInterface() == false) {
 				this.parser.errs = append(this.parser.errs,
-					fmt.Errorf("%s cannot  abstact method is non-abstract class",
+					new error(sprintf("%s cannot  abstact method is non-abstract class",
 						this.parser.errMsgPrefix()))
 			}
 			isAbstract := isAbstract || isInterface
@@ -332,11 +332,11 @@ func (this *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err
 			pos := this.parser.mkPos()
 			this.parser.parseImports()
 			this.parser.errs = append(this.parser.errs,
-				fmt.Errorf("%s cannot have import at this scope",
+				new error(sprintf("%s cannot have import at this scope",
 					this.parser.errMsgPrefix(pos)))
 		default:
 			this.parser.errs = append(this.parser.errs,
-				fmt.Errorf("%s unexpected '%s'",
+				new error(sprintf("%s unexpected '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.Description))
 			this.Next(lfNotToken)
 		}
@@ -361,7 +361,7 @@ func (this *ClassParser) parseConst(classDefinition *ast.Class, comment *Comment
 	for _, v := range cs {
 		if _, ok := classDefinition.Block.Constants[v.Name]; ok {
 			this.parser.errs = append(this.parser.errs,
-				fmt.Errorf("%s const %s alreay declared",
+				new error(sprintf("%s const %s alreay declared",
 					this.parser.errMsgPrefix(), v.Name))
 			continue
 		}
@@ -373,7 +373,7 @@ func (this *ClassParser) parseConst(classDefinition *ast.Class, comment *Comment
 
 func (this *ClassParser) parseField(
 	classDefinition *ast.Class,
-	errs *[]error,
+	errs []error,
 	isStatic bool,
 	isVolatile bool,
 	accessControlToken *lex.Token,
@@ -386,7 +386,7 @@ func (this *ClassParser) parseField(
 	if err != nil {
 		return err
 	}
-	var initValues []*ast.Expression
+	var initValues []ast.Expression
 	if this.parser.token.Type == lex.TokenAssign {
 		this.parser.Next(lfNotToken) // skip = or :=
 		initValues, err = this.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
@@ -406,7 +406,7 @@ func (this *ClassParser) parseField(
 	for k, v := range names {
 		if _, ok := classDefinition.Fields[v.Name]; ok {
 			this.parser.errs = append(this.parser.errs,
-				fmt.Errorf("%s field %s is alreay declared",
+				new error(sprintf("%s field %s is alreay declared",
 					this.parser.errMsgPrefix(), v.Name))
 			continue
 		}

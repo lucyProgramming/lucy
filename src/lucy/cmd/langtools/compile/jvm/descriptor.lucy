@@ -137,13 +137,13 @@ func (this *Description) ParseType(bs []byte) ([]byte, *ast.Type, error) {
 		}
 		return bs, ret, err
 	}
-	return bs, nil, fmt.Errorf("unkown type:%v", string(bs))
+	return bs, nil, new error(sprintf("unkown type:%v", string(bs))
 }
 
 func (this *Description) ParseFunctionType(bs []byte) (ast.FunctionType, error) {
 	t := ast.FunctionType{}
 	if bs[0] != '(' {
-		return t, fmt.Errorf("function descriptor does not start with '('")
+		return t, new error(sprintf("function descriptor does not start with '('")
 	}
 	bs = bs[1:]
 	var err error

@@ -1,4 +1,5 @@
- 
+import "lucy/cmd/langtools/compile/jvm/cg" 
+import "java/lang/Object"
 
 /*
 	public abstract final class {}
@@ -18,7 +19,7 @@ class Class {
 	FinalPos                          Pos // final pos
 	IsJava                            bool //class imported from CLASSPATH
 	Block                             Block
-	AccessFlags                       uint16
+	AccessFlags                       char
 	Fields                            map { string -> ClassField }
 	Methods                           map { string -> []ClassMethod }
 	SuperClassName                    NameWithPos
@@ -55,7 +56,7 @@ class Class {
         this.NotImportedYet = false
         load, err := PackageBeenCompile.loadClass(this.Name)
         if err != null {
-            return fmt.Errorf("%s %s", pos.ErrMsgPrefix(), err.getMessage())
+            return new error(sprintf("%s %s", pos.ErrMsgPrefix(), err.getMessage()))
         }
 		this.AccessFlags = load.AccessFlags
 		this.Fields = load.Fields
@@ -117,8 +118,8 @@ class Class {
         }
         method := new ClassMethod()
         method.Function = new Function()
-        method.Function.Type.ParameterList = make(ParameterList, 0)
-        method.Function.Type.ReturnList = make(ReturnList, 0)
+        method.Function.Type.ParameterList = new []Variable( 0)
+        method.Function.Type.ReturnList =  new []Variable( 0)
         f := method.Function
         f.Pos = this.Pos
         f.Block.Statements =new []Statement ( len(this.StaticBlocks))
@@ -154,8 +155,8 @@ class Class {
         var err error
         for _, v := range this.Fields {
             if v.Name == SUPER {
-                errs = append(errs, fmt.Errorf("%s 'super' not allow for field name",
-                    errMsgPrefix(v.Pos)))
+                errs = append(errs, new error(sprintf("%s 'super' not allow for field name",
+                    errMsgPrefix(v.Pos))))
                 continue
             }
             err = v.Type.resolve(this.Block)
@@ -169,15 +170,15 @@ class Class {
                     for _, v := range m.Function.Type.ParameterList {
                         if v.DefaultValueExpression != null {
                             errs = append(errs,
-                                fmt.Errorf("%s abstract method parameter '%s' cannot have default value '%s'",
-                                    errMsgPrefix(v.Pos), v.Name, v.DefaultValueExpression.Op))
+                                new error(sprintf("%s abstract method parameter '%s' cannot have default value '%s'",
+                                    errMsgPrefix(v.Pos), v.Name, v.DefaultValueExpression.Op)))
                         }
                     }
                     for _, v := range m.Function.Type.ReturnList {
                         if v.DefaultValueExpression != null {
                             errs = append(errs,
-                                fmt.Errorf("%s abstract method return variable '%s' cannot have default value '%s'",
-                                    errMsgPrefix(v.Pos), v.Name, v.DefaultValueExpression.Op))
+                                new error(sprintf("%s abstract method return variable '%s' cannot have default value '%s'",
+                                    errMsgPrefix(v.Pos), v.Name, v.DefaultValueExpression.Op)))
                         }
                     }
                 }
@@ -186,8 +187,8 @@ class Class {
                 m.Function.Block.InheritedAttribute.ClassMethod = m
                 m.Function.checkParametersAndReturns(errs, false, m.IsAbstract())
                 if len(m.Function.Type.TemplateNames) > 0 {
-                    errs = append(errs, fmt.Errorf("%s cannot use template for method",
-                        errMsgPrefix(m.Function.Pos)))
+                    errs = append(errs, new error(sprintf("%s cannot use template for method",
+                        errMsgPrefix(m.Function.Pos))))
                 }
                 if m.IsStatic() == false { // bind this
                     if m.Function.Block.Variables == null {
@@ -240,15 +241,15 @@ class Class {
                 return err
             }
             if variableType.Type != VariableTypeObject {
-                err := fmt.Errorf("%s '%s' is not a class",
-                    this.Pos.ErrMsgPrefix(), this.SuperClassName.Name)
+                err := new error(sprintf("%s '%s' is not a class",
+                    this.Pos.ErrMsgPrefix(), this.SuperClassName.Name))
                 return err
             }
             this.SuperClass = variableType.Class
             if this.IsInterface() {
                 if this.SuperClass.Name != JavaRootClass {
-                    err := fmt.Errorf("%s interface`s super-class must be '%s'",
-                        errMsgPrefix(this.SuperClassName.Pos), JavaRootClass)
+                    err := new error(sprintf("%s interface`s super-class must be '%s'",
+                        errMsgPrefix(this.SuperClassName.Pos), JavaRootClass))
 
                     return err
                 }
@@ -263,6 +264,7 @@ class Class {
         }
         this.resolveInterfacesCalled = true
         errs := []error{}
+        this.Interfaces = []Class{}
         for _, i := range this.InterfaceNames {
             t := new Type()
             t.Type = VariableTypeName
@@ -274,13 +276,13 @@ class Class {
                 continue
             }
             if t.Type != VariableTypeObject {
-                errs = append(errs, fmt.Errorf("%s '%s' is not a object , but '%s'",
-                    errMsgPrefix(i.Pos), i.Name, t.TypeString()))
+                errs.append(new error(sprintf("%s '%s' is not a object , but '%s'",
+                    errMsgPrefix(i.Pos), i.Name, t.TypeString())))
                 continue
             }
             if t.Class.IsInterface() == false {
-                errs = append(errs, fmt.Errorf("%s '%s' is not a interface",
-                    errMsgPrefix(i.Pos), i.Name))
+                errs.append(new error(sprintf("%s '%s' is not a interface",
+                    errMsgPrefix(i.Pos), i.Name)))
                 continue
             }
             this.Interfaces = append(this.Interfaces, t.Class)
@@ -388,7 +390,7 @@ class Class {
         }
         this.loadSuperClassCalled = true
         if this.Name == JavaRootClass {
-            err := fmt.Errorf("%s root class already", errMsgPrefix(pos))
+            err := new error(sprintf("%s root class already", errMsgPrefix(pos)))
             return err
         }
         if this.SuperClassName == null {
@@ -398,7 +400,7 @@ class Class {
         }
         c, err := PackageBeenCompile.loadClass(this.SuperClassName.Name)
         if err != null {
-            err := fmt.Errorf("%s %s", pos.ErrMsgPrefix(), err.getMessage())
+            err := new error(sprintf("%s %s", pos.ErrMsgPrefix(), err.getMessage()))
             return err
         }
         this.SuperClass = c
@@ -452,7 +454,7 @@ class Class {
         if err != null {
             return null, err
         }
-        notFoundErr := fmt.Errorf("%s field or method named '%s' not found", pos.ErrMsgPrefix(), name)
+        notFoundErr := new error(sprintf("%s field or method named '%s' not found", pos.ErrMsgPrefix(), name))
         if this.Fields != null && null != this.Fields[name] {
             if fromSub && this.Fields[name].ableAccessFromSubClass() == false {
                 // private field
@@ -486,17 +488,17 @@ class Class {
     fn constructionMethodAccessAble(pos Pos, method ClassMethod) -> (err error) {
         if this.LoadFromOutSide {
             if this.IsPublic() == false {
-                return fmt.Errorf("%s class '%s' is not public",
-                    pos.ErrMsgPrefix(), this.Name)
+                return new error(sprintf("%s class '%s' is not public",
+                    pos.ErrMsgPrefix(), this.Name))
             }
             if method.IsPublic() == false {
-                return fmt.Errorf("%s method '%s' is not public",
-                    pos.ErrMsgPrefix(), method.Function.Name)
+                return new error(sprintf("%s method '%s' is not public",
+                    pos.ErrMsgPrefix(), method.Function.Name))
             }
         } else {
             if method.IsPrivate() {
-                return fmt.Errorf("%s method '%s' is private",
-                    pos.ErrMsgPrefix(), method.Function.Name)
+                return new error(sprintf("%s method '%s' is private",
+                    pos.ErrMsgPrefix(), method.Function.Name))
             }
         }
         return null
@@ -507,8 +509,8 @@ class Class {
             if err != null {
                 return null, err
             }
-            notFoundErr := fmt.Errorf("%s field named '%s' not found",
-                pos.ErrMsgPrefix(), name)
+            notFoundErr := new error(sprintf("%s field named '%s' not found",
+                pos.ErrMsgPrefix(), name))
             if this.Fields != null && null != this.Fields[name] {
                 if fromSub && this.Fields[name].ableAccessFromSubClass() == false {
                     // private field
@@ -638,8 +640,8 @@ class Class {
             if len(this.Methods[call.Name]) > 0 {
                 for _, m := range this.Methods[call.Name] {
                     if fromSub && m.ableAccessFromSubClass() == false {
-                        return null, false, fmt.Errorf("%s method '%s' not found",
-                            pos.ErrMsgPrefix(), call.Name)
+                        return null, false, new error(sprintf("%s method '%s' not found",
+                            pos.ErrMsgPrefix(), call.Name))
                     }
                     call.VArgs, err = m.Function.Type.fitArgs(pos, call.Args,
                         callArgTypes, m.Function)
@@ -733,14 +735,13 @@ class Class {
                 errs.append(err)
             }
         }
-        errs = append(errs, this.checkModifierOk()...)
-        errs = append(errs, this.resolveFieldsAndMethodsType()...)
+        errs.appendAll(this.checkModifierOk())
+        errs.appendAll(this.resolveFieldsAndMethodsType())
         return errs
     }
 
     fn checkPhase2()-> (errs []error = []error{}){
-        errs := []error{}
-        errs = append(errs, this.checkFields()...)
+        errs.appendAll(this.checkFields())
         if PackageBeenCompile.shouldStop(errs) {
             return errs
         }
@@ -749,26 +750,26 @@ class Class {
             if this.Fields != null && this.Fields[name] != null {
                 f := this.Fields[name]
                 if f.Pos.Line < ms[0].Function.Pos.Line {
-                    errMsg := fmt.Sprintf("%s method named '%s' already declared as field,at:\n",
+                    errMsg := sprintf("%s method named '%s' already declared as field,at:\n",
                         errMsgPrefix(ms[0].Function.Pos), name)
-                    errMsg += fmt.Sprintf("\t%s", errMsgPrefix(f.Pos))
-                    errs = append(errs, errors.New(errMsg))
+                    errMsg += sprintf("\t%s", errMsgPrefix(f.Pos))
+                    errs = append(errs, new error(errMsg))
                 } else {
-                    errMsg := fmt.Sprintf("%s field named '%s' already declared as method,at:\n",
+                    errMsg := sprintf("%s field named '%s' already declared as method,at:\n",
                         errMsgPrefix(f.Pos), name)
-                    errMsg += fmt.Sprintf("\t%s", errMsgPrefix(ms[0].Function.Pos))
-                    errs = append(errs, errors.New(errMsg))
+                    errMsg += sprintf("\t%s", errMsgPrefix(ms[0].Function.Pos))
+                    errs = append(errs, new error(errMsg))
                 }
                 continue
             }
             if len(ms) > 1 {
-                errMsg := fmt.Sprintf("%s class method named '%s' has declared %d times,which are:\n",
+                errMsg := sprintf("%s class method named '%s' has declared %d times,which are:\n",
                     errMsgPrefix(ms[0].Function.Pos),
                     ms[0].Function.Name, len(ms))
                 for _, v := range ms {
-                    errMsg += fmt.Sprintf("\t%s\n", errMsgPrefix(v.Function.Pos))
+                    errMsg += sprintf("\t%s\n", errMsgPrefix(v.Function.Pos))
                 }
-                errs = append(errs, errors.New(errMsg))
+                errs = append(errs, new error(errMsg))
             }
         }
         errs = append(errs, this.checkMethods()...)
@@ -791,7 +792,6 @@ class Class {
     }
 
     fn suitableSubClassForAbstract(super Class)-> (errs []error = []error{}){
-        errs := []error{}
         if super.Name != JavaRootClass {
             err := super.loadSuperClass(this.Pos)
             if err != null {
@@ -821,18 +821,17 @@ class Class {
                     }
                 } else {
                     pos := this.Pos
-                    if nameMatch != null && nameMatch.Function.Pos != null {
+                    if nameMatch[0] != null && nameMatch[0].Function.Pos != null {
                         pos = nameMatch.Function.Pos
                     }
-                    if nameMatch != null {
-                        errMsg := fmt.Sprintf("%s method is suitable for abstract super class\n", errMsgPrefix(pos))
-                        errMsg += fmt.Sprintf("\t have %s\n", nameMatch.Function.readableMsg())
-                        errMsg += fmt.Sprintf("\t want %s\n", m.Function.readableMsg())
-                        errs = append(errs, errors.New(errMsg))
+                    if nameMatch[0] != null {
+                        errMsg := sprintf("%s method is suitable for abstract super class\n", errMsgPrefix(pos))
+                        errMsg += sprintf("\t have %s\n", nameMatch[0].Function.readableMsg())
+                        errMsg += sprintf("\t want %s\n", m.Function.readableMsg())
+                        errs.append(new error(errMsg))
                     } else {
-                        errs = append(errs,
-                            fmt.Errorf("%s missing implementation method '%s' define on abstract class '%s'",
-                                pos.ErrMsgPrefix(), m.Function.readableMsg(), super.Name))
+                        errs.append(new error(sprintf("%s missing implementation method '%s' define on abstract class '%s'",
+                                pos.ErrMsgPrefix(), m.Function.readableMsg(), super.Name)))
                     }
                 }
             }
@@ -899,8 +898,8 @@ class Class {
                 continue
             }
             if exist != null {
-                errs = append(errs, fmt.Errorf("%s method '%s' override '%s'",
-                    errMsgPrefix(v[0].Function.Pos), name, exist.Name))
+                errs = append(errs, new error(sprintf("%s method '%s' override '%s'",
+                    errMsgPrefix(v[0].Function.Pos), name, exist.Name)))
             }
         }
         return errs
@@ -917,8 +916,8 @@ class Class {
                 }
             }
             if exist != null {
-                errs = append(errs, fmt.Errorf("%s method '%s' override '%s'",
-                    errMsgPrefix(v[0].Function.Pos), name, exist.Name))
+                errs = append(errs, new error(sprintf("%s method '%s' override '%s'",
+                    errMsgPrefix(v[0].Function.Pos), name, exist.Name)))
             }
         }
         return errs
@@ -938,8 +937,8 @@ class Class {
         }
 
         if this.SuperClass.IsFinal() {
-            return fmt.Errorf("%s class name '%s' have super class  named '%s' that is final",
-                this.Pos.ErrMsgPrefix(), this.Name, this.SuperClass.Name)
+            return new error(sprintf("%s class name '%s' have super class  named '%s' that is final",
+                this.Pos.ErrMsgPrefix(), this.Name, this.SuperClass.Name))
         }
         for c.Name != JavaRootClass {
             _, ok := m[c.Name]
@@ -962,7 +961,7 @@ class Class {
         if is == false {
             return null
         }
-        errMsg := fmt.Sprintf("%s class named '%s' detects a circularity in class hierarchy",
+        errMsg := sprintf("%s class named '%s' detects a circularity in class hierarchy",
             this.Pos.ErrMsgPrefix(), this.Name)
         tab := "\t"
         index := len(arr) - 1
@@ -971,7 +970,7 @@ class Class {
             tab += " "
             index--
         }
-        return fmt.Errorf(errMsg)
+        return new error(errMsg)
     }
 
     fn checkIfOverrideFinalMethod()-> (errs []error = []error{}){
@@ -1000,8 +999,8 @@ class Class {
                     f2.Type = VariableTypeFunction
                     f2.FunctionType = v.Function.Type
                     if f1.Equal(f2) {
-                        errs = append(errs, fmt.Errorf("%s override final method",
-                            errMsgPrefix(m.Function.Pos)))
+                        errs = append(errs, new error(sprintf("%s override final method",
+                            errMsgPrefix(m.Function.Pos))))
                     }
                 }
             }
@@ -1040,8 +1039,8 @@ class Class {
                 if nameMatch != null && nameMatch.Function.Pos != null {
                     pos = nameMatch.Function.Pos
                 }
-                errs = append(errs, fmt.Errorf("%s missing implementation method '%s' define on interface '%s'",
-                    pos.ErrMsgPrefix(), m.Function.readableMsg(), inter.Name))
+                errs = append(errs, new error(sprintf("%s missing implementation method '%s' define on interface '%s'",
+                    pos.ErrMsgPrefix(), m.Function.readableMsg(), inter.Name)))
             }
         }
         for _, v := range inter.Interfaces {
@@ -1055,8 +1054,8 @@ class Class {
         errs := []error{}
         if this.IsInterface() {
             for _, v := range this.Fields {
-                errs = append(errs, fmt.Errorf("%s interface '%s' expect no field named '%s'",
-                    errMsgPrefix(v.Pos), this.Name, v.Name))
+                errs.append(new error(sprintf("%s interface '%s' expect no field named '%s'",
+                    errMsgPrefix(v.Pos), this.Name, v.Name)))
             }
             return errs
         }
@@ -1070,13 +1069,13 @@ class Class {
                     continue
                 }
                 if v.Type.assignAble(errs, assignment) == false {
-                    errs = append(errs, fmt.Errorf("%s cannot assign '%s' as '%s' for default value",
-                        errMsgPrefix(v.Pos), assignment.TypeString(), v.Type.TypeString()))
+                    errs = append(errs, new error(sprintf("%s cannot assign '%s' as '%s' for default value",
+                        errMsgPrefix(v.Pos), assignment.TypeString(), v.Type.TypeString())))
                     continue
                 }
                 if assignment.Type == VariableTypeNull {
-                    errs = append(errs, fmt.Errorf("%s pointer types default value is '%s' already",
-                        v.Pos.ErrMsgPrefix(), assignment.TypeString()))
+                    errs = append(errs, new error(sprintf("%s pointer types default value is '%s' already",
+                        v.Pos.ErrMsgPrefix(), assignment.TypeString())))
                     continue
                 }
                 if v.IsStatic() &&
@@ -1103,20 +1102,19 @@ class Class {
                     selection.Name = v.Name
                     selection.Field = v
                     left := new Expression()
-                    left.    Type =  ExpressionTypeSelection
-                    left.   Data =  selection,
-                    left.    Op =   "selection"
-
+                    left.Type =  ExpressionTypeSelection
+                    left.Data =  selection
+                    left.Op =   "selection"
                     left.Value = v.Type
                     bin.Left = new Expression()
                     bin.Left.Type = ExpressionTypeList
                     bin.Left.Data = []Expression{left}
                 }
                 e := new Expression()
-                e.    Type =  ExpressionTypeAssign
-                e.    Data =  bin
-                e.    IsStatementExpression =  true,
-                e.    Op =  "assign"
+                e.Type =  ExpressionTypeAssign
+                e.Data =  bin
+                e.IsStatementExpression =  true
+                e.Op =  "assign"
                 {
                     t := new Statement()
                     t.Type = StatementTypeExpression
@@ -1150,21 +1148,21 @@ class Class {
                     //nothing
                 } else {
                     if this.IsInterface() {
-                        errs = append(errs, fmt.Errorf("%s interface method cannot have implementation",
-                            errMsgPrefix(method.Function.Pos)))
+                        errs = append(errs, new error(sprintf("%s interface method cannot have implementation",
+                            errMsgPrefix(method.Function.Pos))))
                         continue
                     }
                     errs = append(errs, method.Function.checkReturnVarExpression()...)
                     isConstruction := name == SpecialMethodInit
                     if isConstruction {
                         if method.IsFirstStatementCallFatherConstruction() == false {
-                            errs = append(errs, fmt.Errorf("%s construction method should call father construction method first",
-                                errMsgPrefix(method.Function.Pos)))
+                            errs = append(errs, new error(sprintf("%s construction method should call father construction method first",
+                                errMsgPrefix(method.Function.Pos))))
                         }
                     }
                     if isConstruction && method.Function.Type.VoidReturn() == false {
-                        errs = append(errs, fmt.Errorf("%s construction method expect no return values",
-                            errMsgPrefix(method.Function.Type.ParameterList[0].Pos)))
+                        errs = append(errs, new error(sprintf("%s construction method expect no return values",
+                            errMsgPrefix(method.Function.Type.ParameterList[0].Pos))))
                     }
                     method.Function.Block.InheritedAttribute.IsConstructionMethod = isConstruction
                     method.Function.checkBlock(errs)
@@ -1175,14 +1173,13 @@ class Class {
     }
 
     fn checkModifierOk()-> (errs []error = []error{}){
-        errs := []error{}
         if this.IsInterface() && this.IsFinal() {
-            errs = append(errs, fmt.Errorf("%s interface '%s' cannot be final",
-                errMsgPrefix(this.FinalPos), this.Name))
+            errs.append(new error(sprintf("%s interface '%s' cannot be final",
+                errMsgPrefix(this.FinalPos), this.Name)))
         }
         if this.IsAbstract() && this.IsFinal() {
-            errs = append(errs, fmt.Errorf("%s abstract class '%s' cannot be final",
-                errMsgPrefix(this.FinalPos), this.Name))
+            errs.append(new error(sprintf("%s abstract class '%s' cannot be final",
+                errMsgPrefix(this.FinalPos), this.Name)))
         }
         return errs
     }

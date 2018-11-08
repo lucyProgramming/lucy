@@ -6,8 +6,8 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 )
 
-func (ep *ExpressionParser) parseSuffixExpression() (*ast.Expression, error) {
-	var prefix *ast.Expression
+func (ep *ExpressionParser) parseSuffixExpression() (ast.Expression, error) {
+	var prefix ast.Expression
 	var err error
 	switch ep.parser.token.Type {
 	case lex.TokenIdentifier:
@@ -126,7 +126,7 @@ func (ep *ExpressionParser) parseSuffixExpression() (*ast.Expression, error) {
 		}
 		ep.parser.ifTokenIsLfThenSkip()
 		if ep.parser.token.Type != lex.TokenRp {
-			err := fmt.Errorf("%s '(' and ')' not matched, but '%s'",
+			err := new error(sprintf("%s '(' and ')' not matched, but '%s'",
 				ep.parser.errMsgPrefix(), ep.parser.token.Description)
 			ep.parser.errs = append(ep.parser.errs, err)
 			return nil, err
@@ -230,12 +230,12 @@ func (ep *ExpressionParser) parseSuffixExpression() (*ast.Expression, error) {
 		}
 		ep.parser.unExpectNewLineAndSkip()
 		if ep.parser.token.Type != lex.TokenLp {
-			err := fmt.Errorf("%s missing '(' after new", ep.parser.errMsgPrefix())
+			err := new error(sprintf("%s missing '(' after new", ep.parser.errMsgPrefix())
 			ep.parser.errs = append(ep.parser.errs, err)
 			return nil, err
 		}
 		ep.Next(lfNotToken) // skip (
-		var es []*ast.Expression
+		var es []ast.Expression
 		if ep.parser.token.Type != lex.TokenRp { //
 			es, err = ep.parseExpressions(lex.TokenRp)
 			if err != nil {
@@ -244,7 +244,7 @@ func (ep *ExpressionParser) parseSuffixExpression() (*ast.Expression, error) {
 		}
 		ep.parser.ifTokenIsLfThenSkip()
 		if ep.parser.token.Type != lex.TokenRp {
-			err := fmt.Errorf("%s '(' and ')' not match", ep.parser.errMsgPrefix())
+			err := new error(sprintf("%s '(' and ')' not match", ep.parser.errMsgPrefix())
 			ep.parser.errs = append(ep.parser.errs, err)
 			return nil, err
 		}
@@ -347,7 +347,7 @@ func (ep *ExpressionParser) parseSuffixExpression() (*ast.Expression, error) {
 		ep.parser.unExpectNewLineAndSkip()
 		return ep.parseSuffixExpression()
 	default:
-		err = fmt.Errorf("%s unkown begining of a expression, token:'%s'",
+		err = new error(sprintf("%s unkown begining of a expression, token:'%s'",
 			ep.parser.errMsgPrefix(), ep.parser.token.Description)
 		ep.parser.errs = append(ep.parser.errs, err)
 		return nil, err
@@ -389,7 +389,7 @@ func (ep *ExpressionParser) parseSuffixExpression() (*ast.Expression, error) {
 					a[:]
 				*/
 				ep.Next(lfNotToken) // skip :
-				var end *ast.Expression
+				var end ast.Expression
 				if ep.parser.token.Type != lex.TokenRb {
 					end, err = ep.parseExpression(false)
 					if err != nil {
@@ -398,7 +398,7 @@ func (ep *ExpressionParser) parseSuffixExpression() (*ast.Expression, error) {
 				}
 				ep.parser.ifTokenIsLfThenSkip()
 				if ep.parser.token.Type != lex.TokenRb {
-					err := fmt.Errorf("%s '[' and ']' not match", ep.parser.errMsgPrefix())
+					err := new error(sprintf("%s '[' and ']' not match", ep.parser.errMsgPrefix())
 					ep.parser.errs = append(ep.parser.errs, err)
 					return nil, err
 				}
@@ -419,7 +419,7 @@ func (ep *ExpressionParser) parseSuffixExpression() (*ast.Expression, error) {
 				}
 				if ep.parser.token.Type == lex.TokenColon {
 					ep.Next(lfNotToken)
-					var end *ast.Expression
+					var end ast.Expression
 					if ep.parser.token.Type != lex.TokenRb {
 						end, err = ep.parseExpression(false)
 						if err != nil {
@@ -427,7 +427,7 @@ func (ep *ExpressionParser) parseSuffixExpression() (*ast.Expression, error) {
 						}
 					}
 					if ep.parser.token.Type != lex.TokenRb {
-						err := fmt.Errorf("%s '[' and ']' not match", ep.parser.errMsgPrefix())
+						err := new error(sprintf("%s '[' and ']' not match", ep.parser.errMsgPrefix())
 						ep.parser.errs = append(ep.parser.errs, err)
 						return nil, err
 					}
@@ -444,7 +444,7 @@ func (ep *ExpressionParser) parseSuffixExpression() (*ast.Expression, error) {
 					ep.Next(lfIsToken) // skip ]
 				} else {
 					if ep.parser.token.Type != lex.TokenRb {
-						err := fmt.Errorf("%s '[' and ']' not match", ep.parser.errMsgPrefix())
+						err := new error(sprintf("%s '[' and ']' not match", ep.parser.errMsgPrefix())
 						ep.parser.errs = append(ep.parser.errs, err)
 						return nil, err
 					}
@@ -466,7 +466,7 @@ func (ep *ExpressionParser) parseSuffixExpression() (*ast.Expression, error) {
 			var constName string
 			if ep.parser.token.Type != lex.TokenIdentifier {
 				ep.parser.errs = append(ep.parser.errs,
-					fmt.Errorf("%s expect idnetifier , but '%s'",
+					new error(sprintf("%s expect idnetifier , but '%s'",
 						ep.parser.errMsgPrefix(), ep.parser.token.Description))
 				constName = compileAutoName()
 			} else {
@@ -505,7 +505,7 @@ func (ep *ExpressionParser) parseSuffixExpression() (*ast.Expression, error) {
 				}
 				ep.parser.ifTokenIsLfThenSkip()
 				if ep.parser.token.Type != lex.TokenRp {
-					err := fmt.Errorf("%s '(' and ')' not match", ep.parser.errMsgPrefix())
+					err := new error(sprintf("%s '(' and ')' not match", ep.parser.errMsgPrefix())
 					ep.parser.errs = append(ep.parser.errs, err)
 					return nil, err
 				}
@@ -520,7 +520,7 @@ func (ep *ExpressionParser) parseSuffixExpression() (*ast.Expression, error) {
 				prefix = newExpression
 				ep.Next(lfIsToken) // skip  )
 			} else {
-				err := fmt.Errorf("%s expect  'identifier' or '(',but '%s'",
+				err := new error(sprintf("%s expect  'identifier' or '(',but '%s'",
 					ep.parser.errMsgPrefix(), ep.parser.token.Description)
 				ep.parser.errs = append(ep.parser.errs, err)
 				return nil, err

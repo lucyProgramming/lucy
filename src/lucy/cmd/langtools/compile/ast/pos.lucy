@@ -21,6 +21,6 @@ class NameWithPos {
 	Pos  Pos
 }
 
-func errMsgPrefix(pos Pos) string {
+fn errMsgPrefix(pos Pos) -> (prefix string) {
 	return pos.ErrMsgPrefix()
 }

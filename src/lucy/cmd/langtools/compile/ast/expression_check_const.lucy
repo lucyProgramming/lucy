@@ -2,8 +2,7 @@
 
 class ExpressionCheckConst {
 	
-	static fn checkConstant(e Expression , block Block) []error {
-		errs := []error{}
+	static fn checkConstant(e Expression , block Block) -> (errs []error = []error{}) {
 		cs := e.Data.([]Constant)
 		for _, c := range cs {
 			err := checkConst(block, c)

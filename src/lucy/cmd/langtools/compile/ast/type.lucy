@@ -1,4 +1,4 @@
-
+import "java/lang/Object"
 
 public enum  VariableTypeKind {
 	VariableTypeBool =1 ,
@@ -36,7 +36,7 @@ public class Map {
 	V Type
 }
 
-pulic class Type {
+public class Type {
 	Type           VariableTypeKind
 	IsBuildIn      bool // build in type alias
 	IsVariableArgs bool // int ...
@@ -52,8 +52,23 @@ pulic class Type {
 	Map            Map
 	Package        Package
 	Alias          TypeAlias
-	
-	fn validForTypeAssertOrConversion() bool {
+	fn cp(t Type) {
+	    t.Type = this.Type
+	    t.IsBuildIn = this.IsBuildIn
+	    t.IsVariableArgs = this.IsVariableArgs
+	    t.Resolved = this.Resolved
+	    t.Pos = this.Pos
+	    t.Name = this.Name
+	    t.Array = this.Array
+	    t.Class = this.Class
+	    t.Enum = this.Enum
+	    t.EnumName = this.EnumName
+	    t.Function = this.Function
+	    t.Map = this.Map
+	    t.Package = this.Package
+	    t.Alias = this.Alias
+	}
+	fn validForTypeAssertOrConversion() -> (valid bool) {
 		if this.IsPointer() == false {
 			return false
 		}
@@ -74,7 +89,7 @@ pulic class Type {
 		return false
 	}
 
-	fn mkDefaultValueExpression() *Expression {
+	fn mkDefaultValueExpression() -> (d Expression) {
 		e := new Expression()
 		e.Op = "defaultValueByCompiler"
 		e.IsCompileAuto = true
@@ -83,31 +98,31 @@ pulic class Type {
 		switch this.Type {
 		case VariableTypeBool:
 			e.Type = ExpressionTypeBool
-			e.Data = false
+			e.longValue = 0
 		case VariableTypeByte:
 			e.Type = ExpressionTypeByte
-			e.Data = int(0)
+			e.longValue =  0
 		case VariableTypeShort:
 			e.Type = ExpressionTypeInt
-			e.Data = int(0)
+			e.longValue =  0
 		case VariableTypeChar:
 			e.Type = ExpressionTypeInt
-			e.Data = int(0)
+			e.longValue =  0
 		case VariableTypeInt:
 			e.Type = ExpressionTypeInt
-			e.Data = int(0)
+			e.longValue =  0
 		case VariableTypeLong:
 			e.Type = ExpressionTypeLong
-			e.Data = int(0)
+			e.longValue = 0
 		case VariableTypeFloat:
 			e.Type = ExpressionTypeFloat
-			e.Data = float(0)
+			e.doubleValue = float(0)
 		case VariableTypeDouble:
 			e.Type = ExpressionTypeDouble
-			e.Data = double(0)
+			e.doubleValue = double(0)
 		case VariableTypeEnum:
 			e.Type = ExpressionTypeInt
-			e.Data = this.Enum.DefaultValue
+			e.longValue = long(this.Enum.DefaultValue)
 		default:
 			e.Type = ExpressionTypeNull
 		}
@@ -129,16 +144,16 @@ pulic class Type {
 		}
 		switch this.Type {
 		case VariableTypePackage:
-			return new error(sprinf("%s use package '%s' without selector",
+			return new error(sprintf("%s use package '%s' without selector",
 				this.Pos.ErrMsgPrefix(), this.Package.Name))
 		case VariableTypeClass:
-			return new error(sprinf("%s use class '%s' without selector",
+			return new error(sprintf("%s use class '%s' without selector",
 				this.Pos.ErrMsgPrefix(), this.Class.Name))
 		case VariableTypeMagicFunction:
-			return new error(sprinf("%s use '%s' without selector",
+			return new error(sprintf("%s use '%s' without selector",
 				this.Pos.ErrMsgPrefix(), magicIdentifierFunction))
 		default:
-			return new error(sprinf("%s '%s' is not right value valid",
+			return new error(sprintf("%s '%s' is not right value valid",
 				this.Pos.ErrMsgPrefix(), this.TypeString()))
 		}
 	}
@@ -154,7 +169,7 @@ pulic class Type {
 			null is only untyped right value
 		*/
 		if this.Type == VariableTypeNull {
-			return new error(sprinf("%s '%s' is not typed",
+			return new error(sprintf("%s '%s' is not typed",
 				this.Pos.ErrMsgPrefix(), this.TypeString()))
 		}
 		return null
@@ -182,7 +197,7 @@ pulic class Type {
 		}
 	}
 
-	fn resolve(block *Block) error {
+	fn resolve(block Block) -> (err error) {
 		if this.Resolved {
 			return null
 		}
@@ -190,15 +205,16 @@ pulic class Type {
 		switch this.Type {
 		case VariableTypeTemplate:
 			if block.InheritedAttribute.Function.parameterTypes == null {
-				return fmt.Errorf("%s parameter type '%s' not in a template function",
-					errMsgPrefix(this.Pos), this.Name)
+				return new error(sprintf("%s parameter type '%s' not in a template function",
+					errMsgPrefix(this.Pos), this.Name))
 			}
 			if block.InheritedAttribute.Function.parameterTypes[this.Name] == null {
-				return fmt.Errorf("%s parameter type '%s' not found",
-					errMsgPrefix(this.Pos), this.Name)
+				return new error(sprintf("%s parameter type '%s' not found",
+					errMsgPrefix(this.Pos), this.Name))
 			}
 			pos := this.Pos // keep pos
-			*typ = *block.InheritedAttribute.Function.parameterTypes[this.Name]
+			//TODO:: copy
+			//*typ = *block.InheritedAttribute.Function.parameterTypes[this.Name]
 			this.Pos = pos // keep pos
 			return null
 		case VariableTypeName:
@@ -206,8 +222,8 @@ pulic class Type {
 		case VariableTypeGlobal:
 			d, exists := PackageBeenCompile.Block.NameExists(this.Name)
 			if exists == false {
-				return fmt.Errorf("%s '%s' not found",
-					errMsgPrefix(this.Pos), this.Name)
+				return new error(sprintf("%s '%s' not found",
+					errMsgPrefix(this.Pos), this.Name))
 			}
 			return this.makeTypeFrom(d)
 		case VariableTypeArray, VariableTypeJavaArray:
@@ -234,33 +250,28 @@ pulic class Type {
 					return err
 				}
 			}
+		default:
 		}
 		return null
 	}
 
-	fn resolveName(block *Block) error {
-		var err error
-		var d interface{}
+	fn resolveName(block Block) -> (err error ) {
+		var d  Object
 		if strings.Contains(this.Name, ".") == false {
 			var loadFromImport bool
 			d = block.searchType(this.Name)
 			if d != null {
-				switch d.(type) {
-				case *Class:
-					if t, ok := d.(*Class); ok &&
+				if t, ok := d.(Class); ok &&
+					t.IsBuildIn == false {
+					_, loadFromImport = shouldAccessFromImports(this.Name, this.Pos, t.Pos)
+				}
+				if t, ok := d.(Type); ok &&
 						t.IsBuildIn == false {
 						_, loadFromImport = shouldAccessFromImports(this.Name, this.Pos, t.Pos)
-					}
-				case *Type:
-					if t, ok := d.(*Type); ok &&
+				}
+				if t, ok := d.(Enum); ok &&
 						t.IsBuildIn == false {
 						_, loadFromImport = shouldAccessFromImports(this.Name, this.Pos, t.Pos)
-					}
-				case *Enum:
-					if t, ok := d.(*Enum); ok &&
-						t.IsBuildIn == false {
-						_, loadFromImport = shouldAccessFromImports(this.Name, this.Pos, t.Pos)
-					}
 				}
 			} else {
 				loadFromImport = true
@@ -278,7 +289,7 @@ pulic class Type {
 			}
 		}
 		if d == null {
-			return fmt.Errorf("%s type named '%s' not found", errMsgPrefix(this.Pos), this.Name)
+			return new error(sprintf("%s type named '%s' not found", errMsgPrefix(this.Pos), this.Name))
 		}
 		err = this.makeTypeFrom(d)
 		if err != null {
@@ -287,85 +298,84 @@ pulic class Type {
 		return null
 	}
 
-	fn getNameFromImport() (d interface{}, err error) {
-		if strings.Contains(this.Name, ".") == false {
+	fn getNameFromImport() -> (d Object, err error) {
+		if this.Name.indexOf(".")  > 0  {
 			i := PackageBeenCompile.getImport(this.Pos.Filename, this.Name)
 			if i != null {
 				i.Used = true
 				return PackageBeenCompile.load(i.Import)
 			}
-			return null, fmt.Errorf("%s type named '%s' not found",
-				errMsgPrefix(this.Pos), this.Name)
+			return null, new error(sprintf("%s type named '%s' not found",
+				errMsgPrefix(this.Pos), this.Name))
 		}
-		packageAndName := strings.Split(this.Name, ".")
+		packageAndName := this.Name.split(".")
 		i := PackageBeenCompile.getImport(this.Pos.Filename, packageAndName[0])
 		if null == i {
-			return null, fmt.Errorf("%s package '%s' not imported",
-				errMsgPrefix(this.Pos), packageAndName[0])
+			return null, new error(sprintf("%s package '%s' not imported",
+				errMsgPrefix(this.Pos), packageAndName[0]))
 		}
 		i.Used = true
 		p, err := PackageBeenCompile.load(i.Import)
 		if err != null {
-			return null, fmt.Errorf("%s %.getMessage()",
-				errMsgPrefix(this.Pos), err.getMessage())
+			return null, new error(sprintf("%s %.getMessage()",
+				errMsgPrefix(this.Pos), err.getMessage()))
 		}
-		if pp, ok := p.(*Package); ok &&
+		if pp, ok := p.(Package); ok &&
 			pp != null {
 			var exists bool
 			d, exists = pp.Block.NameExists(packageAndName[1])
 			if exists == false {
-				err = fmt.Errorf("%s '%s' not found",
-					errMsgPrefix(this.Pos), packageAndName[1])
+				err = new error(sprintf("%s '%s' not found",
+					errMsgPrefix(this.Pos), packageAndName[1]))
 			}
 			return d, err
 		} else {
-			return null, fmt.Errorf("%s '%s' is not a package",
-				errMsgPrefix(this.Pos), packageAndName[0])
+			return null, new error(sprintf("%s '%s' is not a package",
+				errMsgPrefix(this.Pos), packageAndName[0]))
 		}
 	}
 
-	fn makeTypeFrom(d interface{}) error {
-		switch d.(type) {
-		case *Class:
-			dd := d.(*Class)
+	fn makeTypeFrom(d Object) -> (err error)  {
+		if dd := d.(Class) ; dd != null {
 			if dd.LoadFromOutSide && dd.IsPublic() == false {
-				PackageBeenCompile.errors = append(PackageBeenCompile.errors,
-					fmt.Errorf("%s class '%s' is not public",
-						errMsgPrefix(this.Pos), dd.Name))
+				PackageBeenCompile.errors.append(
+				    new error(sprintf("%s class '%s' is not public",
+						       errMsgPrefix(this.Pos), dd.Name)))
 			}
 			this.Type = VariableTypeObject
 			this.Class = dd
 			return null
-		case *Type:
+		}
+		if t := d.(Type) ; t != null {
 			pos := this.Pos
 			alias := this.Alias
 			resolved := this.Resolved
-			*typ = *d.(*Type)
+			//TODO ::
 			this.Pos = pos
 			this.Alias = alias
 			this.Resolved = resolved
 			return null
-		case *Enum:
-			dd := d.(*Enum)
+		}
+		if dd := d.(Enum) ; dd != null {
 			if dd.LoadFromOutSide && dd.isPublic() == false {
-				PackageBeenCompile.errors = append(PackageBeenCompile.errors,
-					fmt.Errorf("%s enum '%s' is not public",
-						errMsgPrefix(this.Pos), dd.Name))
+				PackageBeenCompile.errors.append(
+					new error(sprintf("%s enum '%s' is not public",
+						errMsgPrefix(this.Pos), dd.Name)))
 			}
 			this.Type = VariableTypeEnum
 			this.Enum = dd
 			return null
 		}
-		return fmt.Errorf("%s name '%s' is not a type",
-			errMsgPrefix(this.Pos), this.Name)
+		return new error(sprintf("%s name '%s' is not a type",
+			errMsgPrefix(this.Pos), this.Name))
 	}
 
-	fn IsNumber() bool {
+	fn IsNumber() -> (is bool) {
 		return this.isInteger() ||
 			this.isFloat()
 	}
 
-	fn IsPointer() bool {
+	fn IsPointer() -> (is bool)  {
 		return this.Type == VariableTypeObject ||
 			this.Type == VariableTypeArray ||
 			this.Type == VariableTypeJavaArray ||
@@ -375,7 +385,7 @@ pulic class Type {
 			this.Type == VariableTypeFunction
 	}
 
-	fn isInteger() bool {
+	fn isInteger() -> (is bool)  {
 		return this.Type == VariableTypeByte ||
 			this.Type == VariableTypeShort ||
 			this.Type == VariableTypeInt ||
@@ -386,18 +396,18 @@ pulic class Type {
 	/*
 		float or double
 	*/
-	fn isFloat() bool {
+	fn isFloat() -> (is bool)  {
 		return this.Type == VariableTypeFloat ||
 			this.Type == VariableTypeDouble
 	}
 
-	fn IsPrimitive() bool {
+	fn IsPrimitive() -> (is bool)  {
 		return this.IsNumber() ||
 			this.Type == VariableTypeString ||
 			this.Type == VariableTypeBool
 	}
 
-	fn typeString(prefix string = "") ->(ret string) {
+	fn TypeString(prefix string = "") ->(ret string) {
 		if this.Alias != null {
 			return prefix + this.Alias.Name
 		}
@@ -424,28 +434,28 @@ pulic class Type {
 			return prefix +  "object@" + this.Class.Name
 		case VariableTypeMap:
 			ret =prefix + "map{"
-			ret += this.Map.K.typeString()
+			ret += this.Map.K.TypeString()
 			ret += " -> "
-			ret += this.Map.V.typeString()
+			ret += this.Map.V.TypeString()
 			ret += "}"
 			return ret 
 		case VariableTypeArray:
-			return this.Array.typeString(prefix + "[]")
+			return this.Array.TypeString(prefix + "[]")
 		case VariableTypeJavaArray:
 			if this.IsVariableArgs {
-				ret = prefix + this.Array.typeString() + "..."
+				ret = prefix + this.Array.TypeString() + "..."
 				return ret 
 			} else {
-				ret = prefix + this.Array.typeString() + "[]"
+				ret = prefix + this.Array.TypeString() + "[]"
 				return ret 
 			}
 		case VariableTypeFunction:
-			ret = prefix + "fn " + this.FunctionType.typeString()
+			ret = prefix + "fn " + this.FunctionType.TypeString()
 			return 
 		case VariableTypeEnum:
 			ret = prefix + "enum(" + this.Enum.Name + ")"
 		case VariableTypeClass:
-			ret = prefix + fmt.Sprintf("class@%s", this.Class.Name)
+			ret = prefix + sprintf("class@%s", this.Class.Name)
 		case VariableTypeName:
 			ret = prefix + this.Name // resolve wrong, but TypeString is ok to return
 		case VariableTypeTemplate:
@@ -465,7 +475,7 @@ pulic class Type {
 		}
 	}
 
-	fn getParameterType(ft FunctionType) []string {
+	fn getParameterType(ft FunctionType) -> (pts []string) {
 		if this.Type == VariableTypeName &&
 			ft.haveTemplateName(this.Name) {
 			this.Type = VariableTypeTemplate // convert to type
@@ -486,11 +496,11 @@ pulic class Type {
 		return null
 	}
 
-	fn canBeBindWithParameterTypes(parameterTypes map[string]Type) error {
+	fn canBeBindWithParameterTypes(parameterTypes map{ string->Type }) -> (err error) {
 		if this.Type == VariableTypeTemplate {
 			_, ok := parameterTypes[this.Name]
 			if ok == false {
-				return fmt.Errorf("typed parameter '%s' not found", this.Name)
+				return new error(sprintf("typed parameter '%s' not found", this.Name))
 			}
 			return null
 		}
@@ -511,13 +521,15 @@ pulic class Type {
 	/*
 		if there is error,this function will crash
 	*/
-	fn bindWithParameterTypes(ft FunctionType, parameterTypes map[string]Type) error {
+	fn bindWithParameterTypes(ft FunctionType, parameterTypes map{string->Type}) -> (err error) {
 		if this.Type == VariableTypeTemplate {
-			t, ok := parameterTypes[this.Name]
+			ok := parameterTypes.keyExist(this.Name)
 			if ok == false {
-				panic(fmt.Sprintf("typed parameter '%s' not found", this.Name))
+				panic(sprintf("typed parameter '%s' not found", this.Name))
 			}
-			*typ = *t.Clone() // real bind
+			//TODO ::
+			//*typ = *t.Clone() // real bind
+			typ.cp(parameterTypes[this.Name])
 			return null
 		}
 		if this.Type == VariableTypeArray || this.Type == VariableTypeJavaArray {
@@ -540,12 +552,12 @@ pulic class Type {
 	/*
 
 	 */
-	fn canBeBindWithType(ft FunctionType, mkParameterTypes map[string]Type, bind Type) error {
+	fn canBeBindWithType(ft FunctionType, mkParameterTypes map{string->Type}, bind Type) -> (err error)  {
 		if err := bind.rightValueValid(); err != null {
 			return err
 		}
 		if bind.Type == VariableTypeNull {
-			return fmt.Errorf("'%s' is un typed", bind.TypeString())
+			return new error(sprintf("'%s' is un typed", bind.TypeString()))
 		}
 		if this.Type == VariableTypeTemplate {
 			mkParameterTypes[this.Name] = bind
@@ -568,10 +580,10 @@ pulic class Type {
 				return this.Map.V.canBeBindWithType(ft, mkParameterTypes, bind.Map.V)
 			}
 		}
-		return fmt.Errorf("cannot bind '%s' to '%s'", bind.TypeString(), this.TypeString())
+		return new error(sprintf("cannot bind '%s' to '%s'", bind.TypeString(), this.TypeString()))
 	}
 
-	fn assignAble(errs []error, rightValue Type) bool {
+	fn assignAble(errs []error, rightValue Type) ->(able bool) {
 		leftValue := this
 		if leftValue == rightValue { // equal
 			return true
@@ -613,7 +625,7 @@ pulic class Type {
 		}
 		if leftValue.Type == VariableTypeObject && rightValue.Type == VariableTypeObject { // object
 			if err := leftValue.Class.loadSelf(leftValue.Pos); err != null {
-				*errs = append(*errs, fmt.Errorf("%s %s", errMsgPrefix(rightValue.Pos), err.getMessage()))
+				errs.append(new error( sprintf("%s %s", errMsgPrefix(rightValue.Pos), err.getMessage())))
 				return false
 			}
 			if err := rightValue.Class.loadSelf(rightValue.Pos); err != null {
@@ -637,7 +649,7 @@ pulic class Type {
 		return false
 	}
 
-	fn Equal(compareTo Type) bool {
+	fn Equal(compareTo Type) -> (is bool) {
 		leftValue := this
 		if leftValue.Type != compareTo.Type {
 			return false //early check

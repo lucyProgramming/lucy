@@ -1,10 +1,10 @@
  
 
-func init() {
+{
 	registerBuildInFunctions()
 }
 
-func registerBuildInFunctions() {
+fn registerBuildInFunctions() {
 	{
 		//print
 		buildInFunctionsMap[common.BuildInFunctionPrint] = new Function()
@@ -174,8 +174,8 @@ func registerBuildInFunctions() {
 					errMsgPrefix(e.ParameterTypes[0].Pos))))
 			}
 			if len(args) == 0 {
-				err := fmt.Errorf("%s '%s' expect one argument at lease",
-					pos.ErrMsgPrefix(), common.BuildInFunctionSprintf)
+				err := new error(sprintf("%s '%s' expect one argument at lease",
+					pos.ErrMsgPrefix(), common.BuildInFunctionSprintf))
 				errs.append(err)
 				return
 			}
@@ -183,8 +183,8 @@ func registerBuildInFunctions() {
 				return
 			}
 			if args[0].Type != VariableTypeString {
-				err := fmt.Errorf("%s '%s' first argument must be string",
-					pos.ErrMsgPrefix(), common.BuildInFunctionSprintf)
+				err := new error(sprintf("%s '%s' first argument must be string",
+					pos.ErrMsgPrefix(), common.BuildInFunctionSprintf))
 				errs.append(err)
 				return
 			}
@@ -207,14 +207,14 @@ func registerBuildInFunctions() {
 		typeOf := &Function{}
 		buildInFunctionsMap[common.BuildInFunctionAssert] = typeOf
 		typeOf.IsBuildIn = true
-		typeOf.buildInFunctionChecker = func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
-			args []*Type, pos Pos) {
+		typeOf.buildInFunctionChecker = func(f Function, e ExpressionFunctionCall, block Block, errs []error,
+			args []Type, pos Pos) {
 			if len(e.ParameterTypes) > 0 {
-				*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
+				*errs = append(*errs, new error(sprintf("%s buildin function expect no typed parameter",
 					errMsgPrefix(e.ParameterTypes[0].Pos)))
 			}
 			if len(args) == 0 {
-				err := fmt.Errorf("%s '%s' expect one argument at lease",
+				err := new error(sprintf("%s '%s' expect one argument at lease",
 					pos.ErrMsgPrefix(), typeOf.Name)
 				errs.append(err)
 				return
@@ -224,7 +224,7 @@ func registerBuildInFunctions() {
 					continue
 				}
 				if a.Type != VariableTypeBool {
-					err := fmt.Errorf("%s not a bool expression",
+					err := new error(sprintf("%s not a bool expression",
 						errMsgPrefix(pos))
 					errs.append(err)
 				}
@@ -243,8 +243,8 @@ func registerBuildInFunctions() {
 				meta := new BuildInFunctionPrintfMeta()
 				e.BuildInFunctionMeta = meta
 				if len(args) == 0 {
-					err := fmt.Errorf("%s '%s' expect one argument at least",
-						pos.ErrMsgPrefix(), common.BuildInFunctionPrintf)
+					err := new error(sprintf("%s '%s' expect one argument at least",
+						pos.ErrMsgPrefix(), common.BuildInFunctionPrintf) )
 					errs.append(err)
 					return
 				}
@@ -252,8 +252,8 @@ func registerBuildInFunctions() {
 					return
 				}
 				if len(args) == 0 {
-					err := fmt.Errorf("%s missing format argument",
-						errMsgPrefix(pos))
+					err := new error(sprintf("%s missing format argument",
+						errMsgPrefix(pos)))
 					errs.append(err)
 					return
 				}
@@ -261,8 +261,8 @@ func registerBuildInFunctions() {
 					return
 				}
 				if args[0].Type != VariableTypeString {
-					err := fmt.Errorf("%s format must be string",
-						errMsgPrefix(pos))
+					err := new error(sprintf("%s format must be string",
+						errMsgPrefix(pos)))
 					errs.append(err)
 					return
 				}
@@ -280,8 +280,8 @@ func registerBuildInFunctions() {
 
 	/*
 	buildInFunctionsMap[common.BuildInFunctionBlockHole] = &Function{
-		buildInFunctionChecker: func(f *Function, e *ExpressionFunctionCall, block *Block, errs *[]error,
-			args []*Type, pos Pos) {
+		buildInFunctionChecker: func(f Function, e ExpressionFunctionCall, block Block, errs []error,
+			args []Type, pos Pos) {
 		},
 		IsBuildIn: true,
 	}
@@ -300,22 +300,22 @@ func registerBuildInFunctions() {
 fn monitorChecker(f Function, e ExpressionFunctionCall, block Block, errs []error,
 	args []Type, pos Pos) {
 	if len(e.ParameterTypes) > 0 {
-		*errs = append(*errs, fmt.Errorf("%s buildin function expect no typed parameter",
+		*errs = append(*errs, new error(sprintf("%s buildin function expect no typed parameter",
 			errMsgPrefix(e.ParameterTypes[0].Pos)))
 	}
 	if len(e.Args) == 0 {
-		*errs = append(*errs, fmt.Errorf("%s expect one argument", errMsgPrefix(pos)))
+		*errs = append(*errs, new error(sprintf("%s expect one argument", errMsgPrefix(pos)))
 		return
 	}
 	if len(e.Args) > 1 {
-		*errs = append(*errs, fmt.Errorf("%s only expect one argument", errMsgPrefix(e.Args[1].Pos)))
+		*errs = append(*errs, new error(sprintf("%s only expect one argument", errMsgPrefix(e.Args[1].Pos)))
 		return
 	}
 	if args[0] == null {
 		return
 	}
 	if args[0].IsPointer() == false {
-		*errs = append(*errs, fmt.Errorf("%s '%s' is not valid type to call",
+		*errs = append(*errs, new error(sprintf("%s '%s' is not valid type to call",
 			errMsgPrefix(args[0].Pos), args[0].TypeString()))
 		return
 	}

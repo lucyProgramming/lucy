@@ -6,11 +6,11 @@ import (
 )
 
 func (this *BuildExpression) buildExpressionAssign(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
@@ -18,7 +18,7 @@ func (this *BuildExpression) buildExpressionAssign(
 	assign := e.Data.(*ast.ExpressionAssign)
 	left := assign.Lefts[0]
 	right := assign.Values[0]
-	var remainStack uint16
+	var remainStack char
 	var op []byte
 	var leftValueKind LeftValueKind
 	if left.IsIdentifier(ast.UnderScore) == false {
@@ -51,11 +51,11 @@ func (this *BuildExpression) buildExpressionAssign(
 
 // a,b,c = 122,fdfd2232,"hello";
 func (this *BuildExpression) buildAssign(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	assign := e.Data.(*ast.ExpressionAssign)
 	if e.IsStatementExpression == false || len(assign.Lefts) == 1 {
 		return this.buildExpressionAssign(class, code, e, context, state)
@@ -87,9 +87,9 @@ func (this *BuildExpression) buildAssign(
 }
 
 func (this *BuildExpression) dupStackLeaveValueBelow(
-	code *cg.AttributeCode,
+	code cg.AttributeCode,
 	leftValueKind LeftValueKind,
-	stackTopType *ast.Type) (increment uint16) {
+	stackTopType *ast.Type) (increment char) {
 	switch leftValueKind {
 	case LeftValueKindLocalVar:
 		if jvmSlotSize(stackTopType) == 1 {

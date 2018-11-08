@@ -6,14 +6,14 @@ import (
 )
 
 func (this *BuildExpression) buildUnary(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 
 	if e.Type == ast.ExpressionTypeNegative {
-		ee := e.Data.(*ast.Expression)
+		ee := e.Data.(ast.Expression)
 		maxStack = this.build(class, code, ee, context, state)
 		switch e.Value.Type {
 		case ast.VariableTypeByte:
@@ -35,7 +35,7 @@ func (this *BuildExpression) buildUnary(
 		return
 	}
 	if e.Type == ast.ExpressionTypeBitwiseNot {
-		ee := e.Data.(*ast.Expression)
+		ee := e.Data.(ast.Expression)
 		maxStack = this.build(class, code, ee, context, state)
 		if t := jvmSlotSize(ee.Value) * 2; t > maxStack {
 			maxStack = t
@@ -80,7 +80,7 @@ func (this *BuildExpression) buildUnary(
 		return
 	}
 	if e.Type == ast.ExpressionTypeNot {
-		ee := e.Data.(*ast.Expression)
+		ee := e.Data.(ast.Expression)
 		maxStack = this.build(class, code, ee, context, state)
 		exit := (&cg.Exit{}).Init(cg.OP_ifeq, code)
 		code.Codes[code.CodeLength] = cg.OP_iconst_0

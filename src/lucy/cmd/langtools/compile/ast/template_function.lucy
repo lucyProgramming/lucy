@@ -1,4 +1,7 @@
- 
+import "lucy/cmd/langtools/compile/jvm/cg"
+
+
+
 class TemplateFunctionInstance  {
 	parameterTypes []Type
 	Entrance       cg.MethodHighLevel
@@ -36,7 +39,7 @@ class TemplateFunction  {
 		}
 		ret := new TemplateFunctionInstance ()
 		ret.parameterTypes = parameterTypes 
-		this.instances = append(this.instances, ret)
+		this.instances.append(ret)
 		return ret
 	}
 

@@ -6,11 +6,11 @@ import (
 )
 
 func (this *BuildExpression) buildTemplateFunctionCall(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	if call.TemplateFunctionCallPair.Entrance == nil {
 		method := &cg.MethodHighLevel{}

@@ -66,7 +66,7 @@ func (this *FileLoader) LoadImport(importName string) (interface{}, error) {
 		}
 	}
 	if len(realPaths) == 0 {
-		return nil, fmt.Errorf("resource '%v' not found", importName)
+		return nil, new error(sprintf("resource '%v' not found", importName)
 	}
 	realPathMap := make(map[string][]*Resource)
 	for _, v := range realPaths {
@@ -82,20 +82,20 @@ func (this *FileLoader) LoadImport(importName string) (interface{}, error) {
 		for _, v := range realPathMap {
 			switch v[0].kind {
 			case resourceKindJavaClass:
-				errMsg += fmt.Sprintf("\t in '%s' is a java class\n", v[0].realPath)
+				errMsg += sprintf("\t in '%s' is a java class\n", v[0].realPath)
 			case resourceKindJavaPackage:
-				errMsg += fmt.Sprintf("\t in '%s' is a java package\n", v[0].realPath)
+				errMsg += sprintf("\t in '%s' is a java package\n", v[0].realPath)
 			case resourceKindLucyClass:
-				errMsg += fmt.Sprintf("\t in '%s' is a lucy class\n", v[0].realPath)
+				errMsg += sprintf("\t in '%s' is a lucy class\n", v[0].realPath)
 			case resourceKindLucyPackage:
-				errMsg += fmt.Sprintf("\t in '%s' is a lucy package\n", v[0].realPath)
+				errMsg += sprintf("\t in '%s' is a lucy package\n", v[0].realPath)
 			}
 		}
-		return nil, fmt.Errorf(errMsg)
+		return nil, new error(sprintf(errMsg)
 	}
 	if realPaths[0].kind == resourceKindLucyClass {
 		if filepath.Base(realPaths[0].realPath) == mainClassName {
-			return nil, fmt.Errorf("%s is special class for global variable and other things", mainClassName)
+			return nil, new error(sprintf("%s is special class for global variable and other things", mainClassName)
 		}
 	}
 	if realPaths[0].kind == resourceKindJavaClass {
@@ -355,13 +355,13 @@ func (this *FileLoader) loadLucyEnum(c *cg.Class) (*ast.Enum, error) {
 		en.Name = name
 		en.Enum = e
 		constValue := v.AttributeGroupedByName[cg.AttributeNameConstValue][0] // must have this attribute
-		en.Value = int32(binary.BigEndian.Uint32(c.ConstPool[binary.BigEndian.Uint16(constValue.Info)].Info))
+		en.Value = int(binary.BigEndian.Uint32(c.ConstPool[binary.BigEndian.Uint16(constValue.Info)].Info))
 		e.Enums = append(e.Enums, en)
 	}
 	return e, nil
 }
 
-func (this *FileLoader) loadConst(c *cg.Class, nameIndex uint16, t *ast.Type) (value interface{}) {
+func (this *FileLoader) loadConst(c *cg.Class, nameIndex char, t *ast.Type) (value interface{}) {
 	switch t.Type {
 	case ast.VariableTypeBool:
 		return binary.BigEndian.Uint32(c.ConstPool[nameIndex].Info) != 0
@@ -372,13 +372,13 @@ func (this *FileLoader) loadConst(c *cg.Class, nameIndex uint16, t *ast.Type) (v
 	case ast.VariableTypeChar:
 		fallthrough
 	case ast.VariableTypeInt:
-		fallthrough
+		return long(binary.BigEndian.Uint32(c.ConstPool[nameIndex].Info))
 	case ast.VariableTypeLong:
-		return int64(binary.BigEndian.Uint64(c.ConstPool[nameIndex].Info))
+		return long(binary.BigEndian.Uint64(c.ConstPool[nameIndex].Info))
 	case ast.VariableTypeFloat:
-		return float32(binary.BigEndian.Uint32(c.ConstPool[nameIndex].Info))
+		return float(binary.BigEndian.Uint32(c.ConstPool[nameIndex].Info))
 	case ast.VariableTypeDouble:
-		return float64(binary.BigEndian.Uint64(c.ConstPool[nameIndex].Info))
+		return double(binary.BigEndian.Uint64(c.ConstPool[nameIndex].Info))
 	case ast.VariableTypeString:
 		valueIndex := binary.BigEndian.Uint16(c.ConstPool[nameIndex].Info)
 		return string(c.ConstPool[valueIndex].Info)
@@ -397,7 +397,7 @@ func (this *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error 
 		name := string(c.ConstPool[f.NameIndex].Info)
 		constValue := f.AttributeGroupedByName.GetByName(cg.AttributeNameConstValue)
 		if len(constValue) > 1 {
-			return fmt.Errorf("constant value length greater than  1 at class 'main'  field '%s'", name)
+			return new error(sprintf("constant value length greater than  1 at class 'main'  field '%s'", name)
 		}
 		_, typ, err := jvm.Descriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
 		if err != nil {
@@ -563,21 +563,21 @@ func (this *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 
 	_, ok := fisM[mainClassName]
 	if ok == false {
-		return nil, fmt.Errorf("main class not found")
+		return nil, new error(sprintf("main class not found")
 	}
 	bs, err := ioutil.ReadFile(filepath.Join(r.realPath, mainClassName))
 	if err != nil {
-		return nil, fmt.Errorf("read main.class failed,err:%v", err)
+		return nil, new error(sprintf("read main.class failed,err:%v", err)
 	}
 	c, err := (&ClassDecoder{}).decode(bs)
 	if err != nil {
-		return nil, fmt.Errorf("decode main class failed,err:%v", err)
+		return nil, new error(sprintf("decode main class failed,err:%v", err)
 	}
 	p := &ast.Package{}
 	p.Name = r.name
 	err = this.loadLucyMainClass(p, c)
 	if err != nil {
-		return nil, fmt.Errorf("parse main class failed,err:%v", err)
+		return nil, new error(sprintf("parse main class failed,err:%v", err)
 	}
 
 	delete(fisM, mainClassName)
@@ -596,11 +596,11 @@ func (this *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 	for _, v := range fisM {
 		bs, err := ioutil.ReadFile(filepath.Join(r.realPath, v.Name()))
 		if err != nil {
-			return p, fmt.Errorf("read class failed,err:%v", err)
+			return p, new error(sprintf("read class failed,err:%v", err)
 		}
 		c, err := (&ClassDecoder{}).decode(bs)
 		if err != nil {
-			return nil, fmt.Errorf("decode class failed,err:%v", err)
+			return nil, new error(sprintf("decode class failed,err:%v", err)
 		}
 		if len(c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyEnum)) > 0 {
 			e, err := this.loadLucyEnum(c)
@@ -612,7 +612,7 @@ func (this *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 		}
 		class, err := this.loadAsLucy(c)
 		if err != nil {
-			return nil, fmt.Errorf("decode class failed,err:%v", err)
+			return nil, new error(sprintf("decode class failed,err:%v", err)
 		}
 		if class != nil {
 			if p.Block.Classes == nil {

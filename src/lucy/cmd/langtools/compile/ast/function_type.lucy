@@ -1,7 +1,7 @@
  
 class FunctionType {
 	TemplateNames    []NameWithPos
-	TemplateNamesMap map[string]Pos
+	TemplateNamesMap map { string -> Pos }
 	ParameterList    []Variable
 	ReturnList       []Variable
 	VArgs            Variable
@@ -12,10 +12,10 @@ class FunctionType {
 		for _, v := range this.TemplateNames {
 			if p := m[v.Name]; p != null {
 				errMsg :=
-					fmt.Sprintf("%s duplicated name '%s' , first declaraed at:\n",
+					sprintf("%s duplicated name '%s' , first declaraed at:\n",
 						v.Pos.ErrMsgPrefix(), v.Name)
-				errMsg += fmt.Sprintf("\t%s\n", p.ErrMsgPrefix())
-				errs = append(errs, errors.New(errMsg))
+				errMsg += sprintf("\t%s\n", p.ErrMsgPrefix())
+				errs.append( new error(errMsg))
 				continue
 			}
 			m[v.Name] = v.Pos
@@ -29,16 +29,17 @@ class FunctionType {
 
 	fn Clone() -> (ret FunctionType) {
 		ret = new FunctionType()
-		ret.ParameterList = make(ParameterList, len(this.ParameterList))
+		ret.ParameterList = new []Variable(len(this.ParameterList))
 		for k, _ := range ret.ParameterList {
-			p := &Variable{}
+			p := new Variable()
+			//TODO :: clone
 			p.Type = this.ParameterList[k].Type.Clone()
 			ret.ParameterList[k] = p
 		}
-		ret.ReturnList = make(ReturnList, len(this.ReturnList))
+		ret.ReturnList = new []Variable(len(this.ReturnList))
 		for k, _ := range ret.ReturnList {
-			p := &Variable{}
-			*p = *this.ReturnList[k]
+			p := new Variable()
+			//TODO :: clone
 			p.Type = this.ReturnList[k].Type.Clone()
 			ret.ReturnList[k] = p
 		}
@@ -172,7 +173,7 @@ class FunctionType {
 	}
 
 	fn getParameterTypes() ->(patameterTypes []Type) {
-		ret := make([]Type, len(this.ParameterList))
+		ret := new []Type(len(this.ParameterList))
 		for k, v := range this.ParameterList {
 			ret[k] = v.Type
 		}
@@ -194,21 +195,21 @@ class FunctionType {
 		callArgsTypes []Type,
 		f Function) -> (vArgs CallVariableArgs, err error) {
 		if this.VArgs != null {
-			vArgs = &CallVariableArgs{}
+			vArgs = new CallVariableArgs()
 			vArgs.NoArgs = true
 			vArgs.Type = this.VArgs.Type
 		}
 		var haveAndWant string
 		if this.callArgsHasNoNil(callArgsTypes) {
-			haveAndWant = fmt.Sprintf("\thave %s\n", this.callHave(callArgsTypes))
-			haveAndWant += fmt.Sprintf("\twant %s\n", this.wantArgs())
+			haveAndWant = sprintf("\thave %s\n", this.callHave(callArgsTypes))
+			haveAndWant += sprintf("\twant %s\n", this.wantArgs())
 		}
 		errs := []error{}
 		if len(callArgsTypes) > len(this.ParameterList) {
 			if this.VArgs == null {
-				errMsg := fmt.Sprintf("%s too many paramaters to call\n", errMsgPrefix(from))
+				errMsg := sprintf("%s too many paramaters to call\n", errMsgPrefix(from))
 				errMsg += haveAndWant
-				err = fmt.Errorf(errMsg)
+				err = new error(sprintf(errMsg))
 				return
 			}
 			v := this.VArgs
@@ -218,58 +219,57 @@ class FunctionType {
 				}
 				if t.IsVariableArgs {
 					if len(callArgsTypes[len(this.ParameterList):]) > 1 {
-						errMsg := fmt.Sprintf("%s too many argument to call\n",
+						errMsg := sprintf("%s too many argument to call\n",
 							errMsgPrefix(t.Pos))
 						errMsg += haveAndWant
-						err = fmt.Errorf(errMsg)
+						err = new error(sprintf(errMsg))
 						return
 					}
-					if false == v.Type.assignAble(&errs, t) {
-						err = fmt.Errorf("%s cannot use '%s' as '%s'",
+					if false == v.Type.assignAble(errs, t) {
+						err = new error(sprintf("%s cannot use '%s' as '%s'",
 							errMsgPrefix(t.Pos),
-							t.TypeString(), v.Type.TypeString())
+							t.TypeString(), v.Type.TypeString()))
 						return
 					}
 					vArgs.PackArray2VArgs = true
 					continue
 				}
-				if false == v.Type.Array.assignAble(&errs, t) {
-					err = fmt.Errorf("%s cannot use '%s' as '%s'",
+				if false == v.Type.Array.assignAble(errs, t) {
+					err = new error(sprintf("%s cannot use '%s' as '%s'",
 						errMsgPrefix(t.Pos),
-						t.TypeString(), v.Type.TypeString())
+						t.TypeString(), v.Type.TypeString()))
 					return
 				}
 			}
 			vArgs.NoArgs = false
 			k := len(this.ParameterList)
 			vArgs.Length = len(callArgsTypes) - k
-			vArgs.Expressions = (*args)[k:]
-			*args = (*args)[:k]
+			vArgs.Expressions = args[k:]
 			vArgs.Length = len(callArgsTypes) - k
 		}
 		if len(callArgsTypes) < len(this.ParameterList) {
 			if f != null && f.HaveDefaultValue && len(callArgsTypes) >= f.DefaultValueStartAt {
 				for i := len(callArgsTypes); i < len(f.Type.ParameterList); i++ {
-					*args = append(*args, f.Type.ParameterList[i].DefaultValueExpression)
+					args.append(f.Type.ParameterList[i].DefaultValueExpression)
 				}
 			} else { // no default value
-				errMsg := fmt.Sprintf("%s too few paramaters to call\n", errMsgPrefix(from))
+				errMsg := sprintf("%s too few paramaters to call\n", errMsgPrefix(from))
 				errMsg += haveAndWant
-				err = fmt.Errorf(errMsg)
+				err = new error(sprintf(errMsg))
 				return
 			}
 		}
 
 		for k, v := range this.ParameterList {
 			if k < len(callArgsTypes) && callArgsTypes[k] != null {
-				if v.Type.assignAble(&errs, callArgsTypes[k]) {
+				if v.Type.assignAble(errs, callArgsTypes[k]) {
 					continue
 				}
 				//TODO :: convert or not ???
-				errMsg := fmt.Sprintf("%s cannot use '%s' as '%s'",
+				errMsg := sprintf("%s cannot use '%s' as '%s'",
 					errMsgPrefix(callArgsTypes[k].Pos),
 					callArgsTypes[k].TypeString(), v.Type.TypeString())
-				err = fmt.Errorf(errMsg)
+				err = new error(sprintf(errMsg))
 				return
 			}
 		}

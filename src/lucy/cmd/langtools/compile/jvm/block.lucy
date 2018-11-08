@@ -7,11 +7,11 @@ import (
 )
 
 func (this *BuildPackage) buildBlock(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
 	b *ast.Block,
-	context *Context,
-	state *StackMapState) {
+	context Context,
+	state StackMapState) {
 	notToHere := false
 	for _, s := range b.Statements {
 		if notToHere == true && s.Type == ast.StatementTypeLabel {
@@ -37,7 +37,7 @@ func (this *BuildPackage) buildBlock(
 				ss = append(ss, v.ToString())
 			}
 			fmt.Println("stacks:", ss)
-			panic(fmt.Sprintf("stack is not empty:%d", len(state.Stacks)))
+			panic(sprintf("stack is not empty:%d", len(state.Stacks)))
 		}
 		//unCondition goto
 		if this.statementIsUnConditionJump(s) {

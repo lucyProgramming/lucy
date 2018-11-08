@@ -6,11 +6,11 @@ import (
 )
 
 func (this *BuildExpression) buildMethodCall(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	if call.FieldMethodHandler != nil {
 		return this.buildMethodCallOnFieldHandler(class, code, e, context, state)
@@ -106,11 +106,11 @@ func (this *BuildExpression) buildMethodCall(
 	return
 }
 func (this *BuildExpression) buildMethodCallOnFieldHandler(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	if call.FieldMethodHandler.IsStatic() == false {
 		stack := this.build(class, code, call.Expression, context, state)
@@ -149,8 +149,8 @@ func (this *BuildExpression) buildMethodCallOnFieldHandler(
 	}
 	return
 }
-func (this *BuildExpression) buildMethodCallOnDynamicSelector(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (this *BuildExpression) buildMethodCallOnDynamicSelector(class cg.ClassHighLevel, code cg.AttributeCode,
+	e ast.Expression, context Context, state StackMapState) (maxStack char) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	if call.FieldMethodHandler != nil {
 		if call.FieldMethodHandler.IsStatic() == false {
@@ -189,7 +189,7 @@ func (this *BuildExpression) buildMethodCallOnDynamicSelector(class *cg.ClassHig
 			maxStack = t
 		}
 	} else {
-		currentStack := uint16(0)
+		currentStack := char(0)
 		if call.Method.IsStatic() == false {
 			code.Codes[code.CodeLength] = cg.OP_aload_0
 			code.CodeLength++
@@ -221,8 +221,8 @@ func (this *BuildExpression) buildMethodCallOnDynamicSelector(class *cg.ClassHig
 	}
 	return
 }
-func (this *BuildExpression) buildMethodCallOnPackage(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
+func (this *BuildExpression) buildMethodCallOnPackage(class cg.ClassHighLevel, code cg.AttributeCode,
+	e ast.Expression, context Context, state StackMapState) (maxStack char) {
 	call := e.Data.(*ast.ExpressionMethodCall)
 	if call.PackageFunction != nil {
 		stack := this.buildCallArgs(class, code, call.Args, call.VArgs, context, state)

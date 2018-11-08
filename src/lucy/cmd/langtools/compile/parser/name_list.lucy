@@ -9,9 +9,9 @@ import (
 //at least one name
 func (this *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
 	if this.token.Type != lex.TokenIdentifier {
-		err = fmt.Errorf("%s expect identifier,but '%s'",
+		err = new error(sprintf("%s expect identifier,but '%s'",
 			this.errMsgPrefix(), this.token.Description)
-		this.errs = append(this.errs, err)
+		this.errs = append(this.errs, err))
 		return nil, err
 	}
 	names = []*ast.NameWithPos{}
@@ -27,8 +27,8 @@ func (this *Parser) parseNameList() (names []*ast.NameWithPos, err error) {
 		} else {
 			this.Next(lfNotToken) // skip comma
 			if this.token.Type != lex.TokenIdentifier {
-				err = fmt.Errorf("%s not a 'identifier' after a comma,but '%s'",
-					this.errMsgPrefix(), this.token.Description)
+				err = new error(sprintf("%s not a 'identifier' after a comma,but '%s'",
+					this.errMsgPrefix(), this.token.Description))
 				this.errs = append(this.errs, err)
 				return names, err
 			}

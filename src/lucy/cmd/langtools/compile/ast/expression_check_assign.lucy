@@ -2,7 +2,7 @@ class ExpressionCheckAssign {
 		
 	static fn check(e Expression , block Block, errs []error) ->(valueType Type)  {
 		bin := e.Data.(ExpressionBinary)
-		lefts := make([]Expression, 1)
+		lefts := new []Expression(1)
 		if bin.Left.Type == ExpressionTypeList {
 			lefts = bin.Left.Data.([]Expression)
 		} else {
@@ -16,10 +16,10 @@ class ExpressionCheckAssign {
 		leftTypes := []Type{}
 		for _, v := range lefts {
 			if v.IsIdentifier(UnderScore) {
-				leftTypes = append(leftTypes, null) // this is no assign situation
+				leftTypes.append(null) // this is no assign situation
 			} else {
 				t := v.getLeftValue(block, errs)
-				leftTypes = append(leftTypes, t) // append even if it`s null
+				leftTypes.append(t) // append even if it`s null
 			}
 		}
 		convertExpressionsToNeeds(values, leftTypes, valueTypes)
@@ -53,10 +53,9 @@ class ExpressionCheckAssign {
 					valueTypes[k].TypeString(), leftTypes[k].TypeString())))
 			}
 		}
-		e.Data = &ExpressionAssign{
-			Lefts:  lefts,
-			Values: values,
-		}
+		e.Data = new ExpressionAssign()
+		e.Data.Lefts = lefts
+		e.Data.Values = values
 		voidReturn := mkVoidType(e.Pos)
 		if len(lefts) > 1 {
 			return voidReturn

@@ -20,14 +20,14 @@ func (this *BlockParser) parseWhen() (*ast.StatementWhen, error) {
 	when.Condition = condition
 	this.parser.ifTokenIsLfThenSkip()
 	if this.parser.token.Type != lex.TokenLc {
-		err = fmt.Errorf("%s expect '{',but '%s'",
+		err = new error(sprintf("%s expect '{',but '%s'",
 			this.parser.errMsgPrefix(), this.parser.token.Description)
 		this.parser.errs = append(this.parser.errs, err)
 		this.consume(untilLc)
 	}
 	this.Next(lfNotToken) // skip {  , must be case
 	if this.parser.token.Type != lex.TokenCase {
-		err = fmt.Errorf("%s expect 'case',but '%s'",
+		err = new error(sprintf("%s expect 'case',but '%s'",
 			this.parser.errMsgPrefix(), this.parser.token.Description)
 		this.parser.errs = append(this.parser.errs, err)
 		return nil, err
@@ -43,7 +43,7 @@ func (this *BlockParser) parseWhen() (*ast.StatementWhen, error) {
 		}
 		this.parser.unExpectNewLineAndSkip()
 		if this.parser.token.Type != lex.TokenColon {
-			err = fmt.Errorf("%s expect ':',but '%s'",
+			err = new error(sprintf("%s expect ':',but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.Description)
 			this.parser.errs = append(this.parser.errs, err)
 			return when, err
@@ -69,7 +69,7 @@ func (this *BlockParser) parseWhen() (*ast.StatementWhen, error) {
 		this.Next(lfIsToken) // skip default key word
 		this.parser.unExpectNewLineAndSkip()
 		if this.parser.token.Type != lex.TokenColon {
-			err = fmt.Errorf("%s missing colon after default",
+			err = new error(sprintf("%s missing colon after default",
 				this.parser.errMsgPrefix())
 			this.parser.errs = append(this.parser.errs, err)
 		} else {
@@ -84,7 +84,7 @@ func (this *BlockParser) parseWhen() (*ast.StatementWhen, error) {
 		}
 	}
 	if this.parser.token.Type != lex.TokenRc {
-		err = fmt.Errorf("%s expect '}',but '%s'",
+		err = new error(sprintf("%s expect '}',but '%s'",
 			this.parser.errMsgPrefix(), this.parser.token.Description)
 		this.parser.errs = append(this.parser.errs, err)
 		return when, err

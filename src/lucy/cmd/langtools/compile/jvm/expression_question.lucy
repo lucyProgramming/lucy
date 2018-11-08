@@ -6,11 +6,11 @@ import (
 )
 
 func (this *BuildExpression) buildQuestion(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	question := e.Data.(*ast.ExpressionQuestion)
 	maxStack = this.build(class, code, question.Selection, context, state)
 	falseExit := (&cg.Exit{}).Init(cg.OP_ifeq, code)

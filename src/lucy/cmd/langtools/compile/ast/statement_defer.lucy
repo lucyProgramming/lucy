@@ -1,4 +1,4 @@
- 
+import "java/lang/Object"
 
 class StatementDefer {
 	Pos            Pos

@@ -35,7 +35,7 @@ class ExprssionCheckArray {
 			}
 			if noType && arr.Type == null {
 				if err := eType.isTyped(); err == null {
-					arr.Type = &Type{}
+					arr.Type = new Type()
 					arr.Type.Type = VariableTypeArray
 					arr.Type.Array = eType.Clone()
 					arr.Type.Pos = e.Pos

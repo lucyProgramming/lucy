@@ -1,26 +1,28 @@
- 
+class ExpressionSelectConst {
 
-func (e *Expression) checkSelectConstExpression(block *Block, errs *[]error) *Type {
-	selection := e.Data.(*ExpressionSelection)
-	object, es := selection.Expression.checkSingleValueContextExpression(block)
-	errs.appendAll(es)
-	if object == null {
-		return null
+	static fn check(e Expression , block Block, errs []error) ->(valueType Type) {
+		selection := e.Data.(ExpressionSelection)
+		object, es := selection.Expression.checkSingleValueContextExpression(block)
+		errs.appendAll(es)
+		if object == null {
+			return null
+		}
+		if object.Type != VariableTypeClass {
+			errs.append(new error(sprintf("%s not a class , but '%s'",
+				object.Pos.ErrMsgPrefix(), object.TypeString())))
+			return null
+		}
+		if object.Class.Block.Constants == null ||
+			object.Class.Block.Constants[selection.Name] == null {
+			errs.append(new error(sprintf("%s const '%s' not found",
+				e.Pos.ErrMsgPrefix(), selection.Name)))
+			return null
+		}
+		c := object.Class.Block.Constants[selection.Name]
+		e.fromConst(c)
+		valueType = c.Type.Clone()
+		valueType.Pos = e.Pos
 	}
-	if object.Type != VariableTypeClass {
-		*errs = append(*errs, fmt.Errorf("%s not a class , but '%s'",
-			object.Pos.ErrMsgPrefix(), object.TypeString()))
-		return null
-	}
-	if object.Class.Block.Constants == null ||
-		object.Class.Block.Constants[selection.Name] == null {
-		*errs = append(*errs, fmt.Errorf("%s const '%s' not found",
-			e.Pos.ErrMsgPrefix(), selection.Name))
-		return null
-	}
-	c := object.Class.Block.Constants[selection.Name]
-	e.fromConst(c)
-	result := c.Type.Clone()
-	result.Pos = e.Pos
-	return result
-}
+	
+} 
+

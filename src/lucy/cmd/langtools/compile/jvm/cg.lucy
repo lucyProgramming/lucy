@@ -11,8 +11,8 @@ import (
 
 type BuildPackage struct {
 	Package         *ast.Package
-	classes         map[string]*cg.ClassHighLevel
-	mainClass       *cg.ClassHighLevel
+	classes         map[string]cg.ClassHighLevel
+	mainClass       cg.ClassHighLevel
 	BuildExpression BuildExpression
 }
 
@@ -34,7 +34,7 @@ func (this *BuildPackage) Make(p *ast.Package) {
 	mainClass.Fields = make(map[string]*cg.FieldHighLevel)
 	this.mkClassDefaultConstruction(this.mainClass)
 	this.BuildExpression.BuildPackage = this
-	this.classes = make(map[string]*cg.ClassHighLevel)
+	this.classes = make(map[string]cg.ClassHighLevel)
 	this.mkGlobalConstants()
 	this.mkGlobalTypeAlias()
 	this.mkGlobalVariables()
@@ -48,7 +48,7 @@ func (this *BuildPackage) Make(p *ast.Package) {
 	}
 	err := this.DumpClass()
 	if err != nil {
-		panic(fmt.Sprintf("dump to file failed,err:%v\n", err))
+		panic(sprintf("dump to file failed,err:%v\n", err))
 	}
 }
 
@@ -58,7 +58,7 @@ func (this *BuildPackage) newClassName(prefix string) (autoName string) {
 			//use prefix only
 			autoName = prefix
 		} else {
-			autoName = fmt.Sprintf("%s$%d", prefix, i)
+			autoName = sprintf("%s$%d", prefix, i)
 		}
 		if _, exists := this.Package.Block.NameExists(autoName); exists {
 			continue
@@ -73,7 +73,7 @@ func (this *BuildPackage) newClassName(prefix string) (autoName string) {
 	panic("new class name overflow") // impossible
 }
 
-func (this *BuildPackage) putClass(class *cg.ClassHighLevel) {
+func (this *BuildPackage) putClass(class cg.ClassHighLevel) {
 	if class.Name == "" {
 		panic("missing name")
 	}
@@ -82,15 +82,15 @@ func (this *BuildPackage) putClass(class *cg.ClassHighLevel) {
 		panic("cannot have main class`s name")
 	}
 	if this.classes == nil {
-		this.classes = make(map[string]*cg.ClassHighLevel)
+		this.classes = make(map[string]cg.ClassHighLevel)
 	}
 	if _, ok := this.classes[name]; ok {
-		panic(fmt.Sprintf("name:'%s' already been token", name))
+		panic(sprintf("name:'%s' already been token", name))
 	}
 	this.classes[name] = class
 }
 
-func (this *BuildPackage) mkEnum(e *ast.Enum) *cg.ClassHighLevel {
+func (this *BuildPackage) mkEnum(e *ast.Enum) cg.ClassHighLevel {
 	class := &cg.ClassHighLevel{}
 	class.Name = e.Name
 	class.InsertSourceFile(e.Pos.Filename)
@@ -262,7 +262,7 @@ func (this *BuildPackage) mkInitFunctions() {
 	this.mainClass.TriggerPackageInitMethod = trigger
 }
 
-func (this *BuildPackage) insertDefaultValue(c *cg.ClassHighLevel, t *ast.Type, v interface{}) (index uint16) {
+func (this *BuildPackage) insertDefaultValue(c cg.ClassHighLevel, t *ast.Type, v interface{}) (index char) {
 	switch t.Type {
 	case ast.VariableTypeBool:
 		if v.(bool) {
@@ -271,19 +271,19 @@ func (this *BuildPackage) insertDefaultValue(c *cg.ClassHighLevel, t *ast.Type, 
 			index = c.Class.InsertIntConst(0)
 		}
 	case ast.VariableTypeByte:
-		index = c.Class.InsertIntConst(int32(v.(int64)))
+		index = c.Class.InsertIntConst(int(v.(long)))
 	case ast.VariableTypeShort:
-		index = c.Class.InsertIntConst(int32(v.(int64)))
+		index = c.Class.InsertIntConst(int(v.(long)))
 	case ast.VariableTypeChar:
-		index = c.Class.InsertIntConst(int32(v.(int64)))
+		index = c.Class.InsertIntConst(int(v.(long)))
 	case ast.VariableTypeInt:
-		index = c.Class.InsertIntConst(int32(v.(int64)))
+		index = c.Class.InsertIntConst(int(v.(long)))
 	case ast.VariableTypeLong:
-		index = c.Class.InsertLongConst(v.(int64))
+		index = c.Class.InsertLongConst(v.(long))
 	case ast.VariableTypeFloat:
-		index = c.Class.InsertFloatConst(v.(float32))
+		index = c.Class.InsertFloatConst(v.(float))
 	case ast.VariableTypeDouble:
-		index = c.Class.InsertDoubleConst(v.(float64))
+		index = c.Class.InsertDoubleConst(v.(double))
 	case ast.VariableTypeString:
 		index = c.Class.InsertStringConst(v.(string))
 	default:
@@ -292,7 +292,7 @@ func (this *BuildPackage) insertDefaultValue(c *cg.ClassHighLevel, t *ast.Type, 
 	return
 }
 
-func (this *BuildPackage) buildClass(astClass *ast.Class) *cg.ClassHighLevel {
+func (this *BuildPackage) buildClass(astClass *ast.Class) cg.ClassHighLevel {
 	class := &cg.ClassHighLevel{}
 	class.Name = astClass.Name
 	class.InsertSourceFile(astClass.Pos.Filename)
@@ -377,8 +377,8 @@ func (this *BuildPackage) mkGlobalFunctions() {
 				&cg.AttributeTemplateFunction{
 					Name:        f.Name,
 					Filename:    f.Pos.Filename,
-					StartLine:   uint16(f.Pos.Line),
-					StartColumn: uint16(f.Pos.Column),
+					StartLine:   char(f.Pos.Line),
+					StartColumn: char(f.Pos.Column),
 					Code:        string(f.SourceCode),
 				})
 			continue
@@ -450,7 +450,7 @@ func (this *BuildPackage) DumpClass() error {
 /*
 	make_node_objects a default construction
 */
-func (this *BuildPackage) mkClassDefaultConstruction(class *cg.ClassHighLevel) {
+func (this *BuildPackage) mkClassDefaultConstruction(class cg.ClassHighLevel) {
 	method := &cg.MethodHighLevel{}
 	method.Name = specialMethodInit
 	method.Descriptor = "()V"
@@ -471,7 +471,7 @@ func (this *BuildPackage) mkClassDefaultConstruction(class *cg.ClassHighLevel) {
 	class.AppendMethod(method)
 }
 
-func (this *BuildPackage) storeGlobalVariable(class *cg.ClassHighLevel, code *cg.AttributeCode,
+func (this *BuildPackage) storeGlobalVariable(class cg.ClassHighLevel, code cg.AttributeCode,
 	v *ast.Variable) {
 	code.Codes[code.CodeLength] = cg.OP_putstatic
 	if v.JvmDescriptor == "" {

@@ -6,13 +6,13 @@ import (
 )
 
 func (this *BuildExpression) mkBuildInAssert(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	length := int32(len(call.Args))
+	length := int(len(call.Args))
 	lengthOffset := code.MaxLocals
 	code.MaxLocals++
 	state.appendLocals(class, &ast.Type{

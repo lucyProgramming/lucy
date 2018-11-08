@@ -6,11 +6,11 @@ import (
 )
 
 func (this *BuildPackage) buildIfStatement(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
 	s *ast.StatementIf,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	context Context,
+	state StackMapState) (maxStack char) {
 	ifState := (&StackMapState{}).initFromLast(state)
 	defer state.addTop(ifState)
 	for _, v := range s.PrefixExpressions {

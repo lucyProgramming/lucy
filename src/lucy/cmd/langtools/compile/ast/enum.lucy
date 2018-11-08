@@ -1,9 +1,10 @@
- 
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 class EnumName {
 	Enum    Enum
 	Name    string
 	Pos     Pos
-	Value   int32 // int32 is bigger enough
+	Value   int // int is bigger enough
 	Comment string
 	NoNeed  Expression
 }
@@ -12,13 +13,13 @@ class EnumName {
 class Enum   {
 	IsGlobal        bool
 	IsBuildIn       bool
-	AccessFlags     uint16
+	AccessFlags     char
 	Name            string
 	Pos             Pos
 	Enums           []EnumName
 	Init            Expression //should be a int expression
 	Used            bool
-	DefaultValue    int32
+	DefaultValue    int
 	LoadFromOutSide bool
 	FirstValueIndex int
 	Comment         string
@@ -28,9 +29,8 @@ class Enum   {
 	}
 
 	
-
 	fn check() -> (errs []error = []error{}) {
-		var initV int32 = 0
+		var initV int = 0
 		if this.Init != null {
 			if is, err := this.Init.constantFold(); err != null {
 				errs.append(err)
@@ -40,7 +40,7 @@ class Enum   {
 						this.Pos.ErrMsgPrefix()))
 					errs.append(err)
 				} else {
-					initV = int32(this.Init.getLongValue())
+					initV = int(this.Init.getLongValue())
 				}
 			}
 		}
@@ -51,9 +51,9 @@ class Enum   {
 					v.Pos.ErrMsgPrefix())))
 			}
 			if k < this.FirstValueIndex {
-				v.Value = initV - int32(this.FirstValueIndex-k)
+				v.Value = initV - int(this.FirstValueIndex-k)
 			} else {
-				v.Value = initV + int32(k-this.FirstValueIndex)
+				v.Value = initV + int(k-this.FirstValueIndex)
 			}
 		}
 		return errs

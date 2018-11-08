@@ -8,18 +8,28 @@ public class Variable {
 	BeenCapturedAsLeftValue  int
 	BeenCapturedAsRightValue int
 	Used                     bool   // use as right value
-	AccessFlags              uint16 // public private or protected
+	AccessFlags              char // public private or protected
 	Pos                      Pos
 	DefaultValueExpression   Expression
 	Name                     string
 	Type                     Type
-	LocalValOffset           uint16 // offset in stack frame
+	LocalValOffset           char // offset in stack frame
 	JvmDescriptor            string // jvm
 	Comment                  string
 
 	fn isPublic() -> (is bool) {
 		return this.AccessFlags&
 			cg.AccFieldPublic != 0
+	}
+	fn cp(v Variable){
+		v.IsBuildIn = this.IsBuildIn
+		v.IsGlobal = this.IsGlobal
+		v.IsFunctionParameter = this.IsFunctionParameter
+		v.IsReturn = this.IsReturn
+		v.Name = this.Name
+		v.Type = this.Type.Clone()
+		v.Comment = this.Comment
+
 	}
 }
 

@@ -6,17 +6,17 @@ import (
 )
 
 func (this *BuildExpression) buildTypeConversion(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
 	conversion := e.Data.(*ast.ExpressionTypeConversion)
-	currentStack := uint16(0)
+	currentStack := char(0)
 	// []byte("aaaaaaaaaaaa")
 	if conversion.Type.Equal(ast.LucyBytesType) {
 		currentStack = 2
@@ -26,7 +26,7 @@ func (this *BuildExpression) buildTypeConversion(
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		t := &cg.StackMapVerificationTypeInfo{}
 		t.Verify = &cg.StackMapUninitializedVariableInfo{
-			CodeOffset: uint16(code.CodeLength),
+			CodeOffset: char(code.CodeLength),
 		}
 		state.Stacks = append(state.Stacks, t, t)
 		code.CodeLength += 4
@@ -42,7 +42,7 @@ func (this *BuildExpression) buildTypeConversion(
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		t := &cg.StackMapVerificationTypeInfo{}
 		t.Verify = &cg.StackMapUninitializedVariableInfo{
-			CodeOffset: uint16(code.CodeLength),
+			CodeOffset: char(code.CodeLength),
 		}
 		state.Stacks = append(state.Stacks, t, t)
 		code.CodeLength += 4
@@ -148,8 +148,8 @@ func (this *BuildExpression) buildTypeConversion(
 	if conversion.Type.Type == ast.VariableTypeString &&
 		conversion.Expression.Value.Equal(ast.LucyBytesType) {
 		type autoVar struct {
-			start  uint16
-			length uint16
+			start  char
+			length char
 		}
 		var a autoVar
 		a.start = code.MaxLocals

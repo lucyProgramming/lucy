@@ -6,11 +6,11 @@ import (
 )
 
 func (this *BuildExpression) buildArray(
-	class *cg.ClassHighLevel,
-	code *cg.AttributeCode,
-	e *ast.Expression,
-	context *Context,
-	state *StackMapState) (maxStack uint16) {
+	class cg.ClassHighLevel,
+	code cg.AttributeCode,
+	e ast.Expression,
+	context Context,
+	state StackMapState) (maxStack char) {
 	length := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - length)
@@ -25,11 +25,11 @@ func (this *BuildExpression) buildArray(
 	{
 		verify := &cg.StackMapVerificationTypeInfo{}
 		unInit := &cg.StackMapUninitializedVariableInfo{}
-		unInit.CodeOffset = uint16(code.CodeLength - 4)
+		unInit.CodeOffset = char(code.CodeLength - 4)
 		verify.Verify = unInit
 		state.Stacks = append(state.Stacks, verify, verify)
 	}
-	loadInt32(class, code, int32(len(arr.Expressions)))
+	loadInt32(class, code, int(len(arr.Expressions)))
 	newArrayBaseOnType(class, code, e.Value.Array)
 	arrayObject := &ast.Type{
 		Type:  ast.VariableTypeJavaArray,
@@ -38,7 +38,7 @@ func (this *BuildExpression) buildArray(
 	state.pushStack(class, arrayObject)
 	maxStack = 3
 	storeOP := storeArrayElementOp(e.Value.Array.Type)
-	var index int32 = 0
+	var index int = 0
 	for _, v := range arr.Expressions {
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++

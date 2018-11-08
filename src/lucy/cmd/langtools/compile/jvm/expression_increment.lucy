@@ -5,9 +5,9 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
 )
 
-func (this *BuildExpression) buildSelfIncrement(class *cg.ClassHighLevel, code *cg.AttributeCode,
-	e *ast.Expression, context *Context, state *StackMapState) (maxStack uint16) {
-	increment := e.Data.(*ast.Expression)
+func (this *BuildExpression) buildSelfIncrement(class cg.ClassHighLevel, code cg.AttributeCode,
+	e ast.Expression, context Context, state StackMapState) (maxStack char) {
+	increment := e.Data.(ast.Expression)
 	// identifier  and not captured and type`s int
 	if identifier, ok := increment.Data.(*ast.ExpressionIdentifier); ok &&
 		increment.Type == ast.ExpressionTypeIdentifier &&

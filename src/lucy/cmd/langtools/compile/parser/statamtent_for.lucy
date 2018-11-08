@@ -34,7 +34,7 @@ func (this *BlockParser) parseFor() (statementFor *ast.StatementFor, err error) 
 				goto parseBlock
 			}
 			if this.parser.token.Type != lex.TokenSemicolon {
-				this.parser.errs = append(this.parser.errs, fmt.Errorf("%s missing semicolon after expression",
+				this.parser.errs = append(this.parser.errs, new error(sprintf("%s missing semicolon after expression",
 					this.parser.errMsgPrefix()))
 				this.consume(untilLc)
 				goto parseBlock
@@ -53,7 +53,7 @@ func (this *BlockParser) parseFor() (statementFor *ast.StatementFor, err error) 
 parseBlock:
 	this.parser.ifTokenIsLfThenSkip()
 	if this.parser.token.Type != lex.TokenLc {
-		err = fmt.Errorf("%s expect '{',but '%s'",
+		err = new error(sprintf("%s expect '{',but '%s'",
 			this.parser.errMsgPrefix(), this.parser.token.Description)
 		this.parser.errs = append(this.parser.errs, err)
 		return
@@ -61,7 +61,7 @@ parseBlock:
 	this.Next(lfNotToken) // skip {
 	this.parseStatementList(statementFor.Block, false)
 	if this.parser.token.Type != lex.TokenRc {
-		this.parser.errs = append(this.parser.errs, fmt.Errorf("%s expect '}', but '%s'",
+		this.parser.errs = append(this.parser.errs, new error(sprintf("%s expect '}', but '%s'",
 			this.parser.errMsgPrefix(), this.parser.token.Description))
 		this.consume(untilRc)
 	}
