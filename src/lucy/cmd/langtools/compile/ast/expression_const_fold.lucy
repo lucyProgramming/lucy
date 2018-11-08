@@ -25,11 +25,6 @@ class ExpressionConstFold {
 		return folder(bin)
 	}
 
-
-
-	 
-
-
 	static fn constantFold(e Expression) -> (is bool, err error) {
 		if e.isLiteral() {
 			return true, null
@@ -63,11 +58,7 @@ class ExpressionConstFold {
 				return
 			}
 			e.Type = ExpressionTypeBool
-			if ee.longValue == 1 {
-			    e.longValue = 0
-			}else {
-			    e.longValue = 1
-			}
+			e.boolValue = !ee.boolValue
 			return
 		}
 		// -
@@ -113,9 +104,9 @@ class ExpressionConstFold {
 				}
 				is = true
 				if e.Type == ExpressionTypeLogicalAnd {
-					e.longValue = (bin.Left.longValue == 1 && bin.Right.longValue == 1) ? 1L : 0L
+					e.boolValue = bin.Left.boolValue && bin.Right.boolValue 
 				} else {
-					e.longValue = (bin.Left.longValue == 1  || bin.Right.longValue == 1 ) ? 1L : 0L
+					e.boolValue = bin.Left.boolValue || bin.Right.boolValue
 				}
 				e.Type = ExpressionTypeBool
 				return
@@ -205,7 +196,7 @@ class ExpressionConstFold {
 			}
 			is = true
 			e.Type = ExpressionTypeBool
-			e.Data = !ee.Data.(bool)
+			e.Data = !ee.boolValue
 			return
 		}
 		//  == != > < >= <=
@@ -316,9 +307,9 @@ class ExpressionConstFold {
 			bin.Right.Type == ExpressionTypeBool &&
 			e.isEqOrNe() {
 			if e.Type == ExpressionTypeEq {
-				e.longValue = (bin.Left.longValue == bin.Right.longValue) ? 1 : 0
+				e.boolValue = bin.Left.boolValue == bin.Right.boolValue 
 			} else {
-				e.longValue = (bin.Left.longValue != bin.Right.longValue) ? 1 : 0
+				e.boolValue = bin.Left.boolValue != bin.Right.boolValue 
 			}
 			e.Type = ExpressionTypeBool
 			return
@@ -330,26 +321,20 @@ class ExpressionConstFold {
 		case ExpressionTypeString:
 			left := bin.Left.Data.(string)
 			right := bin.Right.Data.(string)
-			var b bool
 			switch e.Type {
 			case ExpressionTypeEq:
-				b = left == right
+				e.boolValue = left == right
 			case ExpressionTypeNe:
-				b = left != right
+				e.boolValue = left != right
 			case ExpressionTypeGe:
-				b = left >= right
+				e.boolValue = left >= right
 			case ExpressionTypeGt:
-				b = left > right
+				e.boolValue = left > right
 			case ExpressionTypeLe:
-				b = left <= right
+				e.boolValue = left <= right
 			case ExpressionTypeLt:
-				b = left < right
+				e.boolValue = left < right
 			default:
-			}
-			if b {
-				e.longValue = 1
-			}else {
-				e.longValue = 0
 			}
 			is = true
 			e.Type = ExpressionTypeBool
@@ -357,26 +342,20 @@ class ExpressionConstFold {
 		case ExpressionTypeByte ,ExpressionTypeShort ,  ExpressionTypeChar , ExpressionTypeInt,ExpressionTypeLong:
 			left := bin.Left.longValue
 			right := bin.Right.longValue
-			var b bool
 			switch e.Type {
 			case ExpressionTypeEq:
-				b = left == right
+				e.boolValue = left == right
 			case ExpressionTypeNe:
-				b = left != right
+				e.boolValue = left != right
 			case ExpressionTypeGe:
-				b = left >= right
+				e.boolValue = left >= right
 			case ExpressionTypeGt:
-				b = left > right
+				e.boolValue = left > right
 			case ExpressionTypeLe:
-				b = left <= right
+				e.boolValue = left <= right
 			case ExpressionTypeLt:
-				b = left < right
+				e.boolValue = left < right
             default:
-			}
-			if b {
-				e.longValue = 1
-			}else {
-				e.longValue = 0
 			}
 			is = true
 			e.Type = ExpressionTypeBool
@@ -384,27 +363,21 @@ class ExpressionConstFold {
 		case ExpressionTypeFloat:
 			left := bin.Left.doubleValue
 			right := bin.Right.doubleValue
-			var b bool
 			switch e.Type {
 			case ExpressionTypeEq:
-				b = left == right
+				e.boolValue = left == right
 			case ExpressionTypeNe:
-				b = left != right
+				e.boolValue = left != right
 			case ExpressionTypeGe:
-				b = left >= right
+				e.boolValue = left >= right
 			case ExpressionTypeGt:
-				b = left > right
+				e.boolValue = left > right
 			case ExpressionTypeLe:
-				b = left <= right
+				e.boolValue = left <= right
 			case ExpressionTypeLt:
-				b = left < right
+				e.boolValue = left < right
 			default:
 
-			}
-			if b {
-				e.longValue = 1
-			}else {
-				e.longValue = 0
 			}
 			is = true
 			e.Type = ExpressionTypeBool
@@ -412,26 +385,20 @@ class ExpressionConstFold {
 		case ExpressionTypeDouble:
 			left := bin.Left.doubleValue
 			right := bin.Right.doubleValue
-			var b bool 
 			switch e.Type {
 			case ExpressionTypeEq:
-				b = left == right
+				e.boolValue = left == right
 			case ExpressionTypeNe:
-				b = left != right
+				e.boolValue = left != right
 			case ExpressionTypeGe:
-				b = left >= right
+				e.boolValue = left >= right
 			case ExpressionTypeGt:
-				b = left > right
+				e.boolValue = left > right
 			case ExpressionTypeLe:
-				b = left <= right
+				e.boolValue = left <= right
 			case ExpressionTypeLt:
-				b = left < right
+				e.boolValue = left < right
             default:
-			}
-			if b {
-				e.longValue = 1
-			}else {
-				e.longValue = 0
 			}
 			is = true
 			e.Type = ExpressionTypeBool

@@ -1,5 +1,5 @@
  
-import "java/lang/Boolean"
+
 
 public enum StatementTypeKind {
 	StatementTypeExpression = 1 ,
@@ -66,7 +66,7 @@ class Statement {
 		if this.StatementIf.Condition.Type != ExpressionTypeBool {
 			return
 		}
-		c := this.StatementIf.Condition.Data.(Boolean).booleanValue()
+		c := this.StatementIf.Condition.boolValue
 		if c {
 			this.Type = StatementTypeBlock
 			this.Block = this.StatementIf.Block
@@ -85,7 +85,7 @@ class Statement {
 			this.StatementFor.Increment == null &&
 			this.StatementFor.Condition != null &&
 			this.StatementFor.Condition.Type == ExpressionTypeBool &&
-			this.StatementFor.Condition.longValue == 0 {
+			this.StatementFor.Condition.boolValue == false  {
 			this.Type = StatementTypeNop
 			this.StatementFor = null
 		}

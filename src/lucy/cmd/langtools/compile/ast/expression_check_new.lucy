@@ -1,6 +1,4 @@
 class ExpressionCheckNew {
-	
-
 	static  fn check(e Expression , block Block, errs []error) ->(valueType Type)  {
 		no := e.Data.(ExpressionNew)
 		err := no.Type.resolve(block)

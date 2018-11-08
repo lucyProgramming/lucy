@@ -19,6 +19,7 @@ class Expression {
 	Op                    string
 	Lefts                 []Expression // left values
 	AsSubForNegative      Expression
+	boolValue bool 
 	longValue long
 	doubleValue double
 
@@ -27,16 +28,6 @@ class Expression {
 			return false
 		}
 		return this.Data.(ExpressionIdentifier).Name == identifier
-	}
-	fn isBoolLiteral(b bool) -> (is bool) {
-		if this.Type != ExpressionTypeBool {
-			return false
-		}
-		if b {
-		    return this.longValue == 1
-		}else {
-		    return this.longValue == 0
-		}
 	}
 
 	fn isRelation() -> (is bool) {
@@ -801,118 +792,4 @@ class Expression {
 	}
 	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-fn binaryExpressionDependOnSub() Expression {
-	switch this.Type {
-	case ExpressionTypeAdd:
-		bin := this.Data.(ExpressionBinary)
-		// 0 + a
-		if bin.Left.isNumber() && bin.Left.getDoubleValue() == 0 {
-			return bin.Right
-		}
-		// a + 0
-		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
-			return bin.Left
-		}
-	case ExpressionTypeSub:
-		// a - 0
-		bin := this.Data.(ExpressionBinary)
-		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
-			return bin.Left
-		}
-
-	case ExpressionTypeMul:
-		// a * 0 == 0
-		bin := this.Data.(ExpressionBinary)
-		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 0 {
-			return bin.Right
-		}
-		// 0 * a == 0
-		if bin.Left.isNumber() && bin.Left.getDoubleValue() == 0 {
-			return bin.Left
-		}
-		// a * 1 == a
-		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 1 {
-			return bin.Left
-		}
-		// 1 * a == a
-		if bin.Left.isNumber() && bin.Left.getDoubleValue() == 1 {
-			return bin.Right
-		}
-	case ExpressionTypeDiv:
-		// a / 1 == a
-		bin := this.Data.(ExpressionBinary)
-		if bin.Right.isNumber() && bin.Right.getDoubleValue() == 1 {
-			return bin.Left
-		}
-	case ExpressionTypeEq:
-		bin := this.Data.(ExpressionBinary)
-		if bin.Left.Value.Type == VariableTypeBool {
-			// true == a
-			if bin.Left.isBoolLiteral(true) {
-				return bin.Right
-			}
-			// a == true
-			if bin.Right.isBoolLiteral(true) {
-				return bin.Left
-			}
-		}
-	case ExpressionTypeNe:
-		bin := this.Data.(ExpressionBinary)
-		if bin.Left.Value.Type == VariableTypeBool {
-			// false != a
-			if bin.Left.isBoolLiteral(false) {
-				return bin.Right
-			}
-			// a != false
-			if bin.Right.isBoolLiteral(false) {
-				return bin.Left
-			}
-		}
-	case ExpressionTypeLogicalAnd:
-		bin := this.Data.(ExpressionBinary)
-		// true && a
-		if bin.Left.isBoolLiteral(true) {
-			return bin.Right
-		}
-		// a && true
-		if bin.Right.isBoolLiteral(true) {
-			return bin.Left
-		}
-	case ExpressionTypeLogicalOr:
-		bin := this.Data.(ExpressionBinary)
-		// false || a
-		if bin.Left.isBoolLiteral(false) {
-			return bin.Right
-		}
-		// a || false
-		if bin.Right.isBoolLiteral(false) {
-			return bin.Left
-		}
-	}
-	return null
-}
-*/
+ 

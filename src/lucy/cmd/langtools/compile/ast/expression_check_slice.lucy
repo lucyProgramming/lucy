@@ -1,4 +1,3 @@
-import "java/lang/Long"
 
 class ExpressionCheckSlice {
 	static fn check(e Expression , block Block, errs []error) ->(valueType Type) {
@@ -19,7 +18,6 @@ class ExpressionCheckSlice {
 			on.Start.Pos = e.Pos
 			on.Start.Op = "intLiteral"
 			on.Start.Type = ExpressionTypeInt
-			on.Start.Data = Long.valueOf(long(0))
 		}
 		startType, es := on.Start.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
