@@ -11,29 +11,29 @@ class Expression {
 	IsPublic              bool // for global
 	IsGlobal              bool
 	IsCompileAuto         bool // compile auto expression
-	Value                 *Type
-	MultiValues           []*Type
+	Value                 Type
+	MultiValues           []Type
 	Pos                   Pos
-	Data                  interface{}
+	Data                  Object
 	IsStatementExpression bool
 	Op                    string
-	Lefts                 []*Expression // left values
-	AsSubForNegative      *Expression
+	Lefts                 []Expression // left values
+	AsSubForNegative      Expression
 
-	fn IsIdentifier(identifier string) bool {
+	fn IsIdentifier(identifier string) -> (is bool) {
 		if this.Type != ExpressionTypeIdentifier {
 			return false
 		}
-		return this.Data.(*ExpressionIdentifier).Name == identifier
+		return this.Data.(ExpressionIdentifier).Name == identifier
 	}
-	fn isBoolLiteral(b bool) bool {
+	fn isBoolLiteral(b bool) -> (is bool) {
 		if this.Type != ExpressionTypeBool {
 			return false
 		}
 		return this.Data.(bool) == b
 	}
 
-	fn isRelation() bool {
+	fn isRelation() -> (is bool) {
 		return this.Type == ExpressionTypeEq ||
 			this.Type == ExpressionTypeNe ||
 			this.Type == ExpressionTypeGe ||
@@ -47,11 +47,11 @@ class Expression {
 		'a' > 'b'
 		1s > 2s
 	*/
-	fn Is2IntCompare() bool {
+	fn Is2IntCompare() -> (is bool) {
 		if this.isRelation() == false {
 			return false
 		}
-		bin := this.Data.(*ExpressionBinary)
+		bin := this.Data.(ExpressionBinary)
 		i1 := bin.Left.Value.isInteger() && bin.Left.Value.Type != VariableTypeLong
 		i2 := bin.Right.Value.isInteger() && bin.Right.Value.Type != VariableTypeLong
 		return i1 && i2
@@ -60,11 +60,11 @@ class Expression {
 	/*
 		a == null
 	*/
-	fn IsCompare2Null() bool {
+	fn IsCompare2Null() -> (is bool) {
 		if this.isRelation() == false {
 			return false
 		}
-		bin := this.Data.(*ExpressionBinary)
+		bin := this.Data.(ExpressionBinary)
 		return bin.Left.Type == ExpressionTypeNull ||
 			bin.Right.Type == ExpressionTypeNull
 	}
@@ -72,11 +72,11 @@ class Expression {
 	/*
 		a > "b"
 	*/
-	fn Is2StringCompare() bool {
+	fn Is2StringCompare() -> (is bool) {
 		if this.isRelation() == false {
 			return false
 		}
-		bin := this.Data.(*ExpressionBinary)
+		bin := this.Data.(ExpressionBinary)
 		return bin.Left.Value.Type == VariableTypeString
 	}
 
@@ -84,23 +84,26 @@ class Expression {
 		var a ,b []int
 		a == b
 	*/
-	fn Is2PointerCompare() bool {
+	fn Is2PointerCompare() -> (is bool) {
 		if this.isRelation() == false {
 			return false
 		}
-		bin := this.Data.(*ExpressionBinary)
+		bin := this.Data.(ExpressionBinary)
 		return bin.Left.Value.IsPointer()
 	}
 
-	fn convertTo(to *Type) {
-		c := &ExpressionTypeConversion{}
-		c.Expression = &Expression{}
-		c.Expression.Op = "checkcast"
-		*c.Expression = *e // copy
+	fn convertTo(to Type) {
+		c := new ExpressionTypeConversion()
+		c.Expression = new Expression()
+		c.Expression.Op = this.Op
+		c.Expression.Value = this.Value
+		c.Expression.Type = this.Type
+		c.Expression.Data = this.Data
 		c.Type = to
 		this.Value = to
 		this.Type = ExpressionTypeCheckCast
 		this.IsCompileAuto = true
+		this.Op = "checkcast"
 		this.Data = c
 	}
 
@@ -122,7 +125,7 @@ class Expression {
 	/*
 		const spread
 	*/
-	fn fromConst(c *Constant) {
+	fn fromConst(c Constant) {
 		this.Op = c.Name
 		switch c.Type.Type {
 		case VariableTypeBool:

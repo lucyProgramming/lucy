@@ -1,0 +1,142 @@
+ 
+
+const	ArrayTypeBoolean byte = 4
+const	ArrayTypeChar    byte = 5
+const	ArrayTypeFloat   byte = 6
+const	ArrayTypeDouble  byte = 7
+const	ArrayTypeByte    byte = 8
+const	ArrayTypeShort   byte = 9
+const	ArrayTypeInt     byte = 10
+const	ArrayTypeLong    byte = 11
+
+
+class ArrayMeta {
+	className                 string
+	constructorFuncDescriptor string
+	sliceDescriptor           string
+	appendDescriptor          string
+	appendAllDescriptor       string
+	elementsFieldDescriptor   string
+	setMethodDescription      string
+	getMethodDescription      string
+	fn ArrayMeta(className , constructorFuncDescriptor ,sliceDescriptor ,appendDescriptor,appendAllDescriptor ， elementsFieldDescriptor ,
+		setMethodDescription , 	getMethodDescription string){
+			this.className = className
+			this.constructorFuncDescriptor = constructorFuncDescriptor
+			this.sliceDescriptor = sliceDescriptor
+			this.appendDescriptor = appendDescriptor
+			this.appendAllDescriptor = appendAllDescriptor
+			this.elementsFieldDescriptor = elementsFieldDescriptor
+			this.setMethodDescription = setMethodDescription
+			this.getMethodDescription = getMethodDescription
+
+	}
+}
+
+{
+	ArrayMetas[ast.VariableTypeBool] = new ArrayMeta (    
+		"lucy/deps/ArrayBool",  
+		"([Z)V",   
+		"[Z",     
+		"(II)Llucy/deps/ArrayBool;",
+		"(Z)V",   
+		"(Llucy/deps/ArrayBool;)V",
+		"(IZ)V", 
+		"(I)Z"
+	)
+	ArrayMetas[ast.VariableTypeByte] = new ArrayMeta(      
+		"lucy/deps/ArrayByte",  
+		"([B)V",   "[B",     
+		"(II)Llucy/deps/ArrayByte;",
+		"(B)V",
+		"(Llucy/deps/ArrayByte;)V",
+		"(IB)V",      
+		"(I)B"
+	)
+	ArrayMetas[ast.VariableTypeShort] = new ArrayMeta(  
+		"lucy/deps/ArrayShort",  
+		"([S)V",   
+		"[S",     
+		"(II)Llucy/deps/ArrayShort;",
+		   "(S)V",       
+		    "(Llucy/deps/ArrayShort;)V",     
+		   "(IS)V",     
+		    "(I)S"
+	)
+	ArrayMetas[ast.VariableTypeChar] = new ArrayMeta(        
+			"lucy/deps/CharInt",  
+			"([I)V",  
+			"[I",      
+			"(II)Llucy/deps/CharInt;",
+		 	"(I)V",        
+		 	"(Llucy/deps/CharInt;)V",       
+		 	"(IC)V",    
+		 	"(I)C"
+	)
+	ArrayMetas[ast.VariableTypeInt] = new ArrayMeta( 
+		 "lucy/deps/ArrayInt",
+		 "([I)V",
+		 "[I",
+		 "(II)Llucy/deps/ArrayInt;",
+		 "(I)V",
+		 "(Llucy/deps/ArrayInt;)V",
+		 "(II)V",
+		 "(I)I",
+	)
+	ArrayMetas[ast.VariableTypeLong] = new ArrayMeta( 
+		 "lucy/deps/ArrayLong",
+		 "([J)V",
+		 "[J",
+		 "(II)Llucy/deps/ArrayLong;",
+		 "(J)V",
+		 "(Llucy/deps/ArrayLong;)V",
+		 "(IJ)V",
+		 "(I)J",
+	)
+	ArrayMetas[ast.VariableTypeFloat] = new ArrayMeta( 
+		 "lucy/deps/ArrayFloat",
+		 "([F)V",
+		 "[F",
+		 "(II)Llucy/deps/ArrayFloat;",
+		 "(F)V",
+		 "(Llucy/deps/ArrayFloat;)V",
+		 "(IF)V",
+		 "(I)F",
+	)
+	ArrayMetas[ast.VariableTypeDouble] = new ArrayMeta( 
+		 "lucy/deps/ArrayDouble",
+		 "([D)V",
+		 "[D",
+		 "(II)Llucy/deps/ArrayDouble;",
+		 "(D)V",
+		"(Llucy/deps/ArrayDouble;)V",
+		 "(ID)V",
+		 "(I)D",
+	)
+	ArrayMetas[ast.VariableTypeString] = new ArrayMeta( 
+		 "lucy/deps/ArrayString",
+		 "([Ljava/lang/String;)V",
+		 "[Ljava/lang/String;",
+		 "(II)Llucy/deps/ArrayString;",
+		 "(Ljava/lang/String;)V",
+		 "(Llucy/deps/ArrayString;)V",
+		 "(ILjava/lang/String;)V",
+		 "(I)Ljava/lang/String;",
+	)
+	ArrayMetas[ast.VariableTypeObject] = new ArrayMeta( 
+		 "lucy/deps/ArrayObject",
+		 "([Ljava/lang/Object;)V",
+		 "[Ljava/lang/Object;",
+		 "(II)Llucy/deps/ArrayObject;",
+		 "(Ljava/lang/Object;)V",
+		 "(Llucy/deps/ArrayObject;)V",
+		 "(ILjava/lang/Object;)V",
+		 "(I)Ljava/lang/Object;",
+	}
+	ArrayMetas[ast.VariableTypeArray] = ArrayMetas[ast.VariableTypeObject]
+	ArrayMetas[ast.VariableTypeMap] = ArrayMetas[ast.VariableTypeObject]
+	ArrayMetas[ast.VariableTypeJavaArray] = ArrayMetas[ast.VariableTypeObject]
+	ArrayMetas[ast.VariableTypeFunction] = ArrayMetas[ast.VariableTypeObject]
+	ArrayMetas[ast.VariableTypeEnum] = ArrayMetas[ast.VariableTypeInt]
+
+}
