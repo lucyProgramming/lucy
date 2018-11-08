@@ -1,6 +1,6 @@
 class ExpressionCheckMap {
 	
-	static fn checkMapExpression(e Expression , block Block, errs []error) ->(valueType Type) {
+	static fn check(e Expression , block Block, errs []error) ->(valueType Type) {
 		m := e.Data.(ExpressionMap)
 		if m.Type != null {
 			if err := m.Type.resolve(block); err != null {

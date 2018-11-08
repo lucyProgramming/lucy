@@ -2,7 +2,7 @@
 class ExpressionCheckTypeAssert {
 	
 	
-	static fn checkTypeAssert(e Expression , block Block, errs []error) -> (valueTypes []Type) {
+	static fn check(e Expression , block Block, errs []error) -> (valueTypes []Type) {
 		assertion := e.Data.(ExpressionTypeAssert)
 		object, es := assertion.Expression.checkSingleValueContextExpression(block)
 		errs.appendAll(es)

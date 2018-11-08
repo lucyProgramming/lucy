@@ -47,7 +47,7 @@ class StatementIf {
 					errs.append(new error(sprintf("%s condition is not a bool expression",
 							conditionType.Pos.ErrMsgPrefix())))
 				}
-				errs = append(errs, v.Block.check()...)
+				errs.appendAll(v.Block.check())
 			}
 		}
 		if this.Else != null {

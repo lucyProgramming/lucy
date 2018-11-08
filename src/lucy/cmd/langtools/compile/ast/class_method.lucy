@@ -66,15 +66,15 @@ class ClassMethod {
 
 	fn checkModifierOk() ->(errs []error = []error{}) {
 		if this.IsAbstract() && this.IsFinal() {
-			errs = append(errs, new error(sprintf("%s abstract method cannot be final",
+			errs.append(new error(sprintf("%s abstract method cannot be final",
 				errMsgPrefix(this.Function.Pos))))
 		}
 		if this.IsAbstract() && this.IsPrivate() {
-			errs = append(errs, new error(sprintf("%s abstract method cannot be private",
+			errs.append( new error(sprintf("%s abstract method cannot be private",
 				errMsgPrefix(this.Function.Pos))))
 		}
 		if this.IsAbstract() && this.Function.Name == SpecialMethodInit {
-			errs = append(errs, new error(sprintf("%s construction method cannot be abstract",
+			errs.append( new error(sprintf("%s construction method cannot be abstract",
 				errMsgPrefix(this.Function.Pos))))
 		}
 		return errs

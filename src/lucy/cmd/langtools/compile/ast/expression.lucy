@@ -32,7 +32,11 @@ class Expression {
 		if this.Type != ExpressionTypeBool {
 			return false
 		}
-		return this.Data.(bool) == b
+		if b {
+		    return this.longValue == 1
+		}else {
+		    return this.longValue == 0
+		}
 	}
 
 	fn isRelation() -> (is bool) {
@@ -123,6 +127,9 @@ class Expression {
 			this.convertTo(t)
 		}
 	}
+
+
+
 
 	/*
 		const spread
@@ -324,9 +331,6 @@ class Expression {
 	
 
 	fn check(block Block) -> (returnValueTypes []Type, errs []error = []error{}) {
-		if e == null {
-			return null, []error{}
-		}
 		_, err := this.constantFold()
 		if err != null {
 			return null, []error{err}
@@ -405,7 +409,7 @@ class Expression {
 			//binaries
 		case ExpressionTypeLogicalOr , ExpressionTypeLogicalAnd ,
 			ExpressionTypeOr ,ExpressionTypeAnd ,ExpressionTypeXor ,
-			ExpressionTypeXor,ExpressionTypeLsh ,ExpressionTypeRsh,
+			ExpressionTypeLsh ,ExpressionTypeRsh,
 			ExpressionTypeEq ,ExpressionTypeNe , ExpressionTypeGe ,
 			ExpressionTypeGt, ExpressionTypeLe,ExpressionTypeLt , 
 			ExpressionTypeAdd,ExpressionTypeSub , ExpressionTypeMul,
@@ -427,11 +431,11 @@ class Expression {
 			}
 			this.Value = tt
 		case ExpressionTypeVarAssign:
-			this.checkVarAssignExpression(block, errs)
+			ExpressionCheckVar.check(this , block, errs)
 			this.Value = mkVoidType(this.Pos)
 			returnValueTypes = []Type{this.Value}
 		case ExpressionTypeAssign:
-			tt := this.checkAssignExpression(block,errs)
+			tt := ExpressionCheckAssign.check(this, block,errs)
 			if tt != null {
 				returnValueTypes = []Type{tt}
 			}
@@ -443,43 +447,39 @@ class Expression {
 			}
 			this.Value = tt
 		case ExpressionTypeConst: // no return value
-			errs = this.checkConstant(block)
+			errs = ExpressionCheckConst.check(this , block)
 			returnValueTypes = []Type{mkVoidType(this.Pos)}
 			this.Value = returnValueTypes[0]
 		case ExpressionTypeVar:
-			this.checkVarExpression(block, errs)
+			ExpressionCheckVar.check(this , block, errs)
 			returnValueTypes = []Type{mkVoidType(this.Pos)}
 			this.Value = returnValueTypes[0]
 		case ExpressionTypeFunctionCall:
-			returnValueTypes = this.checkFunctionCallExpression(block, errs)
+			returnValueTypes = ExpressionCheckFunctionCall.checkFunctionCallExpression(this , block, errs)
 			this.MultiValues = returnValueTypes
 			if len(returnValueTypes) > 0 {
 				this.Value = returnValueTypes[0]
 			}
 		case ExpressionTypeMethodCall:
-			returnValueTypes = this.checkMethodCallExpression(block, errs)
+			returnValueTypes = ExpressionCheckMethodCall.check(this , block, errs)
 			this.MultiValues = returnValueTypes
 			if len(returnValueTypes) > 0 {
 				this.Value = returnValueTypes[0]
 			}
 		case ExpressionTypeTypeAssert:
-			returnValueTypes = this.checkTypeAssert(block, errs)
+			returnValueTypes = ExpressionCheckTypeAssert.check(this , block, errs)
 			this.MultiValues = returnValueTypes
 			if len(returnValueTypes) > 0 {
 				this.Value = returnValueTypes[0]
 			}
-		case ExpressionTypeNot:
-			fallthrough
-		case ExpressionTypeNegative:
-			fallthrough
-		case ExpressionTypeBitwiseNot:
-			tt := this.checkUnaryExpression(block, errs)
+		case ExpressionTypeNot ,ExpressionTypeNegative ,ExpressionTypeBitwiseNot  :
+			tt := ExpressionCheckUnary.checkUnaryExpression(this , block, errs)
 			if tt != null {
 				returnValueTypes = []Type{tt}
 			}
 			this.Value = tt
 		case ExpressionTypeQuestion:
-			tt := this.checkQuestionExpression(block, errs)
+			tt := ExpressionCheckQuestion.check(this , block, errs)
 			if tt != null {
 				returnValueTypes = []Type{tt}
 			}
@@ -497,7 +497,7 @@ class Expression {
 				this.Value = tt
 			}
 		case ExpressionTypeSelectionConst:
-			tt := this.checkSelectConstExpression(block, errs)
+			tt := ExpressionSelectConst.check(this , block, errs)
 			if tt != null {
 				returnValueTypes = []Type{tt}
 				this.Value = tt
@@ -523,16 +523,16 @@ class Expression {
 			}
 			this.Value = tt
 		case ExpressionTypeRange:
-			errs = append(errs, new error(sprintf("%s range is only work with 'for' statement",
+			errs.append(new error(sprintf("%s range is only work with 'for' statement",
 				errMsgPrefix(this.Pos))))
 		case ExpressionTypeSlice:
-			tt := this.checkSlice(block, errs)
+			tt := ExpressionCheckSlice.check(this , block, errs)
 			this.Value = tt
 			if tt != null {
 				returnValueTypes = []Type{tt}
 			}
 		case ExpressionTypeArray:
-			tt := this.checkArray(block, errs)
+			tt := ExprssionCheckArray.check(this , block, errs)
 			this.Value = tt
 			if tt != null {
 				returnValueTypes = []Type{tt}
@@ -610,7 +610,7 @@ class Expression {
 			if es == null {
 				es = []error{err}
 			} else {
-				es = append(es, err)
+				es.append(err)
 			}
 		}
 		return ret, es
@@ -768,6 +768,36 @@ class Expression {
 	}
 	fn constantFold() -> (is bool, err error){
 		return ExpressionConstFold.constantFold(this)
+	}
+
+	fn convertLiteralToNumberType(to VariableTypeKind) {
+		if this.isNumber() == false {
+			panic("not a number")
+		}
+		switch to {
+		case VariableTypeByte:
+			this.longValue = this.getLongValue()
+			this.Type = ExpressionTypeByte
+		case VariableTypeShort:
+			this.longValue = this.getLongValue()
+			this.Type = ExpressionTypeShort
+		case VariableTypeChar:
+			this.longValue = this.getLongValue()
+			this.Type = ExpressionTypeChar
+		case VariableTypeInt:
+			this.longValue = this.getLongValue()
+			this.Type = ExpressionTypeInt
+		case VariableTypeLong:
+			this.longValue = this.getLongValue()
+			this.Type = ExpressionTypeLong
+		case VariableTypeFloat:
+			this.doubleValue = this.getDoubleValue()
+			this.Type = ExpressionTypeFloat
+		case VariableTypeDouble:
+			this.doubleValue = this.getDoubleValue()
+			this.Type = ExpressionTypeDouble
+		default:
+		}
 	}
 	
 }

@@ -1,3 +1,5 @@
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 class ExpressionCheckLeftValue {
 	
 	static fn getLeftValue(e Expression, block Block, errs []error) -> (result Type) {
@@ -42,7 +44,7 @@ class ExpressionCheckLeftValue {
                 e.Pos.ErrMsgPrefix(), identifier.Name, block.identifierIsWhat(d))))
             return null
 		case ExpressionTypeIndex:
-			result = ExpressionCheckIndex.check(this , block, errs)
+			result = ExpressionCheckIndex.check(e , block, errs)
 			e.Value = result
 			return result
 		case ExpressionTypeSelection:

@@ -17,6 +17,7 @@ func (ep *ExpressionParser) parseQuestionExpression() (ast.Expression, error) {
 	if ep.parser.token.Type != lex.TokenQuestion {
 		return left, nil
 	}
+	pos := ep.parser.mkPos()
 	ep.Next(lfNotToken) // skip ?
 	True, err := ep.parseLogicalOrExpression()
 	if err != nil {
@@ -36,7 +37,7 @@ func (ep *ExpressionParser) parseQuestionExpression() (ast.Expression, error) {
 	}
 	newExpression := &ast.Expression{}
 	newExpression.Op = "question"
-	newExpression.Pos = ep.parser.mkPos()
+	newExpression.Pos = pos
 	newExpression.Type = ast.ExpressionTypeQuestion
 	question := &ast.ExpressionQuestion{}
 	question.Selection = left

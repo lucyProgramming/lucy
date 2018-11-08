@@ -52,6 +52,9 @@ public class Type {
 	Map            Map
 	Package        Package
 	Alias          TypeAlias
+	
+
+	// copy to t 
 	fn cp(t Type) {
 	    t.Type = this.Type
 	    t.IsBuildIn = this.IsBuildIn
@@ -257,7 +260,7 @@ public class Type {
 
 	fn resolveName(block Block) -> (err error ) {
 		var d  Object
-		if strings.Contains(this.Name, ".") == false {
+		if this.Name.indexOf(".")  < 0  {
 			var loadFromImport bool
 			d = block.searchType(this.Name)
 			if d != null {
@@ -488,17 +491,17 @@ public class Type {
 			return this.Array.getParameterType(ft)
 		}
 		if this.Type == VariableTypeMap {
-			ret := []string{}
-			ret = append(ret, this.Map.K.getParameterType(ft)...)
-			ret = append(ret, this.Map.V.getParameterType(ft)...)
-			return ret
+			pts = []string{}
+			pts.appendAll(this.Map.K.getParameterType(ft))
+			pts.appendAll( this.Map.V.getParameterType(ft))
+			return
 		}
 		return null
 	}
 
 	fn canBeBindWithParameterTypes(parameterTypes map{ string->Type }) -> (err error) {
 		if this.Type == VariableTypeTemplate {
-			_, ok := parameterTypes[this.Name]
+			 ok := parameterTypes.keyExist(this.Name)
 			if ok == false {
 				return new error(sprintf("typed parameter '%s' not found", this.Name))
 			}
@@ -529,7 +532,7 @@ public class Type {
 			}
 			//TODO ::
 			//*typ = *t.Clone() // real bind
-			typ.cp(parameterTypes[this.Name])
+			parameterTypes[this.Name].cp(this)
 			return null
 		}
 		if this.Type == VariableTypeArray || this.Type == VariableTypeJavaArray {

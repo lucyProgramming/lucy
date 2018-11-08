@@ -2,7 +2,7 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 class ExpressionCheckVar {
 		
-	static fn checkVarExpression(e Expression , block Block, errs []error) {
+	static fn check(e Expression , block Block, errs []error) {
 		ev := e.Data.(ExpressionVar)
 		if ev.Type != null {
 			if err := ev.Type.resolve(block); err != null {

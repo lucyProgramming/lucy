@@ -53,9 +53,12 @@ class ExpressionCheckAssign {
 					valueTypes[k].TypeString(), leftTypes[k].TypeString())))
 			}
 		}
-		e.Data = new ExpressionAssign()
-		e.Data.Lefts = lefts
-		e.Data.Values = values
+		{
+		    t := new ExpressionAssign()
+		    e.Data = t
+		    t.Lefts = lefts
+            t.Values = values
+		}
 		voidReturn := mkVoidType(e.Pos)
 		if len(lefts) > 1 {
 			return voidReturn

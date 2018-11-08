@@ -69,7 +69,7 @@ class Block {
             }
         }
         if this.Labels != null { // should be useless
-            if t, ok := this.Labels[name]; ok {
+            if t := this.Labels[name]; t != null {
                 return t, true
             }
         }
@@ -341,7 +341,7 @@ class Block {
                 return errs
             }
         }
-        errs = append(errs, this.checkUnUsed()...)
+        errs.appendAll( this.checkUnUsed())
         return errs
     }
 
@@ -475,22 +475,26 @@ class Block {
         if err != null {
             return err
         }
+        if buildInFunctionsMap[name] != null {
+            return new error(sprintf("%s function named '%s' is buildin",
+                pos.ErrMsgPrefix(), name))
+        }
         if c := d.(Class) ; d != null {
             this.Classes[name] = c
+            return null
         }
         if f := d.(Function) ; f != null {
-            if buildInFunctionsMap[t.Name] != null {
-                return new error(sprintf("%s function named '%s' is buildin",
-                    pos.ErrMsgPrefix(), name))
-            }
             this.Functions[name] = f
+            return null
         }
         if c := d.(Constant) ; c != null {
              this.Constants[name] = c
+             return null
         }
-        if v := d.(Variable) ;  v != null {
-            v.LocalValOffset = math.MaxUint16 // overflow
+        if v := d.(Variable) ; v != null {
+            v.LocalValOffset = 65535 // overflow
             this.Variables[name] = v
+            return null
         }
         if e := d.(Enum) ; e != null {
             this.Enums[name] = e
@@ -500,12 +504,15 @@ class Block {
                     return err
                 }
             }
+            return null
         }
         if en := d.(EnumName) ; en != null {
             this.EnumNames[name] = en
+            return null
         }
         if t := d.(Type) ; d != null {
              this.TypeAliases[name] = t
+             return null
         }
         return null
     }

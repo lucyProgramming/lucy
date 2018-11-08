@@ -18,9 +18,8 @@ class ExpressionCheckFunctionCall {
 				return null
 			}
 			if f := d.(Function) ;f != null {
-			    f := d.(Function)
                 call.Function = f
-                return e.checkFunctionCall(block, errs, f, call)
+                return .checkFunctionCall(e , block, errs, f, call)
 			}
 			if t := d.(Type) ; t != null {
 				typeConversion := new ExpressionTypeConversion()
@@ -53,7 +52,7 @@ class ExpressionCheckFunctionCall {
 				e.Type = ExpressionTypeCheckCast
 				typeConversion.Expression = call.Args[0]
 				e.Data = typeConversion
-				ret := e.checkTypeConversionExpression(block, errs)
+				ret := ExpressionCheckTypeConversion.check(e , block, errs)
 				if ret == null {
 					return null
 				}
@@ -102,7 +101,7 @@ class ExpressionCheckFunctionCall {
 			call.Function = call.Expression.Data.(Function)
 			call.Expression.IsStatementExpression = true
 		}
-		return e.checkFunctionPointerCall(block, errs, functionPointer.FunctionType, call)
+		return .checkFunctionPointerCall(e , block, errs, functionPointer.FunctionType, call)
 	}
 
 	static fn checkFunctionPointerCall(e Expression , block Block, errs []error,
@@ -230,7 +229,7 @@ class ExpressionCheckFunctionCall {
 			}
 			t := v.Type.Clone()
 			t.bindWithParameterTypes(f.Type, parameterTypes)
-			parameterTypeArray = append(parameterTypeArray, t)
+			parameterTypeArray.append( t)
 			tps = tps[1:]
 		}
 		call.TemplateFunctionCallPair = f.TemplateFunction.insert(parameterTypeArray)

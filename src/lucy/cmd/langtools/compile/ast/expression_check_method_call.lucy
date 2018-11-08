@@ -219,8 +219,8 @@ class ExpressionCheckMethodCall {
 		}
 		if matched {
 			if fieldMethodHandler[0] != null {
-				call.FieldMethodHandler = fieldMethodHandler
-				return fieldMethodHandler.Type.FunctionType.mkCallReturnTypes(e.Pos)
+				call.FieldMethodHandler = fieldMethodHandler[0]
+				return fieldMethodHandler[0].Type.FunctionType.mkCallReturnTypes(e.Pos)
 			} else {
 				method := ms[0]
 				call.Method = method
@@ -342,7 +342,7 @@ class ExpressionCheckMethodCall {
 				errs.append(new error(sprintf("%s cast type expect 1 argument", e.Pos.ErrMsgPrefix())))
 				return []Type{conversion.Type.Clone()}
 			}
-			return []Type{e.checkTypeConversionExpression(block, errs)}
+			return []Type{ExpressionCheckTypeConversion.check(e , block, errs)}
 		}
 		if t := d.(Type) ; t != null {
 			if len(call.Args) != 1 {
@@ -359,7 +359,7 @@ class ExpressionCheckMethodCall {
 				conversion.Expression = call.Args[0]
 			}
 			e.Data = conversion
-			return []Type{e.checkTypeConversionExpression(block, errs)}
+			return []Type{ExpressionCheckTypeConversion.check(e , block, errs)}
 		}
 		errs.append(new error(sprintf("%s '%s' is not a function",
 			e.Pos.ErrMsgPrefix(), call.Name)))

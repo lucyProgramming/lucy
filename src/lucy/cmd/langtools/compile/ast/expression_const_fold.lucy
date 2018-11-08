@@ -47,20 +47,8 @@ class ExpressionConstFold {
 				return
 			}
 			e.Type = ee.Type
-			switch ee.Type {
-			case ExpressionTypeByte:
-				e.longValue = ~ee.Data.(longValue)
-			case ExpressionTypeChar:
-				e.longValue = ~ee.Data.(longValue)
-			case ExpressionTypeShort:
-				e.longValue = ~ee.Data.(longValue)
-			case ExpressionTypeInt:
-				e.longValue = ~ee.Data.(longValue)
-			case ExpressionTypeLong:
-				e.longValue = ~ee.Data.(longValue)
-            default:
-
-			}
+			e.longValue = ~ee.longValue
+		    return
 		}
 		// !
 		if e.Type == ExpressionTypeNot {
@@ -75,7 +63,11 @@ class ExpressionConstFold {
 				return
 			}
 			e.Type = ExpressionTypeBool
-			e.Data = !ee.Data.(bool)
+			if ee.longValue == 1 {
+			    e.longValue = 0
+			}else {
+			    e.longValue = 1
+			}
 			return
 		}
 		// -
@@ -85,19 +77,31 @@ class ExpressionConstFold {
 			if err != null || is == false {
 				return
 			}
+			if e.isNumber() == false {
+			    err = new error(sprintf("%s not a number" , e.Pos.ErrMsgPrefix()))
+			    is = false
+			    return
+			}
+			e.Type = ee.Type
+			is = true
 			switch ee.Type {
+			case ExpressionTypeByte:
+			     e.longValue = -ee.longValue
+            case ExpressionTypeShort:
+                 e.longValue = -ee.longValue
+            case ExpressionTypeChar:
+                 e.longValue = -ee.longValue
+            case ExpressionTypeInt:
+                 e.longValue = -ee.longValue
+            case ExpressionTypeLong:
+                e.longValue = -ee.longValue
 			case ExpressionTypeFloat:
-				is = true
-				e.Data = -ee.doubleValue
-				e.Type = ExpressionTypeFloat
-				return
+                e.doubleValue = -ee.doubleValue
 			case ExpressionTypeDouble:
-				is = true
-				e.Data = -ee.doubleValue
-				e.Type = ExpressionTypeDouble
-				return
+				e.doubleValue = -ee.doubleValue
             default:
 			}
+			return
 		}
 		// && and ||
 		if e.Type == ExpressionTypeLogicalAnd || e.Type == ExpressionTypeLogicalOr {
@@ -109,9 +113,9 @@ class ExpressionConstFold {
 				}
 				is = true
 				if e.Type == ExpressionTypeLogicalAnd {
-					e.Data = bin.Left.Data.(bool) && bin.Right.Data.(bool)
+					e.longValue = (bin.Left.longValue == 1 && bin.Right.longValue == 1) ? 1L : 0L
 				} else {
-					e.Data = bin.Left.Data.(bool) || bin.Right.Data.(bool)
+					e.longValue = (bin.Left.longValue == 1  || bin.Right.longValue == 1 ) ? 1L : 0L
 				}
 				e.Type = ExpressionTypeBool
 				return
@@ -133,22 +137,13 @@ class ExpressionConstFold {
 				if bin.Left.isInteger() == false || bin.Right.isInteger() == false {
 					return
 				}
-				switch bin.Left.Type {
-				case ExpressionTypeByte:
-					fallthrough
-				case ExpressionTypeShort:
-					fallthrough
-				case ExpressionTypeChar:
-					fallthrough
-				case ExpressionTypeInt:
-					fallthrough
-				case ExpressionTypeLong:
-					if e.Type == ExpressionTypeLsh {
-						e.Data = bin.Left.longValue << byte(bin.Right.getLongValue())
-					} else {
-						e.Data = bin.Left.longValue >> byte(bin.Right.getLongValue())
-					}
-				}
+
+                if e.Type == ExpressionTypeLsh {
+                    e.longValue = bin.Left.longValue << byte(bin.Right.getLongValue())
+                } else {
+                    e.longValue = bin.Left.longValue >> byte(bin.Right.getLongValue())
+                }
+
 				//if this.Type == ExpressionTypeLsh {
 				//	switch bin.Left.Type {
 				//	case ExpressionTypeByte:
@@ -183,48 +178,13 @@ class ExpressionConstFold {
 					bin.Left.Type != bin.Right.Type {
 					return
 				}
-				switch bin.Left.Type {
-				case ExpressionTypeByte:
-					if e.Type == ExpressionTypeAnd {
-						e.Data = bin.Left.longValue & bin.Right.longValue
-					} else if e.Type == ExpressionTypeOr {
-						e.Data = bin.Left.longValue | bin.Right.longValue
-					} else {
-						e.Data = bin.Left.longValue ^ bin.Right.longValue
-					}
-				case ExpressionTypeShort:
-					if e.Type == ExpressionTypeAnd {
-						e.Data = bin.Left.longValue & bin.Right.longValue
-					} else if e.Type == ExpressionTypeOr {
-						e.Data = bin.Left.longValue | bin.Right.longValue
-					} else {
-						e.Data = bin.Left.longValue ^ bin.Right.longValue
-					}
-				case ExpressionTypeChar:
-					if e.Type == ExpressionTypeAnd {
-						e.Data = bin.Left.longValue & bin.Right.longValue
-					} else if e.Type == ExpressionTypeOr {
-						e.Data = bin.Left.longValue | bin.Right.longValue
-					} else {
-						e.Data = bin.Left.longValue ^ bin.Right.longValue
-					}
-				case ExpressionTypeInt:
-					if e.Type == ExpressionTypeAnd {
-						e.Data = bin.Left.longValue & bin.Right.longValue
-					} else if e.Type == ExpressionTypeOr {
-						e.Data = bin.Left.longValue | bin.Right.longValue
-					} else {
-						e.Data = bin.Left.longValue ^ bin.Right.longValue
-					}
-				case ExpressionTypeLong:
-					if e.Type == ExpressionTypeAnd {
-						e.Data = bin.Left.longValue & bin.Right.longValue
-					} else if e.Type == ExpressionTypeOr {
-						e.Data = bin.Left.longValue | bin.Right.longValue
-					} else {
-						e.Data = bin.Left.longValue ^ bin.Right.longValue
-					}
-				}
+				if e.Type == ExpressionTypeAnd {
+                    e.longValue = bin.Left.longValue & bin.Right.longValue
+                } else if e.Type == ExpressionTypeOr {
+                    e.longValue = bin.Left.longValue | bin.Right.longValue
+                } else {
+                    e.longValue = bin.Left.longValue ^ bin.Right.longValue
+                }
 				is = true
 				e.Type = bin.Left.Type
 				return
@@ -262,35 +222,7 @@ class ExpressionConstFold {
 
 	
 
-	static fn convertLiteralToNumberType(e Expression , to VariableTypeKind) {
-		if e.isNumber() == false {
-			panic("not a number")
-		}
-		switch to {
-		case VariableTypeByte:
-			e.longValue = e.getLongValue()
-			e.Type = ExpressionTypeByte
-		case VariableTypeShort:
-			e.Data = e.getLongValue()
-			e.Type = ExpressionTypeShort
-		case VariableTypeChar:
-			e.Data = e.getLongValue()
-			e.Type = ExpressionTypeChar
-		case VariableTypeInt:
-			e.Data = e.getLongValue()
-			e.Type = ExpressionTypeInt
-		case VariableTypeLong:
-			e.Data = e.getLongValue()
-			e.Type = ExpressionTypeLong
-		case VariableTypeFloat:
-			e.Data = float(e.getDoubleValue())
-			e.Type = ExpressionTypeFloat
-		case VariableTypeDouble:
-			e.Data = e.getDoubleValue()
-			e.Type = ExpressionTypeDouble
-		default:
-		}
-	}
+	
 
 	
 
@@ -299,102 +231,26 @@ class ExpressionConstFold {
 			return
 		}
 		switch bin.Left.Type {
-		case ExpressionTypeByte:
+		case ExpressionTypeByte ,ExpressionTypeShort ,ExpressionTypeChar ,ExpressionTypeInt ,  ExpressionTypeLong  :
 			left := bin.Left.longValue
 			right := bin.Right.longValue
 			switch e.Type {
 			case ExpressionTypeAdd:
-				e.Data = left + right
+				e.longValue = left + right
 			case ExpressionTypeSub:
-				e.Data = left - right
+				e.longValue = left - right
 			case ExpressionTypeMul:
-				e.Data = left * right
+				e.longValue = left * right
 			case ExpressionTypeDiv:
 				if right == 0 {
 					err = divisionByZeroErr(bin.Right.Pos)
 				}
-				e.Data = left
+				e.longValue = left
 			case ExpressionTypeMod:
 				if right == 0 {
 					err = divisionByZeroErr(bin.Right.Pos)
 				}
-				e.Data = left
-			default:
-				return false, null
-			}
-			//if this.Type == ExpressionTypeAdd || this.Type == ExpressionTypeSub {
-			//	if t := this.longValue; (t >> 8) != 0 {
-			//		PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.byteExceeds(t))
-			//	}
-			//}
-			e.Type = ExpressionTypeByte
-			is = true
-			return
-		case ExpressionTypeShort:
-			fallthrough
-		case ExpressionTypeChar:
-			fallthrough
-		case ExpressionTypeInt:
-			left := bin.Left.longValue
-			right := bin.Right.longValue
-			switch e.Type {
-			case ExpressionTypeAdd:
-				e.Data = left + right
-			case ExpressionTypeSub:
-				e.Data = left - right
-			case ExpressionTypeMul:
-				e.Data = left * right
-			case ExpressionTypeDiv:
-				if right == 0 {
-					err = divisionByZeroErr(bin.Right.Pos)
-				}
-				e.Data = left
-			case ExpressionTypeMod:
-				if right == 0 {
-					err = divisionByZeroErr(bin.Right.Pos)
-				}
-				e.Data = left
-			default:
-				return false, null
-			}
-			//switch this.Type {
-			//case ExpressionTypeShort:
-			//	if t := this.longValue; (t >> 16) != 0 {
-			//		PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.shortExceeds(t))
-			//	}
-			//case ExpressionTypeChar:
-			//	if t := this.longValue; (t >> 16) != 0 {
-			//		PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.charExceeds(t))
-			//	}
-			//case ExpressionTypeInt:
-			//	if t := this.longValue; (t >> 32) != 0 {
-			//		PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.intExceeds(t))
-			//	}
-			//}
-			e.Type = bin.Left.Type
-			is = true
-			return
-		case ExpressionTypeLong:
-			left := bin.Left.longValue
-			right := bin.Right.longValue
-			switch e.Type {
-			case ExpressionTypeAdd:
-				e.Data = left + right
-
-			case ExpressionTypeSub:
-				e.Data = left - right
-			case ExpressionTypeMul:
-				e.Data = left * right
-			case ExpressionTypeDiv:
-				if right == 0 {
-					err = divisionByZeroErr(bin.Right.Pos)
-				}
-				e.Data = left
-			case ExpressionTypeMod:
-				if right == 0 {
-					err = divisionByZeroErr(bin.Right.Pos)
-				}
-				e.Data = left
+				e.longValue = left
 			default:
 				return false, null
 			}
@@ -403,29 +259,29 @@ class ExpressionConstFold {
 			//		PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.longExceeds(this.Data.(long)))
 			//	}
 			//}
-			e.Type = ExpressionTypeLong
+			e.Type = bin.Left.Type
 			is = true
 			return
-		case ExpressionTypeFloat:
+		case ExpressionTypeFloat ,ExpressionTypeDouble :
 			left := bin.Left.doubleValue
 			right := bin.Right.doubleValue
 			switch e.Type {
 			case ExpressionTypeAdd:
-				e.Data = left + right
+				e.doubleValue = left + right
 			case ExpressionTypeSub:
-				e.Data = left - right
+				e.doubleValue = left - right
 			case ExpressionTypeMul:
-				e.Data = left * right
+				e.doubleValue = left * right
 			case ExpressionTypeDiv:
 				if right == 0 {
 					err = divisionByZeroErr(bin.Right.Pos)
 				}
-				e.Data = left
+				e.doubleValue = left
 			case ExpressionTypeMod:
 				if right == 0 {
 					err = divisionByZeroErr(bin.Right.Pos)
 				}
-				e.Data = left
+				e.doubleValue = left
 			default:
 				return false, null
 			}
@@ -434,38 +290,7 @@ class ExpressionConstFold {
 			//		PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.floatExceeds())
 			//	}
 			//}
-			e.Type = ExpressionTypeFloat
-			is = true
-			return
-		case ExpressionTypeDouble:
-			left := bin.Left.doubleValue
-			right := bin.Right.doubleValue
-			switch e.Type {
-			case ExpressionTypeAdd:
-				e.Data = left + right
-			case ExpressionTypeSub:
-				e.Data = left - right
-			case ExpressionTypeMul:
-				e.Data = left * right
-			case ExpressionTypeDiv:
-				if right == 0 {
-					err = divisionByZeroErr(bin.Right.Pos)
-				}
-				e.Data = left
-			case ExpressionTypeMod:
-				if right == 0 {
-					err = divisionByZeroErr(bin.Right.Pos)
-				}
-				e.Data = left
-			default:
-				return false, null
-			}
-			//if this.Type == ExpressionTypeAdd || this.Type == ExpressionTypeSub {
-			//	if t := this.doubleValue < 0; t != (bin.Left.doubleValue < 0) && t != (bin.Left.doubleValue < 0) {
-			//		PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.floatExceeds())
-			//	}
-			//}
-			e.Type = ExpressionTypeDouble
+			e.Type = bin.Left.Type
 			is = true
 			return
 		case ExpressionTypeString:
@@ -491,9 +316,9 @@ class ExpressionConstFold {
 			bin.Right.Type == ExpressionTypeBool &&
 			e.isEqOrNe() {
 			if e.Type == ExpressionTypeEq {
-				e.Data = bin.Left.Data.(bool) == bin.Right.Data.(bool)
+				e.longValue = (bin.Left.longValue == bin.Right.longValue) ? 1 : 0
 			} else {
-				e.Data = bin.Left.Data.(bool) != bin.Right.Data.(bool)
+				e.longValue = (bin.Left.longValue != bin.Right.longValue) ? 1 : 0
 			}
 			e.Type = ExpressionTypeBool
 			return
@@ -508,17 +333,17 @@ class ExpressionConstFold {
 			var b bool
 			switch e.Type {
 			case ExpressionTypeEq:
-				b := left == right
+				b = left == right
 			case ExpressionTypeNe:
-				b := left != right
+				b = left != right
 			case ExpressionTypeGe:
-				b := left >= right
+				b = left >= right
 			case ExpressionTypeGt:
-				b := left > right
+				b = left > right
 			case ExpressionTypeLe:
-				b := left <= right
+				b = left <= right
 			case ExpressionTypeLt:
-				b := left < right
+				b = left < right
 			default:
 			}
 			if b {
