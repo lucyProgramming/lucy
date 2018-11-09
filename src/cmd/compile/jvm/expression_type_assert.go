@@ -59,6 +59,10 @@ func (this *BuildExpression) buildTypeAssert(
 		if 5 > maxStack {
 			maxStack = 5
 		}
+		code.Codes[code.CodeLength] = cg.OP_checkcast // convince the jvm
+		code.CodeLength++
+		insertTypeAssertClass(class, code, assert.Type)
+
 		code.Codes[code.CodeLength] = cg.OP_aastore
 		code.CodeLength++
 
@@ -89,6 +93,9 @@ func (this *BuildExpression) buildTypeAssert(
 		state.pushStack(class, assert.Expression.Value)
 		defer state.popStack(1)
 		context.MakeStackMap(code, state, code.CodeLength)
+		code.Codes[code.CodeLength] = cg.OP_checkcast // convince the jvm
+		code.CodeLength++
+		insertTypeAssertClass(class, code, assert.Type)
 	}
 
 	return

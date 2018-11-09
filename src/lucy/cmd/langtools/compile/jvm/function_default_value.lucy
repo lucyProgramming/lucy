@@ -1,17 +1,10 @@
-package jvm
 
-import (
-	"encoding/binary"
-	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 type DefaultValueParse struct {
 }
 
 func (this *DefaultValueParse) Encode(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	f *ast.Function) *cg.AttributeDefaultParameters {
 	ret := &cg.AttributeDefaultParameters{}
 	ret.Start = char(f.DefaultValueStartAt)
@@ -19,9 +12,9 @@ func (this *DefaultValueParse) Encode(
 		switch f.Type.ParameterList[i].DefaultValueExpression.Type {
 		case ast.ExpressionTypeBool:
 			if f.Type.ParameterList[i].DefaultValueExpression.Data.(bool) {
-				ret.Constants = append(ret.Constants, class.Class.InsertIntConst(1))
+				ret.Constants = append(ret.Constants, ast.TypeClass.InsertIntConst(1))
 			} else {
-				ret.Constants = append(ret.Constants, class.Class.InsertIntConst(0))
+				ret.Constants = append(ret.Constants, ast.TypeClass.InsertIntConst(0))
 			}
 		case ast.ExpressionTypeByte:
 			fallthrough
@@ -29,18 +22,18 @@ func (this *DefaultValueParse) Encode(
 			fallthrough
 		case ast.ExpressionTypeInt:
 			t := f.Type.ParameterList[i].DefaultValueExpression.Data.(long)
-			ret.Constants = append(ret.Constants, class.Class.InsertIntConst(int(t)))
+			ret.Constants = append(ret.Constants, ast.TypeClass.InsertIntConst(int(t)))
 		case ast.ExpressionTypeLong:
-			ret.Constants = append(ret.Constants, class.Class.InsertLongConst(
+			ret.Constants = append(ret.Constants, ast.TypeClass.InsertLongConst(
 				f.Type.ParameterList[i].DefaultValueExpression.Data.(long)))
 		case ast.ExpressionTypeFloat:
-			ret.Constants = append(ret.Constants, class.Class.InsertFloatConst(
+			ret.Constants = append(ret.Constants, ast.TypeClass.InsertFloatConst(
 				f.Type.ParameterList[i].DefaultValueExpression.Data.(float)))
 		case ast.ExpressionTypeDouble:
-			ret.Constants = append(ret.Constants, class.Class.InsertDoubleConst(
+			ret.Constants = append(ret.Constants, ast.TypeClass.InsertDoubleConst(
 				f.Type.ParameterList[i].DefaultValueExpression.Data.(double)))
 		case ast.ExpressionTypeString:
-			ret.Constants = append(ret.Constants, class.Class.InsertStringConst(
+			ret.Constants = append(ret.Constants, ast.TypeClass.InsertStringConst(
 				f.Type.ParameterList[i].DefaultValueExpression.Data.(string)))
 		}
 	}
@@ -58,40 +51,40 @@ func (this *DefaultValueParse) Decode(class *cg.Class, f *ast.Function, dp *cg.A
 		case ast.VariableTypeBool:
 			v.DefaultValueExpression.Type = ast.ExpressionTypeBool
 			v.DefaultValueExpression.Data =
-				binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info) != 0
+				binary.BigEndian.Uint32(ast.TypeConstPool[dp.Constants[i]].Info) != 0
 		case ast.VariableTypeByte:
 			v.DefaultValueExpression.Type = ast.ExpressionTypeByte
 			v.DefaultValueExpression.Data =
-				long(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
+				long(binary.BigEndian.Uint32(ast.TypeConstPool[dp.Constants[i]].Info))
 		case ast.VariableTypeShort:
 			v.DefaultValueExpression.Type = ast.ExpressionTypeShort
 			v.DefaultValueExpression.Data =
-				long(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
+				long(binary.BigEndian.Uint32(ast.TypeConstPool[dp.Constants[i]].Info))
 		case ast.VariableTypeChar:
 			v.DefaultValueExpression.Type = ast.ExpressionTypeChar
 			v.DefaultValueExpression.Data =
-				long(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
+				long(binary.BigEndian.Uint32(ast.TypeConstPool[dp.Constants[i]].Info))
 		case ast.VariableTypeInt:
 			v.DefaultValueExpression.Type = ast.ExpressionTypeInt
 			v.DefaultValueExpression.Data =
-				long(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
+				long(binary.BigEndian.Uint32(ast.TypeConstPool[dp.Constants[i]].Info))
 		case ast.VariableTypeLong:
 			v.DefaultValueExpression.Type = ast.ExpressionTypeLong
 			v.DefaultValueExpression.Data =
-				long(binary.BigEndian.Uint64(class.ConstPool[dp.Constants[i]].Info))
+				long(binary.BigEndian.Uint64(ast.TypeConstPool[dp.Constants[i]].Info))
 		case ast.VariableTypeFloat:
 			v.DefaultValueExpression.Type = ast.ExpressionTypeFloat
 			v.DefaultValueExpression.Data =
-				float(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
+				float(binary.BigEndian.Uint32(ast.TypeConstPool[dp.Constants[i]].Info))
 		case ast.VariableTypeDouble:
 			v.DefaultValueExpression.Type = ast.ExpressionTypeDouble
 			v.DefaultValueExpression.Data =
-				double(binary.BigEndian.Uint32(class.ConstPool[dp.Constants[i]].Info))
+				double(binary.BigEndian.Uint32(ast.TypeConstPool[dp.Constants[i]].Info))
 		case ast.VariableTypeString:
 			v.DefaultValueExpression.Type = ast.ExpressionTypeString
-			utf8Index := binary.BigEndian.Uint16(class.ConstPool[dp.Constants[i]].Info)
+			utf8Index := binary.BigEndian.Uint16(ast.TypeConstPool[dp.Constants[i]].Info)
 			v.DefaultValueExpression.Data =
-				string(class.ConstPool[utf8Index].Info)
+				string(ast.TypeConstPool[utf8Index].Info)
 		}
 		v.DefaultValueExpression.Op = sprintf("%v", v.DefaultValueExpression.Data)
 	}

@@ -1,10 +1,10 @@
  
-class FunctionType {
-	TemplateNames    []NameWithPos
-	TemplateNamesMap map { string -> Pos }
-	ParameterList    []Variable
-	ReturnList       []Variable
-	VArgs            Variable
+public class FunctionType {
+	public TemplateNames    []NameWithPos
+	public TemplateNamesMap map { string -> Pos }
+	public ParameterList    []Variable
+	public ReturnList       []Variable
+	public VArgs            Variable
 
 	fn CheckTemplateNameDuplication() -> (errs []error) {
 		errs = []error{}

@@ -55,7 +55,7 @@ class ExpressionCheckSelection {
                 return result
             }
         case VariableTypePackage:
-            d, ok := object.Package.Block.NameExists(selection.Name)
+            d, ok := object.Package.Block.nameExists(selection.Name)
             if ok == false {
                 err := new error(sprintf("%s '%s' not found",
                     e.Pos.ErrMsgPrefix(), selection.Name))

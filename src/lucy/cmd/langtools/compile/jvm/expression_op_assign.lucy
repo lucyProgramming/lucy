@@ -1,15 +1,10 @@
-package jvm
 
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 /*
 	s += "456";
 */
 func (this *BuildExpression) buildStrPlusAssign(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -33,7 +28,7 @@ func (this *BuildExpression) buildStrPlusAssign(
 		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      javaStringClass,
 		Method:     `concat`,
 		Descriptor: "(Ljava/lang/String;)Ljava/lang/String;",
@@ -50,7 +45,7 @@ func (this *BuildExpression) buildStrPlusAssign(
 	return
 }
 func (this *BuildExpression) buildOpAssign(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,

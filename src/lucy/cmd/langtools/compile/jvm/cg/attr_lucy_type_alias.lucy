@@ -1,9 +1,9 @@
 import "lucy/binary"
 
-class AttributeLucyTypeAlias {
-	Alias   string
-	Comment string
-	fn FromBs(c Class, bs []byte) {
+public class AttributeLucyTypeAlias {
+	public Alias   string
+	public Comment string
+	public fn FromBs(c Class, bs []byte) {
 		this.Alias = string(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
 		this.Comment = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].Info)
 	}

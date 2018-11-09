@@ -1,12 +1,7 @@
-package jvm
-
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
+ 
 
 func (this *BuildExpression) buildIndex(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -31,7 +26,7 @@ func (this *BuildExpression) buildIndex(
 	if index.Expression.Value.Type == ast.VariableTypeArray {
 		meta := ArrayMetas[e.Value.Type]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      meta.className,
 			Method:     "get",
 			Descriptor: meta.getMethodDescription,
@@ -69,7 +64,7 @@ func (this *BuildExpression) buildIndex(
 }
 
 func (this *BuildExpression) buildStringIndex(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -81,7 +76,7 @@ func (this *BuildExpression) buildStringIndex(
 	index := e.Data.(*ast.ExpressionIndex)
 	maxStack = this.build(class, code, index.Expression, context, state)
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      javaStringClass,
 		Method:     "getBytes",
 		Descriptor: "()[B",
@@ -97,7 +92,7 @@ func (this *BuildExpression) buildStringIndex(
 	return
 }
 func (this *BuildExpression) buildMapIndex(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -120,7 +115,7 @@ func (this *BuildExpression) buildMapIndex(
 		typeConverter.packPrimitives(class, code, index.Expression.Value.Map.K)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      mapClass,
 		Method:     "get",
 		Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",

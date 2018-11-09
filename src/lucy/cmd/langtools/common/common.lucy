@@ -17,7 +17,6 @@ public fn getLucyPath()->(paths []string){
 	envs := os.getEnvs()
 	if envs.keyExist("LUCYROOT") == false {
 		panic("env variable LUCYROOT is not set")
-
 	}
 	if envs.keyExist("LUCYPATH") == false {
 		panic("env variable LUCYPATH is not set")

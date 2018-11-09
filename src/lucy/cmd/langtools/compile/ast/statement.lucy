@@ -21,26 +21,26 @@ public enum StatementTypeKind {
 	StatementTypeTypeAlias 
 }
 
-class Statement {
-	Type                      StatementTypeKind
-	Checked                   bool // if checked
-	Pos                       Pos
-	StatementIf               StatementIf
-	Expression                Expression
-	TypeAlias                 TypeAlias
-	StatementFor              StatementFor
-	StatementReturn           StatementReturn
-	StatementSwitch           StatementSwitch
-	StatementWhen             StatementWhen
-	StatementBreak            StatementBreak
-	Block                     Block
-	StatementContinue         StatementContinue
-	StatementLabel            StatementLabel
-	StatementGoTo             StatementGoTo
-	Defer                     StatementDefer
-	Class                     Class
-	Enum                      Enum
-	Import                    Import
+public class Statement {
+	public Type                      StatementTypeKind
+	public Checked                   bool // if checked
+	public Pos                       Pos
+	public StatementIf               StatementIf
+	public Expression                Expression
+	public TypeAlias                 TypeAlias
+	public StatementFor              StatementFor
+	public StatementReturn           StatementReturn
+	public StatementSwitch           StatementSwitch
+	public StatementWhen             StatementWhen
+	public StatementBreak            StatementBreak
+	public Block                     Block
+	public StatementContinue         StatementContinue
+	public StatementLabel            StatementLabel
+	public StatementGoTo             StatementGoTo
+	public Defer                     StatementDefer
+	public Class                     Class
+	public Enum                      Enum
+	public Import                    Import
 	isStaticFieldDefaultValue bool
 	/*
 		this.super()

@@ -1,9 +1,4 @@
-package jvm
 
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 type AutoVariableForRangeArray struct {
 	AutoVariableForRangeJavaArray
@@ -11,7 +6,7 @@ type AutoVariableForRangeArray struct {
 }
 
 func (this *BuildPackage) buildForRangeStatementForArray(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	s *ast.StatementFor,
 	context Context,
@@ -31,8 +26,8 @@ func (this *BuildPackage) buildForRangeStatementForArray(
 	state.popStack(1)
 	forState := (&StackMapState{}).initFromLast(state)
 	defer state.addTop(forState) // add top
-	needK := attr.ExpressionKey != nil ||
-		attr.IdentifierKey != nil
+	needK := attr.ExpressionKey != null ||
+		attr.IdentifierKey != null
 	var autoVar AutoVariableForRangeArray
 	{
 		// else
@@ -65,7 +60,7 @@ func (this *BuildPackage) buildForRangeStatementForArray(
 	}
 	meta := ArrayMetas[attr.RangeOn.Value.Array.Type]
 	code.Codes[code.CodeLength+1] = cg.OP_getfield
-	class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+	ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 		Class:      meta.className,
 		Field:      "elements",
 		Descriptor: meta.elementsFieldDescriptor,
@@ -77,7 +72,7 @@ func (this *BuildPackage) buildForRangeStatementForArray(
 		t := &ast.Type{}
 		t.Type = ast.VariableTypeJavaArray
 		t.Array = attr.RangeOn.Value.Array
-		class.InsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
 
@@ -85,7 +80,7 @@ func (this *BuildPackage) buildForRangeStatementForArray(
 	//get start
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.Codes[code.CodeLength+1] = cg.OP_getfield
-	class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+	ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 		Class:      meta.className,
 		Field:      "start",
 		Descriptor: "I",
@@ -98,7 +93,7 @@ func (this *BuildPackage) buildForRangeStatementForArray(
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.Start)...)
 	//get end
 	code.Codes[code.CodeLength] = cg.OP_getfield
-	class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+	ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 		Class:      meta.className,
 		Field:      "end",
 		Descriptor: "I",
@@ -114,7 +109,7 @@ func (this *BuildPackage) buildForRangeStatementForArray(
 	}
 	//handle captured vars
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
-		if attr.IdentifierValue != nil &&
+		if attr.IdentifierValue != null &&
 			attr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
 			closure.createClosureVar(class, code, attr.IdentifierValue.Variable.Type)
 			attr.IdentifierValue.Variable.LocalValOffset = code.MaxLocals
@@ -124,7 +119,7 @@ func (this *BuildPackage) buildForRangeStatementForArray(
 			forState.appendLocals(class,
 				forState.newObjectVariableType(closure.getMeta(attr.RangeOn.Value.Array.Type).className))
 		}
-		if attr.IdentifierKey != nil &&
+		if attr.IdentifierKey != null &&
 			attr.IdentifierKey.Variable.BeenCapturedAsLeftValue > 0 {
 			closure.createClosureVar(class, code, attr.IdentifierKey.Variable.Type)
 			attr.IdentifierKey.Variable.LocalValOffset = code.MaxLocals
@@ -165,8 +160,8 @@ func (this *BuildPackage) buildForRangeStatementForArray(
 	s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_if_icmpge, code))
 
 	//load elements
-	if attr.IdentifierValue != nil ||
-		attr.ExpressionValue != nil {
+	if attr.IdentifierValue != null ||
+		attr.ExpressionValue != null {
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.Elements)...)
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.Start)...)
 		// load value
@@ -205,7 +200,7 @@ func (this *BuildPackage) buildForRangeStatementForArray(
 	}
 	//current stack is 0
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
-		if attr.IdentifierValue != nil {
+		if attr.IdentifierValue != null {
 			if attr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject,
 					attr.IdentifierValue.Variable.LocalValOffset)...)
@@ -217,7 +212,7 @@ func (this *BuildPackage) buildForRangeStatementForArray(
 				attr.IdentifierValue.Variable.LocalValOffset = autoVar.V
 			}
 		}
-		if attr.IdentifierKey != nil {
+		if attr.IdentifierKey != null {
 			if attr.IdentifierKey.Variable.BeenCapturedAsLeftValue > 0 {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject,
 					attr.IdentifierKey.Variable.LocalValOffset)...)
@@ -231,7 +226,7 @@ func (this *BuildPackage) buildForRangeStatementForArray(
 	} else { // for k,v = range arr
 		// store v
 		//get ops,make_node_objects ops ready
-		if attr.ExpressionValue != nil {
+		if attr.ExpressionValue != null {
 			stackLength := len(blockState.Stacks)
 			stack, remainStack, ops, _ := this.BuildExpression.getLeftValue(class,
 				code, attr.ExpressionValue, context, blockState)
@@ -247,7 +242,7 @@ func (this *BuildPackage) buildForRangeStatementForArray(
 			copyOPs(code, ops...)
 			blockState.popStack(len(blockState.Stacks) - stackLength)
 		}
-		if attr.ExpressionKey != nil { // set to k
+		if attr.ExpressionKey != null { // set to k
 			stackLength := len(blockState.Stacks)
 			stack, remainStack, ops, _ := this.BuildExpression.getLeftValue(class,
 				code, attr.ExpressionKey, context, blockState)

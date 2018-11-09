@@ -1,14 +1,14 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-class StatementIf {
-	PrefixExpressions   []Expression
-	Condition           Expression
-	Pos                 Pos
-	initExpressionBlock Block = new Block()
-	Block               Block
-	ElseIfList          []StatementElseIf
-	Else               	Block
-	Exits               []cg.Exit
+public class StatementIf {
+	public PrefixExpressions   []Expression
+	public Condition           Expression
+	public Pos                 Pos
+	public initExpressionBlock Block = new Block()
+	public Block               Block
+	public ElseIfList          []StatementElseIf
+	public Else               	Block
+	public Exits               []cg.Exit
 	
 	fn check(father Block) -> (errs []error = []error{})  {
 		this.initExpressionBlock.inherit(father)
@@ -60,7 +60,7 @@ class StatementIf {
 
 
 
-class StatementElseIf {
-	Condition Expression
-	Block     Block
+public class StatementElseIf {
+	public Condition Expression
+	public Block     Block
 }

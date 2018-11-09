@@ -1,10 +1,4 @@
-package jvm
-
-import (
-	"bytes"
-	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-)
+ 
 
 type Description struct {
 }
@@ -14,7 +8,7 @@ func (this *Description) methodDescriptor(functionType *ast.FunctionType) string
 	for _, v := range functionType.ParameterList {
 		s += this.typeDescriptor(v.Type)
 	}
-	if functionType.VArgs != nil {
+	if functionType.VArgs != null {
 		s += this.typeDescriptor(functionType.VArgs.Type)
 	}
 	s += ")"
@@ -28,7 +22,7 @@ func (this *Description) methodDescriptor(functionType *ast.FunctionType) string
 	return s
 }
 
-func (this *Description) typeDescriptor(typ *ast.Type) string {
+func (this *Description) typeDescriptor(typ ast.Type) string {
 	switch typ.Type {
 	case ast.VariableTypeBool:
 		return "Z"
@@ -65,53 +59,53 @@ func (this *Description) typeDescriptor(typ *ast.Type) string {
 	panic("unHandle type signature")
 }
 
-func (this *Description) ParseType(bs []byte) ([]byte, *ast.Type, error) {
+func (this *Description) ParseType(bs []byte) ([]byte, ast.Type, error) {
 	switch bs[0] {
 	case 'V':
 		bs = bs[1:]
 		return bs, &ast.Type{
 			Type: ast.VariableTypeVoid,
-		}, nil
+		}, null
 	case 'B':
 		bs = bs[1:]
 		return bs, &ast.Type{
 			Type: ast.VariableTypeByte,
-		}, nil
+		}, null
 	case 'D':
 		bs = bs[1:]
 		return bs, &ast.Type{
 			Type: ast.VariableTypeDouble,
-		}, nil
+		}, null
 	case 'F':
 		bs = bs[1:]
 		return bs, &ast.Type{
 			Type: ast.VariableTypeFloat,
-		}, nil
+		}, null
 	case 'I':
 		bs = bs[1:]
 		return bs, &ast.Type{
 			Type: ast.VariableTypeInt,
-		}, nil
+		}, null
 	case 'J':
 		bs = bs[1:]
 		return bs, &ast.Type{
 			Type: ast.VariableTypeLong,
-		}, nil
+		}, null
 	case 'C':
 		bs = bs[1:]
 		return bs, &ast.Type{
 			Type: ast.VariableTypeChar,
-		}, nil
+		}, null
 	case 'S':
 		bs = bs[1:]
 		return bs, &ast.Type{
 			Type: ast.VariableTypeShort,
-		}, nil
+		}, null
 	case 'Z':
 		bs = bs[1:]
 		return bs, &ast.Type{
 			Type: ast.VariableTypeBool,
-		}, nil
+		}, null
 	case 'L':
 		bs = bs[1:]
 		index := bytes.Index(bs, []byte{';'}) // end token
@@ -124,20 +118,20 @@ func (this *Description) ParseType(bs []byte) ([]byte, *ast.Type, error) {
 		if t.Class.Name == javaStringClass {
 			t.Type = ast.VariableTypeString
 		}
-		return bs, t, nil
+		return bs, t, null
 	case '[':
 		bs = bs[1:]
-		var t *ast.Type
+		var t ast.Type
 		var err error
 		bs, t, err = this.ParseType(bs)
 		ret := &ast.Type{}
-		if err == nil {
+		if err == null {
 			ret.Type = ast.VariableTypeJavaArray
 			ret.Array = t
 		}
 		return bs, ret, err
 	}
-	return bs, nil, new error(sprintf("unkown type:%v", string(bs))
+	return bs, null, new error(sprintf("unkown type:%v", string(bs))
 }
 
 func (this *Description) ParseFunctionType(bs []byte) (ast.FunctionType, error) {
@@ -150,7 +144,7 @@ func (this *Description) ParseFunctionType(bs []byte) (ast.FunctionType, error) 
 	for bs[0] != ')' {
 		vd := &ast.Variable{}
 		bs, vd.Type, err = this.ParseType(bs)
-		if err != nil {
+		if err != null {
 			return t, err
 		}
 		t.ParameterList = append(t.ParameterList, vd)
@@ -159,9 +153,9 @@ func (this *Description) ParseFunctionType(bs []byte) (ast.FunctionType, error) 
 	vd := &ast.Variable{}
 	vd.Name = "returnValue"
 	_, vd.Type, err = this.ParseType(bs)
-	if err != nil {
+	if err != null {
 		return t, err
 	}
 	t.ReturnList = append(t.ReturnList, vd)
-	return t, nil
+	return t, null
 }

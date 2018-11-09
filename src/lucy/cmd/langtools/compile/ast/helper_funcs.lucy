@@ -12,22 +12,22 @@ fn checkExpressions(block Block, es []Expression, errs []error, singleValueConte
 	for _, v := range es {
 		ts, es := v.check(block)
 		errs.appendAll(es)
-		if ts == nil {
-			ret = append(ret, nil)
+		if ts == null {
+			ret.append(null)
 		} else {
 			if len(ts) > 1 && singleValueContext {
 				errs.append(new error( sprintf("%s multi value in single value context",
 					errMsgPrefix(v.Pos))))
 			}
 			for _, t := range ts {
-				if t == nil {
+				if t == null {
 					continue
 				}
-				if err := t.rightValueValid(); err != nil {
+				if err := t.rightValueValid(); err != null {
 					errs.append(err)
 				}
 			}
-			ret = append(ret, ts...)
+			ret.appendAll(ts)
 		}
 	}
 	return ret
@@ -45,7 +45,7 @@ fn getExtraExpressionPos(args []Expression, n int) -> (pos Pos) {
 			return a.Pos
 		}
 	}
-	return nil
+	return null
 }
 
 fn mkVoidType(pos Pos) -> (voidType Type) {
@@ -64,16 +64,16 @@ fn shouldAccessFromImports(name string, from Pos, alreadyHave Pos) -> (i Import,
 	// should access from import
 	if from.Filename != alreadyHave.Filename {
 		i := PackageBeenCompile.getImport(from.Filename, name)
-		if i != nil {
+		if i != null {
 			i.Used = true
 			return i, true
 		} else {
-			return nil, false
+			return null, false
 		}
 	}
-	i := PackageBeenCompile.getImport(from.Filename, name)
-	if i == nil {
-		return nil, false
+	i = PackageBeenCompile.getImport(from.Filename, name)
+	if i == null {
+		return null, false
 	}
 	// this is should
 	/*
@@ -81,7 +81,7 @@ fn shouldAccessFromImports(name string, from Pos, alreadyHave Pos) -> (i Import,
 		from
 		alreadyHave
 	*/
-	should := from.Line < alreadyHave.Line
+	should = from.Line < alreadyHave.Line
 	if should {
 		i.Used = true
 	}
@@ -94,15 +94,15 @@ fn methodsNotMatchError(pos Pos, name string, ms []ClassMethod, want []Type) -> 
 	}
 	var errMsg string
 	if len(ms) == 1 {
-		errMsg = fmt.Sprintf("%s cannot call method '%s':\n",
+		errMsg = sprintf("%s cannot call method '%s':\n",
 			pos.ErrMsgPrefix(), name)
 	} else {
-		errMsg = fmt.Sprintf("%s method named '%s' have no suitable match:\n",
+		errMsg = sprintf("%s method named '%s' have no suitable match:\n",
 			pos.ErrMsgPrefix(), name)
 	}
 	wantString := "fn " + name + " ("
 	for k, v := range want {
-		if v == nil {
+		if v == null {
 			continue
 		}
 		wantString += v.TypeString()
@@ -119,33 +119,32 @@ fn methodsNotMatchError(pos Pos, name string, ms []ClassMethod, want []Type) -> 
 }
 
 fn searchBuildIns(name string) -> (t Object)  {
-	var ok bool
-	t, ok = buildInFunctionsMap[name]
-	if ok {
+	t = buildInFunctionsMap[name]
+	if t != null {
 		//check
-		if _, exists := lucyBuildInPackage.Block.NameExists(name); exists {
-			panic(fmt.Sprintf("%s both exits in 'build function' and 'core package'",
+		if _, exists := lucyBuildInPackage.Block.nameExists(name); exists {
+			panic(sprintf("%s both exits in 'build function' and 'core package'",
 				name))
 		}
 		return t
 	}
-	if lucyBuildInPackage != nil { // avoid lucy/lang package
-		t, _ = lucyBuildInPackage.Block.NameExists(name)
+	if lucyBuildInPackage != null { // avoid lucy/lang package
+		t, _ = lucyBuildInPackage.Block.nameExists(name)
 		return t
 	}
-	return nil
+	return null
 }
 
 fn checkConst(block Block, c Constant) -> (err error)  {
-	if c.Type != nil {
+	if c.Type != null {
 		c.mkDefaultValue()
 	}
-	if c.DefaultValueExpression == nil {
+	if c.DefaultValueExpression == null {
 		err := new error(sprintf("%s const have no expression", errMsgPrefix(c.Pos)))
 		return err
 	}
 	is, err := c.DefaultValueExpression.constantFold()
-	if err != nil {
+	if err != null {
 		return err
 	}
 	if is == false {
@@ -155,7 +154,7 @@ fn checkConst(block Block, c Constant) -> (err error)  {
 	}
 	c.Value = c.DefaultValueExpression.Data
 	t, _ := c.DefaultValueExpression.checkSingleValueContextExpression(block)
-	if c.Type != nil {
+	if c.Type != null {
 		es := []error{}
 		if c.Type.assignAble(es, t) == false {
 			if (c.Type.isInteger() && t.isInteger()) ||
@@ -171,7 +170,7 @@ fn checkConst(block Block, c Constant) -> (err error)  {
 	} else { // means use old type
 		c.Type = t
 	}
-	return nil
+	return null
 }
 
 fn convertExpressionToNeed(e Expression, need Type, eval Type) {
@@ -191,10 +190,10 @@ fn convertExpressionsToNeeds(es []Expression, needs []Type, eval []Type) {
 		if k >= len(needs) {
 			break
 		}
-		if needs[k] == nil {
+		if needs[k] == null {
 			continue
 		}
-		if eval[k] == nil {
+		if eval[k] == null {
 			continue
 		}
 

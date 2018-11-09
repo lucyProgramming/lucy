@@ -1,11 +1,11 @@
 import "lucy/binary"
  
 
-class AttributeLucyFieldDescriptor {
-	Descriptor       string
-	MethodAccessFlag char
+public class AttributeLucyFieldDescriptor {
+	public Descriptor       string
+	public MethodAccessFlag char
 
-	fn FromBs(c Class, bs []byte) {
+	public fn FromBs(c Class, bs []byte) {
 		if len(bs) != 4 {
 			panic("length is not 4")
 		}

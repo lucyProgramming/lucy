@@ -1,12 +1,7 @@
-package jvm
-
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
+ 
 
 func (this *BuildExpression) buildCapturedIdentifier(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context) (maxStack char) {
@@ -19,8 +14,8 @@ func (this *BuildExpression) buildCapturedIdentifier(
 			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 			meta := closure.getMeta(identifier.Variable.Type.Type)
 			code.Codes[code.CodeLength] = cg.OP_getfield
-			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
-				Class:      class.Name,
+			ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+				Class:      ast.TypeName,
 				Field:      identifier.Variable.Name,
 				Descriptor: "L" + meta.className + ";",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -29,8 +24,8 @@ func (this *BuildExpression) buildCapturedIdentifier(
 		} else {
 			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 			code.Codes[code.CodeLength] = cg.OP_getfield
-			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
-				Class:      class.Name,
+			ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+				Class:      ast.TypeName,
 				Field:      identifier.Variable.Name,
 				Descriptor: Descriptor.typeDescriptor(identifier.Variable.Type),
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -48,7 +43,7 @@ func (this *BuildExpression) buildCapturedIdentifier(
 }
 
 func (this *BuildExpression) buildIdentifier(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context) (maxStack char) {
@@ -57,15 +52,15 @@ func (this *BuildExpression) buildIdentifier(
 	}
 	identifier := e.Data.(*ast.ExpressionIdentifier)
 	switch {
-	case e.Value.Type == ast.VariableTypeEnum && identifier.EnumName != nil:
+	case e.Value.Type == ast.VariableTypeEnum && identifier.EnumName != null:
 		loadInt32(class, code, identifier.EnumName.Value)
 		maxStack = 1
 		return
-	case identifier.Function != nil:
+	case identifier.Function != null:
 		return this.BuildPackage.packFunction2MethodHandle(class, code, identifier.Function, context)
 	case identifier.Variable.IsGlobal:
 		code.Codes[code.CodeLength] = cg.OP_getstatic
-		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+		ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 			Class:      this.BuildPackage.mainClass.Name,
 			Field:      identifier.Name,
 			Descriptor: Descriptor.typeDescriptor(identifier.Variable.Type),

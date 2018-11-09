@@ -1,14 +1,14 @@
  import "lucy/binary"
 
  
-const	MethodParameterTypeAccFinal     = 0x0010
-const	MethodParameterTypeAccSynthetic = 0x1000
-const	MethodParameterTypeAccMandated  = 0x8000
+public const	MethodParameterTypeAccFinal     = 0x0010
+public const	MethodParameterTypeAccSynthetic = 0x1000
+public const	MethodParameterTypeAccMandated  = 0x8000
  
 
-class AttributeMethodParameters  {
-	Parameters []MethodParameter
-	fn FromBs(c Class, bs []byte) {
+public class AttributeMethodParameters  {
+	public Parameters []MethodParameter
+	public fn FromBs(c Class, bs []byte) {
 		if len(bs) != int(bs[0])*4+1 {
 			panic("impossible")
 		}

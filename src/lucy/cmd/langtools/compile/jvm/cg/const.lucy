@@ -1,22 +1,22 @@
 
-const	ConstantPoolMaxSize                  = 65536
-const	ClassMagicNumber               		 = 0xcafebabe
-const	AttributeNameSourceFile              = "SourceFile"
-const	AttributeNameConstValue              = "ConstantValue"
-const	AttributeNameStackMap                = "StackMapTable"
-const	AttributeNameSignature               = "Signature"
-const	AttributeNameMethodParameters        = "MethodParameters"
-const	AttributeNameInnerClasses            = "InnerClasses"
+public const	ConstantPoolMaxSize                  = 65536
+public const	ClassMagicNumber               		 = 0xcafebabe
+public const	AttributeNameSourceFile              = "SourceFile"
+public const	AttributeNameConstValue              = "ConstantValue"
+public const	AttributeNameStackMap                = "StackMapTable"
+public const	AttributeNameSignature               = "Signature"
+public const	AttributeNameMethodParameters        = "MethodParameters"
+public const	AttributeNameInnerClasses            = "InnerClasses"
 
-const	AttributeNameLucyFieldDescriptor    = "LucyFieldDescriptor"
-const	AttributeNameLucyMethodDescriptor   = "LucyMethodDescriptor"
-const	AttributeNameLucyTriggerPackageInit = "LucyTriggerPackageInitMethod"
-const	AttributeNameLucyDefaultParameters  = "LucyDefaultParameters"
-const	AttributeNameLucyTypeAlias          = "LucyTypeAlias"
-const	AttributeNameLucyEnum               = "LucyEnum"
-const	AttributeNameLucyConst              = "LucyConst" // indicate a package const
-const	AttributeNameLucyReturnListNames    = "LucyReturnListName"
-const	AttributeNameLucyTemplateFunction   = "LucyTemplateFunction"
-const	AttributeNameLucyComment            = "LucyComment"
-const	AttributeNameLucyClassConst         = "LucyClassConst"
+public const	AttributeNameLucyFieldDescriptor    = "LucyFieldDescriptor"
+public const	AttributeNameLucyMethodDescriptor   = "LucyMethodDescriptor"
+public const	AttributeNameLucyTriggerPackageInit = "LucyTriggerPackageInitMethod"
+public const	AttributeNameLucyDefaultParameters  = "LucyDefaultParameters"
+public const	AttributeNameLucyTypeAlias          = "LucyTypeAlias"
+public const	AttributeNameLucyEnum               = "LucyEnum"
+public const	AttributeNameLucyConst              = "LucyConst" // indicate a package const
+public const	AttributeNameLucyReturnListNames    = "LucyReturnListName"
+public const	AttributeNameLucyTemplateFunction   = "LucyTemplateFunction"
+public const	AttributeNameLucyComment            = "LucyComment"
+public const	AttributeNameLucyClassConst         = "LucyClassConst"
  

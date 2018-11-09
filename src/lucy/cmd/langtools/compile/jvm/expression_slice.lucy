@@ -1,12 +1,8 @@
-package jvm
 
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
+
 
 func (this *BuildExpression) buildStringSlice(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -23,14 +19,14 @@ func (this *BuildExpression) buildStringSlice(
 	if t := 1 + stack; t > maxStack {
 		maxStack = t
 	}
-	if slice.End != nil {
+	if slice.End != null {
 		state.pushStack(class, slice.Start.Value)
 		stack = this.build(class, code, slice.End, context, state)
 		if t := 2 + stack; t > maxStack {
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "substring",
 			Descriptor: "(II)Ljava/lang/String;",
@@ -38,7 +34,7 @@ func (this *BuildExpression) buildStringSlice(
 		code.CodeLength += 3
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "substring",
 			Descriptor: "(I)Ljava/lang/String;",
@@ -48,7 +44,7 @@ func (this *BuildExpression) buildStringSlice(
 	return
 }
 
-func (this *BuildExpression) buildSlice(class cg.ClassHighLevel, code cg.AttributeCode,
+func (this *BuildExpression) buildSlice(c cg.ClassHighLevel, code cg.AttributeCode,
 	e ast.Expression, context Context, state StackMapState) (maxStack char) {
 	slice := e.Data.(*ast.ExpressionSlice)
 	if slice.ExpressionOn.Value.Type == ast.VariableTypeString {
@@ -61,7 +57,7 @@ func (this *BuildExpression) buildSlice(class cg.ClassHighLevel, code cg.Attribu
 	meta := ArrayMetas[e.Value.Array.Type]
 	maxStack = this.build(class, code, slice.ExpressionOn, context, state)
 	state.pushStack(class, slice.ExpressionOn.Value)
-	if slice.End != nil {
+	if slice.End != null {
 		// build start
 		stack := this.build(class, code, slice.Start, context, state)
 		if t := 1 + stack; t > maxStack {
@@ -76,7 +72,7 @@ func (this *BuildExpression) buildSlice(class cg.ClassHighLevel, code cg.Attribu
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      meta.className,
 			Method:     "size",
 			Descriptor: "()I",
@@ -91,7 +87,7 @@ func (this *BuildExpression) buildSlice(class cg.ClassHighLevel, code cg.Attribu
 		code.CodeLength++
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      meta.className,
 		Method:     "slice",
 		Descriptor: meta.sliceDescriptor,

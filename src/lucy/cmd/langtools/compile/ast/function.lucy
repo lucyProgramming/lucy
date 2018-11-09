@@ -9,32 +9,32 @@ typealias buildInFunctionChecker = fn(
 	args []Type,
 	pos Pos) // usEed in build function
 
-class Function {
-	CallFatherConstructionExpression Expression
-	TemplateFunction                 TemplateFunction
+public class Function {
+	public CallFatherConstructionExpression Expression
+	public TemplateFunction                 TemplateFunction
 	parameterTypes                   map { string -> Type }     //typed parameters
-	Entrance                         cg.MethodHighLevel // make_node_objects call from
+	public Entrance                         cg.MethodHighLevel // make_node_objects call from
 	buildInFunctionChecker           buildInFunctionChecker
-	AccessFlags                      char
-	Type                             FunctionType
-	Closure                          Closure = new Closure()
-	Name                             string // if name is null string,means no name function
-	Block                            Block
-	Pos                              Pos
-	JvmDescriptor                    string
-	ClosureVariableOffSet            char // for closure
-	SourceCode                       []byte // source code for template function
-	HasDefer                         bool
-	HaveDefaultValue                 bool
-	DefaultValueStartAt              int
-	IsGlobal                         bool
-	IsBuildIn                        bool
-	LoadedFromCorePackage            bool
-	Used                             bool
-	TemplateClonedFunction           bool
+	public AccessFlags                      char
+	public Type                             FunctionType
+	public Closure                          Closure = new Closure()
+	public Name                             string // if name is null string,means no name function
+	public Block                            Block
+	public Pos                              Pos
+	public JvmDescriptor                    string
+	public ClosureVariableOffSet            char // for closure
+	public SourceCode                       []byte // source code for template function
+	public HasDefer                         bool
+	public HaveDefaultValue                 bool
+	public DefaultValueStartAt              int
+	public IsGlobal                         bool
+	public IsBuildIn                        bool
+	public LoadedFromCorePackage            bool
+	public Used                             bool
+	public TemplateClonedFunction           bool
 	isPackageInitBlockFunction       bool
-	Comment                          string
-	IsClosureFunction                bool
+	public Comment                          string
+	public IsClosureFunction                bool
 
 	fn IsPublic() -> (is bool) {
 		return this.AccessFlags&cg.AccMethodPublic != 0

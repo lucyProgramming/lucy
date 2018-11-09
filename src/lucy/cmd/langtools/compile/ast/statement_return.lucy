@@ -1,9 +1,9 @@
  
 
-class StatementReturn   {
-	Defers      []StatementDefer
-	Expressions []Expression
-	Pos         Pos
+public class StatementReturn   {
+	public Defers      []StatementDefer
+	public Expressions []Expression
+	public Pos         Pos
 
 
 	fn mkDefers(b Block) {

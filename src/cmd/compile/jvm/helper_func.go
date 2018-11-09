@@ -117,7 +117,9 @@ func nameTemplateFunction(function *ast.Function) string {
 }
 
 func insertTypeAssertClass(class *cg.ClassHighLevel, code *cg.AttributeCode, t *ast.Type) {
-	if t.Type == ast.VariableTypeObject {
+	if t.Type == ast.VariableTypeString {
+		class.InsertClassConst(javaStringClass, code.Codes[code.CodeLength:code.CodeLength+2])
+	} else if t.Type == ast.VariableTypeObject {
 		class.InsertClassConst(t.Class.Name, code.Codes[code.CodeLength:code.CodeLength+2])
 	} else if t.Type == ast.VariableTypeArray { // arrays
 		meta := ArrayMetas[t.Array.Type]

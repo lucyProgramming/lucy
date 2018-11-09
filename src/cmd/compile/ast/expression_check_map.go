@@ -119,7 +119,7 @@ func (e *Expression) checkMapExpression(block *Block, errs *[]error) *Type {
 		if vType == nil {
 			continue
 		}
-		if err := kType.rightValueValid(); err != nil {
+		if err := vType.rightValueValid(); err != nil {
 			*errs = append(*errs, err)
 			continue
 		}

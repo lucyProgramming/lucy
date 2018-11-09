@@ -1,10 +1,7 @@
-package jvm
 
-import "gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-import "gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
 
 func (this *BuildExpression) buildSelection(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -16,35 +13,35 @@ func (this *BuildExpression) buildSelection(
 		maxStack = this.build(class, code, selection.Expression, context, state)
 		return
 	}
-	if selection.Method != nil { // pack to method handle
+	if selection.Method != null { // pack to method handle
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      "java/lang/invoke/MethodHandles",
 			Method:     "lookup",
 			Descriptor: "()Ljava/lang/invoke/MethodHandles$Lookup;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		class.InsertClassConst(selection.Expression.Value.Class.Name,
+		ast.TypeInsertClassConst(selection.Expression.Value.Class.Name,
 			code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		class.InsertStringConst(selection.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertStringConst(selection.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		class.InsertMethodTypeConst(cg.ConstantInfoMethodTypeHighLevel{
+		ast.TypeInsertMethodTypeConst(cg.ConstantInfoMethodTypeHighLevel{
 			Descriptor: Descriptor.methodDescriptor(&selection.Method.Function.Type),
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		if selection.Method.IsStatic() {
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      "java/lang/invoke/MethodHandles$Lookup",
 				Method:     "findStatic",
 				Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		} else {
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      "java/lang/invoke/MethodHandles$Lookup",
 				Method:     "findVirtual",
 				Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
@@ -60,7 +57,7 @@ func (this *BuildExpression) buildSelection(
 				maxStack = t
 			}
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      "java/lang/invoke/MethodHandle",
 				Method:     "bindTo",
 				Descriptor: "(Ljava/lang/Object;)Ljava/lang/invoke/MethodHandle;",
@@ -72,13 +69,13 @@ func (this *BuildExpression) buildSelection(
 
 	switch selection.Expression.Value.Type {
 	case ast.VariableTypePackage:
-		if selection.PackageVariable != nil {
+		if selection.PackageVariable != null {
 			maxStack = jvmSlotSize(e.Value)
 			if selection.PackageVariable.JvmDescriptor == "" {
 				selection.PackageVariable.JvmDescriptor = Descriptor.typeDescriptor(e.Value)
 			}
 			code.Codes[code.CodeLength] = cg.OP_getstatic
-			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+			ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 				Class:      selection.Expression.Value.Package.Name + "/main",
 				Field:      selection.PackageVariable.Name,
 				Descriptor: selection.PackageVariable.JvmDescriptor,
@@ -86,33 +83,33 @@ func (this *BuildExpression) buildSelection(
 			code.CodeLength += 3
 			return
 		}
-		if selection.PackageEnumName != nil {
+		if selection.PackageEnumName != null {
 			loadInt32(class, code, selection.PackageEnumName.Value)
 			maxStack = 1
 			return
 		}
-		if selection.PackageFunction != nil { // pack to method handle
+		if selection.PackageFunction != null { // pack to method handle
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      "java/lang/invoke/MethodHandles",
 				Method:     "lookup",
 				Descriptor: "()Ljava/lang/invoke/MethodHandles$Lookup;",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertClassConst(selection.Expression.Value.Package.Name+"/main",
+			ast.TypeInsertClassConst(selection.Expression.Value.Package.Name+"/main",
 				code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertStringConst(selection.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			ast.TypeInsertStringConst(selection.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertMethodTypeConst(cg.ConstantInfoMethodTypeHighLevel{
+			ast.TypeInsertMethodTypeConst(cg.ConstantInfoMethodTypeHighLevel{
 				Descriptor: Descriptor.methodDescriptor(&selection.PackageFunction.Type),
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      "java/lang/invoke/MethodHandles$Lookup",
 				Method:     "findStatic",
 				Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
@@ -124,7 +121,7 @@ func (this *BuildExpression) buildSelection(
 			return
 		}
 	case ast.VariableTypeDynamicSelector:
-		if selection.Field != nil {
+		if selection.Field != null {
 			if selection.Field.IsStatic() == false {
 				code.Codes[code.CodeLength] = cg.OP_aload_0
 				code.CodeLength++
@@ -140,7 +137,7 @@ func (this *BuildExpression) buildSelection(
 			if selection.Field.JvmDescriptor == "" {
 				selection.Field.JvmDescriptor = Descriptor.typeDescriptor(selection.Field.Type)
 			}
-			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+			ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 				Class:      selection.Expression.Value.Class.Name,
 				Field:      selection.Name,
 				Descriptor: selection.Field.JvmDescriptor,
@@ -149,32 +146,32 @@ func (this *BuildExpression) buildSelection(
 			code.CodeLength += 2
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      "java/lang/invoke/MethodHandles",
 				Method:     "lookup",
 				Descriptor: "()Ljava/lang/invoke/MethodHandles$Lookup;",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertClassConst(selection.Expression.Value.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			ast.TypeInsertClassConst(selection.Expression.Value.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertStringConst(selection.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			ast.TypeInsertStringConst(selection.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertMethodTypeConst(cg.ConstantInfoMethodTypeHighLevel{
+			ast.TypeInsertMethodTypeConst(cg.ConstantInfoMethodTypeHighLevel{
 				Descriptor: Descriptor.methodDescriptor(&selection.Method.Function.Type),
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			if selection.Method.IsStatic() {
-				class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+				ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 					Class:      "java/lang/invoke/MethodHandles$Lookup",
 					Method:     "findStatic",
 					Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
 				}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			} else {
-				class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+				ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 					Class:      "java/lang/invoke/MethodHandles$Lookup",
 					Method:     "findVirtual",
 					Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
@@ -188,7 +185,7 @@ func (this *BuildExpression) buildSelection(
 				code.Codes[code.CodeLength] = cg.OP_aload_0
 				code.CodeLength++
 				code.Codes[code.CodeLength] = cg.OP_invokevirtual
-				class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+				ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 					Class:      "java/lang/invoke/MethodHandle",
 					Method:     "bindTo",
 					Descriptor: "(Ljava/lang/Object;)Ljava/lang/invoke/MethodHandle;",
@@ -200,7 +197,7 @@ func (this *BuildExpression) buildSelection(
 	case ast.VariableTypeClass:
 		maxStack = jvmSlotSize(e.Value)
 		code.Codes[code.CodeLength] = cg.OP_getstatic
-		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+		ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 			Class:      selection.Expression.Value.Class.Name,
 			Field:      selection.Name,
 			Descriptor: Descriptor.typeDescriptor(e.Value),
@@ -214,7 +211,7 @@ func (this *BuildExpression) buildSelection(
 			maxStack = stack
 		}
 		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+		ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 			Class:      selection.Expression.Value.Class.Name,
 			Field:      selection.Name,
 			Descriptor: Descriptor.typeDescriptor(e.Value),

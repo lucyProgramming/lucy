@@ -1,15 +1,9 @@
-package jvm
-
-import (
-	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
+ 
 
 func (this *BuildPackage) buildBlock(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
-	b *ast.Block,
+	b ast.Block,
 	context Context,
 	state StackMapState) {
 	notToHere := false
@@ -49,7 +43,7 @@ func (this *BuildPackage) buildBlock(
 			notToHere = s.Block.NotExecuteToLastStatement
 			continue
 		}
-		if s.Type == ast.StatementTypeIf && s.StatementIf.Else != nil {
+		if s.Type == ast.StatementTypeIf && s.StatementIf.Else != null {
 			t := s.StatementIf.Block.NotExecuteToLastStatement
 			for _, v := range s.StatementIf.ElseIfList {
 				t = t && v.Block.NotExecuteToLastStatement
@@ -58,10 +52,10 @@ func (this *BuildPackage) buildBlock(
 			notToHere = t
 			continue
 		}
-		if s.Type == ast.StatementTypeSwitch && s.StatementSwitch.Default != nil {
+		if s.Type == ast.StatementTypeSwitch && s.StatementSwitch.Default != null {
 			t := s.StatementSwitch.Default.NotExecuteToLastStatement
 			for _, v := range s.StatementSwitch.StatementSwitchCases {
-				if v.Block != nil {
+				if v.Block != null {
 					t = t && v.Block.NotExecuteToLastStatement
 				} else {
 					//this will fallthrough

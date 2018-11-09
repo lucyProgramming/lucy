@@ -1,12 +1,6 @@
-package jvm
-
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func (this *BuildExpression) getCaptureIdentifierLeftValue(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -18,8 +12,8 @@ func (this *BuildExpression) getCaptureIdentifierLeftValue(
 	if context.function.Closure.ClosureVariableExist(identifier.Variable) { // capture var exits
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
-			Class:      class.Name,
+		ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+			Class:      ast.TypeName,
 			Field:      identifier.Name,
 			Descriptor: "L" + meta.className + ";",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -32,7 +26,7 @@ func (this *BuildExpression) getCaptureIdentifierLeftValue(
 	remainStack = 1
 	ops = make([]byte, 3)
 	ops[0] = cg.OP_putfield
-	class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+	ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 		Class:      meta.className,
 		Field:      meta.fieldName,
 		Descriptor: meta.fieldDescription,
@@ -42,7 +36,7 @@ func (this *BuildExpression) getCaptureIdentifierLeftValue(
 }
 
 func (this *BuildExpression) getMapLeftValue(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -68,7 +62,7 @@ func (this *BuildExpression) getMapLeftValue(
 	}
 	bs4 := make([]byte, 4)
 	bs4[0] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      mapClass,
 		Method:     "put",
 		Descriptor: "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
@@ -80,7 +74,7 @@ func (this *BuildExpression) getMapLeftValue(
 }
 
 func (this *BuildExpression) getLeftValue(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -97,7 +91,7 @@ func (this *BuildExpression) getLeftValue(
 			ops = make([]byte, 3)
 			leftValueType = LeftValueKindPutStatic
 			ops[0] = cg.OP_putstatic
-			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+			ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 				Class:      this.BuildPackage.mainClass.Name,
 				Field:      identifier.Name,
 				Descriptor: Descriptor.typeDescriptor(identifier.Variable.Type),
@@ -121,7 +115,7 @@ func (this *BuildExpression) getLeftValue(
 			meta := ArrayMetas[index.Expression.Value.Array.Type]
 			ops = make([]byte, 3)
 			ops[0] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      meta.className,
 				Method:     "set",
 				Descriptor: meta.setMethodDescription,
@@ -186,7 +180,7 @@ func (this *BuildExpression) getLeftValue(
 			if selection.PackageVariable.JvmDescriptor == "" {
 				selection.PackageVariable.JvmDescriptor = Descriptor.typeDescriptor(selection.PackageVariable.Type)
 			}
-			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+			ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 				Class:      selection.Expression.Value.Package.Name + "/main",
 				Field:      selection.PackageVariable.Name,
 				Descriptor: selection.PackageVariable.JvmDescriptor,
@@ -211,7 +205,7 @@ func (this *BuildExpression) getLeftValue(
 			if selection.Field.JvmDescriptor == "" {
 				selection.Field.JvmDescriptor = Descriptor.typeDescriptor(selection.Field.Type)
 			}
-			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+			ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 				Class:      selection.Expression.Value.Class.Name,
 				Field:      selection.Name,
 				Descriptor: selection.Field.JvmDescriptor,
@@ -221,7 +215,7 @@ func (this *BuildExpression) getLeftValue(
 			if selection.Field.JvmDescriptor == "" {
 				selection.Field.JvmDescriptor = Descriptor.typeDescriptor(selection.Field.Type)
 			}
-			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+			ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 				Class:      selection.Expression.Value.Class.Name,
 				Field:      selection.Name,
 				Descriptor: selection.Field.JvmDescriptor,

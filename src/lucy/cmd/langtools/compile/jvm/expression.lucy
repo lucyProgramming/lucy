@@ -1,16 +1,11 @@
-package jvm
-
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
+ 
 
 type BuildExpression struct {
 	BuildPackage *BuildPackage
 }
 
 func (this *BuildExpression) build(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -48,7 +43,7 @@ func (this *BuildExpression) build(
 			code.CodeLength++
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_ldc2_w
-			class.InsertLongConst(e.Data.(long), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			ast.TypeInsertLongConst(e.Data.(long), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 		maxStack = 2
@@ -64,7 +59,7 @@ func (this *BuildExpression) build(
 			code.CodeLength++
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertFloatConst(e.Data.(float), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			ast.TypeInsertFloatConst(e.Data.(float), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 		maxStack = 1
@@ -77,13 +72,13 @@ func (this *BuildExpression) build(
 			code.CodeLength++
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_ldc2_w
-			class.InsertDoubleConst(e.Data.(double), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			ast.TypeInsertDoubleConst(e.Data.(double), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 		maxStack = 2
 	case ast.ExpressionTypeString:
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		class.InsertStringConst(e.Data.(string), code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertStringConst(e.Data.(string), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		if len([]byte(e.Data.(string))) > 65536 {
 			panic("jvm max string length is 65536")
@@ -219,7 +214,7 @@ func (this *BuildExpression) jvmSize(e ast.Expression) (size char) {
 	return jvmSlotSize(e.Value)
 }
 
-func (this *BuildExpression) buildExpressions(class cg.ClassHighLevel, code cg.AttributeCode,
+func (this *BuildExpression) buildExpressions(c cg.ClassHighLevel, code cg.AttributeCode,
 	es []ast.Expression, context Context, state StackMapState) (maxStack char) {
 	length := 0
 	for _, e := range es {
@@ -231,7 +226,7 @@ func (this *BuildExpression) buildExpressions(class cg.ClassHighLevel, code cg.A
 	}
 	loadInt32(class, code, int(length))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
-	class.InsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	ast.TypeInsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	if 1 > maxStack {
 		maxStack = 1

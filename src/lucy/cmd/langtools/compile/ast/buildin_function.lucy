@@ -1,4 +1,4 @@
- 
+import "lucy/cmd/langtools/compile/common"
 
 {
 	registerBuildInFunctions()
@@ -19,17 +19,17 @@ fn registerBuildInFunctions() {
 	}
 	{
 		//catch
-		catch := new Function()
-		buildInFunctionsMap[common.BuildInFunctionCatch] = catch
-		catch.Type.ReturnList = new []Variable(1)
-		catch.Type.ReturnList[0] = new Variable()
-		catch.Type.ReturnList[0].Name = "returnValue"
-		catch.Type.ReturnList[0].Type = new Type()
-		catch.Type.ReturnList[0].Type.Type = VariableTypeObject
-		catch.Type.ReturnList[0].Type.Class = new Class()
-		catch.Type.ReturnList[0].Type.Class.Name = DefaultExceptionClass
-		catch.Type.ReturnList[0].Type.Class.NotImportedYet = true
-		catch.buildInFunctionChecker = fn(f Function, e ExpressionFunctionCall, block Block, errs []error, args []Type, pos Pos) {
+		c := new Function()
+		buildInFunctionsMap[common.BuildInFunctionCatch] = c
+		c.Type.ReturnList = new []Variable(1)
+		c.Type.ReturnList[0] = new Variable()
+		c.Type.ReturnList[0].Name = "returnValue"
+		c.Type.ReturnList[0].Type = new Type()
+		c.Type.ReturnList[0].Type.Type = VariableTypeObject
+		c.Type.ReturnList[0].Type.Class = new Class()
+		c.Type.ReturnList[0].Type.Class.Name = DefaultExceptionClass
+		c.Type.ReturnList[0].Type.Class.NotImportedYet = true
+		c.buildInFunctionChecker = fn(f Function, e ExpressionFunctionCall, block Block, errs []error, args []Type, pos Pos) {
 			if len(e.ParameterTypes) > 0 {
 				errs . append(new error( sprintf("%s buildin function expect no typed parameter",
 					e.ParameterTypes[0].Pos.ErrMsgPrefix())) )
@@ -160,14 +160,14 @@ fn registerBuildInFunctions() {
 	}
 	{
 		// sprintf
-		sprintf := new Function()
-		buildInFunctionsMap[common.BuildInFunctionSprintf] = sprintf
-		sprintf.Type.ReturnList = new []Variable(1)
-		sprintf.Type.ReturnList[0] = new Variable()
-		sprintf.Type.ReturnList[0].Name = "returnValue"
-		sprintf.Type.ReturnList[0].Type = new Type()
-		sprintf.Type.ReturnList[0].Type.Type = VariableTypeString
-		sprintf.buildInFunctionChecker = fn(f Function, e ExpressionFunctionCall, block Block, errs []error,
+		s := new Function()
+		buildInFunctionsMap[common.BuildInFunctionSprintf] = s
+		s.Type.ReturnList = new []Variable(1)
+		s.Type.ReturnList[0] = new Variable()
+		s.Type.ReturnList[0].Name = "returnValue"
+		s.Type.ReturnList[0].Type = new Type()
+		s.Type.ReturnList[0].Type.Type = VariableTypeString
+		s.buildInFunctionChecker = fn(f Function, e ExpressionFunctionCall, block Block, errs []error,
 			args []Type, pos Pos) {
 			if len(e.ParameterTypes) > 0 {
 				errs.append(new error(sprintf("%s buildin function expect no typed parameter",

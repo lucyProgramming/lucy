@@ -1,16 +1,17 @@
-import "java/lang/Object"
+ 
 
 public class Token {
-	Type        TokenKind
-	Offset      int // bs offset
-	StartLine   int
-	StartColumn int
-	EndLine     int
-	EndColumn   int
-	Description string
-	Data        Object
-	longValue long 
-	doubleValue double 
+	public Type        TokenKind
+	public Offset      int // bs offset
+	public StartLine   int
+	public StartColumn int
+	public EndLine     int
+	public EndColumn   int
+	public Description string
+	public stringValue string 
+	public longValue long 
+	public doubleValue double 
+	public boolValue bool 
 }
 
 

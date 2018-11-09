@@ -11,21 +11,21 @@ class ForRangeAttr {
 
 
 
-class StatementFor {
-	RangeAttr           ForRangeAttr
-	Exits               []cg.Exit
-	ContinueCodeOffset  int
-	Pos                 Pos
+public class StatementFor {
+	public RangeAttr           ForRangeAttr
+	public Exits               []cg.Exit
+	public ContinueCodeOffset  int
+	public Pos                 Pos
 	initExpressionBlock Block = new Block()
 	/*
 		for i := 0 ; i < 10 ;i ++ {
 
 		}
 	*/
-	Init      Expression
-	Condition Expression
-	Increment Expression
-	Block     Block
+	public Init      Expression
+	public Condition Expression
+	public Increment Expression
+	public Block     Block
 
 
 	fn checkRange() ->(errs []error= []error{})  {

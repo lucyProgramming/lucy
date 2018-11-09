@@ -1,32 +1,36 @@
-package parser
+ 
+import "lucy/cmd/langtools/compile/lex"
 
-import "gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
 
-type CommentParser struct {
+class CommentParser extends ParserExtends{
 	Comment string
-	parser  *Parser
-}
+	fn CommentParser(parser Parser){
+		this.super()
+		this.parser = parser 
+	}
+	fn reset() {
+		this.Comment = ""
+	}
 
-func (c *CommentParser) reset() {
-	c.Comment = ""
-}
-
-func (c *CommentParser) read() {
-	if c.parser.token.Type == lex.TokenComment {
-		for c.parser.token.Type == lex.TokenComment {
-			c.Comment += c.parser.token.Data.(string)
-			c.parser.Next(lfIsToken)
+	fn read() {
+		if this.parser.token.Type == lex.TokenComment {
+			for this.parser.token.Type == lex.TokenComment {
+				this.Comment += this.parser.token.stringValue
+				this.parser.Next(lfIsToken)
+			}
+		} else {
+			this.Comment = this.parser.token.stringValue
+			this.parser.Next(lfIsToken)
 		}
-	} else {
-		c.Comment = c.parser.token.Data.(string)
-		c.parser.Next(lfIsToken)
-	}
-	if c.parser.token.Type != lex.TokenLf {
-		return
-	}
-	c.parser.Next(lfIsToken)
-	if c.parser.token.Type == lex.TokenLf {
-		c.reset()
-		return
+		if this.parser.token.Type != lex.TokenLf {
+			return
+		}
+		this.parser.Next(lfIsToken)
+		if this.parser.token.Type == lex.TokenLf {
+			this.reset()
+			return
+		}
 	}
 }
+
+

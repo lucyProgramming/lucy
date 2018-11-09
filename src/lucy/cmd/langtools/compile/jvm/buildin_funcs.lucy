@@ -1,13 +1,7 @@
-package jvm
-
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
+ 
 
 func (this *BuildExpression) mkBuildInFunctionCall(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -16,7 +10,7 @@ func (this *BuildExpression) mkBuildInFunctionCall(
 	if call.Function.LoadedFromCorePackage {
 		maxStack = this.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      call.Function.Entrance.Class.Name,
 			Method:     call.Function.Name,
 			Descriptor: call.Function.Entrance.Descriptor,

@@ -6,8 +6,8 @@ interface StackMap  {
 	fn ToBytes() -> ([]byte)
 }
 
-class AttributeStackMap {
-	StackMaps []StackMap
+public class AttributeStackMap {
+	public StackMaps []StackMap
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo) {
 		if this == null || len(this.StackMaps) == 0 {
 			return null
@@ -27,16 +27,16 @@ class AttributeStackMap {
 
 
 
-class StackMapSameFrame {
-	FrameType byte
+public class StackMapSameFrame {
+	public FrameType byte
 	fn ToBytes() -> (bs []byte) {
 		return []byte{this.FrameType}
 	}
 }
 
 
-class StackMapSameLocals1StackItemFrame {
-	FrameType byte
+public class StackMapSameLocals1StackItemFrame {
+	public FrameType byte
 	Stack     StackMapVerificationTypeInfo
 	fn StackMapSameLocals1StackItemFrame(FrameType byte ,Stack     StackMapVerificationTypeInfo ){
         this.super()
@@ -53,9 +53,9 @@ class StackMapSameLocals1StackItemFrame {
 
 
 class StackMapSameLocals1StackItemFrameExtended {
-	FrameType byte
-	Delta     char
-	Stack     StackMapVerificationTypeInfo
+	public FrameType byte
+	public Delta     char
+	public Stack     StackMapVerificationTypeInfo
 	fn ToBytes() -> (bs []byte) {
 		bs = new []byte(3)
 		bs[0] = this.FrameType

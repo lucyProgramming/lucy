@@ -1,21 +1,21 @@
 import "lucy/binary"
 
-class ClassHighLevel {
+public class ClassHighLevel {
 	Class Class
 	/*
 		one class file can be compile form multi source file
 	*/
-	SourceFiles              map { string -> bool }
-	Name                     string
-	AccessFlags              char
-	SuperClass               string
-	Interfaces               []string
-	Fields                   map { string -> FieldHighLevel }
-	Methods                  map { string -> []MethodHighLevel }
-	TriggerPackageInitMethod MethodHighLevel
-	TemplateFunctions        []AttributeTemplateFunction
+	public SourceFiles              map { string -> bool }
+	public Name                     string
+	public AccessFlags              char
+	public SuperClass               string
+	public Interfaces               []string
+	public Fields                   map { string -> FieldHighLevel }
+	public Methods                  map { string -> []MethodHighLevel }
+	public TriggerPackageInitMethod MethodHighLevel
+	public TemplateFunctions        []AttributeTemplateFunction
 
-	fn InsertSourceFile(filename string) {
+	public fn InsertSourceFile(filename string) {
 		if this.SourceFiles == null {
 			this.SourceFiles = {filename -> true}
 		    return
@@ -23,12 +23,12 @@ class ClassHighLevel {
 		this.SourceFiles[filename] = true
 	}
 
-	fn InsertMethodRefConst(mr ConstantInfoMethodrefHighLevel,
+	public fn InsertMethodRefConst(mr ConstantInfoMethodrefHighLevel,
 		location []byte) {
 		binary.BigEndian.putChar(location, this.Class.InsertMethodrefConst(mr))
 	}
 
-	fn InsertMethodCall(code AttributeCode, op byte,
+	public fn InsertMethodCall(code AttributeCode, op byte,
 		className, method, descriptor string) {
 		code.Codes[code.CodeLength] = op
 		this.InsertMethodRefConst(
@@ -40,7 +40,7 @@ class ClassHighLevel {
 	/*
 		new a method name,make_node_objects sure it does exists before
 	*/
-	fn NewMethodName(prefix string) -> (name string)  {
+	public fn NewMethodName(prefix string) -> (name string)  {
 		if this.Methods == null ||
 			this.Methods[prefix] == null {
 			return prefix
@@ -59,11 +59,11 @@ class ClassHighLevel {
 		panic("names over flow") // this is not happening
 	}
 
-	fn InsertStringConst(s string, location []byte) {
+	public fn InsertStringConst(s string, location []byte) {
 		binary.BigEndian.putChar(location, this.Class.InsertStringConst(s))
 	}
 
-	fn AppendMethod(ms MethodHighLevel...) {
+	public fn AppendMethod(ms MethodHighLevel...) {
 		if this.Methods == null {
 			this.Methods = new map {string -> []MethodHighLevel}()
 		}
@@ -79,45 +79,45 @@ class ClassHighLevel {
 		}
 	}
 
-	fn InsertInterfaceMethodrefConst(
+	public fn InsertInterfaceMethodrefConst(
 		constant ConstantInfoInterfaceMethodrefHighLevel,
 		location []byte) {
 		binary.BigEndian.putChar(location,
 			this.Class.InsertInterfaceMethodrefConst(constant))
 	}
 
-	fn InsertMethodTypeConst(constant ConstantInfoMethodTypeHighLevel,
+	public fn InsertMethodTypeConst(constant ConstantInfoMethodTypeHighLevel,
 		location []byte) {
 		binary.BigEndian.putChar(location,
 			this.Class.InsertMethodTypeConst(constant))
 	}
 
-	fn InsertFieldRefConst(constant ConstantInfoFieldrefHighLevel,
+	public fn InsertFieldRefConst(constant ConstantInfoFieldrefHighLevel,
 		location []byte) {
 		binary.BigEndian.putChar(location,
 			this.Class.InsertFieldRefConst(constant))
 	}
 
-	fn InsertClassConst(className string, location []byte) {
+	public fn InsertClassConst(className string, location []byte) {
 		binary.BigEndian.putChar(location,
 			this.Class.InsertClassConst(className))
 	}
-	fn InsertIntConst(i int, location []byte) {
+	public fn InsertIntConst(i int, location []byte) {
 		binary.BigEndian.putChar(location,
 			this.Class.InsertIntConst(i))
 	}
 
-	fn InsertLongConst(value long, location []byte) {
+	public fn InsertLongConst(value long, location []byte) {
 		binary.BigEndian.putChar(location,
 			this.Class.InsertLongConst(value))
 	}
 
-	fn InsertFloatConst(value float, location []byte) {
+	public fn InsertFloatConst(value float, location []byte) {
 		binary.BigEndian.putChar(location,
 			this.Class.InsertFloatConst(value))
 	}
 
-	fn InsertDoubleConst(value double, location []byte) {
+	public fn InsertDoubleConst(value double, location []byte) {
 		binary.BigEndian.putChar(location,
 			this.Class.InsertDoubleConst(value))
 	}

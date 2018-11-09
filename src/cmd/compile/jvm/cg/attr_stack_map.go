@@ -193,7 +193,6 @@ func (s *StackMapVerificationTypeInfo) ToBytes() []byte {
 		bs[0] = 8
 		binary.BigEndian.PutUint16(bs[1:], s.Verify.(*StackMapUninitializedVariableInfo).CodeOffset)
 		return bs
-	default:
 	}
 	return nil
 }

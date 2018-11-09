@@ -2,21 +2,21 @@
 
 
 public class Variable {
-	IsBuildIn                bool
-	IsGlobal                 bool
-	IsFunctionParameter      bool
-	IsReturn                 bool
-	BeenCapturedAsLeftValue  int
-	BeenCapturedAsRightValue int
-	Used                     bool   // use as right value
-	AccessFlags              char // public private or protected
-	Pos                      Pos
-	DefaultValueExpression   Expression
-	Name                     string
-	Type                     Type
-	LocalValOffset           char // offset in stack frame
-	JvmDescriptor            string // jvm
-	Comment                  string
+	public IsBuildIn                bool
+	public IsGlobal                 bool
+	public IsFunctionParameter      bool
+	public IsReturn                 bool
+	public BeenCapturedAsLeftValue  int
+	public BeenCapturedAsRightValue int
+	public Used                     bool   // use as right value
+	public AccessFlags              char // public private or protected
+	public Pos                      Pos
+	public DefaultValueExpression   Expression
+	public Name                     string
+	public Type                     Type
+	public LocalValOffset           char // offset in stack frame
+	public JvmDescriptor            string // jvm
+	public Comment                  string
 
 	fn isPublic() -> (is bool) {
 		return this.AccessFlags&

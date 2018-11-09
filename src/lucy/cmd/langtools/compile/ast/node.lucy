@@ -1,9 +1,15 @@
 import "java/lang/Object"
 import "lucy/os"
 
-class TopNode  {
+public class TopNode  {
 	Node Object
+	public fn TopNode(n Object) {
+		this.super()
+		this.Node = n
+	}
 }
+
+
 
 class ConvertTops2Package {
 	

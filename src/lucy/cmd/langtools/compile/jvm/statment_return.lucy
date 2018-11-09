@@ -1,19 +1,12 @@
-package jvm
-
-import (
-	"encoding/binary"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func (this *BuildPackage) buildReturnStatement(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	statementReturn *ast.StatementReturn,
 	context Context,
 	state StackMapState) (maxStack char) {
 	if context.function.Type.VoidReturn() { // no return value
-		if statementReturn.Defers != nil && len(statementReturn.Defers) > 0 {
+		if statementReturn.Defers != null && len(statementReturn.Defers) > 0 {
 			stack := this.buildDefersForReturn(class, code, context, state, statementReturn)
 			if stack > maxStack {
 				maxStack = stack
@@ -111,7 +104,7 @@ func (this *BuildPackage) buildReturnStatement(
 	return
 }
 
-func (this *BuildPackage) buildReturnFromReturnVars(class cg.ClassHighLevel,
+func (this *BuildPackage) buildReturnFromReturnVars(c cg.ClassHighLevel,
 	code cg.AttributeCode, context Context) (maxStack char) {
 	if context.function.Type.VoidReturn() { // when has no return,should not call this function
 		return
@@ -148,7 +141,7 @@ func (this *BuildPackage) buildReturnFromReturnVars(class cg.ClassHighLevel,
 	//new a array list
 	loadInt32(class, code, int(len(context.function.Type.ReturnList)))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
-	class.InsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	ast.TypeInsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	maxStack = 1 // max stack is
 	index := int(0)
@@ -178,7 +171,7 @@ func (this *BuildPackage) buildReturnFromReturnVars(class cg.ClassHighLevel,
 	return
 }
 
-func (this *BuildPackage) buildDefersForReturn(class cg.ClassHighLevel, code cg.AttributeCode,
+func (this *BuildPackage) buildDefersForReturn(c cg.ClassHighLevel, code cg.AttributeCode,
 	context Context, from StackMapState,
 	statementReturn *ast.StatementReturn) (maxStack char) {
 	if len(statementReturn.Defers) == 0 {
@@ -200,10 +193,10 @@ func (this *BuildPackage) buildDefersForReturn(class cg.ClassHighLevel, code cg.
 		e.StartPc = char(statementReturn.Defers[index].StartPc)
 		e.EndPc = char(code.CodeLength)
 		e.HandlerPc = char(code.CodeLength)
-		if statementReturn.Defers[index].ExceptionClass == nil {
-			e.CatchType = class.Class.InsertClassConst(ast.DefaultExceptionClass)
+		if statementReturn.Defers[index].ExceptionClass == null {
+			e.CatchType = ast.TypeClass.InsertClassConst(ast.DefaultExceptionClass)
 		} else {
-			e.CatchType = class.Class.InsertClassConst(statementReturn.Defers[index].ExceptionClass.Name) // custom class
+			e.CatchType = ast.TypeClass.InsertClassConst(statementReturn.Defers[index].ExceptionClass.Name) // custom class
 		}
 		code.Exceptions = append(code.Exceptions, e)
 		//expect exception on stack
@@ -214,7 +207,7 @@ func (this *BuildPackage) buildDefersForReturn(class cg.ClassHighLevel, code cg.
 		context.Defer = statementReturn.Defers[index]
 		this.buildBlock(class, code, &statementReturn.Defers[index].Block, context, state)
 		from.addTop(state)
-		context.Defer = nil
+		context.Defer = null
 		statementReturn.Defers[index].ResetLabels()
 		//if need throw
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)...)

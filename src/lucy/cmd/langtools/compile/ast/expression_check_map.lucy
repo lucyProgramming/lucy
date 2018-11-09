@@ -98,7 +98,7 @@ class ExpressionCheckMap {
 			if vType == null {
 				continue
 			}
-			if err := kType.rightValueValid(); err != null {
+			if err := vType.rightValueValid(); err != null {
 				errs.append(err)
 				continue
 			}

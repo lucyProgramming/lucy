@@ -1,12 +1,3 @@
-package jvm
-
-import (
-	"fmt"
-	"strings"
-
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func writeExits(es []*cg.Exit, to int) {
 	for _, e := range es {
@@ -31,7 +22,7 @@ func copyOPs(code cg.AttributeCode, op ...byte) {
 	code.CodeLength += len(op)
 }
 
-func loadInt32(class cg.ClassHighLevel, code cg.AttributeCode, value int) {
+func loadInt32(c cg.ClassHighLevel, code cg.AttributeCode, value int) {
 	switch value {
 	case int(-1):
 		code.Codes[code.CodeLength] = cg.OP_iconst_m1
@@ -66,7 +57,7 @@ func loadInt32(class cg.ClassHighLevel, code cg.AttributeCode, value int) {
 			code.CodeLength += 3
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertIntConst(value, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			ast.TypeInsertIntConst(value, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 	}
@@ -84,7 +75,7 @@ func interfaceMethodArgsCount(functionType *ast.FunctionType) byte {
 	return byte(count)
 }
 
-func jvmSlotSize(typ *ast.Type) char {
+func jvmSlotSize(typ ast.Type) char {
 	if typ.Type == ast.VariableTypeDouble ||
 		typ.Type == ast.VariableTypeLong {
 		return 2
@@ -116,19 +107,21 @@ func nameTemplateFunction(function *ast.Function) string {
 	return s
 }
 
-func insertTypeAssertClass(class cg.ClassHighLevel, code cg.AttributeCode, t *ast.Type) {
-	if t.Type == ast.VariableTypeObject {
-		class.InsertClassConst(t.Class.Name, code.Codes[code.CodeLength:code.CodeLength+2])
+func insertTypeAssertClass(c cg.ClassHighLevel, code cg.AttributeCode, t ast.Type) {
+	if t.Type == ast.VariableTypeString {
+		ast.TypeInsertClassConst(javaStringClass, code.Codes[code.CodeLength:code.CodeLength+2])
+	} else if t.Type == ast.VariableTypeObject {
+		ast.TypeInsertClassConst(t.Class.Name, code.Codes[code.CodeLength:code.CodeLength+2])
 	} else if t.Type == ast.VariableTypeArray { // arrays
 		meta := ArrayMetas[t.Array.Type]
-		class.InsertClassConst(meta.className, code.Codes[code.CodeLength:code.CodeLength+2])
+		ast.TypeInsertClassConst(meta.className, code.Codes[code.CodeLength:code.CodeLength+2])
 	} else {
-		class.InsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength:code.CodeLength+2])
+		ast.TypeInsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength:code.CodeLength+2])
 	}
 	code.CodeLength += 2
 }
 
-func newArrayBaseOnType(class cg.ClassHighLevel, code cg.AttributeCode, typ *ast.Type) {
+func newArrayBaseOnType(c cg.ClassHighLevel, code cg.AttributeCode, typ ast.Type) {
 	switch typ.Type {
 	case ast.VariableTypeBool:
 		code.Codes[code.CodeLength] = cg.OP_newarray
@@ -166,28 +159,28 @@ func newArrayBaseOnType(class cg.ClassHighLevel, code cg.AttributeCode, typ *ast
 		code.CodeLength += 2
 	case ast.VariableTypeString:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeMap:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeFunction:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(javaMethodHandleClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertClassConst(javaMethodHandleClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeObject:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertClassConst(typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeArray:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		meta := ArrayMetas[typ.Array.Type]
-		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeJavaArray:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(Descriptor.typeDescriptor(typ.Array),
+		ast.TypeInsertClassConst(Descriptor.typeDescriptor(typ.Array),
 			code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
@@ -250,7 +243,7 @@ func functionReturnJvmSize(ft *ast.FunctionType) char {
 	}
 }
 
-func setEnumArray(class cg.ClassHighLevel, code cg.AttributeCode,
+func setEnumArray(c cg.ClassHighLevel, code cg.AttributeCode,
 	state StackMapState, context Context, e *ast.Enum) (maxStack char) {
 	if e.DefaultValue == 0 {
 		return

@@ -1,8 +1,8 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-class ClassMethod {
-	IsCompilerAuto bool
-	Function       Function
+public class ClassMethod {
+	public IsCompilerAuto bool
+	public Function       Function
 
 	fn narrowDownAccessRange(implementation ClassMethod) ->(is bool ) {
 		if this.IsPublic() {

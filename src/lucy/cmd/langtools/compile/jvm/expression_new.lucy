@@ -1,12 +1,6 @@
-package jvm
-
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func (this *BuildExpression) buildNew(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -26,7 +20,7 @@ func (this *BuildExpression) buildNew(
 	//new object
 	n := e.Data.(*ast.ExpressionNew)
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(n.Type.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	ast.TypeInsertClassConst(n.Type.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	t := &cg.StackMapVerificationTypeInfo{}
 	t.Verify = &cg.StackMapUninitializedVariableInfo{
@@ -41,7 +35,7 @@ func (this *BuildExpression) buildNew(
 	if d == "" {
 		d = Descriptor.methodDescriptor(&n.Construction.Function.Type)
 	}
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      n.Type.Class.Name,
 		Method:     specialMethodInit,
 		Descriptor: d,
@@ -51,17 +45,17 @@ func (this *BuildExpression) buildNew(
 }
 
 func (this *BuildExpression) buildNewMap(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context) (maxStack char) {
 	maxStack = 2
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	ast.TypeInsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      mapClass,
 		Method:     specialMethodInit,
 		Descriptor: "()V",
@@ -71,7 +65,7 @@ func (this *BuildExpression) buildNewMap(
 }
 
 func (this *BuildExpression) buildNewJavaArray(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -96,7 +90,7 @@ func (this *BuildExpression) buildNewJavaArray(
 		}
 	}
 	code.Codes[code.CodeLength] = cg.OP_multianewarray
-	class.InsertClassConst(Descriptor.typeDescriptor(e.Value), code.Codes[code.CodeLength+1:code.CodeLength+3])
+	ast.TypeInsertClassConst(Descriptor.typeDescriptor(e.Value), code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = dimensions
 	code.CodeLength += 4
 	if e.Value.Array.Type == ast.VariableTypeEnum {
@@ -109,7 +103,7 @@ func (this *BuildExpression) buildNewJavaArray(
 	return
 }
 func (this *BuildExpression) buildNewArray(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -118,7 +112,7 @@ func (this *BuildExpression) buildNewArray(
 	n := e.Data.(*ast.ExpressionNew)
 	meta := ArrayMetas[e.Value.Array.Type]
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	ast.TypeInsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	maxStack = 2
@@ -148,7 +142,7 @@ func (this *BuildExpression) buildNewArray(
 		state.popStack(1)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      meta.className,
 		Method:     specialMethodInit,
 		Descriptor: meta.constructorFuncDescriptor,

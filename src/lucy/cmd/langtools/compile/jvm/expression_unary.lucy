@@ -1,12 +1,7 @@
-package jvm
 
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func (this *BuildExpression) buildUnary(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -62,7 +57,7 @@ func (this *BuildExpression) buildUnary(
 			}
 		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertIntConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			ast.TypeInsertIntConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.Codes[code.CodeLength+3] = cg.OP_ixor
 			code.CodeLength += 4
 			if 2 > maxStack {
@@ -70,7 +65,7 @@ func (this *BuildExpression) buildUnary(
 			}
 		case ast.VariableTypeLong:
 			code.Codes[code.CodeLength] = cg.OP_ldc2_w
-			class.InsertLongConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			ast.TypeInsertLongConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.Codes[code.CodeLength+3] = cg.OP_lxor
 			code.CodeLength += 4
 			if 4 > maxStack {

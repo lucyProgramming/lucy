@@ -1,18 +1,13 @@
-package jvm
 
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func (this *BuildExpression) buildMethodCall(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
 	state StackMapState) (maxStack char) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	if call.FieldMethodHandler != nil {
+	if call.FieldMethodHandler != null {
 		return this.buildMethodCallOnFieldHandler(class, code, e, context, state)
 	}
 	switch call.Expression.Value.Type {
@@ -32,7 +27,7 @@ func (this *BuildExpression) buildMethodCall(
 		}
 		maxStack = this.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      call.Class.Name,
 			Method:     call.Name,
 			Descriptor: call.Method.Function.JvmDescriptor,
@@ -69,7 +64,7 @@ func (this *BuildExpression) buildMethodCall(
 		}
 		if call.Name == ast.SpecialMethodInit { // call father construction method
 			code.Codes[code.CodeLength] = cg.OP_invokespecial
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      call.Class.Name,
 				Method:     call.Name,
 				Descriptor: call.Method.Function.JvmDescriptor,
@@ -79,7 +74,7 @@ func (this *BuildExpression) buildMethodCall(
 		}
 		if call.Class.IsInterface() {
 			code.Codes[code.CodeLength] = cg.OP_invokeinterface
-			class.InsertInterfaceMethodrefConst(cg.ConstantInfoInterfaceMethodrefHighLevel{
+			ast.TypeInsertInterfaceMethodrefConst(cg.ConstantInfoInterfaceMethodrefHighLevel{
 				Class:      call.Class.Name,
 				Method:     call.Name,
 				Descriptor: call.Method.Function.JvmDescriptor,
@@ -89,7 +84,7 @@ func (this *BuildExpression) buildMethodCall(
 			code.CodeLength += 5
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      call.Class.Name,
 				Method:     call.Name,
 				Descriptor: call.Method.Function.JvmDescriptor,
@@ -106,7 +101,7 @@ func (this *BuildExpression) buildMethodCall(
 	return
 }
 func (this *BuildExpression) buildMethodCallOnFieldHandler(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -123,7 +118,7 @@ func (this *BuildExpression) buildMethodCallOnFieldHandler(
 		code.Codes[code.CodeLength] = cg.OP_getstatic
 		code.CodeLength++
 	}
-	class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+	ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 		Class:      call.Expression.Value.Class.Name,
 		Field:      call.Name,
 		Descriptor: Descriptor.typeDescriptor(call.FieldMethodHandler.Type),
@@ -138,7 +133,7 @@ func (this *BuildExpression) buildMethodCallOnFieldHandler(
 		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      javaMethodHandleClass,
 		Method:     methodHandleInvokeMethodName,
 		Descriptor: Descriptor.methodDescriptor(call.FieldMethodHandler.Type.FunctionType),
@@ -149,10 +144,10 @@ func (this *BuildExpression) buildMethodCallOnFieldHandler(
 	}
 	return
 }
-func (this *BuildExpression) buildMethodCallOnDynamicSelector(class cg.ClassHighLevel, code cg.AttributeCode,
+func (this *BuildExpression) buildMethodCallOnDynamicSelector(c cg.ClassHighLevel, code cg.AttributeCode,
 	e ast.Expression, context Context, state StackMapState) (maxStack char) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	if call.FieldMethodHandler != nil {
+	if call.FieldMethodHandler != null {
 		if call.FieldMethodHandler.IsStatic() == false {
 			code.Codes[code.CodeLength] = cg.OP_aload_0
 			code.CodeLength++
@@ -165,7 +160,7 @@ func (this *BuildExpression) buildMethodCallOnDynamicSelector(class cg.ClassHigh
 			code.Codes[code.CodeLength] = cg.OP_getstatic
 			code.CodeLength++
 		}
-		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+		ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 			Class:      call.Expression.Value.Class.Name,
 			Field:      call.Name,
 			Descriptor: Descriptor.typeDescriptor(call.FieldMethodHandler.Type),
@@ -179,7 +174,7 @@ func (this *BuildExpression) buildMethodCallOnDynamicSelector(class cg.ClassHigh
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaMethodHandleClass,
 			Method:     methodHandleInvokeMethodName,
 			Descriptor: Descriptor.methodDescriptor(call.FieldMethodHandler.Type.FunctionType),
@@ -209,7 +204,7 @@ func (this *BuildExpression) buildMethodCallOnDynamicSelector(class cg.ClassHigh
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			code.CodeLength++
 		}
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      call.Expression.Value.Class.Name,
 			Method:     call.Name,
 			Descriptor: Descriptor.methodDescriptor(&call.Method.Function.Type),
@@ -221,16 +216,16 @@ func (this *BuildExpression) buildMethodCallOnDynamicSelector(class cg.ClassHigh
 	}
 	return
 }
-func (this *BuildExpression) buildMethodCallOnPackage(class cg.ClassHighLevel, code cg.AttributeCode,
+func (this *BuildExpression) buildMethodCallOnPackage(c cg.ClassHighLevel, code cg.AttributeCode,
 	e ast.Expression, context Context, state StackMapState) (maxStack char) {
 	call := e.Data.(*ast.ExpressionMethodCall)
-	if call.PackageFunction != nil {
+	if call.PackageFunction != null {
 		stack := this.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      call.Expression.Value.Package.Name + "/main",
 			Method:     call.Name,
 			Descriptor: Descriptor.methodDescriptor(&call.PackageFunction.Type),
@@ -240,9 +235,9 @@ func (this *BuildExpression) buildMethodCallOnPackage(class cg.ClassHighLevel, c
 			maxStack = t
 		}
 	} else {
-		//call.PackageGlobalVariableFunction != nil
+		//call.PackageGlobalVariableFunction != null
 		code.Codes[code.CodeLength] = cg.OP_getstatic
-		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+		ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 			Class:      call.Expression.Value.Package.Name + "/main",
 			Field:      call.Name,
 			Descriptor: Descriptor.typeDescriptor(call.PackageGlobalVariableFunction.Type),
@@ -255,7 +250,7 @@ func (this *BuildExpression) buildMethodCallOnPackage(class cg.ClassHighLevel, c
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      "java/lang/invoke/MethodHandle",
 			Method:     methodHandleInvokeMethodName,
 			Descriptor: Descriptor.methodDescriptor(call.PackageGlobalVariableFunction.Type.FunctionType),

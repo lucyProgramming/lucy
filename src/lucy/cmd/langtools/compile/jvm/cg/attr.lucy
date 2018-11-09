@@ -2,7 +2,7 @@
 
 
 public class AttributeInfo {
-	NameIndex       char
+	public	NameIndex       char
 	attributeLength int
 	Info            []byte
 }

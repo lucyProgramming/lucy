@@ -1,47 +1,42 @@
-package parser
+ import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/lex"
 
-import (
-	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
-)
 
-const (
-	lfIsToken  = true
-	lfNotToken = false
-)
+const	lfIsToken  = true
+const	lfNotToken = false
 
-func init() {
+
+{
 	ast.ParseFunctionHandler = ParseFunction
 }
 
-var (
-	untilLp = map[lex.TokenKind]bool{
-		lex.TokenLp: true,
-	}
-	untilRp = map[lex.TokenKind]bool{
-		lex.TokenRp: true,
-	}
-	untilGt = map[lex.TokenKind]bool{
-		lex.TokenGt: true,
-	}
-	untilLc = map[lex.TokenKind]bool{
-		lex.TokenLc: true,
-	}
-	untilRc = map[lex.TokenKind]bool{
-		lex.TokenRc: true,
-	}
-	untilComma = map[lex.TokenKind]bool{
-		lex.TokenComma: true,
-	}
-	untilSemicolonOrLf = map[lex.TokenKind]bool{
-		lex.TokenSemicolon: true,
-		lex.TokenLf:        true,
-	}
-)
 
-func ParseFunction(bs []byte, pos *ast.Pos) (*ast.Function, []error) {
-	parser := &Parser{}
+var	untilLp = {
+		lex.TokenLp-> true
+	}
+var	untilRp = {
+		lex.TokenRp-> true
+	}
+var	untilGt = {
+		lex.TokenGt-> true
+	}
+var	untilLc = {
+		lex.TokenLc-> true
+	}
+var	untilRc = {
+		lex.TokenRc-> true
+	}
+var	untilComma = {
+		lex.TokenComma-> true,
+	}
+var	untilSemicolonOrLf = {
+		lex.TokenSemicolon-> true,
+		lex.TokenLf->        true
+	}
+ 
+
+fn ParseFunction(bs []byte, pos ast.Pos) -> (f ast.Function,es []error) {
+	parser := new Parser()
 	parser.filename = pos.Filename
 	parser.nErrors2Stop = 10
 	parser.bs = bs
@@ -49,18 +44,15 @@ func ParseFunction(bs []byte, pos *ast.Pos) (*ast.Function, []error) {
 	parser.lexer = lex.New(parser.bs, pos.Line, pos.Column)
 	parser.Next(lfNotToken) //
 	f, err := parser.FunctionParser.parse(true, false)
-	if err != nil {
+	if err != null {
 		parser.errs = append(parser.errs, err)
 	}
 	return f, parser.errs
 }
 
-var (
-	autoNameIndex = 1
-)
+var    autoNameIndex = 1
 
-func compileAutoName() string {
-	s := sprintf("autoName$%d", autoNameIndex)
+fn compileAutoName() -> (name string) {
+	name = sprintf("autoName$%d", autoNameIndex)
 	autoNameIndex++
-	return s
 }

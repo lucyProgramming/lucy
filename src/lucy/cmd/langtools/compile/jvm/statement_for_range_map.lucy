@@ -1,9 +1,5 @@
-package jvm
 
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
+
 
 type AutoVariableForRangeMap struct {
 	MapObject               char
@@ -13,7 +9,7 @@ type AutoVariableForRangeMap struct {
 }
 
 func (this *BuildPackage) buildForRangeStatementForMap(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	s *ast.StatementFor,
 	context Context,
@@ -45,14 +41,14 @@ func (this *BuildPackage) buildForRangeStatementForMap(
 	}
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      mapClass,
 		Method:     "keySet",
 		Descriptor: "()Ljava/util/Set;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_invokeinterface
-	class.InsertInterfaceMethodrefConst(cg.ConstantInfoInterfaceMethodrefHighLevel{
+	ast.TypeInsertInterfaceMethodrefConst(cg.ConstantInfoInterfaceMethodrefHighLevel{
 		Class:      "java/util/Set",
 		Method:     "toArray",
 		Descriptor: "()[Ljava/lang/Object;",
@@ -96,7 +92,7 @@ func (this *BuildPackage) buildForRangeStatementForMap(
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsK)...)
 	//handle captured vars
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
-		if attr.IdentifierValue != nil && attr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
+		if attr.IdentifierValue != null && attr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
 			closure.createClosureVar(class, code, attr.IdentifierValue.Variable.Type)
 			attr.IdentifierValue.Variable.LocalValOffset = code.MaxLocals
 			code.MaxLocals++
@@ -105,7 +101,7 @@ func (this *BuildPackage) buildForRangeStatementForMap(
 			forState.appendLocals(class,
 				forState.newObjectVariableType(closure.getMeta(attr.IdentifierValue.Variable.Type.Type).className))
 		}
-		if attr.IdentifierKey != nil &&
+		if attr.IdentifierKey != null &&
 			attr.IdentifierKey.Variable.BeenCapturedAsLeftValue > 0 {
 			closure.createClosureVar(class, code, attr.IdentifierKey.Variable.Type)
 			attr.IdentifierKey.Variable.LocalValOffset = code.MaxLocals
@@ -136,7 +132,7 @@ func (this *BuildPackage) buildForRangeStatementForMap(
 		maxStack = 2
 	}
 	s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_if_icmpge, code))
-	if attr.IdentifierValue != nil || attr.ExpressionValue != nil {
+	if attr.IdentifierValue != null || attr.ExpressionValue != null {
 		// load k sets
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.KeySets)...)
 
@@ -151,7 +147,7 @@ func (this *BuildPackage) buildForRangeStatementForMap(
 		code.Codes[code.CodeLength] = cg.OP_swap
 		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      mapClass,
 			Method:     "get",
 			Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
@@ -170,7 +166,7 @@ func (this *BuildPackage) buildForRangeStatementForMap(
 	}
 
 	// store to k,if need
-	if attr.IdentifierKey != nil || attr.ExpressionKey != nil {
+	if attr.IdentifierKey != null || attr.ExpressionKey != null {
 		// load k sets
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.KeySets)...)
 		// load k
@@ -191,7 +187,7 @@ func (this *BuildPackage) buildForRangeStatementForMap(
 	// store k and v into user defined variable
 	//store v in real v
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
-		if attr.IdentifierValue != nil {
+		if attr.IdentifierValue != null {
 			if attr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject,
 					attr.IdentifierValue.Variable.LocalValOffset)...)
@@ -203,7 +199,7 @@ func (this *BuildPackage) buildForRangeStatementForMap(
 				attr.IdentifierValue.Variable.LocalValOffset = autoVar.V
 			}
 		}
-		if attr.IdentifierKey != nil {
+		if attr.IdentifierKey != null {
 			if attr.IdentifierKey.Variable.BeenCapturedAsLeftValue > 0 {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, attr.IdentifierKey.Variable.LocalValOffset)...)
 				copyOPs(code,
@@ -215,7 +211,7 @@ func (this *BuildPackage) buildForRangeStatementForMap(
 		}
 	} else { // for k,v  = range xxx
 		// store v
-		if attr.ExpressionValue != nil {
+		if attr.ExpressionValue != null {
 			stackLength := len(blockState.Stacks)
 			stack, remainStack, op, _ :=
 				this.BuildExpression.getLeftValue(class, code, attr.ExpressionValue, context, blockState)
@@ -230,7 +226,7 @@ func (this *BuildPackage) buildForRangeStatementForMap(
 			copyOPs(code, op...)
 			forState.popStack(len(blockState.Stacks) - stackLength)
 		}
-		if attr.ExpressionKey != nil {
+		if attr.ExpressionKey != null {
 			stackLength := len(blockState.Stacks)
 			stack, remainStack, op, _ :=
 				this.BuildExpression.getLeftValue(class, code, attr.ExpressionKey, context, blockState)

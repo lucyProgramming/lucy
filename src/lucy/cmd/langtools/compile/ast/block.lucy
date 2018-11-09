@@ -3,36 +3,36 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 import "lucy/cmd/langtools/compile/common"
 
 
-class Block {
-	Exits []cg.Exit // for switch template
+public class Block {
+	public Exits []cg.Exit // for switch template
 	/*
 		should analyse at ast stage
 	*/
-	NotExecuteToLastStatement bool
-	Defers                    []StatementDefer
-	Fn                        Function
-	IsFunctionBlock           bool // function block
-	IsClassBlock              bool // class block
-	Class                     Class
-	IsForBlock                bool // for top block
-	IsSwitchBlock             bool // switch statement list block
-	IsWhenBlock               bool // template swtich statement list block
-	Pos                       Pos
-	EndPos                    Pos
-	Outer                     Block
-	InheritedAttribute        InheritedAttribute
-	Statements                []Statement
-	Constants                 map{string->Constant}
-	Functions                 map{string->Function}
-	Classes                   map{string->Class}
-	Enums                     map{string->Enum}
-	EnumNames                 map{string->EnumName}
-	Labels                    map{string->StatementLabel}
-	TypeAliases               map{string->Type}
-	Variables                 map{string->Variable}
+	public NotExecuteToLastStatement bool
+	public Defers                    []StatementDefer
+	public Fn                        Function
+	public IsFunctionBlock           bool // function block
+	public IsClassBlock              bool // class block
+	public Class                     Class
+	public IsForBlock                bool // for top block
+	public IsSwitchBlock             bool // switch statement list block
+	public IsWhenBlock               bool // template swtich statement list block
+	public Pos                       Pos
+	public EndPos                    Pos
+	public Outer                     Block
+	public InheritedAttribute        InheritedAttribute
+	public Statements                []Statement
+	public Constants                 map{string->Constant}
+	public Functions                 map{string->Function}
+	public Classes                   map{string->Class}
+	public Enums                     map{string->Enum}
+	public EnumNames                 map{string->EnumName}
+	public Labels                    map{string->StatementLabel}
+	public TypeAliases               map{string->Type}
+	public Variables                 map{string->Variable}
 	checkConstantsCalled      bool
 
-    fn NameExists(name string) -> (x Object,exist bool) {
+    fn nameExists(name string) -> (x Object,exist bool) {
         if this.Functions != null {
             if t := this.Functions[name]; t != null {
                 return t, true

@@ -1,12 +1,7 @@
-package jvm
-
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
+ 
 
 func (this *BuildExpression) mkBuildInSprintf(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -22,7 +17,7 @@ func (this *BuildExpression) mkBuildInSprintf(
 	state.pushStack(class, state.newObjectVariableType(javaStringClass))
 	loadInt32(class, code, int(meta.ArgsLength))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
-	class.InsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
+	ast.TypeInsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	currentStack := char(2)
 	if currentStack > maxStack {
@@ -54,7 +49,7 @@ func (this *BuildExpression) mkBuildInSprintf(
 		state.popStack(2)
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokestatic
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      javaStringClass,
 		Method:     "format",
 		Descriptor: "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;",

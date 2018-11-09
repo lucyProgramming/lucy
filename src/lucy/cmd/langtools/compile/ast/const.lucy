@@ -6,19 +6,19 @@ import "java/lang/Boolean"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
 
-class Constant {
-	IsGlobal               bool
-	IsBuildIn              bool
-	Used                   bool
-	Pos                    Pos
-	Type                   Type
-	Name                   string
-	DefaultValueExpression Expression
-	AccessFlags            char
-	Comment                string
-	Value                  Object
-	longValue long
-	doubleValue double 
+public class Constant {
+	public IsGlobal               bool
+	public IsBuildIn              bool
+	public Used                   bool
+	public Pos                    Pos
+	public Type                   Type
+	public Name                   string
+	public DefaultValueExpression Expression
+	public AccessFlags            char
+	public Comment                string
+	public Value                  Object
+	public longValue long
+	public doubleValue double 
 	
 	fn isPublic() -> (is bool) {
 		return this.AccessFlags|cg.AccFieldPublic != 0

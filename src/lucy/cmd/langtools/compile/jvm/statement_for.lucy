@@ -1,17 +1,12 @@
-package jvm
 
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func (this *BuildPackage) buildForStatement(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	s *ast.StatementFor,
 	context Context,
 	state StackMapState) (maxStack char) {
-	if s.RangeAttr != nil {
+	if s.RangeAttr != null {
 		if s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeArray {
 			return this.buildForRangeStatementForArray(class, code, s, context, state)
 		} else if s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeJavaArray {
@@ -25,14 +20,14 @@ func (this *BuildPackage) buildForStatement(
 		state.addTop(forState)
 	}()
 	//init
-	if s.Init != nil {
+	if s.Init != null {
 		stack := this.BuildExpression.build(class, code, s.Init, context, forState)
 		if stack > maxStack {
 			maxStack = stack
 		}
 	}
 	var firstTimeExit *cg.Exit
-	if s.Condition != nil {
+	if s.Condition != null {
 		stack, exit := this.BuildExpression.buildConditionNotOk(class, code, context, forState, s.Condition)
 		if stack > maxStack {
 			maxStack = stack
@@ -42,20 +37,20 @@ func (this *BuildPackage) buildForStatement(
 	}
 	s.ContinueCodeOffset = code.CodeLength
 	context.MakeStackMap(code, forState, code.CodeLength)
-	if s.Increment != nil {
+	if s.Increment != null {
 		stack := this.BuildExpression.build(class, code, s.Increment, context, forState)
 		if stack > maxStack {
 			maxStack = stack
 		}
 	}
-	if s.Condition != nil {
+	if s.Condition != null {
 		stack, exit := this.BuildExpression.buildConditionNotOk(class, code, context, forState, s.Condition)
 		if stack > maxStack {
 			maxStack = stack
 		}
 		s.Exits = append(s.Exits, exit)
 	}
-	if firstTimeExit != nil {
+	if firstTimeExit != null {
 		writeExits([]*cg.Exit{firstTimeExit}, code.CodeLength)
 		context.MakeStackMap(code, forState, code.CodeLength)
 	}

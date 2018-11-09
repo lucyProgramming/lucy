@@ -1,9 +1,9 @@
  
 
-class StatementContinue {
-	StatementFor StatementFor
-	Defers       []StatementDefer
-	Pos          Pos
+public class StatementContinue {
+	public StatementFor StatementFor
+	public Defers       []StatementDefer
+	public Pos          Pos
 	
 	fn check(block Block) -> (errs []error) {
 		if block.InheritedAttribute.ForContinue == null {

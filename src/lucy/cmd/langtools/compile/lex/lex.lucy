@@ -1,6 +1,6 @@
 
+import "java/lang/Long"
 import "java/lang/Double"
-import "lucy/cmd/langtools/common"
 import "java/lang/String"
 
 public class Lexer {
@@ -169,50 +169,8 @@ public class Lexer {
 		}
 		if isHex && haveFloatPart {
 			token.Type = TokenLiteralInt
-			token.Data = common.packLong2Object(0L)
+			token.longValue = 0L
 			err = new error("mix up float and hex")
-			return
-		}
-		isScientificNotation := false
-		power := []byte{}
-		powerPositive := true
-		c, eof = this.getChar()
-		if (c == 'e' || c == 'E') && eof == false {
-			isScientificNotation = true
-			c, eof = this.getChar()
-			if eof {
-				err = new error("unexpected EOF")
-			}
-			if c == '-' {
-				powerPositive = false
-				c, eof = this.getChar()
-			} else if this.isDigit(c) {
-				// nothing to do
-			} else if c == '+' { // default is true
-				c, eof = this.getChar()
-			} else {
-				err = new error("wrong format scientific notation")
-			}
-			if this.isDigit(c) == false {
-				this.unGetChar() //
-				err = new error("wrong format scientific notation")
-			} else {
-				power.append(c)
-				c, eof = this.getChar()
-				for eof == false && this.isDigit(c) {
-					power .append( c)
-					c, eof = this.getChar()
-				}
-				this.unGetChar()
-			}
-		} else {
-			this.unGetChar()
-		}
-		if isHex && isScientificNotation {
-			token.Type = TokenLiteralInt
-			token.Data = common.packLong2Object(0L)
-			token.Description = "0"
-			err = new error("mix up hex and seientific notation")
 			return
 		}
 		isDouble := false
@@ -234,141 +192,42 @@ public class Lexer {
 		} else {
 			this.unGetChar()
 		}
-
 		token.EndLine = this.line
 		token.EndColumn = this.column
-		if isScientificNotation == false {
-			integerPart.append('.')
-			integerPart.appendAll(floatPart )
-			floatValue := Double.parseDouble(string(integerPart))
-			if haveFloatPart {
-				if isDouble {
-					token.Type = TokenLiteralDouble
-					token.Data = common.packDouble2Object(floatValue)
-				} else {
-					token.Type = TokenLiteralFloat
-					token.Data = common.packFloat2Object( float(floatValue) )
-				}
-			} else {
-				if isDouble {
-					token.Type = TokenLiteralDouble
-					token.Data = common.packDouble2Object(floatValue)
-				} else if isFloat {
-					token.Type = TokenLiteralFloat
-					token.Data = common.packFloat2Object(float(floatValue))
-				} else if isLong {
-					token.Type = TokenLiteralLong
-					token.Data = common.packLong2Object( long(floatValue) )
-				} else if isByte {
-					token.Type = TokenLiteralByte
-					token.Data = common.packLong2Object(long(floatValue) )
-				} else if isShort {
-					token.Type = TokenLiteralShort
-					token.Data =common.packLong2Object( long(floatValue) )
-				} else {
-					token.Type = TokenLiteralInt
-					token.Data = common.packLong2Object(long(floatValue) )
-				}
-			}
-			return
-		}
-		//scientific notation
-		if t, _ := this.parseInt64(integerPart); t > 10 && t < 1 {
-			err = new error("wrong format of scientific notation")
-			token.Type = TokenLiteralInt
-			token.Data = common.packLong2Object(long(0))
-			return
-		}
-		var p int
-		{
-			t, _ := this.parseInt64(power)
-			p = int(t)
-		}
-		notationIsDouble := false
-		var notationDoubleValue double
-		var notationLongValue long
-		if powerPositive {
-			if p >= len(floatPart) { // int
-				integerPart.appendAll( floatPart)
-				{
-					b := new  []byte (p-len(floatPart) )
-					for k, _ := range b {
-						b[k] = '0'
-					}
-					integerPart.appendAll(b)
-				}
-				var e error
-				notationLongValue, e = this.parseInt64(integerPart)
-				if e != null {
-					err = e
-				}
-			} else { // float
-				integerPart . appendAll( floatPart[:p])
-				integerPart . append( '.')
-				integerPart . appendAll(floatPart[p:])
-				notationIsDouble = true
-				notationDoubleValue = Double.parseDouble(string(integerPart))
-			}
-		} else { // power is negative,must be float number
-			b := new []byte(p-len(integerPart))
-			for k, _ := range b {
-				b[k] = '0'
-			}
-			b.appendAll(integerPart)
-			b.appendAll(floatPart)
-			notationIsDouble = true
-			notationDoubleValue  = Double.parseDouble("0."+string(integerPart))
-		}
-		if isDouble == false &&
-			isFloat == false &&
-			isLong == false &&
-			isByte == false &&
-			isShort == false {
-			if notationIsDouble {
-				token.Type = TokenLiteralDouble
-				token.Data =  common.packDouble2Object(notationDoubleValue)
-			} else {
-				token.Type = TokenLiteralLong
-				token.Data = common.packLong2Object(notationLongValue)
-			}
-			return
-		}
-		if isDouble {
-			token.Type = TokenLiteralDouble
-			token.Data = common.packDouble2Object( notationDoubleValue )
-		} else if isFloat {
-			token.Type = TokenLiteralFloat
-			token.Data = common.packDouble2Object( notationDoubleValue )
-		} else if isLong {
-			token.Type = TokenLiteralLong
-			if notationIsDouble {
-				err = new error("number literal defined as 'long' but notation is float")
-			}
-			token.Data = common.packLong2Object(notationLongValue)
-		} else if isByte {
-			token.Type = TokenLiteralByte
-			token.Data = common.packLong2Object( notationLongValue )
-			if notationIsDouble {
-				err = new error("number literal defined as 'byte' but notation is float")
-			}
-		} else if isShort {
-			token.Type = TokenLiteralShort
-			token.Data =common.packLong2Object( notationLongValue)
-			if notationIsDouble {
-				err = new error("number literal defined as 'short' but notation is float")
-			}
-
-		} else {
-			if notationIsDouble {
-				token.Type = TokenLiteralDouble
-				token.Data =common.packDouble2Object( notationDoubleValue )
-			} else {
-				token.Type = TokenLiteralLong
-				token.Data =common.packLong2Object( notationLongValue)
-			}
-			return
-		}
-		return
+        if haveFloatPart {
+            integerPart.append('.')
+            integerPart.appendAll(floatPart )
+            floatValue := Double.parseDouble(string(integerPart))
+            if isDouble {
+                token.Type = TokenLiteralDouble
+                token.doubleValue = floatValue
+            } else {
+                token.Type = TokenLiteralFloat
+                token.doubleValue = floatValue
+            }
+        } else {
+            longValue := Long.parseLong(string(integerPart))
+            if isDouble {
+                token.Type = TokenLiteralDouble
+                token.doubleValue = double(longValue)
+            } else if isFloat {
+                token.Type = TokenLiteralFloat
+                token.doubleValue = double(longValue)
+            } else if isLong {
+                token.Type = TokenLiteralLong
+                token.longValue = longValue
+            } else if isByte {
+                token.Type = TokenLiteralByte
+                token.longValue = longValue
+            } else if isShort {
+                token.Type = TokenLiteralShort
+                token.longValue = longValue
+            } else {
+                token.Type = TokenLiteralInt
+                token.longValue = longValue
+            }
+        }
+        return
 	}
 
 	fn lexIdentifier(c byte) -> (token Token, err error) {
@@ -400,7 +259,7 @@ public class Lexer {
 			}
 		} else {
 			token.Type = TokenIdentifier
-			token.Data = identifier
+			token.stringValue = identifier
 			token.Description = "identifier_" + identifier
 		}
 		token.EndLine = this.line
@@ -563,7 +422,7 @@ public class Lexer {
 		if c == '\n' {
 			err = new error("string literal start new line")
 		}
-		token.Data = string(bs)
+		token.stringValue = string(bs)
 		token.Description = string(bs)
 		return
 	}
@@ -843,7 +702,7 @@ public class Lexer {
 					bs . append( c)
 				}
 				token.Type = TokenComment
-				token.Data = string(bs)
+				token.stringValue = string(bs)
 				token.Description = string(bs)
 			} else if c == '*' {
 				comment, err := this.lexMultiLineComment()
@@ -851,7 +710,7 @@ public class Lexer {
 					return null, err
 				}
 				token.Type = TokenMultiLineComment
-				token.Data = comment
+				token.stringValue = comment
 				token.Description = comment
 			} else {
 				this.unGetChar()
@@ -877,7 +736,7 @@ public class Lexer {
 				c, eof = this.getChar()
 			}
 			token.Type = TokenLiteralString
-			token.Data = string(bs)
+			token.stringValue = string(bs)
 			token.Description = string(bs)
 		case '"':
 			return this.lexString('"')
@@ -885,15 +744,15 @@ public class Lexer {
 			isChar := this.isChar()
 			token, err = this.lexString('\'')
 			if err == null {
-				if t := []byte(token.Data.(string)); len(t) != 1 {
+				if t := []byte(token.stringValue); len(t) != 1 {
 					err = new error("expect one char")
 				} else { // correct token
 					if isChar {
 						token.Type = TokenLiteralChar
-						token.Data = common.packLong2Object(long(t[0]))
+						token.longValue =  long(t[0])
 					} else {
 						token.Type = TokenLiteralByte
-						token.Data = common.packLong2Object(long(t[0]))
+						token.longValue = long(t[0])
 					}
 				}
 			}

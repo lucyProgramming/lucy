@@ -37,6 +37,7 @@ func (this *BuildExpression) buildVarAssign(
 			this.BuildPackage.storeGlobalVariable(class, code, v)
 		} else {
 			v.LocalValOffset = code.MaxLocals
+
 			this.BuildPackage.storeLocalVar(class, code, v)
 			if v.BeenCapturedAsLeftValue > 0 {
 				code.MaxLocals++

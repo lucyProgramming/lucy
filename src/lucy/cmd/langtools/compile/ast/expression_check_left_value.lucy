@@ -91,7 +91,7 @@ class ExpressionCheckLeftValue {
 				}
 				return null
 			case VariableTypePackage:
-				variable, exists := object.Package.Block.NameExists(selection.Name)
+				variable, exists := object.Package.Block.nameExists(selection.Name)
 				if exists == false {
 					errs.append(new error(sprintf("%s '%s.%s' not found",
 						e.Pos.ErrMsgPrefix(), object.Package.Name, selection.Name)))

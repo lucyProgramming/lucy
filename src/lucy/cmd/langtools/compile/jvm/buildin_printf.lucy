@@ -1,15 +1,10 @@
-package jvm
-
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
+ 
 
 /*
 	function printf
 */
 func (this *BuildExpression) mkBuildInPrintf(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -21,7 +16,7 @@ func (this *BuildExpression) mkBuildInPrintf(
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionPrintfMeta)
 	code.Codes[code.CodeLength] = cg.OP_getstatic
-	class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+	ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 		Class:      "java/lang/System",
 		Field:      "out",
 		Descriptor: "Ljava/io/PrintStream;",
@@ -36,7 +31,7 @@ func (this *BuildExpression) mkBuildInPrintf(
 	state.pushStack(class, state.newObjectVariableType(javaStringClass))
 	loadInt32(class, code, int(meta.ArgsLength))
 	code.Codes[code.CodeLength] = cg.OP_anewarray
-	class.InsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
+	ast.TypeInsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	currentStack := char(3)
 	if currentStack > maxStack {
@@ -68,7 +63,7 @@ func (this *BuildExpression) mkBuildInPrintf(
 		index++
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      javaPrintStreamClass,
 		Method:     "printf",
 		Descriptor: "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/io/PrintStream;",

@@ -1,10 +1,10 @@
  
 
-class StatementGoTo {
-	Defers         []StatementDefer
-	LabelName      string
-	StatementLabel StatementLabel
-	Pos            Pos
+public class StatementGoTo {
+	public Defers         []StatementDefer
+	public LabelName      string
+	public StatementLabel StatementLabel
+	public Pos            Pos
 	fn checkStatementGoTo(b Block) -> (err error) {
 		label := b.searchLabel(this.LabelName)
 		if label == null {

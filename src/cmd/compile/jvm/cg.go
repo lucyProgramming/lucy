@@ -169,8 +169,10 @@ func (this *BuildPackage) mkGlobalVariables() {
 			f.AttributeLucyFieldDescriptor = &cg.AttributeLucyFieldDescriptor{}
 			f.AttributeLucyFieldDescriptor.Descriptor = LucyFieldSignatureParser.Encode(v.Type)
 			if v.Type.Type == ast.VariableTypeFunction {
-				f.AttributeLucyFieldDescriptor.MethodAccessFlag |=
-					cg.AccMethodVarargs
+				if v.Type.FunctionType.VArgs != nil {
+					f.AttributeLucyFieldDescriptor.MethodAccessFlag |=
+						cg.AccMethodVarargs
+				}
 			}
 		}
 		if v.Comment != "" {

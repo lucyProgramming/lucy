@@ -1,21 +1,16 @@
-package jvm
 
-import (
-	"bytes"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-)
 
 type LucyFieldSignature struct {
 }
 
-func (this *LucyFieldSignature) Need(variableType *ast.Type) bool {
+func (this *LucyFieldSignature) Need(variableType ast.Type) bool {
 	return variableType.Type == ast.VariableTypeMap ||
 		variableType.Type == ast.VariableTypeArray ||
 		variableType.Type == ast.VariableTypeEnum ||
 		variableType.Type == ast.VariableTypeFunction
 }
 
-func (this *LucyFieldSignature) Encode(variableType *ast.Type) (d string) {
+func (this *LucyFieldSignature) Encode(variableType ast.Type) (d string) {
 	if variableType.Type == ast.VariableTypeMap {
 		d = "M" // start token of map
 		d += this.Encode(variableType.Map.K)
@@ -39,26 +34,26 @@ func (this *LucyFieldSignature) Encode(variableType *ast.Type) (d string) {
 	return Descriptor.typeDescriptor(variableType)
 }
 
-func (this *LucyFieldSignature) Decode(bs []byte) ([]byte, *ast.Type, error) {
+func (this *LucyFieldSignature) Decode(bs []byte) ([]byte, ast.Type, error) {
 	var err error
 	if bs[0] == 'M' {
 		bs = bs[1:]
-		var kt *ast.Type
+		var kt ast.Type
 		bs, kt, err = this.Decode(bs)
-		if err != nil {
-			return bs, nil, err
+		if err != null {
+			return bs, null, err
 		}
-		var vt *ast.Type
+		var vt ast.Type
 		bs, vt, err = this.Decode(bs)
-		if err != nil {
-			return bs, nil, err
+		if err != null {
+			return bs, null, err
 		}
 		m := &ast.Type{}
 		m.Type = ast.VariableTypeMap
 		m.Map = &ast.Map{}
 		m.Map.K = kt
 		m.Map.V = vt
-		return bs, m, nil
+		return bs, m, null
 	}
 	if bs[0] == 'E' {
 		bs = bs[1:]
@@ -68,17 +63,17 @@ func (this *LucyFieldSignature) Decode(bs []byte) ([]byte, *ast.Type, error) {
 		a.Enum = &ast.Enum{}
 		a.Enum.Name = string(bs[:index])
 		bs = bs[index+1:]
-		return bs, a, nil
+		return bs, a, null
 	}
 	if bs[0] == '(' {
 		a := &ast.Type{}
 		a.Type = ast.VariableTypeFunction
 		a.FunctionType = &ast.FunctionType{}
 		bs, err = LucyMethodSignatureParser.Decode(a.FunctionType, bs)
-		if err != nil {
-			return bs, nil, err
+		if err != null {
+			return bs, null, err
 		}
-		return bs, a, nil
+		return bs, a, null
 	}
 	if bs[0] == ']' {
 		bs = bs[1:]

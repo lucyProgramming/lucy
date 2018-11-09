@@ -20,14 +20,14 @@ type FileLoader struct {
 }
 
 func (this *FileLoader) LoadImport(importName string) (interface{}, error) {
-	if this.caches != nil && this.caches[importName] != nil {
-		return this.caches[importName], nil
+	if this.caches != null && this.caches[importName] != null {
+		return this.caches[importName], null
 	}
 	var realPaths []*Resource
 	for _, v := range compiler.lucyPaths {
 		p := filepath.Join(v, "class", importName)
 		f, err := os.Stat(p)
-		if err == nil && f.IsDir() { // directory is package
+		if err == null && f.IsDir() { // directory is package
 			realPaths = append(realPaths, &Resource{
 				kind:     resourceKindLucyPackage,
 				realPath: p,
@@ -36,7 +36,7 @@ func (this *FileLoader) LoadImport(importName string) (interface{}, error) {
 		}
 		p = filepath.Join(v, "class", importName+".class")
 		f, err = os.Stat(p)
-		if err == nil && f.IsDir() == false { // class file
+		if err == null && f.IsDir() == false { // class file
 			realPaths = append(realPaths, &Resource{
 				kind:     resourceKindLucyClass,
 				realPath: p,
@@ -48,7 +48,7 @@ func (this *FileLoader) LoadImport(importName string) (interface{}, error) {
 	for _, v := range compiler.ClassPaths {
 		p := filepath.Join(v, importName)
 		f, err := os.Stat(p)
-		if err == nil && f.IsDir() { // directory is package
+		if err == null && f.IsDir() { // directory is package
 			realPaths = append(realPaths, &Resource{
 				kind:     resourceKindJavaPackage,
 				realPath: p,
@@ -57,7 +57,7 @@ func (this *FileLoader) LoadImport(importName string) (interface{}, error) {
 		}
 		p = filepath.Join(v, importName+".class")
 		f, err = os.Stat(p)
-		if err == nil && f.IsDir() == false { // directory is package
+		if err == null && f.IsDir() == false { // directory is package
 			realPaths = append(realPaths, &Resource{
 				kind:     resourceKindJavaClass,
 				realPath: p,
@@ -66,7 +66,7 @@ func (this *FileLoader) LoadImport(importName string) (interface{}, error) {
 		}
 	}
 	if len(realPaths) == 0 {
-		return nil, new error(sprintf("resource '%v' not found", importName)
+		return null, new error(sprintf("resource '%v' not found", importName)
 	}
 	realPathMap := make(map[string][]*Resource)
 	for _, v := range realPaths {
@@ -91,34 +91,34 @@ func (this *FileLoader) LoadImport(importName string) (interface{}, error) {
 				errMsg += sprintf("\t in '%s' is a lucy package\n", v[0].realPath)
 			}
 		}
-		return nil, new error(sprintf(errMsg)
+		return null, new error(sprintf(errMsg)
 	}
 	if realPaths[0].kind == resourceKindLucyClass {
 		if filepath.Base(realPaths[0].realPath) == mainClassName {
-			return nil, new error(sprintf("%s is special class for global variable and other things", mainClassName)
+			return null, new error(sprintf("%s is special class for global variable and other things", mainClassName)
 		}
 	}
 	if realPaths[0].kind == resourceKindJavaClass {
 		class, err := this.loadClass(realPaths[0])
-		if class != nil {
+		if class != null {
 			this.caches[importName] = class
 		}
 		return class, err
 	} else if realPaths[0].kind == resourceKindLucyClass {
 		t, err := this.loadClass(realPaths[0])
-		if t != nil {
+		if t != null {
 			this.caches[importName] = t
 		}
 		return t, err
 	} else if realPaths[0].kind == resourceKindJavaPackage {
 		p, err := this.loadJavaPackage(realPaths[0])
-		if p != nil {
+		if p != null {
 			this.caches[importName] = p
 		}
 		return p, err
 	} else { // lucy package
 		p, err := this.loadLucyPackage(realPaths[0])
-		if p != nil {
+		if p != null {
 			this.caches[importName] = p
 		}
 		return p, err
@@ -128,32 +128,32 @@ func (this *FileLoader) LoadImport(importName string) (interface{}, error) {
 /*
 	lucy and java have no difference
 */
-func (this *FileLoader) loadInterfaces(astClass *ast.Class, c *cg.Class) error {
+func (this *FileLoader) loadInterfaces(astClass ast.Class, c *cg.Class) error {
 	astClass.InterfaceNames = make([]*ast.NameWithPos, len(c.Interfaces))
 	for k, v := range c.Interfaces {
 		astClass.InterfaceNames[k] = &ast.NameWithPos{
 			Name: string(c.ConstPool[v].Info),
 		}
 	}
-	astClass.Interfaces = make([]*ast.Class, len(astClass.InterfaceNames))
+	astClass.Interfaces = make([]ast.Class, len(astClass.InterfaceNames))
 	for k, c := range astClass.InterfaceNames {
 		i := &ast.Class{}
 		i.Name = c.Name
 		i.NotImportedYet = true
 		astClass.Interfaces[k] = i
 	}
-	return nil
+	return null
 }
 
-func (this *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
+func (this *FileLoader) loadAsJava(c *cg.Class) (ast.Class, error) {
 	if c.IsSynthetic() {
-		return nil, nil
+		return null, null
 	}
 	if c.IsInnerClass() {
-		return nil, nil
+		return null, null
 	}
 	//name
-	if t := c.AttributeGroupedByName.GetByName(cg.AttributeNameSignature); t != nil && len(t) > 0 {
+	if t := c.AttributeGroupedByName.GetByName(cg.AttributeNameSignature); t != null && len(t) > 0 {
 		//TODO:: support signature???
 	}
 	astClass := &ast.Class{}
@@ -179,8 +179,8 @@ func (this *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		f.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		f.Name = string(c.ConstPool[v.NameIndex].Info)
 		_, f.Type, err = jvm.Descriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
-		if err != nil {
-			return nil, err
+		if err != null {
+			return null, err
 		}
 		astClass.Fields[f.Name] = f
 	}
@@ -193,10 +193,10 @@ func (this *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 		m.Function.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		m.Function.AccessFlags = v.AccessFlags
 		m.Function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
-		if err != nil {
-			return nil, err
+		if err != null {
+			return null, err
 		}
-		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != nil && len(t) > 0 {
+		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != null && len(t) > 0 {
 			parseMethodParameter(c, t[0].Info, m.Function)
 		}
 		if (v.AccessFlags & cg.AccMethodVarargs) != 0 {
@@ -207,21 +207,21 @@ func (this *FileLoader) loadAsJava(c *cg.Class) (*ast.Class, error) {
 			m.Function.Type.VArgs.Type.IsVariableArgs = true
 			m.Function.Type.ParameterList = m.Function.Type.ParameterList[:len(m.Function.Type.ParameterList)-1]
 		}
-		if astClass.Methods[m.Function.Name] == nil {
+		if astClass.Methods[m.Function.Name] == null {
 			astClass.Methods[m.Function.Name] = []*ast.ClassMethod{m}
 		} else {
 			astClass.Methods[m.Function.Name] = append(astClass.Methods[m.Function.Name], m)
 		}
 	}
-	return astClass, nil
+	return astClass, null
 }
 
-func (this *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
+func (this *FileLoader) loadAsLucy(c *cg.Class) (ast.Class, error) {
 	if c.IsSynthetic() {
-		return nil, nil
+		return null, null
 	}
 	if c.IsInnerClass() {
-		return nil, nil
+		return null, null
 	}
 	//name
 	astClass := &ast.Class{}
@@ -243,18 +243,18 @@ func (this *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 	if t := c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyClassConst); len(t) > 0 {
 		attr := &cg.AttributeLucyClassConst{}
 		attr.FromBs(c, t[0].Info)
-		var t *ast.Type
+		var t ast.Type
 		var err error
 		for _, v := range attr.Constants {
 			_, t, err = jvm.LucyFieldSignatureParser.Decode([]byte(v.Descriptor))
-			if err != nil {
-				return nil, err
+			if err != null {
+				return null, err
 			}
 			constant := &ast.Constant{}
 			constant.Name = v.Name
 			constant.Type = t
 			constant.Value = this.loadConst(c, v.ValueIndex, t)
-			if astClass.Block.Constants == nil {
+			if astClass.Block.Constants == null {
 				astClass.Block.Constants = make(map[string]*ast.Constant)
 			}
 			astClass.Block.Constants[v.Name] = constant
@@ -265,15 +265,15 @@ func (this *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		f.Name = string(c.ConstPool[v.NameIndex].Info)
 		f.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
 		_, f.Type, err = jvm.Descriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
-		if err != nil {
-			return nil, err
+		if err != null {
+			return null, err
 		}
-		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyFieldDescriptor); t != nil && len(t) > 0 {
+		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyFieldDescriptor); t != null && len(t) > 0 {
 			d := &cg.AttributeLucyFieldDescriptor{}
 			d.FromBs(c, t[0].Info)
 			_, f.Type, err = jvm.LucyFieldSignatureParser.Decode([]byte(d.Descriptor))
-			if err != nil {
-				return nil, err
+			if err != null {
+				return null, err
 			}
 			if f.Type.Type == ast.VariableTypeFunction && d.MethodAccessFlag&cg.AccMethodVarargs != 0 {
 				if f.Type.FunctionType.ParameterList[len(f.Type.FunctionType.ParameterList)-1].Type.Type !=
@@ -297,32 +297,32 @@ func (this *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 		m.Function = &ast.Function{}
 		m.Function.Name = string(c.ConstPool[v.NameIndex].Info)
 		m.Function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
-		if err != nil {
-			return nil, err
+		if err != null {
+			return null, err
 		}
 		m.Function.AccessFlags = v.AccessFlags
 		m.Function.JvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
-		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyMethodDescriptor); t != nil && len(t) > 0 {
+		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyMethodDescriptor); t != null && len(t) > 0 {
 			index := binary.BigEndian.Uint16(t[0].Info)
 			_, err = jvm.LucyMethodSignatureParser.Decode(&m.Function.Type, c.ConstPool[index].Info)
-			if err != nil {
-				return nil, err
+			if err != null {
+				return null, err
 			}
 		}
-		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyDefaultParameters); t != nil && len(t) > 0 {
+		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyDefaultParameters); t != null && len(t) > 0 {
 			dp := &cg.AttributeDefaultParameters{}
 			dp.FromBytes(t[0].Info)
 			jvm.DefaultValueParser.Decode(c, m.Function, dp)
 		}
-		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != nil && len(t) > 0 {
+		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != null && len(t) > 0 {
 			parseMethodParameter(c, t[0].Info, m.Function)
 		}
-		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyReturnListNames); t != nil && len(t) > 0 {
+		if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyReturnListNames); t != null && len(t) > 0 {
 			parseReturnListNames(c, t[0].Info, m.Function)
 		}
 		err = loadEnumForFunction(m.Function)
-		if err != nil {
-			return nil, err
+		if err != null {
+			return null, err
 		}
 		if (v.AccessFlags & cg.AccMethodVarargs) != 0 {
 			m.Function.Type.VArgs = m.Function.Type.ParameterList[len(m.Function.Type.ParameterList)-1]
@@ -332,13 +332,13 @@ func (this *FileLoader) loadAsLucy(c *cg.Class) (*ast.Class, error) {
 			m.Function.Type.VArgs.Type.IsVariableArgs = true
 			m.Function.Type.ParameterList = m.Function.Type.ParameterList[:len(m.Function.Type.ParameterList)-1]
 		}
-		if astClass.Methods[m.Function.Name] == nil {
+		if astClass.Methods[m.Function.Name] == null {
 			astClass.Methods[m.Function.Name] = []*ast.ClassMethod{m}
 		} else {
 			astClass.Methods[m.Function.Name] = append(astClass.Methods[m.Function.Name], m)
 		}
 	}
-	return astClass, nil
+	return astClass, null
 }
 
 func (this *FileLoader) loadLucyEnum(c *cg.Class) (*ast.Enum, error) {
@@ -358,10 +358,10 @@ func (this *FileLoader) loadLucyEnum(c *cg.Class) (*ast.Enum, error) {
 		en.Value = int(binary.BigEndian.Uint32(c.ConstPool[binary.BigEndian.Uint16(constValue.Info)].Info))
 		e.Enums = append(e.Enums, en)
 	}
-	return e, nil
+	return e, null
 }
 
-func (this *FileLoader) loadConst(c *cg.Class, nameIndex char, t *ast.Type) (value interface{}) {
+func (this *FileLoader) loadConst(c *cg.Class, nameIndex char, t ast.Type) (value interface{}) {
 	switch t.Type {
 	case ast.VariableTypeBool:
 		return binary.BigEndian.Uint32(c.ConstPool[nameIndex].Info) != 0
@@ -383,14 +383,14 @@ func (this *FileLoader) loadConst(c *cg.Class, nameIndex char, t *ast.Type) (val
 		valueIndex := binary.BigEndian.Uint16(c.ConstPool[nameIndex].Info)
 		return string(c.ConstPool[valueIndex].Info)
 	}
-	return nil
+	return null
 }
 
 func (this *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error {
 	var err error
 	mainClassName := &cg.ClassHighLevel{}
 	mainClassName.Name = pack.Name + "/main"
-	pack.Block.Variables = make(map[string]*ast.Variable)
+	pack.Block.Variables = make(map[string]ast.Variable)
 	pack.Block.Constants = make(map[string]*ast.Constant)
 	pack.Block.Functions = make(map[string]*ast.Function)
 	for _, f := range c.Fields {
@@ -400,7 +400,7 @@ func (this *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error 
 			return new error(sprintf("constant value length greater than  1 at class 'main'  field '%s'", name)
 		}
 		_, typ, err := jvm.Descriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
-		if err != nil {
+		if err != null {
 			return err
 		}
 		if len(f.AttributeGroupedByName.GetByName(cg.AttributeNameLucyConst)) > 0 {
@@ -410,7 +410,7 @@ func (this *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error 
 			constant.AccessFlags = f.AccessFlags
 			constant.Type = typ
 			_, constant.Type, err = jvm.Descriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
-			if err != nil {
+			if err != null {
 				return err
 			}
 			valueIndex := binary.BigEndian.Uint16(constValue[0].Info)
@@ -425,11 +425,11 @@ func (this *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error 
 			vd.Type = typ
 			vd.IsGlobal = true
 			pack.Block.Variables[name] = vd
-			if t := f.AttributeGroupedByName.GetByName(cg.AttributeNameLucyFieldDescriptor); t != nil && len(t) > 0 {
+			if t := f.AttributeGroupedByName.GetByName(cg.AttributeNameLucyFieldDescriptor); t != null && len(t) > 0 {
 				d := &cg.AttributeLucyFieldDescriptor{}
 				d.FromBs(c, t[0].Info)
 				_, vd.Type, err = jvm.LucyFieldSignatureParser.Decode([]byte(d.Descriptor))
-				if err != nil {
+				if err != null {
 					return err
 				}
 				if vd.Type.Type == ast.VariableTypeFunction && d.MethodAccessFlag&cg.AccMethodVarargs != 0 {
@@ -451,7 +451,7 @@ func (this *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error 
 	}
 
 	for _, m := range c.Methods {
-		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyTriggerPackageInit); t != nil && len(t) > 0 {
+		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyTriggerPackageInit); t != null && len(t) > 0 {
 			pack.TriggerPackageInitMethodName = string(c.ConstPool[m.NameIndex].Info)
 			continue
 		}
@@ -465,27 +465,27 @@ func (this *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error 
 		function.AccessFlags = m.AccessFlags
 		function.JvmDescriptor = string(c.ConstPool[m.DescriptorIndex].Info)
 		function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[m.DescriptorIndex].Info)
-		if err != nil {
+		if err != null {
 			return err
 		}
-		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyMethodDescriptor); t != nil && len(t) > 0 {
+		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyMethodDescriptor); t != null && len(t) > 0 {
 			index := binary.BigEndian.Uint16(t[0].Info)
 			_, err = jvm.LucyMethodSignatureParser.Decode(&function.Type, c.ConstPool[index].Info)
-			if err != nil {
+			if err != null {
 				return err
 			}
 		}
 		err = loadEnumForFunction(function)
-		if err != nil {
+		if err != null {
 			return err
 		}
-		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != nil && len(t) > 0 {
+		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != null && len(t) > 0 {
 			parseMethodParameter(c, t[0].Info, function)
 		}
-		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyReturnListNames); t != nil && len(t) > 0 {
+		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyReturnListNames); t != null && len(t) > 0 {
 			parseReturnListNames(c, t[0].Info, function)
 		}
-		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyDefaultParameters); t != nil && len(t) > 0 {
+		if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyDefaultParameters); t != null && len(t) > 0 {
 			dp := &cg.AttributeDefaultParameters{}
 			dp.FromBytes(t[0].Info)
 			jvm.DefaultValueParser.Decode(c, function, dp)
@@ -508,14 +508,14 @@ func (this *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error 
 		pack.Block.Functions[name] = function
 	}
 
-	if pack.Block.TypeAliases == nil {
-		pack.Block.TypeAliases = make(map[string]*ast.Type)
+	if pack.Block.TypeAliases == null {
+		pack.Block.TypeAliases = make(map[string]ast.Type)
 	}
 	for _, v := range c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyTypeAlias) {
 		attr := &cg.AttributeLucyTypeAlias{}
 		attr.FromBs(c, v.Info)
 		name, typ, err := jvm.LucyTypeAliasParser.Decode([]byte(attr.Alias))
-		if err != nil {
+		if err != null {
 			return err
 		}
 		alias := &ast.TypeAlias{
@@ -526,7 +526,7 @@ func (this *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error 
 		pack.Block.TypeAliases[name] = typ
 		if typ.Type == ast.VariableTypeEnum {
 			err = loadEnumForVariableType(typ)
-			if err != nil {
+			if err != null {
 				return err
 			}
 		}
@@ -546,13 +546,13 @@ func (this *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error 
 		f.TemplateFunction = &ast.TemplateFunction{}
 		pack.Block.Functions[attr.Name] = f
 	}
-	return nil
+	return null
 }
 
 func (this *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 	fis, err := ioutil.ReadDir(r.realPath)
-	if err != nil {
-		return nil, err
+	if err != null {
+		return null, err
 	}
 	fisM := make(map[string]os.FileInfo)
 	for _, v := range fis {
@@ -563,29 +563,29 @@ func (this *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 
 	_, ok := fisM[mainClassName]
 	if ok == false {
-		return nil, new error(sprintf("main class not found")
+		return null, new error(sprintf("main class not found")
 	}
 	bs, err := ioutil.ReadFile(filepath.Join(r.realPath, mainClassName))
-	if err != nil {
-		return nil, new error(sprintf("read main.class failed,err:%v", err)
+	if err != null {
+		return null, new error(sprintf("read main.class failed,err:%v", err)
 	}
 	c, err := (&ClassDecoder{}).decode(bs)
-	if err != nil {
-		return nil, new error(sprintf("decode main class failed,err:%v", err)
+	if err != null {
+		return null, new error(sprintf("decode main class failed,err:%v", err)
 	}
 	p := &ast.Package{}
 	p.Name = r.name
 	err = this.loadLucyMainClass(p, c)
-	if err != nil {
-		return nil, new error(sprintf("parse main class failed,err:%v", err)
+	if err != null {
+		return null, new error(sprintf("parse main class failed,err:%v", err)
 	}
 
 	delete(fisM, mainClassName)
 	mkEnums := func(e *ast.Enum) {
-		if p.Block.Enums == nil {
+		if p.Block.Enums == null {
 			p.Block.Enums = make(map[string]*ast.Enum)
 		}
-		if p.Block.EnumNames == nil {
+		if p.Block.EnumNames == null {
 			p.Block.EnumNames = make(map[string]*ast.EnumName)
 		}
 		p.Block.Enums[filepath.Base(e.Name)] = e
@@ -595,70 +595,70 @@ func (this *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 	}
 	for _, v := range fisM {
 		bs, err := ioutil.ReadFile(filepath.Join(r.realPath, v.Name()))
-		if err != nil {
+		if err != null {
 			return p, new error(sprintf("read class failed,err:%v", err)
 		}
 		c, err := (&ClassDecoder{}).decode(bs)
-		if err != nil {
-			return nil, new error(sprintf("decode class failed,err:%v", err)
+		if err != null {
+			return null, new error(sprintf("decode class failed,err:%v", err)
 		}
 		if len(c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyEnum)) > 0 {
 			e, err := this.loadLucyEnum(c)
-			if err != nil {
-				return nil, err
+			if err != null {
+				return null, err
 			}
 			mkEnums(e)
 			continue
 		}
 		class, err := this.loadAsLucy(c)
-		if err != nil {
-			return nil, new error(sprintf("decode class failed,err:%v", err)
+		if err != null {
+			return null, new error(sprintf("decode class failed,err:%v", err)
 		}
-		if class != nil {
-			if p.Block.Classes == nil {
-				p.Block.Classes = make(map[string]*ast.Class)
+		if class != null {
+			if p.Block.Classes == null {
+				p.Block.Classes = make(map[string]ast.Class)
 			}
-			p.Block.Classes[filepath.Base(class.Name)] = class
+			p.Block.Classes[filepath.Base(ast.TypeName)] = class
 		}
 	}
-	return p, nil
+	return p, null
 }
 
 func (this *FileLoader) loadJavaPackage(r *Resource) (*ast.Package, error) {
 	fis, err := ioutil.ReadDir(r.realPath)
-	if err != nil {
-		return nil, err
+	if err != null {
+		return null, err
 	}
 	ret := &ast.Package{}
-	ret.Block.Classes = make(map[string]*ast.Class)
+	ret.Block.Classes = make(map[string]ast.Class)
 	for _, v := range fis {
 		if strings.HasSuffix(v.Name(), ".class") == false {
 			continue
 		}
 		bs, err := ioutil.ReadFile(filepath.Join(r.realPath, v.Name()))
-		if err != nil {
-			return nil, err
+		if err != null {
+			return null, err
 		}
 		c, err := (&ClassDecoder{}).decode(bs)
 		class, err := this.loadAsJava(c)
-		if err != nil {
-			return nil, err
+		if err != null {
+			return null, err
 		}
-		if class != nil {
-			if ret.Block.Classes == nil {
-				ret.Block.Classes = make(map[string]*ast.Class)
+		if class != null {
+			if ret.Block.Classes == null {
+				ret.Block.Classes = make(map[string]ast.Class)
 			}
-			ret.Block.Classes[filepath.Base(class.Name)] = class
+			ret.Block.Classes[filepath.Base(ast.TypeName)] = class
 		}
 
 	}
-	return ret, nil
+	return ret, null
 }
 
 func (this *FileLoader) loadClass(r *Resource) (interface{}, error) {
 	bs, err := ioutil.ReadFile(r.realPath)
-	if err != nil {
-		return nil, err
+	if err != null {
+		return null, err
 	}
 	c, err := (&ClassDecoder{}).decode(bs)
 	if r.kind == resourceKindLucyClass {

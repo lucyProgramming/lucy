@@ -1,16 +1,16 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
 import "java/lang/Object"
 
-class ClassField {
-	Class                  Class
-	DefaultValueExpression Expression
-	Name                   string
-	Type                   Type
-	Pos                    Pos
-	Comment                string
-	AccessFlags            char
-	JvmDescriptor          string      // jvm
-	DefaultValue           Object // value base on type
+public class ClassField {
+	public Class                  Class
+	public DefaultValueExpression Expression
+	public Name                   string
+	public Type                   Type
+	public Pos                    Pos
+	public Comment                string
+	public AccessFlags            char
+	public JvmDescriptor          string      // jvm
+	public DefaultValue           Object // value base on type
 	
 	fn IsStatic() ->(is bool) {
 		return (this.AccessFlags & cg.AccFieldStatic) != 0

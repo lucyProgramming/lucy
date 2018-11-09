@@ -1,24 +1,29 @@
  
 
-class Pos {
-	Filename string
-	Line     int
-	Column   int
+public class Pos {
+	public Filename string
+	public Line     int
+	public Column   int
 	/*
 		offset at bs , for special use。
 		for template function only currently
 	*/
 	Offset int
-	fn ErrMsgPrefix() -> (prefix string) {
+	public fn ErrMsgPrefix() -> (prefix string) {
 		return sprintf("%s:%d:%d:", this.Filename, this.Line, this.Column)
 	}
 }
 
 
 
-class NameWithPos {
-	Name string
-	Pos  Pos
+public class NameWithPos {
+	public Name string
+	public Pos  Pos
+	public fn NameWithPos(Name string ,Pos  Pos ){
+	    this.super()
+		this.Name = Name
+		this.Pos = Pos
+	}
 }
 
 fn errMsgPrefix(pos Pos) -> (prefix string) {

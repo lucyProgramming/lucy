@@ -1,15 +1,15 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
 
 
-class StatementLabel {
-	Used                bool
-	CodeOffsetGenerated bool
-	CodeOffset          int
-	Block               Block
-	Name                string
-	Exits               []cg.Exit
-	Statement           Statement
-	Pos                 Pos
+public class StatementLabel {
+	public Used                bool
+	public CodeOffsetGenerated bool
+	public CodeOffset          int
+	public Block               Block
+	public Name                string
+	public Exits               []cg.Exit
+	public Statement           Statement
+	public Pos                 Pos
 
 	/*
 	defer {

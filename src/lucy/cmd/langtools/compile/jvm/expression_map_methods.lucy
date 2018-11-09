@@ -1,13 +1,7 @@
-package jvm
 
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func (this *BuildExpression) buildMethodCallOnMap(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -31,7 +25,7 @@ func (this *BuildExpression) buildMethodCallOnMap(
 			typeConverter.packPrimitives(class, code, variableType)
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      mapClass,
 			Method:     "containsKey",
 			Descriptor: "(Ljava/lang/Object;)Z",
@@ -63,7 +57,7 @@ func (this *BuildExpression) buildMethodCallOnMap(
 			}
 			//call remove
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      mapClass,
 				Method:     "remove",
 				Descriptor: "(Ljava/lang/Object;)Ljava/lang/Object;",
@@ -76,7 +70,7 @@ func (this *BuildExpression) buildMethodCallOnMap(
 		}
 	case common.MapMethodRemoveAll:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      mapClass,
 			Method:     "clear",
 			Descriptor: "()V",
@@ -84,7 +78,7 @@ func (this *BuildExpression) buildMethodCallOnMap(
 		code.CodeLength += 3
 	case common.MapMethodSize:
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      mapClass,
 			Method:     "size",
 			Descriptor: "()I",

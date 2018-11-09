@@ -1,13 +1,6 @@
-package jvm
-
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func (this *BuildExpression) buildMethodCallJavaOnArray(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -27,7 +20,7 @@ func (this *BuildExpression) buildMethodCallJavaOnArray(
 }
 
 func (this *BuildExpression) buildMethodCallOnArray(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -46,7 +39,7 @@ func (this *BuildExpression) buildMethodCallOnArray(
 		common.ArrayMethodEnd:
 		meta := ArrayMetas[call.Expression.Value.Array.Type]
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      meta.className,
 			Method:     call.Name,
 			Descriptor: "()I",
@@ -71,7 +64,7 @@ func (this *BuildExpression) buildMethodCallOnArray(
 				maxStack = t
 			}
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      meta.className,
 				Method:     "append",
 				Descriptor: meta.appendDescriptor,
@@ -97,7 +90,7 @@ func (this *BuildExpression) buildMethodCallOnArray(
 			}
 			//get elements field
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      meta.className,
 				Method:     "append",
 				Descriptor: meta.appendAllDescriptor,
@@ -110,7 +103,7 @@ func (this *BuildExpression) buildMethodCallOnArray(
 	case common.ArrayMethodGetUnderlyingArray:
 		meta := ArrayMetas[call.Expression.Value.Array.Type]
 		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+		ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 			Class:      meta.className,
 			Field:      "elements",
 			Descriptor: meta.elementsFieldDescriptor,

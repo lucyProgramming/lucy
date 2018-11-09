@@ -1,18 +1,18 @@
 
 import "lucy/binary"
 
-class AttributeTemplateFunction {
+public class AttributeTemplateFunction {
 	Name string
 	/*
 		reGenerate pos
 	*/
-	Filename    string
-	StartLine   char
-	StartColumn char
-	Code        string
-	AccessFlag  char
-	Comment     string
-	fn FromBytes(c Class, bs []byte) {
+	public Filename    string
+	public StartLine   char
+	public StartColumn char
+	public Code        string
+	public AccessFlag  char
+	public Comment     string
+	public fn FromBytes(c Class, bs []byte) {
 		this.Name = string(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
 		this.Filename = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].Info)
 		this.StartLine = binary.BigEndian.getChar(bs[4:])

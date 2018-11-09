@@ -1,445 +1,471 @@
-package parser
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/lex"
+ 
 
-import (
-	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
-)
+class BlockParser  extends ParserExtends{
+	
+	StatementForParser StatementForParser
+	StatementIfParser StatementIfParser
+	StatementWhenParser StatementWhenParser
+	StatementSwitchParser StatementSwitchParser
 
-type BlockParser struct {
-	parser *Parser
-}
+	fn BlockParser(parser Parser){
+		this.super()
+		this.parser = parser
+		this.StatementForParser = new StatementForParser(parser,this)
+        this.StatementIfParser = new StatementIfParser(parser,this)
+        this.StatementWhenParser = new StatementWhenParser(parser,this)
+        this.StatementSwitchParser = new StatementSwitchParser(parser,this)
 
-func (this *BlockParser) Next(lfIsToken bool) {
-	this.parser.Next(lfIsToken)
-}
-
-func (this *BlockParser) consume(c map[lex.TokenKind]bool) {
-	this.parser.consume(c)
-}
-
-func (this *BlockParser) parseStatementList(block *ast.Block, isGlobal bool) {
-	block.Pos = this.parser.mkPos()
-	defer func() {
-		block.EndPos = this.parser.mkPos()
-	}()
-	isDefer := false
-	var deferPos *ast.Pos
-	isAbstract := false
-	isFinal := false
-	var finalPos *ast.Pos
-	comment := &CommentParser{
-		parser: this.parser,
 	}
-	resetPrefix := func() {
-		isFinal = false
-		isDefer = false
-		deferPos = nil
-		isAbstract = false
-		comment.reset()
-	}
-	validAfterDefer := func() error {
-		if this.parser.ExpressionParser.looksLikeExpression() ||
-			this.parser.token.Type == lex.TokenLc {
-			return nil
-		}
-		return new error(sprintf("%s not valid token '%s' after defer",
-			this.parser.errMsgPrefix(), this.parser.token.Description)
-	}
-	var err error
-	for lex.TokenEof != this.parser.token.Type {
-		if len(this.parser.errs) > this.parser.nErrors2Stop {
-			break
-		}
-		if this.parser.ExpressionParser.looksLikeExpression() {
-			this.parseExpressionStatement(block, isDefer, deferPos)
-			resetPrefix()
-			continue
-		}
-		switch this.parser.token.Type {
-		case lex.TokenComment, lex.TokenMultiLineComment:
-			comment.read()
-		case lex.TokenSemicolon, lex.TokenLf: // may be empty statement
-			resetPrefix()
-			this.Next(lfNotToken) // look up next
-			continue
-		case lex.TokenFinal:
-			pos := this.parser.mkPos()
-			this.parser.Next(lfIsToken)
-			this.parser.unExpectNewLineAndSkip()
-			if err := this.parser.validAfterFinal(); err != nil {
-				isFinal = false
-			} else {
-				isFinal = true
-				finalPos = pos
-			}
-			continue
-		case lex.TokenDefer:
-			pos := this.parser.mkPos()
-			this.Next(lfIsToken)
-			if err := validAfterDefer(); err != nil {
-				this.parser.errs = append(this.parser.errs, err)
-			} else {
-				isDefer = true
-				deferPos = pos
-			}
-		case lex.TokenVar:
-			pos := this.parser.mkPos()
-			this.Next(lfIsToken) // skip var key word
-			vs, err := this.parser.parseVar()
-			if err != nil {
-				this.consume(untilSemicolonOrLf)
-				this.Next(lfNotToken)
-				continue
-			}
-			statement := &ast.Statement{
-				Type: ast.StatementTypeExpression,
-				Expression: &ast.Expression{
-					Type: ast.ExpressionTypeVar,
-					Data: vs,
-					Pos:  pos,
-					Op:   "var",
-				},
-				Pos: pos,
-			}
-			block.Statements = append(block.Statements, statement)
-			this.parser.validStatementEnding()
+	
 
-		case lex.TokenIf:
-			pos := this.parser.mkPos()
-			statement, err := this.parseIf()
-			if err != nil {
-				this.consume(untilRc)
-				this.Next(lfNotToken)
+    fn validAfterDefer() -> (err error) {
+        if this.parser.ExpressionParser.looksLikeExpression() ||
+            this.parser.token.Type == lex.TokenLc {
+            return null
+        }
+        return new error(sprintf("%s not valid token '%s' after defer",
+            this.parser.errMsgPrefix(), this.parser.token.Description))
+    }
+
+	fn parseStatementList(block ast.Block, isGlobal bool) {
+	    if block.Statements == null {
+	        block.Statements = []ast.Statement{}
+	    }
+		block.Pos = this.parser.mkPos()
+		defer {
+			block.EndPos = this.parser.mkPos()
+		}
+		isDefer := false
+		var deferPos ast.Pos
+		isAbstract := false
+		isFinal := false
+		var finalPos ast.Pos
+		comment := new CommentParser(this.parser)
+		comment.parser = this.parser
+		fn resetPrefix () {
+			isFinal = false
+			isDefer = false
+			deferPos = null
+			isAbstract = false
+			comment.reset()
+		}
+
+		var err error
+		for lex.TokenEof != this.parser.token.Type {
+			if len(this.parser.errs) > this.parser.nErrors2Stop {
+				break
+			}
+			if this.parser.ExpressionParser.looksLikeExpression() {
+				this.parseExpressionStatement(block, isDefer, deferPos)
+				resetPrefix()
 				continue
 			}
-			block.Statements = append(block.Statements, &ast.Statement{
-				Type:        ast.StatementTypeIf,
-				StatementIf: statement,
-				Pos:         pos,
-			})
-		case lex.TokenFor:
-			pos := this.parser.mkPos()
-			statement, err := this.parseFor()
-			if err != nil {
-				this.consume(untilRc)
-				this.Next(lfNotToken)
+			switch this.parser.token.Type {
+			case lex.TokenComment, lex.TokenMultiLineComment:
+				comment.read()
+			case lex.TokenSemicolon, lex.TokenLf: // may be empty statement
+				resetPrefix()
+				this.Next(lfNotToken) // look up next
 				continue
-			}
-			statement.Block.IsForBlock = true
-			block.Statements = append(block.Statements, &ast.Statement{
-				Type:         ast.StatementTypeFor,
-				StatementFor: statement,
-				Pos:          pos,
-			})
-		case lex.TokenAbstract:
-			this.parser.Next(lfIsToken)
-			this.parser.unExpectNewLineAndSkip()
-			if err := this.parser.validAfterAbstract(); err == nil {
-				isAbstract = true
-			}
-		case lex.TokenSwitch:
-			pos := this.parser.mkPos()
-			statement, err := this.parseSwitch()
-			if err != nil {
-				this.consume(untilRc)
-				this.Next(lfNotToken)
-				continue
-			}
-			block.Statements = append(block.Statements, &ast.Statement{
-				Type:            ast.StatementTypeSwitch,
-				StatementSwitch: statement,
-				Pos:             pos,
-			})
-		case lex.TokenWhen:
-			pos := this.parser.mkPos()
-			statement, err := this.parseWhen()
-			if err != nil {
-				this.consume(untilRc)
-				this.Next(lfNotToken)
-				continue
-			}
-			block.Statements = append(block.Statements, &ast.Statement{
-				Type:          ast.StatementTypeWhen,
-				StatementWhen: statement,
-				Pos:           pos,
-			})
-		case lex.TokenConst:
-			pos := this.parser.mkPos()
-			this.Next(lfIsToken)
-			cs, err := this.parser.parseConst()
-			if err != nil {
-				this.consume(untilSemicolonOrLf)
-				this.Next(lfNotToken)
-				continue
-			}
-			statement := &ast.Statement{}
-			statement.Type = ast.StatementTypeExpression
-			statement.Pos = pos
-			statement.Expression = &ast.Expression{
-				Type: ast.ExpressionTypeConst,
-				Data: cs,
-				Pos:  pos,
-				Op:   "const",
-			}
-			block.Statements = append(block.Statements, statement)
-			this.parser.validStatementEnding()
-			if this.parser.token.Type == lex.TokenSemicolon {
-				this.Next(lfNotToken)
-			}
-		case lex.TokenReturn:
-			if isGlobal {
-				this.parser.errs = append(this.parser.errs,
-					new error(sprintf("%s 'return' cannot used in packge init block",
-						this.parser.errMsgPrefix()))
-			}
-			st := &ast.StatementReturn{
-				Pos: this.parser.mkPos(),
-			}
-			this.Next(lfIsToken)
-			block.Statements = append(block.Statements, &ast.Statement{
-				Type:            ast.StatementTypeReturn,
-				StatementReturn: st,
-				Pos:             st.Pos,
-			})
-			if this.parser.token.Type == lex.TokenRc {
-				continue
-			}
-			if this.parser.token.Type == lex.TokenRc ||
-				this.parser.token.Type == lex.TokenSemicolon ||
-				this.parser.token.Type == lex.TokenLf ||
-				this.parser.token.Type == lex.TokenComma ||
-				this.parser.token.Type == lex.TokenMultiLineComment {
-				this.Next(lfNotToken)
-				continue
-			}
-			var es []ast.Expression
-			es, err = this.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
-			if err != nil {
-				this.consume(untilSemicolonOrLf)
-				this.Next(lfNotToken)
-				continue
-			}
-			st.Expressions = es
-			this.parser.validStatementEnding()
-			this.Next(lfNotToken)
-		case lex.TokenLc:
-			pos := this.parser.mkPos()
-			newBlock := ast.Block{}
-			this.Next(lfNotToken) // skip {
-			this.parseStatementList(&newBlock, false)
-			this.parser.ifTokenIsLfThenSkip()
-			if this.parser.token.Type != lex.TokenRc {
-				this.parser.errs = append(this.parser.errs, new error(sprintf("%s expect '}', but '%s'",
-					this.parser.errMsgPrefix(), this.parser.token.Description))
-				this.consume(untilRc)
-			}
-			this.Next(lfNotToken)
-			if isDefer {
-				d := &ast.StatementDefer{
-					Block: newBlock,
-					Pos:   deferPos,
+			case lex.TokenFinal:
+				pos := this.parser.mkPos()
+				this.parser.Next(lfIsToken)
+				this.parser.unExpectNewLineAndSkip()
+				if err := this.parser.validAfterFinal(); err != null {
+					isFinal = false
+				} else {
+					isFinal = true
+					finalPos = pos
 				}
-				block.Statements = append(block.Statements, &ast.Statement{
-					Type:  ast.StatementTypeDefer,
-					Defer: d,
-					Pos:   pos,
-				})
-			} else {
-				block.Statements = append(block.Statements, &ast.Statement{
-					Type:  ast.StatementTypeBlock,
-					Block: &newBlock,
-					Pos:   pos,
-				})
-			}
-			resetPrefix()
-		case lex.TokenPass:
-			if isGlobal == false {
-				this.parser.errs = append(this.parser.errs,
-					new error(sprintf("%s 'pass' can only be used in package init block",
-						this.parser.errMsgPrefix()))
-			}
-			pos := this.parser.mkPos()
-			this.Next(lfIsToken)
-			this.parser.validStatementEnding()
-			block.Statements = append(block.Statements, &ast.Statement{
-				Type: ast.StatementTypeReturn,
-				Pos:  pos,
-				StatementReturn: &ast.StatementReturn{
-					Pos: pos,
-				},
-			})
-		case lex.TokenContinue:
-			pos := this.parser.mkPos()
-			this.Next(lfIsToken)
-			this.parser.validStatementEnding()
-			block.Statements = append(block.Statements, &ast.Statement{
-				Type: ast.StatementTypeContinue,
-				StatementContinue: &ast.StatementContinue{
-					Pos: pos,
-				},
-				Pos: pos,
-			})
-		case lex.TokenBreak:
-			pos := this.parser.mkPos()
-			this.Next(lfIsToken)
-			this.parser.validStatementEnding()
-			block.Statements = append(block.Statements, &ast.Statement{
-				Type: ast.StatementTypeBreak,
-				StatementBreak: &ast.StatementBreak{
-					Pos: pos,
-				},
-				Pos: pos,
-			})
-		case lex.TokenGoto:
-			pos := this.parser.mkPos()
-			this.Next(lfIsToken) // skip goto key word
-			if this.parser.token.Type != lex.TokenIdentifier {
-				this.parser.errs = append(this.parser.errs,
-					new error(sprintf("%s  missing identifier after goto statement, but '%s'",
-						this.parser.errMsgPrefix(), this.parser.token.Description))
-				this.consume(untilSemicolonOrLf)
-				this.Next(lfNotToken)
 				continue
-			}
-			statementGoto := &ast.StatementGoTo{
-				Pos: pos,
-			}
-			statementGoto.LabelName = this.parser.token.Data.(string)
-			block.Statements = append(block.Statements, &ast.Statement{
-				Type:          ast.StatementTypeGoTo,
-				StatementGoTo: statementGoto,
-				Pos:           pos,
-			})
-			this.Next(lfIsToken)
-			this.parser.validStatementEnding()
-			this.Next(lfNotToken)
-		case lex.TokenTypeAlias:
-			pos := this.parser.mkPos()
-			alias, err := this.parser.parseTypeAlias(comment)
-			if err != nil {
-				this.consume(untilSemicolonOrLf)
-				this.Next(lfNotToken)
-				continue
-			}
-			this.parser.validStatementEnding()
-			statement := &ast.Statement{}
-			statement.Pos = pos
-			statement.Type = ast.StatementTypeTypeAlias
-			statement.TypeAlias = alias
-			block.Statements = append(block.Statements, statement)
-			this.Next(lfNotToken)
-		case lex.TokenClass, lex.TokenInterface:
-			pos := this.parser.mkPos()
-			class, _ := this.parser.ClassParser.parse(isAbstract)
-			if class != nil {
-				statement := &ast.Statement{}
+			case lex.TokenDefer:
+				pos := this.parser.mkPos()
+				this.Next(lfIsToken)
+				if err := this.validAfterDefer(); err != null {
+					this.parser.errs.append( err)
+				} else {
+					isDefer = true
+					deferPos = pos
+				}
+			case lex.TokenVar:
+				pos := this.parser.mkPos()
+				this.Next(lfIsToken) // skip var key word
+				vs, err := this.parser.parseVar()
+				if err != null {
+					this.consume(untilSemicolonOrLf)
+					this.Next(lfNotToken)
+					continue
+				}
+				statement := new ast.Statement()
+				statement.Type = ast.StatementTypeExpression
+				statement.Pos = this.parser.mkPos()
+				statement.Expression = new ast.Expression()
+				statement.Expression.Type = ast.ExpressionTypeVar
+				statement.Expression.Data = vs
+				statement.Expression.Pos = pos
+				statement.Expression.Op = "var"
+				block.Statements.append(statement)
+				this.parser.validStatementEnding()
+
+			case lex.TokenIf:
+				pos := this.parser.mkPos()
+				statement, err := this.parseIf()
+				if err != null {
+					this.consume(untilRc)
+					this.Next(lfNotToken)
+					continue
+				}
+				{
+				    t := new ast.Statement()
+				    t.Type = ast.StatementTypeIf
+				    t.StatementIf = statement
+				    t.Pos = pos
+				    block.Statements.append(t)
+				}
+
+			case lex.TokenFor:
+				pos := this.parser.mkPos()
+				statement, err := this.parseFor()
+				if err != null {
+					this.consume(untilRc)
+					this.Next(lfNotToken)
+					continue
+				}
+				statement.Block.IsForBlock = true
+				{
+				    t := new ast.Statement()
+				    t.Type = ast.StatementTypeFor
+				    t.StatementFor = statement
+				    t.Pos = ast.pos
+                    block.Statements.append(t)
+				}
+			case lex.TokenAbstract:
+				this.parser.Next(lfIsToken)
+				this.parser.unExpectNewLineAndSkip()
+				if err := this.parser.validAfterAbstract(); err == null {
+					isAbstract = true
+				}
+			case lex.TokenSwitch:
+				pos := this.parser.mkPos()
+				statement, err := this.parseSwitch()
+				if err != null {
+					this.consume(untilRc)
+					this.Next(lfNotToken)
+					continue
+				}
+				{
+				    t := new ast.Statement()
+				    t.Type =  ast.StatementTypeSwitch
+				    t.StatementSwitch =  statement
+				    t.Pos = pos
+				    block.Statements.append(t)
+				}
+			case lex.TokenWhen:
+				pos := this.parser.mkPos()
+				statement, err := this.parseWhen()
+				if err != null {
+					this.consume(untilRc)
+					this.Next(lfNotToken)
+					continue
+				}
+				{
+				    t := new ast.Statement()
+				    t.Type = ast.StatementTypeWhen
+				    t.StatementWhen = statement
+				    t.Pos = pos
+                    block.Statements.append(t)
+				}
+			case lex.TokenConst:
+				pos := this.parser.mkPos()
+				this.Next(lfIsToken)
+				cs, err := this.parser.parseConst()
+				if err != null {
+					this.consume(untilSemicolonOrLf)
+					this.Next(lfNotToken)
+					continue
+				}
+				statement := new ast.Statement()
+				statement.Type = ast.StatementTypeExpression
 				statement.Pos = pos
-				class.FinalPos = finalPos
-				if isFinal {
-					class.AccessFlags |= cg.AccClassFinal
+				{
+				    t := new ast.Expression()
+				    t.Type = ast.ExpressionTypeConst
+				    t.Data = cs
+				    t.Pos = pos
+				    t.Op = "const"
+				    statement.Expression = t
 				}
-				statement.Type = ast.StatementTypeClass
-				statement.Class = class
 				block.Statements = append(block.Statements, statement)
-			}
-
-		case lex.TokenEnum:
-			pos := this.parser.mkPos()
-			e, _ := this.parser.parseEnum()
-			if e != nil {
-				s := &ast.Statement{}
-				s.Pos = pos
-				s.Type = ast.StatementTypeEnum
-				s.Enum = e
-				block.Statements = append(block.Statements, s)
-			}
-		case lex.TokenImport:
-			pos := this.parser.mkPos()
-			ims := this.parser.parseImports()
-			for _, t := range ims {
-				s := &ast.Statement{
-					Type:   ast.StatementTypeImport,
-					Import: t,
-					Pos:    pos,
+				this.parser.validStatementEnding()
+				if this.parser.token.Type == lex.TokenSemicolon {
+					this.Next(lfNotToken)
 				}
-				block.Statements = append(block.Statements, s)
+			case lex.TokenReturn:
+				if isGlobal {
+					this.parser.errs.append(
+						new error(sprintf("%s 'return' cannot used in packge init block",
+							this.parser.errMsgPrefix())))
+				}
+				st := new ast.StatementReturn()
+				st.Pos = this.parser.mkPos()
+				this.Next(lfIsToken)
+				{
+				    t := new ast.Statement()
+				    t.Type = ast.StatementTypeReturn
+				    t.StatementReturn = st
+				    t.Pos = st.Pos
+				    block.Statements.append(t)
+				}
+				if this.parser.token.Type == lex.TokenRc {
+					continue
+				}
+				if this.parser.token.Type == lex.TokenRc ||
+					this.parser.token.Type == lex.TokenSemicolon ||
+					this.parser.token.Type == lex.TokenLf ||
+					this.parser.token.Type == lex.TokenComma ||
+					this.parser.token.Type == lex.TokenMultiLineComment {
+					this.Next(lfNotToken)
+					continue
+				}
+				var es []ast.Expression
+				es, err = this.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
+				if err != null {
+					this.consume(untilSemicolonOrLf)
+					this.Next(lfNotToken)
+					continue
+				}
+				st.Expressions = es
+				this.parser.validStatementEnding()
+				this.Next(lfNotToken)
+			case lex.TokenLc:
+				pos := this.parser.mkPos()
+				newBlock := new ast.Block()
+				this.Next(lfNotToken) // skip {
+				this.parseStatementList(newBlock, false)
+				this.parser.ifTokenIsLfThenSkip()
+				if this.parser.token.Type != lex.TokenRc {
+					this.parser.errs.append( new error(sprintf("%s expect '}', but '%s'",
+						this.parser.errMsgPrefix(), this.parser.token.Description)))
+					this.consume(untilRc)
+				}
+				this.Next(lfNotToken)
+				if isDefer {
+					d := new ast.StatementDefer()
+					d.Block = newBlock
+					d.Pos = deferPos
+					{
+					    t := new ast.Statement()
+					    t.Type = ast.StatementTypeDefer
+					    t.Defer = d
+					    t.Pos = pos
+					    block.Statements.append(t)
+					}
+
+				} else {
+					t := new ast.Statement()
+					t.Type = ast.StatementTypeBlock
+					t.Block = newBlock
+					t.Pos = pos
+					block.Statements.append(t)
+				}
+				resetPrefix()
+			case lex.TokenPass:
+				if isGlobal == false {
+					this.parser.errs.append(
+						new error(sprintf("%s 'pass' can only be used in package init block",
+							this.parser.errMsgPrefix())))
+				}
+				pos := this.parser.mkPos()
+				this.Next(lfIsToken)
+				this.parser.validStatementEnding()
+				{
+				    t := new ast.Statement()
+				    t.Type = ast.StatementTypeReturn
+				    t.Pos = pos
+				    t.Type = StatementTypeReturn
+				    t.StatementReturn = new ast.StatementReturn()
+				    t.StatementReturn.Pos = pos
+				    block.Statements.append(t)
+				}
+			case lex.TokenContinue:
+				pos := this.parser.mkPos()
+				this.Next(lfIsToken)
+				this.parser.validStatementEnding()
+				{
+				    t := new ast.StatementContinue()
+				    t.Type = ast.StatementTypeContinue
+				    t.Pos = pos
+				    t.StatementContinue = new ast.StatementTypeContinue()
+				    t.StatementContinue.Pos = pos
+				    block.Statements.append(t)
+				}
+			case lex.TokenBreak:
+				pos := this.parser.mkPos()
+				this.Next(lfIsToken)
+				this.parser.validStatementEnding()
+				{
+				    t := new ast.Statement()
+				    t.Type = ast.StatementTypeBreak
+				    t.Pos = pos
+				    t.StatementBreak = new ast.StatementBreak()
+				    t.StatementBreak.Pos = pos
+				}
+			case lex.TokenGoto:
+				pos := this.parser.mkPos()
+				this.Next(lfIsToken) // skip goto key word
+				if this.parser.token.Type != lex.TokenIdentifier {
+					this.parser.errs.append(
+						new error(sprintf("%s  missing identifier after goto statement, but '%s'",
+							this.parser.errMsgPrefix(), this.parser.token.Description)))
+					this.consume(untilSemicolonOrLf)
+					this.Next(lfNotToken)
+					continue
+				}
+				statementGoto := new ast.StatementGoTo()
+				statementGoto.Pos = pos
+				statementGoto.LabelName = this.parser.token.Data.(string)
+				{
+				    t := new ast.Statement()
+				    t.Type = ast.StatementTypeGoTo
+				    t.Pos = pos
+				    t.StatementGoTo = statementGoto
+				    block.Statements.append(t)
+				}
+				this.Next(lfIsToken)
+				this.parser.validStatementEnding()
+				this.Next(lfNotToken)
+			case lex.TokenTypeAlias:
+				pos := this.parser.mkPos()
+				alias, err := this.parser.parseTypeAlias(comment)
+				if err != null {
+					this.consume(untilSemicolonOrLf)
+					this.Next(lfNotToken)
+					continue
+				}
+				this.parser.validStatementEnding()
+				statement := new ast.Statement()
+				statement.Pos = pos
+				statement.Type = ast.StatementTypeTypeAlias
+				statement.TypeAlias = alias
+				block.Statements.append(statement)
+				this.Next(lfNotToken)
+			case lex.TokenClass, lex.TokenInterface:
+				pos := this.parser.mkPos()
+				c, _ := this.parser.ClassParser.parse(isAbstract)
+				if c != null {
+					statement := new ast.Statement()
+					statement.Pos = pos
+					ast.TypeFinalPos = finalPos
+					if isFinal {
+						ast.TypeAccessFlags |= cg.AccClassFinal
+					}
+					statement.Type = ast.StatementTypeClass
+					statement.Class = c
+					block.Statements.append(statement)
+				}
+
+			case lex.TokenEnum:
+				pos := this.parser.mkPos()
+				e, _ := this.parser.parseEnum()
+				if e != null {
+					s := new ast.Statement()
+					s.Pos = pos
+					s.Type = ast.StatementTypeEnum
+					s.Enum = e
+					block.Statements = append(block.Statements, s)
+				}
+			case lex.TokenImport:
+				pos := this.parser.mkPos()
+				ims := this.parser.parseImports()
+				for _, t := range ims {
+					s := new ast.Statement()
+					s.Type = ast.StatementTypeImport
+					s.Import = t
+					s.Pos = pos
+					block.Statements.append(s)
+				}
+			case lex.TokenElse, lex.TokenElseif:
+				this.parser.errs.append(
+					new error(sprintf("%s unexpected '%s'", this.parser.errMsgPrefix(), this.parser.token.Description)))
+				this.Next(lfIsToken)
+
+			default:
+				// something I cannot handle
+				return
 			}
-		case lex.TokenElse, lex.TokenElseif:
-			this.parser.errs = append(this.parser.errs,
-				new error(sprintf("%s unexpected '%s'", this.parser.errMsgPrefix(), this.parser.token.Description))
-			this.Next(lfIsToken)
-
-		default:
-			// something I cannot handle
-			return
 		}
-	}
-	return
-}
-
-func (this *BlockParser) parseExpressionStatement(block *ast.Block, isDefer bool, deferPos *ast.Pos) (isLabel bool) {
-	pos := this.parser.mkPos()
-	e, err := this.parser.ExpressionParser.parseExpression(true)
-	if err != nil {
-		this.consume(untilSemicolonOrLf)
-		this.Next(lfNotToken)
 		return
 	}
-	if e.Type == ast.ExpressionTypeIdentifier &&
-		this.parser.token.Type == lex.TokenColon {
-		//lable found , good...
-		if isDefer {
-			this.parser.errs = append(this.parser.errs,
-				new error(sprintf("%s defer mixup with statement lable has no meaning",
-					this.parser.errMsgPrefix()))
-		}
-		isLabel = true
+
+	fn parseExpressionStatement(block ast.Block, isDefer bool, deferPos ast.Pos) -> (isLabel bool) {
 		pos := this.parser.mkPos()
-		this.Next(lfIsToken) // skip :
-		if this.parser.token.Type != lex.TokenLf {
-			this.parser.errs = append(this.parser.errs,
-				new error(sprintf("%s expect new line",
-					this.parser.errMsgPrefix()))
+		e, err := this.parser.ExpressionParser.parseExpression(true)
+		if err != null {
+			this.consume(untilSemicolonOrLf)
+			this.Next(lfNotToken)
+			return
 		}
-		statement := &ast.Statement{}
-		statement.Pos = pos
-		statement.Type = ast.StatementTypeLabel
-		label := &ast.StatementLabel{}
-		label.Pos = pos
-		label.CodeOffset = -1
-		statement.StatementLabel = label
-		label.Statement = statement
-		label.Name = e.Data.(*ast.ExpressionIdentifier).Name
-		block.Statements = append(block.Statements, statement)
-		label.Block = block
-		err = block.Insert(label.Name, e.Pos, label) // insert first,so this label can be found before it is checked
-		if err != nil {
-			this.parser.errs = append(this.parser.errs, err)
-		}
-	} else {
-		this.parser.validStatementEnding()
-		if isDefer {
-			d := &ast.StatementDefer{
-				Pos: deferPos,
+		if e.Type == ast.ExpressionTypeIdentifier &&
+			this.parser.token.Type == lex.TokenColon {
+			//lable found , good...
+			if isDefer {
+				this.parser.errs.append(
+					new error(sprintf("%s defer mixup with statement lable has no meaning",
+						this.parser.errMsgPrefix())))
 			}
-			d.Block.Statements = []*ast.Statement{&ast.Statement{
-				Type:       ast.StatementTypeExpression,
-				Expression: e,
-				Pos:        pos,
-			}}
-			block.Statements = append(block.Statements, &ast.Statement{
-				Type:  ast.StatementTypeDefer,
-				Defer: d,
-			})
+			isLabel = true
+			pos := this.parser.mkPos()
+			this.Next(lfIsToken) // skip :
+			if this.parser.token.Type != lex.TokenLf {
+				this.parser.errs.append(
+					new error(sprintf("%s expect new line",
+						this.parser.errMsgPrefix())))
+			}
+			statement := new ast.Statement()
+			statement.Pos = pos
+			statement.Type = ast.StatementTypeLabel
+			label := new ast.StatementLabel()
+			label.Pos = pos
+			label.CodeOffset = -1
+			statement.StatementLabel = label
+			label.Statement = statement
+			label.Name = e.Data.(ast.ExpressionIdentifier).Name
+			block.Statements.append(statement)
+			label.Block = block
+			err = block.Insert(label.Name, e.Pos, label) // insert first,so this label can be found before it is checked
+			if err != null {
+				this.parser.errs.append( err)
+			}
 		} else {
-			block.Statements = append(block.Statements, &ast.Statement{
-				Type:       ast.StatementTypeExpression,
-				Expression: e,
-				Pos:        pos,
-			})
+			this.parser.validStatementEnding()
+			if isDefer {
+				d := new ast.StatementDefer()
+				d.Pos = deferPos
+			    {
+			        t := new ast.Statement()
+			        t.Type = ast.StatementTypeExpression
+			        t.Expression = e
+			        t.Pos = pos
+			        d.Block.Statements = [t]
+			    }
+			    {
+			        t := new ast.Statement()
+			        t.Type = ast.StatementTypeDefer
+			        t.Defer = d
+			        block.Statements.append(t)
+			    }
+
+			} else {
+			    t := new ast.Statement()
+			    t.Type = ast.StatementTypeExpression
+			    t.Expression = e
+			    t.Pos = pos
+			    block.Statements.append(t)
+			}
 		}
+		return
 	}
-	return
 }
+

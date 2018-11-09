@@ -1,105 +1,91 @@
-package parser
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/lex"
 
-import (
-	"fmt"
+class EnumParser extends ParserExtends {
+	fn EnumParser(parser Parser){
+		this.super()
+		this.parser = parser
+	}
 
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
-)
+	fn parse() -> (e ast.Enum, err error) {
+		var enumName string
+		this.Next(lfIsToken) // skip enum
+		this.parser.unExpectNewLineAndSkip()
+		if this.parser.token.Type != lex.TokenIdentifier {
+			err = new error(sprintf("%s expect 'identifier' for enum name, but '%s'",
+				this.parser.errMsgPrefix(), this.parser.token.Description))
+			this.parser.errs.append(err)
+			enumName = compileAutoName()
+			this.consume(untilLc)
 
-func (this *Parser) parseEnum() (e *ast.Enum, err error) {
-	var enumName string
-	this.Next(lfIsToken) // skip enum
-	this.unExpectNewLineAndSkip()
-	if this.token.Type != lex.TokenIdentifier {
-		err = new error(sprintf("%s expect 'identifier' for enum name, but '%s'",
-			this.errMsgPrefix(), this.token.Description)
-		this.errs = append(this.errs, err)
-		enumName = compileAutoName()
-		this.consume(untilLc)
-
-	} else {
-		enumName = this.token.Data.(string)
-		this.Next(lfNotToken) // skip enum name
-	}
-	e = &ast.Enum{}
-	e.Name = enumName
-	e.Pos = this.mkPos()
-	comment := &CommentParser{
-		parser: this,
-	}
-	reset := func() {
-		comment.reset()
-	}
-	if this.token.Type != lex.TokenLc {
-		err = new error(sprintf("%s expect '{',but '%s'", this.errMsgPrefix(), this.token.Description)
-		this.errs = append(this.errs, err)
-		this.consume(untilLc)
-	}
-	this.Next(lfNotToken)
-	for this.token.Type != lex.TokenRc &&
-		this.token.Type != lex.TokenEof {
-		switch this.token.Type {
-		case lex.TokenLf:
-			this.Next(lfNotToken)
-		case lex.TokenMultiLineComment,
-			lex.TokenComment:
-			comment.read()
-		case lex.TokenIdentifier:
-			name := this.token.Data.(string)
-			pos := this.mkPos()
-			var value ast.Expression
-			var err error
-			this.Next(lfIsToken)
-			if this.token.Type == lex.TokenAssign {
+		} else {
+			enumName = this.parser.token.stringValue
+			this.Next(lfNotToken) // skip enum name
+		}
+		e = new ast.Enum()
+		e.Name = enumName
+		e.Pos = this.parser.mkPos()
+		comment := new CommentParser(this.parser)
+		if this.parser.token.Type != lex.TokenLc {
+			err = new error(sprintf("%s expect '{',but '%s'", this.parser.errMsgPrefix(), this.parser.token.Description))
+			this.parser.errs.append(err)
+			this.consume(untilLc)
+		}
+		this.Next(lfNotToken)
+		for this.parser.token.Type != lex.TokenRc &&
+			this.parser.token.Type != lex.TokenEof {
+			switch this.parser.token.Type {
+			case lex.TokenLf:
 				this.Next(lfNotToken)
-				value, err = this.ExpressionParser.parseExpression(false)
-				if err != nil {
-					this.consume(untilSemicolonOrLf)
+			case lex.TokenMultiLineComment,
+				lex.TokenComment:
+				comment.read()
+			case lex.TokenIdentifier:
+				name := this.parser.token.stringValue
+				pos := this.parser.mkPos()
+				var value ast.Expression
+				var err error
+				this.Next(lfIsToken)
+				if this.parser.token.Type == lex.TokenAssign {
+					this.Next(lfNotToken)
+					value, err = this.parser.ExpressionParser.parseExpression(false)
+					if err != null {
+						this.consume(untilSemicolonOrLf)
+					}
 				}
+				enumComment := comment.Comment
+				if e.Init == null && value != null {
+					e.Init = value
+					e.FirstValueIndex = len(e.Enums)
+					value = null
+				}
+				enumName := new ast.EnumName()
+				enumName.Name = name
+				enumName.Pos = pos
+				enumName.NoNeed = value
+				enumName.Enum = e
+				enumName.Comment = enumComment
+				e.Enums.append(enumName)
+				comment.reset()
+			case lex.TokenComma:
+				this.Next(lfNotToken)
+			default:
+				this.parser.errs.append( new error(sprintf("%s token '%s' is not except",
+					this.parser.errMsgPrefix(), this.parser.token.Description)))
+				this.Next(lfNotToken)
+				comment.reset()
 			}
-			enumComment := comment.Comment
-			if e.Init == nil && value != nil {
-				e.Init = value
-				e.FirstValueIndex = len(e.Enums)
-				value = nil
-			}
-			enumName := &ast.EnumName{
-				Name:    name,
-				Pos:     pos,
-				NoNeed:  value,
-				Enum:    e,
-				Comment: enumComment,
-			}
-			e.Enums = append(e.Enums, enumName)
-			reset()
-		case lex.TokenComma:
-			this.Next(lfNotToken)
-		default:
-			this.errs = append(this.errs, new error(sprintf("%s token '%s' is not except",
-				this.errMsgPrefix(), this.token.Description))
-			this.Next(lfNotToken)
-			reset()
 		}
-	}
-	if len(e.Enums) == 0 {
-		enumName := &ast.EnumName{
-			Name: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", //easter egg
-			Pos:  this.mkPos(),
-			Enum: e,
+		this.parser.ifTokenIsLfThenSkip()
+		if this.parser.token.Type != lex.TokenRc {
+			err = new error(sprintf("%s expect '}',but '%s'", this.parser.errMsgPrefix(), this.parser.token.Description))
+			this.parser.errs.append( err)
+			this.consume(untilRc)
 		}
-		e.Enums = []*ast.EnumName{
-			enumName,
-		}
-		this.errs = append(this.errs, new error(sprintf("%s enum expect at least 1 enumName",
-			this.errMsgPrefix()))
+		this.Next(lfNotToken)
+		return e, err
 	}
-	this.ifTokenIsLfThenSkip()
-	if this.token.Type != lex.TokenRc {
-		err = new error(sprintf("%s expect '}',but '%s'", this.errMsgPrefix(), this.token.Description)
-		this.errs = append(this.errs, err)
-		this.consume(untilRc)
-	}
-	this.Next(lfNotToken)
-	return e, err
+
+
 }
+

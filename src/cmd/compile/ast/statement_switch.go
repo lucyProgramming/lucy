@@ -69,7 +69,7 @@ func (this *StatementSwitch) check(block *Block) []error {
 	var doubleValue float64
 	var stringValue string
 	var enumName string
-	containsBool := false
+
 	for _, v := range this.StatementSwitchCases {
 		for _, e := range v.Matches {
 			valueValid := false
@@ -79,7 +79,6 @@ func (this *StatementSwitch) check(block *Block) []error {
 				continue
 			}
 			if t.Type == VariableTypeBool { // bool condition
-				containsBool = true
 				continue
 			}
 			if conditionType.assignAble(&errs, t) == false {
@@ -197,27 +196,27 @@ func (this *StatementSwitch) check(block *Block) []error {
 		this.Default.InheritedAttribute.ForBreak = this
 		errs = append(errs, this.Default.check()...)
 	}
-	if conditionType.Type == VariableTypeEnum &&
-		len(enumNamesMap) < len(conditionType.Enum.Enums) &&
-		this.Default == nil &&
-		containsBool == false {
-		//some enum are missing, not allow
-		errMsg := fmt.Sprintf("%s switch for enum '%s' is not complete\n",
-			this.EndPos.ErrMsgPrefix(), conditionType.Enum.Name)
-		errMsg += "\tyou can use 'default:' or give missing enums,which are:\n"
-		for _, v := range conditionType.Enum.Enums {
-			_, ok := enumNamesMap[v.Name]
-			if ok {
-				//handled
-				continue
-			}
-			if enumPackageName == "" {
-				errMsg += fmt.Sprintf("\t\tcase %s:\n", v.Name)
-			} else {
-				errMsg += fmt.Sprintf("\t\tcase %s.%s:\n", enumPackageName, v.Name)
-			}
-		}
-		errs = append(errs, errors.New(errMsg))
-	}
+	//if conditionType.Type == VariableTypeEnum &&
+	//	len(enumNamesMap) < len(conditionType.Enum.Enums) &&
+	//	this.Default == nil &&
+	//	containsBool == false {
+	//	//some enum are missing, not allow
+	//	errMsg := fmt.Sprintf("%s switch for enum '%s' is not complete\n",
+	//		this.EndPos.ErrMsgPrefix(), conditionType.Enum.Name)
+	//	errMsg += "\tyou can use 'default:' or give missing enums,which are:\n"
+	//	for _, v := range conditionType.Enum.Enums {
+	//		_, ok := enumNamesMap[v.Name]
+	//		if ok {
+	//			//handled
+	//			continue
+	//		}
+	//		if enumPackageName == "" {
+	//			errMsg += fmt.Sprintf("\t\tcase %s:\n", v.Name)
+	//		} else {
+	//			errMsg += fmt.Sprintf("\t\tcase %s.%s:\n", enumPackageName, v.Name)
+	//		}
+	//	}
+	//	errs = append(errs, errors.New(errMsg))
+	//}
 	return errs
 }

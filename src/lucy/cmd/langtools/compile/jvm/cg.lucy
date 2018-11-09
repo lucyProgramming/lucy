@@ -1,13 +1,4 @@
-package jvm
-
-import (
-	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-	"math"
-	"os"
-	"path/filepath"
-)
+ 
 
 type BuildPackage struct {
 	Package         *ast.Package
@@ -25,7 +16,7 @@ func (this *BuildPackage) Make(p *ast.Package) {
 	mainClass.AccessFlags |= cg.AccClassSynthetic
 	mainClass.SuperClass = ast.JavaRootClass
 	mainClass.Name = p.Name + "/main"
-	if p.Block.Functions != nil {
+	if p.Block.Functions != null {
 		for _, v := range p.Block.Functions {
 			mainClass.InsertSourceFile(v.Pos.Filename)
 			break
@@ -47,7 +38,7 @@ func (this *BuildPackage) Make(p *ast.Package) {
 		this.putClass(this.mkEnum(v))
 	}
 	err := this.DumpClass()
-	if err != nil {
+	if err != null {
 		panic(sprintf("dump to file failed,err:%v\n", err))
 	}
 }
@@ -64,7 +55,7 @@ func (this *BuildPackage) newClassName(prefix string) (autoName string) {
 			continue
 		}
 		autoName = this.Package.Name + "/" + autoName
-		if this.classes != nil && this.classes[autoName] != nil {
+		if this.classes != null && this.classes[autoName] != null {
 			continue
 		} else {
 			return autoName
@@ -73,15 +64,15 @@ func (this *BuildPackage) newClassName(prefix string) (autoName string) {
 	panic("new class name overflow") // impossible
 }
 
-func (this *BuildPackage) putClass(class cg.ClassHighLevel) {
-	if class.Name == "" {
+func (this *BuildPackage) putClass(c cg.ClassHighLevel) {
+	if ast.TypeName == "" {
 		panic("missing name")
 	}
-	name := class.Name
+	name := ast.TypeName
 	if name == this.mainClass.Name {
 		panic("cannot have main class`s name")
 	}
-	if this.classes == nil {
+	if this.classes == null {
 		this.classes = make(map[string]cg.ClassHighLevel)
 	}
 	if _, ok := this.classes[name]; ok {
@@ -92,14 +83,14 @@ func (this *BuildPackage) putClass(class cg.ClassHighLevel) {
 
 func (this *BuildPackage) mkEnum(e *ast.Enum) cg.ClassHighLevel {
 	class := &cg.ClassHighLevel{}
-	class.Name = e.Name
-	class.InsertSourceFile(e.Pos.Filename)
-	class.AccessFlags = e.AccessFlags
-	class.SuperClass = ast.JavaRootClass
-	class.Fields = make(map[string]*cg.FieldHighLevel)
-	class.Class.AttributeLucyEnum = &cg.AttributeLucyEnum{}
+	ast.TypeName = e.Name
+	ast.TypeInsertSourceFile(e.Pos.Filename)
+	ast.TypeAccessFlags = e.AccessFlags
+	ast.TypeSuperClass = ast.JavaRootClass
+	ast.TypeFields = make(map[string]*cg.FieldHighLevel)
+	ast.TypeClass.AttributeLucyEnum = &cg.AttributeLucyEnum{}
 	if e.Comment != "" {
-		class.Class.AttributeLucyComment = &cg.AttributeLucyComment{
+		ast.TypeClass.AttributeLucyComment = &cg.AttributeLucyComment{
 			Comment: e.Comment,
 		}
 	}
@@ -118,8 +109,8 @@ func (this *BuildPackage) mkEnum(e *ast.Enum) cg.ClassHighLevel {
 		field.Name = v.Name
 		field.Descriptor = "I"
 		field.AttributeConstantValue = &cg.AttributeConstantValue{}
-		field.AttributeConstantValue.Index = class.Class.InsertIntConst(v.Value)
-		class.Fields[v.Name] = field
+		field.AttributeConstantValue.Index = ast.TypeClass.InsertIntConst(v.Value)
+		ast.TypeFields[v.Name] = field
 	}
 	return class
 }
@@ -149,7 +140,7 @@ func (this *BuildPackage) mkGlobalTypeAlias() {
 	for name, v := range this.Package.Block.TypeAliases {
 		t := &cg.AttributeLucyTypeAlias{}
 		t.Alias = LucyTypeAliasParser.Encode(name, v)
-		if v.Alias != nil {
+		if v.Alias != null {
 			t.Comment = v.Alias.Comment
 		}
 		this.mainClass.Class.TypeAlias = append(this.mainClass.Class.TypeAlias, t)
@@ -168,7 +159,7 @@ func (this *BuildPackage) mkGlobalVariables() {
 		if LucyFieldSignatureParser.Need(v.Type) {
 			f.AttributeLucyFieldDescriptor = &cg.AttributeLucyFieldDescriptor{}
 			f.AttributeLucyFieldDescriptor.Descriptor = LucyFieldSignatureParser.Encode(v.Type)
-			if v.Type.Type == ast.VariableTypeFunction {
+			if v.Type.FunctionType.VArgs != nil {
 				f.AttributeLucyFieldDescriptor.MethodAccessFlag |=
 					cg.AccMethodVarargs
 			}
@@ -207,7 +198,7 @@ func (this *BuildPackage) mkInitFunctions() {
 		method.Class = this.mainClass
 		method.Descriptor = "()V"
 		method.Code = &cg.AttributeCode{}
-		this.buildFunction(this.mainClass, nil, method, v)
+		this.buildFunction(this.mainClass, null, method, v)
 		this.mainClass.AppendMethod(method)
 	}
 	method := &cg.MethodHighLevel{}
@@ -262,7 +253,7 @@ func (this *BuildPackage) mkInitFunctions() {
 	this.mainClass.TriggerPackageInitMethod = trigger
 }
 
-func (this *BuildPackage) insertDefaultValue(c cg.ClassHighLevel, t *ast.Type, v interface{}) (index char) {
+func (this *BuildPackage) insertDefaultValue(c cg.ClassHighLevel, t ast.Type, v interface{}) (index char) {
 	switch t.Type {
 	case ast.VariableTypeBool:
 		if v.(bool) {
@@ -292,18 +283,18 @@ func (this *BuildPackage) insertDefaultValue(c cg.ClassHighLevel, t *ast.Type, v
 	return
 }
 
-func (this *BuildPackage) buildClass(astClass *ast.Class) cg.ClassHighLevel {
+func (this *BuildPackage) buildClass(astClass ast.Class) cg.ClassHighLevel {
 	class := &cg.ClassHighLevel{}
-	class.Name = astClass.Name
-	class.InsertSourceFile(astClass.Pos.Filename)
-	class.AccessFlags = astClass.AccessFlags
-	if astClass.SuperClass != nil {
-		class.SuperClass = astClass.SuperClass.Name
+	ast.TypeName = astClass.Name
+	ast.TypeInsertSourceFile(astClass.Pos.Filename)
+	ast.TypeAccessFlags = astClass.AccessFlags
+	if astClass.SuperClass != null {
+		ast.TypeSuperClass = astClass.SuperClass.Name
 	} else {
-		class.SuperClass = astClass.SuperClassName.Name
+		ast.TypeSuperClass = astClass.SuperClassName.Name
 	}
 	if astClass.Comment != "" {
-		class.Class.AttributeLucyComment = &cg.AttributeLucyComment{
+		ast.TypeClass.AttributeLucyComment = &cg.AttributeLucyComment{
 			Comment: astClass.Comment,
 		}
 	}
@@ -317,18 +308,18 @@ func (this *BuildPackage) buildClass(astClass *ast.Class) cg.ClassHighLevel {
 			c.ValueIndex = this.insertDefaultValue(class, v.Type, v.Value)
 			attr.Constants = append(attr.Constants, c)
 		}
-		class.Class.AttributeLucyClassConst = attr
+		ast.TypeClass.AttributeLucyClassConst = attr
 	}
-	class.Fields = make(map[string]*cg.FieldHighLevel)
-	class.Methods = make(map[string][]*cg.MethodHighLevel)
+	ast.TypeFields = make(map[string]*cg.FieldHighLevel)
+	ast.TypeMethods = make(map[string][]*cg.MethodHighLevel)
 	for _, v := range astClass.Interfaces {
-		class.Interfaces = append(class.Interfaces, v.Name)
+		ast.TypeInterfaces = append(ast.TypeInterfaces, v.Name)
 	}
 	for _, v := range astClass.Fields {
 		f := &cg.FieldHighLevel{}
 		f.Name = v.Name
 		f.AccessFlags = v.AccessFlags
-		if v.IsStatic() && v.DefaultValue != nil {
+		if v.IsStatic() && v.DefaultValue != null {
 			f.AttributeConstantValue = &cg.AttributeConstantValue{}
 			f.AttributeConstantValue.Index = this.insertDefaultValue(class, v.Type,
 				v.DefaultValue)
@@ -344,14 +335,14 @@ func (this *BuildPackage) buildClass(astClass *ast.Class) cg.ClassHighLevel {
 				Comment: v.Comment,
 			}
 		}
-		class.Fields[v.Name] = f
+		ast.TypeFields[v.Name] = f
 	}
 	for name, v := range astClass.Methods {
 		vv := v[0]
 		method := &cg.MethodHighLevel{}
 		method.Name = name
 		method.AccessFlags = vv.Function.AccessFlags
-		if vv.Function.Type.VArgs != nil {
+		if vv.Function.Type.VArgs != null {
 			method.AccessFlags |= cg.AccMethodVarargs
 		}
 		if vv.IsCompilerAuto {
@@ -364,7 +355,7 @@ func (this *BuildPackage) buildClass(astClass *ast.Class) cg.ClassHighLevel {
 			method.Code = &cg.AttributeCode{}
 			this.buildFunction(class, astClass, method, vv.Function)
 		}
-		class.AppendMethod(method)
+		ast.TypeAppendMethod(method)
 	}
 	return class
 }
@@ -372,7 +363,7 @@ func (this *BuildPackage) buildClass(astClass *ast.Class) cg.ClassHighLevel {
 func (this *BuildPackage) mkGlobalFunctions() {
 	ms := make(map[string]*cg.MethodHighLevel)
 	for k, f := range this.Package.Block.Functions { // first round
-		if f.TemplateFunction != nil {
+		if f.TemplateFunction != null {
 			this.mainClass.TemplateFunctions = append(this.mainClass.TemplateFunctions,
 				&cg.AttributeTemplateFunction{
 					Name:        f.Name,
@@ -405,7 +396,7 @@ func (this *BuildPackage) mkGlobalFunctions() {
 				Comment: f.Comment,
 			}
 		}
-		if f.Type.VArgs != nil {
+		if f.Type.VArgs != null {
 			method.AccessFlags |= cg.AccMethodVarargs
 		}
 		ms[k] = method
@@ -414,43 +405,43 @@ func (this *BuildPackage) mkGlobalFunctions() {
 		this.mainClass.AppendMethod(method)
 	}
 	for k, f := range this.Package.Block.Functions {
-		if f.IsBuildIn || f.TemplateFunction != nil { //
+		if f.IsBuildIn || f.TemplateFunction != null { //
 			continue
 		}
-		this.buildFunction(ms[k].Class, nil, ms[k], f)
+		this.buildFunction(ms[k].Class, null, ms[k], f)
 	}
 }
 
 func (this *BuildPackage) DumpClass() error {
 	//dump main class
 	f, err := os.OpenFile("main.class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-	if err != nil {
+	if err != null {
 		return err
 	}
-	if err := this.mainClass.ToLow().OutPut(f); err != nil {
+	if err := this.mainClass.ToLow().OutPut(f); err != null {
 		f.Close()
 		return err
 	}
 	f.Close()
 	for _, c := range this.classes {
 		f, err = os.OpenFile(filepath.Base(c.Name)+".class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-		if err != nil {
+		if err != null {
 			return err
 		}
-		if err = c.ToLow().OutPut(f); err != nil {
+		if err = c.ToLow().OutPut(f); err != null {
 			f.Close()
 			return err
 		} else {
 			f.Close()
 		}
 	}
-	return nil
+	return null
 }
 
 /*
 	make_node_objects a default construction
 */
-func (this *BuildPackage) mkClassDefaultConstruction(class cg.ClassHighLevel) {
+func (this *BuildPackage) mkClassDefaultConstruction(c cg.ClassHighLevel) {
 	method := &cg.MethodHighLevel{}
 	method.Name = specialMethodInit
 	method.Descriptor = "()V"
@@ -461,23 +452,23 @@ func (this *BuildPackage) mkClassDefaultConstruction(class cg.ClassHighLevel) {
 	method.Code.MaxLocals = 1
 	method.Code.Codes[0] = cg.OP_aload_0
 	method.Code.Codes[1] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
-		Class:      class.SuperClass,
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		Class:      ast.TypeSuperClass,
 		Method:     specialMethodInit,
 		Descriptor: "()V",
 	}, method.Code.Codes[2:4])
 	method.Code.MaxStack = 1
 	method.Code.Codes[4] = cg.OP_return
-	class.AppendMethod(method)
+	ast.TypeAppendMethod(method)
 }
 
-func (this *BuildPackage) storeGlobalVariable(class cg.ClassHighLevel, code cg.AttributeCode,
-	v *ast.Variable) {
+func (this *BuildPackage) storeGlobalVariable(c cg.ClassHighLevel, code cg.AttributeCode,
+	v ast.Variable) {
 	code.Codes[code.CodeLength] = cg.OP_putstatic
 	if v.JvmDescriptor == "" {
 		v.JvmDescriptor = Descriptor.typeDescriptor(v.Type)
 	}
-	class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+	ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 		Class:      this.mainClass.Name,
 		Field:      v.Name,
 		Descriptor: v.JvmDescriptor,

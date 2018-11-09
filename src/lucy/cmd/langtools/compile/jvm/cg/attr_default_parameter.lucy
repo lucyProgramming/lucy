@@ -2,8 +2,8 @@
 import "lucy/binary"
 
 class AttributeDefaultParameters {
-	Start     char // start
-	Constants []char
+	public Start     char // start
+	public Constants []char
 
 	fn FromBytes(bs []byte) {
 	    this.Constants = []char{}

@@ -1,70 +1,78 @@
-package parser
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/lex"
 
-import (
-	"fmt"
 
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
-)
+class StatementForParser extends ParserExtends{
+	bp BlockParser
 
-func (this *BlockParser) parseFor() (statementFor *ast.StatementFor, err error) {
-	statementFor = &ast.StatementFor{}
-	statementFor.Pos = this.parser.mkPos()
-	statementFor.Block = &ast.Block{}
-	this.Next(lfIsToken) // skip for
-	this.parser.unExpectNewLineAndSkip()
-	if this.parser.token.Type != lex.TokenLc &&
-		this.parser.token.Type != lex.TokenSemicolon { // not '{' and not ';'
-		statementFor.Condition, err = this.parser.ExpressionParser.parseExpression(true)
-		if err != nil {
-			this.consume(untilLc)
-			goto parseBlock
-		}
+	fn StatementForParser(parser Parser ,bp BlockParser){
+		this.super()
+		this.parser = parser
+		this.bp = bp
 	}
-	if this.parser.token.Type == lex.TokenSemicolon {
-		this.Next(lfNotToken) // skip ;
-		statementFor.Init = statementFor.Condition
-		statementFor.Condition = nil // mk nil
-		//condition
-		var err error
-		if this.parser.token.Type != lex.TokenSemicolon {
-			statementFor.Condition, err = this.parser.ExpressionParser.parseExpression(false)
-			if err != nil {
-				this.consume(untilLc)
-				goto parseBlock
-			}
-			if this.parser.token.Type != lex.TokenSemicolon {
-				this.parser.errs = append(this.parser.errs, new error(sprintf("%s missing semicolon after expression",
-					this.parser.errMsgPrefix()))
-				this.consume(untilLc)
-				goto parseBlock
-			}
-		}
-		this.Next(lfIsToken)
+	
+
+	protected fn parseFor() -> (statementFor ast.StatementFor, err error) {
+		statementFor = new ast.StatementFor()
+		statementFor.Pos = this.parser.mkPos()
+		statementFor.Block = new ast.Block()
+		this.Next(lfIsToken) // skip for
 		this.parser.unExpectNewLineAndSkip()
-		if this.parser.token.Type != lex.TokenLc {
-			statementFor.Increment, err = this.parser.ExpressionParser.parseExpression(true)
-			if err != nil {
+		if this.parser.token.Type != lex.TokenLc &&
+			this.parser.token.Type != lex.TokenSemicolon { // not '{' and not ';'
+			statementFor.Condition, err = this.parser.ExpressionParser.parseExpression(true)
+			if err != null {
 				this.consume(untilLc)
 				goto parseBlock
 			}
 		}
+		if this.parser.token.Type == lex.TokenSemicolon {
+			this.Next(lfNotToken) // skip ;
+			statementFor.Init = statementFor.Condition
+			statementFor.Condition = null // mk null
+			//condition
+			var err error
+			if this.parser.token.Type != lex.TokenSemicolon {
+				statementFor.Condition, err = this.parser.ExpressionParser.parseExpression(false)
+				if err != null {
+					this.consume(untilLc)
+					goto parseBlock
+				}
+				if this.parser.token.Type != lex.TokenSemicolon {
+					this.parser.errs.append( new error(sprintf("%s missing semicolon after expression",
+						this.parser.errMsgPrefix())))
+					this.consume(untilLc)
+					goto parseBlock
+				}
+			}
+			this.Next(lfIsToken)
+			this.parser.unExpectNewLineAndSkip()
+			if this.parser.token.Type != lex.TokenLc {
+				statementFor.Increment, err = this.parser.ExpressionParser.parseExpression(true)
+				if err != null {
+					this.consume(untilLc)
+					goto parseBlock
+				}
+			}
+		}
+	parseBlock:
+		this.parser.ifTokenIsLfThenSkip()
+		if this.parser.token.Type != lex.TokenLc {
+			err = new error(sprintf("%s expect '{',but '%s'",
+				this.parser.errMsgPrefix(), this.parser.token.Description))
+			this.parser.errs.append( err)
+			return
+		}
+		this.Next(lfNotToken) // skip {
+		this.bp.parseStatementList(statementFor.Block, false)
+		if this.parser.token.Type != lex.TokenRc {
+			this.parser.errs.append( new error(sprintf("%s expect '}', but '%s'",
+				this.parser.errMsgPrefix(), this.parser.token.Description)))
+			this.consume(untilRc)
+		}
+		this.Next(lfNotToken) // skip }
+		return statementFor, null
 	}
-parseBlock:
-	this.parser.ifTokenIsLfThenSkip()
-	if this.parser.token.Type != lex.TokenLc {
-		err = new error(sprintf("%s expect '{',but '%s'",
-			this.parser.errMsgPrefix(), this.parser.token.Description)
-		this.parser.errs = append(this.parser.errs, err)
-		return
-	}
-	this.Next(lfNotToken) // skip {
-	this.parseStatementList(statementFor.Block, false)
-	if this.parser.token.Type != lex.TokenRc {
-		this.parser.errs = append(this.parser.errs, new error(sprintf("%s expect '}', but '%s'",
-			this.parser.errMsgPrefix(), this.parser.token.Description))
-		this.consume(untilRc)
-	}
-	this.Next(lfNotToken) // skip }
-	return statementFor, nil
+	
 }
+

@@ -1,0 +1,15 @@
+
+import "lucy/cmd/langtools/compile/lex"
+
+
+class ParserExtends {
+	protected parser Parser
+	
+	protected fn Next(lfIsToken bool) {
+		this.parser.Next(lfIsToken)
+	}
+	
+	protected fn consume(c map{lex.TokenKind -> bool } ) {
+		this.parser.consume(c)
+	}
+}

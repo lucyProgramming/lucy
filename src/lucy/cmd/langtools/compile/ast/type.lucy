@@ -37,21 +37,21 @@ public class Map {
 }
 
 public class Type {
-	Type           VariableTypeKind
-	IsBuildIn      bool // build in type alias
-	IsVariableArgs bool // int ...
-	Resolved       bool
-	Pos            Pos
-	Name           string
-	Array          Type
-	Class          Class
-	Enum           Enum
-	EnumName       EnumName // indicate a const
-	Function       Function
-	FunctionType   FunctionType
-	Map            Map
-	Package        Package
-	Alias          TypeAlias
+	public Type           VariableTypeKind
+	public IsBuildIn      bool // build in type alias
+	public IsVariableArgs bool // int ...
+	public Resolved       bool
+	public Pos            Pos
+	public Name           string
+	public Array          Type
+	public Class          Class
+	public Enum           Enum
+	public EnumName       EnumName // indicate a const
+	public Function       Function
+	public FunctionType   FunctionType
+	public Map            Map
+	public Package        Package
+	public Alias          TypeAlias
 	
 
 	// copy to t 
@@ -181,7 +181,7 @@ public class Type {
 	/*
 		deep clone
 	*/
-	fn Clone() ->(cloned Type) {
+	public fn Clone() ->(cloned Type) {
 		cloned = new Type()
 		cloned.Type = this.Type
 
@@ -223,7 +223,7 @@ public class Type {
 		case VariableTypeName:
 			return this.resolveName(block)
 		case VariableTypeGlobal:
-			d, exists := PackageBeenCompile.Block.NameExists(this.Name)
+			d, exists := PackageBeenCompile.Block.nameExists(this.Name)
 			if exists == false {
 				return new error(sprintf("%s '%s' not found",
 					errMsgPrefix(this.Pos), this.Name))
@@ -326,7 +326,7 @@ public class Type {
 		if pp, ok := p.(Package); ok &&
 			pp != null {
 			var exists bool
-			d, exists = pp.Block.NameExists(packageAndName[1])
+			d, exists = pp.Block.nameExists(packageAndName[1])
 			if exists == false {
 				err = new error(sprintf("%s '%s' not found",
 					errMsgPrefix(this.Pos), packageAndName[1]))

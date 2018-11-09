@@ -7,30 +7,30 @@ import "lucy/cmd/langtools/compile/common"
 	public abstract final class {}
 	unlike function class not accept capture
 */
-class Class {
-	IsGlobal                          bool
-	IsBuildIn                         bool
-	Used                              bool
+public class Class {
+	public IsGlobal                          bool
+	public IsBuildIn                         bool
+	public Used                              bool
 	resolveFatherCalled               bool
 	loadSuperClassCalled              bool
 	resolveInterfacesCalled           bool
 	resolveFieldsAndMethodsTypeCalled bool
-	NotImportedYet                    bool   // not imported
-	Name                              string // binary name
-	Pos                               Pos
-	FinalPos                          Pos // final pos
-	IsJava                            bool //class imported from CLASSPATH
-	Block                             Block
-	AccessFlags                       char
-	Fields                            map { string -> ClassField }
-	Methods                           map { string -> []ClassMethod }
-	SuperClassName                    NameWithPos
-	SuperClass                        Class
-	InterfaceNames                    []NameWithPos
-	Interfaces                        []Class
-	LoadFromOutSide                   bool
-	StaticBlocks                      []Block
-	Comment                           string
+	public NotImportedYet                    bool   // not imported
+	public Name                              string // binary name
+	public Pos                               Pos
+	public FinalPos                          Pos // final pos
+	public IsJava                            bool //class imported from CLASSPATH
+	public Block                             Block
+	public AccessFlags                       char
+	public Fields                            map { string -> ClassField }
+	public Methods                           map { string -> []ClassMethod }
+	public SuperClassName                    NameWithPos
+	public SuperClass                        Class
+	public InterfaceNames                    []NameWithPos
+	public Interfaces                        []Class
+	public LoadFromOutSide                   bool
+	public StaticBlocks                      []Block
+	public Comment                           string
 	closure                           Closure
 
 
@@ -283,7 +283,7 @@ class Class {
                     errMsgPrefix(i.Pos), i.Name)))
                 continue
             }
-            this.Interfaces = append(this.Interfaces, t.Class)
+            this.Interfaces.append(t.Class)
         }
         return errs
     }
@@ -392,9 +392,7 @@ class Class {
             return err
         }
         if this.SuperClassName == null {
-            this.SuperClassName = new NameWithPos()
-            this.SuperClassName. Name =  JavaRootClass
-            this.SuperClassName. Pos =  this.Pos
+            this.SuperClassName = new NameWithPos(JavaRootClass ,this.Pos )
         }
         c, err := PackageBeenCompile.loadClass(this.SuperClassName.Name)
         if err != null {
@@ -682,7 +680,7 @@ class Class {
                 if err == null {
                     return []ClassMethod{m}, true, null
                 } else {
-                    ms = append(ms, m)
+                    ms.append(m)
                 }
             }
         }
@@ -719,9 +717,9 @@ class Class {
 
     fn checkPhase1()-> (errs []error = []error{}){
         if this.Block.InheritedAttribute.ClassAndFunctionNames == "" {
-            this.Block.InheritedAttribute.ClassAndFunctionNames = filepath.Base(this.Name)
+            this.Block.InheritedAttribute.ClassAndFunctionNames = common.getBaseName(this.Name)
         } else {
-            this.Block.InheritedAttribute.ClassAndFunctionNames += "$" + filepath.Base(this.Name)
+            this.Block.InheritedAttribute.ClassAndFunctionNames += "$" + common.getBaseName(this.Name)
         }
         this.mkDefaultConstruction()
         errs.appendAll(this.Block.checkConstants())
@@ -771,21 +769,21 @@ class Class {
                 errs.append(new error(errMsg))
             }
         }
-        errs = append(errs, this.checkMethods()...)
+        errs.appendAll(this.checkMethods())
         if PackageBeenCompile.shouldStop(errs) {
             return errs
         }
-        errs = append(errs, this.checkIfOverrideFinalMethod()...)
-        errs = append(errs, this.resolveInterfaces()...)
+        errs.appendAll(this.checkIfOverrideFinalMethod())
+        errs.appendAll(this.resolveInterfaces())
         if this.IsInterface() {
-            errs = append(errs, this.checkOverrideInterfaceMethod()...)
+            errs.appendAll( this.checkOverrideInterfaceMethod())
         }
         if this.IsAbstract() {
-            errs = append(errs, this.checkOverrideAbstractMethod()...)
+            errs.appendAll( this.checkOverrideAbstractMethod())
         }
-        errs = append(errs, this.suitableForInterfaces()...)
+        errs.appendAll( this.suitableForInterfaces())
         if this.SuperClass != null {
-            errs = append(errs, this.suitableSubClassForAbstract(this.SuperClass)...)
+            errs.appendAll(this.suitableSubClassForAbstract(this.SuperClass))
         }
         return errs
     }
@@ -801,7 +799,7 @@ class Class {
                 return errs
             }
             length := len(errs)
-            errs = append(errs, this.suitableSubClassForAbstract(super.SuperClass)...)
+            errs.appendAll(this.suitableSubClassForAbstract(super.SuperClass))
             if len(errs) > length {
                 return errs
             }
@@ -938,14 +936,14 @@ class Class {
                 this.Pos.ErrMsgPrefix(), this.Name, this.SuperClass.Name))
         }
         for c.Name != JavaRootClass {
-            _, ok := m[c.Name]
+            ok := m.keyExist(c.Name)
             if ok {
-                arr = append(arr, c.Name)
+                arr.append(c.Name)
                 is = true
                 break
             }
             m[c.Name] = true
-            arr = append(arr, c.Name)
+            arr.append(c.Name)
             err := c.loadSuperClass(pos)
             if err != null {
                 return err
@@ -1062,12 +1060,12 @@ class Class {
                     continue
                 }
                 if v.Type.assignAble(errs, assignment) == false {
-                    errs = append(errs, new error(sprintf("%s cannot assign '%s' as '%s' for default value",
+                    errs.append(new error(sprintf("%s cannot assign '%s' as '%s' for default value",
                         errMsgPrefix(v.Pos), assignment.TypeString(), v.Type.TypeString())))
                     continue
                 }
                 if assignment.Type == VariableTypeNull {
-                    errs = append(errs, new error(sprintf("%s pointer types default value is '%s' already",
+                   errs.append( new error(sprintf("%s pointer types default value is '%s' already",
                         v.Pos.ErrMsgPrefix(), assignment.TypeString())))
                     continue
                 }
@@ -1121,7 +1119,12 @@ class Class {
             b := new Block()
             b.Statements = staticFieldAssignStatements
             if this.StaticBlocks != null {
-                this.StaticBlocks = append([]Block{b}, this.StaticBlocks...)
+                t := new []Block(1 + len(this.StaticBlocks))
+                t[0] = b
+                for k,v := range this.StaticBlocks{
+                    t[k+ 1] = b
+                }
+                this.StaticBlocks = t
             } else {
                 this.StaticBlocks = []Block{b}
             }
@@ -1144,7 +1147,7 @@ class Class {
                             errMsgPrefix(method.Function.Pos))))
                         continue
                     }
-                    errs.appendAll(method.Function.checkReturnVarExpression()...)
+                    errs.appendAll(method.Function.checkReturnVarExpression())
                     isConstruction := name == SpecialMethodInit
                     if isConstruction {
                         if method.IsFirstStatementCallFatherConstruction() == false {

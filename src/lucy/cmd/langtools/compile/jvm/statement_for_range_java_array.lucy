@@ -1,9 +1,3 @@
-package jvm
-
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 type AutoVariableForRangeJavaArray struct {
 	Elements char
@@ -12,7 +6,7 @@ type AutoVariableForRangeJavaArray struct {
 }
 
 func (this *BuildPackage) buildForRangeStatementForJavaArray(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	s *ast.StatementFor,
 	context Context,
@@ -65,7 +59,7 @@ func (this *BuildPackage) buildForRangeStatementForJavaArray(
 
 	//handle captured vars
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
-		if attr.IdentifierValue != nil &&
+		if attr.IdentifierValue != null &&
 			attr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
 			closure.createClosureVar(class, code, attr.IdentifierValue.Variable.Type)
 			attr.IdentifierValue.Variable.LocalValOffset = code.MaxLocals
@@ -75,7 +69,7 @@ func (this *BuildPackage) buildForRangeStatementForJavaArray(
 			forState.appendLocals(class,
 				forState.newObjectVariableType(closure.getMeta(attr.RangeOn.Value.Array.Type).className))
 		}
-		if attr.IdentifierKey != nil &&
+		if attr.IdentifierKey != null &&
 			attr.IdentifierKey.Variable.BeenCapturedAsLeftValue > 0 {
 			closure.createClosureVar(class, code, attr.IdentifierKey.Variable.Type)
 			attr.IdentifierKey.Variable.LocalValOffset = code.MaxLocals
@@ -108,7 +102,7 @@ func (this *BuildPackage) buildForRangeStatementForJavaArray(
 	}
 	s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_if_icmpge, code))
 	//load elements
-	if attr.IdentifierValue != nil || attr.ExpressionValue != nil {
+	if attr.IdentifierValue != null || attr.ExpressionValue != null {
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.Elements)...)
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
 		if 2 > maxStack {
@@ -150,7 +144,7 @@ func (this *BuildPackage) buildForRangeStatementForJavaArray(
 	}
 	//current stack is 0
 	if s.Condition.Type == ast.ExpressionTypeVarAssign {
-		if attr.IdentifierValue != nil {
+		if attr.IdentifierValue != null {
 			if attr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, attr.IdentifierValue.Variable.LocalValOffset)...)
 				copyOPs(code,
@@ -161,7 +155,7 @@ func (this *BuildPackage) buildForRangeStatementForJavaArray(
 				attr.IdentifierValue.Variable.LocalValOffset = autoVar.V
 			}
 		}
-		if attr.IdentifierKey != nil {
+		if attr.IdentifierKey != null {
 			if attr.IdentifierKey.Variable.BeenCapturedAsLeftValue > 0 {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject,
 					attr.IdentifierKey.Variable.LocalValOffset)...)
@@ -175,7 +169,7 @@ func (this *BuildPackage) buildForRangeStatementForJavaArray(
 	} else { // for k,v = range arr
 		// store v
 		//get ops,make_node_objects ops ready
-		if attr.ExpressionValue != nil {
+		if attr.ExpressionValue != null {
 			stackLength := len(blockState.Stacks)
 			stack, remainStack, ops, _ := this.BuildExpression.getLeftValue(class,
 				code, attr.ExpressionValue, context, blockState)
@@ -191,7 +185,7 @@ func (this *BuildPackage) buildForRangeStatementForJavaArray(
 			copyOPs(code, ops...)
 			blockState.popStack(len(blockState.Stacks) - stackLength)
 		}
-		if attr.ExpressionKey != nil { // set to k
+		if attr.ExpressionKey != null { // set to k
 			stackLength := len(blockState.Stacks)
 			stack, remainStack, ops, _ := this.BuildExpression.getLeftValue(class,
 				code, attr.ExpressionKey, context, blockState)

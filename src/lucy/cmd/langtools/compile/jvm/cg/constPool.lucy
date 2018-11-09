@@ -2,20 +2,20 @@ import "lucy/binary"
 import "java/lang/Float"
 import "java/lang/Double"
  
-const	ConstantPoolTagUtf8               byte = 1
-const	ConstantPoolTagInteger            byte = 3
-const	ConstantPoolTagFloat              byte = 4
-const	ConstantPoolTagLong               byte = 5
-const	ConstantPoolTagDouble             byte = 6
-const	ConstantPoolTagClass              byte = 7
-const	ConstantPoolTagString             byte = 8
-const	ConstantPoolTagFieldref           byte = 9
-const	ConstantPoolTagMethodref          byte = 10
-const	ConstantPoolTagInterfaceMethodref byte = 11
-const	ConstantPoolTagNameAndType        byte = 12
-const	ConstantPoolTagMethodHandle       byte = 15
-const	ConstantPoolTagMethodType         byte = 16
-const	ConstantPoolTagInvokeDynamic      byte = 18
+public const	ConstantPoolTagUtf8               byte = 1
+public const	ConstantPoolTagInteger            byte = 3
+public const	ConstantPoolTagFloat              byte = 4
+public const	ConstantPoolTagLong               byte = 5
+public const	ConstantPoolTagDouble             byte = 6
+public const	ConstantPoolTagClass              byte = 7
+public const	ConstantPoolTagString             byte = 8
+public const	ConstantPoolTagFieldref           byte = 9
+public const	ConstantPoolTagMethodref          byte = 10
+public const	ConstantPoolTagInterfaceMethodref byte = 11
+public const	ConstantPoolTagNameAndType        byte = 12
+public const	ConstantPoolTagMethodHandle       byte = 15
+public const	ConstantPoolTagMethodType         byte = 16
+public const	ConstantPoolTagInvokeDynamic      byte = 18
  
 
 class ConstPool  {

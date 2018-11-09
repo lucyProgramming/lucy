@@ -1,94 +1,99 @@
-package parser
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/lex"
 
-import (
-	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
-)
+class StatementWhenParser extends ParserExtends {
 
-func (this *BlockParser) parseWhen() (*ast.StatementWhen, error) {
-	when := &ast.StatementWhen{
-		Pos: this.parser.mkPos(),
+	bp BlockParser
+	fn StatementWhenParser(parser Parser ,bp BlockParser){
+		this.super()
+		this.parser = parser
+		this.bp = bp
 	}
-	this.parser.Next(lfIsToken)
-	this.parser.unExpectNewLineAndSkip()
-	condition, err := this.parser.parseType()
-	if err != nil {
-		this.parser.errs = append(this.parser.errs, err)
-		this.consume(untilLc)
-	}
-	when.Condition = condition
-	this.parser.ifTokenIsLfThenSkip()
-	if this.parser.token.Type != lex.TokenLc {
-		err = new error(sprintf("%s expect '{',but '%s'",
-			this.parser.errMsgPrefix(), this.parser.token.Description)
-		this.parser.errs = append(this.parser.errs, err)
-		this.consume(untilLc)
-	}
-	this.Next(lfNotToken) // skip {  , must be case
-	if this.parser.token.Type != lex.TokenCase {
-		err = new error(sprintf("%s expect 'case',but '%s'",
-			this.parser.errMsgPrefix(), this.parser.token.Description)
-		this.parser.errs = append(this.parser.errs, err)
-		return nil, err
-	}
+	
+	protected fn parseWhen() -> (whenStatement ast.StatementWhen , err error) {
+		whenStatement = new ast.StatementWhen()
+		whenStatement.Pos = this.parser.mkPos()
+		this.parser.Next(lfIsToken)
+		this.parser.unExpectNewLineAndSkip()
+		condition, err := this.parser.parseType()
+		if err != null {
+			this.parser.errs.append( err)
+			this.consume(untilLc)
+		}
+		whenStatement.Condition = condition
+		this.parser.ifTokenIsLfThenSkip()
+		if this.parser.token.Type != lex.TokenLc {
+			err = new error(sprintf("%s expect '{',but '%s'",
+				this.parser.errMsgPrefix(), this.parser.token.Description))
+			this.parser.errs.append( err)
+			this.consume(untilLc)
+		}
+		this.Next(lfNotToken) // skip {  , must be case
+		if this.parser.token.Type != lex.TokenCase {
+			err = new error(sprintf("%s expect 'case',but '%s'",
+				this.parser.errMsgPrefix(), this.parser.token.Description))
+			this.parser.errs.append( err)
+			return null, err
+		}
 
-	for this.parser.token.Type == lex.TokenCase {
-		this.Next(lfIsToken) // skip case
-		this.parser.unExpectNewLineAndSkip()
-		ts, err := this.parser.parseTypes(lex.TokenColon)
-		if err != nil {
-			this.parser.errs = append(this.parser.errs, err)
-			return when, err
-		}
-		this.parser.unExpectNewLineAndSkip()
-		if this.parser.token.Type != lex.TokenColon {
-			err = new error(sprintf("%s expect ':',but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.Description)
-			this.parser.errs = append(this.parser.errs, err)
-			return when, err
-		}
-		this.Next(lfIsToken) // skip :
-		this.parser.expectNewLineAndSkip()
-		var block *ast.Block
-		if this.parser.token.Type != lex.TokenCase &&
-			this.parser.token.Type != lex.TokenDefault &&
-			this.parser.token.Type != lex.TokenRc {
-			block = &ast.Block{}
-			block.IsSwitchBlock = true
-			this.parseStatementList(block, false)
-		}
-		when.Cases =
-			append(when.Cases, &ast.StatementWhenCase{
-				Matches: ts,
-				Block:   block,
-			})
-	}
-	//default value
-	if this.parser.token.Type == lex.TokenDefault {
-		this.Next(lfIsToken) // skip default key word
-		this.parser.unExpectNewLineAndSkip()
-		if this.parser.token.Type != lex.TokenColon {
-			err = new error(sprintf("%s missing colon after default",
-				this.parser.errMsgPrefix())
-			this.parser.errs = append(this.parser.errs, err)
-		} else {
-			this.Next(lfIsToken)
+		for this.parser.token.Type == lex.TokenCase {
+			this.Next(lfIsToken) // skip case
+			this.parser.unExpectNewLineAndSkip()
+			ts, err := this.parser.parseTypes(lex.TokenColon)
+			if err != null {
+				this.parser.errs.append( err)
+				return whenStatement, err
+			}
+			this.parser.unExpectNewLineAndSkip()
+			if this.parser.token.Type != lex.TokenColon {
+				err = new error(sprintf("%s expect ':',but '%s'",
+					this.parser.errMsgPrefix(), this.parser.token.Description))
+				this.parser.errs.append( err)
+				return whenStatement, err
+			}
+			this.Next(lfIsToken) // skip :
 			this.parser.expectNewLineAndSkip()
+			var block ast.Block
+			if this.parser.token.Type != lex.TokenCase &&
+				this.parser.token.Type != lex.TokenDefault &&
+				this.parser.token.Type != lex.TokenRc {
+				block = new ast.Block()
+				block.IsSwitchBlock = true
+				this.parseStatementList(block, false)
+			}
+			t := new ast.StatementWhenCase()
+			t.Matches = ts
+			t.Block = block
+			whenStatement.Cases.append(t)
+		}
+		//default value
+		if this.parser.token.Type == lex.TokenDefault {
+			this.Next(lfIsToken) // skip default key word
+			this.parser.unExpectNewLineAndSkip()
+			if this.parser.token.Type != lex.TokenColon {
+				err = new error(sprintf("%s missing colon after default",
+					this.parser.errMsgPrefix()))
+				this.parser.errs.append( err)
+			} else {
+				this.Next(lfIsToken)
+				this.parser.expectNewLineAndSkip()
+			}
+			if this.parser.token.Type != lex.TokenRc {
+				block := new ast.Block()
+				block.IsSwitchBlock = true
+				this.parseStatementList(block, false)
+				whenStatement.Default = block
+			}
 		}
 		if this.parser.token.Type != lex.TokenRc {
-			block := ast.Block{}
-			block.IsSwitchBlock = true
-			this.parseStatementList(&block, false)
-			when.Default = &block
+			err = new error(sprintf("%s expect '}',but '%s'",
+				this.parser.errMsgPrefix(), this.parser.token.Description))
+			this.parser.errs.append( err)
+			return whenStatement, err
 		}
+		this.Next(lfNotToken) //  skip }
 	}
-	if this.parser.token.Type != lex.TokenRc {
-		err = new error(sprintf("%s expect '}',but '%s'",
-			this.parser.errMsgPrefix(), this.parser.token.Description)
-		this.parser.errs = append(this.parser.errs, err)
-		return when, err
-	}
-	this.Next(lfNotToken) //  skip }
-	return when, nil
+
+
 }
+ 

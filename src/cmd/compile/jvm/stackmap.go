@@ -10,9 +10,10 @@ type StackMapState struct {
 	Stacks []*cg.StackMapVerificationTypeInfo
 }
 
-func (this *StackMapState) appendLocals(class *cg.ClassHighLevel, v *ast.Type) {
-	this.Locals = append(this.Locals,
-		this.newStackMapVerificationTypeInfo(class, v))
+func (this *StackMapState) appendLocals(class *cg.ClassHighLevel, v *ast.Type) *cg.StackMapVerificationTypeInfo {
+	t := this.newStackMapVerificationTypeInfo(class, v)
+	this.Locals = append(this.Locals, t)
+	return t
 }
 
 func (this *StackMapState) addTop(absent *StackMapState) {

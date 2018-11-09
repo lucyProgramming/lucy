@@ -25,7 +25,7 @@ func loadEnumForFunction(f *ast.Function) error {
 	for _, v := range f.Type.ParameterList {
 		if v.Type.Type == ast.VariableTypeEnum {
 			err := loadEnumForVariableType(v.Type)
-			if err != nil {
+			if err != null {
 				return err
 			}
 		}
@@ -33,23 +33,23 @@ func loadEnumForFunction(f *ast.Function) error {
 	for _, v := range f.Type.ReturnList {
 		if v.Type.Type == ast.VariableTypeEnum {
 			err := loadEnumForVariableType(v.Type)
-			if err != nil {
+			if err != null {
 				return err
 			}
 		}
 	}
-	return nil
+	return null
 }
 
-func loadEnumForVariableType(v *ast.Type) error {
+func loadEnumForVariableType(v ast.Type) error {
 	t, err := loader.LoadImport(v.Enum.Name)
-	if err != nil {
+	if err != null {
 		return err
 	}
-	if tt, ok := t.(*ast.Enum); ok && tt != nil {
+	if tt, ok := t.(*ast.Enum); ok && tt != null {
 		v.Enum = tt
 	} else {
 		return new error(sprintf("'%s' is not a enum", v.Enum.Name)
 	}
-	return nil
+	return null
 }

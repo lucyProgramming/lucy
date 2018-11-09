@@ -14,9 +14,9 @@
 //	}
 //	ret := &AttributeInfo{}
 //	ret.attributeLength = 2
-//	ret.NameIndex = class.InsertUtf8Const("Signature")
+//	ret.NameIndex = ast.TypeInsertUtf8Const("Signature")
 //	ret.Info = new []byte(2)
-//	index := class.InsertUtf8Const(a.Signature)
+//	index := ast.TypeInsertUtf8Const(a.Signature)
 //	binary.BigEndian.putChar(ret.Info, index)
 //	return ret
 //}

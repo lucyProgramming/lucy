@@ -1,7 +1,7 @@
 import "lucy/binary"
 
-class AttributeLucyMethodDescriptor {
-	Descriptor string
+public class AttributeLucyMethodDescriptor {
+	public Descriptor string
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
 		ret.NameIndex = c.InsertUtf8Const(AttributeNameLucyMethodDescriptor)

@@ -1,147 +1,148 @@
-package parser
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/lex"
 
-import (
-	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
-)
-
-// []int{1,2,3}
-func (ep *ExpressionParser) parseArrayExpression() (ast.Expression, error) {
-	ep.parser.Next(lfIsToken) // skip [
-	ep.parser.unExpectNewLineAndSkip()
-	var err error
-	if ep.parser.token.Type != lex.TokenRb {
+class ExpressionArrayParser extends ParserExtends {
+	ep ExpressionParser
+	
+	fn ExpressionArrayParser(parser Parser , ep ExpressionParser) {
+		this.super()
+		this.parser = parser
+		this.ep = ep 
+	}
+	fn parseArrayExpression() -> (e ast.Expression, err error) {
+		this.parser.Next(lfIsToken) // skip [
+		this.parser.unExpectNewLineAndSkip()
+		if this.parser.token.Type != lex.TokenRb {
+			/*
+				[1 ,2]
+			*/
+			arr := new ast.ExpressionArray()
+			arr.Expressions, err = this.ep.parseExpressions(lex.TokenRb)
+			this.parser.ifTokenIsLfThenSkip()
+			if this.parser.token.Type != lex.TokenRb {
+				err = new error(sprintf("%s '[' and ']' not match", this.parser.errMsgPrefix()))
+				return null, err
+			}
+			pos := this.parser.mkPos()
+			this.Next(lfIsToken) // skip ]
+			e = new ast.Expression()
+			e.Type = ast.ExpressionTypeArray
+			e.Data = arr
+			e.Pos = pos
+			e.Op = "arrayLiteral"
+			return
+		}
+		this.Next(lfIsToken) // skip ]
+		this.parser.unExpectNewLineAndSkip()
+		array, err := this.parser.parseType()
+		if err != null {
+			return null, err
+		}
+		pos := this.parser.mkPos()
+		if this.parser.token.Type == lex.TokenLp {
+			/*
+				[]byte("1111111111")
+			*/
+			this.Next(lfNotToken) // skip (
+			e, err := this.ep.parseExpression(false)
+			if err != null {
+				return null, err
+			}
+			if this.parser.token.Type != lex.TokenRp {
+				err = new error(sprintf("%s '(' and  ')' not match",
+					this.parser.errMsgPrefix()))
+				this.parser.errs.append( err)
+				return null, err
+			}
+			ret := new ast.Expression()
+			ret.Op = "checkCast"
+			ret.Pos = pos
+			ret.Type = ast.ExpressionTypeCheckCast
+			data := new ast.ExpressionTypeConversion()
+			data.Type = new ast.Type()
+			data.Type.Type = ast.VariableTypeArray
+			data.Type.Pos = pos
+			data.Type.Array = array
+			data.Expression = e
+			ret.Data = data
+			this.Next(lfIsToken) // skip )
+			return ret, null
+		}
+		this.parser.unExpectNewLineAndSkip()
+		arr := new ast.ExpressionArray()
+		if array != null {
+			arr.Type = new ast.Type()
+			arr.Type.Type = ast.VariableTypeArray
+			arr.Type.Array = array
+			arr.Type.Pos = array.Pos
+		}
 		/*
-			[1 ,2]
+			[]int { 1, 2}
 		*/
-		arr := &ast.ExpressionArray{}
-		arr.Expressions, err = ep.parseExpressions(lex.TokenRb)
-		ep.parser.ifTokenIsLfThenSkip()
-		if ep.parser.token.Type != lex.TokenRb {
-			err = new error(sprintf("%s '[' and ']' not match", ep.parser.errMsgPrefix())
-			return nil, err
-		}
-		pos := ep.parser.mkPos()
-		ep.Next(lfIsToken) // skip ]
-		return &ast.Expression{
-			Type: ast.ExpressionTypeArray,
-			Data: arr,
-			Pos:  pos,
-			Op:   "arrayLiteral",
-		}, err
-	}
-	ep.Next(lfIsToken) // skip ]
-	ep.parser.unExpectNewLineAndSkip()
-	array, err := ep.parser.parseType()
-	if err != nil {
-		return nil, err
-	}
-	pos := ep.parser.mkPos()
-	if ep.parser.token.Type == lex.TokenLp {
-		/*
-			[]byte("1111111111")
-		*/
-		ep.Next(lfNotToken) // skip (
-		e, err := ep.parseExpression(false)
-		if err != nil {
-			return nil, err
-		}
-		if ep.parser.token.Type != lex.TokenRp {
-			err = new error(sprintf("%s '(' and  ')' not match",
-				ep.parser.errMsgPrefix())
-			ep.parser.errs = append(ep.parser.errs, err)
-			return nil, err
-		}
-		ret := &ast.Expression{}
-		ret.Op = "checkCast"
-		ret.Pos = pos
-		ret.Type = ast.ExpressionTypeCheckCast
-		data := &ast.ExpressionTypeConversion{}
-		data.Type = &ast.Type{}
-		data.Type.Type = ast.VariableTypeArray
-		data.Type.Pos = pos
-		data.Type.Array = array
-		data.Expression = e
-		ret.Data = data
-		ep.Next(lfIsToken) // skip )
-		return ret, nil
-	}
-	ep.parser.unExpectNewLineAndSkip()
-	arr := &ast.ExpressionArray{}
-	if array != nil {
-		arr.Type = &ast.Type{}
-		arr.Type.Type = ast.VariableTypeArray
-		arr.Type.Array = array
-		arr.Type.Pos = array.Pos
-	}
-	/*
-		[]int { 1, 2}
-	*/
 
-	arr.Expressions, err = ep.parseArrayValues()
-	return &ast.Expression{
-		Type: ast.ExpressionTypeArray,
-		Data: arr,
-		Pos:  pos,
-		Op:   "arrayLiteral",
-	}, err
+		arr.Expressions, err = this.parseArrayValues()
+		e = new ast.Expression()
+		e.Type = ast.ExpressionTypeArray
+		e.Data = arr
+		e.Pos = pos
+		e.Op = "arrayLiteral"
+		return
+	}
+
+	//{1,2,3}  {{1,2,3},{456}}
+	fn parseArrayValues() ->  (es []ast.Expression = []ast.Expression{},err error) {
+		if this.parser.token.Type != lex.TokenLc {
+			err := new error(sprintf("%s expect '{',but '%s'",
+				this.parser.errMsgPrefix(), this.parser.token.Description))
+			this.parser.errs.append( err)
+			return null, err
+		}
+		this.Next(lfNotToken) // skip {
+		for this.parser.token.Type != lex.TokenEof &&
+			this.parser.token.Type != lex.TokenRc {
+			if this.parser.token.Type == lex.TokenComment ||
+				this.parser.token.Type == lex.TokenMultiLineComment {
+				this.Next(lfIsToken)
+				continue
+			}
+			if this.parser.token.Type == lex.TokenLc {
+				ees, err := this.parseArrayValues()
+				if err != null {
+					return es, err
+				}
+				arrayExpression := new ast.Expression()
+				arrayExpression.Type = ast.ExpressionTypeArray
+				arrayExpression.Pos = this.parser.mkPos()
+				arrayExpression.Op = "arrayLiteral"
+				data := new ast.ExpressionArray()
+				data.Expressions = ees
+				arrayExpression.Data = data
+				es.append(arrayExpression)
+			} else {
+				e, err := this.ep.parseExpression(false)
+				if e != null {
+					es.append(e)
+				}
+				if err != null {
+					return es, err
+				}
+			}
+			if this.parser.token.Type == lex.TokenComma {
+				this.Next(lfNotToken) // skip ,
+			} else {
+				break
+			}
+		}
+		this.parser.ifTokenIsLfThenSkip()
+		if this.parser.token.Type != lex.TokenRc {
+			err := new error(sprintf("%s expect '}',but '%s'",
+				this.parser.errMsgPrefix(), this.parser.token.Description))
+			this.parser.errs.append( err)
+			this.parser.consume(untilRc)
+		}
+		this.Next(lfIsToken)
+		return es, null
+	}
 
 }
 
-//{1,2,3}  {{1,2,3},{456}}
-func (ep *ExpressionParser) parseArrayValues() ([]ast.Expression, error) {
-	if ep.parser.token.Type != lex.TokenLc {
-		err := new error(sprintf("%s expect '{',but '%s'",
-			ep.parser.errMsgPrefix(), ep.parser.token.Description)
-		ep.parser.errs = append(ep.parser.errs, err)
-		return nil, err
-	}
-	ep.Next(lfNotToken) // skip {
-	es := []ast.Expression{}
-	for ep.parser.token.Type != lex.TokenEof &&
-		ep.parser.token.Type != lex.TokenRc {
-		if ep.parser.token.Type == lex.TokenComment ||
-			ep.parser.token.Type == lex.TokenMultiLineComment {
-			ep.Next(lfIsToken)
-			continue
-		}
-		if ep.parser.token.Type == lex.TokenLc {
-			ees, err := ep.parseArrayValues()
-			if err != nil {
-				return es, err
-			}
-			arrayExpression := &ast.Expression{
-				Type: ast.ExpressionTypeArray,
-				Pos:  ep.parser.mkPos(),
-			}
-			arrayExpression.Op = "arrayLiteral"
-			data := ast.ExpressionArray{}
-			data.Expressions = ees
-			arrayExpression.Data = data
-			es = append(es, arrayExpression)
-		} else {
-			e, err := ep.parseExpression(false)
-			if e != nil {
-				es = append(es, e)
-			}
-			if err != nil {
-				return es, err
-			}
-		}
-		if ep.parser.token.Type == lex.TokenComma {
-			ep.Next(lfNotToken) // skip ,
-		} else {
-			break
-		}
-	}
-	ep.parser.ifTokenIsLfThenSkip()
-	if ep.parser.token.Type != lex.TokenRc {
-		err := new error(sprintf("%s expect '}',but '%s'",
-			ep.parser.errMsgPrefix(), ep.parser.token.Description)
-		ep.parser.errs = append(ep.parser.errs, err)
-		ep.parser.consume(untilRc)
-	}
-	ep.Next(lfIsToken)
-	return es, nil
-}

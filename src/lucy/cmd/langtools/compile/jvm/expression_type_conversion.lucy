@@ -1,12 +1,7 @@
-package jvm
 
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func (this *BuildExpression) buildTypeConversion(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -22,7 +17,7 @@ func (this *BuildExpression) buildTypeConversion(
 		currentStack = 2
 		meta := ArrayMetas[ast.VariableTypeByte]
 		code.Codes[code.CodeLength] = cg.OP_new
-		class.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		t := &cg.StackMapVerificationTypeInfo{}
 		t.Verify = &cg.StackMapUninitializedVariableInfo{
@@ -38,7 +33,7 @@ func (this *BuildExpression) buildTypeConversion(
 		(conversion.Type.Type == ast.VariableTypeString && conversion.Expression.Value.Equal(ast.JavaBytesType)) {
 		currentStack = 2
 		code.Codes[code.CodeLength] = cg.OP_new
-		class.InsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		t := &cg.StackMapVerificationTypeInfo{}
 		t.Verify = &cg.StackMapUninitializedVariableInfo{
@@ -80,18 +75,18 @@ func (this *BuildExpression) buildTypeConversion(
 		code.Codes[code.CodeLength] = cg.OP_pop
 		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_new
-		class.InsertClassConst(javaExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertClassConst(javaExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		class.InsertStringConst("int value not found in enum names",
+		ast.TypeInsertStringConst("int value not found in enum names",
 			code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		if 3 > maxStack {
 			maxStack = 3
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaExceptionClass,
 			Method:     specialMethodInit,
 			Descriptor: "(Ljava/lang/String;)V",
@@ -109,7 +104,7 @@ func (this *BuildExpression) buildTypeConversion(
 		conversion.Expression.Value.Type == ast.VariableTypeString {
 		//stack top must be a string
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "getBytes",
 			Descriptor: "()[B",
@@ -120,7 +115,7 @@ func (this *BuildExpression) buildTypeConversion(
 		}
 		meta := ArrayMetas[ast.VariableTypeByte]
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      meta.className,
 			Method:     specialMethodInit,
 			Descriptor: meta.constructorFuncDescriptor,
@@ -133,7 +128,7 @@ func (this *BuildExpression) buildTypeConversion(
 		conversion.Expression.Value.Type == ast.VariableTypeString {
 		//stack top must be a string
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "getBytes",
 			Descriptor: "()[B",
@@ -166,7 +161,7 @@ func (this *BuildExpression) buildTypeConversion(
 		code.CodeLength++
 		meta := ArrayMetas[ast.VariableTypeByte]
 		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+		ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 			Class:      meta.className,
 			Field:      "start",
 			Descriptor: "I",
@@ -176,7 +171,7 @@ func (this *BuildExpression) buildTypeConversion(
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      meta.className,
 			Method:     "size",
 			Descriptor: "()I",
@@ -184,7 +179,7 @@ func (this *BuildExpression) buildTypeConversion(
 		code.CodeLength += 3
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, a.length)...)
 		code.Codes[code.CodeLength] = cg.OP_getfield
-		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+		ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 			Class:      meta.className,
 			Field:      "elements",
 			Descriptor: meta.elementsFieldDescriptor,
@@ -193,13 +188,13 @@ func (this *BuildExpression) buildTypeConversion(
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.start)...)
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.length)...)
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		class.InsertStringConst("utf-8", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertStringConst("utf-8", code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		if 6 > maxStack { // stack is ... stringRef stringRef byte[] start length "utf-8"
 			maxStack = 6
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     specialMethodInit,
 			Descriptor: "([BIILjava/lang/String;)V",
@@ -211,7 +206,7 @@ func (this *BuildExpression) buildTypeConversion(
 	if conversion.Type.Type == ast.VariableTypeString &&
 		conversion.Expression.Value.Equal(ast.JavaBytesType) {
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     specialMethodInit,
 			Descriptor: "([B)V",
@@ -221,7 +216,7 @@ func (this *BuildExpression) buildTypeConversion(
 	}
 	if conversion.Type.Type == ast.VariableTypeString {
 		code.Codes[code.CodeLength] = cg.OP_checkcast
-		class.InsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		return
 	}

@@ -1,7 +1,7 @@
 import "lucy/binary"
 
-class AttributeLucyComment {
-	Comment string
+public class AttributeLucyComment {
+	public Comment string
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
 		ret.attributeLength = 2

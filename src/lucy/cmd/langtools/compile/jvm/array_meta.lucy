@@ -19,7 +19,7 @@ class ArrayMeta {
 	elementsFieldDescriptor   string
 	setMethodDescription      string
 	getMethodDescription      string
-	fn ArrayMeta(className , constructorFuncDescriptor ,sliceDescriptor ,appendDescriptor,appendAllDescriptor ， elementsFieldDescriptor ,
+	fn ArrayMeta(className , constructorFuncDescriptor ,sliceDescriptor ,appendDescriptor,appendAllDescriptor , elementsFieldDescriptor ,
 		setMethodDescription , 	getMethodDescription string){
 			this.className = className
 			this.constructorFuncDescriptor = constructorFuncDescriptor
@@ -81,7 +81,7 @@ class ArrayMeta {
 		 "(I)V",
 		 "(Llucy/deps/ArrayInt;)V",
 		 "(II)V",
-		 "(I)I",
+		 "(I)I"
 	)
 	ArrayMetas[ast.VariableTypeLong] = new ArrayMeta( 
 		 "lucy/deps/ArrayLong",
@@ -91,7 +91,7 @@ class ArrayMeta {
 		 "(J)V",
 		 "(Llucy/deps/ArrayLong;)V",
 		 "(IJ)V",
-		 "(I)J",
+		 "(I)J"
 	)
 	ArrayMetas[ast.VariableTypeFloat] = new ArrayMeta( 
 		 "lucy/deps/ArrayFloat",
@@ -101,7 +101,7 @@ class ArrayMeta {
 		 "(F)V",
 		 "(Llucy/deps/ArrayFloat;)V",
 		 "(IF)V",
-		 "(I)F",
+		 "(I)F"
 	)
 	ArrayMetas[ast.VariableTypeDouble] = new ArrayMeta( 
 		 "lucy/deps/ArrayDouble",
@@ -111,7 +111,7 @@ class ArrayMeta {
 		 "(D)V",
 		"(Llucy/deps/ArrayDouble;)V",
 		 "(ID)V",
-		 "(I)D",
+		 "(I)D"
 	)
 	ArrayMetas[ast.VariableTypeString] = new ArrayMeta( 
 		 "lucy/deps/ArrayString",
@@ -121,7 +121,7 @@ class ArrayMeta {
 		 "(Ljava/lang/String;)V",
 		 "(Llucy/deps/ArrayString;)V",
 		 "(ILjava/lang/String;)V",
-		 "(I)Ljava/lang/String;",
+		 "(I)Ljava/lang/String;"
 	)
 	ArrayMetas[ast.VariableTypeObject] = new ArrayMeta( 
 		 "lucy/deps/ArrayObject",
@@ -131,8 +131,8 @@ class ArrayMeta {
 		 "(Ljava/lang/Object;)V",
 		 "(Llucy/deps/ArrayObject;)V",
 		 "(ILjava/lang/Object;)V",
-		 "(I)Ljava/lang/Object;",
-	}
+		 "(I)Ljava/lang/Object;"
+	)
 	ArrayMetas[ast.VariableTypeArray] = ArrayMetas[ast.VariableTypeObject]
 	ArrayMetas[ast.VariableTypeMap] = ArrayMetas[ast.VariableTypeObject]
 	ArrayMetas[ast.VariableTypeJavaArray] = ArrayMetas[ast.VariableTypeObject]

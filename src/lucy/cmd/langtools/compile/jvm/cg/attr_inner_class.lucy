@@ -2,10 +2,10 @@ import "lucy/binary"
 
 
 class InnerClass {
-	InnerClass  string
-	OuterClass  string
-	Name        string
-	AccessFlags char
+	public InnerClass  string
+	public OuterClass  string
+	public Name        string
+	public AccessFlags char
 	
 	fn FromBs(c Class, bs []byte) {
     		nameIndex := binary.BigEndian.getChar(c.ConstPool[binary.BigEndian.getChar(bs)].Info)

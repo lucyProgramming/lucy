@@ -1,9 +1,11 @@
+import "lucy/cmd/langtools/compile/common"
 
-class Import {
-	Alias  string
-	Import string // full name
-	Pos    Pos
-	Used   bool
+
+public class Import {
+	public Alias  string
+	public Import string // full name
+	public Pos    Pos
+	public Used   bool
 	/*
 		import "github.com/lucy" should access by lucy.doSomething()
 		import "github.com/std" as std2 should access by std2.doSomething()
@@ -16,7 +18,7 @@ class Import {
 			return new error(sprintf("%s '%s' is not a valid name",
 				this.Pos.ErrMsgPrefix(), this.Import))
 		}
-		this.Alias = filepath.Base(this.Import)
+		this.Alias = common.getBaseName(this.Import)
 		return null
 	}
 }

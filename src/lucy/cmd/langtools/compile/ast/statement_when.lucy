@@ -1,16 +1,16 @@
  
 
-class StatementWhenCase {
-	Matches []Type
-	Block   Block
+public class StatementWhenCase {
+	public Matches []Type
+	public Block   Block
 }
 
 
-class StatementWhen {
-	Pos       Pos
-	Condition Type
-	Cases     []StatementWhenCase
-	Default   Block
+public class StatementWhen {
+	public Pos       Pos
+	public Condition Type
+	public Cases     []StatementWhenCase
+	public Default   Block
 	/*
 		switchStatement will be override
 	*/

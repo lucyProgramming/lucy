@@ -1,10 +1,4 @@
-package jvm
 
-import (
-	"encoding/binary"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func (this *BuildExpression) stackTop2Byte(code cg.AttributeCode, on ast.VariableTypeKind) {
 	switch on {
@@ -206,8 +200,8 @@ func (this *BuildExpression) numberTypeConverter(code cg.AttributeCode,
 	}
 }
 
-func (this *BuildExpression) stackTop2String(class cg.ClassHighLevel, code cg.AttributeCode,
-	typ *ast.Type, context Context, state StackMapState) (maxStack char) {
+func (this *BuildExpression) stackTop2String(c cg.ClassHighLevel, code cg.AttributeCode,
+	typ ast.Type, context Context, state StackMapState) (maxStack char) {
 	if typ.Type == ast.VariableTypeString {
 		return
 	}
@@ -215,7 +209,7 @@ func (this *BuildExpression) stackTop2String(class cg.ClassHighLevel, code cg.At
 	switch typ.Type {
 	case ast.VariableTypeBool:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "valueOf",
 			Descriptor: "(Z)Ljava/lang/String;",
@@ -223,7 +217,7 @@ func (this *BuildExpression) stackTop2String(class cg.ClassHighLevel, code cg.At
 		code.CodeLength += 3
 	case ast.VariableTypeChar:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "valueOf",
 			Descriptor: "(C)Ljava/lang/String;",
@@ -237,7 +231,7 @@ func (this *BuildExpression) stackTop2String(class cg.ClassHighLevel, code cg.At
 		fallthrough
 	case ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "valueOf",
 			Descriptor: "(I)Ljava/lang/String;",
@@ -245,7 +239,7 @@ func (this *BuildExpression) stackTop2String(class cg.ClassHighLevel, code cg.At
 		code.CodeLength += 3
 	case ast.VariableTypeLong:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "valueOf",
 			Descriptor: "(J)Ljava/lang/String;",
@@ -253,7 +247,7 @@ func (this *BuildExpression) stackTop2String(class cg.ClassHighLevel, code cg.At
 		code.CodeLength += 3
 	case ast.VariableTypeFloat:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "valueOf",
 			Descriptor: "(F)Ljava/lang/String;",
@@ -261,7 +255,7 @@ func (this *BuildExpression) stackTop2String(class cg.ClassHighLevel, code cg.At
 		code.CodeLength += 3
 	case ast.VariableTypeDouble:
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "valueOf",
 			Descriptor: "(D)Ljava/lang/String;",
@@ -282,11 +276,11 @@ func (this *BuildExpression) stackTop2String(class cg.ClassHighLevel, code cg.At
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 10)
 		code.Codes[code.CodeLength+3] = cg.OP_pop
 		code.Codes[code.CodeLength+4] = cg.OP_ldc_w
-		class.InsertStringConst("null", code.Codes[code.CodeLength+5:code.CodeLength+7])
+		ast.TypeInsertStringConst("null", code.Codes[code.CodeLength+5:code.CodeLength+7])
 		code.Codes[code.CodeLength+7] = cg.OP_goto
 		binary.BigEndian.PutUint16(code.Codes[code.CodeLength+8:code.CodeLength+10], 6)
 		code.Codes[code.CodeLength+10] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      "java/lang/Object",
 			Method:     "toString",
 			Descriptor: "()Ljava/lang/String;",

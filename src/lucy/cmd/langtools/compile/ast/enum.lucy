@@ -1,28 +1,28 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-class EnumName {
-	Enum    Enum
-	Name    string
-	Pos     Pos
-	Value   int // int is bigger enough
-	Comment string
-	NoNeed  Expression
+public class EnumName {
+	public Enum    Enum
+	public Name    string
+	public Pos     Pos
+	public Value   int // int is bigger enough
+	public Comment string
+	public NoNeed  Expression
 }
 
 
-class Enum   {
-	IsGlobal        bool
-	IsBuildIn       bool
-	AccessFlags     char
-	Name            string
-	Pos             Pos
-	Enums           []EnumName
-	Init            Expression //should be a int expression
-	Used            bool
-	DefaultValue    int
-	LoadFromOutSide bool
-	FirstValueIndex int
-	Comment         string
+public class Enum   {
+	public IsGlobal        bool
+	public IsBuildIn       bool
+	public AccessFlags     char
+	public Name            string
+	public Pos             Pos
+	public Enums           []EnumName
+	public Init            Expression //should be a int expression
+	public Used            bool
+	public DefaultValue    int
+	public LoadFromOutSide bool
+	public FirstValueIndex int
+	public Comment         string
 	
 	fn isPublic() -> (is bool) {
 		return this.AccessFlags&cg.AccClassPublic != 0

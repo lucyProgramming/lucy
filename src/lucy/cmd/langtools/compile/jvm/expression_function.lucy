@@ -1,12 +1,7 @@
-package jvm
-
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
+ 
 
 func (this *BuildPackage) buildFunctionExpression(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -25,22 +20,22 @@ func (this *BuildPackage) buildFunctionExpression(
 		function.Name = function.NameLiteralFunction()
 	}
 	if function.IsClosureFunction == false {
-		function.Name = class.NewMethodName(function.Name) // new a function name
+		function.Name = ast.TypeNewMethodName(function.Name) // new a function name
 		method := &cg.MethodHighLevel{}
 		method.Name = function.Name
 		method.AccessFlags |= cg.AccMethodFinal
 		method.AccessFlags |= cg.AccMethodPrivate
 		method.AccessFlags |= cg.AccMethodStatic
 		method.AccessFlags |= cg.AccMethodBridge
-		if function.Type.VArgs != nil {
+		if function.Type.VArgs != null {
 			method.AccessFlags |= cg.AccMethodVarargs
 		}
 		function.Entrance = method
 		method.Class = class
 		method.Descriptor = Descriptor.methodDescriptor(&function.Type)
 		method.Code = &cg.AttributeCode{}
-		this.buildFunction(class, nil, method, function)
-		class.AppendMethod(method)
+		this.buildFunction(class, null, method, function)
+		ast.TypeAppendMethod(method)
 		return
 	}
 
@@ -58,7 +53,7 @@ func (this *BuildPackage) buildFunctionExpression(
 	method.Name = function.Name
 	method.AccessFlags |= cg.AccMethodFinal
 	method.AccessFlags |= cg.AccMethodBridge
-	if function.Type.VArgs != nil {
+	if function.Type.VArgs != null {
 		method.AccessFlags |= cg.AccMethodVarargs
 	}
 	method.Descriptor = Descriptor.methodDescriptor(&function.Type)
@@ -67,12 +62,12 @@ func (this *BuildPackage) buildFunctionExpression(
 	closureClass.AppendMethod(method)
 	//new a object to hold this closure function
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(closureClass.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	ast.TypeInsertClassConst(closureClass.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	maxStack = 2 // maxStack is 2 right now
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      className,
 		Method:     specialMethodInit,
 		Descriptor: "()V",
@@ -107,8 +102,8 @@ func (this *BuildPackage) buildFunctionExpression(
 					maxStack = 3
 				}
 				code.Codes[code.CodeLength] = cg.OP_getfield
-				class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
-					Class:      class.Name,
+				ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+					Class:      ast.TypeName,
 					Field:      v.Name,
 					Descriptor: field.Descriptor,
 				}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -128,8 +123,8 @@ func (this *BuildPackage) buildFunctionExpression(
 					maxStack = 3
 				}
 				code.Codes[code.CodeLength] = cg.OP_getfield
-				class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
-					Class:      class.Name,
+				ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+					Class:      ast.TypeName,
 					Field:      v.Name,
 					Descriptor: field.Descriptor,
 				}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -142,7 +137,7 @@ func (this *BuildPackage) buildFunctionExpression(
 			}
 		}
 		code.Codes[code.CodeLength] = cg.OP_putfield
-		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+		ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 			Class:      className,
 			Field:      v.Name,
 			Descriptor: field.Descriptor,
@@ -171,8 +166,8 @@ func (this *BuildPackage) buildFunctionExpression(
 				maxStack = 3
 			}
 			code.Codes[code.CodeLength] = cg.OP_getfield
-			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
-				Class:      class.Name,
+			ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+				Class:      ast.TypeName,
 				Field:      v.Name,
 				Descriptor: filed.Descriptor,
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -184,7 +179,7 @@ func (this *BuildPackage) buildFunctionExpression(
 			}
 		}
 		code.Codes[code.CodeLength] = cg.OP_putfield
-		class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+		ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 			Class:      className,
 			Field:      v.Name,
 			Descriptor: filed.Descriptor,
@@ -194,39 +189,39 @@ func (this *BuildPackage) buildFunctionExpression(
 	}
 	method.Code = &cg.AttributeCode{}
 	// build function
-	this.buildFunction(closureClass, nil, method, function)
+	this.buildFunction(closureClass, null, method, function)
 	return
 
 }
-func (this *BuildPackage) packFunction2MethodHandle(class cg.ClassHighLevel, code cg.AttributeCode,
+func (this *BuildPackage) packFunction2MethodHandle(c cg.ClassHighLevel, code cg.AttributeCode,
 	function *ast.Function, context Context) (maxStack char) {
 	code.Codes[code.CodeLength] = cg.OP_invokestatic
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      "java/lang/invoke/MethodHandles",
 		Method:     "lookup",
 		Descriptor: "()Ljava/lang/invoke/MethodHandles$Lookup;",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_ldc_w
-	class.InsertClassConst(function.Entrance.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	ast.TypeInsertClassConst(function.Entrance.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_ldc_w
-	class.InsertStringConst(function.Entrance.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	ast.TypeInsertStringConst(function.Entrance.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_ldc_w
-	class.InsertMethodTypeConst(cg.ConstantInfoMethodTypeHighLevel{
+	ast.TypeInsertMethodTypeConst(cg.ConstantInfoMethodTypeHighLevel{
 		Descriptor: function.Entrance.Descriptor,
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
 	if function.IsClosureFunction {
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      "java/lang/invoke/MethodHandles$Lookup",
 			Method:     "findVirtual",
 			Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	} else {
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      "java/lang/invoke/MethodHandles$Lookup",
 			Method:     "findStatic",
 			Descriptor: "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;",
@@ -240,8 +235,8 @@ func (this *BuildPackage) packFunction2MethodHandle(class cg.ClassHighLevel, cod
 		if context.function.Closure.ClosureFunctionExist(function) {
 			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 			code.Codes[code.CodeLength] = cg.OP_getfield
-			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
-				Class:      class.Name,
+			ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+				Class:      ast.TypeName,
 				Field:      function.Name,
 				Descriptor: "L" + function.Entrance.Class.Name + ";",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -250,7 +245,7 @@ func (this *BuildPackage) packFunction2MethodHandle(class cg.ClassHighLevel, cod
 			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, function.ClosureVariableOffSet)...)
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      "java/lang/invoke/MethodHandle",
 			Method:     "bindTo",
 			Descriptor: "(Ljava/lang/Object;)Ljava/lang/invoke/MethodHandle;",

@@ -1,9 +1,4 @@
-package jvm
 
-import (
-	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-)
 
 type LucyMethodSignature struct {
 }
@@ -14,7 +9,7 @@ func (this *LucyMethodSignature) Need(ft *ast.FunctionType) bool {
 			return true
 		}
 	}
-	if ft.VArgs != nil && LucyFieldSignatureParser.Need(ft.VArgs.Type) {
+	if ft.VArgs != null && LucyFieldSignatureParser.Need(ft.VArgs.Type) {
 		return true
 	}
 	for _, v := range ft.ReturnList {
@@ -33,7 +28,7 @@ func (this *LucyMethodSignature) Encode(ft *ast.FunctionType) (descriptor string
 	for _, v := range ft.ParameterList {
 		descriptor += LucyFieldSignatureParser.Encode(v.Type)
 	}
-	if ft.VArgs != nil {
+	if ft.VArgs != null {
 		descriptor += LucyFieldSignatureParser.Encode(ft.VArgs.Type)
 	}
 	descriptor += ")"
@@ -54,12 +49,12 @@ func (this *LucyMethodSignature) Decode(ft *ast.FunctionType, bs []byte) ([]byte
 	bs = bs[1:] // skip (
 	var err error
 	if len(ft.ParameterList) > 0 {
-		ft.ParameterList = nil
+		ft.ParameterList = null
 	}
 	for bs[0] != ')' {
-		var t *ast.Type
+		var t ast.Type
 		bs, t, err = LucyFieldSignatureParser.Decode(bs)
-		if err != nil {
+		if err != null {
 			return bs, err
 		}
 		vd := &ast.Variable{}
@@ -72,12 +67,12 @@ func (this *LucyMethodSignature) Decode(ft *ast.FunctionType, bs []byte) ([]byte
 	bs = bs[1:] // skip )
 	if bs[0] == '(' {
 		bs = bs[1:]
-		ft.ReturnList = []*ast.Variable{}
+		ft.ReturnList = []ast.Variable{}
 		for bs[0] != ')' {
 			v := &ast.Variable{}
-			var t *ast.Type
+			var t ast.Type
 			bs, t, err = LucyFieldSignatureParser.Decode(bs)
-			if err != nil {
+			if err != null {
 				return bs, err
 			}
 			v.Type = t
@@ -86,7 +81,7 @@ func (this *LucyMethodSignature) Decode(ft *ast.FunctionType, bs []byte) ([]byte
 		bs = bs[1:] // skip )
 	} else if bs[0] == 'V' {
 		bs = bs[1:] // skip V
-		ft.ReturnList = make([]*ast.Variable, 1)
+		ft.ReturnList = make([]ast.Variable, 1)
 		ft.ReturnList[0] = &ast.Variable{
 			Name: "returnValue",
 			Type: &ast.Type{
@@ -96,5 +91,5 @@ func (this *LucyMethodSignature) Decode(ft *ast.FunctionType, bs []byte) ([]byte
 	} else {
 		return bs, new error(sprintf("function type format wrong")
 	}
-	return bs, nil
+	return bs, null
 }

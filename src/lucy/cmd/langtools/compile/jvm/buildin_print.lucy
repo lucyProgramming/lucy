@@ -1,15 +1,10 @@
-package jvm
-
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
+ 
 
 /*
 	function print
 */
 func (this *BuildExpression) mkBuildInPrint(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -17,7 +12,7 @@ func (this *BuildExpression) mkBuildInPrint(
 	call := e.Data.(*ast.ExpressionFunctionCall)
 	// get stream from stdout
 	code.Codes[code.CodeLength] = cg.OP_getstatic
-	class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+	ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
 		Class:      "java/lang/System",
 		Field:      "out",
 		Descriptor: "Ljava/io/PrintStream;",
@@ -26,7 +21,7 @@ func (this *BuildExpression) mkBuildInPrint(
 	maxStack = 1
 	if len(call.Args) == 0 {
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      "java/io/PrintStream",
 			Method:     "println",
 			Descriptor: "()V",
@@ -49,7 +44,7 @@ func (this *BuildExpression) mkBuildInPrint(
 		switch call.Args[0].Value.Type {
 		case ast.VariableTypeBool:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      "java/io/PrintStream",
 				Method:     "println",
 				Descriptor: "(Z)V",
@@ -57,7 +52,7 @@ func (this *BuildExpression) mkBuildInPrint(
 			code.CodeLength += 3
 		case ast.VariableTypeChar:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      "java/io/PrintStream",
 				Method:     "println",
 				Descriptor: "(C)V",
@@ -71,7 +66,7 @@ func (this *BuildExpression) mkBuildInPrint(
 			fallthrough
 		case ast.VariableTypeInt:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      "java/io/PrintStream",
 				Method:     "println",
 				Descriptor: "(I)V",
@@ -79,7 +74,7 @@ func (this *BuildExpression) mkBuildInPrint(
 			code.CodeLength += 3
 		case ast.VariableTypeLong:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      "java/io/PrintStream",
 				Method:     "println",
 				Descriptor: "(J)V",
@@ -87,7 +82,7 @@ func (this *BuildExpression) mkBuildInPrint(
 			code.CodeLength += 3
 		case ast.VariableTypeFloat:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      "java/io/PrintStream",
 				Method:     "println",
 				Descriptor: "(F)V",
@@ -95,7 +90,7 @@ func (this *BuildExpression) mkBuildInPrint(
 			code.CodeLength += 3
 		case ast.VariableTypeDouble:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      "java/io/PrintStream",
 				Method:     "println",
 				Descriptor: "(D)V",
@@ -103,7 +98,7 @@ func (this *BuildExpression) mkBuildInPrint(
 			code.CodeLength += 3
 		case ast.VariableTypeString:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      "java/io/PrintStream",
 				Method:     "println",
 				Descriptor: "(Ljava/lang/String;)V",
@@ -111,7 +106,7 @@ func (this *BuildExpression) mkBuildInPrint(
 			code.CodeLength += 3
 		default:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      "java/io/PrintStream",
 				Method:     "println",
 				Descriptor: "(Ljava/lang/Object;)V",
@@ -122,7 +117,7 @@ func (this *BuildExpression) mkBuildInPrint(
 		return
 	}
 	code.Codes[code.CodeLength] = cg.OP_ldc_w
-	class.InsertStringConst("", code.Codes[code.CodeLength+1:code.CodeLength+3])
+	ast.TypeInsertStringConst("", code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
 	state.pushStack(class, state.newObjectVariableType(javaStringClass))
 	defer state.popStack(1)
@@ -136,7 +131,7 @@ func (this *BuildExpression) mkBuildInPrint(
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaStringClass,
 			Method:     "concat",
 			Descriptor: "(Ljava/lang/String;)Ljava/lang/String;",
@@ -144,13 +139,13 @@ func (this *BuildExpression) mkBuildInPrint(
 		code.CodeLength += 3
 		if k != len(call.Args)-1 {
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			class.InsertStringConst(" ", code.Codes[code.CodeLength+1:code.CodeLength+3])
+			ast.TypeInsertStringConst(" ", code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 			if 2 > maxStack {
 				maxStack = 2
 			}
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      javaStringClass,
 				Method:     "concat",
 				Descriptor: "(Ljava/lang/String;)Ljava/lang/String;",
@@ -160,7 +155,7 @@ func (this *BuildExpression) mkBuildInPrint(
 	}
 	// call println
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      "java/io/PrintStream",
 		Method:     "println",
 		Descriptor: "(Ljava/lang/String;)V",

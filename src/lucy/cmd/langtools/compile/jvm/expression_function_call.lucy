@@ -1,12 +1,7 @@
-package jvm
 
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func (this *BuildExpression) buildFunctionPointerCall(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -18,7 +13,7 @@ func (this *BuildExpression) buildFunctionPointerCall(
 		maxStack = t
 	}
 	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      "java/lang/invoke/MethodHandle",
 		Method:     methodHandleInvokeMethodName,
 		Descriptor: Descriptor.methodDescriptor(call.Expression.Value.FunctionType),
@@ -30,29 +25,29 @@ func (this *BuildExpression) buildFunctionPointerCall(
 	return
 }
 func (this *BuildExpression) buildFunctionCall(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
 	state StackMapState) (maxStack char) {
 	call := e.Data.(*ast.ExpressionFunctionCall)
-	if call.Function == nil {
+	if call.Function == null {
 		return this.buildFunctionPointerCall(class, code, e, context, state)
 	}
-	if call.Function.TemplateFunction != nil {
+	if call.Function.TemplateFunction != null {
 		return this.buildTemplateFunctionCall(class, code, e, context, state)
 	}
 	if call.Function.IsBuildIn {
 		return this.mkBuildInFunctionCall(class, code, e, context, state)
 	}
-	if call.Expression != nil &&
+	if call.Expression != null &&
 		call.Expression.Type == ast.ExpressionTypeFunctionLiteral {
 		maxStack = this.build(class, code, call.Expression, context, state)
 	}
 	if call.Function.IsClosureFunction == false {
 		maxStack = this.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      call.Function.Entrance.Class.Name,
 			Method:     call.Function.Entrance.Name,
 			Descriptor: call.Function.Entrance.Descriptor,
@@ -64,8 +59,8 @@ func (this *BuildExpression) buildFunctionCall(
 		if context.function.Closure.ClosureFunctionExist(call.Function) {
 			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 			code.Codes[code.CodeLength] = cg.OP_getfield
-			class.InsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
-				Class:      class.Name,
+			ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
+				Class:      ast.TypeName,
 				Field:      call.Function.Name,
 				Descriptor: "L" + call.Function.Entrance.Class.Name + ";",
 			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -80,7 +75,7 @@ func (this *BuildExpression) buildFunctionCall(
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      call.Function.Entrance.Class.Name,
 			Method:     call.Function.Name,
 			Descriptor: call.Function.Entrance.Descriptor,

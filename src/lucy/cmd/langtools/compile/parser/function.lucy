@@ -1,74 +1,196 @@
-package parser
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/lex"
 
-import (
-	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
-)
+class FunctionParser extends ParserExtends{
 
-type FunctionParser struct {
-	parser *Parser
-}
+    fn FunctionParser(parser Parser){
+        this.super()
+        this.parser = parser
+    }
 
-func (this *FunctionParser) Next(lfIsToken bool) {
-	this.parser.Next(lfIsToken)
-}
-
-func (this *FunctionParser) consume(until map[lex.TokenKind]bool) {
-	this.parser.consume(until)
-}
-
-/*
-	when canBeAbstract is true , means can have no body
-*/
-func (this *FunctionParser) parse(needName bool, isAbstract bool) (f *ast.Function, err error) {
-	f = &ast.Function{}
-	offset := this.parser.token.Offset
-	this.Next(lfIsToken) // skip fn key word
-	this.parser.unExpectNewLineAndSkip()
-	if needName && this.parser.token.Type != lex.TokenIdentifier {
-		err := new error(sprintf("%s expect function name,but '%s'",
-			this.parser.errMsgPrefix(), this.parser.token.Description)
-		this.parser.errs = append(this.parser.errs, err)
-		this.consume(untilLp)
-	}
-	f.Pos = this.parser.mkPos()
-	if this.parser.token.Type == lex.TokenIdentifier {
-		f.Name = this.parser.token.Data.(string)
-		this.Next(lfNotToken)
-	}
-	f.Type, err = this.parser.parseFunctionType()
-	if err != nil {
+	/*
+		when canBeAbstract is true , means can have no body
+	*/
+	fn parse(needName bool, isAbstract bool) -> (f ast.Function, err error) {
+		f = new ast.Function()
+		offset := this.parser.token.Offset
+		this.Next(lfIsToken) // skip fn key word
+		this.parser.unExpectNewLineAndSkip()
+		if needName && this.parser.token.Type != lex.TokenIdentifier {
+			err := new error(sprintf("%s expect function name,but '%s'",
+				this.parser.errMsgPrefix(), this.parser.token.Description))
+			this.parser.errs.append( err)
+			this.consume(untilLp)
+		}
+		f.Pos = this.parser.mkPos()
+		if this.parser.token.Type == lex.TokenIdentifier {
+			f.Name = this.parser.token.Data.(string)
+			this.Next(lfNotToken)
+		}
+		f.Type, err = this.parser.parseFunctionType()
+		if err != null {
+			if isAbstract {
+				this.consume(untilSemicolonOrLf)
+			} else {
+				this.consume(untilLc)
+			}
+		}
 		if isAbstract {
-			this.consume(untilSemicolonOrLf)
-		} else {
+			return f, null
+		}
+		this.parser.ifTokenIsLfThenSkip()
+		if this.parser.token.Type != lex.TokenLc {
+			err = new error(sprintf("%s except '{' but '%s'",
+				this.parser.errMsgPrefix(), this.parser.token.Description))
+			this.parser.errs.append( err)
 			this.consume(untilLc)
 		}
+		f.Block.IsFunctionBlock = true
+		f.Block.Fn = f
+		this.Next(lfNotToken) // skip {
+		this.parser.BlockParser.parseStatementList(f.Block, false)
+		if this.parser.token.Type != lex.TokenRc {
+			err = new error(sprintf("%s expect '}', but '%s'",
+				this.parser.errMsgPrefix(), this.parser.token.Description))
+			this.parser.errs.append( err)
+			this.consume(untilRc)
+		} else {
+			f.SourceCode =
+				this.parser.
+					bs[offset : this.parser.token.Offset+1]
+		}
+		this.Next(lfIsToken)
+		return f, err
 	}
-	if isAbstract {
-		return f, nil
+
+
+
+	//(a,b int)->(total int)
+	fn parseFunctionType() -> (functionType ast.FunctionType, err error) {
+		functionType = new ast.FunctionType()
+		if this.parser.token.Type == lex.TokenLt {
+			this.Next(lfNotToken)
+			var err error
+			functionType.TemplateNames, err = this.parseNameList()
+			if err != null {
+				this.consume(untilLp)
+				goto skipTemplateNames
+			}
+			this.errs = append(this.errs, functionType.CheckTemplateNameDuplication()...)
+			this.Next(lfIsToken)
+		}
+		this.unExpectNewLineAndSkip()
+	skipTemplateNames:
+		if this.parser.token.Type != lex.TokenLp {
+			err = new error(sprintf("%s fn declared wrong,missing '(',but '%s'",
+				this.errMsgPrefix(), this.parser.token.Description))
+			this.errs = append(this.errs, err)
+			return
+		}
+		this.Next(lfNotToken)               // skip (
+		if this.parser.token.Type != lex.TokenRp { // not )
+			functionType.ParameterList, err = this.parseParameterOrReturnList()
+			if err != null {
+				this.consume(untilRp)
+				this.Next(lfNotToken)
+			}
+		}
+		this.ifTokenIsLfThenSkip()
+		if this.parser.token.Type != lex.TokenRp { // not )
+			err = new error(sprintf("%s fn declared wrong,missing ')',but '%s'",
+				this.errMsgPrefix(), this.parser.token.Description))
+			this.errs = append(this.errs, err)
+			return
+		}
+		this.Next(lfIsToken)                   // skip )
+		if this.parser.token.Type == lex.TokenArrow { // ->  parse return list
+			this.Next(lfNotToken) // skip ->
+			if this.parser.token.Type != lex.TokenLp {
+				err = new error(sprintf("%s fn declared wrong, not '(' after '->'",
+					this.errMsgPrefix()))
+				this.errs = append(this.errs, err)
+				return
+			}
+			this.Next(lfNotToken) // skip (
+			if this.parser.token.Type != lex.TokenRp {
+				functionType.ReturnList, err = this.parseParameterOrReturnList()
+				if err != null { // skip until next (,continue to analyse
+					this.consume(untilRp)
+					this.Next(lfIsToken)
+				}
+			}
+			this.ifTokenIsLfThenSkip()
+			if this.parser.token.Type != lex.TokenRp {
+				err = new error(sprintf("%s fn declared wrong,expected ')',but '%s'",
+					this.errMsgPrefix(), this.parser.token.Description))
+				this.errs = append(this.errs, err)
+				return
+			}
+			this.Next(lfIsToken) // skip )
+		} else {
+			functionType.ReturnList = new []ast.Variable(1)
+			functionType.ReturnList[0] = new ast.Variable()
+			functionType.ReturnList[0].Pos = this.mkPos()
+			functionType.ReturnList[0].Type = new ast.Type()
+			functionType.ReturnList[0].Type.Pos = this.mkPos()
+			functionType.ReturnList[0].Type.Type = ast.VariableTypeVoid
+		}
+		return functionType, err
 	}
-	this.parser.ifTokenIsLfThenSkip()
-	if this.parser.token.Type != lex.TokenLc {
-		err = new error(sprintf("%s except '{' but '%s'",
-			this.parser.errMsgPrefix(), this.parser.token.Description)
-		this.parser.errs = append(this.parser.errs, err)
-		this.consume(untilLc)
+
+	/*
+		parse default value
+		a int = ""
+		int = 1
+
+	*/
+	fn parseTypedNameDefaultValue() -> (returnList []ast.Variable, err error) {
+		returnList, err = this.parser.parseTypedName()
+		if this.parser.token.Type != lex.TokenAssign {
+			return
+		}
+		this.Next(lfIsToken) // skip =
+		for k, v := range returnList {
+			var er error
+			v.DefaultValueExpression, er = this.ExpressionParser.parseExpression(false)
+			if er != null {
+				this.consume(untilComma)
+				err = er
+				this.Next(lfNotToken)
+				continue
+			}
+			if this.parser.token.Type != lex.TokenComma ||
+				k == len(returnList)-1 {
+				break
+			} else {
+				this.Next(lfNotToken) // skip ,
+			}
+		}
+		return returnList, err
 	}
-	f.Block.IsFunctionBlock = true
-	f.Block.Fn = f
-	this.Next(lfNotToken) // skip {
-	this.parser.BlockParser.parseStatementList(&f.Block, false)
-	if this.parser.token.Type != lex.TokenRc {
-		err = new error(sprintf("%s expect '}', but '%s'",
-			this.parser.errMsgPrefix(), this.parser.token.Description)
-		this.parser.errs = append(this.parser.errs, err)
-		this.consume(untilRc)
-	} else {
-		f.SourceCode =
-			this.parser.
-				bs[offset : this.parser.token.Offset+1]
-	}
-	this.Next(lfIsToken)
-	return f, err
+	fn parseParameterOrReturnList() -> (returnList []ast.Variable, err error) {
+		for this.parser.token.Type != lex.TokenRp {
+			if this.parser.token.Type == lex.TokenComma {
+				this.errs = append(this.errs, new error(sprintf("%s extra comma",
+					this.errMsgPrefix())))
+				this.Next(lfNotToken)
+				continue
+			}
+			v, err := this.parseTypedNameDefaultValue()
+			if v != null {
+				returnList = append(returnList, v...)
+			}
+			if err != null {
+				break
+			}
+			if this.parser.token.Type == lex.TokenComma {
+				this.Next(lfNotToken)
+			} else {
+				break
+			}
+		}
+		return
+	}	
+	 
 }
+

@@ -2,14 +2,14 @@ import "lucy/binary"
  
 
 class AttributeCode  {
-	MaxStack          char
-	MaxLocals         char
-	CodeLength        int
-	Codes             []byte
-	LineNumbers       AttributeLineNumber
-	Exceptions        []ExceptionTable
-	attributes        []AttributeInfo
-	AttributeStackMap AttributeStackMap
+	public	MaxStack          char
+	public	MaxLocals         char
+	public	CodeLength        int
+	public	Codes             []byte
+	public	LineNumbers       AttributeLineNumber
+	public	Exceptions        []ExceptionTable
+			attributes        []AttributeInfo
+	public	AttributeStackMap AttributeStackMap
 	
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()

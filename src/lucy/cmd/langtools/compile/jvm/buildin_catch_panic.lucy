@@ -1,12 +1,6 @@
-package jvm
-
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
-
+ 
 func (this *BuildExpression) mkBuildInPanic(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
@@ -20,7 +14,7 @@ func (this *BuildExpression) mkBuildInPanic(
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_new
 			className := call.Args[0].Value.Class.Name
-			class.InsertClassConst(className, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			ast.TypeInsertClassConst(className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.Codes[code.CodeLength+3] = cg.OP_dup
 			code.CodeLength += 4
 			{
@@ -35,7 +29,7 @@ func (this *BuildExpression) mkBuildInPanic(
 			state.popStack(2)
 			maxStack = 2 + stack
 			code.Codes[code.CodeLength] = cg.OP_invokespecial
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      className,
 				Method:     specialMethodInit,
 				Descriptor: "(Ljava/lang/Throwable;)V",
@@ -44,7 +38,7 @@ func (this *BuildExpression) mkBuildInPanic(
 		}
 	} else {
 		code.Codes[code.CodeLength] = cg.OP_new
-		class.InsertClassConst(javaExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertClassConst(javaExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
 		{
@@ -64,7 +58,7 @@ func (this *BuildExpression) mkBuildInPanic(
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      javaExceptionClass,
 			Method:     specialMethodInit,
 			Descriptor: "(Ljava/lang/String;)V",
@@ -77,7 +71,7 @@ func (this *BuildExpression) mkBuildInPanic(
 	return
 }
 
-func (this *BuildExpression) mkBuildInCatch(class cg.ClassHighLevel, code cg.AttributeCode,
+func (this *BuildExpression) mkBuildInCatch(c cg.ClassHighLevel, code cg.AttributeCode,
 	e ast.Expression, context Context) (maxStack char) {
 	if e.IsStatementExpression { // statement call
 		maxStack = 1
@@ -95,10 +89,10 @@ func (this *BuildExpression) mkBuildInCatch(class cg.ClassHighLevel, code cg.Att
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)...) // store
 		//check cast
 		code.Codes[code.CodeLength] = cg.OP_checkcast
-		if context.Defer.ExceptionClass != nil {
-			class.InsertClassConst(context.Defer.ExceptionClass.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		if context.Defer.ExceptionClass != null {
+			ast.TypeInsertClassConst(context.Defer.ExceptionClass.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		} else {
-			class.InsertClassConst(ast.DefaultExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			ast.TypeInsertClassConst(ast.DefaultExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		}
 		code.CodeLength += 3
 	}

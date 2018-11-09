@@ -8,7 +8,7 @@ class ClassDecoder {
 	fn decode(bs []byte) -> (c cg.Class,err error) {
 		c.bs = bs
 		if binary.BigEndian.Uint32(bs) != cg.ClassMagicNumber {
-			return nil, new error(sprintf("magic number is not right")
+			return null, new error(sprintf("magic number is not right")
 		}
 		c.bs = c.bs[4:]
 		ret := &cg.Class{}
@@ -17,9 +17,9 @@ class ClassDecoder {
 		ret.MinorVersion = binary.BigEndian.Uint16(c.bs)
 		ret.MajorVersion = binary.BigEndian.Uint16(c.bs[2:])
 		c.bs = c.bs[4:]
-		ret.ConstPool = []*cg.ConstPool{nil} // pool start 1
+		ret.ConstPool = []*cg.ConstPool{null} // pool start 1
 		//const pool
-		if err := c.parseConstPool(); err != nil {
+		if err := c.parseConstPool(); err != null {
 			return ret, err
 		}
 		//access flag
@@ -97,14 +97,14 @@ class ClassDecoder {
 				p.Tag = c.bs[0]
 				p.Info = c.bs[1:9]
 				c.bs = c.bs[9:]
-				c.classFile.ConstPool = append(c.classFile.ConstPool, p, nil)
+				c.classFile.ConstPool = append(c.classFile.ConstPool, p, null)
 				i++ // increment twice
 			case cg.ConstantPoolTagDouble:
 				p := new cg.ConstPool()
 				p.Tag = c.bs[0]
 				p.Info = c.bs[1:9]
 				c.bs = c.bs[9:]
-				c.classFile.ConstPool = append(c.classFile.ConstPool, p, nil)
+				c.classFile.ConstPool = append(c.classFile.ConstPool, p, null)
 				i++ // increment twice
 			case cg.ConstantPoolTagClass:
 				p := new cg.ConstPool()
@@ -132,7 +132,7 @@ class ClassDecoder {
 				c.classFile.ConstPool = append(c.classFile.ConstPool, p)
 			}
 		}
-		return nil
+		return null
 	}
 
 	fn parseInterfaces() {
@@ -154,12 +154,12 @@ class ClassDecoder {
 			f.DescriptorIndex = binary.BigEndian.Uint16(c.bs[4:])
 			c.bs = c.bs[6:]
 			f.AttributeGroupedByName, err = c.parseAttributes()
-			if err != nil {
+			if err != null {
 				return err
 			}
 			c.classFile.Fields = append(c.classFile.Fields, f)
 		}
-		return nil
+		return null
 	}
 
 	fn parserMethods() (err error) {
@@ -172,12 +172,12 @@ class ClassDecoder {
 			m.DescriptorIndex = binary.BigEndian.Uint16(c.bs[4:])
 			c.bs = c.bs[6:]
 			m.AttributeGroupedByName, err = c.parseAttributes()
-			if err != nil {
+			if err != null {
 				return err
 			}
 			c.classFile.Methods = append(c.classFile.Methods, m)
 		}
-		return nil
+		return null
 	}
 
 	fn parseAttributes() (cg.AttributeGroupedByName, error) {
@@ -201,7 +201,7 @@ class ClassDecoder {
 				ret[name] = []*cg.AttributeInfo{a}
 			}
 		}
-		return ret, nil
+		return ret, null
 	}
 	
 }

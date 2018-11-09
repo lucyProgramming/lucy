@@ -1,16 +1,10 @@
-package jvm
-
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 type StackMapState struct {
 	Locals []*cg.StackMapVerificationTypeInfo
 	Stacks []*cg.StackMapVerificationTypeInfo
 }
 
-func (this StackMapState) appendLocals(class cg.ClassHighLevel, v *ast.Type) {
+func (this StackMapState) appendLocals(c cg.ClassHighLevel, v ast.Type) {
 	this.Locals = append(this.Locals,
 		this.newStackMapVerificationTypeInfo(class, v))
 }
@@ -38,7 +32,7 @@ func (this StackMapState) addTop(absent StackMapState) {
 	}
 }
 
-func (this StackMapState) newObjectVariableType(name string) *ast.Type {
+func (this StackMapState) newObjectVariableType(name string) ast.Type {
 	ret := &ast.Type{}
 	ret.Type = ast.VariableTypeObject
 	ret.Class = &ast.Class{}
@@ -58,9 +52,9 @@ func (this StackMapState) popStack(pop int) {
 	}
 	this.Stacks = this.Stacks[:len(this.Stacks)-pop]
 }
-func (this StackMapState) pushStack(class cg.ClassHighLevel, v *ast.Type) {
-	if this == nil {
-		panic("s is nil")
+func (this StackMapState) pushStack(c cg.ClassHighLevel, v ast.Type) {
+	if this == null {
+		panic("s is null")
 	}
 	this.Stacks = append(this.Stacks, this.newStackMapVerificationTypeInfo(class, v))
 }
@@ -70,8 +64,8 @@ func (this StackMapState) initFromLast(last StackMapState) StackMapState {
 	return this
 }
 
-func (this StackMapState) newStackMapVerificationTypeInfo(class cg.ClassHighLevel,
-	t *ast.Type) (ret *cg.StackMapVerificationTypeInfo) {
+func (this StackMapState) newStackMapVerificationTypeInfo(c cg.ClassHighLevel,
+	t ast.Type) (ret *cg.StackMapVerificationTypeInfo) {
 	ret = &cg.StackMapVerificationTypeInfo{}
 	switch t.Type {
 	case ast.VariableTypeBool:
@@ -96,34 +90,34 @@ func (this StackMapState) newStackMapVerificationTypeInfo(class cg.ClassHighLeve
 		ret.Verify = &cg.StackMapNullVariableInfo{}
 	case ast.VariableTypeString:
 		ret.Verify = &cg.StackMapObjectVariableInfo{
-			Index:    class.Class.InsertClassConst(javaStringClass),
+			Index:    ast.TypeClass.InsertClassConst(javaStringClass),
 			Readable: javaStringClass,
 		}
 	case ast.VariableTypeObject:
 		ret.Verify = &cg.StackMapObjectVariableInfo{
-			Index:    class.Class.InsertClassConst(t.Class.Name),
+			Index:    ast.TypeClass.InsertClassConst(t.Class.Name),
 			Readable: t.Class.Name,
 		}
 	case ast.VariableTypeFunction:
 		ret.Verify = &cg.StackMapObjectVariableInfo{
-			Index:    class.Class.InsertClassConst(javaMethodHandleClass),
+			Index:    ast.TypeClass.InsertClassConst(javaMethodHandleClass),
 			Readable: javaMethodHandleClass,
 		}
 	case ast.VariableTypeMap:
 		ret.Verify = &cg.StackMapObjectVariableInfo{
-			Index:    class.Class.InsertClassConst(mapClass),
+			Index:    ast.TypeClass.InsertClassConst(mapClass),
 			Readable: mapClass,
 		}
 	case ast.VariableTypeArray:
 		meta := ArrayMetas[t.Array.Type]
 		ret.Verify = &cg.StackMapObjectVariableInfo{
-			Index:    class.Class.InsertClassConst(meta.className),
+			Index:    ast.TypeClass.InsertClassConst(meta.className),
 			Readable: meta.className,
 		}
 	case ast.VariableTypeJavaArray:
 		d := Descriptor.typeDescriptor(t)
 		ret.Verify = &cg.StackMapObjectVariableInfo{
-			Index:    class.Class.InsertClassConst(d),
+			Index:    ast.TypeClass.InsertClassConst(d),
 			Readable: d,
 		}
 	default:

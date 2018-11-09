@@ -1,17 +1,11 @@
-package jvm
 
-import (
-	"encoding/binary"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func (this *BuildExpression) buildTypeAssert(
-	class cg.ClassHighLevel,
-	code cg.AttributeCode,
-	e ast.Expression,
-	context Context,
-	state StackMapState) (maxStack char) {
+	class *cg.ClassHighLevel,
+	code *cg.AttributeCode,
+	e *ast.Expression,
+	context *Context,
+	state *StackMapState) (maxStack uint16) {
 	assert := e.Data.(*ast.ExpressionTypeAssert)
 	if assert.MultiValueContext {
 		maxStack = this.build(class, code, assert.Expression, context, state)
@@ -44,7 +38,7 @@ func (this *BuildExpression) buildTypeAssert(
 		code.CodeLength += 11
 		loadInt32(class, code, 2)
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		class.InsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 
 		// store object
@@ -59,6 +53,10 @@ func (this *BuildExpression) buildTypeAssert(
 		if 5 > maxStack {
 			maxStack = 5
 		}
+		code.Codes[code.CodeLength] = cg.OP_checkcast // convince the jvm
+		code.CodeLength++
+		insertTypeAssertClass(class, code, assert.Type)
+
 		code.Codes[code.CodeLength] = cg.OP_aastore
 		code.CodeLength++
 
@@ -89,6 +87,9 @@ func (this *BuildExpression) buildTypeAssert(
 		state.pushStack(class, assert.Expression.Value)
 		defer state.popStack(1)
 		context.MakeStackMap(code, state, code.CodeLength)
+		code.Codes[code.CodeLength] = cg.OP_checkcast // convince the jvm
+		code.CodeLength++
+		insertTypeAssertClass(class, code, assert.Type)
 	}
 
 	return

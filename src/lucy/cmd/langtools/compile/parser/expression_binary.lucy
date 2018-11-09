@@ -1,321 +1,330 @@
-package parser
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/lex"
 
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lex"
-)
 
-// ||
-func (ep *ExpressionParser) parseLogicalOrExpression() (ast.Expression, error) {
-	left, err := ep.parseLogicalAndExpression()
-	if err != nil {
-		return nil, err
+class ExpressionBinaryParser extends ParserExtends{
+	ep ExpressionParser
+	fn ExpressionBinaryParser(parser Parser , ep ExpressionParser){
+		this.super()
+		this.parser = parser
+		this.ep = ep 
 	}
-	for ep.parser.token.Type == lex.TokenLogicalOr {
-		pos := ep.parser.mkPos()
-		name := ep.parser.token.Description
-		ep.Next(lfNotToken)
-		right, err := ep.parseLogicalAndExpression()
-		if err != nil {
-			return left, err
+
+
+	// ||
+	fn parseLogicalOrExpression() -> (e ast.Expression,err error) {
+		left, err := this.parseLogicalAndExpression()
+		if err != null {
+			return null, err
 		}
-		newExpression := &ast.Expression{}
-		newExpression.Pos = pos
-		newExpression.Op = name
-		newExpression.Type = ast.ExpressionTypeLogicalOr
-		binary := &ast.ExpressionBinary{}
-		binary.Left = left
-		binary.Right = right
-		newExpression.Data = binary
-		left = newExpression
-	}
-	return left, nil
-}
-
-// &&
-func (ep *ExpressionParser) parseLogicalAndExpression() (ast.Expression, error) {
-	left, err := ep.parseEqualExpression()
-	if err != nil {
-		return nil, err
-	}
-	for ep.parser.token.Type == lex.TokenLogicalAnd {
-		pos := ep.parser.mkPos()
-		name := ep.parser.token.Description
-		ep.Next(lfNotToken)
-		right, err := ep.parseEqualExpression()
-		if err != nil {
-			return left, err
+		for this.parser.token.Type == lex.TokenLogicalOr {
+			pos := this.parser.mkPos()
+			name := this.parser.token.Description
+			this.Next(lfNotToken)
+			right, err := this.parseLogicalAndExpression()
+			if err != null {
+				return left, err
+			}
+			newExpression := new ast.Expression()
+			newExpression.Pos = pos
+			newExpression.Op = name
+			newExpression.Type = ast.ExpressionTypeLogicalOr
+			binary := new ast.ExpressionBinary()
+			binary.Left = left
+			binary.Right = right
+			newExpression.Data = binary
+			left = newExpression
 		}
-		newExpression := &ast.Expression{}
-		newExpression.Pos = pos
-		newExpression.Op = name
-		newExpression.Type = ast.ExpressionTypeLogicalAnd
-		binary := &ast.ExpressionBinary{}
-		binary.Left = left
-		binary.Right = right
-		newExpression.Data = binary
-		left = newExpression
+		return left, null
 	}
-	return left, nil
-}
 
-// == and !=
-func (ep *ExpressionParser) parseEqualExpression() (ast.Expression, error) {
-	left, err := ep.parseRelationExpression()
-	if err != nil {
-		return nil, err
-	}
-	for ep.parser.token.Type == lex.TokenEqual ||
-		ep.parser.token.Type == lex.TokenNe {
-		typ := ep.parser.token.Type
-		name := ep.parser.token.Description
-		pos := ep.parser.mkPos()
-		ep.Next(lfNotToken)
-		right, err := ep.parseRelationExpression()
-		if err != nil {
-			return left, err
+	// &&
+	fn parseLogicalAndExpression() -> (e ast.Expression,err error) {
+		left, err := this.parseEqualExpression()
+		if err != null {
+			return null, err
 		}
-		newExpression := &ast.Expression{}
-		newExpression.Pos = pos
-		newExpression.Op = name
-		if typ == lex.TokenEqual {
-			newExpression.Type = ast.ExpressionTypeEq
-		} else {
-			newExpression.Type = ast.ExpressionTypeNe
+		for this.parser.token.Type == lex.TokenLogicalAnd {
+			pos := this.parser.mkPos()
+			name := this.parser.token.Description
+			this.Next(lfNotToken)
+			right, err := this.parseEqualExpression()
+			if err != null {
+				return left, err
+			}
+			newExpression := new ast.Expression()
+			newExpression.Pos = pos
+			newExpression.Op = name
+			newExpression.Type = ast.ExpressionTypeLogicalAnd
+			binary := new ast.ExpressionBinary()
+			binary.Left = left
+			binary.Right = right
+			newExpression.Data = binary
+			left = newExpression
 		}
-		binary := &ast.ExpressionBinary{}
-		binary.Left = left
-		binary.Right = right
-		newExpression.Data = binary
-		left = newExpression
+		return left, null
 	}
-	return left, nil
-}
 
-// > < >= <=
-func (ep *ExpressionParser) parseRelationExpression() (ast.Expression, error) {
-	left, err := ep.parseOrExpression()
-	if err != nil {
-		return nil, err
-	}
-	for ep.parser.token.Type == lex.TokenGt ||
-		ep.parser.token.Type == lex.TokenGe ||
-		ep.parser.token.Type == lex.TokenLt ||
-		ep.parser.token.Type == lex.TokenLe {
-		typ := ep.parser.token.Type
-		name := ep.parser.token.Description
-		pos := ep.parser.mkPos()
-		ep.Next(lfNotToken)
-		right, err := ep.parseOrExpression()
-		if err != nil {
-			return left, err
+	// == and !=
+	fn parseEqualExpression() -> (e ast.Expression,err error) {
+		left, err := this.parseRelationExpression()
+		if err != null {
+			return null, err
 		}
-		newExpression := &ast.Expression{}
-		newExpression.Pos = pos
-		newExpression.Op = name
-		if typ == lex.TokenGt {
-			newExpression.Type = ast.ExpressionTypeGt
-
-		} else if typ == lex.TokenGe {
-			newExpression.Type = ast.ExpressionTypeGe
-
-		} else if typ == lex.TokenLt {
-			newExpression.Type = ast.ExpressionTypeLt
-
-		} else {
-			newExpression.Type = ast.ExpressionTypeLe
-
+		for this.parser.token.Type == lex.TokenEqual ||
+			this.parser.token.Type == lex.TokenNe {
+			typ := this.parser.token.Type
+			name := this.parser.token.Description
+			pos := this.parser.mkPos()
+			this.Next(lfNotToken)
+			right, err := this.parseRelationExpression()
+			if err != null {
+				return left, err
+			}
+			newExpression := new ast.Expression()
+			newExpression.Pos = pos
+			newExpression.Op = name
+			if typ == lex.TokenEqual {
+				newExpression.Type = ast.ExpressionTypeEq
+			} else {
+				newExpression.Type = ast.ExpressionTypeNe
+			}
+			binary := new ast.ExpressionBinary()
+			binary.Left = left
+			binary.Right = right
+			newExpression.Data = binary
+			left = newExpression
 		}
-		binary := &ast.ExpressionBinary{}
-		binary.Left = left
-		binary.Right = right
-		newExpression.Data = binary
-		left = newExpression
+		return left, null
 	}
-	return left, nil
-}
 
-//  |
-func (ep *ExpressionParser) parseOrExpression() (ast.Expression, error) {
-	left, err := ep.parseXorExpression()
-	if err != nil {
-		return nil, err
-	}
-	for ep.parser.token.Type == lex.TokenOr {
-		pos := ep.parser.mkPos()
-		name := ep.parser.token.Description
-		ep.Next(lfNotToken)
-		right, err := ep.parseXorExpression()
-		if err != nil {
-			return left, err
+	// > < >= <=
+	fn parseRelationExpression() -> (e ast.Expression,err error) {
+		left, err := this.parseOrExpression()
+		if err != null {
+			return null, err
 		}
-		newExpression := &ast.Expression{}
-		newExpression.Pos = pos
-		newExpression.Op = name
-		newExpression.Type = ast.ExpressionTypeOr
-		binary := &ast.ExpressionBinary{}
-		binary.Left = left
-		binary.Right = right
-		newExpression.Data = binary
-		left = newExpression
-	}
-	return left, nil
-}
+		for this.parser.token.Type == lex.TokenGt ||
+			this.parser.token.Type == lex.TokenGe ||
+			this.parser.token.Type == lex.TokenLt ||
+			this.parser.token.Type == lex.TokenLe {
+			typ := this.parser.token.Type
+			name := this.parser.token.Description
+			pos := this.parser.mkPos()
+			this.Next(lfNotToken)
+			right, err := this.parseOrExpression()
+			if err != null {
+				return left, err
+			}
+			newExpression := new ast.Expression()
+			newExpression.Pos = pos
+			newExpression.Op = name
+			if typ == lex.TokenGt {
+				newExpression.Type = ast.ExpressionTypeGt
 
-// ^
-func (ep *ExpressionParser) parseXorExpression() (ast.Expression, error) {
-	left, err := ep.parseAndExpression()
-	if err != nil {
-		return nil, err
-	}
-	for ep.parser.token.Type == lex.TokenXor {
-		pos := ep.parser.mkPos()
-		name := ep.parser.token.Description
-		ep.Next(lfNotToken)
-		right, err := ep.parseAndExpression()
-		if err != nil {
-			return left, err
-		}
-		newExpression := &ast.Expression{}
-		newExpression.Pos = pos
-		newExpression.Op = name
-		newExpression.Type = ast.ExpressionTypeXor
-		binary := &ast.ExpressionBinary{}
-		binary.Left = left
-		binary.Right = right
-		newExpression.Data = binary
-		left = newExpression
-	}
-	return left, nil
-}
+			} else if typ == lex.TokenGe {
+				newExpression.Type = ast.ExpressionTypeGe
 
-// &
-func (ep *ExpressionParser) parseAndExpression() (ast.Expression, error) {
-	left, err := ep.parseShiftExpression()
-	if err != nil {
-		return nil, err
-	}
-	for ep.parser.token.Type == lex.TokenAnd {
-		pos := ep.parser.mkPos()
-		name := ep.parser.token.Description
-		ep.Next(lfNotToken)
-		right, err := ep.parseShiftExpression()
-		if err != nil {
-			return left, err
-		}
-		newExpression := &ast.Expression{}
-		newExpression.Pos = pos
-		newExpression.Type = ast.ExpressionTypeAnd
-		newExpression.Op = name
-		binary := &ast.ExpressionBinary{}
-		binary.Left = left
-		binary.Right = right
-		newExpression.Data = binary
-		left = newExpression
-	}
-	return left, nil
-}
+			} else if typ == lex.TokenLt {
+				newExpression.Type = ast.ExpressionTypeLt
 
-// << >>
-func (ep *ExpressionParser) parseShiftExpression() (ast.Expression, error) {
-	left, err := ep.parseAddExpression()
-	if err != nil {
-		return nil, err
-	}
-	for ep.parser.token.Type == lex.TokenLsh ||
-		ep.parser.token.Type == lex.TokenRsh {
-		typ := ep.parser.token.Type
-		name := ep.parser.token.Description
-		pos := ep.parser.mkPos()
-		ep.Next(lfNotToken)
-		right, err := ep.parseAddExpression()
-		if err != nil {
-			return left, err
-		}
-		newExpression := &ast.Expression{}
-		newExpression.Pos = pos
-		newExpression.Op = name
-		if typ == lex.TokenLsh {
-			newExpression.Type = ast.ExpressionTypeLsh
+			} else {
+				newExpression.Type = ast.ExpressionTypeLe
 
-		} else {
-			newExpression.Type = ast.ExpressionTypeRsh
+			}
+			binary := new ast.ExpressionBinary()
+			binary.Left = left
+			binary.Right = right
+			newExpression.Data = binary
+			left = newExpression
+		}
+		return left, null
+	}
 
+	//  |
+	fn parseOrExpression() -> (e ast.Expression,err error) {
+		left, err := this.parseXorExpression()
+		if err != null {
+			return null, err
 		}
-		binary := &ast.ExpressionBinary{}
-		binary.Left = left
-		binary.Right = right
-		newExpression.Data = binary
-		left = newExpression
+		for this.parser.token.Type == lex.TokenOr {
+			pos := this.parser.mkPos()
+			name := this.parser.token.Description
+			this.Next(lfNotToken)
+			right, err := this.parseXorExpression()
+			if err != null {
+				return left, err
+			}
+			newExpression := new ast.Expression()
+			newExpression.Pos = pos
+			newExpression.Op = name
+			newExpression.Type = ast.ExpressionTypeOr
+			binary := new ast.ExpressionBinary()
+			binary.Left = left
+			binary.Right = right
+			newExpression.Data = binary
+			left = newExpression
+		}
+		return left, null
 	}
-	return left, nil
-}
 
-// + -
-func (ep *ExpressionParser) parseAddExpression() (ast.Expression, error) {
-	left, err := ep.parseMulExpression()
-	if err != nil {
-		return nil, err
-	}
-	for ep.parser.token.Type == lex.TokenAdd ||
-		ep.parser.token.Type == lex.TokenSub {
-		typ := ep.parser.token.Type
-		name := ep.parser.token.Description
-		pos := ep.parser.mkPos()
-		ep.Next(lfNotToken)
-		right, err := ep.parseMulExpression()
-		if err != nil {
-			return left, err
+	// ^
+	fn parseXorExpression() -> (e ast.Expression,err error) {
+		left, err := this.parseAndExpression()
+		if err != null {
+			return null, err
 		}
-		newExpression := &ast.Expression{}
-		newExpression.Pos = pos
-		newExpression.Op = name
-		if typ == lex.TokenAdd {
-			newExpression.Type = ast.ExpressionTypeAdd
-		} else {
-			newExpression.Type = ast.ExpressionTypeSub
+		for this.parser.token.Type == lex.TokenXor {
+			pos := this.parser.mkPos()
+			name := this.parser.token.Description
+			this.Next(lfNotToken)
+			right, err := this.parseAndExpression()
+			if err != null {
+				return left, err
+			}
+			newExpression := new ast.Expression()
+			newExpression.Pos = pos
+			newExpression.Op = name
+			newExpression.Type = ast.ExpressionTypeXor
+			binary := new ast.ExpressionBinary()
+			binary.Left = left
+			binary.Right = right
+			newExpression.Data = binary
+			left = newExpression
 		}
-		binary := &ast.ExpressionBinary{}
-		binary.Left = left
-		binary.Right = right
-		newExpression.Data = binary
-		left = newExpression
+		return left, null
 	}
-	return left, nil
-}
 
-// * / %
-func (ep *ExpressionParser) parseMulExpression() (ast.Expression, error) {
-	left, err := ep.parseSuffixExpression()
-	if err != nil {
-		return nil, err
-	}
-	for ep.parser.token.Type == lex.TokenMul ||
-		ep.parser.token.Type == lex.TokenDiv ||
-		ep.parser.token.Type == lex.TokenMod {
-		typ := ep.parser.token.Type
-		name := ep.parser.token.Description
-		pos := ep.parser.mkPos()
-		ep.Next(lfNotToken)
-		right, err := ep.parseSuffixExpression()
-		if err != nil {
-			return left, err
+	// &
+	fn parseAndExpression() -> (e ast.Expression,err error) {
+		left, err := this.parseShiftExpression()
+		if err != null {
+			return null, err
 		}
-		newExpression := &ast.Expression{}
-		newExpression.Pos = pos
-		newExpression.Op = name
-		if typ == lex.TokenMul {
-			newExpression.Type = ast.ExpressionTypeMul
-		} else if typ == lex.TokenDiv {
-			newExpression.Type = ast.ExpressionTypeDiv
-		} else {
-			newExpression.Type = ast.ExpressionTypeMod
+		for this.parser.token.Type == lex.TokenAnd {
+			pos := this.parser.mkPos()
+			name := this.parser.token.Description
+			this.Next(lfNotToken)
+			right, err := this.parseShiftExpression()
+			if err != null {
+				return left, err
+			}
+			newExpression := new ast.Expression()
+			newExpression.Pos = pos
+			newExpression.Type = ast.ExpressionTypeAnd
+			newExpression.Op = name
+			binary := new ast.ExpressionBinary()
+			binary.Left = left
+			binary.Right = right
+			newExpression.Data = binary
+			left = newExpression
 		}
-		binary := &ast.ExpressionBinary{}
-		binary.Left = left
-		binary.Right = right
-		newExpression.Data = binary
-		left = newExpression
+		return left, null
 	}
-	return left, nil
-}
+
+	// << >>
+	fn parseShiftExpression() -> (e ast.Expression,err error) {
+		left, err := this.parseAddExpression()
+		if err != null {
+			return null, err
+		}
+		for this.parser.token.Type == lex.TokenLsh ||
+			this.parser.token.Type == lex.TokenRsh {
+			typ := this.parser.token.Type
+			name := this.parser.token.Description
+			pos := this.parser.mkPos()
+			this.Next(lfNotToken)
+			right, err := this.parseAddExpression()
+			if err != null {
+				return left, err
+			}
+			newExpression := new ast.Expression()
+			newExpression.Pos = pos
+			newExpression.Op = name
+			if typ == lex.TokenLsh {
+				newExpression.Type = ast.ExpressionTypeLsh
+
+			} else {
+				newExpression.Type = ast.ExpressionTypeRsh
+
+			}
+			binary := new ast.ExpressionBinary()
+			binary.Left = left
+			binary.Right = right
+			newExpression.Data = binary
+			left = newExpression
+		}
+		return left, null
+	}
+
+	// + -
+	fn parseAddExpression() -> (e ast.Expression,err error) {
+		left, err := this.parseMulExpression()
+		if err != null {
+			return null, err
+		}
+		for this.parser.token.Type == lex.TokenAdd ||
+			this.parser.token.Type == lex.TokenSub {
+			typ := this.parser.token.Type
+			name := this.parser.token.Description
+			pos := this.parser.mkPos()
+			this.Next(lfNotToken)
+			right, err := this.parseMulExpression()
+			if err != null {
+				return left, err
+			}
+			newExpression := new ast.Expression()
+			newExpression.Pos = pos
+			newExpression.Op = name
+			if typ == lex.TokenAdd {
+				newExpression.Type = ast.ExpressionTypeAdd
+			} else {
+				newExpression.Type = ast.ExpressionTypeSub
+			}
+			binary := new ast.ExpressionBinary()
+			binary.Left = left
+			binary.Right = right
+			newExpression.Data = binary
+			left = newExpression
+		}
+		return left, null
+	}
+
+	// * / %
+	fn parseMulExpression() -> (e ast.Expression,err error) {
+		left, err := this.ep.ExpressionSuffix.parseSuffixExpression()
+		if err != null {
+			return null, err
+		}
+		for this.parser.token.Type == lex.TokenMul ||
+			this.parser.token.Type == lex.TokenDiv ||
+			this.parser.token.Type == lex.TokenMod {
+			typ := this.parser.token.Type
+			name := this.parser.token.Description
+			pos := this.parser.mkPos()
+			this.Next(lfNotToken)
+			right, err := this.ep.ExpressionSuffix.parseSuffixExpression()
+			if err != null {
+				return left, err
+			}
+			newExpression := new ast.Expression()
+			newExpression.Pos = pos
+			newExpression.Op = name
+			if typ == lex.TokenMul {
+				newExpression.Type = ast.ExpressionTypeMul
+			} else if typ == lex.TokenDiv {
+				newExpression.Type = ast.ExpressionTypeDiv
+			} else {
+				newExpression.Type = ast.ExpressionTypeMod
+			}
+			binary := new ast.ExpressionBinary()
+			binary.Left = left
+			binary.Right = right
+			newExpression.Data = binary
+			left = newExpression
+		}
+		return left, null
+	}
+
+} 
+

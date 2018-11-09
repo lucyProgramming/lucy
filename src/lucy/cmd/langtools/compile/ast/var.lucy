@@ -32,15 +32,15 @@ fn isMagicIdentifier(name string) ->(is bool)  {
 }
 
  
-var ImportsLoader       LoadImport
-var	 PackageBeenCompile = new  Package()
+public var ImportsLoader       LoadImport
+public var	 PackageBeenCompile = new  Package()
 var	buildInFunctionsMap = new map {string -> Function }()
 var	lucyBuildInPackage  Package
 	 
-var	ParseFunctionHandler fn(bs []byte, pos Pos) -> (f Function, es []error)
+public var	ParseFunctionHandler fn(bs []byte, pos Pos) -> (f Function, es []error)
 var	javaStringClass      Class
-var	LucyBytesType       Type // []byte
-var	JavaBytesType        Type // byte[]
+public var	LucyBytesType       Type // []byte
+public var	JavaBytesType        Type // byte[]
  
 {
 	LucyBytesType = new Type()

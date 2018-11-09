@@ -256,7 +256,7 @@ class ExpressionCheckMethodCall {
 		errs []error,
 		p Package) -> (valueTypes []Type) {
 		call := e.Data.(ExpressionMethodCall)
-		d, exists := p.Block.NameExists(call.Name)
+		d, exists := p.Block.nameExists(call.Name)
 		if exists == false {
 			errs.append(new error(sprintf("%s function '%s' not found", e.Pos.ErrMsgPrefix(), call.Name)))
 			return null

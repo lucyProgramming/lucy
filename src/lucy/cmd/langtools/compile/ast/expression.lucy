@@ -1,27 +1,26 @@
 import "java/lang/Object"
 
 
-class Expression {
-	//checkRangeCalled bool
-	Type ExpressionTypeKind
+public class Expression {
+	public Type ExpressionTypeKind
 	/*
 		only for global variable definition
 		public hello := "hai...."
 	*/
-	IsPublic              bool // for global
-	IsGlobal              bool
-	IsCompileAuto         bool // compile auto expression
-	Value                 Type
-	MultiValues           []Type
-	Pos                   Pos
-	Data                  Object
-	IsStatementExpression bool
-	Op                    string
-	Lefts                 []Expression // left values
-	AsSubForNegative      Expression
-	boolValue bool 
-	longValue long
-	doubleValue double
+	public IsPublic              bool // for global
+	public IsGlobal              bool
+	public IsCompileAuto         bool // compile auto expression
+	public Value                 Type
+	public MultiValues           []Type
+	public Pos                   Pos
+	public Data                  Object
+	public IsStatementExpression bool
+	public Op                    string
+	public Lefts                 []Expression // left values
+	public AsSubForNegative      Expression
+	public boolValue bool 
+	public longValue long
+	public doubleValue double
 
 	fn IsIdentifier(identifier string) -> (is bool) {
 		if this.Type != ExpressionTypeIdentifier {
@@ -340,7 +339,7 @@ class Expression {
 			    this.Value = new Type()
 			    this.Value.Type = VariableTypeDynamicSelector
 			    this.Value.Pos = this.Pos
-			    this.Class = block.InheritedAttribute.Class
+			    this.Value.Class = block.InheritedAttribute.Class
 				returnValueTypes = [this.Value]
 			}
 		case ExpressionTypeBool:
@@ -530,8 +529,11 @@ class Expression {
 			}
 		case ExpressionTypeFunctionLiteral:
 			f := this.Data.(Function)
-			PackageBeenCompile.statementLevelFunctions =
-				append(PackageBeenCompile.statementLevelFunctions, f)
+			if PackageBeenCompile.statementLevelFunctions == null {
+                PackageBeenCompile.statementLevelFunctions = [f]
+			}else {
+			    PackageBeenCompile.statementLevelFunctions.append(f)
+			}
 			if this.IsStatementExpression {
 				err := block.Insert(f.Name, f.Pos, f)
 				if err != null {
@@ -547,8 +549,7 @@ class Expression {
 			returnValueTypes[0].FunctionType = f.Type
 			this.Value = returnValueTypes[0]
 		case ExpressionTypeList:
-			errs = append(errs,
-				new error(sprintf("%s cannot have expression '%s' at this scope,"+
+			errs.append(new error(sprintf("%s cannot have expression '%s' at this scope,"+
 					"this may be cause by the compiler error,please contact the author",
 					this.Pos.ErrMsgPrefix(), this.Op)))
 		case ExpressionTypeGlobal:
@@ -573,7 +574,7 @@ class Expression {
 				return
 			}
 			if t.Type != VariableTypeJavaArray {
-				errs = append(errs, new error(sprintf("%s cannot pack non java array to variable-length arguments",
+				errs.append(new error(sprintf("%s cannot pack non java array to variable-length arguments",
 					errMsgPrefix(this.Pos))))
 				return
 			}

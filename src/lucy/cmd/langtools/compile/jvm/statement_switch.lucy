@@ -1,20 +1,13 @@
-package jvm
 
-import (
-	"encoding/binary"
-
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func (this *BuildPackage) buildSwitchStatement(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	s *ast.StatementSwitch,
 	context Context,
 	state StackMapState) (maxStack char) {
 	// if equal,leave 0 on stack
-	compare := func(t *ast.Type) {
+	compare := func(t ast.Type) {
 		switch t.Type {
 		case ast.VariableTypeByte:
 			fallthrough
@@ -38,7 +31,7 @@ func (this *BuildPackage) buildSwitchStatement(
 			code.CodeLength++
 		case ast.VariableTypeString:
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+			ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 				Class:      javaStringClass,
 				Method:     "compareTo",
 				Descriptor: "(Ljava/lang/String;)I",
@@ -76,7 +69,7 @@ func (this *BuildPackage) buildSwitchStatement(
 	currentStack := size
 	state.pushStack(class, s.Condition.Value)
 	for _, c := range s.StatementSwitchCases {
-		if notMatch != nil {
+		if notMatch != null {
 			writeExits([]*cg.Exit{notMatch}, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
@@ -122,12 +115,12 @@ func (this *BuildPackage) buildSwitchStatement(
 		}
 		code.CodeLength++
 		//block is here
-		if c.Block != nil {
+		if c.Block != null {
 			ss := (&StackMapState{}).initFromLast(state)
 			this.buildBlock(class, code, c.Block, context, ss)
 			state.addTop(ss)
 		}
-		if c.Block == nil || c.Block.NotExecuteToLastStatement == false {
+		if c.Block == null || c.Block.NotExecuteToLastStatement == false {
 			s.Exits = append(s.Exits,
 				(&cg.Exit{}).Init(cg.OP_goto, code)) // matched,goto switch outside
 		}
@@ -141,7 +134,7 @@ func (this *BuildPackage) buildSwitchStatement(
 	}
 	code.CodeLength++
 	state.popStack(1)
-	if s.Default != nil {
+	if s.Default != null {
 		ss := (&StackMapState{}).initFromLast(state)
 		this.buildBlock(class, code, s.Default, context, ss)
 		state.addTop(ss)

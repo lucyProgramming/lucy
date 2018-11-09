@@ -1,12 +1,7 @@
-package jvm
 
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func (this *BuildPackage) buildIfStatement(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	s *ast.StatementIf,
 	context Context,
@@ -27,7 +22,7 @@ func (this *BuildPackage) buildIfStatement(
 	}
 	this.buildBlock(class, code, &s.Block, context, trueBlockState)
 	ifState.addTop(trueBlockState)
-	if s.Else != nil || len(s.ElseIfList) > 0 {
+	if s.Else != null || len(s.ElseIfList) > 0 {
 		if s.Block.NotExecuteToLastStatement == false {
 			s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
 		}
@@ -42,7 +37,7 @@ func (this *BuildPackage) buildIfStatement(
 			maxStack = stack
 		}
 		this.buildBlock(class, code, v.Block, context, elseIfState)
-		if s.Else != nil || k != len(s.ElseIfList)-1 {
+		if s.Else != null || k != len(s.ElseIfList)-1 {
 			if v.Block.NotExecuteToLastStatement == false {
 				s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
 			}
@@ -52,7 +47,7 @@ func (this *BuildPackage) buildIfStatement(
 	}
 	context.MakeStackMap(code, ifState, code.CodeLength)
 	writeExits([]*cg.Exit{exit}, code.CodeLength)
-	if s.Else != nil {
+	if s.Else != null {
 		elseBlockState := (&StackMapState{}).initFromLast(ifState)
 		this.buildBlock(class, code, s.Else, context, elseBlockState)
 		ifState.addTop(elseBlockState)

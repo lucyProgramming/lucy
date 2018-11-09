@@ -1,23 +1,17 @@
-package jvm
-
-import (
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func (this *BuildExpression) buildMapLiteral(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
 	state StackMapState) (maxStack char) {
 	code.Codes[code.CodeLength] = cg.OP_new
-	class.InsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+	ast.TypeInsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.Codes[code.CodeLength+3] = cg.OP_dup
 	code.CodeLength += 4
 	maxStack = 2
 	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      mapClass,
 		Method:     specialMethodInit,
 		Descriptor: "()V",
@@ -50,7 +44,7 @@ func (this *BuildExpression) buildMapLiteral(
 		}
 		// put in hashmap
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
+		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      mapClass,
 			Method:     "put",
 			Descriptor: "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",

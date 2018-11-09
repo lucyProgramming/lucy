@@ -1,15 +1,8 @@
-package jvm
-
-import (
-	"encoding/binary"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func (this *BuildPackage) buildStatement(
-	class cg.ClassHighLevel,
+	c cg.ClassHighLevel,
 	code cg.AttributeCode,
-	block *ast.Block,
+	block ast.Block,
 	s *ast.Statement,
 	context Context,
 	state StackMapState) (maxStack char) {
@@ -44,9 +37,9 @@ func (this *BuildPackage) buildStatement(
 	case ast.StatementTypeBreak:
 		this.buildDefers(class, code, context, s.StatementBreak.Defers, state)
 		exit := (&cg.Exit{}).Init(cg.OP_goto, code)
-		if s.StatementBreak.StatementFor != nil {
+		if s.StatementBreak.StatementFor != null {
 			s.StatementBreak.StatementFor.Exits = append(s.StatementBreak.StatementFor.Exits, exit)
-		} else if s.StatementBreak.StatementSwitch != nil { // switch
+		} else if s.StatementBreak.StatementSwitch != null { // switch
 			s.StatementBreak.StatementSwitch.Exits = append(s.StatementBreak.StatementSwitch.Exits, exit)
 		} else {
 			s.StatementBreak.SwitchTemplateBlock.Exits = append(s.StatementBreak.SwitchTemplateBlock.Exits, exit)
@@ -94,12 +87,12 @@ func (this *BuildPackage) buildStatement(
 		s.Class.Name = this.newClassName(name)
 		innerClass := &cg.InnerClass{
 			InnerClass:  s.Class.Name,
-			OuterClass:  class.Name,
+			OuterClass:  ast.TypeName,
 			Name:        oldName,
 			AccessFlags: 0,
 		}
-		class.Class.AttributeInnerClasses.Classes =
-			append(class.Class.AttributeInnerClasses.Classes, innerClass)
+		ast.TypeClass.AttributeInnerClasses.Classes =
+			append(ast.TypeClass.AttributeInnerClasses.Classes, innerClass)
 		c := this.buildClass(s.Class)
 		c.Class.AttributeInnerClasses.Classes = append(c.Class.AttributeInnerClasses.Classes, innerClass)
 		this.putClass(c)
@@ -111,7 +104,7 @@ func (this *BuildPackage) buildStatement(
 	return
 }
 
-func (this *BuildPackage) buildDefers(class cg.ClassHighLevel,
+func (this *BuildPackage) buildDefers(c cg.ClassHighLevel,
 	code cg.AttributeCode, context Context, ds []*ast.StatementDefer, from StackMapState) {
 	if len(ds) == 0 {
 		return
@@ -129,10 +122,10 @@ func (this *BuildPackage) buildDefers(class cg.ClassHighLevel,
 		e.StartPc = char(ds[index].StartPc)
 		e.EndPc = char(code.CodeLength)
 		e.HandlerPc = char(code.CodeLength)
-		if ds[index].ExceptionClass == nil {
-			e.CatchType = class.Class.InsertClassConst(ast.DefaultExceptionClass)
+		if ds[index].ExceptionClass == null {
+			e.CatchType = ast.TypeClass.InsertClassConst(ast.DefaultExceptionClass)
 		} else {
-			e.CatchType = class.Class.InsertClassConst(ds[index].ExceptionClass.Name) // custom class
+			e.CatchType = ast.TypeClass.InsertClassConst(ds[index].ExceptionClass.Name) // custom class
 		}
 		code.Exceptions = append(code.Exceptions, e)
 		//expect exception on stack
@@ -143,7 +136,7 @@ func (this *BuildPackage) buildDefers(class cg.ClassHighLevel,
 		context.Defer = ds[index]
 		this.buildBlock(class, code, &ds[index].Block, context, state)
 		from.addTop(state)
-		context.Defer = nil
+		context.Defer = null
 		ds[index].ResetLabels()
 
 		//if need throw
