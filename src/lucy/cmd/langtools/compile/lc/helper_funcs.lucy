@@ -1,12 +1,12 @@
 
-func parseMethodParameter(class *cg.Class, bs []byte, f *ast.Function) {
+func parseMethodParameter(class cg.Class, bs []byte, f ast.Function) {
 	a := &cg.AttributeMethodParameters{}
 	a.FromBs(class, bs)
 	for k, v := range a.Parameters {
 		f.Type.ParameterList[k].Name = v.Name
 	}
 }
-func parseReturnListNames(class *cg.Class, bs []byte, f *ast.Function) {
+func parseReturnListNames(class cg.Class, bs []byte, f ast.Function) {
 	a := &cg.AttributeMethodParameters{}
 	a.FromBs(class, bs)
 	for k, v := range a.Parameters {
@@ -14,7 +14,7 @@ func parseReturnListNames(class *cg.Class, bs []byte, f *ast.Function) {
 	}
 }
 
-func loadEnumForFunction(f *ast.Function) error {
+func loadEnumForFunction(f ast.Function) error {
 	for _, v := range f.Type.ParameterList {
 		if v.Type.Type == ast.VariableTypeEnum {
 			err := loadEnumForVariableType(v.Type)

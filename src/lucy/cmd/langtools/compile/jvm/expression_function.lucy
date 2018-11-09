@@ -6,8 +6,8 @@ func (this *BuildPackage) buildFunctionExpression(
 	e ast.Expression,
 	context Context,
 	state StackMapState) (maxStack char) {
-	function := e.Data.(*ast.Function)
-	defer func(function *ast.Function) {
+	function := e.Data.(ast.Function)
+	defer func(function ast.Function) {
 		if e.IsStatementExpression {
 			return
 		}
@@ -194,7 +194,7 @@ func (this *BuildPackage) buildFunctionExpression(
 
 }
 func (this *BuildPackage) packFunction2MethodHandle(c cg.ClassHighLevel, code cg.AttributeCode,
-	function *ast.Function, context Context) (maxStack char) {
+	function ast.Function, context Context) (maxStack char) {
 	code.Codes[code.CodeLength] = cg.OP_invokestatic
 	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 		Class:      "java/lang/invoke/MethodHandles",

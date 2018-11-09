@@ -116,7 +116,7 @@ func (this *FileLoader) LoadImport(importName string) (interface{}, error) {
 /*
 	lucy and java have no difference
 */
-func (this *FileLoader) loadInterfaces(astClass ast.Class, c *cg.Class) error {
+func (this *FileLoader) loadInterfaces(astClass ast.Class, c cg.Class) error {
 	astClass.InterfaceNames = make([]*ast.NameWithPos, len(c.Interfaces))
 	for k, v := range c.Interfaces {
 		astClass.InterfaceNames[k] = &ast.NameWithPos{
@@ -133,7 +133,7 @@ func (this *FileLoader) loadInterfaces(astClass ast.Class, c *cg.Class) error {
 	return null
 }
 
-func (this *FileLoader) loadAsJava(c *cg.Class) (ast.Class, error) {
+func (this *FileLoader) loadAsJava(c cg.Class) (ast.Class, error) {
 	if c.IsSynthetic() {
 		return null, null
 	}
@@ -204,7 +204,7 @@ func (this *FileLoader) loadAsJava(c *cg.Class) (ast.Class, error) {
 	return astClass, null
 }
 
-func (this *FileLoader) loadAsLucy(c *cg.Class) (ast.Class, error) {
+func (this *FileLoader) loadAsLucy(c cg.Class) (ast.Class, error) {
 	if c.IsSynthetic() {
 		return null, null
 	}
@@ -329,7 +329,7 @@ func (this *FileLoader) loadAsLucy(c *cg.Class) (ast.Class, error) {
 	return astClass, null
 }
 
-func (this *FileLoader) loadLucyEnum(c *cg.Class) (ast.Enum, error) {
+func (this *FileLoader) loadLucyEnum(c cg.Class) (ast.Enum, error) {
 	e := &ast.Enum{}
 	{
 		nameIndex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
@@ -349,7 +349,7 @@ func (this *FileLoader) loadLucyEnum(c *cg.Class) (ast.Enum, error) {
 	return e, null
 }
 
-func (this *FileLoader) loadConst(c *cg.Class, nameIndex char, t ast.Type) (value interface{}) {
+func (this *FileLoader) loadConst(c cg.Class, nameIndex char, t ast.Type) (value interface{}) {
 	switch t.Type {
 	case ast.VariableTypeBool:
 		return binary.BigEndian.Uint32(c.ConstPool[nameIndex].Info) != 0
@@ -374,13 +374,13 @@ func (this *FileLoader) loadConst(c *cg.Class, nameIndex char, t ast.Type) (valu
 	return null
 }
 
-func (this *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error {
+func (this *FileLoader) loadLucyMainClass(pack *ast.Package, c cg.Class) error {
 	var err error
 	mainClassName := &cg.ClassHighLevel{}
 	mainClassName.Name = pack.Name + "/main"
 	pack.Block.Variables = make(map[string]ast.Variable)
 	pack.Block.Constants = make(map[string]*ast.Constant)
-	pack.Block.Functions = make(map[string]*ast.Function)
+	pack.Block.Functions = make(map[string]ast.Function)
 	for _, f := range c.Fields {
 		name := string(c.ConstPool[f.NameIndex].Info)
 		constValue := f.AttributeGroupedByName.GetByName(cg.AttributeNameConstValue)

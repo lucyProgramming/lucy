@@ -1,7 +1,7 @@
 
 
 func (this *BuildPackage) mkParametersOffset(c cg.ClassHighLevel, code cg.AttributeCode,
-	f *ast.Function, state StackMapState) {
+	f ast.Function, state StackMapState) {
 	for _, v := range f.Type.ParameterList { // insert into locals
 		v.LocalValOffset = code.MaxLocals
 		code.MaxLocals += jvmSlotSize(v.Type)
@@ -15,7 +15,7 @@ func (this *BuildPackage) mkParametersOffset(c cg.ClassHighLevel, code cg.Attrib
 }
 
 func (this *BuildPackage) mkCapturedParameters(c cg.ClassHighLevel, code cg.AttributeCode,
-	f *ast.Function, state StackMapState) (maxStack char) {
+	f ast.Function, state StackMapState) (maxStack char) {
 	for _, v := range f.Type.ParameterList {
 		if v.BeenCapturedAsLeftValue == 0 { // not capture
 			continue
@@ -40,7 +40,7 @@ func (this *BuildPackage) mkCapturedParameters(c cg.ClassHighLevel, code cg.Attr
 }
 
 func (this *BuildPackage) buildFunctionParameterAndReturnList(c cg.ClassHighLevel, code cg.AttributeCode,
-	f *ast.Function, context Context, state StackMapState) (maxStack char) {
+	f ast.Function, context Context, state StackMapState) (maxStack char) {
 	this.mkParametersOffset(class, code, f, state)
 	maxStack = this.mkCapturedParameters(class, code, f, state)
 	if f.Type.VoidReturn() == false {
@@ -84,7 +84,7 @@ func (this *BuildPackage) buildFunctionParameterAndReturnList(c cg.ClassHighLeve
 }
 
 func (this *BuildPackage) buildFunction(c cg.ClassHighLevel, astClass ast.Class, method *cg.MethodHighLevel,
-	f *ast.Function) {
+	f ast.Function) {
 	context := &Context{}
 	context.lastStackMapOffset = -1
 	context.class = astClass
@@ -196,7 +196,7 @@ func (this *BuildPackage) buildFunction(c cg.ClassHighLevel, astClass ast.Class,
 	return
 }
 func (this *BuildPackage) buildFunctionMultiReturnOffset(c cg.ClassHighLevel, code cg.AttributeCode,
-	f *ast.Function, context Context, state StackMapState) (maxStack char) {
+	f ast.Function, context Context, state StackMapState) (maxStack char) {
 	code.Codes[code.CodeLength] = cg.OP_aconst_null
 	code.CodeLength++
 	context.multiValueVarOffset = code.MaxLocals

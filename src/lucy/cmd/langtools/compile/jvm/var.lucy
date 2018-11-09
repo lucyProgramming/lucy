@@ -2,8 +2,6 @@
 
 
 var	ArrayMetas                = new map{ast.VariableTypeKind -> ArrayMeta}()
-
-var	DefaultValueParser        DefaultValueParse
 var	closure                  = new Closure()
 
 

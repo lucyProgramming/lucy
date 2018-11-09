@@ -84,7 +84,7 @@ fn jvmSlotSize(typ ast.Type) char {
 	}
 }
 
-fn nameTemplateFunction(function *ast.Function) string {
+fn nameTemplateFunction(function ast.Function) string {
 	s := function.Name
 	for _, v := range function.Type.ParameterList {
 		if v.Type.IsPrimitive() {

@@ -7,23 +7,16 @@ enum  ClosureKind(
 	ClosureClassFloat,
 	ClosureClassDouble,
 	ClosureClassString,
-	ClosureClassObject,
+	ClosureClassObject
 )
 
-class Closure   {
-	ClosureObjectMetas map { ClosureKind -> ClosureObjectMeta } 
-}
 
-class ClosureObjectMeta {
-	className        string
-	fieldName        string
-	fieldDescription string
-	fn ClosureObjectMeta(className , fieldName , fieldDescription string){
-		this.super()
-		this.className = className
-		this.fieldName = fieldName
-		this.fieldDescription = fieldDescription
-	}
+
+
+class Closure  {
+	ClosureObjectMetas map { ClosureKind -> ClosureObjectMeta } 
+
+	
 
 
 	fn getMeta(t ast.VariableTypeKind) (meta *ClosureObjectMeta) {
@@ -217,7 +210,20 @@ class ClosureObjectMeta {
 			typeConverter.castPointer(class, code, v)
 		}
 	}
-	
+}
+
+
+
+class ClosureObjectMeta {
+	className        string
+	fieldName        string
+	fieldDescription string
+	fn ClosureObjectMeta(className , fieldName , fieldDescription string){
+		this.super()
+		this.className = className
+		this.fieldName = fieldName
+		this.fieldDescription = fieldDescription
+	}
 }
 
 
