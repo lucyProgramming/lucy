@@ -1,15 +1,11 @@
 
 
-var (
-	ArrayMetas                = map[ast.VariableTypeKind]*ArrayMeta{}
-	typeConverter             TypeConverterAndPrimitivePacker
-	Descriptor                Description
-	LucyMethodSignatureParser LucyMethodSignature
-	LucyFieldSignatureParser  LucyFieldSignature
-	LucyTypeAliasParser       LucyTypeAlias
-	DefaultValueParser        DefaultValueParse
-	closure                   Closure
-)
+
+var	ArrayMetas                = new map{ast.VariableTypeKind -> ArrayMeta}()
+
+var	DefaultValueParser        DefaultValueParse
+var	closure                  = new Closure()
+
 
 type LeftValueKind int
 

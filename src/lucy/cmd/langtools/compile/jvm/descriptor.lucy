@@ -1,161 +1,165 @@
  
 
-type Description struct {
-}
+class Description  {
 
-func (this *Description) methodDescriptor(functionType ast.FunctionType) string {
-	s := "("
-	for _, v := range functionType.ParameterList {
-		s += this.typeDescriptor(v.Type)
-	}
-	if functionType.VArgs != null {
-		s += this.typeDescriptor(functionType.VArgs.Type)
-	}
-	s += ")"
-	if functionType.VoidReturn() {
-		s += "V"
-	} else if len(functionType.ReturnList) == 1 {
-		s += this.typeDescriptor(functionType.ReturnList[0].Type)
-	} else {
-		s += "[Ljava/lang/Object;" //always this type
-	}
-	return s
-}
 
-func (this *Description) typeDescriptor(typ ast.Type) string {
-	switch typ.Type {
-	case ast.VariableTypeBool:
-		return "Z"
-	case ast.VariableTypeByte:
-		return "B"
-	case ast.VariableTypeShort:
-		return "S"
-	case ast.VariableTypeChar:
-		return "C"
-	case ast.VariableTypeInt, ast.VariableTypeEnum:
-		return "I"
-	case ast.VariableTypeLong:
-		return "J"
-	case ast.VariableTypeFloat:
-		return "F"
-	case ast.VariableTypeDouble:
-		return "D"
-	case ast.VariableTypeArray:
-		meta := ArrayMetas[typ.Array.Type] // combination type
-		return "L" + meta.className + ";"
-	case ast.VariableTypeString:
-		return "Ljava/lang/String;"
-	case ast.VariableTypeVoid:
-		return "V"
-	case ast.VariableTypeObject:
-		return "L" + typ.Class.Name + ";"
-	case ast.VariableTypeMap:
-		return "L" + mapClass + ";"
-	case ast.VariableTypeFunction:
-		return "L" + javaMethodHandleClass + ";"
-	case ast.VariableTypeJavaArray:
-		return "[" + this.typeDescriptor(typ.Array)
-	}
-	panic("unHandle type signature")
-}
-
-func (this *Description) ParseType(bs []byte) ([]byte, ast.Type, error) {
-	switch bs[0] {
-	case 'V':
-		bs = bs[1:]
-		return bs, &ast.Type{
-			Type: ast.VariableTypeVoid,
-		}, null
-	case 'B':
-		bs = bs[1:]
-		return bs, &ast.Type{
-			Type: ast.VariableTypeByte,
-		}, null
-	case 'D':
-		bs = bs[1:]
-		return bs, &ast.Type{
-			Type: ast.VariableTypeDouble,
-		}, null
-	case 'F':
-		bs = bs[1:]
-		return bs, &ast.Type{
-			Type: ast.VariableTypeFloat,
-		}, null
-	case 'I':
-		bs = bs[1:]
-		return bs, &ast.Type{
-			Type: ast.VariableTypeInt,
-		}, null
-	case 'J':
-		bs = bs[1:]
-		return bs, &ast.Type{
-			Type: ast.VariableTypeLong,
-		}, null
-	case 'C':
-		bs = bs[1:]
-		return bs, &ast.Type{
-			Type: ast.VariableTypeChar,
-		}, null
-	case 'S':
-		bs = bs[1:]
-		return bs, &ast.Type{
-			Type: ast.VariableTypeShort,
-		}, null
-	case 'Z':
-		bs = bs[1:]
-		return bs, &ast.Type{
-			Type: ast.VariableTypeBool,
-		}, null
-	case 'L':
-		bs = bs[1:]
-		index := bytes.Index(bs, []byte{';'}) // end token
-		t := &ast.Type{}
-		t.Type = ast.VariableTypeObject
-		t.Class = &ast.Class{}
-		t.Class.Name = string(bs[:index])
-		bs = bs[index+1:] // skip ;
-		t.Class.NotImportedYet = true
-		if t.Class.Name == javaStringClass {
-			t.Type = ast.VariableTypeString
+	static fn methodDescriptor(functionType ast.FunctionType) string {
+		s := "("
+		for _, v := range functionType.ParameterList {
+			s += this.typeDescriptor(v.Type)
 		}
-		return bs, t, null
-	case '[':
+		if functionType.VArgs != null {
+			s += this.typeDescriptor(functionType.VArgs.Type)
+		}
+		s += ")"
+		if functionType.VoidReturn() {
+			s += "V"
+		} else if len(functionType.ReturnList) == 1 {
+			s += this.typeDescriptor(functionType.ReturnList[0].Type)
+		} else {
+			s += "[Ljava/lang/Object;" //always this type
+		}
+		return s
+	}
+
+	static fn typeDescriptor(typ ast.Type) string {
+		switch typ.Type {
+		case ast.VariableTypeBool:
+			return "Z"
+		case ast.VariableTypeByte:
+			return "B"
+		case ast.VariableTypeShort:
+			return "S"
+		case ast.VariableTypeChar:
+			return "C"
+		case ast.VariableTypeInt, ast.VariableTypeEnum:
+			return "I"
+		case ast.VariableTypeLong:
+			return "J"
+		case ast.VariableTypeFloat:
+			return "F"
+		case ast.VariableTypeDouble:
+			return "D"
+		case ast.VariableTypeArray:
+			meta := ArrayMetas[typ.Array.Type] // combination type
+			return "L" + meta.className + ";"
+		case ast.VariableTypeString:
+			return "Ljava/lang/String;"
+		case ast.VariableTypeVoid:
+			return "V"
+		case ast.VariableTypeObject:
+			return "L" + typ.Class.Name + ";"
+		case ast.VariableTypeMap:
+			return "L" + mapClass + ";"
+		case ast.VariableTypeFunction:
+			return "L" + javaMethodHandleClass + ";"
+		case ast.VariableTypeJavaArray:
+			return "[" + this.typeDescriptor(typ.Array)
+		}
+		panic("unHandle type signature")
+	}
+
+	static fn ParseType(bs []byte) ([]byte, ast.Type, error) {
+		switch bs[0] {
+		case 'V':
+			bs = bs[1:]
+			return bs, &ast.Type{
+				Type: ast.VariableTypeVoid,
+			}, null
+		case 'B':
+			bs = bs[1:]
+			return bs, &ast.Type{
+				Type: ast.VariableTypeByte,
+			}, null
+		case 'D':
+			bs = bs[1:]
+			return bs, &ast.Type{
+				Type: ast.VariableTypeDouble,
+			}, null
+		case 'F':
+			bs = bs[1:]
+			return bs, &ast.Type{
+				Type: ast.VariableTypeFloat,
+			}, null
+		case 'I':
+			bs = bs[1:]
+			return bs, &ast.Type{
+				Type: ast.VariableTypeInt,
+			}, null
+		case 'J':
+			bs = bs[1:]
+			return bs, &ast.Type{
+				Type: ast.VariableTypeLong,
+			}, null
+		case 'C':
+			bs = bs[1:]
+			return bs, &ast.Type{
+				Type: ast.VariableTypeChar,
+			}, null
+		case 'S':
+			bs = bs[1:]
+			return bs, &ast.Type{
+				Type: ast.VariableTypeShort,
+			}, null
+		case 'Z':
+			bs = bs[1:]
+			return bs, &ast.Type{
+				Type: ast.VariableTypeBool,
+			}, null
+		case 'L':
+			bs = bs[1:]
+			index := bytes.Index(bs, []byte{';'}) // end token
+			t := &ast.Type{}
+			t.Type = ast.VariableTypeObject
+			t.Class = &ast.Class{}
+			t.Class.Name = string(bs[:index])
+			bs = bs[index+1:] // skip ;
+			t.Class.NotImportedYet = true
+			if t.Class.Name == javaStringClass {
+				t.Type = ast.VariableTypeString
+			}
+			return bs, t, null
+		case '[':
+			bs = bs[1:]
+			var t ast.Type
+			var err error
+			bs, t, err = this.ParseType(bs)
+			ret := &ast.Type{}
+			if err == null {
+				ret.Type = ast.VariableTypeJavaArray
+				ret.Array = t
+			}
+			return bs, ret, err
+		}
+		return bs, null, new error(sprintf("unkown type:%v", string(bs))
+	}
+
+	static fn ParseFunctionType(bs []byte) (ast.FunctionType, error) {
+		t := ast.FunctionType{}
+		if bs[0] != '(' {
+			return t, new error(sprintf("function descriptor does not start with '('")
+		}
 		bs = bs[1:]
-		var t ast.Type
 		var err error
-		bs, t, err = this.ParseType(bs)
-		ret := &ast.Type{}
-		if err == null {
-			ret.Type = ast.VariableTypeJavaArray
-			ret.Array = t
+		for bs[0] != ')' {
+			vd := &ast.Variable{}
+			bs, vd.Type, err = this.ParseType(bs)
+			if err != null {
+				return t, err
+			}
+			t.ParameterList = append(t.ParameterList, vd)
 		}
-		return bs, ret, err
-	}
-	return bs, null, new error(sprintf("unkown type:%v", string(bs))
-}
-
-func (this *Description) ParseFunctionType(bs []byte) (ast.FunctionType, error) {
-	t := ast.FunctionType{}
-	if bs[0] != '(' {
-		return t, new error(sprintf("function descriptor does not start with '('")
-	}
-	bs = bs[1:]
-	var err error
-	for bs[0] != ')' {
+		bs = bs[1:] // skip )
 		vd := &ast.Variable{}
-		bs, vd.Type, err = this.ParseType(bs)
+		vd.Name = "returnValue"
+		_, vd.Type, err = this.ParseType(bs)
 		if err != null {
 			return t, err
 		}
-		t.ParameterList = append(t.ParameterList, vd)
+		t.ReturnList = append(t.ReturnList, vd)
+		return t, null
 	}
-	bs = bs[1:] // skip )
-	vd := &ast.Variable{}
-	vd.Name = "returnValue"
-	_, vd.Type, err = this.ParseType(bs)
-	if err != null {
-		return t, err
-	}
-	t.ReturnList = append(t.ReturnList, vd)
-	return t, null
+
+
 }
+

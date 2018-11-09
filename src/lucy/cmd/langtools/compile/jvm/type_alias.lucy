@@ -1,16 +1,19 @@
 
-type LucyTypeAlias struct {
+class LucyTypeAlias {
+
+    static fn Encode(name string, variableType ast.Type) -> (e string) {
+        name += ";"
+        name += LucyFieldSignatureParser.Encode(variableType)
+        return name
+    }
+
+    static fn Decode(bs []byte) -> (name string, variableType ast.Type, err error) {
+        index := bytes.Index(bs, []byte{';'})
+        name = string(bs[0:index])
+        _, variableType, err = LucyFieldSignatureParser.Decode(bs[index+1:])
+        return
+    }
+
 }
 
-func (LucyTypeAlias) Encode(name string, variableType ast.Type) string {
-	name += ";"
-	name += LucyFieldSignatureParser.Encode(variableType)
-	return name
-}
 
-func (LucyTypeAlias) Decode(bs []byte) (name string, variableType ast.Type, err error) {
-	index := bytes.Index(bs, []byte{';'})
-	name = string(bs[0:index])
-	_, variableType, err = LucyFieldSignatureParser.Decode(bs[index+1:])
-	return
-}
