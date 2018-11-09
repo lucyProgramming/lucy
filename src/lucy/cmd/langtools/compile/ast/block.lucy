@@ -453,7 +453,7 @@ public class Block {
         return null
     }
 
-    fn Insert(name string, pos Pos, d Object) -> (err error) {
+    public fn Insert(name string, pos Pos, d Object) -> (err error) {
         if err := this.nameIsValid(name, pos); err != null {
             return err
         }

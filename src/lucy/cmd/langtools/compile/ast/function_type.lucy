@@ -6,7 +6,7 @@ public class FunctionType {
 	public ReturnList       []Variable
 	public VArgs            Variable
 
-	fn CheckTemplateNameDuplication() -> (errs []error) {
+	public fn CheckTemplateNameDuplication() -> (errs []error) {
 		errs = []error{}
 		m := new map {string -> Pos}()
 		for _, v := range this.TemplateNames {

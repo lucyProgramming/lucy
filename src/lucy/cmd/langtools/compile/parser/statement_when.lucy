@@ -59,7 +59,7 @@ class StatementWhenParser extends ParserExtends {
 				this.parser.token.Type != lex.TokenRc {
 				block = new ast.Block()
 				block.IsSwitchBlock = true
-				this.parseStatementList(block, false)
+				this.bp.parseStatementList(block, false)
 			}
 			t := new ast.StatementWhenCase()
 			t.Matches = ts
@@ -81,7 +81,7 @@ class StatementWhenParser extends ParserExtends {
 			if this.parser.token.Type != lex.TokenRc {
 				block := new ast.Block()
 				block.IsSwitchBlock = true
-				this.parseStatementList(block, false)
+				this.bp.parseStatementList(block, false)
 				whenStatement.Default = block
 			}
 		}

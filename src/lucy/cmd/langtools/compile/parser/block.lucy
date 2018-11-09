@@ -1,6 +1,7 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
- 
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 
 class BlockParser  extends ParserExtends{
 	
@@ -111,7 +112,7 @@ class BlockParser  extends ParserExtends{
 
 			case lex.TokenIf:
 				pos := this.parser.mkPos()
-				statement, err := this.parseIf()
+				statement, err := this.StatementIfParser.parseIf()
 				if err != null {
 					this.consume(untilRc)
 					this.Next(lfNotToken)
@@ -127,7 +128,7 @@ class BlockParser  extends ParserExtends{
 
 			case lex.TokenFor:
 				pos := this.parser.mkPos()
-				statement, err := this.parseFor()
+				statement, err := this.StatementForParser.parseFor()
 				if err != null {
 					this.consume(untilRc)
 					this.Next(lfNotToken)
@@ -138,7 +139,7 @@ class BlockParser  extends ParserExtends{
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeFor
 				    t.StatementFor = statement
-				    t.Pos = ast.pos
+				    t.Pos = pos
                     block.Statements.append(t)
 				}
 			case lex.TokenAbstract:
@@ -149,7 +150,7 @@ class BlockParser  extends ParserExtends{
 				}
 			case lex.TokenSwitch:
 				pos := this.parser.mkPos()
-				statement, err := this.parseSwitch()
+				statement, err := this.StatementSwitchParser.parseSwitch()
 				if err != null {
 					this.consume(untilRc)
 					this.Next(lfNotToken)
@@ -164,7 +165,7 @@ class BlockParser  extends ParserExtends{
 				}
 			case lex.TokenWhen:
 				pos := this.parser.mkPos()
-				statement, err := this.parseWhen()
+				statement, err := this.StatementWhenParser.parseWhen()
 				if err != null {
 					this.consume(untilRc)
 					this.Next(lfNotToken)
@@ -197,7 +198,7 @@ class BlockParser  extends ParserExtends{
 				    t.Op = "const"
 				    statement.Expression = t
 				}
-				block.Statements = append(block.Statements, statement)
+				block.Statements.append(statement)
 				this.parser.validStatementEnding()
 				if this.parser.token.Type == lex.TokenSemicolon {
 					this.Next(lfNotToken)
@@ -284,7 +285,7 @@ class BlockParser  extends ParserExtends{
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeReturn
 				    t.Pos = pos
-				    t.Type = StatementTypeReturn
+				    t.Type = ast.StatementTypeReturn
 				    t.StatementReturn = new ast.StatementReturn()
 				    t.StatementReturn.Pos = pos
 				    block.Statements.append(t)
@@ -294,10 +295,10 @@ class BlockParser  extends ParserExtends{
 				this.Next(lfIsToken)
 				this.parser.validStatementEnding()
 				{
-				    t := new ast.StatementContinue()
+				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeContinue
 				    t.Pos = pos
-				    t.StatementContinue = new ast.StatementTypeContinue()
+				    t.StatementContinue = new ast.StatementContinue()
 				    t.StatementContinue.Pos = pos
 				    block.Statements.append(t)
 				}
@@ -325,7 +326,7 @@ class BlockParser  extends ParserExtends{
 				}
 				statementGoto := new ast.StatementGoTo()
 				statementGoto.Pos = pos
-				statementGoto.LabelName = this.parser.token.Data.(string)
+				statementGoto.LabelName = this.parser.token.stringValue
 				{
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeGoTo
@@ -357,9 +358,9 @@ class BlockParser  extends ParserExtends{
 				if c != null {
 					statement := new ast.Statement()
 					statement.Pos = pos
-					ast.TypeFinalPos = finalPos
 					if isFinal {
-						ast.TypeAccessFlags |= cg.AccClassFinal
+						c.AccessFlags |= cg.AccClassFinal
+						c.FinalPos = finalPos
 					}
 					statement.Type = ast.StatementTypeClass
 					statement.Class = c
@@ -368,13 +369,13 @@ class BlockParser  extends ParserExtends{
 
 			case lex.TokenEnum:
 				pos := this.parser.mkPos()
-				e, _ := this.parser.parseEnum()
+				e, _ := this.parser.EnumParser.parse()
 				if e != null {
 					s := new ast.Statement()
 					s.Pos = pos
 					s.Type = ast.StatementTypeEnum
 					s.Enum = e
-					block.Statements = append(block.Statements, s)
+					block.Statements.append(s)
 				}
 			case lex.TokenImport:
 				pos := this.parser.mkPos()

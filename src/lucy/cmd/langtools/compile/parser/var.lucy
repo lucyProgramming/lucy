@@ -40,12 +40,11 @@ fn ParseFunction(bs []byte, pos ast.Pos) -> (f ast.Function,es []error) {
 	parser.filename = pos.Filename
 	parser.nErrors2Stop = 10
 	parser.bs = bs
-	parser.initParser()
 	parser.lexer = lex.New(parser.bs, pos.Line, pos.Column)
 	parser.Next(lfNotToken) //
 	f, err := parser.FunctionParser.parse(true, false)
 	if err != null {
-		parser.errs = append(parser.errs, err)
+		parser.errs.append(err)
 	}
 	return f, parser.errs
 }

@@ -72,7 +72,11 @@ class StatementSwitchParser extends ParserExtends{
 			t := new ast.StatementSwitchCase()
 			t.Matches = es
 			t.Block = block
-			statementSwitch.StatementSwitchCases.append(statementSwitch.StatementSwitchCases, t)
+			if statementSwitch.StatementSwitchCases == null {
+                statementSwitch.StatementSwitchCases = [t]
+			}else {
+			    statementSwitch.StatementSwitchCases.append(t)
+			}
 		}
 		//default value
 		if this.parser.token.Type == lex.TokenDefault {
@@ -90,7 +94,7 @@ class StatementSwitchParser extends ParserExtends{
 			block.IsSwitchBlock = true
 			statementSwitch.Default = block
 			if this.parser.token.Type != lex.TokenRc {
-				this.parseStatementList(block, false)
+				this.bp.parseStatementList(block, false)
 				statementSwitch.Default = block
 			}
 		}
@@ -100,7 +104,7 @@ class StatementSwitchParser extends ParserExtends{
 			this.parser.errs.append( err)
 			return statementSwitch, err
 		}
-		statementSwitch.EndPos = this.parser.mkEndPos()
+		statementSwitch.EndPos = this.parser.mkPos()
 		this.Next(lfNotToken) //  skip }
 		return statementSwitch, null
 	}

@@ -41,13 +41,14 @@ class StatementIfParser extends ParserExtends {
 		}
 		this.parser.ifTokenIsLfThenSkip()
 		if this.parser.token.Type != lex.TokenLc {
-			err = new error(sprintf("%s missing '{' after condtion,but '%s'",
+			err = new error(sprintf("%s missing '{' after condition,but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.Description))
 			this.parser.errs.append( err)
 			this.consume(untilLc)
 		}
 		this.Next(lfNotToken) //skip {
-		this.parseStatementList(new statementIf.Block(), false)
+		statementIf.Block = new ast.Block()
+		this.bp.parseStatementList(statementIf.Block, false)
 		if this.parser.token.Type != lex.TokenRc {
 			this.parser.errs.append( new error(sprintf("%s expect '}', but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.Description)))
@@ -86,7 +87,7 @@ class StatementIfParser extends ParserExtends {
 			}
 			this.Next(lfNotToken) // skip {
 			statementIf.Else = new ast.Block()
-			this.parseStatementList(statementIf.Else, false)
+			this.bp.parseStatementList(statementIf.Else, false)
 			if this.parser.token.Type != lex.TokenRc {
 				err = new error(sprintf("%s expect '}', but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.Description))
@@ -124,7 +125,7 @@ class StatementIfParser extends ParserExtends {
 			if this.parser.token.Type != lex.TokenRc {
 				err = new error(sprintf("%s expect '}', but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.Description))
-				this.parser.errs = append(this.parser.errs)
+				this.parser.errs.append(err)
 				this.consume(untilRc)
 			}
 			this.Next(lfIsToken) // skip }

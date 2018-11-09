@@ -24,10 +24,10 @@ class FunctionParser extends ParserExtends{
 		}
 		f.Pos = this.parser.mkPos()
 		if this.parser.token.Type == lex.TokenIdentifier {
-			f.Name = this.parser.token.Data.(string)
+			f.Name = this.parser.token.stringValue
 			this.Next(lfNotToken)
 		}
-		f.Type, err = this.parser.parseFunctionType()
+		f.Type, err = this.parseFunctionType()
 		if err != null {
 			if isAbstract {
 				this.consume(untilSemicolonOrLf)
@@ -71,20 +71,20 @@ class FunctionParser extends ParserExtends{
 		if this.parser.token.Type == lex.TokenLt {
 			this.Next(lfNotToken)
 			var err error
-			functionType.TemplateNames, err = this.parseNameList()
+			functionType.TemplateNames, err = this.parser.parseNameList()
 			if err != null {
 				this.consume(untilLp)
 				goto skipTemplateNames
 			}
-			this.errs = append(this.errs, functionType.CheckTemplateNameDuplication()...)
+			this.parser.errs.appendAll(functionType.CheckTemplateNameDuplication())
 			this.Next(lfIsToken)
 		}
-		this.unExpectNewLineAndSkip()
+		this.parser.unExpectNewLineAndSkip()
 	skipTemplateNames:
 		if this.parser.token.Type != lex.TokenLp {
 			err = new error(sprintf("%s fn declared wrong,missing '(',but '%s'",
-				this.errMsgPrefix(), this.parser.token.Description))
-			this.errs = append(this.errs, err)
+				this.parser.errMsgPrefix()))
+			this.parser.errs.append( err)
 			return
 		}
 		this.Next(lfNotToken)               // skip (
@@ -95,11 +95,11 @@ class FunctionParser extends ParserExtends{
 				this.Next(lfNotToken)
 			}
 		}
-		this.ifTokenIsLfThenSkip()
+		this.parser.ifTokenIsLfThenSkip()
 		if this.parser.token.Type != lex.TokenRp { // not )
 			err = new error(sprintf("%s fn declared wrong,missing ')',but '%s'",
-				this.errMsgPrefix(), this.parser.token.Description))
-			this.errs = append(this.errs, err)
+				this.parser.errMsgPrefix()))
+			this.parser.errs.append( err)
 			return
 		}
 		this.Next(lfIsToken)                   // skip )
@@ -107,8 +107,8 @@ class FunctionParser extends ParserExtends{
 			this.Next(lfNotToken) // skip ->
 			if this.parser.token.Type != lex.TokenLp {
 				err = new error(sprintf("%s fn declared wrong, not '(' after '->'",
-					this.errMsgPrefix()))
-				this.errs = append(this.errs, err)
+					this.parser.errMsgPrefix()))
+				this.parser.errs.append( err)
 				return
 			}
 			this.Next(lfNotToken) // skip (
@@ -119,20 +119,20 @@ class FunctionParser extends ParserExtends{
 					this.Next(lfIsToken)
 				}
 			}
-			this.ifTokenIsLfThenSkip()
+			this.parser.ifTokenIsLfThenSkip()
 			if this.parser.token.Type != lex.TokenRp {
 				err = new error(sprintf("%s fn declared wrong,expected ')',but '%s'",
-					this.errMsgPrefix(), this.parser.token.Description))
-				this.errs = append(this.errs, err)
+					this.parser.errMsgPrefix()))
+				this.parser.errs.append( err)
 				return
 			}
 			this.Next(lfIsToken) // skip )
 		} else {
 			functionType.ReturnList = new []ast.Variable(1)
 			functionType.ReturnList[0] = new ast.Variable()
-			functionType.ReturnList[0].Pos = this.mkPos()
+			functionType.ReturnList[0].Pos = this.parser.mkPos()
 			functionType.ReturnList[0].Type = new ast.Type()
-			functionType.ReturnList[0].Type.Pos = this.mkPos()
+			functionType.ReturnList[0].Type.Pos = this.parser.mkPos()
 			functionType.ReturnList[0].Type.Type = ast.VariableTypeVoid
 		}
 		return functionType, err
@@ -152,7 +152,7 @@ class FunctionParser extends ParserExtends{
 		this.Next(lfIsToken) // skip =
 		for k, v := range returnList {
 			var er error
-			v.DefaultValueExpression, er = this.ExpressionParser.parseExpression(false)
+			v.DefaultValueExpression, er = this.parser.ExpressionParser.parseExpression(false)
 			if er != null {
 				this.consume(untilComma)
 				err = er
@@ -171,14 +171,14 @@ class FunctionParser extends ParserExtends{
 	fn parseParameterOrReturnList() -> (returnList []ast.Variable, err error) {
 		for this.parser.token.Type != lex.TokenRp {
 			if this.parser.token.Type == lex.TokenComma {
-				this.errs = append(this.errs, new error(sprintf("%s extra comma",
-					this.errMsgPrefix())))
+				this.parser.errs.append( new error(sprintf("%s extra comma",
+					this.parser.errMsgPrefix())))
 				this.Next(lfNotToken)
 				continue
 			}
 			v, err := this.parseTypedNameDefaultValue()
 			if v != null {
-				returnList = append(returnList, v...)
+				returnList.appendAll(v)
 			}
 			if err != null {
 				break

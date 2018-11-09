@@ -44,7 +44,7 @@ class ClassParser extends  ParserExtends{
 			if err != null {
 				return null, err
 			}
-			ret.append(name)
+			names.append(name)
 			if this.parser.token.Type == lex.TokenComma {
 				this.Next(lfNotToken)
 			} else {
@@ -155,7 +155,7 @@ class ClassParser extends  ParserExtends{
 					}
 					continue
 				}
-				err := validAfterStatic()
+				err := this.validAfterStatic()
 				if err != null {
 					this.parser.errs.append( err)
 					isStatic = false
@@ -165,7 +165,7 @@ class ClassParser extends  ParserExtends{
 				accessControlToken = this.parser.token
 				this.Next(lfIsToken)
 				this.parser.unExpectNewLineAndSkip()
-				err = validAfterAccessControlToken(accessControlToken.Description)
+				err = this.validAfterAccessControlToken(accessControlToken.Description)
 				if err != null {
 					this.parser.errs.append( err)
 					accessControlToken = null // set to null
@@ -212,7 +212,7 @@ class ClassParser extends  ParserExtends{
 			case lex.TokenSynchronized:
 				isSynchronized = true
 				this.Next(lfIsToken)
-				if err := validAfterSynchronized(); err != null {
+				if err := this.validAfterSynchronized(); err != null {
 					this.parser.errs.append( err)
 					isSynchronized = false
 				}
@@ -264,7 +264,11 @@ class ClassParser extends  ParserExtends{
 				if f.Name == classDefinition.Name && isInterface == false {
 					f.Name = ast.SpecialMethodInit
 				}
-				classDefinition.Methods[f.Name] = append(classDefinition.Methods[f.Name], m)
+				if classDefinition.Methods[f.Name] == null {
+                    classDefinition.Methods[f.Name] = [m]
+				}else {
+				    classDefinition.Methods[f.Name].append(m)
+				}
 				resetProperty()
 			case lex.TokenImport:
 				pos := this.parser.mkPos()
@@ -297,7 +301,7 @@ class ClassParser extends  ParserExtends{
 			classDefinition.Block.Constants = new map { string -> ast.Constant }( )
 		}
 		for _, v := range cs {
-			if _, ok := classDefinition.Block.Constants[v.Name]; ok {
+			if classDefinition.Block.Constants.keyExist(v.Name) {
 				this.parser.errs.append(
 					new error(sprintf("%s const %s alreay declared",
 						this.parser.errMsgPrefix(), v.Name)))

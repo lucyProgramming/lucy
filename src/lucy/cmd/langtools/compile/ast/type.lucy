@@ -32,8 +32,8 @@ public enum  VariableTypeKind {
 
 
 public class Map {
-	K Type
-	V Type
+	public K Type
+	public V Type
 }
 
 public class Type {

@@ -24,7 +24,7 @@ class TypeParser extends ParserExtends {
 			}
 			//lookahead
 			this.Next(lfIsToken) //skip ]
-			this.unExpectNewLineAndSkip()
+			this.parser.unExpectNewLineAndSkip()
 			array, err := this.parseType()
 			if err != null {
 				return null, err
@@ -98,7 +98,7 @@ class TypeParser extends ParserExtends {
 			if err != null {
 				return null, err
 			}
-			this.ifTokenIsLfThenSkip()
+			this.parser.ifTokenIsLfThenSkip()
 			if this.parser.token.Type != lex.TokenArrow {
 				err := new error(sprintf("%s expect '->',but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.Description))
@@ -110,7 +110,7 @@ class TypeParser extends ParserExtends {
 			if err != null {
 				return null, err
 			}
-			this.ifTokenIsLfThenSkip()
+			this.parser.ifTokenIsLfThenSkip()
 			if this.parser.token.Type != lex.TokenRc {
 				err := new error(sprintf("%s expect '}',but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.Description))
@@ -128,7 +128,7 @@ class TypeParser extends ParserExtends {
 
 		case lex.TokenFn:
 			this.Next(lfIsToken)
-			ft, err := this.parseFunctionType()
+			ft, err := this.parser.FunctionParser.parseFunctionType()
 			if err != null {
 				return null, err
 			}
@@ -139,7 +139,7 @@ class TypeParser extends ParserExtends {
 
 		case lex.TokenGlobal:
 			this.Next(lfIsToken)
-			this.unExpectNewLineAndSkip()
+			this.parser.unExpectNewLineAndSkip()
 			if this.parser.token.Type != lex.TokenSelection {
 				return null, new error(sprintf("%s expect '.' , but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.Description))
@@ -152,7 +152,7 @@ class TypeParser extends ParserExtends {
 				ret = new ast.Type()
                 ret.Type = ast.VariableTypeGlobal
                 ret.Pos = pos
-                ret.Name = this.parser.token.Data.(string)
+                ret.Name = this.parser.token.stringValue
 				this.Next(lfIsToken)
 			}
 		default:
@@ -167,7 +167,7 @@ class TypeParser extends ParserExtends {
 		}
 		if this.parser.token.Type == lex.TokenVArgs {
 			newRet := new ast.Type()
-			newRet.Pos = this.mkPos()
+			newRet.Pos = this.parser.mkPos()
 			newRet.Type = ast.VariableTypeJavaArray
 			newRet.Array = ret
 			newRet.IsVariableArgs = true
@@ -177,14 +177,14 @@ class TypeParser extends ParserExtends {
 		}
 		for this.parser.token.Type == lex.TokenLb { // int [
 			this.Next(lfIsToken) // skip [
-			this.unExpectNewLineAndSkip()
+			this.parser.unExpectNewLineAndSkip()
 			if this.parser.token.Type != lex.TokenRb {
 				err = new error(sprintf("%s '[' and ']' not match", this.parser.errMsgPrefix()))
 				this.parser.errs.append( err)
 				return ret, err
 			}
 			newRet := new ast.Type()
-			newRet.Pos = this.mkPos()
+			newRet.Pos = this.parser.mkPos()
 			newRet.Type = ast.VariableTypeJavaArray
 			newRet.Array = ret
 			ret = newRet
@@ -212,10 +212,9 @@ class TypeParser extends ParserExtends {
 			this.parser.token.Type == lex.TokenFn
 	}
 
-	fn parseIdentifierType() -> (ret ast.Type,err error) {
-		name := this.parser.token.Data.(string)
-		ret := new ast.Type()
-		ret.Pos =  this.mkPos()
+	fn parseIdentifierType() -> (ret ast.Type = new ast.Type(),err error) {
+		name := this.parser.token.stringValue
+		ret.Pos =  this.parser.mkPos()
 		ret.Type = ast.VariableTypeName
 		this.Next(lfIsToken) // skip name identifier
 		for this.parser.token.Type == lex.TokenSelection {
@@ -224,8 +223,8 @@ class TypeParser extends ParserExtends {
 				return null, new error(sprintf("%s not a identifier after dot",
 					this.parser.errMsgPrefix()))
 			}
-			name += "." + this.parser.token.Data.(string)
-			ret.Pos = this.mkPos() //  override pos
+			name += "." + this.parser.token.stringValue
+			ret.Pos = this.parser.mkPos() //  override pos
 			this.Next(lfIsToken)   // skip identifier
 		}
 		ret.Name = name

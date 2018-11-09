@@ -38,10 +38,10 @@ public class Class {
         return len(this.StaticBlocks) > 0
     }
 
-    fn IsInterface() -> (is bool)  {
+    public fn IsInterface() -> (is bool)  {
         return this.AccessFlags&cg.AccClassInterface != 0
     }
-    fn IsAbstract() -> (is bool)  {
+    public fn IsAbstract() -> (is bool)  {
         return this.AccessFlags&cg.AccClassAbstract != 0
     }
     fn IsFinal() -> (is bool)  {

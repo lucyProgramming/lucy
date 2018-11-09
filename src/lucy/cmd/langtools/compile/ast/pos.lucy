@@ -8,7 +8,7 @@ public class Pos {
 		offset at bs , for special use。
 		for template function only currently
 	*/
-	Offset int
+	public Offset int
 	public fn ErrMsgPrefix() -> (prefix string) {
 		return sprintf("%s:%d:%d:", this.Filename, this.Line, this.Column)
 	}

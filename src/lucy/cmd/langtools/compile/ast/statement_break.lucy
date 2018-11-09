@@ -1,11 +1,11 @@
  
 
 public class StatementBreak {
-	Defers              []StatementDefer
-	StatementFor        StatementFor
-	StatementSwitch     StatementSwitch
-	SwitchTemplateBlock Block
-	Pos                 Pos
+	public Defers              []StatementDefer
+	public StatementFor        StatementFor
+	public StatementSwitch     StatementSwitch
+	public SwitchTemplateBlock Block
+	public Pos                 Pos
 
 	fn check(block Block) ->(errs []error)  {
 		if block.InheritedAttribute.ForBreak == null {
