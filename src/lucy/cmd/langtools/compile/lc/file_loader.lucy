@@ -1,16 +1,4 @@
-package lc
 
-import (
-	"encoding/binary"
-	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-	"io/ioutil"
-	"os"
-	"path/filepath"
-	"strings"
-)
 
 /*
 	load from file implementation
@@ -341,7 +329,7 @@ func (this *FileLoader) loadAsLucy(c *cg.Class) (ast.Class, error) {
 	return astClass, null
 }
 
-func (this *FileLoader) loadLucyEnum(c *cg.Class) (*ast.Enum, error) {
+func (this *FileLoader) loadLucyEnum(c *cg.Class) (ast.Enum, error) {
 	e := &ast.Enum{}
 	{
 		nameIndex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
@@ -581,12 +569,12 @@ func (this *FileLoader) loadLucyPackage(r *Resource) (*ast.Package, error) {
 	}
 
 	delete(fisM, mainClassName)
-	mkEnums := func(e *ast.Enum) {
+	mkEnums := func(e ast.Enum) {
 		if p.Block.Enums == null {
-			p.Block.Enums = make(map[string]*ast.Enum)
+			p.Block.Enums = make(map[string]ast.Enum)
 		}
 		if p.Block.EnumNames == null {
-			p.Block.EnumNames = make(map[string]*ast.EnumName)
+			p.Block.EnumNames = make(map[string]ast.EnumName)
 		}
 		p.Block.Enums[filepath.Base(e.Name)] = e
 		for _, v := range e.Enums {

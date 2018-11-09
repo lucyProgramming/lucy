@@ -66,14 +66,14 @@ class Parser {
 		isAbstract := false
 		var finalPos ast.Pos
 		comment := new CommentParser(this)
-		resetProperty := fn() {
+		fn resetProperty () {
 			accessControlToken = null
 			isFinal = false
 			isAbstract = false
 			finalPos = null
 			comment.reset()
 		}
-		isPublic := fn() -> (is bool) {
+		fn isPublic () -> (is bool) {
 			return accessControlToken != null && accessControlToken.Type == lex.TokenPublic
 		}
 		for this.token.Type != lex.TokenEof {

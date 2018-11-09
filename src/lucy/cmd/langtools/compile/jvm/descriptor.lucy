@@ -3,7 +3,7 @@
 type Description struct {
 }
 
-func (this *Description) methodDescriptor(functionType *ast.FunctionType) string {
+func (this *Description) methodDescriptor(functionType ast.FunctionType) string {
 	s := "("
 	for _, v := range functionType.ParameterList {
 		s += this.typeDescriptor(v.Type)

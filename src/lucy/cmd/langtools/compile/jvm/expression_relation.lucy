@@ -6,7 +6,7 @@ func (this *BuildExpression) buildRelations(
 	e ast.Expression,
 	context Context,
 	state StackMapState) (maxStack char) {
-	bin := e.Data.(*ast.ExpressionBinary)
+	bin := e.Data.(ast.ExpressionBinary)
 	stackLength := len(state.Stacks)
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)

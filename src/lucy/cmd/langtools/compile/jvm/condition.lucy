@@ -29,7 +29,7 @@ func (this *BuildExpression) build2IntCompareConditionNotOk(
 	context Context,
 	state StackMapState,
 	condition ast.Expression) (maxStack char, exit *cg.Exit) {
-	bin := condition.Data.(*ast.ExpressionBinary)
+	bin := condition.Data.(ast.ExpressionBinary)
 	stack := this.build(class, code, bin.Left, context, state)
 	if stack > maxStack {
 		maxStack = stack
@@ -63,7 +63,7 @@ func (this *BuildExpression) buildNullCompareConditionNotOk(
 	state StackMapState,
 	condition ast.Expression) (maxStack char, exit *cg.Exit) {
 	var noNullExpression ast.Expression
-	bin := condition.Data.(*ast.ExpressionBinary)
+	bin := condition.Data.(ast.ExpressionBinary)
 	if bin.Left.Type != ast.ExpressionTypeNull {
 		noNullExpression = bin.Left
 	} else {
@@ -87,7 +87,7 @@ func (this *BuildExpression) buildStringCompareConditionNotOk(
 	context Context,
 	state StackMapState,
 	condition ast.Expression) (maxStack char, exit *cg.Exit) {
-	bin := condition.Data.(*ast.ExpressionBinary)
+	bin := condition.Data.(ast.ExpressionBinary)
 	stack := this.build(class, code, bin.Left, context, state)
 	if stack > maxStack {
 		maxStack = stack
@@ -127,7 +127,7 @@ func (this *BuildExpression) buildPointerCompareConditionNotOk(
 	context Context,
 	state StackMapState,
 	condition ast.Expression) (maxStack char, exit *cg.Exit) {
-	bin := condition.Data.(*ast.ExpressionBinary)
+	bin := condition.Data.(ast.ExpressionBinary)
 	stack := this.build(class, code, bin.Left, context, state)
 	if stack > maxStack {
 		maxStack = stack

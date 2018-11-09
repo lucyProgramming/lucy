@@ -1,10 +1,3 @@
-package lc
-
-import (
-	"fmt"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/ast"
-	"gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg"
-)
 
 func parseMethodParameter(class *cg.Class, bs []byte, f *ast.Function) {
 	a := &cg.AttributeMethodParameters{}
@@ -46,7 +39,7 @@ func loadEnumForVariableType(v ast.Type) error {
 	if err != null {
 		return err
 	}
-	if tt, ok := t.(*ast.Enum); ok && tt != null {
+	if tt, ok := t.(ast.Enum); ok && tt != null {
 		v.Enum = tt
 	} else {
 		return new error(sprintf("'%s' is not a enum", v.Enum.Name)

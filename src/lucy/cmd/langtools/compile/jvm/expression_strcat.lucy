@@ -9,7 +9,7 @@ func (this *BuildExpression) buildStrCat(
 	defer func() {
 		state.popStack(len(state.Stacks) - stackLength)
 	}()
-	bin := e.Data.(*ast.ExpressionBinary)
+	bin := e.Data.(ast.ExpressionBinary)
 	maxStack = this.build(class, code, bin.Left, context, state)
 	if t := this.stackTop2String(class, code, bin.Left.Value, context, state); t > maxStack {
 		maxStack = t

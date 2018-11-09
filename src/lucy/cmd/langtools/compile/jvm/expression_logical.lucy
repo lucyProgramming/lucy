@@ -5,7 +5,7 @@ func (this *BuildExpression) buildLogical(
 	e ast.Expression,
 	context Context,
 	state StackMapState) (maxStack char) {
-	bin := e.Data.(*ast.ExpressionBinary)
+	bin := e.Data.(ast.ExpressionBinary)
 	maxStack = this.build(class, code, bin.Left, context, state)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++

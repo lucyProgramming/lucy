@@ -81,7 +81,7 @@ func (this *BuildPackage) putClass(c cg.ClassHighLevel) {
 	this.classes[name] = class
 }
 
-func (this *BuildPackage) mkEnum(e *ast.Enum) cg.ClassHighLevel {
+func (this *BuildPackage) mkEnum(e ast.Enum) cg.ClassHighLevel {
 	class := &cg.ClassHighLevel{}
 	ast.TypeName = e.Name
 	ast.TypeInsertSourceFile(e.Pos.Filename)

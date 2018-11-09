@@ -1,16 +1,15 @@
-package lc
 
-type resourceKind int
 
-const (
-	_ resourceKind = iota
-	resourceKindJavaClass
-	resourceKindJavaPackage
-	resourceKindLucyClass
+
+
+enum  resourceKind{
+	resourceKindJavaClass = 1,
+	resourceKindJavaPackage,
+	resourceKindLucyClass,
 	resourceKindLucyPackage
-)
+}
 
-type Resource struct {
+class Resource {
 	kind     resourceKind
 	realPath string
 	name     string

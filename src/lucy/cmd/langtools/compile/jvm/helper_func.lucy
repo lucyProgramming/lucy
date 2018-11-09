@@ -1,5 +1,5 @@
 
-func writeExits(es []*cg.Exit, to int) {
+fn writeExits(es []*cg.Exit, to int) {
 	for _, e := range es {
 		offset := int16(to - int(e.CurrentCodeLength))
 		e.BranchBytes[0] = byte(offset >> 8)
@@ -7,7 +7,7 @@ func writeExits(es []*cg.Exit, to int) {
 	}
 }
 
-func jumpTo(code cg.AttributeCode, to int) {
+fn jumpTo(code cg.AttributeCode, to int) {
 	if to < 0 {
 		panic("to is negative")
 	}
@@ -15,14 +15,14 @@ func jumpTo(code cg.AttributeCode, to int) {
 	writeExits([]*cg.Exit{exit}, to)
 }
 
-func copyOPs(code cg.AttributeCode, op ...byte) {
+fn copyOPs(code cg.AttributeCode, op ...byte) {
 	for k, v := range op {
 		code.Codes[code.CodeLength+k] = v
 	}
 	code.CodeLength += len(op)
 }
 
-func loadInt32(c cg.ClassHighLevel, code cg.AttributeCode, value int) {
+fn loadInt32(c cg.ClassHighLevel, code cg.AttributeCode, value int) {
 	switch value {
 	case int(-1):
 		code.Codes[code.CodeLength] = cg.OP_iconst_m1
@@ -63,7 +63,7 @@ func loadInt32(c cg.ClassHighLevel, code cg.AttributeCode, value int) {
 	}
 }
 
-func interfaceMethodArgsCount(functionType *ast.FunctionType) byte {
+fn interfaceMethodArgsCount(functionType ast.FunctionType) byte {
 	var count char
 	count = 1
 	for _, v := range functionType.ParameterList {
@@ -75,7 +75,7 @@ func interfaceMethodArgsCount(functionType *ast.FunctionType) byte {
 	return byte(count)
 }
 
-func jvmSlotSize(typ ast.Type) char {
+fn jvmSlotSize(typ ast.Type) char {
 	if typ.Type == ast.VariableTypeDouble ||
 		typ.Type == ast.VariableTypeLong {
 		return 2
@@ -84,7 +84,7 @@ func jvmSlotSize(typ ast.Type) char {
 	}
 }
 
-func nameTemplateFunction(function *ast.Function) string {
+fn nameTemplateFunction(function *ast.Function) string {
 	s := function.Name
 	for _, v := range function.Type.ParameterList {
 		if v.Type.IsPrimitive() {
@@ -107,7 +107,7 @@ func nameTemplateFunction(function *ast.Function) string {
 	return s
 }
 
-func insertTypeAssertClass(c cg.ClassHighLevel, code cg.AttributeCode, t ast.Type) {
+fn insertTypeAssertClass(c cg.ClassHighLevel, code cg.AttributeCode, t ast.Type) {
 	if t.Type == ast.VariableTypeString {
 		ast.TypeInsertClassConst(javaStringClass, code.Codes[code.CodeLength:code.CodeLength+2])
 	} else if t.Type == ast.VariableTypeObject {
@@ -121,7 +121,7 @@ func insertTypeAssertClass(c cg.ClassHighLevel, code cg.AttributeCode, t ast.Typ
 	code.CodeLength += 2
 }
 
-func newArrayBaseOnType(c cg.ClassHighLevel, code cg.AttributeCode, typ ast.Type) {
+fn newArrayBaseOnType(c cg.ClassHighLevel, code cg.AttributeCode, typ ast.Type) {
 	switch typ.Type {
 	case ast.VariableTypeBool:
 		code.Codes[code.CodeLength] = cg.OP_newarray
@@ -185,7 +185,7 @@ func newArrayBaseOnType(c cg.ClassHighLevel, code cg.AttributeCode, typ ast.Type
 		code.CodeLength += 3
 	}
 }
-func storeArrayElementOp(typ ast.VariableTypeKind) (op byte) {
+fn storeArrayElementOp(typ ast.VariableTypeKind) (op byte) {
 	switch typ {
 	case ast.VariableTypeBool:
 		op = cg.OP_bastore
@@ -213,7 +213,7 @@ func storeArrayElementOp(typ ast.VariableTypeKind) (op byte) {
 /*
 	return function call result stack size , this value should be proper handled
 */
-func popCallResult(code cg.AttributeCode, e ast.Expression, ft *ast.FunctionType) (stackSize char) {
+fn popCallResult(code cg.AttributeCode, e ast.Expression, ft ast.FunctionType) (stackSize char) {
 	stackSize = functionReturnJvmSize(ft)
 	if ft.VoidReturn() == false && e.IsStatementExpression {
 		if len(ft.ReturnList) == 1 {
@@ -232,7 +232,7 @@ func popCallResult(code cg.AttributeCode, e ast.Expression, ft *ast.FunctionType
 	return
 }
 
-func functionReturnJvmSize(ft *ast.FunctionType) char {
+fn functionReturnJvmSize(ft ast.FunctionType) char {
 	if ft.VoidReturn() {
 		return 0
 	}
@@ -243,8 +243,8 @@ func functionReturnJvmSize(ft *ast.FunctionType) char {
 	}
 }
 
-func setEnumArray(c cg.ClassHighLevel, code cg.AttributeCode,
-	state StackMapState, context Context, e *ast.Enum) (maxStack char) {
+fn setEnumArray(c cg.ClassHighLevel, code cg.AttributeCode,
+	state StackMapState, context Context, e ast.Enum) (maxStack char) {
 	if e.DefaultValue == 0 {
 		return
 	}
