@@ -40,10 +40,10 @@ class BuildSwitch {
                 context.MakeStackMap(code, state, code.CodeLength+8)
                 state.popStack(1)
                 code.Codes[code.CodeLength] = cg.OP_if_acmpeq
-                binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
+                binary.BigEndian.putChar(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
                 code.Codes[code.CodeLength+3] = cg.OP_iconst_1
                 code.Codes[code.CodeLength+4] = cg.OP_goto
-                binary.BigEndian.PutUint16(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
+                binary.BigEndian.putChar(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
                 code.Codes[code.CodeLength+7] = cg.OP_iconst_0
                 code.CodeLength += 8
             }

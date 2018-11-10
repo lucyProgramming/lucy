@@ -11,7 +11,7 @@ class BuildinFunctionSprintf {
         this.eb = eb
     }
     
-    fn mkBuildInSprintf(
+    fn build(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
         e ast.Expression,

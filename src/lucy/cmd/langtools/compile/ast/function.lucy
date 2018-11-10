@@ -207,12 +207,12 @@ public class Function {
 				if this.TemplateFunction != null {
 					continue
 				}
-				if v.DefaultValueExpression == null {
-					v.DefaultValueExpression = v.Type.mkDefaultValueExpression()
-					continue
-				}
 				if checkReturnVarExpression == false {
 					// eval expression later
+					continue
+				}
+				if v.DefaultValueExpression == null {
+					v.DefaultValueExpression = v.Type.mkDefaultValueExpression()
 					continue
 				}
 				t, es := v.DefaultValueExpression.checkSingleValueContextExpression(this.Block)

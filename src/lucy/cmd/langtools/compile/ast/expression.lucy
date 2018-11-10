@@ -22,7 +22,7 @@ public class Expression {
 	public longValue long
 	public doubleValue double
 
-	fn IsIdentifier(identifier string) -> (is bool) {
+	public fn IsIdentifier(identifier string) -> (is bool) {
 		if this.Type != ExpressionTypeIdentifier {
 			return false
 		}
@@ -274,7 +274,7 @@ public class Expression {
 	/*
 		check out this expression is increment or decrement
 	*/
-	fn IsIncrement() -> (is bool) {
+	public fn IsIncrement() -> (is bool) {
 		if this.Type == ExpressionTypeIncrement ||
 			this.Type == ExpressionTypePrefixIncrement ||
 			this.Type == ExpressionTypeDecrement ||

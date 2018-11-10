@@ -6,15 +6,15 @@ class LucyMethodSignature {
 	
 	static fn Need(ft ast.FunctionType) ->(n bool)  {
 		for _, v := range ft.ParameterList {
-			if LucyFieldSignatureParser.Need(v.Type) {
+			if LucyFieldSignature.Need(v.Type) {
 				return true
 			}
 		}
-		if ft.VArgs != null && LucyFieldSignatureParser.Need(ft.VArgs.Type) {
+		if ft.VArgs != null && LucyFieldSignature.Need(ft.VArgs.Type) {
 			return true
 		}
 		for _, v := range ft.ReturnList {
-			if LucyFieldSignatureParser.Need(v.Type) {
+			if LucyFieldSignature.Need(v.Type) {
 				return true
 			}
 		}
@@ -53,7 +53,7 @@ class LucyMethodSignature {
 		}
 		for bs[0] != ')' {
 			var t ast.Type
-			bs, t, err = LucyFieldSignatureParser.Decode(bs)
+			bs, t, err = LucyFieldSignature.Decode(bs)
 			if err != null {
 				return bs, err
 			}
@@ -71,7 +71,7 @@ class LucyMethodSignature {
 			for bs[0] != ')' {
 				v := new ast.Variable()
 				var t ast.Type
-				bs, t, err = LucyFieldSignatureParser.Decode(bs)
+				bs, t, err = LucyFieldSignature.Decode(bs)
 				if err != null {
 					return bs, err
 				}

@@ -48,7 +48,7 @@ class BuildinFunctionPrint {
         state.pushStack(c, state.newObjectVariableType(javaPrintStreamClass))
         if len(call.Args) == 1 {
             stack := this.eb.build(c, code, call.Args[0], context, state)
-            if t := 1 + stack; t > maxStack {
+            if t := char(1) + stack; t > maxStack {
                 maxStack = t
             }
 
@@ -129,7 +129,7 @@ class BuildinFunctionPrint {
         for k, v := range call.Args {
             variableType := v.Value
             stack := this.eb.build(c, code, v, context, state)
-            if t := 2 + stack; t > maxStack {
+            if t := char(2) + stack; t > maxStack {
                 maxStack = t
             }
             if t := 2 + this.stackTop2String(c, code, variableType, context, state); t > maxStack {

@@ -12,7 +12,7 @@ public class ClassField {
 	public JvmDescriptor          string      // jvm
 	public DefaultValue           Object // value base on type
 	
-	fn IsStatic() ->(is bool) {
+	public fn IsStatic() ->(is bool) {
 		return (this.AccessFlags & cg.AccFieldStatic) != 0
 	}
 	fn IsPublic() ->(is bool) {

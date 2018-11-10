@@ -25,9 +25,9 @@ class BuildExpressionRelation {
         }
         if bin.Left.Value.IsNumber() ||
             bin.Left.Value.Type == ast.VariableTypeEnum { // in this case ,right must be a number type
-            maxStack = this.build(c, code, bin.Left, context, state)
+            maxStack = this.eb.build(c, code, bin.Left, context, state)
             state.pushStack(c, bin.Left.Value)
-            stack := this.build(c, code, bin.Right, context, state)
+            stack := this.eb.build(c, code, bin.Right, context, state)
             if t := jvmSlotSize(bin.Left.Value) + stack; t > maxStack {
                 maxStack = t
             }
@@ -92,9 +92,9 @@ class BuildExpressionRelation {
         }
         if bin.Left.Value.Type == ast.VariableTypeBool ||
             bin.Right.Value.Type == ast.VariableTypeBool { // bool type
-            maxStack = this.build(c, code, bin.Left, context, state)
+            maxStack = this.eb.build(c, code, bin.Left, context, state)
             state.pushStack(c, bin.Left.Value)
-            stack := this.build(c, code, bin.Right, context, state)
+            stack := this.eb.build(c, code, bin.Right, context, state)
             if t := jvmSlotSize(bin.Left.Value) + stack; t > maxStack {
                 maxStack = t
             }
@@ -126,7 +126,7 @@ class BuildExpressionRelation {
             } else {
                 notNullExpression = bin.Right
             }
-            maxStack = this.build(c, code, notNullExpression, context, state)
+            maxStack = this.eb.build(c, code, notNullExpression, context, state)
             var exit cg.Exit
             if e.Type == ast.ExpressionTypeEq {
                 exit = new cg.Exit(cg.OP_ifnull, code)
@@ -149,9 +149,9 @@ class BuildExpressionRelation {
 
         //string compare
         if bin.Left.Value.Type == ast.VariableTypeString {
-            maxStack = this.build(c, code, bin.Left, context, state)
+            maxStack = this.eb.build(c, code, bin.Left, context, state)
             state.pushStack(c, bin.Left.Value)
-            stack := this.build(c, code, bin.Right, context, state)
+            stack := this.eb.build(c, code, bin.Right, context, state)
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
             c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
@@ -193,12 +193,12 @@ class BuildExpressionRelation {
         }
 
         if bin.Left.Value.IsPointer() && bin.Right.Value.IsPointer() { //
-            stack := this.build(c, code, bin.Left, context, state)
+            stack := this.eb.build(c, code, bin.Left, context, state)
             if stack > maxStack {
                 maxStack = stack
             }
             state.pushStack(c, bin.Left.Value)
-            stack = this.build(c, code, bin.Right, context, state)
+            stack = this.eb.build(c, code, bin.Right, context, state)
             if t := stack + 1; t > maxStack {
                 maxStack = t
             }

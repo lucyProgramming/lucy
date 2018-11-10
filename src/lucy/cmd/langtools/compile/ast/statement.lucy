@@ -46,7 +46,7 @@ public class Statement {
 		this.super()
 		special case
 	*/
-	IsCallFatherConstructionStatement bool
+	public IsCallFatherConstructionStatement bool
 
 	fn isVariableDefinition() ->(is bool)  {
 		if this.Type != StatementTypeExpression {

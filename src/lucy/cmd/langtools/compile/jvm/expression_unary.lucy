@@ -20,7 +20,7 @@ class BuildExpressionUnary{
 
         if e.Type == ast.ExpressionTypeNegative {
             ee := e.Data.(ast.Expression)
-            maxStack = this.build(c, code, ee, context, state)
+            maxStack = this.eb.build(c, code, ee, context, state)
             switch e.Value.Type {
             case ast.VariableTypeByte,ast.VariableTypeShort ,ast.VariableTypeChar ,ast.VariableTypeInt  :
                 code.Codes[code.CodeLength] = cg.OP_ineg
@@ -36,7 +36,7 @@ class BuildExpressionUnary{
         }
         if e.Type == ast.ExpressionTypeBitwiseNot {
             ee := e.Data.(ast.Expression)
-            maxStack = this.build(c, code, ee, context, state)
+            maxStack = this.eb.build(c, code, ee, context, state)
             if t := jvmSlotSize(ee.Value) * 2; t > maxStack {
                 maxStack = t
             }
@@ -49,9 +49,7 @@ class BuildExpressionUnary{
                 if 2 > maxStack {
                     maxStack = 2
                 }
-            case ast.VariableTypeShort:
-                fallthrough
-            case ast.VariableTypeChar:
+            case ast.VariableTypeChar , ast.VariableTypeShort :
                 code.Codes[code.CodeLength] = cg.OP_sipush
                 code.Codes[code.CodeLength+1] = 255
                 code.Codes[code.CodeLength+2] = 255
@@ -70,7 +68,7 @@ class BuildExpressionUnary{
                 }
             case ast.VariableTypeLong:
                 code.Codes[code.CodeLength] = cg.OP_ldc2_w
-                c.InsertLongConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
+                c.InsertLongConst(-1L, code.Codes[code.CodeLength+1:code.CodeLength+3])
                 code.Codes[code.CodeLength+3] = cg.OP_lxor
                 code.CodeLength += 4
                 if 4 > maxStack {
@@ -81,7 +79,7 @@ class BuildExpressionUnary{
         }
         if e.Type == ast.ExpressionTypeNot {
             ee := e.Data.(ast.Expression)
-            maxStack = this.build(c, code, ee, context, state)
+            maxStack = this.eb.build(c, code, ee, context, state)
             exit := new cg.Exit(cg.OP_ifeq, code)
             code.Codes[code.CodeLength] = cg.OP_iconst_0
             code.CodeLength++

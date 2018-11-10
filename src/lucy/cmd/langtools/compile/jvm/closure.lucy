@@ -4,10 +4,10 @@
 
 enum  ClosureKind{
 	ClosureClassInt = 1 ,
-	ClosureClassLong,
-	ClosureClassFloat,
-	ClosureClassDouble,
-	ClosureClassString,
+	ClosureClassLong ,
+	ClosureClassFloat ,
+	ClosureClassDouble ,
+	ClosureClassString ,
 	ClosureClassObject
 }
 

@@ -41,14 +41,14 @@ class BuildPackageFor {
         }
         //init
         if s.Init != null {
-            stack := this.BuildExpression.build(c, code, s.Init, context, forState)
+            stack := this.eb.build(c, code, s.Init, context, forState)
             if stack > maxStack {
                 maxStack = stack
             }
         }
         var firstTimeExit ast.Statement
         if s.Condition != null {
-            stack, exit := this.BuildExpression.buildConditionNotOk(c, code, context, forState, s.Condition)
+            stack, exit := this.eb.buildConditionNotOk(c, code, context, forState, s.Condition)
             if stack > maxStack {
                 maxStack = stack
             }
@@ -58,13 +58,13 @@ class BuildPackageFor {
         s.ContinueCodeOffset = code.CodeLength
         context.MakeStackMap(code, forState, code.CodeLength)
         if s.Increment != null {
-            stack := this.BuildExpression.build(c, code, s.Increment, context, forState)
+            stack := this.eb.build(c, code, s.Increment, context, forState)
             if stack > maxStack {
                 maxStack = stack
             }
         }
         if s.Condition != null {
-            stack, exit := this.BuildExpression.buildConditionNotOk(c, code, context, forState, s.Condition)
+            stack, exit := this.eb.buildConditionNotOk(c, code, context, forState, s.Condition)
             if stack > maxStack {
                 maxStack = stack
             }

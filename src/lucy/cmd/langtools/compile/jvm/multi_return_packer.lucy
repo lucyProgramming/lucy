@@ -5,10 +5,11 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 class MultiValueAutoVar {
 	localVarOffset char
 	fn MultiValueAutoVar(c cg.ClassHighLevel, code cg.AttributeCode, state StackMapState){
+        this.super()
         this.localVarOffset = code.MaxLocals
         code.MaxLocals++
         copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-            this.localVarOffset)...)
+            this.localVarOffset))
         state.appendLocals(c, state.newObjectVariableType(javaRootObjectArray))
 	}
 
@@ -40,7 +41,7 @@ class MultiValueAutoVar {
         maxStack = 2
         //a.buildLoadArrayListAutoVar(code, context) // local array list on stack
         copyOPs(code,
-            loadLocalVariableOps(ast.VariableTypeObject, this.localVarOffset)...)
+            loadLocalVariableOps(ast.VariableTypeObject, this.localVarOffset))
         loadInt32(c, code, int(valueIndex))
         code.Codes[code.CodeLength] = cg.OP_aaload
         code.CodeLength++

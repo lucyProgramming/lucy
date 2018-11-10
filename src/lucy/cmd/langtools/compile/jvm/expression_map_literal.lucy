@@ -90,7 +90,7 @@ class BuildExpressionMap{
         case common.MapMethodKeyExist:
             variableType := call.Args[0].Value
             stack := this.eb.build(c, code, call.Args[0], context, state)
-            if t := 1 + stack; t > maxStack {
+            if t := char(1) + stack; t > maxStack {
                 maxStack = t
             }
             if variableType.IsPointer() == false {

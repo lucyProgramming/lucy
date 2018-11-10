@@ -66,7 +66,7 @@ class BuildExpressionSelection {
                 maxStack = 4
             }
             if selection.Expression.Value.Type == ast.VariableTypeObject {
-                stack := this.build(c, code, selection.Expression, context, state)
+                stack := this.eb.build(c, code, selection.Expression, context, state)
                 if t := 1 + stack; t > maxStack {
                     maxStack = t
                 }
@@ -220,7 +220,7 @@ class BuildExpressionSelection {
             return
         case ast.VariableTypeObject:
             // object
-            stack := this.build(c, code, selection.Expression, context, state)
+            stack := this.eb.build(c, code, selection.Expression, context, state)
             if stack > maxStack {
                 maxStack = stack
             }

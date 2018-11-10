@@ -5,9 +5,7 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 class BuildExpressionVarAssign {
 
-    
     eb BuildExpression
-    
     fn BuildExpressionVarAssign(eb BuildExpression){
         this.super()
         this.eb = eb
@@ -37,15 +35,15 @@ class BuildExpressionVarAssign {
                 state.pushStack(c, obj)
                 state.pushStack(c, obj)
             }
-            stack := this.build(c, code, vs.InitValues[0], context, state)
+            stack := this.eb.build(c, code, vs.InitValues[0], context, state)
             if t := currentStack + stack; t > maxStack {
                 maxStack = t
             }
             if v.IsGlobal {
-                this.BuildPackage.storeGlobalVariable(c, code, v)
+                this.eb.storeGlobalVariable(c, code, v)
             } else {
                 v.LocalValOffset = code.MaxLocals
-                this.BuildPackage.storeLocalVar(c, code, v)
+                this.eb.storeLocalVar(c, code, v)
                 if v.BeenCapturedAsLeftValue > 0 {
                     code.MaxLocals++
                     copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
@@ -58,7 +56,7 @@ class BuildExpressionVarAssign {
             return
         }
         if len(vs.InitValues) == 1 {
-            maxStack = this.build(c, code, vs.InitValues[0], context, state)
+            maxStack = this.eb.build(c, code, vs.InitValues[0], context, state)
         } else {
             maxStack = this.buildExpressions(c, code, vs.InitValues, context, state)
         }

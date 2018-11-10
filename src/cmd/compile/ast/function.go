@@ -213,12 +213,12 @@ func (this *Function) checkParametersAndReturns(
 			if this.TemplateFunction != nil {
 				continue
 			}
-			if v.DefaultValueExpression == nil {
-				v.DefaultValueExpression = v.Type.mkDefaultValueExpression()
-				continue
-			}
 			if checkReturnVarExpression == false {
 				// eval expression later
+				continue
+			}
+			if v.DefaultValueExpression == nil {
+				v.DefaultValueExpression = v.Type.mkDefaultValueExpression()
 				continue
 			}
 			t, es := v.DefaultValueExpression.checkSingleValueContextExpression(&this.Block)

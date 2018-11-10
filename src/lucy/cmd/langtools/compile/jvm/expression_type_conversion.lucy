@@ -51,7 +51,7 @@ class BuildExpressionTypeConversion {
             state.Stacks = append(state.Stacks, t, t)
             code.CodeLength += 4
         }
-        stack := this.build(c, code, conversion.Expression, context, state)
+        stack := this.eb.build(c, code, conversion.Expression, context, state)
         maxStack = currentStack + stack
         if e.Value.IsNumber() {
             this.numberTypeConverter(code, conversion.Expression.Value.Type, conversion.Type.Type)

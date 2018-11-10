@@ -6,6 +6,24 @@ public class FunctionType {
 	public ReturnList       []Variable
 	public VArgs            Variable
 
+	fn reDefineParameterOrReturnVar(v Variable) -> (err error){
+		for _,v := range this.ParameterList{
+			if v.Name == v.Name {
+				return new error(sprintf("%s reDefine parameter '%s'" , 
+					v.Pos.ErrMsgPrefix() . v.Name()))
+			}
+		}
+		if this.VoidReturn() == false {
+			for _,v := range this.ReturnList{
+				if v.Name == v.Name {
+					return new error(sprintf("%s reDefine return variable '%s'" , 
+						v.Pos.ErrMsgPrefix() . v.Name()))
+				}
+			}
+		}
+
+	}
+
 	public fn CheckTemplateNameDuplication() -> (errs []error) {
 		errs = []error{}
 		m := new map {string -> Pos}()

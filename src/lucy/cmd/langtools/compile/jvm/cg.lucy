@@ -150,7 +150,7 @@ class  BuildPackage {
                 f.AccessFlags |= cg.AccFieldPublic
             }
             f.AccessFlags |= cg.AccFieldVolatile
-            if LucyFieldSignatureParser.Need(v.Type) {
+            if LucyFieldSignature.Need(v.Type) {
                 f.AttributeLucyFieldDescriptor = new cg.AttributeLucyFieldDescriptor()
                 f.AttributeLucyFieldDescriptor.Descriptor = LucyFieldSignature.Encode(v.Type)
                 if v.Type.FunctionType.VArgs != nil {
@@ -158,6 +158,7 @@ class  BuildPackage {
                         cg.AccMethodVarargs
                 }
             }
+            v.GlobalVarClassName = this.mainClass.Name
             if v.Comment != "" {
                 f.AttributeLucyComment = new cg.AttributeLucyComment ()
                 f.AttributeLucyComment.Comment = v.Comment
@@ -318,7 +319,7 @@ class  BuildPackage {
                     v.DefaultValue)
             }
             f.Descriptor = Descriptor.typeDescriptor(v.Type)
-            if LucyFieldSignatureParser.Need(v.Type) {
+            if LucyFieldSignature.Need(v.Type) {
                 t := new cg.AttributeLucyFieldDescriptor()
                 t.Descriptor = LucyFieldSignature.Encode(v.Type)
                 f.AttributeLucyFieldDescriptor = t
@@ -452,19 +453,6 @@ class  BuildPackage {
         ast.TypeAppendMethod(method)
     }
 
-    fn storeGlobalVariable(c cg.ClassHighLevel, code cg.AttributeCode,
-        v ast.Variable) {
-        code.Codes[code.CodeLength] = cg.OP_putstatic
-        if v.JvmDescriptor == "" {
-            v.JvmDescriptor = Descriptor.typeDescriptor(v.Type)
-        }
-        c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-                this.mainClass.Name,
-                v.Name,
-             v.JvmDescriptor
-        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.CodeLength += 3
-    }
 
 
 }

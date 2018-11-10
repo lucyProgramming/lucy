@@ -5,7 +5,7 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 /*
 	store local var according on type and offset
 */
-fn storeLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs byte[] ) {
+fn storeLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs []byte) {
 	if offset == math.MaxUint16 {
 		panic("local variable missing assign offset ," +
 			" this is cause by serious compiler error")

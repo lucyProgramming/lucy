@@ -17,7 +17,7 @@ class BuildinFunctionPrintf {
     /*
         function printf
     */
-    fn mkBuildInPrintf(
+    fn build(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
         e ast.Expression,
@@ -39,7 +39,7 @@ class BuildinFunctionPrintf {
         maxStack = 1
         state.pushStack(c, state.newObjectVariableType(javaPrintStreamClass))
         stack := this.eb.build(c, code, meta.Format, context, state)
-        if t := 1 + stack; t > maxStack {
+        if t := char(1) + stack; t > maxStack {
             maxStack = t
         }
         state.pushStack(c, state.newObjectVariableType(javaStringClass))

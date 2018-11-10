@@ -93,7 +93,7 @@ class BuildExpressionNew {
             }
         }
         n := e.Data.(ast.ExpressionNew)
-        maxStack = this.build(c, code, n.Args[0], context, state) // must be a integer
+        maxStack = this.eb.build(c, code, n.Args[0], context, state) // must be a integer
         currentStack := char(1)
         for i := byte(0); i < dimensions-1; i++ {
             loadInt32(c, code, 0)
@@ -138,7 +138,7 @@ class BuildExpressionNew {
             defer state.popStack(2)
         }
         // get amount
-        stack := this.build(c, code, n.Args[0], context, state) // must be a integer
+        stack := this.eb.build(c, code, n.Args[0], context, state) // must be a integer
         if t := 2 + stack; t > maxStack {
             maxStack = t
         }

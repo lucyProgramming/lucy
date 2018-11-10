@@ -17,7 +17,7 @@ public class Variable {
 	public LocalValOffset           char // offset in stack frame
 	public JvmDescriptor            string // jvm
 	public Comment                  string
-
+	public GlobalVarClassName 		string 
 	fn isPublic() -> (is bool) {
 		return this.AccessFlags&
 			cg.AccFieldPublic != 0
@@ -30,7 +30,8 @@ public class Variable {
 		v.Name = this.Name
 		v.Type = this.Type.Clone()
 		v.Comment = this.Comment
-
 	}
+
+
 }
 

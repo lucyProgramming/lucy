@@ -2,6 +2,8 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 class ExpressionCheckLeftValue {
 	
+
+	
 	static fn getLeftValue(e Expression, block Block, errs []error) -> (result Type) {
 		switch e.Type {
 		case ExpressionTypeIdentifier:

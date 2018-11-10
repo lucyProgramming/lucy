@@ -16,7 +16,7 @@ class BuildinFunctionCall {
     BuildinFunctionSprintf BuildinFunctionSprintf
 
 
-    fn BuildExpressionBuildinFunctionCall(eb BuildExpression){
+    fn BuildinFunctionCall(eb BuildExpression){
         this.super()
         this.eb = eb
         this.BuildinFunctionAssert = new BuildinFunctionAssert(eb)
@@ -37,9 +37,13 @@ class BuildinFunctionCall {
         state StackMapState) -> (maxStack char) {
         call := e.Data.(ast.ExpressionFunctionCall)
         if call.Function.LoadedFromCorePackage {
-            maxStack = this.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
+            maxStack = this.eb.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
             code.Codes[code.CodeLength] = cg.OP_invokestatic
-            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.Function.Entrance.Class.Name,call.Function.Name,call.Function.Entrance.Descriptor
+            c.InsertMethodRefConst(
+                new cg.ConstantInfoMethodrefHighLevel(
+                    call.Function.Entrance.Class.Name,
+                    call.Function.Name,
+                    call.Function.Entrance.Descriptor
             ), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
             return
@@ -62,15 +66,15 @@ class BuildinFunctionCall {
             code.CodeLength++
           */
         case common.BuildInFunctionPrintf:
-            return this.mkBuildInPrintf(c, code, e, context, state)
+            return this.BuildinFunctionPrintf.build(c, code, e, context, state)
         case common.BuildInFunctionSprintf:
-            return this.BuildinFunctionPrintf.mkBuildInSprintf(c, code, e, context, state)
+            return this.BuildinFunctionSprintf.build(c, code, e, context, state)
         case common.BuildInFunctionLen:
-            return this.mkBuildInLen(c, code, e, context, state)
-        case common.BuildInFunctionBlockHole:
-            return this.mkBuildInBlackHole(c, code, e, context, state)
+            return this.BuildinFunctionLen.build(c, code, e, context, state)
+        //case common.BuildInFunctionBlockHole:
+        //    return this.mkBuildInBlackHole(c, code, e, context, state)
         case common.BuildInFunctionAssert:
-            return this.BuildinFunctionAssert.mkBuildInAssert(c, code, e, context, state)
+            return this.BuildinFunctionAssert.build(c, code, e, context, state)
         default:
             panic("unknown  buildIn function:" + call.Function.Name)
         }

@@ -67,21 +67,6 @@ func (this *Type) validForTypeAssertOrConversion() bool {
 		return false
 	}
 	return true
-	//// object or string
-	//if this.Type == VariableTypeObject || this.Type == VariableTypeString {
-	//	return true
-	//}
-	//if this.Type == VariableTypeArray && this.Array.IsPrimitive() {
-	//	return true
-	//}
-	//if this.Type == VariableTypeJavaArray {
-	//	if this.Array.IsPointer() {
-	//		return this.Array.validForTypeAssertOrConversion()
-	//	} else {
-	//		return true
-	//	}
-	//}
-	//return false
 }
 
 func (this *Type) mkDefaultValueExpression() *Expression {

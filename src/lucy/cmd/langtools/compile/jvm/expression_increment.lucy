@@ -57,7 +57,7 @@ class BuildExpressionIncrement {
 		/*
 			left value must can be used as right value
 		*/
-		stack := this.build(c, code, increment, context, state) // load it`s value
+		stack := this.eb.build(c, code, increment, context, state) // load it`s value
 		if t := stack + remainStack; t > maxStack {
 			maxStack = t
 		}

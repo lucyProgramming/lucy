@@ -26,7 +26,7 @@ class BuildExpressionCallArgs {
 			state.popStack(len(state.Stacks) - stackLength) // let`s pop
 		}
 		for _, e := range args {
-			stack := this.build(c, code, e, context, state)
+			stack := this.eb.build(c, code, e, context, state)
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
 			}
@@ -39,12 +39,12 @@ class BuildExpressionCallArgs {
 		if vArgs.NoArgs {
 			code.Codes[code.CodeLength] = cg.OP_aconst_null
 			code.CodeLength++
-			if t := 1 + currentStack; t > maxStack {
+			if t := char(1) + currentStack; t > maxStack {
 				maxStack = t
 			}
 		} else {
 			if vArgs.PackArray2VArgs {
-				stack := this.build(c, code, vArgs.Expressions[0], context, state)
+				stack := this.eb.build(c, code, vArgs.Expressions[0], context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
@@ -62,7 +62,7 @@ class BuildExpressionCallArgs {
 					loadInt32(c, code, index)
 					state.pushStack(c,typeInt)
 					currentStack += 2
-					stack := this.build(c, code, e, context, state)
+					stack := this.eb.build(c, code, e, context, state)
 					if t := currentStack + stack; t > maxStack {
 						maxStack = t
 					}

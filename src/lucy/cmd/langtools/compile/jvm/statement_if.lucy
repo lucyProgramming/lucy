@@ -3,6 +3,14 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
 class BuildIf {
+    eb BuildExpression
+    bb BuildBlock 
+    
+    fn BuildIf(eb BuildExpression , bb BuildBlock ){
+        this.super()
+        this.eb = eb
+        this.bb = bb
+    }
 
     fn buildIfStatement(
         c cg.ClassHighLevel,
@@ -13,7 +21,7 @@ class BuildIf {
         ifState := new StackMapState(state)
         defer state.addTop(ifState)
         for _, v := range s.PrefixExpressions {
-            stack := this.BuildExpression.build(c, code, v, context, ifState)
+            stack := this.eb.build(c, code, v, context, ifState)
             if stack > maxStack {
                 maxStack = stack
             }

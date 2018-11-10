@@ -245,7 +245,7 @@ class  BuildExpressionFunction {
 		}
 		if function.IsClosureFunction {
 			if context.function.Closure.ClosureFunctionExist(function) {
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0))
 				code.Codes[code.CodeLength] = cg.OP_getfield
 				c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					ast.TypeName,

@@ -373,7 +373,7 @@ public class Type {
 			errMsgPrefix(this.Pos), this.Name))
 	}
 
-	fn IsNumber() -> (is bool) {
+	public fn IsNumber() -> (is bool) {
 		return this.isInteger() ||
 			this.isFloat()
 	}

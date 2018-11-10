@@ -92,7 +92,7 @@ class BuildExpressionIndex {
         ), code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.CodeLength += 3
         state.pushStack(c, state.newObjectVariableType("[B"))
-        stack := this.build(c, code, index.Index, context, state)
+        stack := this.eb.build(c, code, index.Index, context, state)
         if t := 1 + stack; t > maxStack {
             maxStack = t
         }
@@ -111,11 +111,11 @@ class BuildExpressionIndex {
             state.popStack(len(state.Stacks) - length)
         }
         index := e.Data.(ast.ExpressionIndex)
-        maxStack = this.build(c, code, index.Expression, context, state)
+        maxStack = this.eb.build(c, code, index.Expression, context, state)
         currentStack := char(1)
         //build index
         state.pushStack(c, index.Expression.Value)
-        stack := this.build(c, code, index.Index, context, state)
+        stack := this.eb.build(c, code, index.Index, context, state)
         if t := currentStack + stack; t > maxStack {
             maxStack = t
         }

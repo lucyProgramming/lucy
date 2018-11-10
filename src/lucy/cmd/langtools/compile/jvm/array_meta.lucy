@@ -22,6 +22,7 @@ class ArrayMeta {
 	getMethodDescription      string
 	fn ArrayMeta(className , constructorFuncDescriptor ,sliceDescriptor ,appendDescriptor,appendAllDescriptor , elementsFieldDescriptor ,
 		setMethodDescription , 	getMethodDescription string){
+			this.super()
 			this.className = className
 			this.constructorFuncDescriptor = constructorFuncDescriptor
 			this.sliceDescriptor = sliceDescriptor

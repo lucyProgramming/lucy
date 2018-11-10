@@ -32,8 +32,7 @@ class BuildExpressionArray {
 		code.CodeLength += 4
 		{
 			verify := new cg.StackMapVerificationTypeInfo()
-			unInit := new cg.StackMapUninitializedVariableInfo()
-			unInit.CodeOffset = char(code.CodeLength - 4)
+			unInit := new cg.StackMapUninitializedVariableInfo(char(code.CodeLength - 4))
 			verify.Verify = unInit
 			state.Stacks = append(state.Stacks, verify, verify)
 		}
