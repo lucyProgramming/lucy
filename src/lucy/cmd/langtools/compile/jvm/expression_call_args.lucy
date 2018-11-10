@@ -1,66 +1,69 @@
- 
-func (this *BuildExpression) buildCallArgs(
-	c cg.ClassHighLevel,
-	code cg.AttributeCode,
-	args []ast.Expression,
-	vArgs *ast.CallVariableArgs,
-	context Context,
-	state StackMapState) (maxStack char) {
-	currentStack := char(0)
-	stackLength := len(state.Stacks)
-	defer func() {
-		state.popStack(len(state.Stacks) - stackLength) // let`s pop
-	}()
-	for _, e := range args {
-		stack := this.build(class, code, e, context, state)
-		if t := stack + currentStack; t > maxStack {
-			maxStack = t
+class BuildExpressionCallArgs {
+
+	fn buildCallArgs(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		args []ast.Expression,
+		vArgs ast.CallVariableArgs,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		currentStack := char(0)
+		stackLength := len(state.Stacks)
+		defer  {
+			state.popStack(len(state.Stacks) - stackLength) // let`s pop
 		}
-		currentStack += jvmSlotSize(e.Value)
-		state.pushStack(class, e.Value)
-	}
-	if vArgs == null {
-		return
-	}
-	if vArgs.NoArgs {
-		code.Codes[code.CodeLength] = cg.OP_aconst_null
-		code.CodeLength++
-		if t := 1 + currentStack; t > maxStack {
-			maxStack = t
+		for _, e := range args {
+			stack := this.build(c, code, e, context, state)
+			if t := stack + currentStack; t > maxStack {
+				maxStack = t
+			}
+			currentStack += jvmSlotSize(e.Value)
+			state.pushStack(c, e.Value)
 		}
-	} else {
-		if vArgs.PackArray2VArgs {
-			stack := this.build(class, code, vArgs.Expressions[0], context, state)
-			if t := currentStack + stack; t > maxStack {
+		if vArgs == null {
+			return
+		}
+		if vArgs.NoArgs {
+			code.Codes[code.CodeLength] = cg.OP_aconst_null
+			code.CodeLength++
+			if t := 1 + currentStack; t > maxStack {
 				maxStack = t
 			}
 		} else {
-			loadInt32(class, code, int(vArgs.Length))
-			newArrayBaseOnType(class, code, vArgs.Type.Array)
-			state.pushStack(class, vArgs.Type)
-			currentStack++
-			op := storeArrayElementOp(vArgs.Type.Array.Type)
-			index := int(0)
-			for _, e := range vArgs.Expressions {
-				code.Codes[code.CodeLength] = cg.OP_dup
-				code.CodeLength++
-				state.pushStack(class, vArgs.Type)
-				loadInt32(class, code, index)
-				state.pushStack(class, &ast.Type{
-					Type: ast.VariableTypeInt,
-				})
-				currentStack += 2
-				stack := this.build(class, code, e, context, state)
+			if vArgs.PackArray2VArgs {
+				stack := this.build(c, code, vArgs.Expressions[0], context, state)
 				if t := currentStack + stack; t > maxStack {
 					maxStack = t
 				}
-				code.Codes[code.CodeLength] = op
-				code.CodeLength++
-				state.popStack(2)
-				currentStack -= 2
-				index++
+			} else {
+				loadInt32(c, code, int(vArgs.Length))
+				newArrayBaseOnType(c, code, vArgs.Type.Array)
+				state.pushStack(c, vArgs.Type)
+				currentStack++
+				op := storeArrayElementOp(vArgs.Type.Array.Type)
+				index := int(0)
+				for _, e := range vArgs.Expressions {
+					code.Codes[code.CodeLength] = cg.OP_dup
+					code.CodeLength++
+					state.pushStack(c, vArgs.Type)
+					loadInt32(c, code, index)
+					state.pushStack(c,typeInt)
+					currentStack += 2
+					stack := this.build(c, code, e, context, state)
+					if t := currentStack + stack; t > maxStack {
+						maxStack = t
+					}
+					code.Codes[code.CodeLength] = op
+					code.CodeLength++
+					state.popStack(2)
+					currentStack -= 2
+					index++
+				}
 			}
 		}
-	}
-	return
+		return
+	}	
+
 }
+
+ 

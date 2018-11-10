@@ -20,7 +20,7 @@ func (this *BuildPackage) buildForRangeStatementForArray(
 	code.Codes[code.CodeLength] = cg.OP_pop
 	code.CodeLength++
 	s.Exits = append(s.Exits, (&cg.Exit{}).Init(cg.OP_goto, code))
-	writeExits([]*cg.Exit{noNullExit}, code.CodeLength)
+	writeExits([]cg.Exit{noNullExit}, code.CodeLength)
 	state.pushStack(class, attr.RangeOn.Value)
 	context.MakeStackMap(code, state, code.CodeLength)
 	state.popStack(1)

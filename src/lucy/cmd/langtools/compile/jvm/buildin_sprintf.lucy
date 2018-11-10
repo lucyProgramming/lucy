@@ -1,63 +1,67 @@
  
+class BuildExpressionSprintf {
 
-func (this *BuildExpression) mkBuildInSprintf(
-	c cg.ClassHighLevel,
-	code cg.AttributeCode,
-	e ast.Expression,
-	context Context,
-	state StackMapState) (maxStack char) {
-	length := len(state.Stacks)
-	defer func() {
-		state.popStack(len(state.Stacks) - length)
-	}()
-	// format,must be string
-	call := e.Data.(*ast.ExpressionFunctionCall)
-	meta := call.BuildInFunctionMeta.(*ast.BuildInFunctionSprintfMeta)
-	maxStack = this.build(class, code, meta.Format, context, state)
-	state.pushStack(class, state.newObjectVariableType(javaStringClass))
-	loadInt32(class, code, int(meta.ArgsLength))
-	code.Codes[code.CodeLength] = cg.OP_anewarray
-	ast.TypeInsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	currentStack := char(2)
-	if currentStack > maxStack {
-		maxStack = currentStack
-	}
-	objectArray := &ast.Type{}
-	objectArray.Type = ast.VariableTypeJavaArray
-	objectArray.Array = state.newObjectVariableType(javaRootClass)
-	state.pushStack(class, objectArray)
-	index := int(0)
-	for _, v := range call.Args {
-		currentStack = 2
-		code.Codes[code.CodeLength] = cg.OP_dup
-		code.CodeLength++
-		loadInt32(class, code, index)
-		currentStack += 2
-		state.pushStack(class, objectArray)
-		state.pushStack(class, &ast.Type{Type: ast.VariableTypeInt})
-		stack := this.build(class, code, v, context, state)
-		if t := currentStack + stack; t > maxStack {
-			maxStack = t
-		}
-		if v.Value.IsPointer() == false {
-			typeConverter.packPrimitives(class, code, v.Value)
-		}
-		code.Codes[code.CodeLength] = cg.OP_aastore
-		code.CodeLength++
-		index++
-		state.popStack(2)
-	}
-	code.Codes[code.CodeLength] = cg.OP_invokestatic
-	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
-		Class:      javaStringClass,
-		Method:     "format",
-		Descriptor: "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	if e.IsStatementExpression {
-		code.Codes[code.CodeLength] = cg.OP_pop
-		code.CodeLength++
-	}
-	return
+    fn mkBuildInSprintf(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        e ast.Expression,
+        context Context,
+        state StackMapState) -> (maxStack char) {
+        length := len(state.Stacks)
+        defer {
+            state.popStack(len(state.Stacks) - length)
+        }
+        // format,must be string
+        call := e.Data.(ast.ExpressionFunctionCall)
+        meta := call.BuildInFunctionMeta.(ast.BuildInFunctionSprintfMeta)
+        maxStack = this.build(c, code, meta.Format, context, state)
+        state.pushStack(c, state.newObjectVariableType(javaStringClass))
+        loadInt32(c, code, int(meta.ArgsLength))
+        code.Codes[code.CodeLength] = cg.OP_anewarray
+        ast.TypeInsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
+        code.CodeLength += 3
+        currentStack := char(2)
+        if currentStack > maxStack {
+            maxStack = currentStack
+        }
+        objectArray := new ast.Type()
+        objectArray.Type = ast.VariableTypeJavaArray
+        objectArray.Array = state.newObjectVariableType(javaRootClass)
+        state.pushStack(c, objectArray)
+        index := int(0)
+        for _, v := range call.Args {
+            currentStack = 2
+            code.Codes[code.CodeLength] = cg.OP_dup
+            code.CodeLength++
+            loadInt32(c, code, index)
+            currentStack += 2
+            state.pushStack(c, objectArray)
+            state.pushStack(c, typeInt)
+            stack := this.build(c, code, v, context, state)
+            if t := currentStack + stack; t > maxStack {
+                maxStack = t
+            }
+            if v.Value.IsPointer() == false {
+                typeConverter.packPrimitives(c, code, v.Value)
+            }
+            code.Codes[code.CodeLength] = cg.OP_aastore
+            code.CodeLength++
+            index++
+            state.popStack(2)
+        }
+        code.Codes[code.CodeLength] = cg.OP_invokestatic
+        ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+                javaStringClass,
+                 "format",
+            "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;"
+        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
+        code.CodeLength += 3
+        if e.IsStatementExpression {
+            code.Codes[code.CodeLength] = cg.OP_pop
+            code.CodeLength++
+        }
+        return
+    }
 }
+
+

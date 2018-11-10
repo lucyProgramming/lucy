@@ -1,57 +1,155 @@
+class BuildExpressionMap{
 
-func (this *BuildExpression) buildMapLiteral(
-	c cg.ClassHighLevel,
-	code cg.AttributeCode,
-	e ast.Expression,
-	context Context,
-	state StackMapState) (maxStack char) {
-	code.Codes[code.CodeLength] = cg.OP_new
-	ast.TypeInsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.Codes[code.CodeLength+3] = cg.OP_dup
-	code.CodeLength += 4
-	maxStack = 2
-	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
-		Class:      mapClass,
-		Method:     specialMethodInit,
-		Descriptor: "()V",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	values := e.Data.(*ast.ExpressionMap).KeyValuePairs
-	hashMapObject := state.newObjectVariableType(mapClass)
-	state.pushStack(class, hashMapObject)
-	defer state.popStack(1)
-	for _, v := range values {
-		code.Codes[code.CodeLength] = cg.OP_dup
-		code.CodeLength++
-		currentStack := char(2)
-		state.pushStack(class, hashMapObject)
-		stack := this.build(class, code, v.Key, context, state)
-		if t := currentStack + stack; t > maxStack {
-			maxStack = t
-		}
-		if v.Key.Value.IsPointer() == false {
-			typeConverter.packPrimitives(class, code, v.Key.Value)
-		}
-		state.pushStack(class, state.newObjectVariableType(javaRootClass))
-		currentStack = 3 // stack is ... mapref mapref kref
-		stack = this.build(class, code, v.Value, context, state)
-		if t := currentStack + stack; t > maxStack {
-			maxStack = t
-		}
-		if v.Value.Value.IsPointer() == false {
-			typeConverter.packPrimitives(class, code, v.Value.Value)
-		}
-		// put in hashmap
-		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
-			Class:      mapClass,
-			Method:     "put",
-			Descriptor: "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.Codes[code.CodeLength+3] = cg.OP_pop
-		code.CodeLength += 4
-		state.popStack(2)
-	}
-	return
+    fn  buildMapLiteral(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        e ast.Expression,
+        context Context,
+        state StackMapState) -> (maxStack char) {
+        code.Codes[code.CodeLength] = cg.OP_new
+        ast.TypeInsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+        code.Codes[code.CodeLength+3] = cg.OP_dup
+        code.CodeLength += 4
+        maxStack = 2
+        code.Codes[code.CodeLength] = cg.OP_invokespecial
+        ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            mapClass,
+            specialMethodInit,
+           "()V"
+        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
+        code.CodeLength += 3
+        values := e.Data.(ast.ExpressionMap).KeyValuePairs
+        hashMapObject := state.newObjectVariableType(mapClass)
+        state.pushStack(c, hashMapObject)
+        defer state.popStack(1)
+        for _, v := range values {
+            code.Codes[code.CodeLength] = cg.OP_dup
+            code.CodeLength++
+            currentStack := char(2)
+            state.pushStack(c, hashMapObject)
+            stack := this.build(c, code, v.Key, context, state)
+            if t := currentStack + stack; t > maxStack {
+                maxStack = t
+            }
+            if v.Key.Value.IsPointer() == false {
+                typeConverter.packPrimitives(c, code, v.Key.Value)
+            }
+            state.pushStack(c, state.newObjectVariableType(javaRootClass))
+            currentStack = 3 // stack is ... mapref mapref kref
+            stack = this.build(c, code, v.Value, context, state)
+            if t := currentStack + stack; t > maxStack {
+                maxStack = t
+            }
+            if v.Value.Value.IsPointer() == false {
+                typeConverter.packPrimitives(c, code, v.Value.Value)
+            }
+            // put in hashmap
+            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+                mapClass,
+                "put",
+                "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"
+            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
+            code.Codes[code.CodeLength+3] = cg.OP_pop
+            code.CodeLength += 4
+            state.popStack(2)
+        }
+        return
+    }
+
+
+    fn  buildMethodCallOnMap(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        e ast.Expression,
+        context Context,
+        state StackMapState) -> (maxStack char) {
+        call := e.Data.(ast.ExpressionMethodCall)
+        maxStack = this.build(c, code, call.Expression, context, state)
+        stackLength := len(state.Stacks)
+        defer  {
+            state.popStack(len(state.Stacks) - stackLength)
+        }
+        hashMapVerifyType := state.newObjectVariableType(mapClass)
+        state.pushStack(c, hashMapVerifyType)
+        switch call.Name {
+        case common.MapMethodKeyExist:
+            variableType := call.Args[0].Value
+            stack := this.build(c, code, call.Args[0], context, state)
+            if t := 1 + stack; t > maxStack {
+                maxStack = t
+            }
+            if variableType.IsPointer() == false {
+                typeConverter.packPrimitives(c, code, variableType)
+            }
+            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+                mapClass,
+                "containsKey",
+                "(Ljava/lang/Object;)Z"
+            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
+            code.CodeLength += 3
+            if e.IsStatementExpression {
+                code.Codes[code.CodeLength] = cg.OP_pop
+                code.CodeLength++
+            }
+        case common.MapMethodRemove:
+            currentStack := char(1)
+            for k, v := range call.Args {
+                currentStack = 1
+                variableType := v.Value
+                if k != len(call.Args)-1 {
+                    code.Codes[code.CodeLength] = cg.OP_dup
+                    currentStack++
+                    if currentStack > maxStack {
+                        maxStack = currentStack
+                    }
+                    state.pushStack(c, hashMapVerifyType)
+                }
+                stack := this.build(c, code, v, context, state)
+                if t := stack + currentStack; t > maxStack {
+                    maxStack = t
+                }
+                if variableType.IsPointer() == false {
+                    typeConverter.packPrimitives(c, code, variableType)
+                }
+                //call remove
+                code.Codes[code.CodeLength] = cg.OP_invokevirtual
+                ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+                    mapClass,
+                    "remove",
+                    "(Ljava/lang/Object;)Ljava/lang/Object;"
+                ), code.Codes[code.CodeLength+1:code.CodeLength+3])
+                code.Codes[code.CodeLength+3] = cg.OP_pop
+                code.CodeLength += 4
+                if k != len(call.Args)-1 {
+                    state.popStack(1)
+                }
+            }
+        case common.MapMethodRemoveAll:
+            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+                mapClass,
+                "clear",
+                "()V"
+            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
+            code.CodeLength += 3
+        case common.MapMethodSize:
+            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+                mapClass,
+                "size",
+                "()I"
+            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
+            code.CodeLength += 3
+            if e.IsStatementExpression {
+                code.Codes[code.CodeLength] = cg.OP_pop
+                code.CodeLength++
+            }
+        }
+        return
+    }
+
+
 }
+

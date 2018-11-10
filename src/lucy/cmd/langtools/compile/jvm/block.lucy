@@ -1,85 +1,416 @@
  
+class BuildBlock {
+	
+	fn BuildBlock(){
 
-func (this *BuildPackage) buildBlock(
-	c cg.ClassHighLevel,
-	code cg.AttributeCode,
-	b ast.Block,
-	context Context,
-	state StackMapState) {
-	notToHere := false
-	for _, s := range b.Statements {
-		if notToHere == true && s.Type == ast.StatementTypeLabel {
-			notToHere = len(s.StatementLabel.Exits) == 0
-			//continue compile block from this label statement
-		}
-		if notToHere {
-			continue
-		}
-		if s.IsCallFatherConstructionStatement {
-			// special case
-			// no need to build
-			// this statement is build before
-			continue
-		}
-		maxStack := this.buildStatement(class, code, b, s, context, state)
-		if maxStack > code.MaxStack {
-			code.MaxStack = maxStack
-		}
-		if len(state.Stacks) > 0 {
-			var ss []string
-			for _, v := range state.Stacks {
-				ss = append(ss, v.ToString())
+
+	}
+	fn buildBlock(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		b ast.Block,
+		context Context,
+		state StackMapState) {
+		notToHere := false
+		for _, s := range b.Statements {
+			if notToHere == true && s.Type == ast.StatementTypeLabel {
+				notToHere = len(s.StatementLabel.Exits) == 0
+				//continue compile block from this label statement
 			}
-			fmt.Println("stacks:", ss)
-			panic(sprintf("stack is not empty:%d", len(state.Stacks)))
-		}
-		//unCondition goto
-		if this.statementIsUnConditionJump(s) {
-			notToHere = true
-			continue
-		}
-		//block deadEnd
-		if s.Type == ast.StatementTypeBlock {
-			notToHere = s.Block.NotExecuteToLastStatement
-			continue
-		}
-		if s.Type == ast.StatementTypeIf && s.StatementIf.Else != null {
-			t := s.StatementIf.Block.NotExecuteToLastStatement
-			for _, v := range s.StatementIf.ElseIfList {
-				t = t && v.Block.NotExecuteToLastStatement
+			if notToHere {
+				continue
 			}
-			t = t && s.StatementIf.Else.NotExecuteToLastStatement
-			notToHere = t
-			continue
-		}
-		if s.Type == ast.StatementTypeSwitch && s.StatementSwitch.Default != null {
-			t := s.StatementSwitch.Default.NotExecuteToLastStatement
-			for _, v := range s.StatementSwitch.StatementSwitchCases {
-				if v.Block != null {
-					t = t && v.Block.NotExecuteToLastStatement
-				} else {
-					//this will fallthrough
-					t = false
-					break
+			if s.IsCallFatherConstructionStatement {
+				// special case
+				// no need to build
+				// this statement is build before
+				continue
+			}
+			maxStack := this.buildStatement(c, code, b, s, context, state)
+			if maxStack > code.MaxStack {
+				code.MaxStack = maxStack
+			}
+			if len(state.Stacks) > 0 {
+				var ss []string
+				for _, v := range state.Stacks {
+					ss = append(ss, v.ToString())
 				}
+				fmt.Println("stacks:", ss)
+				panic(sprintf("stack is not empty:%d", len(state.Stacks)))
 			}
-			t = t && s.StatementSwitch.Default.NotExecuteToLastStatement
-			notToHere = t
-			continue
+			//unCondition goto
+			if this.statementIsUnConditionJump(s) {
+				notToHere = true
+				continue
+			}
+			//block deadEnd
+			if s.Type == ast.StatementTypeBlock {
+				notToHere = s.Block.NotExecuteToLastStatement
+				continue
+			}
+			if s.Type == ast.StatementTypeIf && s.StatementIf.Else != null {
+				t := s.StatementIf.Block.NotExecuteToLastStatement
+				for _, v := range s.StatementIf.ElseIfList {
+					t = t && v.Block.NotExecuteToLastStatement
+				}
+				t = t && s.StatementIf.Else.NotExecuteToLastStatement
+				notToHere = t
+				continue
+			}
+			if s.Type == ast.StatementTypeSwitch && s.StatementSwitch.Default != null {
+				t := s.StatementSwitch.Default.NotExecuteToLastStatement
+				for _, v := range s.StatementSwitch.StatementSwitchCases {
+					if v.Block != null {
+						t = t && v.Block.NotExecuteToLastStatement
+					} else {
+						//this will fallthrough
+						t = false
+						break
+					}
+				}
+				t = t && s.StatementSwitch.Default.NotExecuteToLastStatement
+				notToHere = t
+				continue
+			}
+		}
+		b.NotExecuteToLastStatement = notToHere
+		if b.IsFunctionBlock == false &&
+			len(b.Defers) > 0 &&
+			b.NotExecuteToLastStatement == false {
+			this.buildDefers(c, code, context, b.Defers, state)
+		}
+		return
+	}
+
+	fn statementIsUnConditionJump(s ast.Statement) ->(is bool) {
+		return s.Type == ast.StatementTypeReturn ||
+			s.Type == ast.StatementTypeGoTo ||
+			s.Type == ast.StatementTypeContinue ||
+			s.Type == ast.StatementTypeBreak
+	}
+
+
+
+
+
+	fn buildStatement(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		block ast.Block,
+		s ast.Statement,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		//fmt.Println(s.Pos)
+		switch s.Type {
+		case ast.StatementTypeExpression:
+			maxStack = this.BuildExpression.build(c, code, s.Expression, context, state)
+		case ast.StatementTypeIf:
+			s.StatementIf.Exits = []cg.Exit{} //could compile multi times
+			maxStack = this.buildIfStatement(c, code, s.StatementIf, context, state)
+			if len(s.StatementIf.Exits) > 0 {
+				writeExits(s.StatementIf.Exits, code.CodeLength)
+				context.MakeStackMap(code, state, code.CodeLength)
+			}
+		case ast.StatementTypeBlock:
+			blockState := new StackMapState(state)
+			s.Block.Exits = []cg.Exit{}
+			this.buildBlock(c, code, s.Block, context, blockState)
+			state.addTop(blockState)
+			if len(s.Block.Exits) > 0 {
+				writeExits(s.StatementIf.Exits, code.CodeLength)
+				context.MakeStackMap(code, state, code.CodeLength)
+			}
+		case ast.StatementTypeFor:
+			s.StatementFor.Exits = []cg.Exit{} //could compile multi times
+			maxStack = this.buildForStatement(c, code, s.StatementFor, context, state)
+			writeExits(s.StatementFor.Exits, code.CodeLength)
+			context.MakeStackMap(code, state, code.CodeLength)
+		case ast.StatementTypeContinue:
+			this.buildDefers(c, code, context, s.StatementContinue.Defers, state)
+			jumpTo(code, s.StatementContinue.StatementFor.ContinueCodeOffset)
+		case ast.StatementTypeBreak:
+			this.buildDefers(c, code, context, s.StatementBreak.Defers, state)
+			exit := new cg.Exit(cg.OP_goto, code)
+			if s.StatementBreak.StatementFor != null {
+				s.StatementBreak.StatementFor.Exits = append(s.StatementBreak.StatementFor.Exits, exit)
+			} else if s.StatementBreak.StatementSwitch != null { // switch
+				s.StatementBreak.StatementSwitch.Exits = append(s.StatementBreak.StatementSwitch.Exits, exit)
+			} else {
+				s.StatementBreak.SwitchTemplateBlock.Exits = append(s.StatementBreak.SwitchTemplateBlock.Exits, exit)
+			}
+		case ast.StatementTypeReturn:
+			maxStack = this.buildReturnStatement(c, code,
+				s.StatementReturn, context, state)
+		case ast.StatementTypeSwitch:
+			s.StatementSwitch.Exits = []cg.Exit{} //could compile multi times
+			maxStack = this.buildSwitchStatement(c, code, s.StatementSwitch, context, state)
+			if len(s.StatementSwitch.Exits) > 0 {
+				if code.CodeLength == context.lastStackMapOffset {
+					code.Codes[code.CodeLength] = cg.OP_nop
+					code.CodeLength++
+				}
+				writeExits(s.StatementSwitch.Exits, code.CodeLength)
+				context.MakeStackMap(code, state, code.CodeLength)
+			}
+		case ast.StatementTypeGoTo:
+			this.buildDefers(c, code, context, s.StatementGoTo.Defers, state)
+			if s.StatementGoTo.StatementLabel.CodeOffsetGenerated {
+				jumpTo(code, s.StatementGoTo.StatementLabel.CodeOffset)
+			} else {
+				exit := new cg.Exit(cg.OP_goto, code)
+				s.StatementGoTo.StatementLabel.Exits = append(s.StatementGoTo.StatementLabel.Exits, exit)
+			}
+		case ast.StatementTypeLabel:
+			s.StatementLabel.CodeOffsetGenerated = true
+			s.StatementLabel.CodeOffset = code.CodeLength
+			if len(s.StatementLabel.Exits) > 0 {
+				writeExits(s.StatementLabel.Exits, code.CodeLength) // back patch
+			}
+			context.MakeStackMap(code, state, code.CodeLength)
+		case ast.StatementTypeDefer: // nothing to do  ,defer will do after block is compiled
+			s.Defer.StartPc = code.CodeLength
+			s.Defer.StackMapState = (new StackMapState(state))
+		case ast.StatementTypeClass:
+			oldName := s.Class.Name
+			var name string
+			if block.InheritedAttribute.ClassAndFunctionNames == "" {
+				name = s.Class.Name
+			} else {
+				name = block.InheritedAttribute.ClassAndFunctionNames + "$" + s.Class.Name
+			}
+			s.Class.Name = this.newClassName(name)
+			innerClass := new cg.InnerClass()
+			innerClassInnerClass.InnerClass = s.Class.Name
+			innerClassInnerClass.OuterClass = ast.TypeName
+			innerClassInnerClass.Name = oldName
+			ast.TypeClass.AttributeInnerClasses.Classes =
+				append(ast.TypeClass.AttributeInnerClasses.Classes, innerClass)
+			c := this.buildClass(s.Class)
+			c.Class.AttributeInnerClasses.Classes = append(c.Class.AttributeInnerClasses.Classes, innerClass)
+			this.putClass(c)
+		case ast.StatementTypeNop:
+			// nop
+		case ast.StatementTypeTypeAlias:
+			// handled at ast stage
+		}
+		return
+	}
+
+	fn buildDefers(c cg.ClassHighLevel,
+		code cg.AttributeCode, context Context, ds []ast.StatementDefer, from StackMapState) {
+		if len(ds) == 0 {
+			return
+		}
+		code.Codes[code.CodeLength] = cg.OP_aconst_null
+		code.CodeLength++
+		index := len(ds) - 1
+		for index >= 0 { // build defer,cannot have return statement is defer
+			state := ds[index].StackMapState.(StackMapState)
+			state = (new StackMapState(state))
+			state.addTop(from)
+			state.pushStack(c, state.newObjectVariableType(throwableClass))
+			context.MakeStackMap(code, state, code.CodeLength)
+			e := new cg.ExceptionTable()
+			e.StartPc = char(ds[index].StartPc)
+			e.EndPc = char(code.CodeLength)
+			e.HandlerPc = char(code.CodeLength)
+			if ds[index].ExceptionClass == null {
+				e.CatchType = ast.TypeClass.InsertClassConst(ast.DefaultExceptionClass)
+			} else {
+				e.CatchType = ast.TypeClass.InsertClassConst(ds[index].ExceptionClass.Name) // custom c
+			}
+			code.Exceptions = append(code.Exceptions, e)
+			//expect exception on stack
+			copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
+				context.exceptionVarOffset)...) // this code will make_node_objects stack is empty
+			state.popStack(1)
+			// build block
+			context.Defer = ds[index]
+			this.buildBlock(c, code, ds[index].Block, context, state)
+			from.addTop(state)
+			context.Defer = null
+			ds[index].ResetLabels()
+
+			//if need throw
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)...)
+			code.Codes[code.CodeLength] = cg.OP_dup
+			code.CodeLength++
+			state.pushStack(c, state.newObjectVariableType(throwableClass))
+			context.MakeStackMap(code, state, code.CodeLength+6)
+			context.MakeStackMap(code, state, code.CodeLength+7)
+			state.popStack(1)
+			code.Codes[code.CodeLength] = cg.OP_ifnonnull
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
+			code.Codes[code.CodeLength+3] = cg.OP_goto
+			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+4:code.CodeLength+6], 4) // goto pop
+			code.Codes[code.CodeLength+6] = cg.OP_athrow
+			code.Codes[code.CodeLength+7] = cg.OP_pop // pop exception on stack
+			code.CodeLength += 8
+			if index != 0 {
+				code.Codes[code.CodeLength] = cg.OP_aconst_null
+				code.CodeLength++
+			}
+			index--
 		}
 	}
-	b.NotExecuteToLastStatement = notToHere
-	if b.IsFunctionBlock == false &&
-		len(b.Defers) > 0 &&
-		b.NotExecuteToLastStatement == false {
-		this.buildDefers(class, code, context, b.Defers, state)
+
+
+
+
+
+
+	/*
+		compile condition for false  &&  generate exit
+	*/
+	fn buildConditionNotOk(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		context Context,
+		state StackMapState,
+		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
+		if condition.Is2IntCompare() {
+			return this.build2IntCompareConditionNotOk(c, code, context, state, condition)
+		} else if condition.IsCompare2Null() {
+			return this.buildNullCompareConditionNotOk(c, code, context, state, condition)
+		} else if condition.Is2StringCompare() {
+			return this.buildStringCompareConditionNotOk(c, code, context, state, condition)
+		} else if condition.Is2PointerCompare() {
+			return this.buildPointerCompareConditionNotOk(c, code, context, state, condition)
+		} else {
+			maxStack = this.build(c, code, condition, context, state)
+			exit = new cg.Exit(cg.OP_ifeq, code)
+			return
+		}
 	}
-	return
+
+	fn build2IntCompareConditionNotOk(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		context Context,
+		state StackMapState,
+		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
+		bin := condition.Data.(ast.ExpressionBinary)
+		stack := this.build(c, code, bin.Left, context, state)
+		if stack > maxStack {
+			maxStack = stack
+		}
+		state.pushStack(c, bin.Left.Value)
+		stack = this.build(c, code, bin.Right, context, state)
+		if t := 1 + stack; t > maxStack {
+			maxStack = t
+		}
+		state.popStack(1)
+		switch condition.Type {
+		case ast.ExpressionTypeEq:
+			exit = new cg.Exit(cg.OP_if_icmpne, code)
+		case ast.ExpressionTypeNe:
+			exit = new cg.Exit(cg.OP_if_icmpeq, code)
+		case ast.ExpressionTypeGe:
+			exit = new cg.Exit(cg.OP_if_icmplt, code)
+		case ast.ExpressionTypeGt:
+			exit = new cg.Exit(cg.OP_if_icmple, code)
+		case ast.ExpressionTypeLe:
+			exit = new cg.Exit(cg.OP_if_icmpgt, code)
+		case ast.ExpressionTypeLt:
+			exit = new cg.Exit(cg.OP_if_icmpge, code)
+		}
+		return
+	}
+	fn buildNullCompareConditionNotOk(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		context Context,
+		state StackMapState,
+		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
+		var noNullExpression ast.Expression
+		bin := condition.Data.(ast.ExpressionBinary)
+		if bin.Left.Type != ast.ExpressionTypeNull {
+			noNullExpression = bin.Left
+		} else {
+			noNullExpression = bin.Right
+		}
+		stack := this.build(c, code, noNullExpression, context, state)
+		if stack > maxStack {
+			maxStack = stack
+		}
+		switch condition.Type {
+		case ast.ExpressionTypeEq:
+			exit = new cg.Exit(cg.OP_ifnonnull, code)
+		case ast.ExpressionTypeNe:
+			exit = new cg.Exit(cg.OP_ifnull, code)
+		}
+		return
+	}
+
+	fn buildStringCompareConditionNotOk(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		context Context,
+		state StackMapState,
+		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
+		bin := condition.Data.(ast.ExpressionBinary)
+		stack := this.build(c, code, bin.Left, context, state)
+		if stack > maxStack {
+			maxStack = stack
+		}
+		state.pushStack(c, bin.Left.Value)
+		stack = this.build(c, code, bin.Right, context, state)
+		if t := 1 + stack; t > maxStack {
+			maxStack = t
+		}
+		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			javaStringClass,
+			"compareTo",
+			"(Ljava/lang/String;)I"
+		), code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		state.popStack(1)
+		switch condition.Type {
+		case ast.ExpressionTypeEq:
+			exit = new cg.Exit(cg.OP_ifne, code)
+		case ast.ExpressionTypeNe:
+			exit = new cg.Exit(cg.OP_ifeq, code)
+		case ast.ExpressionTypeGe:
+			exit = new cg.Exit(cg.OP_iflt, code)
+		case ast.ExpressionTypeGt:
+			exit = new cg.Exit(cg.OP_ifle, code)
+		case ast.ExpressionTypeLe:
+			exit = new cg.Exit(cg.OP_ifgt, code)
+		case ast.ExpressionTypeLt:
+			exit = new cg.Exit(cg.OP_ifge, code)
+		}
+		return
+	}
+
+	fn buildPointerCompareConditionNotOk(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		context Context,
+		state StackMapState,
+		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
+		bin := condition.Data.(ast.ExpressionBinary)
+		stack := this.build(c, code, bin.Left, context, state)
+		if stack > maxStack {
+			maxStack = stack
+		}
+		state.pushStack(c, bin.Left.Value)
+		stack = this.build(c, code, bin.Right, context, state)
+		if t := 1 + stack; t > maxStack {
+			maxStack = t
+		}
+		switch condition.Type {
+		case ast.ExpressionTypeEq:
+			exit = new cg.Exit(cg.OP_if_acmpne, code)
+		case ast.ExpressionTypeNe:
+			exit = new cg.Exit(cg.OP_if_acmpeq, code)
+		}
+		state.popStack(1)
+		return
+	}
+
+
+
 }
 
-func (this *BuildPackage) statementIsUnConditionJump(s *ast.Statement) bool {
-	return s.Type == ast.StatementTypeReturn ||
-		s.Type == ast.StatementTypeGoTo ||
-		s.Type == ast.StatementTypeContinue ||
-		s.Type == ast.StatementTypeBreak
-}
+

@@ -1,78 +1,81 @@
- 
+class  BuildExpressionIdentifier {
+	
 
-func (this *BuildExpression) buildCapturedIdentifier(
-	c cg.ClassHighLevel,
-	code cg.AttributeCode,
-	e ast.Expression,
-	context Context) (maxStack char) {
-	identifier := e.Data.(*ast.ExpressionIdentifier)
-	//fmt.Println(identifier.Name, identifier.Variable.BeenCapturedAsLeftValue,
-	//	context.function.Closure.ClosureVariableExist(identifier.Variable))
-	maxStack = jvmSlotSize(identifier.Variable.Type)
-	if context.function.Closure.ClosureVariableExist(identifier.Variable) {
-		if identifier.Variable.BeenCapturedAsLeftValue > 0 {
-			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
-			meta := closure.getMeta(identifier.Variable.Type.Type)
-			code.Codes[code.CodeLength] = cg.OP_getfield
-			ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
-				Class:      ast.TypeName,
-				Field:      identifier.Variable.Name,
-				Descriptor: "L" + meta.className + ";",
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			closure.unPack(class, code, identifier.Variable.Type)
-		} else {
-			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
-			code.Codes[code.CodeLength] = cg.OP_getfield
-			ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
-				Class:      ast.TypeName,
-				Field:      identifier.Variable.Name,
-				Descriptor: Descriptor.typeDescriptor(identifier.Variable.Type),
-			}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-		}
-	} else {
-		if identifier.Variable.BeenCapturedAsLeftValue > 0 {
-			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, identifier.Variable.LocalValOffset)...)
-			closure.unPack(class, code, identifier.Variable.Type)
-		} else {
-			copyOPs(code, loadLocalVariableOps(e.Value.Type, identifier.Variable.LocalValOffset)...)
-		}
-	}
-	return
-}
-
-func (this *BuildExpression) buildIdentifier(
-	c cg.ClassHighLevel,
-	code cg.AttributeCode,
-	e ast.Expression,
-	context Context) (maxStack char) {
-	if e.Value.Type == ast.VariableTypeClass {
-		panic("this is not happening")
-	}
-	identifier := e.Data.(*ast.ExpressionIdentifier)
-	switch {
-	case e.Value.Type == ast.VariableTypeEnum && identifier.EnumName != null:
-		loadInt32(class, code, identifier.EnumName.Value)
-		maxStack = 1
-		return
-	case identifier.Function != null:
-		return this.BuildPackage.packFunction2MethodHandle(class, code, identifier.Function, context)
-	case identifier.Variable.IsGlobal:
-		code.Codes[code.CodeLength] = cg.OP_getstatic
-		ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
-			Class:      this.BuildPackage.mainClass.Name,
-			Field:      identifier.Name,
-			Descriptor: Descriptor.typeDescriptor(identifier.Variable.Type),
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+	fn  buildCapturedIdentifier(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context) -> (maxStack char) {
+		identifier := e.Data.(ast.ExpressionIdentifier)
+		//fmt.Println(identifier.Name, identifier.Variable.BeenCapturedAsLeftValue,
+		//	context.function.Closure.ClosureVariableExist(identifier.Variable))
 		maxStack = jvmSlotSize(identifier.Variable.Type)
-		return
-	case identifier.Variable.BeenCapturedAsLeftValue+identifier.Variable.BeenCapturedAsRightValue > 0:
-		return this.buildCapturedIdentifier(class, code, e, context)
-	default:
-		maxStack = jvmSlotSize(e.Value)
-		copyOPs(code, loadLocalVariableOps(e.Value.Type, identifier.Variable.LocalValOffset)...)
+		if context.function.Closure.ClosureVariableExist(identifier.Variable) {
+			if identifier.Variable.BeenCapturedAsLeftValue > 0 {
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
+				meta := closure.getMeta(identifier.Variable.Type.Type)
+				code.Codes[code.CodeLength] = cg.OP_getfield
+				ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+					ast.TypeName,
+					identifier.Variable.Name,
+					"L" + meta.className + ";"
+				), code.Codes[code.CodeLength+1:code.CodeLength+3])
+				code.CodeLength += 3
+				closure.unPack(c, code, identifier.Variable.Type)
+			} else {
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
+				code.Codes[code.CodeLength] = cg.OP_getfield
+				ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+					ast.TypeName,
+					identifier.Variable.Name,
+					Descriptor.typeDescriptor(identifier.Variable.Type)
+				), code.Codes[code.CodeLength+1:code.CodeLength+3])
+				code.CodeLength += 3
+			}
+		} else {
+			if identifier.Variable.BeenCapturedAsLeftValue > 0 {
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, identifier.Variable.LocalValOffset)...)
+				closure.unPack(c, code, identifier.Variable.Type)
+			} else {
+				copyOPs(code, loadLocalVariableOps(e.Value.Type, identifier.Variable.LocalValOffset)...)
+			}
+		}
 		return
 	}
+
+	fn  buildIdentifier(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context) -> (maxStack char) {
+		if e.Value.Type == ast.VariableTypeClass {
+			panic("this is not happening")
+		}
+		identifier := e.Data.(ast.ExpressionIdentifier)
+		switch identifier{
+		case e.Value.Type == ast.VariableTypeEnum && identifier.EnumName != null:
+			loadInt32(c, code, identifier.EnumName.Value)
+			maxStack = 1
+			return
+		case identifier.Function != null:
+			return this.BuildPackage.packFunction2MethodHandle(c, code, identifier.Function, context)
+		case identifier.Variable.IsGlobal:
+			code.Codes[code.CodeLength] = cg.OP_getstatic
+			ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+				this.BuildPackage.mainClass.Name,
+				identifier.Name,
+				Descriptor.typeDescriptor(identifier.Variable.Type)
+			), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			code.CodeLength += 3
+			maxStack = jvmSlotSize(identifier.Variable.Type)
+			return
+		case identifier.Variable.BeenCapturedAsLeftValue+identifier.Variable.BeenCapturedAsRightValue > 0:
+			return this.buildCapturedIdentifier(c, code, e, context)
+		default:
+			maxStack = jvmSlotSize(e.Value)
+			copyOPs(code, loadLocalVariableOps(e.Value.Type, identifier.Variable.LocalValOffset)...)
+			return
+		}
+	}	
 }
+

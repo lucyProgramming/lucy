@@ -33,3 +33,14 @@ const (
 	javaPrintStreamClass         = "java/io/PrintStream"
 	mapClass                     = "java/util/concurrent/ConcurrentHashMap"
 )
+
+var typeInt = new  ast.Type()
+var typestring = new  ast.Type()
+var typeBool  = new ast.Type()
+
+{
+    typeInt.Type = ast.VariableTypeInt
+    typeString.Type = ast.VariableTypeString
+    typeBool.Type = ast.VariableTypeBool
+}
+

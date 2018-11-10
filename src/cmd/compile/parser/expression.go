@@ -42,6 +42,7 @@ func (ep *ExpressionParser) parseExpressions(endTokens ...lex.TokenKind) ([]*ast
 			break
 		}
 		// == ,
+		commnaPos := ep.parser.mkPos()
 		ep.Next(lfNotToken) // skip ,
 		for ep.parser.token.Type == lex.TokenComma {
 			ep.parser.errs = append(ep.parser.errs,
@@ -52,7 +53,7 @@ func (ep *ExpressionParser) parseExpressions(endTokens ...lex.TokenKind) ([]*ast
 			if v == ep.parser.token.Type {
 				// found end token
 				ep.parser.errs = append(ep.parser.errs,
-					fmt.Errorf("%s extra comma", ep.parser.errMsgPrefix()))
+					fmt.Errorf("%s extra comma", ep.parser.errMsgPrefix(commnaPos)))
 				goto end
 			}
 		}

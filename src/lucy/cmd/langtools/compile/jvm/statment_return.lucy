@@ -238,7 +238,7 @@ func (this *BuildPackage) buildDefersForReturn(c cg.ClassHighLevel, code cg.Attr
 				exit := (&cg.Exit{}).Init(cg.OP_ifnonnull, code)
 				this.buildReturnFromReturnVars(class, code, context)
 				context.MakeStackMap(code, state, code.CodeLength)
-				writeExits([]*cg.Exit{exit}, code.CodeLength)
+				writeExits([]cg.Exit{exit}, code.CodeLength)
 			}
 		}
 		index--

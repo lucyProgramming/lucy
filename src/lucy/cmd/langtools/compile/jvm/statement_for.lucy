@@ -26,7 +26,7 @@ func (this *BuildPackage) buildForStatement(
 			maxStack = stack
 		}
 	}
-	var firstTimeExit *cg.Exit
+	var firstTimeExit ast.Statement
 	if s.Condition != null {
 		stack, exit := this.BuildExpression.buildConditionNotOk(class, code, context, forState, s.Condition)
 		if stack > maxStack {
@@ -51,7 +51,7 @@ func (this *BuildPackage) buildForStatement(
 		s.Exits = append(s.Exits, exit)
 	}
 	if firstTimeExit != null {
-		writeExits([]*cg.Exit{firstTimeExit}, code.CodeLength)
+		writeExits([]cg.Exit{firstTimeExit}, code.CodeLength)
 		context.MakeStackMap(code, forState, code.CodeLength)
 	}
 	this.buildBlock(class, code, s.Block, context, forState)

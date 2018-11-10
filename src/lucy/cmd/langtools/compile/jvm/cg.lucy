@@ -1,477 +1,475 @@
  
 
-type BuildPackage struct {
-	Package         *ast.Package
-	classes         map[string]cg.ClassHighLevel
+class  BuildPackage {
+	Package         ast.Package
+	classes         map { string -> cg.ClassHighLevel }
 	mainClass       cg.ClassHighLevel
 	BuildExpression BuildExpression
+
+    fn Make(p ast.Package) {
+        this.Package = p
+        mainClass := new cg.ClassHighLevel()
+        this.mainClass = mainClass
+        mainClass.AccessFlags |= cg.AccClassPublic
+        mainClass.AccessFlags |= cg.AccClassFinal
+        mainClass.AccessFlags |= cg.AccClassSynthetic
+        mainClass.SuperClass = ast.JavaRootClass
+        mainClass.Name = p.Name + "/main"
+        if p.Block.Functions != null {
+            for _, v := range p.Block.Functions {
+                mainClass.InsertSourceFile(v.Pos.Filename)
+                break
+            }
+        }
+        mainClass.Fields = new map {string -> cg.FieldHighLevel }()
+        this.mkClassDefaultConstruction(this.mainClass)
+        this.BuildExpression.BuildPackage = this
+        this.classes = new map { string -> cg.ClassHighLevel } ()
+        this.mkGlobalConstants()
+        this.mkGlobalTypeAlias()
+        this.mkGlobalVariables()
+        this.mkGlobalFunctions()
+        this.mkInitFunctions()
+        for _, v := range p.Block.Classes {
+            this.putClass(this.buildClass(v))
+        }
+        for _, v := range p.Block.Enums {
+            this.putClass(this.mkEnum(v))
+        }
+        err := this.DumpClass()
+        if err != null {
+            panic(sprintf("dump to file failed,err:%v\n", err))
+        }
+    }
+
+    fn newClassName(prefix string) -> (autoName string) {
+        for i := 0; i < 65536; i++ {
+            if i == 0 {
+                //use prefix only
+                autoName = prefix
+            } else {
+                autoName = sprintf("%s$%d", prefix, i)
+            }
+            if _, exists := this.Package.Block.NameExists(autoName); exists {
+                continue
+            }
+            autoName = this.Package.Name + "/" + autoName
+            if this.classes != null && this.classes[autoName] != null {
+                continue
+            } else {
+                return autoName
+            }
+        }
+        panic("new class name overflow") // impossible
+    }
+
+    fn putClass(c cg.ClassHighLevel) {
+        if ast.TypeName == "" {
+            panic("missing name")
+        }
+        name := ast.TypeName
+        if name == this.mainClass.Name {
+            panic("cannot have main class`s name")
+        }
+        if this.classes == null {
+            this.classes = new map { string -> cg.ClassHighLevel }()
+        }
+        if this.classes.keyExist(name) {
+            panic(sprintf("name:'%s' already been token", name))
+        }
+        this.classes[name] = c
+    }
+
+    fn mkEnum(e ast.Enum) -> (c cg.ClassHighLevel) {
+        c := new cg.ClassHighLevel()
+        ast.TypeName = e.Name
+        ast.TypeInsertSourceFile(e.Pos.Filename)
+        ast.TypeAccessFlags = e.AccessFlags
+        ast.TypeSuperClass = ast.JavaRootClass
+        ast.TypeFields = new map { string -> cg.FieldHighLevel } ()
+        ast.TypeClass.AttributeLucyEnum = new cg.AttributeLucyEnum()
+        if e.Comment != "" {
+            ast.TypeClass.AttributeLucyComment = new cg.AttributeLucyComment()
+            ast.TypeClass.AttributeLucyComment.Comment = e.Comment
+        }
+        for _, v := range e.Enums {
+            field := new cg.FieldHighLevel()
+            if e.AccessFlags&cg.AccClassPublic != 0 {
+                field.AccessFlags |= cg.AccFieldPublic
+            } else {
+                field.AccessFlags |= cg.AccFieldPrivate
+            }
+            if v.Comment != "" {
+                field.AttributeLucyComment = new cg.AttributeLucyComment()
+                field.AttributeLucyComment.Comment = v.Comment
+            }
+            field.Name = v.Name
+            field.Descriptor = "I"
+            field.AttributeConstantValue = new cg.AttributeConstantValue()
+            field.AttributeConstantValue.Index = ast.TypeClass.InsertIntConst(v.Value)
+            ast.TypeFields[v.Name] = field
+        }
+        return c
+    }
+
+    fn mkGlobalConstants() {
+        for k, v := range this.Package.Block.Constants {
+            f := new cg.FieldHighLevel()
+            f.AccessFlags |= cg.AccFieldStatic
+            f.AccessFlags |= cg.AccFieldFinal
+            if v.AccessFlags&cg.AccFieldPublic != 0 {
+                f.AccessFlags |= cg.AccFieldPublic
+            }
+            f.Name = v.Name
+            f.AttributeConstantValue = new cg.AttributeConstantValue()
+            f.AttributeConstantValue.Index = this.insertDefaultValue(this.mainClass, v.Type, v.Value)
+            f.AttributeLucyConst = new cg.AttributeLucyConst()
+            if v.Comment != "" {
+                f.AttributeLucyComment = new cg.AttributeLucyComment()
+                f.AttributeLucyComment.Comment = v.Comment
+            }
+            f.Descriptor = Descriptor.typeDescriptor(v.Type)
+            this.mainClass.Fields[k] = f
+        }
+    }
+    fn mkGlobalTypeAlias() {
+        for name, v := range this.Package.Block.TypeAliases {
+            t := new cg.AttributeLucyTypeAlias()
+            t.Alias = LucyTypeAliasParser.Encode(name, v)
+            if v.Alias != null {
+                t.Comment = v.Alias.Comment
+            }
+            this.mainClass.Class.TypeAlias = append(this.mainClass.Class.TypeAlias, t)
+        }
+    }
+
+    fn mkGlobalVariables() {
+        for k, v := range this.Package.Block.Variables {
+            f := new cg.FieldHighLevel()
+            f.AccessFlags |= cg.AccFieldStatic
+            f.Descriptor = Descriptor.typeDescriptor(v.Type)
+            if v.AccessFlags&cg.AccFieldPublic != 0 {
+                f.AccessFlags |= cg.AccFieldPublic
+            }
+            f.AccessFlags |= cg.AccFieldVolatile
+            if LucyFieldSignatureParser.Need(v.Type) {
+                f.AttributeLucyFieldDescriptor = new cg.AttributeLucyFieldDescriptor()
+                f.AttributeLucyFieldDescriptor.Descriptor = LucyFieldSignatureParser.Encode(v.Type)
+                if v.Type.FunctionType.VArgs != nil {
+                    f.AttributeLucyFieldDescriptor.MethodAccessFlag |=
+                        cg.AccMethodVarargs
+                }
+            }
+            if v.Comment != "" {
+                f.AttributeLucyComment = new cg.AttributeLucyComment ()
+                f.AttributeLucyComment.Comment = v.Comment
+            }
+            f.Name = v.Name
+            this.mainClass.Fields[k] = f
+        }
+    }
+
+    fn mkInitFunctions() {
+        if len(this.Package.InitFunctions) == 0 {
+            needTrigger := false
+            for _, v := range this.Package.LoadedPackages {
+                if v.TriggerPackageInitMethodName != "" {
+                    needTrigger = true
+                    break
+                }
+            }
+            if needTrigger == false {
+                return
+            }
+        }
+        blockMethods := []cg.MethodHighLevel{}
+        for _, v := range this.Package.InitFunctions {
+            method := new  cg.MethodHighLevel()
+            blockMethods = append(blockMethods, method)
+            method.AccessFlags |= cg.AccMethodStatic
+            method.AccessFlags |= cg.AccMethodFinal
+            method.AccessFlags |= cg.AccMethodPrivate
+            method.Name = this.mainClass.NewMethodName("block")
+            method.Class = this.mainClass
+            method.Descriptor = "()V"
+            method.Code = new cg.AttributeCode()
+            this.buildFunction(this.mainClass, null, method, v)
+            this.mainClass.AppendMethod(method)
+        }
+        method := new cg.MethodHighLevel()
+        method.AccessFlags |= cg.AccMethodStatic
+        method.Name = "<clinit>"
+        method.Descriptor = "()V"
+        codes := new []byte (65536)
+        codeLength := int(0)
+        method.Code = new cg.AttributeCode()
+        for _, v := range this.Package.LoadedPackages {
+            if v.TriggerPackageInitMethodName == "" {
+                continue
+            }
+            codes[codeLength] = cg.OP_invokestatic
+            this.mainClass.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+                   v.Name + "/main", // main c
+                    v.TriggerPackageInitMethodName,
+                "()V"
+            ), codes[codeLength+1:codeLength+3])
+            codeLength += 3
+        }
+        for _, v := range blockMethods {
+            codes[codeLength] = cg.OP_invokestatic
+            this.mainClass.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+                   this.mainClass.Name,
+                    v.Name,
+                 "()V"
+            ), codes[codeLength+1:codeLength+3])
+            codeLength += 3
+        }
+        codes[codeLength] = cg.OP_return
+        codeLength++
+        codes = codes[0:codeLength]
+        method.Code.Codes = codes
+        method.Code.CodeLength = codeLength
+        this.mainClass.AppendMethod(method)
+
+        // trigger init
+        trigger := new cg.MethodHighLevel()
+        trigger.Name = this.mainClass.NewMethodName("triggerPackageInit")
+        trigger.AccessFlags |= cg.AccMethodPublic
+        trigger.AccessFlags |= cg.AccMethodBridge
+        trigger.AccessFlags |= cg.AccMethodStatic
+        trigger.AccessFlags |= cg.AccMethodSynthetic
+        trigger.Descriptor = "()V"
+        trigger.Code = new cg.AttributeCode()
+        trigger.Code.Codes = new []byte(1)
+        trigger.Code.Codes[0] = cg.OP_return
+        trigger.Code.CodeLength = 1
+        trigger.AttributeLucyTriggerPackageInitMethod = new cg.AttributeLucyTriggerPackageInitMethod()
+        this.mainClass.AppendMethod(trigger)
+        this.mainClass.TriggerPackageInitMethod = trigger
+    }
+    /*
+    fn insertDefaultValue(c cg.ClassHighLevel, t ast.Type, v interface{}) -> (index char) {
+        switch t.Type {
+        case ast.VariableTypeBool:
+            if v.(bool) {
+                index = c.Class.InsertIntConst(1)
+            } else {
+                index = c.Class.InsertIntConst(0)
+            }
+        case ast.VariableTypeByte:
+            index = c.Class.InsertIntConst(int(v.(long)))
+        case ast.VariableTypeShort:
+            index = c.Class.InsertIntConst(int(v.(long)))
+        case ast.VariableTypeChar:
+            index = c.Class.InsertIntConst(int(v.(long)))
+        case ast.VariableTypeInt:
+            index = c.Class.InsertIntConst(int(v.(long)))
+        case ast.VariableTypeLong:
+            index = c.Class.InsertLongConst(v.(long))
+        case ast.VariableTypeFloat:
+            index = c.Class.InsertFloatConst(v.(float))
+        case ast.VariableTypeDouble:
+            index = c.Class.InsertDoubleConst(v.(double))
+        case ast.VariableTypeString:
+            index = c.Class.InsertStringConst(v.(string))
+        default:
+            panic("no match")
+        }
+        return
+    }*/
+
+
+    fn buildClass(astClass ast.Class) -> (c cg.ClassHighLevel) {
+        c = new cg.ClassHighLevel()
+        c.Name = astClass.Name
+        c.InsertSourceFile(astClass.Pos.Filename)
+        c.AccessFlags = astClass.AccessFlags
+        if astClass.SuperClass != nil {
+            c.SuperClass = astClass.SuperClass.Name
+        } else {
+            c.SuperClass = astClass.SuperClassName.Name
+        }
+        if astClass.Comment != "" {
+            c.Class.AttributeLucyComment = new cg.AttributeLucyComment()
+            c.Class.AttributeLucyComment.Comment = astClass.Comment
+        }
+        if len(astClass.Block.Constants) > 0 {
+            attr := new cg.AttributeLucyClassConst()
+            for _, v := range astClass.Block.Constants {
+                cos := new cg.LucyClassConst()
+                cos.Name = v.Name
+                cos.Comment = v.Comment
+                cos.Descriptor = Descriptor.typeDescriptor(v.Type)
+                cos.ValueIndex = this.insertDefaultValue(c, v.Type, v.Value)
+                attr.Constants = append(attr.Constants, c)
+            }
+            c.Class.AttributeLucyClassConst = attr
+        }
+        c.Fields = new map {string -> cg.FieldHighLevel } ()
+        c.Methods = new map { string -> []cg.MethodHighLevel } ()
+        for _, v := range astClass.Interfaces {
+            c.Interfaces = append(c.Interfaces, v.Name)
+        }
+        for _, v := range astClass.Fields {
+            f := new cg.FieldHighLevel()
+            f.Name = v.Name
+            f.AccessFlags = v.AccessFlags
+            if v.IsStatic() && v.DefaultValue != nil {
+                f.AttributeConstantValue = new cg.AttributeConstantValue()
+                f.AttributeConstantValue.Index = this.insertDefaultValue(c, v.Type,
+                    v.DefaultValue)
+            }
+            f.Descriptor = Descriptor.typeDescriptor(v.Type)
+            if LucyFieldSignatureParser.Need(v.Type) {
+                t := new cg.AttributeLucyFieldDescriptor()
+                t.Descriptor = LucyFieldSignatureParser.Encode(v.Type)
+                f.AttributeLucyFieldDescriptor = t
+            }
+            if v.Comment != "" {
+                f.AttributeLucyComment = new cg.AttributeLucyComment()
+                f.AttributeLucyComment.Comment = v.Comment
+            }
+            c.Fields[v.Name] = f
+        }
+        for name, v := range astClass.Methods {
+            vv := v[0]
+            method := new cg.MethodHighLevel()
+            method.Name = name
+            method.AccessFlags = vv.Function.AccessFlags
+            if vv.Function.Type.VArgs != nil {
+                method.AccessFlags |= cg.AccMethodVarargs
+            }
+            if vv.IsCompilerAuto {
+                method.AccessFlags |= cg.AccMethodSynthetic
+            }
+            method.Class = c
+            method.Descriptor = Descriptor.methodDescriptor(vv.Function.Type)
+            method.IsConstruction = name == specialMethodInit
+            if vv.IsAbstract() == false {
+                method.Code = new cg.AttributeCode()
+                this.buildFunction(c, astClass, method, vv.Function)
+            }
+            c.AppendMethod(method)
+        }
+    }
+
+
+    fn mkGlobalFunctions() {
+        ms := new map { string -> cg.MethodHighLevel }()
+        for k, f := range this.Package.Block.Functions { // first round
+            if f.TemplateFunction != null {
+                t := new cg.AttributeTemplateFunction()
+                t.Name = f.Name
+                t.Filename = f.Pos.Filename
+                t.StartLine = char(f.Pos.Line)
+                t.StartColumn = char(f.Pos.Column)
+                t.Code = string(f.SourceCode)
+                this.mainClass.TemplateFunctions = append(this.mainClass.TemplateFunctions,t)
+                continue
+            }
+            if f.IsBuildIn { //
+                continue
+            }
+            c := this.mainClass
+            method := new cg.MethodHighLevel()
+            method.Class = c
+            method.Name = f.Name
+            if f.Name == ast.MainFunctionName {
+                method.Descriptor = "([Ljava/lang/String;)V"
+            } else {
+                method.Descriptor = Descriptor.methodDescriptor(f.Type)
+            }
+            method.AccessFlags = 0
+            method.AccessFlags |= cg.AccMethodStatic
+            if f.AccessFlags&cg.AccMethodPublic != 0 || f.Name == ast.MainFunctionName {
+                method.AccessFlags |= cg.AccMethodPublic
+            }
+            if f.Comment != "" {
+                method.AttributeLucyComment = new cg.AttributeLucyComment()
+                method.AttributeLucyComment.Comment = f.Comment
+
+            }
+            if f.Type.VArgs != null {
+                method.AccessFlags |= cg.AccMethodVarargs
+            }
+            ms[k] = method
+            f.Entrance = method
+            method.Code = new cg.AttributeCode()
+            this.mainClass.AppendMethod(method)
+        }
+        for k, f := range this.Package.Block.Functions {
+            if f.IsBuildIn || f.TemplateFunction != null { //
+                continue
+            }
+            this.buildFunction(ms[k].Class, null, ms[k], f)
+        }
+    }
+
+    fn DumpClass() {
+        //dump main c
+        f := io.OpenFile("main.class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+        if err != null {
+            return err
+        }
+        if err := this.mainClass.ToLow().OutPut(f); err != null {
+            f.Close()
+            return err
+        }
+        f.Close()
+        for _, c := range this.classes {
+            f, err = os.OpenFile(filepath.Base(c.Name)+".c", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
+            if err != null {
+                return err
+            }
+            if err = c.ToLow().OutPut(f); err != null {
+                f.Close()
+                return err
+            } else {
+                f.Close()
+            }
+        }
+    }
+
+    /*
+        make_node_objects a default construction
+    */
+    fn mkClassDefaultConstruction(c cg.ClassHighLevel) {
+        method := new cg.MethodHighLevel()
+        method.Name = specialMethodInit
+        method.Descriptor = "()V"
+        method.AccessFlags |= cg.AccMethodPublic
+        method.Code = new cg.AttributeCode()
+        method.Code.Codes = new []byte(5)
+        method.Code.CodeLength = 5
+        method.Code.MaxLocals = 1
+        method.Code.Codes[0] = cg.OP_aload_0
+        method.Code.Codes[1] = cg.OP_invokespecial
+        ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+               ast.TypeSuperClass,
+                specialMethodInit,
+           "()V"
+        ), method.Code.Codes[2:4])
+        method.Code.MaxStack = 1
+        method.Code.Codes[4] = cg.OP_return
+        ast.TypeAppendMethod(method)
+    }
+
+    fn storeGlobalVariable(c cg.ClassHighLevel, code cg.AttributeCode,
+        v ast.Variable) {
+        code.Codes[code.CodeLength] = cg.OP_putstatic
+        if v.JvmDescriptor == "" {
+            v.JvmDescriptor = Descriptor.typeDescriptor(v.Type)
+        }
+        ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+                this.mainClass.Name,
+                v.Name,
+             v.JvmDescriptor
+        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
+        code.CodeLength += 3
+    }
+
+
 }
 
-func (this *BuildPackage) Make(p *ast.Package) {
-	this.Package = p
-	mainClass := &cg.ClassHighLevel{}
-	this.mainClass = mainClass
-	mainClass.AccessFlags |= cg.AccClassPublic
-	mainClass.AccessFlags |= cg.AccClassFinal
-	mainClass.AccessFlags |= cg.AccClassSynthetic
-	mainClass.SuperClass = ast.JavaRootClass
-	mainClass.Name = p.Name + "/main"
-	if p.Block.Functions != null {
-		for _, v := range p.Block.Functions {
-			mainClass.InsertSourceFile(v.Pos.Filename)
-			break
-		}
-	}
-	mainClass.Fields = make(map[string]*cg.FieldHighLevel)
-	this.mkClassDefaultConstruction(this.mainClass)
-	this.BuildExpression.BuildPackage = this
-	this.classes = make(map[string]cg.ClassHighLevel)
-	this.mkGlobalConstants()
-	this.mkGlobalTypeAlias()
-	this.mkGlobalVariables()
-	this.mkGlobalFunctions()
-	this.mkInitFunctions()
-	for _, v := range p.Block.Classes {
-		this.putClass(this.buildClass(v))
-	}
-	for _, v := range p.Block.Enums {
-		this.putClass(this.mkEnum(v))
-	}
-	err := this.DumpClass()
-	if err != null {
-		panic(sprintf("dump to file failed,err:%v\n", err))
-	}
-}
 
-func (this *BuildPackage) newClassName(prefix string) (autoName string) {
-	for i := 0; i < math.MaxInt16; i++ {
-		if i == 0 {
-			//use prefix only
-			autoName = prefix
-		} else {
-			autoName = sprintf("%s$%d", prefix, i)
-		}
-		if _, exists := this.Package.Block.NameExists(autoName); exists {
-			continue
-		}
-		autoName = this.Package.Name + "/" + autoName
-		if this.classes != null && this.classes[autoName] != null {
-			continue
-		} else {
-			return autoName
-		}
-	}
-	panic("new class name overflow") // impossible
-}
 
-func (this *BuildPackage) putClass(c cg.ClassHighLevel) {
-	if ast.TypeName == "" {
-		panic("missing name")
-	}
-	name := ast.TypeName
-	if name == this.mainClass.Name {
-		panic("cannot have main class`s name")
-	}
-	if this.classes == null {
-		this.classes = make(map[string]cg.ClassHighLevel)
-	}
-	if _, ok := this.classes[name]; ok {
-		panic(sprintf("name:'%s' already been token", name))
-	}
-	this.classes[name] = class
-}
-
-func (this *BuildPackage) mkEnum(e ast.Enum) cg.ClassHighLevel {
-	class := &cg.ClassHighLevel{}
-	ast.TypeName = e.Name
-	ast.TypeInsertSourceFile(e.Pos.Filename)
-	ast.TypeAccessFlags = e.AccessFlags
-	ast.TypeSuperClass = ast.JavaRootClass
-	ast.TypeFields = make(map[string]*cg.FieldHighLevel)
-	ast.TypeClass.AttributeLucyEnum = &cg.AttributeLucyEnum{}
-	if e.Comment != "" {
-		ast.TypeClass.AttributeLucyComment = &cg.AttributeLucyComment{
-			Comment: e.Comment,
-		}
-	}
-	for _, v := range e.Enums {
-		field := &cg.FieldHighLevel{}
-		if e.AccessFlags&cg.AccClassPublic != 0 {
-			field.AccessFlags |= cg.AccFieldPublic
-		} else {
-			field.AccessFlags |= cg.AccFieldPrivate
-		}
-		if v.Comment != "" {
-			field.AttributeLucyComment = &cg.AttributeLucyComment{
-				Comment: v.Comment,
-			}
-		}
-		field.Name = v.Name
-		field.Descriptor = "I"
-		field.AttributeConstantValue = &cg.AttributeConstantValue{}
-		field.AttributeConstantValue.Index = ast.TypeClass.InsertIntConst(v.Value)
-		ast.TypeFields[v.Name] = field
-	}
-	return class
-}
-
-func (this *BuildPackage) mkGlobalConstants() {
-	for k, v := range this.Package.Block.Constants {
-		f := &cg.FieldHighLevel{}
-		f.AccessFlags |= cg.AccFieldStatic
-		f.AccessFlags |= cg.AccFieldFinal
-		if v.AccessFlags&cg.AccFieldPublic != 0 {
-			f.AccessFlags |= cg.AccFieldPublic
-		}
-		f.Name = v.Name
-		f.AttributeConstantValue = &cg.AttributeConstantValue{}
-		f.AttributeConstantValue.Index = this.insertDefaultValue(this.mainClass, v.Type, v.Value)
-		f.AttributeLucyConst = &cg.AttributeLucyConst{}
-		if v.Comment != "" {
-			f.AttributeLucyComment = &cg.AttributeLucyComment{
-				Comment: v.Comment,
-			}
-		}
-		f.Descriptor = Descriptor.typeDescriptor(v.Type)
-		this.mainClass.Fields[k] = f
-	}
-}
-func (this *BuildPackage) mkGlobalTypeAlias() {
-	for name, v := range this.Package.Block.TypeAliases {
-		t := &cg.AttributeLucyTypeAlias{}
-		t.Alias = LucyTypeAliasParser.Encode(name, v)
-		if v.Alias != null {
-			t.Comment = v.Alias.Comment
-		}
-		this.mainClass.Class.TypeAlias = append(this.mainClass.Class.TypeAlias, t)
-	}
-}
-
-func (this *BuildPackage) mkGlobalVariables() {
-	for k, v := range this.Package.Block.Variables {
-		f := &cg.FieldHighLevel{}
-		f.AccessFlags |= cg.AccFieldStatic
-		f.Descriptor = Descriptor.typeDescriptor(v.Type)
-		if v.AccessFlags&cg.AccFieldPublic != 0 {
-			f.AccessFlags |= cg.AccFieldPublic
-		}
-		f.AccessFlags |= cg.AccFieldVolatile
-		if LucyFieldSignatureParser.Need(v.Type) {
-			f.AttributeLucyFieldDescriptor = &cg.AttributeLucyFieldDescriptor{}
-			f.AttributeLucyFieldDescriptor.Descriptor = LucyFieldSignatureParser.Encode(v.Type)
-			if v.Type.FunctionType.VArgs != nil {
-				f.AttributeLucyFieldDescriptor.MethodAccessFlag |=
-					cg.AccMethodVarargs
-			}
-		}
-		if v.Comment != "" {
-			f.AttributeLucyComment = &cg.AttributeLucyComment{
-				Comment: v.Comment,
-			}
-		}
-		f.Name = v.Name
-		this.mainClass.Fields[k] = f
-	}
-}
-
-func (this *BuildPackage) mkInitFunctions() {
-	if len(this.Package.InitFunctions) == 0 {
-		needTrigger := false
-		for _, v := range this.Package.LoadedPackages {
-			if v.TriggerPackageInitMethodName != "" {
-				needTrigger = true
-				break
-			}
-		}
-		if needTrigger == false {
-			return
-		}
-	}
-	blockMethods := []*cg.MethodHighLevel{}
-	for _, v := range this.Package.InitFunctions {
-		method := &cg.MethodHighLevel{}
-		blockMethods = append(blockMethods, method)
-		method.AccessFlags |= cg.AccMethodStatic
-		method.AccessFlags |= cg.AccMethodFinal
-		method.AccessFlags |= cg.AccMethodPrivate
-		method.Name = this.mainClass.NewMethodName("block")
-		method.Class = this.mainClass
-		method.Descriptor = "()V"
-		method.Code = &cg.AttributeCode{}
-		this.buildFunction(this.mainClass, null, method, v)
-		this.mainClass.AppendMethod(method)
-	}
-	method := &cg.MethodHighLevel{}
-	method.AccessFlags |= cg.AccMethodStatic
-	method.Name = "<clinit>"
-	method.Descriptor = "()V"
-	codes := make([]byte, 65536)
-	codeLength := int(0)
-	method.Code = &cg.AttributeCode{}
-	for _, v := range this.Package.LoadedPackages {
-		if v.TriggerPackageInitMethodName == "" {
-			continue
-		}
-		codes[codeLength] = cg.OP_invokestatic
-		this.mainClass.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
-			Class:      v.Name + "/main", // main class
-			Method:     v.TriggerPackageInitMethodName,
-			Descriptor: "()V",
-		}, codes[codeLength+1:codeLength+3])
-		codeLength += 3
-	}
-	for _, v := range blockMethods {
-		codes[codeLength] = cg.OP_invokestatic
-		this.mainClass.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
-			Class:      this.mainClass.Name,
-			Method:     v.Name,
-			Descriptor: "()V",
-		}, codes[codeLength+1:codeLength+3])
-		codeLength += 3
-	}
-	codes[codeLength] = cg.OP_return
-	codeLength++
-	codes = codes[0:codeLength]
-	method.Code.Codes = codes
-	method.Code.CodeLength = codeLength
-	this.mainClass.AppendMethod(method)
-
-	// trigger init
-	trigger := &cg.MethodHighLevel{}
-	trigger.Name = this.mainClass.NewMethodName("triggerPackageInit")
-	trigger.AccessFlags |= cg.AccMethodPublic
-	trigger.AccessFlags |= cg.AccMethodBridge
-	trigger.AccessFlags |= cg.AccMethodStatic
-	trigger.AccessFlags |= cg.AccMethodSynthetic
-	trigger.Descriptor = "()V"
-	trigger.Code = &cg.AttributeCode{}
-	trigger.Code.Codes = make([]byte, 1)
-	trigger.Code.Codes[0] = cg.OP_return
-	trigger.Code.CodeLength = 1
-	trigger.AttributeLucyTriggerPackageInitMethod = &cg.AttributeLucyTriggerPackageInitMethod{}
-	this.mainClass.AppendMethod(trigger)
-	this.mainClass.TriggerPackageInitMethod = trigger
-}
-
-func (this *BuildPackage) insertDefaultValue(c cg.ClassHighLevel, t ast.Type, v interface{}) (index char) {
-	switch t.Type {
-	case ast.VariableTypeBool:
-		if v.(bool) {
-			index = c.Class.InsertIntConst(1)
-		} else {
-			index = c.Class.InsertIntConst(0)
-		}
-	case ast.VariableTypeByte:
-		index = c.Class.InsertIntConst(int(v.(long)))
-	case ast.VariableTypeShort:
-		index = c.Class.InsertIntConst(int(v.(long)))
-	case ast.VariableTypeChar:
-		index = c.Class.InsertIntConst(int(v.(long)))
-	case ast.VariableTypeInt:
-		index = c.Class.InsertIntConst(int(v.(long)))
-	case ast.VariableTypeLong:
-		index = c.Class.InsertLongConst(v.(long))
-	case ast.VariableTypeFloat:
-		index = c.Class.InsertFloatConst(v.(float))
-	case ast.VariableTypeDouble:
-		index = c.Class.InsertDoubleConst(v.(double))
-	case ast.VariableTypeString:
-		index = c.Class.InsertStringConst(v.(string))
-	default:
-		panic("no match")
-	}
-	return
-}
-
-func (this *BuildPackage) buildClass(astClass ast.Class) cg.ClassHighLevel {
-	class := &cg.ClassHighLevel{}
-	ast.TypeName = astClass.Name
-	ast.TypeInsertSourceFile(astClass.Pos.Filename)
-	ast.TypeAccessFlags = astClass.AccessFlags
-	if astClass.SuperClass != null {
-		ast.TypeSuperClass = astClass.SuperClass.Name
-	} else {
-		ast.TypeSuperClass = astClass.SuperClassName.Name
-	}
-	if astClass.Comment != "" {
-		ast.TypeClass.AttributeLucyComment = &cg.AttributeLucyComment{
-			Comment: astClass.Comment,
-		}
-	}
-	if len(astClass.Block.Constants) > 0 {
-		attr := &cg.AttributeLucyClassConst{}
-		for _, v := range astClass.Block.Constants {
-			c := &cg.LucyClassConst{}
-			c.Name = v.Name
-			c.Comment = v.Comment
-			c.Descriptor = Descriptor.typeDescriptor(v.Type)
-			c.ValueIndex = this.insertDefaultValue(class, v.Type, v.Value)
-			attr.Constants = append(attr.Constants, c)
-		}
-		ast.TypeClass.AttributeLucyClassConst = attr
-	}
-	ast.TypeFields = make(map[string]*cg.FieldHighLevel)
-	ast.TypeMethods = make(map[string][]*cg.MethodHighLevel)
-	for _, v := range astClass.Interfaces {
-		ast.TypeInterfaces = append(ast.TypeInterfaces, v.Name)
-	}
-	for _, v := range astClass.Fields {
-		f := &cg.FieldHighLevel{}
-		f.Name = v.Name
-		f.AccessFlags = v.AccessFlags
-		if v.IsStatic() && v.DefaultValue != null {
-			f.AttributeConstantValue = &cg.AttributeConstantValue{}
-			f.AttributeConstantValue.Index = this.insertDefaultValue(class, v.Type,
-				v.DefaultValue)
-		}
-		f.Descriptor = Descriptor.typeDescriptor(v.Type)
-		if LucyFieldSignatureParser.Need(v.Type) {
-			t := &cg.AttributeLucyFieldDescriptor{}
-			t.Descriptor = LucyFieldSignatureParser.Encode(v.Type)
-			f.AttributeLucyFieldDescriptor = t
-		}
-		if v.Comment != "" {
-			f.AttributeLucyComment = &cg.AttributeLucyComment{
-				Comment: v.Comment,
-			}
-		}
-		ast.TypeFields[v.Name] = f
-	}
-	for name, v := range astClass.Methods {
-		vv := v[0]
-		method := &cg.MethodHighLevel{}
-		method.Name = name
-		method.AccessFlags = vv.Function.AccessFlags
-		if vv.Function.Type.VArgs != null {
-			method.AccessFlags |= cg.AccMethodVarargs
-		}
-		if vv.IsCompilerAuto {
-			method.AccessFlags |= cg.AccMethodSynthetic
-		}
-		method.Class = class
-		method.Descriptor = Descriptor.methodDescriptor(&vv.Function.Type)
-		method.IsConstruction = name == specialMethodInit
-		if vv.IsAbstract() == false {
-			method.Code = &cg.AttributeCode{}
-			this.buildFunction(class, astClass, method, vv.Function)
-		}
-		ast.TypeAppendMethod(method)
-	}
-	return class
-}
-
-func (this *BuildPackage) mkGlobalFunctions() {
-	ms := make(map[string]*cg.MethodHighLevel)
-	for k, f := range this.Package.Block.Functions { // first round
-		if f.TemplateFunction != null {
-			this.mainClass.TemplateFunctions = append(this.mainClass.TemplateFunctions,
-				&cg.AttributeTemplateFunction{
-					Name:        f.Name,
-					Filename:    f.Pos.Filename,
-					StartLine:   char(f.Pos.Line),
-					StartColumn: char(f.Pos.Column),
-					Code:        string(f.SourceCode),
-				})
-			continue
-		}
-		if f.IsBuildIn { //
-			continue
-		}
-		class := this.mainClass
-		method := &cg.MethodHighLevel{}
-		method.Class = class
-		method.Name = f.Name
-		if f.Name == ast.MainFunctionName {
-			method.Descriptor = "([Ljava/lang/String;)V"
-		} else {
-			method.Descriptor = Descriptor.methodDescriptor(&f.Type)
-		}
-		method.AccessFlags = 0
-		method.AccessFlags |= cg.AccMethodStatic
-		if f.AccessFlags&cg.AccMethodPublic != 0 || f.Name == ast.MainFunctionName {
-			method.AccessFlags |= cg.AccMethodPublic
-		}
-		if f.Comment != "" {
-			method.AttributeLucyComment = &cg.AttributeLucyComment{
-				Comment: f.Comment,
-			}
-		}
-		if f.Type.VArgs != null {
-			method.AccessFlags |= cg.AccMethodVarargs
-		}
-		ms[k] = method
-		f.Entrance = method
-		method.Code = &cg.AttributeCode{}
-		this.mainClass.AppendMethod(method)
-	}
-	for k, f := range this.Package.Block.Functions {
-		if f.IsBuildIn || f.TemplateFunction != null { //
-			continue
-		}
-		this.buildFunction(ms[k].Class, null, ms[k], f)
-	}
-}
-
-func (this *BuildPackage) DumpClass() error {
-	//dump main class
-	f, err := os.OpenFile("main.class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-	if err != null {
-		return err
-	}
-	if err := this.mainClass.ToLow().OutPut(f); err != null {
-		f.Close()
-		return err
-	}
-	f.Close()
-	for _, c := range this.classes {
-		f, err = os.OpenFile(filepath.Base(c.Name)+".class", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-		if err != null {
-			return err
-		}
-		if err = c.ToLow().OutPut(f); err != null {
-			f.Close()
-			return err
-		} else {
-			f.Close()
-		}
-	}
-	return null
-}
-
-/*
-	make_node_objects a default construction
-*/
-func (this *BuildPackage) mkClassDefaultConstruction(c cg.ClassHighLevel) {
-	method := &cg.MethodHighLevel{}
-	method.Name = specialMethodInit
-	method.Descriptor = "()V"
-	method.AccessFlags |= cg.AccMethodPublic
-	method.Code = &cg.AttributeCode{}
-	method.Code.Codes = make([]byte, 5)
-	method.Code.CodeLength = 5
-	method.Code.MaxLocals = 1
-	method.Code.Codes[0] = cg.OP_aload_0
-	method.Code.Codes[1] = cg.OP_invokespecial
-	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
-		Class:      ast.TypeSuperClass,
-		Method:     specialMethodInit,
-		Descriptor: "()V",
-	}, method.Code.Codes[2:4])
-	method.Code.MaxStack = 1
-	method.Code.Codes[4] = cg.OP_return
-	ast.TypeAppendMethod(method)
-}
-
-func (this *BuildPackage) storeGlobalVariable(c cg.ClassHighLevel, code cg.AttributeCode,
-	v ast.Variable) {
-	code.Codes[code.CodeLength] = cg.OP_putstatic
-	if v.JvmDescriptor == "" {
-		v.JvmDescriptor = Descriptor.typeDescriptor(v.Type)
-	}
-	ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
-		Class:      this.mainClass.Name,
-		Field:      v.Name,
-		Descriptor: v.JvmDescriptor,
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-}

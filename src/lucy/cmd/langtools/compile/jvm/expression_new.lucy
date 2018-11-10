@@ -1,152 +1,164 @@
+class BuildExpressionNew {
 
-func (this *BuildExpression) buildNew(
-	c cg.ClassHighLevel,
-	code cg.AttributeCode,
-	e ast.Expression,
-	context Context,
-	state StackMapState) (maxStack char) {
-	switch e.Value.Type {
-	case ast.VariableTypeArray:
-		return this.buildNewArray(class, code, e, context, state)
-	case ast.VariableTypeJavaArray:
-		return this.buildNewJavaArray(class, code, e, context, state)
-	case ast.VariableTypeMap:
-		return this.buildNewMap(class, code, e, context)
-	}
-	stackLength := len(state.Stacks)
-	defer func() {
-		state.popStack(len(state.Stacks) - stackLength)
-	}()
-	//new object
-	n := e.Data.(*ast.ExpressionNew)
-	code.Codes[code.CodeLength] = cg.OP_new
-	ast.TypeInsertClassConst(n.Type.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.Codes[code.CodeLength+3] = cg.OP_dup
-	t := &cg.StackMapVerificationTypeInfo{}
-	t.Verify = &cg.StackMapUninitializedVariableInfo{
-		CodeOffset: char(code.CodeLength),
-	}
-	state.Stacks = append(state.Stacks, t, t)
-	code.CodeLength += 4
-	maxStack = 2
-	maxStack += this.buildCallArgs(class, code, n.Args, n.VArgs, context, state)
-	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	d := n.Construction.Function.JvmDescriptor
-	if d == "" {
-		d = Descriptor.methodDescriptor(&n.Construction.Function.Type)
-	}
-	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
-		Class:      n.Type.Class.Name,
-		Method:     specialMethodInit,
-		Descriptor: d,
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	return
+
+
+
+    fn  buildNew(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        e ast.Expression,
+        context Context,
+        state StackMapState) -> (maxStack char) {
+        switch e.Value.Type {
+        case ast.VariableTypeArray:
+            return this.buildNewArray(c, code, e, context, state)
+        case ast.VariableTypeJavaArray:
+            return this.buildNewJavaArray(c, code, e, context, state)
+        case ast.VariableTypeMap:
+            return this.buildNewMap(c, code, e, context)
+        }
+        stackLength := len(state.Stacks)
+        defer  {
+            state.popStack(len(state.Stacks) - stackLength)
+        }
+        //new object
+        n := e.Data.(ast.ExpressionNew)
+        code.Codes[code.CodeLength] = cg.OP_new
+        ast.TypeInsertClassConst(n.Type.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+        code.Codes[code.CodeLength+3] = cg.OP_dup
+        t := new cg.StackMapVerificationTypeInfo()
+        t.Verify = new cg.StackMapUninitializedVariableInfo()
+        t.Verify.(cg.StackMapUninitializedVariableInfo).CodeOffset = char(code.CodeLength)
+        state.Stacks = append(state.Stacks, t, t)
+        code.CodeLength += 4
+        maxStack = 2
+        maxStack += this.buildCallArgs(c, code, n.Args, n.VArgs, context, state)
+        code.Codes[code.CodeLength] = cg.OP_invokespecial
+        d := n.Construction.Function.JvmDescriptor
+        if d == "" {
+            d = Descriptor.methodDescriptor(n.Construction.Function.Type)
+        }
+        ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            n.Type.Class.Name,
+            specialMethodInit,
+            d
+        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
+        code.CodeLength += 3
+        return
+    }
+
+    fn  buildNewMap(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        e ast.Expression,
+        context Context) -> (maxStack char) {
+        maxStack = 2
+        code.Codes[code.CodeLength] = cg.OP_new
+        ast.TypeInsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+        code.Codes[code.CodeLength+3] = cg.OP_dup
+        code.CodeLength += 4
+        code.Codes[code.CodeLength] = cg.OP_invokespecial
+        ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            mapClass,
+            specialMethodInit,
+            "()V"
+        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
+        code.CodeLength += 3
+        return
+    }
+
+    fn  buildNewJavaArray(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        e ast.Expression,
+        context Context,
+        state StackMapState) -> (maxStack char) {
+        dimensions := byte(0)
+        {
+            // get dimension
+            t := e.Value
+            for t.Type == ast.VariableTypeJavaArray {
+                dimensions++
+                t = t.Array
+            }
+        }
+        n := e.Data.(ast.ExpressionNew)
+        maxStack = this.build(c, code, n.Args[0], context, state) // must be a integer
+        currentStack := char(1)
+        for i := byte(0); i < dimensions-1; i++ {
+            loadInt32(c, code, 0)
+            currentStack++
+            if currentStack > maxStack {
+                maxStack = currentStack
+            }
+        }
+        code.Codes[code.CodeLength] = cg.OP_multianewarray
+        ast.TypeInsertClassConst(Descriptor.typeDescriptor(e.Value), code.Codes[code.CodeLength+1:code.CodeLength+3])
+        code.Codes[code.CodeLength+3] = dimensions
+        code.CodeLength += 4
+        if e.Value.Array.Type == ast.VariableTypeEnum {
+            state.pushStack(c, e.Value)
+            defer state.popStack(1)
+            if t := 3 + setEnumArray(c, code, state, context, e.Value.Array.Enum); t > maxStack {
+                maxStack = t
+            }
+        }
+        return
+    }
+    fn  buildNewArray(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        e ast.Expression,
+        context Context,
+        state StackMapState) -> (maxStack char) {
+        //new
+        n := e.Data.(ast.ExpressionNew)
+        meta := ArrayMetas[e.Value.Array.Type]
+        code.Codes[code.CodeLength] = cg.OP_new
+        ast.TypeInsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
+        code.Codes[code.CodeLength+3] = cg.OP_dup
+        code.CodeLength += 4
+        maxStack = 2
+        {
+            t := new cg.StackMapVerificationTypeInfo()
+            unInit := new cg.StackMapUninitializedVariableInfo()
+            unInit.CodeOffset = char(code.CodeLength - 4)
+            t.Verify = unInit
+            state.Stacks = append(state.Stacks, t, t) // 2 for dup
+            defer state.popStack(2)
+        }
+        // get amount
+        stack := this.build(c, code, n.Args[0], context, state) // must be a integer
+        if t := 2 + stack; t > maxStack {
+            maxStack = t
+        }
+        newArrayBaseOnType(c, code, e.Value.Array)
+        if e.Value.Array.Type == ast.VariableTypeEnum {
+            t := new ast.Type()
+            t .Type = ast.VariableTypeJavaArray
+            t .Array = e.Value.Array
+            state.pushStack(c, t)
+
+            if t := 3 + setEnumArray(c, code, state, context, e.Value.Array.Enum); t > maxStack {
+                maxStack = t
+            }
+            state.popStack(1)
+        }
+        code.Codes[code.CodeLength] = cg.OP_invokespecial
+        ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            meta.className,
+            specialMethodInit,
+            meta.constructorFuncDescriptor
+        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
+        code.CodeLength += 3
+        return
+    }
+
+
+
+
+
+
 }
 
-func (this *BuildExpression) buildNewMap(
-	c cg.ClassHighLevel,
-	code cg.AttributeCode,
-	e ast.Expression,
-	context Context) (maxStack char) {
-	maxStack = 2
-	code.Codes[code.CodeLength] = cg.OP_new
-	ast.TypeInsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.Codes[code.CodeLength+3] = cg.OP_dup
-	code.CodeLength += 4
-	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
-		Class:      mapClass,
-		Method:     specialMethodInit,
-		Descriptor: "()V",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	return
-}
 
-func (this *BuildExpression) buildNewJavaArray(
-	c cg.ClassHighLevel,
-	code cg.AttributeCode,
-	e ast.Expression,
-	context Context,
-	state StackMapState) (maxStack char) {
-	dimensions := byte(0)
-	{
-		// get dimension
-		t := e.Value
-		for t.Type == ast.VariableTypeJavaArray {
-			dimensions++
-			t = t.Array
-		}
-	}
-	n := e.Data.(*ast.ExpressionNew)
-	maxStack = this.build(class, code, n.Args[0], context, state) // must be a integer
-	currentStack := char(1)
-	for i := byte(0); i < dimensions-1; i++ {
-		loadInt32(class, code, 0)
-		currentStack++
-		if currentStack > maxStack {
-			maxStack = currentStack
-		}
-	}
-	code.Codes[code.CodeLength] = cg.OP_multianewarray
-	ast.TypeInsertClassConst(Descriptor.typeDescriptor(e.Value), code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.Codes[code.CodeLength+3] = dimensions
-	code.CodeLength += 4
-	if e.Value.Array.Type == ast.VariableTypeEnum {
-		state.pushStack(class, e.Value)
-		defer state.popStack(1)
-		if t := 3 + setEnumArray(class, code, state, context, e.Value.Array.Enum); t > maxStack {
-			maxStack = t
-		}
-	}
-	return
-}
-func (this *BuildExpression) buildNewArray(
-	c cg.ClassHighLevel,
-	code cg.AttributeCode,
-	e ast.Expression,
-	context Context,
-	state StackMapState) (maxStack char) {
-	//new
-	n := e.Data.(*ast.ExpressionNew)
-	meta := ArrayMetas[e.Value.Array.Type]
-	code.Codes[code.CodeLength] = cg.OP_new
-	ast.TypeInsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.Codes[code.CodeLength+3] = cg.OP_dup
-	code.CodeLength += 4
-	maxStack = 2
-	{
-		t := &cg.StackMapVerificationTypeInfo{}
-		unInit := &cg.StackMapUninitializedVariableInfo{}
-		unInit.CodeOffset = char(code.CodeLength - 4)
-		t.Verify = unInit
-		state.Stacks = append(state.Stacks, t, t) // 2 for dup
-		defer state.popStack(2)
-	}
-	// get amount
-	stack := this.build(class, code, n.Args[0], context, state) // must be a integer
-	if t := 2 + stack; t > maxStack {
-		maxStack = t
-	}
-	newArrayBaseOnType(class, code, e.Value.Array)
-	if e.Value.Array.Type == ast.VariableTypeEnum {
-		state.pushStack(class, &ast.Type{
-			Type:  ast.VariableTypeJavaArray,
-			Array: e.Value.Array,
-		})
-
-		if t := 3 + setEnumArray(class, code, state, context, e.Value.Array.Enum); t > maxStack {
-			maxStack = t
-		}
-		state.popStack(1)
-	}
-	code.Codes[code.CodeLength] = cg.OP_invokespecial
-	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
-		Class:      meta.className,
-		Method:     specialMethodInit,
-		Descriptor: meta.constructorFuncDescriptor,
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	return
-}

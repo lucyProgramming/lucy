@@ -1,5 +1,5 @@
 
-fn writeExits(es []*cg.Exit, to int) {
+fn writeExits(es []cg.Exit, to int) {
 	for _, e := range es {
 		offset := int16(to - int(e.CurrentCodeLength))
 		e.BranchBytes[0] = byte(offset >> 8)
@@ -12,7 +12,7 @@ fn jumpTo(code cg.AttributeCode, to int) {
 		panic("to is negative")
 	}
 	exit := (&cg.Exit{}).Init(cg.OP_goto, code)
-	writeExits([]*cg.Exit{exit}, to)
+	writeExits([]cg.Exit{exit}, to)
 }
 
 fn copyOPs(code cg.AttributeCode, op ...byte) {
@@ -287,7 +287,7 @@ fn setEnumArray(c cg.ClassHighLevel, code cg.AttributeCode,
 	code.Codes[code.CodeLength+2] = 1
 	code.CodeLength += 3
 	jumpTo(code, offset)
-	writeExits([]*cg.Exit{exit}, code.CodeLength)
+	writeExits([]cg.Exit{exit}, code.CodeLength)
 	context.MakeStackMap(code, state, code.CodeLength)
 	return
 

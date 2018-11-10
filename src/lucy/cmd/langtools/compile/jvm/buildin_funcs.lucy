@@ -1,50 +1,53 @@
- 
 
-func (this *BuildExpression) mkBuildInFunctionCall(
-	c cg.ClassHighLevel,
-	code cg.AttributeCode,
-	e ast.Expression,
-	context Context,
-	state StackMapState) (maxStack char) {
-	call := e.Data.(*ast.ExpressionFunctionCall)
-	if call.Function.LoadedFromCorePackage {
-		maxStack = this.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
-		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
-			Class:      call.Function.Entrance.Class.Name,
-			Method:     call.Function.Name,
-			Descriptor: call.Function.Entrance.Descriptor,
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		return
-	}
-	switch call.Function.Name {
-	case common.BuildInFunctionPrint:
-		return this.mkBuildInPrint(class, code, e, context, state)
-	case common.BuildInFunctionPanic:
-		return this.mkBuildInPanic(class, code, e, context, state)
-	case common.BuildInFunctionCatch:
-		return this.mkBuildInCatch(class, code, e, context)
-	case common.BuildInFunctionMonitorEnter, common.BuildInFunctionMonitorExit:
-		maxStack = this.build(class, code, call.Args[0], context, state)
-		if call.Function.Name == common.BuildInFunctionMonitorEnter {
-			code.Codes[code.CodeLength] = cg.OP_monitorenter
-		} else { // monitor enter on exit
-			code.Codes[code.CodeLength] = cg.OP_monitorexit
-		}
-		code.CodeLength++
-	case common.BuildInFunctionPrintf:
-		return this.mkBuildInPrintf(class, code, e, context, state)
-	case common.BuildInFunctionSprintf:
-		return this.mkBuildInSprintf(class, code, e, context, state)
-	case common.BuildInFunctionLen:
-		return this.mkBuildInLen(class, code, e, context, state)
-	case common.BuildInFunctionBlockHole:
-		return this.mkBuildInBlackHole(class, code, e, context, state)
-	case common.BuildInFunctionAssert:
-		return this.mkBuildInAssert(class, code, e, context, state)
-	default:
-		panic("unknown  buildIn function:" + call.Function.Name)
-	}
-	return
+class BuildExpressionBuildinFunctionCall {
+
+    fn mkBuildInFunctionCall(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        e ast.Expression,
+        context Context,
+        state StackMapState) -> (maxStack char) {
+        call := e.Data.(ast.ExpressionFunctionCall)
+        if call.Function.LoadedFromCorePackage {
+            maxStack = this.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
+            code.Codes[code.CodeLength] = cg.OP_invokestatic
+            ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.Function.Entrance.Class.Name,call.Function.Name,call.Function.Entrance.Descriptor
+            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
+            code.CodeLength += 3
+            return
+        }
+        switch call.Function.Name {
+        case common.BuildInFunctionPrint:
+            return this.mkBuildInPrint(c, code, e, context, state)
+        case common.BuildInFunctionPanic:
+            return this.mkBuildInPanic(c, code, e, context, state)
+        case common.BuildInFunctionCatch:
+            return this.mkBuildInCatch(c, code, e, context)
+        /*
+        case common.BuildInFunctionMonitorEnter, common.BuildInFunctionMonitorExit:
+            maxStack = this.build(c, code, call.Args[0], context, state)
+            if call.Function.Name == common.BuildInFunctionMonitorEnter {
+                code.Codes[code.CodeLength] = cg.OP_monitorenter
+            } else { // monitor enter on exit
+                code.Codes[code.CodeLength] = cg.OP_monitorexit
+            }
+            code.CodeLength++
+          */
+        case common.BuildInFunctionPrintf:
+            return this.mkBuildInPrintf(c, code, e, context, state)
+        case common.BuildInFunctionSprintf:
+            return this.mkBuildInSprintf(c, code, e, context, state)
+        case common.BuildInFunctionLen:
+            return this.mkBuildInLen(c, code, e, context, state)
+        case common.BuildInFunctionBlockHole:
+            return this.mkBuildInBlackHole(c, code, e, context, state)
+        case common.BuildInFunctionAssert:
+            return this.mkBuildInAssert(c, code, e, context, state)
+        default:
+            panic("unknown  buildIn function:" + call.Function.Name)
+        }
+        return
+    }
+
 }
+

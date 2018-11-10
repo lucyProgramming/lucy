@@ -1,10 +1,10 @@
  
 
-class Description  {
+class Descriptor  {
 
 
-	static fn methodDescriptor(functionType ast.FunctionType) string {
-		s := "("
+	static fn methodDescriptor(functionType ast.FunctionType) -> (s string) {
+		s = "("
 		for _, v := range functionType.ParameterList {
 			s += this.typeDescriptor(v.Type)
 		}
@@ -22,7 +22,7 @@ class Description  {
 		return s
 	}
 
-	static fn typeDescriptor(typ ast.Type) string {
+	static fn typeDescriptor(typ ast.Type) -> (d string) {
 		switch typ.Type {
 		case ast.VariableTypeBool:
 			return "Z"
@@ -59,59 +59,59 @@ class Description  {
 		panic("unHandle type signature")
 	}
 
-	static fn ParseType(bs []byte) ([]byte, ast.Type, error) {
+	static fn ParseType(bs []byte) -> (bsSlieced []byte, t ast.Type,err error) {
 		switch bs[0] {
 		case 'V':
 			bs = bs[1:]
-			return bs, &ast.Type{
-				Type: ast.VariableTypeVoid,
-			}, null
+			t = new ast.Type()
+			t .Type = ast.VariableTypeVoid
+			return bs , t ,err
 		case 'B':
 			bs = bs[1:]
-			return bs, &ast.Type{
-				Type: ast.VariableTypeByte,
-			}, null
+			t = new ast.Type()
+			t .Type = ast.VariableTypeByte
+			return bs , t ,err
 		case 'D':
 			bs = bs[1:]
-			return bs, &ast.Type{
-				Type: ast.VariableTypeDouble,
-			}, null
+			t = new ast.Type()
+			t .Type = ast.VariableTypeDouble
+			return bs , t ,err
 		case 'F':
 			bs = bs[1:]
-			return bs, &ast.Type{
-				Type: ast.VariableTypeFloat,
-			}, null
+			t = new ast.Type()
+			t .Type = ast.VariableTypeFloat
+			return bs , t ,err
 		case 'I':
 			bs = bs[1:]
-			return bs, &ast.Type{
-				Type: ast.VariableTypeInt,
-			}, null
+			t = new ast.Type()
+			t .Type = ast.VariableTypeInt
+			return bs , t ,err
 		case 'J':
 			bs = bs[1:]
-			return bs, &ast.Type{
-				Type: ast.VariableTypeLong,
-			}, null
+			t = new ast.Type()
+			t .Type = ast.VariableTypeLong
+			return bs , t ,err
 		case 'C':
 			bs = bs[1:]
-			return bs, &ast.Type{
-				Type: ast.VariableTypeChar,
-			}, null
+			t = new ast.Type()
+			t .Type = ast.VariableTypeChar
+			return bs , t ,err
 		case 'S':
 			bs = bs[1:]
-			return bs, &ast.Type{
-				Type: ast.VariableTypeShort,
-			}, null
+			t = new ast.Type()
+			t .Type = ast.VariableTypeShort
+			return bs , t ,err
 		case 'Z':
 			bs = bs[1:]
-			return bs, &ast.Type{
-				Type: ast.VariableTypeBool,
-			}, null
+			t = new ast.Type()
+			t .Type = ast.VariableTypeBool
+			return bs , t ,err
 		case 'L':
 			bs = bs[1:]
 			index := bytes.Index(bs, []byte{';'}) // end token
-			t := &ast.Type{}
+			t := new ast.Type()
 			t.Type = ast.VariableTypeObject
-			t.Class = &ast.Class{}
+			t.Class = new ast.Class()
 			t.Class.Name = string(bs[:index])
 			bs = bs[index+1:] // skip ;
 			t.Class.NotImportedYet = true
@@ -124,25 +124,24 @@ class Description  {
 			var t ast.Type
 			var err error
 			bs, t, err = this.ParseType(bs)
-			ret := &ast.Type{}
+			ret := new ast.Type()
 			if err == null {
 				ret.Type = ast.VariableTypeJavaArray
 				ret.Array = t
 			}
 			return bs, ret, err
 		}
-		return bs, null, new error(sprintf("unkown type:%v", string(bs))
+		return bs, null, new error(sprintf("unkown type:%v", string(bs)))
 	}
 
-	static fn ParseFunctionType(bs []byte) (ast.FunctionType, error) {
-		t := ast.FunctionType{}
+	static fn ParseFunctionType(bs []byte) -> (t ast.FunctionType,err error) {
+		t = new ast.FunctionType()
 		if bs[0] != '(' {
-			return t, new error(sprintf("function descriptor does not start with '('")
+			return t, new error(sprintf("function descriptor does not start with '('"))
 		}
 		bs = bs[1:]
-		var err error
 		for bs[0] != ')' {
-			vd := &ast.Variable{}
+			vd := new ast.Variable()
 			bs, vd.Type, err = this.ParseType(bs)
 			if err != null {
 				return t, err
@@ -150,7 +149,7 @@ class Description  {
 			t.ParameterList = append(t.ParameterList, vd)
 		}
 		bs = bs[1:] // skip )
-		vd := &ast.Variable{}
+		vd := new ast.Variable()
 		vd.Name = "returnValue"
 		_, vd.Type, err = this.ParseType(bs)
 		if err != null {

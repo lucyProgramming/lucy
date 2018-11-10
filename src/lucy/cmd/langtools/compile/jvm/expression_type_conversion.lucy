@@ -71,7 +71,7 @@ func (this *BuildExpression) buildTypeConversion(
 		state.pushStack(class, conversion.Expression.Value)
 		defer state.popStack(1)
 		context.MakeStackMap(code, state, code.CodeLength)
-		writeExits([]*cg.Exit{wrongExit, wrongExit2}, code.CodeLength)
+		writeExits([]cg.Exit{wrongExit, wrongExit2}, code.CodeLength)
 		code.Codes[code.CodeLength] = cg.OP_pop
 		code.CodeLength++
 		code.Codes[code.CodeLength] = cg.OP_new
@@ -95,7 +95,7 @@ func (this *BuildExpression) buildTypeConversion(
 		code.Codes[code.CodeLength] = cg.OP_athrow
 		code.CodeLength++
 		context.MakeStackMap(code, state, code.CodeLength)
-		writeExits([]*cg.Exit{okExit}, code.CodeLength)
+		writeExits([]cg.Exit{okExit}, code.CodeLength)
 		return
 	}
 

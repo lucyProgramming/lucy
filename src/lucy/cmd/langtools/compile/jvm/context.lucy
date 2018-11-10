@@ -34,15 +34,15 @@ class Context {
 		} else {
 			delta = char(offset - this.lastStackMapOffset - 1)
 		}
-		defer func() {
+		defer {
 			this.lastStackMapOffset = offset // rewrite
 			this.lastStackMapState = state
-			this.lastStackMapStateLocals = make([]*cg.StackMapVerificationTypeInfo, len(state.Locals))
+			this.lastStackMapStateLocals = new []cg.StackMapVerificationTypeInfo(len(state.Locals))
 			copy(this.lastStackMapStateLocals, state.Locals)
-			this.lastStackMapStateStacks = make([]*cg.StackMapVerificationTypeInfo, len(state.Stacks))
+			this.lastStackMapStateStacks = new []cg.StackMapVerificationTypeInfo(len(state.Stacks))
 			copy(this.lastStackMapStateStacks, state.Stacks)
 			this.stackMapOffsets = append(this.stackMapOffsets, offset)
-		}()
+		}
 		if state == this.lastStackMapState { // same state
 			if len(state.Locals) == len(this.lastStackMapStateLocals) && len(state.Stacks) == 0 {
 				/*
@@ -50,37 +50,37 @@ class Context {
 				*/
 				if delta <= 63 {
 					code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-						&cg.StackMapSameFrame{FrameType: byte(delta)})
+						new cg.StackMapSameFrame(byte(delta)))
 				} else {
 					code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-						&cg.StackMapSameFrameExtended{FrameType: 251, Delta: delta})
+						new cg.StackMapSameFrameExtended(251, delta))
 				}
 				return
 			}
 			if len(this.lastStackMapStateLocals) == len(state.Locals) && len(state.Stacks) == 1 { // 1 stack or 1 stack extended
 				if delta <= 64 {
 					code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-						&cg.StackMapSameLocals1StackItemFrame{
-							FrameType: byte(delta + 64),
-							Stack:     state.Stacks[0],
-						})
+						new cg.StackMapSameLocals1StackItemFrame(
+							byte(delta + 64),
+							state.Stacks[0]
+						))
 				} else {
 					code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-						&cg.StackMapSameLocals1StackItemFrameExtended{
-							FrameType: 247,
-							Delta:     delta,
-							Stack:     state.Stacks[0],
-						})
+						new cg.StackMapSameLocals1StackItemFrameExtended(
+							247,
+							delta,
+							state.Stacks[0]
+						))
 				}
 				return
 			}
 			if len(this.lastStackMapStateLocals) < len(state.Locals) && len(state.Stacks) == 0 { // append frame
 				num := len(state.Locals) - len(this.lastStackMapStateLocals)
 				if num <= 3 {
-					appendFrame := &cg.StackMapAppendFrame{}
+					appendFrame := new cg.StackMapAppendFrame()
 					appendFrame.FrameType = byte(num + 251)
 					appendFrame.Delta = delta
-					appendFrame.Locals = make([]*cg.StackMapVerificationTypeInfo, num)
+					appendFrame.Locals = new []cg.StackMapVerificationTypeInfo(num)
 					copy(appendFrame.Locals, state.Locals[len(state.Locals)-num:])
 					code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, appendFrame)
 					return
@@ -88,12 +88,12 @@ class Context {
 			}
 		}
 		// full frame
-		fullFrame := &cg.StackMapFullFrame{}
+		fullFrame := new cg.StackMapFullFrame()
 		fullFrame.FrameType = 255
 		fullFrame.Delta = delta
-		fullFrame.Locals = make([]*cg.StackMapVerificationTypeInfo, len(state.Locals))
+		fullFrame.Locals = new []cg.StackMapVerificationTypeInfo(len(state.Locals))
 		copy(fullFrame.Locals, state.Locals)
-		fullFrame.Stacks = make([]*cg.StackMapVerificationTypeInfo, len(state.Stacks))
+		fullFrame.Stacks = new []cg.StackMapVerificationTypeInfo(len(state.Stacks))
 		copy(fullFrame.Stacks, state.Stacks)
 		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, fullFrame)
 		return

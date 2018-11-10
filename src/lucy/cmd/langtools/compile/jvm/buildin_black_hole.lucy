@@ -1,12 +1,13 @@
  
 
+/*
 func (this *BuildExpression) mkBuildInBlackHole(
 	c cg.ClassHighLevel,
 	code cg.AttributeCode,
 	e ast.Expression,
 	context Context,
 	state StackMapState) (maxStack char) {
-	call := e.Data.(*ast.ExpressionFunctionCall)
+	call := e.Data.(ast.ExpressionFunctionCall)
 	for _, v := range call.Args {
 		stack := this.build(class, code, v, context, state)
 		if stack > maxStack {
@@ -21,3 +22,4 @@ func (this *BuildExpression) mkBuildInBlackHole(
 	}
 	return
 }
+*/

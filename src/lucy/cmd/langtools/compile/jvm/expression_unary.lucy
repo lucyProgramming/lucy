@@ -82,12 +82,12 @@ func (this *BuildExpression) buildUnary(
 		code.CodeLength++
 		exit2 := (&cg.Exit{}).Init(cg.OP_goto, code)
 		context.MakeStackMap(code, state, code.CodeLength)
-		writeExits([]*cg.Exit{exit}, code.CodeLength)
+		writeExits([]cg.Exit{exit}, code.CodeLength)
 		code.Codes[code.CodeLength] = cg.OP_iconst_1
 		code.CodeLength++
 		state.pushStack(class, ee.Value)
 		defer state.popStack(1)
-		writeExits([]*cg.Exit{exit2}, code.CodeLength)
+		writeExits([]cg.Exit{exit2}, code.CodeLength)
 		context.MakeStackMap(code, state, code.CodeLength)
 	}
 	return

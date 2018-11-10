@@ -1,14 +1,14 @@
  
 
 
-enum  ClosureKind(
+enum  ClosureKind{
 	ClosureClassInt = 1 ,
 	ClosureClassLong,
 	ClosureClassFloat,
 	ClosureClassDouble,
 	ClosureClassString,
 	ClosureClassObject
-)
+}
 
 
 
@@ -19,7 +19,7 @@ class Closure  {
 	
 
 
-	fn getMeta(t ast.VariableTypeKind) (meta *ClosureObjectMeta) {
+	fn getMeta(t ast.VariableTypeKind) -> (meta ClosureObjectMeta) {
 		switch t {
 		case ast.VariableTypeBool:
 			fallthrough
@@ -59,9 +59,9 @@ class Closure  {
 		create a closure var, init and leave on stack
 	*/
 	fn createClosureVar(c cg.ClassHighLevel,
-		code cg.AttributeCode, v ast.Type) (maxStack char) {
+		code cg.AttributeCode, v ast.Type) -> (maxStack char) {
 		maxStack = 2
-		var meta *ClosureObjectMeta
+		var meta ClosureObjectMeta
 		switch v.Type {
 		case ast.VariableTypeBool:
 			fallthrough
@@ -99,17 +99,17 @@ class Closure  {
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
-			Class:      meta.className,
-			Method:     specialMethodInit,
-			Descriptor: "()V",
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			     meta.className,
+			    specialMethodInit,
+			"()V"
+		), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		return
 	}
 
 	fn storeLocalClosureVar(c cg.ClassHighLevel, code cg.AttributeCode, v ast.Variable) {
-		var meta *ClosureObjectMeta
+		var meta ClosureObjectMeta
 		switch v.Type.Type {
 		case ast.VariableTypeBool:
 			fallthrough
@@ -143,11 +143,11 @@ class Closure  {
 			meta = this.ClosureObjectMetas[ClosureClassObject]
 		}
 		code.Codes[code.CodeLength] = cg.OP_putfield
-		ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
-			Class:      meta.className,
-			Field:      meta.fieldName,
-			Descriptor: meta.fieldDescription,
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+			    meta.className,
+			  meta.fieldName,
+			meta.fieldDescription
+		), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
 
@@ -155,9 +155,9 @@ class Closure  {
 		create a closure var on stack
 	*/
 	fn loadLocalClosureVar(c cg.ClassHighLevel, code cg.AttributeCode,
-		v ast.Variable) (maxStack char) {
+		v ast.Variable) -> (maxStack char) {
 		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
-		this.unPack(class, code, v.Type)
+		this.unPack(c, code, v.Type)
 		maxStack = jvmSlotSize(v.Type)
 		return
 	}
@@ -166,7 +166,7 @@ class Closure  {
 		closure object is on stack
 	*/
 	fn unPack(c cg.ClassHighLevel, code cg.AttributeCode, v ast.Type) {
-		var meta *ClosureObjectMeta
+		var meta ClosureObjectMeta
 		switch v.Type {
 		case ast.VariableTypeBool:
 			fallthrough
@@ -200,14 +200,14 @@ class Closure  {
 			meta = this.ClosureObjectMetas[ClosureClassObject]
 		}
 		code.Codes[code.CodeLength] = cg.OP_getfield
-		ast.TypeInsertFieldRefConst(cg.ConstantInfoFieldrefHighLevel{
-			Class:      meta.className,
-			Field:      meta.fieldName,
-			Descriptor: meta.fieldDescription,
-		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+			      meta.className,
+			      meta.fieldName,
+			 meta.fieldDescription
+		), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		if v.IsPointer() && v.Type != ast.VariableTypeString {
-			typeConverter.castPointer(class, code, v)
+			typeConverter.castPointer(c, code, v)
 		}
 	}
 }

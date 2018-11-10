@@ -64,16 +64,16 @@ func (this *BuildPackage) buildSwitchStatement(
 		maxStack = stack
 	}
 	//value is on stack
-	var notMatch *cg.Exit
+	var notMatch ast.Statement
 	size := jvmSlotSize(s.Condition.Value)
 	currentStack := size
 	state.pushStack(class, s.Condition.Value)
 	for _, c := range s.StatementSwitchCases {
 		if notMatch != null {
-			writeExits([]*cg.Exit{notMatch}, code.CodeLength)
+			writeExits([]cg.Exit{notMatch}, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		}
-		matches := []*cg.Exit{}
+		matches := []cg.Exit{}
 		for _, ee := range c.Matches {
 			if ee.Value.Type == ast.VariableTypeBool {
 				currentStack = size
@@ -125,7 +125,7 @@ func (this *BuildPackage) buildSwitchStatement(
 				(&cg.Exit{}).Init(cg.OP_goto, code)) // matched,goto switch outside
 		}
 	}
-	writeExits([]*cg.Exit{notMatch}, code.CodeLength)
+	writeExits([]cg.Exit{notMatch}, code.CodeLength)
 	context.MakeStackMap(code, state, code.CodeLength)
 	if size == 1 {
 		code.Codes[code.CodeLength] = cg.OP_pop

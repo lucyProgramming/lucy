@@ -5,7 +5,7 @@ func (this *BuildExpression) buildTemplateFunctionCall(
 	e ast.Expression,
 	context Context,
 	state StackMapState) (maxStack char) {
-	call := e.Data.(*ast.ExpressionFunctionCall)
+	call := e.Data.(ast.ExpressionFunctionCall)
 	if call.TemplateFunctionCallPair.Entrance == null {
 		method := &cg.MethodHighLevel{}
 		method.Class = class
