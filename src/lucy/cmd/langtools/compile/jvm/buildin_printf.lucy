@@ -38,7 +38,7 @@ class BuildinFunctionPrintf {
         code.CodeLength += 3
         maxStack = 1
         state.pushStack(c, state.newObjectVariableType(javaPrintStreamClass))
-        stack := this.build(c, code, meta.Format, context, state)
+        stack := this.eb.build(c, code, meta.Format, context, state)
         if t := 1 + stack; t > maxStack {
             maxStack = t
         }
@@ -64,7 +64,7 @@ class BuildinFunctionPrintf {
             currentStack += 2
             state.pushStack(c, objectArray)
             state.pushStack(c, typeInt)
-            stack := this.build(c, code, v, context, state)
+            stack := this.eb.build(c, code, v, context, state)
             state.popStack(2)
             if t := currentStack + stack; t > maxStack {
                 maxStack = t

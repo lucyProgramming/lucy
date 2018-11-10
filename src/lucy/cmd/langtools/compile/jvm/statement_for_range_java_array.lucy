@@ -8,9 +8,16 @@ class AutoVariableForRangeJavaArray {
 	K, V     char
 }
 
-class BuildForJavaArray {
+class BuildForRangeJavaArray {
 
+    eb BuildExpression
+    bb  BuildBlock
 
+    fn BuildForRangeJavaArray(eb BuildExpression , bb  BuildBlock){
+        this.super()
+        this.eb = eb
+        this.bb = bb
+    }
 
     fn buildForRangeStatementForJavaArray(
         c cg.ClassHighLevel,

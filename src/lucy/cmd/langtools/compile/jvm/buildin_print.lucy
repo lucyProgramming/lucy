@@ -47,7 +47,7 @@ class BuildinFunctionPrint {
         } 
         state.pushStack(c, state.newObjectVariableType(javaPrintStreamClass))
         if len(call.Args) == 1 {
-            stack := this.build(c, code, call.Args[0], context, state)
+            stack := this.eb.build(c, code, call.Args[0], context, state)
             if t := 1 + stack; t > maxStack {
                 maxStack = t
             }
@@ -69,13 +69,7 @@ class BuildinFunctionPrint {
                     "(C)V"
                 ), code.Codes[code.CodeLength+1:code.CodeLength+3])
                 code.CodeLength += 3
-            case ast.VariableTypeByte:
-                fallthrough
-            case ast.VariableTypeShort:
-                fallthrough
-            case ast.VariableTypeEnum:
-                fallthrough
-            case ast.VariableTypeInt:
+            case ast.VariableTypeByte ,ast.VariableTypeShort ,ast.VariableTypeEnum , ast.VariableTypeInt   :
                 code.Codes[code.CodeLength] = cg.OP_invokevirtual
                 c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                      "java/io/PrintStream",
@@ -128,13 +122,13 @@ class BuildinFunctionPrint {
             return
         }
         code.Codes[code.CodeLength] = cg.OP_ldc_w
-        ast.TypeInsertStringConst("", code.Codes[code.CodeLength+1:code.CodeLength+3])
+        c.InsertStringConst("", code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.CodeLength += 3
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
         defer state.popStack(1)
         for k, v := range call.Args {
             variableType := v.Value
-            stack := this.build(c, code, v, context, state)
+            stack := this.eb.build(c, code, v, context, state)
             if t := 2 + stack; t > maxStack {
                 maxStack = t
             }
@@ -150,7 +144,7 @@ class BuildinFunctionPrint {
             code.CodeLength += 3
             if k != len(call.Args)-1 {
                 code.Codes[code.CodeLength] = cg.OP_ldc_w
-                ast.TypeInsertStringConst(" ", code.Codes[code.CodeLength+1:code.CodeLength+3])
+                c.InsertStringConst(" ", code.Codes[code.CodeLength+1:code.CodeLength+3])
                 code.CodeLength += 3
                 if 2 > maxStack {
                     maxStack = 2

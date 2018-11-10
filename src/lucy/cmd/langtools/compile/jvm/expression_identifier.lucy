@@ -26,7 +26,7 @@ class  BuildExpressionIdentifier {
 				meta := closure.getMeta(identifier.Variable.Type.Type)
 				code.Codes[code.CodeLength] = cg.OP_getfield
 				c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-					ast.TypeName,
+					c.Name,
 					identifier.Variable.Name,
 					"L" + meta.className + ";"
 				), code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -36,7 +36,7 @@ class  BuildExpressionIdentifier {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 				code.Codes[code.CodeLength] = cg.OP_getfield
 				c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-					ast.TypeName,
+					c.Name,
 					identifier.Variable.Name,
 					Descriptor.typeDescriptor(identifier.Variable.Type)
 				), code.Codes[code.CodeLength+1:code.CodeLength+3])

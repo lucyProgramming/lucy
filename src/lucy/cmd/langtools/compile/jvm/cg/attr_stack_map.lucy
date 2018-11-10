@@ -167,6 +167,10 @@ public class StackMapObjectVariableInfo  {
 }
 public class StackMapUninitializedVariableInfo  {
 	public CodeOffset char
+	public fn StackMapUninitializedVariableInfo(CodeOffset char){
+		this.super()
+		this.CodeOffset = CodeOffset
+	}
 }
 
 public class StackMapVerificationTypeInfo  {

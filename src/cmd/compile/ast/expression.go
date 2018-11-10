@@ -211,7 +211,7 @@ func (e *Expression) isRelation() bool {
 	'a' > 'b'
 	1s > 2s
 */
-func (e *Expression) Is2IntCompare() bool {
+public func (e *Expression) Is2IntCompare() bool {
 	if e.isRelation() == false {
 		return false
 	}
@@ -224,7 +224,7 @@ func (e *Expression) Is2IntCompare() bool {
 /*
 	a == null
 */
-func (e *Expression) IsCompare2Null() bool {
+public func (e *Expression) IsCompare2Null() bool {
 	if e.isRelation() == false {
 		return false
 	}
@@ -236,7 +236,7 @@ func (e *Expression) IsCompare2Null() bool {
 /*
 	a > "b"
 */
-func (e *Expression) Is2StringCompare() bool {
+public func (e *Expression) Is2StringCompare() bool {
 	if e.isRelation() == false {
 		return false
 	}
@@ -248,7 +248,7 @@ func (e *Expression) Is2StringCompare() bool {
 	var a ,b []int
 	a == b
 */
-func (e *Expression) Is2PointerCompare() bool {
+public func (e *Expression) Is2PointerCompare() bool {
 	if e.isRelation() == false {
 		return false
 	}

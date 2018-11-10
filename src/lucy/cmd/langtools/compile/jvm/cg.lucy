@@ -152,7 +152,7 @@ class  BuildPackage {
             f.AccessFlags |= cg.AccFieldVolatile
             if LucyFieldSignatureParser.Need(v.Type) {
                 f.AttributeLucyFieldDescriptor = new cg.AttributeLucyFieldDescriptor()
-                f.AttributeLucyFieldDescriptor.Descriptor = LucyFieldSignatureParser.Encode(v.Type)
+                f.AttributeLucyFieldDescriptor.Descriptor = LucyFieldSignature.Encode(v.Type)
                 if v.Type.FunctionType.VArgs != nil {
                     f.AttributeLucyFieldDescriptor.MethodAccessFlag |=
                         cg.AccMethodVarargs
@@ -320,7 +320,7 @@ class  BuildPackage {
             f.Descriptor = Descriptor.typeDescriptor(v.Type)
             if LucyFieldSignatureParser.Need(v.Type) {
                 t := new cg.AttributeLucyFieldDescriptor()
-                t.Descriptor = LucyFieldSignatureParser.Encode(v.Type)
+                t.Descriptor = LucyFieldSignature.Encode(v.Type)
                 f.AttributeLucyFieldDescriptor = t
             }
             if v.Comment != "" {

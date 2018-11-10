@@ -191,9 +191,9 @@ class BuildReturn {
             e.EndPc = char(code.CodeLength)
             e.HandlerPc = char(code.CodeLength)
             if statementReturn.Defers[index].ExceptionClass == null {
-                e.CatchType = ast.TypeClass.InsertClassConst(ast.DefaultExceptionClass)
+                e.CatchType = c.InsertClassConst(ast.DefaultExceptionClass)
             } else {
-                e.CatchType = ast.TypeClass.InsertClassConst(statementReturn.Defers[index].ExceptionClass.Name) // custom c
+                e.CatchType = c.InsertClassConst(statementReturn.Defers[index].ExceptionClass.Name) // custom c
             }
             code.Exceptions = append(code.Exceptions, e)
             //expect exception on stack

@@ -24,11 +24,11 @@ class BuildExpressionMethodCall {
         case call.FieldMethodHandler != null:
             return this.buildMethodCallOnFieldHandler(c, code, e, context, state)
         case ast.VariableTypeArray:
-            return this.buildMethodCallOnArray(c, code, e, context, state)
+            return this.eb.BuildExpressionArray.buildMethodCallOnArray(c, code, e, context, state)
         case ast.VariableTypeMap:
-            return this.buildMethodCallOnMap(c, code, e, context, state)
+            return this.eb.BuildExpressionMap.buildMethodCallOnMap(c, code, e, context, state)
         case ast.VariableTypeJavaArray:
-            return this.buildMethodCallJavaOnArray(c, code, e, context, state)
+            return this.eb.BuildExpressionArray.buildMethodCallJavaOnArray(c, code, e, context, state)
         case ast.VariableTypePackage:
             return this.buildMethodCallOnPackage(c, code, e, context, state)
         case ast.VariableTypeDynamicSelector:
@@ -56,7 +56,7 @@ class BuildExpressionMethodCall {
             if call.Method.Function.JvmDescriptor == "" {
                 call.Method.Function.JvmDescriptor = Descriptor.methodDescriptor(call.Method.Function.Type)
             }
-            maxStack = this.build(c, code, call.Expression, context, state)
+            maxStack = this.eb.build(c, code, call.Expression, context, state)
             // object ref
             state.pushStack(c, call.Expression.Value)
             defer state.popStack(1)
@@ -121,7 +121,7 @@ class BuildExpressionMethodCall {
         state StackMapState) -> (maxStack char) {
         call := e.Data.(ast.ExpressionMethodCall)
         if call.FieldMethodHandler.IsStatic() == false {
-            stack := this.build(c, code, call.Expression, context, state)
+            stack := this.eb.build(c, code, call.Expression, context, state)
             if stack > maxStack {
                 maxStack = stack
             }

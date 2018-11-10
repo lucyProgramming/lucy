@@ -1,9 +1,9 @@
  import "lucy/binary"
  
 
-class AttributeConstantValue {
-	Index char
-	fn AttributeConstantValue(Index char){
+public class AttributeConstantValue {
+	public Index char
+	public fn AttributeConstantValue(Index char){
 		this.super()
 		this.Index = Index 
 	}

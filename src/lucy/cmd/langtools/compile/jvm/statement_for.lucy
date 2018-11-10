@@ -3,6 +3,21 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
 class BuildPackageFor {
+    
+    eb BuildExpression
+    bb  BuildBlock
+    BuildForRangeArray BuildForRangeArray
+    BuildForRangeJavaArray BuildForRangeJavaArray
+    BuildForRangeMap BuildForRangeMap
+
+    fn BuildPackageFor(eb BuildExpression , bb  BuildBlock){
+        this.super()
+        this.eb = eb
+        this.bb = bb
+        this.BuildForRangeArray = new BuildForRangeArray(eb ,bb)
+        this.BuildForRangeJavaArray = new BuildForRangeJavaArray(eb ,bb)
+        this.BuildForRangeMap = new BuildForRangeMap(eb ,bb)
+    }
 
 
     fn buildForStatement(

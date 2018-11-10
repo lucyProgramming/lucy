@@ -25,7 +25,7 @@ class BuildExpressionLogical {
         if 2 > maxStack { // dup increment stack
             maxStack = 2
         }
-        var exit ast.Statement
+        var exit cg.Exit
         if e.Type == ast.ExpressionTypeLogicalOr {
             exit = new cg.Exit(cg.OP_ifne, code)
         } else {

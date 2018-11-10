@@ -55,7 +55,7 @@ class Descriptor  {
 		case ast.VariableTypeFunction:
 			return "L" + javaMethodHandleClass + ";"
 		case ast.VariableTypeJavaArray:
-			return "[" + this.typeDescriptor(typ.Array)
+			return "[" + .typeDescriptor(typ.Array)
 		}
 		panic("unHandle type signature")
 	}
@@ -141,13 +141,14 @@ class Descriptor  {
 			return t, new error(sprintf("function descriptor does not start with '('"))
 		}
 		bs = bs[1:]
+		t.ParameterList = []ast.Variable{}
 		for bs[0] != ')' {
 			vd := new ast.Variable()
 			bs, vd.Type, err = .ParseType(bs)
 			if err != null {
 				return t, err
 			}
-			t.ParameterList = append(t.ParameterList, vd)
+			t.ParameterList.append(vd)
 		}
 		bs = bs[1:] // skip )
 		vd := new ast.Variable()
@@ -156,7 +157,7 @@ class Descriptor  {
 		if err != null {
 			return t, err
 		}
-		t.ReturnList = append(t.ReturnList, vd)
+		t.ReturnList = [vd]
 		return t, null
 	}
 

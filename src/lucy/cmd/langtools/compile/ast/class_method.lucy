@@ -6,16 +6,16 @@ public class ClassMethod {
 
 	fn narrowDownAccessRange(implementation ClassMethod) ->(is bool ) {
 		if this.IsPublic() {
-			return !implementation.IsPublic()
-		}
-		if this.IsProtected() {
-			return implementation.IsPrivate() ||
-				implementation.isAccessFlagDefault()
-		}
-		if this.isAccessFlagDefault() {
-			return implementation.IsPrivate()
-		}
-		return false
+            return !implementation.IsPublic()
+        }
+        if this.IsProtected() {
+            return implementation.IsPrivate() ||
+                implementation.isAccessFlagDefault()
+        }
+        if this.isAccessFlagDefault() {
+            return implementation.IsPrivate()
+        }
+        return false
 	}
 	
 	fn accessString() ->(s string) {
@@ -45,7 +45,7 @@ public class ClassMethod {
 		return (this.Function.AccessFlags & cg.AccMethodProtected) != 0
 	}
 
-	fn IsStatic() ->(is bool ) {
+	public fn IsStatic() ->(is bool ) {
 		return (this.Function.AccessFlags & cg.AccMethodStatic) != 0
 	}
 

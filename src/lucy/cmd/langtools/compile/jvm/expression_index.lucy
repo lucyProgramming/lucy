@@ -46,7 +46,7 @@ class BuildExpressionIndex {
             ), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
             if e.Value.IsPointer() && e.Value.Type != ast.VariableTypeString {
-                typeConverter.castPointer(c, code, e.Value)
+                TypeConverterAndPrimitivePacker.castPointer(c, code, e.Value)
             }
         } else {
             switch e.Value.Type {
@@ -136,9 +136,9 @@ class BuildExpressionIndex {
         code.CodeLength += 3
         state.popStack(1)
         if index.Expression.Value.Map.V.Type == ast.VariableTypeEnum {
-            typeConverter.unPackPrimitives(c, code, index.Expression.Value.Map.V)
+            TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, index.Expression.Value.Map.V)
         } else if index.Expression.Value.Map.V.IsPointer() {
-            typeConverter.castPointer(c, code, index.Expression.Value.Map.V)
+            TypeConverterAndPrimitivePacker.castPointer(c, code, index.Expression.Value.Map.V)
         } else {
             code.Codes[code.CodeLength] = cg.OP_dup // increment the stack
             code.CodeLength++
@@ -170,7 +170,7 @@ class BuildExpressionIndex {
             context.MakeStackMap(code, state, code.CodeLength)
             state.popStack(1) // pop java_root_class ref
             writeExits([]cg.Exit{noNullExit}, code.CodeLength)
-            typeConverter.unPackPrimitives(c, code, index.Expression.Value.Map.V)
+            TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, index.Expression.Value.Map.V)
             writeExits([]cg.Exit{nullExit}, code.CodeLength)
             state.pushStack(c, e.Value)
             context.MakeStackMap(code, state, code.CodeLength)

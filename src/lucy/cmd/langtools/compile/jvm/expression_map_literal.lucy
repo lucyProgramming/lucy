@@ -79,7 +79,7 @@ class BuildExpressionMap{
         context Context,
         state StackMapState) -> (maxStack char) {
         call := e.Data.(ast.ExpressionMethodCall)
-        maxStack = this.build(c, code, call.Expression, context, state)
+        maxStack = this.eb.build(c, code, call.Expression, context, state)
         stackLength := len(state.Stacks)
         defer  {
             state.popStack(len(state.Stacks) - stackLength)
@@ -89,7 +89,7 @@ class BuildExpressionMap{
         switch call.Name {
         case common.MapMethodKeyExist:
             variableType := call.Args[0].Value
-            stack := this.build(c, code, call.Args[0], context, state)
+            stack := this.eb.build(c, code, call.Args[0], context, state)
             if t := 1 + stack; t > maxStack {
                 maxStack = t
             }
@@ -120,7 +120,7 @@ class BuildExpressionMap{
                     }
                     state.pushStack(c, hashMapVerifyType)
                 }
-                stack := this.build(c, code, v, context, state)
+                stack := this.eb.build(c, code, v, context, state)
                 if t := stack + currentStack; t > maxStack {
                     maxStack = t
                 }

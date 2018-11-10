@@ -3,7 +3,7 @@
 public class AttributeLucyClassConst {
 	public Constants []LucyClassConst
 
-	fn FromBs(c Class, bs []byte) {
+	public fn FromBs(c Class, bs []byte) {
 	    this.Constants = []LucyClassConst{}
 		for len(bs) > 0 {
 			constant := new LucyClassConst()
@@ -35,11 +35,11 @@ public class AttributeLucyClassConst {
 	}	
 }
 
-class LucyClassConst {
-	Name       string
-	Descriptor string
-	ValueIndex char
-	Comment    string
+public class LucyClassConst {
+	public Name       string
+	public Descriptor string
+	public ValueIndex char
+	public Comment    string
 }
 
 

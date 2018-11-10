@@ -220,7 +220,7 @@ class  BuildExpressionFunction {
 		c.InsertClassConst(function.Entrance.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		ast.TypeInsertStringConst(function.Entrance.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		c.InsertStringConst(function.Entrance.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
 		c.InsertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(

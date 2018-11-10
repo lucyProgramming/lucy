@@ -5,7 +5,7 @@ class LucyTypeAlias {
 
     static fn Encode(name string, variableType ast.Type) -> (e string) {
         name += ";"
-        name += LucyFieldSignatureParser.Encode(variableType)
+        name += LucyFieldSignature.Encode(variableType)
         return name
     }
 

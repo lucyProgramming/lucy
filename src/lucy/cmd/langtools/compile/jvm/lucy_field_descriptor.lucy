@@ -37,8 +37,7 @@ class LucyFieldSignature {
         return Descriptor.typeDescriptor(variableType)
     }
 
-    static fn Decode(bs []byte) -> (bss []byte,t ast.Type,err  error) {
-        var err error
+    static fn Decode(bs []byte) -> (bsSliced []byte,t ast.Type,err  error) {
         if bs[0] == 'M' {
             bs = bs[1:]
             var kt ast.Type

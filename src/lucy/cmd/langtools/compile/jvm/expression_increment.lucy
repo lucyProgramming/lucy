@@ -138,7 +138,7 @@ class BuildExpressionIncrement {
 				code.CodeLength++
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_ldc2_w
-				ast.TypeInsertDoubleConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
+				c.InsertDoubleConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
 				code.CodeLength += 3
 			}
 			code.Codes[code.CodeLength] = cg.OP_dadd

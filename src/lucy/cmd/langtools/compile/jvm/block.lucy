@@ -3,8 +3,18 @@
  import "lucy/cmd/langtools/compile/jvm/cg"
 
 class BuildBlock {
-	
-	fn BuildBlock(){
+	eb BuildExpression	
+	BuildPackageFor BuildPackageFor
+	BuildIf BuildIf
+	BuildSwitch BuildSwitch
+	BuildReturn BuildReturn
+	fn BuildBlock(eb BuildExpression){
+		this.super()
+		this.eb = eb
+		this.BuildPackageFor = new BuildPackageFor(eb , this)
+		this.BuildIf = new BuildIf(eb , this)
+		this.BuildSwitch = new BuildSwitch(eb , this)
+		this.BuildReturn = new BuildReturn(eb , this)
 
 
 	}
@@ -256,11 +266,6 @@ class BuildBlock {
 			index--
 		}
 	}
-
-
-
-
-
 
 	/*
 		compile condition for false  &&  generate exit

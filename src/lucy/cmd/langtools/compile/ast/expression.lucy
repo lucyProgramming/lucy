@@ -308,7 +308,7 @@ public class Expression {
 		return false
 	}
 
-	fn HaveMultiValue() -> (is bool) {
+	public fn HaveMultiValue() -> (is bool) {
 		if this.Type == ExpressionTypeFunctionCall ||
 			this.Type == ExpressionTypeMethodCall ||
 			this.Type == ExpressionTypeTypeAssert {

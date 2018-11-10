@@ -88,7 +88,7 @@ class BuildExpressionTypeConversion {
             code.Codes[code.CodeLength+3] = cg.OP_dup
             code.CodeLength += 4
             code.Codes[code.CodeLength] = cg.OP_ldc_w
-            ast.TypeInsertStringConst("int value not found in enum names",
+            c.InsertStringConst("int value not found in enum names",
                 code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
             if 3 > maxStack {
@@ -193,7 +193,7 @@ class BuildExpressionTypeConversion {
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.start)...)
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.length)...)
             code.Codes[code.CodeLength] = cg.OP_ldc_w
-            ast.TypeInsertStringConst("utf-8", code.Codes[code.CodeLength+1:code.CodeLength+3])
+            c.InsertStringConst("utf-8", code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
             if 6 > maxStack { // stack is ... stringRef stringRef byte[] start length "utf-8"
                 maxStack = 6

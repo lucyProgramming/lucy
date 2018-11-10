@@ -11,7 +11,16 @@ class AutoVariableForRangeMap {
 }
 
 class BuildForRangeMap {
+    
+    eb BuildExpression
+    bb  BuildBlock
 
+    fn BuildForRangeMap(eb BuildExpression , bb  BuildBlock){
+        this.super()
+        this.eb = eb
+        this.bb = bb
+    }
+    
     fn buildForRangeStatementForMap(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
@@ -158,9 +167,9 @@ class BuildForRangeMap {
             ), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
             if attr.RangeOn.Value.Map.V.IsPointer() == false {
-                typeConverter.unPackPrimitives(c, code, attr.RangeOn.Value.Map.V)
+                TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, attr.RangeOn.Value.Map.V)
             } else {
-                typeConverter.castPointer(c, code, attr.RangeOn.Value.Map.V)
+                TypeConverterAndPrimitivePacker.castPointer(c, code, attr.RangeOn.Value.Map.V)
             }
             autoVar.V = code.MaxLocals
             code.MaxLocals += jvmSlotSize(attr.RangeOn.Value.Map.V)
@@ -178,9 +187,9 @@ class BuildForRangeMap {
             code.Codes[code.CodeLength] = cg.OP_aaload
             code.CodeLength++
             if attr.RangeOn.Value.Map.K.IsPointer() == false {
-                typeConverter.unPackPrimitives(c, code, attr.RangeOn.Value.Map.K)
+                TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, attr.RangeOn.Value.Map.K)
             } else {
-                typeConverter.castPointer(c, code, attr.RangeOn.Value.Map.K)
+                TypeConverterAndPrimitivePacker.castPointer(c, code, attr.RangeOn.Value.Map.K)
             }
             autoVar.K = code.MaxLocals
             code.MaxLocals += jvmSlotSize(attr.RangeOn.Value.Map.K)

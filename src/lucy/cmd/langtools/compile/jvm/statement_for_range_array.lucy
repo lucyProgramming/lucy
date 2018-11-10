@@ -8,6 +8,16 @@ class AutoVariableForRangeArray extends AutoVariableForRangeJavaArray {
 }
 
 class BuildForRangeArray {
+    
+    eb BuildExpression
+    bb  BuildBlock
+
+    fn BuildForRangeArray(eb BuildExpression , bb  BuildBlock){
+        this.super()
+        this.eb = eb
+        this.bb = bb
+    }
+
     fn buildForRangeStatementForArray(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
