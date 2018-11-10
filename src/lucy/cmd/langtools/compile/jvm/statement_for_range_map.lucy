@@ -87,9 +87,9 @@ class BuildForRangeMap {
         }
         code.Codes[code.CodeLength] = cg.OP_arraylength
         code.CodeLength++
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsLength)...)
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, autoVar.KeySets)...)
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, autoVar.MapObject)...)
+        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsLength))
+        copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, autoVar.KeySets))
+        copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, autoVar.MapObject))
         // k set to -1
         code.Codes[code.CodeLength] = cg.OP_iconst_m1
         code.CodeLength++

@@ -60,9 +60,9 @@ class BuildExpressionLeftValue {
             ops []byte,
             leftValueType LeftValueKind) {
         index := e.Data.(ast.ExpressionIndex)
-        maxStack = this.build(c, code, index.Expression, context, state)
+        maxStack = this.eb.build(c, code, index.Expression, context, state)
         state.pushStack(c, state.newObjectVariableType(mapClass))
-        stack := this.build(c, code, index.Index, context, state)
+        stack := this.eb.build(c, code, index.Index, context, state)
         if t := 1 + stack; t > maxStack {
             maxStack = t
         }
@@ -73,8 +73,7 @@ class BuildExpressionLeftValue {
         remainStack = 2
         ops = []byte{}
         if index.Expression.Value.Map.V.IsPointer() == false {
-            ops = append(ops,
-                typeConverter.packPrimitivesBytes(c, index.Expression.Value.Map.V)...)
+            ops.appendAll(typeConverter.packPrimitivesBytes(c, index.Expression.Value.Map.V))
         }
         bs4 := new []byte(4)
         bs4[0] = cg.OP_invokevirtual
