@@ -17,7 +17,7 @@ class BuildExpressionFunctionCall {
 		context Context,
 		state StackMapState) -> (maxStack char) {
 		call := e.Data.(ast.ExpressionFunctionCall)
-		maxStack = this.build(c, code, call.Expression, context, state)
+		maxStack = this.eb.build(c, code, call.Expression, context, state)
 		stack := this.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
 		if t := 1 + stack; t > maxStack {
 			maxStack = t
@@ -52,7 +52,7 @@ class BuildExpressionFunctionCall {
 		}
 		if call.Expression != null &&
 			call.Expression.Type == ast.ExpressionTypeFunctionLiteral {
-			maxStack = this.build(c, code, call.Expression, context, state)
+			maxStack = this.eb.build(c, code, call.Expression, context, state)
 		}
 		if call.Function.IsClosureFunction == false {
 			maxStack = this.buildCallArgs(c, code, call.Args, call.VArgs, context, state)

@@ -32,7 +32,7 @@ class BuildExpression {
     BuildExpressionVar BuildExpressionVar
     BuildExpressionVarAssign BuildExpressionVarAssign
 
-    fn BuildExpression(bp BuildExpression){
+    fn BuildExpression(bp BuildPackage){
         this.super()
         this.bp = bp
         this.BuildExpressionArithmetic = new BuildExpressionArithmetic(this)
@@ -103,7 +103,7 @@ class BuildExpression {
                 code.CodeLength++
             } else {
                 code.Codes[code.CodeLength] = cg.OP_ldc2_w
-                ast.TypeInsertLongConst(e.longValue, code.Codes[code.CodeLength+1:code.CodeLength+3])
+                c.InsertLongConst(e.longValue, code.Codes[code.CodeLength+1:code.CodeLength+3])
                 code.CodeLength += 3
             }
             maxStack = 2
@@ -119,7 +119,7 @@ class BuildExpression {
                 code.CodeLength++
             } else {
                 code.Codes[code.CodeLength] = cg.OP_ldc_w
-                ast.TypeInsertFloatConst(float(e.doubleValue), code.Codes[code.CodeLength+1:code.CodeLength+3])
+                c.InsertFloatConst(float(e.doubleValue), code.Codes[code.CodeLength+1:code.CodeLength+3])
                 code.CodeLength += 3
             }
             maxStack = 1
@@ -247,7 +247,7 @@ class BuildExpression {
                 if t := currentStack + stack; t > maxStack {
                     maxStack = t
                 }
-                autoVar := new MultiValueAutoVar()(c, code, state)
+                autoVar := new MultiValueAutoVar(c, code, state)
                 for kk, _ := range v.MultiValues {
                     currentStack = 1
                     code.Codes[code.CodeLength] = cg.OP_dup

@@ -18,7 +18,7 @@ class BuildForRangeArray {
         this.bb = bb
     }
 
-    fn buildForRangeStatementForArray(
+    fn build(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
         s ast.StatementFor,

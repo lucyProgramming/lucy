@@ -71,7 +71,7 @@ class  BuildExpressionAssign {
 		} else {
 			maxStack = this.buildExpressions(c, code, assign.Values, context, state)
 		}
-		autoVar := new MultiValueAutoVar()(c, code, state)
+		autoVar := new MultiValueAutoVar(c, code, state)
 		for k, v := range assign.Lefts {
 			if v.IsIdentifier(ast.UnderScore) {
 				continue

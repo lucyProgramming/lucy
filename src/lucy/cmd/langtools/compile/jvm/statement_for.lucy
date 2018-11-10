@@ -28,11 +28,11 @@ class BuildPackageFor {
         state StackMapState) -> (maxStack char) {
         if s.RangeAttr != null {
             if s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeArray {
-                return this.buildForRangeStatementForArray(c, code, s, context, state)
+                return this.BuildForRangeArray.build(c, code, s, context, state)
             } else if s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeJavaArray {
-                return this.buildForRangeStatementForJavaArray(c, code, s, context, state)
+                return this.BuildForRangeJavaArray.build(c, code, s, context, state)
             } else { // for map
-                return this.buildForRangeStatementForMap(c, code, s, context, state)
+                return this.BuildForRangeMap.build(c, code, s, context, state)
             }
         }
         forState := new StackMapState(state)

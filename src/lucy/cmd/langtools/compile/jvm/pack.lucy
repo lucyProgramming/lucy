@@ -109,7 +109,7 @@ class TypeConverterAndPrimitivePacker {
 		c cg.ClassHighLevel,
 		code cg.AttributeCode,
 		t ast.Type) {
-		copyOPs(code, .packPrimitivesBytes(c, t)...)
+		copyOPs(code, .packPrimitivesBytes(c, t))
 	}
 
 	static fn packPrimitivesBytes(

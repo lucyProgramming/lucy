@@ -28,7 +28,7 @@ class BuildExpressionLeftValue {
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
             code.Codes[code.CodeLength] = cg.OP_getfield
             c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-                ast.TypeName,
+                c.Name,
                 identifier.Name,
                "L" + meta.className + ";"
             ), code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -121,9 +121,9 @@ class BuildExpressionLeftValue {
         case ast.ExpressionTypeIndex:
             index := e.Data.(ast.ExpressionIndex)
             if index.Expression.Value.Type == ast.VariableTypeArray {
-                maxStack = this.build(c, code, index.Expression, context, state)
+                maxStack = this.eb.build(c, code, index.Expression, context, state)
                 state.pushStack(c, index.Expression.Value)
-                stack := this.build(c, code, index.Index, context, state)
+                stack := this.eb.build(c, code, index.Index, context, state)
                 if t := stack + 1; t > maxStack {
                     maxStack = t
                 }
@@ -141,9 +141,9 @@ class BuildExpressionLeftValue {
             } else if index.Expression.Value.Type == ast.VariableTypeMap { // map
                 return this.getMapLeftValue(c, code, e, context, state)
             } else { // java array
-                maxStack = this.build(c, code, index.Expression, context, state)
+                maxStack = this.eb.build(c, code, index.Expression, context, state)
                 state.pushStack(c, index.Expression.Value)
-                stack := this.build(c, code, index.Index, context, state)
+                stack := this.eb.build(c, code, index.Index, context, state)
                 if t := stack + 1; t > maxStack {
                     maxStack = t
                 }
@@ -227,7 +227,7 @@ class BuildExpressionLeftValue {
                 } else {
                     leftValueType = LeftValueKindPutField
                     ops[0] = cg.OP_putfield
-                    maxStack = this.build(c, code, selection.Expression, context, state)
+                    maxStack = this.eb.build(c, code, selection.Expression, context, state)
                     remainStack = 1
                     state.pushStack(c, selection.Expression.Value)
                 }

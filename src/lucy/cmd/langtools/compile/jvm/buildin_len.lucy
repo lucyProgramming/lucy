@@ -22,7 +22,7 @@ class BuildinFunctionLen {
         state StackMapState) -> (maxStack char) {
         call := e.Data.(ast.ExpressionFunctionCall)
         a0 := call.Args[0]
-        maxStack = this.build(c, code, a0, context, state)
+        maxStack = this.eb.build(c, code, a0, context, state)
         code.Codes[code.CodeLength] = cg.OP_dup
         code.CodeLength++
         if 2 > maxStack {

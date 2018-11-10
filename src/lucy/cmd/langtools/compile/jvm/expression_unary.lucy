@@ -70,7 +70,7 @@ class BuildExpressionUnary{
                 }
             case ast.VariableTypeLong:
                 code.Codes[code.CodeLength] = cg.OP_ldc2_w
-                ast.TypeInsertLongConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
+                c.InsertLongConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
                 code.Codes[code.CodeLength+3] = cg.OP_lxor
                 code.CodeLength += 4
                 if 4 > maxStack {

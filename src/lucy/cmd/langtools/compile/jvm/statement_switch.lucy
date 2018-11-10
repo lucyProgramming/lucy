@@ -13,15 +13,8 @@ class BuildSwitch {
         // if equal,leave 0 on stack
         compare := fn(t ast.Type) {
             switch t.Type {
-            case ast.VariableTypeByte:
-                fallthrough
-            case ast.VariableTypeShort:
-                fallthrough
-            case ast.VariableTypeEnum:
-                fallthrough
-            case ast.VariableTypeChar:
-                fallthrough
-            case ast.VariableTypeInt:
+            case ast.VariableTypeByte , ast.VariableTypeShort ,ast.VariableTypeEnum,
+                ast.VariableTypeChar , ast.VariableTypeInt :
                 code.Codes[code.CodeLength] = cg.OP_isub
                 code.CodeLength++
             case ast.VariableTypeLong:

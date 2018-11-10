@@ -24,16 +24,16 @@ class BuildExpressionStrcat {
             state.popStack(len(state.Stacks) - stackLength)
         }
         bin := e.Data.(ast.ExpressionBinary)
-        maxStack = this.build(c, code, bin.Left, context, state)
+        maxStack = this.eb.build(c, code, bin.Left, context, state)
         if t := this.stackTop2String(c, code, bin.Left.Value, context, state); t > maxStack {
             maxStack = t
         }
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
-        stack := this.build(c, code, bin.Right, context, state)
+        stack := this.eb.build(c, code, bin.Right, context, state)
         if t := 1 + stack; t > maxStack {
             maxStack = t
         }
-        if t := 1 + this.stackTop2String(c, code,
+        if t := 1 + this.eb.BuildExpressionConversion.stackTop2String(c, code,
             bin.Right.Value, context, state); t > maxStack {
             maxStack = t
         }

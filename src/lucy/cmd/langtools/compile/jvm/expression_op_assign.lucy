@@ -27,7 +27,7 @@ class BuildExpressionOpAssign {
         }
         bin := e.Data.(ast.ExpressionBinary)
         maxStack, remainStack, op, leftValueKind :=
-            this.BuildExpressionLeftValue.getLeftValue(c, code, bin.Left, context, state)
+            this.eb.BuildExpressionLeftValue.getLeftValue(c, code, bin.Left, context, state)
         currentStack := remainStack
         stack := this.eb.build(c, code, bin.Left, context, state)
         if t := currentStack + stack; t > maxStack {
@@ -70,7 +70,7 @@ class BuildExpressionOpAssign {
         if bin.Left.Value.Type == ast.VariableTypeString {
             return this.buildStrPlusAssign(c, code, e, context, state)
         }
-        maxStack, remainStack, op, leftValueKind := this.getLeftValue(c, code, bin.Left, context, state)
+        maxStack, remainStack, op, leftValueKind := this.eb.BuildExpressionLeftValue.getLeftValue(c, code, bin.Left, context, state)
         //left value must can be used as right value,
         stack := this.build(c, code, bin.Left, context, state) // load it`s value
         if t := stack + remainStack; t > maxStack {

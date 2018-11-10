@@ -44,10 +44,10 @@ class  BuildExpressionIdentifier {
 			}
 		} else {
 			if identifier.Variable.BeenCapturedAsLeftValue > 0 {
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, identifier.Variable.LocalValOffset)...)
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, identifier.Variable.LocalValOffset))
 				closure.unPack(c, code, identifier.Variable.Type)
 			} else {
-				copyOPs(code, loadLocalVariableOps(e.Value.Type, identifier.Variable.LocalValOffset)...)
+				copyOPs(code, loadLocalVariableOps(e.Value.Type, identifier.Variable.LocalValOffset))
 			}
 		}
 		return
@@ -83,7 +83,7 @@ class  BuildExpressionIdentifier {
 			return this.buildCapturedIdentifier(c, code, e, context)
 		default:
 			maxStack = jvmSlotSize(e.Value)
-			copyOPs(code, loadLocalVariableOps(e.Value.Type, identifier.Variable.LocalValOffset)...)
+			copyOPs(code, loadLocalVariableOps(e.Value.Type, identifier.Variable.LocalValOffset))
 			return
 		}
 	}	

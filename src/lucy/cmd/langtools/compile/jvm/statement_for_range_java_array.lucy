@@ -19,7 +19,7 @@ class BuildForRangeJavaArray {
         this.bb = bb
     }
 
-    fn buildForRangeStatementForJavaArray(
+    fn build(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
         s ast.StatementFor,
@@ -64,12 +64,12 @@ class BuildForRangeJavaArray {
         }
         code.Codes[code.CodeLength] = cg.OP_arraylength
         code.CodeLength++
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.End)...)
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeJavaArray, autoVar.Elements)...)
+        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.End))
+        copyOPs(code, storeLocalVariableOps(ast.VariableTypeJavaArray, autoVar.Elements))
 
         code.Codes[code.CodeLength] = cg.OP_iconst_m1
         code.CodeLength++
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
+        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.K))
 
         //handle captured vars
         if s.Condition.Type == ast.ExpressionTypeVarAssign {
@@ -79,7 +79,7 @@ class BuildForRangeJavaArray {
                 attr.IdentifierValue.Variable.LocalValOffset = code.MaxLocals
                 code.MaxLocals++
                 copyOPs(code,
-                    storeLocalVariableOps(ast.VariableTypeObject, attr.IdentifierValue.Variable.LocalValOffset)...)
+                    storeLocalVariableOps(ast.VariableTypeObject, attr.IdentifierValue.Variable.LocalValOffset))
                 forState.appendLocals(c,
                     forState.newObjectVariableType(closure.getMeta(attr.RangeOn.Value.Array.Type).className))
             }
@@ -89,7 +89,7 @@ class BuildForRangeJavaArray {
                 attr.IdentifierKey.Variable.LocalValOffset = code.MaxLocals
                 code.MaxLocals++
                 copyOPs(code,
-                    storeLocalVariableOps(ast.VariableTypeObject, attr.IdentifierKey.Variable.LocalValOffset)...)
+                    storeLocalVariableOps(ast.VariableTypeObject, attr.IdentifierKey.Variable.LocalValOffset))
                 forState.appendLocals(c,
                     forState.newObjectVariableType(closure.getMeta(ast.VariableTypeInt).className))
             }
@@ -107,18 +107,18 @@ class BuildForRangeJavaArray {
         code.CodeLength += 3
 
         // load  k
-        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
+        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K))
 
         // load end
-        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.End)...)
+        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.End))
         if 2 > maxStack {
             maxStack = 2
         }
         s.Exits = append(s.Exits, new cg.Exit(cg.OP_if_icmpge, code))
         //load elements
         if attr.IdentifierValue != null || attr.ExpressionValue != null {
-            copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.Elements)...)
-            copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
+            copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.Elements))
+            copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K))
             if 2 > maxStack {
                 maxStack = 2
             }
@@ -160,7 +160,7 @@ class BuildForRangeJavaArray {
         if s.Condition.Type == ast.ExpressionTypeVarAssign {
             if attr.IdentifierValue != null {
                 if attr.IdentifierValue.Variable.BeenCapturedAsLeftValue > 0 {
-                    copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, attr.IdentifierValue.Variable.LocalValOffset)...)
+                    copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, attr.IdentifierValue.Variable.LocalValOffset))
                     copyOPs(code,
                         loadLocalVariableOps(attr.RangeOn.Value.Array.Type,
                             autoVar.V)...)

@@ -50,17 +50,13 @@ class BuildExpressionIndex {
             }
         } else {
             switch e.Value.Type {
-            case ast.VariableTypeBool:
-                fallthrough
-            case ast.VariableTypeByte:
+            case ast.VariableTypeBool, ast.VariableTypeByte:
                 code.Codes[code.CodeLength] = cg.OP_baload
             case ast.VariableTypeShort:
                 code.Codes[code.CodeLength] = cg.OP_saload
             case ast.VariableTypeChar:
                 code.Codes[code.CodeLength] = cg.OP_caload
-            case ast.VariableTypeEnum:
-                fallthrough
-            case ast.VariableTypeInt:
+            case ast.VariableTypeEnum ,ast.VariableTypeInt:
                 code.Codes[code.CodeLength] = cg.OP_iaload
             case ast.VariableTypeLong:
                 code.Codes[code.CodeLength] = cg.OP_laload

@@ -24,7 +24,7 @@ class BuildinFunctionSprintf {
         // format,must be string
         call := e.Data.(ast.ExpressionFunctionCall)
         meta := call.BuildInFunctionMeta.(ast.BuildInFunctionSprintfMeta)
-        maxStack = this.build(c, code, meta.Format, context, state)
+        maxStack = this.eb.build(c, code, meta.Format, context, state)
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
         loadInt32(c, code, int(meta.ArgsLength))
         code.Codes[code.CodeLength] = cg.OP_anewarray
@@ -47,7 +47,7 @@ class BuildinFunctionSprintf {
             currentStack += 2
             state.pushStack(c, objectArray)
             state.pushStack(c, typeInt)
-            stack := this.build(c, code, v, context, state)
+            stack := this.eb.build(c, code, v, context, state)
             if t := currentStack + stack; t > maxStack {
                 maxStack = t
             }
