@@ -1,4 +1,5 @@
- 
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg" 
 
 class  BuildPackage {
 	Package         ast.Package
@@ -36,10 +37,7 @@ class  BuildPackage {
         for _, v := range p.Block.Enums {
             this.putClass(this.mkEnum(v))
         }
-        err := this.DumpClass()
-        if err != null {
-            panic(sprintf("dump to file failed,err:%v\n", err))
-        }
+        this.DumpClass()
     }
 
     fn newClassName(prefix string) -> (autoName string) {
@@ -67,7 +65,7 @@ class  BuildPackage {
         if ast.TypeName == "" {
             panic("missing name")
         }
-        name := ast.TypeName
+        name := c.Name
         if name == this.mainClass.Name {
             panic("cannot have main class`s name")
         }
@@ -444,7 +442,7 @@ class  BuildPackage {
         method.Code.MaxLocals = 1
         method.Code.Codes[0] = cg.OP_aload_0
         method.Code.Codes[1] = cg.OP_invokespecial
-        ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                ast.TypeSuperClass,
                 specialMethodInit,
            "()V"
@@ -460,7 +458,7 @@ class  BuildPackage {
         if v.JvmDescriptor == "" {
             v.JvmDescriptor = Descriptor.typeDescriptor(v.Type)
         }
-        ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+        c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                 this.mainClass.Name,
                 v.Name,
              v.JvmDescriptor

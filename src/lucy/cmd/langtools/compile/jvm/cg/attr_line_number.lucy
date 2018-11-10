@@ -1,7 +1,9 @@
 import "lucy/binary"
 
-class AttributeLineNumber  {
+public class AttributeLineNumber  {
 	lineNumbers []AttributeLinePc
+
+	
 	fn AttributeLineNumber (){
 	    this.super()
 		this.lineNumbers = []AttributeLinePc{}

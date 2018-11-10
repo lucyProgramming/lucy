@@ -1,41 +1,39 @@
 
+import "lucy/cmd/langtools/compile/ast"
 
 
 var	ArrayMetas                = new map{ast.VariableTypeKind -> ArrayMeta}()
 var	closure                  = new Closure()
 
 
-type LeftValueKind int
-
-const (
-	_ LeftValueKind = iota
-	LeftValueKindLucyArray
-	LeftValueKindMap
-	LeftValueKindLocalVar
-	LeftValueKindPutStatic
-	LeftValueKindPutField
+enum  LeftValueKind {
+	LeftValueKindLucyArray = 1,
+	LeftValueKindMap,
+	LeftValueKindLocalVar,
+	LeftValueKindPutStatic,
+	LeftValueKindPutField,
 	LeftValueKindArray
-)
+}
 
-const (
-	methodHandleInvokeMethodName = "invoke"
-	specialMethodInit            = "<init>"
-	javaRootObjectArray          = "[Ljava/lang/Object;"
-	javaStringClass              = "java/lang/String"
-	javaExceptionClass           = "java/lang/Exception"
-	javaMethodHandleClass        = "java/lang/invoke/MethodHandle"
-	javaRootClass                = "java/lang/Object"
-	javaIntegerClass             = "java/lang/Integer"
-	javaFloatClass               = "java/lang/Float"
-	javaDoubleClass              = "java/lang/Double"
-	javaLongClass                = "java/lang/Long"
-	throwableClass               = "java/lang/Throwable"
-	javaPrintStreamClass         = "java/io/PrintStream"
-	mapClass                     = "java/util/concurrent/ConcurrentHashMap"
-)
+
+const	methodHandleInvokeMethodName = "invoke"
+const	specialMethodInit            = "<init>"
+const	javaRootObjectArray          = "[Ljava/lang/Object;"
+const	javaStringClass              = "java/lang/String"
+const	javaExceptionClass           = "java/lang/Exception"
+const	javaMethodHandleClass        = "java/lang/invoke/MethodHandle"
+const	javaRootClass                = "java/lang/Object"
+const	javaIntegerClass             = "java/lang/Integer"
+const	javaFloatClass               = "java/lang/Float"
+const	javaDoubleClass              = "java/lang/Double"
+const	javaLongClass                = "java/lang/Long"
+const	throwableClass               = "java/lang/Throwable"
+const	javaPrintStreamClass         = "java/io/PrintStream"
+const	mapClass                     = "java/util/concurrent/ConcurrentHashMap"
+
 
 var typeInt = new  ast.Type()
-var typestring = new  ast.Type()
+var typeString = new  ast.Type()
 var typeBool  = new ast.Type()
 
 {

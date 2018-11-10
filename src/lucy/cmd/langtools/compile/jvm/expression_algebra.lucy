@@ -1,11 +1,14 @@
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 
 class BuildExpressionArithmetic {
-	bs BuildExpression
-	
-	fn BuildExpressionArithmetic(be BuildExpression) {
-		this.super()
-		this.be = be
-	}
+	eb BuildExpression
+    
+    fn BuildExpressionArithmetic(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
 
 	fn build(
 		c cg.ClassHighLevel,
@@ -28,13 +31,7 @@ class BuildExpressionArithmetic {
 				maxStack = t
 			}
 			switch e.Value.Type {
-			case ast.VariableTypeByte:
-				fallthrough
-			case ast.VariableTypeShort:
-				fallthrough
-			case ast.VariableTypeChar:
-				fallthrough
-			case ast.VariableTypeInt:
+			case ast.VariableTypeByte , ast.VariableTypeShort ,ast.VariableTypeChar ,ast.VariableTypeInt  :
 				if e.Type == ast.ExpressionTypeAnd {
 					code.Codes[code.CodeLength] = cg.OP_iand
 				} else if e.Type == ast.ExpressionTypeOr {

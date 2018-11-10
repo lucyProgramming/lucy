@@ -1,5 +1,17 @@
-class BuildExpressionIncrement {
 
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
+
+class BuildExpressionIncrement {
+	
+
+	eb BuildExpression
+    
+    fn BuildExpressionIncrement(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
 
 	fn  buildSelfIncrement(c cg.ClassHighLevel, code cg.AttributeCode,
 		e ast.Expression, context Context, state StackMapState) -> (maxStack char) {
@@ -15,7 +27,7 @@ class BuildExpressionIncrement {
 			}
 			if e.IsStatementExpression == false { //  need it`s value
 				if e.Type == ast.ExpressionTypeIncrement || e.Type == ast.ExpressionTypeDecrement {
-					copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, identifier.Variable.LocalValOffset)...) // load to stack top
+					copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, identifier.Variable.LocalValOffset)) // load to stack top
 					maxStack = 1
 				}
 			}

@@ -1,6 +1,18 @@
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
+class BuildinFunctionLen {
 
 
-class BuildExpressionLen {
+
+    eb BuildExpression
+    
+    fn BuildinFunctionLen(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
+
+    
 
     fn mkBuildInLen(
         c cg.ClassHighLevel,
@@ -31,14 +43,14 @@ class BuildExpressionLen {
         } else if a0.Value.Type == ast.VariableTypeArray {
             meta := ArrayMetas[a0.Value.Array.Type]
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                     meta.className,
                    "size",
                 "()I"), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
         } else if a0.Value.Type == ast.VariableTypeMap {
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                  mapClass,
                  "size",
                  "()I"
@@ -46,7 +58,7 @@ class BuildExpressionLen {
             code.CodeLength += 3
         } else if a0.Value.Type == ast.VariableTypeString {
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                  javaStringClass,
                  "length",
                  "()I"

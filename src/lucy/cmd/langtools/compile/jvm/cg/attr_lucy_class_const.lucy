@@ -1,7 +1,7 @@
  import "lucy/binary"
 
-class AttributeLucyClassConst {
-	Constants []LucyClassConst
+public class AttributeLucyClassConst {
+	public Constants []LucyClassConst
 
 	fn FromBs(c Class, bs []byte) {
 	    this.Constants = []LucyClassConst{}

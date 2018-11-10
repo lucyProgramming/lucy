@@ -1,7 +1,17 @@
 
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 
 class BuildExpressionOpAssign {
-
+    
+    eb BuildExpression
+    
+    fn BuildExpressionOpAssign(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
+    
     /*
         s += "456";
     */
@@ -19,7 +29,7 @@ class BuildExpressionOpAssign {
         maxStack, remainStack, op, leftValueKind :=
             this.getLeftValue(c, code, bin.Left, context, state)
         currentStack := remainStack
-        stack := this.build(c, code, bin.Left, context, state)
+        stack := this.eb.build(c, code, bin.Left, context, state)
         if t := currentStack + stack; t > maxStack {
             maxStack = t
         }
@@ -30,7 +40,7 @@ class BuildExpressionOpAssign {
             maxStack = t
         }
         code.Codes[code.CodeLength] = cg.OP_invokevirtual
-        ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             javaStringClass,
             `concat`,
             "(Ljava/lang/String;)Ljava/lang/String;"

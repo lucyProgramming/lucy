@@ -1,3 +1,6 @@
+
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
  
 class Context {
 	c                   	ast.Class
@@ -41,7 +44,7 @@ class Context {
 			copy(this.lastStackMapStateLocals, state.Locals)
 			this.lastStackMapStateStacks = new []cg.StackMapVerificationTypeInfo(len(state.Stacks))
 			copy(this.lastStackMapStateStacks, state.Stacks)
-			this.stackMapOffsets = append(this.stackMapOffsets, offset)
+			this.stackMapOffsets.append( offset)
 		}
 		if state == this.lastStackMapState { // same state
 			if len(state.Locals) == len(this.lastStackMapStateLocals) && len(state.Stacks) == 0 {
@@ -49,11 +52,9 @@ class Context {
 					same frame or same frame extended
 				*/
 				if delta <= 63 {
-					code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-						new cg.StackMapSameFrame(byte(delta)))
+					code.AttributeStackMap.StackMaps.append(new cg.StackMapSameFrame(byte(delta)))
 				} else {
-					code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
-						new cg.StackMapSameFrameExtended(251, delta))
+					code.AttributeStackMap.StackMaps.append(new cg.StackMapSameFrameExtended(251, delta))
 				}
 				return
 			}
@@ -107,7 +108,7 @@ class Context {
 			return
 		}
 		if pos.Filename != this.currentSourceFile {
-			ast.TypeInsertSourceFile(pos.Filename)
+			c.InsertSourceFile(pos.Filename)
 			this.currentSourceFile = pos.Filename
 			this.currentLineNumber = pos.Line
 			code.MKLineNumber(pos.Line)

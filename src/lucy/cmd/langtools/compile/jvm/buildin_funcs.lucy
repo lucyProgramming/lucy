@@ -1,5 +1,33 @@
 
-class BuildExpressionBuildinFunctionCall {
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+import "lucy/cmd/langtools/compile/common"
+
+
+
+class BuildinFunctionCall {
+    
+    eb BuildExpression
+    BuildinFunctionAssert BuildinFunctionAssert
+    BuildinFunctionCatchPanic BuildinFunctionCatchPanic
+    BuildinFunctionLen BuildinFunctionLen
+    BuildinFunctionPrint BuildinFunctionPrint
+    BuildinFunctionPrintf BuildinFunctionPrintf
+    BuildinFunctionSprintf BuildinFunctionSprintf
+
+
+    fn BuildExpressionBuildinFunctionCall(eb BuildExpression){
+        this.super()
+        this.eb = eb
+        this.BuildinFunctionAssert = new BuildinFunctionAssert(eb)
+        this.BuildinFunctionCatchPanic = new BuildinFunctionCatchPanic(eb)
+        this.BuildinFunctionLen = new BuildinFunctionLen(eb)
+        this.BuildinFunctionPrint = new BuildinFunctionPrint(eb)
+        this.BuildinFunctionPrintf = new BuildinFunctionPrintf(eb)
+        this.BuildinFunctionSprintf = new BuildinFunctionSprintf(eb)
+        this.BuildinFunctionAssert = new BuildinFunctionAssert(eb)
+    }
+
 
     fn mkBuildInFunctionCall(
         c cg.ClassHighLevel,
@@ -11,18 +39,18 @@ class BuildExpressionBuildinFunctionCall {
         if call.Function.LoadedFromCorePackage {
             maxStack = this.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
             code.Codes[code.CodeLength] = cg.OP_invokestatic
-            ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.Function.Entrance.Class.Name,call.Function.Name,call.Function.Entrance.Descriptor
+            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.Function.Entrance.Class.Name,call.Function.Name,call.Function.Entrance.Descriptor
             ), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
             return
         }
         switch call.Function.Name {
         case common.BuildInFunctionPrint:
-            return this.mkBuildInPrint(c, code, e, context, state)
+            return this.BuildinFunctionPrint.mkBuildInPrint(c, code, e, context, state)
         case common.BuildInFunctionPanic:
-            return this.mkBuildInPanic(c, code, e, context, state)
+            return this.BuildinFunctionCatchPanic.mkBuildInPanic(c, code, e, context, state)
         case common.BuildInFunctionCatch:
-            return this.mkBuildInCatch(c, code, e, context)
+            return this.BuildinFunctionCatchPanic.mkBuildInCatch(c, code, e, context)
         /*
         case common.BuildInFunctionMonitorEnter, common.BuildInFunctionMonitorExit:
             maxStack = this.build(c, code, call.Args[0], context, state)
@@ -36,13 +64,13 @@ class BuildExpressionBuildinFunctionCall {
         case common.BuildInFunctionPrintf:
             return this.mkBuildInPrintf(c, code, e, context, state)
         case common.BuildInFunctionSprintf:
-            return this.mkBuildInSprintf(c, code, e, context, state)
+            return this.BuildinFunctionPrintf.mkBuildInSprintf(c, code, e, context, state)
         case common.BuildInFunctionLen:
             return this.mkBuildInLen(c, code, e, context, state)
         case common.BuildInFunctionBlockHole:
             return this.mkBuildInBlackHole(c, code, e, context, state)
         case common.BuildInFunctionAssert:
-            return this.mkBuildInAssert(c, code, e, context, state)
+            return this.BuildinFunctionAssert.mkBuildInAssert(c, code, e, context, state)
         default:
             panic("unknown  buildIn function:" + call.Function.Name)
         }

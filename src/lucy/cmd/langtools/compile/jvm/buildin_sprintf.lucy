@@ -1,6 +1,16 @@
- 
-class BuildExpressionSprintf {
 
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+ 
+class BuildinFunctionSprintf {
+    
+    eb BuildExpression
+    
+    fn BuildinFunctionSprintf(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
+    
     fn mkBuildInSprintf(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
@@ -18,7 +28,7 @@ class BuildExpressionSprintf {
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
         loadInt32(c, code, int(meta.ArgsLength))
         code.Codes[code.CodeLength] = cg.OP_anewarray
-        ast.TypeInsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
+        c.InsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.CodeLength += 3
         currentStack := char(2)
         if currentStack > maxStack {
@@ -42,7 +52,7 @@ class BuildExpressionSprintf {
                 maxStack = t
             }
             if v.Value.IsPointer() == false {
-                typeConverter.packPrimitives(c, code, v.Value)
+                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.Value)
             }
             code.Codes[code.CodeLength] = cg.OP_aastore
             code.CodeLength++
@@ -50,7 +60,7 @@ class BuildExpressionSprintf {
             state.popStack(2)
         }
         code.Codes[code.CodeLength] = cg.OP_invokestatic
-        ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                  "format",
             "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;"

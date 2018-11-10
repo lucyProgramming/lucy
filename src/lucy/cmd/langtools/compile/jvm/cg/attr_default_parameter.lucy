@@ -1,7 +1,7 @@
 
 import "lucy/binary"
 
-class AttributeDefaultParameters {
+public class AttributeDefaultParameters {
 	public Start     char // start
 	public Constants []char
 

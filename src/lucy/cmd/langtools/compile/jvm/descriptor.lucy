@@ -1,4 +1,5 @@
- 
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg" 
 
 class Descriptor  {
 
@@ -6,16 +7,16 @@ class Descriptor  {
 	static fn methodDescriptor(functionType ast.FunctionType) -> (s string) {
 		s = "("
 		for _, v := range functionType.ParameterList {
-			s += this.typeDescriptor(v.Type)
+			s += .typeDescriptor(v.Type)
 		}
 		if functionType.VArgs != null {
-			s += this.typeDescriptor(functionType.VArgs.Type)
+			s += .typeDescriptor(functionType.VArgs.Type)
 		}
 		s += ")"
 		if functionType.VoidReturn() {
 			s += "V"
 		} else if len(functionType.ReturnList) == 1 {
-			s += this.typeDescriptor(functionType.ReturnList[0].Type)
+			s += .typeDescriptor(functionType.ReturnList[0].Type)
 		} else {
 			s += "[Ljava/lang/Object;" //always this type
 		}
@@ -142,7 +143,7 @@ class Descriptor  {
 		bs = bs[1:]
 		for bs[0] != ')' {
 			vd := new ast.Variable()
-			bs, vd.Type, err = this.ParseType(bs)
+			bs, vd.Type, err = .ParseType(bs)
 			if err != null {
 				return t, err
 			}

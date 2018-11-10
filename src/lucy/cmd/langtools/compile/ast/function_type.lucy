@@ -152,7 +152,7 @@ public class FunctionType {
 		have += ")"
 	}
 
-	fn VoidReturn() ->(is bool) {
+	public fn VoidReturn() ->(is bool) {
 		return len(this.ReturnList) == 0 ||
 			this.ReturnList[0].Type.Type == VariableTypeVoid
 	}
@@ -300,14 +300,14 @@ public class FunctionType {
 }
 
 
-class CallVariableArgs {
-	Expressions []Expression
-	Length      int
+public class CallVariableArgs {
+	public Expressions []Expression
+	public Length      int
 	/*
 		a := new int[](10)
 		print(a...)
 	*/
-	PackArray2VArgs bool
-	NoArgs          bool
-	Type            Type
+	public PackArray2VArgs bool
+	public NoArgs          bool
+	public Type            Type
 }

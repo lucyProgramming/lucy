@@ -1,5 +1,15 @@
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 class  BuildExpressionAssign {
 	
+
+	eb BuildExpression
+    
+    fn BuildExpressionAssign(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
 
 	fn  buildExpressionAssign(
 		c cg.ClassHighLevel,
@@ -61,7 +71,7 @@ class  BuildExpressionAssign {
 		} else {
 			maxStack = this.buildExpressions(c, code, assign.Values, context, state)
 		}
-		autoVar := newMultiValueAutoVar(c, code, state)
+		autoVar := new MultiValueAutoVar()(c, code, state)
 		for k, v := range assign.Lefts {
 			if v.IsIdentifier(ast.UnderScore) {
 				continue

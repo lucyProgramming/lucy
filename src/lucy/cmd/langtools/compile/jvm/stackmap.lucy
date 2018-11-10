@@ -1,9 +1,12 @@
 
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 class StackMapState {
 	Locals []cg.StackMapVerificationTypeInfo
 	Stacks []cg.StackMapVerificationTypeInfo
 
-    fn StackMapState(last StackMapState) StackMapState {
+    fn StackMapState(last StackMapState) {
     	this.super()
     	if last == null {
     		return 
@@ -15,7 +18,7 @@ class StackMapState {
 
 	fn appendLocals(c cg.ClassHighLevel, v ast.Type) {
 		this.Locals = append(this.Locals,
-			this.newStackMapVerificationTypeInfo(class, v))
+			this.newStackMapVerificationTypeInfo(c, v))
 	}
 
 	fn addTop(absent StackMapState) {
@@ -27,12 +30,12 @@ class StackMapState {
 			return
 		}
 		oldLength := len(this.Locals)
-		verify := &cg.StackMapVerificationTypeInfo{}
-		verify.Verify = &cg.StackMapTopVariableInfo{}
+		verify := new cg.StackMapVerificationTypeInfo()
+		verify.Verify = new cg.StackMapTopVariableInfo()
 		for i := 0; i < length; i++ {
 			tt := absent.Locals[i+oldLength].Verify
-			_, isDouble := tt.(*cg.StackMapDoubleVariableInfo)
-			_, isLong := tt.(*cg.StackMapLongVariableInfo)
+			_, isDouble := tt.(cg.StackMapDoubleVariableInfo)
+			_, isLong := tt.(cg.StackMapLongVariableInfo)
 			if isDouble || isLong {
 				this.Locals = append(this.Locals, verify, verify)
 			} else {
@@ -41,10 +44,10 @@ class StackMapState {
 		}
 	}
 
-	fn newObjectVariableType(name string) ast.Type {
-		ret := &ast.Type{}
+	fn newObjectVariableType(name string) -> (ret ast.Type) {
+		ret :=new ast.Type()
 		ret.Type = ast.VariableTypeObject
-		ret.Class = &ast.Class{}
+		ret.Class = new ast.Class()
 		ret.Class.Name = name
 		return ret
 	}
@@ -65,66 +68,39 @@ class StackMapState {
 		if this == null {
 			panic("s is null")
 		}
-		this.Stacks = append(this.Stacks, this.newStackMapVerificationTypeInfo(class, v))
+		this.Stacks = append(this.Stacks, this.newStackMapVerificationTypeInfo(c, v))
 	}
 
 
 	fn newStackMapVerificationTypeInfo(c cg.ClassHighLevel,
-		t ast.Type) (ret *cg.StackMapVerificationTypeInfo) {
-		ret = &cg.StackMapVerificationTypeInfo{}
+		t ast.Type) -> (ret cg.StackMapVerificationTypeInfo) {
+		ret = new cg.StackMapVerificationTypeInfo()
 		switch t.Type {
-		case ast.VariableTypeBool:
-			fallthrough
-		case ast.VariableTypeByte:
-			fallthrough
-		case ast.VariableTypeShort:
-			fallthrough
-		case ast.VariableTypeEnum:
-			fallthrough
-		case ast.VariableTypeChar:
-			fallthrough
-		case ast.VariableTypeInt:
-			ret.Verify = &cg.StackMapIntegerVariableInfo{}
+		case ast.VariableTypeBool ,ast.VariableTypeByte , ast.VariableTypeShort,
+		    ast.VariableTypeEnum ,ast.VariableTypeChar ,  ast.VariableTypeInt:
+			ret.Verify = new cg.StackMapIntegerVariableInfo()
 		case ast.VariableTypeLong:
-			ret.Verify = &cg.StackMapLongVariableInfo{}
+			ret.Verify = new cg.StackMapLongVariableInfo()
 		case ast.VariableTypeFloat:
-			ret.Verify = &cg.StackMapFloatVariableInfo{}
+			ret.Verify = newcg.StackMapFloatVariableInfo()
 		case ast.VariableTypeDouble:
-			ret.Verify = &cg.StackMapDoubleVariableInfo{}
+			ret.Verify = new cg.StackMapDoubleVariableInfo()
 		case ast.VariableTypeNull:
-			ret.Verify = &cg.StackMapNullVariableInfo{}
+			ret.Verify = newcg.StackMapNullVariableInfo()
 		case ast.VariableTypeString:
-			ret.Verify = &cg.StackMapObjectVariableInfo{
-				Index:    ast.TypeClass.InsertClassConst(javaStringClass),
-				Readable: javaStringClass,
-			}
+			ret.Verify = new cg.StackMapObjectVariableInfo(c.InsertClassConst(javaStringClass))
 		case ast.VariableTypeObject:
-			ret.Verify = &cg.StackMapObjectVariableInfo{
-				Index:    ast.TypeClass.InsertClassConst(t.Class.Name),
-				Readable: t.Class.Name,
-			}
+			ret.Verify = new cg.StackMapObjectVariableInfo( c.InsertClassConst(t.Class.Name))
 		case ast.VariableTypeFunction:
-			ret.Verify = &cg.StackMapObjectVariableInfo{
-				Index:    ast.TypeClass.InsertClassConst(javaMethodHandleClass),
-				Readable: javaMethodHandleClass,
-			}
+			ret.Verify = new cg.StackMapObjectVariableInfo( c.InsertClassConst(javaMethodHandleClass))
 		case ast.VariableTypeMap:
-			ret.Verify = &cg.StackMapObjectVariableInfo{
-				Index:    ast.TypeClass.InsertClassConst(mapClass),
-				Readable: mapClass,
-			}
+			ret.Verify = new cg.StackMapObjectVariableInfo(c.InsertClassConst(mapClass))
 		case ast.VariableTypeArray:
 			meta := ArrayMetas[t.Array.Type]
-			ret.Verify = &cg.StackMapObjectVariableInfo{
-				Index:    ast.TypeClass.InsertClassConst(meta.className),
-				Readable: meta.className,
-			}
+			ret.Verify = new cg.StackMapObjectVariableInfo(c.InsertClassConst(meta.className))
 		case ast.VariableTypeJavaArray:
 			d := Descriptor.typeDescriptor(t)
-			ret.Verify = &cg.StackMapObjectVariableInfo{
-				Index:    ast.TypeClass.InsertClassConst(d),
-				Readable: d,
-			}
+			ret.Verify = new cg.StackMapObjectVariableInfo(	c.InsertClassConst(d))
 		default:
 			panic(1)
 		}

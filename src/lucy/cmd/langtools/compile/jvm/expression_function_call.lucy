@@ -1,4 +1,14 @@
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 class BuildExpressionFunctionCall {
+	
+	eb BuildExpression
+    
+    fn BuildExpressionFunctionCall(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
 	
 	fn  buildFunctionPointerCall(
 		c cg.ClassHighLevel,
@@ -13,7 +23,7 @@ class BuildExpressionFunctionCall {
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+		c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 			"java/lang/invoke/MethodHandle",
 			methodHandleInvokeMethodName,
 			Descriptor.methodDescriptor(call.Expression.Value.FunctionType)
@@ -47,7 +57,7 @@ class BuildExpressionFunctionCall {
 		if call.Function.IsClosureFunction == false {
 			maxStack = this.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				call.Function.Entrance.Class.Name,
 				call.Function.Entrance.Name,
 				call.Function.Entrance.Descriptor
@@ -59,7 +69,7 @@ class BuildExpressionFunctionCall {
 			if context.function.Closure.ClosureFunctionExist(call.Function) {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 				code.Codes[code.CodeLength] = cg.OP_getfield
-				ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+				c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					ast.TypeName,
 					call.Function.Name,
 					"L" + call.Function.Entrance.Class.Name + ";"
@@ -75,7 +85,7 @@ class BuildExpressionFunctionCall {
 				maxStack = t
 			}
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				call.Function.Entrance.Class.Name,
 				call.Function.Name,
 				call.Function.Entrance.Descriptor

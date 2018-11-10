@@ -1,4 +1,17 @@
+
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
+
 class BuildExpressionCallArgs {
+
+
+	eb BuildExpression
+    
+    fn BuildExpressionCallArgs(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
 
 	fn buildCallArgs(
 		c cg.ClassHighLevel,

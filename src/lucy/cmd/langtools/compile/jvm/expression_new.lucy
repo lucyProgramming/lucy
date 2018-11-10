@@ -1,6 +1,16 @@
+
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 class BuildExpressionNew {
 
 
+    eb BuildExpression
+    
+    fn BuildExpressionNew(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
 
 
     fn  buildNew(
@@ -24,7 +34,7 @@ class BuildExpressionNew {
         //new object
         n := e.Data.(ast.ExpressionNew)
         code.Codes[code.CodeLength] = cg.OP_new
-        ast.TypeInsertClassConst(n.Type.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+        c.InsertClassConst(n.Type.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.Codes[code.CodeLength+3] = cg.OP_dup
         t := new cg.StackMapVerificationTypeInfo()
         t.Verify = new cg.StackMapUninitializedVariableInfo()
@@ -32,13 +42,13 @@ class BuildExpressionNew {
         state.Stacks = append(state.Stacks, t, t)
         code.CodeLength += 4
         maxStack = 2
-        maxStack += this.buildCallArgs(c, code, n.Args, n.VArgs, context, state)
+        maxStack += this.eb.buildCallArgs(c, code, n.Args, n.VArgs, context, state)
         code.Codes[code.CodeLength] = cg.OP_invokespecial
         d := n.Construction.Function.JvmDescriptor
         if d == "" {
             d = Descriptor.methodDescriptor(n.Construction.Function.Type)
         }
-        ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             n.Type.Class.Name,
             specialMethodInit,
             d
@@ -54,11 +64,11 @@ class BuildExpressionNew {
         context Context) -> (maxStack char) {
         maxStack = 2
         code.Codes[code.CodeLength] = cg.OP_new
-        ast.TypeInsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+        c.InsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.Codes[code.CodeLength+3] = cg.OP_dup
         code.CodeLength += 4
         code.Codes[code.CodeLength] = cg.OP_invokespecial
-        ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             mapClass,
             specialMethodInit,
             "()V"
@@ -93,7 +103,7 @@ class BuildExpressionNew {
             }
         }
         code.Codes[code.CodeLength] = cg.OP_multianewarray
-        ast.TypeInsertClassConst(Descriptor.typeDescriptor(e.Value), code.Codes[code.CodeLength+1:code.CodeLength+3])
+        c.InsertClassConst(Descriptor.typeDescriptor(e.Value), code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.Codes[code.CodeLength+3] = dimensions
         code.CodeLength += 4
         if e.Value.Array.Type == ast.VariableTypeEnum {
@@ -115,7 +125,7 @@ class BuildExpressionNew {
         n := e.Data.(ast.ExpressionNew)
         meta := ArrayMetas[e.Value.Array.Type]
         code.Codes[code.CodeLength] = cg.OP_new
-        ast.TypeInsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
+        c.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.Codes[code.CodeLength+3] = cg.OP_dup
         code.CodeLength += 4
         maxStack = 2
@@ -145,7 +155,7 @@ class BuildExpressionNew {
             state.popStack(1)
         }
         code.Codes[code.CodeLength] = cg.OP_invokespecial
-        ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             meta.className,
             specialMethodInit,
             meta.constructorFuncDescriptor

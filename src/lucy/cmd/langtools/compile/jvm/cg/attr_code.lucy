@@ -1,7 +1,7 @@
 import "lucy/binary"
  
 
-class AttributeCode  {
+public class AttributeCode  {
 	public	MaxStack          char
 	public	MaxLocals         char
 	public	CodeLength        int
@@ -37,7 +37,7 @@ class AttributeCode  {
 	/*
 		mk line number attribute
 	*/
-	fn MKLineNumber(lineNumber int) {
+	public fn MKLineNumber(lineNumber int) {
 	    if this.LineNumbers == null {
 	        this.LineNumbers = new AttributeLineNumber()
 	    }
@@ -88,9 +88,9 @@ class AttributeCode  {
 
 
 
-class ExceptionTable  {
-	StartPc   char
-	EndPc     char
-	HandlerPc char
-	CatchType char
+public class ExceptionTable  {
+	public StartPc   char
+	public EndPc     char
+	public HandlerPc char
+	public CatchType char
 }

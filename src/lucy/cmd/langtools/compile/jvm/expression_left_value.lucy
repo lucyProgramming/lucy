@@ -1,7 +1,17 @@
 
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 class BuildExpressionLeftValue {
 
-
+    
+    eb BuildExpression
+    
+    fn BuildExpressionLeftValue(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
+    
     fn  getCaptureIdentifierLeftValue(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
@@ -17,7 +27,7 @@ class BuildExpressionLeftValue {
         if context.function.Closure.ClosureVariableExist(identifier.Variable) { // capture var exits
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
             code.Codes[code.CodeLength] = cg.OP_getfield
-            ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+            c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                 ast.TypeName,
                 identifier.Name,
                "L" + meta.className + ";"
@@ -31,7 +41,7 @@ class BuildExpressionLeftValue {
         remainStack = 1
         ops = new []byte(3)
         ops[0] = cg.OP_putfield
-        ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+        c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
             meta.className,
             meta.fieldName,
             meta.fieldDescription
@@ -57,7 +67,7 @@ class BuildExpressionLeftValue {
             maxStack = t
         }
         if index.Index.Value.IsPointer() == false {
-            typeConverter.packPrimitives(c, code, index.Index.Value)
+            TypeConverterAndPrimitivePacker.packPrimitives(c, code, index.Index.Value)
         }
         state.pushStack(c, state.newObjectVariableType(javaRootClass))
         remainStack = 2
@@ -68,7 +78,7 @@ class BuildExpressionLeftValue {
         }
         bs4 := new []byte(4)
         bs4[0] = cg.OP_invokevirtual
-        ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             mapClass,
             "put",
             "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"
@@ -97,7 +107,7 @@ class BuildExpressionLeftValue {
                 ops = new []byte(3)
                 leftValueType = LeftValueKindPutStatic
                 ops[0] = cg.OP_putstatic
-                ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+                c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                     this.BuildPackage.mainClass.Name,
                     identifier.Name,
                     Descriptor.typeDescriptor(identifier.Variable.Type)
@@ -121,7 +131,7 @@ class BuildExpressionLeftValue {
                 meta := ArrayMetas[index.Expression.Value.Array.Type]
                 ops = new []byte(3)
                 ops[0] = cg.OP_invokevirtual
-                ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+                c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                     meta.className,
                     "set",
                     meta.setMethodDescription
@@ -172,7 +182,7 @@ class BuildExpressionLeftValue {
                 if selection.PackageVariable.JvmDescriptor == "" {
                     selection.PackageVariable.JvmDescriptor = Descriptor.typeDescriptor(selection.PackageVariable.Type)
                 }
-                ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+                c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                     selection.Expression.Value.Package.Name + "/main",
                     selection.PackageVariable.Name,
                     selection.PackageVariable.JvmDescriptor
@@ -197,7 +207,7 @@ class BuildExpressionLeftValue {
                 if selection.Field.JvmDescriptor == "" {
                     selection.Field.JvmDescriptor = Descriptor.typeDescriptor(selection.Field.Type)
                 }
-                ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+                c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                     selection.Expression.Value.Class.Name,
                     selection.Name,
                     selection.Field.JvmDescriptor
@@ -207,7 +217,7 @@ class BuildExpressionLeftValue {
                 if selection.Field.JvmDescriptor == "" {
                     selection.Field.JvmDescriptor = Descriptor.typeDescriptor(selection.Field.Type)
                 }
-                ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+                c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                     selection.Expression.Value.Class.Name,
                     selection.Name,
                     selection.Field.JvmDescriptor

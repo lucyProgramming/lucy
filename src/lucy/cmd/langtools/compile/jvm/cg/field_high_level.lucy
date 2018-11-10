@@ -1,11 +1,11 @@
 
 
-class FieldHighLevel {
-	Name                         string
-	Descriptor                   string
-	AccessFlags                  char
-	AttributeConstantValue       AttributeConstantValue
-	AttributeLucyFieldDescriptor AttributeLucyFieldDescriptor
-	AttributeLucyConst           AttributeLucyConst
-	AttributeLucyComment         AttributeLucyComment
+public class FieldHighLevel {
+	public Name                         string
+	public Descriptor                   string
+	public AccessFlags                  char
+	public AttributeConstantValue       AttributeConstantValue
+	public AttributeLucyFieldDescriptor AttributeLucyFieldDescriptor
+	public AttributeLucyConst           AttributeLucyConst
+	public AttributeLucyComment         AttributeLucyComment
 }

@@ -13,38 +13,38 @@ public const	AccClassAnnotation char = 0x2000 // 标识注解类型
 public const	AccClassEnum       char = 0x4000 // 标识枚举类型
 
 
-class Class {
+public class Class {
 	writer                  io.FileOutputStream
 	magic                   int //0xCAFEBABE
-	MinorVersion            char
-	MajorVersion            char
-	ConstPool               []ConstPool
-	AccessFlag              char
-	ThisClass               char
-	SuperClass              char
-	Interfaces              []char
-	Fields                  []FieldInfo
-	Methods                 []MethodInfo
-	Attributes              []AttributeInfo
-	AttributeGroupedByName  AttributeGroupedByName
-	TypeAlias               []AttributeLucyTypeAlias
-	AttributeLucyEnum       AttributeLucyEnum
-	AttributeLucyComment    AttributeLucyComment
-	AttributeLucyClassConst AttributeLucyClassConst
-	AttributeInnerClasses   AttributeInnerClasses
+	public MinorVersion            char
+	public MajorVersion            char
+	public ConstPool               []ConstPool
+	public AccessFlag              char
+	public ThisClass               char
+	public SuperClass              char
+	public Interfaces              []char
+	public Fields                  []FieldInfo
+	public Methods                 []MethodInfo
+	public Attributes              []AttributeInfo
+	public AttributeGroupedByName  AttributeGroupedByName
+	public TypeAlias               []AttributeLucyTypeAlias
+	public AttributeLucyEnum       AttributeLucyEnum
+	public AttributeLucyComment    AttributeLucyComment
+	public AttributeLucyClassConst AttributeLucyClassConst
+	public AttributeInnerClasses   AttributeInnerClasses
 	//const caches
-	Utf8Constants               map{string -> ConstPool }
-	IntConstants                map{int-> ConstPool }
-	LongConstants               map{long-> ConstPool }
-	FloatConstants              map{float-> ConstPool }
-	DoubleConstants             map{double-> ConstPool }
-	ClassConstants              map{string-> ConstPool }
-	StringConstants             map{string-> ConstPool }
-	FieldRefConstants           map{string-> ConstPool }
-	NameAndTypeConstants        map{string-> ConstPool }
-	MethodrefConstants          map{string-> ConstPool }
-	InterfaceMethodrefConstants map{string-> ConstPool }
-	MethodTypeConstants         map{string-> ConstPool }
+	public Utf8Constants               map{string -> ConstPool }
+	public IntConstants                map{int-> ConstPool }
+	public LongConstants               map{long-> ConstPool }
+	public FloatConstants              map{float-> ConstPool }
+	public DoubleConstants             map{double-> ConstPool }
+	public ClassConstants              map{string-> ConstPool }
+	public StringConstants             map{string-> ConstPool }
+	public FieldRefConstants           map{string-> ConstPool }
+	public NameAndTypeConstants        map{string-> ConstPool }
+	public MethodrefConstants          map{string-> ConstPool }
+	public InterfaceMethodrefConstants map{string-> ConstPool }
+	public MethodTypeConstants         map{string-> ConstPool }
 
 	fn IsSynthetic() -> (is bool) {
 		return (this.AccessFlag & AccClassSynthetic) != 0

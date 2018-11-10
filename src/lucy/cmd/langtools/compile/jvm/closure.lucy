@@ -1,4 +1,5 @@
- 
+ import "lucy/cmd/langtools/compile/ast"
+ import "lucy/cmd/langtools/compile/jvm/cg"
 
 
 enum  ClosureKind{
@@ -21,17 +22,8 @@ class Closure  {
 
 	fn getMeta(t ast.VariableTypeKind) -> (meta ClosureObjectMeta) {
 		switch t {
-		case ast.VariableTypeBool:
-			fallthrough
-		case ast.VariableTypeByte:
-			fallthrough
-		case ast.VariableTypeShort:
-			fallthrough
-		case ast.VariableTypeEnum:
-			fallthrough
-		case ast.VariableTypeChar:
-			fallthrough
-		case ast.VariableTypeInt:
+		case ast.VariableTypeBool ,ast.VariableTypeByte ,ast.VariableTypeShort ,
+		    ast.VariableTypeEnum , ast.VariableTypeChar , ast.VariableTypeInt:
 			meta = this.ClosureObjectMetas[ClosureClassInt]
 		case ast.VariableTypeLong:
 			meta = this.ClosureObjectMetas[ClosureClassLong]
@@ -41,15 +33,7 @@ class Closure  {
 			meta = this.ClosureObjectMetas[ClosureClassDouble]
 		case ast.VariableTypeString:
 			meta = this.ClosureObjectMetas[ClosureClassString]
-		case ast.VariableTypeObject:
-			fallthrough
-		case ast.VariableTypeArray: //[]int
-			fallthrough
-		case ast.VariableTypeJavaArray: // java array int[]
-			fallthrough
-		case ast.VariableTypeFunction:
-			fallthrough
-		case ast.VariableTypeMap:
+		default:
 			meta = this.ClosureObjectMetas[ClosureClassObject]
 		}
 		return
@@ -63,17 +47,8 @@ class Closure  {
 		maxStack = 2
 		var meta ClosureObjectMeta
 		switch v.Type {
-		case ast.VariableTypeBool:
-			fallthrough
-		case ast.VariableTypeByte:
-			fallthrough
-		case ast.VariableTypeShort:
-			fallthrough
-		case ast.VariableTypeEnum:
-			fallthrough
-		case ast.VariableTypeChar:
-			fallthrough
-		case ast.VariableTypeInt:
+		case ast.VariableTypeBool ,ast.VariableTypeByte ,ast.VariableTypeShort ,
+            ast.VariableTypeEnum , ast.VariableTypeChar , ast.VariableTypeInt:
 			meta = this.ClosureObjectMetas[ClosureClassInt]
 		case ast.VariableTypeLong:
 			meta = this.ClosureObjectMetas[ClosureClassLong]
@@ -83,23 +58,15 @@ class Closure  {
 			meta = this.ClosureObjectMetas[ClosureClassDouble]
 		case ast.VariableTypeString:
 			meta = this.ClosureObjectMetas[ClosureClassString]
-		case ast.VariableTypeObject:
-			fallthrough
-		case ast.VariableTypeFunction:
-			fallthrough
-		case ast.VariableTypeArray: //[]int
-			fallthrough
-		case ast.VariableTypeJavaArray: // java array int[]
-			fallthrough
-		case ast.VariableTypeMap:
-			meta = this.ClosureObjectMetas[ClosureClassObject]
+		default:
+		    meta = this.ClosureObjectMetas[ClosureClassObject]
 		}
 		code.Codes[code.CodeLength] = cg.OP_new
-		ast.TypeInsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		c.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+		c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 			     meta.className,
 			    specialMethodInit,
 			"()V"
@@ -111,17 +78,8 @@ class Closure  {
 	fn storeLocalClosureVar(c cg.ClassHighLevel, code cg.AttributeCode, v ast.Variable) {
 		var meta ClosureObjectMeta
 		switch v.Type.Type {
-		case ast.VariableTypeBool:
-			fallthrough
-		case ast.VariableTypeByte:
-			fallthrough
-		case ast.VariableTypeShort:
-			fallthrough
-		case ast.VariableTypeEnum:
-			fallthrough
-		case ast.VariableTypeChar:
-			fallthrough
-		case ast.VariableTypeInt:
+		case ast.VariableTypeBool ,ast.VariableTypeByte ,ast.VariableTypeShort ,
+             ast.VariableTypeEnum , ast.VariableTypeChar , ast.VariableTypeInt:
 			meta = this.ClosureObjectMetas[ClosureClassInt]
 		case ast.VariableTypeLong:
 			meta = this.ClosureObjectMetas[ClosureClassLong]
@@ -131,19 +89,11 @@ class Closure  {
 			meta = this.ClosureObjectMetas[ClosureClassDouble]
 		case ast.VariableTypeString:
 			meta = this.ClosureObjectMetas[ClosureClassString]
-		case ast.VariableTypeObject:
-			fallthrough
-		case ast.VariableTypeFunction:
-			fallthrough
-		case ast.VariableTypeMap:
-			fallthrough
-		case ast.VariableTypeArray:
-			fallthrough
-		case ast.VariableTypeJavaArray:
+		default:
 			meta = this.ClosureObjectMetas[ClosureClassObject]
 		}
 		code.Codes[code.CodeLength] = cg.OP_putfield
-		ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+		c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 			    meta.className,
 			  meta.fieldName,
 			meta.fieldDescription
@@ -168,17 +118,8 @@ class Closure  {
 	fn unPack(c cg.ClassHighLevel, code cg.AttributeCode, v ast.Type) {
 		var meta ClosureObjectMeta
 		switch v.Type {
-		case ast.VariableTypeBool:
-			fallthrough
-		case ast.VariableTypeByte:
-			fallthrough
-		case ast.VariableTypeShort:
-			fallthrough
-		case ast.VariableTypeEnum:
-			fallthrough
-		case ast.VariableTypeChar:
-			fallthrough
-		case ast.VariableTypeInt:
+		case ast.VariableTypeBool ,ast.VariableTypeByte ,ast.VariableTypeShort ,
+             ast.VariableTypeEnum , ast.VariableTypeChar , ast.VariableTypeInt:
 			meta = this.ClosureObjectMetas[ClosureClassInt]
 		case ast.VariableTypeLong:
 			meta = this.ClosureObjectMetas[ClosureClassLong]
@@ -188,19 +129,11 @@ class Closure  {
 			meta = this.ClosureObjectMetas[ClosureClassDouble]
 		case ast.VariableTypeString:
 			meta = this.ClosureObjectMetas[ClosureClassString]
-		case ast.VariableTypeFunction:
-			fallthrough
-		case ast.VariableTypeMap:
-			fallthrough
-		case ast.VariableTypeObject:
-			fallthrough
-		case ast.VariableTypeArray:
-			fallthrough
-		case ast.VariableTypeJavaArray:
+		default:
 			meta = this.ClosureObjectMetas[ClosureClassObject]
 		}
 		code.Codes[code.CodeLength] = cg.OP_getfield
-		ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+		c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 			      meta.className,
 			      meta.fieldName,
 			 meta.fieldDescription

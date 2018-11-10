@@ -1,11 +1,14 @@
 
+ import "lucy/cmd/langtools/compile/ast"
+ import "lucy/cmd/langtools/compile/jvm/cg"
+
 
 class DefaultValueParse {
 
 	static fn Encode(
 		c cg.ClassHighLevel,
-		f ast.Function) cg.AttributeDefaultParameters {
-		ret := &cg.AttributeDefaultParameters{}
+		f ast.Function) -> (d cg.AttributeDefaultParameters) {
+		ret := new cg.AttributeDefaultParameters()
 		ret.Start = char(f.DefaultValueStartAt)
 		for i := ret.Start; i < char(len(f.Type.ParameterList)); i++ {
 			switch f.Type.ParameterList[i].DefaultValueExpression.Type {
@@ -39,12 +42,12 @@ class DefaultValueParse {
 		return ret
 	}
 
-	static fn Decode(class cg.Class, f ast.Function, dp cg.AttributeDefaultParameters) {
+	static fn Decode(c cg.Class, f ast.Function, dp cg.AttributeDefaultParameters) {
 		f.HaveDefaultValue = true
 		f.DefaultValueStartAt = int(dp.Start)
 		for i := char(0); i < char(len(dp.Constants)); i++ {
 			v := f.Type.ParameterList[dp.Start+i]
-			v.DefaultValueExpression = &ast.Expression{}
+			v.DefaultValueExpression = new ast.Expression()
 			v.DefaultValueExpression.Value = v.Type
 			switch v.Type.Type {
 			case ast.VariableTypeBool:

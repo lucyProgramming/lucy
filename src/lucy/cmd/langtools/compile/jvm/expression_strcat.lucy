@@ -1,35 +1,52 @@
 
-func (this *BuildExpression) buildStrCat(
-	c cg.ClassHighLevel,
-	code cg.AttributeCode,
-	e ast.Expression,
-	context Context,
-	state StackMapState) (maxStack char) {
-	stackLength := len(state.Stacks)
-	defer func() {
-		state.popStack(len(state.Stacks) - stackLength)
-	}()
-	bin := e.Data.(ast.ExpressionBinary)
-	maxStack = this.build(class, code, bin.Left, context, state)
-	if t := this.stackTop2String(class, code, bin.Left.Value, context, state); t > maxStack {
-		maxStack = t
-	}
-	state.pushStack(class, state.newObjectVariableType(javaStringClass))
-	stack := this.build(class, code, bin.Right, context, state)
-	if t := 1 + stack; t > maxStack {
-		maxStack = t
-	}
-	if t := 1 + this.stackTop2String(class, code,
-		bin.Right.Value, context, state); t > maxStack {
-		maxStack = t
-	}
-	code.Codes[code.CodeLength] = cg.OP_invokevirtual
-	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
-		Class:      javaStringClass,
-		Method:     `concat`,
-		Descriptor: "(Ljava/lang/String;)Ljava/lang/String;",
-	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	return
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
+class BuildExpressionStrcat {
+    
+
+    eb BuildExpression
+    
+    fn BuildExpressionStrcat(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
+
+    
+    fn buildStrCat(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        e ast.Expression,
+        context Context,
+        state StackMapState) -> (maxStack char) {
+        stackLength := len(state.Stacks)
+        defer {
+            state.popStack(len(state.Stacks) - stackLength)
+        }
+        bin := e.Data.(ast.ExpressionBinary)
+        maxStack = this.build(c, code, bin.Left, context, state)
+        if t := this.stackTop2String(c, code, bin.Left.Value, context, state); t > maxStack {
+            maxStack = t
+        }
+        state.pushStack(c, state.newObjectVariableType(javaStringClass))
+        stack := this.build(c, code, bin.Right, context, state)
+        if t := 1 + stack; t > maxStack {
+            maxStack = t
+        }
+        if t := 1 + this.stackTop2String(c, code,
+            bin.Right.Value, context, state); t > maxStack {
+            maxStack = t
+        }
+        code.Codes[code.CodeLength] = cg.OP_invokevirtual
+        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            javaStringClass,
+            `concat`,
+           "(Ljava/lang/String;)Ljava/lang/String;"
+        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
+        code.CodeLength += 3
+        return
+
+    }
+
 
 }

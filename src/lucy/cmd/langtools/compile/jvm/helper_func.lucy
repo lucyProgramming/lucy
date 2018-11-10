@@ -1,4 +1,8 @@
 
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
+
 fn writeExits(es []cg.Exit, to int) {
 	for _, e := range es {
 		offset := int16(to - int(e.CurrentCodeLength))
@@ -11,11 +15,11 @@ fn jumpTo(code cg.AttributeCode, to int) {
 	if to < 0 {
 		panic("to is negative")
 	}
-	exit := (&cg.Exit{}).Init(cg.OP_goto, code)
+	exit := new cg.Exit(cg.OP_goto, code)
 	writeExits([]cg.Exit{exit}, to)
 }
 
-fn copyOPs(code cg.AttributeCode, op ...byte) {
+fn copyOPs(code cg.AttributeCode, op []byte) {
 	for k, v := range op {
 		code.Codes[code.CodeLength+k] = v
 	}
@@ -63,19 +67,14 @@ fn loadInt32(c cg.ClassHighLevel, code cg.AttributeCode, value int) {
 	}
 }
 
-fn interfaceMethodArgsCount(functionType ast.FunctionType) byte {
-	var count char
+fn interfaceMethodArgsCount(functionType ast.FunctionType) -> (count byte) {
 	count = 1
 	for _, v := range functionType.ParameterList {
 		count += jvmSlotSize(v.Type)
 	}
-	if count > 255 {
-		panic("over 255")
-	}
-	return byte(count)
 }
 
-fn jvmSlotSize(typ ast.Type) char {
+fn jvmSlotSize(typ ast.Type) -> (size char) {
 	if typ.Type == ast.VariableTypeDouble ||
 		typ.Type == ast.VariableTypeLong {
 		return 2
@@ -84,8 +83,7 @@ fn jvmSlotSize(typ ast.Type) char {
 	}
 }
 
-fn nameTemplateFunction(function ast.Function) string {
-	s := function.Name
+fn nameTemplateFunction(function ast.Function) -> (s string = function.Name) {
 	for _, v := range function.Type.ParameterList {
 		if v.Type.IsPrimitive() {
 			s += sprintf("$%s", v.Type.TypeString())
@@ -109,14 +107,14 @@ fn nameTemplateFunction(function ast.Function) string {
 
 fn insertTypeAssertClass(c cg.ClassHighLevel, code cg.AttributeCode, t ast.Type) {
 	if t.Type == ast.VariableTypeString {
-		ast.TypeInsertClassConst(javaStringClass, code.Codes[code.CodeLength:code.CodeLength+2])
+		c.InsertClassConst(javaStringClass, code.Codes[code.CodeLength:code.CodeLength+2])
 	} else if t.Type == ast.VariableTypeObject {
-		ast.TypeInsertClassConst(t.Class.Name, code.Codes[code.CodeLength:code.CodeLength+2])
+		c.InsertClassConst(t.Class.Name, code.Codes[code.CodeLength:code.CodeLength+2])
 	} else if t.Type == ast.VariableTypeArray { // arrays
 		meta := ArrayMetas[t.Array.Type]
-		ast.TypeInsertClassConst(meta.className, code.Codes[code.CodeLength:code.CodeLength+2])
+		c.InsertClassConst(meta.className, code.Codes[code.CodeLength:code.CodeLength+2])
 	} else {
-		ast.TypeInsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength:code.CodeLength+2])
+		c.InsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength:code.CodeLength+2])
 	}
 	code.CodeLength += 2
 }
@@ -159,33 +157,33 @@ fn newArrayBaseOnType(c cg.ClassHighLevel, code cg.AttributeCode, typ ast.Type) 
 		code.CodeLength += 2
 	case ast.VariableTypeString:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		ast.TypeInsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		c.InsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeMap:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		ast.TypeInsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		c.InsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeFunction:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		ast.TypeInsertClassConst(javaMethodHandleClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		c.InsertClassConst(javaMethodHandleClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeObject:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		ast.TypeInsertClassConst(typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		c.InsertClassConst(typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeArray:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
 		meta := ArrayMetas[typ.Array.Type]
-		ast.TypeInsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		c.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeJavaArray:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		ast.TypeInsertClassConst(Descriptor.typeDescriptor(typ.Array),
+		c.InsertClassConst(Descriptor.typeDescriptor(typ.Array),
 			code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
 }
-fn storeArrayElementOp(typ ast.VariableTypeKind) (op byte) {
+fn storeArrayElementOp(typ ast.VariableTypeKind) -> (op byte) {
 	switch typ {
 	case ast.VariableTypeBool:
 		op = cg.OP_bastore
@@ -213,7 +211,7 @@ fn storeArrayElementOp(typ ast.VariableTypeKind) (op byte) {
 /*
 	return function call result stack size , this value should be proper handled
 */
-fn popCallResult(code cg.AttributeCode, e ast.Expression, ft ast.FunctionType) (stackSize char) {
+fn popCallResult(code cg.AttributeCode, e ast.Expression, ft ast.FunctionType) ->(stackSize char) {
 	stackSize = functionReturnJvmSize(ft)
 	if ft.VoidReturn() == false && e.IsStatementExpression {
 		if len(ft.ReturnList) == 1 {
@@ -232,7 +230,7 @@ fn popCallResult(code cg.AttributeCode, e ast.Expression, ft ast.FunctionType) (
 	return
 }
 
-fn functionReturnJvmSize(ft ast.FunctionType) char {
+fn functionReturnJvmSize(ft ast.FunctionType) -> (size char) {
 	if ft.VoidReturn() {
 		return 0
 	}
@@ -244,15 +242,15 @@ fn functionReturnJvmSize(ft ast.FunctionType) char {
 }
 
 fn setEnumArray(c cg.ClassHighLevel, code cg.AttributeCode,
-	state StackMapState, context Context, e ast.Enum) (maxStack char) {
+	state StackMapState, context Context, e ast.Enum) -> (maxStack char) {
 	if e.DefaultValue == 0 {
 		return
 	}
-	type autoVar = struct {
+	class autoVar {
 		k      char
 		length char
 	}
-	var a autoVar
+	var a autoVar = new autoVar()
 	a.k = code.MaxLocals
 	a.length = code.MaxLocals + 1
 	code.MaxLocals += 2
@@ -264,21 +262,17 @@ fn setEnumArray(c cg.ClassHighLevel, code cg.AttributeCode,
 	code.Codes[code.CodeLength] = cg.OP_iconst_0
 	code.CodeLength++
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, a.k)...)
-	state.appendLocals(class, &ast.Type{
-		Type: ast.VariableTypeInt,
-	})
-	state.appendLocals(class, &ast.Type{
-		Type: ast.VariableTypeInt,
-	})
+	state.appendLocals(c,typeInt)
+	state.appendLocals(c, typeInt)
 	context.MakeStackMap(code, state, code.CodeLength)
 	offset := code.CodeLength
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.k)...)
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.length)...)
-	exit := (&cg.Exit{}).Init(cg.OP_if_icmpge, code)
+	exit := new cg.Exit(cg.OP_if_icmpge, code)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.k)...)
-	loadInt32(class, code, e.DefaultValue)
+	loadInt32(c, code, e.DefaultValue)
 	code.Codes[code.CodeLength] = cg.OP_iastore
 	code.CodeLength++
 	maxStack = 3

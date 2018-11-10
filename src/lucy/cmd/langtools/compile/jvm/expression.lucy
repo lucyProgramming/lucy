@@ -1,8 +1,67 @@
  
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 
 class BuildExpression {
-	BuildPackage BuildPackage
+	bp BuildPackage
+    BuildExpressionArithmetic BuildExpressionArithmetic
+    BuildExpressionArray BuildExpressionArray
+    BuildExpressionAssign BuildExpressionAssign
+    BuildExpressionCallArgs BuildExpressionCallArgs
+    BuildExpressionConversion BuildExpressionConversion
+    BuildExpressionFunction BuildExpressionFunction
+    BuildExpressionFunctionCall BuildExpressionFunctionCall
+    BuildExpressionIdentifier BuildExpressionIdentifier
+    BuildExpressionIncrement BuildExpressionIncrement
+    BuildExpressionIndex BuildExpressionIndex
+    BuildExpressionLeftValue BuildExpressionLeftValue
+    BuildExpressionLogical BuildExpressionLogical
+    BuildExpressionMap BuildExpressionMap
+    BuildExpressionMethodCall BuildExpressionMethodCall
+    BuildExpressionNew BuildExpressionNew
+    BuildExpressionOpAssign BuildExpressionOpAssign
+    BuildExpressionQuestion BuildExpressionQuestion
+    BuildExpressionRelation BuildExpressionRelation
+    BuildExpressionSelection BuildExpressionSelection
+    BuildExpressionSlice BuildExpressionSlice
+    BuildExpressionStrcat BuildExpressionStrcat
+    BuildExpressionAssert BuildExpressionAssert
+    BuildExpressionTypeConversion BuildExpressionTypeConversion
+    BuildExpressionUnary BuildExpressionUnary
+    BuildExpressionVar BuildExpressionVar
+    BuildExpressionVarAssign BuildExpressionVarAssign
 
+    fn BuildExpression(bp BuildExpression){
+        this.super()
+        this.bp = bp
+        this.BuildExpressionArithmetic =new BuildExpressionArithmetic(this)
+        this.BuildExpressionArray =new BuildExpressionArray(this)
+        this.BuildExpressionAssign =new BuildExpressionAssign(this)
+        this.BuildExpressionCallArgs =new BuildExpressionCallArgs(this)
+        this.BuildExpressionConversion =new BuildExpressionConversion(this)
+        this.BuildExpressionFunction =new BuildExpressionFunction(this)
+        this.BuildExpressionFunctionCall=new  BuildExpressionFunctionCall(this)
+        this.BuildExpressionIdentifier=new  BuildExpressionIdentifier(this)
+        this.BuildExpressionIncrement =new BuildExpressionIncrement(this)
+        this.BuildExpressionIndex =new BuildExpressionIndex(this)
+        this.BuildExpressionLeftValue=new  BuildExpressionLeftValue(this)
+        this.BuildExpressionLogical =new BuildExpressionLogical(this)
+        this.BuildExpressionMap =new BuildExpressionMap(this)
+        this.BuildExpressionMethodCall=new  BuildExpressionMethodCall(this)
+        this.BuildExpressionNew =new BuildExpressionNew(this)
+        this.BuildExpressionOpAssign =new BuildExpressionOpAssign(this)
+        this.BuildExpressionQuestion=new  BuildExpressionQuestion(this)
+        this.BuildExpressionRelation =new BuildExpressionRelation(this)
+        this.BuildExpressionSelection =new BuildExpressionSelection(this)
+        this.BuildExpressionSlice=new  BuildExpressionSlice(this)
+        this.BuildExpressionStrcat=new  BuildExpressionStrcat(this)
+        this.BuildExpressionAssert=new  BuildExpressionAssert(this)
+        this.BuildExpressionTypeConversion=new  BuildExpressionTypeConversion(this)
+        this.BuildExpressionUnary =new BuildExpressionUnary(this)
+        this.BuildExpressionVar=new  BuildExpressionVar(this)
+        this.BuildExpressionVarAssign=new  BuildExpressionVarAssign(this)
+    }
 
 
     fn build(
@@ -172,7 +231,7 @@ class BuildExpression {
         }
         loadInt32(c, code, int(length))
         code.Codes[code.CodeLength] = cg.OP_anewarray
-        ast.TypeInsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+        c.InsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.CodeLength += 3
         if 1 > maxStack {
             maxStack = 1
@@ -188,7 +247,7 @@ class BuildExpression {
                 if t := currentStack + stack; t > maxStack {
                     maxStack = t
                 }
-                autoVar := newMultiValueAutoVar(c, code, state)
+                autoVar := new MultiValueAutoVar()(c, code, state)
                 for kk, _ := range v.MultiValues {
                     currentStack = 1
                     code.Codes[code.CodeLength] = cg.OP_dup
@@ -218,7 +277,7 @@ class BuildExpression {
                 maxStack = t
             }
             if v.Value.IsPointer() == false {
-                typeConverter.packPrimitives(c, code, v.Value)
+                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.Value)
             }
             loadInt32(c, code, index)
             if 4 > maxStack { // current stack is  arrayRef arrayRef value index

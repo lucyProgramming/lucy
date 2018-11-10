@@ -378,7 +378,7 @@ public class Type {
 			this.isFloat()
 	}
 
-	fn IsPointer() -> (is bool)  {
+	public fn IsPointer() -> (is bool)  {
 		return this.Type == VariableTypeObject ||
 			this.Type == VariableTypeArray ||
 			this.Type == VariableTypeJavaArray ||
@@ -652,7 +652,7 @@ public class Type {
 		return false
 	}
 
-	fn Equal(compareTo Type) -> (is bool) {
+	public fn Equal(compareTo Type) -> (is bool) {
 		leftValue := this
 		if leftValue.Type != compareTo.Type {
 			return false //early check

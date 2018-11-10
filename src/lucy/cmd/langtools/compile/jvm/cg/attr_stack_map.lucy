@@ -52,7 +52,7 @@ public class StackMapSameLocals1StackItemFrame {
 
 
 
-class StackMapSameLocals1StackItemFrameExtended {
+public class StackMapSameLocals1StackItemFrameExtended {
 	public FrameType byte
 	public Delta     char
 	public Stack     StackMapVerificationTypeInfo
@@ -67,10 +67,10 @@ class StackMapSameLocals1StackItemFrameExtended {
 
 
 
-class StackMapChopFrame  {
-	FrameType byte
-	Delta     char
-	fn StackMapChopFrame(FrameType byte ,Delta     char ){
+public class StackMapChopFrame  {
+	public FrameType byte
+	public Delta     char
+	public fn StackMapChopFrame(FrameType byte ,Delta     char ){
         this.super()
         this.FrameType = FrameType
         this.Delta = Delta
@@ -85,10 +85,10 @@ class StackMapChopFrame  {
 
 
 
-class StackMapSameFrameExtended {
-	FrameType byte
-	Delta     char
-	fn StackMapSameFrameExtended(FrameType byte ,Delta char ){
+public class StackMapSameFrameExtended {
+	public FrameType byte
+	public Delta     char
+	public fn StackMapSameFrameExtended(FrameType byte ,Delta char ){
         this.super()
         this.FrameType = FrameType
         this.Delta = Delta
@@ -103,10 +103,10 @@ class StackMapSameFrameExtended {
 
 
 
-class StackMapAppendFrame {
-	FrameType byte
-	Delta     char
-	Locals    []StackMapVerificationTypeInfo
+public class StackMapAppendFrame {
+	public FrameType byte
+	public Delta     char
+	public Locals    []StackMapVerificationTypeInfo
 	fn ToBytes() -> (bs []byte) {
 		bs = new []byte(3)
 		bs[0] = this.FrameType
@@ -120,13 +120,13 @@ class StackMapAppendFrame {
 
 
 
-class StackMapFullFrame {
-	FrameType byte
-	Delta     char
-	Locals    []StackMapVerificationTypeInfo
-	Stacks    []StackMapVerificationTypeInfo
+public class StackMapFullFrame {
+	public FrameType byte
+	public Delta     char
+	public Locals    []StackMapVerificationTypeInfo
+	public Stacks    []StackMapVerificationTypeInfo
 
-    fn StackMapFullFrame(FrameType byte , Delta     char ,Locals ,  Stacks []StackMapVerificationTypeInfo ){
+    public fn StackMapFullFrame(FrameType byte , Delta     char ,Locals ,  Stacks []StackMapVerificationTypeInfo ){
         this.super()
         this.FrameType = FrameType
         this.Delta = Delta
@@ -154,23 +154,23 @@ class StackMapFullFrame {
 
 
 
-class StackMapTopVariableInfo {}
-class StackMapIntegerVariableInfo {}
-class StackMapFloatVariableInfo {}
-class StackMapLongVariableInfo {}
-class StackMapDoubleVariableInfo {}
-class StackMapNullVariableInfo {}
-class StackMapUninitializedThisVariableInfo {}
-class StackMapObjectVariableInfo  {
-	Index    char
-	Readable string
+public class StackMapTopVariableInfo {}
+public class StackMapIntegerVariableInfo {}
+public class StackMapFloatVariableInfo {}
+public class StackMapLongVariableInfo {}
+public class StackMapDoubleVariableInfo {}
+public class StackMapNullVariableInfo {}
+public class StackMapUninitializedThisVariableInfo {}
+public class StackMapObjectVariableInfo  {
+	public Index    char
+	public Readable string
 }
-class StackMapUninitializedVariableInfo  {
-	CodeOffset char
+public class StackMapUninitializedVariableInfo  {
+	public CodeOffset char
 }
 
-class StackMapVerificationTypeInfo  {
-	Verify Object
+public class StackMapVerificationTypeInfo  {
+	public Verify Object
 	fn ToBytes() -> (bs []byte)  {
 		if _,ok := this.Verify.(StackMapTopVariableInfo) ; ok {
 			return []byte{0}

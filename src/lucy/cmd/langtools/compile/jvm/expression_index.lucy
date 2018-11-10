@@ -1,5 +1,16 @@
-class BuildExpressionIndex {
 
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
+class BuildExpressionIndex {
+    
+
+    eb BuildExpression
+    
+    fn BuildExpressionIndex(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
 
 
     fn  buildIndex(
@@ -19,16 +30,16 @@ class BuildExpressionIndex {
         defer  {
             state.popStack(len(state.Stacks) - stackLength)
         }
-        maxStack = this.build(c, code, index.Expression, context, state)
+        maxStack = this.eb.build(c, code, index.Expression, context, state)
         state.pushStack(c, index.Expression.Value)
-        stack := this.build(c, code, index.Index, context, state)
+        stack := this.eb.build(c, code, index.Index, context, state)
         if t := stack + 1; t > maxStack {
             maxStack = t
         }
         if index.Expression.Value.Type == ast.VariableTypeArray {
             meta := ArrayMetas[e.Value.Type]
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 meta.className,
                 "get",
                meta.getMethodDescription
@@ -76,9 +87,9 @@ class BuildExpressionIndex {
             state.popStack(len(state.Stacks) - length)
         }
         index := e.Data.(ast.ExpressionIndex)
-        maxStack = this.build(c, code, index.Expression, context, state)
+        maxStack = this.eb.build(c, code, index.Expression, context, state)
         code.Codes[code.CodeLength] = cg.OP_invokevirtual
-        ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             javaStringClass,
             "getBytes",
             "()[B"
@@ -114,10 +125,10 @@ class BuildExpressionIndex {
         }
         currentStack = 2 // mapref kref
         if index.Expression.Value.Map.K.IsPointer() == false {
-            typeConverter.packPrimitives(c, code, index.Expression.Value.Map.K)
+            TypeConverterAndPrimitivePacker.packPrimitives(c, code, index.Expression.Value.Map.K)
         }
         code.Codes[code.CodeLength] = cg.OP_invokevirtual
-        ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             mapClass,
             "get",
             "(Ljava/lang/Object;)Ljava/lang/Object;"

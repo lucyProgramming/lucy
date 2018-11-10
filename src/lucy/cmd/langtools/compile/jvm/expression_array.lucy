@@ -1,5 +1,16 @@
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+import "lucy/cmd/langtools/compile/common"
+
+
+
 class BuildExpressionArray {
-	
+	eb BuildExpression
+    
+    fn BuildExpressionArray(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
 
 
 	fn buildArray(
@@ -16,7 +27,7 @@ class BuildExpressionArray {
 		//	new array
 		meta := ArrayMetas[e.Value.Array.Type]
 		code.Codes[code.CodeLength] = cg.OP_new
-		ast.TypeInsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		c.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
 		{
@@ -41,7 +52,7 @@ class BuildExpressionArray {
 			loadInt32(c, code, index) // load index
 			state.pushStack(c, arrayObject)
 			state.pushStack(c, typeInt)
-			stack := this.build(c, code, v, context, state)
+			stack := this.eb.build(c, code, v, context, state)
 			state.popStack(2)
 			if t := 5 + stack; t > maxStack {
 				maxStack = t
@@ -51,7 +62,7 @@ class BuildExpressionArray {
 			index++
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+		c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 			 meta.className,
 			 specialMethodInit,
 			 meta.constructorFuncDescriptor
@@ -68,7 +79,7 @@ class BuildExpressionArray {
         context Context,
         state StackMapState) -> (maxStack char) {
         call := e.Data.(ast.ExpressionMethodCall)
-        maxStack = this.build(c, code, call.Expression, context, state)
+        maxStack = this.eb.build(c, code, call.Expression, context, state)
         switch call.Name {
         case common.ArrayMethodSize:
             code.Codes[code.CodeLength] = cg.OP_arraylength
@@ -92,7 +103,7 @@ class BuildExpressionArray {
             state.popStack(len(state.Stacks) - length) // ref type
         }
         call := e.Data.(ast.ExpressionMethodCall)
-        maxStack = this.build(c, code, call.Expression, context, state)
+        maxStack = this.eb.build(c, code, call.Expression, context, state)
         state.pushStack(c, call.Expression.Value)
         switch call.Name {
         case common.ArrayMethodSize,
@@ -101,7 +112,7 @@ class BuildExpressionArray {
             common.ArrayMethodEnd:
             meta := ArrayMetas[call.Expression.Value.Array.Type]
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                       meta.className,
                     call.Name,
                 "()I"
@@ -121,12 +132,12 @@ class BuildExpressionArray {
                     state.pushStack(c, call.Expression.Value)
                     currentStack++
                 }
-                stack := this.build(c, code, v, context, state)
+                stack := this.eb.build(c, code, v, context, state)
                 if t := stack + currentStack; t > maxStack {
                     maxStack = t
                 }
                 code.Codes[code.CodeLength] = cg.OP_invokevirtual
-                ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+                c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                      meta.className,
                      "append",
                      meta.appendDescriptor
@@ -146,13 +157,13 @@ class BuildExpressionArray {
                     state.pushStack(c, call.Expression.Value)
                     currentStack++
                 }
-                stack := this.build(c, code, v, context, state)
+                stack := this.eb.build(c, code, v, context, state)
                 if t := stack + currentStack; t > maxStack {
                     maxStack = t
                 }
                 //get elements field
                 code.Codes[code.CodeLength] = cg.OP_invokevirtual
-                ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+                c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                     meta.className,
                     "append",
                     meta.appendAllDescriptor
@@ -165,7 +176,7 @@ class BuildExpressionArray {
         case common.ArrayMethodGetUnderlyingArray:
             meta := ArrayMetas[call.Expression.Value.Array.Type]
             code.Codes[code.CodeLength] = cg.OP_getfield
-            ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+            c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                 meta.className,
                 "elements",
                 meta.elementsFieldDescriptor

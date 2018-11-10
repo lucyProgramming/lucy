@@ -1,4 +1,14 @@
-class BuildExpressionAssert {
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
+class BuildinFunctionAssert {
+    
+    eb BuildExpression
+    
+    fn BuildinFunctionAssert(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
 
     fn mkBuildInAssert(
         c cg.ClassHighLevel,
@@ -42,7 +52,7 @@ class BuildExpressionAssert {
         code.CodeLength += 3
         loadInt32(c, code, 1)
         code.Codes[code.CodeLength] = cg.OP_anewarray
-        ast.TypeInsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+        c.InsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.CodeLength += 3
         code.Codes[code.CodeLength] = cg.OP_dup
         code.CodeLength++
@@ -52,14 +62,14 @@ class BuildExpressionAssert {
         if 5 > maxStack {
             maxStack = 5
         }
-        typeConverter.packPrimitives(c, code,  typeInt)
+        TypeConverterAndPrimitivePacker.packPrimitives(c, code,  typeInt)
         code.Codes[code.CodeLength] = cg.OP_aastore
         code.CodeLength++
         ast.TypeInsertMethodCall(code, cg.OP_invokestatic, javaStringClass,
             "format", "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;")
 
         code.Codes[code.CodeLength] = cg.OP_new
-        ast.TypeInsertClassConst(javaExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+        c.InsertClassConst(javaExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.CodeLength += 3
         code.Codes[code.CodeLength] = cg.OP_dup_x1
         code.Codes[code.CodeLength+1] = cg.OP_swap

@@ -1,5 +1,18 @@
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
+
+
+
 class  BuildExpressionFunction {
 	
+
+	eb BuildExpression
+    
+    fn BuildExpressionFunction(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
 
 	fn  buildFunctionExpression(
 		c cg.ClassHighLevel,
@@ -21,7 +34,7 @@ class  BuildExpressionFunction {
 			function.Name = function.NameLiteralFunction()
 		}
 		if function.IsClosureFunction == false {
-			function.Name = ast.TypeNewMethodName(function.Name) // new a function name
+			function.Name = c.NewMethodName(function.Name) // new a function name
 			method := new cg.MethodHighLevel()
 			method.Name = function.Name
 			method.AccessFlags |= cg.AccMethodFinal
@@ -63,12 +76,12 @@ class  BuildExpressionFunction {
 		closureClass.AppendMethod(method)
 		//new a object to hold this closure function
 		code.Codes[code.CodeLength] = cg.OP_new
-		ast.TypeInsertClassConst(closureClass.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		c.InsertClassConst(closureClass.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
 		maxStack = 2 // maxStack is 2 right now
 		code.Codes[code.CodeLength] = cg.OP_invokespecial
-		ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+		c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 			className,
 			specialMethodInit,
 			"()V"
@@ -103,7 +116,7 @@ class  BuildExpressionFunction {
 						maxStack = 3
 					}
 					code.Codes[code.CodeLength] = cg.OP_getfield
-					ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+					c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 						ast.TypeName,
 						v.Name,
 						field.Descriptor
@@ -124,7 +137,7 @@ class  BuildExpressionFunction {
 						maxStack = 3
 					}
 					code.Codes[code.CodeLength] = cg.OP_getfield
-					ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+					c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 						ast.TypeName,
 						v.Name,
 						field.Descriptor
@@ -138,7 +151,7 @@ class  BuildExpressionFunction {
 				}
 			}
 			code.Codes[code.CodeLength] = cg.OP_putfield
-			ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+			c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 				className,
 				v.Name,
 				field.Descriptor
@@ -167,7 +180,7 @@ class  BuildExpressionFunction {
 					maxStack = 3
 				}
 				code.Codes[code.CodeLength] = cg.OP_getfield
-				ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+				c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					ast.TypeName,
 					v.Name,
 					filed.Descriptor
@@ -180,7 +193,7 @@ class  BuildExpressionFunction {
 				}
 			}
 			code.Codes[code.CodeLength] = cg.OP_putfield
-			ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+			c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 				className,
 				v.Name,
 				filed.Descriptor
@@ -197,31 +210,31 @@ class  BuildExpressionFunction {
 	fn  packFunction2MethodHandle(c cg.ClassHighLevel, code cg.AttributeCode,
 		function ast.Function, context Context) -> (maxStack char) {
 		code.Codes[code.CodeLength] = cg.OP_invokestatic
-		ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+		c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 			"java/lang/invoke/MethodHandles",
 			"lookup",
 			"()Ljava/lang/invoke/MethodHandles$Lookup;"
 		), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		ast.TypeInsertClassConst(function.Entrance.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		c.InsertClassConst(function.Entrance.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
 		ast.TypeInsertStringConst(function.Entrance.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		ast.TypeInsertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(
+		c.InsertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(
 			function.Entrance.Descriptor),code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		if function.IsClosureFunction {
-			ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				"java/lang/invoke/MethodHandles$Lookup",
 				"findVirtual",
 				 "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;"
 			), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		} else {
-			ast.TypeInsertMethodRefConst(new       cg.ConstantInfoMethodrefHighLevel(
+			c.InsertMethodRefConst(new       cg.ConstantInfoMethodrefHighLevel(
 				"java/lang/invoke/MethodHandles$Lookup",
 				"findStatic",
 				"(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;"
@@ -235,7 +248,7 @@ class  BuildExpressionFunction {
 			if context.function.Closure.ClosureFunctionExist(function) {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 				code.Codes[code.CodeLength] = cg.OP_getfield
-				ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+				c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					ast.TypeName,
 					function.Name,
 					"L" + function.Entrance.Class.Name + ";"
@@ -245,7 +258,7 @@ class  BuildExpressionFunction {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, function.ClosureVariableOffSet)...)
 			}
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				"java/lang/invoke/MethodHandle",
 				"bindTo",
 				"(Ljava/lang/Object;)Ljava/lang/invoke/MethodHandle;"

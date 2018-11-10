@@ -1,9 +1,10 @@
-
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
 
 class LucyMethodSignature {
 
-
-	static fn Need(ft ast.FunctionType) bool {
+	
+	static fn Need(ft ast.FunctionType) ->(n bool)  {
 		for _, v := range ft.ParameterList {
 			if LucyFieldSignatureParser.Need(v.Type) {
 				return true
@@ -23,7 +24,7 @@ class LucyMethodSignature {
 		return false
 	}
 
-	static fn Encode(ft ast.FunctionType) (descriptor string) {
+	static fn Encode(ft ast.FunctionType) -> (descriptor string) {
 		descriptor = "("
 		for _, v := range ft.ParameterList {
 			descriptor += LucyFieldSignatureParser.Encode(v.Type)
@@ -45,9 +46,8 @@ class LucyMethodSignature {
 	}
 
 	//rewrite types
-	static fn Decode(ft ast.FunctionType, bs []byte) ([]byte, error) {
+	static fn Decode(ft ast.FunctionType, bs []byte)-> (bsSliced []byte,err  error) {
 		bs = bs[1:] // skip (
-		var err error
 		if len(ft.ParameterList) > 0 {
 			ft.ParameterList = null
 		}
@@ -57,19 +57,19 @@ class LucyMethodSignature {
 			if err != null {
 				return bs, err
 			}
-			vd := &ast.Variable{}
+			vd := new ast.Variable()
 			vd.Type = t
 			ft.ParameterList = append(ft.ParameterList, vd)
 		}
 		if bs[0] != ')' {
-			return bs, new error(sprintf("function type format wrong")
+			return bs, new error(sprintf("function type format wrong"))
 		}
 		bs = bs[1:] // skip )
 		if bs[0] == '(' {
 			bs = bs[1:]
 			ft.ReturnList = []ast.Variable{}
 			for bs[0] != ')' {
-				v := &ast.Variable{}
+				v := new ast.Variable()
 				var t ast.Type
 				bs, t, err = LucyFieldSignatureParser.Decode(bs)
 				if err != null {
@@ -81,15 +81,13 @@ class LucyMethodSignature {
 			bs = bs[1:] // skip )
 		} else if bs[0] == 'V' {
 			bs = bs[1:] // skip V
-			ft.ReturnList = make([]ast.Variable, 1)
-			ft.ReturnList[0] = &ast.Variable{
-				Name: "returnValue",
-				Type: &ast.Type{
-					Type: ast.VariableTypeVoid,
-				},
-			}
+			ft.ReturnList = new []ast.Variable(1)
+			ft.ReturnList[0] = new ast.Variable()
+			ft.ReturnList[0].Name = "returnValue"
+			ft.ReturnList[0].Type = new ast.Type()
+			ft.ReturnList[0].Type.Type = ast.VariableTypeVoid
 		} else {
-			return bs, new error(sprintf("function type format wrong")
+			return bs, new error(sprintf("function type format wrong"))
 		}
 		return bs, null
 	}

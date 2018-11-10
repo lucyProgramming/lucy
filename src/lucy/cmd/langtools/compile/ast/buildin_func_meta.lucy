@@ -1,14 +1,16 @@
  
 
-class BuildInFunctionPrintfMeta  {
-	Format     Expression
-	ArgsLength int
+public class BuildInFunctionPrintfMeta  {
+	public Format     Expression
+	public ArgsLength int
 }
 
-class BuildInFunctionSprintfMeta  {
-	Format     Expression
-	ArgsLength int
+public class BuildInFunctionSprintfMeta  {
+	public Format     Expression
+	public ArgsLength int
 }
-class BuildInFunctionPanicMeta  {
-	ArgThrowable bool
+
+
+public class BuildInFunctionPanicMeta  {
+	public ArgThrowable bool
 }

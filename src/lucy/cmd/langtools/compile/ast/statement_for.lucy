@@ -1,12 +1,12 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
 
 
-class ForRangeAttr {
-	IdentifierKey   ExpressionIdentifier
-	IdentifierValue ExpressionIdentifier
-	ExpressionKey   Expression
-	ExpressionValue Expression
-	RangeOn         Expression
+public class ForRangeAttr {
+	public IdentifierKey   ExpressionIdentifier
+	public IdentifierValue ExpressionIdentifier
+	public ExpressionKey   Expression
+	public ExpressionValue Expression
+	public RangeOn         Expression
 }
 
 

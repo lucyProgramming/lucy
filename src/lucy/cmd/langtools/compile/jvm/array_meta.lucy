@@ -1,4 +1,5 @@
- 
+import "lucy/cmd/langtools/compile/ast"
+
 
 const	ArrayTypeBoolean byte = 4
 const	ArrayTypeChar    byte = 5

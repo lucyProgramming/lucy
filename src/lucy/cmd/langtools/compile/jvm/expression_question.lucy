@@ -1,6 +1,16 @@
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 
 class BuildExpressionQuestion {
+    
 
+    eb BuildExpression
+    
+    fn BuildExpressionQuestion(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
 
     fn buildQuestion(
         c cg.ClassHighLevel,

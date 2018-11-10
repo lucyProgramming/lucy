@@ -1,15 +1,21 @@
 
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 class BuildExpressionConversion {
 	
+	eb BuildExpression
+    
+    fn BuildExpressionConversion(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
+    
 	fn  stackTop2Byte(code cg.AttributeCode, on ast.VariableTypeKind) {
 		switch on {
 		case ast.VariableTypeByte:
 			// already is
-		case ast.VariableTypeShort:
-			fallthrough
-		case ast.VariableTypeChar:
-			fallthrough
-		case ast.VariableTypeInt:
+		case ast.VariableTypeShort , ast.VariableTypeChar ,ast.VariableTypeInt :
 			code.Codes[code.CodeLength] = cg.OP_i2b
 			code.CodeLength++
 		case ast.VariableTypeLong:
@@ -109,13 +115,7 @@ class BuildExpressionConversion {
 
 	fn  stackTop2Float(code cg.AttributeCode, on ast.VariableTypeKind) {
 		switch on {
-		case ast.VariableTypeByte:
-			fallthrough
-		case ast.VariableTypeShort:
-			fallthrough
-		case ast.VariableTypeChar:
-			fallthrough
-		case ast.VariableTypeInt:
+		case ast.VariableTypeByte ,ast.VariableTypeShort ,ast.VariableTypeChar ,ast.VariableTypeInt   :
 			code.Codes[code.CodeLength] = cg.OP_i2f
 			code.CodeLength++
 		case ast.VariableTypeLong:
@@ -132,13 +132,7 @@ class BuildExpressionConversion {
 
 	fn  stackTop2Long(code cg.AttributeCode, on ast.VariableTypeKind) {
 		switch on {
-		case ast.VariableTypeByte:
-			fallthrough
-		case ast.VariableTypeShort:
-			fallthrough
-		case ast.VariableTypeChar:
-			fallthrough
-		case ast.VariableTypeInt:
+		case ast.VariableTypeByte , ast.VariableTypeShort ,ast.VariableTypeChar ,ast.VariableTypeInt  :
 			code.Codes[code.CodeLength] = cg.OP_i2l
 			code.CodeLength++
 		case ast.VariableTypeLong:
@@ -155,13 +149,7 @@ class BuildExpressionConversion {
 
 	fn  stackTop2Double(code cg.AttributeCode, on ast.VariableTypeKind) {
 		switch on {
-		case ast.VariableTypeByte:
-			fallthrough
-		case ast.VariableTypeShort:
-			fallthrough
-		case ast.VariableTypeChar:
-			fallthrough
-		case ast.VariableTypeInt:
+		case ast.VariableTypeByte , ast.VariableTypeShort ,ast.VariableTypeChar , ast.VariableTypeInt :
 			code.Codes[code.CodeLength] = cg.OP_i2d
 			code.CodeLength++
 		case ast.VariableTypeLong:
@@ -210,7 +198,7 @@ class BuildExpressionConversion {
 		switch typ.Type {
 		case ast.VariableTypeBool:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(Z)Ljava/lang/String;"
@@ -218,21 +206,15 @@ class BuildExpressionConversion {
 			code.CodeLength += 3
 		case ast.VariableTypeChar:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(C)Ljava/lang/String;"
 			), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
-		case ast.VariableTypeByte:
-			fallthrough
-		case ast.VariableTypeShort:
-			fallthrough
-		case ast.VariableTypeEnum:
-			fallthrough
-		case ast.VariableTypeInt:
+		case ast.VariableTypeByte ,ast.VariableTypeShort ,  ast.VariableTypeEnum ,ast.VariableTypeInt :
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(I)Ljava/lang/String;"
@@ -240,7 +222,7 @@ class BuildExpressionConversion {
 			code.CodeLength += 3
 		case ast.VariableTypeLong:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(J)Ljava/lang/String;"
@@ -248,7 +230,7 @@ class BuildExpressionConversion {
 			code.CodeLength += 3
 		case ast.VariableTypeFloat:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(F)Ljava/lang/String;"
@@ -256,7 +238,7 @@ class BuildExpressionConversion {
 			code.CodeLength += 3
 		case ast.VariableTypeDouble:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(D)Ljava/lang/String;"
@@ -281,7 +263,7 @@ class BuildExpressionConversion {
 			code.Codes[code.CodeLength+7] = cg.OP_goto
 			binary.BigEndian.PutUint16(code.Codes[code.CodeLength+8:code.CodeLength+10], 6)
 			code.Codes[code.CodeLength+10] = cg.OP_invokevirtual
-			ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				"java/lang/Object",
 				"toString",
 				"()Ljava/lang/String;"

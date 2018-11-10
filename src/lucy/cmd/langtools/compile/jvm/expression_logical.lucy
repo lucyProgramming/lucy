@@ -1,6 +1,16 @@
 
-class BuildExpressionLogical {
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
 
+class BuildExpressionLogical {
+    
+    eb BuildExpression
+    
+    fn BuildExpressionLogical(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
+    
 
     fn buildLogical(
         c cg.ClassHighLevel,

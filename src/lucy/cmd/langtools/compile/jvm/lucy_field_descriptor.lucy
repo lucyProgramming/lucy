@@ -1,5 +1,8 @@
 
 
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 class LucyFieldSignature {
 
 
@@ -13,8 +16,8 @@ class LucyFieldSignature {
     static fn Encode(variableType ast.Type) -> (d string) {
         if variableType.Type == ast.VariableTypeMap {
             d = "M" // start token of map
-            d += this.Encode(variableType.Map.K)
-            d += this.Encode(variableType.Map.V)
+            d += .Encode(variableType.Map.K)
+            d += .Encode(variableType.Map.V)
             return d
         }
         if variableType.Type == ast.VariableTypeEnum {
@@ -24,11 +27,11 @@ class LucyFieldSignature {
         }
         if variableType.Type == ast.VariableTypeArray {
             d = "]"
-            d += this.Encode(variableType.Array)
+            d += .Encode(variableType.Array)
             return d
         }
         if variableType.Type == ast.VariableTypeFunction {
-            d = LucyMethodSignatureParser.Encode(variableType.FunctionType)
+            d = LucyMethodSignature.Encode(variableType.FunctionType)
             return d
         }
         return Descriptor.typeDescriptor(variableType)
@@ -48,27 +51,27 @@ class LucyFieldSignature {
             if err != null {
                 return bs, null, err
             }
-            m := &ast.Type{}
+            m := new ast.Type()
             m.Type = ast.VariableTypeMap
-            m.Map = &ast.Map{}
+            m.Map = new ast.Map()
             m.Map.K = kt
             m.Map.V = vt
             return bs, m, null
         }
         if bs[0] == 'E' {
             bs = bs[1:]
-            a := &ast.Type{}
+            a := new ast.Type()
             a.Type = ast.VariableTypeEnum
             index := bytes.Index(bs, []byte{';'})
-            a.Enum = &ast.Enum{}
+            a.Enum = newast.Enum ()
             a.Enum.Name = string(bs[:index])
             bs = bs[index+1:]
             return bs, a, null
         }
         if bs[0] == '(' {
-            a := &ast.Type{}
+            a := new ast.Type()
             a.Type = ast.VariableTypeFunction
-            a.FunctionType = &ast.FunctionType{}
+            a.FunctionType = new ast.FunctionType()
             bs, err = LucyMethodSignatureParser.Decode(a.FunctionType, bs)
             if err != null {
                 return bs, null, err
@@ -77,7 +80,7 @@ class LucyFieldSignature {
         }
         if bs[0] == ']' {
             bs = bs[1:]
-            a := &ast.Type{}
+            a := new ast.Type()
             a.Type = ast.VariableTypeArray
             bs, a.Array, err = this.Decode(bs)
             return bs, a, err

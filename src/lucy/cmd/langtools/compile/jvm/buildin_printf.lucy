@@ -1,6 +1,18 @@
  
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
 
-class BuildExpressionPrintf {
+
+class BuildinFunctionPrintf {
+
+
+
+    eb BuildExpression
+    
+    fn BuildinFunctionPrintf(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
 
     /*
         function printf
@@ -18,7 +30,7 @@ class BuildExpressionPrintf {
         call := e.Data.(ast.ExpressionFunctionCall)
         meta := call.BuildInFunctionMeta.(ast.BuildInFunctionPrintfMeta)
         code.Codes[code.CodeLength] = cg.OP_getstatic
-        ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+        c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                  "java/lang/System",
                 "out",
              "Ljava/io/PrintStream;"
@@ -33,7 +45,7 @@ class BuildExpressionPrintf {
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
         loadInt32(c, code, int(meta.ArgsLength))
         code.Codes[code.CodeLength] = cg.OP_anewarray
-        ast.TypeInsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
+        c.InsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.CodeLength += 3
         currentStack := char(3)
         if currentStack > maxStack {
@@ -58,14 +70,14 @@ class BuildExpressionPrintf {
                 maxStack = t
             }
             if v.Value.IsPointer() == false {
-                typeConverter.packPrimitives(c, code, v.Value)
+                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.Value)
             }
             code.Codes[code.CodeLength] = cg.OP_aastore
             code.CodeLength++
             index++
         }
         code.Codes[code.CodeLength] = cg.OP_invokevirtual
-        ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaPrintStreamClass,
               "printf",
              "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/io/PrintStream;"

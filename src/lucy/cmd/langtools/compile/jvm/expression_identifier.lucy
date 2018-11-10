@@ -1,5 +1,15 @@
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 class  BuildExpressionIdentifier {
 	
+
+	eb BuildExpression
+    
+    fn BuildExpressionIdentifier(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
 
 	fn  buildCapturedIdentifier(
 		c cg.ClassHighLevel,
@@ -15,7 +25,7 @@ class  BuildExpressionIdentifier {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 				meta := closure.getMeta(identifier.Variable.Type.Type)
 				code.Codes[code.CodeLength] = cg.OP_getfield
-				ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+				c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					ast.TypeName,
 					identifier.Variable.Name,
 					"L" + meta.className + ";"
@@ -25,7 +35,7 @@ class  BuildExpressionIdentifier {
 			} else {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 				code.Codes[code.CodeLength] = cg.OP_getfield
-				ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+				c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					ast.TypeName,
 					identifier.Variable.Name,
 					Descriptor.typeDescriptor(identifier.Variable.Type)
@@ -61,7 +71,7 @@ class  BuildExpressionIdentifier {
 			return this.BuildPackage.packFunction2MethodHandle(c, code, identifier.Function, context)
 		case identifier.Variable.IsGlobal:
 			code.Codes[code.CodeLength] = cg.OP_getstatic
-			ast.TypeInsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+			c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 				this.BuildPackage.mainClass.Name,
 				identifier.Name,
 				Descriptor.typeDescriptor(identifier.Variable.Type)

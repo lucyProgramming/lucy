@@ -3,16 +3,16 @@ import "java/lang/Object"
 import "lucy/cmd/langtools/compile/common"
 
 
-class Package {
-	Name                         string
-	LoadedPackages               map { string -> Package }
+public class Package {
+	public Name                         string
+	public LoadedPackages               map { string -> Package }
 	loadedClasses                map { string -> Class }
-	Block                        Block // package always have a default block
+	public Block                        Block // package always have a default block
 	files                        map { string -> SourceFile}
-	InitFunctions                []Function
-	NErrors2Stop                 int // number of errors should stop compile
+	public InitFunctions                []Function
+	public NErrors2Stop                 int // number of errors should stop compile
 	errors                       []error
-	TriggerPackageInitMethodName string //
+	public TriggerPackageInitMethodName string //
 	unUsedPackage                map{string ->  Import }
 	statementLevelFunctions      []Function
 	statementLevelClass          []Class

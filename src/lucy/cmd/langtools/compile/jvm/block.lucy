@@ -1,4 +1,7 @@
- 
+
+ import "lucy/cmd/langtools/compile/ast"
+ import "lucy/cmd/langtools/compile/jvm/cg"
+
 class BuildBlock {
 	
 	fn BuildBlock(){
@@ -359,7 +362,7 @@ class BuildBlock {
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+		c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 			javaStringClass,
 			"compareTo",
 			"(Ljava/lang/String;)I"

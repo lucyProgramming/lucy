@@ -1,7 +1,7 @@
 import "lucy/binary"
 
 
-class InnerClass {
+public class InnerClass {
 	public InnerClass  string
 	public OuterClass  string
 	public Name        string

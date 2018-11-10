@@ -1,8 +1,8 @@
 
 
-class ConstantInfoNameAndTypeHighLevel {
-	Name       string
-	Descriptor string
+public class ConstantInfoNameAndTypeHighLevel {
+	public Name       string
+	public Descriptor string
 	public fn ConstantInfoNameAndTypeHighLevel(Name ,Descriptor string  ){
 		this.super()
 		this.Name = Name
@@ -13,11 +13,11 @@ class ConstantInfoNameAndTypeHighLevel {
 	}
 }
 
-class ConstantInfoMethodrefHighLevel {
-	Class      string
-	Method     string
-	Descriptor string
-	fn ConstantInfoMethodrefHighLevel(Class , Method ,Descriptor string  ){
+public class ConstantInfoMethodrefHighLevel {
+	public Class      string
+	public Method     string
+	public Descriptor string
+	public fn ConstantInfoMethodrefHighLevel(Class , Method ,Descriptor string  ){
 		this.super()
 		this.Class = Class
 		this.Method = Method
@@ -28,11 +28,11 @@ class ConstantInfoMethodrefHighLevel {
 	}
 }
 
-class ConstantInfoInterfaceMethodrefHighLevel {
-	Class      string
-	Method     string
-	Descriptor string
-	fn ConstantInfoInterfaceMethodrefHighLevel(Class , Method ,Descriptor string){
+public class ConstantInfoInterfaceMethodrefHighLevel {
+	public Class      string
+	public Method     string
+	public Descriptor string
+	public fn ConstantInfoInterfaceMethodrefHighLevel(Class , Method ,Descriptor string){
 		this.super()
 		this.Class = Class
 		this.Method = Method
@@ -43,11 +43,11 @@ class ConstantInfoInterfaceMethodrefHighLevel {
 	}
 }
 
-class ConstantInfoFieldrefHighLevel {
-	Class      string
-	Field      string
-	Descriptor string
-	fn ConstantInfoFieldrefHighLevel(Class , Field , Descriptor string){
+public class ConstantInfoFieldrefHighLevel {
+	public Class      string
+	public Field      string
+	public Descriptor string
+	public fn ConstantInfoFieldrefHighLevel(Class , Field , Descriptor string){
 		this.super()
 		this.Class = Class
 		this.Field = Field
@@ -58,9 +58,9 @@ class ConstantInfoFieldrefHighLevel {
 	}
 }
 
-class ConstantInfoMethodTypeHighLevel {
-	Descriptor string
-	fn ConstantInfoMethodTypeHighLevel(Descriptor string) {
+public class ConstantInfoMethodTypeHighLevel {
+	public Descriptor string
+	public fn ConstantInfoMethodTypeHighLevel(Descriptor string) {
 	    this.super()
 		this.Descriptor = Descriptor
 	}

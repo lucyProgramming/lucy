@@ -1,5 +1,16 @@
-class BuildExpressionRelation {
 
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
+class BuildExpressionRelation {
+    
+
+    eb BuildExpression
+    
+    fn BuildExpressionRelation(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
 
     fn  buildRelations(
         c cg.ClassHighLevel,
@@ -20,7 +31,7 @@ class BuildExpressionRelation {
             if t := jvmSlotSize(bin.Left.Value) + stack; t > maxStack {
                 maxStack = t
             }
-            var exit ast.Statement
+            var exit cg.Exit
             if bin.Left.Value.Type == ast.VariableTypeByte ||
                 bin.Left.Value.Type == ast.VariableTypeShort ||
                 bin.Left.Value.Type == ast.VariableTypeChar ||
@@ -88,7 +99,7 @@ class BuildExpressionRelation {
                 maxStack = t
             }
             state.popStack(1) // 1 bool value
-            var exit ast.Statement
+            var exit cg.Exit
             if e.Type == ast.ExpressionTypeEq {
                 exit = new cg.Exit(cg.OP_if_icmpeq, code)
             } else {
@@ -116,7 +127,7 @@ class BuildExpressionRelation {
                 notNullExpression = bin.Right
             }
             maxStack = this.build(c, code, notNullExpression, context, state)
-            var exit ast.Statement
+            var exit cg.Exit
             if e.Type == ast.ExpressionTypeEq {
                 exit = new cg.Exit(cg.OP_ifnull, code)
             } else { // ne
@@ -142,7 +153,7 @@ class BuildExpressionRelation {
             state.pushStack(c, bin.Left.Value)
             stack := this.build(c, code, bin.Right, context, state)
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            ast.TypeInsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                 "compareTo",
                 "(Ljava/lang/String;)I"
@@ -152,7 +163,7 @@ class BuildExpressionRelation {
                 maxStack = t
             }
             state.popStack(1) // pop left string
-            var exit ast.Statement
+            var exit cg.Exit
             switch e.Type {
             case ast.ExpressionTypeGt:
                 exit = new cg.Exit(cg.OP_ifgt, code)
@@ -192,7 +203,7 @@ class BuildExpressionRelation {
                 maxStack = t
             }
             state.popStack(1)
-            var exit ast.Statement
+            var exit cg.Exit
             if e.Type == ast.ExpressionTypeEq {
                 exit = new cg.Exit(cg.OP_if_acmpeq, code)
             } else { // ne

@@ -1,38 +1,48 @@
 
-func (this *BuildExpression) buildTemplateFunctionCall(
-	c cg.ClassHighLevel,
-	code cg.AttributeCode,
-	e ast.Expression,
-	context Context,
-	state StackMapState) (maxStack char) {
-	call := e.Data.(ast.ExpressionFunctionCall)
-	if call.TemplateFunctionCallPair.Entrance == null {
-		method := &cg.MethodHighLevel{}
-		method.Class = class
-		method.Name = ast.TypeNewMethodName(nameTemplateFunction(call.TemplateFunctionCallPair.Function))
-		method.AccessFlags |= cg.AccClassPublic
-		method.AccessFlags |= cg.AccClassFinal
-		method.AccessFlags |= cg.AccMethodStatic
-		method.AccessFlags |= cg.AccMethodBridge
-		if call.TemplateFunctionCallPair.Function.Type.VArgs != null {
-			method.AccessFlags |= cg.AccMethodVarargs
-		}
-		method.Descriptor = Descriptor.methodDescriptor(&call.TemplateFunctionCallPair.Function.Type)
-		method.Code = &cg.AttributeCode{}
-		ast.TypeAppendMethod(method)
-		call.TemplateFunctionCallPair.Function.Entrance = method
-		//build function
-		this.BuildPackage.buildFunction(class, null, method, call.TemplateFunctionCallPair.Function)
-		call.TemplateFunctionCallPair.Entrance = method
-	}
-	maxStack = this.buildCallArgs(class, code, call.Args, call.VArgs, context, state)
-	code.Codes[code.CodeLength] = cg.OP_invokestatic
-	ast.TypeInsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
-		Class:      call.TemplateFunctionCallPair.Entrance.Class.Name,
-		Method:     call.TemplateFunctionCallPair.Entrance.Name,
-		Descriptor: call.TemplateFunctionCallPair.Entrance.Descriptor,
-	},
-		code.Codes[code.CodeLength+1:code.CodeLength+3])
-	code.CodeLength += 3
-	return
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
+
+class BuildTemplateFunctionCall {
+
+    fn buildTemplateFunctionCall(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        e ast.Expression,
+        context Context,
+        state StackMapState) -> (maxStack char) {
+        call := e.Data.(ast.ExpressionFunctionCall)
+        if call.TemplateFunctionCallPair.Entrance == null {
+            method := new cg.MethodHighLevel()
+            method.Class = c
+            method.Name = ast.TypeNewMethodName(nameTemplateFunction(call.TemplateFunctionCallPair.Function))
+            method.AccessFlags |= cg.AccClassPublic
+            method.AccessFlags |= cg.AccClassFinal
+            method.AccessFlags |= cg.AccMethodStatic
+            method.AccessFlags |= cg.AccMethodBridge
+            if call.TemplateFunctionCallPair.Function.Type.VArgs != null {
+                method.AccessFlags |= cg.AccMethodVarargs
+            }
+            method.Descriptor = Descriptor.methodDescriptor(call.TemplateFunctionCallPair.Function.Type)
+            method.Code = new cg.AttributeCode()
+            ast.TypeAppendMethod(method)
+            call.TemplateFunctionCallPair.Function.Entrance = method
+            //build function
+            this.BuildPackage.buildFunction(c, null, method, call.TemplateFunctionCallPair.Function)
+            call.TemplateFunctionCallPair.Entrance = method
+        }
+        maxStack = this.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
+        code.Codes[code.CodeLength] = cg.OP_invokestatic
+        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            call.TemplateFunctionCallPair.Entrance.Class.Name,
+            call.TemplateFunctionCallPair.Entrance.Name,
+            call.TemplateFunctionCallPair.Entrance.Descriptor
+        ),
+            code.Codes[code.CodeLength+1:code.CodeLength+3])
+        code.CodeLength += 3
+        return
+    }
+
+
 }
+
+
