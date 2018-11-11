@@ -13,7 +13,7 @@ public class ForRangeAttr {
 
 public class StatementFor {
 	public RangeAttr           ForRangeAttr
-	public Exits               []cg.Exit
+	public exits               []cg.Exit
 	public ContinueCodeOffset  int
 	public pos                 Pos
 	initExpressionBlock Block = new Block()
@@ -23,7 +23,7 @@ public class StatementFor {
 		}
 	*/
 	public Init      Expression
-	public Condition Expression
+	public condition Expression
 	public Increment Expression
 	public block     Block
 
@@ -31,9 +31,9 @@ public class StatementFor {
 	fn checkRange() ->(errs []error= []error{})  {
 		//
 		var rangeExpression Expression
-		bin := this.Condition.data.(ExpressionBinary)
+		bin := this.condition.data.(ExpressionBinary)
 		if bin.Right.Type == ExpressionTypeRange {
-			rangeExpression = this.Condition.data.(Expression)
+			rangeExpression = this.condition.data.(Expression)
 		} else if bin.Right.Type == ExpressionTypeList {
 			t := bin.Right.data.([]Expression)
 			if len(t) > 1 {
@@ -89,7 +89,7 @@ public class StatementFor {
 		this.RangeAttr = new ForRangeAttr()
 		this.RangeAttr.RangeOn = rangeExpression
 		var err error
-		if this.Condition.Type == ExpressionTypeVarAssign {
+		if this.condition.Type == ExpressionTypeVarAssign {
 			for _, v := range lefts {
 				if v.Type != ExpressionTypeIdentifier {
 					errs.append(
@@ -120,7 +120,7 @@ public class StatementFor {
 				}
 				vd.pos = posV
 				vd.name = identifierV.name
-				err = this.initExpressionBlock.Insert(identifierV.name, this.Condition.pos, vd)
+				err = this.initExpressionBlock.Insert(identifierV.name, this.condition.pos, vd)
 				if err != null {
 					errs.append(err)
 				}
@@ -211,13 +211,13 @@ public class StatementFor {
 	}
 	fn check(block Block) ->(errs []error = []error{})  {
 		this.initExpressionBlock.inherit(block)
-		this.initExpressionBlock.inheritedAttribute.forContinue = this
+		this.initExpressionBlock.inheritedAttribute.forStatement = this
 		this.initExpressionBlock.inheritedAttribute.forBreak = this
 		this.block.inherit(this.initExpressionBlock)
 		if this.Init == null &&
 			this.Increment == null &&
-			this.Condition != null &&
-			this.Condition.canBeUsedForRange() {
+			this.condition != null &&
+			this.condition.canBeUsedForRange() {
 			// for k,v := range arr
 			return this.checkRange()
 		}
@@ -229,15 +229,15 @@ public class StatementFor {
 			_, es := this.Init.check(this.initExpressionBlock)
 			errs.appendAll(es)
 		}
-		if this.Condition != null {
-			if err := this.Condition.canBeUsedAsCondition(); err != null {
+		if this.condition != null {
+			if err := this.condition.canBeUsedAsCondition(); err != null {
 				errs.append(err)
 			}
-			t, es := this.Condition.checkSingleValueContextExpression(this.initExpressionBlock)
+			t, es := this.condition.checkSingleValueContextExpression(this.initExpressionBlock)
 			errs.appendAll(es)
 			if t != null && t.Type != VariableTypeBool {
 				errs.append( new error(sprintf("%s condition must be bool expression,but %s",
-					errMsgPrefix(this.Condition.pos), t.typeString())))
+					errMsgPrefix(this.condition.pos), t.typeString())))
 			}
 		}
 		if this.Increment != null {

@@ -109,7 +109,7 @@ class Descriptor  {
 			return bs , t ,err
 		case 'L':
 			bs = bs[1:]
-			index := bytes.Index(bs, []byte{';'}) // end token
+			index := bytes.index(bs, []byte{';'}) // end token
 			t := new ast.Type()
 			t.Type = ast.VariableTypeObject
 			t.Class = new ast.Class()

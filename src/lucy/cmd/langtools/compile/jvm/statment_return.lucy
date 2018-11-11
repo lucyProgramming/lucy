@@ -23,13 +23,13 @@ class BuildReturn {
             return
         }
         if len(context.function.Type.ReturnList) == 1 {
-            if len(statementReturn.Expressions) > 0 {
-                maxStack = this.BuildExpression.build(c, code, statementReturn.Expressions[0], context, state)
+            if len(statementReturn.expressions) > 0 {
+                maxStack = this.BuildExpression.build(c, code, statementReturn.expressions[0], context, state)
             }
             // execute defer first
             if len(statementReturn.defers) > 0 {
                 //return value  is on stack,  store to local var
-                if len(statementReturn.Expressions) > 0 {
+                if len(statementReturn.expressions) > 0 {
                     this.storeLocalVar(c, code, context.function.Type.ReturnList[0])
                 }
                 stack := this.buildDefersForReturn(c, code, context, state, statementReturn)
@@ -37,12 +37,12 @@ class BuildReturn {
                     maxStack = stack
                 }
                 //restore the stack
-                if len(statementReturn.Expressions) > 0 { //restore stack
+                if len(statementReturn.expressions) > 0 { //restore stack
                     this.loadLocalVar(c, code, context.function.Type.ReturnList[0])
                 }
             }
             // in this case,load local var is not under exception handle,should be ok
-            if len(statementReturn.Expressions) == 0 {
+            if len(statementReturn.expressions) == 0 {
                 this.loadLocalVar(c, code, context.function.Type.ReturnList[0])
             }
             switch context.function.Type.ReturnList[0].Type.Type {
@@ -71,18 +71,18 @@ class BuildReturn {
             return
         }
         //multi returns
-        if len(statementReturn.Expressions) > 0 {
-            if len(statementReturn.Expressions) == 1 {
+        if len(statementReturn.expressions) > 0 {
+            if len(statementReturn.expressions) == 1 {
                 maxStack = this.BuildExpression.build(c, code,
-                    statementReturn.Expressions[0], context, state)
+                    statementReturn.expressions[0], context, state)
             } else {
                 maxStack = this.BuildExpression.buildExpressions(c, code,
-                    statementReturn.Expressions, context, state)
+                    statementReturn.expressions, context, state)
             }
         }
         if len(statementReturn.defers) > 0 {
             //store a simple var,should be no exception
-            if len(statementReturn.Expressions) > 0 {
+            if len(statementReturn.expressions) > 0 {
                 copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
                     context.multiValueVarOffset)...)
             }
@@ -91,14 +91,14 @@ class BuildReturn {
                 maxStack = stack
             }
             //restore the stack
-            if len(statementReturn.Expressions) > 0 {
+            if len(statementReturn.expressions) > 0 {
                 copyOPs(code,
                     loadLocalVariableOps(ast.VariableTypeObject,
                         context.multiValueVarOffset)...)
             }
         }
         // return value is on stack
-        if len(statementReturn.Expressions) > 0 {
+        if len(statementReturn.expressions) > 0 {
             code.Codes[code.CodeLength] = cg.OP_areturn
             code.CodeLength++
             return
@@ -187,13 +187,13 @@ class BuildReturn {
             state.pushStack(c, state.newObjectVariableType(throwableClass))
             context.MakeStackMap(code, state, code.CodeLength)
             e := new cg.ExceptionTable()
-            e.StartPc = char(statementReturn.defers[index].StartPc)
+            e.startPc = char(statementReturn.defers[index].startPc)
             e.EndPc = char(code.CodeLength)
             e.HandlerPc = char(code.CodeLength)
-            if statementReturn.defers[index].ExceptionClass == null {
+            if statementReturn.defers[index].exceptionClass == null {
                 e.CatchType = c.InsertClassConst(ast.DefaultExceptionClass)
             } else {
-                e.CatchType = c.InsertClassConst(statementReturn.defers[index].ExceptionClass.name) // custom c
+                e.CatchType = c.InsertClassConst(statementReturn.defers[index].exceptionClass.name) // custom c
             }
             code.Exceptions = append(code.Exceptions, e)
             //expect exception on stack
@@ -229,7 +229,7 @@ class BuildReturn {
                 code.CodeLength++
             } else {
                 //exception that have been handled
-                if len(statementReturn.Expressions) > 0 && len(context.function.Type.ReturnList) > 1 {
+                if len(statementReturn.expressions) > 0 && len(context.function.Type.ReturnList) > 1 {
                     //load when function have multi returns if read to end
                     copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.multiValueVarOffset)...)
                     exit := new cg.Exit(cg.OP_ifnonnull, code)

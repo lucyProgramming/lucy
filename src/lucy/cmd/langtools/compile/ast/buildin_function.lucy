@@ -11,7 +11,7 @@ fn registerBuildInFunctions() {
         buildInFunctionsMap[common.BuildInFunctionPrint].buildInFunctionChecker = fn(f Function, e ExpressionFunctionCall, block Block, errs []error, args []Type, pos Pos) {
             if len(e.ParameterTypes) > 0 {
                 msg := sprintf("%s buildin function expect no typed parameter",
-                                          e.ParameterTypes[0].pos.ErrMsgPrefix() )
+                                          e.ParameterTypes[0].pos.errMsgPrefix() )
                 errs . append( new error(msg))
             }
         }
@@ -32,33 +32,33 @@ fn registerBuildInFunctions() {
 		c.buildInFunctionChecker = fn(f Function, e ExpressionFunctionCall, block Block, errs []error, args []Type, pos Pos) {
 			if len(e.ParameterTypes) > 0 {
 				errs . append(new error( sprintf("%s buildin function expect no typed parameter",
-					e.ParameterTypes[0].pos.ErrMsgPrefix())) )
+					e.ParameterTypes[0].pos.errMsgPrefix())) )
 			}
 			if block.inheritedAttribute.Defer == null {
 				errs.append(new error( sprintf("%s buildin function '%s' only allow in defer block",
-					pos.ErrMsgPrefix(), common.BuildInFunctionCatch)))
+					pos.errMsgPrefix(), common.BuildInFunctionCatch)))
 				return
 			}
 			if len(e.Args) > 1 {
 				errs.append(new error( sprintf("%s build function '%s' expect at most 1 argument",
-					e.Args[1].pos.ErrMsgPrefix(), common.BuildInFunctionCatch)))
+					e.Args[1].pos.errMsgPrefix(), common.BuildInFunctionCatch)))
 				return
 			}
 			if len(e.Args) == 0 {
-				if block.inheritedAttribute.Defer.ExceptionClass == null {
+				if block.inheritedAttribute.Defer.exceptionClass == null {
 					c, err := PackageBeenCompile.loadClass(DefaultExceptionClass)
 					if err != null {
 						errs . append(new error( sprintf("%s load exception class failed,err:%s",
-							pos.ErrMsgPrefix(), err.getMessage())))
+							pos.errMsgPrefix(), err.getMessage())))
 						return
 					}
 					f.Type.ReturnList[0].Type.Class = c
 					err = block.inheritedAttribute.Defer.registerExceptionClass(c)
 					if err != null {
-						errs . append(new error( sprintf("%s %s", pos.ErrMsgPrefix(), err.getMessage())))
+						errs . append(new error( sprintf("%s %s", pos.errMsgPrefix(), err.getMessage())))
 					}
 				} else {
-					f.Type.ReturnList[0].Type.Class = block.inheritedAttribute.Defer.ExceptionClass
+					f.Type.ReturnList[0].Type.Class = block.inheritedAttribute.Defer.exceptionClass
 				}
 				return
 			}
@@ -69,18 +69,18 @@ fn registerBuildInFunctions() {
 			className := e.Args[0].data.(string)
 			c, err := PackageBeenCompile.loadClass(className)
 			if err != null {
-				errs . append(new error(sprintf("%s %s", e.Args[0].pos.ErrMsgPrefix(), err.getMessage())))
+				errs . append(new error(sprintf("%s %s", e.Args[0].pos.errMsgPrefix(), err.getMessage())))
 				return
 			}
 			have, _ := c.haveSuperClass(e.Args[0].pos, JavaThrowableClass)
 			if have == false {
 				errs.append(new error(sprintf("%s '%s' does't have super class '%s'",
-					e.Args[0].pos.ErrMsgPrefix(), className, JavaThrowableClass)))
+					e.Args[0].pos.errMsgPrefix(), className, JavaThrowableClass)))
 				return
 			}
 			err = block.inheritedAttribute.Defer.registerExceptionClass(c)
 			if err != null {
-				errs. append(new error(sprintf("%s %s", args[0].pos.ErrMsgPrefix(), err.getMessage())))
+				errs. append(new error(sprintf("%s %s", args[0].pos.errMsgPrefix(), err.getMessage())))
 			}
 		}
 	}
@@ -175,7 +175,7 @@ fn registerBuildInFunctions() {
 			}
 			if len(args) == 0 {
 				err := new error(sprintf("%s '%s' expect one argument at lease",
-					pos.ErrMsgPrefix(), common.BuildInFunctionSprintf))
+					pos.errMsgPrefix(), common.BuildInFunctionSprintf))
 				errs.append(err)
 				return
 			}
@@ -184,7 +184,7 @@ fn registerBuildInFunctions() {
 			}
 			if args[0].Type != VariableTypeString {
 				err := new error(sprintf("%s '%s' first argument must be string",
-					pos.ErrMsgPrefix(), common.BuildInFunctionSprintf))
+					pos.errMsgPrefix(), common.BuildInFunctionSprintf))
 				errs.append(err)
 				return
 			}
@@ -215,7 +215,7 @@ fn registerBuildInFunctions() {
 			}
 			if len(args) == 0 {
 				err := new error(sprintf("%s '%s' expect one argument at lease",
-					pos.ErrMsgPrefix(), typeOf.name)
+					pos.errMsgPrefix(), typeOf.name)
 				errs.append(err)
 				return
 			}
@@ -244,7 +244,7 @@ fn registerBuildInFunctions() {
 				e.BuildInFunctionMeta = meta
 				if len(args) == 0 {
 					err := new error(sprintf("%s '%s' expect one argument at least",
-						pos.ErrMsgPrefix(), common.BuildInFunctionPrintf) )
+						pos.errMsgPrefix(), common.BuildInFunctionPrintf) )
 					errs.append(err)
 					return
 				}

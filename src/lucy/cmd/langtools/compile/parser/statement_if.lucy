@@ -22,18 +22,18 @@ class StatementIfParser extends ParserExtends {
 			this.consume(untilLc)
 			this.Next(lfNotToken)
 		}
-		statementIf.Condition = condition
+		statementIf.condition = condition
 		this.parser.ifTokenIsLfThenSkip()
 		for this.parser.token.Type == lex.TokenSemicolon {
-			if statementIf.Condition != null {
+			if statementIf.condition != null {
 			    if statementIf.PrefixExpressions == null {
-                    statementIf.PrefixExpressions = [statementIf.Condition]
+                    statementIf.PrefixExpressions = [statementIf.condition]
 			    }else {
-			        statementIf.PrefixExpressions.append(statementIf.Condition)
+			        statementIf.PrefixExpressions.append(statementIf.condition)
 			    }
 			}
 			this.Next(lfNotToken) // skip ;
-			statementIf.Condition, err = this.parser.ExpressionParser.parseExpression(true)
+			statementIf.condition, err = this.parser.ExpressionParser.parseExpression(true)
 			if err != null {
 				this.consume(untilLc)
 				this.Next(lfNotToken)
@@ -119,7 +119,7 @@ class StatementIfParser extends ParserExtends {
 			block := new ast.Block()
 			this.bp.parseStatementList(block, false)
 			t := new ast.StatementElseIf()
-			t.Condition = condition
+			t.condition = condition
 			t.block = block
 			elseIfList.append(t)
 			if this.parser.token.Type != lex.TokenRc {

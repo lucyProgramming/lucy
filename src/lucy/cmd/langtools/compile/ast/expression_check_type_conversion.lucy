@@ -62,7 +62,7 @@ class ExpressionCheckTypeConversion {
 			return valueType
 		}
 		errs.append(new error( sprintf("%s cannot convert '%s' to '%s'",
-			on.pos.ErrMsgPrefix(), on.typeString(), conversion.Type.typeString())))
+			on.pos.errMsgPrefix(), on.typeString(), conversion.Type.typeString())))
 		return valueType
 	}
 }

@@ -10,21 +10,21 @@ public class Closure {
 	Variables map{ Variable -> ClosureMeta }
 	Functions map{ Function -> ClosureMeta }	
 	
-	public fn ClosureVariableExist(v Variable) ->(exists bool) {
+	public fn closureVariableExist(v Variable) ->(exists bool) {
 		if this.Variables == null {
 			return false
 		}
 		return this.Variables.keyExist(v)
 	}
 
-	public fn ClosureFunctionExist(v Function)  ->(exists bool)  {
+	public fn closureFunctionExist(v Function)  ->(exists bool)  {
 		if this.Functions == null {
 			return false
 		}
 		return this.Functions.keyExist(v)
 	}
 
-	fn CaptureCount(f Function) ->(sum int = len(this.Variables)) {
+	fn captureCount(f Function) ->(sum int = len(this.Variables)) {
 		for v, _ := range this.Functions {
 			if f == v {
 				continue
@@ -36,7 +36,7 @@ public class Closure {
 		return sum
 	}
 
-	fn InsertVar(pos Pos, v Variable) {
+	fn insertVar(pos Pos, v Variable) {
 		if this.Variables == null {
 			this.Variables = new map{Variable->ClosureMeta}()
 		}
@@ -44,7 +44,7 @@ public class Closure {
 		this.Variables[v].pos = pos
 	}
 
-	fn InsertFunction(pos Pos, f Function) {
+	fn insertFunction(pos Pos, f Function) {
 		if this.Functions == null {
 			this.Functions = new map { Function -> ClosureMeta }()
 		}
@@ -52,7 +52,7 @@ public class Closure {
 		this.Functions[f].pos = pos 
 	}
 	
-	fn Search(name string) -> ( x Object) {
+	fn search(name string) -> ( x Object) {
 		for f, _ := range this.Functions {
 			if f.name == name {
 				return f

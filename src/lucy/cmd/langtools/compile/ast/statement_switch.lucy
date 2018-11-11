@@ -2,7 +2,7 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 
 public class StatementSwitchCase  {
-	public Matches []Expression
+	public matches []Expression
 	public block   Block
 }
 
@@ -11,13 +11,13 @@ public class StatementSwitch  {
 	initExpressionBlock  Block = new Block() 
 	public pos                  Pos
 	public EndPos               Pos
-	public Condition            Expression //switch
+	public condition            Expression //switch
 	public StatementSwitchCases []StatementSwitchCase
 	public Default              Block
-	public Exits                []cg.Exit
+	public exits                []cg.Exit
 	
 	fn check(block Block) ->(errs []error = []error{})  {
-		if this.Condition == null { // must be a error at parse stage
+		if this.condition == null { // must be a error at parse stage
 			return errs
 		}
 		this.initExpressionBlock.inherit(block)
@@ -29,10 +29,10 @@ public class StatementSwitch  {
 				errs.append(err)
 			}
 		}
-		if this.Condition == null {
+		if this.condition == null {
 			return errs
 		}
-		conditionType, es := this.Condition.checkSingleValueContextExpression(this.initExpressionBlock)
+		conditionType, es := this.condition.checkSingleValueContextExpression(this.initExpressionBlock)
 		errs.appendAll(es)
 		if conditionType == null {
 			return errs
@@ -43,12 +43,12 @@ public class StatementSwitch  {
 		}
 		if conditionType.Type == VariableTypeBool {
 			errs.append(new error(sprintf("%s bool expression not allow for switch",
-				conditionType.pos.ErrMsgPrefix())))
+				conditionType.pos.errMsgPrefix())))
 			return errs
 		}
 		if len(this.StatementSwitchCases) == 0 {
 			errs.append(new error(sprintf("%s switch statement has no cases",
-				this.EndPos.ErrMsgPrefix())))
+				this.EndPos.errMsgPrefix())))
 			return errs
 		}
 		longMap :=  new map { long -> Pos } ()
@@ -62,7 +62,7 @@ public class StatementSwitch  {
 		var enumName string
 		containsBool := false
 		for _, v := range this.StatementSwitchCases {
-			for _, e := range v.Matches {
+			for _, e := range v.matches {
 				valueValid := false
 				t, es := e.checkSingleValueContextExpression(this.initExpressionBlock)
 				errs.appendAll(es)
@@ -75,7 +75,7 @@ public class StatementSwitch  {
 				}
 				if conditionType.assignAble(errs, t) == false {
 					errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-						e.pos.ErrMsgPrefix(), t.typeString(), conditionType.typeString())))
+						e.pos.errMsgPrefix(), t.typeString(), conditionType.typeString())))
 					continue
 				}
 				if conditionType.Type == VariableTypeEnum {
@@ -118,8 +118,8 @@ public class StatementSwitch  {
 				if valueValid {
 					fn errMsg(first Pos, which string) -> (err error) {
 						errMsg := sprintf("%s  '%s' duplicate case,first declared at:\n",
-							e.pos.ErrMsgPrefix(), which)
-						errMsg += sprintf("\t%s", first.ErrMsgPrefix())
+							e.pos.errMsgPrefix(), which)
+						errMsg += sprintf("\t%s", first.errMsgPrefix())
 						return new error(errMsg)
 					}
 					switch conditionType.Type {
@@ -172,7 +172,7 @@ public class StatementSwitch  {
 			containsBool == false {
 			//some enum are missing, not allow
 			errMsg := sprintf("%s switch for enum '%s' is not complete\n",
-				this.EndPos.ErrMsgPrefix(), conditionType.Enum.name)
+				this.EndPos.errMsgPrefix(), conditionType.Enum.name)
 			errMsg += "\tyou can use 'default:' or give missing enums,which are:\n"
 			for _, v := range conditionType.Enum.Enums {
 				ok := enumNamesMap.keyExist(v.name)

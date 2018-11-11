@@ -40,7 +40,7 @@ class BuildForRangeMap {
         noNullExit := new cg.Exit(cg.OP_ifnonnull, code)
         code.Codes[code.CodeLength] = cg.OP_pop
         code.CodeLength++
-        s.Exits = append(s.Exits, new cg.Exit(cg.OP_goto, code))
+        s.exits = append(s.exits, new cg.Exit(cg.OP_goto, code))
         writeExits([]cg.Exit{noNullExit}, code.CodeLength)
         state.pushStack(c, attr.RangeOn.value)
         context.MakeStackMap(code, state, code.CodeLength)
@@ -104,7 +104,7 @@ class BuildForRangeMap {
         code.CodeLength++
         copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsK))
         //handle captured vars
-        if s.Condition.Type == ast.ExpressionTypeVarAssign {
+        if s.condition.Type == ast.ExpressionTypeVarAssign {
             if attr.IdentifierValue != null && attr.IdentifierValue.Variable.beenCapturedAsLeftValue > 0 {
                 closure.createClosureVar(c, code, attr.IdentifierValue.Variable.Type)
                 attr.IdentifierValue.Variable.localValOffset = code.MaxLocals
@@ -144,7 +144,7 @@ class BuildForRangeMap {
         if 2 > maxStack {
             maxStack = 2
         }
-        s.Exits.append(new cg.Exit(cg.OP_if_icmpge, code))
+        s.exits.append(new cg.Exit(cg.OP_if_icmpge, code))
         if attr.IdentifierValue != null || attr.ExpressionValue != null {
             // load k sets
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.KeySets)...)
@@ -199,7 +199,7 @@ class BuildForRangeMap {
 
         // store k and v into user defined variable
         //store v in real v
-        if s.Condition.Type == ast.ExpressionTypeVarAssign {
+        if s.condition.Type == ast.ExpressionTypeVarAssign {
             if attr.IdentifierValue != null {
                 if attr.IdentifierValue.Variable.beenCapturedAsLeftValue > 0 {
                     copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject,

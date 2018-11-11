@@ -107,16 +107,16 @@ class Context {
 		if pos == null {
 			return
 		}
-		if pos.Filename != this.currentSourceFile {
-			c.InsertSourceFile(pos.Filename)
-			this.currentSourceFile = pos.Filename
-			this.currentLineNumber = pos.Line
-			code.MKLineNumber(pos.Line)
+		if pos.filename != this.currentSourceFile {
+			c.InsertSourceFile(pos.filename)
+			this.currentSourceFile = pos.filename
+			this.currentLineNumber = pos.line
+			code.MKLineNumber(pos.line)
 			return
 		}
-		if this.currentLineNumber != pos.Line {
-			code.MKLineNumber(pos.Line)
-			this.currentLineNumber = pos.Line
+		if this.currentLineNumber != pos.line {
+			code.MKLineNumber(pos.line)
+			this.currentLineNumber = pos.line
 		}
 	}
 

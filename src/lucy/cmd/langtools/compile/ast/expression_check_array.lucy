@@ -8,7 +8,7 @@ class ExprssionCheckArray {
 	*/
 	static fn check(e Expression , block Block, errs []error) ->(valueType Type)  {
 		arr := e.data.(ExpressionArray)
-		if arr.Type == null && len(arr.Expressions) == 0 {
+		if arr.Type == null && len(arr.expressions) == 0 {
 			errs.append(new error(sprintf("%s array literal has no type and no expression, cannot inference it`s type ",
 					errMsgPrefix(e.pos))))
 			return null
@@ -22,7 +22,7 @@ class ExprssionCheckArray {
 				return null
 			}
 		}
-		for _, v := range arr.Expressions {
+		for _, v := range arr.expressions {
 			eType, es := v.checkSingleValueContextExpression(block)
 			errs.appendAll(es)
 			if eType == null {

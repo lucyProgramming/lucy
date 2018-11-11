@@ -61,7 +61,7 @@ class LucyFieldSignature {
             bs = bs[1:]
             a := new ast.Type()
             a.Type = ast.VariableTypeEnum
-            index := bytes.Index(bs, []byte{';'})
+            index := bytes.index(bs, []byte{';'})
             a.Enum = newast.Enum ()
             a.Enum.name = string(bs[:index])
             bs = bs[index+1:]

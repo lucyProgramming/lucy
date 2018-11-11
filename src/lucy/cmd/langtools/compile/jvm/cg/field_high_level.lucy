@@ -2,7 +2,7 @@
 
 public class FieldHighLevel {
 	public name                         string
-	public Descriptor                   string
+	public descriptor                   string
 	public accessFlags                  char
 	public AttributeConstantValue       AttributeConstantValue
 	public AttributeLucyFieldDescriptor AttributeLucyFieldDescriptor

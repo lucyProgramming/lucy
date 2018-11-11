@@ -37,7 +37,7 @@ public class Enum   {
 			} else {
 				if is == false {
 					err := new error(sprintf("%s enum type must inited by 'int' literal",
-						this.pos.ErrMsgPrefix()))
+						this.pos.errMsgPrefix()))
 					errs.append(err)
 				} else {
 					initV = int(this.Init.getLongValue())
@@ -48,7 +48,7 @@ public class Enum   {
 		for k, v := range this.Enums {
 			if v.NoNeed != null {
 				errs.append(new error(sprintf("%s enum only expect 1 init value",
-					v.pos.ErrMsgPrefix())))
+					v.pos.errMsgPrefix())))
 			}
 			if k < this.FirstValueIndex {
 				v.value = initV - int(this.FirstValueIndex-k)

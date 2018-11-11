@@ -15,7 +15,7 @@ enum  ClosureKind{
 
 
 class Closure  {
-	ClosureObjectMetas map { ClosureKind -> ClosureObjectMeta } 
+	closureObjectMetas map { ClosureKind -> ClosureObjectMeta }
 
 	
 
@@ -24,17 +24,17 @@ class Closure  {
 		switch t {
 		case ast.VariableTypeBool ,ast.VariableTypeByte ,ast.VariableTypeShort ,
 		    ast.VariableTypeEnum , ast.VariableTypeChar , ast.VariableTypeInt:
-			meta = this.ClosureObjectMetas[ClosureClassInt]
+			meta = this.closureObjectMetas[ClosureClassInt]
 		case ast.VariableTypeLong:
-			meta = this.ClosureObjectMetas[ClosureClassLong]
+			meta = this.closureObjectMetas[ClosureClassLong]
 		case ast.VariableTypeFloat:
-			meta = this.ClosureObjectMetas[ClosureClassFloat]
+			meta = this.closureObjectMetas[ClosureClassFloat]
 		case ast.VariableTypeDouble:
-			meta = this.ClosureObjectMetas[ClosureClassDouble]
+			meta = this.closureObjectMetas[ClosureClassDouble]
 		case ast.VariableTypeString:
-			meta = this.ClosureObjectMetas[ClosureClassString]
+			meta = this.closureObjectMetas[ClosureClassString]
 		default:
-			meta = this.ClosureObjectMetas[ClosureClassObject]
+			meta = this.closureObjectMetas[ClosureClassObject]
 		}
 		return
 	}
@@ -49,17 +49,17 @@ class Closure  {
 		switch v.Type {
 		case ast.VariableTypeBool ,ast.VariableTypeByte ,ast.VariableTypeShort ,
             ast.VariableTypeEnum , ast.VariableTypeChar , ast.VariableTypeInt:
-			meta = this.ClosureObjectMetas[ClosureClassInt]
+			meta = this.closureObjectMetas[ClosureClassInt]
 		case ast.VariableTypeLong:
-			meta = this.ClosureObjectMetas[ClosureClassLong]
+			meta = this.closureObjectMetas[ClosureClassLong]
 		case ast.VariableTypeFloat:
-			meta = this.ClosureObjectMetas[ClosureClassFloat]
+			meta = this.closureObjectMetas[ClosureClassFloat]
 		case ast.VariableTypeDouble:
-			meta = this.ClosureObjectMetas[ClosureClassDouble]
+			meta = this.closureObjectMetas[ClosureClassDouble]
 		case ast.VariableTypeString:
-			meta = this.ClosureObjectMetas[ClosureClassString]
+			meta = this.closureObjectMetas[ClosureClassString]
 		default:
-		    meta = this.ClosureObjectMetas[ClosureClassObject]
+		    meta = this.closureObjectMetas[ClosureClassObject]
 		}
 		code.Codes[code.CodeLength] = cg.OP_new
 		c.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -80,17 +80,17 @@ class Closure  {
 		switch v.Type.Type {
 		case ast.VariableTypeBool ,ast.VariableTypeByte ,ast.VariableTypeShort ,
              ast.VariableTypeEnum , ast.VariableTypeChar , ast.VariableTypeInt:
-			meta = this.ClosureObjectMetas[ClosureClassInt]
+			meta = this.closureObjectMetas[ClosureClassInt]
 		case ast.VariableTypeLong:
-			meta = this.ClosureObjectMetas[ClosureClassLong]
+			meta = this.closureObjectMetas[ClosureClassLong]
 		case ast.VariableTypeFloat:
-			meta = this.ClosureObjectMetas[ClosureClassFloat]
+			meta = this.closureObjectMetas[ClosureClassFloat]
 		case ast.VariableTypeDouble:
-			meta = this.ClosureObjectMetas[ClosureClassDouble]
+			meta = this.closureObjectMetas[ClosureClassDouble]
 		case ast.VariableTypeString:
-			meta = this.ClosureObjectMetas[ClosureClassString]
+			meta = this.closureObjectMetas[ClosureClassString]
 		default:
-			meta = this.ClosureObjectMetas[ClosureClassObject]
+			meta = this.closureObjectMetas[ClosureClassObject]
 		}
 		code.Codes[code.CodeLength] = cg.OP_putfield
 		c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
@@ -120,17 +120,17 @@ class Closure  {
 		switch v.Type {
 		case ast.VariableTypeBool ,ast.VariableTypeByte ,ast.VariableTypeShort ,
              ast.VariableTypeEnum , ast.VariableTypeChar , ast.VariableTypeInt:
-			meta = this.ClosureObjectMetas[ClosureClassInt]
+			meta = this.closureObjectMetas[ClosureClassInt]
 		case ast.VariableTypeLong:
-			meta = this.ClosureObjectMetas[ClosureClassLong]
+			meta = this.closureObjectMetas[ClosureClassLong]
 		case ast.VariableTypeFloat:
-			meta = this.ClosureObjectMetas[ClosureClassFloat]
+			meta = this.closureObjectMetas[ClosureClassFloat]
 		case ast.VariableTypeDouble:
-			meta = this.ClosureObjectMetas[ClosureClassDouble]
+			meta = this.closureObjectMetas[ClosureClassDouble]
 		case ast.VariableTypeString:
-			meta = this.ClosureObjectMetas[ClosureClassString]
+			meta = this.closureObjectMetas[ClosureClassString]
 		default:
-			meta = this.ClosureObjectMetas[ClosureClassObject]
+			meta = this.closureObjectMetas[ClosureClassObject]
 		}
 		code.Codes[code.CodeLength] = cg.OP_getfield
 		c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
@@ -163,33 +163,33 @@ class ClosureObjectMeta {
 
 
 {
-	closure.ClosureObjectMetas = new map { ClosureKind -> ClosureObjectMeta } ()
-	closure.ClosureObjectMetas[ClosureClassInt] = new ClosureObjectMeta(
+	closure.closureObjectMetas = new map { ClosureKind -> ClosureObjectMeta } ()
+	closure.closureObjectMetas[ClosureClassInt] = new ClosureObjectMeta(
 		"lucy/deps/ClosureInt",
 		"value",
 		"I"
 	)
-	closure.ClosureObjectMetas[ClosureClassLong] = new ClosureObjectMeta(
+	closure.closureObjectMetas[ClosureClassLong] = new ClosureObjectMeta(
 		"lucy/deps/ClosureLong",
 		"value",
 		"J"
 	)
-	closure.ClosureObjectMetas[ClosureClassFloat] = new ClosureObjectMeta(
+	closure.closureObjectMetas[ClosureClassFloat] = new ClosureObjectMeta(
 		"lucy/deps/ClosureFloat",
 		"value",
 		"F"
 	)
-	closure.ClosureObjectMetas[ClosureClassDouble] = new ClosureObjectMeta(
+	closure.closureObjectMetas[ClosureClassDouble] = new ClosureObjectMeta(
 		"lucy/deps/ClosureDouble",
 		"value",
 		"D"
 	)
-	closure.ClosureObjectMetas[ClosureClassString] = new ClosureObjectMeta(
+	closure.closureObjectMetas[ClosureClassString] = new ClosureObjectMeta(
 		"lucy/deps/ClosureString",
 		"value",
 		"Ljava/lang/String;"
 	)
-	closure.ClosureObjectMetas[ClosureClassObject] = new ClosureObjectMeta(
+	closure.closureObjectMetas[ClosureClassObject] = new ClosureObjectMeta(
 		"lucy/deps/ClosureObject",
 		"value",
 		"Ljava/lang/Object;"

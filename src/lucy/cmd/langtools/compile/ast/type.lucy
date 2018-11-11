@@ -148,16 +148,16 @@ public class Type {
 		switch this.Type {
 		case VariableTypePackage:
 			return new error(sprintf("%s use package '%s' without selector",
-				this.pos.ErrMsgPrefix(), this.Package.name))
+				this.pos.errMsgPrefix(), this.Package.name))
 		case VariableTypeClass:
 			return new error(sprintf("%s use class '%s' without selector",
-				this.pos.ErrMsgPrefix(), this.Class.name))
+				this.pos.errMsgPrefix(), this.Class.name))
 		case VariableTypeMagicFunction:
 			return new error(sprintf("%s use '%s' without selector",
-				this.pos.ErrMsgPrefix(), magicIdentifierFunction))
+				this.pos.errMsgPrefix(), magicIdentifierFunction))
 		default:
 			return new error(sprintf("%s '%s' is not right value valid",
-				this.pos.ErrMsgPrefix(), this.typeString()))
+				this.pos.errMsgPrefix(), this.typeString()))
 		}
 	}
 
@@ -173,7 +173,7 @@ public class Type {
 		*/
 		if this.Type == VariableTypeNull {
 			return new error(sprintf("%s '%s' is not typed",
-				this.pos.ErrMsgPrefix(), this.typeString()))
+				this.pos.errMsgPrefix(), this.typeString()))
 		}
 		return null
 	}
@@ -303,7 +303,7 @@ public class Type {
 
 	fn getNameFromImport() -> (d Object, err error) {
 		if this.name.indexOf(".")  > 0  {
-			i := PackageBeenCompile.getImport(this.pos.Filename, this.name)
+			i := PackageBeenCompile.getImport(this.pos.filename, this.name)
 			if i != null {
 				i.used = true
 				return PackageBeenCompile.load(i.Import)
@@ -312,7 +312,7 @@ public class Type {
 				errMsgPrefix(this.pos), this.name))
 		}
 		packageAndName := this.name.split(".")
-		i := PackageBeenCompile.getImport(this.pos.Filename, packageAndName[0])
+		i := PackageBeenCompile.getImport(this.pos.filename, packageAndName[0])
 		if null == i {
 			return null, new error(sprintf("%s package '%s' not imported",
 				errMsgPrefix(this.pos), packageAndName[0]))

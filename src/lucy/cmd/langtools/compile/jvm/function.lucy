@@ -93,34 +93,34 @@ class BuildFunction {
         context.lastStackMapOffset = -1
         context.c = astClass
         context.function = f
-        method.Code.Codes = new []byte (65536)
-        method.Code.CodeLength = 0
+        method.code.Codes = new []byte (65536)
+        method.code.CodeLength = 0
         defer{
-            method.Code.Codes = method.Code.Codes[0:method.Code.CodeLength]
+            method.code.Codes = method.code.Codes[0:method.code.CodeLength]
         }
         state := new StackMapState()
         if method.accessFlags&cg.AccMethodStatic == 0 {
-            if method.IsConstruction { // construction method
-                method.Code.MaxLocals = 1
+            if method.isConstruction { // construction method
+                method.code.MaxLocals = 1
                 t := new cg.StackMapVerificationTypeInfo()
                 t.Verify = new cg.StackMapUninitializedThisVariableInfo()
                 state.Locals = append(state.Locals, t)
-                this.mkParametersOffset(c, method.Code, f, state)
-                stack := this.BuildExpression.build(c, method.Code, f.CallFatherConstructionExpression,
+                this.mkParametersOffset(c, method.code, f, state)
+                stack := this.BuildExpression.build(c, method.code, f.CallFatherConstructionExpression,
                     context, state)
-                if stack > method.Code.MaxStack {
-                    method.Code.MaxStack = stack
+                if stack > method.code.MaxStack {
+                    method.code.MaxStack = stack
                 }
                 state.Locals[0] = state.newStackMapVerificationTypeInfo(c, state.newObjectVariableType(ast.TypeName))
-                this.mkFieldDefaultValue(c, method.Code, astClass, context, state)
-                this.mkCapturedParameters(c, method.Code, f, state)
+                this.mkFieldDefaultValue(c, method.code, astClass, context, state)
+                this.mkCapturedParameters(c, method.code, f, state)
             } else {
-                method.Code.MaxLocals = 1
+                method.code.MaxLocals = 1
                 state.appendLocals(c, state.newObjectVariableType(ast.TypeName))
             }
         }
         if f.IsGlobalMain() { // main function
-            code := method.Code
+            code := method.code
             code.Codes[code.CodeLength] = cg.OP_new
             meta := ArrayMetas[ast.VariableTypeString]
             c.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -146,7 +146,7 @@ class BuildFunction {
                 t.array.Type = ast.VariableTypeString
                 state.appendLocals(c, t)
             }
-            method.Code.MaxLocals = 1
+            method.code.MaxLocals = 1
         }
         if LucyMethodSignatureParser.Need(f.Type) {
             d := new cg.AttributeLucyMethodDescriptor()
@@ -156,9 +156,9 @@ class BuildFunction {
         if f.HaveDefaultValue {
             method.AttributeDefaultParameters = DefaultValueParser.Encode(c, f)
         }
-        if method.IsConstruction == false {
-            if t := this.buildFunctionParameterAndReturnList(c, method.Code, f, context, state); t > method.Code.MaxStack {
-                method.Code.MaxStack = t
+        if method.isConstruction == false {
+            if t := this.buildFunctionParameterAndReturnList(c, method.code, f, context, state); t > method.code.MaxStack {
+                method.code.MaxStack = t
             }
         }
         {
@@ -181,20 +181,20 @@ class BuildFunction {
             }
         }
         if len(f.Type.ReturnList) > 1 {
-            if t := this.buildFunctionMultiReturnOffset(c, method.Code,
-                f, context, state); t > method.Code.MaxStack {
-                method.Code.MaxStack = t
+            if t := this.buildFunctionMultiReturnOffset(c, method.code,
+                f, context, state); t > method.code.MaxStack {
+                method.code.MaxStack = t
             }
         }
         if f.HasDefer {
-            context.exceptionVarOffset = method.Code.MaxLocals
-            method.Code.MaxLocals++
-            method.Code.Codes[method.Code.CodeLength] = cg.OP_aconst_null
-            method.Code.CodeLength++
-            copyOPs(method.Code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)...)
+            context.exceptionVarOffset = method.code.MaxLocals
+            method.code.MaxLocals++
+            method.code.Codes[method.code.CodeLength] = cg.OP_aconst_null
+            method.code.CodeLength++
+            copyOPs(method.code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)...)
             state.appendLocals(c, state.newObjectVariableType(ast.JavaThrowableClass))
         }
-        this.buildBlock(c, method.Code, f.block, context, state)
+        this.buildBlock(c, method.code, f.block, context, state)
         return
     }
     fn  buildFunctionMultiReturnOffset(c cg.ClassHighLevel, code cg.AttributeCode,
@@ -213,7 +213,7 @@ class BuildFunction {
     fn  mkFieldDefaultValue(c cg.ClassHighLevel, code cg.AttributeCode,
         astClass ast.Class, context Context, state StackMapState) {
         for _, v := range astClass.fields {
-            if v.IsStatic() || v.defaultValueExpression == null {
+            if v.isStatic() || v.defaultValueExpression == null {
                 continue
             }
             code.Codes[code.CodeLength] = cg.OP_aload_0

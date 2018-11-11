@@ -80,7 +80,7 @@ class ExpressionCheckOpAssign {
 			}
 		}
 		errs.append(new error(sprintf("%s cannot apply algorithm '%s' on '%s' and '%s'",
-			e.pos.ErrMsgPrefix(),
+			e.pos.errMsgPrefix(),
 			e.op,
 			left.typeString(),
 			right.typeString())))

@@ -23,7 +23,7 @@ class BuildTemplateFunctionCall {
                 method.accessFlags |= cg.AccMethodVarargs
             }
             method.Descriptor = Descriptor.methodDescriptor(call.TemplateFunctionCallPair.Function.Type)
-            method.Code = new cg.AttributeCode()
+            method.code = new cg.AttributeCode()
             c.AppendMethod(method)
             call.TemplateFunctionCallPair.Function.Entrance = method
             //build function

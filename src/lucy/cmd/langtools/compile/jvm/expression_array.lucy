@@ -36,7 +36,7 @@ class BuildExpressionArray {
 			verify.Verify = unInit
 			state.Stacks = append(state.Stacks, verify, verify)
 		}
-		loadInt32(c, code, int(len(arr.Expressions)))
+		loadInt32(c, code, int(len(arr.expressions)))
 		newArrayBaseOnType(c, code, e.value.array)
 		arrayObject := new ast.Type()
 		arrayObject.Type = ast.VariableTypeJavaArray
@@ -45,7 +45,7 @@ class BuildExpressionArray {
 		maxStack = 3
 		storeOP := storeArrayElementOp(e.value.array.Type)
 		var index int = 0
-		for _, v := range arr.Expressions {
+		for _, v := range arr.expressions {
 			code.Codes[code.CodeLength] = cg.OP_dup
 			code.CodeLength++
 			loadInt32(c, code, index) // load index

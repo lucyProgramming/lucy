@@ -27,13 +27,13 @@ class ExpressionCheckAssign {
 		if len(lefts) > len(valueTypes) { //expression length compare with value types is more appropriate
 			pos := values[len(values)-1].pos
 			errs.append(new error(sprintf("%s cannot assign %d value to %d detinations",
-				pos.ErrMsgPrefix(),
+				pos.errMsgPrefix(),
 				len(valueTypes),
 				len(lefts))))
 		} else if len(lefts) < len(valueTypes) {
 			pos := getExtraExpressionPos(values, len(lefts))
 			errs.append(new error(sprintf("%s cannot assign %d value to %d detinations",
-				pos.ErrMsgPrefix(),
+				pos.errMsgPrefix(),
 				len(valueTypes),
 				len(lefts))))
 		}

@@ -24,7 +24,7 @@ class BuildExpressionVarAssign {
         }
         if len(vs.Lefts) == 1 {
             v := vs.Lefts[0].data.(ast.ExpressionIdentifier).Variable
-            //fmt.Println(v.name, v.pos.ErrMsgPrefix())
+            //fmt.Println(v.name, v.pos.errMsgPrefix())
             currentStack := char(0)
             if v.beenCapturedAsLeftValue > 0 {
                 closure.createClosureVar(c, code, v.Type)

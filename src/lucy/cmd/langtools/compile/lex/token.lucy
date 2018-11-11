@@ -2,9 +2,9 @@
 
 public class Token {
 	public Type        TokenKind
-	public Offset      int // bs offset
-	public StartLine   int
-	public StartColumn int
+	public offset      int // bs offset
+	public startLine   int
+	public startColumn int
 	public EndLine     int
 	public EndColumn   int
 	public Description string

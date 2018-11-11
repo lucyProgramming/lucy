@@ -1,20 +1,20 @@
 import "lucy/binary"
 
 
-public class InnerClass {
-	public InnerClass  string
-	public OuterClass  string
+public class innerClass {
+	public innerClass  string
+	public outerClass  string
 	public name        string
 	public accessFlags char
 	
 	fn FromBs(c Class, bs []byte) {
     		nameIndex := binary.BigEndian.getChar(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
-    		this.InnerClass = string(c.ConstPool[nameIndex].Info)
+    		this.innerClass = string(c.ConstPool[nameIndex].Info)
     		if 0 == binary.BigEndian.getChar(bs[2:]) {
     			//TODO:: what zero means???
     		} else {
     			nameIndex = binary.BigEndian.getChar(c.ConstPool[binary.BigEndian.getChar(bs[2:])].Info)
-    			this.OuterClass = string(c.ConstPool[nameIndex].Info)
+    			this.outerClass = string(c.ConstPool[nameIndex].Info)
     		}
     		if 0 == binary.BigEndian.getChar(bs[4:]) {
     			//TODO:: what zero means???
@@ -27,16 +27,16 @@ public class InnerClass {
 
 
 class AttributeInnerClasses {
-	Classes []InnerClass
+	Classes []innerClass
 	fn FromBs(c Class, bs []byte) {
 		length := binary.BigEndian.getChar(bs)
 		bs = bs[2:]
 		if int(length*8) != len(bs) {
 			panic("length not match")
 		}
-		this.Classes = []InnerClass{}
+		this.Classes = []innerClass{}
 		for len(bs) > 0 {
-			inner := new InnerClass()
+			inner := new innerClass()
 			inner.FromBs(c, bs[:8])
 			this.Classes.append( inner)
 			bs = bs[8:]
@@ -48,13 +48,13 @@ class AttributeInnerClasses {
 			return null
 		}
 		ret = new AttributeInfo()
-		ret.NameIndex = c.InsertUtf8Const(AttributeNameInnerClasses)
+		ret.nameIndex = c.InsertUtf8Const(AttributeNameInnerClasses)
 		ret.Info = new []byte(2)
 		binary.BigEndian.putChar(ret.Info, char(len(this.Classes)))
 		for _, v := range this.Classes {
 			bs8 := new []byte(8)
-			binary.BigEndian.putChar(bs8, c.InsertClassConst(v.InnerClass))
-			binary.BigEndian.putChar(bs8[2:], c.InsertClassConst(v.OuterClass))
+			binary.BigEndian.putChar(bs8, c.InsertClassConst(v.innerClass))
+			binary.BigEndian.putChar(bs8[2:], c.InsertClassConst(v.outerClass))
 			binary.BigEndian.putChar(bs8[4:], c.InsertUtf8Const(v.name))
 			binary.BigEndian.putChar(bs8[6:], v.accessFlags)
 			ret.Info.appendAll(bs8)

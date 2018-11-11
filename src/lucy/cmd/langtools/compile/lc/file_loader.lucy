@@ -157,7 +157,7 @@ class FileLoader {
             }
         }
         this.loadInterfaces(astClass, c)
-        astClass.accessFlags = c.AccessFlag
+        astClass.accessFlags = c.accessFlags
         astClass.isJava = true // class compiled from java
         var err error
         astClass.fields = make(map[string]*ast.ClassField)
@@ -165,9 +165,9 @@ class FileLoader {
         for _, v := range c.fields {
             f := &ast.ClassField{}
             f.accessFlags = v.accessFlags
-            f.jvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
-            f.name = string(c.ConstPool[v.NameIndex].Info)
-            _, f.Type, err = jvm.Descriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
+            f.jvmDescriptor = string(c.ConstPool[v.descriptorIndex].Info)
+            f.name = string(c.ConstPool[v.nameIndex].Info)
+            _, f.Type, err = jvm.Descriptor.ParseType(c.ConstPool[v.descriptorIndex].Info)
             if err != null {
                 return null, err
             }
@@ -178,10 +178,10 @@ class FileLoader {
             m := &ast.ClassMethod{}
             m.Function = &ast.Function{}
             //m.loadFromOutSide = true
-            m.Function.name = string(c.ConstPool[v.NameIndex].Info)
-            m.Function.jvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
+            m.Function.name = string(c.ConstPool[v.nameIndex].Info)
+            m.Function.jvmDescriptor = string(c.ConstPool[v.descriptorIndex].Info)
             m.Function.accessFlags = v.accessFlags
-            m.Function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
+            m.Function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.descriptorIndex].Info)
             if err != null {
                 return null, err
             }
@@ -225,7 +225,7 @@ class FileLoader {
             }
         }
         this.loadInterfaces(astClass, c)
-        astClass.accessFlags = c.AccessFlag
+        astClass.accessFlags = c.accessFlags
         astClass.loadFromOutSide = true
         var err error
         astClass.fields = make(map[string]*ast.ClassField)
@@ -251,9 +251,9 @@ class FileLoader {
         }
         for _, v := range c.fields {
             f := &ast.ClassField{}
-            f.name = string(c.ConstPool[v.NameIndex].Info)
-            f.jvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
-            _, f.Type, err = jvm.Descriptor.ParseType(c.ConstPool[v.DescriptorIndex].Info)
+            f.name = string(c.ConstPool[v.nameIndex].Info)
+            f.jvmDescriptor = string(c.ConstPool[v.descriptorIndex].Info)
+            _, f.Type, err = jvm.Descriptor.ParseType(c.ConstPool[v.descriptorIndex].Info)
             if err != null {
                 return null, err
             }
@@ -284,13 +284,13 @@ class FileLoader {
         for _, v := range c.methods {
             m := &ast.ClassMethod{}
             m.Function = &ast.Function{}
-            m.Function.name = string(c.ConstPool[v.NameIndex].Info)
-            m.Function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.DescriptorIndex].Info)
+            m.Function.name = string(c.ConstPool[v.nameIndex].Info)
+            m.Function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.descriptorIndex].Info)
             if err != null {
                 return null, err
             }
             m.Function.accessFlags = v.accessFlags
-            m.Function.jvmDescriptor = string(c.ConstPool[v.DescriptorIndex].Info)
+            m.Function.jvmDescriptor = string(c.ConstPool[v.descriptorIndex].Info)
             if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyMethodDescriptor); t != null && len(t) > 0 {
                 index := binary.BigEndian.Uint16(t[0].Info)
                 _, err = jvm.LucyMethodSignatureParser.Decode(&m.Function.Type, c.ConstPool[index].Info)
@@ -300,7 +300,7 @@ class FileLoader {
             }
             if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyDefaultParameters); t != null && len(t) > 0 {
                 dp := &cg.AttributeDefaultParameters{}
-                dp.FromBytes(t[0].Info)
+                dp.fromBytes(t[0].Info)
                 jvm.DefaultValueParser.Decode(c, m.Function, dp)
             }
             if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != null && len(t) > 0 {
@@ -337,10 +337,10 @@ class FileLoader {
             e.name = string(c.ConstPool[nameIndex].Info)
         }
         e.loadFromOutSide = true
-        e.accessFlags = c.AccessFlag
+        e.accessFlags = c.accessFlags
         for _, v := range c.fields {
             en := &ast.EnumName{}
-            name := string(c.ConstPool[v.NameIndex].Info)
+            name := string(c.ConstPool[v.nameIndex].Info)
             en.name = name
             en.Enum = e
             constValue := v.AttributeGroupedByName[cg.AttributeNameConstValue][0] // must have this attribute
@@ -383,12 +383,12 @@ class FileLoader {
         pack.Block.constants = make(map[string]*ast.Constant)
         pack.Block.Functions = make(map[string]ast.Function)
         for _, f := range c.fields {
-            name := string(c.ConstPool[f.NameIndex].Info)
+            name := string(c.ConstPool[f.nameIndex].Info)
             constValue := f.AttributeGroupedByName.GetByName(cg.AttributeNameConstValue)
             if len(constValue) > 1 {
                 return new error(sprintf("constant value length greater than  1 at class 'main'  field '%s'", name)
             }
-            _, typ, err := jvm.Descriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
+            _, typ, err := jvm.Descriptor.ParseType(c.ConstPool[f.descriptorIndex].Info)
             if err != null {
                 return err
             }
@@ -398,7 +398,7 @@ class FileLoader {
                 constant.name = name
                 constant.accessFlags = f.accessFlags
                 constant.Type = typ
-                _, constant.Type, err = jvm.Descriptor.ParseType(c.ConstPool[f.DescriptorIndex].Info)
+                _, constant.Type, err = jvm.Descriptor.ParseType(c.ConstPool[f.descriptorIndex].Info)
                 if err != null {
                     return err
                 }
@@ -410,7 +410,7 @@ class FileLoader {
                 vd := &ast.Variable{}
                 vd.name = name
                 vd.accessFlags = f.accessFlags
-                vd.jvmDescriptor = string(c.ConstPool[f.DescriptorIndex].Info)
+                vd.jvmDescriptor = string(c.ConstPool[f.descriptorIndex].Info)
                 vd.Type = typ
                 vd.isGlobal = true
                 pack.Block.Variables[name] = vd
@@ -441,10 +441,10 @@ class FileLoader {
 
         for _, m := range c.methods {
             if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyTriggerPackageInit); t != null && len(t) > 0 {
-                pack.TriggerPackageInitMethodName = string(c.ConstPool[m.NameIndex].Info)
+                pack.triggerPackageInitMethodName = string(c.ConstPool[m.nameIndex].Info)
                 continue
             }
-            name := string(c.ConstPool[m.NameIndex].Info)
+            name := string(c.ConstPool[m.nameIndex].Info)
             if name == ast.MainFunctionName {
                 // this is main function
                 continue
@@ -452,8 +452,8 @@ class FileLoader {
             function := &ast.Function{}
             function.name = name
             function.accessFlags = m.accessFlags
-            function.jvmDescriptor = string(c.ConstPool[m.DescriptorIndex].Info)
-            function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[m.DescriptorIndex].Info)
+            function.jvmDescriptor = string(c.ConstPool[m.descriptorIndex].Info)
+            function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[m.descriptorIndex].Info)
             if err != null {
                 return err
             }
@@ -476,7 +476,7 @@ class FileLoader {
             }
             if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyDefaultParameters); t != null && len(t) > 0 {
                 dp := &cg.AttributeDefaultParameters{}
-                dp.FromBytes(t[0].Info)
+                dp.fromBytes(t[0].Info)
                 jvm.DefaultValueParser.Decode(c, function, dp)
             }
 
@@ -522,16 +522,16 @@ class FileLoader {
         }
         for _, v := range c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyTemplateFunction) {
             attr := &cg.AttributeTemplateFunction{}
-            attr.FromBytes(c, v.Info)
-            f, es := ast.ParseFunctionHandler([]byte(attr.Code), &ast.Pos{
-                Filename: attr.Filename,
-                Line:     int(attr.StartLine),
-                Column:   int(attr.StartColumn),
+            attr.fromBytes(c, v.Info)
+            f, es := ast.ParseFunctionHandler([]byte(attr.code), &ast.Pos{
+                filename: attr.filename,
+                line:     int(attr.startLine),
+                column:   int(attr.startColumn),
             })
             if len(es) > 0 { // looks impossible
                 return es[0]
             }
-            f.accessFlags = attr.AccessFlag
+            f.accessFlags = attr.accessFlags
             f.TemplateFunction = &ast.TemplateFunction{}
             pack.Block.Functions[attr.name] = f
         }

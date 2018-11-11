@@ -1,20 +1,20 @@
  
 
 public class StatementContinue {
-	public StatementFor StatementFor
+	public statementFor StatementFor
 	public defers       []StatementDefer
 	public pos          Pos
 	
 	fn check(block Block) -> (errs []error) {
-		if block.inheritedAttribute.forContinue == null {
+		if block.inheritedAttribute.forStatement == null {
 			return []error{new error(sprintf("%s 'continue' can`t in this scope",
-				this.pos.ErrMsgPrefix())) }
+				this.pos.errMsgPrefix())) }
 		}
 		if block.inheritedAttribute.Defer != null {
 			return []error{new error(sprintf("%s cannot has 'continue' in 'defer'",
-				this.pos.ErrMsgPrefix()))}
+				this.pos.errMsgPrefix()))}
 		}
-		this.StatementFor = block.inheritedAttribute.forContinue
+		this.statementFor = block.inheritedAttribute.forStatement
 		this.defers = []StatementDefer{}
 		this.mkDefers(block)
 		return null

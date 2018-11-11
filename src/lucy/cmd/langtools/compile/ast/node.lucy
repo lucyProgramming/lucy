@@ -89,7 +89,7 @@ class ConvertTops2Package {
 					expressions.append(t)
 				} else {
 					errs.append(new error(sprintf("%s cannot have '%s' in top",
-						t.pos.ErrMsgPrefix(), t.op)))
+						t.pos.errMsgPrefix(), t.op)))
 				}	
 			}
 		}

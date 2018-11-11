@@ -1,29 +1,29 @@
  
 
 public class StatementWhenCase {
-	public Matches []Type
+	public matches []Type
 	public block   Block
 }
 
 
 public class StatementWhen {
 	public pos       Pos
-	public Condition Type
-	public Cases     []StatementWhenCase
+	public condition Type
+	public cases     []StatementWhenCase
 	public Default   Block
 	/*
 		switchStatement will be override
 	*/
 	fn check(block Block, switchStatement Statement) -> (errs []error = []error{}) {
-		if this.Condition == null { // must be a error must parse stage
+		if this.condition == null { // must be a error must parse stage
 			return  
 		}
-		if len(this.Condition.getParameterType(block.inheritedAttribute.Function.Type)) == 0 {
+		if len(this.condition.getParameterType(block.inheritedAttribute.Function.Type)) == 0 {
 			errs.append(new error(sprintf("%s '%s' constains no parameter type",
-				this.Condition.pos.ErrMsgPrefix(), this.Condition.typeString())))
+				this.condition.pos.errMsgPrefix(), this.condition.typeString())))
 			return errs
 		}
-		if err := this.Condition.resolve(block); err != null {
+		if err := this.condition.resolve(block); err != null {
 			errs.append(err)
 			return
 		}
@@ -38,8 +38,8 @@ public class StatementWhen {
 			}
 			return null
 		}
-		for _, t := range this.Cases {
-			for _, tt := range t.Matches {
+		for _, t := range this.cases {
+			for _, tt := range t.matches {
 				if err := tt.resolve(block); err != null {
 					errs.append(err)
 					continue
@@ -52,7 +52,7 @@ public class StatementWhen {
 					return
 				}
 				typesChecked.append(tt)
-				if this.Condition.equal(tt) == false {
+				if this.condition.equal(tt) == false {
 					//no match here
 					continue
 				}
@@ -69,7 +69,7 @@ public class StatementWhen {
 		if match == null {
 			if this.Default == null {
 				errs.append(new error(sprintf("%s condition resolve as '%s' has no match and no 'default block'",
-						errMsgPrefix(this.Condition.pos), this.Condition.typeString())))
+						errMsgPrefix(this.condition.pos), this.condition.typeString())))
 			} else {
 				switchStatement.Type = StatementTypeBlock
 				switchStatement.block = this.Default

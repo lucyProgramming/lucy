@@ -2,29 +2,29 @@ import "lucy/binary"
  
 
 public class AttributeLucyFieldDescriptor {
-	public Descriptor       string
+	public descriptor       string
 	public MethodAccessFlag char
 
 	public fn FromBs(c Class, bs []byte) {
 		if len(bs) != 4 {
 			panic("length is not 4")
 		}
-		this.Descriptor = string(c.ConstPool[binary.BigEndian.getChar(bs[0:2])].Info)
+		this.descriptor = string(c.ConstPool[binary.BigEndian.getChar(bs[0:2])].Info)
 		this.MethodAccessFlag = binary.BigEndian.getChar(bs[2:4])
 	}
 
 	fn AttributeLucyFieldDescriptor(Descriptor string , MethodAccessFlag char){
 		this.super()
-		this.Descriptor = Descriptor
+		this.descriptor = Descriptor
 		this.MethodAccessFlag = MethodAccessFlag
 	}
 
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
-		ret.NameIndex = c.InsertUtf8Const(AttributeNameLucyFieldDescriptor)
+		ret.nameIndex = c.InsertUtf8Const(AttributeNameLucyFieldDescriptor)
 		ret.Info = new []byte(4)
 		ret.attributeLength = 4
-		binary.BigEndian.putChar(ret.Info, c.InsertUtf8Const(this.Descriptor))
+		binary.BigEndian.putChar(ret.Info, c.InsertUtf8Const(this.descriptor))
 		binary.BigEndian.putChar(ret.Info[2:], this.MethodAccessFlag)
 		return ret
 	}

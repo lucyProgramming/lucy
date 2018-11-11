@@ -20,7 +20,7 @@ class StatementWhenParser extends ParserExtends {
 			this.parser.errs.append( err)
 			this.consume(untilLc)
 		}
-		whenStatement.Condition = condition
+		whenStatement.condition = condition
 		this.parser.ifTokenIsLfThenSkip()
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s expect '{',but '%s'",
@@ -62,9 +62,9 @@ class StatementWhenParser extends ParserExtends {
 				this.bp.parseStatementList(block, false)
 			}
 			t := new ast.StatementWhenCase()
-			t.Matches = ts
+			t.matches = ts
 			t.block = block
-			whenStatement.Cases.append(t)
+			whenStatement.cases.append(t)
 		}
 		//default value
 		if this.parser.token.Type == lex.TokenDefault {

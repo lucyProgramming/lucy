@@ -5,14 +5,14 @@ import "lucy/cmd/langtools/compile/common"
 
 public class Package {
 	public name                         string
-	public LoadedPackages               map { string -> Package }
+	public loadedPackages               map { string -> Package }
 	loadedClasses                map { string -> Class }
 	public block                        Block // package always have a default block
 	files                        map { string -> SourceFile}
-	public InitFunctions                []Function
-	public NErrors2Stop                 int // number of errors should stop compile
+	public initFunctions                []Function
+	public nErrors2Stop                 int // number of errors should stop compile
 	errors                       []error
-	public TriggerPackageInitMethodName string //
+	public triggerPackageInitMethodName string //
 	unUsedPackage                map{string ->  Import }
 	statementLevelFunctions      []Function
 	statementLevelClass          []Class
@@ -68,26 +68,26 @@ public class Package {
 	}
 
 	fn mkInitFunctions(bs []Block) {
-		this.InitFunctions = new []Function(len(bs))
+		this.initFunctions = new []Function(len(bs))
 		for k, b := range bs {
 			b.isFunctionBlock = true
 			f := new Function()
 			b.Fn = f
 			f.pos = b.pos
 			f.block = b
-			this.InitFunctions[k] = f
+			this.initFunctions[k] = f
 			f.isPackageInitBlockFunction = true
 			f.used = true
 		}
 	}
 
 	fn shouldStop(errs []error) -> (should bool) {
-		return len(this.errors)+len(errs) >= this.NErrors2Stop
+		return len(this.errors)+len(errs) >= this.nErrors2Stop
 	}
 
 	fn TypeCheck() -> (es []error) {
-		if this.NErrors2Stop <= 2 {
-			this.NErrors2Stop = 10
+		if this.nErrors2Stop <= 2 {
+			this.nErrors2Stop = 10
 		}
 		this.errors = []error{}
 		this.errors.appendAll(this.block.checkConstants())
@@ -153,7 +153,7 @@ public class Package {
 			}
 			this.errors.appendAll( v.checkReturnVarExpression())
 		}
-		for _, v := range this.InitFunctions {
+		for _, v := range this.initFunctions {
 			this.errors.appendAll( v.check(this.block))
 			if this.shouldStop(null) {
 				return this.errors
@@ -178,7 +178,7 @@ public class Package {
 			}
 		}
 		for _, v := range this.statementLevelFunctions {
-			v.IsClosureFunction = v.Closure.CaptureCount(v) > 0
+			v.IsClosureFunction = v.Closure.captureCount(v) > 0
 		}
 		for _, v := range this.statementLevelClass {
 			for f, meta := range v.closure.Functions {
@@ -186,7 +186,7 @@ public class Package {
 					continue
 				}
 				this.errors.append( new error(sprintf("%s trying to access capture function '%s' from outside",
-						meta.pos.ErrMsgPrefix(), f.name)))
+						meta.pos.errMsgPrefix(), f.name)))
 			}
 		}
 		if this.shouldStop(null) {
@@ -209,15 +209,15 @@ public class Package {
 		if t := this.loadedClasses[resource]; t != null {
 			return t, null
 		}
-		if this.LoadedPackages == null {
-			this.LoadedPackages = new map { string -> Package} ()
+		if this.loadedPackages == null {
+			this.loadedPackages = new map { string -> Package} ()
 		}
-		if t := this.LoadedPackages[resource]; t != null {
+		if t := this.loadedPackages[resource]; t != null {
 			return t, null
 		}
 		t, err := ImportsLoader.LoadImport(resource)
 		if pp, ok := t.(Package); ok && pp != null {
-			PackageBeenCompile.LoadedPackages[resource] = pp
+			PackageBeenCompile.loadedPackages[resource] = pp
 			this.mkClassCache(pp)
 			if pp.name == common.CorePackage {
 				pp.markBuildIn()
@@ -258,7 +258,7 @@ public class Package {
 				errs = append(errs, new error(sprintf("%s '%s' not a package",
 					errMsgPrefix(i.pos), i.Import)))
 			} else {
-				if ppp.TriggerPackageInitMethodName == "" {
+				if ppp.triggerPackageInitMethodName == "" {
 					errs.append(new error(sprintf("%s  package named '%s' have no global vars and package "+
 							        "init blocks, no need to trigger package init method",
 							        errMsgPrefix(i.pos), i.Import)))
@@ -299,10 +299,10 @@ public class Package {
 		if this.files == null {
 			this.files = new map { string -> SourceFile } ()
 		}
-		x := this.files[i.pos.Filename]
+		x := this.files[i.pos.filename]
 		if x == null {
 			x = new SourceFile()
-			this.files[i.pos.Filename] = x
+			this.files[i.pos.filename] = x
 		}
 		return x.insertImport(i)
 	}	

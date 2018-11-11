@@ -10,7 +10,7 @@ public class AttributeLucyTypeAlias {
 
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
-		ret.NameIndex = c.InsertUtf8Const(AttributeNameLucyTypeAlias)
+		ret.nameIndex = c.InsertUtf8Const(AttributeNameLucyTypeAlias)
 		ret.Info = new []byte(4)
 		ret.attributeLength = (len(ret.Info))
 		binary.BigEndian.putChar(ret.Info, c.InsertUtf8Const(this.alias))

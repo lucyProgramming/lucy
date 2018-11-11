@@ -8,13 +8,13 @@ class ExpressionCheckIdentifier {
 		if identifier.name == UnderScore {
 			//_ is not valid
 			return null, new error(sprintf("%s '%s' is not a valid name",
-				e.pos.ErrMsgPrefix(), identifier.name))
+				e.pos.errMsgPrefix(), identifier.name))
 		}
 		//handle magic identifier
 		switch identifier.name {
 		case magicIdentifierFile:
 			e.Type = ExpressionTypeString
-			e.data = e.pos.Filename
+			e.data = e.pos.filename
 			result, _ := e.checkSingleValueContextExpression(block)
 			return result, null
 		case magicIdentifierLine:
@@ -30,7 +30,7 @@ class ExpressionCheckIdentifier {
 		case magicIdentifierClass:
 			if block.inheritedAttribute.Class == null {
 				return null,
-					new error(sprintf("%s '%s' must in class scope", e.pos.ErrMsgPrefix(), identifier.name))
+					new error(sprintf("%s '%s' must in class scope", e.pos.errMsgPrefix(), identifier.name))
 			}
 			result := new Type()
 			result.Type = VariableTypeClass
@@ -39,7 +39,7 @@ class ExpressionCheckIdentifier {
 			return result, null
 		case magicIdentifierFunction:
 			if block.inheritedAttribute.Function.isPackageInitBlockFunction {
-				return null,new error(sprintf("%s '%s' must in function scope", e.pos.ErrMsgPrefix(), identifier.name))
+				return null,new error(sprintf("%s '%s' must in function scope", e.pos.errMsgPrefix(), identifier.name))
 			}
 			result := new Type()
 			result.Type = VariableTypeMagicFunction
@@ -53,14 +53,14 @@ class ExpressionCheckIdentifier {
 			return null, err
 		}
 		if d == null {
-			i := PackageBeenCompile.getImport(e.pos.Filename, identifier.name)
+			i := PackageBeenCompile.getImport(e.pos.filename, identifier.name)
 			if i != null {
 				i.used = true
 				return .checkIdentifierThroughImports(e , i)
 			}
 		}
 		if d == null {
-			return null, new error(sprintf("%s '%s' not found", e.pos.ErrMsgPrefix(), identifier.name))
+			return null, new error(sprintf("%s '%s' not found", e.pos.errMsgPrefix(), identifier.name))
 		}
 
 		if f := d.(Function) ;f != null {
@@ -71,11 +71,11 @@ class ExpressionCheckIdentifier {
 			}
 			if f.isBuildIn {
 				return null, new error(sprintf("%s fucntion '%s' is buildin",
-					e.pos.ErrMsgPrefix(), f.name))
+					e.pos.errMsgPrefix(), f.name))
 			}
 			if f.TemplateFunction != null {
 				return null, new error(sprintf("%s fucntion '%s' a template function",
-					e.pos.ErrMsgPrefix(), f.name))
+					e.pos.errMsgPrefix(), f.name))
 			}
 			// try from import
 			if f.isBuildIn == false {
@@ -149,13 +149,13 @@ class ExpressionCheckIdentifier {
 			return result, null
 		}
 		err = new error(sprintf("%s identifier '%s' is not a expression , but '%s'",
-			e.pos.ErrMsgPrefix(), identifier.name, block.identifierIsWhat(d)))
+			e.pos.errMsgPrefix(), identifier.name, block.identifierIsWhat(d)))
 	}
 	
 	static fn checkIdentifierThroughImports(e Expression , it Import) -> (valueType Type,err  error) {
 		p, err := PackageBeenCompile.load(it.Import)
 		if err != null {
-			return null, new error(sprintf("%s %s", e.pos.ErrMsgPrefix(), err.getMessage()))
+			return null, new error(sprintf("%s %s", e.pos.errMsgPrefix(), err.getMessage()))
 		}
 		valueType = new Type()
 		valueType.pos = e.pos

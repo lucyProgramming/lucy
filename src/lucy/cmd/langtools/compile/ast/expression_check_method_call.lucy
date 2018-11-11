@@ -27,13 +27,13 @@ class ExpressionCheckMethodCall {
 			return .checkMethodCallExpressionOnJavaArray(e , block, errs, object)
 		case VariableTypeDynamicSelector:
 			if call.name == "finalize" {
-				errs.append(new error(sprintf("%s cannot call '%s'", e.pos.ErrMsgPrefix(), call.name)))
+				errs.append(new error(sprintf("%s cannot call '%s'", e.pos.errMsgPrefix(), call.name)))
 				return null
 			}
 			return .checkMethodCallExpressionOnDynamicSelector(e , block, errs, object)
 		case VariableTypeString:
 			if call.name == "finalize" {
-				errs.append(new error(sprintf("%s cannot call '%s'", e.pos.ErrMsgPrefix(), call.name)))
+				errs.append(new error(sprintf("%s cannot call '%s'", e.pos.errMsgPrefix(), call.name)))
 				return null
 			}
 			if err := loadJavaStringClass(e.pos); err != null {
@@ -55,7 +55,7 @@ class ExpressionCheckMethodCall {
 				call.Class = javaStringClass
 				if false == call.Expression.IsIdentifier(ThisPointerName) &&
 					ms[0].isPublic() == false {
-					errs.append(new error(sprintf("%s method '%s' is not public", e.pos.ErrMsgPrefix(), call.name)))
+					errs.append(new error(sprintf("%s method '%s' is not public", e.pos.errMsgPrefix(), call.name)))
 				}
 				call.Method = ms[0]
 				return ms[0].Function.Type.mkCallReturnTypes(e.pos)
@@ -66,7 +66,7 @@ class ExpressionCheckMethodCall {
 
 		case VariableTypeObject, VariableTypeClass:
 			if call.name == "finalize" {
-				errs.append(new error(sprintf("%s cannot call '%s'", e.pos.ErrMsgPrefix(), call.name)))
+				errs.append(new error(sprintf("%s cannot call '%s'", e.pos.errMsgPrefix(), call.name)))
 				return null
 			}
 			call.Class = object.Class
@@ -78,7 +78,7 @@ class ExpressionCheckMethodCall {
 			if object.Class.IsInterface() {
 				if object.Type == VariableTypeClass {
 					errs.append(new error(sprintf("%s cannot make_node_objects call on interface '%s'",
-						e.pos.ErrMsgPrefix(), object.Class.name)))
+						e.pos.errMsgPrefix(), object.Class.name)))
 					return null
 				}
 				ms, matched, err :=
@@ -88,9 +88,9 @@ class ExpressionCheckMethodCall {
 					return null
 				}
 				if matched {
-					if ms[0].IsStatic() {
+					if ms[0].isStatic() {
 						errs.append(new error(sprintf("%s method '%s' is static",
-							e.pos.ErrMsgPrefix(), call.name)))
+							e.pos.errMsgPrefix(), call.name)))
 					}
 					call.Method = ms[0]
 					return ms[0].Function.Type.mkCallReturnTypes(e.pos)
@@ -133,7 +133,7 @@ class ExpressionCheckMethodCall {
 			return null
 		default:
 			errs.append(new error(sprintf("%s cannot make_node_objects method call '%s' on '%s'",
-				e.pos.ErrMsgPrefix(), call.name, object.typeString())))
+				e.pos.errMsgPrefix(), call.name, object.typeString())))
 			return null
 		}
 	}
@@ -149,14 +149,14 @@ class ExpressionCheckMethodCall {
 		call := e.data.(ExpressionMethodCall)
 		if call.Expression.IsIdentifier(ThisPointerName) == false {
 			errs.append(new error(sprintf("%s call father`s constuction must use 'thi.super()'",
-				e.pos.ErrMsgPrefix())))
+				e.pos.errMsgPrefix())))
 			return
 		}
 		if block.inheritedAttribute.isConstructionMethod == false ||
 			block.isFunctionBlock == false ||
 			block.inheritedAttribute.statementOffset != 0 {
 			errs.append(new error(sprintf("%s call father`s constuction on must first statement of a constructon method",
-					e.pos.ErrMsgPrefix())))
+					e.pos.errMsgPrefix())))
 			return
 		}
 		if object.Class.loadFromOutSide {
@@ -181,7 +181,7 @@ class ExpressionCheckMethodCall {
 		ms, matched, err := object.Class.superClass.accessConstructionMethod(e.pos, errs,
 			null, call, callArgsTypes)
 		if err != null {
-			errs.append(new error(sprintf("%s %s", e.pos.ErrMsgPrefix(), err.getMessage())))
+			errs.append(new error(sprintf("%s %s", e.pos.errMsgPrefix(), err.getMessage())))
 			return
 		}
 		if matched {
@@ -203,7 +203,7 @@ class ExpressionCheckMethodCall {
 		call := e.data.(ExpressionMethodCall)
 		if call.name == SUPER {
 			errs.append(new error(sprintf("%s access '%s' at '%s' not allow",
-				e.pos.ErrMsgPrefix(), SUPER, object.typeString())))
+				e.pos.errMsgPrefix(), SUPER, object.typeString())))
 			return null
 		}
 		fieldMethodHandler :=[]ClassField{null}
@@ -240,12 +240,12 @@ class ExpressionCheckMethodCall {
 			result.pos = e.pos
 			if len(call.Args) > 0 {
 				errs.append(new error(sprintf("%s method '%s' expect no arguments",
-					call.Args[0].pos.ErrMsgPrefix(), call.name)))
+					call.Args[0].pos.errMsgPrefix(), call.name)))
 			}
 			return []Type{result}
 		default:
 			errs.append(new error(sprintf("%s unkown call '%s' on '%s'",
-				e.pos.ErrMsgPrefix(), call.name, array.typeString())))
+				e.pos.errMsgPrefix(), call.name, array.typeString())))
 		}
 		return null
 	}
@@ -258,14 +258,14 @@ class ExpressionCheckMethodCall {
 		call := e.data.(ExpressionMethodCall)
 		d, exists := p.block.nameExists(call.name)
 		if exists == false {
-			errs.append(new error(sprintf("%s function '%s' not found", e.pos.ErrMsgPrefix(), call.name)))
+			errs.append(new error(sprintf("%s function '%s' not found", e.pos.errMsgPrefix(), call.name)))
 			return null
 		}
 		if f := d.(Function) ;f != null {
 			if f.isPublic() == false &&
 				p.isSame(PackageBeenCompile) == false {
 				errs.append(new error(sprintf("%s function '%s' is not public",
-					e.pos.ErrMsgPrefix(), call.name)))
+					e.pos.errMsgPrefix(), call.name)))
 			}
 			if f.TemplateFunction != null {
 				// better convert to function call
@@ -297,11 +297,11 @@ class ExpressionCheckMethodCall {
 		if v := d.(Variable) ; v != null {
 			if v.isPublic() == false && p.isSame(PackageBeenCompile) == false {
 				errs . append(new error( sprintf("%s variable '%s' is not public",
-					e.pos.ErrMsgPrefix(), call.name)))
+					e.pos.errMsgPrefix(), call.name)))
 			}
 			if v.Type.Type != VariableTypeFunction {
 				errs.append(new error(sprintf("%s variable '%s' is not a function",
-					e.pos.ErrMsgPrefix(), call.name)))
+					e.pos.errMsgPrefix(), call.name)))
 				return null
 			}
 			call := e.data.(ExpressionMethodCall)
@@ -326,7 +326,7 @@ class ExpressionCheckMethodCall {
 		if c := d.(Class) ; c != null {
 			if c.isPublic() == false && p.isSame(PackageBeenCompile) == false {
 				errs.append(new error(sprintf("%s class '%s' is not public",
-					e.pos.ErrMsgPrefix(), call.name)))
+					e.pos.errMsgPrefix(), call.name)))
 			}
 			conversion := new ExpressionTypeConversion()
 			conversion.Type = new Type()
@@ -339,7 +339,7 @@ class ExpressionCheckMethodCall {
 			}
 			e.data = conversion
 			if len(call.Args) != 1 {
-				errs.append(new error(sprintf("%s cast type expect 1 argument", e.pos.ErrMsgPrefix())))
+				errs.append(new error(sprintf("%s cast type expect 1 argument", e.pos.errMsgPrefix())))
 				return []Type{conversion.Type.Clone()}
 			}
 			return []Type{ExpressionCheckTypeConversion.check(e , block, errs)}
@@ -347,7 +347,7 @@ class ExpressionCheckMethodCall {
 		if t := d.(Type) ; t != null {
 			if len(call.Args) != 1 {
 				errs.append(new error(sprintf("%s cast type expect 1 argument",
-					e.pos.ErrMsgPrefix())))
+					e.pos.errMsgPrefix())))
 				result := p.block.TypeAliases[call.name].Clone()
 				result.pos = e.pos
 				return []Type{result}
@@ -362,7 +362,7 @@ class ExpressionCheckMethodCall {
 			return []Type{ExpressionCheckTypeConversion.check(e , block, errs)}
 		}
 		errs.append(new error(sprintf("%s '%s' is not a function",
-			e.pos.ErrMsgPrefix(), call.name)))
+			e.pos.errMsgPrefix(), call.name)))
 		return null
 		 
 	}
@@ -382,14 +382,14 @@ class ExpressionCheckMethodCall {
 			result.pos = e.pos
 			if len(call.Args) > 0 {
 				errs.append(new error(sprintf("%s too mamy argument to call,method '%s' expect no arguments",
-						call.Args[0].pos.ErrMsgPrefix(), call.name)))
+						call.Args[0].pos.errMsgPrefix(), call.name)))
 			}
 			return []Type{result}
 		case common.ArrayMethodAppend,
 			common.ArrayMethodAppendAll:
 			if len(call.Args) == 0 {
 				errs.append(new error(sprintf("%s too few arguments to call %s,expect at least one argument",
-						e.pos.ErrMsgPrefix(), call.name)))
+						e.pos.errMsgPrefix(), call.name)))
 			}
 			ts := checkExpressions(block, call.Args, errs, true)
 			for _, t := range ts {
@@ -399,12 +399,12 @@ class ExpressionCheckMethodCall {
 				if call.name == common.ArrayMethodAppend {
 					if array.array.assignAble(errs, t) == false {
 						errs.append(new error(sprintf("%s cannot use '%s' as '%s' to call method '%s'",
-							t.pos.ErrMsgPrefix(), t.typeString(), array.array.typeString(), call.name)))
+							t.pos.errMsgPrefix(), t.typeString(), array.array.typeString(), call.name)))
 					}
 				} else {
 					if array.assignAble(errs, t) == false {
 						errs.append(new error(sprintf("%s cannot use '%s' as '%s' to call method '%s'",
-							t.pos.ErrMsgPrefix(), t.typeString(), array.typeString(), call.name)))
+							t.pos.errMsgPrefix(), t.typeString(), array.typeString(), call.name)))
 					}
 				}
 			}
@@ -420,11 +420,11 @@ class ExpressionCheckMethodCall {
 			result.array.pos = e.pos
 			if len(call.Args) > 0 {
 				errs.append(new error(sprintf("%s too mamy argument to call,method '%s' expect no arguments",
-					call.Args[0].pos.ErrMsgPrefix(), call.name)))
+					call.Args[0].pos.errMsgPrefix(), call.name)))
 			}
 			return []Type{result}
 		default:
-			errs.append(new error(sprintf("%s unkown call '%s' on array", e.pos.ErrMsgPrefix(), call.name)))
+			errs.append(new error(sprintf("%s unkown call '%s' on array", e.pos.errMsgPrefix(), call.name)))
 		}
 		return null
 	}
@@ -445,7 +445,7 @@ class ExpressionCheckMethodCall {
 					pos = call.Args[1].pos
 				}
 				errs.append(new error(sprintf("%s call '%s' expect one argument",
-					pos.ErrMsgPrefix(), call.name)))
+					pos.errMsgPrefix(), call.name)))
 				return []Type{ret}
 			}
 			t, es := call.Args[0].checkSingleValueContextExpression(block)
@@ -455,7 +455,7 @@ class ExpressionCheckMethodCall {
 			}
 			if false == m.K.assignAble(errs, t) {
 				errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-					t.pos.ErrMsgPrefix(), t.typeString(), m.K.typeString())))
+					t.pos.errMsgPrefix(), t.typeString(), m.K.typeString())))
 			}
 			return []Type{ret}
 		case common.MapMethodRemove:
@@ -464,7 +464,7 @@ class ExpressionCheckMethodCall {
 			ret.Type = VariableTypeVoid
 			if len(call.Args) == 0 {
 				errs.append(new error(sprintf("%s remove expect at last 1 argement",
-					e.pos.ErrMsgPrefix())))
+					e.pos.errMsgPrefix())))
 				return []Type{ret}
 			}
 			ts := checkExpressions(block, call.Args, errs, true)
@@ -474,7 +474,7 @@ class ExpressionCheckMethodCall {
 				}
 				if m.K.assignAble(errs, t) == false {
 					errs.append(new error(sprintf("%s cannot use '%s' as '%s' for map-key",
-						t.pos.ErrMsgPrefix(), t.typeString(), m.K.typeString())))
+						t.pos.errMsgPrefix(), t.typeString(), m.K.typeString())))
 				}
 			}
 			return []Type{ret}
@@ -484,7 +484,7 @@ class ExpressionCheckMethodCall {
 			ret.Type = VariableTypeVoid
 			if len(call.Args) > 0 {
 				errs.append(new error(sprintf("%s '%s' expect no arguments",
-					e.pos.ErrMsgPrefix(), common.MapMethodRemoveAll)))
+					e.pos.errMsgPrefix(), common.MapMethodRemoveAll)))
 			}
 			return []Type{ret}
 		case common.MapMethodSize:
@@ -493,12 +493,12 @@ class ExpressionCheckMethodCall {
 			ret.Type = VariableTypeInt
 			if len(call.Args) > 0 {
 				errs.append(new error(sprintf("%s too many argument to call '%s''",
-					call.Args[0].pos.ErrMsgPrefix(), call.name)))
+					call.Args[0].pos.errMsgPrefix(), call.name)))
 			}
 			return []Type{ret}
 		default:
 			errs.append(new error(sprintf("%s unkown call '%s' on map",
-				e.pos.ErrMsgPrefix(), call.name)))
+				e.pos.errMsgPrefix(), call.name)))
 			return null
 		}
 		return null

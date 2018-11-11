@@ -13,7 +13,7 @@ public class AttributeCode  {
 	
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
-		ret.NameIndex = c.InsertUtf8Const("Code")
+		ret.nameIndex = c.InsertUtf8Const("Code")
 		ret.Info = new []byte( 8)
 		binary.BigEndian.putChar(ret.Info[0:2], this.MaxStack)
 		binary.BigEndian.putChar(ret.Info[2:4], this.MaxLocals)
@@ -55,7 +55,7 @@ public class AttributeCode  {
 			b := new []byte(0)
 			for _, v := range this.attributes {
 				bb := new []byte(2)
-				binary.BigEndian.putChar(bb, v.NameIndex)
+				binary.BigEndian.putChar(bb, v.nameIndex)
 				bs4 := new []byte(4)
 				binary.BigEndian.putInt(bs4, (v.attributeLength))
 				bb.appendAll(bs4)
@@ -73,7 +73,7 @@ public class AttributeCode  {
 		if len(this.Exceptions) > 0 {
 			b := new []byte (8*len(this.Exceptions))
 			for k, v := range this.Exceptions {
-				binary.BigEndian.putChar(b[k*8:], v.StartPc)
+				binary.BigEndian.putChar(b[k*8:], v.startPc)
 				binary.BigEndian.putChar(b[k*8+2:], v.EndPc)
 				binary.BigEndian.putChar(b[k*8+4:], v.HandlerPc)
 				binary.BigEndian.putChar(b[k*8+6:], v.CatchType)
@@ -89,7 +89,7 @@ public class AttributeCode  {
 
 
 public class ExceptionTable  {
-	public StartPc   char
+	public startPc   char
 	public EndPc     char
 	public HandlerPc char
 	public CatchType char

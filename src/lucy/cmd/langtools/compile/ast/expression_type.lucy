@@ -94,7 +94,7 @@ public class ExpressionQuestion  {
 
 public class ExpressionSlice  {
 	public ExpressionOn Expression
-	public Start, End   Expression
+	public start, End   Expression
 }
 
 
@@ -154,7 +154,7 @@ public class ExpressionIdentifier  {
 
 public class ExpressionIndex  {
 	public Expression Expression
-	public Index      Expression
+	public index      Expression
 }
 
 public class ExpressionSelection  {
@@ -201,7 +201,7 @@ public class ExpressionAssign  {
 
 public class ExpressionArray  {
 	public Type        Type
-	public Expressions []Expression
+	public expressions []Expression
 }
 
 

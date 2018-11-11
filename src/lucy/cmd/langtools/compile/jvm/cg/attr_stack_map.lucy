@@ -13,7 +13,7 @@ public class AttributeStackMap {
 			return null
 		}
 		info := new AttributeInfo() 
-		info.NameIndex = c.InsertUtf8Const(AttributeNameStackMap)
+		info.nameIndex = c.InsertUtf8Const(AttributeNameStackMap)
 		bs := new []byte(2)
 		binary.BigEndian.putChar(bs, char(len(this.StackMaps)))
 		for _, v := range this.StackMaps {
@@ -166,14 +166,14 @@ public class StackMapDoubleVariableInfo {}
 public class StackMapNullVariableInfo {}
 public class StackMapUninitializedThisVariableInfo {}
 public class StackMapObjectVariableInfo  {
-	public Index    char
+	public index    char
 	public Readable string
 }
 public class StackMapUninitializedVariableInfo  {
-	public CodeOffset char
-	public fn StackMapUninitializedVariableInfo(CodeOffset char){
+	public codeOffset char
+	public fn StackMapUninitializedVariableInfo(codeOffset char){
 		this.super()
-		this.CodeOffset = CodeOffset
+		this.codeOffset = codeOffset
 	}
 }
 
@@ -204,13 +204,13 @@ public class StackMapVerificationTypeInfo  {
 		if v,ok := this.Verify.(StackMapObjectVariableInfo) ; ok {
 			bs := new []byte(3)
 			bs[0] = 7
-			binary.BigEndian.putChar(bs[1:], v.Index)
+			binary.BigEndian.putChar(bs[1:], v.index)
 			return bs
 		}
 		if v,ok := this.Verify.(StackMapUninitializedVariableInfo) ; ok {
 			bs := new []byte (3)
 			bs[0] = 8
-			binary.BigEndian.putChar(bs[1:], v.CodeOffset)
+			binary.BigEndian.putChar(bs[1:], v.codeOffset)
 			return bs
 		}
 	}	

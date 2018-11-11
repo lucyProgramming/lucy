@@ -10,14 +10,14 @@ public class FunctionType {
 		for _,v := range this.ParameterList{
 			if v.name == reDefine.name {
 				return new error(sprintf("%s reDefine parameter '%s'" , 
-					v.pos.ErrMsgPrefix(), v.name))
+					v.pos.errMsgPrefix(), v.name))
 			}
 		}
 		if this.VoidReturn() == false {
 			for _,v := range this.ReturnList{
 				if v.name == reDefine.name {
 					return new error(sprintf("%s reDefine return variable '%s'" , 
-						v.pos.ErrMsgPrefix(), v.name))
+						v.pos.errMsgPrefix(), v.name))
 				}
 			}
 		}
@@ -31,8 +31,8 @@ public class FunctionType {
 			if p := m[v.name]; p != null {
 				errMsg :=
 					sprintf("%s duplicated name '%s' , first declaraed at:\n",
-						v.pos.ErrMsgPrefix(), v.name)
-				errMsg += sprintf("\t%s\n", p.ErrMsgPrefix())
+						v.pos.errMsgPrefix(), v.name)
+				errMsg += sprintf("\t%s\n", p.errMsgPrefix())
 				errs.append( new error(errMsg))
 				continue
 			}
@@ -262,7 +262,7 @@ public class FunctionType {
 			vArgs.NoArgs = false
 			k := len(this.ParameterList)
 			vArgs.Length = len(callArgsTypes) - k
-			vArgs.Expressions = args[k:]
+			vArgs.expressions = args[k:]
 			vArgs.Length = len(callArgsTypes) - k
 		}
 		if len(callArgsTypes) < len(this.ParameterList) {
@@ -319,7 +319,7 @@ public class FunctionType {
 
 
 public class CallVariableArgs {
-	public Expressions []Expression
+	public expressions []Expression
 	public Length      int
 	/*
 		a := new int[](10)

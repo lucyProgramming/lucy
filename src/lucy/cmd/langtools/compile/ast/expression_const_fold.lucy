@@ -47,7 +47,7 @@ class ExpressionConstFold {
 				return
 			}
 			if e.isNumber() == false {
-			    err = new error(sprintf("%s not a number" , e.pos.ErrMsgPrefix()))
+			    err = new error(sprintf("%s not a number" , e.pos.errMsgPrefix()))
 			    is = false
 			    return
 			}

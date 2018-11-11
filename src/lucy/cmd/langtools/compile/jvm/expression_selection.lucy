@@ -48,7 +48,7 @@ class BuildExpressionSelection {
             ), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            if selection.Method.IsStatic() {
+            if selection.Method.isStatic() {
                 c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                     "java/lang/invoke/MethodHandles$Lookup",
                     "findStatic",
@@ -136,7 +136,7 @@ class BuildExpressionSelection {
             }
         case ast.VariableTypeDynamicSelector:
             if selection.Field != null {
-                if selection.Field.IsStatic() == false {
+                if selection.Field.isStatic() == false {
                     code.Codes[code.CodeLength] = cg.OP_aload_0
                     code.CodeLength++
                     if 1 > maxStack {
@@ -178,7 +178,7 @@ class BuildExpressionSelection {
                 ), code.Codes[code.CodeLength+1:code.CodeLength+3])
                 code.CodeLength += 3
                 code.Codes[code.CodeLength] = cg.OP_invokevirtual
-                if selection.Method.IsStatic() {
+                if selection.Method.isStatic() {
                     c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                         "java/lang/invoke/MethodHandles$Lookup",
                         "findStatic",
@@ -195,7 +195,7 @@ class BuildExpressionSelection {
                 if 4 > maxStack {
                     maxStack = 4
                 }
-                if selection.Method.IsStatic() == false {
+                if selection.Method.isStatic() == false {
                     code.Codes[code.CodeLength] = cg.OP_aload_0
                     code.CodeLength++
                     code.Codes[code.CodeLength] = cg.OP_invokevirtual

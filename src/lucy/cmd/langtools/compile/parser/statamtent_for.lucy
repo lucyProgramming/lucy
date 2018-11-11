@@ -20,7 +20,7 @@ class StatementForParser extends ParserExtends{
 		this.parser.unExpectNewLineAndSkip()
 		if this.parser.token.Type != lex.TokenLc &&
 			this.parser.token.Type != lex.TokenSemicolon { // not '{' and not ';'
-			statementFor.Condition, err = this.parser.ExpressionParser.parseExpression(true)
+			statementFor.condition, err = this.parser.ExpressionParser.parseExpression(true)
 			if err != null {
 				this.consume(untilLc)
 				goto parseBlock
@@ -28,12 +28,12 @@ class StatementForParser extends ParserExtends{
 		}
 		if this.parser.token.Type == lex.TokenSemicolon {
 			this.Next(lfNotToken) // skip ;
-			statementFor.Init = statementFor.Condition
-			statementFor.Condition = null // mk null
+			statementFor.Init = statementFor.condition
+			statementFor.condition = null // mk null
 			//condition
 			var err error
 			if this.parser.token.Type != lex.TokenSemicolon {
-				statementFor.Condition, err = this.parser.ExpressionParser.parseExpression(false)
+				statementFor.condition, err = this.parser.ExpressionParser.parseExpression(false)
 				if err != null {
 					this.consume(untilLc)
 					goto parseBlock

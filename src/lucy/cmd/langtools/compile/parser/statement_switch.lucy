@@ -15,18 +15,18 @@ class StatementSwitchParser extends ParserExtends{
 		this.Next(lfIsToken) // skip switch key word
 		this.parser.unExpectNewLineAndSkip()
 		statementSwitch.EndPos = this.parser.mkPos()
-		statementSwitch.Condition, err = this.parser.ExpressionParser.parseExpression(false)
+		statementSwitch.condition, err = this.parser.ExpressionParser.parseExpression(false)
 		if err != null {
 			this.consume(untilLc)
 		}
 		this.parser.ifTokenIsLfThenSkip()
 		for this.parser.token.Type == lex.TokenSemicolon {
-			if statementSwitch.Condition != null {
-				statementSwitch.PrefixExpressions.append(statementSwitch.Condition)
-				statementSwitch.Condition = null
+			if statementSwitch.condition != null {
+				statementSwitch.PrefixExpressions.append(statementSwitch.condition)
+				statementSwitch.condition = null
 			}
 			this.parser.Next(lfNotToken)
-			statementSwitch.Condition, err = this.parser.ExpressionParser.parseExpression(false)
+			statementSwitch.condition, err = this.parser.ExpressionParser.parseExpression(false)
 			if err != null {
 				this.consume(untilLc)
 			}
@@ -70,7 +70,7 @@ class StatementSwitchParser extends ParserExtends{
 				this.bp.parseStatementList(block, false)
 			}
 			t := new ast.StatementSwitchCase()
-			t.Matches = es
+			t.matches = es
 			t.block = block
 			if statementSwitch.StatementSwitchCases == null {
                 statementSwitch.StatementSwitchCases = [t]

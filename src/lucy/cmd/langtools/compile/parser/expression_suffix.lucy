@@ -377,7 +377,7 @@ class ExpressionSuffix extends  ParserExtends {
 						newExpression.pos = this.parser.mkPos()
 						slice := new ast.ExpressionSlice()
 						newExpression.data = slice
-						slice.Start = e
+						slice.start = e
 						slice.ExpressionOn = prefix
 						slice.End = end
 						prefix = newExpression
@@ -394,7 +394,7 @@ class ExpressionSuffix extends  ParserExtends {
 						newExpression.Type = ast.ExpressionTypeIndex
 						index := new ast.ExpressionIndex()
 						index.Expression = prefix
-						index.Index = e
+						index.index = e
 						newExpression.data = index
 						prefix = newExpression
 						this.Next(lfIsToken)
@@ -490,9 +490,9 @@ class ExpressionSuffix extends  ParserExtends {
 			pos := this.parser.mkPos()
 			if this.parser.lastToken != null {
 				pos = new ast.Pos()
-				pos.Filename = this.parser.filename
-				pos.Line = this.parser.lastToken.EndLine
-				pos.Column = this.parser.lastToken.EndColumn
+				pos.filename = this.parser.filename
+				pos.line = this.parser.lastToken.EndLine
+				pos.column = this.parser.lastToken.EndColumn
 			}
 			this.parser.ifTokenIsLfThenSkip()
 			if this.parser.token.Type != lex.TokenRp {

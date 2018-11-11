@@ -63,10 +63,10 @@ public class Statement {
 		if len(this.StatementIf.PrefixExpressions) > 0 {
 			return
 		}
-		if this.StatementIf.Condition.Type != ExpressionTypeBool {
+		if this.StatementIf.condition.Type != ExpressionTypeBool {
 			return
 		}
-		c := this.StatementIf.Condition.boolValue
+		c := this.StatementIf.condition.boolValue
 		if c {
 			this.Type = StatementTypeBlock
 			this.block = this.StatementIf.block
@@ -83,9 +83,9 @@ public class Statement {
 	fn simplifyFor() {
 		if this.StatementFor.Init == null &&
 			this.StatementFor.Increment == null &&
-			this.StatementFor.Condition != null &&
-			this.StatementFor.Condition.Type == ExpressionTypeBool &&
-			this.StatementFor.Condition.boolValue == false  {
+			this.StatementFor.condition != null &&
+			this.StatementFor.condition.Type == ExpressionTypeBool &&
+			this.StatementFor.condition.boolValue == false  {
 			this.Type = StatementTypeNop
 			this.StatementFor = null
 		}

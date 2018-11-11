@@ -2,12 +2,12 @@
 import "lucy/binary"
 
 public class AttributeDefaultParameters {
-	public Start     char // start
+	public start     char // start
 	public constants []char
 
-	fn FromBytes(bs []byte) {
+	fn fromBytes(bs []byte) {
 	    this.constants = []char{}
-		this.Start = binary.BigEndian.getChar(bs)
+		this.start = binary.BigEndian.getChar(bs)
 		bs = bs[2:]
 		for len(bs) > 0 {
 			this.constants.append(binary.BigEndian.getChar(bs))
@@ -15,9 +15,9 @@ public class AttributeDefaultParameters {
 		}
 	}
 
-	fn AttributeDefaultParameters(Start char , Constants []char){
+	fn AttributeDefaultParameters(start char , Constants []char){
 		this.super()
-		this.Start = Start
+		this.start = start
 		this.constants = Constants
 	}
 
@@ -26,10 +26,10 @@ public class AttributeDefaultParameters {
 			return null
 		}
 		info = new AttributeInfo()
-		info.NameIndex = c.InsertUtf8Const(AttributeNameLucyDefaultParameters)
+		info.nameIndex = c.InsertUtf8Const(AttributeNameLucyDefaultParameters)
 		info.attributeLength = (2 * (1 + len(this.constants)))
 		info.Info = new []byte(info.attributeLength)
-		binary.BigEndian.putChar(info.Info, this.Start)
+		binary.BigEndian.putChar(info.Info, this.start)
 		for i := 0; i < len(this.constants); i++ {
 			binary.BigEndian.putChar(info.Info[(i+1)*2:], this.constants[i])
 		}

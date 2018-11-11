@@ -54,22 +54,22 @@ class BuildSwitch {
                 maxStack = stack
             }
         }
-        stack := this.BuildExpression.build(c, code, s.Condition, context, state)
+        stack := this.BuildExpression.build(c, code, s.condition, context, state)
         if stack > maxStack {
             maxStack = stack
         }
         //value is on stack
         var notMatch ast.Statement
-        size := jvmSlotSize(s.Condition.value)
+        size := jvmSlotSize(s.condition.value)
         currentStack := size
-        state.pushStack(c, s.Condition.value)
+        state.pushStack(c, s.condition.value)
         for _, c := range s.StatementSwitchCases {
             if notMatch != null {
                 writeExits([]cg.Exit{notMatch}, code.CodeLength)
                 context.MakeStackMap(code, state, code.CodeLength)
             }
             matches := []cg.Exit{}
-            for _, ee := range c.Matches {
+            for _, ee := range c.matches {
                 if ee.value.Type == ast.VariableTypeBool {
                     currentStack = size
                     stack := this.BuildExpression.build(c, code, ee, context, state)
@@ -87,13 +87,13 @@ class BuildSwitch {
                     }
                     code.CodeLength++
                     currentStack += size
-                    state.pushStack(c, s.Condition.value)
+                    state.pushStack(c, s.condition.value)
                     stack := this.BuildExpression.build(c, code, ee, context, state)
                     if t := currentStack + stack; t > maxStack {
                         maxStack = t
                     }
                     state.popStack(1)
-                    compare(s.Condition.value)
+                    compare(s.condition.value)
                     matches = append(matches, new cg.Exit(cg.OP_ifeq, code)) // comsume result on stack
                 }
             }
@@ -116,7 +116,7 @@ class BuildSwitch {
                 state.addTop(ss)
             }
             if c.Block == null || c.Block.notExecuteToLastStatement == false {
-                s.Exits = append(s.Exits,
+                s.exits = append(s.exits,
                     new cg.Exit(cg.OP_goto, code)) // matched,goto switch outside
             }
         }

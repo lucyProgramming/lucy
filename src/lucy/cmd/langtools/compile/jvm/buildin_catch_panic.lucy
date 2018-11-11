@@ -32,7 +32,7 @@ class BuildinFunctionCatchPanic {
                 {
                     verificationTypeInfo := new cg.StackMapVerificationTypeInfo()
                     uninitializedVariableInfo := new cg.StackMapUninitializedVariableInfo()
-                    uninitializedVariableInfo.CodeOffset = char(code.CodeLength - 4)
+                    uninitializedVariableInfo.codeOffset = char(code.CodeLength - 4)
                     verificationTypeInfo.Verify = uninitializedVariableInfo
                     state.Stacks.append(verificationTypeInfo)
                     state.Stacks.append(verificationTypeInfo)
@@ -53,7 +53,7 @@ class BuildinFunctionCatchPanic {
             {
                 verificationTypeInfo := new cg.StackMapVerificationTypeInfo()
                 uninitializedVariableInfo := new cg.StackMapUninitializedVariableInfo()
-                uninitializedVariableInfo.CodeOffset = char(code.CodeLength - 4)
+                uninitializedVariableInfo.codeOffset = char(code.CodeLength - 4)
                 verificationTypeInfo.Verify = uninitializedVariableInfo
                 state.Stacks = append(state.Stacks, verificationTypeInfo)
                 state.Stacks = append(state.Stacks, verificationTypeInfo)
@@ -95,8 +95,8 @@ class BuildinFunctionCatchPanic {
             copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)) // store
             //check cast
             code.Codes[code.CodeLength] = cg.OP_checkcast
-            if context.Defer.ExceptionClass != null {
-                c.InsertClassConst(context.Defer.ExceptionClass.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+            if context.Defer.exceptionClass != null {
+                c.InsertClassConst(context.Defer.exceptionClass.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
             } else {
                 c.InsertClassConst(ast.DefaultExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
             }

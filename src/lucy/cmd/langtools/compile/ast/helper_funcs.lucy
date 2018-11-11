@@ -4,7 +4,7 @@ import "java/lang/Object"
 
 
 fn divisionByZeroErr(pos Pos) -> (err error) {
-	return new error(sprintf("%s division by zero", pos.ErrMsgPrefix()))
+	return new error(sprintf("%s division by zero", pos.errMsgPrefix()))
 }
 
 fn checkExpressions(block Block, es []Expression, errs []error, singleValueContext bool) ->(valueTypes []Type) {
@@ -62,8 +62,8 @@ fn shouldAccessFromImports(name string, from Pos, alreadyHave Pos) -> (i Import,
 	//fmt.Println(name, from, alreadyHave)
 	// different file
 	// should access from import
-	if from.Filename != alreadyHave.Filename {
-		i := PackageBeenCompile.getImport(from.Filename, name)
+	if from.filename != alreadyHave.filename {
+		i := PackageBeenCompile.getImport(from.filename, name)
 		if i != null {
 			i.used = true
 			return i, true
@@ -71,7 +71,7 @@ fn shouldAccessFromImports(name string, from Pos, alreadyHave Pos) -> (i Import,
 			return null, false
 		}
 	}
-	i = PackageBeenCompile.getImport(from.Filename, name)
+	i = PackageBeenCompile.getImport(from.filename, name)
 	if i == null {
 		return null, false
 	}
@@ -81,7 +81,7 @@ fn shouldAccessFromImports(name string, from Pos, alreadyHave Pos) -> (i Import,
 		from
 		alreadyHave
 	*/
-	should = from.Line < alreadyHave.Line
+	should = from.line < alreadyHave.line
 	if should {
 		i.used = true
 	}
@@ -90,15 +90,15 @@ fn shouldAccessFromImports(name string, from Pos, alreadyHave Pos) -> (i Import,
 
 fn methodsNotMatchError(pos Pos, name string, ms []ClassMethod, want []Type) -> (err error) {
 	if len(ms) == 0 {
-		return new error(sprintf("%s method '%s' not found", pos.ErrMsgPrefix(), name))
+		return new error(sprintf("%s method '%s' not found", pos.errMsgPrefix(), name))
 	}
 	var errMsg string
 	if len(ms) == 1 {
 		errMsg = sprintf("%s cannot call method '%s':\n",
-			pos.ErrMsgPrefix(), name)
+			pos.errMsgPrefix(), name)
 	} else {
 		errMsg = sprintf("%s method named '%s' have no suitable match:\n",
-			pos.ErrMsgPrefix(), name)
+			pos.errMsgPrefix(), name)
 	}
 	wantString := "fn " + name + " ("
 	for k, v := range want {
@@ -149,10 +149,9 @@ fn checkConst(block Block, c Constant) -> (err error)  {
 	}
 	if is == false {
 		err := new error(sprintf("%s const named '%s' is not defined by const value",
-			c.pos.ErrMsgPrefix(), c.name))
+			c.pos.errMsgPrefix(), c.name))
 		return err
 	}
-	c.value = c.defaultValueExpression.data
 	t, _ := c.defaultValueExpression.checkSingleValueContextExpression(block)
 	if c.Type != null {
 		es := []error{}
@@ -160,16 +159,26 @@ fn checkConst(block Block, c Constant) -> (err error)  {
 			if (c.Type.isInteger() && t.isInteger()) ||
 				(c.Type.isFloat() && t.isFloat()) {
 				c.defaultValueExpression.convertLiteralToNumberType(c.Type.Type)
-				c.value = c.defaultValueExpression.data
 			} else {
 				err := new error(sprintf("%s cannot use '%s' as '%s' for initialization value",
-					c.pos.ErrMsgPrefix(), c.Type.typeString(), t.typeString()))
+					c.pos.errMsgPrefix(), c.Type.typeString(), t.typeString()))
 				return err
 			}
 		}
 	} else { // means use old type
 		c.Type = t
 	}
+	switch c.Type.Type {
+		case VariableTypeBool:
+			c.boolValue = c.defaultValueExpression.boolValue
+		case c.Type.isInteger():
+			c.longValue = c.defaultValueExpression.longValue
+		case c.Type.isFloat():
+			c.doubleValue = c.defaultValueExpression.doubleValue
+		case VariableTypeString:
+			c.stringValue = c.defaultValueExpression.stringValue
+	}
+    
 	return null
 }
 

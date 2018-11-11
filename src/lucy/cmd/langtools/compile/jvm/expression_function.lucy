@@ -45,7 +45,7 @@ class  BuildExpressionFunction {
 			function.Entrance = method
 			method.Class = c
 			method.Descriptor = Descriptor.methodDescriptor(function.Type)
-			method.Code = new cg.AttributeCode()
+			method.code = new cg.AttributeCode()
 			this.buildFunction(c, null, method, function)
 			c.AppendMethod(method)
 			return
@@ -107,7 +107,7 @@ class  BuildExpressionFunction {
 			if v.beenCapturedAsLeftValue > 0 {
 				meta := closure.getMeta(v.Type.Type)
 				field.Descriptor = "L" + meta.className + ";"
-				if context.function.Closure.ClosureVariableExist(v) {
+				if context.function.Closure.closureVariableExist(v) {
 					// I Know c object at offset 0
 					copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 					if 3 > maxStack {
@@ -128,7 +128,7 @@ class  BuildExpressionFunction {
 				}
 			} else {
 				field.Descriptor = Descriptor.typeDescriptor(v.Type)
-				if context.function.Closure.ClosureVariableExist(v) {
+				if context.function.Closure.closureVariableExist(v) {
 					// I Know c object at offset 0
 					copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 					if 3 > maxStack {
@@ -171,7 +171,7 @@ class  BuildExpressionFunction {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
 			}
-			if context.function.Closure.ClosureFunctionExist(v) {
+			if context.function.Closure.closureFunctionExist(v) {
 				// I Know this at 0 offset
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
 				if 3 > maxStack {
@@ -199,7 +199,7 @@ class  BuildExpressionFunction {
 			code.CodeLength += 3
 			total--
 		}
-		method.Code = new cg.AttributeCode()
+		method.code = new cg.AttributeCode()
 		// build function
 		this.buildFunction(closureClass, null, method, function)
 		return
@@ -243,7 +243,7 @@ class  BuildExpressionFunction {
 			maxStack = 4
 		}
 		if function.IsClosureFunction {
-			if context.function.Closure.ClosureFunctionExist(function) {
+			if context.function.Closure.closureFunctionExist(function) {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0))
 				code.Codes[code.CodeLength] = cg.OP_getfield
 				c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(

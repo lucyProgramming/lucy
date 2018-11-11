@@ -28,7 +28,7 @@ class BuildIf {
         }
         trueBlockState := new StackMapState(ifState)
         stack, exit :=
-            this.BuildExpression.buildConditionNotOk(c, code, context, trueBlockState, s.Condition)
+            this.BuildExpression.buildConditionNotOk(c, code, context, trueBlockState, s.condition)
         if stack > maxStack {
             maxStack = stack
         }
@@ -36,7 +36,7 @@ class BuildIf {
         ifState.addTop(trueBlockState)
         if s.Else != null || len(s.ElseIfList) > 0 {
             if s.block.notExecuteToLastStatement == false {
-                s.Exits = append(s.Exits, new cg.Exit(cg.OP_goto, code))
+                s.exits = append(s.exits, new cg.Exit(cg.OP_goto, code))
             }
         }
         for k, v := range s.ElseIfList {
@@ -44,14 +44,14 @@ class BuildIf {
             writeExits([]cg.Exit{exit}, code.CodeLength)
             elseIfState := new StackMapState(ifState)
             stack, exit =
-                this.BuildExpression.buildConditionNotOk(c, code, context, elseIfState, v.Condition)
+                this.BuildExpression.buildConditionNotOk(c, code, context, elseIfState, v.condition)
             if stack > maxStack {
                 maxStack = stack
             }
             this.buildBlock(c, code, v.block, context, elseIfState)
             if s.Else != null || k != len(s.ElseIfList)-1 {
                 if v.block.notExecuteToLastStatement == false {
-                    s.Exits = append(s.Exits, new cg.Exit(cg.OP_goto, code))
+                    s.exits = append(s.exits, new cg.Exit(cg.OP_goto, code))
                 }
             }
             // when done

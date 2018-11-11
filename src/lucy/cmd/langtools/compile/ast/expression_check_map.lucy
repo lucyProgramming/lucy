@@ -63,7 +63,7 @@ class ExpressionCheckMap {
 				m.Type.Map.K.Type == v.Key.value.Type {
 				fn errMsg (pos Pos, first Pos, which string) -> (err error) {
 					errMsg := sprintf("%s  '%s' duplicate key,first declared at:\n",
-						pos.ErrMsgPrefix(), which)
+						pos.errMsgPrefix(), which)
 					errMsg += sprintf("\t%s", errMsgPrefix(first))
 					return new error(errMsg)
 				}

@@ -2,24 +2,24 @@
 
 public class StatementGoTo {
 	public defers         []StatementDefer
-	public LabelName      string
-	public StatementLabel StatementLabel
+	public labelName      string
+	public statementLabel StatementLabel
 	public pos            Pos
 	fn checkStatementGoTo(b Block) -> (err error) {
-		label := b.searchLabel(this.LabelName)
+		label := b.searchLabel(this.labelName)
 		if label == null {
 			return new error(sprintf("%s label named '%s' not found",
-				this.pos.ErrMsgPrefix(), this.LabelName))
+				this.pos.errMsgPrefix(), this.labelName))
 		}
-		this.StatementLabel = label
+		this.statementLabel = label
 		this.defers = []StatementDefer{}
 		this.mkDefers(b)
-		return this.StatementLabel.Ready(this.pos)
+		return this.statementLabel.Ready(this.pos)
 	}
 
 	fn mkDefers(currentBlock Block) {
 		bs := []Block{}
-		for this.StatementLabel.block != currentBlock {
+		for this.statementLabel.block != currentBlock {
 			bs.append(currentBlock)
 			currentBlock = currentBlock.outer
 		}

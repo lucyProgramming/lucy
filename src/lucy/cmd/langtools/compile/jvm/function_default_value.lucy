@@ -9,9 +9,9 @@ class DefaultValueParse {
 		c cg.ClassHighLevel,
 		f ast.Function) -> (d cg.AttributeDefaultParameters) {
 		ret := new cg.AttributeDefaultParameters()
-		ret.Start = char(f.DefaultValueStartAt)
+		ret.start = char(f.DefaultValueStartAt)
 		ret.constants = []int{}
-		for i := ret.Start; i < char(len(f.Type.ParameterList)); i++ {
+		for i := ret.start; i < char(len(f.Type.ParameterList)); i++ {
 			switch f.Type.ParameterList[i].defaultValueExpression.Type {
 			case ast.ExpressionTypeBool:
 				if f.Type.ParameterList[i].defaultValueExpression.data.(bool) {
@@ -45,9 +45,9 @@ class DefaultValueParse {
 
 	static fn Decode(c cg.Class, f ast.Function, dp cg.AttributeDefaultParameters) {
 		f.HaveDefaultValue = true
-		f.DefaultValueStartAt = int(dp.Start)
+		f.DefaultValueStartAt = int(dp.start)
 		for i := char(0); i < char(len(dp.constants)); i++ {
-			v := f.Type.ParameterList[dp.Start+i]
+			v := f.Type.ParameterList[dp.start+i]
 			v.defaultValueExpression = new ast.Expression()
 			v.defaultValueExpression.value = v.Type
 			switch v.Type.Type {

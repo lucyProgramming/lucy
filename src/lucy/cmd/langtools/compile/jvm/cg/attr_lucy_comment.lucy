@@ -5,7 +5,7 @@ public class AttributeLucyComment {
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
 		ret.attributeLength = 2
-		ret.NameIndex = c.InsertUtf8Const(AttributeNameLucyComment)
+		ret.nameIndex = c.InsertUtf8Const(AttributeNameLucyComment)
 		ret.Info = new []byte(2)
 		index := c.InsertUtf8Const(this.comment)
 		binary.BigEndian.putChar(ret.Info, index)

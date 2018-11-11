@@ -10,30 +10,30 @@ class ExpressionCheckSlice {
 		if sliceOn.Type != VariableTypeArray &&
 			sliceOn.Type != VariableTypeString {
 			errs . append(new error( sprintf("%s cannot have slice on '%s'",
-				sliceOn.pos.ErrMsgPrefix(), sliceOn.typeString())))
+				sliceOn.pos.errMsgPrefix(), sliceOn.typeString())))
 		}
 		//start
-		if on.Start == null {
-			on.Start = new Expression()
-			on.Start.pos = e.pos
-			on.Start.op = "intLiteral"
-			on.Start.Type = ExpressionTypeInt
+		if on.start == null {
+			on.start = new Expression()
+			on.start.pos = e.pos
+			on.start.op = "intLiteral"
+			on.start.Type = ExpressionTypeInt
 		}
-		startType, es := on.Start.checkSingleValueContextExpression(block)
+		startType, es := on.start.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if startType != null {
 			if startType.isInteger() == false {
 				errs . append(new error( sprintf("%s cannot use '%s' for startIndex",
-					startType.pos.ErrMsgPrefix(), startType.typeString())))
+					startType.pos.errMsgPrefix(), startType.typeString())))
 			} else {
 				if startType.Type == VariableTypeLong {
-					on.Start.convertToNumberType(VariableTypeInt)
+					on.start.convertToNumberType(VariableTypeInt)
 				}
-				if on.Start.isLiteral() {
-					startIndexValue := on.Start.getLongValue()
+				if on.start.isLiteral() {
+					startIndexValue := on.start.getLongValue()
 					if startIndexValue < 0 {
 						errs.append(new error( sprintf("%s startIndex '%d' is negative",
-								startType.pos.ErrMsgPrefix(), startIndexValue)))
+								startType.pos.errMsgPrefix(), startIndexValue)))
 					}
 				}
 			}
@@ -44,7 +44,7 @@ class ExpressionCheckSlice {
 			if endType != null {
 				if endType.isInteger() == false {
 					errs . append(new error( sprintf("%s cannot use '%s' for endIndex",
-						endType.pos.ErrMsgPrefix(), endType.typeString())))
+						endType.pos.errMsgPrefix(), endType.typeString())))
 				} else {
 					if endType.Type == VariableTypeLong {
 						on.End.convertToNumberType(VariableTypeInt)
@@ -53,14 +53,14 @@ class ExpressionCheckSlice {
 						endIndexValue := on.End.getLongValue()
 						if endIndexValue < 0 {
 							errs . append(new error( sprintf("%s endIndex '%d' is negative",
-									endType.pos.ErrMsgPrefix(), endIndexValue)))
+									endType.pos.errMsgPrefix(), endIndexValue)))
 						}
 						if startType != null &&
 							startType.isInteger() &&
-							on.Start.isLiteral() {
-							if on.Start.getLongValue() > endIndexValue {
+							on.start.isLiteral() {
+							if on.start.getLongValue() > endIndexValue {
 								errs . append(new error( sprintf("%s startIndex '%d' is greater than endIndex '%d'",
-										endType.pos.ErrMsgPrefix(), on.Start.getLongValue(), endIndexValue)))
+										endType.pos.errMsgPrefix(), on.start.getLongValue(), endIndexValue)))
 							}
 						}
 					}

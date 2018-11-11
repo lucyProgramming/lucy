@@ -1,12 +1,8 @@
-import "java/lang/Object"
-import "java/lang/Long"
-import "java/lang/Double"
-import "java/lang/Float"
-import "java/lang/Boolean"
+
 import "lucy/cmd/langtools/compile/jvm/cg"
 
 
-public class Constant {
+public class Constant implements GetDefaultValue{
 	public isGlobal               bool
 	public isBuildIn              bool
 	public used                   bool
@@ -16,9 +12,10 @@ public class Constant {
 	public defaultValueExpression Expression
 	public accessFlags            char
 	public comment                string
-	public value                  Object
+	public stringValue            string
 	public longValue long
-	public doubleValue double 
+	public doubleValue double
+	public boolValue bool
 	
 	fn isPublic() -> (is bool) {
 		return this.accessFlags|cg.AccFieldPublic != 0
@@ -27,19 +24,35 @@ public class Constant {
 	fn mkDefaultValue() {
 		switch this.Type.Type {
 		case VariableTypeBool:
-			this.value = Boolean.valueOf(false)
+			this.boolValue = false
 		case this.Type.isInteger():
-			this.value = Long.valueOf(long(0))
+			this.longValue = 0L
 		case VariableTypeFloat:
-			this.value = Float.valueOf(float(0))
+			this.doubleValue = 0d
 		case VariableTypeDouble:
-			this.value = Double.valueOf(double(0))
+			this.doubleValue = 0d
 		case VariableTypeString:
-			this.value = ""
+			this.stringValue = ""
 		default:
 			//
 		}
 	}
+
+	public fn getType()->(t Type) {
+		return this.Type 
+	}
+    public fn getLongValue()->(v long){
+    	return this.longValue
+    }
+    public fn getDoubleValue()->(v double){
+    	return this.doubleValue
+    }
+    public fn getBoolValue ()-> (v bool){
+    	return this.boolValue
+    }
+    public fn getStringValue() -> (v string){
+    	return this.stringValue
+    }
 }
 
 

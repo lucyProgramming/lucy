@@ -2,17 +2,17 @@
  
 
 public class AttributeConstantValue {
-	public Index char
-	public fn AttributeConstantValue(Index char){
+	public index char
+	public fn AttributeConstantValue(index char){
 		this.super()
-		this.Index = Index 
+		this.index = index
 	}
 	fn ToAttributeInfo(c Class) -> (info AttributeInfo) {
 		info = new AttributeInfo()
-		info.NameIndex = c.InsertUtf8Const(AttributeNameConstValue)
+		info.nameIndex = c.InsertUtf8Const(AttributeNameConstValue)
 		info.attributeLength = 2
 		info.Info = new []byte(2)
-		binary.BigEndian.putChar(info.Info, this.Index)
+		binary.BigEndian.putChar(info.Info, this.index)
 		return info
 	}
 }

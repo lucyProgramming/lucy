@@ -17,9 +17,9 @@ const	AccMethodSynthetic    char = 0x1000 //方法在源文件中不出现，由
 
 class MethodInfo {
 	accessFlags            char
-	NameIndex              char
-	DescriptorIndex        char
-	Attributes             []AttributeInfo
+	nameIndex              char
+	descriptorIndex        char
+	attributes             []AttributeInfo
 	AttributeGroupedByName AttributeGroupedByName
 
 	fn IsBridge() ->(is bool)  {

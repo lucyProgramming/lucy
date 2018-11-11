@@ -32,7 +32,7 @@ class BuildForRangeJavaArray {
         noNullExit := new cg.Exit(cg.OP_ifnonnull, code)
         code.Codes[code.CodeLength] = cg.OP_pop
         code.CodeLength++
-        s.Exits = append(s.Exits, new cg.Exit(cg.OP_goto, code))
+        s.exits = append(s.exits, new cg.Exit(cg.OP_goto, code))
         writeExits([]cg.Exit{noNullExit}, code.CodeLength)
         state.pushStack(c, s.RangeAttr.RangeOn.value)
         context.MakeStackMap(code, state, code.CodeLength)
@@ -72,7 +72,7 @@ class BuildForRangeJavaArray {
         copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.K))
 
         //handle captured vars
-        if s.Condition.Type == ast.ExpressionTypeVarAssign {
+        if s.condition.Type == ast.ExpressionTypeVarAssign {
             if attr.IdentifierValue != null &&
                 attr.IdentifierValue.Variable.beenCapturedAsLeftValue > 0 {
                 closure.createClosureVar(c, code, attr.IdentifierValue.Variable.Type)
@@ -114,7 +114,7 @@ class BuildForRangeJavaArray {
         if 2 > maxStack {
             maxStack = 2
         }
-        s.Exits = append(s.Exits, new cg.Exit(cg.OP_if_icmpge, code))
+        s.exits = append(s.exits, new cg.Exit(cg.OP_if_icmpge, code))
         //load elements
         if attr.IdentifierValue != null || attr.ExpressionValue != null {
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.Elements))
@@ -157,7 +157,7 @@ class BuildForRangeJavaArray {
             blockState.appendLocals(c, attr.RangeOn.value.array)
         }
         //current stack is 0
-        if s.Condition.Type == ast.ExpressionTypeVarAssign {
+        if s.condition.Type == ast.ExpressionTypeVarAssign {
             if attr.IdentifierValue != null {
                 if attr.IdentifierValue.Variable.beenCapturedAsLeftValue > 0 {
                     copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, attr.IdentifierValue.Variable.localValOffset))

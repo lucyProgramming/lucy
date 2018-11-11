@@ -3,7 +3,7 @@ import "java/lang/Object"
 class InheritedAttribute {
 	statementOffset       int // should not inherite
 	isConstructionMethod  bool
-	forContinue           StatementFor // if this statement is in for or not
+	forStatement           StatementFor // if this statement is in for or not
 	forBreak              Object
 	Function              Function
 	Class                 Class

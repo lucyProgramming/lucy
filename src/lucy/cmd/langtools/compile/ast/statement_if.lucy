@@ -2,13 +2,13 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 public class StatementIf {
 	public PrefixExpressions   []Expression
-	public Condition           Expression
+	public condition           Expression
 	public pos                 Pos
 	public initExpressionBlock Block = new Block()
 	public block               Block
 	public ElseIfList          []StatementElseIf
 	public Else               	Block
-	public Exits               []cg.Exit
+	public exits               []cg.Exit
 	
 	fn check(father Block) -> (errs []error = []error{})  {
 		this.initExpressionBlock.inherit(father)
@@ -20,15 +20,15 @@ public class StatementIf {
 				errs.append(err)
 			}
 		}
-		if this.Condition != null {
-			conditionType, es := this.Condition.checkSingleValueContextExpression(this.initExpressionBlock)
+		if this.condition != null {
+			conditionType, es := this.condition.checkSingleValueContextExpression(this.initExpressionBlock)
 			errs.appendAll(es)
 			if conditionType != null &&
 				conditionType.Type != VariableTypeBool {
 				errs.append(new error(sprintf("%s condition is not a bool expression",
-					this.Condition.pos.ErrMsgPrefix())))
+					this.condition.pos.errMsgPrefix())))
 			}
-			if err := this.Condition.canBeUsedAsCondition(); err != null {
+			if err := this.condition.canBeUsedAsCondition(); err != null {
 				errs.append(err)
 			}
 		}
@@ -36,16 +36,16 @@ public class StatementIf {
 		errs.appendAll(this.block.check())
 		for _, v := range this.ElseIfList {
 			v.block.inherit(this.initExpressionBlock)
-			if v.Condition != null {
-				conditionType, es := v.Condition.checkSingleValueContextExpression(v.block)
+			if v.condition != null {
+				conditionType, es := v.condition.checkSingleValueContextExpression(v.block)
 				errs.appendAll(es)
-				if err := v.Condition.canBeUsedAsCondition(); err != null {
+				if err := v.condition.canBeUsedAsCondition(); err != null {
 					errs.append(err)
 				}
 				if conditionType != null &&
 					conditionType.Type != VariableTypeBool {
 					errs.append(new error(sprintf("%s condition is not a bool expression",
-							conditionType.pos.ErrMsgPrefix())))
+							conditionType.pos.errMsgPrefix())))
 				}
 				errs.appendAll(v.block.check())
 			}
@@ -61,6 +61,6 @@ public class StatementIf {
 
 
 public class StatementElseIf {
-	public Condition Expression
+	public condition Expression
 	public block     Block
 }

@@ -1,12 +1,12 @@
 
 
 public class MethodHighLevel {
-	public	IsConstruction                        bool
+	public	isConstruction                        bool
 	public	Class                                 ClassHighLevel
 	public	name                                  string
 	public	Descriptor                            string
 	public	accessFlags                           char
-	public	Code                                  AttributeCode
+	public	code                                  AttributeCode
 	public	AttributeLucyMethodDescriptor         AttributeLucyMethodDescriptor
 	public	AttributeLucyTriggerPackageInitMethod AttributeLucyTriggerPackageInitMethod
 	public	AttributeDefaultParameters            AttributeDefaultParameters

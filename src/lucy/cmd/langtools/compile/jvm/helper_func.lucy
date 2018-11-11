@@ -5,9 +5,9 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 fn writeExits(es []cg.Exit, to int) {
 	for _, e := range es {
-		offset := int16(to - int(e.CurrentCodeLength))
-		e.BranchBytes[0] = byte(offset >> 8)
-		e.BranchBytes[1] = byte(offset)
+		offset := int16(to - int(e.currentCodeLength))
+		e.branchBytes[0] = byte(offset >> 8)
+		e.branchBytes[1] = byte(offset)
 	}
 }
 

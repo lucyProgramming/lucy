@@ -8,7 +8,7 @@ public class AttributeLucyClassConst {
 		for len(bs) > 0 {
 			constant := new LucyClassConst()
 			constant.name = string(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
-			constant.Descriptor = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].Info)
+			constant.descriptor = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].Info)
 			constant.ValueIndex = binary.BigEndian.getChar(bs[4:])
 			constant.comment = string(c.ConstPool[binary.BigEndian.getChar(bs[6:])].Info)
 			bs = bs[8:]
@@ -21,12 +21,12 @@ public class AttributeLucyClassConst {
 			return null
 		}
 		ret = new AttributeInfo()
-		ret.NameIndex = c.InsertUtf8Const(AttributeNameLucyClassConst)
+		ret.nameIndex = c.InsertUtf8Const(AttributeNameLucyClassConst)
 		ret.Info = new []byte(len(this.constants)*8)
 		for k, v := range this.constants {
 			b := ret.Info[k*8:]
 			binary.BigEndian.putChar(b, c.InsertUtf8Const(v.name))
-			binary.BigEndian.putChar(b[2:], c.InsertUtf8Const(v.Descriptor))
+			binary.BigEndian.putChar(b[2:], c.InsertUtf8Const(v.descriptor))
 			binary.BigEndian.putChar(b[4:], v.ValueIndex)
 			binary.BigEndian.putChar(b[6:], c.InsertUtf8Const(v.comment))
 		}
@@ -37,7 +37,7 @@ public class AttributeLucyClassConst {
 
 public class LucyClassConst {
 	public name       string
-	public Descriptor string
+	public descriptor string
 	public ValueIndex char
 	public comment    string
 }

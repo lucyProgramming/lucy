@@ -10,12 +10,12 @@ class ExpressionCheckLeftValue {
 			identifier := e.data.(ExpressionIdentifier)
 			if identifier.name == UnderScore {
 				errs.append(new error(sprintf("%s cannot use '%s' as left value",
-					e.pos.ErrMsgPrefix(), identifier.name)))
+					e.pos.errMsgPrefix(), identifier.name)))
 				return null
 			}
 			if identifier.name == ThisPointerName {
 				errs.append(new error(sprintf("%s '%s' cannot be used as left value",
-					e.pos.ErrMsgPrefix(), ThisPointerName)))
+					e.pos.errMsgPrefix(), ThisPointerName)))
 			}
 			isCaptureVar := [false]
 			d, err := block.searchIdentifier(e.pos, identifier.name, isCaptureVar)
@@ -25,7 +25,7 @@ class ExpressionCheckLeftValue {
 			}
 			if d == null {
 				errs.append(new error(sprintf("%s '%s' not found",
-					e.pos.ErrMsgPrefix(), identifier.name)))
+					e.pos.errMsgPrefix(), identifier.name)))
 				return null
 			}
 			if v := d.(Variable) ; v != null {
@@ -43,7 +43,7 @@ class ExpressionCheckLeftValue {
                 return result
 			}
             errs.append(new error(sprintf("%s identifier '%s' is '%s' , cannot be used as left value",
-                e.pos.ErrMsgPrefix(), identifier.name, block.identifierIsWhat(d))))
+                e.pos.errMsgPrefix(), identifier.name, block.identifierIsWhat(d))))
             return null
 		case ExpressionTypeIndex:
 			result = ExpressionCheckIndex.check(e , block, errs)
@@ -60,7 +60,7 @@ class ExpressionCheckLeftValue {
 			case VariableTypeDynamicSelector:
 				if selection.name == SUPER {
 					errs.append(new error(sprintf("%s access '%s' at '%s' not allow",
-						e.pos.ErrMsgPrefix(), SUPER, object.typeString())))
+						e.pos.errMsgPrefix(), SUPER, object.typeString())))
 					return null
 				}
 				field, err := object.Class.getField(e.pos, selection.name, false)
@@ -96,14 +96,14 @@ class ExpressionCheckLeftValue {
 				variable, exists := object.Package.block.nameExists(selection.name)
 				if exists == false {
 					errs.append(new error(sprintf("%s '%s.%s' not found",
-						e.pos.ErrMsgPrefix(), object.Package.name, selection.name)))
+						e.pos.errMsgPrefix(), object.Package.name, selection.name)))
 					return null
 				}
 				if v := variable.(Variable) ;v != null {
 				    if v.accessFlags&cg.AccFieldPublic == 0 &&
                         object.Package.isSame(PackageBeenCompile) == false {
                         errs.append(new error(sprintf("%s '%s.%s' is private",
-                            e.pos.ErrMsgPrefix(), object.Package.name, selection.name)))
+                            e.pos.errMsgPrefix(), object.Package.name, selection.name)))
                     }
                     selection.PackageVariable = v
                     result = v.Type.Clone()
@@ -113,13 +113,13 @@ class ExpressionCheckLeftValue {
 				}
 
                 errs.append(new error(sprintf("%s '%s' is not variable",
-                    e.pos.ErrMsgPrefix(), selection.name)))
+                    e.pos.errMsgPrefix(), selection.name)))
                 return null
 
 			case VariableTypeMagicFunction:
 				v := object.Function.Type.searchName(selection.name)
 				if v == null {
-					err := new error(sprintf("%s '%s' not found", e.pos.ErrMsgPrefix(), selection.name))
+					err := new error(sprintf("%s '%s' not found", e.pos.errMsgPrefix(), selection.name))
 					errs.append(err)
 					return null
 				}
@@ -135,12 +135,12 @@ class ExpressionCheckLeftValue {
 				return result
 			default:
 				errs.append(new error(sprintf("%s cannot access '%s' on '%s'",
-					e.pos.ErrMsgPrefix(), selection.name, object.typeString())))
+					e.pos.errMsgPrefix(), selection.name, object.typeString())))
 				return null
 			}
 		default:
 			errs.append(new error(sprintf("%s '%s' cannot be used as left value",
-				e.pos.ErrMsgPrefix(),
+				e.pos.errMsgPrefix(),
 				e.op)))
 			return null
 		}

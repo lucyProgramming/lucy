@@ -6,32 +6,32 @@ public class AttributeTemplateFunction {
 	/*
 		reGenerate pos
 	*/
-	public Filename    string
-	public StartLine   char
-	public StartColumn char
-	public Code        string
-	public AccessFlag  char
+	public filename    string
+	public startLine   char
+	public startColumn char
+	public code        string
+	public accessFlags  char
 	public comment     string
-	public fn FromBytes(c Class, bs []byte) {
+	public fn fromBytes(c Class, bs []byte) {
 		this.name = string(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
-		this.Filename = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].Info)
-		this.StartLine = binary.BigEndian.getChar(bs[4:])
-		this.StartColumn = binary.BigEndian.getChar(bs[6:])
-		this.Code = string(c.ConstPool[binary.BigEndian.getChar(bs[8:])].Info)
-		this.AccessFlag = binary.BigEndian.getChar(bs[10:])
+		this.filename = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].Info)
+		this.startLine = binary.BigEndian.getChar(bs[4:])
+		this.startColumn = binary.BigEndian.getChar(bs[6:])
+		this.code = string(c.ConstPool[binary.BigEndian.getChar(bs[8:])].Info)
+		this.accessFlags = binary.BigEndian.getChar(bs[10:])
 	}
 	
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo) {
 		info := new AttributeInfo()
-		info.NameIndex = c.InsertUtf8Const(AttributeNameLucyTemplateFunction)
+		info.nameIndex = c.InsertUtf8Const(AttributeNameLucyTemplateFunction)
 		info.attributeLength = 14
 		info.Info = new []byte(info.attributeLength)
 		binary.BigEndian.putChar(info.Info, c.InsertUtf8Const(this.name))
-		binary.BigEndian.putChar(info.Info[2:], c.InsertUtf8Const(this.Filename))
-		binary.BigEndian.putChar(info.Info[4:], this.StartLine)
-		binary.BigEndian.putChar(info.Info[6:], this.StartColumn)
-		binary.BigEndian.putChar(info.Info[8:], c.InsertUtf8Const(this.Code))
-		binary.BigEndian.putChar(info.Info[10:], this.AccessFlag)
+		binary.BigEndian.putChar(info.Info[2:], c.InsertUtf8Const(this.filename))
+		binary.BigEndian.putChar(info.Info[4:], this.startLine)
+		binary.BigEndian.putChar(info.Info[6:], this.startColumn)
+		binary.BigEndian.putChar(info.Info[8:], c.InsertUtf8Const(this.code))
+		binary.BigEndian.putChar(info.Info[10:], this.accessFlags)
 		binary.BigEndian.putChar(info.Info[12:], c.InsertUtf8Const(this.comment))
 		return info
 	}	

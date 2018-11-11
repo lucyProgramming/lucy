@@ -15,19 +15,19 @@ class ExpressionCheckUnary {
 		if e.Type == ExpressionTypeNot {
 			if unary.Type != VariableTypeBool {
 				errs.append(new error( sprintf("%s not a bool expression , but '%s'",
-					unary.pos.ErrMsgPrefix(), unary.typeString())))
+					unary.pos.errMsgPrefix(), unary.typeString())))
 			}
 		}
 		if e.Type == ExpressionTypeNegative {
 			if unary.isNumber() == false {
 				errs.append(new error( sprintf("%s cannot apply '-' on '%s'",
-					unary.pos.ErrMsgPrefix(), unary.typeString())))
+					unary.pos.errMsgPrefix(), unary.typeString())))
 			}
 		}
 		if e.Type == ExpressionTypeBitwiseNot {
 			if unary.isInteger() == false {
 				errs . append(new error( sprintf("%s cannot apply '~' on '%s'",
-					unary.pos.ErrMsgPrefix(), unary.typeString())))
+					unary.pos.errMsgPrefix(), unary.typeString())))
 			}
 		}
 		result := unary.Clone()
@@ -54,7 +54,7 @@ class ExpressionCheckUnary {
 		}
 		if false == increment.isNumber() {
 			errs . append(new error( sprintf("%s cannot apply '%s' on '%s'",
-					on.pos.ErrMsgPrefix(), on.op, increment.typeString())))
+					on.pos.errMsgPrefix(), on.op, increment.typeString())))
 		}
 		result := increment.Clone()
 		result.pos = e.pos

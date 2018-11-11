@@ -2,7 +2,7 @@
 
 public class StatementReturn   {
 	public defers      []StatementDefer
-	public Expressions []Expression
+	public expressions []Expression
 	public pos         Pos
 
 
@@ -18,28 +18,28 @@ public class StatementReturn   {
 	fn check(b Block) -> (errs []error = []error {} ) {
 		if b.inheritedAttribute.Defer != null {
 			return []error{new error(sprintf("%s cannot has 'return' in 'defer'",
-				this.pos.ErrMsgPrefix()))}
+				this.pos.errMsgPrefix()))}
 		}
 		this.defers = []StatementDefer{}
 		this.mkDefers(b)
-		if len(this.Expressions) == 0 { // always ok
+		if len(this.expressions) == 0 { // always ok
 			return errs
 		}
-		returnValueTypes := checkExpressions(b, this.Expressions, errs, false)
+		returnValueTypes := checkExpressions(b, this.expressions, errs, false)
 		rs := b.inheritedAttribute.Function.Type.ReturnList
-		pos := this.Expressions[len(this.Expressions)-1].pos
+		pos := this.expressions[len(this.expressions)-1].pos
 		if len(returnValueTypes) < len(rs) {
-			errs.append(new error(sprintf("%s too few arguments to return", pos.ErrMsgPrefix())))
+			errs.append(new error(sprintf("%s too few arguments to return", pos.errMsgPrefix())))
 		} else if len(returnValueTypes) > len(rs) {
-			errs.append(new error(sprintf("%s too many arguments to return", pos.ErrMsgPrefix())))
+			errs.append(new error(sprintf("%s too many arguments to return", pos.errMsgPrefix())))
 		}
-		convertExpressionsToNeeds(this.Expressions,
-			b.inheritedAttribute.Function.Type.mkCallReturnTypes(this.Expressions[0].pos), returnValueTypes)
+		convertExpressionsToNeeds(this.expressions,
+			b.inheritedAttribute.Function.Type.mkCallReturnTypes(this.expressions[0].pos), returnValueTypes)
 		for k, v := range rs {
 			if k < len(returnValueTypes) && returnValueTypes[k] != null {
 				if false == v.Type.assignAble(errs, returnValueTypes[k]) {
 					errs.append(new error(sprintf("%s cannot use '%s' as '%s' to return",
-						returnValueTypes[k].pos.ErrMsgPrefix(),
+						returnValueTypes[k].pos.errMsgPrefix(),
 						returnValueTypes[k].typeString(),
 						v.Type.typeString())))
 				}

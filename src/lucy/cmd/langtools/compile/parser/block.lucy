@@ -237,7 +237,7 @@ class BlockParser  extends ParserExtends{
 					this.Next(lfNotToken)
 					continue
 				}
-				st.Expressions = es
+				st.expressions = es
 				this.parser.validStatementEnding()
 				this.Next(lfNotToken)
 			case lex.TokenLc:
@@ -326,7 +326,7 @@ class BlockParser  extends ParserExtends{
 				}
 				statementGoto := new ast.StatementGoTo()
 				statementGoto.pos = pos
-				statementGoto.LabelName = this.parser.token.stringValue
+				statementGoto.labelName = this.parser.token.stringValue
 				{
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeGoTo
@@ -429,9 +429,9 @@ class BlockParser  extends ParserExtends{
 			statement.Type = ast.StatementTypeLabel
 			label := new ast.StatementLabel()
 			label.pos = pos
-			label.CodeOffset = -1
+			label.codeOffset = -1
 			statement.StatementLabel = label
-			label.Statement = statement
+			label.statement = statement
 			label.name = e.data.(ast.ExpressionIdentifier).name
 			block.statements.append(statement)
 			label.block = block

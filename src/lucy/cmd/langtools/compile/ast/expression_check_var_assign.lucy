@@ -20,13 +20,13 @@ class ExpressionCheckVarAssign {
 		if len(lefts) > len(assignTypes) {
 			pos := values[len(values)-1].pos
 			errs.append(new error( sprintf("%s too few values , assign %d values to %d destinations",
-					pos.ErrMsgPrefix(),
+					pos.errMsgPrefix(),
 					len(assignTypes),
 					len(lefts))))
 		} else if len(lefts) < len(assignTypes) {
 			pos := getExtraExpressionPos(values, len(lefts))
 			errs.append(new error( sprintf("%s too many values , assign %d values to %d destinations",
-					pos.ErrMsgPrefix(),
+					pos.errMsgPrefix(),
 					len(assignTypes),
 					len(lefts))))
 		}

@@ -7,7 +7,7 @@ public class Lexer {
 	bs                   []byte
 	lastLine, lastColumn int
 	line, column         int
-	offset, end          int
+	offset , end          int
 	
 	public fn GetLineAndColumn() -> (line int, column int) {
 		return this.line, this.column
@@ -232,9 +232,9 @@ public class Lexer {
 
 	fn lexIdentifier(c byte) -> (token Token, err error) {
 		token = new Token()
-		token.StartLine = this.line
-		token.StartColumn = this.column - 1 // c is read
-		token.Offset = this.offset - 1      // c is read
+		token.startLine = this.line
+		token.startColumn = this.column - 1 // c is read
+		token.offset = this.offset - 1      // c is read
 		bs := []byte{c}
 		c, eof := this.getChar()
 		for eof == false {
@@ -297,8 +297,8 @@ public class Lexer {
 
 	fn lexString(endChar byte) -> (token Token, err error) {
 		token = new Token()
-		token.StartLine = this.line
-		token.StartColumn = this.column - 1
+		token.startLine = this.line
+		token.startColumn = this.column - 1
 		token.Type = TokenLiteralString
 		bs := []byte{}
 		var c byte
@@ -499,8 +499,8 @@ public class Lexer {
 			c == '\r' { // skip empty
 			c, eof = this.getChar()
 		}
-		token.StartLine = this.line
-		token.StartColumn = this.column - 1
+		token.startLine = this.line
+		token.startColumn = this.column - 1
 		if eof {
 			token.Type = TokenEof
 			token.Description = "EOF"
@@ -513,7 +513,7 @@ public class Lexer {
 			eof, err = this.lexNumber(token, c)
 			return
 		}
-		token.Offset = this.offset
+		token.offset = this.offset
 		switch c {
 		case '?':
 			token.Type = TokenQuestion

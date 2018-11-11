@@ -302,17 +302,17 @@ class Parser {
 	fn mkPos() -> (pos ast.Pos) {
 		if this.token != null {
 		    pos := new ast.Pos()
-		    pos.Filename = this.filename
-		    pos.Line = this.token.EndLine
-		    pos.Column = this.token.EndColumn
-		    pos.Offset = this.lexer.GetOffSet()
+		    pos.filename = this.filename
+		    pos.line = this.token.EndLine
+		    pos.column = this.token.EndColumn
+		    pos.offset = this.lexer.GetOffSet()
 			return
 		} else {
 			line, column := this.lexer.GetLineAndColumn()
 			pos = new  ast.Pos()
-			pos.Filename = this.filename
-			pos.Line = line
-			pos.Column = column
+			pos.filename = this.filename
+			pos.line = line
+			pos.column = column
 			return
 		}
 	}
@@ -320,16 +320,16 @@ class Parser {
 	fn mkEndPos() -> (pos ast.Pos) {
 		if this.lastToken == null {
 			return &ast.Pos{
-				Filename: this.filename,
-				Line:     this.token.EndLine,
-				Column:   this.token.EndColumn,
-				Offset:   this.lexer.GetOffSet(),
+				filename: this.filename,
+				line:     this.token.EndLine,
+				column:   this.token.EndColumn,
+				offset:   this.lexer.GetOffSet(),
 			}
 		} else {
 			return &ast.Pos{
-				Filename: this.filename,
-				Line:     this.lastToken.EndLine,
-				Column:   this.lastToken.EndColumn,
+				filename: this.filename,
+				line:     this.lastToken.EndLine,
+				column:   this.lastToken.EndColumn,
 			}
 		}
 	}
@@ -449,13 +449,13 @@ class Parser {
 	}
 
 	/*
-		pos.ErrMsgPrefix() only receive one argument
+		pos.errMsgPrefix() only receive one argument
 	*/
 	fn errMsgPrefix(pos ast.Pos...) -> (prefix string) {
 		if len(pos) > 0 {
-			return pos[0].ErrMsgPrefix()
+			return pos[0].errMsgPrefix()
 		}
-		return this.mkPos().ErrMsgPrefix()
+		return this.mkPos().errMsgPrefix()
 	}
 
 	fn consume(until map{lex.TokenKind -> bool } ) {

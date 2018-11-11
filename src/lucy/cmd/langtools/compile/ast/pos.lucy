@@ -1,16 +1,16 @@
  
 
 public class Pos {
-	public Filename string
-	public Line     int
-	public Column   int
+	public filename string
+	public line     int
+	public column   int
 	/*
 		offset at bs , for special use。
 		for template function only currently
 	*/
-	public Offset int
-	public fn ErrMsgPrefix() -> (prefix string) {
-		return sprintf("%s:%d:%d:", this.Filename, this.Line, this.Column)
+	public offset int
+	public fn errMsgPrefix() -> (prefix string) {
+		return sprintf("%s:%d:%d:", this.filename, this.line, this.column)
 	}
 }
 
@@ -27,5 +27,5 @@ public class NameWithPos {
 }
 
 fn errMsgPrefix(pos Pos) -> (prefix string) {
-	return pos.ErrMsgPrefix()
+	return pos.errMsgPrefix()
 }

@@ -7,7 +7,7 @@ class ExpressionCheckQuestion {
 		if condition != null {
 			if condition.Type != VariableTypeBool {
 				errs.append(new error(sprintf("%s not a bool expression",
-						condition.pos.ErrMsgPrefix())))
+						condition.pos.errMsgPrefix())))
 			}
 			if err := question.Selection.canBeUsedAsCondition(); err != null {
 				errs.append(err)
@@ -33,7 +33,7 @@ class ExpressionCheckQuestion {
 		if fType != null &&
 			tType.assignAble(errs, fType) == false {
 			errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-				fType.pos.ErrMsgPrefix(), fType.typeString(), tType.typeString())))
+				fType.pos.errMsgPrefix(), fType.typeString(), tType.typeString())))
 		}
 	}
 } 

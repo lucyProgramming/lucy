@@ -18,7 +18,7 @@ class  BuildPackage {
         mainClass.name = p.name + "/main"
         if p.block.Functions != null {
             for _, v := range p.block.Functions {
-                mainClass.InsertSourceFile(v.pos.Filename)
+                mainClass.InsertSourceFile(v.pos.filename)
                 break
             }
         }
@@ -81,7 +81,7 @@ class  BuildPackage {
     fn mkEnum(e ast.Enum) -> (c cg.ClassHighLevel) {
         c := new cg.ClassHighLevel()
         ast.TypeName = e.name
-        ast.TypeInsertSourceFile(e.pos.Filename)
+        ast.TypeInsertSourceFile(e.pos.filename)
         ast.TypeAccessFlags = e.accessFlags
         ast.TypeSuperClass = ast.JavaRootClass
         ast.TypeFields = new map { string -> cg.FieldHighLevel } ()
@@ -104,7 +104,7 @@ class  BuildPackage {
             field.name = v.name
             field.Descriptor = "I"
             field.AttributeConstantValue = new cg.AttributeConstantValue()
-            field.AttributeConstantValue.Index = c.InsertIntConst(v.value)
+            field.AttributeConstantValue.index = c.InsertIntConst(v.value)
             ast.TypeFields[v.name] = field
         }
         return c
@@ -120,7 +120,7 @@ class  BuildPackage {
             }
             f.name = v.name
             f.AttributeConstantValue = new cg.AttributeConstantValue()
-            f.AttributeConstantValue.Index = this.insertDefaultValue(this.mainClass, v.Type, v.value)
+            f.AttributeConstantValue.index = this.insertDefaultValue(this.mainClass, v.Type, v.value)
             f.AttributeLucyConst = new cg.AttributeLucyConst()
             if v.comment != "" {
                 f.AttributeLucyComment = new cg.AttributeLucyComment()
@@ -169,10 +169,10 @@ class  BuildPackage {
     }
 
     fn mkInitFunctions() {
-        if len(this.Package.InitFunctions) == 0 {
+        if len(this.Package.initFunctions) == 0 {
             needTrigger := false
-            for _, v := range this.Package.LoadedPackages {
-                if v.TriggerPackageInitMethodName != "" {
+            for _, v := range this.Package.loadedPackages {
+                if v.triggerPackageInitMethodName != "" {
                     needTrigger = true
                     break
                 }
@@ -182,7 +182,7 @@ class  BuildPackage {
             }
         }
         blockMethods := []cg.MethodHighLevel{}
-        for _, v := range this.Package.InitFunctions {
+        for _, v := range this.Package.initFunctions {
             method := new  cg.MethodHighLevel()
             blockMethods = append(blockMethods, method)
             method.accessFlags |= cg.AccMethodStatic
@@ -191,7 +191,7 @@ class  BuildPackage {
             method.name = this.mainClass.NewMethodName("block")
             method.Class = this.mainClass
             method.Descriptor = "()V"
-            method.Code = new cg.AttributeCode()
+            method.code = new cg.AttributeCode()
             this.buildFunction(this.mainClass, null, method, v)
             this.mainClass.AppendMethod(method)
         }
@@ -201,15 +201,15 @@ class  BuildPackage {
         method.Descriptor = "()V"
         codes := new []byte (65536)
         codeLength := int(0)
-        method.Code = new cg.AttributeCode()
-        for _, v := range this.Package.LoadedPackages {
-            if v.TriggerPackageInitMethodName == "" {
+        method.code = new cg.AttributeCode()
+        for _, v := range this.Package.loadedPackages {
+            if v.triggerPackageInitMethodName == "" {
                 continue
             }
             codes[codeLength] = cg.OP_invokestatic
             this.mainClass.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                    v.name + "/main", // main c
-                    v.TriggerPackageInitMethodName,
+                    v.triggerPackageInitMethodName,
                 "()V"
             ), codes[codeLength+1:codeLength+3])
             codeLength += 3
@@ -226,8 +226,8 @@ class  BuildPackage {
         codes[codeLength] = cg.OP_return
         codeLength++
         codes = codes[0:codeLength]
-        method.Code.Codes = codes
-        method.Code.CodeLength = codeLength
+        method.code.Codes = codes
+        method.code.CodeLength = codeLength
         this.mainClass.AppendMethod(method)
 
         // trigger init
@@ -238,10 +238,10 @@ class  BuildPackage {
         trigger.accessFlags |= cg.AccMethodStatic
         trigger.accessFlags |= cg.AccMethodSynthetic
         trigger.Descriptor = "()V"
-        trigger.Code = new cg.AttributeCode()
-        trigger.Code.Codes = new []byte(1)
-        trigger.Code.Codes[0] = cg.OP_return
-        trigger.Code.CodeLength = 1
+        trigger.code = new cg.AttributeCode()
+        trigger.code.Codes = new []byte(1)
+        trigger.code.Codes[0] = cg.OP_return
+        trigger.code.CodeLength = 1
         trigger.AttributeLucyTriggerPackageInitMethod = new cg.AttributeLucyTriggerPackageInitMethod()
         this.mainClass.AppendMethod(trigger)
         this.mainClass.TriggerPackageInitMethod = trigger
@@ -281,7 +281,7 @@ class  BuildPackage {
     fn buildClass(astClass ast.Class) -> (c cg.ClassHighLevel) {
         c = new cg.ClassHighLevel()
         c.name = astClass.name
-        c.InsertSourceFile(astClass.pos.Filename)
+        c.InsertSourceFile(astClass.pos.filename)
         c.accessFlags = astClass.accessFlags
         if astClass.superClass != null {
             c.superClass = astClass.superClass.name
@@ -313,9 +313,9 @@ class  BuildPackage {
             f := new cg.FieldHighLevel()
             f.name = v.name
             f.accessFlags = v.accessFlags
-            if v.IsStatic() && v.DefaultValue != null {
+            if v.isStatic() && v.DefaultValue != null {
                 f.AttributeConstantValue = new cg.AttributeConstantValue()
-                f.AttributeConstantValue.Index = this.insertDefaultValue(c, v.Type,
+                f.AttributeConstantValue.index = this.insertDefaultValue(c, v.Type,
                     v.DefaultValue)
             }
             f.Descriptor = Descriptor.typeDescriptor(v.Type)
@@ -338,14 +338,14 @@ class  BuildPackage {
             if vv.Function.Type.VArgs != null {
                 method.accessFlags |= cg.AccMethodVarargs
             }
-            if vv.IsCompilerAuto {
+            if vv.isCompilerAuto {
                 method.accessFlags |= cg.AccMethodSynthetic
             }
             method.Class = c
             method.Descriptor = Descriptor.methodDescriptor(vv.Function.Type)
-            method.IsConstruction = name == specialMethodInit
-            if vv.IsAbstract() == false {
-                method.Code = new cg.AttributeCode()
+            method.isConstruction = name == specialMethodInit
+            if vv.isAbstract() == false {
+                method.code = new cg.AttributeCode()
                 this.buildFunction(c, astClass, method, vv.Function)
             }
             c.AppendMethod(method)
@@ -359,10 +359,10 @@ class  BuildPackage {
             if f.TemplateFunction != null {
                 t := new cg.AttributeTemplateFunction()
                 t.name = f.name
-                t.Filename = f.pos.Filename
-                t.StartLine = char(f.pos.Line)
-                t.StartColumn = char(f.pos.Column)
-                t.Code = string(f.SourceCode)
+                t.filename = f.pos.filename
+                t.startLine = char(f.pos.line)
+                t.startColumn = char(f.pos.column)
+                t.code = string(f.SourceCode)
                 this.mainClass.TemplateFunctions = append(this.mainClass.TemplateFunctions,t)
                 continue
             }
@@ -393,7 +393,7 @@ class  BuildPackage {
             }
             ms[k] = method
             f.Entrance = method
-            method.Code = new cg.AttributeCode()
+            method.code = new cg.AttributeCode()
             this.mainClass.AppendMethod(method)
         }
         for k, f := range this.Package.Block.Functions {
@@ -437,19 +437,19 @@ class  BuildPackage {
         method.name = specialMethodInit
         method.Descriptor = "()V"
         method.accessFlags |= cg.AccMethodPublic
-        method.Code = new cg.AttributeCode()
-        method.Code.Codes = new []byte(5)
-        method.Code.CodeLength = 5
-        method.Code.MaxLocals = 1
-        method.Code.Codes[0] = cg.OP_aload_0
-        method.Code.Codes[1] = cg.OP_invokespecial
+        method.code = new cg.AttributeCode()
+        method.code.Codes = new []byte(5)
+        method.code.CodeLength = 5
+        method.code.MaxLocals = 1
+        method.code.Codes[0] = cg.OP_aload_0
+        method.code.Codes[1] = cg.OP_invokespecial
         c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                ast.TypeSuperClass,
                 specialMethodInit,
            "()V"
-        ), method.Code.Codes[2:4])
-        method.Code.MaxStack = 1
-        method.Code.Codes[4] = cg.OP_return
+        ), method.code.Codes[2:4])
+        method.code.MaxStack = 1
+        method.code.Codes[4] = cg.OP_return
         c.AppendMethod(method)
     }
 

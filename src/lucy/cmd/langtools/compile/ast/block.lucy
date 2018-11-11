@@ -4,7 +4,7 @@ import "lucy/cmd/langtools/compile/common"
 
 
 public class Block {
-	public Exits []cg.Exit // for switch template
+	public exits []cg.Exit // for switch template
 	/*
 		should analyse at ast stage
 	*/
@@ -188,7 +188,7 @@ public class Block {
         }
         // search closure
         if this.inheritedAttribute.Function != null {
-            v := this.inheritedAttribute.Function.Closure.Search(name)
+            v := this.inheritedAttribute.Function.Closure.search(name)
             if v != null {
                 return v, null
             }
@@ -213,23 +213,23 @@ public class Block {
                 if v.isGlobal == false { // not a global variable
                     if this.isFunctionBlock &&
                         this.inheritedAttribute.Function.isGlobal == false {
-                        this.inheritedAttribute.Function.Closure.InsertVar(from, v)
+                        this.inheritedAttribute.Function.Closure.insertVar(from, v)
                             isCaptureVar[0] = true
                     }
                     //cannot search variable from class body
                     if this.isClassBlock {
                         return null, new error(sprintf("%s trying to access variable '%s' from class",
-                            from.ErrMsgPrefix(), name))
+                            from.errMsgPrefix(), name))
                     }
                 }
             } 
             if f,ok :=  t.(Function) ; ok {
                 if f.isGlobal == false {
                     if this.isClassBlock {
-                        this.Class.closure.InsertFunction(from, f)
+                        this.Class.closure.insertFunction(from, f)
                     }
                     if this.isFunctionBlock {
-                        this.Fn.Closure.InsertFunction(from, f)
+                        this.Fn.Closure.insertFunction(from, f)
                     }
                 }
 
@@ -252,7 +252,7 @@ public class Block {
         this.inheritedAttribute.forBreak = father.inheritedAttribute.forBreak
         this.inheritedAttribute.statementOffset = father.inheritedAttribute.statementOffset
         this.inheritedAttribute.isConstructionMethod = father.inheritedAttribute.isConstructionMethod
-        this.inheritedAttribute.forContinue = father.inheritedAttribute.forContinue
+        this.inheritedAttribute.forStatement = father.inheritedAttribute.forStatement
         this.inheritedAttribute.Function = father.inheritedAttribute.Function
         this.inheritedAttribute.Class = father.inheritedAttribute.Class
         this.inheritedAttribute.Defer = father.inheritedAttribute.Defer
@@ -262,7 +262,7 @@ public class Block {
 
         if this.isFunctionBlock || this.isClassBlock {
             this.inheritedAttribute.forBreak = null
-            this.inheritedAttribute.forContinue = null
+            this.inheritedAttribute.forStatement = null
             this.inheritedAttribute.statementOffset = 0
             this.inheritedAttribute.isConstructionMethod = false
             this.inheritedAttribute.classMethod = null
@@ -281,7 +281,7 @@ public class Block {
                 continue
             }
             es.append(new error(sprintf("%s const '%s' has declared,but not used",
-                v.pos.ErrMsgPrefix(), v.name)))
+                v.pos.errMsgPrefix(), v.name)))
         }
         for _, v := range this.Enums {
             if v.used ||
@@ -289,7 +289,7 @@ public class Block {
                 continue
             }
             es.append( new error(sprintf("%s enum '%s' has declared,but not used",
-                v.pos.ErrMsgPrefix(), v.name)))
+                v.pos.errMsgPrefix(), v.name)))
         }
         for _, v := range this.Classes {
             if v.used ||
@@ -297,7 +297,7 @@ public class Block {
                 continue
             }
             es.append(new error(sprintf("%s class '%s' has declared,but not used",
-                v.pos.ErrMsgPrefix(), v.name)))
+                v.pos.errMsgPrefix(), v.name)))
         }
         for _, v := range this.Functions {
             if v.used ||
@@ -305,14 +305,14 @@ public class Block {
                 continue
             }
             es.append(new error(sprintf("%s function '%s' has declared,but not used",
-                v.pos.ErrMsgPrefix(), v.name)))
+                v.pos.errMsgPrefix(), v.name)))
         }
         for _, v := range this.Labels {
             if v.used {
                 continue
             }
             es.append(new error(sprintf("%s enum '%s' has declared,but not used",
-                v.pos.ErrMsgPrefix(), v.name)))
+                v.pos.errMsgPrefix(), v.name)))
         }
         for _, v := range this.Variables {
             if v.used ||
@@ -323,7 +323,7 @@ public class Block {
                 continue
             }
             es.append(new error(sprintf("%s variable '%s' has declared,but not used",
-                v.pos.ErrMsgPrefix(), v.name)))
+                v.pos.errMsgPrefix(), v.name)))
         }
         return es
     }
@@ -373,8 +373,8 @@ public class Block {
         }
         if v := this.Variables[name]; v != null {
             errMsg := sprintf("%s name '%s' already declared as variable,first declared at:\n",
-                pos.ErrMsgPrefix(), name)
-            errMsg += sprintf("\t%s", v.pos.ErrMsgPrefix())
+                pos.errMsgPrefix(), name)
+            errMsg += sprintf("\t%s", v.pos.errMsgPrefix())
             return new error(errMsg)
         }
         if this.Classes == null {
@@ -382,8 +382,8 @@ public class Block {
         }
         if c := this.Classes[name]; c != null {
             errMsg := sprintf("%s name '%s' already declared as class,first declared at:\n",
-                pos.ErrMsgPrefix(), name)
-            errMsg += sprintf("\t%s", c.pos.ErrMsgPrefix())
+                pos.errMsgPrefix(), name)
+            errMsg += sprintf("\t%s", c.pos.errMsgPrefix())
             return new error(errMsg)
         }
         if this.Functions == null {
@@ -391,8 +391,8 @@ public class Block {
         }
         if f := this.Functions[name]; f != null {
             errMsg := sprintf("%s name '%s' already declared as function,first declared at:\n",
-                pos.ErrMsgPrefix(), name)
-            errMsg += sprintf("\t%s", f.pos.ErrMsgPrefix())
+                pos.errMsgPrefix(), name)
+            errMsg += sprintf("\t%s", f.pos.errMsgPrefix())
             return new error(errMsg)
         }
         if this.constants == null {
@@ -400,8 +400,8 @@ public class Block {
         }
         if c := this.constants[name]; c != null {
             errMsg := sprintf("%s name '%s' already declared as const,first declared at:\n",
-                pos.ErrMsgPrefix(), name)
-            errMsg += sprintf("\t%s", c.pos.ErrMsgPrefix())
+                pos.errMsgPrefix(), name)
+            errMsg += sprintf("\t%s", c.pos.errMsgPrefix())
             return new error(errMsg)
         }
         if this.EnumNames == null {
@@ -409,8 +409,8 @@ public class Block {
         }
         if en := this.EnumNames[name]; en != null {
             errMsg := sprintf("%s name '%s' already declared as enumName,first declared at:\n",
-                pos.ErrMsgPrefix(), name)
-            errMsg += sprintf("\t%s", en.pos.ErrMsgPrefix())
+                pos.errMsgPrefix(), name)
+            errMsg += sprintf("\t%s", en.pos.errMsgPrefix())
             return new error(errMsg)
         }
         if this.TypeAliases == null {
@@ -418,8 +418,8 @@ public class Block {
         }
         if t := this.TypeAliases[name]; t != null {
             errMsg := sprintf("%s name '%s' already declared as enumName,first declared at:\n",
-                pos.ErrMsgPrefix(), name)
-            errMsg += sprintf("\t%s", t.pos.ErrMsgPrefix())
+                pos.errMsgPrefix(), name)
+            errMsg += sprintf("\t%s", t.pos.errMsgPrefix())
             return new error(errMsg)
         }
         if this.Enums == null {
@@ -427,8 +427,8 @@ public class Block {
         }
         if e := this.Enums[name]; e != null {
             errMsg := sprintf("%s name %s already declared as enum,first declared at:\n",
-                pos.ErrMsgPrefix(), name)
-            errMsg += sprintf("\t%s", e.pos.ErrMsgPrefix())
+                pos.errMsgPrefix(), name)
+            errMsg += sprintf("\t%s", e.pos.errMsgPrefix())
             return new error(errMsg)
         }
         return null
@@ -436,19 +436,19 @@ public class Block {
 
     fn nameIsValid(name string, pos Pos) -> (err error) {
         if name == "" {
-            return new error(sprintf(`%s "" is not a valid name`, pos.ErrMsgPrefix()))
+            return new error(sprintf(`%s "" is not a valid name`, pos.errMsgPrefix()))
         }
         if name == ThisPointerName {
-            return new error(sprintf("%s '%s' already been taken", pos.ErrMsgPrefix(), ThisPointerName))
+            return new error(sprintf("%s '%s' already been taken", pos.errMsgPrefix(), ThisPointerName))
         }
         if name == "_" {
-            return new error(sprintf("%s '%s' is not a valid name", pos.ErrMsgPrefix(), name))
+            return new error(sprintf("%s '%s' is not a valid name", pos.errMsgPrefix(), name))
         }
         if isMagicIdentifier(name) {
-            return new error(sprintf("%s '%s' is not a magic identifier", pos.ErrMsgPrefix(), name))
+            return new error(sprintf("%s '%s' is not a magic identifier", pos.errMsgPrefix(), name))
         }
         if searchBuildIns(name) != null {
-            return new error(sprintf("%s '%s' is buildin", pos.ErrMsgPrefix(), name))
+            return new error(sprintf("%s '%s' is buildin", pos.errMsgPrefix(), name))
         }
         return null
     }
@@ -464,8 +464,8 @@ public class Block {
             }
             if l := this.Labels[name]; l != null {
                 errMsg := sprintf("%s name '%s' already declared as enumName,first declared at:",
-                    pos.ErrMsgPrefix(), name)
-                errMsg += sprintf("\t%s", l.Statement.pos.ErrMsgPrefix())
+                    pos.errMsgPrefix(), name)
+                errMsg += sprintf("\t%s", l.statement.pos.errMsgPrefix())
                 return new error(errMsg)
             }
             this.Labels[name] = label
@@ -477,7 +477,7 @@ public class Block {
         }
         if buildInFunctionsMap[name] != null {
             return new error(sprintf("%s function named '%s' is buildin",
-                pos.ErrMsgPrefix(), name))
+                pos.errMsgPrefix(), name))
         }
         if c := d.(Class) ; d != null {
             this.Classes[name] = c

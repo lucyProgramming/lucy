@@ -120,7 +120,7 @@ class BuildExpressionMethodCall {
         context Context,
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionMethodCall)
-        if call.FieldMethodHandler.IsStatic() == false {
+        if call.FieldMethodHandler.isStatic() == false {
             stack := this.eb.build(c, code, call.Expression, context, state)
             if stack > maxStack {
                 maxStack = stack
@@ -161,7 +161,7 @@ class BuildExpressionMethodCall {
         e ast.Expression, context Context, state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionMethodCall)
         if call.FieldMethodHandler != null {
-            if call.FieldMethodHandler.IsStatic() == false {
+            if call.FieldMethodHandler.isStatic() == false {
                 code.Codes[code.CodeLength] = cg.OP_aload_0
                 code.CodeLength++
                 if 1 > maxStack {
@@ -198,7 +198,7 @@ class BuildExpressionMethodCall {
             }
         } else {
             currentStack := char(0)
-            if call.Method.IsStatic() == false {
+            if call.Method.isStatic() == false {
                 code.Codes[code.CodeLength] = cg.OP_aload_0
                 code.CodeLength++
                 state.pushStack(c, state.newObjectVariableType(call.Expression.value.Class.name))
@@ -210,7 +210,7 @@ class BuildExpressionMethodCall {
             if t := currentStack + stack; t > maxStack {
                 maxStack = t
             }
-            if call.Method.IsStatic() {
+            if call.Method.isStatic() {
                 code.Codes[code.CodeLength] = cg.OP_invokestatic
                 code.CodeLength++
             } else {

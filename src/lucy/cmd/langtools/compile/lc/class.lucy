@@ -23,7 +23,7 @@ class ClassDecoder {
 			return ret, err
 		}
 		//access flag
-		ret.AccessFlag = binary.BigEndian.Uint16(c.bs)
+		ret.accessFlags = binary.BigEndian.Uint16(c.bs)
 		c.bs = c.bs[2:]
 		// this class
 		ret.ThisClass = binary.BigEndian.Uint16(c.bs)
@@ -150,8 +150,8 @@ class ClassDecoder {
 		for i := char(0); i < length; i++ {
 			f := new cg.FieldInfo()
 			f.accessFlags = binary.BigEndian.Uint16(c.bs)
-			f.NameIndex = binary.BigEndian.Uint16(c.bs[2:])
-			f.DescriptorIndex = binary.BigEndian.Uint16(c.bs[4:])
+			f.nameIndex = binary.BigEndian.Uint16(c.bs[2:])
+			f.descriptorIndex = binary.BigEndian.Uint16(c.bs[4:])
 			c.bs = c.bs[6:]
 			f.AttributeGroupedByName, err = c.parseAttributes()
 			if err != null {
@@ -168,8 +168,8 @@ class ClassDecoder {
 		for i := char(0); i < length; i++ {
 			m := new cg.MethodInfo()
 			m.accessFlags = binary.BigEndian.Uint16(c.bs)
-			m.NameIndex = binary.BigEndian.Uint16(c.bs[2:])
-			m.DescriptorIndex = binary.BigEndian.Uint16(c.bs[4:])
+			m.nameIndex = binary.BigEndian.Uint16(c.bs[2:])
+			m.descriptorIndex = binary.BigEndian.Uint16(c.bs[4:])
 			c.bs = c.bs[6:]
 			m.AttributeGroupedByName, err = c.parseAttributes()
 			if err != null {
@@ -186,15 +186,15 @@ class ClassDecoder {
 		c.bs = c.bs[2:]
 		for i := char(0); i < length; i++ {
 			a := new cg.AttributeInfo()
-			a.NameIndex = binary.BigEndian.Uint16(c.bs)
-			if c.classFile.ConstPool[a.NameIndex].Tag != cg.ConstantPoolTagUtf8 {
-				return ret, new error(sprintf("name index %d is not a utf8 const", a.NameIndex))
+			a.nameIndex = binary.BigEndian.Uint16(c.bs)
+			if c.classFile.ConstPool[a.nameIndex].Tag != cg.ConstantPoolTagUtf8 {
+				return ret, new error(sprintf("name index %d is not a utf8 const", a.nameIndex))
 			}
 			length := binary.BigEndian.getInt(c.bs[2:])
 			c.bs = c.bs[6:]
 			a.Info = c.bs[:length]
 			c.bs = c.bs[length:]
-			name := string(c.classFile.ConstPool[a.NameIndex].Info)
+			name := string(c.classFile.ConstPool[a.nameIndex].Info)
 			if _, ok := ret[name]; ok {
 				ret[name] = append(ret[name], a)
 			} else {

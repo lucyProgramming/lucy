@@ -36,13 +36,13 @@ class ExpressionCheckVar {
 			if len(ev.Variables) > len(valueTypes) {
 				pos := ev.InitValues[len(ev.InitValues)-1].pos // last Pos
 				errs.append(new error( sprintf("%s too few values , assign %d values to %d destinations",
-					pos.ErrMsgPrefix(),
+					pos.errMsgPrefix(),
 					len(valueTypes),
 					len(ev.Variables))))
 			} else if len(ev.Variables) < len(valueTypes) {
 				pos := getExtraExpressionPos(ev.InitValues, len(ev.Variables))
 				errs.append(new error( sprintf("%s too many values , assign %d values to %d destinations",
-					pos.ErrMsgPrefix(),
+					pos.errMsgPrefix(),
 					len(valueTypes),
 					len(ev.Variables))))
 			}

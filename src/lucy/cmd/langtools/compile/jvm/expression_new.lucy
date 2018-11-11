@@ -38,7 +38,7 @@ class BuildExpressionNew {
         code.Codes[code.CodeLength+3] = cg.OP_dup
         t := new cg.StackMapVerificationTypeInfo()
         t.Verify = new cg.StackMapUninitializedVariableInfo()
-        t.Verify.(cg.StackMapUninitializedVariableInfo).CodeOffset = char(code.CodeLength)
+        t.Verify.(cg.StackMapUninitializedVariableInfo).codeOffset = char(code.CodeLength)
         state.Stacks = append(state.Stacks, t, t)
         code.CodeLength += 4
         maxStack = 2
@@ -132,7 +132,7 @@ class BuildExpressionNew {
         {
             t := new cg.StackMapVerificationTypeInfo()
             unInit := new cg.StackMapUninitializedVariableInfo()
-            unInit.CodeOffset = char(code.CodeLength - 4)
+            unInit.codeOffset = char(code.CodeLength - 4)
             t.Verify = unInit
             state.Stacks = append(state.Stacks, t, t) // 2 for dup
             defer state.popStack(2)

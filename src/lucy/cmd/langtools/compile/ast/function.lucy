@@ -62,10 +62,10 @@ public class Function {
 	fn makeName() {
 		if this.name == "" {
 			if this.block.inheritedAttribute.classAndFunctionNames == "" {
-				this.name = sprintf("literal$%d", this.pos.Line)
+				this.name = sprintf("literal$%d", this.pos.line)
 			} else {
 				this.name = sprintf("%s$literal%d",
-					this.block.inheritedAttribute.classAndFunctionNames, this.pos.Line)
+					this.block.inheritedAttribute.classAndFunctionNames, this.pos.line)
 			}
 		}
 		name := this.name

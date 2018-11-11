@@ -47,12 +47,12 @@ class BuildPackageFor {
             }
         }
         var firstTimeExit ast.Statement
-        if s.Condition != null {
-            stack, exit := this.eb.buildConditionNotOk(c, code, context, forState, s.Condition)
+        if s.condition != null {
+            stack, exit := this.eb.buildConditionNotOk(c, code, context, forState, s.condition)
             if stack > maxStack {
                 maxStack = stack
             }
-            s.Exits = append(s.Exits, exit)
+            s.exits = append(s.exits, exit)
             firstTimeExit = new cg.Exit(cg.OP_goto, code) // goto body
         }
         s.ContinueCodeOffset = code.CodeLength
@@ -63,12 +63,12 @@ class BuildPackageFor {
                 maxStack = stack
             }
         }
-        if s.Condition != null {
-            stack, exit := this.eb.buildConditionNotOk(c, code, context, forState, s.Condition)
+        if s.condition != null {
+            stack, exit := this.eb.buildConditionNotOk(c, code, context, forState, s.condition)
             if stack > maxStack {
                 maxStack = stack
             }
-            s.Exits = append(s.Exits, exit)
+            s.exits = append(s.exits, exit)
         }
         if firstTimeExit != null {
             writeExits([]cg.Exit{firstTimeExit}, code.CodeLength)

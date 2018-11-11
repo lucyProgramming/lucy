@@ -11,23 +11,23 @@
 		switch on.Type {
 		case VariableTypeArray,
 			VariableTypeJavaArray:
-			indexType, es := index.Index.checkSingleValueContextExpression(block)
+			indexType, es := index.index.checkSingleValueContextExpression(block)
 			errs.appendAll(es)
 			if indexType != null {
 				if indexType.isInteger() {
 					if indexType.Type == VariableTypeLong {
-						index.Index.convertToNumberType(VariableTypeInt) //  convert to int
+						index.index.convertToNumberType(VariableTypeInt) //  convert to int
 					}
-					if index.Index.isLiteral() {
-						indexValue := index.Index.getLongValue()
+					if index.index.isLiteral() {
+						indexValue := index.index.getLongValue()
 						if indexValue < 0 {
 							errs.append(new error(sprintf("%s index '%d' is negative",
-									index.Index.pos.ErrMsgPrefix(), indexValue)))
+									index.index.pos.errMsgPrefix(), indexValue)))
 						}
 					}
 				} else {
 					errs.append(new error(sprintf("%s only integer can be used as index,but '%s'",
-							index.Index.pos.ErrMsgPrefix(), indexType.typeString())))
+							index.index.pos.errMsgPrefix(), indexType.typeString())))
 				}
 			}
 			valueType = on.array.Clone()
@@ -36,27 +36,27 @@
 		case VariableTypeMap:
 			valueType = on.Map.V.Clone()
 			valueType.pos = e.pos
-			indexType, es := index.Index.checkSingleValueContextExpression(block)
+			indexType, es := index.index.checkSingleValueContextExpression(block)
 			errs.appendAll(es)
 			if indexType == null {
 				return  
 			}
 			if on.Map.K.assignAble(errs, indexType) == false {
 				errs.append(new error(sprintf("%s cannot use '%s' as '%s' for index",
-					index.Index.pos.ErrMsgPrefix(), indexType.typeString(), on.Map.K.typeString())))
+					index.index.pos.errMsgPrefix(), indexType.typeString(), on.Map.K.typeString())))
 			}
 			return  
 		case VariableTypeString:
-			indexType, es := index.Index.checkSingleValueContextExpression(block)
+			indexType, es := index.index.checkSingleValueContextExpression(block)
 			errs.appendAll(es)
 			if indexType != null {
 				if indexType.isInteger() {
 					if indexType.Type == VariableTypeLong {
-						index.Index.convertToNumberType(VariableTypeInt) //  convert to int
+						index.index.convertToNumberType(VariableTypeInt) //  convert to int
 					}
 				} else {
 					errs.append(new error(sprintf("%s only integer can be used as index,but '%s'",
-						index.Index.pos.ErrMsgPrefix(), indexType.typeString())))
+						index.index.pos.errMsgPrefix(), indexType.typeString())))
 				}
 			}
 			valueType = new Type()
@@ -65,7 +65,7 @@
 			return 
 		default:
 			errs.append(new error(sprintf("%s cannot index '%s'",
-				on.pos.ErrMsgPrefix(), on.typeString())))
+				on.pos.errMsgPrefix(), on.typeString())))
 			return null
 		}
 	}	

@@ -19,13 +19,13 @@ public class Class {
 	public MinorVersion            char
 	public MajorVersion            char
 	public ConstPool               []ConstPool
-	public AccessFlag              char
+	public accessFlags              char
 	public ThisClass               char
 	public superClass              char
 	public interfaces              []char
 	public fields                  []FieldInfo
 	public methods                 []MethodInfo
-	public Attributes              []AttributeInfo
+	public attributes              []AttributeInfo
 	public AttributeGroupedByName  AttributeGroupedByName
 	public TypeAlias               []AttributeLucyTypeAlias
 	public AttributeLucyEnum       AttributeLucyEnum
@@ -47,7 +47,7 @@ public class Class {
 	public MethodTypeConstants         map{string-> ConstPool }
 
 	fn IsSynthetic() -> (is bool) {
-		return (this.AccessFlag & AccClassSynthetic) != 0
+		return (this.accessFlags & AccClassSynthetic) != 0
 	}
 
 	fn InsertMethodTypeConst(n ConstantInfoMethodTypeHighLevel) -> (index char) {
@@ -60,7 +60,7 @@ public class Class {
 		if con := this.MethodTypeConstants[n.toString()]; con != null {
 			return con.selfIndex
 		}
-		info := new ConstantInfoMethodType ( this.InsertUtf8Const(n.Descriptor) ).ToConstPool()
+		info := new ConstantInfoMethodType ( this.InsertUtf8Const(n.descriptor) ).ToConstPool()
 		info.selfIndex = this.constPoolUint16Length()
 		this.ConstPool.append(info)
 		this.MethodTypeConstants[n.toString()] = info
@@ -79,7 +79,7 @@ public class Class {
 		}
 		info :=  new ConstantInfoInterfaceMethodref(
 			this.InsertClassConst(n.Class),
-			this.InsertNameAndType( new ConstantInfoNameAndTypeHighLevel(     n.Method,  n.Descriptor ) )
+			this.InsertNameAndType( new ConstantInfoNameAndTypeHighLevel(     n.Method,  n.descriptor ) )
 		).ToConstPool()
 		info.selfIndex = this.constPoolUint16Length()
 		this.ConstPool.append(info)
@@ -101,7 +101,7 @@ public class Class {
                     this.InsertClassConst(n.Class),
                     this.InsertNameAndType( new ConstantInfoNameAndTypeHighLevel (
                        n.Method,
-                       n.Descriptor) )
+                       n.descriptor) )
 			) .ToConstPool()
 		info.selfIndex = this.constPoolUint16Length()
 		this.ConstPool.append(info)
@@ -121,7 +121,7 @@ public class Class {
 		}
 		info := new ConstantInfoNameAndType(
 			       this.InsertUtf8Const(n.name),
-			    this.InsertUtf8Const(n.Descriptor)
+			    this.InsertUtf8Const(n.descriptor)
 		    ).ToConstPool()
 		info.selfIndex = this.constPoolUint16Length()
 		this.ConstPool.append(info)
@@ -140,7 +140,7 @@ public class Class {
 		}
 		info := new ConstantInfoFieldref(
 			this.InsertClassConst(f.Class),
-			this.InsertNameAndType(new ConstantInfoNameAndTypeHighLevel(   f.Field,  f.Descriptor)
+			this.InsertNameAndType(new ConstantInfoNameAndTypeHighLevel(   f.Field,  f.descriptor)
 			)
 		).ToConstPool()
 		info.selfIndex = this.constPoolUint16Length()
@@ -274,7 +274,7 @@ public class Class {
 		if len(this.ConstPool) == 0 {
 			this.ConstPool = []ConstPool{null} // jvm const pool index begin at 1
 		}
-		this.AccessFlag = high.accessFlags
+		this.accessFlags = high.accessFlags
 		this.ThisClass = this.InsertClassConst(high.name)
 		this.superClass = this.InsertClassConst(high.superClass)
 		this.interfaces = []char {}
@@ -288,20 +288,20 @@ public class Class {
 		for _, f := range high.fields {
 			field := new FieldInfo()
 			field.accessFlags = f.accessFlags
-			field.NameIndex = this.InsertUtf8Const(f.name)
-            field.Attributes = []AttributeInfo{}
+			field.nameIndex = this.InsertUtf8Const(f.name)
+            field.attributes = []AttributeInfo{}
 			if f.AttributeConstantValue != null {
-				field.Attributes . append(  f.AttributeConstantValue.ToAttributeInfo(this))
+				field.attributes . append(  f.AttributeConstantValue.ToAttributeInfo(this))
 			}
-			field.DescriptorIndex = this.InsertUtf8Const(f.Descriptor)
+			field.descriptorIndex = this.InsertUtf8Const(f.descriptor)
 			if f.AttributeLucyFieldDescriptor != null {
-				field.Attributes . append(  f.AttributeLucyFieldDescriptor.ToAttributeInfo(this))
+				field.attributes . append(  f.AttributeLucyFieldDescriptor.ToAttributeInfo(this))
 			}
 			if f.AttributeLucyConst != null {
-				field.Attributes . append(  f.AttributeLucyConst.ToAttributeInfo(this))
+				field.attributes . append(  f.AttributeLucyConst.ToAttributeInfo(this))
 			}
 			if f.AttributeLucyComment != null {
-				field.Attributes . append(  f.AttributeLucyComment.ToAttributeInfo(this))
+				field.attributes . append(  f.AttributeLucyComment.ToAttributeInfo(this))
 			}
 			this.fields.append(field)
 		}
@@ -310,61 +310,61 @@ public class Class {
 			for _, m := range ms {
 				info := new MethodInfo()
 				info.accessFlags = m.accessFlags
-				info.NameIndex = this.InsertUtf8Const(m.name)
-				info.DescriptorIndex = this.InsertUtf8Const(m.Descriptor)
-				info.Attributes = []AttributeInfo{}
-				if m.Code != null {
-					info.Attributes . append( m.Code.ToAttributeInfo(this))
+				info.nameIndex = this.InsertUtf8Const(m.name)
+				info.descriptorIndex = this.InsertUtf8Const(m.Descriptor)
+				info.attributes = []AttributeInfo{}
+				if m.code != null {
+					info.attributes . append( m.code.ToAttributeInfo(this))
 				}
 				if m.AttributeLucyMethodDescriptor != null {
-					info.Attributes . append( m.AttributeLucyMethodDescriptor.ToAttributeInfo(this))
+					info.attributes . append( m.AttributeLucyMethodDescriptor.ToAttributeInfo(this))
 				}
 				if m.AttributeLucyTriggerPackageInitMethod != null {
-					info.Attributes . append(  m.AttributeLucyTriggerPackageInitMethod.ToAttributeInfo(this))
+					info.attributes . append(  m.AttributeLucyTriggerPackageInitMethod.ToAttributeInfo(this))
 				}
 				if m.AttributeDefaultParameters != null {
-					info.Attributes . append(  m.AttributeDefaultParameters.ToAttributeInfo(this))
+					info.attributes . append(  m.AttributeDefaultParameters.ToAttributeInfo(this))
 				}
 				if m.AttributeLucyComment != null {
-					info.Attributes . append(  m.AttributeLucyComment.ToAttributeInfo(this))
+					info.attributes . append(  m.AttributeLucyComment.ToAttributeInfo(this))
 				}
 				if m.AttributeMethodParameters != null {
 					t := m.AttributeMethodParameters.ToAttributeInfo(this)
 					if t != null {
-						info.Attributes . append(t)
+						info.attributes . append(t)
 					}
 				}
 				if m.AttributeLucyReturnListNames != null {
 					t := m.AttributeLucyReturnListNames.ToAttributeInfo(this, AttributeNameLucyReturnListNames)
 					if t != null {
-						info.Attributes.append(t)
+						info.attributes.append(t)
 					}
 				}
 				this.methods . append(info)
 			}
 		}
-		if this.Attributes == null {
-			this.Attributes = []AttributeInfo{}
+		if this.attributes == null {
+			this.attributes = []AttributeInfo{}
 		}
 		//source file
-		this.Attributes . append(new AttributeSourceFile(high.getSourceFile()).ToAttributeInfo(this))
+		this.attributes . append(new AttributeSourceFile(high.getSourceFile()).ToAttributeInfo(this))
 		for _, v := range this.TypeAlias {
-			this.Attributes . append( v.ToAttributeInfo(this))
+			this.attributes . append( v.ToAttributeInfo(this))
 		}
 		if this.AttributeLucyEnum != null {
-			this.Attributes . append( this.AttributeLucyEnum.ToAttributeInfo(this))
+			this.attributes . append( this.AttributeLucyEnum.ToAttributeInfo(this))
 		}
 		if this.AttributeLucyComment != null {
-			this.Attributes . append(  this.AttributeLucyComment.ToAttributeInfo(this))
+			this.attributes . append(  this.AttributeLucyComment.ToAttributeInfo(this))
 		}
 		if this.AttributeLucyClassConst != null {
-			this.Attributes . append( this.AttributeLucyClassConst.ToAttributeInfo(this))
+			this.attributes . append( this.AttributeLucyClassConst.ToAttributeInfo(this))
 		}
 		if a := this.AttributeInnerClasses.ToAttributeInfo(this); a != null {
-			this.Attributes . append(  a)
+			this.attributes . append(  a)
 		}
 		for _, v := range high.TemplateFunctions {
-			this.Attributes.append(  v.ToAttributeInfo(this))
+			this.attributes.append(  v.ToAttributeInfo(this))
 		}
 		this.ifConstPoolOverMaxSize()
 		return
@@ -388,7 +388,7 @@ public class Class {
 		thisClassName := string(this.ConstPool[binary.BigEndian.getChar(this.ConstPool[this.ThisClass].Info)].Info)
 		attr.FromBs(this, innerClass.Info)
 		for _, v := range attr.Classes {
-			if thisClassName == v.InnerClass {
+			if thisClassName == v.innerClass {
 				return true
 			}
 		}
@@ -426,7 +426,7 @@ public class Class {
 			writer.write(v.Info.getUnderlyingArray())
 		}
 		//access flag
-		binary.BigEndian.putChar(bs2, char(this.AccessFlag))
+		binary.BigEndian.putChar(bs2, char(this.accessFlags))
 		writer.write(bs2.getUnderlyingArray())
 
 		binary.BigEndian.putChar(bs2, this.ThisClass)
@@ -449,7 +449,7 @@ public class Class {
 		//methods
 		this.writeMethods()
 		// attribute
-		this.writeAttributeInfo(this.Attributes)
+		this.writeAttributeInfo(this.attributes)
 	}
 
 	fn writeMethods()  {
@@ -459,11 +459,11 @@ public class Class {
 		for _, v := range this.methods {
 			binary.BigEndian.putChar(bs2, char(v.accessFlags))
 			this.writer.write(bs2.getUnderlyingArray())
-			binary.BigEndian.putChar(bs2, v.NameIndex)
+			binary.BigEndian.putChar(bs2, v.nameIndex)
 			this.writer.write(bs2.getUnderlyingArray())
-			binary.BigEndian.putChar(bs2, v.DescriptorIndex)
+			binary.BigEndian.putChar(bs2, v.descriptorIndex)
 			this.writer.write(bs2.getUnderlyingArray())
-			this.writeAttributeInfo(v.Attributes)
+			this.writeAttributeInfo(v.attributes)
 		}
 	}
 
@@ -474,11 +474,11 @@ public class Class {
 		for _, v := range this.fields {
 			binary.BigEndian.putChar(bs2, char(v.accessFlags))
 			this.writer.write(bs2.getUnderlyingArray())
-			binary.BigEndian.putChar(bs2, v.NameIndex)
+			binary.BigEndian.putChar(bs2, v.nameIndex)
 			this.writer.write(bs2.getUnderlyingArray())
-			binary.BigEndian.putChar(bs2, v.DescriptorIndex)
+			binary.BigEndian.putChar(bs2, v.descriptorIndex)
 			this.writer.write(bs2.getUnderlyingArray())
-			this.writeAttributeInfo(v.Attributes)
+			this.writeAttributeInfo(v.attributes)
 		}
 	}
 
@@ -488,7 +488,7 @@ public class Class {
 		this.writer.write(bs2.getUnderlyingArray())
 		bs4 := new []byte(4)
 		for _, v := range attrs {
-			binary.BigEndian.putChar(bs2 , v.NameIndex)
+			binary.BigEndian.putChar(bs2 , v.nameIndex)
 			this.writer.write(bs2.getUnderlyingArray())
 			binary.BigEndian.putInt(bs4 , v.attributeLength)
 			this.writer.write(bs4.getUnderlyingArray())

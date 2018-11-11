@@ -1,12 +1,12 @@
 
 public class Exit {
-	public CurrentCodeLength int
-	public BranchBytes       []byte //[2]byte
+	public currentCodeLength int
+	public branchBytes       []byte //[2]byte
 	public fn Exit(op byte, code AttributeCode)  {
 	    this.super()
-		this.CurrentCodeLength = code.CodeLength
+		this.currentCodeLength = code.CodeLength
 		code.Codes[code.CodeLength] = op
-		this.BranchBytes = code.Codes[code.CodeLength+1 : code.CodeLength+3]
+		this.branchBytes = code.Codes[code.CodeLength+1 : code.CodeLength+3]
 		code.CodeLength += 3
 	}
 

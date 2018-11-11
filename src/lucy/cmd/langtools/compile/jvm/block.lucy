@@ -27,7 +27,7 @@ class BuildBlock {
 		notToHere := false
 		for _, s := range b.statements {
 			if notToHere == true && s.Type == ast.StatementTypeLabel {
-				notToHere = len(s.StatementLabel.Exits) == 0
+				notToHere = len(s.StatementLabel.exits) == 0
 				//continue compile block from this label statement
 			}
 			if notToHere {
@@ -118,25 +118,25 @@ class BuildBlock {
 		case ast.StatementTypeExpression:
 			maxStack = this.BuildExpression.build(c, code, s.Expression, context, state)
 		case ast.StatementTypeIf:
-			s.StatementIf.Exits = []cg.Exit{} //could compile multi times
+			s.StatementIf.exits = []cg.Exit{} //could compile multi times
 			maxStack = this.buildIfStatement(c, code, s.StatementIf, context, state)
-			if len(s.StatementIf.Exits) > 0 {
-				writeExits(s.StatementIf.Exits, code.CodeLength)
+			if len(s.StatementIf.exits) > 0 {
+				writeExits(s.StatementIf.exits, code.CodeLength)
 				context.MakeStackMap(code, state, code.CodeLength)
 			}
 		case ast.StatementTypeBlock:
 			blockState := new StackMapState(state)
-			s.block.Exits = []cg.Exit{}
+			s.block.exits = []cg.Exit{}
 			this.buildBlock(c, code, s.block, context, blockState)
 			state.addTop(blockState)
-			if len(s.block.Exits) > 0 {
-				writeExits(s.StatementIf.Exits, code.CodeLength)
+			if len(s.block.exits) > 0 {
+				writeExits(s.StatementIf.exits, code.CodeLength)
 				context.MakeStackMap(code, state, code.CodeLength)
 			}
 		case ast.StatementTypeFor:
-			s.StatementFor.Exits = []cg.Exit{} //could compile multi times
+			s.StatementFor.exits = []cg.Exit{} //could compile multi times
 			maxStack = this.buildForStatement(c, code, s.StatementFor, context, state)
-			writeExits(s.StatementFor.Exits, code.CodeLength)
+			writeExits(s.StatementFor.exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		case ast.StatementTypeContinue:
 			this.buildDefers(c, code, context, s.StatementContinue.defers, state)
@@ -145,43 +145,43 @@ class BuildBlock {
 			this.buildDefers(c, code, context, s.StatementBreak.defers, state)
 			exit := new cg.Exit(cg.OP_goto, code)
 			if s.StatementBreak.StatementFor != null {
-				s.StatementBreak.StatementFor.Exits = append(s.StatementBreak.StatementFor.Exits, exit)
+				s.StatementBreak.StatementFor.exits = append(s.StatementBreak.StatementFor.exits, exit)
 			} else if s.StatementBreak.StatementSwitch != null { // switch
-				s.StatementBreak.StatementSwitch.Exits = append(s.StatementBreak.StatementSwitch.Exits, exit)
+				s.StatementBreak.StatementSwitch.exits = append(s.StatementBreak.StatementSwitch.exits, exit)
 			} else {
-				s.StatementBreak.SwitchTemplateBlock.Exits = append(s.StatementBreak.SwitchTemplateBlock.Exits, exit)
+				s.StatementBreak.SwitchTemplateBlock.exits = append(s.StatementBreak.SwitchTemplateBlock.exits, exit)
 			}
 		case ast.StatementTypeReturn:
 			maxStack = this.buildReturnStatement(c, code,
 				s.StatementReturn, context, state)
 		case ast.StatementTypeSwitch:
-			s.StatementSwitch.Exits = []cg.Exit{} //could compile multi times
+			s.StatementSwitch.exits = []cg.Exit{} //could compile multi times
 			maxStack = this.buildSwitchStatement(c, code, s.StatementSwitch, context, state)
-			if len(s.StatementSwitch.Exits) > 0 {
+			if len(s.StatementSwitch.exits) > 0 {
 				if code.CodeLength == context.lastStackMapOffset {
 					code.Codes[code.CodeLength] = cg.OP_nop
 					code.CodeLength++
 				}
-				writeExits(s.StatementSwitch.Exits, code.CodeLength)
+				writeExits(s.StatementSwitch.exits, code.CodeLength)
 				context.MakeStackMap(code, state, code.CodeLength)
 			}
 		case ast.StatementTypeGoTo:
 			this.buildDefers(c, code, context, s.StatementGoTo.defers, state)
-			if s.StatementGoTo.StatementLabel.CodeOffsetGenerated {
-				jumpTo(code, s.StatementGoTo.StatementLabel.CodeOffset)
+			if s.StatementGoTo.StatementLabel.codeOffsetGenerated {
+				jumpTo(code, s.StatementGoTo.StatementLabel.codeOffset)
 			} else {
 				exit := new cg.Exit(cg.OP_goto, code)
-				s.StatementGoTo.StatementLabel.Exits = append(s.StatementGoTo.StatementLabel.Exits, exit)
+				s.StatementGoTo.StatementLabel.exits = append(s.StatementGoTo.StatementLabel.exits, exit)
 			}
 		case ast.StatementTypeLabel:
-			s.StatementLabel.CodeOffsetGenerated = true
-			s.StatementLabel.CodeOffset = code.CodeLength
-			if len(s.StatementLabel.Exits) > 0 {
-				writeExits(s.StatementLabel.Exits, code.CodeLength) // back patch
+			s.StatementLabel.codeOffsetGenerated = true
+			s.StatementLabel.codeOffset = code.CodeLength
+			if len(s.StatementLabel.exits) > 0 {
+				writeExits(s.StatementLabel.exits, code.CodeLength) // back patch
 			}
 			context.MakeStackMap(code, state, code.CodeLength)
 		case ast.StatementTypeDefer: // nothing to do  ,defer will do after block is compiled
-			s.Defer.StartPc = code.CodeLength
+			s.Defer.startPc = code.CodeLength
 			s.Defer.StackMapState = (new StackMapState(state))
 		case ast.StatementTypeClass:
 			oldName := s.Class.name
@@ -192,9 +192,9 @@ class BuildBlock {
 				name = block.inheritedAttribute.classAndFunctionNames + "$" + s.Class.name
 			}
 			s.Class.name = this.newClassName(name)
-			innerClass := new cg.InnerClass()
-			innerClassInnerClass.InnerClass = s.Class.name
-			innerClassInnerClass.OuterClass = ast.TypeName
+			innerClass := new cg.innerClass()
+			innerClassInnerClass.innerClass = s.Class.name
+			innerClassInnerClass.outerClass = ast.TypeName
 			innerClassInnerClass.name = oldName
 			ast.TypeClass.AttributeInnerClasses.Classes =
 				append(ast.TypeClass.AttributeInnerClasses.Classes, innerClass)
@@ -224,13 +224,13 @@ class BuildBlock {
 			state.pushStack(c, state.newObjectVariableType(throwableClass))
 			context.MakeStackMap(code, state, code.CodeLength)
 			e := new cg.ExceptionTable()
-			e.StartPc = char(ds[index].StartPc)
+			e.startPc = char(ds[index].startPc)
 			e.EndPc = char(code.CodeLength)
 			e.HandlerPc = char(code.CodeLength)
-			if ds[index].ExceptionClass == null {
+			if ds[index].exceptionClass == null {
 				e.CatchType = ast.TypeClass.InsertClassConst(ast.DefaultExceptionClass)
 			} else {
-				e.CatchType = ast.TypeClass.InsertClassConst(ds[index].ExceptionClass.name) // custom c
+				e.CatchType = ast.TypeClass.InsertClassConst(ds[index].exceptionClass.name) // custom c
 			}
 			code.Exceptions = append(code.Exceptions, e)
 			//expect exception on stack

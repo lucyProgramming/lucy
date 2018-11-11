@@ -34,17 +34,17 @@ public class Class {
 	closure                           Closure
 
 
-    fn HaveStaticsCodes() -> (is bool)  {
+    fn haveStaticsCodes() -> (is bool)  {
         return len(this.staticBlocks) > 0
     }
 
     public fn IsInterface() -> (is bool)  {
         return this.accessFlags&cg.AccClassInterface != 0
     }
-    public fn IsAbstract() -> (is bool)  {
+    public fn isAbstract() -> (is bool)  {
         return this.accessFlags&cg.AccClassAbstract != 0
     }
-    fn IsFinal() -> (is bool)  {
+    fn isFinal() -> (is bool)  {
         return this.accessFlags&cg.AccClassFinal != 0
     }
     fn isPublic() -> (is bool)  {
@@ -58,7 +58,7 @@ public class Class {
         this.notImportedYet = false
         load, err := PackageBeenCompile.loadClass(this.name)
         if err != null {
-            return new error(sprintf("%s %s", pos.ErrMsgPrefix(), err.getMessage()))
+            return new error(sprintf("%s %s", pos.errMsgPrefix(), err.getMessage()))
         }
 		this.accessFlags = load.accessFlags
 		this.fields = load.fields
@@ -79,7 +79,7 @@ public class Class {
             return
         }
         m := new ClassMethod()
-        m.IsCompilerAuto = true
+        m.isCompilerAuto = true
         m.Function = new Function()
         m.Function.accessFlags |= cg.AccMethodPublic
         m.Function.pos = this.pos
@@ -115,7 +115,7 @@ public class Class {
     }
 
     fn mkClassInitMethod() {
-        if this.HaveStaticsCodes() == false {
+        if this.haveStaticsCodes() == false {
             return
         }
         method := new ClassMethod()
@@ -167,7 +167,7 @@ public class Class {
         }
         for _, ms := range this.methods {
             for _, m := range ms {
-                if m.IsAbstract() {
+                if m.isAbstract() {
                     for _, v := range m.Function.Type.ParameterList {
                         if v.defaultValueExpression != null {
                             errs.append( new error(sprintf("%s abstract method parameter '%s' cannot have default value '%s'",
@@ -184,12 +184,12 @@ public class Class {
                 m.Function.block.inherit(this.block)
                 m.Function.block.inheritedAttribute.Function = m.Function
                 m.Function.block.inheritedAttribute.classMethod = m
-                m.Function.checkParametersAndReturns(errs, false, m.IsAbstract())
+                m.Function.checkParametersAndReturns(errs, false, m.isAbstract())
                 if len(m.Function.Type.TemplateNames) > 0 {
                     errs.append(new error(sprintf("%s cannot use template for method",
                         errMsgPrefix(m.Function.pos))))
                 }
-                if m.IsStatic() == false { // bind this
+                if m.isStatic() == false { // bind this
                     if m.Function.block.Variables == null {
                         m.Function.block.Variables = new map { string-> Variable } ()
                     }
@@ -241,7 +241,7 @@ public class Class {
             }
             if variableType.Type != VariableTypeObject {
                 err := new error(sprintf("%s '%s' is not a class",
-                    this.pos.ErrMsgPrefix(), this.superClassName.name))
+                    this.pos.errMsgPrefix(), this.superClassName.name))
                 return err
             }
             this.superClass = variableType.Class
@@ -296,7 +296,7 @@ public class Class {
         errs []error) ->(method ClassMethod) {
         if this.methods != null {
             for _, v := range this.methods[m.Function.name] {
-                if v.IsAbstract() {
+                if v.isAbstract() {
                     continue
                 }
                 if fromSub && v.ableAccessFromSubClass() == false {
@@ -396,7 +396,7 @@ public class Class {
         }
         c, err := PackageBeenCompile.loadClass(this.superClassName.name)
         if err != null {
-            err := new error(sprintf("%s %s", pos.ErrMsgPrefix(), err.getMessage()))
+            err := new error(sprintf("%s %s", pos.errMsgPrefix(), err.getMessage()))
             return err
         }
         this.superClass = c
@@ -450,7 +450,7 @@ public class Class {
         if err != null {
             return null, err
         }
-        notFoundErr := new error(sprintf("%s field or method named '%s' not found", pos.ErrMsgPrefix(), name))
+        notFoundErr := new error(sprintf("%s field or method named '%s' not found", pos.errMsgPrefix(), name))
         if this.fields != null && null != this.fields[name] {
             if fromSub && this.fields[name].ableAccessFromSubClass() == false {
                 // private field
@@ -485,16 +485,16 @@ public class Class {
         if this.loadFromOutSide {
             if this.isPublic() == false {
                 return new error(sprintf("%s class '%s' is not public",
-                    pos.ErrMsgPrefix(), this.name))
+                    pos.errMsgPrefix(), this.name))
             }
             if method.isPublic() == false {
                 return new error(sprintf("%s method '%s' is not public",
-                    pos.ErrMsgPrefix(), method.Function.name))
+                    pos.errMsgPrefix(), method.Function.name))
             }
         } else {
-            if method.IsPrivate() {
+            if method.isPrivate() {
                 return new error(sprintf("%s method '%s' is private",
-                    pos.ErrMsgPrefix(), method.Function.name))
+                    pos.errMsgPrefix(), method.Function.name))
             }
         }
         return null
@@ -506,7 +506,7 @@ public class Class {
                 return null, err
             }
             notFoundErr := new error(sprintf("%s field named '%s' not found",
-                pos.ErrMsgPrefix(), name))
+                pos.errMsgPrefix(), name))
             if this.fields != null && null != this.fields[name] {
                 if fromSub && this.fields[name].ableAccessFromSubClass() == false {
                     // private field
@@ -637,7 +637,7 @@ public class Class {
                 for _, m := range this.methods[call.name] {
                     if fromSub && m.ableAccessFromSubClass() == false {
                         return null, false, new error(sprintf("%s method '%s' not found",
-                            pos.ErrMsgPrefix(), call.name))
+                            pos.errMsgPrefix(), call.name))
                     }
                     call.VArgs, err = m.Function.Type.fitArgs(pos, call.Args,
                         callArgTypes, m.Function)
@@ -746,7 +746,7 @@ public class Class {
         for name, ms := range this.methods {
             if this.fields != null && this.fields[name] != null {
                 f := this.fields[name]
-                if f.pos.Line < ms[0].Function.pos.Line {
+                if f.pos.line < ms[0].Function.pos.line {
                     errMsg := sprintf("%s method named '%s' already declared as field,at:\n",
                         errMsgPrefix(ms[0].Function.pos), name)
                     errMsg += sprintf("\t%s", errMsgPrefix(f.pos))
@@ -778,7 +778,7 @@ public class Class {
         if this.IsInterface() {
             errs.appendAll( this.checkOverrideInterfaceMethod())
         }
-        if this.IsAbstract() {
+        if this.isAbstract() {
             errs.appendAll( this.checkOverrideAbstractMethod())
         }
         errs.appendAll( this.suitableForInterfaces())
@@ -804,10 +804,10 @@ public class Class {
                 return errs
             }
         }
-        if super.IsAbstract() {
+        if super.isAbstract() {
             for _, v := range super.methods {
                 m := v[0]
-                if m.IsAbstract() == false {
+                if m.isAbstract() == false {
                     continue
                 }
                 nameMatch :=  []ClassMethod {null}
@@ -828,7 +828,7 @@ public class Class {
                         errs.append(new error(errMsg))
                     } else {
                         errs.append(new error(sprintf("%s missing implementation method '%s' define on abstract class '%s'",
-                                pos.ErrMsgPrefix(), m.Function.readableMsg(), super.name)))
+                                pos.errMsgPrefix(), m.Function.readableMsg(), super.name)))
                     }
                 }
             }
@@ -852,10 +852,10 @@ public class Class {
     }
 
     fn abstractMethodExists(pos Pos, name string) -> (c Class,err error) {
-        if this.IsAbstract() {
+        if this.isAbstract() {
             if this.methods != null && len(this.methods[name]) > 0 {
                 method := this.methods[name][0]
-                if method.IsAbstract() {
+                if method.isAbstract() {
                     return this, null
                 }
             }
@@ -885,7 +885,7 @@ public class Class {
         for _, v := range this.methods {
             m := v[0]
             name := m.Function.name
-            if m.IsAbstract() == false {
+            if m.isAbstract() == false {
                 continue
             }
             exist, err := this.superClass.abstractMethodExists(m.Function.pos, name)
@@ -931,9 +931,9 @@ public class Class {
             return null
         }
 
-        if this.superClass.IsFinal() {
+        if this.superClass.isFinal() {
             return new error(sprintf("%s class name '%s' have super class  named '%s' that is final",
-                this.pos.ErrMsgPrefix(), this.name, this.superClass.name))
+                this.pos.errMsgPrefix(), this.name, this.superClass.name))
         }
         for c.name != JavaRootClass {
             ok := m.keyExist(c.name)
@@ -957,7 +957,7 @@ public class Class {
             return null
         }
         errMsg := sprintf("%s class named '%s' detects a circularity in class hierarchy",
-            this.pos.ErrMsgPrefix(), this.name)
+            this.pos.errMsgPrefix(), this.name)
         tab := "\t"
         index := len(arr) - 1
         for index >= 0 {
@@ -983,7 +983,7 @@ public class Class {
                 }
                 m := v[0]
                 for _, v := range this.superClass.methods[name] {
-                    if v.IsFinal() == false {
+                    if v.isFinal() == false {
                         continue
                     }
                     f1 := new Type()
@@ -1032,7 +1032,7 @@ public class Class {
                     pos = nameMatch[0].Function.pos
                 }
                 errs.append(new error(sprintf("%s missing implementation method '%s' define on interface '%s'",
-                    pos.ErrMsgPrefix(), m.Function.readableMsg(), inter.name)))
+                    pos.errMsgPrefix(), m.Function.readableMsg(), inter.name)))
             }
         }
         for _, v := range inter.interfaces {
@@ -1066,15 +1066,15 @@ public class Class {
                 }
                 if assignment.Type == VariableTypeNull {
                    errs.append( new error(sprintf("%s pointer types default value is '%s' already",
-                        v.pos.ErrMsgPrefix(), assignment.typeString())))
+                        v.pos.errMsgPrefix(), assignment.typeString())))
                     continue
                 }
-                if v.IsStatic() &&
+                if v.isStatic() &&
                     v.defaultValueExpression.isLiteral() {
                     v.DefaultValue = v.defaultValueExpression.data
                     continue
                 }
-                if v.IsStatic() == false {
+                if v.isStatic() == false {
                     // nothing to do
                     continue
                 }
@@ -1139,7 +1139,7 @@ public class Class {
         for name, methods := range this.methods {
             for _, method := range methods {
                 errs.appendAll( method.checkModifierOk())
-                if method.IsAbstract() {
+                if method.isAbstract() {
                     //nothing
                 } else {
                     if this.IsInterface() {
@@ -1150,7 +1150,7 @@ public class Class {
                     errs.appendAll(method.Function.checkReturnVarExpression())
                     isConstruction := name == SpecialMethodInit
                     if isConstruction {
-                        if method.IsFirstStatementCallFatherConstruction() == false {
+                        if method.isFirstStatementCallFatherConstruction() == false {
                             errs.append( new error(sprintf("%s construction method should call father construction method first",
                                 errMsgPrefix(method.Function.pos))))
                         }
@@ -1168,11 +1168,11 @@ public class Class {
     }
 
     fn checkModifierOk()-> (errs []error = []error{}){
-        if this.IsInterface() && this.IsFinal() {
+        if this.IsInterface() && this.isFinal() {
             errs.append(new error(sprintf("%s interface '%s' cannot be final",
                 errMsgPrefix(this.finalPos), this.name)))
         }
-        if this.IsAbstract() && this.IsFinal() {
+        if this.isAbstract() && this.isFinal() {
             errs.append(new error(sprintf("%s abstract class '%s' cannot be final",
                 errMsgPrefix(this.finalPos), this.name)))
         }

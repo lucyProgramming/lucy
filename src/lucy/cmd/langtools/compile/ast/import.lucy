@@ -16,7 +16,7 @@ public class Import {
 		}
 		if false == PackageNameIsValid(this.Import) {
 			return new error(sprintf("%s '%s' is not a valid name",
-				this.pos.ErrMsgPrefix(), this.Import))
+				this.pos.errMsgPrefix(), this.Import))
 		}
 		this.alias = common.getBaseName(this.Import)
 		return null
@@ -39,11 +39,11 @@ class SourceFile {
 		}
 		if this.Imports.keyExist(i.Import){
 			return new error(sprintf("%s '%s' reimported",
-				i.pos.ErrMsgPrefix(), i.Import))
+				i.pos.errMsgPrefix(), i.Import))
 		}
 		if this.ImportsByResources.keyExist(i.alias) {
 			return new error(sprintf("%s '%s' reimported",
-				i.pos.ErrMsgPrefix(), i.alias))
+				i.pos.errMsgPrefix(), i.alias))
 		}
 		this.Imports[i.Import] = i
 		this.Imports[i.alias] = i

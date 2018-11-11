@@ -17,7 +17,7 @@ class ExpressionArrayParser extends ParserExtends {
 				[1 ,2]
 			*/
 			arr := new ast.ExpressionArray()
-			arr.Expressions, err = this.ep.parseExpressions(lex.TokenRb)
+			arr.expressions, err = this.ep.parseExpressions(lex.TokenRb)
 			this.parser.ifTokenIsLfThenSkip()
 			if this.parser.token.Type != lex.TokenRb {
 				err = new error(sprintf("%s '[' and ']' not match", this.parser.errMsgPrefix()))
@@ -80,7 +80,7 @@ class ExpressionArrayParser extends ParserExtends {
 			[]int { 1, 2}
 		*/
 
-		arr.Expressions, err = this.parseArrayValues()
+		arr.expressions, err = this.parseArrayValues()
 		e = new ast.Expression()
 		e.Type = ast.ExpressionTypeArray
 		e.data = arr
@@ -115,7 +115,7 @@ class ExpressionArrayParser extends ParserExtends {
 				arrayExpression.pos = this.parser.mkPos()
 				arrayExpression.op = "arrayLiteral"
 				data := new ast.ExpressionArray()
-				data.Expressions = ees
+				data.expressions = ees
 				arrayExpression.data = data
 				es.append(arrayExpression)
 			} else {

@@ -12,21 +12,21 @@ public class ClassField {
 	public jvmDescriptor          string      // jvm
 	public DefaultValue           Object // value base on type
 	
-	public fn IsStatic() ->(is bool) {
+	public fn isStatic() ->(is bool) {
 		return (this.accessFlags & cg.AccFieldStatic) != 0
 	}
 	fn isPublic() ->(is bool) {
 		return (this.accessFlags & cg.AccFieldPublic) != 0
 	}
-	fn IsProtected() ->(is bool) {
+	fn isProtected() ->(is bool) {
 		return (this.accessFlags & cg.AccFieldProtected) != 0
 	}
-	fn IsPrivate() ->(is bool) {
+	fn isPrivate() ->(is bool) {
 		return (this.accessFlags & cg.AccFieldPrivate) != 0
 	}
 	fn ableAccessFromSubClass() ->(accessable bool) {
 		return this.isPublic() ||
-			this.IsProtected()
+			this.isProtected()
 	}
 
 	

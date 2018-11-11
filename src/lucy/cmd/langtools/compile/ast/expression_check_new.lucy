@@ -18,13 +18,13 @@ class ExpressionCheckNew {
 		// new object
 		if no.Type.Type != VariableTypeObject {
 			errs . append(new error( sprintf("%s cannot have new on type '%s'",
-					no.Type.pos.ErrMsgPrefix(), no.Type.typeString())))
+					no.Type.pos.errMsgPrefix(), no.Type.typeString())))
 			return null
 		}
 		err = no.Type.Class.loadSelf(e.pos)
 		if err != null {
 			errs . append(new error( sprintf("%s %s",
-				no.Type.pos.ErrMsgPrefix(), err.getMessage())))
+				no.Type.pos.errMsgPrefix(), err.getMessage())))
 			return null
 		}
 		if no.Type.Class.IsInterface() {
@@ -32,7 +32,7 @@ class ExpressionCheckNew {
 				errMsgPrefix(no.Type.pos), no.Type.Class.name)))
 			return null
 		}
-		if no.Type.Class.IsAbstract() {
+		if no.Type.Class.isAbstract() {
 			errs . append(new error( sprintf("%s '%s' is abstract",
 				errMsgPrefix(no.Type.pos), no.Type.Class.name)))
 			return null
@@ -47,7 +47,7 @@ class ExpressionCheckNew {
 		}
 		ms, matched, err := no.Type.Class.accessConstructionMethod(e.pos, errs, no, null, callArgTypes)
 		if err != null {
-			errs . append(new error( sprintf("%s %s", e.pos.ErrMsgPrefix(), err.getMessage())))
+			errs . append(new error( sprintf("%s %s", e.pos.errMsgPrefix(), err.getMessage())))
 			return ret
 		}
 		if matched {

@@ -17,7 +17,7 @@ class ExpressionCheckSelection {
             v := object.Function.Type.searchName(selection.name)
             if v == null {
                 err := new error(sprintf("%s '%s' not found",
-                    e.pos.ErrMsgPrefix(), selection.name))
+                    e.pos.errMsgPrefix(), selection.name))
                 errs.append(err)
                 return null
             }
@@ -32,7 +32,7 @@ class ExpressionCheckSelection {
         case VariableTypeDynamicSelector:
             if selection.name == SUPER {
                 errs . append(new error( sprintf("%s access '%s' at '%s' not allow",
-                    e.pos.ErrMsgPrefix(), SUPER, object.typeString())))
+                    e.pos.errMsgPrefix(), SUPER, object.typeString())))
                 return null
             }
             access, err := object.Class.getFieldOrMethod(e.pos, selection.name, false)
@@ -58,7 +58,7 @@ class ExpressionCheckSelection {
             d, ok := object.Package.block.nameExists(selection.name)
             if ok == false {
                 err := new error(sprintf("%s '%s' not found",
-                    e.pos.ErrMsgPrefix(), selection.name))
+                    e.pos.errMsgPrefix(), selection.name))
                 errs.append(err)
                 return null
             }
@@ -67,7 +67,7 @@ class ExpressionCheckSelection {
                 result.pos = e.pos
                 if v.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
                     err := new error(sprintf("%s variable '%s' is not public",
-                        e.pos.ErrMsgPrefix(), selection.name))
+                        e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
                 }
                 selection.PackageVariable = v
@@ -79,7 +79,7 @@ class ExpressionCheckSelection {
                 result.pos = e.pos
                 if c.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
                     err := new error(sprintf("%s const '%s' is not public",
-                        e.pos.ErrMsgPrefix(), selection.name))
+                        e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
                 }
                 return result
@@ -91,7 +91,7 @@ class ExpressionCheckSelection {
                 result.Class = c
                 if c.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
                     err := new error(sprintf("%s class '%s' is not public",
-                        e.pos.ErrMsgPrefix(), selection.name))
+                        e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
                 }
                 return result
@@ -99,7 +99,7 @@ class ExpressionCheckSelection {
             if n := d.(EnumName) ; n != null {
             	if n.Enum.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
                     err := new error(sprintf("%s enum '%s' is not public",
-                        e.pos.ErrMsgPrefix(), selection.name))
+                        e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
                 }
                 result := new Type()
@@ -113,12 +113,12 @@ class ExpressionCheckSelection {
             if f := d.(Function) ; f != null {
 				if f.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
                     err := new error(sprintf("%s function '%s' is not public",
-                        e.pos.ErrMsgPrefix(), selection.name))
+                        e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
                 }
                 if f.TemplateFunction != null {
                     err := new error(sprintf("%s function '%s' is a template function",
-                        e.pos.ErrMsgPrefix(), selection.name))
+                        e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
                     return null
                 }
@@ -130,19 +130,19 @@ class ExpressionCheckSelection {
                 return result
             }
             err := new error(sprintf("%s name '%s' cannot be used as right value",
-                    e.pos.ErrMsgPrefix(), selection.name))
+                    e.pos.errMsgPrefix(), selection.name))
             errs.append(err)
             return null
         case VariableTypeObject, VariableTypeClass:
             if selection.name == SUPER {
                 if object.Type == VariableTypeClass {
                     errs . append(new error( sprintf("%s cannot access class`s super",
-                        object.pos.ErrMsgPrefix())))
+                        object.pos.errMsgPrefix())))
                     return object
                 }
                 if object.Class.name == JavaRootClass {
                     errs . append(new error( sprintf("%s '%s' is root class",
-                        object.pos.ErrMsgPrefix(), JavaRootClass)))
+                        object.pos.errMsgPrefix(), JavaRootClass)))
                     return object
                 }
                 err := object.Class.loadSuperClass(e.pos)
@@ -188,7 +188,7 @@ class ExpressionCheckSelection {
 
         default:
             errs . append(new error( sprintf("%s cannot access '%s' on '%s'",
-                e.pos.ErrMsgPrefix(), selection.name, object.typeString())))
+                e.pos.errMsgPrefix(), selection.name, object.typeString())))
             return null
         }
         return null

@@ -20,6 +20,7 @@ public class Expression {
 	public boolValue bool 
 	public longValue long
 	public doubleValue double
+	public stringValue string 
 
 	public fn IsIdentifier(identifier string) -> (is bool) {
 		if this.Type != ExpressionTypeIdentifier {
@@ -152,7 +153,7 @@ public class Expression {
 			this.doubleValue = c.doubleValue
 		case VariableTypeString:
 			this.Type = ExpressionTypeString
-			this.data = c.value.(string)
+			this.data = c.stringValue
 		default:
 		}
 	}
@@ -217,7 +218,7 @@ public class Expression {
 			return null
 		}
 		return new error(sprintf("%s cannot use '%s' as condition",
-			this.pos.ErrMsgPrefix(), this.op))
+			this.pos.errMsgPrefix(), this.op))
 	}
 
 	fn canBeUsedAsStatement() -> (err error) {
@@ -245,7 +246,7 @@ public class Expression {
 			return null
 		}
 		return new error(sprintf("%s expression '%s' evaluate but not used",
-			this.pos.ErrMsgPrefix(), this.op))
+			this.pos.errMsgPrefix(), this.op))
 	}
 
 	fn isNumber() -> (is bool) {
@@ -333,7 +334,7 @@ public class Expression {
 		case ExpressionTypeDot:
 			if block.inheritedAttribute.Class == null {
 				errs = []error{new error(sprintf("%s '%s' must in class scope",
-					this.pos.ErrMsgPrefix(), this.op))}
+					this.pos.errMsgPrefix(), this.op))}
 			} else {
 			    this.value = new Type()
 			    this.value.Type = VariableTypeDynamicSelector
@@ -550,7 +551,7 @@ public class Expression {
 		case ExpressionTypeList:
 			errs.append(new error(sprintf("%s cannot have expression '%s' at this scope,"+
 					"this may be cause by the compiler error,please contact the author",
-					this.pos.ErrMsgPrefix(), this.op)))
+					this.pos.errMsgPrefix(), this.op)))
 		case ExpressionTypeGlobal:
 			returnValueTypes =new []Type( 1)
 			returnValueTypes[0] = new Type()
@@ -609,47 +610,47 @@ public class Expression {
 
 	fn methodAccessAble(block Block, method ClassMethod) -> (err error ) {
 		if this.value.Type == VariableTypeObject {
-			if method.IsStatic() {
+			if method.isStatic() {
 				return new error(sprintf("%s method '%s' is static",
-					this.pos.ErrMsgPrefix(), method.Function.name))
+					this.pos.errMsgPrefix(), method.Function.name))
 			}
 			if false == this.IsIdentifier(ThisPointerName) {
 				if this.value.Class.loadFromOutSide {
 					if this.value.Class.isPublic() == false {
 						return new error(sprintf("%s class '%s' is not public",
-							this.pos.ErrMsgPrefix(), this.value.Class.name))
+							this.pos.errMsgPrefix(), this.value.Class.name))
 					}
 					if method.isPublic() == false {
 						return new error(sprintf("%s method '%s' is not public",
-							this.pos.ErrMsgPrefix(), method.Function.name))
+							this.pos.errMsgPrefix(), method.Function.name))
 					}
 				} else {
-					if method.IsPrivate() {
+					if method.isPrivate() {
 						return new error(sprintf("%s method '%s' is private",
-							this.pos.ErrMsgPrefix(), method.Function.name))
+							this.pos.errMsgPrefix(), method.Function.name))
 					}
 				}
 			}
 		} else {
-			if method.IsStatic() == false {
+			if method.isStatic() == false {
 				return new error(sprintf("%s method '%s' is a instance method",
-					this.pos.ErrMsgPrefix(), method.Function.name))
+					this.pos.errMsgPrefix(), method.Function.name))
 			}
 			if this.value.Class != block.inheritedAttribute.Class {
 				if this.value.Class.loadFromOutSide {
 					if this.value.Class.isPublic() == false {
 						return new error(sprintf("%s class '%s' is not public",
-							this.pos.ErrMsgPrefix(), this.value.Class.name))
+							this.pos.errMsgPrefix(), this.value.Class.name))
 
 					}
 					if method.isPublic() == false {
 						return new error(sprintf("%s method '%s' is not public",
-							this.pos.ErrMsgPrefix(), method.Function.name))
+							this.pos.errMsgPrefix(), method.Function.name))
 					}
 				} else {
-					if method.IsPrivate() {
+					if method.isPrivate() {
 						return new error(sprintf("%s method '%s' is private",
-							this.pos.ErrMsgPrefix(), method.Function.name))
+							this.pos.errMsgPrefix(), method.Function.name))
 					}
 				}
 			}
@@ -659,46 +660,46 @@ public class Expression {
 
 	fn fieldAccessAble(block Block, field ClassField) -> (err error ) {
 		if this.value.Type == VariableTypeObject {
-			if field.IsStatic() {
+			if field.isStatic() {
 				return new error(sprintf("%s field '%s' is static",
-					this.pos.ErrMsgPrefix(), field.name))
+					this.pos.errMsgPrefix(), field.name))
 			}
 			if false == this.IsIdentifier(ThisPointerName) {
 				if this.value.Class.loadFromOutSide {
 					if this.value.Class.isPublic() == false {
 						return new error(sprintf("%s class '%s' is not public",
-							this.pos.ErrMsgPrefix(), this.value.Class.name))
+							this.pos.errMsgPrefix(), this.value.Class.name))
 					}
 					if field.isPublic() == false {
 						return new error(sprintf("%s field '%s' is not public",
-							this.pos.ErrMsgPrefix(), field.name))
+							this.pos.errMsgPrefix(), field.name))
 					}
 				} else {
-					if field.IsPrivate() {
+					if field.isPrivate() {
 						return new error(sprintf("%s field '%s' is private",
-							this.pos.ErrMsgPrefix(), field.name))
+							this.pos.errMsgPrefix(), field.name))
 					}
 				}
 			}
 		} else { // class
-			if field.IsStatic() == false {
+			if field.isStatic() == false {
 				return new error(sprintf("%s field '%s' is not static",
-					this.pos.ErrMsgPrefix(), field.name))
+					this.pos.errMsgPrefix(), field.name))
 			}
 			if this.value.Class != block.inheritedAttribute.Class {
 				if this.value.Class.loadFromOutSide {
 					if this.value.Class.isPublic() == false {
 						return new error(sprintf("%s class '%s' is not public",
-							this.pos.ErrMsgPrefix(), this.value.Class.name))
+							this.pos.errMsgPrefix(), this.value.Class.name))
 					}
 					if field.isPublic() == false {
 						return new error(sprintf("%s field '%s' is not public",
-							this.pos.ErrMsgPrefix(), field.name))
+							this.pos.errMsgPrefix(), field.name))
 					}
 				} else {
-					if field.IsPrivate() {
+					if field.isPrivate() {
 						return new error(sprintf("%s field '%s' is private",
-							this.pos.ErrMsgPrefix(), field.name))
+							this.pos.errMsgPrefix(), field.name))
 					}
 				}
 			}
@@ -749,7 +750,7 @@ public class Expression {
 			typ2 = bin.Right.op
 		}
 		return new error(sprintf("%s cannot apply '%s' on '%s' and '%s'",
-			this.pos.ErrMsgPrefix(),
+			this.pos.errMsgPrefix(),
 			this.op,
 			typ1,
 			typ2))

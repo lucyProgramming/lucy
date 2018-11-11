@@ -13,7 +13,7 @@ class FunctionParser extends ParserExtends{
 	*/
 	fn parse(needName bool, isAbstract bool) -> (f ast.Function, err error) {
 		f = new ast.Function()
-		offset := this.parser.token.Offset
+		offset := this.parser.token.offset
 		this.Next(lfIsToken) // skip fn key word
 		this.parser.unExpectNewLineAndSkip()
 		if needName && this.parser.token.Type != lex.TokenIdentifier {
@@ -57,7 +57,7 @@ class FunctionParser extends ParserExtends{
 		} else {
 			f.SourceCode =
 				this.parser.
-					bs[offset : this.parser.token.Offset+1]
+					bs[offset : this.parser.token.offset+1]
 		}
 		this.Next(lfIsToken)
 		return f, err

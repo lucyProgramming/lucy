@@ -13,8 +13,8 @@ public const	AccFieldEnum      char = 0x4000 //enum，表示字段为枚举类�
 
 class FieldInfo {
 	accessFlags            char
-	NameIndex              char
-	DescriptorIndex        char
-	Attributes             []AttributeInfo
+	nameIndex              char
+	descriptorIndex        char
+	attributes             []AttributeInfo
 	AttributeGroupedByName AttributeGroupedByName
 }
