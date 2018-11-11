@@ -1,8 +1,8 @@
  
 
 public class TypeAlias {
-	public 	Name    string
+	public 	name    string
 	public 	Type    Type
-	public 	Pos     Pos
-	public 	Comment string
+	public 	pos     Pos
+	public 	comment string
 }

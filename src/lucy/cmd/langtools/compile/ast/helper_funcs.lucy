@@ -17,7 +17,7 @@ fn checkExpressions(block Block, es []Expression, errs []error, singleValueConte
 		} else {
 			if len(ts) > 1 && singleValueContext {
 				errs.append(new error( sprintf("%s multi value in single value context",
-					errMsgPrefix(v.Pos))))
+					errMsgPrefix(v.pos))))
 			}
 			for _, t := range ts {
 				if t == null {
@@ -37,12 +37,12 @@ fn getExtraExpressionPos(args []Expression, n int) -> (pos Pos) {
 	i := 0
 	for _, a := range args {
 		if a.HaveMultiValue() {
-			i += len(a.MultiValues)
+			i += len(a.multiValues)
 		} else {
 			i++
 		}
 		if i >= n {
-			return a.Pos
+			return a.pos
 		}
 	}
 	return null
@@ -51,7 +51,7 @@ fn getExtraExpressionPos(args []Expression, n int) -> (pos Pos) {
 fn mkVoidType(pos Pos) -> (voidType Type) {
 	result := new Type()
 	result.Type = VariableTypeVoid // means no return;
-	result.Pos = pos
+	result.pos = pos
 	return result
 }
 
@@ -65,7 +65,7 @@ fn shouldAccessFromImports(name string, from Pos, alreadyHave Pos) -> (i Import,
 	if from.Filename != alreadyHave.Filename {
 		i := PackageBeenCompile.getImport(from.Filename, name)
 		if i != null {
-			i.Used = true
+			i.used = true
 			return i, true
 		} else {
 			return null, false
@@ -83,7 +83,7 @@ fn shouldAccessFromImports(name string, from Pos, alreadyHave Pos) -> (i Import,
 	*/
 	should = from.Line < alreadyHave.Line
 	if should {
-		i.Used = true
+		i.used = true
 	}
 	return i, should
 }
@@ -105,7 +105,7 @@ fn methodsNotMatchError(pos Pos, name string, ms []ClassMethod, want []Type) -> 
 		if v == null {
 			continue
 		}
-		wantString += v.TypeString()
+		wantString += v.typeString()
 		if k != len(want)-1 {
 			wantString += ","
 		}
@@ -113,7 +113,7 @@ fn methodsNotMatchError(pos Pos, name string, ms []ClassMethod, want []Type) -> 
 	wantString += ")"
 	errMsg += "\twant " + wantString + "\n"
 	for _, m := range ms {
-		errMsg += "\thave fn " + name + " " + m.Function.Type.TypeString() + "\n"
+		errMsg += "\thave fn " + name + " " + m.Function.Type.typeString() + "\n"
 	}
 	return new error(errMsg)
 }
@@ -122,14 +122,14 @@ fn searchBuildIns(name string) -> (t Object)  {
 	t = buildInFunctionsMap[name]
 	if t != null {
 		//check
-		if _, exists := lucyBuildInPackage.Block.nameExists(name); exists {
+		if _, exists := lucyBuildInPackage.block.nameExists(name); exists {
 			panic(sprintf("%s both exits in 'build function' and 'core package'",
 				name))
 		}
 		return t
 	}
 	if lucyBuildInPackage != null { // avoid lucy/lang package
-		t, _ = lucyBuildInPackage.Block.nameExists(name)
+		t, _ = lucyBuildInPackage.block.nameExists(name)
 		return t
 	}
 	return null
@@ -139,31 +139,31 @@ fn checkConst(block Block, c Constant) -> (err error)  {
 	if c.Type != null {
 		c.mkDefaultValue()
 	}
-	if c.DefaultValueExpression == null {
-		err := new error(sprintf("%s const have no expression", errMsgPrefix(c.Pos)))
+	if c.defaultValueExpression == null {
+		err := new error(sprintf("%s const have no expression", errMsgPrefix(c.pos)))
 		return err
 	}
-	is, err := c.DefaultValueExpression.constantFold()
+	is, err := c.defaultValueExpression.constantFold()
 	if err != null {
 		return err
 	}
 	if is == false {
 		err := new error(sprintf("%s const named '%s' is not defined by const value",
-			c.Pos.ErrMsgPrefix(), c.Name))
+			c.pos.ErrMsgPrefix(), c.name))
 		return err
 	}
-	c.Value = c.DefaultValueExpression.Data
-	t, _ := c.DefaultValueExpression.checkSingleValueContextExpression(block)
+	c.value = c.defaultValueExpression.data
+	t, _ := c.defaultValueExpression.checkSingleValueContextExpression(block)
 	if c.Type != null {
 		es := []error{}
 		if c.Type.assignAble(es, t) == false {
 			if (c.Type.isInteger() && t.isInteger()) ||
 				(c.Type.isFloat() && t.isFloat()) {
-				c.DefaultValueExpression.convertLiteralToNumberType(c.Type.Type)
-				c.Value = c.DefaultValueExpression.Data
+				c.defaultValueExpression.convertLiteralToNumberType(c.Type.Type)
+				c.value = c.defaultValueExpression.data
 			} else {
 				err := new error(sprintf("%s cannot use '%s' as '%s' for initialization value",
-					c.Pos.ErrMsgPrefix(), c.Type.TypeString(), t.TypeString()))
+					c.pos.ErrMsgPrefix(), c.Type.typeString(), t.typeString()))
 				return err
 			}
 		}
@@ -202,10 +202,10 @@ fn convertExpressionsToNeeds(es []Expression, needs []Type, eval []Type) {
 		}
 		if (needs[k].isInteger() && eval[k].isInteger()) ||
 			(needs[k].isFloat() && eval[k].isFloat()) {
-			pos := eval[k].Pos // keep pos
+			pos := eval[k].pos // keep pos
 			e.convertToNumberType(needs[k].Type)
-			eval[k] = e.Value
-			eval[k].Pos = pos
+			eval[k] = e.value
+			eval[k].pos = pos
 		}
 	}
 	return

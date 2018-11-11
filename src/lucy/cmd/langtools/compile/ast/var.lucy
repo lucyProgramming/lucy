@@ -45,12 +45,12 @@ public var	JavaBytesType        Type // byte[]
 {
 	LucyBytesType = new Type()
 	LucyBytesType.Type = VariableTypeArray
-	LucyBytesType.Array = new Type()
-	LucyBytesType.Array.Type = VariableTypeByte
+	LucyBytesType.array = new Type()
+	LucyBytesType.array.Type = VariableTypeByte
 	JavaBytesType = new Type()
 	JavaBytesType.Type = VariableTypeJavaArray
-	JavaBytesType.Array = new Type()
-	JavaBytesType.Array.Type = VariableTypeByte
+	JavaBytesType.array = new Type()
+	JavaBytesType.array.Type = VariableTypeByte
 }
 
 fn loadJavaStringClass(pos Pos) ->(err error) {

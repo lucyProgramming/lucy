@@ -23,8 +23,8 @@ class EnumParser extends ParserExtends {
 			this.Next(lfNotToken) // skip enum name
 		}
 		e = new ast.Enum()
-		e.Name = enumName
-		e.Pos = this.parser.mkPos()
+		e.name = enumName
+		e.pos = this.parser.mkPos()
 		comment := new CommentParser(this.parser)
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s expect '{',but '%s'", this.parser.errMsgPrefix(), this.parser.token.Description))
@@ -53,18 +53,18 @@ class EnumParser extends ParserExtends {
 						this.consume(untilSemicolonOrLf)
 					}
 				}
-				enumComment := comment.Comment
+				enumComment := comment.comment
 				if e.Init == null && value != null {
 					e.Init = value
 					e.FirstValueIndex = len(e.Enums)
 					value = null
 				}
 				enumName := new ast.EnumName()
-				enumName.Name = name
-				enumName.Pos = pos
+				enumName.name = name
+				enumName.pos = pos
 				enumName.NoNeed = value
 				enumName.Enum = e
-				enumName.Comment = enumComment
+				enumName.comment = enumComment
 				e.Enums.append(enumName)
 				comment.reset()
 			case lex.TokenComma:

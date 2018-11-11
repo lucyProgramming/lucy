@@ -4,8 +4,8 @@ import "lucy/binary"
 public class InnerClass {
 	public InnerClass  string
 	public OuterClass  string
-	public Name        string
-	public AccessFlags char
+	public name        string
+	public accessFlags char
 	
 	fn FromBs(c Class, bs []byte) {
     		nameIndex := binary.BigEndian.getChar(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
@@ -19,9 +19,9 @@ public class InnerClass {
     		if 0 == binary.BigEndian.getChar(bs[4:]) {
     			//TODO:: what zero means???
     		} else {
-    			this.Name = string(c.ConstPool[binary.BigEndian.getChar(bs[4:])].Info)
+    			this.name = string(c.ConstPool[binary.BigEndian.getChar(bs[4:])].Info)
     		}
-    		this.AccessFlags = binary.BigEndian.getChar(bs[6:])
+    		this.accessFlags = binary.BigEndian.getChar(bs[6:])
     }
 }
 
@@ -55,8 +55,8 @@ class AttributeInnerClasses {
 			bs8 := new []byte(8)
 			binary.BigEndian.putChar(bs8, c.InsertClassConst(v.InnerClass))
 			binary.BigEndian.putChar(bs8[2:], c.InsertClassConst(v.OuterClass))
-			binary.BigEndian.putChar(bs8[4:], c.InsertUtf8Const(v.Name))
-			binary.BigEndian.putChar(bs8[6:], v.AccessFlags)
+			binary.BigEndian.putChar(bs8[4:], c.InsertUtf8Const(v.name))
+			binary.BigEndian.putChar(bs8[6:], v.accessFlags)
 			ret.Info.appendAll(bs8)
 		}
 		ret.attributeLength = (len(ret.Info))

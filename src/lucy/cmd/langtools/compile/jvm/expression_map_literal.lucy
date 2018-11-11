@@ -32,7 +32,7 @@ class BuildExpressionMap{
            "()V"
         ), code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.CodeLength += 3
-        values := e.Data.(ast.ExpressionMap).KeyValuePairs
+        values := e.data.(ast.ExpressionMap).KeyValuePairs
         hashMapObject := state.newObjectVariableType(mapClass)
         state.pushStack(c, hashMapObject)
         defer state.popStack(1)
@@ -45,17 +45,17 @@ class BuildExpressionMap{
             if t := currentStack + stack; t > maxStack {
                 maxStack = t
             }
-            if v.Key.Value.IsPointer() == false {
-                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.Key.Value)
+            if v.Key.value.isPointer() == false {
+                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.Key.value)
             }
             state.pushStack(c, state.newObjectVariableType(javaRootClass))
             currentStack = 3 // stack is ... mapref mapref kref
-            stack = this.eb.build(c, code, v.Value, context, state)
+            stack = this.eb.build(c, code, v.value, context, state)
             if t := currentStack + stack; t > maxStack {
                 maxStack = t
             }
-            if v.Value.Value.IsPointer() == false {
-                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.Value.Value)
+            if v.value.value.isPointer() == false {
+                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.value.value)
             }
             // put in hashmap
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -78,7 +78,7 @@ class BuildExpressionMap{
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        call := e.Data.(ast.ExpressionMethodCall)
+        call := e.data.(ast.ExpressionMethodCall)
         maxStack = this.eb.build(c, code, call.Expression, context, state)
         stackLength := len(state.Stacks)
         defer  {
@@ -86,14 +86,14 @@ class BuildExpressionMap{
         }
         hashMapVerifyType := state.newObjectVariableType(mapClass)
         state.pushStack(c, hashMapVerifyType)
-        switch call.Name {
+        switch call.name {
         case common.MapMethodKeyExist:
-            variableType := call.Args[0].Value
+            variableType := call.Args[0].value
             stack := this.eb.build(c, code, call.Args[0], context, state)
             if t := char(1) + stack; t > maxStack {
                 maxStack = t
             }
-            if variableType.IsPointer() == false {
+            if variableType.isPointer() == false {
                 TypeConverterAndPrimitivePacker.packPrimitives(c, code, variableType)
             }
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -103,7 +103,7 @@ class BuildExpressionMap{
                 "(Ljava/lang/Object;)Z"
             ), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
-            if e.IsStatementExpression {
+            if e.isStatementExpression {
                 code.Codes[code.CodeLength] = cg.OP_pop
                 code.CodeLength++
             }
@@ -111,7 +111,7 @@ class BuildExpressionMap{
             currentStack := char(1)
             for k, v := range call.Args {
                 currentStack = 1
-                variableType := v.Value
+                variableType := v.value
                 if k != len(call.Args)-1 {
                     code.Codes[code.CodeLength] = cg.OP_dup
                     currentStack++
@@ -124,7 +124,7 @@ class BuildExpressionMap{
                 if t := stack + currentStack; t > maxStack {
                     maxStack = t
                 }
-                if variableType.IsPointer() == false {
+                if variableType.isPointer() == false {
                     TypeConverterAndPrimitivePacker.packPrimitives(c, code, variableType)
                 }
                 //call remove
@@ -156,7 +156,7 @@ class BuildExpressionMap{
                 "()I"
             ), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
-            if e.IsStatementExpression {
+            if e.isStatementExpression {
                 code.Codes[code.CodeLength] = cg.OP_pop
                 code.CodeLength++
             }

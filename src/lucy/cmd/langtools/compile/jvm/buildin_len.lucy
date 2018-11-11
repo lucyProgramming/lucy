@@ -22,7 +22,7 @@ class BuildinFunctionLen {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        call := e.Data.(ast.ExpressionFunctionCall)
+        call := e.data.(ast.ExpressionFunctionCall)
         a0 := call.Args[0]
         maxStack = this.eb.build(c, code, a0, context, state)
         code.Codes[code.CodeLength] = cg.OP_dup
@@ -36,21 +36,21 @@ class BuildinFunctionLen {
         code.Codes[code.CodeLength+4] = cg.OP_iconst_0
         code.CodeLength += 5
         noNullExit := (new cg.Exit(cg.OP_goto, code))
-        state.pushStack(c, a0.Value)
+        state.pushStack(c, a0.value)
         context.MakeStackMap(code, state, code.CodeLength)
         state.popStack(1)
-        if a0.Value.Type == ast.VariableTypeJavaArray {
+        if a0.value.Type == ast.VariableTypeJavaArray {
             code.Codes[code.CodeLength] = cg.OP_arraylength
             code.CodeLength++
-        } else if a0.Value.Type == ast.VariableTypeArray {
-            meta := ArrayMetas[a0.Value.Array.Type]
+        } else if a0.value.Type == ast.VariableTypeArray {
+            meta := ArrayMetas[a0.value.array.Type]
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
             c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                     meta.className,
                    "size",
                 "()I"), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
-        } else if a0.Value.Type == ast.VariableTypeMap {
+        } else if a0.value.Type == ast.VariableTypeMap {
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
             c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                  mapClass,
@@ -58,7 +58,7 @@ class BuildinFunctionLen {
                  "()I"
             ), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
-        } else if a0.Value.Type == ast.VariableTypeString {
+        } else if a0.value.Type == ast.VariableTypeString {
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
             c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                  javaStringClass,
@@ -71,7 +71,7 @@ class BuildinFunctionLen {
         state.pushStack(c, typeInt)
         context.MakeStackMap(code, state, code.CodeLength)
         state.popStack(1)
-        if e.IsStatementExpression {
+        if e.isStatementExpression {
             code.Codes[code.CodeLength] = cg.OP_pop
             code.CodeLength++
         }

@@ -2,7 +2,7 @@
 import "lucy/binary"
 
 public class AttributeTemplateFunction {
-	Name string
+	name string
 	/*
 		reGenerate pos
 	*/
@@ -11,9 +11,9 @@ public class AttributeTemplateFunction {
 	public StartColumn char
 	public Code        string
 	public AccessFlag  char
-	public Comment     string
+	public comment     string
 	public fn FromBytes(c Class, bs []byte) {
-		this.Name = string(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
+		this.name = string(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
 		this.Filename = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].Info)
 		this.StartLine = binary.BigEndian.getChar(bs[4:])
 		this.StartColumn = binary.BigEndian.getChar(bs[6:])
@@ -26,13 +26,13 @@ public class AttributeTemplateFunction {
 		info.NameIndex = c.InsertUtf8Const(AttributeNameLucyTemplateFunction)
 		info.attributeLength = 14
 		info.Info = new []byte(info.attributeLength)
-		binary.BigEndian.putChar(info.Info, c.InsertUtf8Const(this.Name))
+		binary.BigEndian.putChar(info.Info, c.InsertUtf8Const(this.name))
 		binary.BigEndian.putChar(info.Info[2:], c.InsertUtf8Const(this.Filename))
 		binary.BigEndian.putChar(info.Info[4:], this.StartLine)
 		binary.BigEndian.putChar(info.Info[6:], this.StartColumn)
 		binary.BigEndian.putChar(info.Info[8:], c.InsertUtf8Const(this.Code))
 		binary.BigEndian.putChar(info.Info[10:], this.AccessFlag)
-		binary.BigEndian.putChar(info.Info[12:], c.InsertUtf8Const(this.Comment))
+		binary.BigEndian.putChar(info.Info[12:], c.InsertUtf8Const(this.comment))
 		return info
 	}	
 }

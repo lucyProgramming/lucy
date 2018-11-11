@@ -1,11 +1,11 @@
 import "java/lang/Object"
 
 public class StatementDefer {
-	public Pos            Pos
+	public pos            Pos
 	public Labels         []StatementLabel
 	public StartPc        int         // for jvm
 	public StackMapState  Object // *jvm.StackMapState
-	public Block          Block
+	public block          Block
 	public ExceptionClass Class
 	fn ResetLabels() {
 		for _, v := range this.Labels {
@@ -16,7 +16,7 @@ public class StatementDefer {
 	fn registerExceptionClass(c Class) -> (err error) {
 		if this.ExceptionClass != null {
 			return new error(sprintf("exception class already registed as '%s'",
-				this.ExceptionClass.Name))
+				this.ExceptionClass.name))
 		}
 		this.ExceptionClass = c
 		return null

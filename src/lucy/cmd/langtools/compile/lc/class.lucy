@@ -27,7 +27,7 @@ class ClassDecoder {
 		c.bs = c.bs[2:]
 		// this class
 		ret.ThisClass = binary.BigEndian.Uint16(c.bs)
-		ret.SuperClass = binary.BigEndian.Uint16(c.bs[2:])
+		ret.superClass = binary.BigEndian.Uint16(c.bs[2:])
 		c.bs = c.bs[4:]
 		c.parseInterfaces()
 		c.parseFields()
@@ -139,7 +139,7 @@ class ClassDecoder {
 		length := binary.BigEndian.Uint16(c.bs)
 		c.bs = c.bs[2:]
 		for i := char(0); i < length; i++ {
-			c.classFile.Interfaces = append(c.classFile.Interfaces, binary.BigEndian.Uint16(c.bs))
+			c.classFile.interfaces = append(c.classFile.interfaces, binary.BigEndian.Uint16(c.bs))
 			c.bs = c.bs[2:]
 		}
 	}
@@ -149,7 +149,7 @@ class ClassDecoder {
 		c.bs = c.bs[2:]
 		for i := char(0); i < length; i++ {
 			f := new cg.FieldInfo()
-			f.AccessFlags = binary.BigEndian.Uint16(c.bs)
+			f.accessFlags = binary.BigEndian.Uint16(c.bs)
 			f.NameIndex = binary.BigEndian.Uint16(c.bs[2:])
 			f.DescriptorIndex = binary.BigEndian.Uint16(c.bs[4:])
 			c.bs = c.bs[6:]
@@ -157,7 +157,7 @@ class ClassDecoder {
 			if err != null {
 				return err
 			}
-			c.classFile.Fields = append(c.classFile.Fields, f)
+			c.classFile.fields = append(c.classFile.fields, f)
 		}
 		return null
 	}
@@ -167,7 +167,7 @@ class ClassDecoder {
 		c.bs = c.bs[2:]
 		for i := char(0); i < length; i++ {
 			m := new cg.MethodInfo()
-			m.AccessFlags = binary.BigEndian.Uint16(c.bs)
+			m.accessFlags = binary.BigEndian.Uint16(c.bs)
 			m.NameIndex = binary.BigEndian.Uint16(c.bs[2:])
 			m.DescriptorIndex = binary.BigEndian.Uint16(c.bs[4:])
 			c.bs = c.bs[6:]
@@ -175,7 +175,7 @@ class ClassDecoder {
 			if err != null {
 				return err
 			}
-			c.classFile.Methods = append(c.classFile.Methods, m)
+			c.classFile.methods = append(c.classFile.methods, m)
 		}
 		return null
 	}

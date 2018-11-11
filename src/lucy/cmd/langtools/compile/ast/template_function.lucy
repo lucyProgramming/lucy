@@ -2,14 +2,14 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 
 
-class TemplateFunctionInstance  {
+public class TemplateFunctionInstance  {
 	parameterTypes []Type
-	Entrance       cg.MethodHighLevel
-	Function       Function
+	public Entrance       cg.MethodHighLevel
+	public Function       Function
 }
 
 
-class TemplateFunction  {
+public class TemplateFunction  {
 	instances []TemplateFunctionInstance
 
 	fn instanceExists(parameterTypes []Type) -> (instance TemplateFunctionInstance) {
@@ -18,7 +18,7 @@ class TemplateFunction  {
 				return false
 			}
 			for k, tType := range parameterTypes {
-				if tType.Equal(instance.parameterTypes[k]) == false {
+				if tType.equal(instance.parameterTypes[k]) == false {
 					//not equal
 					return false
 				}

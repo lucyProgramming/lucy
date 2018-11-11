@@ -129,7 +129,7 @@ public class Compiler {
 			os.Exit(1)
 		}
 		c := ast.ConvertTops2Package{}
-		ast.PackageBeenCompile.Name = compileCommon.CompileFlags.PackageName
+		ast.PackageBeenCompile.name = compileCommon.CompileFlags.PackageName
 		rs, errs := c.ConvertTops2Package(this.Tops)
 		this.Errs = append(this.Errs, errs...)
 		for _, v := range rs {

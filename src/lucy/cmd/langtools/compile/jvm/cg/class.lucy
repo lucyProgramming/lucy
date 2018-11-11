@@ -21,10 +21,10 @@ public class Class {
 	public ConstPool               []ConstPool
 	public AccessFlag              char
 	public ThisClass               char
-	public SuperClass              char
-	public Interfaces              []char
-	public Fields                  []FieldInfo
-	public Methods                 []MethodInfo
+	public superClass              char
+	public interfaces              []char
+	public fields                  []FieldInfo
+	public methods                 []MethodInfo
 	public Attributes              []AttributeInfo
 	public AttributeGroupedByName  AttributeGroupedByName
 	public TypeAlias               []AttributeLucyTypeAlias
@@ -120,7 +120,7 @@ public class Class {
 			return con.selfIndex
 		}
 		info := new ConstantInfoNameAndType(
-			       this.InsertUtf8Const(n.Name),
+			       this.InsertUtf8Const(n.name),
 			    this.InsertUtf8Const(n.Descriptor)
 		    ).ToConstPool()
 		info.selfIndex = this.constPoolUint16Length()
@@ -274,21 +274,21 @@ public class Class {
 		if len(this.ConstPool) == 0 {
 			this.ConstPool = []ConstPool{null} // jvm const pool index begin at 1
 		}
-		this.AccessFlag = high.AccessFlags
-		this.ThisClass = this.InsertClassConst(high.Name)
-		this.SuperClass = this.InsertClassConst(high.SuperClass)
-		this.Interfaces = []char {}
-		for _, i := range high.Interfaces {
+		this.AccessFlag = high.accessFlags
+		this.ThisClass = this.InsertClassConst(high.name)
+		this.superClass = this.InsertClassConst(high.superClass)
+		this.interfaces = []char {}
+		for _, i := range high.interfaces {
 			inter := (new ConstantInfoClass(this.InsertUtf8Const(i))).ToConstPool()
 			index := this.constPoolUint16Length()
-			this.Interfaces . append(index)
+			this.interfaces . append(index)
 			this.ConstPool . append(inter)
 		}
-		this.Fields = []FieldInfo{}
-		for _, f := range high.Fields {
+		this.fields = []FieldInfo{}
+		for _, f := range high.fields {
 			field := new FieldInfo()
-			field.AccessFlags = f.AccessFlags
-			field.NameIndex = this.InsertUtf8Const(f.Name)
+			field.accessFlags = f.accessFlags
+			field.NameIndex = this.InsertUtf8Const(f.name)
             field.Attributes = []AttributeInfo{}
 			if f.AttributeConstantValue != null {
 				field.Attributes . append(  f.AttributeConstantValue.ToAttributeInfo(this))
@@ -303,14 +303,14 @@ public class Class {
 			if f.AttributeLucyComment != null {
 				field.Attributes . append(  f.AttributeLucyComment.ToAttributeInfo(this))
 			}
-			this.Fields.append(field)
+			this.fields.append(field)
 		}
-		this.Methods = []MethodInfo{}
-		for _, ms := range high.Methods {
+		this.methods = []MethodInfo{}
+		for _, ms := range high.methods {
 			for _, m := range ms {
 				info := new MethodInfo()
-				info.AccessFlags = m.AccessFlags
-				info.NameIndex = this.InsertUtf8Const(m.Name)
+				info.accessFlags = m.accessFlags
+				info.NameIndex = this.InsertUtf8Const(m.name)
 				info.DescriptorIndex = this.InsertUtf8Const(m.Descriptor)
 				info.Attributes = []AttributeInfo{}
 				if m.Code != null {
@@ -340,7 +340,7 @@ public class Class {
 						info.Attributes.append(t)
 					}
 				}
-				this.Methods . append(info)
+				this.methods . append(info)
 			}
 		}
 		if this.Attributes == null {
@@ -434,14 +434,14 @@ public class Class {
 		writer.write(bs2.getUnderlyingArray())
 
 		//super Class
-		binary.BigEndian.putChar(bs2, this.SuperClass)
+		binary.BigEndian.putChar(bs2, this.superClass)
 		writer.write(bs2.getUnderlyingArray())
 
 		// interface
-		binary.BigEndian.putChar(bs2, char(len(this.Interfaces)))
+		binary.BigEndian.putChar(bs2, char(len(this.interfaces)))
 		writer.write(bs2.getUnderlyingArray())
 
-		for _, v := range this.Interfaces {
+		for _, v := range this.interfaces {
 			binary.BigEndian.putChar(bs2, char(v))
 			writer.write(bs2.getUnderlyingArray())
 		}
@@ -454,10 +454,10 @@ public class Class {
 
 	fn writeMethods()  {
 		bs2 := new []byte(2)
-		binary.BigEndian.putChar(bs2, char(len(this.Methods)))
+		binary.BigEndian.putChar(bs2, char(len(this.methods)))
 		this.writer.write(bs2.getUnderlyingArray())
-		for _, v := range this.Methods {
-			binary.BigEndian.putChar(bs2, char(v.AccessFlags))
+		for _, v := range this.methods {
+			binary.BigEndian.putChar(bs2, char(v.accessFlags))
 			this.writer.write(bs2.getUnderlyingArray())
 			binary.BigEndian.putChar(bs2, v.NameIndex)
 			this.writer.write(bs2.getUnderlyingArray())
@@ -469,10 +469,10 @@ public class Class {
 
 	fn writeFields()  {
 		bs2 := new []byte(2)
-		binary.BigEndian.putChar(bs2, char(len(this.Fields)))
+		binary.BigEndian.putChar(bs2, char(len(this.fields)))
 		this.writer.write(bs2.getUnderlyingArray())
-		for _, v := range this.Fields {
-			binary.BigEndian.putChar(bs2, char(v.AccessFlags))
+		for _, v := range this.fields {
+			binary.BigEndian.putChar(bs2, char(v.accessFlags))
 			this.writer.write(bs2.getUnderlyingArray())
 			binary.BigEndian.putChar(bs2, v.NameIndex)
 			this.writer.write(bs2.getUnderlyingArray())

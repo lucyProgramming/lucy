@@ -7,35 +7,35 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 
 public class Constant {
-	public IsGlobal               bool
-	public IsBuildIn              bool
-	public Used                   bool
-	public Pos                    Pos
+	public isGlobal               bool
+	public isBuildIn              bool
+	public used                   bool
+	public pos                    Pos
 	public Type                   Type
-	public Name                   string
-	public DefaultValueExpression Expression
-	public AccessFlags            char
-	public Comment                string
-	public Value                  Object
+	public name                   string
+	public defaultValueExpression Expression
+	public accessFlags            char
+	public comment                string
+	public value                  Object
 	public longValue long
 	public doubleValue double 
 	
 	fn isPublic() -> (is bool) {
-		return this.AccessFlags|cg.AccFieldPublic != 0
+		return this.accessFlags|cg.AccFieldPublic != 0
 	}
 
 	fn mkDefaultValue() {
 		switch this.Type.Type {
 		case VariableTypeBool:
-			this.Value = Boolean.valueOf(false)
+			this.value = Boolean.valueOf(false)
 		case this.Type.isInteger():
-			this.Value = Long.valueOf(long(0))
+			this.value = Long.valueOf(long(0))
 		case VariableTypeFloat:
-			this.Value = Float.valueOf(float(0))
+			this.value = Float.valueOf(float(0))
 		case VariableTypeDouble:
-			this.Value = Double.valueOf(double(0))
+			this.value = Double.valueOf(double(0))
 		case VariableTypeString:
-			this.Value = ""
+			this.value = ""
 		default:
 			//
 		}

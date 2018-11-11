@@ -113,7 +113,7 @@ public class ExpressionMethodCall  {
 	public Expression         Expression
 	public Args               []Expression
 	public VArgs              CallVariableArgs
-	public Name               string
+	public name               string
 	public Method             ClassMethod
 	public FieldMethodHandler ClassField
 	/*
@@ -145,11 +145,11 @@ public class ExpressionTypeConversion  {
 }
 
 public class ExpressionIdentifier  {
-	public Name     string
+	public name     string
 	public Variable Variable
 	public Function Function
 	public EnumName EnumName
-	public Comment  string
+	public comment  string
 }
 
 public class ExpressionIndex  {
@@ -159,7 +159,7 @@ public class ExpressionIndex  {
 
 public class ExpressionSelection  {
 	public Expression      Expression
-	public Name            string
+	public name            string
 	public Field           ClassField  // expression is class or object
 	public Method          ClassMethod // pack to method handle
 	public PackageFunction Function    // expression is package , pack function to method handle
@@ -182,7 +182,7 @@ public class ExpressionMap  {
 
 public class ExpressionKV  {
 	public Key   Expression
-	public Value Expression
+	public value Expression
 }
 
 /*

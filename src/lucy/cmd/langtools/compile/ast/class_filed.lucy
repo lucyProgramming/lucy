@@ -3,29 +3,29 @@ import "java/lang/Object"
 
 public class ClassField {
 	public Class                  Class
-	public DefaultValueExpression Expression
-	public Name                   string
+	public defaultValueExpression Expression
+	public name                   string
 	public Type                   Type
-	public Pos                    Pos
-	public Comment                string
-	public AccessFlags            char
-	public JvmDescriptor          string      // jvm
+	public pos                    Pos
+	public comment                string
+	public accessFlags            char
+	public jvmDescriptor          string      // jvm
 	public DefaultValue           Object // value base on type
 	
 	public fn IsStatic() ->(is bool) {
-		return (this.AccessFlags & cg.AccFieldStatic) != 0
+		return (this.accessFlags & cg.AccFieldStatic) != 0
 	}
-	fn IsPublic() ->(is bool) {
-		return (this.AccessFlags & cg.AccFieldPublic) != 0
+	fn isPublic() ->(is bool) {
+		return (this.accessFlags & cg.AccFieldPublic) != 0
 	}
 	fn IsProtected() ->(is bool) {
-		return (this.AccessFlags & cg.AccFieldProtected) != 0
+		return (this.accessFlags & cg.AccFieldProtected) != 0
 	}
 	fn IsPrivate() ->(is bool) {
-		return (this.AccessFlags & cg.AccFieldPrivate) != 0
+		return (this.accessFlags & cg.AccFieldPrivate) != 0
 	}
 	fn ableAccessFromSubClass() ->(accessable bool) {
-		return this.IsPublic() ||
+		return this.isPublic() ||
 			this.IsProtected()
 	}
 

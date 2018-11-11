@@ -12,7 +12,7 @@ class StatementWhenParser extends ParserExtends {
 	
 	protected fn parseWhen() -> (whenStatement ast.StatementWhen , err error) {
 		whenStatement = new ast.StatementWhen()
-		whenStatement.Pos = this.parser.mkPos()
+		whenStatement.pos = this.parser.mkPos()
 		this.parser.Next(lfIsToken)
 		this.parser.unExpectNewLineAndSkip()
 		condition, err := this.parser.parseType()
@@ -58,12 +58,12 @@ class StatementWhenParser extends ParserExtends {
 				this.parser.token.Type != lex.TokenDefault &&
 				this.parser.token.Type != lex.TokenRc {
 				block = new ast.Block()
-				block.IsSwitchBlock = true
+				block.isSwitchBlock = true
 				this.bp.parseStatementList(block, false)
 			}
 			t := new ast.StatementWhenCase()
 			t.Matches = ts
-			t.Block = block
+			t.block = block
 			whenStatement.Cases.append(t)
 		}
 		//default value
@@ -80,7 +80,7 @@ class StatementWhenParser extends ParserExtends {
 			}
 			if this.parser.token.Type != lex.TokenRc {
 				block := new ast.Block()
-				block.IsSwitchBlock = true
+				block.isSwitchBlock = true
 				this.bp.parseStatementList(block, false)
 				whenStatement.Default = block
 			}

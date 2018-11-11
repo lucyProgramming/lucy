@@ -23,10 +23,10 @@ class BuildExpressionTypeConversion {
         defer {
             state.popStack(len(state.Stacks) - stackLength)
         }
-        conversion := e.Data.(ast.ExpressionTypeConversion)
+        conversion := e.data.(ast.ExpressionTypeConversion)
         currentStack := char(0)
         // []byte("aaaaaaaaaaaa")
-        if conversion.Type.Equal(ast.LucyBytesType) {
+        if conversion.Type.equal(ast.LucyBytesType) {
             currentStack = 2
             meta := ArrayMetas[ast.VariableTypeByte]
             code.Codes[code.CodeLength] = cg.OP_new
@@ -40,8 +40,8 @@ class BuildExpressionTypeConversion {
         // string(byte[])
         // string ([]byte)
         if (conversion.Type.Type == ast.VariableTypeString &&
-            conversion.Expression.Value.Equal(ast.LucyBytesType)) ||
-            (conversion.Type.Type == ast.VariableTypeString && conversion.Expression.Value.Equal(ast.JavaBytesType)) {
+            conversion.Expression.value.equal(ast.LucyBytesType)) ||
+            (conversion.Type.Type == ast.VariableTypeString && conversion.Expression.value.equal(ast.JavaBytesType)) {
             currentStack = 2
             code.Codes[code.CodeLength] = cg.OP_new
             c.InsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -53,8 +53,8 @@ class BuildExpressionTypeConversion {
         }
         stack := this.eb.build(c, code, conversion.Expression, context, state)
         maxStack = currentStack + stack
-        if e.Value.IsNumber() {
-            this.numberTypeConverter(code, conversion.Expression.Value.Type, conversion.Type.Type)
+        if e.value.isNumber() {
+            this.numberTypeConverter(code, conversion.Expression.value.Type, conversion.Type.Type)
             if t := jvmSlotSize(conversion.Type); t > maxStack {
                 maxStack = t
             }
@@ -62,22 +62,22 @@ class BuildExpressionTypeConversion {
         }
         // int(enum)
         if conversion.Type.Type == ast.VariableTypeInt &&
-            conversion.Expression.Value.Type == ast.VariableTypeEnum {
+            conversion.Expression.value.Type == ast.VariableTypeEnum {
             return
         }
         // enum(int)
         if conversion.Type.Type == ast.VariableTypeEnum &&
-            conversion.Expression.Value.Type == ast.VariableTypeInt {
+            conversion.Expression.value.Type == ast.VariableTypeInt {
             code.Codes[code.CodeLength] = cg.OP_dup
             code.CodeLength++
             loadInt32(c, code, conversion.Type.Enum.DefaultValue)
             wrongExit := new cg.Exit(cg.OP_if_icmplt, code)
             code.Codes[code.CodeLength] = cg.OP_dup
             code.CodeLength++
-            loadInt32(c, code, conversion.Type.Enum.Enums[len(conversion.Type.Enum.Enums)-1].Value)
+            loadInt32(c, code, conversion.Type.Enum.Enums[len(conversion.Type.Enum.Enums)-1].value)
             wrongExit2 := new cg.Exit(cg.OP_if_icmpgt, code)
             okExit := new cg.Exit(cg.OP_goto, code)
-            state.pushStack(c, conversion.Expression.Value)
+            state.pushStack(c, conversion.Expression.value)
             defer state.popStack(1)
             context.MakeStackMap(code, state, code.CodeLength)
             writeExits([]cg.Exit{wrongExit, wrongExit2}, code.CodeLength)
@@ -109,8 +109,8 @@ class BuildExpressionTypeConversion {
         }
 
         // []byte("hello world")
-        if conversion.Type.Equal(ast.LucyBytesType) &&
-            conversion.Expression.Value.Type == ast.VariableTypeString {
+        if conversion.Type.equal(ast.LucyBytesType) &&
+            conversion.Expression.value.Type == ast.VariableTypeString {
             //stack top must be a string
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
             c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
@@ -133,8 +133,8 @@ class BuildExpressionTypeConversion {
             return
         }
         // byte[]("hello world")
-        if conversion.Type.Equal(ast.LucyBytesType) &&
-            conversion.Expression.Value.Type == ast.VariableTypeString {
+        if conversion.Type.equal(ast.LucyBytesType) &&
+            conversion.Expression.value.Type == ast.VariableTypeString {
             //stack top must be a string
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
             c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
@@ -150,7 +150,7 @@ class BuildExpressionTypeConversion {
         }
         //  string(['h','e'])
         if conversion.Type.Type == ast.VariableTypeString &&
-            conversion.Expression.Value.Equal(ast.LucyBytesType) {
+            conversion.Expression.value.equal(ast.LucyBytesType) {
             class autoVar {
                 start  char
                 length char
@@ -209,7 +209,7 @@ class BuildExpressionTypeConversion {
         }
         // string(byte[])
         if conversion.Type.Type == ast.VariableTypeString &&
-            conversion.Expression.Value.Equal(ast.JavaBytesType) {
+            conversion.Expression.value.equal(ast.JavaBytesType) {
             code.Codes[code.CodeLength] = cg.OP_invokespecial
             c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,

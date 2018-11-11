@@ -8,63 +8,63 @@ import "lucy/cmd/langtools/compile/common"
 	unlike function class not accept capture
 */
 public class Class {
-	public IsGlobal                          bool
-	public IsBuildIn                         bool
-	public Used                              bool
+	public isGlobal                          bool
+	public isBuildIn                         bool
+	public used                              bool
 	resolveFatherCalled               bool
 	loadSuperClassCalled              bool
 	resolveInterfacesCalled           bool
 	resolveFieldsAndMethodsTypeCalled bool
-	public NotImportedYet                    bool   // not imported
-	public Name                              string // binary name
-	public Pos                               Pos
-	public FinalPos                          Pos // final pos
-	public IsJava                            bool //class imported from CLASSPATH
-	public Block                             Block
-	public AccessFlags                       char
-	public Fields                            map { string -> ClassField }
-	public Methods                           map { string -> []ClassMethod }
-	public SuperClassName                    NameWithPos
-	public SuperClass                        Class
-	public InterfaceNames                    []NameWithPos
-	public Interfaces                        []Class
-	public LoadFromOutSide                   bool
-	public StaticBlocks                      []Block
-	public Comment                           string
+	public notImportedYet                    bool   // not imported
+	public name                              string // binary name
+	public pos                               Pos
+	public finalPos                          Pos // final pos
+	public isJava                            bool //class imported from CLASSPATH
+	public block                             Block
+	public accessFlags                       char
+	public fields                            map { string -> ClassField }
+	public methods                           map { string -> []ClassMethod }
+	public superClassName                    NameWithPos
+	public superClass                        Class
+	public interfaceNames                    []NameWithPos
+	public interfaces                        []Class
+	public loadFromOutSide                   bool
+	public staticBlocks                      []Block
+	public comment                           string
 	closure                           Closure
 
 
     fn HaveStaticsCodes() -> (is bool)  {
-        return len(this.StaticBlocks) > 0
+        return len(this.staticBlocks) > 0
     }
 
     public fn IsInterface() -> (is bool)  {
-        return this.AccessFlags&cg.AccClassInterface != 0
+        return this.accessFlags&cg.AccClassInterface != 0
     }
     public fn IsAbstract() -> (is bool)  {
-        return this.AccessFlags&cg.AccClassAbstract != 0
+        return this.accessFlags&cg.AccClassAbstract != 0
     }
     fn IsFinal() -> (is bool)  {
-        return this.AccessFlags&cg.AccClassFinal != 0
+        return this.accessFlags&cg.AccClassFinal != 0
     }
-    fn IsPublic() -> (is bool)  {
-        return this.AccessFlags&cg.AccClassPublic != 0
+    fn isPublic() -> (is bool)  {
+        return this.accessFlags&cg.AccClassPublic != 0
     }
     
     fn loadSelf(pos Pos) -> (err error) {
-        if this.NotImportedYet == false { // current compile class
+        if this.notImportedYet == false { // current compile class
             return null
         }
-        this.NotImportedYet = false
-        load, err := PackageBeenCompile.loadClass(this.Name)
+        this.notImportedYet = false
+        load, err := PackageBeenCompile.loadClass(this.name)
         if err != null {
             return new error(sprintf("%s %s", pos.ErrMsgPrefix(), err.getMessage()))
         }
-		this.AccessFlags = load.AccessFlags
-		this.Fields = load.Fields
-		this.Methods = load.Methods
-		this.SuperClass = load.SuperClass
-		this.Interfaces = load.Interfaces
+		this.accessFlags = load.accessFlags
+		this.fields = load.fields
+		this.methods = load.methods
+		this.superClass = load.superClass
+		this.interfaces = load.interfaces
         return null
     }
 
@@ -72,46 +72,46 @@ public class Class {
         if this.IsInterface() {
             return
         }
-        if this.Methods == null {
-            this.Methods = new map { string -> []ClassMethod } ( )
+        if this.methods == null {
+            this.methods = new map { string -> []ClassMethod } ( )
         }
-        if len(this.Methods[SpecialMethodInit]) > 0 {
+        if len(this.methods[SpecialMethodInit]) > 0 {
             return
         }
         m := new ClassMethod()
         m.IsCompilerAuto = true
         m.Function = new Function()
-        m.Function.AccessFlags |= cg.AccMethodPublic
-        m.Function.Pos = this.Pos
-        m.Function.Block.IsFunctionBlock = true
-        m.Function.Block.Fn = m.Function
-        m.Function.Name = SpecialMethodInit
+        m.Function.accessFlags |= cg.AccMethodPublic
+        m.Function.pos = this.pos
+        m.Function.block.isFunctionBlock = true
+        m.Function.block.Fn = m.Function
+        m.Function.name = SpecialMethodInit
         {
             e := new Expression()
-            e.Op = "methodCall"
+            e.op = "methodCall"
             e.Type = ExpressionTypeMethodCall
-            e.Pos = this.Pos
+            e.pos = this.pos
             call := new ExpressionMethodCall()
-            call.Name = SUPER
+            call.name = SUPER
             {
                 t := new Expression()
                 t.Type = ExpressionTypeIdentifier
-                t.Pos = this.Pos
-                t.Op = "methodCall"
+                t.pos = this.pos
+                t.op = "methodCall"
                 t2 := new ExpressionIdentifier()
-                t2.Name = ThisPointerName
+                t2.name = ThisPointerName
                 call.Expression = t
             }
-            e.Data = call
-            m.Function.Block.Statements = new []Statement(1)
+            e.data = call
+            m.Function.block.statements = new []Statement(1)
             {
                 t := new Statement()
                 t.Type = StatementTypeExpression
                 t.Expression = e
-                m.Function.Block.Statements[0] = t
+                m.Function.block.statements[0] = t
             }
         }
-        this.Methods[SpecialMethodInit] = []ClassMethod{m}
+        this.methods[SpecialMethodInit] = []ClassMethod{m}
     }
 
     fn mkClassInitMethod() {
@@ -123,29 +123,29 @@ public class Class {
         method.Function.Type.ParameterList = new []Variable( 0)
         method.Function.Type.ReturnList =  new []Variable( 0)
         f := method.Function
-        f.Pos = this.Pos
-        f.Block.Statements =new []Statement ( len(this.StaticBlocks))
-        for k, _ := range f.Block.Statements {
+        f.pos = this.pos
+        f.block.statements =new []Statement ( len(this.staticBlocks))
+        for k, _ := range f.block.statements {
             s := new Statement()
             s.Type = StatementTypeBlock
-            s.Block = this.StaticBlocks[k]
-            f.Block.Statements[k] = s
+            s.block = this.staticBlocks[k]
+            f.block.statements[k] = s
         }
         f.makeLastReturnStatement()
-        f.AccessFlags |= cg.AccMethodPublic
-        f.AccessFlags |= cg.AccMethodStatic
-        f.AccessFlags |= cg.AccMethodFinal
-        f.AccessFlags |= cg.AccMethodBridge
-        f.Name = classInitMethod
-        f.Block.IsFunctionBlock = true
-        f.Block.Fn = method.Function
-        if this.Methods == null {
-            this.Methods = new map { string -> []ClassMethod } ()
+        f.accessFlags |= cg.AccMethodPublic
+        f.accessFlags |= cg.AccMethodStatic
+        f.accessFlags |= cg.AccMethodFinal
+        f.accessFlags |= cg.AccMethodBridge
+        f.name = classInitMethod
+        f.block.isFunctionBlock = true
+        f.block.Fn = method.Function
+        if this.methods == null {
+            this.methods = new map { string -> []ClassMethod } ()
         }
-        f.Block.inherit(this.Block)
-        f.Block.InheritedAttribute.Function = f
-        f.Block.InheritedAttribute.ClassMethod = method
-        this.Methods[f.Name] = []ClassMethod{method}
+        f.block.inherit(this.block)
+        f.block.inheritedAttribute.Function = f
+        f.block.inheritedAttribute.classMethod = method
+        this.methods[f.name] = []ClassMethod{method}
     }
 
     fn resolveFieldsAndMethodsType()-> (errs []error = []error{}){
@@ -154,53 +154,53 @@ public class Class {
         }
         this.resolveFieldsAndMethodsTypeCalled = true
         var err error
-        for _, v := range this.Fields {
-            if v.Name == SUPER {
+        for _, v := range this.fields {
+            if v.name == SUPER {
                 errs.append(new error(sprintf("%s 'super' not allow for field name",
-                    errMsgPrefix(v.Pos))))
+                    errMsgPrefix(v.pos))))
                 continue
             }
-            err = v.Type.resolve(this.Block)
+            err = v.Type.resolve(this.block)
             if err != null {
                 errs.append(err)
             }
         }
-        for _, ms := range this.Methods {
+        for _, ms := range this.methods {
             for _, m := range ms {
                 if m.IsAbstract() {
                     for _, v := range m.Function.Type.ParameterList {
-                        if v.DefaultValueExpression != null {
+                        if v.defaultValueExpression != null {
                             errs.append( new error(sprintf("%s abstract method parameter '%s' cannot have default value '%s'",
-                                    errMsgPrefix(v.Pos), v.Name, v.DefaultValueExpression.Op)))
+                                    errMsgPrefix(v.pos), v.name, v.defaultValueExpression.op)))
                         }
                     }
                     for _, v := range m.Function.Type.ReturnList {
-                        if v.DefaultValueExpression != null {
+                        if v.defaultValueExpression != null {
                             errs.append(new error(sprintf("%s abstract method return variable '%s' cannot have default value '%s'",
-                                    errMsgPrefix(v.Pos), v.Name, v.DefaultValueExpression.Op)))
+                                    errMsgPrefix(v.pos), v.name, v.defaultValueExpression.op)))
                         }
                     }
                 }
-                m.Function.Block.inherit(this.Block)
-                m.Function.Block.InheritedAttribute.Function = m.Function
-                m.Function.Block.InheritedAttribute.ClassMethod = m
+                m.Function.block.inherit(this.block)
+                m.Function.block.inheritedAttribute.Function = m.Function
+                m.Function.block.inheritedAttribute.classMethod = m
                 m.Function.checkParametersAndReturns(errs, false, m.IsAbstract())
                 if len(m.Function.Type.TemplateNames) > 0 {
                     errs.append(new error(sprintf("%s cannot use template for method",
-                        errMsgPrefix(m.Function.Pos))))
+                        errMsgPrefix(m.Function.pos))))
                 }
                 if m.IsStatic() == false { // bind this
-                    if m.Function.Block.Variables == null {
-                        m.Function.Block.Variables = new map { string-> Variable } ()
+                    if m.Function.block.Variables == null {
+                        m.Function.block.Variables = new map { string-> Variable } ()
                     }
-                    m.Function.Block.Variables[ThisPointerName] = new Variable()
-                    m.Function.Block.Variables[ThisPointerName].Name = ThisPointerName
-                    m.Function.Block.Variables[ThisPointerName].Pos = m.Function.Pos
+                    m.Function.block.Variables[ThisPointerName] = new Variable()
+                    m.Function.block.Variables[ThisPointerName].name = ThisPointerName
+                    m.Function.block.Variables[ThisPointerName].pos = m.Function.pos
                     {
                         t := new Type()
                         t.Type = VariableTypeObject
                         t.Class = this
-                        m.Function.Block.Variables[ThisPointerName].Type = t
+                        m.Function.block.Variables[ThisPointerName].Type = t
                     }
                 }
             }
@@ -213,9 +213,9 @@ public class Class {
             return null
         }
         this.resolveFatherCalled = true
-        if this.SuperClassName == null {
+        if this.superClassName == null {
             superClassName := ""
-            if PackageBeenCompile.Name == common.CorePackage {
+            if PackageBeenCompile.name == common.CorePackage {
                 superClassName = JavaRootClass
             } else {
                 if this.IsInterface() {
@@ -226,29 +226,29 @@ public class Class {
             }
             {
                 t := new Class()
-                t.Name = superClassName
-                t.NotImportedYet = true
-                this.SuperClass = t
+                t.name = superClassName
+                t.notImportedYet = true
+                this.superClass = t
             }
         } else {
             variableType := new Type()
             variableType.Type = VariableTypeName // naming
-            variableType.Name = this.SuperClassName.Name
-            variableType.Pos = this.SuperClassName.Pos
-            err := variableType.resolve(this.Block)
+            variableType.name = this.superClassName.name
+            variableType.pos = this.superClassName.pos
+            err := variableType.resolve(this.block)
             if err != null {
                 return err
             }
             if variableType.Type != VariableTypeObject {
                 err := new error(sprintf("%s '%s' is not a class",
-                    this.Pos.ErrMsgPrefix(), this.SuperClassName.Name))
+                    this.pos.ErrMsgPrefix(), this.superClassName.name))
                 return err
             }
-            this.SuperClass = variableType.Class
+            this.superClass = variableType.Class
             if this.IsInterface() {
-                if this.SuperClass.Name != JavaRootClass {
+                if this.superClass.name != JavaRootClass {
                     err := new error(sprintf("%s interface`s super-class must be '%s'",
-                        errMsgPrefix(this.SuperClassName.Pos), JavaRootClass))
+                        errMsgPrefix(this.superClassName.pos), JavaRootClass))
 
                     return err
                 }
@@ -262,28 +262,28 @@ public class Class {
             return null
         }
         this.resolveInterfacesCalled = true
-        this.Interfaces = []Class{}
-        for _, i := range this.InterfaceNames {
+        this.interfaces = []Class{}
+        for _, i := range this.interfaceNames {
             t := new Type()
             t.Type = VariableTypeName
-            t.Pos = i.Pos
-            t.Name = i.Name
-            err := t.resolve(this.Block)
+            t.pos = i.pos
+            t.name = i.name
+            err := t.resolve(this.block)
             if err != null {
                 errs.append(err)
                 continue
             }
             if t.Type != VariableTypeObject {
                 errs.append(new error(sprintf("%s '%s' is not a object , but '%s'",
-                    errMsgPrefix(i.Pos), i.Name, t.TypeString())))
+                    errMsgPrefix(i.pos), i.name, t.typeString())))
                 continue
             }
             if t.Class.IsInterface() == false {
                 errs.append(new error(sprintf("%s '%s' is not a interface",
-                    errMsgPrefix(i.Pos), i.Name)))
+                    errMsgPrefix(i.pos), i.name)))
                 continue
             }
-            this.Interfaces.append(t.Class)
+            this.interfaces.append(t.Class)
         }
         return errs
     }
@@ -294,8 +294,8 @@ public class Class {
         nameMatched []ClassMethod,
         fromSub bool,
         errs []error) ->(method ClassMethod) {
-        if this.Methods != null {
-            for _, v := range this.Methods[m.Function.Name] {
+        if this.methods != null {
+            for _, v := range this.methods[m.Function.name] {
                 if v.IsAbstract() {
                     continue
                 }
@@ -311,7 +311,7 @@ public class Class {
             }
         }
         //no same name method at current class
-        if this.Name == JavaRootClass {
+        if this.name == JavaRootClass {
             return null
         }
         err := this.loadSuperClass(pos)
@@ -320,11 +320,11 @@ public class Class {
             return null
         }
 
-        if this.SuperClass == null {
+        if this.superClass == null {
             return null
         }
 
-        return this.SuperClass.implementMethod(pos, m, nameMatched, true, errs)
+        return this.superClass.implementMethod(pos, m, nameMatched, true, errs)
     }
 
     fn haveSuperClass(pos Pos, superclassName string) -> (have bool,err  error) {
@@ -332,10 +332,10 @@ public class Class {
         if err != null {
             return false, err
         }
-        if this.Name == superclassName {
+        if this.name == superclassName {
             return true, null
         }
-        if this.Name == JavaRootClass {
+        if this.name == JavaRootClass {
             return false, null
         }
 
@@ -344,11 +344,11 @@ public class Class {
             return false, err
         }
 
-        if this.SuperClass == null {
+        if this.superClass == null {
             return false, null
         }
 
-        return this.SuperClass.haveSuperClass(pos, superclassName) // check father is implements
+        return this.superClass.haveSuperClass(pos, superclassName) // check father is implements
     }
 
     fn implementedInterface(pos Pos, inter string) -> (implemented bool,err  error) {
@@ -356,8 +356,8 @@ public class Class {
         if err != null {
             return false, err
         }
-        for _, v := range this.Interfaces {
-            if v.Name == inter {
+        for _, v := range this.interfaces {
+            if v.name == inter {
                 return true, null
             }
             im, _ := v.implementedInterface(pos, inter)
@@ -365,41 +365,41 @@ public class Class {
                 return im, null
             }
         }
-        if this.Name == JavaRootClass {
+        if this.name == JavaRootClass {
             return false, null
         }
         err = this.loadSuperClass(pos)
         if err != null {
             return false, err
         }
-        if this.SuperClass == null {
+        if this.superClass == null {
             return false, null
         }
-        return this.SuperClass.implementedInterface(pos, inter) // check father is implements
+        return this.superClass.implementedInterface(pos, inter) // check father is implements
     }
 
     fn loadSuperClass(pos Pos) -> (err error) {
-        if this.SuperClass != null {
-            return this.SuperClass.loadSelf(pos)
+        if this.superClass != null {
+            return this.superClass.loadSelf(pos)
         }
         if this.resolveFatherCalled ||
             this.loadSuperClassCalled {
             return null
         }
         this.loadSuperClassCalled = true
-        if this.Name == JavaRootClass {
+        if this.name == JavaRootClass {
             err := new error(sprintf("%s root class already", errMsgPrefix(pos)))
             return err
         }
-        if this.SuperClassName == null {
-            this.SuperClassName = new NameWithPos(JavaRootClass ,this.Pos )
+        if this.superClassName == null {
+            this.superClassName = new NameWithPos(JavaRootClass ,this.pos )
         }
-        c, err := PackageBeenCompile.loadClass(this.SuperClassName.Name)
+        c, err := PackageBeenCompile.loadClass(this.superClassName.name)
         if err != null {
             err := new error(sprintf("%s %s", pos.ErrMsgPrefix(), err.getMessage()))
             return err
         }
-        this.SuperClass = c
+        this.superClass = c
         return null
     }
 
@@ -419,7 +419,7 @@ public class Class {
         } else {
             args = callFatherCase.Args
         }
-        for _, v := range this.Methods[SpecialMethodInit] {
+        for _, v := range this.methods[SpecialMethodInit] {
             vArgs, err := v.Function.Type.fitArgs(pos, args, callArgs, v.Function)
             if err == null {
                 if newCase != null {
@@ -429,7 +429,7 @@ public class Class {
                 }
                 return []ClassMethod{v}, true, null
             } else {
-                if this.IsJava {
+                if this.isJava {
                     ms.append(v)
                 } else {
                     return null, false, err
@@ -451,50 +451,50 @@ public class Class {
             return null, err
         }
         notFoundErr := new error(sprintf("%s field or method named '%s' not found", pos.ErrMsgPrefix(), name))
-        if this.Fields != null && null != this.Fields[name] {
-            if fromSub && this.Fields[name].ableAccessFromSubClass() == false {
+        if this.fields != null && null != this.fields[name] {
+            if fromSub && this.fields[name].ableAccessFromSubClass() == false {
                 // private field
                 // break find
                 return null, notFoundErr
             } else {
-                return this.Fields[name], null
+                return this.fields[name], null
             }
         }
-        if this.Methods != null && null != this.Methods[name] {
-            m := this.Methods[name][0]
+        if this.methods != null && null != this.methods[name] {
+            m := this.methods[name][0]
             if fromSub && m.ableAccessFromSubClass() == false {
                 return null, notFoundErr
             } else {
                 return m, null
             }
         }
-        if this.Name == JavaRootClass { // root class
+        if this.name == JavaRootClass { // root class
             return null, notFoundErr
         }
         err = this.loadSuperClass(pos)
         if err != null {
             return null, err
         }
-        if this.SuperClass == null {
+        if this.superClass == null {
             return null, notFoundErr
         }
-        return this.SuperClass.getFieldOrMethod(pos, name, true)
+        return this.superClass.getFieldOrMethod(pos, name, true)
     }
 
     fn constructionMethodAccessAble(pos Pos, method ClassMethod) -> (err error) {
-        if this.LoadFromOutSide {
-            if this.IsPublic() == false {
+        if this.loadFromOutSide {
+            if this.isPublic() == false {
                 return new error(sprintf("%s class '%s' is not public",
-                    pos.ErrMsgPrefix(), this.Name))
+                    pos.ErrMsgPrefix(), this.name))
             }
-            if method.IsPublic() == false {
+            if method.isPublic() == false {
                 return new error(sprintf("%s method '%s' is not public",
-                    pos.ErrMsgPrefix(), method.Function.Name))
+                    pos.ErrMsgPrefix(), method.Function.name))
             }
         } else {
             if method.IsPrivate() {
                 return new error(sprintf("%s method '%s' is private",
-                    pos.ErrMsgPrefix(), method.Function.Name))
+                    pos.ErrMsgPrefix(), method.Function.name))
             }
         }
         return null
@@ -507,25 +507,25 @@ public class Class {
             }
             notFoundErr := new error(sprintf("%s field named '%s' not found",
                 pos.ErrMsgPrefix(), name))
-            if this.Fields != null && null != this.Fields[name] {
-                if fromSub && this.Fields[name].ableAccessFromSubClass() == false {
+            if this.fields != null && null != this.fields[name] {
+                if fromSub && this.fields[name].ableAccessFromSubClass() == false {
                     // private field
                     return null, notFoundErr
                 } else {
-                    return this.Fields[name], null
+                    return this.fields[name], null
                 }
             }
-            if this.Name == JavaRootClass { // root class
+            if this.name == JavaRootClass { // root class
                 return null, notFoundErr
             }
             err = this.loadSuperClass(pos)
             if err != null {
                 return null, err
             }
-            if this.SuperClass == null {
+            if this.superClass == null {
                 return null, notFoundErr
             }
-            return this.SuperClass.getField(pos, name, true)
+            return this.superClass.getField(pos, name, true)
     }
 
 
@@ -550,10 +550,10 @@ public class Class {
         if err != null {
             return null, false, err
         }
-        if this.SuperClass == null {
+        if this.superClass == null {
             return null, false, null
         }
-        return this.SuperClass.accessMethod(pos, errs, call, callArgTypes, fromSub, null)
+        return this.superClass.accessMethod(pos, errs, call, callArgTypes, fromSub, null)
     }
 
     fn accessInterfaceMethod(
@@ -567,8 +567,8 @@ public class Class {
         if err != null {
             return null, false, err
         }
-        if null != this.Methods {
-            for _, m := range this.Methods[name] {
+        if null != this.methods {
+            for _, m := range this.methods[name] {
                 if fromSub && m.ableAccessFromSubClass() == false {
                     continue
                 }
@@ -580,7 +580,7 @@ public class Class {
                 }
             }
         }
-        for _, v := range this.Interfaces {
+        for _, v := range this.interfaces {
             err := v.loadSelf(pos)
             if err != null {
                 return null, false, err
@@ -610,17 +610,17 @@ public class Class {
         if err != null {
             return null, false, err
         }
-        if this.IsJava {
+        if this.isJava {
             return this.accessMethodAsJava(pos, errs, call, callArgTypes, false)
         }
-        if this.Fields != null {
-            if f := this.Fields[call.Name]; f != null &&
+        if this.fields != null {
+            if f := this.fields[call.name]; f != null &&
                 f.Type.Type == VariableTypeFunction &&
                 fieldMethodHandler != null {
                 if fromSub && f.ableAccessFromSubClass() == false {
                     //cannot access this field
                 } else {
-                    call.VArgs, err = this.Fields[call.Name].Type.FunctionType.fitArgs(pos, call.Args,
+                    call.VArgs, err = this.fields[call.name].Type.functionType.fitArgs(pos, call.Args,
                         callArgTypes, null)
                     if err == null {
                         fieldMethodHandler[0] = f
@@ -632,12 +632,12 @@ public class Class {
                 }
             }
         }
-        if this.Methods != null {
-            if len(this.Methods[call.Name]) > 0 {
-                for _, m := range this.Methods[call.Name] {
+        if this.methods != null {
+            if len(this.methods[call.name]) > 0 {
+                for _, m := range this.methods[call.name] {
                     if fromSub && m.ableAccessFromSubClass() == false {
                         return null, false, new error(sprintf("%s method '%s' not found",
-                            pos.ErrMsgPrefix(), call.Name))
+                            pos.ErrMsgPrefix(), call.name))
                     }
                     call.VArgs, err = m.Function.Type.fitArgs(pos, call.Args,
                         callArgTypes, m.Function)
@@ -654,10 +654,10 @@ public class Class {
         if err != null {
             return ms, false, err
         }
-        if this.SuperClass == null {
+        if this.superClass == null {
             return ms, false, null
         }
-        return this.SuperClass.accessMethod(pos, errs, call,
+        return this.superClass.accessMethod(pos, errs, call,
             callArgTypes, true, fieldMethodHandler)
     }
 
@@ -670,8 +670,8 @@ public class Class {
         call ExpressionMethodCall,
         callArgTypes []Type,
         fromSub bool) -> (ms []ClassMethod, matched bool, err error) {
-        if this.Methods != null {
-            for _, m := range this.Methods[call.Name] {
+        if this.methods != null {
+            for _, m := range this.methods[call.name] {
                 if fromSub == true && m.ableAccessFromSubClass() == false {
                     //cannot access from sub
                     continue
@@ -684,17 +684,17 @@ public class Class {
                 }
             }
         }
-        if this.Name == JavaRootClass {
+        if this.name == JavaRootClass {
             return ms, false, null
         }
         err = this.loadSuperClass(pos)
         if err != null {
             return null, false, err
         }
-        if this.SuperClass == null {
+        if this.superClass == null {
             return ms, false, null
         }
-        ms_, matched, err := this.SuperClass.accessMethodAsJava(pos, errs, call, callArgTypes, true)
+        ms_, matched, err := this.superClass.accessMethodAsJava(pos, errs, call, callArgTypes, true)
         if err != null {
             return ms, false, err
         }
@@ -708,21 +708,21 @@ public class Class {
 
 
     fn check(father Block) -> (errs []error = []error{}){
-        this.Block.inherit(father)
-        this.Block.InheritedAttribute.Class = this
+        this.block.inherit(father)
+        this.block.inheritedAttribute.Class = this
         errs.appendAll(this.checkPhase1())
         errs.appendAll( this.checkPhase2())
         return errs
     }
 
     fn checkPhase1()-> (errs []error = []error{}){
-        if this.Block.InheritedAttribute.ClassAndFunctionNames == "" {
-            this.Block.InheritedAttribute.ClassAndFunctionNames = common.getBaseName(this.Name)
+        if this.block.inheritedAttribute.classAndFunctionNames == "" {
+            this.block.inheritedAttribute.classAndFunctionNames = common.getBaseName(this.name)
         } else {
-            this.Block.InheritedAttribute.ClassAndFunctionNames += "$" + common.getBaseName(this.Name)
+            this.block.inheritedAttribute.classAndFunctionNames += "$" + common.getBaseName(this.name)
         }
         this.mkDefaultConstruction()
-        errs.appendAll(this.Block.checkConstants())
+        errs.appendAll(this.block.checkConstants())
         err := this.resolveFather()
         if err != null {
             errs.append(err)
@@ -743,28 +743,28 @@ public class Class {
             return errs
         }
         this.mkClassInitMethod()
-        for name, ms := range this.Methods {
-            if this.Fields != null && this.Fields[name] != null {
-                f := this.Fields[name]
-                if f.Pos.Line < ms[0].Function.Pos.Line {
+        for name, ms := range this.methods {
+            if this.fields != null && this.fields[name] != null {
+                f := this.fields[name]
+                if f.pos.Line < ms[0].Function.pos.Line {
                     errMsg := sprintf("%s method named '%s' already declared as field,at:\n",
-                        errMsgPrefix(ms[0].Function.Pos), name)
-                    errMsg += sprintf("\t%s", errMsgPrefix(f.Pos))
+                        errMsgPrefix(ms[0].Function.pos), name)
+                    errMsg += sprintf("\t%s", errMsgPrefix(f.pos))
                     errs.append(new error(errMsg))
                 } else {
                     errMsg := sprintf("%s field named '%s' already declared as method,at:\n",
-                        errMsgPrefix(f.Pos), name)
-                    errMsg += sprintf("\t%s", errMsgPrefix(ms[0].Function.Pos))
+                        errMsgPrefix(f.pos), name)
+                    errMsg += sprintf("\t%s", errMsgPrefix(ms[0].Function.pos))
                     errs.append(new error(errMsg))
                 }
                 continue
             }
             if len(ms) > 1 {
                 errMsg := sprintf("%s class method named '%s' has declared %d times,which are:\n",
-                    errMsgPrefix(ms[0].Function.Pos),
-                    ms[0].Function.Name, len(ms))
+                    errMsgPrefix(ms[0].Function.pos),
+                    ms[0].Function.name, len(ms))
                 for _, v := range ms {
-                    errMsg += sprintf("\t%s\n", errMsgPrefix(v.Function.Pos))
+                    errMsg += sprintf("\t%s\n", errMsgPrefix(v.Function.pos))
                 }
                 errs.append(new error(errMsg))
             }
@@ -782,44 +782,44 @@ public class Class {
             errs.appendAll( this.checkOverrideAbstractMethod())
         }
         errs.appendAll( this.suitableForInterfaces())
-        if this.SuperClass != null {
-            errs.appendAll(this.suitableSubClassForAbstract(this.SuperClass))
+        if this.superClass != null {
+            errs.appendAll(this.suitableSubClassForAbstract(this.superClass))
         }
         return errs
     }
 
     fn suitableSubClassForAbstract(super Class)-> (errs []error = []error{}){
-        if super.Name != JavaRootClass {
-            err := super.loadSuperClass(this.Pos)
+        if super.name != JavaRootClass {
+            err := super.loadSuperClass(this.pos)
             if err != null {
                 errs.append(err)
                 return errs
             }
-            if super.SuperClass == null {
+            if super.superClass == null {
                 return errs
             }
             length := len(errs)
-            errs.appendAll(this.suitableSubClassForAbstract(super.SuperClass))
+            errs.appendAll(this.suitableSubClassForAbstract(super.superClass))
             if len(errs) > length {
                 return errs
             }
         }
         if super.IsAbstract() {
-            for _, v := range super.Methods {
+            for _, v := range super.methods {
                 m := v[0]
                 if m.IsAbstract() == false {
                     continue
                 }
                 nameMatch :=  []ClassMethod {null}
-                implementation := this.implementMethod(this.Pos, m, nameMatch, false, errs)
+                implementation := this.implementMethod(this.pos, m, nameMatch, false, errs)
                 if implementation != null {
-                    if err := m.implementationMethodIsOk(this.Pos, implementation); err != null {
+                    if err := m.implementationMethodIsOk(this.pos, implementation); err != null {
                         errs.append(err)
                     }
                 } else {
-                    pos := this.Pos
-                    if nameMatch[0] != null && nameMatch[0].Function.Pos != null {
-                        pos = nameMatch[0].Function.Pos
+                    pos := this.pos
+                    if nameMatch[0] != null && nameMatch[0].Function.pos != null {
+                        pos = nameMatch[0].Function.pos
                     }
                     if nameMatch[0] != null {
                         errMsg := sprintf("%s method is suitable for abstract super class\n", errMsgPrefix(pos))
@@ -828,7 +828,7 @@ public class Class {
                         errs.append(new error(errMsg))
                     } else {
                         errs.append(new error(sprintf("%s missing implementation method '%s' define on abstract class '%s'",
-                                pos.ErrMsgPrefix(), m.Function.readableMsg(), super.Name)))
+                                pos.ErrMsgPrefix(), m.Function.readableMsg(), super.name)))
                     }
                 }
             }
@@ -840,10 +840,10 @@ public class Class {
         if this.IsInterface() == false {
             panic("not a interface")
         }
-        if this.Methods != null && len(this.Methods[name]) > 0 {
+        if this.methods != null && len(this.methods[name]) > 0 {
             return this
         }
-        for _, v := range this.Interfaces {
+        for _, v := range this.interfaces {
             if v.interfaceMethodExists(name) != null {
                 return v
             }
@@ -853,58 +853,58 @@ public class Class {
 
     fn abstractMethodExists(pos Pos, name string) -> (c Class,err error) {
         if this.IsAbstract() {
-            if this.Methods != null && len(this.Methods[name]) > 0 {
-                method := this.Methods[name][0]
+            if this.methods != null && len(this.methods[name]) > 0 {
+                method := this.methods[name][0]
                 if method.IsAbstract() {
                     return this, null
                 }
             }
         }
-        if this.Name == JavaRootClass {
+        if this.name == JavaRootClass {
             return null, null
         }
         err = this.loadSuperClass(pos)
         if err != null {
             return null, err
         }
-        if this.SuperClass == null {
+        if this.superClass == null {
             return null, null
         }
-        return this.SuperClass.abstractMethodExists(pos, name)
+        return this.superClass.abstractMethodExists(pos, name)
     }
 
     fn checkOverrideAbstractMethod()-> (errs []error = []error{}){
-        err := this.loadSuperClass(this.Pos)
+        err := this.loadSuperClass(this.pos)
         if err != null {
             errs.append(err)
             return errs
         }
-        if this.SuperClass == null {
+        if this.superClass == null {
             return errs
         }
-        for _, v := range this.Methods {
+        for _, v := range this.methods {
             m := v[0]
-            name := m.Function.Name
+            name := m.Function.name
             if m.IsAbstract() == false {
                 continue
             }
-            exist, err := this.SuperClass.abstractMethodExists(m.Function.Pos, name)
+            exist, err := this.superClass.abstractMethodExists(m.Function.pos, name)
             if err != null {
                 errs.append(err)
                 continue
             }
             if exist != null {
                 errs.append(new error(sprintf("%s method '%s' override '%s'",
-                    errMsgPrefix(v[0].Function.Pos), name, exist.Name)))
+                    errMsgPrefix(v[0].Function.pos), name, exist.name)))
             }
         }
         return errs
     }
 
     fn checkOverrideInterfaceMethod()-> (errs []error = []error{}){
-        for name, v := range this.Methods {
+        for name, v := range this.methods {
             var exist Class
-            for _, vv := range this.Interfaces {
+            for _, vv := range this.interfaces {
                 exist = vv.interfaceMethodExists(name)
                 if exist != null {
                     break
@@ -912,7 +912,7 @@ public class Class {
             }
             if exist != null {
                 errs.append(new error(sprintf("%s method '%s' override '%s'",
-                    errMsgPrefix(v[0].Function.Pos), name, exist.Name)))
+                    errMsgPrefix(v[0].Function.pos), name, exist.name)))
             }
         }
         return errs
@@ -923,41 +923,41 @@ public class Class {
         arr := []string{}
         is := false
         c := this
-        pos := this.Pos
+        pos := this.pos
         if err := this.loadSuperClass(pos); err != null {
             return err
         }
-        if this.SuperClass == null {
+        if this.superClass == null {
             return null
         }
 
-        if this.SuperClass.IsFinal() {
+        if this.superClass.IsFinal() {
             return new error(sprintf("%s class name '%s' have super class  named '%s' that is final",
-                this.Pos.ErrMsgPrefix(), this.Name, this.SuperClass.Name))
+                this.pos.ErrMsgPrefix(), this.name, this.superClass.name))
         }
-        for c.Name != JavaRootClass {
-            ok := m.keyExist(c.Name)
+        for c.name != JavaRootClass {
+            ok := m.keyExist(c.name)
             if ok {
-                arr.append(c.Name)
+                arr.append(c.name)
                 is = true
                 break
             }
-            m[c.Name] = true
-            arr.append(c.Name)
+            m[c.name] = true
+            arr.append(c.name)
             err := c.loadSuperClass(pos)
             if err != null {
                 return err
             }
-            if this.SuperClass == null {
+            if this.superClass == null {
                 return null
             }
-            c = c.SuperClass
+            c = c.superClass
         }
         if is == false {
             return null
         }
         errMsg := sprintf("%s class named '%s' detects a circularity in class hierarchy",
-            this.Pos.ErrMsgPrefix(), this.Name)
+            this.pos.ErrMsgPrefix(), this.name)
         tab := "\t"
         index := len(arr) - 1
         for index >= 0 {
@@ -969,32 +969,32 @@ public class Class {
     }
 
     fn checkIfOverrideFinalMethod()-> (errs []error = []error{}){
-        if this.SuperClass != null {
-            for name, v := range this.Methods {
+        if this.superClass != null {
+            for name, v := range this.methods {
                 if name == SpecialMethodInit {
                     continue
                 }
                 if len(v) == 0 {
                     continue
                 }
-                if len(this.SuperClass.Methods[name]) == 0 {
+                if len(this.superClass.methods[name]) == 0 {
                     // this class not found at super
                     continue
                 }
                 m := v[0]
-                for _, v := range this.SuperClass.Methods[name] {
+                for _, v := range this.superClass.methods[name] {
                     if v.IsFinal() == false {
                         continue
                     }
                     f1 := new Type()
                     f1.Type = VariableTypeFunction
-                    f1.FunctionType = m.Function.Type
+                    f1.functionType = m.Function.Type
                     f2 := new Type()
                     f2.Type = VariableTypeFunction
-                    f2.FunctionType = v.Function.Type
-                    if f1.Equal(f2) {
+                    f2.functionType = v.Function.Type
+                    if f1.equal(f2) {
                         errs.append(new error(sprintf("%s override final method",
-                            errMsgPrefix(m.Function.Pos))))
+                            errMsgPrefix(m.Function.pos))))
                     }
                 }
             }
@@ -1006,36 +1006,36 @@ public class Class {
         if this.IsInterface() {
             return errs
         }
-        for _, i := range this.Interfaces {
+        for _, i := range this.interfaces {
             errs.appendAll(this.suitableForInterface(i))
         }
         return errs
     }
 
     fn suitableForInterface(inter Class)-> (errs []error = []error{}){
-        err := inter.loadSelf(this.Pos)
+        err := inter.loadSelf(this.pos)
         if err != null {
             errs.append(err)
             return errs
         }
-        for _, v := range inter.Methods {
+        for _, v := range inter.methods {
             m := v[0]
             nameMatch := []ClassMethod {null}
-            implementation := this.implementMethod(this.Pos, m, nameMatch, false, errs)
+            implementation := this.implementMethod(this.pos, m, nameMatch, false, errs)
             if implementation != null {
-                if err := m.implementationMethodIsOk(this.Pos, implementation); err != null {
+                if err := m.implementationMethodIsOk(this.pos, implementation); err != null {
                     errs.append(err)
                 }
             } else {
-                pos := this.Pos
-                if nameMatch != null && nameMatch[0].Function.Pos != null {
-                    pos = nameMatch[0].Function.Pos
+                pos := this.pos
+                if nameMatch != null && nameMatch[0].Function.pos != null {
+                    pos = nameMatch[0].Function.pos
                 }
                 errs.append(new error(sprintf("%s missing implementation method '%s' define on interface '%s'",
-                    pos.ErrMsgPrefix(), m.Function.readableMsg(), inter.Name)))
+                    pos.ErrMsgPrefix(), m.Function.readableMsg(), inter.name)))
             }
         }
-        for _, v := range inter.Interfaces {
+        for _, v := range inter.interfaces {
             es := this.suitableForInterface(v)
             errs.appendAll(es)
         }
@@ -1044,34 +1044,34 @@ public class Class {
 
     fn checkFields()-> (errs []error = []error{}){
         if this.IsInterface() {
-            for _, v := range this.Fields {
+            for _, v := range this.fields {
                 errs.append(new error(sprintf("%s interface '%s' expect no field named '%s'",
-                    errMsgPrefix(v.Pos), this.Name, v.Name)))
+                    errMsgPrefix(v.pos), this.name, v.name)))
             }
             return errs
         }
         staticFieldAssignStatements := []Statement{}
-        for _, v := range this.Fields {
-            if v.DefaultValueExpression != null {
-                assignment, es := v.DefaultValueExpression.
-                    checkSingleValueContextExpression(this.Methods[SpecialMethodInit][0].Function.Block)
+        for _, v := range this.fields {
+            if v.defaultValueExpression != null {
+                assignment, es := v.defaultValueExpression.
+                    checkSingleValueContextExpression(this.methods[SpecialMethodInit][0].Function.block)
                 errs.appendAll(es)
                 if assignment == null {
                     continue
                 }
                 if v.Type.assignAble(errs, assignment) == false {
                     errs.append(new error(sprintf("%s cannot assign '%s' as '%s' for default value",
-                        errMsgPrefix(v.Pos), assignment.TypeString(), v.Type.TypeString())))
+                        errMsgPrefix(v.pos), assignment.typeString(), v.Type.typeString())))
                     continue
                 }
                 if assignment.Type == VariableTypeNull {
                    errs.append( new error(sprintf("%s pointer types default value is '%s' already",
-                        v.Pos.ErrMsgPrefix(), assignment.TypeString())))
+                        v.pos.ErrMsgPrefix(), assignment.typeString())))
                     continue
                 }
                 if v.IsStatic() &&
-                    v.DefaultValueExpression.isLiteral() {
-                    v.DefaultValue = v.DefaultValueExpression.Data
+                    v.defaultValueExpression.isLiteral() {
+                    v.DefaultValue = v.defaultValueExpression.data
                     continue
                 }
                 if v.IsStatic() == false {
@@ -1081,31 +1081,31 @@ public class Class {
                 bin := new ExpressionBinary()
                 bin.Right = new Expression()
                 bin.Right.Type = ExpressionTypeList
-                bin.Right.Op =  "list"
-                bin.Right.Data =  []Expression{v.DefaultValueExpression}
+                bin.Right.op =  "list"
+                bin.Right.data =  []Expression{v.defaultValueExpression}
                 {
                     selection := new ExpressionSelection()
                     selection.Expression = new Expression()
-                    selection.Expression.Op = "selection"
-                    selection.Expression.Value = new Type()
-                    selection.Expression.Value.Type = VariableTypeClass
-                    selection.Expression.Value.Class = this
-                    selection.Name = v.Name
+                    selection.Expression.op = "selection"
+                    selection.Expression.value = new Type()
+                    selection.Expression.value.Type = VariableTypeClass
+                    selection.Expression.value.Class = this
+                    selection.name = v.name
                     selection.Field = v
                     left := new Expression()
                     left.Type =  ExpressionTypeSelection
-                    left.Data =  selection
-                    left.Op =   "selection"
-                    left.Value = v.Type
+                    left.data =  selection
+                    left.op =   "selection"
+                    left.value = v.Type
                     bin.Left = new Expression()
                     bin.Left.Type = ExpressionTypeList
-                    bin.Left.Data = []Expression{left}
+                    bin.Left.data = []Expression{left}
                 }
                 e := new Expression()
                 e.Type =  ExpressionTypeAssign
-                e.Data =  bin
-                e.IsStatementExpression =  true
-                e.Op =  "assign"
+                e.data =  bin
+                e.isStatementExpression =  true
+                e.op =  "assign"
                 {
                     t := new Statement()
                     t.Type = StatementTypeExpression
@@ -1117,16 +1117,16 @@ public class Class {
         }
         if len(staticFieldAssignStatements) > 0 {
             b := new Block()
-            b.Statements = staticFieldAssignStatements
-            if this.StaticBlocks != null {
-                t := new []Block(1 + len(this.StaticBlocks))
+            b.statements = staticFieldAssignStatements
+            if this.staticBlocks != null {
+                t := new []Block(1 + len(this.staticBlocks))
                 t[0] = b
-                for k,v := range this.StaticBlocks{
+                for k,v := range this.staticBlocks{
                     t[k+ 1] = b
                 }
-                this.StaticBlocks = t
+                this.staticBlocks = t
             } else {
-                this.StaticBlocks = []Block{b}
+                this.staticBlocks = []Block{b}
             }
         }
         return errs
@@ -1136,7 +1136,7 @@ public class Class {
         if this.IsInterface() {
             return errs
         }
-        for name, methods := range this.Methods {
+        for name, methods := range this.methods {
             for _, method := range methods {
                 errs.appendAll( method.checkModifierOk())
                 if method.IsAbstract() {
@@ -1144,7 +1144,7 @@ public class Class {
                 } else {
                     if this.IsInterface() {
                         errs.append( new error(sprintf("%s interface method cannot have implementation",
-                            errMsgPrefix(method.Function.Pos))))
+                            errMsgPrefix(method.Function.pos))))
                         continue
                     }
                     errs.appendAll(method.Function.checkReturnVarExpression())
@@ -1152,14 +1152,14 @@ public class Class {
                     if isConstruction {
                         if method.IsFirstStatementCallFatherConstruction() == false {
                             errs.append( new error(sprintf("%s construction method should call father construction method first",
-                                errMsgPrefix(method.Function.Pos))))
+                                errMsgPrefix(method.Function.pos))))
                         }
                     }
                     if isConstruction && method.Function.Type.VoidReturn() == false {
                         errs.append( new error(sprintf("%s construction method expect no return values",
-                            errMsgPrefix(method.Function.Type.ParameterList[0].Pos))))
+                            errMsgPrefix(method.Function.Type.ParameterList[0].pos))))
                     }
-                    method.Function.Block.InheritedAttribute.IsConstructionMethod = isConstruction
+                    method.Function.block.inheritedAttribute.isConstructionMethod = isConstruction
                     method.Function.checkBlock(errs)
                 }
             }
@@ -1170,11 +1170,11 @@ public class Class {
     fn checkModifierOk()-> (errs []error = []error{}){
         if this.IsInterface() && this.IsFinal() {
             errs.append(new error(sprintf("%s interface '%s' cannot be final",
-                errMsgPrefix(this.FinalPos), this.Name)))
+                errMsgPrefix(this.finalPos), this.name)))
         }
         if this.IsAbstract() && this.IsFinal() {
             errs.append(new error(sprintf("%s abstract class '%s' cannot be final",
-                errMsgPrefix(this.FinalPos), this.Name)))
+                errMsgPrefix(this.finalPos), this.name)))
         }
         return errs
     }

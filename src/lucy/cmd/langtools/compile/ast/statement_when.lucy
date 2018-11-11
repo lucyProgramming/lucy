@@ -2,12 +2,12 @@
 
 public class StatementWhenCase {
 	public Matches []Type
-	public Block   Block
+	public block   Block
 }
 
 
 public class StatementWhen {
-	public Pos       Pos
+	public pos       Pos
 	public Condition Type
 	public Cases     []StatementWhenCase
 	public Default   Block
@@ -18,9 +18,9 @@ public class StatementWhen {
 		if this.Condition == null { // must be a error must parse stage
 			return  
 		}
-		if len(this.Condition.getParameterType(block.InheritedAttribute.Function.Type)) == 0 {
+		if len(this.Condition.getParameterType(block.inheritedAttribute.Function.Type)) == 0 {
 			errs.append(new error(sprintf("%s '%s' constains no parameter type",
-				this.Condition.Pos.ErrMsgPrefix(), this.Condition.TypeString())))
+				this.Condition.pos.ErrMsgPrefix(), this.Condition.typeString())))
 			return errs
 		}
 		if err := this.Condition.resolve(block); err != null {
@@ -32,7 +32,7 @@ public class StatementWhen {
 		typesChecked := []Type{}
 		checkExists := fn(ts []Type, t Type) ->(exists Type) {
 			for _, v := range ts {
-				if v.Equal(t) {
+				if v.equal(t) {
 					return v
 				}
 			}
@@ -46,20 +46,20 @@ public class StatementWhen {
 				}
 				if exist := checkExists(typesChecked, tt); exist != null {
 					errMsg := sprintf("%s match '%s' already exist,first declared at:\n",
-						errMsgPrefix(tt.Pos), tt.TypeString())
-					errMsg += sprintf("\t %s", errMsgPrefix(exist.Pos))
+						errMsgPrefix(tt.pos), tt.typeString())
+					errMsg += sprintf("\t %s", errMsgPrefix(exist.pos))
 					errs.append(new error(errMsg))
 					return
 				}
 				typesChecked.append(tt)
-				if this.Condition.Equal(tt) == false {
+				if this.Condition.equal(tt) == false {
 					//no match here
 					continue
 				}
 				// found
 				if match == null {
 					match = tt
-					matchBlock = t.Block
+					matchBlock = t.block
 				}
 			}
 		}
@@ -69,14 +69,14 @@ public class StatementWhen {
 		if match == null {
 			if this.Default == null {
 				errs.append(new error(sprintf("%s condition resolve as '%s' has no match and no 'default block'",
-						errMsgPrefix(this.Condition.Pos), this.Condition.TypeString())))
+						errMsgPrefix(this.Condition.pos), this.Condition.typeString())))
 			} else {
 				switchStatement.Type = StatementTypeBlock
-				switchStatement.Block = this.Default
-				switchStatement.Block.inherit(block)
-				switchStatement.Block.IsWhenBlock = true
-				switchStatement.Block.InheritedAttribute.ForBreak = switchStatement.Block
-				errs.appendAll (switchStatement.Block.check())
+				switchStatement.block = this.Default
+				switchStatement.block.inherit(block)
+				switchStatement.block.isWhenBlock = true
+				switchStatement.block.inheritedAttribute.forBreak = switchStatement.block
+				errs.appendAll (switchStatement.block.check())
 			}
 			return
 		}
@@ -86,11 +86,11 @@ public class StatementWhen {
 			return errs
 		} else {
 			switchStatement.Type = StatementTypeBlock
-			switchStatement.Block = matchBlock
-			switchStatement.Block.inherit(block)
-			switchStatement.Block.IsWhenBlock = true
-			switchStatement.Block.InheritedAttribute.ForBreak = switchStatement.Block
-			errs.appendAll(switchStatement.Block.check())
+			switchStatement.block = matchBlock
+			switchStatement.block.inherit(block)
+			switchStatement.block.isWhenBlock = true
+			switchStatement.block.inheritedAttribute.forBreak = switchStatement.block
+			errs.appendAll(switchStatement.block.check())
 			return 
 		}
 	}	

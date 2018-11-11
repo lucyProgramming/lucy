@@ -2,14 +2,14 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 
 public class StatementLabel {
-	public Used                bool
+	public used                bool
 	public CodeOffsetGenerated bool
 	public CodeOffset          int
-	public Block               Block
-	public Name                string
+	public block               Block
+	public name                string
 	public Exits               []cg.Exit
 	public Statement           Statement
-	public Pos                 Pos
+	public pos                 Pos
 
 	/*
 	defer {
@@ -29,7 +29,7 @@ public class StatementLabel {
 	// check this label is read to goto
 	fn Ready(from Pos) ->(err error) {
 		ss := []Statement{}
-		for _, v := range this.Block.Statements {
+		for _, v := range this.block.statements {
 			if v.StatementLabel == this { // this is me
 				break
 			}
@@ -52,7 +52,7 @@ public class StatementLabel {
 		*/
 		errMsg := sprintf("%s cannot jump over variable definition:\n", from.ErrMsgPrefix())
 		for _, v := range ss {
-			errMsg += sprintf("\t%s constains variable definition\n", v.Pos.ErrMsgPrefix())
+			errMsg += sprintf("\t%s constains variable definition\n", v.pos.ErrMsgPrefix())
 		}
 		return new error(errMsg)
 	}

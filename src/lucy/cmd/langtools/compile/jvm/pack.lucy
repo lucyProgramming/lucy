@@ -176,10 +176,10 @@ class TypeConverterAndPrimitivePacker {
 		c cg.ClassHighLevel,
 		code cg.AttributeCode,
 		t ast.Type) {
-		if t.IsPointer() == false {
+		if t.isPointer() == false {
 			panic("not pointer at all , compiler error")
 		}
-		if t.Type == ast.VariableTypeObject && t.Class.Name == javaRootClass {
+		if t.Type == ast.VariableTypeObject && t.Class.name == javaRootClass {
 			// no need  ,try to cast to root class
 			return
 		}
@@ -189,12 +189,12 @@ class TypeConverterAndPrimitivePacker {
 			c.InsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		case ast.VariableTypeObject:
-			if t.Class.Name != ast.JavaRootClass {
-				c.InsertClassConst(t.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			if t.Class.name != ast.JavaRootClass {
+				c.InsertClassConst(t.Class.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 				code.CodeLength += 3
 			}
 		case ast.VariableTypeArray:
-			meta := ArrayMetas[t.Array.Type]
+			meta := ArrayMetas[t.array.Type]
 			c.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		case ast.VariableTypeMap:

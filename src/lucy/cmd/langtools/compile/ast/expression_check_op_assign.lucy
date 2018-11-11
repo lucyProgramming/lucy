@@ -2,12 +2,12 @@ class ExpressionCheckOpAssign {
 	
 
 	static fn check(e Expression , block Block, errs []error) -> (valueType Type) {
-		bin := e.Data.(ExpressionBinary)
+		bin := e.data.(ExpressionBinary)
 		if bin.Left.Type == ExpressionTypeList {
-			list := bin.Left.Data.([]Expression)
+			list := bin.Left.data.([]Expression)
 			if len(list) > 1 {
 				errs.append(new error(sprintf("%s expect 1 expression on left",
-						errMsgPrefix(e.Pos))))
+						errMsgPrefix(e.pos))))
 			}
 			bin.Left = list[0]
 		}
@@ -18,20 +18,20 @@ class ExpressionCheckOpAssign {
 			return
 		}
 		valueType = left.Clone()
-		valueType.Pos = e.Pos
+		valueType.pos = e.pos
 		if err := right.rightValueValid(); err != null {
 			errs.append(err)
 			return valueType
 		}
 		if bin.Left.Type == ExpressionTypeIdentifier &&
-			e.IsStatementExpression == false {
+			e.isStatementExpression == false {
 			/*
 				var a = 1
 				print(a += 1)
 			*/
-			t := bin.Left.Data.(ExpressionIdentifier)
+			t := bin.Left.data.(ExpressionIdentifier)
 			if t.Variable != null {
-				t.Variable.Used = true
+				t.Variable.used = true
 			}
 		}
 		convertExpressionToNeed(bin.Right, left, right)
@@ -80,10 +80,10 @@ class ExpressionCheckOpAssign {
 			}
 		}
 		errs.append(new error(sprintf("%s cannot apply algorithm '%s' on '%s' and '%s'",
-			e.Pos.ErrMsgPrefix(),
-			e.Op,
-			left.TypeString(),
-			right.TypeString())))
+			e.pos.ErrMsgPrefix(),
+			e.op,
+			left.typeString(),
+			right.typeString())))
 			
 	}
 

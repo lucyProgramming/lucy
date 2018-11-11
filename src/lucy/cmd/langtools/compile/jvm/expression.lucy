@@ -70,8 +70,8 @@ class BuildExpression {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        if e.IsCompileAuto == false {
-            context.appendLimeNumberAndSourceFile(e.Pos, code, c)
+        if e.isCompileAuto == false {
+            context.appendLimeNumberAndSourceFile(e.pos, code, c)
         }
         switch e.Type {
         case ast.ExpressionTypeNull:
@@ -140,7 +140,7 @@ class BuildExpression {
             code.Codes[code.CodeLength] = cg.OP_ldc_w
             c.InsertStringConst(e.stringValue, code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
-            if len([]byte(e.Data.(string))) > 65536 {
+            if len([]byte(e.data.(string))) > 65536 {
                 panic("jvm max string length is 65536")
             }
             maxStack = 1
@@ -150,9 +150,9 @@ class BuildExpression {
         case ast.ExpressionTypeOr ,ast.ExpressionTypeAnd ,ast.ExpressionTypeXor ,
             ast.ExpressionTypeLsh , ast.ExpressionTypeRsh,ast.ExpressionTypeAdd, ast.ExpressionTypeSub,
             ast.ExpressionTypeMul , ast.ExpressionTypeDiv , ast.ExpressionTypeMod:
-            maxStack = this.BuildExpressionArithmetic.buildArithmetic(c, code, e, context, state)
+            maxStack = this.BuildExpressionArithmetic.build(c, code, e, context, state)
         case ast.ExpressionTypeAssign :
-            maxStack = this.buildAssign(c, code, e, context, state)
+            maxStack = this.BuildExpressionAssign.buildAssign(c, code, e, context, state)
         case ast.ExpressionTypeVarAssign:
             maxStack = this.BuildExpressionAssign.buildVarAssign(c, code, e, context, state)
         case ast.ExpressionTypePlusAssign,  ast.ExpressionTypeMinusAssign ,ast.ExpressionTypeMulAssign ,
@@ -185,9 +185,9 @@ class BuildExpression {
         case ast.ExpressionTypeNew:
             maxStack = this.BuildExpressionNew.buildNew(c, code, e, context, state)
         case ast.ExpressionTypeFunctionLiteral:
-            maxStack = this.BuildPackage.buildFunctionExpression(c, code, e, context, state)
+            maxStack = this.bp.buildFunctionExpression(c, code, e, context, state)
         case ast.ExpressionTypeCheckCast: // []byte(str)
-            maxStack = this.BuildExpressionTypeConversion.BuildExpressionAssert.buildTypeConversion(c, code, e, context, state)
+            maxStack = this.BuildExpressionTypeConversion.buildTypeConversion(c, code, e, context, state)
         case ast.ExpressionTypeConst:
             /*
              analyse at ast stage
@@ -205,18 +205,18 @@ class BuildExpression {
         case ast.ExpressionTypeQuestion:
             maxStack = this.BuildExpressionQuestion.buildQuestion(c, code, e, context, state)
         case ast.ExpressionTypeVArgs:
-            maxStack = this.build(c, code, e.Data.(ast.Expression), context, state)
+            maxStack = this.build(c, code, e.data.(ast.Expression), context, state)
         default:
-            panic("missing handle:" + e.Op)
+            panic("missing handle:" + e.op)
         }
         return
     }
 
     fn jvmSize(e ast.Expression) -> (size char) {
-        if len(e.MultiValues) > 1 {
+        if len(e.multiValues) > 1 {
             return 1
         }
-        return jvmSlotSize(e.Value)
+        return jvmSlotSize(e.value)
     }
 
     fn buildExpressions(c cg.ClassHighLevel, code cg.AttributeCode,
@@ -224,7 +224,7 @@ class BuildExpression {
         length := 0
         for _, e := range es {
             if e.HaveMultiValue() {
-                length += len(e.MultiValues)
+                length += len(e.multiValues)
             } else {
                 length++
             }
@@ -248,7 +248,7 @@ class BuildExpression {
                     maxStack = t
                 }
                 autoVar := new MultiValueAutoVar(c, code, state)
-                for kk, _ := range v.MultiValues {
+                for kk, _ := range v.multiValues {
                     currentStack = 1
                     code.Codes[code.CodeLength] = cg.OP_dup
                     code.CodeLength++
@@ -276,8 +276,8 @@ class BuildExpression {
             if t := currentStack + stack; t > maxStack {
                 maxStack = t
             }
-            if v.Value.IsPointer() == false {
-                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.Value)
+            if v.value.isPointer() == false {
+                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.value)
             }
             loadInt32(c, code, index)
             if 4 > maxStack { // current stack is  arrayRef arrayRef value index
@@ -295,13 +295,13 @@ class BuildExpression {
     fn storeGlobalVariable(c cg.ClassHighLevel, code cg.AttributeCode,
         v ast.Variable) {
         code.Codes[code.CodeLength] = cg.OP_putstatic
-        if v.JvmDescriptor == "" {
-            v.JvmDescriptor = Descriptor.typeDescriptor(v.Type)
+        if v.jvmDescriptor == "" {
+            v.jvmDescriptor = Descriptor.typeDescriptor(v.Type)
         }
         c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-                v.GlobalVarClassName,
-                v.Name,
-             v.JvmDescriptor
+                v.globalVarClassName,
+                v.name,
+             v.jvmDescriptor
         ), code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.CodeLength += 3
     }

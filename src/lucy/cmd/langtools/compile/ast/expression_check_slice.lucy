@@ -1,7 +1,7 @@
 
 class ExpressionCheckSlice {
 	static fn check(e Expression , block Block, errs []error) ->(valueType Type) {
-		on := e.Data.(ExpressionSlice)
+		on := e.data.(ExpressionSlice)
 		sliceOn, es := on.ExpressionOn.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if sliceOn == null {
@@ -10,13 +10,13 @@ class ExpressionCheckSlice {
 		if sliceOn.Type != VariableTypeArray &&
 			sliceOn.Type != VariableTypeString {
 			errs . append(new error( sprintf("%s cannot have slice on '%s'",
-				sliceOn.Pos.ErrMsgPrefix(), sliceOn.TypeString())))
+				sliceOn.pos.ErrMsgPrefix(), sliceOn.typeString())))
 		}
 		//start
 		if on.Start == null {
 			on.Start = new Expression()
-			on.Start.Pos = e.Pos
-			on.Start.Op = "intLiteral"
+			on.Start.pos = e.pos
+			on.Start.op = "intLiteral"
 			on.Start.Type = ExpressionTypeInt
 		}
 		startType, es := on.Start.checkSingleValueContextExpression(block)
@@ -24,7 +24,7 @@ class ExpressionCheckSlice {
 		if startType != null {
 			if startType.isInteger() == false {
 				errs . append(new error( sprintf("%s cannot use '%s' for startIndex",
-					startType.Pos.ErrMsgPrefix(), startType.TypeString())))
+					startType.pos.ErrMsgPrefix(), startType.typeString())))
 			} else {
 				if startType.Type == VariableTypeLong {
 					on.Start.convertToNumberType(VariableTypeInt)
@@ -33,7 +33,7 @@ class ExpressionCheckSlice {
 					startIndexValue := on.Start.getLongValue()
 					if startIndexValue < 0 {
 						errs.append(new error( sprintf("%s startIndex '%d' is negative",
-								startType.Pos.ErrMsgPrefix(), startIndexValue)))
+								startType.pos.ErrMsgPrefix(), startIndexValue)))
 					}
 				}
 			}
@@ -44,7 +44,7 @@ class ExpressionCheckSlice {
 			if endType != null {
 				if endType.isInteger() == false {
 					errs . append(new error( sprintf("%s cannot use '%s' for endIndex",
-						endType.Pos.ErrMsgPrefix(), endType.TypeString())))
+						endType.pos.ErrMsgPrefix(), endType.typeString())))
 				} else {
 					if endType.Type == VariableTypeLong {
 						on.End.convertToNumberType(VariableTypeInt)
@@ -53,14 +53,14 @@ class ExpressionCheckSlice {
 						endIndexValue := on.End.getLongValue()
 						if endIndexValue < 0 {
 							errs . append(new error( sprintf("%s endIndex '%d' is negative",
-									endType.Pos.ErrMsgPrefix(), endIndexValue)))
+									endType.pos.ErrMsgPrefix(), endIndexValue)))
 						}
 						if startType != null &&
 							startType.isInteger() &&
 							on.Start.isLiteral() {
 							if on.Start.getLongValue() > endIndexValue {
 								errs . append(new error( sprintf("%s startIndex '%d' is greater than endIndex '%d'",
-										endType.Pos.ErrMsgPrefix(), on.Start.getLongValue(), endIndexValue)))
+										endType.pos.ErrMsgPrefix(), on.Start.getLongValue(), endIndexValue)))
 							}
 						}
 					}
@@ -68,7 +68,7 @@ class ExpressionCheckSlice {
 			}
 		}
 		valueType = sliceOn.Clone()
-		valueType.Pos = e.Pos
+		valueType.pos = e.pos
 	}
 }
  

@@ -18,14 +18,14 @@ class BuildinFunctionCatchPanic {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        call := e.Data.(ast.ExpressionFunctionCall)
+        call := e.data.(ast.ExpressionFunctionCall)
         meta := call.BuildInFunctionMeta.(ast.BuildInFunctionPanicMeta)
         if meta.ArgThrowable {
             if call.Args[0].Type == ast.ExpressionTypeNew { // not new expression
                 maxStack = this.eb.build(c, code, call.Args[0], context, state)
             } else {
                 code.Codes[code.CodeLength] = cg.OP_new
-                className := call.Args[0].Value.Class.Name
+                className := call.Args[0].value.Class.name
                 c.InsertClassConst(className, code.Codes[code.CodeLength+1:code.CodeLength+3])
                 code.Codes[code.CodeLength+3] = cg.OP_dup
                 code.CodeLength += 4
@@ -39,7 +39,7 @@ class BuildinFunctionCatchPanic {
                 }
                 stack := this.eb.build(c, code, call.Args[0], context, state)
                 state.popStack(2)
-                maxStack = 2 + stack
+                maxStack = char(2) + stack
                 code.Codes[code.CodeLength] = cg.OP_invokespecial
                 c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(  className,  specialMethodInit ,"(Ljava/lang/Throwable;)V"),
                  code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -60,10 +60,10 @@ class BuildinFunctionCatchPanic {
             }
             stack := this.eb.build(c, code, call.Args[0], context, state)
             state.popStack(2)
-            if t := 2 + stack; t > maxStack {
+            if t := char(2) + stack; t > maxStack {
                 maxStack = t
             }
-            if t := 2 + this.stackTop2String(c, code, call.Args[0].Value, context, state); t > maxStack {
+            if t := 2 + this.stackTop2String(c, code, call.Args[0].value, context, state); t > maxStack {
                 maxStack = t
             }
             code.Codes[code.CodeLength] = cg.OP_invokespecial
@@ -79,24 +79,24 @@ class BuildinFunctionCatchPanic {
 
     fn mkBuildInCatch(c cg.ClassHighLevel, code cg.AttributeCode,
         e ast.Expression, context Context) -> (maxStack char) {
-        if e.IsStatementExpression { // statement call
+        if e.isStatementExpression { // statement call
             maxStack = 1
             code.Codes[code.CodeLength] = cg.OP_aconst_null
             code.CodeLength++
             copyOPs(code,
-                storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)...)
+                storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset))
         } else {
             maxStack = 2
             //load to stack
-            copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)...) // load
+            copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)) // load
             //set 2 null
             code.Codes[code.CodeLength] = cg.OP_aconst_null
             code.CodeLength++
-            copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)...) // store
+            copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)) // store
             //check cast
             code.Codes[code.CodeLength] = cg.OP_checkcast
             if context.Defer.ExceptionClass != null {
-                c.InsertClassConst(context.Defer.ExceptionClass.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+                c.InsertClassConst(context.Defer.ExceptionClass.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
             } else {
                 c.InsertClassConst(ast.DefaultExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
             }

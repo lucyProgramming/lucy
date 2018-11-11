@@ -5,22 +5,22 @@ public class ClassHighLevel {
 	/*
 		one class file can be compile form multi source file
 	*/
-	public SourceFiles              map { string -> bool }
-	public Name                     string
-	public AccessFlags              char
-	public SuperClass               string
-	public Interfaces               []string
-	public Fields                   map { string -> FieldHighLevel }
-	public Methods                  map { string -> []MethodHighLevel }
+	public sourceFiles              map { string -> bool }
+	public name                     string
+	public accessFlags              char
+	public superClass               string
+	public interfaces               []string
+	public fields                   map { string -> FieldHighLevel }
+	public methods                  map { string -> []MethodHighLevel }
 	public TriggerPackageInitMethod MethodHighLevel
 	public TemplateFunctions        []AttributeTemplateFunction
 
 	public fn InsertSourceFile(filename string) {
-		if this.SourceFiles == null {
-			this.SourceFiles = {filename -> true}
+		if this.sourceFiles == null {
+			this.sourceFiles = {filename -> true}
 		    return
 		}
-		this.SourceFiles[filename] = true
+		this.sourceFiles[filename] = true
 	}
 
 	public fn InsertMethodRefConst(mr ConstantInfoMethodrefHighLevel,
@@ -41,8 +41,8 @@ public class ClassHighLevel {
 		new a method name,make_node_objects sure it does exists before
 	*/
 	public fn NewMethodName(prefix string) -> (name string)  {
-		if this.Methods == null ||
-			this.Methods[prefix] == null {
+		if this.methods == null ||
+			this.methods[prefix] == null {
 			return prefix
 		}
 		for i := 0; i < 65535 ; i++ {
@@ -52,7 +52,7 @@ public class ClassHighLevel {
 			} else {
 				name = sprintf("%s$%d", prefix, i)
 			}
-			if false == this.Methods.keyExist(name) {
+			if false == this.methods.keyExist(name) {
 				return name
 			}
 		}
@@ -64,17 +64,17 @@ public class ClassHighLevel {
 	}
 
 	public fn AppendMethod(ms MethodHighLevel...) {
-		if this.Methods == null {
-			this.Methods = new map {string -> []MethodHighLevel}()
+		if this.methods == null {
+			this.methods = new map {string -> []MethodHighLevel}()
 		}
 		for _, v := range ms {
-			if v.Name == "" {
+			if v.name == "" {
 				panic("null name")
 			}
-			if  this.Methods.keyExist(v.Name) {
-				this.Methods[v.Name].append(v)
+			if  this.methods.keyExist(v.name) {
+				this.methods[v.name].append(v)
 			} else {
-				this.Methods[v.Name] = []MethodHighLevel{v}
+				this.methods[v.name] = []MethodHighLevel{v}
 			}
 		}
 	}
@@ -126,16 +126,16 @@ public class ClassHighLevel {
 		source files
 	*/
 	fn getSourceFile() -> (name string) {
-		if len(this.SourceFiles) == 0 {
+		if len(this.sourceFiles) == 0 {
 			return ""
 		}
-		if len(this.SourceFiles) == 1 {
-			for k, _ := range this.SourceFiles {
+		if len(this.sourceFiles) == 1 {
+			for k, _ := range this.sourceFiles {
 				return k
 			}
 		}
 		var s string
-		for k, _ := range this.SourceFiles {
+		for k, _ := range this.sourceFiles {
 		    index := len(k)
 		    for index > 0 {
 		        if s[index] == '/' || s[index] == '\\'{
@@ -148,7 +148,7 @@ public class ClassHighLevel {
 		}
 		s += "\\{"
 		i := 0
-		for f, _ := range this.SourceFiles {
+		for f, _ := range this.sourceFiles {
 		    index := len(f)
             for index > 0 {
                 if s[index] == '/' || s[index] == '\\'{
@@ -157,7 +157,7 @@ public class ClassHighLevel {
                 index--
             }
 			s += f[index:]
-			if i != len(this.SourceFiles)-1 {
+			if i != len(this.sourceFiles)-1 {
 				s += ","
 			}
 			i++

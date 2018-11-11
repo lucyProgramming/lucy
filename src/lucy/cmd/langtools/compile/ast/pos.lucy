@@ -17,12 +17,12 @@ public class Pos {
 
 
 public class NameWithPos {
-	public Name string
-	public Pos  Pos
-	public fn NameWithPos(Name string ,Pos  Pos ){
+	public name string
+	public pos  Pos
+	public fn NameWithPos(name string ,Pos  Pos ){
 	    this.super()
-		this.Name = Name
-		this.Pos = Pos
+		this.name = name
+		this.pos = Pos
 	}
 }
 

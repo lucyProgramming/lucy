@@ -10,31 +10,31 @@ class BuildTemplateFunctionCall {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        call := e.Data.(ast.ExpressionFunctionCall)
+        call := e.data.(ast.ExpressionFunctionCall)
         if call.TemplateFunctionCallPair.Entrance == null {
             method := new cg.MethodHighLevel()
             method.Class = c
-            method.Name = ast.TypeNewMethodName(nameTemplateFunction(call.TemplateFunctionCallPair.Function))
-            method.AccessFlags |= cg.AccClassPublic
-            method.AccessFlags |= cg.AccClassFinal
-            method.AccessFlags |= cg.AccMethodStatic
-            method.AccessFlags |= cg.AccMethodBridge
+            method.name = ast.TypeNewMethodName(nameTemplateFunction(call.TemplateFunctionCallPair.Function))
+            method.accessFlags |= cg.AccClassPublic
+            method.accessFlags |= cg.AccClassFinal
+            method.accessFlags |= cg.AccMethodStatic
+            method.accessFlags |= cg.AccMethodBridge
             if call.TemplateFunctionCallPair.Function.Type.VArgs != null {
-                method.AccessFlags |= cg.AccMethodVarargs
+                method.accessFlags |= cg.AccMethodVarargs
             }
             method.Descriptor = Descriptor.methodDescriptor(call.TemplateFunctionCallPair.Function.Type)
             method.Code = new cg.AttributeCode()
-            ast.TypeAppendMethod(method)
+            c.AppendMethod(method)
             call.TemplateFunctionCallPair.Function.Entrance = method
             //build function
             this.BuildPackage.buildFunction(c, null, method, call.TemplateFunctionCallPair.Function)
             call.TemplateFunctionCallPair.Entrance = method
         }
-        maxStack = this.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
+        maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
         code.Codes[code.CodeLength] = cg.OP_invokestatic
         c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-            call.TemplateFunctionCallPair.Entrance.Class.Name,
-            call.TemplateFunctionCallPair.Entrance.Name,
+            call.TemplateFunctionCallPair.Entrance.Class.name,
+            call.TemplateFunctionCallPair.Entrance.name,
             call.TemplateFunctionCallPair.Entrance.Descriptor
         ),
             code.Codes[code.CodeLength+1:code.CodeLength+3])

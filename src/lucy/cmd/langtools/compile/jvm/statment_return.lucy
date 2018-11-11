@@ -12,7 +12,7 @@ class BuildReturn {
         context Context,
         state StackMapState) -> (maxStack char) {
         if context.function.Type.VoidReturn() { // no return value
-            if statementReturn.Defers != null && len(statementReturn.Defers) > 0 {
+            if statementReturn.defers != null && len(statementReturn.defers) > 0 {
                 stack := this.buildDefersForReturn(c, code, context, state, statementReturn)
                 if stack > maxStack {
                     maxStack = stack
@@ -27,7 +27,7 @@ class BuildReturn {
                 maxStack = this.BuildExpression.build(c, code, statementReturn.Expressions[0], context, state)
             }
             // execute defer first
-            if len(statementReturn.Defers) > 0 {
+            if len(statementReturn.defers) > 0 {
                 //return value  is on stack,  store to local var
                 if len(statementReturn.Expressions) > 0 {
                     this.storeLocalVar(c, code, context.function.Type.ReturnList[0])
@@ -80,7 +80,7 @@ class BuildReturn {
                     statementReturn.Expressions, context, state)
             }
         }
-        if len(statementReturn.Defers) > 0 {
+        if len(statementReturn.defers) > 0 {
             //store a simple var,should be no exception
             if len(statementReturn.Expressions) > 0 {
                 copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
@@ -151,7 +151,7 @@ class BuildReturn {
             if t := currentStack + jvmSlotSize(v.Type); t > maxStack {
                 maxStack = t
             }
-            if v.Type.IsPointer() == false {
+            if v.Type.isPointer() == false {
                 TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.Type)
             }
             loadInt32(c, code, index)
@@ -171,7 +171,7 @@ class BuildReturn {
     fn  buildDefersForReturn(c cg.ClassHighLevel, code cg.AttributeCode,
         context Context, from StackMapState,
         statementReturn ast.StatementReturn) -> (maxStack char) {
-        if len(statementReturn.Defers) == 0 {
+        if len(statementReturn.defers) == 0 {
             return
         }
         code.Codes[code.CodeLength] = cg.OP_aconst_null
@@ -179,21 +179,21 @@ class BuildReturn {
         if 1 > maxStack {
             maxStack = 1
         }
-        index := len(statementReturn.Defers) - 1
+        index := len(statementReturn.defers) - 1
         for index >= 0 { // build defer,cannot have return statement is defer
-            state := statementReturn.Defers[index].StackMapState.(StackMapState)
+            state := statementReturn.defers[index].StackMapState.(StackMapState)
             state = new StackMapState(state) // clone
             state.addTop(from)
             state.pushStack(c, state.newObjectVariableType(throwableClass))
             context.MakeStackMap(code, state, code.CodeLength)
             e := new cg.ExceptionTable()
-            e.StartPc = char(statementReturn.Defers[index].StartPc)
+            e.StartPc = char(statementReturn.defers[index].StartPc)
             e.EndPc = char(code.CodeLength)
             e.HandlerPc = char(code.CodeLength)
-            if statementReturn.Defers[index].ExceptionClass == null {
+            if statementReturn.defers[index].ExceptionClass == null {
                 e.CatchType = c.InsertClassConst(ast.DefaultExceptionClass)
             } else {
-                e.CatchType = c.InsertClassConst(statementReturn.Defers[index].ExceptionClass.Name) // custom c
+                e.CatchType = c.InsertClassConst(statementReturn.defers[index].ExceptionClass.name) // custom c
             }
             code.Exceptions = append(code.Exceptions, e)
             //expect exception on stack
@@ -201,11 +201,11 @@ class BuildReturn {
                 context.exceptionVarOffset)...) // this code will make_node_objects stack is empty
             state.popStack(1)
             // build block
-            context.Defer = statementReturn.Defers[index]
-            this.buildBlock(c, code, statementReturn.Defers[index].Block, context, state)
+            context.Defer = statementReturn.defers[index]
+            this.buildBlock(c, code, statementReturn.defers[index].Block, context, state)
             from.addTop(state)
             context.Defer = null
-            statementReturn.Defers[index].ResetLabels()
+            statementReturn.defers[index].ResetLabels()
             //if need throw
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)...)
             code.Codes[code.CodeLength] = cg.OP_dup

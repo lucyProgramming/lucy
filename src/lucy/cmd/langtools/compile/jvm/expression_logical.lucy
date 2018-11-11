@@ -18,7 +18,7 @@ class BuildExpressionLogical {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        bin := e.Data.(ast.ExpressionBinary)
+        bin := e.data.(ast.ExpressionBinary)
         maxStack = this.build(c, code, bin.Left, context, state)
         code.Codes[code.CodeLength] = cg.OP_dup
         code.CodeLength++
@@ -37,7 +37,7 @@ class BuildExpressionLogical {
         if stack > maxStack {
             maxStack = stack
         }
-        state.pushStack(c, e.Value)
+        state.pushStack(c, e.value)
         writeExits([]cg.Exit{exit}, code.CodeLength)
         context.MakeStackMap(code, state, code.CodeLength)
         state.popStack(1)

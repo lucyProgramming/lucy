@@ -20,10 +20,10 @@ class BuildExpressionSelection {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        selection := e.Data.(ast.ExpressionSelection)
+        selection := e.data.(ast.ExpressionSelection)
 
         // check cast to super class
-        if selection.Name == ast.SUPER {
+        if selection.name == ast.SUPER {
             maxStack = this.eb.build(c, code, selection.Expression, context, state)
             return
         }
@@ -36,11 +36,11 @@ class BuildExpressionSelection {
             ), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
             code.Codes[code.CodeLength] = cg.OP_ldc_w
-            c.InsertClassConst(selection.Expression.Value.Class.Name,
+            c.InsertClassConst(selection.Expression.value.Class.name,
                 code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
             code.Codes[code.CodeLength] = cg.OP_ldc_w
-            c.InsertStringConst(selection.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+            c.InsertStringConst(selection.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
             code.Codes[code.CodeLength] = cg.OP_ldc_w
             c.InsertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(
@@ -65,9 +65,9 @@ class BuildExpressionSelection {
             if 4 > maxStack {
                 maxStack = 4
             }
-            if selection.Expression.Value.Type == ast.VariableTypeObject {
+            if selection.Expression.value.Type == ast.VariableTypeObject {
                 stack := this.eb.build(c, code, selection.Expression, context, state)
-                if t := 1 + stack; t > maxStack {
+                if t := char(1) + stack; t > maxStack {
                     maxStack = t
                 }
                 code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -81,24 +81,24 @@ class BuildExpressionSelection {
             return
         }
 
-        switch selection.Expression.Value.Type {
+        switch selection.Expression.value.Type {
         case ast.VariableTypePackage:
             if selection.PackageVariable != null {
-                maxStack = jvmSlotSize(e.Value)
-                if selection.PackageVariable.JvmDescriptor == "" {
-                    selection.PackageVariable.JvmDescriptor = Descriptor.typeDescriptor(e.Value)
+                maxStack = jvmSlotSize(e.value)
+                if selection.PackageVariable.jvmDescriptor == "" {
+                    selection.PackageVariable.jvmDescriptor = Descriptor.typeDescriptor(e.value)
                 }
                 code.Codes[code.CodeLength] = cg.OP_getstatic
                 c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-                    selection.Expression.Value.Package.Name + "/main",
-                    selection.PackageVariable.Name,
-                    selection.PackageVariable.JvmDescriptor
+                    selection.Expression.value.Package.name + "/main",
+                    selection.PackageVariable.name,
+                    selection.PackageVariable.jvmDescriptor
                 ), code.Codes[code.CodeLength+1:code.CodeLength+3])
                 code.CodeLength += 3
                 return
             }
             if selection.PackageEnumName != null {
-                loadInt32(c, code, selection.PackageEnumName.Value)
+                loadInt32(c, code, selection.PackageEnumName.value)
                 maxStack = 1
                 return
             }
@@ -111,11 +111,11 @@ class BuildExpressionSelection {
                 ), code.Codes[code.CodeLength+1:code.CodeLength+3])
                 code.CodeLength += 3
                 code.Codes[code.CodeLength] = cg.OP_ldc_w
-                c.InsertClassConst(selection.Expression.Value.Package.Name+"/main",
+                c.InsertClassConst(selection.Expression.value.Package.name+"/main",
                     code.Codes[code.CodeLength+1:code.CodeLength+3])
                 code.CodeLength += 3
                 code.Codes[code.CodeLength] = cg.OP_ldc_w
-                c.InsertStringConst(selection.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+                c.InsertStringConst(selection.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
                 code.CodeLength += 3
                 code.Codes[code.CodeLength] = cg.OP_ldc_w
                 c.InsertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(
@@ -148,13 +148,13 @@ class BuildExpressionSelection {
                     code.Codes[code.CodeLength] = cg.OP_getstatic
                     code.CodeLength++
                 }
-                if selection.Field.JvmDescriptor == "" {
-                    selection.Field.JvmDescriptor = Descriptor.typeDescriptor(selection.Field.Type)
+                if selection.Field.jvmDescriptor == "" {
+                    selection.Field.jvmDescriptor = Descriptor.typeDescriptor(selection.Field.Type)
                 }
                 c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-                    selection.Expression.Value.Class.Name,
-                    selection.Name,
-                    selection.Field.JvmDescriptor
+                    selection.Expression.value.Class.name,
+                    selection.name,
+                    selection.Field.jvmDescriptor
                 ),
                     code.Codes[code.CodeLength:code.CodeLength+2])
                 code.CodeLength += 2
@@ -167,10 +167,10 @@ class BuildExpressionSelection {
                 ), code.Codes[code.CodeLength+1:code.CodeLength+3])
                 code.CodeLength += 3
                 code.Codes[code.CodeLength] = cg.OP_ldc_w
-                c.InsertClassConst(selection.Expression.Value.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+                c.InsertClassConst(selection.Expression.value.Class.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
                 code.CodeLength += 3
                 code.Codes[code.CodeLength] = cg.OP_ldc_w
-                c.InsertStringConst(selection.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+                c.InsertStringConst(selection.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
                 code.CodeLength += 3
                 code.Codes[code.CodeLength] = cg.OP_ldc_w
                 c.InsertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(
@@ -209,12 +209,12 @@ class BuildExpressionSelection {
             }
             return
         case ast.VariableTypeClass:
-            maxStack = jvmSlotSize(e.Value)
+            maxStack = jvmSlotSize(e.value)
             code.Codes[code.CodeLength] = cg.OP_getstatic
             c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-                selection.Expression.Value.Class.Name,
-                selection.Name,
-                Descriptor.typeDescriptor(e.Value)
+                selection.Expression.value.Class.name,
+                selection.name,
+                Descriptor.typeDescriptor(e.value)
             ), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
             return
@@ -226,12 +226,12 @@ class BuildExpressionSelection {
             }
             code.Codes[code.CodeLength] = cg.OP_getfield
             c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-                selection.Expression.Value.Class.Name,
-                selection.Name,
-                Descriptor.typeDescriptor(e.Value)
+                selection.Expression.value.Class.name,
+                selection.name,
+                Descriptor.typeDescriptor(e.value)
             ), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
-            if t := jvmSlotSize(e.Value); t > maxStack {
+            if t := jvmSlotSize(e.value); t > maxStack {
                 maxStack = t
             }
             return

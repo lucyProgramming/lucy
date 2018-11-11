@@ -6,7 +6,7 @@
 class ExpressionCheckSelection {
 
     static fn check(e Expression , block Block, errs []error) -> (valueType Type) {
-        selection := e.Data.(ExpressionSelection)
+        selection := e.data.(ExpressionSelection)
         object, es := selection.Expression.checkSingleValueContextExpression(block)
         errs.appendAll(es)
         if object == null {
@@ -14,28 +14,28 @@ class ExpressionCheckSelection {
         }
         switch object.Type {
         case VariableTypeMagicFunction:
-            v := object.Function.Type.searchName(selection.Name)
+            v := object.Function.Type.searchName(selection.name)
             if v == null {
                 err := new error(sprintf("%s '%s' not found",
-                    e.Pos.ErrMsgPrefix(), selection.Name))
+                    e.pos.ErrMsgPrefix(), selection.name))
                 errs.append(err)
                 return null
             }
-            e.Value = v.Type.Clone()
-            e.Value.Pos = e.Pos
+            e.value = v.Type.Clone()
+            e.value.pos = e.pos
             e.Type = ExpressionTypeIdentifier
             identifier := new ExpressionIdentifier()
-            identifier.Name = selection.Name
+            identifier.name = selection.name
             identifier.Variable = v
-            e.Data = identifier
-            return e.Value
+            e.data = identifier
+            return e.value
         case VariableTypeDynamicSelector:
-            if selection.Name == SUPER {
+            if selection.name == SUPER {
                 errs . append(new error( sprintf("%s access '%s' at '%s' not allow",
-                    e.Pos.ErrMsgPrefix(), SUPER, object.TypeString())))
+                    e.pos.ErrMsgPrefix(), SUPER, object.typeString())))
                 return null
             }
-            access, err := object.Class.getFieldOrMethod(e.Pos, selection.Name, false)
+            access, err := object.Class.getFieldOrMethod(e.pos, selection.name, false)
             if err != null {
                 errs.append(err)
                 return null
@@ -43,31 +43,31 @@ class ExpressionCheckSelection {
             if field, ok := access.(ClassField); ok {
                 selection.Field = field
                 result := field.Type.Clone()
-                result.Pos = e.Pos
+                result.pos = e.pos
                 return result
             } else {
                 method := access.(ClassMethod)
                 selection.Method = method
                 result := new Type()
                 result.Type = VariableTypeFunction
-                result.FunctionType = method.Function.Type
-                result.Pos = e.Pos
+                result.functionType = method.Function.Type
+                result.pos = e.pos
                 return result
             }
         case VariableTypePackage:
-            d, ok := object.Package.Block.nameExists(selection.Name)
+            d, ok := object.Package.block.nameExists(selection.name)
             if ok == false {
                 err := new error(sprintf("%s '%s' not found",
-                    e.Pos.ErrMsgPrefix(), selection.Name))
+                    e.pos.ErrMsgPrefix(), selection.name))
                 errs.append(err)
                 return null
             }
             if v := d.(Variable) ;v != null {
             	result := v.Type.Clone()
-                result.Pos = e.Pos
+                result.pos = e.pos
                 if v.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
                     err := new error(sprintf("%s variable '%s' is not public",
-                        e.Pos.ErrMsgPrefix(), selection.Name))
+                        e.pos.ErrMsgPrefix(), selection.name))
                     errs.append(err)
                 }
                 selection.PackageVariable = v
@@ -76,22 +76,22 @@ class ExpressionCheckSelection {
             if  c := d.(Constant) ; c != null {
 				e.fromConst(c) //
                 result := c.Type.Clone()
-                result.Pos = e.Pos
+                result.pos = e.pos
                 if c.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
                     err := new error(sprintf("%s const '%s' is not public",
-                        e.Pos.ErrMsgPrefix(), selection.Name))
+                        e.pos.ErrMsgPrefix(), selection.name))
                     errs.append(err)
                 }
                 return result
             }
             if c := d.(Class) ; c != null {
 				result := new Type()
-                result.Pos = e.Pos
+                result.pos = e.pos
                 result.Type = VariableTypeClass
                 result.Class = c
-                if c.IsPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
+                if c.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
                     err := new error(sprintf("%s class '%s' is not public",
-                        e.Pos.ErrMsgPrefix(), selection.Name))
+                        e.pos.ErrMsgPrefix(), selection.name))
                     errs.append(err)
                 }
                 return result
@@ -99,66 +99,66 @@ class ExpressionCheckSelection {
             if n := d.(EnumName) ; n != null {
             	if n.Enum.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
                     err := new error(sprintf("%s enum '%s' is not public",
-                        e.Pos.ErrMsgPrefix(), selection.Name))
+                        e.pos.ErrMsgPrefix(), selection.name))
                     errs.append(err)
                 }
                 result := new Type()
-                result.Pos = e.Pos
+                result.pos = e.pos
                 result.Enum = n.Enum
-                result.EnumName = n
+                result.enumName = n
                 result.Type = VariableTypeEnum
                 selection.PackageEnumName = n
                 return result
             }
             if f := d.(Function) ; f != null {
-				if f.IsPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
+				if f.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
                     err := new error(sprintf("%s function '%s' is not public",
-                        e.Pos.ErrMsgPrefix(), selection.Name))
+                        e.pos.ErrMsgPrefix(), selection.name))
                     errs.append(err)
                 }
                 if f.TemplateFunction != null {
                     err := new error(sprintf("%s function '%s' is a template function",
-                        e.Pos.ErrMsgPrefix(), selection.Name))
+                        e.pos.ErrMsgPrefix(), selection.name))
                     errs.append(err)
                     return null
                 }
                 result := new Type()
-                result.Pos = e.Pos
+                result.pos = e.pos
                 result.Type = VariableTypeFunction
-                result.FunctionType = f.Type
+                result.functionType = f.Type
                 selection.PackageFunction = f
                 return result
             }
             err := new error(sprintf("%s name '%s' cannot be used as right value",
-                    e.Pos.ErrMsgPrefix(), selection.Name))
+                    e.pos.ErrMsgPrefix(), selection.name))
             errs.append(err)
             return null
         case VariableTypeObject, VariableTypeClass:
-            if selection.Name == SUPER {
+            if selection.name == SUPER {
                 if object.Type == VariableTypeClass {
                     errs . append(new error( sprintf("%s cannot access class`s super",
-                        object.Pos.ErrMsgPrefix())))
+                        object.pos.ErrMsgPrefix())))
                     return object
                 }
-                if object.Class.Name == JavaRootClass {
+                if object.Class.name == JavaRootClass {
                     errs . append(new error( sprintf("%s '%s' is root class",
-                        object.Pos.ErrMsgPrefix(), JavaRootClass)))
+                        object.pos.ErrMsgPrefix(), JavaRootClass)))
                     return object
                 }
-                err := object.Class.loadSuperClass(e.Pos)
+                err := object.Class.loadSuperClass(e.pos)
                 if err != null {
                     errs.append(err)
                     return object
                 }
-                if object.Class.SuperClass == null {
+                if object.Class.superClass == null {
                     return object
                 }
                 result := object.Clone()
-                result.Pos = e.Pos
-                result.Class = result.Class.SuperClass
+                result.pos = e.pos
+                result.Class = result.Class.superClass
                 return result
             }
-            fieldOrMethod, err := object.Class.getFieldOrMethod(e.Pos, selection.Name, false)
+            fieldOrMethod, err := object.Class.getFieldOrMethod(e.pos, selection.name, false)
             if err != null {
                 errs.append(err)
                 return null
@@ -169,7 +169,7 @@ class ExpressionCheckSelection {
                     errs.append(err)
                 }
                 result := field.Type.Clone()
-                result.Pos = e.Pos
+                result.pos = e.pos
                 selection.Field = field
                 return result
             } else {
@@ -181,14 +181,14 @@ class ExpressionCheckSelection {
                 selection.Method = method
                 result := new Type()
                 result.Type = VariableTypeFunction
-                result.FunctionType = method.Function.Type
-                result.Pos = e.Pos
+                result.functionType = method.Function.Type
+                result.pos = e.pos
                 return result
             }
 
         default:
             errs . append(new error( sprintf("%s cannot access '%s' on '%s'",
-                e.Pos.ErrMsgPrefix(), selection.Name, object.TypeString())))
+                e.pos.ErrMsgPrefix(), selection.name, object.typeString())))
             return null
         }
         return null

@@ -22,7 +22,7 @@ class BuildinFunctionSprintf {
             state.popStack(len(state.Stacks) - length)
         }
         // format,must be string
-        call := e.Data.(ast.ExpressionFunctionCall)
+        call := e.data.(ast.ExpressionFunctionCall)
         meta := call.BuildInFunctionMeta.(ast.BuildInFunctionSprintfMeta)
         maxStack = this.eb.build(c, code, meta.Format, context, state)
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
@@ -36,7 +36,7 @@ class BuildinFunctionSprintf {
         }
         objectArray := new ast.Type()
         objectArray.Type = ast.VariableTypeJavaArray
-        objectArray.Array = state.newObjectVariableType(javaRootClass)
+        objectArray.array = state.newObjectVariableType(javaRootClass)
         state.pushStack(c, objectArray)
         index := int(0)
         for _, v := range call.Args {
@@ -51,8 +51,8 @@ class BuildinFunctionSprintf {
             if t := currentStack + stack; t > maxStack {
                 maxStack = t
             }
-            if v.Value.IsPointer() == false {
-                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.Value)
+            if v.value.isPointer() == false {
+                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.value)
             }
             code.Codes[code.CodeLength] = cg.OP_aastore
             code.CodeLength++
@@ -66,7 +66,7 @@ class BuildinFunctionSprintf {
             "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;"
         ), code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.CodeLength += 3
-        if e.IsStatementExpression {
+        if e.isStatementExpression {
             code.Codes[code.CodeLength] = cg.OP_pop
             code.CodeLength++
         }

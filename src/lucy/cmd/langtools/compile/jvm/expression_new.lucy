@@ -19,7 +19,7 @@ class BuildExpressionNew {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        switch e.Value.Type {
+        switch e.value.Type {
         case ast.VariableTypeArray:
             return this.buildNewArray(c, code, e, context, state)
         case ast.VariableTypeJavaArray:
@@ -32,9 +32,9 @@ class BuildExpressionNew {
             state.popStack(len(state.Stacks) - stackLength)
         }
         //new object
-        n := e.Data.(ast.ExpressionNew)
+        n := e.data.(ast.ExpressionNew)
         code.Codes[code.CodeLength] = cg.OP_new
-        c.InsertClassConst(n.Type.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+        c.InsertClassConst(n.Type.Class.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.Codes[code.CodeLength+3] = cg.OP_dup
         t := new cg.StackMapVerificationTypeInfo()
         t.Verify = new cg.StackMapUninitializedVariableInfo()
@@ -44,12 +44,12 @@ class BuildExpressionNew {
         maxStack = 2
         maxStack += this.eb.buildCallArgs(c, code, n.Args, n.VArgs, context, state)
         code.Codes[code.CodeLength] = cg.OP_invokespecial
-        d := n.Construction.Function.JvmDescriptor
+        d := n.Construction.Function.jvmDescriptor
         if d == "" {
             d = Descriptor.methodDescriptor(n.Construction.Function.Type)
         }
         c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-            n.Type.Class.Name,
+            n.Type.Class.name,
             specialMethodInit,
             d
         ), code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -86,13 +86,13 @@ class BuildExpressionNew {
         dimensions := byte(0)
         {
             // get dimension
-            t := e.Value
+            t := e.value
             for t.Type == ast.VariableTypeJavaArray {
                 dimensions++
-                t = t.Array
+                t = t.array
             }
         }
-        n := e.Data.(ast.ExpressionNew)
+        n := e.data.(ast.ExpressionNew)
         maxStack = this.eb.build(c, code, n.Args[0], context, state) // must be a integer
         currentStack := char(1)
         for i := byte(0); i < dimensions-1; i++ {
@@ -103,13 +103,13 @@ class BuildExpressionNew {
             }
         }
         code.Codes[code.CodeLength] = cg.OP_multianewarray
-        c.InsertClassConst(Descriptor.typeDescriptor(e.Value), code.Codes[code.CodeLength+1:code.CodeLength+3])
+        c.InsertClassConst(Descriptor.typeDescriptor(e.value), code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.Codes[code.CodeLength+3] = dimensions
         code.CodeLength += 4
-        if e.Value.Array.Type == ast.VariableTypeEnum {
-            state.pushStack(c, e.Value)
+        if e.value.array.Type == ast.VariableTypeEnum {
+            state.pushStack(c, e.value)
             defer state.popStack(1)
-            if t := 3 + setEnumArray(c, code, state, context, e.Value.Array.Enum); t > maxStack {
+            if t := 3 + setEnumArray(c, code, state, context, e.value.array.Enum); t > maxStack {
                 maxStack = t
             }
         }
@@ -122,8 +122,8 @@ class BuildExpressionNew {
         context Context,
         state StackMapState) -> (maxStack char) {
         //new
-        n := e.Data.(ast.ExpressionNew)
-        meta := ArrayMetas[e.Value.Array.Type]
+        n := e.data.(ast.ExpressionNew)
+        meta := ArrayMetas[e.value.array.Type]
         code.Codes[code.CodeLength] = cg.OP_new
         c.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.Codes[code.CodeLength+3] = cg.OP_dup
@@ -139,17 +139,17 @@ class BuildExpressionNew {
         }
         // get amount
         stack := this.eb.build(c, code, n.Args[0], context, state) // must be a integer
-        if t := 2 + stack; t > maxStack {
+        if t := char(2) + stack; t > maxStack {
             maxStack = t
         }
-        newArrayBaseOnType(c, code, e.Value.Array)
-        if e.Value.Array.Type == ast.VariableTypeEnum {
+        newArrayBaseOnType(c, code, e.value.array)
+        if e.value.array.Type == ast.VariableTypeEnum {
             t := new ast.Type()
             t .Type = ast.VariableTypeJavaArray
-            t .Array = e.Value.Array
+            t .array = e.value.array
             state.pushStack(c, t)
 
-            if t := 3 + setEnumArray(c, code, state, context, e.Value.Array.Enum); t > maxStack {
+            if t := 3 + setEnumArray(c, code, state, context, e.value.array.Enum); t > maxStack {
                 maxStack = t
             }
             state.popStack(1)

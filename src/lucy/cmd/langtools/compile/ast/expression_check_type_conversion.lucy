@@ -1,7 +1,7 @@
  
 class ExpressionCheckTypeConversion {
 	static fn check(e Expression , block Block, errs []error)  ->(valueType Type){
-		conversion := e.Data.(ExpressionTypeConversion)
+		conversion := e.data.(ExpressionTypeConversion)
 		on, es := conversion.Expression.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if on == null {
@@ -17,25 +17,25 @@ class ExpressionCheckTypeConversion {
 			return null
 		}
 		valueType = conversion.Type.Clone()
-		valueType.Pos = e.Pos
-		if on.IsNumber() && conversion.Type.IsNumber() {
+		valueType.pos = e.pos
+		if on.isNumber() && conversion.Type.isNumber() {
 			if conversion.Expression.isLiteral() {
 				conversion.Expression.convertToNumberType(conversion.Type.Type)
 				e.Type = conversion.Expression.Type
 				e.longValue = conversion.Expression.longValue
 				e.doubleValue = conversion.Expression.doubleValue
-				e.Value = conversion.Expression.Value
+				e.value = conversion.Expression.value
 			}
 			return valueType
 		}
 		// string([]byte)
 		if conversion.Type.Type == VariableTypeString &&
-			on.Equal(LucyBytesType) {
+			on.equal(LucyBytesType) {
 			return valueType
 		}
 		// string(byte[])
 		if conversion.Type.Type == VariableTypeString &&
-			on.Equal(JavaBytesType) {
+			on.equal(JavaBytesType) {
 			return valueType
 		}
 		// int(enum)
@@ -49,20 +49,20 @@ class ExpressionCheckTypeConversion {
 			return valueType
 		}
 		// []byte("hello world")
-		if conversion.Type.Equal(LucyBytesType) &&
+		if conversion.Type.equal(LucyBytesType) &&
 			on.Type == VariableTypeString {
 			return valueType
 		}
 		// byte[]("hello world")
-		if conversion.Type.Equal(JavaBytesType) &&
+		if conversion.Type.equal(JavaBytesType) &&
 			on.Type == VariableTypeString {
 			return valueType
 		}
-		if conversion.Type.validForTypeAssertOrConversion() && on.IsPointer() {
+		if conversion.Type.validForTypeAssertOrConversion() && on.isPointer() {
 			return valueType
 		}
 		errs.append(new error( sprintf("%s cannot convert '%s' to '%s'",
-			on.Pos.ErrMsgPrefix(), on.TypeString(), conversion.Type.TypeString())))
+			on.pos.ErrMsgPrefix(), on.typeString(), conversion.Type.typeString())))
 		return valueType
 	}
 }

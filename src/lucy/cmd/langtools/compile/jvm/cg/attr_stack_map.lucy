@@ -29,6 +29,10 @@ public class AttributeStackMap {
 
 public class StackMapSameFrame {
 	public FrameType byte
+	public fn StackMapSameFrame(FrameType byte){
+		this.super()
+		this.FrameType = FrameType
+	}
 	fn ToBytes() -> (bs []byte) {
 		return []byte{this.FrameType}
 	}

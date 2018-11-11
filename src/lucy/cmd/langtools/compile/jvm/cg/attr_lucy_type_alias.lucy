@@ -1,11 +1,11 @@
 import "lucy/binary"
 
 public class AttributeLucyTypeAlias {
-	public Alias   string
-	public Comment string
+	public alias   string
+	public comment string
 	public fn FromBs(c Class, bs []byte) {
-		this.Alias = string(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
-		this.Comment = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].Info)
+		this.alias = string(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
+		this.comment = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].Info)
 	}
 
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
@@ -13,8 +13,8 @@ public class AttributeLucyTypeAlias {
 		ret.NameIndex = c.InsertUtf8Const(AttributeNameLucyTypeAlias)
 		ret.Info = new []byte(4)
 		ret.attributeLength = (len(ret.Info))
-		binary.BigEndian.putChar(ret.Info, c.InsertUtf8Const(this.Alias))
-		binary.BigEndian.putChar(ret.Info[2:], c.InsertUtf8Const(this.Comment))
+		binary.BigEndian.putChar(ret.Info, c.InsertUtf8Const(this.alias))
+		binary.BigEndian.putChar(ret.Info[2:], c.InsertUtf8Const(this.comment))
 		return ret
 	}
 }

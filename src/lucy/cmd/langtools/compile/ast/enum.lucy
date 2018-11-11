@@ -2,30 +2,30 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 public class EnumName {
 	public Enum    Enum
-	public Name    string
-	public Pos     Pos
-	public Value   int // int is bigger enough
-	public Comment string
+	public name    string
+	public pos     Pos
+	public value   int // int is bigger enough
+	public comment string
 	public NoNeed  Expression
 }
 
 
 public class Enum   {
-	public IsGlobal        bool
-	public IsBuildIn       bool
-	public AccessFlags     char
-	public Name            string
-	public Pos             Pos
+	public isGlobal        bool
+	public isBuildIn       bool
+	public accessFlags     char
+	public name            string
+	public pos             Pos
 	public Enums           []EnumName
 	public Init            Expression //should be a int expression
-	public Used            bool
+	public used            bool
 	public DefaultValue    int
-	public LoadFromOutSide bool
+	public loadFromOutSide bool
 	public FirstValueIndex int
-	public Comment         string
+	public comment         string
 	
 	fn isPublic() -> (is bool) {
-		return this.AccessFlags&cg.AccClassPublic != 0
+		return this.accessFlags&cg.AccClassPublic != 0
 	}
 
 	
@@ -37,7 +37,7 @@ public class Enum   {
 			} else {
 				if is == false {
 					err := new error(sprintf("%s enum type must inited by 'int' literal",
-						this.Pos.ErrMsgPrefix()))
+						this.pos.ErrMsgPrefix()))
 					errs.append(err)
 				} else {
 					initV = int(this.Init.getLongValue())
@@ -48,12 +48,12 @@ public class Enum   {
 		for k, v := range this.Enums {
 			if v.NoNeed != null {
 				errs.append(new error(sprintf("%s enum only expect 1 init value",
-					v.Pos.ErrMsgPrefix())))
+					v.pos.ErrMsgPrefix())))
 			}
 			if k < this.FirstValueIndex {
-				v.Value = initV - int(this.FirstValueIndex-k)
+				v.value = initV - int(this.FirstValueIndex-k)
 			} else {
-				v.Value = initV + int(k-this.FirstValueIndex)
+				v.value = initV + int(k-this.FirstValueIndex)
 			}
 		}
 		return errs

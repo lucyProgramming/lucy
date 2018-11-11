@@ -24,7 +24,7 @@ public enum StatementTypeKind {
 public class Statement {
 	public Type                      StatementTypeKind
 	public Checked                   bool // if checked
-	public Pos                       Pos
+	public pos                       Pos
 	public StatementIf               StatementIf
 	public Expression                Expression
 	public TypeAlias                 TypeAlias
@@ -33,7 +33,7 @@ public class Statement {
 	public StatementSwitch           StatementSwitch
 	public StatementWhen             StatementWhen
 	public StatementBreak            StatementBreak
-	public Block                     Block
+	public block                     Block
 	public StatementContinue         StatementContinue
 	public StatementLabel            StatementLabel
 	public StatementGoTo             StatementGoTo
@@ -69,11 +69,11 @@ public class Statement {
 		c := this.StatementIf.Condition.boolValue
 		if c {
 			this.Type = StatementTypeBlock
-			this.Block = this.StatementIf.Block
+			this.block = this.StatementIf.block
 		} else {
 			if this.StatementIf.Else != null {
 				this.Type = StatementTypeBlock
-				this.Block = this.StatementIf.Else
+				this.block = this.StatementIf.Else
 			} else {
 				this.Type = StatementTypeNop
 			}
@@ -119,25 +119,25 @@ public class Statement {
 				return []error{err}
 			}
 		case StatementTypeDefer:
-			if block.Defers == null {
-				block.Defers = []StatementDefer{this.Defer}
+			if block.defers == null {
+				block.defers = []StatementDefer{this.Defer}
 			}else {
-				block.Defers.append(this.Defer)
+				block.defers.append(this.Defer)
 			}
-			block.InheritedAttribute.Function.HasDefer = true
-			this.Defer.Block.inherit(block)
-			this.Defer.Block.InheritedAttribute.Defer = this.Defer
-			es := this.Defer.Block.check()
+			block.inheritedAttribute.Function.HasDefer = true
+			this.Defer.block.inherit(block)
+			this.Defer.block.inheritedAttribute.Defer = this.Defer
+			es := this.Defer.block.check()
 			return es
 		case StatementTypeBlock:
-			this.Block.inherit(block)
-			return this.Block.check()
+			this.block.inherit(block)
+			return this.block.check()
 		case StatementTypeLabel:
-			if block.InheritedAttribute.Defer != null {
-			    if block.InheritedAttribute.Defer.Labels != null {
-			        block.InheritedAttribute.Defer.Labels.append(this.StatementLabel)
+			if block.inheritedAttribute.Defer != null {
+			    if block.inheritedAttribute.Defer.Labels != null {
+			        block.inheritedAttribute.Defer.Labels.append(this.StatementLabel)
 			    }else {
-			        block.InheritedAttribute.Defer.Labels = [this.StatementLabel]
+			        block.inheritedAttribute.Defer.Labels = [this.StatementLabel]
 			    }
 			}
 		case StatementTypeClass:
@@ -146,7 +146,7 @@ public class Statement {
 		    }else {
                 PackageBeenCompile.statementLevelClass.append(this.Class)
 		    }
-			err := block.Insert(this.Class.Name, this.Class.Pos, this.Class)
+			err := block.Insert(this.Class.name, this.Class.pos, this.Class)
 			if err != null {
 				errs.append(err)
 			}
@@ -154,7 +154,7 @@ public class Statement {
 			return errs
 		case StatementTypeEnum:
 			es := this.Enum.check()
-			err := block.Insert(this.Enum.Name, this.Enum.Pos, this.Enum)
+			err := block.Insert(this.Enum.name, this.Enum.pos, this.Enum)
 			if err != null {
 				es.append(err)
 			}
@@ -165,9 +165,9 @@ public class Statement {
 		case StatementTypeWhen:
 			return this.StatementWhen.check(block, this)
 		case StatementTypeImport:
-			if block.InheritedAttribute.Function.TemplateClonedFunction == false {
+			if block.inheritedAttribute.Function.TemplateClonedFunction == false {
 				errs.append(new error(sprintf("%s cannot have 'import' at this scope , non-template function",
-					errMsgPrefix(this.Import.Pos))))
+					errMsgPrefix(this.Import.pos))))
 				return errs
 			}
 			err := this.Import.MkAccessName()
@@ -175,9 +175,9 @@ public class Statement {
 				errs.append(err)
 				return errs
 			}
-			if this.Import.Alias == UnderScore {
+			if this.Import.alias == UnderScore {
 				errs.append(new error(sprintf("%s import at block scope , must be used",
-					errMsgPrefix(this.Import.Pos))))
+					errMsgPrefix(this.Import.pos))))
 				return null
 			}
 			if err := PackageBeenCompile.insertImport(this.Import); err != null {
@@ -188,7 +188,7 @@ public class Statement {
 			if err != null {
 				return []error{err}
 			}
-			err = block.Insert(this.TypeAlias.Name, this.TypeAlias.Pos, this.TypeAlias.Type)
+			err = block.Insert(this.TypeAlias.name, this.TypeAlias.pos, this.TypeAlias.Type)
 			if err != null {
 				return []error{err}
 			}
@@ -198,7 +198,7 @@ public class Statement {
 	}
 	
 	fn checkStatementExpression(block Block) ->(errs []error = []error{})  {
-		this.Expression.IsStatementExpression = true
+		this.Expression.isStatementExpression = true
 		if err := this.Expression.canBeUsedAsStatement(); err != null {
 			errs.append(err)
 		}

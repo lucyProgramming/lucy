@@ -4,161 +4,161 @@ import "java/util/Date"
 class ExpressionCheckIdentifier {
 
 	static fn check(e Expression , block Block) -> (valueType Type,err  error) {
-		identifier := e.Data.(ExpressionIdentifier)
-		if identifier.Name == UnderScore {
+		identifier := e.data.(ExpressionIdentifier)
+		if identifier.name == UnderScore {
 			//_ is not valid
 			return null, new error(sprintf("%s '%s' is not a valid name",
-				e.Pos.ErrMsgPrefix(), identifier.Name))
+				e.pos.ErrMsgPrefix(), identifier.name))
 		}
 		//handle magic identifier
-		switch identifier.Name {
+		switch identifier.name {
 		case magicIdentifierFile:
 			e.Type = ExpressionTypeString
-			e.Data = e.Pos.Filename
+			e.data = e.pos.Filename
 			result, _ := e.checkSingleValueContextExpression(block)
 			return result, null
 		case magicIdentifierLine:
 			e.Type = ExpressionTypeInt
-			e.Data = Long.valueOf(long(0))
+			e.data = Long.valueOf(long(0))
 			result, _ := e.checkSingleValueContextExpression(block)
 			return result, null
 		case magicIdentifierTime:
 			e.Type = ExpressionTypeLong
-			e.Data = Long.valueOf(new Date().getTime())
+			e.data = Long.valueOf(new Date().getTime())
 			result, _ := e.checkSingleValueContextExpression(block)
 			return result, null
 		case magicIdentifierClass:
-			if block.InheritedAttribute.Class == null {
+			if block.inheritedAttribute.Class == null {
 				return null,
-					new error(sprintf("%s '%s' must in class scope", e.Pos.ErrMsgPrefix(), identifier.Name))
+					new error(sprintf("%s '%s' must in class scope", e.pos.ErrMsgPrefix(), identifier.name))
 			}
 			result := new Type()
 			result.Type = VariableTypeClass
-			result.Pos = e.Pos
-			result.Class = block.InheritedAttribute.Class
+			result.pos = e.pos
+			result.Class = block.inheritedAttribute.Class
 			return result, null
 		case magicIdentifierFunction:
-			if block.InheritedAttribute.Function.isPackageInitBlockFunction {
-				return null,new error(sprintf("%s '%s' must in function scope", e.Pos.ErrMsgPrefix(), identifier.Name))
+			if block.inheritedAttribute.Function.isPackageInitBlockFunction {
+				return null,new error(sprintf("%s '%s' must in function scope", e.pos.ErrMsgPrefix(), identifier.name))
 			}
 			result := new Type()
 			result.Type = VariableTypeMagicFunction
-			result.Pos = e.Pos
-			result.Function = block.InheritedAttribute.Function
+			result.pos = e.pos
+			result.Function = block.inheritedAttribute.Function
 			return result, null
 		}
 		isCaptureVar := [false]
-		d, err := block.searchIdentifier(e.Pos, identifier.Name, isCaptureVar)
+		d, err := block.searchIdentifier(e.pos, identifier.name, isCaptureVar)
 		if err != null {
 			return null, err
 		}
 		if d == null {
-			i := PackageBeenCompile.getImport(e.Pos.Filename, identifier.Name)
+			i := PackageBeenCompile.getImport(e.pos.Filename, identifier.name)
 			if i != null {
-				i.Used = true
+				i.used = true
 				return .checkIdentifierThroughImports(e , i)
 			}
 		}
 		if d == null {
-			return null, new error(sprintf("%s '%s' not found", e.Pos.ErrMsgPrefix(), identifier.Name))
+			return null, new error(sprintf("%s '%s' not found", e.pos.ErrMsgPrefix(), identifier.name))
 		}
 
 		if f := d.(Function) ;f != null {
 			f := d.(Function)
 			if f.IsGlobalMain() {
 				// not allow
-				return null, new error(sprintf("%s fucntion is global main", errMsgPrefix(e.Pos)))
+				return null, new error(sprintf("%s fucntion is global main", errMsgPrefix(e.pos)))
 			}
-			if f.IsBuildIn {
+			if f.isBuildIn {
 				return null, new error(sprintf("%s fucntion '%s' is buildin",
-					e.Pos.ErrMsgPrefix(), f.Name))
+					e.pos.ErrMsgPrefix(), f.name))
 			}
 			if f.TemplateFunction != null {
 				return null, new error(sprintf("%s fucntion '%s' a template function",
-					e.Pos.ErrMsgPrefix(), f.Name))
+					e.pos.ErrMsgPrefix(), f.name))
 			}
 			// try from import
-			if f.IsBuildIn == false {
-				i, should := shouldAccessFromImports(identifier.Name, e.Pos, f.Pos)
+			if f.isBuildIn == false {
+				i, should := shouldAccessFromImports(identifier.name, e.pos, f.pos)
 				if should {
 					return .checkIdentifierThroughImports(e , i)
 				}
 			}
 			result := new Type()
 			result.Type = VariableTypeFunction
-			result.FunctionType = f.Type
-			result.Pos = e.Pos
+			result.functionType = f.Type
+			result.pos = e.pos
 			identifier.Function = f
 			return result, null
 		}
 		if t := d.(Variable) ;t != null {
-			if t.IsBuildIn == false { // try from import
-				i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
+			if t.isBuildIn == false { // try from import
+				i, should := shouldAccessFromImports(identifier.name, e.pos, t.pos)
 				if should {
 					return .checkIdentifierThroughImports(e , i)
 				}
 			}
 			if isCaptureVar[0] {
-				t.BeenCapturedAsRightValue++
+				t.beenCapturedAsRightValue++
 			}
-			t.Used = true
+			t.used = true
 			result := t.Type.Clone()
-			result.Pos = e.Pos
+			result.pos = e.pos
 			identifier.Variable = t
 			return result, null
 		}
 		if t := d.(Constant) ;t != null {
-			if t.IsBuildIn == false { // try from import
-				i, should := shouldAccessFromImports(identifier.Name, e.Pos, t.Pos)
+			if t.isBuildIn == false { // try from import
+				i, should := shouldAccessFromImports(identifier.name, e.pos, t.pos)
 				if should {
 					return .checkIdentifierThroughImports(e , i)
 				}
 			}
-			t.Used = true
+			t.used = true
 			e.fromConst(t)
 			result := t.Type.Clone()
-			result.Pos = e.Pos
+			result.pos = e.pos
 			return result, null
 		}
 		if c := d.(Class) ; c != null {
-			if c.IsBuildIn == false { // try from import
-				i, should := shouldAccessFromImports(identifier.Name, e.Pos, c.Pos)
+			if c.isBuildIn == false { // try from import
+				i, should := shouldAccessFromImports(identifier.name, e.pos, c.pos)
 				if should {
 					return .checkIdentifierThroughImports(e , i)
 				}
 			}
 			result := new Type()
 			result.Type = VariableTypeClass
-			result.Pos = e.Pos
+			result.pos = e.pos
 			result.Class = c
 			return result, null
 		}
 		if enumName := d.(EnumName) ; enumName != null {
-			if enumName.Enum.IsBuildIn == false { // try from import
-				i, should := shouldAccessFromImports(identifier.Name, e.Pos, enumName.Pos)
+			if enumName.Enum.isBuildIn == false { // try from import
+				i, should := shouldAccessFromImports(identifier.name, e.pos, enumName.pos)
 				if should {
 					return .checkIdentifierThroughImports(e , i)
 				}
 			}
 			result := new Type()
-			result.Pos = enumName.Pos
+			result.pos = enumName.pos
 			result.Type = VariableTypeEnum
-			result.EnumName = enumName
+			result.enumName = enumName
 			result.Enum = enumName.Enum
 			identifier.EnumName = enumName
 			return result, null
 		}
 		err = new error(sprintf("%s identifier '%s' is not a expression , but '%s'",
-			e.Pos.ErrMsgPrefix(), identifier.Name, block.identifierIsWhat(d)))
+			e.pos.ErrMsgPrefix(), identifier.name, block.identifierIsWhat(d)))
 	}
 	
 	static fn checkIdentifierThroughImports(e Expression , it Import) -> (valueType Type,err  error) {
 		p, err := PackageBeenCompile.load(it.Import)
 		if err != null {
-			return null, new error(sprintf("%s %s", e.Pos.ErrMsgPrefix(), err.getMessage()))
+			return null, new error(sprintf("%s %s", e.pos.ErrMsgPrefix(), err.getMessage()))
 		}
 		valueType = new Type()
-		valueType.Pos = e.Pos
+		valueType.pos = e.pos
 		if pp, ok := p.(Package); ok {
 			valueType.Package = pp
 			valueType.Type = VariableTypePackage

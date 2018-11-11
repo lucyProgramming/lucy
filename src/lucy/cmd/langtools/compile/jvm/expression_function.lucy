@@ -19,55 +19,54 @@ class  BuildExpressionFunction {
 		e ast.Expression,
 		context Context,
 		state StackMapState) -> (maxStack char) {
-		function := e.Data.(ast.Function)
+		function := e.data.(ast.Function)
 		defer {
-			if e.IsStatementExpression {
-				return
-			}
-			stack := this.packFunction2MethodHandle(c, code, function, context)
-			if stack > maxStack {
-				maxStack = stack
+			if e.isStatementExpression == false  {
+				stack := this.packFunction2MethodHandle(c, code, function, context)
+                if stack > maxStack {
+                    maxStack = stack
+                }
 			}
 		}
-		if function.Name == "" {
-			function.Name = function.NameLiteralFunction()
+		if function.name == "" {
+			function.name = function.NameLiteralFunction()
 		}
 		if function.IsClosureFunction == false {
-			function.Name = c.NewMethodName(function.Name) // new a function name
+			function.name = c.NewMethodName(function.name) // new a function name
 			method := new cg.MethodHighLevel()
-			method.Name = function.Name
-			method.AccessFlags |= cg.AccMethodFinal
-			method.AccessFlags |= cg.AccMethodPrivate
-			method.AccessFlags |= cg.AccMethodStatic
-			method.AccessFlags |= cg.AccMethodBridge
+			method.name = function.name
+			method.accessFlags |= cg.AccMethodFinal
+			method.accessFlags |= cg.AccMethodPrivate
+			method.accessFlags |= cg.AccMethodStatic
+			method.accessFlags |= cg.AccMethodBridge
 			if function.Type.VArgs != null {
-				method.AccessFlags |= cg.AccMethodVarargs
+				method.accessFlags |= cg.AccMethodVarargs
 			}
 			function.Entrance = method
 			method.Class = c
 			method.Descriptor = Descriptor.methodDescriptor(function.Type)
 			method.Code = new cg.AttributeCode()
 			this.buildFunction(c, null, method, function)
-			ast.TypeAppendMethod(method)
+			c.AppendMethod(method)
 			return
 		}
 
 		// function have captured vars
-		className := this.newClassName("closureFunction$" + function.Name)
+		className := this.newClassName("closureFunction$" + function.name)
 		closureClass := new cg.ClassHighLevel()
-		closureClass.Name = className
-		closureClass.SuperClass = ast.LucyRootClass
-		closureClass.AccessFlags = 0
-		closureClass.AccessFlags |= cg.AccClassSynthetic
-		closureClass.AccessFlags |= cg.AccClassFinal
+		closureClass.name = className
+		closureClass.superClass = ast.LucyRootClass
+		closureClass.accessFlags = 0
+		closureClass.accessFlags |= cg.AccClassSynthetic
+		closureClass.accessFlags |= cg.AccClassFinal
 		this.mkClassDefaultConstruction(closureClass)
 		this.putClass(closureClass)
 		method := new cg.MethodHighLevel()
-		method.Name = function.Name
-		method.AccessFlags |= cg.AccMethodFinal
-		method.AccessFlags |= cg.AccMethodBridge
+		method.name = function.name
+		method.accessFlags |= cg.AccMethodFinal
+		method.accessFlags |= cg.AccMethodBridge
 		if function.Type.VArgs != null {
-			method.AccessFlags |= cg.AccMethodVarargs
+			method.accessFlags |= cg.AccMethodVarargs
 		}
 		method.Descriptor = Descriptor.methodDescriptor(function.Type)
 		method.Class = closureClass
@@ -75,7 +74,7 @@ class  BuildExpressionFunction {
 		closureClass.AppendMethod(method)
 		//new a object to hold this closure function
 		code.Codes[code.CodeLength] = cg.OP_new
-		c.InsertClassConst(closureClass.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		c.InsertClassConst(closureClass.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
 		maxStack = 2 // maxStack is 2 right now
@@ -94,18 +93,18 @@ class  BuildExpressionFunction {
 		state.appendLocals(c, state.newObjectVariableType(className))
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, function.ClosureVariableOffSet)...)
 		//set filed
-		closureClass.Fields = new map { string -> cg.FieldHighLevel} ()
+		closureClass.fields = new map { string -> cg.FieldHighLevel} ()
 		total := len(function.Closure.Variables) + len(function.Closure.Functions) - 1
 		for v, _ := range function.Closure.Variables {
 			field := new cg.FieldHighLevel()
-			field.AccessFlags |= cg.AccFieldSynthetic
-			field.Name = v.Name
-			closureClass.Fields[v.Name] = field
+			field.accessFlags |= cg.AccFieldSynthetic
+			field.name = v.name
+			closureClass.fields[v.name] = field
 			if total != 0 {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
 			}
-			if v.BeenCapturedAsLeftValue > 0 {
+			if v.beenCapturedAsLeftValue > 0 {
 				meta := closure.getMeta(v.Type.Type)
 				field.Descriptor = "L" + meta.className + ";"
 				if context.function.Closure.ClosureVariableExist(v) {
@@ -117,12 +116,12 @@ class  BuildExpressionFunction {
 					code.Codes[code.CodeLength] = cg.OP_getfield
 					c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 						ast.TypeName,
-						v.Name,
+						v.name,
 						field.Descriptor
 					), code.Codes[code.CodeLength+1:code.CodeLength+3])
 					code.CodeLength += 3
 				} else { // not exits
-					copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
+					copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.localValOffset)...)
 					if 3 > maxStack {
 						maxStack = 3
 					}
@@ -138,12 +137,12 @@ class  BuildExpressionFunction {
 					code.Codes[code.CodeLength] = cg.OP_getfield
 					c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 						ast.TypeName,
-						v.Name,
+						v.name,
 						field.Descriptor
 					), code.Codes[code.CodeLength+1:code.CodeLength+3])
 					code.CodeLength += 3
 				} else { // not exits
-					copyOPs(code, loadLocalVariableOps(v.Type.Type, v.LocalValOffset)...)
+					copyOPs(code, loadLocalVariableOps(v.Type.Type, v.localValOffset)...)
 					if 3 > maxStack {
 						maxStack = 3
 					}
@@ -152,7 +151,7 @@ class  BuildExpressionFunction {
 			code.Codes[code.CodeLength] = cg.OP_putfield
 			c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 				className,
-				v.Name,
+				v.name,
 				field.Descriptor
 			), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
@@ -163,11 +162,11 @@ class  BuildExpressionFunction {
 				continue
 			}
 			filed := new cg.FieldHighLevel()
-			filed.AccessFlags |= cg.AccFieldPublic
-			filed.AccessFlags |= cg.AccFieldSynthetic
-			filed.Name = v.Name
-			filed.Descriptor = "L" + v.Entrance.Class.Name + ";"
-			closureClass.Fields[v.Name] = filed
+			filed.accessFlags |= cg.AccFieldPublic
+			filed.accessFlags |= cg.AccFieldSynthetic
+			filed.name = v.name
+			filed.Descriptor = "L" + v.Entrance.Class.name + ";"
+			closureClass.fields[v.name] = filed
 			if total != 0 {
 				code.Codes[code.CodeLength] = cg.OP_dup
 				code.CodeLength++
@@ -181,7 +180,7 @@ class  BuildExpressionFunction {
 				code.Codes[code.CodeLength] = cg.OP_getfield
 				c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					ast.TypeName,
-					v.Name,
+					v.name,
 					filed.Descriptor
 				), code.Codes[code.CodeLength+1:code.CodeLength+3])
 				code.CodeLength += 3
@@ -194,7 +193,7 @@ class  BuildExpressionFunction {
 			code.Codes[code.CodeLength] = cg.OP_putfield
 			c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 				className,
-				v.Name,
+				v.name,
 				filed.Descriptor
 			), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
@@ -216,10 +215,10 @@ class  BuildExpressionFunction {
 		), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		c.InsertClassConst(function.Entrance.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		c.InsertClassConst(function.Entrance.Class.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		c.InsertStringConst(function.Entrance.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		c.InsertStringConst(function.Entrance.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
 		c.InsertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(
@@ -249,8 +248,8 @@ class  BuildExpressionFunction {
 				code.Codes[code.CodeLength] = cg.OP_getfield
 				c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					ast.TypeName,
-					function.Name,
-					"L" + function.Entrance.Class.Name + ";"
+					function.name,
+					"L" + function.Entrance.Class.name + ";"
 				), code.Codes[code.CodeLength+1:code.CodeLength+3])
 				code.CodeLength += 3
 			} else {

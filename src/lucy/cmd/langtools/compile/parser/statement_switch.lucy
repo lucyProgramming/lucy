@@ -11,7 +11,7 @@ class StatementSwitchParser extends ParserExtends{
 	
 	fn parseSwitch() -> (statementSwitch ast.StatementSwitch,err error) {
 		statementSwitch = new ast.StatementSwitch()
-		statementSwitch.Pos = this.parser.mkPos()
+		statementSwitch.pos = this.parser.mkPos()
 		this.Next(lfIsToken) // skip switch key word
 		this.parser.unExpectNewLineAndSkip()
 		statementSwitch.EndPos = this.parser.mkPos()
@@ -66,12 +66,12 @@ class StatementSwitchParser extends ParserExtends{
 				this.parser.token.Type != lex.TokenDefault &&
 				this.parser.token.Type != lex.TokenRc {
 				block = new ast.Block()
-				block.IsSwitchBlock = true
+				block.isSwitchBlock = true
 				this.bp.parseStatementList(block, false)
 			}
 			t := new ast.StatementSwitchCase()
 			t.Matches = es
-			t.Block = block
+			t.block = block
 			if statementSwitch.StatementSwitchCases == null {
                 statementSwitch.StatementSwitchCases = [t]
 			}else {
@@ -91,7 +91,7 @@ class StatementSwitchParser extends ParserExtends{
 			}
 			this.parser.expectNewLineAndSkip()
 			block := new ast.Block()
-			block.IsSwitchBlock = true
+			block.isSwitchBlock = true
 			statementSwitch.Default = block
 			if this.parser.token.Type != lex.TokenRc {
 				this.bp.parseStatementList(block, false)

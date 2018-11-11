@@ -57,31 +57,31 @@ class ClassParser extends  ParserExtends{
 		isInterface := this.parser.token.Type == lex.TokenInterface
 		classDefinition = new ast.Class()
 		if isInterface {
-			classDefinition.AccessFlags |= cg.AccClassInterface
-			classDefinition.AccessFlags |= cg.AccClassAbstract
+			classDefinition.accessFlags |= cg.AccClassInterface
+			classDefinition.accessFlags |= cg.AccClassAbstract
 		}
 		if isAbstract {
-			classDefinition.AccessFlags |= cg.AccClassAbstract
+			classDefinition.accessFlags |= cg.AccClassAbstract
 		}
 		this.Next(lfIsToken) // skip class key word
 		this.parser.unExpectNewLineAndSkip()
 		t, err := this.parseClassName()
 		if t != null {
-			classDefinition.Name = t.Name
+			classDefinition.name = t.name
 		}
-		classDefinition.Block.IsClassBlock = true
-		classDefinition.Block.Class = classDefinition
+		classDefinition.block.isClassBlock = true
+		classDefinition.block.Class = classDefinition
 		if err != null {
-			if classDefinition.Name == "" {
+			if classDefinition.name == "" {
 				compileAutoName()
 			}
 			this.consume(untilLc)
 		}
-		classDefinition.Pos = this.parser.mkPos()
+		classDefinition.pos = this.parser.mkPos()
 		if this.parser.token.Type == lex.TokenExtends { // parse father expression
 			this.Next(lfNotToken) // skip extends
 			var err error
-			classDefinition.SuperClassName, err = this.parseClassName()
+			classDefinition.superClassName, err = this.parseClassName()
 			if err != null {
 				this.parser.errs.append( err)
 				this.consume(untilLc)
@@ -89,7 +89,7 @@ class ClassParser extends  ParserExtends{
 		}
 		if this.parser.token.Type == lex.TokenImplements {
 			this.Next(lfNotToken) // skip key word
-			classDefinition.InterfaceNames, err = this.parseImplementsInterfaces()
+			classDefinition.interfaceNames, err = this.parseImplementsInterfaces()
 			if err != null {
 				this.parser.errs.append( err)
 				this.consume(untilLc)
@@ -146,10 +146,10 @@ class ClassParser extends  ParserExtends{
 								this.parser.token.Description)))
 					} else {
 						this.Next(lfNotToken) // skip }
-						if classDefinition.StaticBlocks == null {
-                            classDefinition.StaticBlocks = [block]
+						if classDefinition.staticBlocks == null {
+                            classDefinition.staticBlocks = [block]
 						}else {
-						    classDefinition.StaticBlocks.append(block)
+						    classDefinition.staticBlocks.append(block)
 						}
 
 					}
@@ -230,44 +230,44 @@ class ClassParser extends  ParserExtends{
 					this.Next(lfNotToken)
 					continue
 				}
-				f.Comment = comment.Comment
-				if classDefinition.Methods == null {
-					classDefinition.Methods = new map { string -> []ast.ClassMethod }( )
+				f.comment = comment.comment
+				if classDefinition.methods == null {
+					classDefinition.methods = new map { string -> []ast.ClassMethod }( )
 				}
-				if f.Name == "" {
-					f.Name = compileAutoName()
+				if f.name == "" {
+					f.name = compileAutoName()
 				}
 				m := new ast.ClassMethod()
 				m.Function = f
 				if accessControlToken != null {
 					switch accessControlToken.Type {
 					case lex.TokenPrivate:
-						m.Function.AccessFlags |= cg.AccMethodPrivate
+						m.Function.accessFlags |= cg.AccMethodPrivate
 					case lex.TokenProtected:
-						m.Function.AccessFlags |= cg.AccMethodProtected
+						m.Function.accessFlags |= cg.AccMethodProtected
 					case lex.TokenPublic:
-						m.Function.AccessFlags |= cg.AccMethodPublic
+						m.Function.accessFlags |= cg.AccMethodPublic
 					}
 				}
 				if isSynchronized {
-					m.Function.AccessFlags |= cg.AccMethodSynchronized
+					m.Function.accessFlags |= cg.AccMethodSynchronized
 				}
 				if isStatic {
-					f.AccessFlags |= cg.AccMethodStatic
+					f.accessFlags |= cg.AccMethodStatic
 				}
 				if isAbstract {
-					f.AccessFlags |= cg.AccMethodAbstract
+					f.accessFlags |= cg.AccMethodAbstract
 				}
 				if isFinal {
-					f.AccessFlags |= cg.AccMethodFinal
+					f.accessFlags |= cg.AccMethodFinal
 				}
-				if f.Name == classDefinition.Name && isInterface == false {
-					f.Name = ast.SpecialMethodInit
+				if f.name == classDefinition.name && isInterface == false {
+					f.name = ast.SpecialMethodInit
 				}
-				if classDefinition.Methods[f.Name] == null {
-                    classDefinition.Methods[f.Name] = [m]
+				if classDefinition.methods[f.name] == null {
+                    classDefinition.methods[f.name] = [m]
 				}else {
-				    classDefinition.Methods[f.Name].append(m)
+				    classDefinition.methods[f.name].append(m)
 				}
 				resetProperty()
 			case lex.TokenImport:
@@ -291,24 +291,24 @@ class ClassParser extends  ParserExtends{
 		if err != null {
 			return err
 		}
-		constComment := comment.Comment
+		constComment := comment.comment
 		if this.parser.token.Type == lex.TokenComment {
 			this.Next(lfIsToken)
 		} else {
 			this.parser.validStatementEnding()
 		}
-		if classDefinition.Block.Constants == null {
-			classDefinition.Block.Constants = new map { string -> ast.Constant }( )
+		if classDefinition.block.constants == null {
+			classDefinition.block.constants = new map { string -> ast.Constant }( )
 		}
 		for _, v := range cs {
-			if classDefinition.Block.Constants.keyExist(v.Name) {
+			if classDefinition.block.constants.keyExist(v.name) {
 				this.parser.errs.append(
 					new error(sprintf("%s const %s alreay declared",
-						this.parser.errMsgPrefix(), v.Name)))
+						this.parser.errMsgPrefix(), v.name)))
 				continue
 			}
-			classDefinition.Block.Constants[v.Name] = v
-			v.Comment = constComment
+			classDefinition.block.constants[v.name] = v
+			v.comment = constComment
 		}
 		return null
 	}
@@ -336,47 +336,47 @@ class ClassParser extends  ParserExtends{
 				this.consume(untilSemicolonOrLf)
 			}
 		}
-		fieldComment := comment.Comment
+		fieldComment := comment.comment
 		if this.parser.token.Type == lex.TokenComment {
 			this.Next(lfIsToken)
 		} else {
 			this.parser.validStatementEnding()
 		}
-		if classDefinition.Fields == null {
-			classDefinition.Fields = new map { string -> ast.ClassField } ()
+		if classDefinition.fields == null {
+			classDefinition.fields = new map { string -> ast.ClassField } ()
 		}
 		for k, v := range names {
-			if classDefinition.Fields.keyExist(v.Name) {
+			if classDefinition.fields.keyExist(v.name) {
 				this.parser.errs.append( new error(sprintf("%s field %s is alreay declared",
-						this.parser.errMsgPrefix(), v.Name)))
+						this.parser.errMsgPrefix(), v.name)))
 				continue
 			}
 			f := new ast.ClassField()
-			f.Name = v.Name
-			f.Pos = v.Pos
+			f.name = v.name
+			f.pos = v.pos
 			f.Type = t.Clone()
-			f.AccessFlags = 0
+			f.accessFlags = 0
 			if k < len(initValues) {
-				f.DefaultValueExpression = initValues[k]
+				f.defaultValueExpression = initValues[k]
 			}
-			f.Comment = fieldComment
+			f.comment = fieldComment
 			if isStatic {
-				f.AccessFlags |= cg.AccFieldStatic
+				f.accessFlags |= cg.AccFieldStatic
 			}
 			if accessControlToken != null {
 				switch accessControlToken.Type {
 				case lex.TokenPublic:
-					f.AccessFlags |= cg.AccFieldPublic
+					f.accessFlags |= cg.AccFieldPublic
 				case lex.TokenProtected:
-					f.AccessFlags |= cg.AccFieldProtected
+					f.accessFlags |= cg.AccFieldProtected
 				default: // private
-					f.AccessFlags |= cg.AccFieldPrivate
+					f.accessFlags |= cg.AccFieldPrivate
 				}
 			}
 			if isVolatile {
-				f.AccessFlags |= cg.AccFieldVolatile
+				f.accessFlags |= cg.AccFieldVolatile
 			}
-			classDefinition.Fields[v.Name] = f
+			classDefinition.fields[v.name] = f
 		}
 		return null
 	}

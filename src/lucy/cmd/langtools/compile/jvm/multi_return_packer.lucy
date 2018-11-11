@@ -17,7 +17,7 @@ class MultiValueAutoVar {
     fn unPack(c cg.ClassHighLevel, code cg.AttributeCode,
         valueIndex int, typ ast.Type)  -> (maxStack char) {
         maxStack = this.unPack2Object(c, code, valueIndex)
-        if typ.IsPointer() == false {
+        if typ.isPointer() == false {
             TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, typ)
             if t := jvmSlotSize(typ); t > maxStack {
                 maxStack = t

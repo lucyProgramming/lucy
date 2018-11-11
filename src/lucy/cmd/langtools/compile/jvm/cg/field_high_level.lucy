@@ -1,9 +1,9 @@
 
 
 public class FieldHighLevel {
-	public Name                         string
+	public name                         string
 	public Descriptor                   string
-	public AccessFlags                  char
+	public accessFlags                  char
 	public AttributeConstantValue       AttributeConstantValue
 	public AttributeLucyFieldDescriptor AttributeLucyFieldDescriptor
 	public AttributeLucyConst           AttributeLucyConst

@@ -16,8 +16,8 @@ public class AttributeMethodParameters  {
 		this.Parameters = []MethodParameter{}
 		for len(bs) > 0 {
 			p := new MethodParameter()
-			p.Name = string(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
-			p.AccessFlags = binary.BigEndian.getChar(bs[2:])
+			p.name = string(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
+			p.accessFlags = binary.BigEndian.getChar(bs[2:])
 			this.Parameters . append(p)
 			bs = bs[4:]
 		}
@@ -37,8 +37,8 @@ public class AttributeMethodParameters  {
 		ret.Info = new []byte(ret.attributeLength)
 		ret.Info[0] = byte(len(this.Parameters))
 		for k, v := range this.Parameters {
-			binary.BigEndian.putChar(ret.Info[4*k+1:], c.InsertUtf8Const(v.Name))
-			binary.BigEndian.putChar(ret.Info[4*k+3:], v.AccessFlags)
+			binary.BigEndian.putChar(ret.Info[4*k+1:], c.InsertUtf8Const(v.name))
+			binary.BigEndian.putChar(ret.Info[4*k+3:], v.accessFlags)
 		}
 		return ret
 	}
@@ -46,8 +46,8 @@ public class AttributeMethodParameters  {
 
 
 class MethodParameter  {
-	Name        string
-	AccessFlags char
+	name        string
+	accessFlags char
 }
 
 

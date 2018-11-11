@@ -7,13 +7,13 @@ func (this *BuildExpression) mkBuildInBlackHole(
 	e ast.Expression,
 	context Context,
 	state StackMapState) (maxStack char) {
-	call := e.Data.(ast.ExpressionFunctionCall)
+	call := e.data.(ast.ExpressionFunctionCall)
 	for _, v := range call.Args {
 		stack := this.build(class, code, v, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
-		if 1 == jvmSlotSize(v.Value) {
+		if 1 == jvmSlotSize(v.value) {
 			code.Codes[code.CodeLength] = cg.OP_pop
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_pop2

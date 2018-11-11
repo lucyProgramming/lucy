@@ -123,11 +123,11 @@ class Parser {
 				isPublic := isPublic()
 				e := new ast.Expression()
 				e.Type = ast.ExpressionTypeVar
-				e.Data = vs
-				e.Pos = pos
-				e.IsPublic = isPublic
-				e.IsGlobal = true
-				e.Op = "var"
+				e.data = vs
+				e.pos = pos
+				e.isPublic = isPublic
+				e.isGlobal = true
+				e.op = "var"
 				this.tops.append( new ast.TopNode(e))
 				resetProperty()
 			case lex.TokenEnum:
@@ -136,10 +136,10 @@ class Parser {
 					resetProperty()
 					continue
 				}
-				e.Comment = comment.Comment
+				e.comment = comment.comment
 				isPublic := isPublic()
 				if isPublic {
-					e.AccessFlags |= cg.AccClassPublic
+					e.accessFlags |= cg.AccClassPublic
 				}
 				if e != null {
 					this.tops.append( new ast.TopNode(e))
@@ -151,10 +151,10 @@ class Parser {
 					this.Next(lfNotToken)
 					continue
 				}
-				f.Comment = comment.Comment
+				f.comment = comment.comment
 				isPublic := isPublic()
 				if isPublic {
-					f.AccessFlags |= cg.AccMethodPublic
+					f.accessFlags |= cg.AccMethodPublic
 				}
 				this.tops.append( new ast.TopNode(f))
 				resetProperty()
@@ -176,18 +176,18 @@ class Parser {
 					resetProperty()
 					continue
 				}
-				c.Comment = comment.Comment
+				c.comment = comment.comment
 				this.tops.append( new ast.TopNode( c) )
 				isPublic := isPublic()
 				if isPublic {
-					c.AccessFlags |= cg.AccClassPublic
+					c.accessFlags |= cg.AccClassPublic
 				}
 				if isAbstract {
-					c.AccessFlags |= cg.AccClassAbstract
+					c.accessFlags |= cg.AccClassAbstract
 				}
 				if isFinal {
-					c.AccessFlags |= cg.AccClassFinal
-					c.FinalPos = finalPos
+					c.accessFlags |= cg.AccClassFinal
+					c.finalPos = finalPos
 				}
 				resetProperty()
 			case lex.TokenConst:
@@ -202,7 +202,7 @@ class Parser {
 				isPublic := isPublic()
 				for _, v := range cs {
 					if isPublic {
-						v.AccessFlags |= cg.AccFieldPublic
+						v.accessFlags |= cg.AccFieldPublic
 					}
 					this.tops.append( new ast.TopNode(v))
 				}
@@ -230,8 +230,8 @@ class Parser {
 					if err != null {
 						continue
 					}
-					e.IsPublic = isPublic()
-					e.IsGlobal = true
+					e.isPublic = isPublic()
+					e.isGlobal = true
 					this.tops.append( new ast.TopNode( e))
 				} else {
 					this.errs.append( new error(sprintf("%s token '%s' is not except",
@@ -343,8 +343,8 @@ class Parser {
 		constants = new []ast.Constant(len(names))
 		for k, v := range names {
 			vd := new ast.Constant()
-			vd.Name = v.Name
-			vd.Pos = v.Pos
+			vd.name = v.name
+			vd.pos = v.pos
 			constants[k] = vd
 		}
 		var variableType ast.Type
@@ -376,7 +376,7 @@ class Parser {
 		}
 		for k, _ := range constants {
 			if k < len(es) {
-				constants[k].DefaultValueExpression = es[k]
+				constants[k].defaultValueExpression = es[k]
 			}
 		}
 		return
@@ -392,8 +392,8 @@ class Parser {
 		ret.Variables = new []ast.Variable(len(names))
 		for k, v := range names {
 			vd := new ast.Variable()
-			vd.Name = v.Name
-			vd.Pos = v.Pos
+			vd.name = v.name
+			vd.pos = v.pos
 			ret.Variables[k] = vd
 		}
 		if this.token.Type != lex.TokenAssign {
@@ -555,8 +555,8 @@ class Parser {
 			return null, err
 		}
 		ret := new ast.TypeAlias()
-		ret.Pos = this.mkPos()
-		ret.Name = this.token.stringValue
+		ret.pos = this.mkPos()
+		ret.name = this.token.stringValue
 		this.Next(lfIsToken) // skip identifier
 		if this.token.Type != lex.TokenAssign {
 			err := new error(sprintf("%s expect '=',but '%s'", this.errMsgPrefix(), this.token.Description))
@@ -568,7 +568,7 @@ class Parser {
 		if err != null {
 			return null, err
 		}
-		ret.Comment = comment.Comment
+		ret.comment = comment.comment
 		if this.token.Type == lex.TokenComment {
 			this.Next(lfIsToken)
 		}
@@ -592,7 +592,7 @@ class Parser {
 			}
 			v := new ast.Variable()
 			v.Type = t
-			v.Pos = this.mkPos()
+			v.pos = this.mkPos()
 			return []ast.Variable{v}, null
 		}
 		names, err := this.parseNameList()
@@ -611,10 +611,10 @@ class Parser {
 			for k, v := range names {
 				vd := new ast.Variable()
 				vs[k] = vd
-				vd.Name = v.Name
-				vd.Pos = v.Pos
+				vd.name = v.name
+				vd.pos = v.pos
 				vd.Type = t.Clone()
-				vd.Type.Pos = v.Pos // override pos
+				vd.Type.pos = v.pos // override pos
 			}
 			return vs, null
 		} else {
@@ -627,12 +627,12 @@ class Parser {
 			for k, v := range names {
 				vd := new ast.Variable()
 				vs[k] = vd
-				vd.Pos = v.Pos
+				vd.pos = v.pos
 				vd.Type = new ast.Type()
 				vd.Type.Type = ast.VariableTypeName
-				vd.Type.Pos = v.Pos
-				vd.Type.Name = v.Name
-				vd.Type.Pos = v.Pos // override pos
+				vd.Type.pos = v.pos
+				vd.Type.name = v.name
+				vd.Type.pos = v.pos // override pos
 			}
 			return vs, null
 		}
@@ -652,8 +652,8 @@ class Parser {
 			}
 			for _, v := range ns {
 				vd := new ast.Variable()
-				vd.Name = v.Name
-				vd.Pos = v.Pos
+				vd.name = v.name
+				vd.pos = v.pos
 				vd.Type = t.Clone()
 				vs.append(vd)
 			}
@@ -687,7 +687,7 @@ class Parser {
 				continue
 			}
 			i := new ast.Import()
-			i.Pos = this.mkPos()
+			i.pos = this.mkPos()
 			i.Import = this.token.stringValue
 			imports.append(i)
 			this.Next(lfIsToken) // skip name
@@ -703,7 +703,7 @@ class Parser {
 					this.Next(lfNotToken)
 					continue
 				} else {
-					i.Alias = this.token.stringValue
+					i.alias = this.token.stringValue
 					this.Next(lfIsToken) // skip identifier
 				}
 			}

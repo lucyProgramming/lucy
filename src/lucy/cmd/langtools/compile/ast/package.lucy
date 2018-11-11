@@ -4,10 +4,10 @@ import "lucy/cmd/langtools/compile/common"
 
 
 public class Package {
-	public Name                         string
+	public name                         string
 	public LoadedPackages               map { string -> Package }
 	loadedClasses                map { string -> Class }
-	public Block                        Block // package always have a default block
+	public block                        Block // package always have a default block
 	files                        map { string -> SourceFile}
 	public InitFunctions                []Function
 	public NErrors2Stop                 int // number of errors should stop compile
@@ -18,32 +18,32 @@ public class Package {
 	statementLevelClass          []Class
 
 	fn isSame(compare Package) -> (is bool) {
-		return this.Name == compare.Name
+		return this.name == compare.name
 	}
 
 	fn markBuildIn() {
-		for _, v := range this.Block.Variables {
-			v.IsBuildIn = true
+		for _, v := range this.block.Variables {
+			v.isBuildIn = true
 		}
-		for _, v := range this.Block.Constants {
-			v.IsBuildIn = true
+		for _, v := range this.block.constants {
+			v.isBuildIn = true
 		}
-		for _, v := range this.Block.Enums {
-			v.IsBuildIn = true
+		for _, v := range this.block.Enums {
+			v.isBuildIn = true
 		}
-		for _, v := range this.Block.Classes {
-			v.IsBuildIn = true
+		for _, v := range this.block.Classes {
+			v.isBuildIn = true
 		}
-		for _, v := range this.Block.Functions {
-			v.IsBuildIn = true
+		for _, v := range this.block.Functions {
+			v.isBuildIn = true
 			v.LoadedFromCorePackage = true
 		}
-		for _, v := range this.Block.TypeAliases {
-			v.IsBuildIn = true
+		for _, v := range this.block.TypeAliases {
+			v.isBuildIn = true
 		}
 	}
 	fn loadCorePackage() -> (err error) {
-		if this.Name == common.CorePackage {
+		if this.name == common.CorePackage {
 			return null
 		}
 		pp, err := this.load(common.CorePackage)
@@ -52,7 +52,7 @@ public class Package {
 		}
 		lucyBuildInPackage = pp.(Package)
 		lucyBuildInPackage.markBuildIn()
-		this.Block.Outer = lucyBuildInPackage.Block
+		this.block.outer = lucyBuildInPackage.block
 		return null
 	}
 
@@ -70,14 +70,14 @@ public class Package {
 	fn mkInitFunctions(bs []Block) {
 		this.InitFunctions = new []Function(len(bs))
 		for k, b := range bs {
-			b.IsFunctionBlock = true
+			b.isFunctionBlock = true
 			f := new Function()
 			b.Fn = f
-			f.Pos = b.Pos
-			f.Block = b
+			f.pos = b.pos
+			f.block = b
 			this.InitFunctions[k] = f
 			f.isPackageInitBlockFunction = true
-			f.Used = true
+			f.used = true
 		}
 	}
 
@@ -90,48 +90,48 @@ public class Package {
 			this.NErrors2Stop = 10
 		}
 		this.errors = []error{}
-		this.errors.appendAll(this.Block.checkConstants())
-		for _, v := range this.Block.Enums {
-			v.Name = this.Name + "/" + v.Name
+		this.errors.appendAll(this.block.checkConstants())
+		for _, v := range this.block.Enums {
+			v.name = this.name + "/" + v.name
 			this.errors.appendAll(v.check())
 		}
-		for _, v := range this.Block.TypeAliases {
-			err := v.resolve(PackageBeenCompile.Block)
+		for _, v := range this.block.TypeAliases {
+			err := v.resolve(PackageBeenCompile.block)
 			if err != null {
 				this.errors.append(err)
 			}
 		}
-		for _, v := range this.Block.Functions {
-			if v.IsBuildIn {
+		for _, v := range this.block.Functions {
+			if v.isBuildIn {
 				continue
 			}
-			v.Block.inherit(this.Block)
-			v.Block.InheritedAttribute.Function = v
+			v.block.inherit(this.block)
+			v.block.inheritedAttribute.Function = v
 			v.checkParametersAndReturns(this.errors, false, false)
 			if v.IsGlobalMain() {
 				defineMainOK := false
 				if len(v.Type.ParameterList) == 1 {
 					defineMainOK = v.Type.ParameterList[0].Type.Type == VariableTypeArray &&
-						v.Type.ParameterList[0].Type.Array.Type == VariableTypeString
+						v.Type.ParameterList[0].Type.array.Type == VariableTypeString
 				}
 				if defineMainOK == false {
 					this.errors.append(new error(sprintf("%s function '%s' expect declared as 'main(args []string)'",
-							errMsgPrefix(v.Pos), MainFunctionName)))
+							errMsgPrefix(v.pos), MainFunctionName)))
 				}
 			}
 			if this.shouldStop(null) {
 				return this.errors
 			}
 		}
-		for _, v := range this.Block.Classes {
-			v.Name = this.Name + "/" + v.Name
-			this.errors.appendAll(v.Block.checkConstants())
+		for _, v := range this.block.Classes {
+			v.name = this.name + "/" + v.name
+			this.errors.appendAll(v.block.checkConstants())
 			v.mkDefaultConstruction()
-			v.Block.inherit(PackageBeenCompile.Block)
-			v.Block.InheritedAttribute.Class = v
+			v.block.inherit(PackageBeenCompile.block)
+			v.block.inheritedAttribute.Class = v
 		}
 
-		for _, v := range this.Block.Classes {
+		for _, v := range this.block.Classes {
 			err := v.resolveFather()
 			if err != null {
 				this.errors.append(err)
@@ -140,33 +140,33 @@ public class Package {
 			this.errors.appendAll (v.resolveFieldsAndMethodsType())
 		}
 
-		for _, v := range this.Block.Classes {
+		for _, v := range this.block.Classes {
 			es := v.checkPhase1()
 			this.errors.appendAll(es)
 			if this.shouldStop(null) {
 				return this.errors
 			}
 		}
-		for _, v := range this.Block.Functions {
+		for _, v := range this.block.Functions {
 			if v.TemplateFunction != null {
 				continue
 			}
 			this.errors.appendAll( v.checkReturnVarExpression())
 		}
 		for _, v := range this.InitFunctions {
-			this.errors.appendAll( v.check(this.Block))
+			this.errors.appendAll( v.check(this.block))
 			if this.shouldStop(null) {
 				return this.errors
 			}
 		}
-		for _, v := range this.Block.Classes {
+		for _, v := range this.block.Classes {
 			this.errors.appendAll( v.checkPhase2())
 			if this.shouldStop(null) {
 				return this.errors
 			}
 		}
-		for _, v := range this.Block.Functions {
-			if v.IsBuildIn {
+		for _, v := range this.block.Functions {
+			if v.isBuildIn {
 				continue
 			}
 			if v.TemplateFunction != null {
@@ -186,7 +186,7 @@ public class Package {
 					continue
 				}
 				this.errors.append( new error(sprintf("%s trying to access capture function '%s' from outside",
-						meta.pos.ErrMsgPrefix(), f.Name)))
+						meta.pos.ErrMsgPrefix(), f.name)))
 			}
 		}
 		if this.shouldStop(null) {
@@ -219,12 +219,12 @@ public class Package {
 		if pp, ok := t.(Package); ok && pp != null {
 			PackageBeenCompile.LoadedPackages[resource] = pp
 			this.mkClassCache(pp)
-			if pp.Name == common.CorePackage {
+			if pp.name == common.CorePackage {
 				pp.markBuildIn()
 			}
 		}
 		if c, ok := t.(Class); ok && c != null {
-			if c.IsJava == false {
+			if c.isJava == false {
 				return null, new error(sprintf("load lucy class not allow"))
 			}
 			PackageBeenCompile.loadedClasses[resource] = c
@@ -241,9 +241,9 @@ public class Package {
 		}
 		for _, v := range this.files {
 			for _, i := range v.Imports {
-				if i.Used == false {
+				if i.used == false {
 					errs = append(errs, new error(sprintf("%s '%s' imported not used",
-						errMsgPrefix(i.Pos), i.Import)))
+						errMsgPrefix(i.pos), i.Import)))
 				}
 			}
 		}
@@ -251,17 +251,17 @@ public class Package {
 			pp, err := this.load(i.Import)
 			if err != null {
 				errs = append(errs, new error(sprintf("%s %s",
-					errMsgPrefix(i.Pos), err.getMessage())))
+					errMsgPrefix(i.pos), err.getMessage())))
 				continue
 			}
 			if ppp, ok := pp.(Package); ok == false {
 				errs = append(errs, new error(sprintf("%s '%s' not a package",
-					errMsgPrefix(i.Pos), i.Import)))
+					errMsgPrefix(i.pos), i.Import)))
 			} else {
 				if ppp.TriggerPackageInitMethodName == "" {
 					errs.append(new error(sprintf("%s  package named '%s' have no global vars and package "+
 							        "init blocks, no need to trigger package init method",
-							        errMsgPrefix(i.Pos), i.Import)))
+							        errMsgPrefix(i.pos), i.Import)))
 				}
 			}
 		}
@@ -290,8 +290,8 @@ public class Package {
 	}
 
 	fn mkClassCache(loadedPackage Package) {
-		for _, v := range loadedPackage.Block.Classes {
-			this.loadedClasses[v.Name] = v // binary name
+		for _, v := range loadedPackage.block.Classes {
+			this.loadedClasses[v.name] = v // binary name
 		}
 	}
 
@@ -299,10 +299,10 @@ public class Package {
 		if this.files == null {
 			this.files = new map { string -> SourceFile } ()
 		}
-		x := this.files[i.Pos.Filename]
+		x := this.files[i.pos.Filename]
 		if x == null {
 			x = new SourceFile()
-			this.files[i.Pos.Filename] = x
+			this.files[i.pos.Filename] = x
 		}
 		return x.insertImport(i)
 	}	

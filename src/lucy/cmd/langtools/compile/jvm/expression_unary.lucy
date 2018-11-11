@@ -19,9 +19,9 @@ class BuildExpressionUnary{
         state StackMapState) -> (maxStack char) {
 
         if e.Type == ast.ExpressionTypeNegative {
-            ee := e.Data.(ast.Expression)
+            ee := e.data.(ast.Expression)
             maxStack = this.eb.build(c, code, ee, context, state)
-            switch e.Value.Type {
+            switch e.value.Type {
             case ast.VariableTypeByte,ast.VariableTypeShort ,ast.VariableTypeChar ,ast.VariableTypeInt  :
                 code.Codes[code.CodeLength] = cg.OP_ineg
             case ast.VariableTypeFloat:
@@ -35,12 +35,12 @@ class BuildExpressionUnary{
             return
         }
         if e.Type == ast.ExpressionTypeBitwiseNot {
-            ee := e.Data.(ast.Expression)
+            ee := e.data.(ast.Expression)
             maxStack = this.eb.build(c, code, ee, context, state)
-            if t := jvmSlotSize(ee.Value) * 2; t > maxStack {
+            if t := jvmSlotSize(ee.value) * 2; t > maxStack {
                 maxStack = t
             }
-            switch e.Value.Type {
+            switch e.value.Type {
             case ast.VariableTypeByte:
                 code.Codes[code.CodeLength] = cg.OP_bipush
                 code.Codes[code.CodeLength+1] = 255
@@ -60,7 +60,7 @@ class BuildExpressionUnary{
                 }
             case ast.VariableTypeInt:
                 code.Codes[code.CodeLength] = cg.OP_ldc_w
-                ast.TypeInsertIntConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
+                c.InsertIntConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
                 code.Codes[code.CodeLength+3] = cg.OP_ixor
                 code.CodeLength += 4
                 if 2 > maxStack {
@@ -78,7 +78,7 @@ class BuildExpressionUnary{
             return
         }
         if e.Type == ast.ExpressionTypeNot {
-            ee := e.Data.(ast.Expression)
+            ee := e.data.(ast.Expression)
             maxStack = this.eb.build(c, code, ee, context, state)
             exit := new cg.Exit(cg.OP_ifeq, code)
             code.Codes[code.CodeLength] = cg.OP_iconst_0
@@ -88,7 +88,7 @@ class BuildExpressionUnary{
             writeExits([]cg.Exit{exit}, code.CodeLength)
             code.Codes[code.CodeLength] = cg.OP_iconst_1
             code.CodeLength++
-            state.pushStack(c, ee.Value)
+            state.pushStack(c, ee.value)
             defer state.popStack(1)
             writeExits([]cg.Exit{exit2}, code.CodeLength)
             context.MakeStackMap(code, state, code.CodeLength)

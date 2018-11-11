@@ -1,7 +1,7 @@
 
 import "java/lang/Object"
 import "java/lang/Class"
-import "java/lang/reflect/Array"
+import "java/lang/reflect/array"
 import "java/util/AbstractMap"
 
 
@@ -120,10 +120,10 @@ public class Encoder {
 		if this.indent != "" {
 			bs.append('\n')
 		}
-		length := Array.getLength(this.x)
+		length := array.getLength(this.x)
 		for i := 0; i < length; i ++ {
 			bs.appendAll([]byte(this.indents))
-			bs2  :=  new Encoder( Array.get(this.x  , i) , this.indents + this.indent ,  this.indent  ) . encode()
+			bs2  :=  new Encoder( array.get(this.x  , i) , this.indents + this.indent ,  this.indent  ) . encode()
 			bs.appendAll([]byte(this.indents + this.indent) )
 			bs.appendAll(bs2)
 			if i != length -1 {

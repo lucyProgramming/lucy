@@ -2,23 +2,23 @@ import "lucy/cmd/langtools/compile/common"
 
 
 public class Import {
-	public Alias  string
+	public alias  string
 	public Import string // full name
-	public Pos    Pos
-	public Used   bool
+	public pos    Pos
+	public used   bool
 	/*
 		import "github.com/lucy" should access by lucy.doSomething()
 		import "github.com/std" as std2 should access by std2.doSomething()
 	*/
 	fn MkAccessName() -> (err error) {
-		if this.Alias != "" {
+		if this.alias != "" {
 			return null
 		}
 		if false == PackageNameIsValid(this.Import) {
 			return new error(sprintf("%s '%s' is not a valid name",
-				this.Pos.ErrMsgPrefix(), this.Import))
+				this.pos.ErrMsgPrefix(), this.Import))
 		}
-		this.Alias = common.getBaseName(this.Import)
+		this.alias = common.getBaseName(this.Import)
 		return null
 	}
 }
@@ -39,14 +39,14 @@ class SourceFile {
 		}
 		if this.Imports.keyExist(i.Import){
 			return new error(sprintf("%s '%s' reimported",
-				i.Pos.ErrMsgPrefix(), i.Import))
+				i.pos.ErrMsgPrefix(), i.Import))
 		}
-		if this.ImportsByResources.keyExist(i.Alias) {
+		if this.ImportsByResources.keyExist(i.alias) {
 			return new error(sprintf("%s '%s' reimported",
-				i.Pos.ErrMsgPrefix(), i.Alias))
+				i.pos.ErrMsgPrefix(), i.alias))
 		}
 		this.Imports[i.Import] = i
-		this.Imports[i.Alias] = i
+		this.Imports[i.alias] = i
 		return null
 	}
 }

@@ -6,37 +6,37 @@ public class FunctionType {
 	public ReturnList       []Variable
 	public VArgs            Variable
 
-	fn reDefineParameterOrReturnVar(v Variable) -> (err error){
+	fn reDefineParameterOrReturnVar(reDefine Variable) -> (err error){
 		for _,v := range this.ParameterList{
-			if v.Name == v.Name {
+			if v.name == reDefine.name {
 				return new error(sprintf("%s reDefine parameter '%s'" , 
-					v.Pos.ErrMsgPrefix() . v.Name()))
+					v.pos.ErrMsgPrefix(), v.name))
 			}
 		}
 		if this.VoidReturn() == false {
 			for _,v := range this.ReturnList{
-				if v.Name == v.Name {
+				if v.name == reDefine.name {
 					return new error(sprintf("%s reDefine return variable '%s'" , 
-						v.Pos.ErrMsgPrefix() . v.Name()))
+						v.pos.ErrMsgPrefix(), v.name))
 				}
 			}
 		}
-
 	}
+	
 
 	public fn CheckTemplateNameDuplication() -> (errs []error) {
 		errs = []error{}
 		m := new map {string -> Pos}()
 		for _, v := range this.TemplateNames {
-			if p := m[v.Name]; p != null {
+			if p := m[v.name]; p != null {
 				errMsg :=
 					sprintf("%s duplicated name '%s' , first declaraed at:\n",
-						v.Pos.ErrMsgPrefix(), v.Name)
+						v.pos.ErrMsgPrefix(), v.name)
 				errMsg += sprintf("\t%s\n", p.ErrMsgPrefix())
 				errs.append( new error(errMsg))
 				continue
 			}
-			m[v.Name] = v.Pos
+			m[v.name] = v.pos
 		}
 		this.TemplateNamesMap = m
 		return errs
@@ -63,15 +63,15 @@ public class FunctionType {
 		}
 		return
 	}
-	fn TypeString() -> (s string) {
+	fn typeString() -> (s string) {
 		s = "("
 		for k, v := range this.ParameterList {
-			if v.Name != "" {
-				s += v.Name + " "
+			if v.name != "" {
+				s += v.name + " "
 			}
-			s += v.Type.TypeString()
-			if v.DefaultValueExpression != null {
-				s += " = " + v.DefaultValueExpression.Op
+			s += v.Type.typeString()
+			if v.defaultValueExpression != null {
+				s += " = " + v.defaultValueExpression.op
 			}
 			if k != len(this.ParameterList)-1 {
 				s += ","
@@ -81,19 +81,19 @@ public class FunctionType {
 			if len(this.ParameterList) > 0 {
 				s += ","
 			}
-			if this.VArgs.Name != "" {
-				s += this.VArgs.Name + " "
+			if this.VArgs.name != "" {
+				s += this.VArgs.name + " "
 			}
-			s += this.VArgs.Type.TypeString()
+			s += this.VArgs.Type.typeString()
 		}
 		s += ")"
 		if this.VoidReturn() == false {
 			s += "->( "
 			for k, v := range this.ReturnList {
-				if v.Name != "" {
-					s += v.Name + " "
+				if v.name != "" {
+					s += v.name + " "
 				}
-				s += v.Type.TypeString()
+				s += v.Type.typeString()
 				if k != len(this.ReturnList)-1 {
 					s += ","
 				}
@@ -108,13 +108,13 @@ public class FunctionType {
 			return null
 		}
 		for _, v := range this.ParameterList {
-			if name == v.Name {
+			if name == v.name {
 				return v
 			}
 		}
 		if this.VoidReturn() == false {
 			for _, v := range this.ReturnList {
-				if name == v.Name {
+				if name == v.name {
 					return v
 				}
 			}
@@ -127,7 +127,7 @@ public class FunctionType {
 			return false
 		}
 		for k, v := range this.ParameterList {
-			if false == v.Type.Equal(compare.ParameterList[k].Type) {
+			if false == v.Type.equal(compare.ParameterList[k].Type) {
 				return false
 			}
 		}
@@ -136,7 +136,7 @@ public class FunctionType {
 		}
 
 		if this.VArgs != null {
-			if this.VArgs.Type.Equal(compare.VArgs.Type) == false {
+			if this.VArgs.Type.equal(compare.VArgs.Type) == false {
 				return false
 			}
 		}
@@ -146,7 +146,7 @@ public class FunctionType {
 
 		if this.VoidReturn() == false {
 			for k, v := range this.ReturnList {
-				if false == v.Type.Equal(compare.ReturnList[k].Type) {
+				if false == v.Type.equal(compare.ReturnList[k].Type) {
 					return false
 				}
 			}
@@ -159,10 +159,10 @@ public class FunctionType {
 			if v == null {
 				continue
 			}
-			if v.Name != "" {
-				have += v.Name + " "
+			if v.name != "" {
+				have += v.name + " "
 			}
-			have += v.TypeString()
+			have += v.typeString()
 			if k != len(ts)-1 {
 				have += ","
 			}
@@ -179,13 +179,13 @@ public class FunctionType {
 		if this.ReturnList == null || len(this.ReturnList) == 0 {
 			t := new Type()
 			t.Type = VariableTypeVoid // means no return ;
-			t.Pos = pos
+			t.pos = pos
 			return []Type{t}
 		}
 		ret := new []Type(len(this.ReturnList))
 		for k, v := range this.ReturnList {
 			ret[k] = v.Type.Clone()
-			ret[k].Pos = pos
+			ret[k].pos = pos
 		}
 		return ret
 	}
@@ -235,27 +235,27 @@ public class FunctionType {
 				if t == null { // some error before
 					return
 				}
-				if t.IsVariableArgs {
+				if t.isVariableArgs {
 					if len(callArgsTypes[len(this.ParameterList):]) > 1 {
 						errMsg := sprintf("%s too many argument to call\n",
-							errMsgPrefix(t.Pos))
+							errMsgPrefix(t.pos))
 						errMsg += haveAndWant
 						err = new error(sprintf(errMsg))
 						return
 					}
 					if false == v.Type.assignAble(errs, t) {
 						err = new error(sprintf("%s cannot use '%s' as '%s'",
-							errMsgPrefix(t.Pos),
-							t.TypeString(), v.Type.TypeString()))
+							errMsgPrefix(t.pos),
+							t.typeString(), v.Type.typeString()))
 						return
 					}
 					vArgs.PackArray2VArgs = true
 					continue
 				}
-				if false == v.Type.Array.assignAble(errs, t) {
+				if false == v.Type.array.assignAble(errs, t) {
 					err = new error(sprintf("%s cannot use '%s' as '%s'",
-						errMsgPrefix(t.Pos),
-						t.TypeString(), v.Type.TypeString()))
+						errMsgPrefix(t.pos),
+						t.typeString(), v.Type.typeString()))
 					return
 				}
 			}
@@ -268,7 +268,7 @@ public class FunctionType {
 		if len(callArgsTypes) < len(this.ParameterList) {
 			if f != null && f.HaveDefaultValue && len(callArgsTypes) >= f.DefaultValueStartAt {
 				for i := len(callArgsTypes); i < len(f.Type.ParameterList); i++ {
-					args.append(f.Type.ParameterList[i].DefaultValueExpression)
+					args.append(f.Type.ParameterList[i].defaultValueExpression)
 				}
 			} else { // no default value
 				errMsg := sprintf("%s too few paramaters to call\n", errMsgPrefix(from))
@@ -285,8 +285,8 @@ public class FunctionType {
 				}
 				//TODO :: convert or not ???
 				errMsg := sprintf("%s cannot use '%s' as '%s'",
-					errMsgPrefix(callArgsTypes[k].Pos),
-					callArgsTypes[k].TypeString(), v.Type.TypeString())
+					errMsgPrefix(callArgsTypes[k].pos),
+					callArgsTypes[k].typeString(), v.Type.typeString())
 				err = new error(sprintf(errMsg))
 				return
 			}
@@ -298,8 +298,8 @@ public class FunctionType {
 	
 	fn wantArgs() -> (want string = "(") {
 		for k, v := range this.ParameterList {
-			want += v.Name + " "
-			want += v.Type.TypeString()
+			want += v.name + " "
+			want += v.Type.typeString()
 			if k != len(this.ParameterList)-1 {
 				want += ","
 			}
@@ -308,8 +308,8 @@ public class FunctionType {
 			if len(this.ParameterList) > 0 {
 				want += ","
 			}
-			want += this.VArgs.Name + " "
-			want += this.VArgs.Type.TypeString()
+			want += this.VArgs.name + " "
+			want += this.VArgs.Type.typeString()
 		}
 		want += ")"
 		return want

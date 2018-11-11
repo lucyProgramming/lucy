@@ -31,24 +31,24 @@ class ConvertTops2Package {
 				continue
 			}
 			if t := v.Node.(Function) ; t != null {
-				t.IsGlobal = true
-				err := PackageBeenCompile.Block.Insert(t.Name, t.Pos, t)
+				t.isGlobal = true
+				err := PackageBeenCompile.block.Insert(t.name, t.pos, t)
 				if err != null {
 					errs.append(err)
 				}
 				continue
 			}
 			if t := v.Node.(Enum) ; t != null {
-				t.IsGlobal = true
-				err := PackageBeenCompile.Block.Insert(t.Name, t.Pos,t)
+				t.isGlobal = true
+				err := PackageBeenCompile.block.Insert(t.name, t.pos,t)
 				if err != null {
 					errs.append(err)
 				}
 				continue
 			}
 			if t := v.Node.(Class) ; t != null {
-				t.IsGlobal = true
-				err := PackageBeenCompile.Block.Insert(t.Name, t.Pos, t)
+				t.isGlobal = true
+				err := PackageBeenCompile.block.Insert(t.name, t.pos, t)
 				if err != null {
 					errs.append(err)
 				}
@@ -56,22 +56,22 @@ class ConvertTops2Package {
 			}
 
 			if t := v.Node.(TypeAlias) ; t != null {
-				err := PackageBeenCompile.Block.Insert(t.Name, t.Pos, t)
+				err := PackageBeenCompile.block.Insert(t.name, t.pos, t)
 				if err != null {
 					errs.append(err)
 				}
 				continue
 			}
 			if t := v.Node.(Constant) ; t != null {
-				t.IsGlobal = true
-				err := PackageBeenCompile.Block.Insert(t.Name, t.Pos, t)
+				t.isGlobal = true
+				err := PackageBeenCompile.block.Insert(t.name, t.pos, t)
 				if err != null {
 					errs.append(err)
 				}
 				continue
 			}
 			if t := v.Node.(Import) ; t != null {
-				if t.Alias != UnderScore {
+				if t.alias != UnderScore {
 					err := PackageBeenCompile.insertImport(t)
 					if err != null {
 						errs.append(err)
@@ -89,7 +89,7 @@ class ConvertTops2Package {
 					expressions.append(t)
 				} else {
 					errs.append(new error(sprintf("%s cannot have '%s' in top",
-						t.Pos.ErrMsgPrefix(), t.Op)))
+						t.pos.ErrMsgPrefix(), t.op)))
 				}	
 			}
 		}
@@ -100,11 +100,11 @@ class ConvertTops2Package {
 			    s[k] = new  Statement()
 				s[k].Type = StatementTypeExpression
 				s[k].Expression = v
-				s[k].Pos = v.Pos
+				s[k].pos = v.pos
 			}
 			b := new Block()
-			b.Pos = expressions[0].Pos
-			b.Statements = s
+			b.pos = expressions[0].pos
+			b.statements = s
 			t := []Block{b}
 			t.appendAll(bs)
 			bs = t

@@ -18,7 +18,7 @@ class BuildExpressionAssert {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        assertion := e.Data.(ast.ExpressionTypeAssert)
+        assertion := e.data.(ast.ExpressionTypeAssert)
         if assertion.MultiValueContext {
             maxStack = this.build(c, code, assertion.Expression, context, state)
             code.Codes[code.CodeLength] = cg.OP_dup
@@ -29,12 +29,12 @@ class BuildExpressionAssert {
             code.Codes[code.CodeLength] = cg.OP_dup
             code.CodeLength++
             {
-                state.pushStack(c, assertion.Expression.Value)
+                state.pushStack(c, assertion.Expression.value)
                 state.pushStack(c, typeInt)
                 context.MakeStackMap(code, state, code.CodeLength+7)
                 state.popStack(2)
                 state.pushStack(c, typeInt )
-                state.pushStack(c, assertion.Expression.Value)
+                state.pushStack(c, assertion.Expression.value)
                 context.MakeStackMap(code, state, code.CodeLength+11)
                 state.popStack(2)
             }
@@ -96,7 +96,7 @@ class BuildExpressionAssert {
             code.Codes[code.CodeLength+1] = cg.OP_aconst_null
             code.CodeLength += 2
             writeExits([]cg.Exit{exit}, code.CodeLength)
-            state.pushStack(c, assertion.Expression.Value)
+            state.pushStack(c, assertion.Expression.value)
             defer state.popStack(1)
             context.MakeStackMap(code, state, code.CodeLength)
             code.Codes[code.CodeLength] = cg.OP_checkcast // convince the jvm

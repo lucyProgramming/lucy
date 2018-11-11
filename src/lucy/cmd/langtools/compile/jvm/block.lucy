@@ -25,7 +25,7 @@ class BuildBlock {
 		context Context,
 		state StackMapState) {
 		notToHere := false
-		for _, s := range b.Statements {
+		for _, s := range b.statements {
 			if notToHere == true && s.Type == ast.StatementTypeLabel {
 				notToHere = len(s.StatementLabel.Exits) == 0
 				//continue compile block from this label statement
@@ -58,39 +58,39 @@ class BuildBlock {
 			}
 			//block deadEnd
 			if s.Type == ast.StatementTypeBlock {
-				notToHere = s.Block.NotExecuteToLastStatement
+				notToHere = s.block.notExecuteToLastStatement
 				continue
 			}
 			if s.Type == ast.StatementTypeIf && s.StatementIf.Else != null {
-				t := s.StatementIf.Block.NotExecuteToLastStatement
+				t := s.StatementIf.Block.notExecuteToLastStatement
 				for _, v := range s.StatementIf.ElseIfList {
-					t = t && v.Block.NotExecuteToLastStatement
+					t = t && v.block.notExecuteToLastStatement
 				}
-				t = t && s.StatementIf.Else.NotExecuteToLastStatement
+				t = t && s.StatementIf.Else.notExecuteToLastStatement
 				notToHere = t
 				continue
 			}
 			if s.Type == ast.StatementTypeSwitch && s.StatementSwitch.Default != null {
-				t := s.StatementSwitch.Default.NotExecuteToLastStatement
+				t := s.StatementSwitch.Default.notExecuteToLastStatement
 				for _, v := range s.StatementSwitch.StatementSwitchCases {
-					if v.Block != null {
-						t = t && v.Block.NotExecuteToLastStatement
+					if v.block != null {
+						t = t && v.block.notExecuteToLastStatement
 					} else {
 						//this will fallthrough
 						t = false
 						break
 					}
 				}
-				t = t && s.StatementSwitch.Default.NotExecuteToLastStatement
+				t = t && s.StatementSwitch.Default.notExecuteToLastStatement
 				notToHere = t
 				continue
 			}
 		}
-		b.NotExecuteToLastStatement = notToHere
-		if b.IsFunctionBlock == false &&
-			len(b.Defers) > 0 &&
-			b.NotExecuteToLastStatement == false {
-			this.buildDefers(c, code, context, b.Defers, state)
+		b.notExecuteToLastStatement = notToHere
+		if b.isFunctionBlock == false &&
+			len(b.defers) > 0 &&
+			b.notExecuteToLastStatement == false {
+			this.buildDefers(c, code, context, b.defers, state)
 		}
 		return
 	}
@@ -113,7 +113,7 @@ class BuildBlock {
 		s ast.Statement,
 		context Context,
 		state StackMapState) -> (maxStack char) {
-		//fmt.Println(s.Pos)
+		//fmt.Println(s.pos)
 		switch s.Type {
 		case ast.StatementTypeExpression:
 			maxStack = this.BuildExpression.build(c, code, s.Expression, context, state)
@@ -126,10 +126,10 @@ class BuildBlock {
 			}
 		case ast.StatementTypeBlock:
 			blockState := new StackMapState(state)
-			s.Block.Exits = []cg.Exit{}
-			this.buildBlock(c, code, s.Block, context, blockState)
+			s.block.Exits = []cg.Exit{}
+			this.buildBlock(c, code, s.block, context, blockState)
 			state.addTop(blockState)
-			if len(s.Block.Exits) > 0 {
+			if len(s.block.Exits) > 0 {
 				writeExits(s.StatementIf.Exits, code.CodeLength)
 				context.MakeStackMap(code, state, code.CodeLength)
 			}
@@ -139,10 +139,10 @@ class BuildBlock {
 			writeExits(s.StatementFor.Exits, code.CodeLength)
 			context.MakeStackMap(code, state, code.CodeLength)
 		case ast.StatementTypeContinue:
-			this.buildDefers(c, code, context, s.StatementContinue.Defers, state)
+			this.buildDefers(c, code, context, s.StatementContinue.defers, state)
 			jumpTo(code, s.StatementContinue.StatementFor.ContinueCodeOffset)
 		case ast.StatementTypeBreak:
-			this.buildDefers(c, code, context, s.StatementBreak.Defers, state)
+			this.buildDefers(c, code, context, s.StatementBreak.defers, state)
 			exit := new cg.Exit(cg.OP_goto, code)
 			if s.StatementBreak.StatementFor != null {
 				s.StatementBreak.StatementFor.Exits = append(s.StatementBreak.StatementFor.Exits, exit)
@@ -166,7 +166,7 @@ class BuildBlock {
 				context.MakeStackMap(code, state, code.CodeLength)
 			}
 		case ast.StatementTypeGoTo:
-			this.buildDefers(c, code, context, s.StatementGoTo.Defers, state)
+			this.buildDefers(c, code, context, s.StatementGoTo.defers, state)
 			if s.StatementGoTo.StatementLabel.CodeOffsetGenerated {
 				jumpTo(code, s.StatementGoTo.StatementLabel.CodeOffset)
 			} else {
@@ -184,18 +184,18 @@ class BuildBlock {
 			s.Defer.StartPc = code.CodeLength
 			s.Defer.StackMapState = (new StackMapState(state))
 		case ast.StatementTypeClass:
-			oldName := s.Class.Name
+			oldName := s.Class.name
 			var name string
-			if block.InheritedAttribute.ClassAndFunctionNames == "" {
-				name = s.Class.Name
+			if block.inheritedAttribute.classAndFunctionNames == "" {
+				name = s.Class.name
 			} else {
-				name = block.InheritedAttribute.ClassAndFunctionNames + "$" + s.Class.Name
+				name = block.inheritedAttribute.classAndFunctionNames + "$" + s.Class.name
 			}
-			s.Class.Name = this.newClassName(name)
+			s.Class.name = this.newClassName(name)
 			innerClass := new cg.InnerClass()
-			innerClassInnerClass.InnerClass = s.Class.Name
+			innerClassInnerClass.InnerClass = s.Class.name
 			innerClassInnerClass.OuterClass = ast.TypeName
-			innerClassInnerClass.Name = oldName
+			innerClassInnerClass.name = oldName
 			ast.TypeClass.AttributeInnerClasses.Classes =
 				append(ast.TypeClass.AttributeInnerClasses.Classes, innerClass)
 			c := this.buildClass(s.Class)
@@ -230,7 +230,7 @@ class BuildBlock {
 			if ds[index].ExceptionClass == null {
 				e.CatchType = ast.TypeClass.InsertClassConst(ast.DefaultExceptionClass)
 			} else {
-				e.CatchType = ast.TypeClass.InsertClassConst(ds[index].ExceptionClass.Name) // custom c
+				e.CatchType = ast.TypeClass.InsertClassConst(ds[index].ExceptionClass.name) // custom c
 			}
 			code.Exceptions = append(code.Exceptions, e)
 			//expect exception on stack
@@ -297,14 +297,14 @@ class BuildBlock {
 		context Context,
 		state StackMapState,
 		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
-		bin := condition.Data.(ast.ExpressionBinary)
+		bin := condition.data.(ast.ExpressionBinary)
 		stack := this.build(c, code, bin.Left, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
-		state.pushStack(c, bin.Left.Value)
+		state.pushStack(c, bin.Left.value)
 		stack = this.build(c, code, bin.Right, context, state)
-		if t := 1 + stack; t > maxStack {
+		if t := char(1) + stack; t > maxStack {
 			maxStack = t
 		}
 		state.popStack(1)
@@ -331,7 +331,7 @@ class BuildBlock {
 		state StackMapState,
 		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
 		var noNullExpression ast.Expression
-		bin := condition.Data.(ast.ExpressionBinary)
+		bin := condition.data.(ast.ExpressionBinary)
 		if bin.Left.Type != ast.ExpressionTypeNull {
 			noNullExpression = bin.Left
 		} else {
@@ -356,14 +356,14 @@ class BuildBlock {
 		context Context,
 		state StackMapState,
 		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
-		bin := condition.Data.(ast.ExpressionBinary)
+		bin := condition.data.(ast.ExpressionBinary)
 		stack := this.build(c, code, bin.Left, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
-		state.pushStack(c, bin.Left.Value)
+		state.pushStack(c, bin.Left.value)
 		stack = this.build(c, code, bin.Right, context, state)
-		if t := 1 + stack; t > maxStack {
+		if t := char(1) + stack; t > maxStack {
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -397,14 +397,14 @@ class BuildBlock {
 		context Context,
 		state StackMapState,
 		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
-		bin := condition.Data.(ast.ExpressionBinary)
+		bin := condition.data.(ast.ExpressionBinary)
 		stack := this.build(c, code, bin.Left, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
-		state.pushStack(c, bin.Left.Value)
+		state.pushStack(c, bin.Left.value)
 		stack = this.build(c, code, bin.Right, context, state)
-		if t := 1 + stack; t > maxStack {
+		if t := char(1) + stack; t > maxStack {
 			maxStack = t
 		}
 		switch condition.Type {

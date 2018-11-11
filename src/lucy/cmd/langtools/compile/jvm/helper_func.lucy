@@ -61,7 +61,7 @@ fn loadInt32(c cg.ClassHighLevel, code cg.AttributeCode, value int) {
 			code.CodeLength += 3
 		} else {
 			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			ast.TypeInsertIntConst(value, code.Codes[code.CodeLength+1:code.CodeLength+3])
+			c.InsertIntConst(value, code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 		}
 	}
@@ -83,15 +83,15 @@ fn jvmSlotSize(typ ast.Type) -> (size char) {
 	}
 }
 
-fn nameTemplateFunction(function ast.Function) -> (s string = function.Name) {
+fn nameTemplateFunction(function ast.Function) -> (s string = function.name) {
 	for _, v := range function.Type.ParameterList {
-		if v.Type.IsPrimitive() {
-			s += sprintf("$%s", v.Type.TypeString())
+		if v.Type.isPrimitive() {
+			s += sprintf("$%s", v.Type.typeString())
 			continue
 		}
 		switch v.Type.Type {
 		case ast.VariableTypeObject:
-			s += sprintf("$%s", strings.Replace(v.Type.Class.Name, "/", "$", -1))
+			s += sprintf("$%s", strings.Replace(v.Type.Class.name, "/", "$", -1))
 		case ast.VariableTypeMap:
 			s += "_map"
 		case ast.VariableTypeArray:
@@ -99,7 +99,7 @@ fn nameTemplateFunction(function ast.Function) -> (s string = function.Name) {
 		case ast.VariableTypeJavaArray:
 			s += "_java_array"
 		case ast.VariableTypeEnum:
-			s += sprintf("$%s", strings.Replace(v.Type.Enum.Name, "/", "$", -1))
+			s += sprintf("$%s", strings.Replace(v.Type.Enum.name, "/", "$", -1))
 		}
 	}
 	return s
@@ -109,9 +109,9 @@ fn insertTypeAssertClass(c cg.ClassHighLevel, code cg.AttributeCode, t ast.Type)
 	if t.Type == ast.VariableTypeString {
 		c.InsertClassConst(javaStringClass, code.Codes[code.CodeLength:code.CodeLength+2])
 	} else if t.Type == ast.VariableTypeObject {
-		c.InsertClassConst(t.Class.Name, code.Codes[code.CodeLength:code.CodeLength+2])
+		c.InsertClassConst(t.Class.name, code.Codes[code.CodeLength:code.CodeLength+2])
 	} else if t.Type == ast.VariableTypeArray { // arrays
-		meta := ArrayMetas[t.Array.Type]
+		meta := ArrayMetas[t.array.Type]
 		c.InsertClassConst(meta.className, code.Codes[code.CodeLength:code.CodeLength+2])
 	} else {
 		c.InsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength:code.CodeLength+2])
@@ -169,16 +169,16 @@ fn newArrayBaseOnType(c cg.ClassHighLevel, code cg.AttributeCode, typ ast.Type) 
 		code.CodeLength += 3
 	case ast.VariableTypeObject:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		c.InsertClassConst(typ.Class.Name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		c.InsertClassConst(typ.Class.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeArray:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		meta := ArrayMetas[typ.Array.Type]
+		meta := ArrayMetas[typ.array.Type]
 		c.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	case ast.VariableTypeJavaArray:
 		code.Codes[code.CodeLength] = cg.OP_anewarray
-		c.InsertClassConst(Descriptor.typeDescriptor(typ.Array),
+		c.InsertClassConst(Descriptor.typeDescriptor(typ.array),
 			code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 	}
@@ -213,7 +213,7 @@ fn storeArrayElementOp(typ ast.VariableTypeKind) -> (op byte) {
 */
 fn popCallResult(code cg.AttributeCode, e ast.Expression, ft ast.FunctionType) ->(stackSize char) {
 	stackSize = functionReturnJvmSize(ft)
-	if ft.VoidReturn() == false && e.IsStatementExpression {
+	if ft.VoidReturn() == false && e.isStatementExpression {
 		if len(ft.ReturnList) == 1 {
 			if jvmSlotSize(ft.ReturnList[0].Type) == 1 {
 				code.Codes[code.CodeLength] = cg.OP_pop

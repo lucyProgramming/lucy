@@ -60,9 +60,9 @@ class BuildSwitch {
         }
         //value is on stack
         var notMatch ast.Statement
-        size := jvmSlotSize(s.Condition.Value)
+        size := jvmSlotSize(s.Condition.value)
         currentStack := size
-        state.pushStack(c, s.Condition.Value)
+        state.pushStack(c, s.Condition.value)
         for _, c := range s.StatementSwitchCases {
             if notMatch != null {
                 writeExits([]cg.Exit{notMatch}, code.CodeLength)
@@ -70,7 +70,7 @@ class BuildSwitch {
             }
             matches := []cg.Exit{}
             for _, ee := range c.Matches {
-                if ee.Value.Type == ast.VariableTypeBool {
+                if ee.value.Type == ast.VariableTypeBool {
                     currentStack = size
                     stack := this.BuildExpression.build(c, code, ee, context, state)
                     if t := currentStack + stack; t > maxStack {
@@ -87,13 +87,13 @@ class BuildSwitch {
                     }
                     code.CodeLength++
                     currentStack += size
-                    state.pushStack(c, s.Condition.Value)
+                    state.pushStack(c, s.Condition.value)
                     stack := this.BuildExpression.build(c, code, ee, context, state)
                     if t := currentStack + stack; t > maxStack {
                         maxStack = t
                     }
                     state.popStack(1)
-                    compare(s.Condition.Value)
+                    compare(s.Condition.value)
                     matches = append(matches, new cg.Exit(cg.OP_ifeq, code)) // comsume result on stack
                 }
             }
@@ -115,7 +115,7 @@ class BuildSwitch {
                 this.buildBlock(c, code, c.Block, context, ss)
                 state.addTop(ss)
             }
-            if c.Block == null || c.Block.NotExecuteToLastStatement == false {
+            if c.Block == null || c.Block.notExecuteToLastStatement == false {
                 s.Exits = append(s.Exits,
                     new cg.Exit(cg.OP_goto, code)) // matched,goto switch outside
             }

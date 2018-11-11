@@ -32,10 +32,10 @@ class BuildIf {
         if stack > maxStack {
             maxStack = stack
         }
-        this.buildBlock(c, code, s.Block, context, trueBlockState)
+        this.buildBlock(c, code, s.block, context, trueBlockState)
         ifState.addTop(trueBlockState)
         if s.Else != null || len(s.ElseIfList) > 0 {
-            if s.Block.NotExecuteToLastStatement == false {
+            if s.block.notExecuteToLastStatement == false {
                 s.Exits = append(s.Exits, new cg.Exit(cg.OP_goto, code))
             }
         }
@@ -48,9 +48,9 @@ class BuildIf {
             if stack > maxStack {
                 maxStack = stack
             }
-            this.buildBlock(c, code, v.Block, context, elseIfState)
+            this.buildBlock(c, code, v.block, context, elseIfState)
             if s.Else != null || k != len(s.ElseIfList)-1 {
-                if v.Block.NotExecuteToLastStatement == false {
+                if v.block.notExecuteToLastStatement == false {
                     s.Exits = append(s.Exits, new cg.Exit(cg.OP_goto, code))
                 }
             }

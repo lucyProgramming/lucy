@@ -8,21 +8,21 @@ public class Block {
 	/*
 		should analyse at ast stage
 	*/
-	public NotExecuteToLastStatement bool
-	public Defers                    []StatementDefer
+	public notExecuteToLastStatement bool
+	public defers                    []StatementDefer
 	public Fn                        Function
-	public IsFunctionBlock           bool // function block
-	public IsClassBlock              bool // class block
+	public isFunctionBlock           bool // function block
+	public isClassBlock              bool // class block
 	public Class                     Class
-	public IsForBlock                bool // for top block
-	public IsSwitchBlock             bool // switch statement list block
-	public IsWhenBlock               bool // template swtich statement list block
-	public Pos                       Pos
-	public EndPos                    Pos
-	public Outer                     Block
-	public InheritedAttribute        InheritedAttribute
-	public Statements                []Statement
-	public Constants                 map{string->Constant}
+	public isForBlock                bool // for top block
+	public isSwitchBlock             bool // switch statement list block
+	public isWhenBlock               bool // template swtich statement list block
+	public pos                       Pos
+	public endPos                    Pos
+	public outer                     Block
+	public inheritedAttribute        InheritedAttribute
+	public statements                []Statement
+	public constants                 map{string->Constant}
 	public Functions                 map{string->Function}
 	public Classes                   map{string->Class}
 	public Enums                     map{string->Enum}
@@ -43,8 +43,8 @@ public class Block {
                 return t, true
             }
         }
-        if this.Constants != null {
-            if t := this.Constants[name]; t != null {
+        if this.constants != null {
+            if t := this.constants[name]; t != null {
                 return t, true
             }
         }
@@ -84,14 +84,14 @@ public class Block {
         for {
             if outer.Labels != null {
                 if l := outer.Labels[name]; l != null {
-                    l.Used = true
+                    l.used = true
                     return l
                 }
             }
-            if outer.IsFunctionBlock {
+            if outer.isFunctionBlock {
                 return null
             }
-            outer = outer.Outer
+            outer = outer.outer
         }
         return null
     }
@@ -104,13 +104,13 @@ public class Block {
         for bb != null {
             if bb.Classes != null {
                 if t := bb.Classes[name]; t != null {
-                    t.Used = true
+                    t.used = true
                     return t
                 }
             }
             if bb.Enums != null {
                 if t := bb.Enums[name]; t != null {
-                    t.Used = true
+                    t.used = true
                     return t
                 }
             }
@@ -119,14 +119,14 @@ public class Block {
                     return t
                 }
             }
-            if bb.IsFunctionBlock && bb.Fn != null {
+            if bb.isFunctionBlock && bb.Fn != null {
                 if bb.Fn.parameterTypes != null {
                     if t := bb.Fn.parameterTypes[name]; t != null {
                         return t
                     }
                 }
             }
-            bb = bb.Outer
+            bb = bb.outer
         }
         return null
     }
@@ -141,7 +141,7 @@ public class Block {
     fn searchIdentifier(from Pos, name string, isCaptureVar []bool) -> (x Object,err error) {
         if this.Functions != null {
             if t := this.Functions[name]; t != null {
-                t.Used = true
+                t.used = true
                 return t, null
             }
         }
@@ -150,27 +150,27 @@ public class Block {
                 return t, null
             }
         }
-        if this.Constants != null {
-            if t := this.Constants[name]; t != null {
-                t.Used = true
+        if this.constants != null {
+            if t := this.constants[name]; t != null {
+                t.used = true
                 return t, null
             }
         }
         if this.EnumNames != null {
             if t := this.EnumNames[name]; t != null {
-                t.Enum.Used = true
+                t.Enum.used = true
                 return t, null
             }
         }
         if this.Enums != null {
             if t := this.Enums[name]; t != null {
-                t.Used = true
+                t.used = true
                 return t, null
             }
         }
         if this.Classes != null {
             if t := this.Classes[name]; t != null {
-                t.Used = true
+                t.used = true
                 return t, null
             }
         }
@@ -179,7 +179,7 @@ public class Block {
                 return t, null
             }
         }
-        if this.IsFunctionBlock && this.Fn != null {
+        if this.isFunctionBlock && this.Fn != null {
             if this.Fn.parameterTypes != null {
                 if t := this.Fn.parameterTypes[name]; t != null {
                     return t, null
@@ -187,48 +187,48 @@ public class Block {
             }
         }
         // search closure
-        if this.InheritedAttribute.Function != null {
-            v := this.InheritedAttribute.Function.Closure.Search(name)
+        if this.inheritedAttribute.Function != null {
+            v := this.inheritedAttribute.Function.Closure.Search(name)
             if v != null {
                 return v, null
             }
         }
-        if this.IsFunctionBlock &&
-            len(this.InheritedAttribute.Function.parameterTypes) > 0 {
+        if this.isFunctionBlock &&
+            len(this.inheritedAttribute.Function.parameterTypes) > 0 {
             return searchBuildIns(name), null
         }
-        if this.IsFunctionBlock &&
+        if this.isFunctionBlock &&
             name == ThisPointerName {
             return null, null
         }
-        if this.Outer == null {
+        if this.outer == null {
             return searchBuildIns(name), null
         }
-        t, err := this.Outer.searchIdentifier(from, name, isCaptureVar) // search by outer block
+        t, err := this.outer.searchIdentifier(from, name, isCaptureVar) // search by outer block
         if err != null {
             return t, err
         }
         if t != null { //
             if v,ok := t.(Variable) ; ok {
-                if v.IsGlobal == false { // not a global variable
-                    if this.IsFunctionBlock &&
-                        this.InheritedAttribute.Function.IsGlobal == false {
-                        this.InheritedAttribute.Function.Closure.InsertVar(from, v)
+                if v.isGlobal == false { // not a global variable
+                    if this.isFunctionBlock &&
+                        this.inheritedAttribute.Function.isGlobal == false {
+                        this.inheritedAttribute.Function.Closure.InsertVar(from, v)
                             isCaptureVar[0] = true
                     }
                     //cannot search variable from class body
-                    if this.IsClassBlock {
+                    if this.isClassBlock {
                         return null, new error(sprintf("%s trying to access variable '%s' from class",
                             from.ErrMsgPrefix(), name))
                     }
                 }
             } 
             if f,ok :=  t.(Function) ; ok {
-                if f.IsGlobal == false {
-                    if this.IsClassBlock {
+                if f.isGlobal == false {
+                    if this.isClassBlock {
                         this.Class.closure.InsertFunction(from, f)
                     }
-                    if this.IsFunctionBlock {
+                    if this.isFunctionBlock {
                         this.Fn.Closure.InsertFunction(from, f)
                     }
                 }
@@ -241,32 +241,32 @@ public class Block {
     }
 
     fn inherit(father Block) {
-        if this.Outer != null {
+        if this.outer != null {
             return
         }
         if this == father {
             panic("inherit from self")
         }
 
-        this.Outer = father
-        this.InheritedAttribute.ForBreak = father.InheritedAttribute.ForBreak
-        this.InheritedAttribute.StatementOffset = father.InheritedAttribute.StatementOffset
-        this.InheritedAttribute.IsConstructionMethod = father.InheritedAttribute.IsConstructionMethod
-        this.InheritedAttribute.ForContinue = father.InheritedAttribute.ForContinue
-        this.InheritedAttribute.Function = father.InheritedAttribute.Function
-        this.InheritedAttribute.Class = father.InheritedAttribute.Class
-        this.InheritedAttribute.Defer = father.InheritedAttribute.Defer
-        this.InheritedAttribute.ClassMethod = father.InheritedAttribute.ClassMethod
-        this.InheritedAttribute.ClassAndFunctionNames = father.InheritedAttribute.ClassAndFunctionNames
+        this.outer = father
+        this.inheritedAttribute.forBreak = father.inheritedAttribute.forBreak
+        this.inheritedAttribute.statementOffset = father.inheritedAttribute.statementOffset
+        this.inheritedAttribute.isConstructionMethod = father.inheritedAttribute.isConstructionMethod
+        this.inheritedAttribute.forContinue = father.inheritedAttribute.forContinue
+        this.inheritedAttribute.Function = father.inheritedAttribute.Function
+        this.inheritedAttribute.Class = father.inheritedAttribute.Class
+        this.inheritedAttribute.Defer = father.inheritedAttribute.Defer
+        this.inheritedAttribute.classMethod = father.inheritedAttribute.classMethod
+        this.inheritedAttribute.classAndFunctionNames = father.inheritedAttribute.classAndFunctionNames
 
 
-        if this.IsFunctionBlock || this.IsClassBlock {
-            this.InheritedAttribute.ForBreak = null
-            this.InheritedAttribute.ForContinue = null
-            this.InheritedAttribute.StatementOffset = 0
-            this.InheritedAttribute.IsConstructionMethod = false
-            this.InheritedAttribute.ClassMethod = null
-            this.InheritedAttribute.Defer = null
+        if this.isFunctionBlock || this.isClassBlock {
+            this.inheritedAttribute.forBreak = null
+            this.inheritedAttribute.forContinue = null
+            this.inheritedAttribute.statementOffset = 0
+            this.inheritedAttribute.isConstructionMethod = false
+            this.inheritedAttribute.classMethod = null
+            this.inheritedAttribute.Defer = null
         }
     }
 
@@ -275,67 +275,67 @@ public class Block {
             return null
         }
         es = []error{}
-        for _, v := range this.Constants {
-            if v.Used ||
-                v.IsGlobal {
+        for _, v := range this.constants {
+            if v.used ||
+                v.isGlobal {
                 continue
             }
             es.append(new error(sprintf("%s const '%s' has declared,but not used",
-                v.Pos.ErrMsgPrefix(), v.Name)))
+                v.pos.ErrMsgPrefix(), v.name)))
         }
         for _, v := range this.Enums {
-            if v.Used ||
-                v.IsGlobal {
+            if v.used ||
+                v.isGlobal {
                 continue
             }
             es.append( new error(sprintf("%s enum '%s' has declared,but not used",
-                v.Pos.ErrMsgPrefix(), v.Name)))
+                v.pos.ErrMsgPrefix(), v.name)))
         }
         for _, v := range this.Classes {
-            if v.Used ||
-                v.IsGlobal {
+            if v.used ||
+                v.isGlobal {
                 continue
             }
             es.append(new error(sprintf("%s class '%s' has declared,but not used",
-                v.Pos.ErrMsgPrefix(), v.Name)))
+                v.pos.ErrMsgPrefix(), v.name)))
         }
         for _, v := range this.Functions {
-            if v.Used ||
-                v.IsGlobal {
+            if v.used ||
+                v.isGlobal {
                 continue
             }
             es.append(new error(sprintf("%s function '%s' has declared,but not used",
-                v.Pos.ErrMsgPrefix(), v.Name)))
+                v.pos.ErrMsgPrefix(), v.name)))
         }
         for _, v := range this.Labels {
-            if v.Used {
+            if v.used {
                 continue
             }
             es.append(new error(sprintf("%s enum '%s' has declared,but not used",
-                v.Pos.ErrMsgPrefix(), v.Name)))
+                v.pos.ErrMsgPrefix(), v.name)))
         }
         for _, v := range this.Variables {
-            if v.Used ||
-                v.IsGlobal ||
-                v.IsFunctionParameter ||
-                v.Name == ThisPointerName ||
-                v.IsReturn {
+            if v.used ||
+                v.isGlobal ||
+                v.isFunctionParameter ||
+                v.name == ThisPointerName ||
+                v.isReturn {
                 continue
             }
             es.append(new error(sprintf("%s variable '%s' has declared,but not used",
-                v.Pos.ErrMsgPrefix(), v.Name)))
+                v.pos.ErrMsgPrefix(), v.name)))
         }
         return es
     }
 
     fn check()  -> (errs []error = []error{}) {
-        for k, s := range this.Statements {
+        for k, s := range this.statements {
             if s.isStaticFieldDefaultValue {
                 // no need to check
                 // compile auto statement , checked before
                 continue
             }
-            this.InheritedAttribute.StatementOffset = k
+            this.inheritedAttribute.statementOffset = k
             errs.appendAll(s.check(this))
             if PackageBeenCompile.shouldStop(errs) {
                 return errs
@@ -350,10 +350,10 @@ public class Block {
             return null
         }
         this.checkConstantsCalled = true
-        for _, c := range this.Constants {
-            if err := this.nameIsValid(c.Name, c.Pos); err != null {
+        for _, c := range this.constants {
+            if err := this.nameIsValid(c.name, c.pos); err != null {
                 errs.append(err)
-                this.Constants.remove(c.Name)
+                this.constants.remove(c.name)
                 continue
             }
             err := checkConst(this, c)
@@ -361,7 +361,7 @@ public class Block {
                 errs.append(err)
             }
             if err != null && c.Type == null {
-                this.Constants.remove(c.Name)
+                this.constants.remove(c.name)
             }
         }
         return errs
@@ -374,7 +374,7 @@ public class Block {
         if v := this.Variables[name]; v != null {
             errMsg := sprintf("%s name '%s' already declared as variable,first declared at:\n",
                 pos.ErrMsgPrefix(), name)
-            errMsg += sprintf("\t%s", v.Pos.ErrMsgPrefix())
+            errMsg += sprintf("\t%s", v.pos.ErrMsgPrefix())
             return new error(errMsg)
         }
         if this.Classes == null {
@@ -383,7 +383,7 @@ public class Block {
         if c := this.Classes[name]; c != null {
             errMsg := sprintf("%s name '%s' already declared as class,first declared at:\n",
                 pos.ErrMsgPrefix(), name)
-            errMsg += sprintf("\t%s", c.Pos.ErrMsgPrefix())
+            errMsg += sprintf("\t%s", c.pos.ErrMsgPrefix())
             return new error(errMsg)
         }
         if this.Functions == null {
@@ -392,16 +392,16 @@ public class Block {
         if f := this.Functions[name]; f != null {
             errMsg := sprintf("%s name '%s' already declared as function,first declared at:\n",
                 pos.ErrMsgPrefix(), name)
-            errMsg += sprintf("\t%s", f.Pos.ErrMsgPrefix())
+            errMsg += sprintf("\t%s", f.pos.ErrMsgPrefix())
             return new error(errMsg)
         }
-        if this.Constants == null {
-            this.Constants = new map { string -> Constant } ()
+        if this.constants == null {
+            this.constants = new map { string -> Constant } ()
         }
-        if c := this.Constants[name]; c != null {
+        if c := this.constants[name]; c != null {
             errMsg := sprintf("%s name '%s' already declared as const,first declared at:\n",
                 pos.ErrMsgPrefix(), name)
-            errMsg += sprintf("\t%s", c.Pos.ErrMsgPrefix())
+            errMsg += sprintf("\t%s", c.pos.ErrMsgPrefix())
             return new error(errMsg)
         }
         if this.EnumNames == null {
@@ -410,7 +410,7 @@ public class Block {
         if en := this.EnumNames[name]; en != null {
             errMsg := sprintf("%s name '%s' already declared as enumName,first declared at:\n",
                 pos.ErrMsgPrefix(), name)
-            errMsg += sprintf("\t%s", en.Pos.ErrMsgPrefix())
+            errMsg += sprintf("\t%s", en.pos.ErrMsgPrefix())
             return new error(errMsg)
         }
         if this.TypeAliases == null {
@@ -419,7 +419,7 @@ public class Block {
         if t := this.TypeAliases[name]; t != null {
             errMsg := sprintf("%s name '%s' already declared as enumName,first declared at:\n",
                 pos.ErrMsgPrefix(), name)
-            errMsg += sprintf("\t%s", t.Pos.ErrMsgPrefix())
+            errMsg += sprintf("\t%s", t.pos.ErrMsgPrefix())
             return new error(errMsg)
         }
         if this.Enums == null {
@@ -428,7 +428,7 @@ public class Block {
         if e := this.Enums[name]; e != null {
             errMsg := sprintf("%s name %s already declared as enum,first declared at:\n",
                 pos.ErrMsgPrefix(), name)
-            errMsg += sprintf("\t%s", e.Pos.ErrMsgPrefix())
+            errMsg += sprintf("\t%s", e.pos.ErrMsgPrefix())
             return new error(errMsg)
         }
         return null
@@ -465,7 +465,7 @@ public class Block {
             if l := this.Labels[name]; l != null {
                 errMsg := sprintf("%s name '%s' already declared as enumName,first declared at:",
                     pos.ErrMsgPrefix(), name)
-                errMsg += sprintf("\t%s", l.Statement.Pos.ErrMsgPrefix())
+                errMsg += sprintf("\t%s", l.Statement.pos.ErrMsgPrefix())
                 return new error(errMsg)
             }
             this.Labels[name] = label
@@ -488,18 +488,18 @@ public class Block {
             return null
         }
         if c := d.(Constant) ; c != null {
-             this.Constants[name] = c
+             this.constants[name] = c
              return null
         }
         if v := d.(Variable) ; v != null {
-            v.LocalValOffset = 65535 // overflow
+            v.localValOffset = 65535 // overflow
             this.Variables[name] = v
             return null
         }
         if e := d.(Enum) ; e != null {
             this.Enums[name] = e
             for _, v := range e.Enums {
-                err := this.Insert(v.Name, v.Pos, v)
+                err := this.Insert(v.name, v.pos, v)
                 if err != null {
                     return err
                 }

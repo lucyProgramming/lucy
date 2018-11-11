@@ -30,8 +30,8 @@ class BuildExpressionCallArgs {
 			if t := stack + currentStack; t > maxStack {
 				maxStack = t
 			}
-			currentStack += jvmSlotSize(e.Value)
-			state.pushStack(c, e.Value)
+			currentStack += jvmSlotSize(e.value)
+			state.pushStack(c, e.value)
 		}
 		if vArgs == null {
 			return
@@ -50,10 +50,10 @@ class BuildExpressionCallArgs {
 				}
 			} else {
 				loadInt32(c, code, int(vArgs.Length))
-				newArrayBaseOnType(c, code, vArgs.Type.Array)
+				newArrayBaseOnType(c, code, vArgs.Type.array)
 				state.pushStack(c, vArgs.Type)
 				currentStack++
-				op := storeArrayElementOp(vArgs.Type.Array.Type)
+				op := storeArrayElementOp(vArgs.Type.array.Type)
 				index := int(0)
 				for _, e := range vArgs.Expressions {
 					code.Codes[code.CodeLength] = cg.OP_dup

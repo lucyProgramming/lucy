@@ -3,14 +3,14 @@ func parseMethodParameter(class cg.Class, bs []byte, f ast.Function) {
 	a := &cg.AttributeMethodParameters{}
 	a.FromBs(class, bs)
 	for k, v := range a.Parameters {
-		f.Type.ParameterList[k].Name = v.Name
+		f.Type.ParameterList[k].name = v.name
 	}
 }
 func parseReturnListNames(class cg.Class, bs []byte, f ast.Function) {
 	a := &cg.AttributeMethodParameters{}
 	a.FromBs(class, bs)
 	for k, v := range a.Parameters {
-		f.Type.ReturnList[k].Name = v.Name
+		f.Type.ReturnList[k].name = v.name
 	}
 }
 
@@ -35,14 +35,14 @@ func loadEnumForFunction(f ast.Function) error {
 }
 
 func loadEnumForVariableType(v ast.Type) error {
-	t, err := loader.LoadImport(v.Enum.Name)
+	t, err := loader.LoadImport(v.Enum.name)
 	if err != null {
 		return err
 	}
 	if tt, ok := t.(ast.Enum); ok && tt != null {
 		v.Enum = tt
 	} else {
-		return new error(sprintf("'%s' is not a enum", v.Enum.Name)
+		return new error(sprintf("'%s' is not a enum", v.Enum.name)
 	}
 	return null
 }

@@ -27,9 +27,9 @@ class BuildPackageFor {
         context Context,
         state StackMapState) -> (maxStack char) {
         if s.RangeAttr != null {
-            if s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeArray {
+            if s.RangeAttr.RangeOn.value.Type == ast.VariableTypeArray {
                 return this.BuildForRangeArray.build(c, code, s, context, state)
-            } else if s.RangeAttr.RangeOn.Value.Type == ast.VariableTypeJavaArray {
+            } else if s.RangeAttr.RangeOn.value.Type == ast.VariableTypeJavaArray {
                 return this.BuildForRangeJavaArray.build(c, code, s, context, state)
             } else { // for map
                 return this.BuildForRangeMap.build(c, code, s, context, state)
@@ -74,8 +74,8 @@ class BuildPackageFor {
             writeExits([]cg.Exit{firstTimeExit}, code.CodeLength)
             context.MakeStackMap(code, forState, code.CodeLength)
         }
-        this.buildBlock(c, code, s.Block, context, forState)
-        if s.Block.NotExecuteToLastStatement == false {
+        this.buildBlock(c, code, s.block, context, forState)
+        if s.block.notExecuteToLastStatement == false {
             jumpTo(code, s.ContinueCodeOffset)
         }
         return

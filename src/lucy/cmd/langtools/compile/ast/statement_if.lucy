@@ -3,9 +3,9 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 public class StatementIf {
 	public PrefixExpressions   []Expression
 	public Condition           Expression
-	public Pos                 Pos
+	public pos                 Pos
 	public initExpressionBlock Block = new Block()
-	public Block               Block
+	public block               Block
 	public ElseIfList          []StatementElseIf
 	public Else               	Block
 	public Exits               []cg.Exit
@@ -13,7 +13,7 @@ public class StatementIf {
 	fn check(father Block) -> (errs []error = []error{})  {
 		this.initExpressionBlock.inherit(father)
 		for _, v := range this.PrefixExpressions {
-			v.IsStatementExpression = true
+			v.isStatementExpression = true
 			_, es := v.check(this.initExpressionBlock)
 			errs.appendAll(es)
 			if err := v.canBeUsedAsStatement(); err != null {
@@ -26,18 +26,18 @@ public class StatementIf {
 			if conditionType != null &&
 				conditionType.Type != VariableTypeBool {
 				errs.append(new error(sprintf("%s condition is not a bool expression",
-					this.Condition.Pos.ErrMsgPrefix())))
+					this.Condition.pos.ErrMsgPrefix())))
 			}
 			if err := this.Condition.canBeUsedAsCondition(); err != null {
 				errs.append(err)
 			}
 		}
-		this.Block.inherit(this.initExpressionBlock)
-		errs.appendAll(this.Block.check())
+		this.block.inherit(this.initExpressionBlock)
+		errs.appendAll(this.block.check())
 		for _, v := range this.ElseIfList {
-			v.Block.inherit(this.initExpressionBlock)
+			v.block.inherit(this.initExpressionBlock)
 			if v.Condition != null {
-				conditionType, es := v.Condition.checkSingleValueContextExpression(v.Block)
+				conditionType, es := v.Condition.checkSingleValueContextExpression(v.block)
 				errs.appendAll(es)
 				if err := v.Condition.canBeUsedAsCondition(); err != null {
 					errs.append(err)
@@ -45,9 +45,9 @@ public class StatementIf {
 				if conditionType != null &&
 					conditionType.Type != VariableTypeBool {
 					errs.append(new error(sprintf("%s condition is not a bool expression",
-							conditionType.Pos.ErrMsgPrefix())))
+							conditionType.pos.ErrMsgPrefix())))
 				}
-				errs.appendAll(v.Block.check())
+				errs.appendAll(v.block.check())
 			}
 		}
 		if this.Else != null {
@@ -62,5 +62,5 @@ public class StatementIf {
 
 public class StatementElseIf {
 	public Condition Expression
-	public Block     Block
+	public block     Block
 }

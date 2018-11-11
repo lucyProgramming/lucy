@@ -3,23 +3,23 @@ import "lucy/cmd/langtools/compile/lex"
 
 
 class CommentParser extends ParserExtends{
-	Comment string
+	comment string
 	fn CommentParser(parser Parser){
 		this.super()
 		this.parser = parser 
 	}
 	fn reset() {
-		this.Comment = ""
+		this.comment = ""
 	}
 
 	fn read() {
 		if this.parser.token.Type == lex.TokenComment {
 			for this.parser.token.Type == lex.TokenComment {
-				this.Comment += this.parser.token.stringValue
+				this.comment += this.parser.token.stringValue
 				this.parser.Next(lfIsToken)
 			}
 		} else {
-			this.Comment = this.parser.token.stringValue
+			this.comment = this.parser.token.stringValue
 			this.parser.Next(lfIsToken)
 		}
 		if this.parser.token.Type != lex.TokenLf {

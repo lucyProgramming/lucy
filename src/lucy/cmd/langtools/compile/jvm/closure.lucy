@@ -106,7 +106,7 @@ class Closure  {
 	*/
 	fn loadLocalClosureVar(c cg.ClassHighLevel, code cg.AttributeCode,
 		v ast.Variable) -> (maxStack char) {
-		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset))
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.localValOffset))
 		this.unPack(c, code, v.Type)
 		maxStack = jvmSlotSize(v.Type)
 		return
@@ -139,7 +139,7 @@ class Closure  {
 			 meta.fieldDescription
 		), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if v.IsPointer() && v.Type != ast.VariableTypeString {
+		if v.isPointer() && v.Type != ast.VariableTypeString {
 			TypeConverterAndPrimitivePacker.castPointer(c, code, v)
 		}
 	}

@@ -1,6 +1,6 @@
 class ExpressionCheckNew {
 	static  fn check(e Expression , block Block, errs []error) ->(valueType Type)  {
-		no := e.Data.(ExpressionNew)
+		no := e.data.(ExpressionNew)
 		err := no.Type.resolve(block)
 		if err != null {
 			errs.append(err)
@@ -18,47 +18,47 @@ class ExpressionCheckNew {
 		// new object
 		if no.Type.Type != VariableTypeObject {
 			errs . append(new error( sprintf("%s cannot have new on type '%s'",
-					no.Type.Pos.ErrMsgPrefix(), no.Type.TypeString())))
+					no.Type.pos.ErrMsgPrefix(), no.Type.typeString())))
 			return null
 		}
-		err = no.Type.Class.loadSelf(e.Pos)
+		err = no.Type.Class.loadSelf(e.pos)
 		if err != null {
 			errs . append(new error( sprintf("%s %s",
-				no.Type.Pos.ErrMsgPrefix(), err.getMessage())))
+				no.Type.pos.ErrMsgPrefix(), err.getMessage())))
 			return null
 		}
 		if no.Type.Class.IsInterface() {
 			errs . append(new error( sprintf("%s '%s' is interface",
-				errMsgPrefix(no.Type.Pos), no.Type.Class.Name)))
+				errMsgPrefix(no.Type.pos), no.Type.Class.name)))
 			return null
 		}
 		if no.Type.Class.IsAbstract() {
 			errs . append(new error( sprintf("%s '%s' is abstract",
-				errMsgPrefix(no.Type.Pos), no.Type.Class.Name)))
+				errMsgPrefix(no.Type.pos), no.Type.Class.name)))
 			return null
 		}
 		ret := no.Type.Clone()
 		ret.Type = VariableTypeObject
-		ret.Pos = e.Pos
+		ret.pos = e.pos
 		errsLength := len(errs)
 		callArgTypes := checkExpressions(block, no.Args, errs, true)
 		if len(errs) > errsLength {
 			return ret
 		}
-		ms, matched, err := no.Type.Class.accessConstructionMethod(e.Pos, errs, no, null, callArgTypes)
+		ms, matched, err := no.Type.Class.accessConstructionMethod(e.pos, errs, no, null, callArgTypes)
 		if err != null {
-			errs . append(new error( sprintf("%s %s", e.Pos.ErrMsgPrefix(), err.getMessage())))
+			errs . append(new error( sprintf("%s %s", e.pos.ErrMsgPrefix(), err.getMessage())))
 			return ret
 		}
 		if matched {
 			m := ms[0]
-			if err := no.Type.Class.constructionMethodAccessAble(e.Pos, m); err != null {
+			if err := no.Type.Class.constructionMethodAccessAble(e.pos, m); err != null {
 				errs.append(err)
 			}
 			no.Construction = m
 			return ret
 		}
-		errs.append(methodsNotMatchError(no.Type.Pos, no.Type.TypeString(), ms, callArgTypes))
+		errs.append(methodsNotMatchError(no.Type.pos, no.Type.typeString(), ms, callArgTypes))
 		return ret
 	}
 
@@ -66,10 +66,10 @@ class ExpressionCheckNew {
 		errs []error) ->(valueType Type)  {
 		if len(newMap.Args) > 0 {
 			errs . append(new error( sprintf("%s new 'map' expect no arguments",
-					errMsgPrefix(newMap.Args[0].Pos))))
+					errMsgPrefix(newMap.Args[0].pos))))
 		}
 		ret := newMap.Type.Clone()
-		ret.Pos = e.Pos
+		ret.pos = e.pos
 		return ret
 	}
 
@@ -81,10 +81,10 @@ class ExpressionCheckNew {
 	static fn checkNewArrayExpression(e Expression , block Block, newArray ExpressionNew,
 		errs []error) ->(valueType Type) {
 		ret := newArray.Type.Clone() // clone the type
-		ret.Pos = e.Pos
+		ret.pos = e.pos
 		if len(newArray.Args) != 1 { //
 			errs . append(new error( sprintf("%s new array expect at least 1 argument",
-					errMsgPrefix(e.Pos))))
+					errMsgPrefix(e.pos))))
 			return ret
 		}
 		amount, es := newArray.Args[0].checkSingleValueContextExpression(block)
@@ -96,7 +96,7 @@ class ExpressionCheckNew {
 		}
 		if amount.isInteger() == false {
 			errs . append(new error( sprintf("%s argument must be 'int',but '%s'",
-					errMsgPrefix(amount.Pos), amount.TypeString())))
+					errMsgPrefix(amount.pos), amount.typeString())))
 		} else {
 			if amount.Type == VariableTypeLong {
 				newArray.Args[0].convertToNumberType(VariableTypeLong)
@@ -104,7 +104,7 @@ class ExpressionCheckNew {
 			if newArray.Args[0].isLiteral() {
 				if a := newArray.Args[0].getLongValue(); a < 0 {
 					errs . append(new error( sprintf("%s '%d' is negative ",
-							errMsgPrefix(amount.Pos), a)))
+							errMsgPrefix(amount.pos), a)))
 				}
 			}
 		}

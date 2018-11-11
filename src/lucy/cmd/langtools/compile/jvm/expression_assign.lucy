@@ -21,7 +21,7 @@ class  BuildExpressionAssign {
 		defer  {
 			state.popStack(len(state.Stacks) - stackLength)
 		}
-		assign := e.Data.(ast.ExpressionAssign)
+		assign := e.data.(ast.ExpressionAssign)
 		left := assign.Lefts[0]
 		right := assign.Values[0]
 		var remainStack char
@@ -36,16 +36,16 @@ class  BuildExpressionAssign {
 			maxStack = t
 		}
 		if left.IsIdentifier(ast.UnderScore) {
-			if jvmSlotSize(right.Value) == 1 {
+			if jvmSlotSize(right.value) == 1 {
 				code.Codes[code.CodeLength] = cg.OP_pop
 			} else {
 				code.Codes[code.CodeLength] = cg.OP_pop2
 			}
 			code.CodeLength++
 		} else {
-			currentStack := remainStack + jvmSlotSize(left.Value)
-			if e.IsStatementExpression == false {
-				currentStack += this.dupStackLeaveValueBelow(code, leftValueKind, left.Value)
+			currentStack := remainStack + jvmSlotSize(left.value)
+			if e.isStatementExpression == false {
+				currentStack += this.dupStackLeaveValueBelow(code, leftValueKind, left.value)
 				if currentStack > maxStack {
 					maxStack = currentStack
 				}
@@ -62,8 +62,8 @@ class  BuildExpressionAssign {
 		e ast.Expression,
 		context Context,
 		state StackMapState) -> (maxStack char) {
-		assign := e.Data.(ast.ExpressionAssign)
-		if e.IsStatementExpression == false || len(assign.Lefts) == 1 {
+		assign := e.data.(ast.ExpressionAssign)
+		if e.isStatementExpression == false || len(assign.Lefts) == 1 {
 			return this.buildExpressionAssign(c, code, e, context, state)
 		}
 		if len(assign.Values) == 1 {
@@ -82,11 +82,11 @@ class  BuildExpressionAssign {
 			if stack > maxStack {
 				maxStack = stack
 			}
-			stack = autoVar.unPack(c, code, k, v.Value)
+			stack = autoVar.unPack(c, code, k, v.value)
 			if t := remainStack + stack; t > maxStack {
 				maxStack = t
 			}
-			copyOPs(code, op...)
+			copyOPs(code, op)
 			state.popStack(len(state.Stacks) - stackLength)
 		}
 		return

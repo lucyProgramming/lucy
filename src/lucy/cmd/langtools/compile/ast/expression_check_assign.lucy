@@ -1,16 +1,16 @@
 class ExpressionCheckAssign {
 		
 	static fn check(e Expression , block Block, errs []error) ->(valueType Type)  {
-		bin := e.Data.(ExpressionBinary)
+		bin := e.data.(ExpressionBinary)
 		lefts := new []Expression(1)
 		if bin.Left.Type == ExpressionTypeList {
-			lefts = bin.Left.Data.([]Expression)
+			lefts = bin.Left.data.([]Expression)
 		} else {
 			lefts[0] = bin.Left
 		}
-		values := bin.Right.Data.([]Expression)
+		values := bin.Right.data.([]Expression)
 		for _, v := range values {
-			v.Lefts = lefts
+			v.lefts = lefts
 		}
 		valueTypes := checkExpressions(block, values, errs, false)
 		leftTypes := []Type{}
@@ -23,9 +23,9 @@ class ExpressionCheckAssign {
 			}
 		}
 		convertExpressionsToNeeds(values, leftTypes, valueTypes)
-		bin.Left.MultiValues = leftTypes
+		bin.Left.multiValues = leftTypes
 		if len(lefts) > len(valueTypes) { //expression length compare with value types is more appropriate
-			pos := values[len(values)-1].Pos
+			pos := values[len(values)-1].pos
 			errs.append(new error(sprintf("%s cannot assign %d value to %d detinations",
 				pos.ErrMsgPrefix(),
 				len(valueTypes),
@@ -49,39 +49,39 @@ class ExpressionCheckAssign {
 			}
 			if false == leftTypes[k].assignAble(errs, valueTypes[k]) {
 				errs.append(new error(sprintf("%s cannot assign '%s' to '%s'",
-					errMsgPrefix(valueTypes[k].Pos),
-					valueTypes[k].TypeString(), leftTypes[k].TypeString())))
+					errMsgPrefix(valueTypes[k].pos),
+					valueTypes[k].typeString(), leftTypes[k].typeString())))
 			}
 		}
 		{
 		    t := new ExpressionAssign()
-		    e.Data = t
+		    e.data = t
 		    t.Lefts = lefts
             t.Values = values
 		}
-		voidReturn := mkVoidType(e.Pos)
+		voidReturn := mkVoidType(e.pos)
 		if len(lefts) > 1 {
 			return voidReturn
 		}
 		if len(lefts) == 0 || leftTypes[0] == null {
 			return voidReturn
 		}
-		if e.IsStatementExpression == false {
+		if e.isStatementExpression == false {
 			left := lefts[0]
 			if left.Type == ExpressionTypeIdentifier {
-				t := left.Data.(ExpressionIdentifier)
-				if t.Name == UnderScore {
+				t := left.data.(ExpressionIdentifier)
+				if t.name == UnderScore {
 					return voidReturn
 				} else {
 					if null != t.Variable {
-						t.Variable.Used = true
+						t.Variable.used = true
 					}
 				}
 			}
 		}
 		// here is safe
 		valueType = leftTypes[0].Clone()
-		valueType.Pos = e.Pos
+		valueType.pos = e.pos
 	}	
 } 
 

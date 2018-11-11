@@ -3,7 +3,7 @@
 class ExpressionCheckConst {
 	
 	static fn check(e Expression , block Block) -> (errs []error = []error{}) {
-		cs := e.Data.([]Constant)
+		cs := e.data.([]Constant)
 		for _, c := range cs {
 			err := checkConst(block, c)
 			if err != null {
@@ -12,7 +12,7 @@ class ExpressionCheckConst {
 				}
 				continue
 			}
-			err = block.Insert(c.Name, c.Pos, c)
+			err = block.Insert(c.name, c.pos, c)
 			if err != null {
 				errs.append(err)
 			}

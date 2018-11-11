@@ -26,13 +26,13 @@ class ExpressionBinaryParser extends ParserExtends{
 				return left, err
 			}
 			newExpression := new ast.Expression()
-			newExpression.Pos = pos
-			newExpression.Op = name
+			newExpression.pos = pos
+			newExpression.op = name
 			newExpression.Type = ast.ExpressionTypeLogicalOr
 			binary := new ast.ExpressionBinary()
 			binary.Left = left
 			binary.Right = right
-			newExpression.Data = binary
+			newExpression.data = binary
 			left = newExpression
 		}
 		return left, null
@@ -53,13 +53,13 @@ class ExpressionBinaryParser extends ParserExtends{
 				return left, err
 			}
 			newExpression := new ast.Expression()
-			newExpression.Pos = pos
-			newExpression.Op = name
+			newExpression.pos = pos
+			newExpression.op = name
 			newExpression.Type = ast.ExpressionTypeLogicalAnd
 			binary := new ast.ExpressionBinary()
 			binary.Left = left
 			binary.Right = right
-			newExpression.Data = binary
+			newExpression.data = binary
 			left = newExpression
 		}
 		return left, null
@@ -82,8 +82,8 @@ class ExpressionBinaryParser extends ParserExtends{
 				return left, err
 			}
 			newExpression := new ast.Expression()
-			newExpression.Pos = pos
-			newExpression.Op = name
+			newExpression.pos = pos
+			newExpression.op = name
 			if typ == lex.TokenEqual {
 				newExpression.Type = ast.ExpressionTypeEq
 			} else {
@@ -92,7 +92,7 @@ class ExpressionBinaryParser extends ParserExtends{
 			binary := new ast.ExpressionBinary()
 			binary.Left = left
 			binary.Right = right
-			newExpression.Data = binary
+			newExpression.data = binary
 			left = newExpression
 		}
 		return left, null
@@ -117,8 +117,8 @@ class ExpressionBinaryParser extends ParserExtends{
 				return left, err
 			}
 			newExpression := new ast.Expression()
-			newExpression.Pos = pos
-			newExpression.Op = name
+			newExpression.pos = pos
+			newExpression.op = name
 			if typ == lex.TokenGt {
 				newExpression.Type = ast.ExpressionTypeGt
 
@@ -135,7 +135,7 @@ class ExpressionBinaryParser extends ParserExtends{
 			binary := new ast.ExpressionBinary()
 			binary.Left = left
 			binary.Right = right
-			newExpression.Data = binary
+			newExpression.data = binary
 			left = newExpression
 		}
 		return left, null
@@ -156,13 +156,13 @@ class ExpressionBinaryParser extends ParserExtends{
 				return left, err
 			}
 			newExpression := new ast.Expression()
-			newExpression.Pos = pos
-			newExpression.Op = name
+			newExpression.pos = pos
+			newExpression.op = name
 			newExpression.Type = ast.ExpressionTypeOr
 			binary := new ast.ExpressionBinary()
 			binary.Left = left
 			binary.Right = right
-			newExpression.Data = binary
+			newExpression.data = binary
 			left = newExpression
 		}
 		return left, null
@@ -183,13 +183,13 @@ class ExpressionBinaryParser extends ParserExtends{
 				return left, err
 			}
 			newExpression := new ast.Expression()
-			newExpression.Pos = pos
-			newExpression.Op = name
+			newExpression.pos = pos
+			newExpression.op = name
 			newExpression.Type = ast.ExpressionTypeXor
 			binary := new ast.ExpressionBinary()
 			binary.Left = left
 			binary.Right = right
-			newExpression.Data = binary
+			newExpression.data = binary
 			left = newExpression
 		}
 		return left, null
@@ -210,13 +210,13 @@ class ExpressionBinaryParser extends ParserExtends{
 				return left, err
 			}
 			newExpression := new ast.Expression()
-			newExpression.Pos = pos
+			newExpression.pos = pos
 			newExpression.Type = ast.ExpressionTypeAnd
-			newExpression.Op = name
+			newExpression.op = name
 			binary := new ast.ExpressionBinary()
 			binary.Left = left
 			binary.Right = right
-			newExpression.Data = binary
+			newExpression.data = binary
 			left = newExpression
 		}
 		return left, null
@@ -239,8 +239,8 @@ class ExpressionBinaryParser extends ParserExtends{
 				return left, err
 			}
 			newExpression := new ast.Expression()
-			newExpression.Pos = pos
-			newExpression.Op = name
+			newExpression.pos = pos
+			newExpression.op = name
 			if typ == lex.TokenLsh {
 				newExpression.Type = ast.ExpressionTypeLsh
 
@@ -251,7 +251,7 @@ class ExpressionBinaryParser extends ParserExtends{
 			binary := new ast.ExpressionBinary()
 			binary.Left = left
 			binary.Right = right
-			newExpression.Data = binary
+			newExpression.data = binary
 			left = newExpression
 		}
 		return left, null
@@ -274,8 +274,8 @@ class ExpressionBinaryParser extends ParserExtends{
 				return left, err
 			}
 			newExpression := new ast.Expression()
-			newExpression.Pos = pos
-			newExpression.Op = name
+			newExpression.pos = pos
+			newExpression.op = name
 			if typ == lex.TokenAdd {
 				newExpression.Type = ast.ExpressionTypeAdd
 			} else {
@@ -284,7 +284,7 @@ class ExpressionBinaryParser extends ParserExtends{
 			binary := new ast.ExpressionBinary()
 			binary.Left = left
 			binary.Right = right
-			newExpression.Data = binary
+			newExpression.data = binary
 			left = newExpression
 		}
 		return left, null
@@ -308,8 +308,8 @@ class ExpressionBinaryParser extends ParserExtends{
 				return left, err
 			}
 			newExpression := new ast.Expression()
-			newExpression.Pos = pos
-			newExpression.Op = name
+			newExpression.pos = pos
+			newExpression.op = name
 			if typ == lex.TokenMul {
 				newExpression.Type = ast.ExpressionTypeMul
 			} else if typ == lex.TokenDiv {
@@ -320,7 +320,7 @@ class ExpressionBinaryParser extends ParserExtends{
 			binary := new ast.ExpressionBinary()
 			binary.Left = left
 			binary.Right = right
-			newExpression.Data = binary
+			newExpression.data = binary
 			left = newExpression
 		}
 		return left, null

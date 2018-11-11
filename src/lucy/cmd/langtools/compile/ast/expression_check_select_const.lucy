@@ -1,7 +1,7 @@
 class ExpressionSelectConst {
 
 	static fn check(e Expression , block Block, errs []error) ->(valueType Type) {
-		selection := e.Data.(ExpressionSelection)
+		selection := e.data.(ExpressionSelection)
 		object, es := selection.Expression.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if object == null {
@@ -9,19 +9,19 @@ class ExpressionSelectConst {
 		}
 		if object.Type != VariableTypeClass {
 			errs.append(new error(sprintf("%s not a class , but '%s'",
-				object.Pos.ErrMsgPrefix(), object.TypeString())))
+				object.pos.ErrMsgPrefix(), object.typeString())))
 			return null
 		}
-		if object.Class.Block.Constants == null ||
-			object.Class.Block.Constants[selection.Name] == null {
+		if object.Class.block.constants == null ||
+			object.Class.block.constants[selection.name] == null {
 			errs.append(new error(sprintf("%s const '%s' not found",
-				e.Pos.ErrMsgPrefix(), selection.Name)))
+				e.pos.ErrMsgPrefix(), selection.name)))
 			return null
 		}
-		c := object.Class.Block.Constants[selection.Name]
+		c := object.Class.block.constants[selection.name]
 		e.fromConst(c)
 		valueType = c.Type.Clone()
-		valueType.Pos = e.Pos
+		valueType.pos = e.pos
 	}
 	
 } 

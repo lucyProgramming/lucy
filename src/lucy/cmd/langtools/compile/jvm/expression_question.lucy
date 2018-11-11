@@ -18,7 +18,7 @@ class BuildExpressionQuestion {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        question := e.Data.(ast.ExpressionQuestion)
+        question := e.data.(ast.ExpressionQuestion)
         maxStack = this.eb.build(c, code, question.Selection, context, state)
         falseExit := new cg.Exit(cg.OP_ifeq, code)
         //true part
@@ -33,7 +33,7 @@ class BuildExpressionQuestion {
         if stack > maxStack {
             maxStack = stack
         }
-        state.pushStack(c, e.Value)
+        state.pushStack(c, e.value)
         context.MakeStackMap(code, state, code.CodeLength)
         state.popStack(1)
         writeExits([]cg.Exit{trueExit}, code.CodeLength)

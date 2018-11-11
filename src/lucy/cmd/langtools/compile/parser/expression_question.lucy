@@ -37,14 +37,14 @@ class ExpressionQuestionParser extends ParserExtends {
 			return left, null
 		}
 		newExpression := new ast.Expression()
-		newExpression.Op = "question"
-		newExpression.Pos = pos
+		newExpression.op = "question"
+		newExpression.pos = pos
 		newExpression.Type = ast.ExpressionTypeQuestion
 		question := new ast.ExpressionQuestion()
 		question.Selection = left
 		question.True = True
 		question.False = False
-		newExpression.Data = question
+		newExpression.data = question
 		return newExpression, null
 	}	
 

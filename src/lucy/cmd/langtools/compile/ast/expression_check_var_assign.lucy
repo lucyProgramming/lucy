@@ -5,20 +5,20 @@ class ExpressionCheckVarAssign {
 
 
 	static fn check(e Expression , block Block, errs []error) {
-		bin := e.Data.(ExpressionBinary)
+		bin := e.data.(ExpressionBinary)
 		var lefts []Expression
 		if bin.Left.Type == ExpressionTypeList {
-			lefts = bin.Left.Data.([]Expression)
+			lefts = bin.Left.data.([]Expression)
 		} else {
 			lefts = []Expression{bin.Left}
 		}
-		values := bin.Right.Data.([]Expression)
+		values := bin.Right.data.([]Expression)
 		for _, v := range values {
-			v.Lefts = lefts
+			v.lefts = lefts
 		}
 		assignTypes := checkExpressions(block, values, errs, false)
 		if len(lefts) > len(assignTypes) {
-			pos := values[len(values)-1].Pos
+			pos := values[len(values)-1].pos
 			errs.append(new error( sprintf("%s too few values , assign %d values to %d destinations",
 					pos.ErrMsgPrefix(),
 					len(assignTypes),
@@ -48,21 +48,21 @@ class ExpressionCheckVarAssign {
 				}
 				if t.assignAble(errs, variableType) == false {
 					errs.append(new error( sprintf("%s cannot use '%s' as '%s'",
-						errMsgPrefix(t.Pos), variableType.TypeString(), t.TypeString())))
+						errMsgPrefix(t.pos), variableType.typeString(), t.typeString())))
 				}
 				continue
 			}
-			identifier := v.Data.(ExpressionIdentifier)
-			if identifier.Name == UnderScore {
+			identifier := v.data.(ExpressionIdentifier)
+			if identifier.name == UnderScore {
 				continue
 			}
-			if variable := block.Variables[identifier.Name]; variable != null {
+			if variable := block.Variables[identifier.name]; variable != null {
 				if variableType != null {
 					if variable.Type.assignAble(errs, variableType) == false {
 						errs.append(new error( sprintf("%s cannot assign '%s' to '%s'",
-							errMsgPrefix(assignTypes[k].Pos),
-							variable.Type.TypeString(),
-							variableType.TypeString())))
+							errMsgPrefix(assignTypes[k].pos),
+							variable.Type.typeString(),
+							variableType.typeString())))
 					}
 				}
 				identifier.Variable = variable
@@ -73,37 +73,37 @@ class ExpressionCheckVarAssign {
 				if k < len(assignTypes) {
 					vd.Type = assignTypes[k]
 				}
-				vd.Name = identifier.Name
-				vd.Pos = v.Pos
+				vd.name = identifier.name
+				vd.pos = v.pos
 				if variableType == null {
 					continue
 				}
-				vd.Comment = identifier.Comment
+				vd.comment = identifier.comment
 				vd.Type = variableType.Clone()
-				vd.Type.Pos = e.Pos
+				vd.Type.pos = e.pos
 				if err := variableType.isTyped(); err != null {
 					errs.append(err)
 				}
-				if e.IsGlobal {
-					err = PackageBeenCompile.Block.Insert(vd.Name, v.Pos, vd)
-					vd.IsGlobal = true
+				if e.isGlobal {
+					err = PackageBeenCompile.block.Insert(vd.name, v.pos, vd)
+					vd.isGlobal = true
 				} else {
-					err = block.Insert(vd.Name, v.Pos, vd)
+					err = block.Insert(vd.name, v.pos, vd)
 				}
 				identifier.Variable = vd
 				if err != null {
 					errs.append(err)
 					continue
 				}
-				if e.IsPublic { // only use when is is global
-					vd.AccessFlags |= cg.AccFieldPublic
+				if e.isPublic { // only use when is is global
+					vd.accessFlags |= cg.AccFieldPublic
 				}
 			}
 		}
 		if noNewVariable {
-			errs.append(new error( sprintf("%s no new variables to create", errMsgPrefix(e.Pos))))
+			errs.append(new error( sprintf("%s no new variables to create", errMsgPrefix(e.pos))))
 		}
-		e.Data = assign
+		e.data = assign
 	}	
 
 } 

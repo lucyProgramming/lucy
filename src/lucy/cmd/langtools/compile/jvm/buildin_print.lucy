@@ -20,7 +20,7 @@ class BuildinFunctionPrint {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        call := e.Data.(ast.ExpressionFunctionCall)
+        call := e.data.(ast.ExpressionFunctionCall)
         // get stream from stdout
         code.Codes[code.CodeLength] = cg.OP_getstatic
         c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
@@ -52,7 +52,7 @@ class BuildinFunctionPrint {
                 maxStack = t
             }
 
-            switch call.Args[0].Value.Type {
+            switch call.Args[0].value.Type {
             case ast.VariableTypeBool:
                 code.Codes[code.CodeLength] = cg.OP_invokevirtual
                 c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
@@ -127,7 +127,7 @@ class BuildinFunctionPrint {
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
         defer state.popStack(1)
         for k, v := range call.Args {
-            variableType := v.Value
+            variableType := v.value
             stack := this.eb.build(c, code, v, context, state)
             if t := char(2) + stack; t > maxStack {
                 maxStack = t

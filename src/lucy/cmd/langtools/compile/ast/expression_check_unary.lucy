@@ -2,7 +2,7 @@ class ExpressionCheckUnary {
 	
 
 	static fn checkUnaryExpression(e Expression , block Block, errs []error)  ->(valueType Type) {
-		ee := e.Data.(Expression)
+		ee := e.data.(Expression)
 		unary, es := ee.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if unary == null {
@@ -15,49 +15,49 @@ class ExpressionCheckUnary {
 		if e.Type == ExpressionTypeNot {
 			if unary.Type != VariableTypeBool {
 				errs.append(new error( sprintf("%s not a bool expression , but '%s'",
-					unary.Pos.ErrMsgPrefix(), unary.TypeString())))
+					unary.pos.ErrMsgPrefix(), unary.typeString())))
 			}
 		}
 		if e.Type == ExpressionTypeNegative {
-			if unary.IsNumber() == false {
+			if unary.isNumber() == false {
 				errs.append(new error( sprintf("%s cannot apply '-' on '%s'",
-					unary.Pos.ErrMsgPrefix(), unary.TypeString())))
+					unary.pos.ErrMsgPrefix(), unary.typeString())))
 			}
 		}
 		if e.Type == ExpressionTypeBitwiseNot {
 			if unary.isInteger() == false {
 				errs . append(new error( sprintf("%s cannot apply '~' on '%s'",
-					unary.Pos.ErrMsgPrefix(), unary.TypeString())))
+					unary.pos.ErrMsgPrefix(), unary.typeString())))
 			}
 		}
 		result := unary.Clone()
-		result.Pos = e.Pos
+		result.pos = e.pos
 		return result
 	}
 
 	static fn checkIncrementExpression(e Expression  , block Block, errs []error) ->(valueType Type) {
-		on := e.Data.(Expression)
+		on := e.data.(Expression)
 		increment := on.getLeftValue(block, errs)
 		if increment == null {
 			return null
 		}
 		if on.Type == ExpressionTypeIdentifier &&
-			e.IsStatementExpression == false {
+			e.isStatementExpression == false {
 			/*
 				special case
 				fn1(a++)
 			*/
-			t := on.Data.(ExpressionIdentifier)
+			t := on.data.(ExpressionIdentifier)
 			if t.Variable != null {
-				t.Variable.Used = true
+				t.Variable.used = true
 			}
 		}
-		if false == increment.IsNumber() {
+		if false == increment.isNumber() {
 			errs . append(new error( sprintf("%s cannot apply '%s' on '%s'",
-					on.Pos.ErrMsgPrefix(), on.Op, increment.TypeString())))
+					on.pos.ErrMsgPrefix(), on.op, increment.typeString())))
 		}
 		result := increment.Clone()
-		result.Pos = e.Pos
+		result.pos = e.pos
 		return result
 	}	
 } 

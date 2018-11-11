@@ -27,9 +27,9 @@ class ExpressionArrayParser extends ParserExtends {
 			this.Next(lfIsToken) // skip ]
 			e = new ast.Expression()
 			e.Type = ast.ExpressionTypeArray
-			e.Data = arr
-			e.Pos = pos
-			e.Op = "arrayLiteral"
+			e.data = arr
+			e.pos = pos
+			e.op = "arrayLiteral"
 			return
 		}
 		this.Next(lfIsToken) // skip ]
@@ -55,16 +55,16 @@ class ExpressionArrayParser extends ParserExtends {
 				return null, err
 			}
 			ret := new ast.Expression()
-			ret.Op = "checkCast"
-			ret.Pos = pos
+			ret.op = "checkCast"
+			ret.pos = pos
 			ret.Type = ast.ExpressionTypeCheckCast
 			data := new ast.ExpressionTypeConversion()
 			data.Type = new ast.Type()
 			data.Type.Type = ast.VariableTypeArray
-			data.Type.Pos = pos
-			data.Type.Array = array
+			data.Type.pos = pos
+			data.Type.array = array
 			data.Expression = e
-			ret.Data = data
+			ret.data = data
 			this.Next(lfIsToken) // skip )
 			return ret, null
 		}
@@ -73,8 +73,8 @@ class ExpressionArrayParser extends ParserExtends {
 		if array != null {
 			arr.Type = new ast.Type()
 			arr.Type.Type = ast.VariableTypeArray
-			arr.Type.Array = array
-			arr.Type.Pos = array.Pos
+			arr.Type.array = array
+			arr.Type.pos = array.pos
 		}
 		/*
 			[]int { 1, 2}
@@ -83,9 +83,9 @@ class ExpressionArrayParser extends ParserExtends {
 		arr.Expressions, err = this.parseArrayValues()
 		e = new ast.Expression()
 		e.Type = ast.ExpressionTypeArray
-		e.Data = arr
-		e.Pos = pos
-		e.Op = "arrayLiteral"
+		e.data = arr
+		e.pos = pos
+		e.op = "arrayLiteral"
 		return
 	}
 
@@ -112,11 +112,11 @@ class ExpressionArrayParser extends ParserExtends {
 				}
 				arrayExpression := new ast.Expression()
 				arrayExpression.Type = ast.ExpressionTypeArray
-				arrayExpression.Pos = this.parser.mkPos()
-				arrayExpression.Op = "arrayLiteral"
+				arrayExpression.pos = this.parser.mkPos()
+				arrayExpression.op = "arrayLiteral"
 				data := new ast.ExpressionArray()
 				data.Expressions = ees
-				arrayExpression.Data = data
+				arrayExpression.data = data
 				es.append(arrayExpression)
 			} else {
 				e, err := this.ep.parseExpression(false)

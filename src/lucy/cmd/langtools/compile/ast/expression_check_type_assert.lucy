@@ -3,7 +3,7 @@ class ExpressionCheckTypeAssert {
 	
 	
 	static fn check(e Expression , block Block, errs []error) -> (valueTypes []Type) {
-		assertion := e.Data.(ExpressionTypeAssert)
+		assertion := e.data.(ExpressionTypeAssert)
 		object, es := assertion.Expression.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if object == null {
@@ -13,9 +13,9 @@ class ExpressionCheckTypeAssert {
 			errs.append(err)
 			return null
 		}
-		if object.IsPointer() == false {
+		if object.isPointer() == false {
 			errs . append(new error( sprintf("%s expression is not pointer",
-					errMsgPrefix(object.Pos))))
+					errMsgPrefix(object.pos))))
 			return null
 		}
 		err := assertion.Type.resolve(block)
@@ -25,21 +25,21 @@ class ExpressionCheckTypeAssert {
 		}
 		if assertion.Type.validForTypeAssertOrConversion() == false {
 			errs . append(new error( sprintf("%s cannot use '%s' for type assertion",
-					errMsgPrefix(assertion.Type.Pos), assertion.Type.TypeString())))
+					errMsgPrefix(assertion.Type.pos), assertion.Type.typeString())))
 			return null
 		}
-		if len(e.Lefts) > 1 {
+		if len(e.lefts) > 1 {
 			assertion.MultiValueContext = true
 			valueTypes = new []Type(2)
 			valueTypes[0] = assertion.Type.Clone()
-			valueTypes[0].Pos = e.Pos
+			valueTypes[0].pos = e.pos
 			valueTypes[1] = new Type()
-			valueTypes[1].Pos = e.Pos
+			valueTypes[1].pos = e.pos
 			valueTypes[1].Type = VariableTypeBool // if  assert is ok
 		} else {
 			valueTypes = new []Type(1)
 			valueTypes[0] = assertion.Type.Clone()
-			valueTypes[0].Pos = e.Pos
+			valueTypes[0].pos = e.pos
 		}
 	}
 }

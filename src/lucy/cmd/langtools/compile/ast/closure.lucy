@@ -54,7 +54,7 @@ public class Closure {
 	
 	fn Search(name string) -> ( x Object) {
 		for f, _ := range this.Functions {
-			if f.Name == name {
+			if f.name == name {
 				return f
 			}
 		}

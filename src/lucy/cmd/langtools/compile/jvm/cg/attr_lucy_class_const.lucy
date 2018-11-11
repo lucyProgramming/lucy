@@ -1,34 +1,34 @@
  import "lucy/binary"
 
 public class AttributeLucyClassConst {
-	public Constants []LucyClassConst
+	public constants []LucyClassConst
 
 	public fn FromBs(c Class, bs []byte) {
-	    this.Constants = []LucyClassConst{}
+	    this.constants = []LucyClassConst{}
 		for len(bs) > 0 {
 			constant := new LucyClassConst()
-			constant.Name = string(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
+			constant.name = string(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
 			constant.Descriptor = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].Info)
 			constant.ValueIndex = binary.BigEndian.getChar(bs[4:])
-			constant.Comment = string(c.ConstPool[binary.BigEndian.getChar(bs[6:])].Info)
+			constant.comment = string(c.ConstPool[binary.BigEndian.getChar(bs[6:])].Info)
 			bs = bs[8:]
-			this.Constants.append(constant)
+			this.constants.append(constant)
 		}
 	}
 
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)   {
-		if this == null || len(this.Constants) == 0 {
+		if this == null || len(this.constants) == 0 {
 			return null
 		}
 		ret = new AttributeInfo()
 		ret.NameIndex = c.InsertUtf8Const(AttributeNameLucyClassConst)
-		ret.Info = new []byte(len(this.Constants)*8)
-		for k, v := range this.Constants {
+		ret.Info = new []byte(len(this.constants)*8)
+		for k, v := range this.constants {
 			b := ret.Info[k*8:]
-			binary.BigEndian.putChar(b, c.InsertUtf8Const(v.Name))
+			binary.BigEndian.putChar(b, c.InsertUtf8Const(v.name))
 			binary.BigEndian.putChar(b[2:], c.InsertUtf8Const(v.Descriptor))
 			binary.BigEndian.putChar(b[4:], v.ValueIndex)
-			binary.BigEndian.putChar(b[6:], c.InsertUtf8Const(v.Comment))
+			binary.BigEndian.putChar(b[6:], c.InsertUtf8Const(v.comment))
 		}
 		ret.attributeLength = (len(ret.Info))
 		return ret
@@ -36,10 +36,10 @@ public class AttributeLucyClassConst {
 }
 
 public class LucyClassConst {
-	public Name       string
+	public name       string
 	public Descriptor string
 	public ValueIndex char
-	public Comment    string
+	public comment    string
 }
 
 

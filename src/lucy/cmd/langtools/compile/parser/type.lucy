@@ -30,54 +30,54 @@ class TypeParser extends ParserExtends {
 				return null, err
 			}
 			ret = new ast.Type()
-			ret.Pos = pos
+			ret.pos = pos
 			ret.Type = ast.VariableTypeArray
-			ret.Array = array
+			ret.array = array
 		case lex.TokenBool:
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeBool
-			ret.Pos = pos
+			ret.pos = pos
 			this.Next(lfIsToken)
 		case lex.TokenByte:
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeByte
-			ret.Pos = pos
+			ret.pos = pos
 			this.Next(lfIsToken)
 		case lex.TokenShort:
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeShort
-			ret.Pos = pos
+			ret.pos = pos
 			this.Next(lfIsToken)
 		case lex.TokenChar:
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeChar
-			ret.Pos = pos
+			ret.pos = pos
 			this.Next(lfIsToken)
 		case lex.TokenInt:
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeInt
-			ret.Pos = pos
+			ret.pos = pos
 			this.Next(lfIsToken)
 		case lex.TokenFloat:
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeFloat
-			ret.Pos = pos
+			ret.pos = pos
 			this.Next(lfIsToken)
 
 		case lex.TokenDouble:
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeDouble
-			ret.Pos = pos
+			ret.pos = pos
 			this.Next(lfIsToken)
 		case lex.TokenLong:
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeLong
-			ret.Pos = pos
+			ret.pos = pos
 			this.Next(lfIsToken)
 		case lex.TokenString:
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeString
-			ret.Pos = pos
+			ret.pos = pos
 			this.Next(lfIsToken)
 		case lex.TokenIdentifier:
 			ret, err = this.parseIdentifierType()
@@ -124,7 +124,7 @@ class TypeParser extends ParserExtends {
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeMap
 			ret.Map = m
-			ret.Pos = pos
+			ret.pos = pos
 
 		case lex.TokenFn:
 			this.Next(lfIsToken)
@@ -134,8 +134,8 @@ class TypeParser extends ParserExtends {
 			}
 			ret = new ast.Type()
 			ret.Type =  ast.VariableTypeFunction
-			ret.Pos =  pos
-			ret.FunctionType =  ft
+			ret.pos =  pos
+			ret.functionType =  ft
 
 		case lex.TokenGlobal:
 			this.Next(lfIsToken)
@@ -151,8 +151,8 @@ class TypeParser extends ParserExtends {
 			} else {
 				ret = new ast.Type()
                 ret.Type = ast.VariableTypeGlobal
-                ret.Pos = pos
-                ret.Name = this.parser.token.stringValue
+                ret.pos = pos
+                ret.name = this.parser.token.stringValue
 				this.Next(lfIsToken)
 			}
 		default:
@@ -167,10 +167,10 @@ class TypeParser extends ParserExtends {
 		}
 		if this.parser.token.Type == lex.TokenVArgs {
 			newRet := new ast.Type()
-			newRet.Pos = this.parser.mkPos()
+			newRet.pos = this.parser.mkPos()
 			newRet.Type = ast.VariableTypeJavaArray
-			newRet.Array = ret
-			newRet.IsVariableArgs = true
+			newRet.array = ret
+			newRet.isVariableArgs = true
 			this.Next(lfIsToken) // skip ...
 			ret = newRet
 			return ret, null
@@ -184,9 +184,9 @@ class TypeParser extends ParserExtends {
 				return ret, err
 			}
 			newRet := new ast.Type()
-			newRet.Pos = this.parser.mkPos()
+			newRet.pos = this.parser.mkPos()
 			newRet.Type = ast.VariableTypeJavaArray
-			newRet.Array = ret
+			newRet.array = ret
 			ret = newRet
 			this.Next(lfIsToken) // skip ]
 		}
@@ -214,7 +214,7 @@ class TypeParser extends ParserExtends {
 
 	fn parseIdentifierType() -> (ret ast.Type = new ast.Type(),err error) {
 		name := this.parser.token.stringValue
-		ret.Pos =  this.parser.mkPos()
+		ret.pos =  this.parser.mkPos()
 		ret.Type = ast.VariableTypeName
 		this.Next(lfIsToken) // skip name identifier
 		for this.parser.token.Type == lex.TokenSelection {
@@ -224,10 +224,10 @@ class TypeParser extends ParserExtends {
 					this.parser.errMsgPrefix()))
 			}
 			name += "." + this.parser.token.stringValue
-			ret.Pos = this.parser.mkPos() //  override pos
+			ret.pos = this.parser.mkPos() //  override pos
 			this.Next(lfIsToken)   // skip identifier
 		}
-		ret.Name = name
+		ret.name = name
 		return ret, null
 	}
 

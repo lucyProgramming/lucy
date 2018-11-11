@@ -42,20 +42,20 @@ class Descriptor  {
 		case ast.VariableTypeDouble:
 			return "D"
 		case ast.VariableTypeArray:
-			meta := ArrayMetas[typ.Array.Type] // combination type
+			meta := ArrayMetas[typ.array.Type] // combination type
 			return "L" + meta.className + ";"
 		case ast.VariableTypeString:
 			return "Ljava/lang/String;"
 		case ast.VariableTypeVoid:
 			return "V"
 		case ast.VariableTypeObject:
-			return "L" + typ.Class.Name + ";"
+			return "L" + typ.Class.name + ";"
 		case ast.VariableTypeMap:
 			return "L" + mapClass + ";"
 		case ast.VariableTypeFunction:
 			return "L" + javaMethodHandleClass + ";"
 		case ast.VariableTypeJavaArray:
-			return "[" + .typeDescriptor(typ.Array)
+			return "[" + .typeDescriptor(typ.array)
 		}
 		panic("unHandle type signature")
 	}
@@ -113,10 +113,10 @@ class Descriptor  {
 			t := new ast.Type()
 			t.Type = ast.VariableTypeObject
 			t.Class = new ast.Class()
-			t.Class.Name = string(bs[:index])
+			t.Class.name = string(bs[:index])
 			bs = bs[index+1:] // skip ;
-			t.Class.NotImportedYet = true
-			if t.Class.Name == javaStringClass {
+			t.Class.notImportedYet = true
+			if t.Class.name == javaStringClass {
 				t.Type = ast.VariableTypeString
 			}
 			return bs, t, null
@@ -128,7 +128,7 @@ class Descriptor  {
 			ret := new ast.Type()
 			if err == null {
 				ret.Type = ast.VariableTypeJavaArray
-				ret.Array = t
+				ret.array = t
 			}
 			return bs, ret, err
 		}
@@ -152,8 +152,8 @@ class Descriptor  {
 		}
 		bs = bs[1:] // skip )
 		vd := new ast.Variable()
-		vd.Name = "returnValue"
-		_, vd.Type, err = this.ParseType(bs)
+		vd.name = "returnValue"
+		_, vd.Type, err = .ParseType(bs)
 		if err != null {
 			return t, err
 		}

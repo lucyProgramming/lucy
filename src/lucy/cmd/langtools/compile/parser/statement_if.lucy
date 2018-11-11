@@ -13,7 +13,7 @@ class StatementIfParser extends ParserExtends {
 	
 	protected fn parseIf() -> (statementIf ast.StatementIf, err error) {
 		statementIf = new ast.StatementIf()
-		statementIf.Pos = this.parser.mkPos()
+		statementIf.pos = this.parser.mkPos()
 		this.Next(lfIsToken) // skip if
 		var condition ast.Expression
 		this.parser.unExpectNewLineAndSkip()
@@ -47,8 +47,8 @@ class StatementIfParser extends ParserExtends {
 			this.consume(untilLc)
 		}
 		this.Next(lfNotToken) //skip {
-		statementIf.Block = new ast.Block()
-		this.bp.parseStatementList(statementIf.Block, false)
+		statementIf.block = new ast.Block()
+		this.bp.parseStatementList(statementIf.block, false)
 		if this.parser.token.Type != lex.TokenRc {
 			this.parser.errs.append( new error(sprintf("%s expect '}', but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.Description)))
@@ -120,7 +120,7 @@ class StatementIfParser extends ParserExtends {
 			this.bp.parseStatementList(block, false)
 			t := new ast.StatementElseIf()
 			t.Condition = condition
-			t.Block = block
+			t.block = block
 			elseIfList.append(t)
 			if this.parser.token.Type != lex.TokenRc {
 				err = new error(sprintf("%s expect '}', but '%s'",

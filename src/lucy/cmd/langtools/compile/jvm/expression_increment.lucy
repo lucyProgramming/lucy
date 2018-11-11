@@ -15,24 +15,24 @@ class BuildExpressionIncrement {
 
 	fn  buildSelfIncrement(c cg.ClassHighLevel, code cg.AttributeCode,
 		e ast.Expression, context Context, state StackMapState) -> (maxStack char) {
-		increment := e.Data.(ast.Expression)
+		increment := e.data.(ast.Expression)
 		// identifier  and not captured and type`s int
-		if identifier, ok := increment.Data.(ast.ExpressionIdentifier); ok &&
+		if identifier, ok := increment.data.(ast.ExpressionIdentifier); ok &&
 			increment.Type == ast.ExpressionTypeIdentifier &&
-			identifier.Variable.BeenCapturedAsLeftValue == 0 &&
+			identifier.Variable.beenCapturedAsLeftValue == 0 &&
 			identifier.Variable.Type.Type == ast.VariableTypeInt &&
-			identifier.Variable.IsGlobal == false {
-			if identifier.Variable.LocalValOffset > 255 { // early check
+			identifier.Variable.isGlobal == false {
+			if identifier.Variable.localValOffset > 255 { // early check
 				panic("over 255")
 			}
-			if e.IsStatementExpression == false { //  need it`s value
+			if e.isStatementExpression == false { //  need it`s value
 				if e.Type == ast.ExpressionTypeIncrement || e.Type == ast.ExpressionTypeDecrement {
-					copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, identifier.Variable.LocalValOffset)) // load to stack top
+					copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, identifier.Variable.localValOffset)) // load to stack top
 					maxStack = 1
 				}
 			}
 			code.Codes[code.CodeLength] = cg.OP_iinc
-			code.Codes[code.CodeLength+1] = byte(identifier.Variable.LocalValOffset)
+			code.Codes[code.CodeLength+1] = byte(identifier.Variable.localValOffset)
 			if e.IsIncrement() {
 				code.Codes[code.CodeLength+2] = 1
 			} else { // --
@@ -40,9 +40,9 @@ class BuildExpressionIncrement {
 				code.CodeLength += 3
 			}
 			code.CodeLength += 3
-			if e.IsStatementExpression == false { // I still need it`s value
+			if e.isStatementExpression == false { // I still need it`s value
 				if e.Type == ast.ExpressionTypePrefixIncrement || e.Type == ast.ExpressionTypePrefixDecrement { // decrement
-					copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, identifier.Variable.LocalValOffset)) // load to stack top
+					copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, identifier.Variable.localValOffset)) // load to stack top
 					maxStack = 1
 				}
 			}
@@ -61,20 +61,20 @@ class BuildExpressionIncrement {
 		if t := stack + remainStack; t > maxStack {
 			maxStack = t
 		}
-		currentStack := jvmSlotSize(e.Value) + remainStack
-		if e.IsStatementExpression == false {
+		currentStack := jvmSlotSize(e.value) + remainStack
+		if e.isStatementExpression == false {
 			if e.Type == ast.ExpressionTypeIncrement || e.Type == ast.ExpressionTypeDecrement {
-				currentStack += this.dupStackLeaveValueBelow(code, leftValueKind, e.Value)
+				currentStack += this.dupStackLeaveValueBelow(code, leftValueKind, e.value)
 				if currentStack > maxStack {
 					maxStack = currentStack
 				}
 			}
 		}
-		if t := currentStack + jvmSlotSize(e.Value); t > maxStack {
+		if t := currentStack + jvmSlotSize(e.value); t > maxStack {
 			//
 			maxStack = t
 		}
-		switch e.Value.Type {
+		switch e.value.Type {
 		case ast.VariableTypeByte:
 			if e.IsIncrement() {
 				code.Codes[code.CodeLength] = cg.OP_iconst_1
@@ -144,10 +144,10 @@ class BuildExpressionIncrement {
 			code.Codes[code.CodeLength] = cg.OP_dadd
 			code.CodeLength++
 		}
-		if e.IsStatementExpression == false {
+		if e.isStatementExpression == false {
 			if e.Type == ast.ExpressionTypePrefixIncrement ||
 				e.Type == ast.ExpressionTypePrefixDecrement {
-				currentStack += this.dupStackLeaveValueBelow(code, leftValueKind, e.Value)
+				currentStack += this.dupStackLeaveValueBelow(code, leftValueKind, e.value)
 				if currentStack > maxStack {
 					maxStack = currentStack
 				}

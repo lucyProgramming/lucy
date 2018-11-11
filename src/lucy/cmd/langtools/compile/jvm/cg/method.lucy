@@ -16,18 +16,18 @@ const	AccMethodSynthetic    char = 0x1000 //方法在源文件中不出现，由
  
 
 class MethodInfo {
-	AccessFlags            char
+	accessFlags            char
 	NameIndex              char
 	DescriptorIndex        char
 	Attributes             []AttributeInfo
 	AttributeGroupedByName AttributeGroupedByName
 
 	fn IsBridge() ->(is bool)  {
-		return this.AccessFlags & AccMethodBridge != 0
+		return this.accessFlags & AccMethodBridge != 0
 	}
 
 	fn IsSynthetic()  ->(is bool) {
-		return this.AccessFlags & AccMethodSynthetic != 0
+		return this.accessFlags & AccMethodSynthetic != 0
 	}
 }
 

@@ -15,7 +15,7 @@ public class StatementFor {
 	public RangeAttr           ForRangeAttr
 	public Exits               []cg.Exit
 	public ContinueCodeOffset  int
-	public Pos                 Pos
+	public pos                 Pos
 	initExpressionBlock Block = new Block()
 	/*
 		for i := 0 ; i < 10 ;i ++ {
@@ -25,23 +25,23 @@ public class StatementFor {
 	public Init      Expression
 	public Condition Expression
 	public Increment Expression
-	public Block     Block
+	public block     Block
 
 
 	fn checkRange() ->(errs []error= []error{})  {
 		//
 		var rangeExpression Expression
-		bin := this.Condition.Data.(ExpressionBinary)
+		bin := this.Condition.data.(ExpressionBinary)
 		if bin.Right.Type == ExpressionTypeRange {
-			rangeExpression = this.Condition.Data.(Expression)
+			rangeExpression = this.Condition.data.(Expression)
 		} else if bin.Right.Type == ExpressionTypeList {
-			t := bin.Right.Data.([]Expression)
+			t := bin.Right.data.([]Expression)
 			if len(t) > 1 {
 				errs.append(
 					new error(sprintf("%s for range statement only allow one argument on the right",
-						errMsgPrefix(t[1].Pos))))
+						errMsgPrefix(t[1].pos))))
 			}
-			rangeExpression = t[0].Data.(Expression)
+			rangeExpression = t[0].data.(Expression)
 		}
 		rangeOn, es := rangeExpression.checkSingleValueContextExpression(this.initExpressionBlock)
 		errs.appendAll(es)
@@ -53,16 +53,16 @@ public class StatementFor {
 			conversion := new ExpressionTypeConversion()
 			conversion.Type = new Type()
 			conversion.Type.Type = VariableTypeJavaArray
-			conversion.Type.Pos = rangeOn.Pos
-			conversion.Type.Array = new Type()
-			conversion.Type.Array.Type = VariableTypeByte
-			conversion.Type.Array.Pos = rangeOn.Pos
+			conversion.Type.pos = rangeOn.pos
+			conversion.Type.array = new Type()
+			conversion.Type.array.Type = VariableTypeByte
+			conversion.Type.array.pos = rangeOn.pos
 			conversion.Expression = rangeExpression
 			bs := new Expression()
 			bs.Type = ExpressionTypeCheckCast
-			bs.Data = conversion
-			bs.Pos = rangeOn.Pos
-			bs.Value = conversion.Type
+			bs.data = conversion
+			bs.pos = rangeOn.pos
+			bs.value = conversion.Type
 			rangeExpression = bs
 			rangeOn = conversion.Type
 		}
@@ -70,19 +70,19 @@ public class StatementFor {
 			rangeOn.Type != VariableTypeJavaArray &&
 			rangeOn.Type != VariableTypeMap {
 			errs.append( new error(sprintf("%s cannot range on '%s'",
-				errMsgPrefix(rangeExpression.Pos), rangeOn.TypeString())))
+				errMsgPrefix(rangeExpression.pos), rangeOn.typeString())))
 			return errs
 		}
 		var lefts []Expression
 		if bin.Left.Type == ExpressionTypeList {
-			lefts = bin.Left.Data.([]Expression)
+			lefts = bin.Left.data.([]Expression)
 		} else {
 			lefts = []Expression{bin.Left}
 		}
 		if len(lefts) > 2 {
 			errs.append(
 				new error(sprintf("%s cannot have more than 2 expressions on the left",
-					errMsgPrefix(lefts[2].Pos))))
+					errMsgPrefix(lefts[2].pos))))
 			lefts = lefts[0:2]
 		}
 		modelKv := len(lefts) == 2
@@ -94,7 +94,7 @@ public class StatementFor {
 				if v.Type != ExpressionTypeIdentifier {
 					errs.append(
 						new error(sprintf("%s not a identifier on left",
-							errMsgPrefix(v.Pos))))
+							errMsgPrefix(v.pos))))
 					return errs
 				}
 			}
@@ -102,25 +102,25 @@ public class StatementFor {
 			var identifierV ExpressionIdentifier
 			var posK, posV Pos
 			if modelKv {
-				identifierK = lefts[0].Data.(ExpressionIdentifier)
-				identifierV = lefts[1].Data.(ExpressionIdentifier)
-				posK = lefts[0].Pos
-				posV = lefts[1].Pos
+				identifierK = lefts[0].data.(ExpressionIdentifier)
+				identifierV = lefts[1].data.(ExpressionIdentifier)
+				posK = lefts[0].pos
+				posV = lefts[1].pos
 			} else {
-				identifierV = lefts[0].Data.(ExpressionIdentifier)
-				posV = lefts[0].Pos
+				identifierV = lefts[0].data.(ExpressionIdentifier)
+				posV = lefts[0].pos
 			}
-			if identifierV.Name != UnderScore {
+			if identifierV.name != UnderScore {
 				vd := new Variable()
 				if rangeOn.Type == VariableTypeArray ||
 					rangeOn.Type == VariableTypeJavaArray {
-					vd.Type = rangeOn.Array.Clone()
+					vd.Type = rangeOn.array.Clone()
 				} else {
 					vd.Type = rangeOn.Map.V.Clone()
 				}
-				vd.Pos = posV
-				vd.Name = identifierV.Name
-				err = this.initExpressionBlock.Insert(identifierV.Name, this.Condition.Pos, vd)
+				vd.pos = posV
+				vd.name = identifierV.name
+				err = this.initExpressionBlock.Insert(identifierV.name, this.Condition.pos, vd)
 				if err != null {
 					errs.append(err)
 				}
@@ -128,7 +128,7 @@ public class StatementFor {
 				this.RangeAttr.IdentifierValue = identifierV
 			}
 			if modelKv &&
-				identifierK.Name != UnderScore {
+				identifierK.name != UnderScore {
 				vd := new Variable()
 				var vt Type
 				if rangeOn.Type == VariableTypeArray ||
@@ -137,12 +137,12 @@ public class StatementFor {
 					vt.Type = VariableTypeInt
 				} else {
 					vt = rangeOn.Map.K.Clone()
-					vt.Pos = rangeOn.Pos
+					vt.pos = rangeOn.pos
 				}
-				vd.Name = identifierK.Name
+				vd.name = identifierK.name
 				vd.Type = vt
-				vd.Pos = posK
-				err = this.initExpressionBlock.Insert(identifierK.Name, posK, vd)
+				vd.pos = posK
+				err = this.initExpressionBlock.Insert(identifierK.name, posK, vd)
 				if err != null {
 					errs.append(err)
 				}
@@ -182,7 +182,7 @@ public class StatementFor {
 				kType = new Type()
 				kType.Type = VariableTypeInt
 
-				vType = rangeOn.Array
+				vType = rangeOn.array
 			} else {
 				kType = rangeOn.Map.K
 				vType = rangeOn.Map.V
@@ -190,8 +190,8 @@ public class StatementFor {
 			if receiverKType != null {
 				if receiverKType.assignAble(errs, kType) == false {
 					err = new error(sprintf("%s cannot use '%s' as '%s' for index",
-						errMsgPrefix(this.RangeAttr.ExpressionKey.Pos),
-						receiverKType.TypeString(), kType.TypeString()))
+						errMsgPrefix(this.RangeAttr.ExpressionKey.pos),
+						receiverKType.typeString(), kType.typeString()))
 					errs.append(err)
 					return errs
 				}
@@ -199,21 +199,21 @@ public class StatementFor {
 			if receiverVType != null {
 				if receiverVType.assignAble(errs, vType) == false {
 					err = new error(sprintf("%s cannot use '%s' as '%s' for value destination",
-						errMsgPrefix(this.RangeAttr.ExpressionKey.Pos),
-						receiverKType.TypeString(), kType.TypeString()))
+						errMsgPrefix(this.RangeAttr.ExpressionKey.pos),
+						receiverKType.typeString(), kType.typeString()))
 					errs.append(err)
 					return errs
 				}
 			}
 		}
-		errs.appendAll( this.Block.check())
+		errs.appendAll( this.block.check())
 		return errs
 	}
 	fn check(block Block) ->(errs []error = []error{})  {
 		this.initExpressionBlock.inherit(block)
-		this.initExpressionBlock.InheritedAttribute.ForContinue = this
-		this.initExpressionBlock.InheritedAttribute.ForBreak = this
-		this.Block.inherit(this.initExpressionBlock)
+		this.initExpressionBlock.inheritedAttribute.forContinue = this
+		this.initExpressionBlock.inheritedAttribute.forBreak = this
+		this.block.inherit(this.initExpressionBlock)
 		if this.Init == null &&
 			this.Increment == null &&
 			this.Condition != null &&
@@ -222,7 +222,7 @@ public class StatementFor {
 			return this.checkRange()
 		}
 		if this.Init != null {
-			this.Init.IsStatementExpression = true
+			this.Init.isStatementExpression = true
 			if err := this.Init.canBeUsedAsStatement(); err != null {
 				errs.append(err)
 			}
@@ -237,11 +237,11 @@ public class StatementFor {
 			errs.appendAll(es)
 			if t != null && t.Type != VariableTypeBool {
 				errs.append( new error(sprintf("%s condition must be bool expression,but %s",
-					errMsgPrefix(this.Condition.Pos), t.TypeString())))
+					errMsgPrefix(this.Condition.pos), t.typeString())))
 			}
 		}
 		if this.Increment != null {
-			this.Increment.IsStatementExpression = true
+			this.Increment.isStatementExpression = true
 			if err := this.Increment.canBeUsedAsStatement(); err != null {
 				errs.append(err)
 			}
@@ -251,7 +251,7 @@ public class StatementFor {
 		if len(errs) > 0 {
 			return errs
 		}
-		errs.appendAll( this.Block.check())
+		errs.appendAll( this.block.check())
 		return errs
 	}	
 }

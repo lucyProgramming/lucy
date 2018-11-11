@@ -1,7 +1,7 @@
 class ExpressionCheckBinary {
 	
 	static fn check(e Expression , block Block, errs []error) -> (result Type) {
-		bin := e.Data.(ExpressionBinary)
+		bin := e.data.(ExpressionBinary)
 		left, es := bin.Left.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		right, es := bin.Right.checkSingleValueContextExpression(block)
@@ -24,7 +24,7 @@ class ExpressionCheckBinary {
 			e.Type == ExpressionTypeLogicalAnd {
 			result = new Type()
 			result.Type = VariableTypeBool
-			result.Pos = e.Pos 
+			result.pos = e.pos
 			if left == null || right == null {
 				return result
 			}
@@ -39,14 +39,14 @@ class ExpressionCheckBinary {
 			ExpressionTypeAnd == e.Type ||
 			ExpressionTypeXor == e.Type {
 			if left == null || right == null {
-				if left != null && left.IsNumber() {
+				if left != null && left.isNumber() {
 					result := left.Clone()
-					result.Pos = e.Pos
+					result.pos = e.pos
 					return result
 				}
-				if right != null && right.IsNumber() {
+				if right != null && right.isNumber() {
 					result := right.Clone()
-					result.Pos = e.Pos
+					result.pos = e.pos
 					return result
 				}
 				return null
@@ -55,15 +55,15 @@ class ExpressionCheckBinary {
 				errs.append(e.binaryWrongOpErr())
 			}
 			result = left.Clone()
-			result.Pos = e.Pos
+			result.pos = e.pos
 			return result
 		}
 		if e.Type == ExpressionTypeLsh ||
 			e.Type == ExpressionTypeRsh {
 			if left == null || right == null {
-				if left != null && left.IsNumber() {
+				if left != null && left.isNumber() {
 					result := left.Clone()
-					result.Pos = e.Pos
+					result.pos = e.pos
 					return result
 				}
 				return null
@@ -76,7 +76,7 @@ class ExpressionCheckBinary {
 				bin.Right.convertToNumberType(VariableTypeInt)
 			}
 			result = left.Clone()
-			result.Pos = e.Pos
+			result.pos = e.pos
 			return result
 		}
 		if e.Type == ExpressionTypeEq ||
@@ -87,7 +87,7 @@ class ExpressionCheckBinary {
 			e.Type == ExpressionTypeLt {
 			result = new Type()
 			result.Type = VariableTypeBool
-			result.Pos = e.Pos
+			result.pos = e.pos
 			if left == null || right == null {
 				return result
 			}
@@ -101,7 +101,7 @@ class ExpressionCheckBinary {
 				if left.assignAble(errs, right) == false {
 					errs.append(e.binaryWrongOpErr())
 				}
-			case left.IsNumber():
+			case left.isNumber():
 				if (left.isInteger() && right.isInteger()) ||
 					(left.isFloat() && right.isFloat()) {
 					if left.assignAble(errs, right) == false {
@@ -114,7 +114,7 @@ class ExpressionCheckBinary {
 				} else {
 					errs.append(e.binaryWrongOpErr())
 				}
-			case left.IsPointer():
+			case left.isPointer():
 				if left.assignAble(errs, right) == false || e.isEqOrNe() == false {
 					errs.append(e.binaryWrongOpErr())
 				}
@@ -132,12 +132,12 @@ class ExpressionCheckBinary {
 			if left == null || right == null {
 				if left != null {
 					result := left.Clone()
-					result.Pos = e.Pos
+					result.pos = e.pos
 					return result
 				}
 				if right != null {
 					result := right.Clone()
-					result.Pos = e.Pos
+					result.pos = e.pos
 					return result
 				}
 				return null
@@ -150,7 +150,7 @@ class ExpressionCheckBinary {
 				}
 				result = new Type()
 				result.Type = VariableTypeString
-				result.Pos = e.Pos
+				result.pos = e.pos
 				return result
 			}
 			if (left.isInteger() && right.isInteger()) ||
@@ -166,7 +166,7 @@ class ExpressionCheckBinary {
 				errs.append(e.binaryWrongOpErr())
 			}
 			result = left.Clone()
-			result.Pos = e.Pos
+			result.pos = e.pos
 			return result
 		}
 		return null

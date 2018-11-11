@@ -22,9 +22,9 @@ class FunctionParser extends ParserExtends{
 			this.parser.errs.append( err)
 			this.consume(untilLp)
 		}
-		f.Pos = this.parser.mkPos()
+		f.pos = this.parser.mkPos()
 		if this.parser.token.Type == lex.TokenIdentifier {
-			f.Name = this.parser.token.stringValue
+			f.name = this.parser.token.stringValue
 			this.Next(lfNotToken)
 		}
 		f.Type, err = this.parseFunctionType()
@@ -45,10 +45,10 @@ class FunctionParser extends ParserExtends{
 			this.parser.errs.append( err)
 			this.consume(untilLc)
 		}
-		f.Block.IsFunctionBlock = true
-		f.Block.Fn = f
+		f.block.isFunctionBlock = true
+		f.block.Fn = f
 		this.Next(lfNotToken) // skip {
-		this.parser.BlockParser.parseStatementList(f.Block, false)
+		this.parser.BlockParser.parseStatementList(f.block, false)
 		if this.parser.token.Type != lex.TokenRc {
 			err = new error(sprintf("%s expect '}', but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.Description))
@@ -130,9 +130,9 @@ class FunctionParser extends ParserExtends{
 		} else {
 			functionType.ReturnList = new []ast.Variable(1)
 			functionType.ReturnList[0] = new ast.Variable()
-			functionType.ReturnList[0].Pos = this.parser.mkPos()
+			functionType.ReturnList[0].pos = this.parser.mkPos()
 			functionType.ReturnList[0].Type = new ast.Type()
-			functionType.ReturnList[0].Type.Pos = this.parser.mkPos()
+			functionType.ReturnList[0].Type.pos = this.parser.mkPos()
 			functionType.ReturnList[0].Type.Type = ast.VariableTypeVoid
 		}
 		return functionType, err
@@ -152,7 +152,7 @@ class FunctionParser extends ParserExtends{
 		this.Next(lfIsToken) // skip =
 		for k, v := range returnList {
 			var er error
-			v.DefaultValueExpression, er = this.parser.ExpressionParser.parseExpression(false)
+			v.defaultValueExpression, er = this.parser.ExpressionParser.parseExpression(false)
 			if er != null {
 				this.consume(untilComma)
 				err = er

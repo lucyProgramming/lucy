@@ -27,7 +27,7 @@ class BuildinFunctionPrintf {
         defer {
             state.popStack(len(state.Stacks) - length)
         }
-        call := e.Data.(ast.ExpressionFunctionCall)
+        call := e.data.(ast.ExpressionFunctionCall)
         meta := call.BuildInFunctionMeta.(ast.BuildInFunctionPrintfMeta)
         code.Codes[code.CodeLength] = cg.OP_getstatic
         c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
@@ -53,7 +53,7 @@ class BuildinFunctionPrintf {
         }
         objectArray := new ast.Type()
         objectArray.Type = ast.VariableTypeJavaArray
-        objectArray.Array = state.newObjectVariableType(javaRootClass)
+        objectArray.array = state.newObjectVariableType(javaRootClass)
         state.pushStack(c, objectArray)
         index := int(0)
         for _, v := range call.Args {
@@ -69,8 +69,8 @@ class BuildinFunctionPrintf {
             if t := currentStack + stack; t > maxStack {
                 maxStack = t
             }
-            if v.Value.IsPointer() == false {
-                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.Value)
+            if v.value.isPointer() == false {
+                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.value)
             }
             code.Codes[code.CodeLength] = cg.OP_aastore
             code.CodeLength++

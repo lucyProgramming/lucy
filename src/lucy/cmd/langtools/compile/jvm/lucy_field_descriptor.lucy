@@ -22,12 +22,12 @@ class LucyFieldSignature {
         }
         if variableType.Type == ast.VariableTypeEnum {
             d = "E"
-            d += variableType.Enum.Name + ";"
+            d += variableType.Enum.name + ";"
             return d
         }
         if variableType.Type == ast.VariableTypeArray {
             d = "]"
-            d += .Encode(variableType.Array)
+            d += .Encode(variableType.array)
             return d
         }
         if variableType.Type == ast.VariableTypeFunction {
@@ -41,12 +41,12 @@ class LucyFieldSignature {
         if bs[0] == 'M' {
             bs = bs[1:]
             var kt ast.Type
-            bs, kt, err = this.Decode(bs)
+            bs, kt, err = .Decode(bs)
             if err != null {
                 return bs, null, err
             }
             var vt ast.Type
-            bs, vt, err = this.Decode(bs)
+            bs, vt, err = .Decode(bs)
             if err != null {
                 return bs, null, err
             }
@@ -63,7 +63,7 @@ class LucyFieldSignature {
             a.Type = ast.VariableTypeEnum
             index := bytes.Index(bs, []byte{';'})
             a.Enum = newast.Enum ()
-            a.Enum.Name = string(bs[:index])
+            a.Enum.name = string(bs[:index])
             bs = bs[index+1:]
             return bs, a, null
         }
@@ -81,7 +81,7 @@ class LucyFieldSignature {
             bs = bs[1:]
             a := new ast.Type()
             a.Type = ast.VariableTypeArray
-            bs, a.Array, err = this.Decode(bs)
+            bs, a.array, err = .Decode(bs)
             return bs, a, err
         }
         return Descriptor.ParseType(bs)

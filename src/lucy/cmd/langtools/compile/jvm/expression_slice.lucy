@@ -23,18 +23,18 @@ class BuildExpressionSlice {
         defer   {
             state.popStack(len(state.Stacks) - stackLength)
         }
-        slice := e.Data.(ast.ExpressionSlice)
+        slice := e.data.(ast.ExpressionSlice)
         maxStack = this.build(c, code, slice.ExpressionOn, context, state)
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
         // build start
         stack := this.build(c, code, slice.Start, context, state)
-        if t := 1 + stack; t > maxStack {
+        if t := char(1) + stack; t > maxStack {
             maxStack = t
         }
         if slice.End != null {
-            state.pushStack(c, slice.Start.Value)
+            state.pushStack(c, slice.Start.value)
             stack = this.build(c, code, slice.End, context, state)
-            if t := 2 + stack; t > maxStack {
+            if t := char(2) + stack; t > maxStack {
                 maxStack = t
             }
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
@@ -58,24 +58,24 @@ class BuildExpressionSlice {
 
     fn  buildSlice(c cg.ClassHighLevel, code cg.AttributeCode,
         e ast.Expression, context Context, state StackMapState) -> (maxStack char) {
-        slice := e.Data.(ast.ExpressionSlice)
-        if slice.ExpressionOn.Value.Type == ast.VariableTypeString {
+        slice := e.data.(ast.ExpressionSlice)
+        if slice.ExpressionOn.value.Type == ast.VariableTypeString {
             return this.buildStringSlice(c, code, e, context, state)
         }
         stackLength := len(state.Stacks)
         defer  {
             state.popStack(len(state.Stacks) - stackLength)
         }
-        meta := ArrayMetas[e.Value.Array.Type]
+        meta := ArrayMetas[e.value.array.Type]
         maxStack = this.build(c, code, slice.ExpressionOn, context, state)
-        state.pushStack(c, slice.ExpressionOn.Value)
+        state.pushStack(c, slice.ExpressionOn.value)
         if slice.End != null {
             // build start
             stack := this.build(c, code, slice.Start, context, state)
-            if t := 1 + stack; t > maxStack {
+            if t := char(1) + stack; t > maxStack {
                 maxStack = t
             }
-            state.pushStack(c, slice.Start.Value)
+            state.pushStack(c, slice.Start.value)
             stack = this.build(c, code, slice.End, context, state)
             if t := 3 + stack; t > maxStack {
                 maxStack = t
@@ -90,9 +90,9 @@ class BuildExpressionSlice {
                 "()I"
             ), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
-            state.pushStack(c, slice.Start.Value)
+            state.pushStack(c, slice.Start.value)
             stack := this.build(c, code, slice.Start, context, state)
-            if t := 2 + stack; t > maxStack {
+            if t := char(2) + stack; t > maxStack {
                 maxStack = t
             }
             code.Codes[code.CodeLength] = cg.OP_swap

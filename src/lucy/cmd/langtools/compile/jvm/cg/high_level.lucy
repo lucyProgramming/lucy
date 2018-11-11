@@ -1,15 +1,15 @@
 
 
 public class ConstantInfoNameAndTypeHighLevel {
-	public Name       string
+	public name       string
 	public Descriptor string
-	public fn ConstantInfoNameAndTypeHighLevel(Name ,Descriptor string  ){
+	public fn ConstantInfoNameAndTypeHighLevel(name ,Descriptor string  ){
 		this.super()
-		this.Name = Name
+		this.name = name
 		this.Descriptor = Descriptor
 	}
 	public fn toString() ->(s string) {
-		return this.Name + ";" + this.Descriptor
+		return this.name + ";" + this.Descriptor
 	}
 }
 

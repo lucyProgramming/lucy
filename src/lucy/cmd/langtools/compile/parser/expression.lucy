@@ -78,14 +78,14 @@ class ExpressionParser extends  ParserExtends {
 				return null, err
 			}
 			if left.Type == ast.ExpressionTypeList {
-				left.Data.([]ast.Expression).append(left2)
+				left.data.([]ast.Expression).append(left2)
 			} else {
 				newExpression := new ast.Expression()
 				newExpression.Type = ast.ExpressionTypeList
-				newExpression.Pos = left.Pos
-				newExpression.Op = "list"
+				newExpression.pos = left.pos
+				newExpression.op = "list"
 				list := []ast.Expression{left, left2}
-				newExpression.Data = list
+				newExpression.data = list
 				left = newExpression
 			}
 		}
@@ -125,11 +125,11 @@ class ExpressionParser extends  ParserExtends {
         this.Next(lfNotToken) // skip = :=
         result := new ast.Expression()
         result.Type = expressionType
-        result.Op = opName
+        result.op = opName
         bin := new ast.ExpressionBinary()
-        result.Data = bin
+        result.data = bin
         bin.Left = left
-        result.Pos = pos
+        result.pos = pos
         if isMulti {
             es, err := this.parseExpressions(lex.TokenSemicolon)
             if err != null {
@@ -137,7 +137,7 @@ class ExpressionParser extends  ParserExtends {
             }
             bin.Right = new ast.Expression()
             bin.Right.Type = ast.ExpressionTypeList
-            bin.Right.Data = es
+            bin.Right.data = es
         } else {
             bin.Right, err = this.parseExpression(false)
             if err != null {
@@ -174,11 +174,11 @@ class ExpressionParser extends  ParserExtends {
 		this.Next(lfIsToken) // skip )
 		e = new ast.Expression()
 		e.Type = ast.ExpressionTypeCheckCast
-		e.Pos = pos
+		e.pos = pos
 		t := new ast.ExpressionTypeConversion()
 		t.Type = to
 		t.Expression = on
-		e.Data = t
+		e.data = t
 	}
 
 	fn looksLikeExpression() ->(looksLike bool)  {
@@ -224,10 +224,10 @@ class ExpressionParser extends  ParserExtends {
 		this.Next(lfNotToken) // skip {
 		e = new ast.Expression()
 		e.Type =  ast.ExpressionTypeMap
-		e.Op = "mapLiteral"
+		e.op = "mapLiteral"
 		m := new ast.ExpressionMap()
 		m.Type = typ
-		e.Data = m
+		e.data = m
 		for this.parser.token.Type != lex.TokenEof &&
 			this.parser.token.Type != lex.TokenRc {
 			// key
@@ -251,7 +251,7 @@ class ExpressionParser extends  ParserExtends {
 			}
 			t := new ast.ExpressionKV()
 			t.Key = k
-			t.Value = v
+			t.value = v
 			m.KeyValuePairs.append( t)
 			if this.parser.token.Type == lex.TokenComma {
 				// read next  key value pair
@@ -267,7 +267,7 @@ class ExpressionParser extends  ParserExtends {
 			this.parser.errs.append( err)
 			this.parser.consume(untilRc)
 		}
-		e.Pos = this.parser.mkPos()
+		e.pos = this.parser.mkPos()
 		this.Next(lfIsToken) // skip }
 	}
 

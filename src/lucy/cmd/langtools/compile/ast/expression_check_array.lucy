@@ -7,10 +7,10 @@ class ExprssionCheckArray {
 		in array type must equal
 	*/
 	static fn check(e Expression , block Block, errs []error) ->(valueType Type)  {
-		arr := e.Data.(ExpressionArray)
+		arr := e.data.(ExpressionArray)
 		if arr.Type == null && len(arr.Expressions) == 0 {
 			errs.append(new error(sprintf("%s array literal has no type and no expression, cannot inference it`s type ",
-					errMsgPrefix(e.Pos))))
+					errMsgPrefix(e.pos))))
 			return null
 		}
 		var noType = true
@@ -30,27 +30,27 @@ class ExprssionCheckArray {
 			}
 			if arr.Type != null &&
 				noType == false {
-				convertExpressionToNeed(v, arr.Type.Array, eType)
-				eType = v.Value
+				convertExpressionToNeed(v, arr.Type.array, eType)
+				eType = v.value
 			}
 			if noType && arr.Type == null {
 				if err := eType.isTyped(); err == null {
 					arr.Type = new Type()
 					arr.Type.Type = VariableTypeArray
-					arr.Type.Array = eType.Clone()
-					arr.Type.Pos = e.Pos
+					arr.Type.array = eType.Clone()
+					arr.Type.pos = e.pos
 				} else {
 					errs.append(err)
 				}
 			}
 			if arr.Type != null {
-				if arr.Type.Array.assignAble(errs, eType) == false {
+				if arr.Type.array.assignAble(errs, eType) == false {
 					if noType {
 						errs.append(new error(sprintf("%s array literal mix up '%s' and '%s'",
-							errMsgPrefix(eType.Pos), arr.Type.Array.TypeString(), eType.TypeString())))
+							errMsgPrefix(eType.pos), arr.Type.array.typeString(), eType.typeString())))
 					} else {
 						errs.append(new error( sprintf("%s cannot use '%s' as '%s'",
-							errMsgPrefix(eType.Pos), eType.TypeString(), arr.Type.Array.TypeString())))
+							errMsgPrefix(eType.pos), eType.typeString(), arr.Type.array.typeString())))
 					}
 				}
 			}
@@ -59,7 +59,7 @@ class ExprssionCheckArray {
 			return null
 		}
 		valueType = arr.Type.Clone()
-		valueType.Pos = e.Pos
+		valueType.pos = e.pos
 	}
 } 
 

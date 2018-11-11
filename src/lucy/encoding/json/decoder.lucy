@@ -10,7 +10,7 @@ import "java/lang/Double"
 import "java/lang/Long"
 import "java/lang/Character" 
 import "java/lang/String" 
-import "java/lang/reflect/Array"
+import "java/lang/reflect/array"
 
 
 enum JsonSyntaxTreeType {
@@ -168,21 +168,21 @@ public class Decoder {
 	private fn decodeArrayFromTree (tree JsonSyntaxTreeNode , x Object , c Class) -> (x2 Object  ){
 		componentClass := c.getComponentType()
 		if tree.Type == JsonSyntaxTreeTypeNull {
-			x2 = Array.newInstance( componentClass, 0)
+			x2 = array.newInstance( componentClass, 0)
 			return 
 		}
 		if tree.Type != JsonSyntaxTreeTypeArray {
 		    panic(sprintf("cannot decode '%s' to 'array'" , tree.nodeType()))
 		}
-		x2 = Array.newInstance( componentClass, tree.arrayElements.size())
+		x2 = array.newInstance( componentClass, tree.arrayElements.size())
 		for k,v := range tree.arrayElements {
 			if componentClass.isPrimitive() {
 				t  := .decodePrimitives(componentClass ,v )
-				Array.set(x2 , k , t)
+				array.set(x2 , k , t)
 			}else {
 				t := componentClass.newInstance() 
 				t2 := this.decodeFromTree(v , t )
-				Array.set(x2 , k , t2)
+				array.set(x2 , k , t2)
 			}
 		}
 		return x2

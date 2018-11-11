@@ -51,6 +51,7 @@ class LucyMethodSignature {
 		if len(ft.ParameterList) > 0 {
 			ft.ParameterList = null
 		}
+		ft.ParameterList = []ast.Variable{}
 		for bs[0] != ')' {
 			var t ast.Type
 			bs, t, err = LucyFieldSignature.Decode(bs)
@@ -59,7 +60,7 @@ class LucyMethodSignature {
 			}
 			vd := new ast.Variable()
 			vd.Type = t
-			ft.ParameterList = append(ft.ParameterList, vd)
+			ft.ParameterList.append(vd)
 		}
 		if bs[0] != ')' {
 			return bs, new error(sprintf("function type format wrong"))
@@ -76,14 +77,14 @@ class LucyMethodSignature {
 					return bs, err
 				}
 				v.Type = t
-				ft.ReturnList = append(ft.ReturnList, v)
+				ft.ReturnList.append(v)
 			}
 			bs = bs[1:] // skip )
 		} else if bs[0] == 'V' {
 			bs = bs[1:] // skip V
 			ft.ReturnList = new []ast.Variable(1)
 			ft.ReturnList[0] = new ast.Variable()
-			ft.ReturnList[0].Name = "returnValue"
+			ft.ReturnList[0].name = "returnValue"
 			ft.ReturnList[0].Type = new ast.Type()
 			ft.ReturnList[0].Type.Type = ast.VariableTypeVoid
 		} else {

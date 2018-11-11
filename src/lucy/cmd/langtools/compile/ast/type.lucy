@@ -38,53 +38,53 @@ public class Map {
 
 public class Type {
 	public Type           VariableTypeKind
-	public IsBuildIn      bool // build in type alias
-	public IsVariableArgs bool // int ...
-	public Resolved       bool
-	public Pos            Pos
-	public Name           string
-	public Array          Type
+	public isBuildIn      bool // build in type alias
+	public isVariableArgs bool // int ...
+	public resolved       bool
+	public pos            Pos
+	public name           string
+	public array          Type
 	public Class          Class
 	public Enum           Enum
-	public EnumName       EnumName // indicate a const
+	public enumName       EnumName // indicate a const
 	public Function       Function
-	public FunctionType   FunctionType
+	public functionType   FunctionType
 	public Map            Map
 	public Package        Package
-	public Alias          TypeAlias
+	public alias          TypeAlias
 	
 
 	// copy to t 
 	fn cp(t Type) {
 	    t.Type = this.Type
-	    t.IsBuildIn = this.IsBuildIn
-	    t.IsVariableArgs = this.IsVariableArgs
-	    t.Resolved = this.Resolved
-	    t.Pos = this.Pos
-	    t.Name = this.Name
-	    t.Array = this.Array
+	    t.isBuildIn = this.isBuildIn
+	    t.isVariableArgs = this.isVariableArgs
+	    t.resolved = this.resolved
+	    t.pos = this.pos
+	    t.name = this.name
+	    t.array = this.array
 	    t.Class = this.Class
 	    t.Enum = this.Enum
-	    t.EnumName = this.EnumName
+	    t.enumName = this.enumName
 	    t.Function = this.Function
 	    t.Map = this.Map
 	    t.Package = this.Package
-	    t.Alias = this.Alias
+	    t.alias = this.alias
 	}
 	fn validForTypeAssertOrConversion() -> (valid bool) {
-		if this.IsPointer() == false {
+		if this.isPointer() == false {
 			return false
 		}
 		// object or string
 		if this.Type == VariableTypeObject || this.Type == VariableTypeString {
 			return true
 		}
-		if this.Type == VariableTypeArray && this.Array.IsPrimitive() {
+		if this.Type == VariableTypeArray && this.array.isPrimitive() {
 			return true
 		}
 		if this.Type == VariableTypeJavaArray {
-			if this.Array.IsPointer() {
-				return this.Array.validForTypeAssertOrConversion()
+			if this.array.isPointer() {
+				return this.array.validForTypeAssertOrConversion()
 			} else {
 				return true
 			}
@@ -94,10 +94,10 @@ public class Type {
 
 	fn mkDefaultValueExpression() -> (d Expression) {
 		e := new Expression()
-		e.Op = "defaultValueByCompiler"
-		e.IsCompileAuto = true
-		e.Pos = this.Pos
-		e.Value = this.Clone()
+		e.op = "defaultValueByCompiler"
+		e.isCompileAuto = true
+		e.pos = this.pos
+		e.value = this.Clone()
 		switch this.Type {
 		case VariableTypeBool:
 			e.Type = ExpressionTypeBool
@@ -134,7 +134,7 @@ public class Type {
 
 	fn rightValueValid() -> (err error) {
 		if this.Type == VariableTypeBool ||
-			this.IsNumber() ||
+			this.isNumber() ||
 			this.Type == VariableTypeString ||
 			this.Type == VariableTypeObject ||
 			this.Type == VariableTypeArray ||
@@ -148,16 +148,16 @@ public class Type {
 		switch this.Type {
 		case VariableTypePackage:
 			return new error(sprintf("%s use package '%s' without selector",
-				this.Pos.ErrMsgPrefix(), this.Package.Name))
+				this.pos.ErrMsgPrefix(), this.Package.name))
 		case VariableTypeClass:
 			return new error(sprintf("%s use class '%s' without selector",
-				this.Pos.ErrMsgPrefix(), this.Class.Name))
+				this.pos.ErrMsgPrefix(), this.Class.name))
 		case VariableTypeMagicFunction:
 			return new error(sprintf("%s use '%s' without selector",
-				this.Pos.ErrMsgPrefix(), magicIdentifierFunction))
+				this.pos.ErrMsgPrefix(), magicIdentifierFunction))
 		default:
 			return new error(sprintf("%s '%s' is not right value valid",
-				this.Pos.ErrMsgPrefix(), this.TypeString()))
+				this.pos.ErrMsgPrefix(), this.typeString()))
 		}
 	}
 
@@ -173,7 +173,7 @@ public class Type {
 		*/
 		if this.Type == VariableTypeNull {
 			return new error(sprintf("%s '%s' is not typed",
-				this.Pos.ErrMsgPrefix(), this.TypeString()))
+				this.pos.ErrMsgPrefix(), this.typeString()))
 		}
 		return null
 	}
@@ -188,7 +188,7 @@ public class Type {
 		//TODO:: 
 		if cloned.Type == VariableTypeArray ||
 			cloned.Type == VariableTypeJavaArray {
-			cloned.Array = this.Array.Clone()
+			cloned.array = this.array.Clone()
 		}
 		if cloned.Type == VariableTypeMap {
 			cloned.Map = new Map()
@@ -196,41 +196,41 @@ public class Type {
 			cloned.Map.V = this.Map.V.Clone()
 		}
 		if this.Type == VariableTypeFunction {
-			cloned.FunctionType = this.FunctionType.Clone()
+			cloned.functionType = this.functionType.Clone()
 		}
 	}
 
 	fn resolve(block Block) -> (err error) {
-		if this.Resolved {
+		if this.resolved {
 			return null
 		}
-		this.Resolved = true // single threading
+		this.resolved = true // single threading
 		switch this.Type {
 		case VariableTypeTemplate:
-			if block.InheritedAttribute.Function.parameterTypes == null {
+			if block.inheritedAttribute.Function.parameterTypes == null {
 				return new error(sprintf("%s parameter type '%s' not in a template function",
-					errMsgPrefix(this.Pos), this.Name))
+					errMsgPrefix(this.pos), this.name))
 			}
-			if block.InheritedAttribute.Function.parameterTypes[this.Name] == null {
+			if block.inheritedAttribute.Function.parameterTypes[this.name] == null {
 				return new error(sprintf("%s parameter type '%s' not found",
-					errMsgPrefix(this.Pos), this.Name))
+					errMsgPrefix(this.pos), this.name))
 			}
-			pos := this.Pos // keep pos
+			pos := this.pos // keep pos
 			//TODO:: copy
-			//*typ = *block.InheritedAttribute.Function.parameterTypes[this.Name]
-			this.Pos = pos // keep pos
+			//*typ = *block.inheritedAttribute.Function.parameterTypes[this.name]
+			this.pos = pos // keep pos
 			return null
 		case VariableTypeName:
 			return this.resolveName(block)
 		case VariableTypeGlobal:
-			d, exists := PackageBeenCompile.Block.nameExists(this.Name)
+			d, exists := PackageBeenCompile.block.nameExists(this.name)
 			if exists == false {
 				return new error(sprintf("%s '%s' not found",
-					errMsgPrefix(this.Pos), this.Name))
+					errMsgPrefix(this.pos), this.name))
 			}
 			return this.makeTypeFrom(d)
 		case VariableTypeArray, VariableTypeJavaArray:
-			return this.Array.resolve(block)
+			return this.array.resolve(block)
 		case VariableTypeMap:
 			var err error
 			if this.Map.K != null {
@@ -243,12 +243,12 @@ public class Type {
 				return this.Map.V.resolve(block)
 			}
 		case VariableTypeFunction:
-			for _, v := range this.FunctionType.ParameterList {
+			for _, v := range this.functionType.ParameterList {
 				if err := v.Type.resolve(block); err != null {
 					return err
 				}
 			}
-			for _, v := range this.FunctionType.ReturnList {
+			for _, v := range this.functionType.ReturnList {
 				if err := v.Type.resolve(block); err != null {
 					return err
 				}
@@ -260,21 +260,21 @@ public class Type {
 
 	fn resolveName(block Block) -> (err error ) {
 		var d  Object
-		if this.Name.indexOf(".")  < 0  {
+		if this.name.indexOf(".")  < 0  {
 			var loadFromImport bool
-			d = block.searchType(this.Name)
+			d = block.searchType(this.name)
 			if d != null {
 				if t, ok := d.(Class); ok &&
-					t.IsBuildIn == false {
-					_, loadFromImport = shouldAccessFromImports(this.Name, this.Pos, t.Pos)
+					t.isBuildIn == false {
+					_, loadFromImport = shouldAccessFromImports(this.name, this.pos, t.pos)
 				}
 				if t, ok := d.(Type); ok &&
-						t.IsBuildIn == false {
-						_, loadFromImport = shouldAccessFromImports(this.Name, this.Pos, t.Pos)
+						t.isBuildIn == false {
+						_, loadFromImport = shouldAccessFromImports(this.name, this.pos, t.pos)
 				}
 				if t, ok := d.(Enum); ok &&
-						t.IsBuildIn == false {
-						_, loadFromImport = shouldAccessFromImports(this.Name, this.Pos, t.Pos)
+						t.isBuildIn == false {
+						_, loadFromImport = shouldAccessFromImports(this.name, this.pos, t.pos)
 				}
 			} else {
 				loadFromImport = true
@@ -292,7 +292,7 @@ public class Type {
 			}
 		}
 		if d == null {
-			return new error(sprintf("%s type named '%s' not found", errMsgPrefix(this.Pos), this.Name))
+			return new error(sprintf("%s type named '%s' not found", errMsgPrefix(this.pos), this.name))
 		}
 		err = this.makeTypeFrom(d)
 		if err != null {
@@ -302,83 +302,83 @@ public class Type {
 	}
 
 	fn getNameFromImport() -> (d Object, err error) {
-		if this.Name.indexOf(".")  > 0  {
-			i := PackageBeenCompile.getImport(this.Pos.Filename, this.Name)
+		if this.name.indexOf(".")  > 0  {
+			i := PackageBeenCompile.getImport(this.pos.Filename, this.name)
 			if i != null {
-				i.Used = true
+				i.used = true
 				return PackageBeenCompile.load(i.Import)
 			}
 			return null, new error(sprintf("%s type named '%s' not found",
-				errMsgPrefix(this.Pos), this.Name))
+				errMsgPrefix(this.pos), this.name))
 		}
-		packageAndName := this.Name.split(".")
-		i := PackageBeenCompile.getImport(this.Pos.Filename, packageAndName[0])
+		packageAndName := this.name.split(".")
+		i := PackageBeenCompile.getImport(this.pos.Filename, packageAndName[0])
 		if null == i {
 			return null, new error(sprintf("%s package '%s' not imported",
-				errMsgPrefix(this.Pos), packageAndName[0]))
+				errMsgPrefix(this.pos), packageAndName[0]))
 		}
-		i.Used = true
+		i.used = true
 		p, err := PackageBeenCompile.load(i.Import)
 		if err != null {
 			return null, new error(sprintf("%s %.getMessage()",
-				errMsgPrefix(this.Pos), err.getMessage()))
+				errMsgPrefix(this.pos), err.getMessage()))
 		}
 		if pp, ok := p.(Package); ok &&
 			pp != null {
 			var exists bool
-			d, exists = pp.Block.nameExists(packageAndName[1])
+			d, exists = pp.block.nameExists(packageAndName[1])
 			if exists == false {
 				err = new error(sprintf("%s '%s' not found",
-					errMsgPrefix(this.Pos), packageAndName[1]))
+					errMsgPrefix(this.pos), packageAndName[1]))
 			}
 			return d, err
 		} else {
 			return null, new error(sprintf("%s '%s' is not a package",
-				errMsgPrefix(this.Pos), packageAndName[0]))
+				errMsgPrefix(this.pos), packageAndName[0]))
 		}
 	}
 
 	fn makeTypeFrom(d Object) -> (err error)  {
 		if dd := d.(Class) ; dd != null {
-			if dd.LoadFromOutSide && dd.IsPublic() == false {
+			if dd.loadFromOutSide && dd.isPublic() == false {
 				PackageBeenCompile.errors.append(
 				    new error(sprintf("%s class '%s' is not public",
-						       errMsgPrefix(this.Pos), dd.Name)))
+						       errMsgPrefix(this.pos), dd.name)))
 			}
 			this.Type = VariableTypeObject
 			this.Class = dd
 			return null
 		}
 		if t := d.(Type) ; t != null {
-			pos := this.Pos
-			alias := this.Alias
-			resolved := this.Resolved
+			pos := this.pos
+			alias := this.alias
+			resolved := this.resolved
 			//TODO ::
-			this.Pos = pos
-			this.Alias = alias
-			this.Resolved = resolved
+			this.pos = pos
+			this.alias = alias
+			this.resolved = resolved
 			return null
 		}
 		if dd := d.(Enum) ; dd != null {
-			if dd.LoadFromOutSide && dd.isPublic() == false {
+			if dd.loadFromOutSide && dd.isPublic() == false {
 				PackageBeenCompile.errors.append(
 					new error(sprintf("%s enum '%s' is not public",
-						errMsgPrefix(this.Pos), dd.Name)))
+						errMsgPrefix(this.pos), dd.name)))
 			}
 			this.Type = VariableTypeEnum
 			this.Enum = dd
 			return null
 		}
 		return new error(sprintf("%s name '%s' is not a type",
-			errMsgPrefix(this.Pos), this.Name))
+			errMsgPrefix(this.pos), this.name))
 	}
 
-	public fn IsNumber() -> (is bool) {
+	public fn isNumber() -> (is bool) {
 		return this.isInteger() ||
 			this.isFloat()
 	}
 
-	public fn IsPointer() -> (is bool)  {
+	public fn isPointer() -> (is bool)  {
 		return this.Type == VariableTypeObject ||
 			this.Type == VariableTypeArray ||
 			this.Type == VariableTypeJavaArray ||
@@ -404,15 +404,15 @@ public class Type {
 			this.Type == VariableTypeDouble
 	}
 
-	fn IsPrimitive() -> (is bool)  {
-		return this.IsNumber() ||
+	fn isPrimitive() -> (is bool)  {
+		return this.isNumber() ||
 			this.Type == VariableTypeString ||
 			this.Type == VariableTypeBool
 	}
 
-	fn TypeString(prefix string = "") ->(ret string) {
-		if this.Alias != null {
-			return prefix + this.Alias.Name
+	public fn typeString(prefix string = "") ->(ret string) {
+		if this.alias != null {
+			return prefix + this.alias.name
 		}
 		switch this.Type {
 		case VariableTypeBool:
@@ -434,45 +434,45 @@ public class Type {
 		case VariableTypeString:
 			return prefix +  "string"
 		case VariableTypeObject: // class name
-			return prefix +  "object@" + this.Class.Name
+			return prefix +  "object@" + this.Class.name
 		case VariableTypeMap:
 			ret =prefix + "map{"
-			ret += this.Map.K.TypeString()
+			ret += this.Map.K.typeString()
 			ret += " -> "
-			ret += this.Map.V.TypeString()
+			ret += this.Map.V.typeString()
 			ret += "}"
 			return ret 
 		case VariableTypeArray:
-			return this.Array.TypeString(prefix + "[]")
+			return this.array.typeString(prefix + "[]")
 		case VariableTypeJavaArray:
-			if this.IsVariableArgs {
-				ret = prefix + this.Array.TypeString() + "..."
+			if this.isVariableArgs {
+				ret = prefix + this.array.typeString() + "..."
 				return ret 
 			} else {
-				ret = prefix + this.Array.TypeString() + "[]"
+				ret = prefix + this.array.typeString() + "[]"
 				return ret 
 			}
 		case VariableTypeFunction:
-			ret = prefix + "fn " + this.FunctionType.TypeString()
+			ret = prefix + "fn " + this.functionType.typeString()
 			return 
 		case VariableTypeEnum:
-			ret = prefix + "enum(" + this.Enum.Name + ")"
+			ret = prefix + "enum(" + this.Enum.name + ")"
 		case VariableTypeClass:
-			ret = prefix + sprintf("class@%s", this.Class.Name)
+			ret = prefix + sprintf("class@%s", this.Class.name)
 		case VariableTypeName:
-			ret = prefix + this.Name // resolve wrong, but TypeString is ok to return
+			ret = prefix + this.name // resolve wrong, but typeString is ok to return
 		case VariableTypeTemplate:
-			ret = prefix + this.Name
+			ret = prefix + this.name
 		case VariableTypeDynamicSelector:
-			ret = prefix + "dynamicSelector@" + this.Class.Name
+			ret = prefix + "dynamicSelector@" + this.Class.name
 		case VariableTypeVoid:
 			ret = prefix + "void"
 		case VariableTypePackage:
-			ret = prefix + "package@" + this.Package.Name
+			ret = prefix + "package@" + this.Package.name
 		case VariableTypeNull:
 			ret = prefix + "null"
 		case VariableTypeGlobal:
-			ret = prefix + this.Name
+			ret = prefix + this.name
 		case VariableTypeMagicFunction:
 			ret = prefix + magicIdentifierFunction
 		}
@@ -480,15 +480,15 @@ public class Type {
 
 	fn getParameterType(ft FunctionType) -> (pts []string) {
 		if this.Type == VariableTypeName &&
-			ft.haveTemplateName(this.Name) {
+			ft.haveTemplateName(this.name) {
 			this.Type = VariableTypeTemplate // convert to type
 		}
 		if this.Type == VariableTypeTemplate {
-			return []string{this.Name}
+			return []string{this.name}
 		}
 		if this.Type == VariableTypeArray ||
 			this.Type == VariableTypeJavaArray {
-			return this.Array.getParameterType(ft)
+			return this.array.getParameterType(ft)
 		}
 		if this.Type == VariableTypeMap {
 			pts = []string{}
@@ -501,15 +501,15 @@ public class Type {
 
 	fn canBeBindWithParameterTypes(parameterTypes map{ string->Type }) -> (err error) {
 		if this.Type == VariableTypeTemplate {
-			 ok := parameterTypes.keyExist(this.Name)
+			 ok := parameterTypes.keyExist(this.name)
 			if ok == false {
-				return new error(sprintf("typed parameter '%s' not found", this.Name))
+				return new error(sprintf("typed parameter '%s' not found", this.name))
 			}
 			return null
 		}
 		if this.Type == VariableTypeArray ||
 			this.Type == VariableTypeJavaArray {
-			return this.Array.canBeBindWithParameterTypes(parameterTypes)
+			return this.array.canBeBindWithParameterTypes(parameterTypes)
 		}
 		if this.Type == VariableTypeMap {
 			err := this.Map.K.canBeBindWithParameterTypes(parameterTypes)
@@ -526,17 +526,17 @@ public class Type {
 	*/
 	fn bindWithParameterTypes(ft FunctionType, parameterTypes map{string->Type}) -> (err error) {
 		if this.Type == VariableTypeTemplate {
-			ok := parameterTypes.keyExist(this.Name)
+			ok := parameterTypes.keyExist(this.name)
 			if ok == false {
-				panic(sprintf("typed parameter '%s' not found", this.Name))
+				panic(sprintf("typed parameter '%s' not found", this.name))
 			}
 			//TODO ::
 			//*typ = *t.Clone() // real bind
-			parameterTypes[this.Name].cp(this)
+			parameterTypes[this.name].cp(this)
 			return null
 		}
 		if this.Type == VariableTypeArray || this.Type == VariableTypeJavaArray {
-			return this.Array.bindWithParameterTypes(ft, parameterTypes)
+			return this.array.bindWithParameterTypes(ft, parameterTypes)
 		}
 		if this.Type == VariableTypeMap {
 			if len(this.Map.K.getParameterType(ft)) > 0 {
@@ -560,17 +560,17 @@ public class Type {
 			return err
 		}
 		if bind.Type == VariableTypeNull {
-			return new error(sprintf("'%s' is un typed", bind.TypeString()))
+			return new error(sprintf("'%s' is un typed", bind.typeString()))
 		}
 		if this.Type == VariableTypeTemplate {
-			mkParameterTypes[this.Name] = bind
+			mkParameterTypes[this.name] = bind
 			return null
 		}
 		if this.Type == VariableTypeArray && bind.Type == VariableTypeArray {
-			return this.Array.canBeBindWithType(ft, mkParameterTypes, bind.Array)
+			return this.array.canBeBindWithType(ft, mkParameterTypes, bind.array)
 		}
 		if this.Type == VariableTypeJavaArray && bind.Type == VariableTypeJavaArray {
-			return this.Array.canBeBindWithType(ft, mkParameterTypes, bind.Array)
+			return this.array.canBeBindWithType(ft, mkParameterTypes, bind.array)
 		}
 		if this.Type == VariableTypeMap && bind.Type == VariableTypeMap {
 			if len(this.Map.K.getParameterType(ft)) > 0 {
@@ -583,7 +583,7 @@ public class Type {
 				return this.Map.V.canBeBindWithType(ft, mkParameterTypes, bind.Map.V)
 			}
 		}
-		return new error(sprintf("cannot bind '%s' to '%s'", bind.TypeString(), this.TypeString()))
+		return new error(sprintf("cannot bind '%s' to '%s'", bind.typeString(), this.typeString()))
 	}
 
 	fn assignAble(errs []error, rightValue Type) ->(able bool) {
@@ -591,32 +591,32 @@ public class Type {
 		if leftValue == rightValue { // equal
 			return true
 		}
-		if leftValue.IsPrimitive() &&
-			rightValue.IsPrimitive() {
+		if leftValue.isPrimitive() &&
+			rightValue.isPrimitive() {
 			return leftValue.Type == rightValue.Type
 		}
-		if leftValue.IsPointer() && rightValue.Type == VariableTypeNull {
+		if leftValue.isPointer() && rightValue.Type == VariableTypeNull {
 			return true
 		}
 		if leftValue.Type == VariableTypeObject &&
-			leftValue.Class.Name == JavaRootClass &&
-			rightValue.IsPointer() {
+			leftValue.Class.name == JavaRootClass &&
+			rightValue.isPointer() {
 			return true
 		}
 		if leftValue.Type == VariableTypeArray &&
 			rightValue.Type == VariableTypeArray {
-			return leftValue.Array.assignAble(errs, rightValue.Array)
+			return leftValue.array.assignAble(errs, rightValue.array)
 		}
 		if leftValue.Type == VariableTypeJavaArray &&
 			rightValue.Type == VariableTypeJavaArray {
-			if leftValue.IsVariableArgs != rightValue.IsVariableArgs {
+			if leftValue.isVariableArgs != rightValue.isVariableArgs {
 				return false
 			}
-			return leftValue.Array.assignAble(errs, rightValue.Array)
+			return leftValue.array.assignAble(errs, rightValue.array)
 		}
 
 		if leftValue.Type == VariableTypeEnum && rightValue.Type == VariableTypeEnum {
-			return leftValue.Enum.Name == rightValue.Enum.Name // same enum
+			return leftValue.Enum.name == rightValue.Enum.name // same enum
 		}
 		if leftValue.Type == VariableTypeMap && rightValue.Type == VariableTypeMap {
 			return leftValue.Map.K.assignAble(errs, rightValue.Map.K) &&
@@ -624,25 +624,25 @@ public class Type {
 		}
 		if leftValue.Type == VariableTypeFunction &&
 			rightValue.Type == VariableTypeFunction {
-			return leftValue.FunctionType.equal(rightValue.FunctionType)
+			return leftValue.functionType.equal(rightValue.functionType)
 		}
 		if leftValue.Type == VariableTypeObject && rightValue.Type == VariableTypeObject { // object
-			if err := leftValue.Class.loadSelf(leftValue.Pos); err != null {
-				errs.append(new error( sprintf("%s %s", errMsgPrefix(rightValue.Pos), err.getMessage())))
+			if err := leftValue.Class.loadSelf(leftValue.pos); err != null {
+				errs.append(new error( sprintf("%s %s", errMsgPrefix(rightValue.pos), err.getMessage())))
 				return false
 			}
-			if err := rightValue.Class.loadSelf(rightValue.Pos); err != null {
+			if err := rightValue.Class.loadSelf(rightValue.pos); err != null {
 				errs.append(err)
 				return false
 			}
 			if leftValue.Class.IsInterface() {
-				i, err := rightValue.Class.implementedInterface(leftValue.Pos, leftValue.Class.Name)
+				i, err := rightValue.Class.implementedInterface(leftValue.pos, leftValue.Class.name)
 				if err != null {
 					errs.append(err)
 				}
 				return i
 			} else { // class
-				has, err := rightValue.Class.haveSuperClass(rightValue.Pos, leftValue.Class.Name)
+				has, err := rightValue.Class.haveSuperClass(rightValue.pos, leftValue.Class.name)
 				if err != null {
 					errs.append(err)
 				}
@@ -652,12 +652,12 @@ public class Type {
 		return false
 	}
 
-	public fn Equal(compareTo Type) -> (is bool) {
+	public fn equal(compareTo Type) -> (is bool) {
 		leftValue := this
 		if leftValue.Type != compareTo.Type {
 			return false //early check
 		}
-		if leftValue.IsPrimitive() {
+		if leftValue.isPrimitive() {
 			return true //
 		}
 		if leftValue.Type == VariableTypeVoid {
@@ -666,23 +666,23 @@ public class Type {
 		if leftValue.Type == VariableTypeArray ||
 			leftValue.Type == VariableTypeJavaArray {
 			if leftValue.Type == VariableTypeJavaArray &&
-				leftValue.IsVariableArgs != compareTo.IsVariableArgs {
+				leftValue.isVariableArgs != compareTo.isVariableArgs {
 				return false
 			}
-			return leftValue.Array.Equal(compareTo.Array)
+			return leftValue.array.equal(compareTo.array)
 		}
 		if leftValue.Type == VariableTypeMap {
-			return leftValue.Map.K.Equal(compareTo.Map.K) &&
-				leftValue.Map.V.Equal(compareTo.Map.V)
+			return leftValue.Map.K.equal(compareTo.Map.K) &&
+				leftValue.Map.V.equal(compareTo.Map.V)
 		}
 		if leftValue.Type == VariableTypeEnum {
-			return leftValue.Enum.Name == compareTo.Enum.Name
+			return leftValue.Enum.name == compareTo.Enum.name
 		}
 		if leftValue.Type == VariableTypeObject {
-			return leftValue.Class.Name == compareTo.Class.Name
+			return leftValue.Class.name == compareTo.Class.name
 		}
 		if leftValue.Type == VariableTypeFunction {
-			return leftValue.FunctionType.equal(compareTo.FunctionType)
+			return leftValue.functionType.equal(compareTo.functionType)
 		}
 		return false
 	}

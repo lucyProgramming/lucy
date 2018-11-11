@@ -2,7 +2,7 @@
  class ExpressionCheckIndex {
 
 	static fn check(e Expression , block Block, errs []error) -> (valueType Type) {
-		index := e.Data.(ExpressionIndex)
+		index := e.data.(ExpressionIndex)
 		on, es := index.Expression.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if on == null {
@@ -22,20 +22,20 @@
 						indexValue := index.Index.getLongValue()
 						if indexValue < 0 {
 							errs.append(new error(sprintf("%s index '%d' is negative",
-									index.Index.Pos.ErrMsgPrefix(), indexValue)))
+									index.Index.pos.ErrMsgPrefix(), indexValue)))
 						}
 					}
 				} else {
 					errs.append(new error(sprintf("%s only integer can be used as index,but '%s'",
-							index.Index.Pos.ErrMsgPrefix(), indexType.TypeString())))
+							index.Index.pos.ErrMsgPrefix(), indexType.typeString())))
 				}
 			}
-			valueType = on.Array.Clone()
-			valueType.Pos = e.Pos
+			valueType = on.array.Clone()
+			valueType.pos = e.pos
 			return  
 		case VariableTypeMap:
 			valueType = on.Map.V.Clone()
-			valueType.Pos = e.Pos
+			valueType.pos = e.pos
 			indexType, es := index.Index.checkSingleValueContextExpression(block)
 			errs.appendAll(es)
 			if indexType == null {
@@ -43,7 +43,7 @@
 			}
 			if on.Map.K.assignAble(errs, indexType) == false {
 				errs.append(new error(sprintf("%s cannot use '%s' as '%s' for index",
-					index.Index.Pos.ErrMsgPrefix(), indexType.TypeString(), on.Map.K.TypeString())))
+					index.Index.pos.ErrMsgPrefix(), indexType.typeString(), on.Map.K.typeString())))
 			}
 			return  
 		case VariableTypeString:
@@ -56,16 +56,16 @@
 					}
 				} else {
 					errs.append(new error(sprintf("%s only integer can be used as index,but '%s'",
-						index.Index.Pos.ErrMsgPrefix(), indexType.TypeString())))
+						index.Index.pos.ErrMsgPrefix(), indexType.typeString())))
 				}
 			}
 			valueType = new Type()
 			valueType.Type = VariableTypeByte
-			valueType.Pos =   e.Pos
+			valueType.pos =   e.pos
 			return 
 		default:
 			errs.append(new error(sprintf("%s cannot index '%s'",
-				on.Pos.ErrMsgPrefix(), on.TypeString())))
+				on.pos.ErrMsgPrefix(), on.typeString())))
 			return null
 		}
 	}	

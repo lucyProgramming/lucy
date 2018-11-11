@@ -5,8 +5,8 @@ public class ClassMethod {
 	public Function       Function
 
 	fn narrowDownAccessRange(implementation ClassMethod) ->(is bool ) {
-		if this.IsPublic() {
-            return !implementation.IsPublic()
+		if this.isPublic() {
+            return !implementation.isPublic()
         }
         if this.IsProtected() {
             return implementation.IsPrivate() ||
@@ -19,7 +19,7 @@ public class ClassMethod {
 	}
 	
 	fn accessString() ->(s string) {
-		if this.IsPublic() {
+		if this.isPublic() {
 			return "public"
 		}
 		if this.IsProtected() {
@@ -32,59 +32,59 @@ public class ClassMethod {
 	}
 
 	fn isAccessFlagDefault() ->(is bool ) {
-		return this.Function.AccessFlags&
+		return this.Function.accessFlags&
 			(cg.AccMethodPublic|
 				cg.AccMethodPrivate|
 				cg.AccMethodProtected) == 0
 	}
 
-	fn IsPublic() ->(is bool ) {
-		return (this.Function.AccessFlags & cg.AccMethodPublic) != 0
+	fn isPublic() ->(is bool ) {
+		return (this.Function.accessFlags & cg.AccMethodPublic) != 0
 	}
 	fn IsProtected() ->(is bool ) {
-		return (this.Function.AccessFlags & cg.AccMethodProtected) != 0
+		return (this.Function.accessFlags & cg.AccMethodProtected) != 0
 	}
 
 	public fn IsStatic() ->(is bool ) {
-		return (this.Function.AccessFlags & cg.AccMethodStatic) != 0
+		return (this.Function.accessFlags & cg.AccMethodStatic) != 0
 	}
 
 	fn IsPrivate() ->(is bool ) {
-		return (this.Function.AccessFlags & cg.AccMethodPrivate) != 0
+		return (this.Function.accessFlags & cg.AccMethodPrivate) != 0
 	}
 	fn IsFinal() ->(is bool ) {
-		return (this.Function.AccessFlags & cg.AccMethodFinal) != 0
+		return (this.Function.accessFlags & cg.AccMethodFinal) != 0
 	}
 	fn IsAbstract() ->(is bool ) {
-		return (this.Function.AccessFlags & cg.AccMethodAbstract) != 0
+		return (this.Function.accessFlags & cg.AccMethodAbstract) != 0
 	}
 
 	fn ableAccessFromSubClass() ->(is bool ) {
-		return this.IsPublic() ||
+		return this.isPublic() ||
 			this.IsProtected()
 	}
 
 	fn checkModifierOk() ->(errs []error = []error{}) {
 		if this.IsAbstract() && this.IsFinal() {
 			errs.append(new error(sprintf("%s abstract method cannot be final",
-				errMsgPrefix(this.Function.Pos))))
+				errMsgPrefix(this.Function.pos))))
 		}
 		if this.IsAbstract() && this.IsPrivate() {
 			errs.append( new error(sprintf("%s abstract method cannot be private",
-				errMsgPrefix(this.Function.Pos))))
+				errMsgPrefix(this.Function.pos))))
 		}
-		if this.IsAbstract() && this.Function.Name == SpecialMethodInit {
+		if this.IsAbstract() && this.Function.name == SpecialMethodInit {
 			errs.append( new error(sprintf("%s construction method cannot be abstract",
-				errMsgPrefix(this.Function.Pos))))
+				errMsgPrefix(this.Function.pos))))
 		}
 		return errs
 	}
 
 	fn IsFirstStatementCallFatherConstruction() ->(is bool ) {
-		if len(this.Function.Block.Statements) == 0 {
+		if len(this.Function.block.statements) == 0 {
 			return false
 		}
-		s := this.Function.Block.Statements[0]
+		s := this.Function.block.statements[0]
 		if s.Type != StatementTypeExpression {
 			return false
 		}
@@ -92,8 +92,8 @@ public class ClassMethod {
 		if e.Type != ExpressionTypeMethodCall {
 			return false
 		}
-		call := s.Expression.Data.(ExpressionMethodCall)
-		if call.Expression.IsIdentifier(ThisPointerName) == false || call.Name != SUPER {
+		call := s.Expression.data.(ExpressionMethodCall)
+		if call.Expression.IsIdentifier(ThisPointerName) == false || call.name != SUPER {
 			return false
 		}
 		return true
@@ -104,15 +104,15 @@ public class ClassMethod {
 	fn implementationMethodIsOk(
 		pos Pos,
 		implementation ClassMethod) ->(err error) {
-		if implementation.Function.Pos != null {
-			pos = implementation.Function.Pos
+		if implementation.Function.pos != null {
+			pos = implementation.Function.pos
 		}
 		if implementation.IsStatic() {
-			return new error(sprintf("%s method '%s' is static", pos.ErrMsgPrefix(), this.Function.Name))
+			return new error(sprintf("%s method '%s' is static", pos.ErrMsgPrefix(), this.Function.name))
 		}
 		if this.narrowDownAccessRange(implementation) {
 			return new error(sprintf("%s implementation of method '%s' should not narrow down access range, '%s' -> '%s'",
-				pos.ErrMsgPrefix(), this.Function.Name, this.accessString(), implementation.accessString()))
+				pos.ErrMsgPrefix(), this.Function.name, this.accessString(), implementation.accessString()))
 		}
 		return null
 	}	

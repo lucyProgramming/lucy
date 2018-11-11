@@ -31,12 +31,12 @@ class BlockParser  extends ParserExtends{
     }
 
 	fn parseStatementList(block ast.Block, isGlobal bool) {
-	    if block.Statements == null {
-	        block.Statements = []ast.Statement{}
+	    if block.statements == null {
+	        block.statements = []ast.Statement{}
 	    }
-		block.Pos = this.parser.mkPos()
+		block.pos = this.parser.mkPos()
 		defer {
-			block.EndPos = this.parser.mkPos()
+			block.endPos = this.parser.mkPos()
 		}
 		isDefer := false
 		var deferPos ast.Pos
@@ -101,13 +101,13 @@ class BlockParser  extends ParserExtends{
 				}
 				statement := new ast.Statement()
 				statement.Type = ast.StatementTypeExpression
-				statement.Pos = this.parser.mkPos()
+				statement.pos = this.parser.mkPos()
 				statement.Expression = new ast.Expression()
 				statement.Expression.Type = ast.ExpressionTypeVar
-				statement.Expression.Data = vs
-				statement.Expression.Pos = pos
-				statement.Expression.Op = "var"
-				block.Statements.append(statement)
+				statement.Expression.data = vs
+				statement.Expression.pos = pos
+				statement.Expression.op = "var"
+				block.statements.append(statement)
 				this.parser.validStatementEnding()
 
 			case lex.TokenIf:
@@ -122,8 +122,8 @@ class BlockParser  extends ParserExtends{
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeIf
 				    t.StatementIf = statement
-				    t.Pos = pos
-				    block.Statements.append(t)
+				    t.pos = pos
+				    block.statements.append(t)
 				}
 
 			case lex.TokenFor:
@@ -134,13 +134,13 @@ class BlockParser  extends ParserExtends{
 					this.Next(lfNotToken)
 					continue
 				}
-				statement.Block.IsForBlock = true
+				statement.block.isForBlock = true
 				{
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeFor
 				    t.StatementFor = statement
-				    t.Pos = pos
-                    block.Statements.append(t)
+				    t.pos = pos
+                    block.statements.append(t)
 				}
 			case lex.TokenAbstract:
 				this.parser.Next(lfIsToken)
@@ -160,8 +160,8 @@ class BlockParser  extends ParserExtends{
 				    t := new ast.Statement()
 				    t.Type =  ast.StatementTypeSwitch
 				    t.StatementSwitch =  statement
-				    t.Pos = pos
-				    block.Statements.append(t)
+				    t.pos = pos
+				    block.statements.append(t)
 				}
 			case lex.TokenWhen:
 				pos := this.parser.mkPos()
@@ -175,8 +175,8 @@ class BlockParser  extends ParserExtends{
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeWhen
 				    t.StatementWhen = statement
-				    t.Pos = pos
-                    block.Statements.append(t)
+				    t.pos = pos
+                    block.statements.append(t)
 				}
 			case lex.TokenConst:
 				pos := this.parser.mkPos()
@@ -189,16 +189,16 @@ class BlockParser  extends ParserExtends{
 				}
 				statement := new ast.Statement()
 				statement.Type = ast.StatementTypeExpression
-				statement.Pos = pos
+				statement.pos = pos
 				{
 				    t := new ast.Expression()
 				    t.Type = ast.ExpressionTypeConst
-				    t.Data = cs
-				    t.Pos = pos
-				    t.Op = "const"
+				    t.data = cs
+				    t.pos = pos
+				    t.op = "const"
 				    statement.Expression = t
 				}
-				block.Statements.append(statement)
+				block.statements.append(statement)
 				this.parser.validStatementEnding()
 				if this.parser.token.Type == lex.TokenSemicolon {
 					this.Next(lfNotToken)
@@ -210,14 +210,14 @@ class BlockParser  extends ParserExtends{
 							this.parser.errMsgPrefix())))
 				}
 				st := new ast.StatementReturn()
-				st.Pos = this.parser.mkPos()
+				st.pos = this.parser.mkPos()
 				this.Next(lfIsToken)
 				{
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeReturn
 				    t.StatementReturn = st
-				    t.Pos = st.Pos
-				    block.Statements.append(t)
+				    t.pos = st.pos
+				    block.statements.append(t)
 				}
 				if this.parser.token.Type == lex.TokenRc {
 					continue
@@ -254,22 +254,22 @@ class BlockParser  extends ParserExtends{
 				this.Next(lfNotToken)
 				if isDefer {
 					d := new ast.StatementDefer()
-					d.Block = newBlock
-					d.Pos = deferPos
+					d.block = newBlock
+					d.pos = deferPos
 					{
 					    t := new ast.Statement()
 					    t.Type = ast.StatementTypeDefer
 					    t.Defer = d
-					    t.Pos = pos
-					    block.Statements.append(t)
+					    t.pos = pos
+					    block.statements.append(t)
 					}
 
 				} else {
 					t := new ast.Statement()
 					t.Type = ast.StatementTypeBlock
-					t.Block = newBlock
-					t.Pos = pos
-					block.Statements.append(t)
+					t.block = newBlock
+					t.pos = pos
+					block.statements.append(t)
 				}
 				resetPrefix()
 			case lex.TokenPass:
@@ -284,11 +284,11 @@ class BlockParser  extends ParserExtends{
 				{
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeReturn
-				    t.Pos = pos
+				    t.pos = pos
 				    t.Type = ast.StatementTypeReturn
 				    t.StatementReturn = new ast.StatementReturn()
-				    t.StatementReturn.Pos = pos
-				    block.Statements.append(t)
+				    t.StatementReturn.pos = pos
+				    block.statements.append(t)
 				}
 			case lex.TokenContinue:
 				pos := this.parser.mkPos()
@@ -297,10 +297,10 @@ class BlockParser  extends ParserExtends{
 				{
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeContinue
-				    t.Pos = pos
+				    t.pos = pos
 				    t.StatementContinue = new ast.StatementContinue()
-				    t.StatementContinue.Pos = pos
-				    block.Statements.append(t)
+				    t.StatementContinue.pos = pos
+				    block.statements.append(t)
 				}
 			case lex.TokenBreak:
 				pos := this.parser.mkPos()
@@ -309,9 +309,9 @@ class BlockParser  extends ParserExtends{
 				{
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeBreak
-				    t.Pos = pos
+				    t.pos = pos
 				    t.StatementBreak = new ast.StatementBreak()
-				    t.StatementBreak.Pos = pos
+				    t.StatementBreak.pos = pos
 				}
 			case lex.TokenGoto:
 				pos := this.parser.mkPos()
@@ -325,14 +325,14 @@ class BlockParser  extends ParserExtends{
 					continue
 				}
 				statementGoto := new ast.StatementGoTo()
-				statementGoto.Pos = pos
+				statementGoto.pos = pos
 				statementGoto.LabelName = this.parser.token.stringValue
 				{
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeGoTo
-				    t.Pos = pos
+				    t.pos = pos
 				    t.StatementGoTo = statementGoto
-				    block.Statements.append(t)
+				    block.statements.append(t)
 				}
 				this.Next(lfIsToken)
 				this.parser.validStatementEnding()
@@ -347,24 +347,24 @@ class BlockParser  extends ParserExtends{
 				}
 				this.parser.validStatementEnding()
 				statement := new ast.Statement()
-				statement.Pos = pos
+				statement.pos = pos
 				statement.Type = ast.StatementTypeTypeAlias
 				statement.TypeAlias = alias
-				block.Statements.append(statement)
+				block.statements.append(statement)
 				this.Next(lfNotToken)
 			case lex.TokenClass, lex.TokenInterface:
 				pos := this.parser.mkPos()
 				c, _ := this.parser.ClassParser.parse(isAbstract)
 				if c != null {
 					statement := new ast.Statement()
-					statement.Pos = pos
+					statement.pos = pos
 					if isFinal {
-						c.AccessFlags |= cg.AccClassFinal
-						c.FinalPos = finalPos
+						c.accessFlags |= cg.AccClassFinal
+						c.finalPos = finalPos
 					}
 					statement.Type = ast.StatementTypeClass
 					statement.Class = c
-					block.Statements.append(statement)
+					block.statements.append(statement)
 				}
 
 			case lex.TokenEnum:
@@ -372,10 +372,10 @@ class BlockParser  extends ParserExtends{
 				e, _ := this.parser.EnumParser.parse()
 				if e != null {
 					s := new ast.Statement()
-					s.Pos = pos
+					s.pos = pos
 					s.Type = ast.StatementTypeEnum
 					s.Enum = e
-					block.Statements.append(s)
+					block.statements.append(s)
 				}
 			case lex.TokenImport:
 				pos := this.parser.mkPos()
@@ -384,8 +384,8 @@ class BlockParser  extends ParserExtends{
 					s := new ast.Statement()
 					s.Type = ast.StatementTypeImport
 					s.Import = t
-					s.Pos = pos
-					block.Statements.append(s)
+					s.pos = pos
+					block.statements.append(s)
 				}
 			case lex.TokenElse, lex.TokenElseif:
 				this.parser.errs.append(
@@ -425,17 +425,17 @@ class BlockParser  extends ParserExtends{
 						this.parser.errMsgPrefix())))
 			}
 			statement := new ast.Statement()
-			statement.Pos = pos
+			statement.pos = pos
 			statement.Type = ast.StatementTypeLabel
 			label := new ast.StatementLabel()
-			label.Pos = pos
+			label.pos = pos
 			label.CodeOffset = -1
 			statement.StatementLabel = label
 			label.Statement = statement
-			label.Name = e.Data.(ast.ExpressionIdentifier).Name
-			block.Statements.append(statement)
-			label.Block = block
-			err = block.Insert(label.Name, e.Pos, label) // insert first,so this label can be found before it is checked
+			label.name = e.data.(ast.ExpressionIdentifier).name
+			block.statements.append(statement)
+			label.block = block
+			err = block.Insert(label.name, e.pos, label) // insert first,so this label can be found before it is checked
 			if err != null {
 				this.parser.errs.append( err)
 			}
@@ -443,27 +443,27 @@ class BlockParser  extends ParserExtends{
 			this.parser.validStatementEnding()
 			if isDefer {
 				d := new ast.StatementDefer()
-				d.Pos = deferPos
+				d.pos = deferPos
 			    {
 			        t := new ast.Statement()
 			        t.Type = ast.StatementTypeExpression
 			        t.Expression = e
-			        t.Pos = pos
-			        d.Block.Statements = [t]
+			        t.pos = pos
+			        d.block.statements = [t]
 			    }
 			    {
 			        t := new ast.Statement()
 			        t.Type = ast.StatementTypeDefer
 			        t.Defer = d
-			        block.Statements.append(t)
+			        block.statements.append(t)
 			    }
 
 			} else {
 			    t := new ast.Statement()
 			    t.Type = ast.StatementTypeExpression
 			    t.Expression = e
-			    t.Pos = pos
-			    block.Statements.append(t)
+			    t.pos = pos
+			    block.statements.append(t)
 			}
 		}
 		return

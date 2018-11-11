@@ -14,8 +14,8 @@ class StatementForParser extends ParserExtends{
 
 	protected fn parseFor() -> (statementFor ast.StatementFor, err error) {
 		statementFor = new ast.StatementFor()
-		statementFor.Pos = this.parser.mkPos()
-		statementFor.Block = new ast.Block()
+		statementFor.pos = this.parser.mkPos()
+		statementFor.block = new ast.Block()
 		this.Next(lfIsToken) // skip for
 		this.parser.unExpectNewLineAndSkip()
 		if this.parser.token.Type != lex.TokenLc &&
@@ -64,7 +64,7 @@ class StatementForParser extends ParserExtends{
 			return
 		}
 		this.Next(lfNotToken) // skip {
-		this.bp.parseStatementList(statementFor.Block, false)
+		this.bp.parseStatementList(statementFor.block, false)
 		if this.parser.token.Type != lex.TokenRc {
 			this.parser.errs.append( new error(sprintf("%s expect '}', but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.Description)))

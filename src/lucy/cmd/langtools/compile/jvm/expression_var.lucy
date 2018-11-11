@@ -17,11 +17,11 @@ class BuildExpressionVar {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        vs := e.Data.(ast.ExpressionVar)
+        vs := e.data.(ast.ExpressionVar)
         //
         for _, v := range vs.Variables {
-            v.LocalValOffset = code.MaxLocals
-            if v.BeenCapturedAsLeftValue > 0 {
+            v.localValOffset = code.MaxLocals
+            if v.beenCapturedAsLeftValue > 0 {
                 code.MaxLocals++
             } else {
                 code.MaxLocals += jvmSlotSize(v.Type)
@@ -30,7 +30,7 @@ class BuildExpressionVar {
         index := len(vs.Variables) - 1
         currentStack := char(0)
         for index >= 0 {
-            if vs.Variables[index].BeenCapturedAsLeftValue > 0 {
+            if vs.Variables[index].beenCapturedAsLeftValue > 0 {
                 v := vs.Variables[index]
                 closure.createClosureVar(c, code, v.Type)
                 code.Codes[code.CodeLength] = cg.OP_dup
@@ -43,14 +43,50 @@ class BuildExpressionVar {
             index--
         }
         index = 0
-        store := fn(index int) {
-            if vs.Variables[index].IsGlobal {
+
+        for _, v := range vs.InitValues {
+            if v.HaveMultiValue() {
+                stack := this.eb.build(c, code, v, context, state)
+                if t := currentStack + stack; t > maxStack {
+                    maxStack = t
+                }
+                autoVar := new MultiValueAutoVar(c, code, state)
+                for kk, tt := range v.multiValues {
+                    stack = autoVar.unPack(c, code, kk, tt)
+                    if t := stack + currentStack; t > maxStack {
+                        maxStack = t
+                    }
+                    if vs.Variables[index].isGlobal {
+                        this.BuildPackage.storeGlobalVariable(c, code, vs.Variables[index])
+                    } else {
+                        this.BuildPackage.storeLocalVar(c, code, vs.Variables[index])
+                        if vs.Variables[index].beenCapturedAsLeftValue > 0 {
+                            copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
+                                vs.Variables[index].localValOffset)...)
+                            state.popStack(2)
+                            state.appendLocals(c,
+                                state.newObjectVariableType(closure.getMeta(vs.Variables[index].Type.Type).className))
+                            currentStack -= 2
+                        } else {
+                            state.appendLocals(c, vs.Variables[index].Type)
+                        }
+                    }
+                    index++
+                }
+                continue
+            }
+            //
+            stack := this.eb.build(c, code, v, context, state)
+            if t := currentStack + stack; t > maxStack {
+                maxStack = t
+            }
+            if vs.Variables[index].isGlobal {
                 this.BuildPackage.storeGlobalVariable(c, code, vs.Variables[index])
             } else {
                 this.BuildPackage.storeLocalVar(c, code, vs.Variables[index])
-                if vs.Variables[index].BeenCapturedAsLeftValue > 0 {
+                if vs.Variables[index].beenCapturedAsLeftValue > 0 {
                     copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-                        vs.Variables[index].LocalValOffset)...)
+                        vs.Variables[index].localValOffset)...)
                     state.popStack(2)
                     state.appendLocals(c,
                         state.newObjectVariableType(closure.getMeta(vs.Variables[index].Type.Type).className))
@@ -59,34 +95,13 @@ class BuildExpressionVar {
                     state.appendLocals(c, vs.Variables[index].Type)
                 }
             }
-        }
-        for _, v := range vs.InitValues {
-            if v.HaveMultiValue() {
-                stack := this.build(c, code, v, context, state)
-                if t := currentStack + stack; t > maxStack {
-                    maxStack = t
-                }
-                autoVar := new MultiValueAutoVar()(c, code, state)
-                for kk, tt := range v.MultiValues {
-                    stack = autoVar.unPack(c, code, kk, tt)
-                    if t := stack + currentStack; t > maxStack {
-                        maxStack = t
-                    }
-                    store(index)
-                    index++
-                }
-                continue
-            }
-            //
-            stack := this.build(c, code, v, context, state)
-            if t := currentStack + stack; t > maxStack {
-                maxStack = t
-            }
-            store(index)
             index++
         }
         return
     }
+
+
+
 
 }
 

@@ -1,53 +1,53 @@
  
 
 public class StatementBreak {
-	public Defers              []StatementDefer
+	public defers              []StatementDefer
 	public StatementFor        StatementFor
 	public StatementSwitch     StatementSwitch
 	public SwitchTemplateBlock Block
-	public Pos                 Pos
+	public pos                 Pos
 
 	fn check(block Block) ->(errs []error)  {
-		if block.InheritedAttribute.ForBreak == null {
-			return []error{new error(sprintf("%s 'break' cannot in this scope", this.Pos.ErrMsgPrefix()))}
+		if block.inheritedAttribute.forBreak == null {
+			return []error{new error(sprintf("%s 'break' cannot in this scope", this.pos.ErrMsgPrefix()))}
 		}
-		if block.InheritedAttribute.Defer != null {
+		if block.inheritedAttribute.Defer != null {
 			return []error{new error(sprintf("%s cannot has 'break' in 'defer'",
-				this.Pos.ErrMsgPrefix()))}
+				this.pos.ErrMsgPrefix()))}
 		}
-		if t, ok := block.InheritedAttribute.ForBreak.(StatementFor); ok {
+		if t, ok := block.inheritedAttribute.forBreak.(StatementFor); ok {
 			this.StatementFor = t
-		} else if t, ok := block.InheritedAttribute.ForBreak.(StatementSwitch); ok {
+		} else if t, ok := block.inheritedAttribute.forBreak.(StatementSwitch); ok {
 			this.StatementSwitch = t
 		} else {
-			this.SwitchTemplateBlock = block.InheritedAttribute.ForBreak.(Block)
+			this.SwitchTemplateBlock = block.inheritedAttribute.forBreak.(Block)
 		}
-		this.Defers = []StatementDefer{}
+		this.defers = []StatementDefer{}
 		this.mkDefers(block)
 		return null
 	}
 
 	fn mkDefers(block Block) {
 		if this.StatementFor != null {
-			if block.IsForBlock {
-				this.Defers.appendAll(block.Defers)
+			if block.isForBlock {
+				this.defers.appendAll(block.defers)
 				return
 			}
-			this.mkDefers(block.Outer)
+			this.mkDefers(block.outer)
 			return
 		} else if this.StatementSwitch != null {
 			//switch
-			if block.IsSwitchBlock {
-				this.Defers.appendAll(block.Defers)
+			if block.isSwitchBlock {
+				this.defers.appendAll(block.defers)
 				return
 			}
-			this.mkDefers(block.Outer)
+			this.mkDefers(block.outer)
 		} else { //s.SwitchTemplateBlock != null
-			if block.IsWhenBlock {
-				this.Defers.appendAll(block.Defers)
+			if block.isWhenBlock {
+				this.defers.appendAll(block.defers)
 				return
 			}
-			this.mkDefers(block.Outer)
+			this.mkDefers(block.outer)
 		}
 	}
 }

@@ -3,7 +3,7 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 class ExpressionCheckVar {
 		
 	static fn check(e Expression , block Block, errs []error) {
-		ev := e.Data.(ExpressionVar)
+		ev := e.data.(ExpressionVar)
 		if ev.Type != null {
 			if err := ev.Type.resolve(block); err != null {
 				errs.append(err)
@@ -20,7 +20,7 @@ class ExpressionCheckVar {
 		if ev.Type == null && len(ev.InitValues) == 0 {
 			// looks impossible
 			errs.append(new error( sprintf("%s expression var have not type and no initValues",
-					errMsgPrefix(e.Pos))))
+					errMsgPrefix(e.pos))))
 			return
 		}
 		var err error
@@ -34,7 +34,7 @@ class ExpressionCheckVar {
 				convertExpressionsToNeeds(ev.InitValues, needs, valueTypes)
 			}
 			if len(ev.Variables) > len(valueTypes) {
-				pos := ev.InitValues[len(ev.InitValues)-1].Pos // last Pos
+				pos := ev.InitValues[len(ev.InitValues)-1].pos // last Pos
 				errs.append(new error( sprintf("%s too few values , assign %d values to %d destinations",
 					pos.ErrMsgPrefix(),
 					len(valueTypes),
@@ -51,24 +51,24 @@ class ExpressionCheckVar {
 					if v.Type != null {
 						if v.Type.assignAble(errs, valueTypes[k]) == false {
 							err = new error(sprintf("%s cannot assign  '%s' to '%s'",
-								errMsgPrefix(valueTypes[k].Pos),
-								valueTypes[k].TypeString(),
-								v.Type.TypeString()))
+								errMsgPrefix(valueTypes[k].pos),
+								valueTypes[k].typeString(),
+								v.Type.typeString()))
 							errs.append(err)
 							continue
 						}
 					} else {
 						v.Type = valueTypes[k].Clone()
-						v.Type.Pos = v.Pos
+						v.Type.pos = v.pos
 					}
 				}
 				if v.Type == null {
 					continue
 				}
-				if e.IsGlobal {
-					err = PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
+				if e.isGlobal {
+					err = PackageBeenCompile.block.Insert(v.name, v.pos, v)
 				} else {
-					err = block.Insert(v.Name, v.Pos, v)
+					err = block.Insert(v.name, v.pos, v)
 				}
 				if err != null {
 					errs.append(err)
@@ -78,10 +78,10 @@ class ExpressionCheckVar {
 		} else {
 			for _, v := range ev.Variables {
 				var err error
-				if e.IsGlobal {
-					err = PackageBeenCompile.Block.Insert(v.Name, v.Pos, v)
+				if e.isGlobal {
+					err = PackageBeenCompile.block.Insert(v.name, v.pos, v)
 				} else {
-					err = block.Insert(v.Name, v.Pos, v)
+					err = block.Insert(v.name, v.pos, v)
 				}
 				if err != null {
 					errs.append(err)
@@ -90,13 +90,13 @@ class ExpressionCheckVar {
 				ev.InitValues.append(v.Type.mkDefaultValueExpression())
 			}
 		}
-		if e.IsGlobal {
+		if e.isGlobal {
 			for _, v := range ev.Variables {
-				v.IsGlobal = true
+				v.isGlobal = true
 			}
-			if e.IsPublic {
+			if e.isPublic {
 				for _, v := range ev.Variables {
-					v.AccessFlags |= cg.AccFieldPublic
+					v.accessFlags |= cg.AccFieldPublic
 				}
 			}
 		}
