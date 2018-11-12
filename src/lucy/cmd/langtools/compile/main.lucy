@@ -1,8 +1,16 @@
 
 
+import "lucy/cmd/langtools/compile/lc"
+import "lucy/cmd/langtools/compile/common"
+import "lucy/os"
 
 fn main(args []string) {
-	
+	files,err := CompileFlags.CompileFlags.parse(args)
+	if err != null {
+		printf("parse flag failed,err:%s\n",err.getMessage())
+		os.exit(1)
+	}
+	lc.Main(files)
 }
 
 
