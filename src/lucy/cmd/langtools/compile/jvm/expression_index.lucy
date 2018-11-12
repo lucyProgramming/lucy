@@ -26,9 +26,9 @@ class BuildExpressionIndex {
         if index.Expression.value.Type == ast.VariableTypeString {
             return this.buildStringIndex(c, code, e, context, state)
         }
-        stackLength := len(state.Stacks)
+        stackLength := len(state.stacks)
         defer  {
-            state.popStack(len(state.Stacks) - stackLength)
+            state.popStack(len(state.stacks) - stackLength)
         }
         maxStack = this.eb.build(c, code, index.Expression, context, state)
         state.pushStack(c, index.Expression.value)
@@ -39,7 +39,7 @@ class BuildExpressionIndex {
         if index.Expression.value.Type == ast.VariableTypeArray {
             meta := ArrayMetas[e.value.Type]
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 meta.className,
                 "get",
                meta.getMethodDescription
@@ -78,14 +78,14 @@ class BuildExpressionIndex {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        length := len(state.Stacks)
+        length := len(state.stacks)
         defer  {
-            state.popStack(len(state.Stacks) - length)
+            state.popStack(len(state.stacks) - length)
         }
         index := e.data.(ast.ExpressionIndex)
         maxStack = this.eb.build(c, code, index.Expression, context, state)
         code.Codes[code.CodeLength] = cg.OP_invokevirtual
-        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             javaStringClass,
             "getBytes",
             "()[B"
@@ -106,9 +106,9 @@ class BuildExpressionIndex {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        length := len(state.Stacks)
+        length := len(state.stacks)
         defer   {
-            state.popStack(len(state.Stacks) - length)
+            state.popStack(len(state.stacks) - length)
         }
         index := e.data.(ast.ExpressionIndex)
         maxStack = this.eb.build(c, code, index.Expression, context, state)
@@ -124,7 +124,7 @@ class BuildExpressionIndex {
             TypeConverterAndPrimitivePacker.packPrimitives(c, code, index.Expression.value.Map.K)
         }
         code.Codes[code.CodeLength] = cg.OP_invokevirtual
-        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             mapClass,
             "get",
             "(Ljava/lang/Object;)Ljava/lang/Object;"

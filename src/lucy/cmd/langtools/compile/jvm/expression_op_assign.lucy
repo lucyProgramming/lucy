@@ -21,9 +21,9 @@ class BuildExpressionOpAssign {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        stackLength := len(state.Stacks)
+        stackLength := len(state.stacks)
         defer  {
-            state.popStack(len(state.Stacks) - stackLength)
+            state.popStack(len(state.stacks) - stackLength)
         }
         bin := e.data.(ast.ExpressionBinary)
         maxStack, remainStack, op, leftValueKind :=
@@ -35,12 +35,12 @@ class BuildExpressionOpAssign {
         }
         state.pushStack(c, bin.Left.value)
         currentStack += jvmSlotSize(bin.Left.value)
-        stack = this.build(c, code, bin.Right, context, state)
+        stack = this.eb.build(c, code, bin.Right, context, state)
         if t := currentStack + stack; t > maxStack {
             maxStack = t
         }
         code.Codes[code.CodeLength] = cg.OP_invokevirtual
-        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             javaStringClass,
             `concat`,
             "(Ljava/lang/String;)Ljava/lang/String;"
@@ -48,12 +48,12 @@ class BuildExpressionOpAssign {
         code.CodeLength += 3
         if e.isStatementExpression == false {
             if t := currentStack +
-                this.dupStackLeaveValueBelow(code, leftValueKind, e.value); t > maxStack {
+                this.eb.dupStackLeaveValueBelow(code, leftValueKind, e.value); t > maxStack {
                 maxStack = t
             }
         }
         //copy op
-        copyOPs(code, op...)
+        copyOPs(code, op)
         return
     }
     fn  buildOpAssign(
@@ -62,23 +62,23 @@ class BuildExpressionOpAssign {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        length := len(state.Stacks)
+        length := len(state.stacks)
         defer   {
-            state.popStack(len(state.Stacks) - length)
+            state.popStack(len(state.stacks) - length)
         }
         bin := e.data.(ast.ExpressionBinary)
         if bin.Left.value.Type == ast.VariableTypeString {
-            return this.buildStrPlusAssign(c, code, e, context, state)
+            return this.eb.BuildExpressionStrcat.buildStrCat(c, code, e, context, state)
         }
         maxStack, remainStack, op, leftValueKind := this.eb.BuildExpressionLeftValue.getLeftValue(c, code, bin.Left, context, state)
         //left value must can be used as right value,
-        stack := this.build(c, code, bin.Left, context, state) // load it`s value
+        stack := this.eb.build(c, code, bin.Left, context, state) // load it`s value
         if t := stack + remainStack; t > maxStack {
             maxStack = t
         }
         state.pushStack(c, e.value)
         currentStack := jvmSlotSize(e.value) + remainStack // incase int -> long
-        stack = this.build(c, code, bin.Right, context, state)
+        stack = this.eb.build(c, code, bin.Right, context, state)
         if t := currentStack + stack; t > maxStack {
             maxStack = t
         }
@@ -265,13 +265,13 @@ class BuildExpressionOpAssign {
             code.CodeLength++
         }
         if e.isStatementExpression == false {
-            currentStack += this.dupStackLeaveValueBelow(code, leftValueKind, bin.Left.value)
+            currentStack += this.eb.dupStackLeaveValueBelow(code, leftValueKind, bin.Left.value)
             if currentStack > maxStack {
                 maxStack = currentStack
             }
         }
         //copy op
-        copyOPs(code, op...)
+        copyOPs(code, op)
         return
     }
 

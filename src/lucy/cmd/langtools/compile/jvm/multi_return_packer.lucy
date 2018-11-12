@@ -6,8 +6,8 @@ class MultiValueAutoVar {
 	localVarOffset char
 	fn MultiValueAutoVar(c cg.ClassHighLevel, code cg.AttributeCode, state StackMapState){
         this.super()
-        this.localVarOffset = code.MaxLocals
-        code.MaxLocals++
+        this.localVarOffset = code.maxLocals
+        code.maxLocals++
         copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
             this.localVarOffset))
         state.appendLocals(c, state.newObjectVariableType(javaRootObjectArray))

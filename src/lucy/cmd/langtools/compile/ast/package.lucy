@@ -108,7 +108,7 @@ public class Package {
 			v.block.inherit(this.block)
 			v.block.inheritedAttribute.Function = v
 			v.checkParametersAndReturns(this.errors, false, false)
-			if v.IsGlobalMain() {
+			if v.isGlobalMain() {
 				defineMainOK := false
 				if len(v.Type.ParameterList) == 1 {
 					defineMainOK = v.Type.ParameterList[0].Type.Type == VariableTypeArray &&

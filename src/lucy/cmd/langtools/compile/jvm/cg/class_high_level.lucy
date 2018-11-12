@@ -1,7 +1,7 @@
 import "lucy/binary"
 
 public class ClassHighLevel {
-	Class Class
+	public Class Class
 	/*
 		one class file can be compile form multi source file
 	*/
@@ -12,10 +12,10 @@ public class ClassHighLevel {
 	public interfaces               []string
 	public fields                   map { string -> FieldHighLevel }
 	public methods                  map { string -> []MethodHighLevel }
-	public TriggerPackageInitMethod MethodHighLevel
-	public TemplateFunctions        []AttributeTemplateFunction
+	public triggerPackageInitMethod MethodHighLevel
+	public templateFunctions        []AttributeTemplateFunction
 
-	public fn InsertSourceFile(filename string) {
+	public fn insertSourceFile(filename string) {
 		if this.sourceFiles == null {
 			this.sourceFiles = {filename -> true}
 		    return
@@ -23,15 +23,15 @@ public class ClassHighLevel {
 		this.sourceFiles[filename] = true
 	}
 
-	public fn InsertMethodRefConst(mr ConstantInfoMethodrefHighLevel,
+	public fn insertMethodRefConst(mr ConstantInfoMethodrefHighLevel,
 		location []byte) {
-		binary.BigEndian.putChar(location, this.Class.InsertMethodrefConst(mr))
+		binary.BigEndian.putChar(location, this.Class.insertMethodrefConst(mr))
 	}
 
-	public fn InsertMethodCall(code AttributeCode, op byte,
+	public fn insertMethodCall(code AttributeCode, op byte,
 		className, method, descriptor string) {
 		code.Codes[code.CodeLength] = op
-		this.InsertMethodRefConst(
+		this.insertMethodRefConst(
 		    new ConstantInfoMethodrefHighLevel(     className,     method,  descriptor),
 		    code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
@@ -40,7 +40,7 @@ public class ClassHighLevel {
 	/*
 		new a method name,make_node_objects sure it does exists before
 	*/
-	public fn NewMethodName(prefix string) -> (name string)  {
+	public fn newMethodName(prefix string) -> (name string)  {
 		if this.methods == null ||
 			this.methods[prefix] == null {
 			return prefix
@@ -59,11 +59,11 @@ public class ClassHighLevel {
 		panic("names over flow") // this is not happening
 	}
 
-	public fn InsertStringConst(s string, location []byte) {
-		binary.BigEndian.putChar(location, this.Class.InsertStringConst(s))
+	public fn insertStringConst(s string, location []byte) {
+		binary.BigEndian.putChar(location, this.Class.insertStringConst(s))
 	}
 
-	public fn AppendMethod(ms MethodHighLevel...) {
+	public fn appendMethod(ms MethodHighLevel...) {
 		if this.methods == null {
 			this.methods = new map {string -> []MethodHighLevel}()
 		}
@@ -79,47 +79,47 @@ public class ClassHighLevel {
 		}
 	}
 
-	public fn InsertInterfaceMethodrefConst(
+	public fn insertInterfaceMethodrefConst(
 		constant ConstantInfoInterfaceMethodrefHighLevel,
 		location []byte) {
 		binary.BigEndian.putChar(location,
-			this.Class.InsertInterfaceMethodrefConst(constant))
+			this.Class.insertInterfaceMethodrefConst(constant))
 	}
 
-	public fn InsertMethodTypeConst(constant ConstantInfoMethodTypeHighLevel,
+	public fn insertMethodTypeConst(constant ConstantInfoMethodTypeHighLevel,
 		location []byte) {
 		binary.BigEndian.putChar(location,
-			this.Class.InsertMethodTypeConst(constant))
+			this.Class.insertMethodTypeConst(constant))
 	}
 
-	public fn InsertFieldRefConst(constant ConstantInfoFieldrefHighLevel,
+	public fn insertFieldRefConst(constant ConstantInfoFieldrefHighLevel,
 		location []byte) {
 		binary.BigEndian.putChar(location,
-			this.Class.InsertFieldRefConst(constant))
+			this.Class.insertFieldRefConst(constant))
 	}
 
-	public fn InsertClassConst(className string, location []byte) {
+	public fn insertClassConst(className string, location []byte) {
 		binary.BigEndian.putChar(location,
-			this.Class.InsertClassConst(className))
+			this.Class.insertClassConst(className))
 	}
-	public fn InsertIntConst(i int, location []byte) {
+	public fn insertIntConst(i int, location []byte) {
 		binary.BigEndian.putChar(location,
-			this.Class.InsertIntConst(i))
-	}
-
-	public fn InsertLongConst(value long, location []byte) {
-		binary.BigEndian.putChar(location,
-			this.Class.InsertLongConst(value))
+			this.Class.insertIntConst(i))
 	}
 
-	public fn InsertFloatConst(value float, location []byte) {
+	public fn insertLongConst(value long, location []byte) {
 		binary.BigEndian.putChar(location,
-			this.Class.InsertFloatConst(value))
+			this.Class.insertLongConst(value))
 	}
 
-	public fn InsertDoubleConst(value double, location []byte) {
+	public fn insertFloatConst(value float, location []byte) {
 		binary.BigEndian.putChar(location,
-			this.Class.InsertDoubleConst(value))
+			this.Class.insertFloatConst(value))
+	}
+
+	public fn insertDoubleConst(value double, location []byte) {
+		binary.BigEndian.putChar(location,
+			this.Class.insertDoubleConst(value))
 	}
 
 	/*
@@ -166,7 +166,7 @@ public class ClassHighLevel {
 		return s
 	}
 
-	fn ToLow() ->(c Class) {
+	fn toLow() ->(c Class) {
     	this.Class.fromHighLevel(this)
     	return this.Class
     }

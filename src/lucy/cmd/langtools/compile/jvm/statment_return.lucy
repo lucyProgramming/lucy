@@ -1,9 +1,15 @@
 
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/jvm/cg"
+import "lucy/binary"
+
 
 class BuildReturn {
-
+    eb BuildExpression
+    fn BuildReturn(eb BuildExpression) {
+        this.super()
+        this.eb = eb
+    }
 
     fn  buildReturnStatement(
         c cg.ClassHighLevel,
@@ -24,13 +30,13 @@ class BuildReturn {
         }
         if len(context.function.Type.ReturnList) == 1 {
             if len(statementReturn.expressions) > 0 {
-                maxStack = this.BuildExpression.build(c, code, statementReturn.expressions[0], context, state)
+                maxStack = this.eb.build(c, code, statementReturn.expressions[0], context, state)
             }
             // execute defer first
             if len(statementReturn.defers) > 0 {
                 //return value  is on stack,  store to local var
                 if len(statementReturn.expressions) > 0 {
-                    this.storeLocalVar(c, code, context.function.Type.ReturnList[0])
+                    this.eb.storeLocalVar(c, code, context.function.Type.ReturnList[0])
                 }
                 stack := this.buildDefersForReturn(c, code, context, state, statementReturn)
                 if stack > maxStack {
@@ -38,25 +44,16 @@ class BuildReturn {
                 }
                 //restore the stack
                 if len(statementReturn.expressions) > 0 { //restore stack
-                    this.loadLocalVar(c, code, context.function.Type.ReturnList[0])
+                    this.eb.loadLocalVar(c, code, context.function.Type.ReturnList[0])
                 }
             }
             // in this case,load local var is not under exception handle,should be ok
             if len(statementReturn.expressions) == 0 {
-                this.loadLocalVar(c, code, context.function.Type.ReturnList[0])
+                this.eb.loadLocalVar(c, code, context.function.Type.ReturnList[0])
             }
             switch context.function.Type.ReturnList[0].Type.Type {
-            case ast.VariableTypeBool:
-                fallthrough
-            case ast.VariableTypeByte:
-                fallthrough
-            case ast.VariableTypeShort:
-                fallthrough
-            case ast.VariableTypeEnum:
-                fallthrough
-            case ast.VariableTypeChar:
-                fallthrough
-            case ast.VariableTypeInt:
+            case ast.VariableTypeBool ,ast.VariableTypeByte,ast.VariableTypeShort,
+                ast.VariableTypeEnum,ast.VariableTypeChar,ast.VariableTypeInt:
                 code.Codes[code.CodeLength] = cg.OP_ireturn
             case ast.VariableTypeLong:
                 code.Codes[code.CodeLength] = cg.OP_lreturn
@@ -73,10 +70,10 @@ class BuildReturn {
         //multi returns
         if len(statementReturn.expressions) > 0 {
             if len(statementReturn.expressions) == 1 {
-                maxStack = this.BuildExpression.build(c, code,
+                maxStack = this.eb.build(c, code,
                     statementReturn.expressions[0], context, state)
             } else {
-                maxStack = this.BuildExpression.buildExpressions(c, code,
+                maxStack = this.eb.buildExpressions(c, code,
                     statementReturn.expressions, context, state)
             }
         }
@@ -84,7 +81,7 @@ class BuildReturn {
             //store a simple var,should be no exception
             if len(statementReturn.expressions) > 0 {
                 copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-                    context.multiValueVarOffset)...)
+                    context.multiValueVarOffset))
             }
             stack := this.buildDefersForReturn(c, code, context, state, statementReturn)
             if stack > maxStack {
@@ -94,7 +91,7 @@ class BuildReturn {
             if len(statementReturn.expressions) > 0 {
                 copyOPs(code,
                     loadLocalVariableOps(ast.VariableTypeObject,
-                        context.multiValueVarOffset)...)
+                        context.multiValueVarOffset))
             }
         }
         // return value is on stack
@@ -116,7 +113,7 @@ class BuildReturn {
             return
         }
         if len(context.function.Type.ReturnList) == 1 {
-            this.loadLocalVar(c, code, context.function.Type.ReturnList[0])
+            this.eb.loadLocalVar(c, code, context.function.Type.ReturnList[0])
             maxStack = jvmSlotSize(context.function.Type.ReturnList[0].Type)
             switch context.function.Type.ReturnList[0].Type.Type {
             case ast.VariableTypeBool , ast.VariableTypeByte ,ast.VariableTypeShort,
@@ -138,7 +135,7 @@ class BuildReturn {
         //new a array list
         loadInt32(c, code, int(len(context.function.Type.ReturnList)))
         code.Codes[code.CodeLength] = cg.OP_anewarray
-        c.InsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+        c.insertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.CodeLength += 3
         maxStack = 1 // max stack is
         index := int(0)
@@ -147,7 +144,7 @@ class BuildReturn {
             code.Codes[code.CodeLength] = cg.OP_dup
             code.CodeLength++
             currentStack++
-            this.loadLocalVar(c, code, v)
+            this.eb.loadLocalVar(c, code, v)
             if t := currentStack + jvmSlotSize(v.Type); t > maxStack {
                 maxStack = t
             }
@@ -188,26 +185,26 @@ class BuildReturn {
             context.MakeStackMap(code, state, code.CodeLength)
             e := new cg.ExceptionTable()
             e.startPc = char(statementReturn.defers[index].startPc)
-            e.EndPc = char(code.CodeLength)
-            e.HandlerPc = char(code.CodeLength)
+            e.endPc = char(code.CodeLength)
+            e.handlerPc = char(code.CodeLength)
             if statementReturn.defers[index].exceptionClass == null {
-                e.CatchType = c.InsertClassConst(ast.DefaultExceptionClass)
+                e.catchType = c.Class.insertClassConst(ast.DefaultExceptionClass)
             } else {
-                e.CatchType = c.InsertClassConst(statementReturn.defers[index].exceptionClass.name) // custom c
+                e.catchType = c.Class.insertClassConst(statementReturn.defers[index].exceptionClass.name) // custom c
             }
             code.Exceptions = append(code.Exceptions, e)
             //expect exception on stack
             copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-                context.exceptionVarOffset)...) // this code will make_node_objects stack is empty
+                context.exceptionVarOffset)) // this code will make_node_objects stack is empty
             state.popStack(1)
             // build block
             context.Defer = statementReturn.defers[index]
-            this.buildBlock(c, code, statementReturn.defers[index].Block, context, state)
+            this.buildBlock(c, code, statementReturn.defers[index].block, context, state)
             from.addTop(state)
             context.Defer = null
-            statementReturn.defers[index].ResetLabels()
+            statementReturn.defers[index].resetLabels()
             //if need throw
-            copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)...)
+            copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset))
             code.Codes[code.CodeLength] = cg.OP_dup
             code.CodeLength++
             if 2 > maxStack {

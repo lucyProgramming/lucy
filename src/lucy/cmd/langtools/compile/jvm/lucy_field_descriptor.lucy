@@ -2,6 +2,7 @@
 
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/jvm/cg"
+import "lucy/cmd/langtools/compile/common"
 
 class LucyFieldSignature {
 
@@ -31,7 +32,7 @@ class LucyFieldSignature {
             return d
         }
         if variableType.Type == ast.VariableTypeFunction {
-            d = LucyMethodSignature.Encode(variableType.FunctionType)
+            d = LucyMethodSignature.Encode(variableType.functionType)
             return d
         }
         return Descriptor.typeDescriptor(variableType)
@@ -61,8 +62,8 @@ class LucyFieldSignature {
             bs = bs[1:]
             a := new ast.Type()
             a.Type = ast.VariableTypeEnum
-            index := bytes.index(bs, []byte{';'})
-            a.Enum = newast.Enum ()
+            index := common.Bytes.indexByte(bs, ';')
+            a.Enum = new ast.Enum ()
             a.Enum.name = string(bs[:index])
             bs = bs[index+1:]
             return bs, a, null
@@ -70,8 +71,8 @@ class LucyFieldSignature {
         if bs[0] == '(' {
             a := new ast.Type()
             a.Type = ast.VariableTypeFunction
-            a.FunctionType = new ast.FunctionType()
-            bs, err = LucyMethodSignatureParser.Decode(a.FunctionType, bs)
+            a.functionType = new ast.FunctionType()
+            bs, err = LucyMethodSignature.Decode(a.functionType, bs)
             if err != null {
                 return bs, null, err
             }

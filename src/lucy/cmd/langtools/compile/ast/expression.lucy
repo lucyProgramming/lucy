@@ -22,7 +22,7 @@ public class Expression {
 	public doubleValue double
 	public stringValue string 
 
-	public fn IsIdentifier(identifier string) -> (is bool) {
+	public fn isIdentifier(identifier string) -> (is bool) {
 		if this.Type != ExpressionTypeIdentifier {
 			return false
 		}
@@ -43,7 +43,7 @@ public class Expression {
 		'a' > 'b'
 		1s > 2s
 	*/
-	fn Is2IntCompare() -> (is bool) {
+	public fn is2IntCompare() -> (is bool) {
 		if this.isRelation() == false {
 			return false
 		}
@@ -56,7 +56,7 @@ public class Expression {
 	/*
 		a == null
 	*/
-	fn IsCompare2Null() -> (is bool) {
+	public fn isCompare2Null() -> (is bool) {
 		if this.isRelation() == false {
 			return false
 		}
@@ -68,7 +68,7 @@ public class Expression {
 	/*
 		a > "b"
 	*/
-	fn Is2StringCompare() -> (is bool) {
+	public fn is2StringCompare() -> (is bool) {
 		if this.isRelation() == false {
 			return false
 		}
@@ -80,7 +80,7 @@ public class Expression {
 		var a ,b []int
 		a == b
 	*/
-	fn Is2PointerCompare() -> (is bool) {
+	public fn is2PointerCompare() -> (is bool) {
 		if this.isRelation() == false {
 			return false
 		}
@@ -274,7 +274,7 @@ public class Expression {
 	/*
 		check out this expression is increment or decrement
 	*/
-	public fn IsIncrement() -> (is bool) {
+	public fn isIncrement() -> (is bool) {
 		if this.Type == ExpressionTypeIncrement ||
 			this.Type == ExpressionTypePrefixIncrement ||
 			this.Type == ExpressionTypeDecrement ||
@@ -308,7 +308,7 @@ public class Expression {
 		return false
 	}
 
-	public fn HaveMultiValue() -> (is bool) {
+	public fn haveMultiValue() -> (is bool) {
 		if this.Type == ExpressionTypeFunctionCall ||
 			this.Type == ExpressionTypeMethodCall ||
 			this.Type == ExpressionTypeTypeAssert {
@@ -614,7 +614,7 @@ public class Expression {
 				return new error(sprintf("%s method '%s' is static",
 					this.pos.errMsgPrefix(), method.Function.name))
 			}
-			if false == this.IsIdentifier(ThisPointerName) {
+			if false == this.isIdentifier(ThisPointerName) {
 				if this.value.Class.loadFromOutSide {
 					if this.value.Class.isPublic() == false {
 						return new error(sprintf("%s class '%s' is not public",
@@ -664,7 +664,7 @@ public class Expression {
 				return new error(sprintf("%s field '%s' is static",
 					this.pos.errMsgPrefix(), field.name))
 			}
-			if false == this.IsIdentifier(ThisPointerName) {
+			if false == this.isIdentifier(ThisPointerName) {
 				if this.value.Class.loadFromOutSide {
 					if this.value.Class.isPublic() == false {
 						return new error(sprintf("%s class '%s' is not public",

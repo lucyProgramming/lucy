@@ -17,9 +17,9 @@ class  BuildExpressionAssign {
 		e ast.Expression,
 		context Context,
 		state StackMapState) -> (maxStack char) {
-		stackLength := len(state.Stacks)
+		stackLength := len(state.stacks)
 		defer  {
-			state.popStack(len(state.Stacks) - stackLength)
+			state.popStack(len(state.stacks) - stackLength)
 		}
 		assign := e.data.(ast.ExpressionAssign)
 		left := assign.Lefts[0]
@@ -27,7 +27,7 @@ class  BuildExpressionAssign {
 		var remainStack char
 		var op []byte
 		var leftValueKind LeftValueKind
-		if left.IsIdentifier(ast.UnderScore) == false {
+		if left.isIdentifier(ast.UnderScore) == false {
 			maxStack, remainStack, op, leftValueKind =
 				this.eb.BuildExpressionLeftValue.getLeftValue(c, code, left, context, state)
 		}
@@ -35,7 +35,7 @@ class  BuildExpressionAssign {
 		if t := remainStack + stack; t > maxStack {
 			maxStack = t
 		}
-		if left.IsIdentifier(ast.UnderScore) {
+		if left.isIdentifier(ast.UnderScore) {
 			if jvmSlotSize(right.value) == 1 {
 				code.Codes[code.CodeLength] = cg.OP_pop
 			} else {
@@ -45,7 +45,7 @@ class  BuildExpressionAssign {
 		} else {
 			currentStack := remainStack + jvmSlotSize(left.value)
 			if e.isStatementExpression == false {
-				currentStack += this.dupStackLeaveValueBelow(code, leftValueKind, left.value)
+				currentStack += this.eb.dupStackLeaveValueBelow(code, leftValueKind, left.value)
 				if currentStack > maxStack {
 					maxStack = currentStack
 				}
@@ -73,10 +73,10 @@ class  BuildExpressionAssign {
 		}
 		autoVar := new MultiValueAutoVar(c, code, state)
 		for k, v := range assign.Lefts {
-			if v.IsIdentifier(ast.UnderScore) {
+			if v.isIdentifier(ast.UnderScore) {
 				continue
 			}
-			stackLength := len(state.Stacks)
+			stackLength := len(state.stacks)
 			stack, remainStack, op, _ :=
 				this.eb.BuildExpressionLeftValue.getLeftValue(c, code, v, context, state)
 			if stack > maxStack {
@@ -87,68 +87,12 @@ class  BuildExpressionAssign {
 				maxStack = t
 			}
 			copyOPs(code, op)
-			state.popStack(len(state.Stacks) - stackLength)
+			state.popStack(len(state.stacks) - stackLength)
 		}
 		return
 	}
 
-	fn  dupStackLeaveValueBelow(
-		code cg.AttributeCode,
-		leftValueKind LeftValueKind,
-		stackTopType ast.Type) -> (increment char) {
-		switch leftValueKind {
-		case LeftValueKindLocalVar:
-			if jvmSlotSize(stackTopType) == 1 {
-				increment = 1
-				code.Codes[code.CodeLength] = cg.OP_dup
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_dup2
-				increment = 2
-			}
-			code.CodeLength++
-		case LeftValueKindPutStatic:
-			if jvmSlotSize(stackTopType) == 1 {
-				increment = 1
-				code.Codes[code.CodeLength] = cg.OP_dup
-			} else {
-				code.Codes[code.CodeLength] = cg.OP_dup2
-				increment = 2
-			}
-			code.CodeLength++
-		case LeftValueKindPutField:
-			if jvmSlotSize(stackTopType) == 1 {
-				increment = 1
-				code.Codes[code.CodeLength] = cg.OP_dup_x1
-			} else {
-				increment = 2
-				code.Codes[code.CodeLength] = cg.OP_dup2_x1
-			}
-			code.CodeLength++
-		case LeftValueKindArray, LeftValueKindLucyArray:
-			if jvmSlotSize(stackTopType) == 1 {
-				increment = 1
-				code.Codes[code.CodeLength] = cg.OP_dup_x2
-				code.CodeLength++
-			} else {
-				increment = 2
-				code.Codes[code.CodeLength] = cg.OP_dup2_x2
-				code.CodeLength++
-			}
-
-		case LeftValueKindMap:
-			if jvmSlotSize(stackTopType) == 1 {
-				increment = 1
-				code.Codes[code.CodeLength] = cg.OP_dup_x2
-				code.CodeLength++
-			} else {
-				increment = 2
-				code.Codes[code.CodeLength] = cg.OP_dup2_x2
-				code.CodeLength++
-			}
-		}
-
-		return
-	}
+	
 	
 
 }

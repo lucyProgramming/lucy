@@ -1,8 +1,19 @@
 
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/jvm/cg"
+import "lucy/binary"
 
 class BuildSwitch {
+
+
+    eb BuildExpression
+    bb BuildBlock 
+    
+    fn BuildSwitch(eb BuildExpression , bb BuildBlock ){
+        this.super()
+        this.eb = eb
+        this.bb = bb
+    }
 
     fn buildSwitchStatement(
         c cg.ClassHighLevel,
@@ -28,7 +39,7 @@ class BuildSwitch {
                 code.CodeLength++
             case ast.VariableTypeString:
                 code.Codes[code.CodeLength] = cg.OP_invokevirtual
-                c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+                c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                     javaStringClass,
                    "compareTo",
                     "(Ljava/lang/String;)I"
@@ -40,26 +51,26 @@ class BuildSwitch {
                 context.MakeStackMap(code, state, code.CodeLength+8)
                 state.popStack(1)
                 code.Codes[code.CodeLength] = cg.OP_if_acmpeq
-                binary.BigEndian.putChar(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
+                binary.BigEndian.putChar(code.Codes[code.CodeLength+1:code.CodeLength+3], char(7))
                 code.Codes[code.CodeLength+3] = cg.OP_iconst_1
                 code.Codes[code.CodeLength+4] = cg.OP_goto
-                binary.BigEndian.putChar(code.Codes[code.CodeLength+5:code.CodeLength+7], 4)
+                binary.BigEndian.putChar(code.Codes[code.CodeLength+5:code.CodeLength+7], char(4))
                 code.Codes[code.CodeLength+7] = cg.OP_iconst_0
                 code.CodeLength += 8
             }
         }
         for _, v := range s.PrefixExpressions {
-            stack := this.BuildExpression.build(c, code, v, context, state)
+            stack := this.eb.build(c, code, v, context, state)
             if stack > maxStack {
                 maxStack = stack
             }
         }
-        stack := this.BuildExpression.build(c, code, s.condition, context, state)
+        stack := this.eb.build(c, code, s.condition, context, state)
         if stack > maxStack {
             maxStack = stack
         }
         //value is on stack
-        var notMatch ast.Statement
+        var notMatch cg.Exit
         size := jvmSlotSize(s.condition.value)
         currentStack := size
         state.pushStack(c, s.condition.value)
@@ -72,11 +83,11 @@ class BuildSwitch {
             for _, ee := range c.matches {
                 if ee.value.Type == ast.VariableTypeBool {
                     currentStack = size
-                    stack := this.BuildExpression.build(c, code, ee, context, state)
+                    stack := this.eb.build(__FUNCTION__.c, code, ee, context, state)
                     if t := currentStack + stack; t > maxStack {
                         maxStack = t
                     }
-                    matches = append(matches, new cg.Exit(cg.OP_ifne, code)) // comsume result on stack
+                    matches.append(new cg.Exit(cg.OP_ifne, code)) // comsume result on stack
                 } else {
                     currentStack = size
                     // mk stack ready
@@ -87,8 +98,8 @@ class BuildSwitch {
                     }
                     code.CodeLength++
                     currentStack += size
-                    state.pushStack(c, s.condition.value)
-                    stack := this.BuildExpression.build(c, code, ee, context, state)
+                    state.pushStack(__FUNCTION__.c, s.condition.value)
+                    stack := this.eb.build(__FUNCTION__.c, code, ee, context, state)
                     if t := currentStack + stack; t > maxStack {
                         maxStack = t
                     }
@@ -110,13 +121,13 @@ class BuildSwitch {
             }
             code.CodeLength++
             //block is here
-            if c.Block != null {
+            if c.block != null {
                 ss := new StackMapState(state)
-                this.buildBlock(c, code, c.Block, context, ss)
+                this.bb.buildBlock(c, code, c.block, context, ss)
                 state.addTop(ss)
             }
-            if c.Block == null || c.Block.notExecuteToLastStatement == false {
-                s.exits = append(s.exits,
+            if c.block == null || c.block.notExecuteToLastStatement == false {
+                s.exits.append(
                     new cg.Exit(cg.OP_goto, code)) // matched,goto switch outside
             }
         }
@@ -131,7 +142,7 @@ class BuildSwitch {
         state.popStack(1)
         if s.Default != null {
             ss := new StackMapState(state)
-            this.buildBlock(c, code, s.Default, context, ss)
+            this.bb.buildBlock(c, code, s.Default, context, ss)
             state.addTop(ss)
         }
         return

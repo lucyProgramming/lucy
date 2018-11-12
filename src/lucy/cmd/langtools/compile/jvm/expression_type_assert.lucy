@@ -2,6 +2,8 @@
 
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/jvm/cg"
+import "lucy/binary"
+
 
 class BuildExpressionAssert {
     
@@ -39,10 +41,10 @@ class BuildExpressionAssert {
                 state.popStack(2)
             }
             code.Codes[code.CodeLength] = cg.OP_ifeq
-            binary.BigEndian.putChar(code.Codes[code.CodeLength+1:code.CodeLength+3], 7)
+            binary.BigEndian.putChar(code.Codes[code.CodeLength+1:code.CodeLength+3], char(7))
             code.Codes[code.CodeLength+3] = cg.OP_swap
             code.Codes[code.CodeLength+4] = cg.OP_goto
-            binary.BigEndian.putChar(code.Codes[code.CodeLength+5:code.CodeLength+7], 7)
+            binary.BigEndian.putChar(code.Codes[code.CodeLength+5:code.CodeLength+7], char(7))
             code.Codes[code.CodeLength+7] = cg.OP_pop
             code.Codes[code.CodeLength+8] = cg.OP_pop
             code.Codes[code.CodeLength+9] = cg.OP_iconst_0
@@ -50,7 +52,7 @@ class BuildExpressionAssert {
             code.CodeLength += 11
             loadInt32(c, code, 2)
             code.Codes[code.CodeLength] = cg.OP_anewarray
-            c.InsertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+            c.insertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
 
             // store object

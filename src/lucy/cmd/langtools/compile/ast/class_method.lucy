@@ -55,7 +55,7 @@ public class ClassMethod {
 	fn isFinal() ->(is bool ) {
 		return (this.Function.accessFlags & cg.AccMethodFinal) != 0
 	}
-	fn isAbstract() ->(is bool ) {
+	public fn isAbstract() ->(is bool ) {
 		return (this.Function.accessFlags & cg.AccMethodAbstract) != 0
 	}
 
@@ -93,7 +93,7 @@ public class ClassMethod {
 			return false
 		}
 		call := s.Expression.data.(ExpressionMethodCall)
-		if call.Expression.IsIdentifier(ThisPointerName) == false || call.name != SUPER {
+		if call.Expression.isIdentifier(ThisPointerName) == false || call.name != SUPER {
 			return false
 		}
 		return true

@@ -46,11 +46,11 @@ public class Class {
 	public InterfaceMethodrefConstants map{string-> ConstPool }
 	public MethodTypeConstants         map{string-> ConstPool }
 
-	fn IsSynthetic() -> (is bool) {
+	public fn isSynthetic() -> (is bool) {
 		return (this.accessFlags & AccClassSynthetic) != 0
 	}
 
-	fn InsertMethodTypeConst(n ConstantInfoMethodTypeHighLevel) -> (index char) {
+	public fn insertMethodTypeConst(n ConstantInfoMethodTypeHighLevel) -> (index char) {
 		if this.MethodTypeConstants == null {
 			this.MethodTypeConstants = new  map{string -> ConstPool}()
 		}
@@ -60,14 +60,14 @@ public class Class {
 		if con := this.MethodTypeConstants[n.toString()]; con != null {
 			return con.selfIndex
 		}
-		info := new ConstantInfoMethodType ( this.InsertUtf8Const(n.descriptor) ).ToConstPool()
+		info := new ConstantInfoMethodType ( this.insertUtf8Const(n.descriptor) ).ToConstPool()
 		info.selfIndex = this.constPoolUint16Length()
 		this.ConstPool.append(info)
 		this.MethodTypeConstants[n.toString()] = info
 		return info.selfIndex
 	}
 
-	fn InsertInterfaceMethodrefConst(n ConstantInfoInterfaceMethodrefHighLevel) -> (index char) {
+	public fn insertInterfaceMethodrefConst(n ConstantInfoInterfaceMethodrefHighLevel) -> (index char) {
 		if this.InterfaceMethodrefConstants == null {
 			this.InterfaceMethodrefConstants = new map {string -> ConstPool} ()
 		}
@@ -78,8 +78,8 @@ public class Class {
 			return con.selfIndex
 		}
 		info :=  new ConstantInfoInterfaceMethodref(
-			this.InsertClassConst(n.Class),
-			this.InsertNameAndType( new ConstantInfoNameAndTypeHighLevel(     n.Method,  n.descriptor ) )
+			this.insertClassConst(n.Class),
+			this.insertNameAndType( new ConstantInfoNameAndTypeHighLevel(     n.Method,  n.descriptor ) )
 		).ToConstPool()
 		info.selfIndex = this.constPoolUint16Length()
 		this.ConstPool.append(info)
@@ -87,7 +87,7 @@ public class Class {
 		return info.selfIndex
 	}
 
-	fn InsertMethodrefConst(n ConstantInfoMethodrefHighLevel) -> (index char) {
+	public fn insertMethodrefConst(n ConstantInfoMethodrefHighLevel) -> (index char) {
 		if this.MethodrefConstants == null {
 			this.MethodrefConstants = new map{string -> ConstPool} ()
 		}
@@ -98,8 +98,8 @@ public class Class {
 			return con.selfIndex
 		}
 		info := new ConstantInfoMethodref(
-                    this.InsertClassConst(n.Class),
-                    this.InsertNameAndType( new ConstantInfoNameAndTypeHighLevel (
+                    this.insertClassConst(n.Class),
+                    this.insertNameAndType( new ConstantInfoNameAndTypeHighLevel (
                        n.Method,
                        n.descriptor) )
 			) .ToConstPool()
@@ -109,7 +109,7 @@ public class Class {
 		return info.selfIndex
 	}
 
-	fn InsertNameAndType(n ConstantInfoNameAndTypeHighLevel) -> (index char) {
+	public fn insertNameAndType(n ConstantInfoNameAndTypeHighLevel) -> (index char) {
 		if this.NameAndTypeConstants == null {
 			this.NameAndTypeConstants = new map{string -> ConstPool} ()
 		}
@@ -120,15 +120,15 @@ public class Class {
 			return con.selfIndex
 		}
 		info := new ConstantInfoNameAndType(
-			       this.InsertUtf8Const(n.name),
-			    this.InsertUtf8Const(n.descriptor)
+			       this.insertUtf8Const(n.name),
+			    this.insertUtf8Const(n.descriptor)
 		    ).ToConstPool()
 		info.selfIndex = this.constPoolUint16Length()
 		this.ConstPool.append(info)
 		this.NameAndTypeConstants[n.toString()] = info
 		return info.selfIndex
 	}
-	fn InsertFieldRefConst(f ConstantInfoFieldrefHighLevel) -> (index char) {
+	public fn insertFieldRefConst(f ConstantInfoFieldrefHighLevel) -> (index char) {
 		if this.FieldRefConstants == null {
 			this.FieldRefConstants = new map{string -> ConstPool}()
 		}
@@ -139,8 +139,8 @@ public class Class {
 			return con.selfIndex
 		}
 		info := new ConstantInfoFieldref(
-			this.InsertClassConst(f.Class),
-			this.InsertNameAndType(new ConstantInfoNameAndTypeHighLevel(   f.Field,  f.descriptor)
+			this.insertClassConst(f.Class),
+			this.insertNameAndType(new ConstantInfoNameAndTypeHighLevel(   f.Field,  f.descriptor)
 			)
 		).ToConstPool()
 		info.selfIndex = this.constPoolUint16Length()
@@ -148,7 +148,7 @@ public class Class {
 		this.FieldRefConstants[f.toString()] = info
 		return info.selfIndex
 	}
-	fn InsertUtf8Const(s string) -> (index char) {
+	public fn insertUtf8Const(s string) -> (index char) {
 		if this.Utf8Constants == null {
 			this.Utf8Constants = new map {string -> ConstPool}( )
 		}
@@ -165,7 +165,7 @@ public class Class {
 		return info.selfIndex
 	}
 
-	fn InsertIntConst(i int) -> (index char) {
+	public fn insertIntConst(i int) -> (index char) {
 		if this.IntConstants == null {
 			this.IntConstants = new map{ int -> ConstPool }()
 		}
@@ -181,7 +181,7 @@ public class Class {
 		this.IntConstants[i] = info
 		return info.selfIndex
 	}
-	fn InsertLongConst(i long) -> (index char) {
+	public fn insertLongConst(i long) -> (index char) {
 		if this.LongConstants == null {
 			this.LongConstants = new map{ long -> ConstPool } ()
 		}
@@ -198,7 +198,7 @@ public class Class {
 		return info.selfIndex
 	}
 
-	fn InsertFloatConst(f float) -> (index char) {
+	public fn insertFloatConst(f float) -> (index char) {
 		if this.FloatConstants == null {
 			this.FloatConstants = new map {float -> ConstPool} ()
 		}
@@ -215,7 +215,7 @@ public class Class {
 		return info.selfIndex
 	}
 
-	fn InsertDoubleConst(f double) -> (index char) {
+	public fn insertDoubleConst(f double) -> (index char) {
 		if this.DoubleConstants == null {
 			this.DoubleConstants = new map{double -> ConstPool}()
 		}
@@ -232,7 +232,7 @@ public class Class {
 		return info.selfIndex
 	}
 
-	fn InsertClassConst(name string) -> (index char) {
+	public fn insertClassConst(name string) -> (index char) {
 		if this.ClassConstants == null {
 			this.ClassConstants = new map {string -> ConstPool} ()
 		}
@@ -242,14 +242,14 @@ public class Class {
 		if con := this.ClassConstants[name]; con != null {
 			return con.selfIndex
 		}
-		info := new ConstantInfoClass(this.InsertUtf8Const(name)).ToConstPool()
+		info := new ConstantInfoClass(this.insertUtf8Const(name)).ToConstPool()
 		info.selfIndex = this.constPoolUint16Length()
 		this.ConstPool.append(info  )
 		this.ClassConstants[name] = info
 		return info.selfIndex
 	}
 
-	fn InsertStringConst(s string) -> (index char) {
+	public fn insertStringConst(s string) -> (index char) {
 		if this.StringConstants == null {
 			this.StringConstants = new map{string -> ConstPool }()
 		}
@@ -259,7 +259,7 @@ public class Class {
 		if con := this.StringConstants[s]; con != null {
 			return con.selfIndex
 		}
-		info := new ConstantInfoString(this.InsertUtf8Const(s)).ToConstPool()
+		info := new ConstantInfoString(this.insertUtf8Const(s)).ToConstPool()
 		info.selfIndex = this.constPoolUint16Length()
 		this.ConstPool . append( info)
 		this.StringConstants[s] = info
@@ -275,11 +275,11 @@ public class Class {
 			this.ConstPool = []ConstPool{null} // jvm const pool index begin at 1
 		}
 		this.accessFlags = high.accessFlags
-		this.ThisClass = this.InsertClassConst(high.name)
-		this.superClass = this.InsertClassConst(high.superClass)
+		this.ThisClass = this.insertClassConst(high.name)
+		this.superClass = this.insertClassConst(high.superClass)
 		this.interfaces = []char {}
 		for _, i := range high.interfaces {
-			inter := (new ConstantInfoClass(this.InsertUtf8Const(i))).ToConstPool()
+			inter := (new ConstantInfoClass(this.insertUtf8Const(i))).ToConstPool()
 			index := this.constPoolUint16Length()
 			this.interfaces . append(index)
 			this.ConstPool . append(inter)
@@ -288,12 +288,12 @@ public class Class {
 		for _, f := range high.fields {
 			field := new FieldInfo()
 			field.accessFlags = f.accessFlags
-			field.nameIndex = this.InsertUtf8Const(f.name)
+			field.nameIndex = this.insertUtf8Const(f.name)
             field.attributes = []AttributeInfo{}
 			if f.AttributeConstantValue != null {
 				field.attributes . append(  f.AttributeConstantValue.ToAttributeInfo(this))
 			}
-			field.descriptorIndex = this.InsertUtf8Const(f.descriptor)
+			field.descriptorIndex = this.insertUtf8Const(f.descriptor)
 			if f.AttributeLucyFieldDescriptor != null {
 				field.attributes . append(  f.AttributeLucyFieldDescriptor.ToAttributeInfo(this))
 			}
@@ -310,8 +310,8 @@ public class Class {
 			for _, m := range ms {
 				info := new MethodInfo()
 				info.accessFlags = m.accessFlags
-				info.nameIndex = this.InsertUtf8Const(m.name)
-				info.descriptorIndex = this.InsertUtf8Const(m.Descriptor)
+				info.nameIndex = this.insertUtf8Const(m.name)
+				info.descriptorIndex = this.insertUtf8Const(m.Descriptor)
 				info.attributes = []AttributeInfo{}
 				if m.code != null {
 					info.attributes . append( m.code.ToAttributeInfo(this))
@@ -363,7 +363,7 @@ public class Class {
 		if a := this.AttributeInnerClasses.ToAttributeInfo(this); a != null {
 			this.attributes . append(  a)
 		}
-		for _, v := range high.TemplateFunctions {
+		for _, v := range high.templateFunctions {
 			this.attributes.append(  v.ToAttributeInfo(this))
 		}
 		this.ifConstPoolOverMaxSize()
@@ -379,7 +379,7 @@ public class Class {
 		}
 	}
 
-	fn IsInnerClass() -> (is bool) {
+	fn isInnerClass() -> (is bool) {
 		if len(this.AttributeGroupedByName[AttributeNameInnerClasses]) == 0 {
 			return
 		}
@@ -396,7 +396,7 @@ public class Class {
 	}
 
 
-	fn OutPut(writer io.FileOutputStream)  {
+	public fn outPut(writer io.FileOutputStream)  {
 		this.writer = writer
 		//magic number
 		{

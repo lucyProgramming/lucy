@@ -36,7 +36,7 @@ fn checkExpressions(block Block, es []Expression, errs []error, singleValueConte
 fn getExtraExpressionPos(args []Expression, n int) -> (pos Pos) {
 	i := 0
 	for _, a := range args {
-		if a.HaveMultiValue() {
+		if a.haveMultiValue() {
 			i += len(a.multiValues)
 		} else {
 			i++

@@ -578,6 +578,10 @@ func (this *Type) assignAble(errs *[]error, rightValue *Type) bool {
 	}
 	if leftValue.IsPrimitive() &&
 		rightValue.IsPrimitive() {
+		if leftValue.isInteger() &&
+			rightValue.isInteger() && ((leftValue.Type == VariableTypeLong) == (rightValue.Type == VariableTypeLong)) {
+			return true
+		}
 		return leftValue.Type == rightValue.Type
 	}
 	if leftValue.IsPointer() && rightValue.Type == VariableTypeNull {
@@ -621,7 +625,7 @@ func (this *Type) assignAble(errs *[]error, rightValue *Type) bool {
 			return false
 		}
 		if leftValue.Class.IsInterface() {
-			i, err := rightValue.Class.implementedInterface(leftValue.Pos, leftValue.Class.Name)
+			i, err := rightValue.Class.implementedInterface(rightValue.Pos, leftValue.Class.Name)
 			if err != nil {
 				*errs = append(*errs, err)
 			}

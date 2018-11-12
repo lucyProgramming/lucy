@@ -19,13 +19,13 @@ class BuildExpressionStrcat {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        stackLength := len(state.Stacks)
+        stackLength := len(state.stacks)
         defer {
-            state.popStack(len(state.Stacks) - stackLength)
+            state.popStack(len(state.stacks) - stackLength)
         }
         bin := e.data.(ast.ExpressionBinary)
         maxStack = this.eb.build(c, code, bin.Left, context, state)
-        if t := this.BuildExpressionConversion.stackTop2String(c, code, bin.Left.value, context, state); t > maxStack {
+        if t := this.eb.BuildExpressionConversion.stackTop2String(c, code, bin.Left.value, context, state); t > maxStack {
             maxStack = t
         }
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
@@ -33,12 +33,12 @@ class BuildExpressionStrcat {
         if t := char(1) + stack; t > maxStack {
             maxStack = char(t)
         }
-        if t := 1 + this.eb.BuildExpressionConversion.stackTop2String(c, code,
+        if t := char(1) + this.eb.BuildExpressionConversion.stackTop2String(c, code,
             bin.Right.value, context, state); t > maxStack {
             maxStack = t
         }
         code.Codes[code.CodeLength] = cg.OP_invokevirtual
-        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             javaStringClass,
             `concat`,
            "(Ljava/lang/String;)Ljava/lang/String;"

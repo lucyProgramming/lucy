@@ -29,15 +29,15 @@ public class AttributeMethodParameters  {
 		}
 		ret = new AttributeInfo()
 		if len(attrName) > 0 {
-			ret.nameIndex = c.InsertUtf8Const(attrName[0])
+			ret.nameIndex = c.insertUtf8Const(attrName[0])
 		} else {
-			ret.nameIndex = c.InsertUtf8Const(AttributeNameMethodParameters)
+			ret.nameIndex = c.insertUtf8Const(AttributeNameMethodParameters)
 		}
 		ret.attributeLength = (len(this.Parameters)*4 + 1)
 		ret.Info = new []byte(ret.attributeLength)
 		ret.Info[0] = byte(len(this.Parameters))
 		for k, v := range this.Parameters {
-			binary.BigEndian.putChar(ret.Info[4*k+1:], c.InsertUtf8Const(v.name))
+			binary.BigEndian.putChar(ret.Info[4*k+1:], c.insertUtf8Const(v.name))
 			binary.BigEndian.putChar(ret.Info[4*k+3:], v.accessFlags)
 		}
 		return ret
@@ -45,9 +45,9 @@ public class AttributeMethodParameters  {
 }
 
 
-class MethodParameter  {
-	name        string
-	accessFlags char
+public class MethodParameter  {
+	public name        string
+	public accessFlags char
 }
 
 

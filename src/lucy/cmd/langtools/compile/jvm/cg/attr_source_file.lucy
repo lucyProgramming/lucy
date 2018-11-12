@@ -9,10 +9,10 @@ class AttributeSourceFile {
 	}
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo) {
 		ret = new AttributeInfo()
-		ret.nameIndex = c.InsertUtf8Const(AttributeNameSourceFile)
+		ret.nameIndex = c.insertUtf8Const(AttributeNameSourceFile)
 		ret.attributeLength = 2
 		ret.Info = new []byte(2)
-		binary.BigEndian.putChar(ret.Info, c.InsertUtf8Const(this.file))
+		binary.BigEndian.putChar(ret.Info, c.insertUtf8Const(this.file))
 		return ret
 	}
 }

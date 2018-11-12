@@ -17,9 +17,9 @@ class BuildinFunctionSprintf {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        length := len(state.Stacks)
+        length := len(state.stacks)
         defer {
-            state.popStack(len(state.Stacks) - length)
+            state.popStack(len(state.stacks) - length)
         }
         // format,must be string
         call := e.data.(ast.ExpressionFunctionCall)
@@ -28,7 +28,7 @@ class BuildinFunctionSprintf {
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
         loadInt32(c, code, int(meta.ArgsLength))
         code.Codes[code.CodeLength] = cg.OP_anewarray
-        c.InsertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
+        c.insertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.CodeLength += 3
         currentStack := char(2)
         if currentStack > maxStack {
@@ -60,7 +60,7 @@ class BuildinFunctionSprintf {
             state.popStack(2)
         }
         code.Codes[code.CodeLength] = cg.OP_invokestatic
-        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                  "format",
             "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;"

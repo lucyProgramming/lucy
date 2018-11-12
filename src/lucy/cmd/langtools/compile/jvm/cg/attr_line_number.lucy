@@ -13,7 +13,7 @@ public class AttributeLineNumber  {
 			return null
 		}
 		ret  = new AttributeInfo()
-		ret.nameIndex = c.InsertUtf8Const("LineNumberTable")
+		ret.nameIndex = c.insertUtf8Const("LineNumberTable")
 		ret.Info = new []byte (2)
 		binary.BigEndian.putChar(ret.Info, char(len(this.lineNumbers)))
 		for _, v := range this.lineNumbers {

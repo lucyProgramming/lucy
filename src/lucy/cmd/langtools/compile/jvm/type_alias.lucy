@@ -1,5 +1,6 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/jvm/cg"
+import "lucy/cmd/langtools/compile/common"
 
 class LucyTypeAlias {
 
@@ -10,7 +11,7 @@ class LucyTypeAlias {
     }
 
     static fn Decode(bs []byte) -> (name string, variableType ast.Type, err error) {
-        index := bytes.index(bs, []byte{';'})
+        index := common.Bytes.indexByte(bs,';')
         name = string(bs[0:index])
         _, variableType, err = LucyFieldSignature.Decode(bs[index+1:])
         return

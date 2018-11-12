@@ -54,7 +54,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 	}
 	ms, matched, err := no.Type.Class.accessConstructionMethod(e.Pos, errs, no, nil, callArgTypes)
 	if err != nil {
-		*errs = append(*errs, fmt.Errorf("%s %v", e.Pos.ErrMsgPrefix(), err))
+		*errs = append(*errs, err)
 		return ret
 	}
 	if matched {

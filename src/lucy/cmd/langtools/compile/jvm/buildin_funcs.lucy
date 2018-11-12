@@ -37,9 +37,9 @@ class BuildinFunctionCall {
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionFunctionCall)
         if call.Function.LoadedFromCorePackage {
-            maxStack = this.eb.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
+            maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
             code.Codes[code.CodeLength] = cg.OP_invokestatic
-            c.InsertMethodRefConst(
+            c.insertMethodRefConst(
                 new cg.ConstantInfoMethodrefHighLevel(
                     call.Function.Entrance.Class.name,
                     call.Function.name,

@@ -19,7 +19,7 @@ class BuildExpressionLogical {
         context Context,
         state StackMapState) -> (maxStack char) {
         bin := e.data.(ast.ExpressionBinary)
-        maxStack = this.build(c, code, bin.Left, context, state)
+        maxStack = this.eb.build(c, code, bin.Left, context, state)
         code.Codes[code.CodeLength] = cg.OP_dup
         code.CodeLength++
         if 2 > maxStack { // dup increment stack
@@ -33,7 +33,7 @@ class BuildExpressionLogical {
         }
         code.Codes[code.CodeLength] = cg.OP_pop
         code.CodeLength++
-        stack := this.build(c, code, bin.Right, context, state)
+        stack := this.eb.build(c, code, bin.Right, context, state)
         if stack > maxStack {
             maxStack = stack
         }

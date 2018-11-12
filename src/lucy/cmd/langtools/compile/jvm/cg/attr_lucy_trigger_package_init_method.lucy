@@ -3,7 +3,7 @@
 public class AttributeLucyTriggerPackageInitMethod {
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
-		ret.nameIndex = c.InsertUtf8Const(AttributeNameLucyTriggerPackageInit)
+		ret.nameIndex = c.insertUtf8Const(AttributeNameLucyTriggerPackageInit)
 		return ret
 	}
 }

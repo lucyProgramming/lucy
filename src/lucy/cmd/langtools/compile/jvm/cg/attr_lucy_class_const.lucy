@@ -21,14 +21,14 @@ public class AttributeLucyClassConst {
 			return null
 		}
 		ret = new AttributeInfo()
-		ret.nameIndex = c.InsertUtf8Const(AttributeNameLucyClassConst)
+		ret.nameIndex = c.insertUtf8Const(AttributeNameLucyClassConst)
 		ret.Info = new []byte(len(this.constants)*8)
 		for k, v := range this.constants {
 			b := ret.Info[k*8:]
-			binary.BigEndian.putChar(b, c.InsertUtf8Const(v.name))
-			binary.BigEndian.putChar(b[2:], c.InsertUtf8Const(v.descriptor))
+			binary.BigEndian.putChar(b, c.insertUtf8Const(v.name))
+			binary.BigEndian.putChar(b[2:], c.insertUtf8Const(v.descriptor))
 			binary.BigEndian.putChar(b[4:], v.ValueIndex)
-			binary.BigEndian.putChar(b[6:], c.InsertUtf8Const(v.comment))
+			binary.BigEndian.putChar(b[6:], c.insertUtf8Const(v.comment))
 		}
 		ret.attributeLength = (len(ret.Info))
 		return ret

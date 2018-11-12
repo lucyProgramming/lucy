@@ -2,7 +2,7 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-class BuildPackageFor {
+class BuildFor {
     
     eb BuildExpression
     bb  BuildBlock
@@ -10,7 +10,7 @@ class BuildPackageFor {
     BuildForRangeJavaArray BuildForRangeJavaArray
     BuildForRangeMap BuildForRangeMap
 
-    fn BuildPackageFor(eb BuildExpression , bb  BuildBlock){
+    fn BuildFor(eb BuildExpression , bb  BuildBlock){
         this.super()
         this.eb = eb
         this.bb = bb
@@ -46,13 +46,13 @@ class BuildPackageFor {
                 maxStack = stack
             }
         }
-        var firstTimeExit ast.Statement
+        var firstTimeExit cg.Exit
         if s.condition != null {
-            stack, exit := this.eb.buildConditionNotOk(c, code, context, forState, s.condition)
+            stack, exit := this.bb.buildConditionNotOk(c, code, context, forState, s.condition)
             if stack > maxStack {
                 maxStack = stack
             }
-            s.exits = append(s.exits, exit)
+            s.exits.append( exit)
             firstTimeExit = new cg.Exit(cg.OP_goto, code) // goto body
         }
         s.ContinueCodeOffset = code.CodeLength
@@ -64,17 +64,17 @@ class BuildPackageFor {
             }
         }
         if s.condition != null {
-            stack, exit := this.eb.buildConditionNotOk(c, code, context, forState, s.condition)
+            stack, exit := this.bb.buildConditionNotOk(c, code, context, forState, s.condition)
             if stack > maxStack {
                 maxStack = stack
             }
-            s.exits = append(s.exits, exit)
+            s.exits.append( exit)
         }
         if firstTimeExit != null {
             writeExits([]cg.Exit{firstTimeExit}, code.CodeLength)
             context.MakeStackMap(code, forState, code.CodeLength)
         }
-        this.buildBlock(c, code, s.block, context, forState)
+        this.bb.buildBlock(c, code, s.block, context, forState)
         if s.block.notExecuteToLastStatement == false {
             jumpTo(code, s.ContinueCodeOffset)
         }

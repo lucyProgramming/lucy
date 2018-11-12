@@ -11,16 +11,16 @@ class BuildExpressionVarAssign {
         this.eb = eb
     }
     
-    fn buildVarAssign(
+    fn build(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
         vs := e.data.(ast.ExpressionVarAssign)
-        stackLength := len(state.Stacks)
+        stackLength := len(state.stacks)
         defer   {
-            state.popStack(len(state.Stacks) - stackLength)
+            state.popStack(len(state.stacks) - stackLength)
         }
         if len(vs.Lefts) == 1 {
             v := vs.Lefts[0].data.(ast.ExpressionIdentifier).Variable
@@ -42,14 +42,14 @@ class BuildExpressionVarAssign {
             if v.isGlobal {
                 this.eb.storeGlobalVariable(c, code, v)
             } else {
-                v.localValOffset = code.MaxLocals
+                v.localValOffset = code.maxLocals
                 this.eb.storeLocalVar(c, code, v)
                 if v.beenCapturedAsLeftValue > 0 {
-                    code.MaxLocals++
-                    copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, v.localValOffset)...)
+                    code.maxLocals++
+                    copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, v.localValOffset))
                     state.appendLocals(c, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
                 } else {
-                    code.MaxLocals += jvmSlotSize(v.Type)
+                    code.maxLocals += jvmSlotSize(v.Type)
                     state.appendLocals(c, v.Type)
                 }
             }
@@ -58,19 +58,19 @@ class BuildExpressionVarAssign {
         if len(vs.InitValues) == 1 {
             maxStack = this.eb.build(c, code, vs.InitValues[0], context, state)
         } else {
-            maxStack = this.buildExpressions(c, code, vs.InitValues, context, state)
+            maxStack = this.eb.buildExpressions(c, code, vs.InitValues, context, state)
         }
-        autoVar := new MultiValueAutoVar()(c, code, state)
+        autoVar := new MultiValueAutoVar(c, code, state)
         for k, v := range vs.Lefts {
             if v.Type != ast.ExpressionTypeIdentifier {
-                stack, remainStack, ops, _ := this.getLeftValue(c, code, v, context, state)
+                stack, remainStack, ops, _ := this.eb.BuildExpressionLeftValue.getLeftValue(c, code, v, context, state)
                 if stack > maxStack {
                     maxStack = stack
                 }
                 if t := remainStack + autoVar.unPack(c, code, k, v.value); t > maxStack {
                     maxStack = t
                 }
-                copyOPs(code, ops...)
+                copyOPs(code, ops)
                 continue
             }
             //identifier
@@ -84,13 +84,13 @@ class BuildExpressionVarAssign {
                 if stack > maxStack {
                     maxStack = stack
                 }
-                this.BuildPackage.storeGlobalVariable(c, code, variable)
+                this.eb.storeGlobalVariable(c, code, variable)
                 continue
             }
             //this variable not been captured,also not declared here
             if vs.IfDeclaredBefore[k] {
                 if variable.beenCapturedAsLeftValue > 0 {
-                    copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, variable.localValOffset)...)
+                    copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, variable.localValOffset))
                     stack := autoVar.unPack(c, code, k, variable.Type)
                     if t := char(1) + stack; t > maxStack {
                         maxStack = t
@@ -101,12 +101,12 @@ class BuildExpressionVarAssign {
                         maxStack = stack
                     }
                 }
-                this.BuildPackage.storeLocalVar(c, code, variable)
+                this.eb.storeLocalVar(c, code, variable)
             } else {
-                variable.localValOffset = code.MaxLocals
+                variable.localValOffset = code.maxLocals
                 currentStack := char(0)
                 if variable.beenCapturedAsLeftValue > 0 {
-                    code.MaxLocals++
+                    code.maxLocals++
                     stack := closure.createClosureVar(c, code, variable.Type)
                     if stack > maxStack {
                         maxStack = stack
@@ -116,17 +116,17 @@ class BuildExpressionVarAssign {
                     if 2 > maxStack {
                         maxStack = 2
                     }
-                    copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, variable.localValOffset)...)
+                    copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, variable.localValOffset))
                     currentStack = 1
                     state.appendLocals(c, state.newObjectVariableType(closure.getMeta(variable.Type.Type).className))
                 } else {
-                    code.MaxLocals += jvmSlotSize(variable.Type)
+                    code.maxLocals += jvmSlotSize(variable.Type)
                     state.appendLocals(c, variable.Type)
                 }
                 if t := currentStack + autoVar.unPack(c, code, k, variable.Type); t > maxStack {
                     maxStack = t
                 }
-                this.BuildPackage.storeLocalVar(c, code, variable)
+                this.eb.storeLocalVar(c, code, variable)
             }
         }
         return

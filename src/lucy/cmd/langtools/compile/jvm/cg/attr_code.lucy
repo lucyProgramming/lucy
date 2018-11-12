@@ -3,7 +3,7 @@ import "lucy/binary"
 
 public class AttributeCode  {
 	public	MaxStack          char
-	public	MaxLocals         char
+	public	maxLocals         char
 	public	CodeLength        int
 	public	Codes             []byte
 	public	LineNumbers       AttributeLineNumber
@@ -13,10 +13,10 @@ public class AttributeCode  {
 	
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
-		ret.nameIndex = c.InsertUtf8Const("Code")
+		ret.nameIndex = c.insertUtf8Const("Code")
 		ret.Info = new []byte( 8)
 		binary.BigEndian.putChar(ret.Info[0:2], this.MaxStack)
-		binary.BigEndian.putChar(ret.Info[2:4], this.MaxLocals)
+		binary.BigEndian.putChar(ret.Info[2:4], this.maxLocals)
 		binary.BigEndian.putInt(ret.Info[4:8], (this.CodeLength))
 		ret.Info . appendAll( this.Codes)
 		ret.Info . appendAll(this.mkExceptions())
@@ -74,9 +74,9 @@ public class AttributeCode  {
 			b := new []byte (8*len(this.Exceptions))
 			for k, v := range this.Exceptions {
 				binary.BigEndian.putChar(b[k*8:], v.startPc)
-				binary.BigEndian.putChar(b[k*8+2:], v.EndPc)
-				binary.BigEndian.putChar(b[k*8+4:], v.HandlerPc)
-				binary.BigEndian.putChar(b[k*8+6:], v.CatchType)
+				binary.BigEndian.putChar(b[k*8+2:], v.endPc)
+				binary.BigEndian.putChar(b[k*8+4:], v.handlerPc)
+				binary.BigEndian.putChar(b[k*8+6:], v.catchType)
 			}
 			bs.appendAll(b)
 		}
@@ -90,7 +90,7 @@ public class AttributeCode  {
 
 public class ExceptionTable  {
 	public startPc   char
-	public EndPc     char
-	public HandlerPc char
-	public CatchType char
+	public endPc     char
+	public handlerPc char
+	public catchType char
 }

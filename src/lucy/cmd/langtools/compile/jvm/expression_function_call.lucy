@@ -4,10 +4,12 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 class BuildExpressionFunctionCall {
 	
 	eb BuildExpression
-    
+    bfc BuildinFunctionCall
+
     fn BuildExpressionFunctionCall(eb BuildExpression){
         this.super()
         this.eb = eb
+        this.bfc = new BuildinFunctionCall(eb)
     }
 	
 	fn  buildFunctionPointerCall(
@@ -23,13 +25,13 @@ class BuildExpressionFunctionCall {
 			maxStack = t
 		}
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+		c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 			"java/lang/invoke/MethodHandle",
 			methodHandleInvokeMethodName,
-			Descriptor.methodDescriptor(call.Expression.value.FunctionType)
+			Descriptor.methodDescriptor(call.Expression.value.functionType)
 		), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		if t := popCallResult(code, e, call.Expression.value.FunctionType); t > maxStack {
+		if t := popCallResult(code, e, call.Expression.value.functionType); t > maxStack {
 			maxStack = t
 		}
 		return
@@ -48,7 +50,7 @@ class BuildExpressionFunctionCall {
 			return this.buildTemplateFunctionCall(c, code, e, context, state)
 		}
 		if call.Function.isBuildIn {
-			return this.mkBuildInFunctionCall(c, code, e, context, state)
+			return this.bfc.mkBuildInFunctionCall(c, code, e, context, state)
 		}
 		if call.Expression != null &&
 			call.Expression.Type == ast.ExpressionTypeFunctionLiteral {
@@ -57,7 +59,7 @@ class BuildExpressionFunctionCall {
 		if call.Function.IsClosureFunction == false {
 			maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				call.Function.Entrance.Class.name,
 				call.Function.Entrance.name,
 				call.Function.Entrance.Descriptor
@@ -67,16 +69,16 @@ class BuildExpressionFunctionCall {
 			//closure function call
 			//load object
 			if context.function.Closure.closureFunctionExist(call.Function) {
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, char(0)))
 				code.Codes[code.CodeLength] = cg.OP_getfield
-				c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+				c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					c.name,
 					call.Function.name,
 					"L" + call.Function.Entrance.Class.name + ";"
 				), code.Codes[code.CodeLength+1:code.CodeLength+3])
 				code.CodeLength += 3
 			} else {
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, call.Function.ClosureVariableOffSet)...)
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, call.Function.ClosureVariableOffSet))
 			}
 			state.pushStack(c, state.newObjectVariableType(call.Function.Entrance.Class.name))
 			defer state.popStack(1)
@@ -85,7 +87,7 @@ class BuildExpressionFunctionCall {
 				maxStack = t
 			}
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
-			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				call.Function.Entrance.Class.name,
 				call.Function.name,
 				call.Function.Entrance.Descriptor

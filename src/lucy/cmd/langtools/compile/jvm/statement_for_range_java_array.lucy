@@ -26,13 +26,13 @@ class BuildForRangeJavaArray {
         context Context,
         state StackMapState) -> (maxStack char) {
         //build array expression
-        maxStack = this.BuildExpression.build(c, code, s.RangeAttr.RangeOn, context, state) // array on stack
+        maxStack = this.eb.build(c, code, s.RangeAttr.RangeOn, context, state) // array on stack
         code.Codes[code.CodeLength] = cg.OP_dup
         code.CodeLength++
         noNullExit := new cg.Exit(cg.OP_ifnonnull, code)
         code.Codes[code.CodeLength] = cg.OP_pop
         code.CodeLength++
-        s.exits = append(s.exits, new cg.Exit(cg.OP_goto, code))
+        s.exits.append( new cg.Exit(cg.OP_goto, code))
         writeExits([]cg.Exit{noNullExit}, code.CodeLength)
         state.pushStack(c, s.RangeAttr.RangeOn.value)
         context.MakeStackMap(code, state, code.CodeLength)
@@ -42,16 +42,16 @@ class BuildForRangeJavaArray {
         attr := s.RangeAttr
         var autoVar AutoVariableForRangeJavaArray
         {
-            autoVar.Elements = code.MaxLocals
-            code.MaxLocals++
+            autoVar.Elements = code.maxLocals
+            code.maxLocals++
             forState.appendLocals(c, attr.RangeOn.value)
             // K
-            autoVar.K = code.MaxLocals
-            code.MaxLocals++
+            autoVar.K = code.maxLocals
+            code.maxLocals++
             forState.appendLocals(c, typeInt)
             //end
-            autoVar.End = code.MaxLocals
-            code.MaxLocals++
+            autoVar.End = code.maxLocals
+            code.maxLocals++
             forState.appendLocals(c, typeInt)
 
         }
@@ -76,8 +76,8 @@ class BuildForRangeJavaArray {
             if attr.IdentifierValue != null &&
                 attr.IdentifierValue.Variable.beenCapturedAsLeftValue > 0 {
                 closure.createClosureVar(c, code, attr.IdentifierValue.Variable.Type)
-                attr.IdentifierValue.Variable.localValOffset = code.MaxLocals
-                code.MaxLocals++
+                attr.IdentifierValue.Variable.localValOffset = code.maxLocals
+                code.maxLocals++
                 copyOPs(code,
                     storeLocalVariableOps(ast.VariableTypeObject, attr.IdentifierValue.Variable.localValOffset))
                 forState.appendLocals(c,
@@ -86,8 +86,8 @@ class BuildForRangeJavaArray {
             if attr.IdentifierKey != null &&
                 attr.IdentifierKey.Variable.beenCapturedAsLeftValue > 0 {
                 closure.createClosureVar(c, code, attr.IdentifierKey.Variable.Type)
-                attr.IdentifierKey.Variable.localValOffset = code.MaxLocals
-                code.MaxLocals++
+                attr.IdentifierKey.Variable.localValOffset = code.maxLocals
+                code.maxLocals++
                 copyOPs(code,
                     storeLocalVariableOps(ast.VariableTypeObject, attr.IdentifierKey.Variable.localValOffset))
                 forState.appendLocals(c,
@@ -114,7 +114,7 @@ class BuildForRangeJavaArray {
         if 2 > maxStack {
             maxStack = 2
         }
-        s.exits = append(s.exits, new cg.Exit(cg.OP_if_icmpge, code))
+        s.exits.append( new cg.Exit(cg.OP_if_icmpge, code))
         //load elements
         if attr.IdentifierValue != null || attr.ExpressionValue != null {
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.Elements))
@@ -124,17 +124,13 @@ class BuildForRangeJavaArray {
             }
             // load value
             switch attr.RangeOn.value.array.Type {
-            case ast.VariableTypeBool:
-                fallthrough
-            case ast.VariableTypeByte:
+            case ast.VariableTypeBool, ast.VariableTypeByte:
                 code.Codes[code.CodeLength] = cg.OP_baload
             case ast.VariableTypeShort:
                 code.Codes[code.CodeLength] = cg.OP_saload
             case ast.VariableTypeChar:
                 code.Codes[code.CodeLength] = cg.OP_caload
-            case ast.VariableTypeEnum:
-                fallthrough
-            case ast.VariableTypeInt:
+            case ast.VariableTypeEnum , ast.VariableTypeInt:
                 code.Codes[code.CodeLength] = cg.OP_iaload
             case ast.VariableTypeLong:
                 code.Codes[code.CodeLength] = cg.OP_laload
@@ -147,12 +143,12 @@ class BuildForRangeJavaArray {
             }
             code.CodeLength++
             // v
-            autoVar.V = code.MaxLocals
-            code.MaxLocals += jvmSlotSize(attr.RangeOn.value.array)
+            autoVar.V = code.maxLocals
+            code.maxLocals += jvmSlotSize(attr.RangeOn.value.array)
             //store to v tmp
             copyOPs(code,
                 storeLocalVariableOps(attr.RangeOn.value.array.Type,
-                    autoVar.V)...)
+                    autoVar.V))
 
             blockState.appendLocals(c, attr.RangeOn.value.array)
         }
@@ -163,8 +159,8 @@ class BuildForRangeJavaArray {
                     copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, attr.IdentifierValue.Variable.localValOffset))
                     copyOPs(code,
                         loadLocalVariableOps(attr.RangeOn.value.array.Type,
-                            autoVar.V)...)
-                    this.storeLocalVar(c, code, attr.IdentifierValue.Variable)
+                            autoVar.V))
+                    this.eb.storeLocalVar(c, code, attr.IdentifierValue.Variable)
                 } else {
                     attr.IdentifierValue.Variable.localValOffset = autoVar.V
                 }
@@ -172,10 +168,10 @@ class BuildForRangeJavaArray {
             if attr.IdentifierKey != null {
                 if attr.IdentifierKey.Variable.beenCapturedAsLeftValue > 0 {
                     copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject,
-                        attr.IdentifierKey.Variable.localValOffset)...)
+                        attr.IdentifierKey.Variable.localValOffset))
                     copyOPs(code,
-                        loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
-                    this.storeLocalVar(c, code, attr.IdentifierKey.Variable)
+                        loadLocalVariableOps(ast.VariableTypeInt, autoVar.K))
+                    this.eb.storeLocalVar(c, code, attr.IdentifierKey.Variable)
                 } else {
                     attr.IdentifierKey.Variable.localValOffset = autoVar.K
                 }
@@ -184,24 +180,24 @@ class BuildForRangeJavaArray {
             // store v
             //get ops,make_node_objects ops ready
             if attr.ExpressionValue != null {
-                stackLength := len(blockState.Stacks)
-                stack, remainStack, ops, _ := this.BuildExpression.getLeftValue(c,
+                stackLength := len(blockState.stacks)
+                stack, remainStack, ops, _ := this.eb.BuildExpressionLeftValue.getLeftValue(c,
                     code, attr.ExpressionValue, context, blockState)
                 if stack > maxStack {
                     maxStack = stack
                 }
                 //load v
                 copyOPs(code, loadLocalVariableOps(attr.RangeOn.value.array.Type,
-                    autoVar.V)...)
+                    autoVar.V))
                 if t := remainStack + jvmSlotSize(attr.RangeOn.value.array); t > maxStack {
                     maxStack = t
                 }
-                copyOPs(code, ops...)
-                blockState.popStack(len(blockState.Stacks) - stackLength)
+                copyOPs(code, ops)
+                blockState.popStack(len(blockState.stacks) - stackLength)
             }
             if attr.ExpressionKey != null { // set to k
-                stackLength := len(blockState.Stacks)
-                stack, remainStack, ops, _ := this.BuildExpression.getLeftValue(c,
+                stackLength := len(blockState.stacks)
+                stack, remainStack, ops, _ := this.eb.BuildExpressionLeftValue.getLeftValue(c,
                     code, attr.ExpressionKey, context, blockState)
                 if stack > maxStack {
                     maxStack = stack
@@ -210,14 +206,14 @@ class BuildForRangeJavaArray {
                     maxStack = t
                 }
                 // load k
-                copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
-                copyOPs(code, ops...)
-                blockState.popStack(len(blockState.Stacks) - stackLength)
+                copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K))
+                copyOPs(code, ops)
+                blockState.popStack(len(blockState.stacks) - stackLength)
             }
         }
 
         // build block
-        this.buildBlock(c, code, s.block, context, blockState)
+        this.bb.buildBlock(c, code, s.block, context, blockState)
         forState.addTop(blockState)
         if s.block.notExecuteToLastStatement == false {
             jumpTo(code, s.ContinueCodeOffset)

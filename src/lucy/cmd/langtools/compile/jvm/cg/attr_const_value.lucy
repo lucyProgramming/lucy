@@ -9,7 +9,7 @@ public class AttributeConstantValue {
 	}
 	fn ToAttributeInfo(c Class) -> (info AttributeInfo) {
 		info = new AttributeInfo()
-		info.nameIndex = c.InsertUtf8Const(AttributeNameConstValue)
+		info.nameIndex = c.insertUtf8Const(AttributeNameConstValue)
 		info.attributeLength = 2
 		info.Info = new []byte(2)
 		binary.BigEndian.putChar(info.Info, this.index)

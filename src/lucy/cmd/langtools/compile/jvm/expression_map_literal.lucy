@@ -21,12 +21,12 @@ class BuildExpressionMap{
         context Context,
         state StackMapState) -> (maxStack char) {
         code.Codes[code.CodeLength] = cg.OP_new
-        c.InsertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+        c.insertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.Codes[code.CodeLength+3] = cg.OP_dup
         code.CodeLength += 4
         maxStack = 2
         code.Codes[code.CodeLength] = cg.OP_invokespecial
-        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             mapClass,
             specialMethodInit,
            "()V"
@@ -59,7 +59,7 @@ class BuildExpressionMap{
             }
             // put in hashmap
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 mapClass,
                 "put",
                 "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"
@@ -80,9 +80,9 @@ class BuildExpressionMap{
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionMethodCall)
         maxStack = this.eb.build(c, code, call.Expression, context, state)
-        stackLength := len(state.Stacks)
+        stackLength := len(state.stacks)
         defer  {
-            state.popStack(len(state.Stacks) - stackLength)
+            state.popStack(len(state.stacks) - stackLength)
         }
         hashMapVerifyType := state.newObjectVariableType(mapClass)
         state.pushStack(c, hashMapVerifyType)
@@ -97,7 +97,7 @@ class BuildExpressionMap{
                 TypeConverterAndPrimitivePacker.packPrimitives(c, code, variableType)
             }
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 mapClass,
                 "containsKey",
                 "(Ljava/lang/Object;)Z"
@@ -129,7 +129,7 @@ class BuildExpressionMap{
                 }
                 //call remove
                 code.Codes[code.CodeLength] = cg.OP_invokevirtual
-                c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+                c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                     mapClass,
                     "remove",
                     "(Ljava/lang/Object;)Ljava/lang/Object;"
@@ -142,7 +142,7 @@ class BuildExpressionMap{
             }
         case common.MapMethodRemoveAll:
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 mapClass,
                 "clear",
                 "()V"
@@ -150,7 +150,7 @@ class BuildExpressionMap{
             code.CodeLength += 3
         case common.MapMethodSize:
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 mapClass,
                 "size",
                 "()I"

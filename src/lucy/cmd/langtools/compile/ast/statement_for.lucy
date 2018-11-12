@@ -151,14 +151,14 @@ public class StatementFor {
 			}
 		} else { // k,v = range arr
 			if modelKv {
-				if false == lefts[0].IsIdentifier(UnderScore) {
+				if false == lefts[0].isIdentifier(UnderScore) {
 					this.RangeAttr.ExpressionKey = lefts[0]
 				}
-				if false == lefts[1].IsIdentifier(UnderScore) {
+				if false == lefts[1].isIdentifier(UnderScore) {
 					this.RangeAttr.ExpressionValue = lefts[1]
 				}
 			} else {
-				if false == lefts[0].IsIdentifier(UnderScore) {
+				if false == lefts[0].isIdentifier(UnderScore) {
 					this.RangeAttr.ExpressionValue = lefts[0]
 				}
 			}

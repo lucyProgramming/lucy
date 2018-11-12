@@ -25,7 +25,7 @@ class  BuildExpressionIdentifier {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, char(0)))
 				meta := closure.getMeta(identifier.Variable.Type.Type)
 				code.Codes[code.CodeLength] = cg.OP_getfield
-				c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+				c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					c.name,
 					identifier.Variable.name,
 					"L" + meta.className + ";"
@@ -35,7 +35,7 @@ class  BuildExpressionIdentifier {
 			} else {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, char(0)))
 				code.Codes[code.CodeLength] = cg.OP_getfield
-				c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+				c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					c.name,
 					identifier.Variable.name,
 					Descriptor.typeDescriptor(identifier.Variable.Type)
@@ -68,11 +68,11 @@ class  BuildExpressionIdentifier {
 			maxStack = 1
 			return
 		case identifier.Function != null:
-			return this.BuildPackage.packFunction2MethodHandle(c, code, identifier.Function, context)
+			return this.eb.bp.packFunction2MethodHandle(c, code, identifier.Function, context)
 		case identifier.Variable.isGlobal:
 			code.Codes[code.CodeLength] = cg.OP_getstatic
-			c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-				this.BuildPackage.mainClass.name,
+			c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+				this.eb.bp.mainClass.name,
 				identifier.name,
 				Descriptor.typeDescriptor(identifier.Variable.Type)
 			), code.Codes[code.CodeLength+1:code.CodeLength+3])

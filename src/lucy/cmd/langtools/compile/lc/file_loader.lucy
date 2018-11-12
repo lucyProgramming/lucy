@@ -135,10 +135,10 @@ class FileLoader {
     }
 
     fn  loadAsJava(c cg.Class) (ast.Class, error) {
-        if c.IsSynthetic() {
+        if c.isSynthetic() {
             return null, null
         }
-        if c.IsInnerClass() {
+        if c.isInnerClass() {
             return null, null
         }
         //name
@@ -147,10 +147,10 @@ class FileLoader {
         }
         astClass := &ast.Class{}
         {
-            nameIndex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
+            nameIndex := binary.BigEndian.getChar(c.ConstPool[c.ThisClass].Info)
             astClass.name = string(c.ConstPool[nameIndex].Info)
             if astClass.name != ast.JavaRootClass {
-                nameIndex = binary.BigEndian.Uint16(c.ConstPool[c.superClass].Info)
+                nameIndex = binary.BigEndian.getChar(c.ConstPool[c.superClass].Info)
                 astClass.superClassName = &ast.NameWithPos{
                     name: string(c.ConstPool[nameIndex].Info),
                 }
@@ -206,19 +206,19 @@ class FileLoader {
     }
 
     fn  loadAsLucy(c cg.Class) (ast.Class, error) {
-        if c.IsSynthetic() {
+        if c.isSynthetic() {
             return null, null
         }
-        if c.IsInnerClass() {
+        if c.isInnerClass() {
             return null, null
         }
         //name
         astClass := &ast.Class{}
         {
-            nameIndex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
+            nameIndex := binary.BigEndian.getChar(c.ConstPool[c.ThisClass].Info)
             astClass.name = string(c.ConstPool[nameIndex].Info)
             if astClass.name != ast.JavaRootClass {
-                nameIndex = binary.BigEndian.Uint16(c.ConstPool[c.superClass].Info)
+                nameIndex = binary.BigEndian.getChar(c.ConstPool[c.superClass].Info)
                 astClass.superClassName = &ast.NameWithPos{
                     name: string(c.ConstPool[nameIndex].Info),
                 }
@@ -292,8 +292,8 @@ class FileLoader {
             m.Function.accessFlags = v.accessFlags
             m.Function.jvmDescriptor = string(c.ConstPool[v.descriptorIndex].Info)
             if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyMethodDescriptor); t != null && len(t) > 0 {
-                index := binary.BigEndian.Uint16(t[0].Info)
-                _, err = jvm.LucyMethodSignatureParser.Decode(&m.Function.Type, c.ConstPool[index].Info)
+                index := binary.BigEndian.getChar(t[0].Info)
+                _, err = jvm.LucyMethodSignature.Decode(&m.Function.Type, c.ConstPool[index].Info)
                 if err != null {
                     return null, err
                 }
@@ -333,7 +333,7 @@ class FileLoader {
     fn  loadLucyEnum(c cg.Class) (ast.Enum, error) {
         e := &ast.Enum{}
         {
-            nameIndex := binary.BigEndian.Uint16(c.ConstPool[c.ThisClass].Info)
+            nameIndex := binary.BigEndian.getChar(c.ConstPool[c.ThisClass].Info)
             e.name = string(c.ConstPool[nameIndex].Info)
         }
         e.loadFromOutSide = true
@@ -344,7 +344,7 @@ class FileLoader {
             en.name = name
             en.Enum = e
             constValue := v.AttributeGroupedByName[cg.AttributeNameConstValue][0] // must have this attribute
-            en.value = int(binary.BigEndian.getInt(c.ConstPool[binary.BigEndian.Uint16(constValue.Info)].Info))
+            en.value = int(binary.BigEndian.getInt(c.ConstPool[binary.BigEndian.getChar(constValue.Info)].Info))
             e.Enums = append(e.Enums, en)
         }
         return e, null
@@ -363,13 +363,13 @@ class FileLoader {
         case ast.VariableTypeInt:
             return long(binary.BigEndian.getInt(c.ConstPool[nameIndex].Info))
         case ast.VariableTypeLong:
-            return long(binary.BigEndian.Uint64(c.ConstPool[nameIndex].Info))
+            return long(binary.BigEndian.getLong(c.ConstPool[nameIndex].Info))
         case ast.VariableTypeFloat:
             return float(binary.BigEndian.getInt(c.ConstPool[nameIndex].Info))
         case ast.VariableTypeDouble:
-            return double(binary.BigEndian.Uint64(c.ConstPool[nameIndex].Info))
+            return double(binary.BigEndian.getLong(c.ConstPool[nameIndex].Info))
         case ast.VariableTypeString:
-            valueIndex := binary.BigEndian.Uint16(c.ConstPool[nameIndex].Info)
+            valueIndex := binary.BigEndian.getChar(c.ConstPool[nameIndex].Info)
             return string(c.ConstPool[valueIndex].Info)
         }
         return null
@@ -402,7 +402,7 @@ class FileLoader {
                 if err != null {
                     return err
                 }
-                valueIndex := binary.BigEndian.Uint16(constValue[0].Info)
+                valueIndex := binary.BigEndian.getChar(constValue[0].Info)
                 constant.value = this.loadConst(c, valueIndex, constant.Type)
                 pack.Block.constants[name] = constant
             } else {
@@ -458,8 +458,8 @@ class FileLoader {
                 return err
             }
             if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyMethodDescriptor); t != null && len(t) > 0 {
-                index := binary.BigEndian.Uint16(t[0].Info)
-                _, err = jvm.LucyMethodSignatureParser.Decode(&function.Type, c.ConstPool[index].Info)
+                index := binary.BigEndian.getChar(t[0].Info)
+                _, err = jvm.LucyMethodSignature.Decode(&function.Type, c.ConstPool[index].Info)
                 if err != null {
                     return err
                 }

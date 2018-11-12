@@ -17,9 +17,9 @@ class BuildExpressionArithmetic {
 		context Context,
 		state StackMapState) -> (maxStack char) {
 		bin := e.data.(ast.ExpressionBinary)
-		stackLength := len(state.Stacks)
+		stackLength := len(state.stacks)
 		defer {
-			state.popStack(len(state.Stacks) - stackLength)
+			state.popStack(len(state.stacks) - stackLength)
 		}
 		if e.Type == ast.ExpressionTypeOr ||
 			e.Type == ast.ExpressionTypeAnd ||

@@ -19,26 +19,26 @@ class BuildExpressionSlice {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        stackLength := len(state.Stacks)
+        stackLength := len(state.stacks)
         defer   {
-            state.popStack(len(state.Stacks) - stackLength)
+            state.popStack(len(state.stacks) - stackLength)
         }
         slice := e.data.(ast.ExpressionSlice)
-        maxStack = this.build(c, code, slice.ExpressionOn, context, state)
+        maxStack = this.eb.build(c, code, slice.ExpressionOn, context, state)
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
         // build start
-        stack := this.build(c, code, slice.start, context, state)
+        stack := this.eb.build(c, code, slice.start, context, state)
         if t := char(1) + stack; t > maxStack {
             maxStack = t
         }
         if slice.End != null {
             state.pushStack(c, slice.start.value)
-            stack = this.build(c, code, slice.End, context, state)
+            stack = this.eb.build(c, code, slice.End, context, state)
             if t := char(2) + stack; t > maxStack {
                 maxStack = t
             }
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                 "substring",
                 "(II)Ljava/lang/String;"
@@ -46,7 +46,7 @@ class BuildExpressionSlice {
             code.CodeLength += 3
         } else {
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                 "substring",
                 "(I)Ljava/lang/String;"
@@ -62,36 +62,36 @@ class BuildExpressionSlice {
         if slice.ExpressionOn.value.Type == ast.VariableTypeString {
             return this.buildStringSlice(c, code, e, context, state)
         }
-        stackLength := len(state.Stacks)
+        stackLength := len(state.stacks)
         defer  {
-            state.popStack(len(state.Stacks) - stackLength)
+            state.popStack(len(state.stacks) - stackLength)
         }
         meta := ArrayMetas[e.value.array.Type]
-        maxStack = this.build(c, code, slice.ExpressionOn, context, state)
+        maxStack = this.eb.build(c, code, slice.ExpressionOn, context, state)
         state.pushStack(c, slice.ExpressionOn.value)
         if slice.End != null {
             // build start
-            stack := this.build(c, code, slice.start, context, state)
+            stack := this.eb.build(c, code, slice.start, context, state)
             if t := char(1) + stack; t > maxStack {
                 maxStack = t
             }
             state.pushStack(c, slice.start.value)
-            stack = this.build(c, code, slice.End, context, state)
-            if t := 3 + stack; t > maxStack {
+            stack = this.eb.build(c, code, slice.End, context, state)
+            if t := char(3) + stack; t > maxStack {
                 maxStack = t
             }
         } else {
             code.Codes[code.CodeLength] = cg.OP_dup
             code.CodeLength++
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            c.InsertMethodRefConst(new  cg.ConstantInfoMethodrefHighLevel(
+            c.insertMethodRefConst(new  cg.ConstantInfoMethodrefHighLevel(
                 meta.className,
                 "size",
                 "()I"
             ), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
             state.pushStack(c, slice.start.value)
-            stack := this.build(c, code, slice.start, context, state)
+            stack := this.eb.build(c, code, slice.start, context, state)
             if t := char(2) + stack; t > maxStack {
                 maxStack = t
             }
@@ -99,7 +99,7 @@ class BuildExpressionSlice {
             code.CodeLength++
         }
         code.Codes[code.CodeLength] = cg.OP_invokevirtual
-        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             meta.className,
             "slice",
             meta.sliceDescriptor

@@ -1,5 +1,6 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/jvm/cg" 
+import "lucy/cmd/langtools/compile/common"
 
 class Descriptor  {
 
@@ -109,7 +110,7 @@ class Descriptor  {
 			return bs , t ,err
 		case 'L':
 			bs = bs[1:]
-			index := bytes.index(bs, []byte{';'}) // end token
+			index := common.Bytes.indexByte(bs, ';') // end token
 			t := new ast.Type()
 			t.Type = ast.VariableTypeObject
 			t.Class = new ast.Class()
@@ -124,7 +125,7 @@ class Descriptor  {
 			bs = bs[1:]
 			var t ast.Type
 			var err error
-			bs, t, err = this.ParseType(bs)
+			bs, t, err = .ParseType(bs)
 			ret := new ast.Type()
 			if err == null {
 				ret.Type = ast.VariableTypeJavaArray

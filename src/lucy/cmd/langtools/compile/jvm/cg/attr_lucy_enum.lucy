@@ -3,7 +3,7 @@
 public class AttributeLucyEnum {
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo) {
 		ret = new AttributeInfo()
-		ret.nameIndex = c.InsertUtf8Const(AttributeNameLucyEnum)
+		ret.nameIndex = c.insertUtf8Const(AttributeNameLucyEnum)
 		return ret
 	}
 }

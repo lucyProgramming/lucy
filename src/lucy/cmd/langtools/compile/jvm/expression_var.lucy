@@ -20,11 +20,11 @@ class BuildExpressionVar {
         vs := e.data.(ast.ExpressionVar)
         //
         for _, v := range vs.Variables {
-            v.localValOffset = code.MaxLocals
+            v.localValOffset = code.maxLocals
             if v.beenCapturedAsLeftValue > 0 {
-                code.MaxLocals++
+                code.maxLocals++
             } else {
-                code.MaxLocals += jvmSlotSize(v.Type)
+                code.maxLocals += jvmSlotSize(v.Type)
             }
         }
         index := len(vs.Variables) - 1
@@ -45,7 +45,7 @@ class BuildExpressionVar {
         index = 0
 
         for _, v := range vs.InitValues {
-            if v.HaveMultiValue() {
+            if v.haveMultiValue() {
                 stack := this.eb.build(c, code, v, context, state)
                 if t := currentStack + stack; t > maxStack {
                     maxStack = t
@@ -57,12 +57,12 @@ class BuildExpressionVar {
                         maxStack = t
                     }
                     if vs.Variables[index].isGlobal {
-                        this.BuildPackage.storeGlobalVariable(c, code, vs.Variables[index])
+                        this.eb.storeGlobalVariable(c, code, vs.Variables[index])
                     } else {
-                        this.BuildPackage.storeLocalVar(c, code, vs.Variables[index])
+                        this.eb.storeLocalVar(c, code, vs.Variables[index])
                         if vs.Variables[index].beenCapturedAsLeftValue > 0 {
                             copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-                                vs.Variables[index].localValOffset)...)
+                                vs.Variables[index].localValOffset))
                             state.popStack(2)
                             state.appendLocals(c,
                                 state.newObjectVariableType(closure.getMeta(vs.Variables[index].Type.Type).className))
@@ -81,12 +81,12 @@ class BuildExpressionVar {
                 maxStack = t
             }
             if vs.Variables[index].isGlobal {
-                this.BuildPackage.storeGlobalVariable(c, code, vs.Variables[index])
+                this.eb.storeGlobalVariable(c, code, vs.Variables[index])
             } else {
-                this.BuildPackage.storeLocalVar(c, code, vs.Variables[index])
+                this.eb.storeLocalVar(c, code, vs.Variables[index])
                 if vs.Variables[index].beenCapturedAsLeftValue > 0 {
                     copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-                        vs.Variables[index].localValOffset)...)
+                        vs.Variables[index].localValOffset))
                     state.popStack(2)
                     state.appendLocals(c,
                         state.newObjectVariableType(closure.getMeta(vs.Variables[index].Type.Type).className))

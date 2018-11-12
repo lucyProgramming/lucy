@@ -18,10 +18,10 @@ public const	ConstantPoolTagMethodType         byte = 16
 public const	ConstantPoolTagInvokeDynamic      byte = 18
  
 
-class ConstPool  {
+public class ConstPool  {
 	selfIndex char // using when it`s self
-	Tag       byte
-	Info      []byte
+	public Tag       byte
+	public Info      []byte
 }
 
 class ConstantInfoClass  {

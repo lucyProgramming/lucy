@@ -15,7 +15,7 @@ class ExpressionCheckAssign {
 		valueTypes := checkExpressions(block, values, errs, false)
 		leftTypes := []Type{}
 		for _, v := range lefts {
-			if v.IsIdentifier(UnderScore) {
+			if v.isIdentifier(UnderScore) {
 				leftTypes.append(null) // this is no assign situation
 			} else {
 				t := v.getLeftValue(block, errs)

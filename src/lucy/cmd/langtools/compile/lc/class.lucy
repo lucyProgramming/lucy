@@ -14,8 +14,8 @@ class ClassDecoder {
 		ret := new cg.Class()
 		c.classFile = ret
 		//version
-		ret.MinorVersion = binary.BigEndian.Uint16(c.bs)
-		ret.MajorVersion = binary.BigEndian.Uint16(c.bs[2:])
+		ret.MinorVersion = binary.BigEndian.getChar(c.bs)
+		ret.MajorVersion = binary.BigEndian.getChar(c.bs[2:])
 		c.bs = c.bs[4:]
 		ret.ConstPool = []cg.ConstPool{null} // pool start 1
 		//const pool
@@ -23,11 +23,11 @@ class ClassDecoder {
 			return ret, err
 		}
 		//access flag
-		ret.accessFlags = binary.BigEndian.Uint16(c.bs)
+		ret.accessFlags = binary.BigEndian.getChar(c.bs)
 		c.bs = c.bs[2:]
 		// this class
-		ret.ThisClass = binary.BigEndian.Uint16(c.bs)
-		ret.superClass = binary.BigEndian.Uint16(c.bs[2:])
+		ret.ThisClass = binary.BigEndian.getChar(c.bs)
+		ret.superClass = binary.BigEndian.getChar(c.bs[2:])
 		c.bs = c.bs[4:]
 		c.parseInterfaces()
 		c.parseFields()
@@ -38,13 +38,13 @@ class ClassDecoder {
 	}
 
 	fn parseConstPool() -> (err error) {
-		length := binary.BigEndian.Uint16(c.bs) - 1
+		length := binary.BigEndian.getChar(c.bs) - 1
 		c.bs = c.bs[2:]
 		for i := 0; i < int(length); i++ {
 			switch c.bs[0] {
 			case cg.ConstantPoolTagUtf8:
 				p := new cg.ConstPool()
-				length := binary.BigEndian.Uint16(c.bs[1:])
+				length := binary.BigEndian.getChar(c.bs[1:])
 				p.Tag = c.bs[0]
 				c.bs = c.bs[3:]
 				p.Info = c.bs[:length]
@@ -136,22 +136,22 @@ class ClassDecoder {
 	}
 
 	fn parseInterfaces() {
-		length := binary.BigEndian.Uint16(c.bs)
+		length := binary.BigEndian.getChar(c.bs)
 		c.bs = c.bs[2:]
 		for i := char(0); i < length; i++ {
-			c.classFile.interfaces = append(c.classFile.interfaces, binary.BigEndian.Uint16(c.bs))
+			c.classFile.interfaces = append(c.classFile.interfaces, binary.BigEndian.getChar(c.bs))
 			c.bs = c.bs[2:]
 		}
 	}
 
 	fn parseFields() -> (err error) {
-		length := binary.BigEndian.Uint16(c.bs)
+		length := binary.BigEndian.getChar(c.bs)
 		c.bs = c.bs[2:]
 		for i := char(0); i < length; i++ {
 			f := new cg.FieldInfo()
-			f.accessFlags = binary.BigEndian.Uint16(c.bs)
-			f.nameIndex = binary.BigEndian.Uint16(c.bs[2:])
-			f.descriptorIndex = binary.BigEndian.Uint16(c.bs[4:])
+			f.accessFlags = binary.BigEndian.getChar(c.bs)
+			f.nameIndex = binary.BigEndian.getChar(c.bs[2:])
+			f.descriptorIndex = binary.BigEndian.getChar(c.bs[4:])
 			c.bs = c.bs[6:]
 			f.AttributeGroupedByName, err = c.parseAttributes()
 			if err != null {
@@ -163,13 +163,13 @@ class ClassDecoder {
 	}
 
 	fn parserMethods() -> (err error) {
-		length := binary.BigEndian.Uint16(c.bs)
+		length := binary.BigEndian.getChar(c.bs)
 		c.bs = c.bs[2:]
 		for i := char(0); i < length; i++ {
 			m := new cg.MethodInfo()
-			m.accessFlags = binary.BigEndian.Uint16(c.bs)
-			m.nameIndex = binary.BigEndian.Uint16(c.bs[2:])
-			m.descriptorIndex = binary.BigEndian.Uint16(c.bs[4:])
+			m.accessFlags = binary.BigEndian.getChar(c.bs)
+			m.nameIndex = binary.BigEndian.getChar(c.bs[2:])
+			m.descriptorIndex = binary.BigEndian.getChar(c.bs[4:])
 			c.bs = c.bs[6:]
 			m.AttributeGroupedByName, err = c.parseAttributes()
 			if err != null {
@@ -182,11 +182,11 @@ class ClassDecoder {
 
 	fn parseAttributes() -> (attrs  cg.AttributeGroupedByName,err error) {
 		ret := make(cg.AttributeGroupedByName)
-		length := binary.BigEndian.Uint16(c.bs)
+		length := binary.BigEndian.getChar(c.bs)
 		c.bs = c.bs[2:]
 		for i := char(0); i < length; i++ {
 			a := new cg.AttributeInfo()
-			a.nameIndex = binary.BigEndian.Uint16(c.bs)
+			a.nameIndex = binary.BigEndian.getChar(c.bs)
 			if c.classFile.ConstPool[a.nameIndex].Tag != cg.ConstantPoolTagUtf8 {
 				return ret, new error(sprintf("name index %d is not a utf8 const", a.nameIndex))
 			}

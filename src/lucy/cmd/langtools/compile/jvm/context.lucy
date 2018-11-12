@@ -40,49 +40,49 @@ class Context {
 		defer {
 			this.lastStackMapOffset = offset // rewrite
 			this.lastStackMapState = state
-			this.lastStackMapStateLocals = new []cg.StackMapVerificationTypeInfo(len(state.Locals))
-			copy(this.lastStackMapStateLocals, state.Locals)
-			this.lastStackMapStateStacks = new []cg.StackMapVerificationTypeInfo(len(state.Stacks))
-			copy(this.lastStackMapStateStacks, state.Stacks)
+			this.lastStackMapStateLocals = new []cg.StackMapVerificationTypeInfo(len(state.locals))
+			copy(this.lastStackMapStateLocals, state.locals)
+			this.lastStackMapStateStacks = new []cg.StackMapVerificationTypeInfo(len(state.stacks))
+			copy(this.lastStackMapStateStacks, state.stacks)
 			this.stackMapOffsets.append( offset)
 		}
 		if state == this.lastStackMapState { // same state
-			if len(state.Locals) == len(this.lastStackMapStateLocals) && len(state.Stacks) == 0 {
+			if len(state.locals) == len(this.lastStackMapStateLocals) && len(state.stacks) == 0 {
 				/*
 					same frame or same frame extended
 				*/
 				if delta <= 63 {
 					code.AttributeStackMap.StackMaps.append(new cg.StackMapSameFrame(byte(delta)))
 				} else {
-					code.AttributeStackMap.StackMaps.append(new cg.StackMapSameFrameExtended(251, delta))
+					code.AttributeStackMap.StackMaps.append(new cg.StackMapSameFrameExtended(251b, delta))
 				}
 				return
 			}
-			if len(this.lastStackMapStateLocals) == len(state.Locals) && len(state.Stacks) == 1 { // 1 stack or 1 stack extended
+			if len(this.lastStackMapStateLocals) == len(state.locals) && len(state.stacks) == 1 { // 1 stack or 1 stack extended
 				if delta <= 64 {
-					code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
+					code.AttributeStackMap.StackMaps.append(
 						new cg.StackMapSameLocals1StackItemFrame(
 							byte(delta + 64),
-							state.Stacks[0]
+							state.stacks[0]
 						))
 				} else {
-					code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps,
+					code.AttributeStackMap.StackMaps.append(
 						new cg.StackMapSameLocals1StackItemFrameExtended(
 							247,
 							delta,
-							state.Stacks[0]
+							state.stacks[0]
 						))
 				}
 				return
 			}
-			if len(this.lastStackMapStateLocals) < len(state.Locals) && len(state.Stacks) == 0 { // append frame
-				num := len(state.Locals) - len(this.lastStackMapStateLocals)
+			if len(this.lastStackMapStateLocals) < len(state.locals) && len(state.stacks) == 0 { // append frame
+				num := len(state.locals) - len(this.lastStackMapStateLocals)
 				if num <= 3 {
 					appendFrame := new cg.StackMapAppendFrame()
-					appendFrame.FrameType = byte(num + 251)
-					appendFrame.Delta = delta
-					appendFrame.Locals = new []cg.StackMapVerificationTypeInfo(num)
-					copy(appendFrame.Locals, state.Locals[len(state.Locals)-num:])
+					appendFrame.frameType = byte(num + 251)
+					appendFrame.delta = delta
+					appendFrame.locals = new []cg.StackMapVerificationTypeInfo(num)
+					copy(appendFrame.locals, state.locals[len(state.locals)-num:])
 					code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, appendFrame)
 					return
 				}
@@ -90,12 +90,12 @@ class Context {
 		}
 		// full frame
 		fullFrame := new cg.StackMapFullFrame()
-		fullFrame.FrameType = 255
-		fullFrame.Delta = delta
-		fullFrame.Locals = new []cg.StackMapVerificationTypeInfo(len(state.Locals))
-		copy(fullFrame.Locals, state.Locals)
-		fullFrame.Stacks = new []cg.StackMapVerificationTypeInfo(len(state.Stacks))
-		copy(fullFrame.Stacks, state.Stacks)
+		fullFrame.frameType = 255
+		fullFrame.delta = delta
+		fullFrame.locals = new []cg.StackMapVerificationTypeInfo(len(state.locals))
+		copy(fullFrame.locals, state.locals)
+		fullFrame.stacks = new []cg.StackMapVerificationTypeInfo(len(state.stacks))
+		copy(fullFrame.stacks, state.stacks)
 		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, fullFrame)
 		return
 	}
@@ -108,7 +108,7 @@ class Context {
 			return
 		}
 		if pos.filename != this.currentSourceFile {
-			c.InsertSourceFile(pos.filename)
+			c.insertSourceFile(pos.filename)
 			this.currentSourceFile = pos.filename
 			this.currentLineNumber = pos.line
 			code.MKLineNumber(pos.line)

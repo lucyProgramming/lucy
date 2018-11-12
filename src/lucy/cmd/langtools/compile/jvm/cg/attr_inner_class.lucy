@@ -1,7 +1,7 @@
 import "lucy/binary"
 
 
-public class innerClass {
+public class InnerClass {
 	public innerClass  string
 	public outerClass  string
 	public name        string
@@ -27,16 +27,16 @@ public class innerClass {
 
 
 class AttributeInnerClasses {
-	Classes []innerClass
+	Classes []InnerClass
 	fn FromBs(c Class, bs []byte) {
 		length := binary.BigEndian.getChar(bs)
 		bs = bs[2:]
 		if int(length*8) != len(bs) {
 			panic("length not match")
 		}
-		this.Classes = []innerClass{}
+		this.Classes = []InnerClass{}
 		for len(bs) > 0 {
-			inner := new innerClass()
+			inner := new InnerClass()
 			inner.FromBs(c, bs[:8])
 			this.Classes.append( inner)
 			bs = bs[8:]
@@ -48,14 +48,14 @@ class AttributeInnerClasses {
 			return null
 		}
 		ret = new AttributeInfo()
-		ret.nameIndex = c.InsertUtf8Const(AttributeNameInnerClasses)
+		ret.nameIndex = c.insertUtf8Const(AttributeNameInnerClasses)
 		ret.Info = new []byte(2)
 		binary.BigEndian.putChar(ret.Info, char(len(this.Classes)))
 		for _, v := range this.Classes {
 			bs8 := new []byte(8)
-			binary.BigEndian.putChar(bs8, c.InsertClassConst(v.innerClass))
-			binary.BigEndian.putChar(bs8[2:], c.InsertClassConst(v.outerClass))
-			binary.BigEndian.putChar(bs8[4:], c.InsertUtf8Const(v.name))
+			binary.BigEndian.putChar(bs8, c.insertClassConst(v.innerClass))
+			binary.BigEndian.putChar(bs8[2:], c.insertClassConst(v.outerClass))
+			binary.BigEndian.putChar(bs8[4:], c.insertUtf8Const(v.name))
 			binary.BigEndian.putChar(bs8[6:], v.accessFlags)
 			ret.Info.appendAll(bs8)
 		}

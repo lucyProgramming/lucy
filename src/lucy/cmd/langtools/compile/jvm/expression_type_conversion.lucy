@@ -19,9 +19,9 @@ class BuildExpressionTypeConversion {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        stackLength := len(state.Stacks)
+        stackLength := len(state.stacks)
         defer {
-            state.popStack(len(state.Stacks) - stackLength)
+            state.popStack(len(state.stacks) - stackLength)
         }
         conversion := e.data.(ast.ExpressionTypeConversion)
         currentStack := char(0)
@@ -30,11 +30,11 @@ class BuildExpressionTypeConversion {
             currentStack = 2
             meta := ArrayMetas[ast.VariableTypeByte]
             code.Codes[code.CodeLength] = cg.OP_new
-            c.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
+            c.insertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.Codes[code.CodeLength+3] = cg.OP_dup
             t := new cg.StackMapVerificationTypeInfo()
             t.Verify = new cg.StackMapUninitializedVariableInfo(char(code.CodeLength))
-            state.Stacks.append(t, t)
+            state.stacks.append(t, t)
             code.CodeLength += 4
         }
         // string(byte[])
@@ -44,17 +44,17 @@ class BuildExpressionTypeConversion {
             (conversion.Type.Type == ast.VariableTypeString && conversion.Expression.value.equal(ast.JavaBytesType)) {
             currentStack = 2
             code.Codes[code.CodeLength] = cg.OP_new
-            c.InsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+            c.insertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.Codes[code.CodeLength+3] = cg.OP_dup
             t := new cg.StackMapVerificationTypeInfo()
             t.Verify = new cg.StackMapUninitializedVariableInfo(char(code.CodeLength))
-            state.Stacks = append(state.Stacks, t, t)
+            state.stacks.append( t, t)
             code.CodeLength += 4
         }
         stack := this.eb.build(c, code, conversion.Expression, context, state)
         maxStack = currentStack + stack
         if e.value.isNumber() {
-            this.numberTypeConverter(code, conversion.Expression.value.Type, conversion.Type.Type)
+            this.eb.BuildExpressionConversion.numberTypeConverter(code, conversion.Expression.value.Type, conversion.Type.Type)
             if t := jvmSlotSize(conversion.Type); t > maxStack {
                 maxStack = t
             }
@@ -84,18 +84,18 @@ class BuildExpressionTypeConversion {
             code.Codes[code.CodeLength] = cg.OP_pop
             code.CodeLength++
             code.Codes[code.CodeLength] = cg.OP_new
-            c.InsertClassConst(javaExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+            c.insertClassConst(javaExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.Codes[code.CodeLength+3] = cg.OP_dup
             code.CodeLength += 4
             code.Codes[code.CodeLength] = cg.OP_ldc_w
-            c.InsertStringConst("int value not found in enum names",
+            c.insertStringConst("int value not found in enum names",
                 code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
             if 3 > maxStack {
                 maxStack = 3
             }
             code.Codes[code.CodeLength] = cg.OP_invokespecial
-            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaExceptionClass,
                 specialMethodInit,
                 "(Ljava/lang/String;)V"
@@ -113,7 +113,7 @@ class BuildExpressionTypeConversion {
             conversion.Expression.value.Type == ast.VariableTypeString {
             //stack top must be a string
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                 "getBytes",
                 "()[B"
@@ -124,7 +124,7 @@ class BuildExpressionTypeConversion {
             }
             meta := ArrayMetas[ast.VariableTypeByte]
             code.Codes[code.CodeLength] = cg.OP_invokespecial
-            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 meta.className,
                 specialMethodInit,
                 meta.constructorFuncDescriptor
@@ -137,7 +137,7 @@ class BuildExpressionTypeConversion {
             conversion.Expression.value.Type == ast.VariableTypeString {
             //stack top must be a string
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                 "getBytes",
                "()[B"
@@ -156,17 +156,17 @@ class BuildExpressionTypeConversion {
                 length char
             }
             var a = new autoVar()
-            a.start = code.MaxLocalsa
-            a.length = code.MaxLocals + 1
+            a.start = code.maxLocals
+            a.length = code.maxLocals + 1
             state.appendLocals(c, typeInt)
             state.appendLocals(c, typeInt)
-            code.MaxLocals += 2
+            code.maxLocals += 2
             currentStack = 3
             code.Codes[code.CodeLength] = cg.OP_dup
             code.CodeLength++
             meta := ArrayMetas[ast.VariableTypeByte]
             code.Codes[code.CodeLength] = cg.OP_getfield
-            c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+            c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                 meta.className,
                 "start",
                 "I"
@@ -176,7 +176,7 @@ class BuildExpressionTypeConversion {
             code.Codes[code.CodeLength] = cg.OP_dup
             code.CodeLength++
             code.Codes[code.CodeLength] = cg.OP_invokevirtual
-            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 meta.className,
                 "size",
                 "()I"
@@ -184,7 +184,7 @@ class BuildExpressionTypeConversion {
             code.CodeLength += 3
             copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, a.length))
             code.Codes[code.CodeLength] = cg.OP_getfield
-            c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+            c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                 meta.className,
                "elements",
                 meta.elementsFieldDescriptor
@@ -193,13 +193,13 @@ class BuildExpressionTypeConversion {
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.start))
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.length))
             code.Codes[code.CodeLength] = cg.OP_ldc_w
-            c.InsertStringConst("utf-8", code.Codes[code.CodeLength+1:code.CodeLength+3])
+            c.insertStringConst("utf-8", code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
             if 6 > maxStack { // stack is ... stringRef stringRef byte[] start length "utf-8"
                 maxStack = 6
             }
             code.Codes[code.CodeLength] = cg.OP_invokespecial
-            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                 specialMethodInit,
                 "([BIILjava/lang/String;)V"
@@ -211,7 +211,7 @@ class BuildExpressionTypeConversion {
         if conversion.Type.Type == ast.VariableTypeString &&
             conversion.Expression.value.equal(ast.JavaBytesType) {
             code.Codes[code.CodeLength] = cg.OP_invokespecial
-            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                 specialMethodInit,
                 "([B)V"
@@ -221,7 +221,7 @@ class BuildExpressionTypeConversion {
         }
         if conversion.Type.Type == ast.VariableTypeString {
             code.Codes[code.CodeLength] = cg.OP_checkcast
-            c.InsertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+            c.insertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
             return
         }

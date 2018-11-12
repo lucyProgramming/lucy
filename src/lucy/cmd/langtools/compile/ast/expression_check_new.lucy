@@ -47,7 +47,7 @@ class ExpressionCheckNew {
 		}
 		ms, matched, err := no.Type.Class.accessConstructionMethod(e.pos, errs, no, null, callArgTypes)
 		if err != null {
-			errs . append(new error( sprintf("%s %s", e.pos.errMsgPrefix(), err.getMessage())))
+			errs.append(err)
 			return ret
 		}
 		if matched {

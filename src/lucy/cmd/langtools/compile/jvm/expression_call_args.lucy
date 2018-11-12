@@ -21,9 +21,9 @@ class BuildExpressionCallArgs {
 		context Context,
 		state StackMapState) -> (maxStack char) {
 		currentStack := char(0)
-		stackLength := len(state.Stacks)
+		stackLength := len(state.stacks)
 		defer  {
-			state.popStack(len(state.Stacks) - stackLength) // let`s pop
+			state.popStack(len(state.stacks) - stackLength) // let`s pop
 		}
 		for _, e := range args {
 			stack := this.eb.build(c, code, e, context, state)

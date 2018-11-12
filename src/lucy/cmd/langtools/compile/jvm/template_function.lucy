@@ -14,7 +14,7 @@ class BuildTemplateFunctionCall {
         if call.TemplateFunctionCallPair.Entrance == null {
             method := new cg.MethodHighLevel()
             method.Class = c
-            method.name = ast.TypeNewMethodName(nameTemplateFunction(call.TemplateFunctionCallPair.Function))
+            method.name = c.newMethodName(nameTemplateFunction(call.TemplateFunctionCallPair.Function))
             method.accessFlags |= cg.AccClassPublic
             method.accessFlags |= cg.AccClassFinal
             method.accessFlags |= cg.AccMethodStatic
@@ -24,7 +24,7 @@ class BuildTemplateFunctionCall {
             }
             method.Descriptor = Descriptor.methodDescriptor(call.TemplateFunctionCallPair.Function.Type)
             method.code = new cg.AttributeCode()
-            c.AppendMethod(method)
+            c.appendMethod(method)
             call.TemplateFunctionCallPair.Function.Entrance = method
             //build function
             this.BuildPackage.buildFunction(c, null, method, call.TemplateFunctionCallPair.Function)
@@ -32,7 +32,7 @@ class BuildTemplateFunctionCall {
         }
         maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
         code.Codes[code.CodeLength] = cg.OP_invokestatic
-        c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             call.TemplateFunctionCallPair.Entrance.Class.name,
             call.TemplateFunctionCallPair.Entrance.name,
             call.TemplateFunctionCallPair.Entrance.Descriptor

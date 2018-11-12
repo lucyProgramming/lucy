@@ -53,7 +53,7 @@ class ExpressionCheckMethodCall {
 			}
 			if matched {
 				call.Class = javaStringClass
-				if false == call.Expression.IsIdentifier(ThisPointerName) &&
+				if false == call.Expression.isIdentifier(ThisPointerName) &&
 					ms[0].isPublic() == false {
 					errs.append(new error(sprintf("%s method '%s' is not public", e.pos.errMsgPrefix(), call.name)))
 				}
@@ -147,7 +147,7 @@ class ExpressionCheckMethodCall {
 		errs []error,
 		object Type) {
 		call := e.data.(ExpressionMethodCall)
-		if call.Expression.IsIdentifier(ThisPointerName) == false {
+		if call.Expression.isIdentifier(ThisPointerName) == false {
 			errs.append(new error(sprintf("%s call father`s constuction must use 'thi.super()'",
 				e.pos.errMsgPrefix())))
 			return

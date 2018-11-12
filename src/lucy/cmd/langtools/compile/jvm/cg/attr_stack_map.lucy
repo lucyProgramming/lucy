@@ -3,7 +3,7 @@ import "java/lang/Object"
 import "lucy/binary"
 
 interface StackMap  {
-	fn ToBytes() -> ([]byte)
+	fn toBytes() -> ([]byte)
 }
 
 public class AttributeStackMap {
@@ -13,11 +13,11 @@ public class AttributeStackMap {
 			return null
 		}
 		info := new AttributeInfo() 
-		info.nameIndex = c.InsertUtf8Const(AttributeNameStackMap)
+		info.nameIndex = c.insertUtf8Const(AttributeNameStackMap)
 		bs := new []byte(2)
 		binary.BigEndian.putChar(bs, char(len(this.StackMaps)))
 		for _, v := range this.StackMaps {
-			bs . appendAll(v.ToBytes())
+			bs . appendAll(v.toBytes())
 		}
 		info.Info = bs
 		info.attributeLength = (len(info.Info))
@@ -27,96 +27,96 @@ public class AttributeStackMap {
 
 
 
-public class StackMapSameFrame {
-	public FrameType byte
-	public fn StackMapSameFrame(FrameType byte){
+public class StackMapSameFrame implements StackMap{
+	public frameType byte
+	public fn StackMapSameFrame(frameType byte){
 		this.super()
-		this.FrameType = FrameType
+		this.frameType = frameType
 	}
-	fn ToBytes() -> (bs []byte) {
-		return []byte{this.FrameType}
+	fn toBytes() -> (bs []byte) {
+		return []byte{this.frameType}
 	}
 }
 
 
-public class StackMapSameLocals1StackItemFrame {
-	public FrameType byte
-	Stack     StackMapVerificationTypeInfo
-	fn StackMapSameLocals1StackItemFrame(FrameType byte ,Stack     StackMapVerificationTypeInfo ){
+public class StackMapSameLocals1StackItemFrame implements StackMap {
+	public frameType byte
+	stack     StackMapVerificationTypeInfo
+	fn StackMapSameLocals1StackItemFrame(frameType byte ,stack     StackMapVerificationTypeInfo ){
         this.super()
-        this.FrameType = FrameType
-        this.Stack = Stack
+        this.frameType = frameType
+        this.stack = stack
 	}
-	fn ToBytes() -> (bs []byte) {
-		bs  = []byte{this.FrameType}
-		bs.appendAll(this.Stack.ToBytes())
+	fn toBytes() -> (bs []byte) {
+		bs  = []byte{this.frameType}
+		bs.appendAll(this.stack.toBytes())
 		return bs
 	}
 }
 
 
 
-public class StackMapSameLocals1StackItemFrameExtended {
-	public FrameType byte
-	public Delta     char
-	public Stack     StackMapVerificationTypeInfo
-	fn ToBytes() -> (bs []byte) {
+public class StackMapSameLocals1StackItemFrameExtended implements StackMap {
+	public frameType byte
+	public delta     char
+	public stack     StackMapVerificationTypeInfo
+	fn toBytes() -> (bs []byte) {
 		bs = new []byte(3)
-		bs[0] = this.FrameType
-		binary.BigEndian.putChar(bs[1:], this.Delta)
-		bs. appendAll(this.Stack.ToBytes())
+		bs[0] = this.frameType
+		binary.BigEndian.putChar(bs[1:], this.delta)
+		bs. appendAll(this.stack.toBytes())
 		return
 	}
 }
 
 
 
-public class StackMapChopFrame  {
-	public FrameType byte
-	public Delta     char
-	public fn StackMapChopFrame(FrameType byte ,Delta     char ){
+public class StackMapChopFrame  implements StackMap {
+	public frameType byte
+	public delta     char
+	public fn StackMapChopFrame(frameType byte ,delta     char ){
         this.super()
-        this.FrameType = FrameType
-        this.Delta = Delta
+        this.frameType = frameType
+        this.delta = delta
 	}
-	fn ToBytes() -> (bs []byte) {
+	fn toBytes() -> (bs []byte) {
 		bs = new []byte(3)
-		bs[0] = this.FrameType
-		binary.BigEndian.putChar(bs[1:], this.Delta)
+		bs[0] = this.frameType
+		binary.BigEndian.putChar(bs[1:], this.delta)
 		return bs
 	}
 }
 
 
 
-public class StackMapSameFrameExtended {
-	public FrameType byte
-	public Delta     char
-	public fn StackMapSameFrameExtended(FrameType byte ,Delta char ){
+public class StackMapSameFrameExtended  implements StackMap {
+	public frameType byte
+	public delta     char
+	public fn StackMapSameFrameExtended(frameType byte ,delta char ){
         this.super()
-        this.FrameType = FrameType
-        this.Delta = Delta
+        this.frameType = frameType
+        this.delta = delta
 	}
-	fn ToBytes() -> (bs []byte) {
+	fn toBytes() -> (bs []byte) {
 		bs  = new []byte(3)
-		bs[0] = this.FrameType
-		binary.BigEndian.putChar(bs[1:], this.Delta)
+		bs[0] = this.frameType
+		binary.BigEndian.putChar(bs[1:], this.delta)
 		return bs
 	}
 }
 
 
 
-public class StackMapAppendFrame {
-	public FrameType byte
-	public Delta     char
-	public Locals    []StackMapVerificationTypeInfo
-	fn ToBytes() -> (bs []byte) {
+public class StackMapAppendFrame implements StackMap {
+	public frameType byte
+	public delta     char
+	public locals    []StackMapVerificationTypeInfo
+	fn toBytes() -> (bs []byte) {
 		bs = new []byte(3)
-		bs[0] = this.FrameType
-		binary.BigEndian.putChar(bs[1:], this.Delta)
-		for _, v := range this.Locals {
-			bs .appendAll ( v.ToBytes())
+		bs[0] = this.frameType
+		binary.BigEndian.putChar(bs[1:], this.delta)
+		for _, v := range this.locals {
+			bs .appendAll ( v.toBytes())
 		}
 		return bs
 	}
@@ -124,33 +124,27 @@ public class StackMapAppendFrame {
 
 
 
-public class StackMapFullFrame {
-	public FrameType byte
-	public Delta     char
-	public Locals    []StackMapVerificationTypeInfo
-	public Stacks    []StackMapVerificationTypeInfo
+public class StackMapFullFrame implements StackMap{
+	public frameType byte
+	public delta     char
+	public locals    []StackMapVerificationTypeInfo
+	public stacks    []StackMapVerificationTypeInfo
 
-    public fn StackMapFullFrame(FrameType byte , Delta     char ,Locals ,  Stacks []StackMapVerificationTypeInfo ){
-        this.super()
-        this.FrameType = FrameType
-        this.Delta = Delta
-        this.Locals = Locals
-        this.Stacks = Stacks
-    }
+   	
 
-	fn ToBytes() -> (bs []byte) {
+	fn toBytes() -> (bs []byte) {
 		bs = new []byte(5)
-		bs[0] = this.FrameType
-		binary.BigEndian.putChar(bs[1:], this.Delta)
-		binary.BigEndian.putChar(bs[3:], char(len(this.Locals)))
-		for _, v := range this.Locals {
-			bs .appendAll( v.ToBytes())
+		bs[0] = this.frameType
+		binary.BigEndian.putChar(bs[1:], this.delta)
+		binary.BigEndian.putChar(bs[3:], char(len(this.locals)))
+		for _, v := range this.locals {
+			bs .appendAll( v.toBytes())
 		}
 		bs2 := new []byte(2)
-		binary.BigEndian.putChar(bs2, char(len(this.Stacks)))
+		binary.BigEndian.putChar(bs2, char(len(this.stacks)))
 		bs .appendAll(bs2)
-		for _, v := range this.Stacks {
-			bs .appendAll (v.ToBytes())
+		for _, v := range this.stacks {
+			bs .appendAll (v.toBytes())
 		}
 		return bs
 	}
@@ -167,7 +161,12 @@ public class StackMapNullVariableInfo {}
 public class StackMapUninitializedThisVariableInfo {}
 public class StackMapObjectVariableInfo  {
 	public index    char
-	public Readable string
+	public fn StackMapObjectVariableInfo(index char){
+		this.super()
+		this.index = index 
+	}
+
+
 }
 public class StackMapUninitializedVariableInfo  {
 	public codeOffset char
@@ -179,7 +178,7 @@ public class StackMapUninitializedVariableInfo  {
 
 public class StackMapVerificationTypeInfo  {
 	public Verify Object
-	fn ToBytes() -> (bs []byte)  {
+	fn toBytes() -> (bs []byte)  {
 		if _,ok := this.Verify.(StackMapTopVariableInfo) ; ok {
 			return []byte{0}
 		}

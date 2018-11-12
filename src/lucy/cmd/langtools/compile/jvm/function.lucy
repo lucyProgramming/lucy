@@ -3,17 +3,24 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
 class BuildFunction {
+    eb BuildExpression
+    fn BuildFunction(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
+
+
 
     fn  mkParametersOffset(c cg.ClassHighLevel, code cg.AttributeCode,
         f ast.Function, state StackMapState) {
         for _, v := range f.Type.ParameterList { // insert into locals
-            v.localValOffset = code.MaxLocals
-            code.MaxLocals += jvmSlotSize(v.Type)
+            v.localValOffset = code.maxLocals
+            code.maxLocals += jvmSlotSize(v.Type)
             state.appendLocals(c, v.Type)
         }
         if f.Type.VArgs != null {
-            f.Type.VArgs.localValOffset = code.MaxLocals
-            code.MaxLocals++
+            f.Type.VArgs.localValOffset = code.maxLocals
+            code.maxLocals++
             state.appendLocals(c, f.Type.VArgs.Type)
         }
     }
@@ -30,14 +37,14 @@ class BuildFunction {
             }
             code.Codes[code.CodeLength] = cg.OP_dup
             code.CodeLength++
-            if t := 2 + jvmSlotSize(v.Type); t > maxStack {
+            if t := char(2) + jvmSlotSize(v.Type); t > maxStack {
                 maxStack = t
             }
-            copyOPs(code, loadLocalVariableOps(v.Type.Type, v.localValOffset)...)
-            this.storeLocalVar(c, code, v)
-            v.localValOffset = code.MaxLocals //rewrite offset
-            code.MaxLocals++
-            copyOPs(code, storeLocalVariableOps(v.Type.Type, v.localValOffset)...)
+            copyOPs(code, loadLocalVariableOps(v.Type.Type, v.localValOffset))
+            this.eb.storeLocalVar(c, code, v)
+            v.localValOffset = code.maxLocals //rewrite offset
+            code.maxLocals++
+            copyOPs(code, storeLocalVariableOps(v.Type.Type, v.localValOffset))
             state.appendLocals(c, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
         }
         return
@@ -51,8 +58,8 @@ class BuildFunction {
             for _, v := range f.Type.ReturnList {
                 currentStack := char(0)
                 if v.beenCapturedAsLeftValue > 0 { //create closure object
-                    v.localValOffset = code.MaxLocals
-                    code.MaxLocals++
+                    v.localValOffset = code.maxLocals
+                    code.maxLocals++
                     stack := closure.createClosureVar(c, code, v.Type)
                     if stack > maxStack {
                         maxStack = stack
@@ -68,14 +75,14 @@ class BuildFunction {
                     state.pushStack(c,
                         state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
                 } else {
-                    v.localValOffset = code.MaxLocals
-                    code.MaxLocals += jvmSlotSize(v.Type)
+                    v.localValOffset = code.maxLocals
+                    code.maxLocals += jvmSlotSize(v.Type)
                 }
-                stack := this.BuildExpression.build(c, code, v.defaultValueExpression, context, state)
+                stack := this.eb.build(c, code, v.defaultValueExpression, context, state)
                 if t := currentStack + stack; t > maxStack {
                     maxStack = t
                 }
-                this.storeLocalVar(c, code, v)
+                this.eb.storeLocalVar(c, code, v)
                 if v.beenCapturedAsLeftValue > 0 {
                     state.popStack(1)
                     state.appendLocals(c, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
@@ -98,46 +105,46 @@ class BuildFunction {
         defer{
             method.code.Codes = method.code.Codes[0:method.code.CodeLength]
         }
-        state := new StackMapState()
+        state := new StackMapState(null)
         if method.accessFlags&cg.AccMethodStatic == 0 {
             if method.isConstruction { // construction method
-                method.code.MaxLocals = 1
+                method.code.maxLocals = 1
                 t := new cg.StackMapVerificationTypeInfo()
                 t.Verify = new cg.StackMapUninitializedThisVariableInfo()
-                state.Locals = append(state.Locals, t)
+                state.locals.append(t)
                 this.mkParametersOffset(c, method.code, f, state)
-                stack := this.BuildExpression.build(c, method.code, f.CallFatherConstructionExpression,
+                stack := this.eb.build(c, method.code, f.CallFatherConstructionExpression,
                     context, state)
                 if stack > method.code.MaxStack {
                     method.code.MaxStack = stack
                 }
-                state.Locals[0] = state.newStackMapVerificationTypeInfo(c, state.newObjectVariableType(ast.TypeName))
+                state.locals[0] = state.newStackMapVerificationTypeInfo(c, state.newObjectVariableType(c.name))
                 this.mkFieldDefaultValue(c, method.code, astClass, context, state)
                 this.mkCapturedParameters(c, method.code, f, state)
             } else {
-                method.code.MaxLocals = 1
-                state.appendLocals(c, state.newObjectVariableType(ast.TypeName))
+                method.code.maxLocals = 1
+                state.appendLocals(c, state.newObjectVariableType(c.name))
             }
         }
-        if f.IsGlobalMain() { // main function
+        if f.isGlobalMain() { // main function
             code := method.code
             code.Codes[code.CodeLength] = cg.OP_new
             meta := ArrayMetas[ast.VariableTypeString]
-            c.InsertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
+            c.insertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.Codes[code.CodeLength+3] = cg.OP_dup
             code.CodeLength += 4
-            copyOPs(code, loadLocalVariableOps(ast.VariableTypeString, 0)...)
+            copyOPs(code, loadLocalVariableOps(ast.VariableTypeString, char(0)))
             if 3 > code.MaxStack {
                 code.MaxStack = 3
             }
             code.Codes[code.CodeLength] = cg.OP_invokespecial
-            c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 meta.className,
                 specialMethodInit,
                 meta.constructorFuncDescriptor
             ), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
-            copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, 1)...)
+            copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, char(1)))
             {
                 // String[] java style
                 t := new ast.Type()
@@ -146,11 +153,11 @@ class BuildFunction {
                 t.array.Type = ast.VariableTypeString
                 state.appendLocals(c, t)
             }
-            method.code.MaxLocals = 1
+            method.code.maxLocals = 1
         }
-        if LucyMethodSignatureParser.Need(f.Type) {
+        if LucyMethodSignature.Need(f.Type) {
             d := new cg.AttributeLucyMethodDescriptor()
-            d.Descriptor = LucyMethodSignature.Encode(f.Type)
+            d.descriptor = LucyMethodSignature.Encode(f.Type)
             method.AttributeLucyMethodDescriptor = d
         }
         if f.HaveDefaultValue {
@@ -167,7 +174,7 @@ class BuildFunction {
                 p := new cg.MethodParameter()
                 p.name = v.name
                 p.accessFlags = cg.MethodParameterTypeAccMandated
-                method.AttributeMethodParameters.Parameters = append(method.AttributeMethodParameters.Parameters, p)
+                method.AttributeMethodParameters.Parameters.append(p)
             }
         }
         if f.Type.VoidReturn() == false {
@@ -187,11 +194,11 @@ class BuildFunction {
             }
         }
         if f.HasDefer {
-            context.exceptionVarOffset = method.code.MaxLocals
-            method.code.MaxLocals++
+            context.exceptionVarOffset = method.code.maxLocals
+            method.code.maxLocals++
             method.code.Codes[method.code.CodeLength] = cg.OP_aconst_null
             method.code.CodeLength++
-            copyOPs(method.code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)...)
+            copyOPs(method.code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset))
             state.appendLocals(c, state.newObjectVariableType(ast.JavaThrowableClass))
         }
         this.buildBlock(c, method.code, f.block, context, state)
@@ -201,10 +208,10 @@ class BuildFunction {
         f ast.Function, context Context, state StackMapState) -> (maxStack char) {
         code.Codes[code.CodeLength] = cg.OP_aconst_null
         code.CodeLength++
-        context.multiValueVarOffset = code.MaxLocals
-        code.MaxLocals++
+        context.multiValueVarOffset = code.maxLocals
+        code.maxLocals++
         copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-            context.multiValueVarOffset)...)
+            context.multiValueVarOffset))
         state.appendLocals(c, state.newObjectVariableType(javaRootObjectArray))
         maxStack = 1
         return
@@ -218,15 +225,15 @@ class BuildFunction {
             }
             code.Codes[code.CodeLength] = cg.OP_aload_0
             code.CodeLength++
-            state.pushStack(c, state.newObjectVariableType(ast.TypeName))
-            stack := this.BuildExpression.build(c, code, v.defaultValueExpression, context, state)
+            state.pushStack(c, state.newObjectVariableType(c.name))
+            stack := this.eb.build(c, code, v.defaultValueExpression, context, state)
             if t := char(1) + stack; t > code.MaxStack {
                 code.MaxStack = t
             }
             state.popStack(1)
             code.Codes[code.CodeLength] = cg.OP_putfield
-            c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-                ast.TypeName,
+            c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+                c.name,
                 v.name,
                 Descriptor.typeDescriptor(v.Type)
             ), code.Codes[code.CodeLength+1:code.CodeLength+3])
@@ -235,26 +242,7 @@ class BuildFunction {
     }
 
 
-    fn loadLocalVar(c cg.ClassHighLevel,
-        code cg.AttributeCode, v ast.Variable) -> (maxStack char) {
-        if v.beenCapturedAsLeftValue > 0 {
-            return closure.loadLocalClosureVar(c, code, v)
-        }
-        maxStack = jvmSlotSize(v.Type)
-        copyOPs(code, loadLocalVariableOps(v.Type.Type, v.localValOffset))
-        return
-    }
 
-    fn storeLocalVar(c cg.ClassHighLevel,
-        code cg.AttributeCode, v ast.Variable) -> (maxStack char) {
-        if v.beenCapturedAsLeftValue > 0 {
-            closure.storeLocalClosureVar(c, code, v)
-            return
-        }
-        maxStack = jvmSlotSize(v.Type)
-        copyOPs(code, storeLocalVariableOps(v.Type.Type, v.localValOffset)...)
-        return
-    }
 
 
 }

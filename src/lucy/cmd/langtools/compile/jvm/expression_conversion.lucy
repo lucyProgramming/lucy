@@ -200,7 +200,7 @@ class BuildExpressionConversion {
 		switch typ.Type {
 		case ast.VariableTypeBool:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(Z)Ljava/lang/String;"
@@ -208,7 +208,7 @@ class BuildExpressionConversion {
 			code.CodeLength += 3
 		case ast.VariableTypeChar:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(C)Ljava/lang/String;"
@@ -216,7 +216,7 @@ class BuildExpressionConversion {
 			code.CodeLength += 3
 		case ast.VariableTypeByte ,ast.VariableTypeShort ,  ast.VariableTypeEnum ,ast.VariableTypeInt :
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(I)Ljava/lang/String;"
@@ -224,7 +224,7 @@ class BuildExpressionConversion {
 			code.CodeLength += 3
 		case ast.VariableTypeLong:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(J)Ljava/lang/String;"
@@ -232,7 +232,7 @@ class BuildExpressionConversion {
 			code.CodeLength += 3
 		case ast.VariableTypeFloat:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(F)Ljava/lang/String;"
@@ -240,7 +240,7 @@ class BuildExpressionConversion {
 			code.CodeLength += 3
 		case ast.VariableTypeDouble:
 			code.Codes[code.CodeLength] = cg.OP_invokestatic
-			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(D)Ljava/lang/String;"
@@ -261,11 +261,11 @@ class BuildExpressionConversion {
 			binary.BigEndian.putChar(code.Codes[code.CodeLength+1:code.CodeLength+3], char(10))
 			code.Codes[code.CodeLength+3] = cg.OP_pop
 			code.Codes[code.CodeLength+4] = cg.OP_ldc_w
-			c.InsertStringConst("null", code.Codes[code.CodeLength+5:code.CodeLength+7])
+			c.insertStringConst("null", code.Codes[code.CodeLength+5:code.CodeLength+7])
 			code.Codes[code.CodeLength+7] = cg.OP_goto
 			binary.BigEndian.putChar(code.Codes[code.CodeLength+8:code.CodeLength+10],char( 6))
 			code.Codes[code.CodeLength+10] = cg.OP_invokevirtual
-			c.InsertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				"java/lang/Object",
 				"toString",
 				"()Ljava/lang/String;"

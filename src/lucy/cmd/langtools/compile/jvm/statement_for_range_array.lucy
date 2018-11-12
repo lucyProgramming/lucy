@@ -50,21 +50,21 @@ class BuildForRangeArray {
             t := new ast.Type()
             t.Type = ast.VariableTypeJavaArray
             t.array = attr.RangeOn.value.array
-            autoVar.Elements = code.MaxLocals
-            code.MaxLocals++
+            autoVar.Elements = code.maxLocals
+            code.maxLocals++
             forState.appendLocals(c, t)
             // start
-            autoVar.start = code.MaxLocals
-            code.MaxLocals++
+            autoVar.start = code.maxLocals
+            code.maxLocals++
             forState.appendLocals(c, typeInt)
             //end
-            autoVar.End = code.MaxLocals
-            code.MaxLocals++
+            autoVar.End = code.maxLocals
+            code.maxLocals++
             forState.appendLocals(c, typeInt)
             // K
             if needK {
-                autoVar.K = code.MaxLocals
-                code.MaxLocals++
+                autoVar.K = code.maxLocals
+                code.maxLocals++
                 forState.appendLocals(c, typeInt)
             }
         }
@@ -76,7 +76,7 @@ class BuildForRangeArray {
         }
         meta := ArrayMetas[attr.RangeOn.value.array.Type]
         code.Codes[code.CodeLength+1] = cg.OP_getfield
-        c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+        c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
             meta.className,
             "elements",
             meta.elementsFieldDescriptor
@@ -88,15 +88,15 @@ class BuildForRangeArray {
             t := new ast.Type()
             t.Type = ast.VariableTypeJavaArray
             t.array = attr.RangeOn.value.array
-            c.InsertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])
+            c.insertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])
             code.CodeLength += 3
         }
 
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeJavaArray, autoVar.Elements)...)
+        copyOPs(code, storeLocalVariableOps(ast.VariableTypeJavaArray, autoVar.Elements))
         //get start
         code.Codes[code.CodeLength] = cg.OP_dup
         code.Codes[code.CodeLength+1] = cg.OP_getfield
-        c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+        c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
             meta.className,
             "start",
             "I"
@@ -106,42 +106,42 @@ class BuildForRangeArray {
         code.CodeLength++
         code.Codes[code.CodeLength] = cg.OP_iadd
         code.CodeLength++
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.start)...)
+        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.start))
         //get end
         code.Codes[code.CodeLength] = cg.OP_getfield
-        c.InsertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
+        c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
             meta.className,
             "end",
             "I"
         ), code.Codes[code.CodeLength+1:code.CodeLength+3])
         code.CodeLength += 3
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.End)...)
+        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.End))
 
         // k set to -1
         if needK {
             code.Codes[code.CodeLength] = cg.OP_iconst_m1
             code.CodeLength++
-            copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
+            copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.K))
         }
         //handle captured vars
         if s.condition.Type == ast.ExpressionTypeVarAssign {
             if attr.IdentifierValue != null &&
                 attr.IdentifierValue.Variable.beenCapturedAsLeftValue > 0 {
                 closure.createClosureVar(c, code, attr.IdentifierValue.Variable.Type)
-                attr.IdentifierValue.Variable.localValOffset = code.MaxLocals
-                code.MaxLocals++
+                attr.IdentifierValue.Variable.localValOffset = code.maxLocals
+                code.maxLocals++
                 copyOPs(code,
-                    storeLocalVariableOps(ast.VariableTypeObject, attr.IdentifierValue.Variable.localValOffset)...)
+                    storeLocalVariableOps(ast.VariableTypeObject, attr.IdentifierValue.Variable.localValOffset))
                 forState.appendLocals(c,
                     forState.newObjectVariableType(closure.getMeta(attr.RangeOn.value.array.Type).className))
             }
             if attr.IdentifierKey != null &&
                 attr.IdentifierKey.Variable.beenCapturedAsLeftValue > 0 {
                 closure.createClosureVar(c, code, attr.IdentifierKey.Variable.Type)
-                attr.IdentifierKey.Variable.localValOffset = code.MaxLocals
-                code.MaxLocals++
+                attr.IdentifierKey.Variable.localValOffset = code.maxLocals
+                code.maxLocals++
                 copyOPs(code,
-                    storeLocalVariableOps(ast.VariableTypeObject, attr.IdentifierKey.Variable.localValOffset)...)
+                    storeLocalVariableOps(ast.VariableTypeObject, attr.IdentifierKey.Variable.localValOffset))
                 forState.appendLocals(c,
                     forState.newObjectVariableType(closure.getMeta(ast.VariableTypeInt).className))
             }
@@ -166,33 +166,29 @@ class BuildForRangeArray {
             code.CodeLength += 3
         }
         // load start
-        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.start)...)
+        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.start))
 
         // load end
-        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.End)...)
+        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.End))
         if 2 > maxStack {
             maxStack = 2
         }
-        s.exits = append(s.exits, new cg.Exit(cg.OP_if_icmpge, code))
+        s.exits.append(new cg.Exit(cg.OP_if_icmpge, code))
 
         //load elements
         if attr.IdentifierValue != null ||
             attr.ExpressionValue != null {
-            copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.Elements)...)
-            copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.start)...)
+            copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.Elements))
+            copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.start))
             // load value
             switch attr.RangeOn.value.array.Type {
-            case ast.VariableTypeBool:
-                fallthrough
-            case ast.VariableTypeByte:
+            case ast.VariableTypeBool ,ast.VariableTypeByte:
                 code.Codes[code.CodeLength] = cg.OP_baload
             case ast.VariableTypeShort:
                 code.Codes[code.CodeLength] = cg.OP_saload
             case ast.VariableTypeChar:
                 code.Codes[code.CodeLength] = cg.OP_caload
-            case ast.VariableTypeEnum:
-                fallthrough
-            case ast.VariableTypeInt:
+            case ast.VariableTypeEnum ,ast.VariableTypeInt:
                 code.Codes[code.CodeLength] = cg.OP_iaload
             case ast.VariableTypeLong:
                 code.Codes[code.CodeLength] = cg.OP_laload
@@ -205,12 +201,12 @@ class BuildForRangeArray {
             }
             code.CodeLength++
             // v
-            autoVar.V = code.MaxLocals
-            code.MaxLocals += jvmSlotSize(attr.RangeOn.value.array)
+            autoVar.V = code.maxLocals
+            code.maxLocals += jvmSlotSize(attr.RangeOn.value.array)
             //store to v tmp
             copyOPs(code,
                 storeLocalVariableOps(attr.RangeOn.value.array.Type,
-                    autoVar.V)...)
+                    autoVar.V))
 
             blockState.appendLocals(c, attr.RangeOn.value.array)
         }
@@ -219,11 +215,11 @@ class BuildForRangeArray {
             if attr.IdentifierValue != null {
                 if attr.IdentifierValue.Variable.beenCapturedAsLeftValue > 0 {
                     copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject,
-                        attr.IdentifierValue.Variable.localValOffset)...)
+                        attr.IdentifierValue.Variable.localValOffset))
                     copyOPs(code,
                         loadLocalVariableOps(attr.RangeOn.value.array.Type,
-                            autoVar.V)...)
-                    this.storeLocalVar(c, code, attr.IdentifierValue.Variable)
+                            autoVar.V))
+                    this.eb.storeLocalVar(c, code, attr.IdentifierValue.Variable)
                 } else {
                     attr.IdentifierValue.Variable.localValOffset = autoVar.V
                 }
@@ -231,10 +227,10 @@ class BuildForRangeArray {
             if attr.IdentifierKey != null {
                 if attr.IdentifierKey.Variable.beenCapturedAsLeftValue > 0 {
                     copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject,
-                        attr.IdentifierKey.Variable.localValOffset)...)
+                        attr.IdentifierKey.Variable.localValOffset))
                     copyOPs(code,
-                        loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
-                    this.storeLocalVar(c, code, attr.IdentifierKey.Variable)
+                        loadLocalVariableOps(ast.VariableTypeInt, autoVar.K))
+                    this.eb.storeLocalVar(c, code, attr.IdentifierKey.Variable)
                 } else {
                     attr.IdentifierKey.Variable.localValOffset = autoVar.K
                 }
@@ -243,24 +239,24 @@ class BuildForRangeArray {
             // store v
             //get ops,make_node_objects ops ready
             if attr.ExpressionValue != null {
-                stackLength := len(blockState.Stacks)
-                stack, remainStack, ops, _ := this.BuildExpression.getLeftValue(c,
+                stackLength := len(blockState.stacks)
+                stack, remainStack, ops, _ := this.eb.BuildExpressionLeftValue.getLeftValue(c,
                     code, attr.ExpressionValue, context, blockState)
                 if stack > maxStack {
                     maxStack = stack
                 }
                 //load v
                 copyOPs(code, loadLocalVariableOps(attr.RangeOn.value.array.Type,
-                    autoVar.V)...)
+                    autoVar.V))
                 if t := remainStack + jvmSlotSize(attr.RangeOn.value.array); t > maxStack {
                     maxStack = t
                 }
-                copyOPs(code, ops...)
-                blockState.popStack(len(blockState.Stacks) - stackLength)
+                copyOPs(code, ops)
+                blockState.popStack(len(blockState.stacks) - stackLength)
             }
             if attr.ExpressionKey != null { // set to k
-                stackLength := len(blockState.Stacks)
-                stack, remainStack, ops, _ := this.BuildExpression.getLeftValue(c,
+                stackLength := len(blockState.stacks)
+                stack, remainStack, ops, _ := this.eb.BuildExpressionLeftValue.getLeftValue(c,
                     code, attr.ExpressionKey, context, blockState)
                 if stack > maxStack {
                     maxStack = stack
@@ -269,14 +265,14 @@ class BuildForRangeArray {
                     maxStack = t
                 }
                 // load k
-                copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K)...)
-                copyOPs(code, ops...)
-                blockState.popStack(len(blockState.Stacks) - stackLength)
+                copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K))
+                copyOPs(code, ops)
+                blockState.popStack(len(blockState.stacks) - stackLength)
             }
         }
 
         // build block
-        this.buildBlock(c, code, s.block, context, blockState)
+        this.bb.buildBlock(c, code, s.block, context, blockState)
         forState.addTop(blockState)
         if s.block.notExecuteToLastStatement == false {
             jumpTo(code, s.ContinueCodeOffset)

@@ -26,7 +26,7 @@ class MethodInfo {
 		return this.accessFlags & AccMethodBridge != 0
 	}
 
-	fn IsSynthetic()  ->(is bool) {
+	fn isSynthetic()  ->(is bool) {
 		return this.accessFlags & AccMethodSynthetic != 0
 	}
 }

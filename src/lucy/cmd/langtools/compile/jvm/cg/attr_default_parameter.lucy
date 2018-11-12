@@ -14,19 +14,14 @@ public class AttributeDefaultParameters {
 			bs = bs[2:]
 		}
 	}
-
-	fn AttributeDefaultParameters(start char , Constants []char){
-		this.super()
-		this.start = start
-		this.constants = Constants
-	}
+	
 
 	fn ToAttributeInfo(c Class) -> (info AttributeInfo) {
 		if  len(this.constants) == 0 {
 			return null
 		}
 		info = new AttributeInfo()
-		info.nameIndex = c.InsertUtf8Const(AttributeNameLucyDefaultParameters)
+		info.nameIndex = c.insertUtf8Const(AttributeNameLucyDefaultParameters)
 		info.attributeLength = (2 * (1 + len(this.constants)))
 		info.Info = new []byte(info.attributeLength)
 		binary.BigEndian.putChar(info.Info, this.start)

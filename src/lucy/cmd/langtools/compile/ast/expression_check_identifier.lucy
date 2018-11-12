@@ -65,7 +65,7 @@ class ExpressionCheckIdentifier {
 
 		if f := d.(Function) ;f != null {
 			f := d.(Function)
-			if f.IsGlobalMain() {
+			if f.isGlobalMain() {
 				// not allow
 				return null, new error(sprintf("%s fucntion is global main", errMsgPrefix(e.pos)))
 			}
