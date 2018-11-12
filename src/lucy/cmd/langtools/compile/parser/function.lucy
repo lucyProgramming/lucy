@@ -55,7 +55,7 @@ class FunctionParser extends ParserExtends{
 			this.parser.errs.append( err)
 			this.consume(untilRc)
 		} else {
-			f.SourceCode =
+			f.sourceCode =
 				this.parser.
 					bs[offset : this.parser.token.offset+1]
 		}

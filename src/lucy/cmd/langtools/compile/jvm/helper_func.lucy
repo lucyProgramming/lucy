@@ -1,11 +1,12 @@
 
 import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/common"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
 
 fn writeExits(es []cg.Exit, to int) {
 	for _, e := range es {
-		offset := int16(to - int(e.currentCodeLength))
+		offset := char(to - int(e.currentCodeLength))
 		e.branchBytes[0] = byte(offset >> 8)
 		e.branchBytes[1] = byte(offset)
 	}
@@ -56,7 +57,7 @@ fn loadInt32(c cg.ClassHighLevel, code cg.AttributeCode, value int) {
 			code.CodeLength += 2
 		} else if -32768 <= value && value <= 32767 {
 			code.Codes[code.CodeLength] = cg.OP_sipush
-			code.Codes[code.CodeLength+1] = byte(int16(value) >> 8)
+			code.Codes[code.CodeLength+1] = byte(char(value) >> 8)
 			code.Codes[code.CodeLength+2] = byte(value)
 			code.CodeLength += 3
 		} else {
@@ -91,7 +92,7 @@ fn nameTemplateFunction(function ast.Function) -> (s string = function.name) {
 		}
 		switch v.Type.Type {
 		case ast.VariableTypeObject:
-			s += sprintf("$%s", strings.Replace(v.Type.Class.name, "/", "$", -1))
+			s += sprintf("$%s", common.getBaseName(v.Type.Class.name))
 		case ast.VariableTypeMap:
 			s += "_map"
 		case ast.VariableTypeArray:
@@ -99,7 +100,7 @@ fn nameTemplateFunction(function ast.Function) -> (s string = function.name) {
 		case ast.VariableTypeJavaArray:
 			s += "_java_array"
 		case ast.VariableTypeEnum:
-			s += sprintf("$%s", strings.Replace(v.Type.Enum.name, "/", "$", -1))
+			s += sprintf("$%s", common.getBaseName(v.Type.Enum.name))
 		}
 	}
 	return s
@@ -137,9 +138,7 @@ fn newArrayBaseOnType(c cg.ClassHighLevel, code cg.AttributeCode, typ ast.Type) 
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ArrayTypeChar
 		code.CodeLength += 2
-	case ast.VariableTypeEnum:
-		fallthrough
-	case ast.VariableTypeInt:
+	case ast.VariableTypeEnum , ast.VariableTypeInt:
 		code.Codes[code.CodeLength] = cg.OP_newarray
 		code.Codes[code.CodeLength+1] = ArrayTypeInt
 		code.CodeLength += 2
@@ -258,20 +257,20 @@ fn setEnumArray(c cg.ClassHighLevel, code cg.AttributeCode,
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_arraylength
 	code.CodeLength++
-	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, a.length)...)
+	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, a.length))
 	code.Codes[code.CodeLength] = cg.OP_iconst_0
 	code.CodeLength++
-	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, a.k)...)
+	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, a.k))
 	state.appendLocals(c,typeInt)
 	state.appendLocals(c, typeInt)
 	context.MakeStackMap(code, state, code.CodeLength)
 	offset := code.CodeLength
-	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.k)...)
-	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.length)...)
+	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.k))
+	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.length))
 	exit := new cg.Exit(cg.OP_if_icmpge, code)
 	code.Codes[code.CodeLength] = cg.OP_dup
 	code.CodeLength++
-	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.k)...)
+	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.k))
 	loadInt32(c, code, e.DefaultValue)
 	code.Codes[code.CodeLength] = cg.OP_iastore
 	code.CodeLength++

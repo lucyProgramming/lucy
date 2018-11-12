@@ -13,4 +13,10 @@ class Resource {
 	kind     resourceKind
 	realPath string
 	name     string
+	fn Resource(kind resourceKind ,realPath string , name     string) {
+	    this.super()
+	    this.kind = kind
+	    this.realPath = realPath
+	    this.name = name
+	}
 }

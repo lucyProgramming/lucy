@@ -42,7 +42,7 @@ public class StackMapSameFrame implements StackMap{
 public class StackMapSameLocals1StackItemFrame implements StackMap {
 	public frameType byte
 	stack     StackMapVerificationTypeInfo
-	fn StackMapSameLocals1StackItemFrame(frameType byte ,stack     StackMapVerificationTypeInfo ){
+	public fn StackMapSameLocals1StackItemFrame(frameType byte ,stack     StackMapVerificationTypeInfo ){
         this.super()
         this.frameType = frameType
         this.stack = stack
@@ -60,6 +60,13 @@ public class StackMapSameLocals1StackItemFrameExtended implements StackMap {
 	public frameType byte
 	public delta     char
 	public stack     StackMapVerificationTypeInfo
+	public fn StackMapSameLocals1StackItemFrameExtended(frameType byte,delta     char , stack     StackMapVerificationTypeInfo ){
+		this.super()
+		this.frameType = frameType
+		this.delta = delta
+		this.stack = stack
+
+	}
 	fn toBytes() -> (bs []byte) {
 		bs = new []byte(3)
 		bs[0] = this.frameType

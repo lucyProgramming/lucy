@@ -148,7 +148,7 @@ class ExpressionCheckFunctionCall {
 				return ret
 			}
 			if f.isBuildIn {
-				if f.LoadedFromCorePackage {
+				if f.loadedFromCorePackage {
 					var err error
 					call.VArgs, err = f.Type.fitArgs(e.pos,call.Args, callArgsTypes, f)
 					if err != null {

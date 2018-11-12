@@ -4,18 +4,21 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 import "lucy/binary"
 
 class BuildBlock {
-	eb BuildExpression	
+	eb BuildExpression
+	bp BuildPackage
 	BuildFor BuildFor
 	BuildIf BuildIf
 	BuildSwitch BuildSwitch
 	BuildReturn BuildReturn
-	fn BuildBlock(eb BuildExpression){
+	
+	fn BuildBlock(eb BuildExpression, bp BuildPackage){
 		this.super()
 		this.eb = eb
+		this.bp = bp
 		this.BuildFor = new BuildFor(eb , this)
 		this.BuildIf = new BuildIf(eb , this)
 		this.BuildSwitch = new BuildSwitch(eb , this)
-		this.BuildReturn = new BuildReturn(eb)
+		this.BuildReturn = new BuildReturn(eb , this)
 
 
 	}
@@ -164,12 +167,12 @@ class BuildBlock {
 				context.MakeStackMap(code, state, code.CodeLength)
 			}
 		case ast.StatementTypeGoTo:
-			this.eb.buildDefers(c, code, context, s.StatementGoTo.defers, state)
+			this.buildDefers(c, code, context, s.StatementGoTo.defers, state)
 			if s.StatementGoTo.statementLabel.codeOffsetGenerated {
 				jumpTo(code, s.StatementGoTo.statementLabel.codeOffset)
 			} else {
 				exit := new cg.Exit(cg.OP_goto, code)
-				s.StatementGoTo.statementLabel.exits = append(s.StatementGoTo.StatementLabel.exits, exit)
+				s.StatementGoTo.statementLabel.exits.append(exit)
 			}
 		case ast.StatementTypeLabel:
 			s.StatementLabel.codeOffsetGenerated = true
@@ -189,16 +192,28 @@ class BuildBlock {
 			} else {
 				name = block.inheritedAttribute.classAndFunctionNames + "$" + s.Class.name
 			}
-			s.Class.name = this.newClassName(name)
+			s.Class.name = this.bp.newClassName(name)
 			innerClass := new cg.InnerClass()
 			innerClass.innerClass = s.Class.name
-			innerClass.outerClass = ast.TypeName
+			innerClass.outerClass = c.name
 			innerClass.name = oldName
-			ast.TypeClass.AttributeInnerClasses.Classes =
-				append(ast.TypeClass.AttributeInnerClasses.Classes, innerClass)
-			c := this.eb.buildClass(s.Class)
-			c.Class.AttributeInnerClasses.Classes = append(c.Class.AttributeInnerClasses.Classes, innerClass)
-			this.putClass(c)
+			if c.Class.AttributeInnerClasses == null{
+			    c.Class.AttributeInnerClasses = new cg.AttributeInnerClasses()
+			}
+            if c.Class.AttributeInnerClasses.Classes == null {
+                c.Class.AttributeInnerClasses.Classes = []cg.InnerClass{}
+            }
+            c.Class.AttributeInnerClasses.Classes.append(innerClass)
+			t := this.bp.buildClass(s.Class)
+			this.bp.putClass(t)
+			if t.Class.AttributeInnerClasses == null {
+			    t.Class.AttributeInnerClasses = new cg.AttributeInnerClasses()
+			}
+			if t.Class.AttributeInnerClasses.Classes == null {
+			    t.Class.AttributeInnerClasses.Classes = []cg.InnerClass{innerClass}
+			}else {
+                 t.Class.AttributeInnerClasses.Classes.append(innerClass)
+			}
 		case ast.StatementTypeNop:
 			// nop
 		case ast.StatementTypeTypeAlias:
@@ -230,14 +245,14 @@ class BuildBlock {
 			} else {
 				e.catchType = c.Class.insertClassConst(ds[index].exceptionClass.name) // custom c
 			}
-			code.Exceptions = append(code.Exceptions, e)
+			code.Exceptions.append(e)
 			//expect exception on stack
 			copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
 				context.exceptionVarOffset)) // this code will make_node_objects stack is empty
 			state.popStack(1)
 			// build block
 			context.Defer = ds[index]
-			this.eb.buildBlock(c, code, ds[index].Block, context, state)
+			this.buildBlock(c, code, ds[index].block, context, state)
 			from.addTop(state)
 			context.Defer = null
 			ds[index].resetLabels()

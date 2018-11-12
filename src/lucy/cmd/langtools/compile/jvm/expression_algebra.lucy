@@ -59,7 +59,7 @@ class BuildExpressionArithmetic {
 			//handle string first
 			if bin.Left.value.Type == ast.VariableTypeString ||
 				bin.Right.value.Type == ast.VariableTypeString {
-				return this.buildStrCat(c, code, e, context, state)
+				return this.eb.BuildExpressionStrcat.buildStrCat(c, code, e, context, state)
 			}
 			maxStack = this.build(c, code, bin.Left, context, state)
 			state.pushStack(c, e.value)

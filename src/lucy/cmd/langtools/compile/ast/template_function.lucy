@@ -4,7 +4,7 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 public class TemplateFunctionInstance  {
 	parameterTypes []Type
-	public Entrance       cg.MethodHighLevel
+	public entrance       cg.MethodHighLevel
 	public Function       Function
 }
 

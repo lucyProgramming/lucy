@@ -34,7 +34,7 @@ class  BuildExpressionFunction {
 		if function.name == "" {
 			function.name = function.nameLiteralFunction()
 		}
-		if function.IsClosureFunction == false {
+		if function.isClosureFunction == false {
 			function.name = c.newMethodName(function.name) // new a function name
 			method := new cg.MethodHighLevel()
 			method.name = function.name
@@ -45,11 +45,11 @@ class  BuildExpressionFunction {
 			if function.Type.VArgs != null {
 				method.accessFlags |= cg.AccMethodVarargs
 			}
-			function.Entrance = method
+			function.entrance = method
 			method.Class = c
 			method.Descriptor = Descriptor.methodDescriptor(function.Type)
 			method.code = new cg.AttributeCode()
-			this.buildFunction(c, null, method, function)
+			this.bp.BuildFunction.buildFunction(c, null, method, function)
 			c.appendMethod(method)
 			return
 		}
@@ -73,7 +73,7 @@ class  BuildExpressionFunction {
 		}
 		method.Descriptor = Descriptor.methodDescriptor(function.Type)
 		method.Class = closureClass
-		function.Entrance = method
+		function.entrance = method
 		closureClass.appendMethod(method)
 		//new a object to hold this closure function
 		code.Codes[code.CodeLength] = cg.OP_new
@@ -91,10 +91,10 @@ class  BuildExpressionFunction {
 		code.Codes[code.CodeLength] = cg.OP_dup
 		code.CodeLength++
 		// store  to,wait for call
-		function.ClosureVariableOffSet = code.maxLocals
+		function.closureVariableOffSet = code.maxLocals
 		code.maxLocals++
 		state.appendLocals(c, state.newObjectVariableType(className))
-		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, function.ClosureVariableOffSet))
+		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, function.closureVariableOffSet))
 		//set filed
 		closureClass.fields = new map { string -> cg.FieldHighLevel} ()
 		total := len(function.Closure.Variables) + len(function.Closure.Functions) - 1
@@ -161,14 +161,14 @@ class  BuildExpressionFunction {
 			total--
 		}
 		for v, _ := range function.Closure.Functions {
-			if v.IsClosureFunction == false {
+			if v.isClosureFunction == false {
 				continue
 			}
 			filed := new cg.FieldHighLevel()
 			filed.accessFlags |= cg.AccFieldPublic
 			filed.accessFlags |= cg.AccFieldSynthetic
 			filed.name = v.name
-			filed.Descriptor = "L" + v.Entrance.Class.name + ";"
+			filed.descriptor = "L" + v.entrance.Class.name + ";"
 			closureClass.fields[v.name] = filed
 			if total != 0 {
 				code.Codes[code.CodeLength] = cg.OP_dup
@@ -182,13 +182,13 @@ class  BuildExpressionFunction {
 				}
 				code.Codes[code.CodeLength] = cg.OP_getfield
 				c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-					ast.TypeName,
+					c.name,
 					v.name,
-					filed.Descriptor
+					filed.descriptor
 				), code.Codes[code.CodeLength+1:code.CodeLength+3])
 				code.CodeLength += 3
 			} else { // not exits
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.ClosureVariableOffSet))
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.closureVariableOffSet))
 				if 3 > maxStack {
 					maxStack = 3
 				}
@@ -197,14 +197,14 @@ class  BuildExpressionFunction {
 			c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 				className,
 				v.name,
-				filed.Descriptor
+				filed.descriptor
 			), code.Codes[code.CodeLength+1:code.CodeLength+3])
 			code.CodeLength += 3
 			total--
 		}
 		method.code = new cg.AttributeCode()
 		// build function
-		this.buildFunction(closureClass, null, method, function)
+		this.bp.BuildFunction.buildFunction(closureClass, null, method, function)
 		return
 
 	}
@@ -218,17 +218,17 @@ class  BuildExpressionFunction {
 		), code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		c.insertClassConst(function.Entrance.Class.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		c.insertClassConst(function.entrance.Class.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		c.insertStringConst(function.Entrance.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		c.insertStringConst(function.entrance.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_ldc_w
 		c.insertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(
-			function.Entrance.Descriptor),code.Codes[code.CodeLength+1:code.CodeLength+3])
+			function.entrance.Descriptor),code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
-		if function.IsClosureFunction {
+		if function.isClosureFunction {
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				"java/lang/invoke/MethodHandles$Lookup",
 				"findVirtual",
@@ -245,18 +245,18 @@ class  BuildExpressionFunction {
 		if 4 > maxStack {
 			maxStack = 4
 		}
-		if function.IsClosureFunction {
+		if function.isClosureFunction {
 			if context.function.Closure.closureFunctionExist(function) {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, char(0)))
 				code.Codes[code.CodeLength] = cg.OP_getfield
 				c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					c.name,
 					function.name,
-					"L" + function.Entrance.Class.name + ";"
+					"L" + function.entrance.Class.name + ";"
 				), code.Codes[code.CodeLength+1:code.CodeLength+3])
 				code.CodeLength += 3
 			} else {
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, function.ClosureVariableOffSet))
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, function.closureVariableOffSet))
 			}
 			code.Codes[code.CodeLength] = cg.OP_invokevirtual
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(

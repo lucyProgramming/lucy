@@ -7,7 +7,8 @@ public class StatementDefer {
 	public StackMapState  Object // *jvm.StackMapState
 	public block          Block
 	public exceptionClass Class
-	fn resetLabels() {
+	
+	public fn resetLabels() {
 		for _, v := range this.Labels {
 			v.Reset()
 		}

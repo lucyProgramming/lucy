@@ -36,7 +36,7 @@ public class Package {
 		}
 		for _, v := range this.block.Functions {
 			v.isBuildIn = true
-			v.LoadedFromCorePackage = true
+			v.loadedFromCorePackage = true
 		}
 		for _, v := range this.block.TypeAliases {
 			v.isBuildIn = true
@@ -178,11 +178,11 @@ public class Package {
 			}
 		}
 		for _, v := range this.statementLevelFunctions {
-			v.IsClosureFunction = v.Closure.captureCount(v) > 0
+			v.isClosureFunction = v.Closure.captureCount(v) > 0
 		}
 		for _, v := range this.statementLevelClass {
 			for f, meta := range v.closure.Functions {
-				if f.IsClosureFunction == false {
+				if f.isClosureFunction == false {
 					continue
 				}
 				this.errors.append( new error(sprintf("%s trying to access capture function '%s' from outside",

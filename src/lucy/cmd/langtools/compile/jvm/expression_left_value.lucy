@@ -106,7 +106,7 @@ class BuildExpressionLeftValue {
                 leftValueType = LeftValueKindPutStatic
                 ops[0] = cg.OP_putstatic
                 c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-                    this.eb.BuildPackage.mainClass.name,
+                    this.eb.bp.mainClass.name,
                     identifier.name,
                     Descriptor.typeDescriptor(identifier.Variable.Type)
                 ), ops[1:3])

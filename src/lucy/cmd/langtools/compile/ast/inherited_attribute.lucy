@@ -7,7 +7,7 @@ public class InheritedAttribute {
 	forBreak              Object
 	Function              Function
 	Class                 Class
-	Defer                 StatementDefer
+	public Defer                 StatementDefer
 	classMethod           ClassMethod
-	classAndFunctionNames string
+	public classAndFunctionNames string
 }

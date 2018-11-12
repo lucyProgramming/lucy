@@ -579,7 +579,8 @@ func (this *Type) assignAble(errs *[]error, rightValue *Type) bool {
 	if leftValue.IsPrimitive() &&
 		rightValue.IsPrimitive() {
 		if leftValue.isInteger() &&
-			rightValue.isInteger() && ((leftValue.Type == VariableTypeLong) == (rightValue.Type == VariableTypeLong)) {
+			rightValue.isInteger() &&
+			((leftValue.Type == VariableTypeLong) == (rightValue.Type == VariableTypeLong)) {
 			return true
 		}
 		return leftValue.Type == rightValue.Type
@@ -615,7 +616,11 @@ func (this *Type) assignAble(errs *[]error, rightValue *Type) bool {
 		rightValue.Type == VariableTypeFunction {
 		return leftValue.FunctionType.equal(rightValue.FunctionType)
 	}
+
 	if leftValue.Type == VariableTypeObject && rightValue.Type == VariableTypeObject { // object
+		if leftValue.Class.Name == rightValue.Class.Name {
+			return true
+		}
 		if err := leftValue.Class.loadSelf(leftValue.Pos); err != nil {
 			*errs = append(*errs, fmt.Errorf("%s %v", errMsgPrefix(rightValue.Pos), err))
 			return false

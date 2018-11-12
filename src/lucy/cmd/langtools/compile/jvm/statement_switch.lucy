@@ -105,7 +105,7 @@ class BuildSwitch {
                     }
                     state.popStack(1)
                     compare(s.condition.value)
-                    matches = append(matches, new cg.Exit(cg.OP_ifeq, code)) // comsume result on stack
+                    matches.append(new cg.Exit(cg.OP_ifeq, code)) // comsume result on stack
                 }
             }
             // should be goto next,here is no match
@@ -123,7 +123,7 @@ class BuildSwitch {
             //block is here
             if c.block != null {
                 ss := new StackMapState(state)
-                this.bb.buildBlock(c, code, c.block, context, ss)
+                this.bb.buildBlock(__FUNCTION__.c, code, c.block, context, ss)
                 state.addTop(ss)
             }
             if c.block == null || c.block.notExecuteToLastStatement == false {

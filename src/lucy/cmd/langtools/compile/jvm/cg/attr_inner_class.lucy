@@ -26,9 +26,9 @@ public class InnerClass {
 }
 
 
-class AttributeInnerClasses {
-	Classes []InnerClass
-	fn FromBs(c Class, bs []byte) {
+public class AttributeInnerClasses {
+	public Classes []InnerClass
+	public fn FromBs(c Class, bs []byte) {
 		length := binary.BigEndian.getChar(bs)
 		bs = bs[2:]
 		if int(length*8) != len(bs) {

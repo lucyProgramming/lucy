@@ -6,7 +6,7 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 	store local var according on type and offset
 */
 fn storeLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs []byte) {
-	if offset == math.MaxUint16 {
+	if offset == 65535 {
 		panic("local variable missing assign offset ," +
 			" this is cause by serious compiler error")
 	}
@@ -14,17 +14,8 @@ fn storeLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs 
 		panic("over 255")
 	}
 	switch variableType {
-	case ast.VariableTypeBool:
-		fallthrough
-	case ast.VariableTypeByte:
-		fallthrough
-	case ast.VariableTypeShort:
-		fallthrough
-	case ast.VariableTypeEnum:
-		fallthrough
-	case ast.VariableTypeChar:
-		fallthrough
-	case ast.VariableTypeInt:
+	case ast.VariableTypeBool,ast.VariableTypeByte ,ast.VariableTypeShort,ast.VariableTypeEnum,
+	  ast.VariableTypeChar , ast.VariableTypeInt:
 		switch offset {
 		case 0:
 			return []byte{cg.OP_istore_0}
@@ -93,7 +84,7 @@ fn storeLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs 
 }
 
 fn loadLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs []byte )  {
-	if offset == math.MaxUint16 {
+	if offset == 65535 {
 		panic("local variable missing assign offset , " +
 			"this is cause by serious compiler error")
 	}
@@ -101,17 +92,8 @@ fn loadLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs [
 		panic("over 255")
 	}
 	switch variableType {
-	case ast.VariableTypeBool:
-		fallthrough
-	case ast.VariableTypeByte:
-		fallthrough
-	case ast.VariableTypeShort:
-		fallthrough
-	case ast.VariableTypeEnum:
-		fallthrough
-	case ast.VariableTypeChar:
-		fallthrough
-	case ast.VariableTypeInt:
+	case ast.VariableTypeBool,ast.VariableTypeByte ,ast.VariableTypeShort,ast.VariableTypeEnum,
+    	  ast.VariableTypeChar , ast.VariableTypeInt:
 		switch offset {
 		case 0:
 			return []byte{cg.OP_iload_0}

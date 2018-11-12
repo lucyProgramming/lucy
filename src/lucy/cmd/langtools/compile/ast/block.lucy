@@ -32,7 +32,7 @@ public class Block {
 	public Variables                 map{string->Variable}
 	checkConstantsCalled      bool
 
-    fn nameExists(name string) -> (x Object,exist bool) {
+    public fn nameExists(name string) -> (x Object,exist bool) {
         if this.Functions != null {
             if t := this.Functions[name]; t != null {
                 return t, true

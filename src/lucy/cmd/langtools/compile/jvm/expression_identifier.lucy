@@ -68,7 +68,7 @@ class  BuildExpressionIdentifier {
 			maxStack = 1
 			return
 		case identifier.Function != null:
-			return this.eb.bp.packFunction2MethodHandle(c, code, identifier.Function, context)
+			return this.eb.BuildExpressionFunction.packFunction2MethodHandle(c, code, identifier.Function, context)
 		case identifier.Variable.isGlobal:
 			code.Codes[code.CodeLength] = cg.OP_getstatic
 			c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(

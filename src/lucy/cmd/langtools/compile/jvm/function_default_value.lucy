@@ -40,7 +40,7 @@ class DefaultValueParse {
 	}
 
 	static fn Decode(c cg.Class, f ast.Function, dp cg.AttributeDefaultParameters) {
-		f.HaveDefaultValue = true
+		f.haveDefaultValue = true
 		f.DefaultValueStartAt = int(dp.start)
 		for i := char(0); i < char(len(dp.constants)); i++ {
 			v := f.Type.ParameterList[dp.start+i]

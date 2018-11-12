@@ -61,7 +61,7 @@ class BuildinFunctionCatchPanic {
             if t := char(2) + stack; t > maxStack {
                 maxStack = t
             }
-            if t := 2 + this.eb.stackTop2String(c, code, call.Args[0].value, context, state); t > maxStack {
+            if t := 2 + this.eb.BuildExpressionConversion.stackTop2String(c, code, call.Args[0].value, context, state); t > maxStack {
                 maxStack = t
             }
             code.Codes[code.CodeLength] = cg.OP_invokespecial

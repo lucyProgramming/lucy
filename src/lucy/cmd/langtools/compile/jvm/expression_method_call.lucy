@@ -63,10 +63,9 @@ class BuildExpressionMethodCall {
             if call.name == ast.SpecialMethodInit {
                 state.popStack(1)
                 v := new cg.StackMapUninitializedThisVariableInfo() // make_node_objects it right
-
-                state.stacks.append( new cg.StackMapVerificationTypeInfo(
-                    v)
-                )
+                t := new cg.StackMapVerificationTypeInfo()
+                t.Verify = v
+                state.stacks.append( t )
             }
             stack := this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
             if t := stack + 1; t > maxStack {

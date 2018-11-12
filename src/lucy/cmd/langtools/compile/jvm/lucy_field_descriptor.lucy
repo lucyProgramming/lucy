@@ -1,7 +1,6 @@
 
 
 import "lucy/cmd/langtools/compile/ast"
-import "lucy/cmd/langtools/compile/jvm/cg"
 import "lucy/cmd/langtools/compile/common"
 
 class LucyFieldSignature {

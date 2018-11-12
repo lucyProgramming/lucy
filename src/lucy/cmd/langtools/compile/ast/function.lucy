@@ -10,10 +10,10 @@ typealias buildInFunctionChecker = fn(
 	pos Pos) // usEed in build function
 
 public class Function {
-	public CallFatherConstructionExpression Expression
+	public callFatherConstructionExpression Expression
 	public TemplateFunction                 TemplateFunction
 	parameterTypes                   map { string -> Type }     //typed parameters
-	public Entrance                         cg.MethodHighLevel // make_node_objects call from
+	public entrance                         cg.MethodHighLevel // make_node_objects call from
 	buildInFunctionChecker           buildInFunctionChecker
 	public accessFlags                      char
 	public Type                             FunctionType
@@ -22,19 +22,19 @@ public class Function {
 	public block                            Block
 	public pos                              Pos
 	public jvmDescriptor                    string
-	public ClosureVariableOffSet            char // for closure
-	public SourceCode                       []byte // source code for template function
-	public HasDefer                         bool
-	public HaveDefaultValue                 bool
+	public closureVariableOffSet            char // for closure
+	public sourceCode                       []byte // source code for template function
+	public hasDefer                         bool
+	public haveDefaultValue                 bool
 	public DefaultValueStartAt              int
 	public isGlobal                         bool
 	public isBuildIn                        bool
-	public LoadedFromCorePackage            bool
+	public loadedFromCorePackage            bool
 	public used                             bool
-	public TemplateClonedFunction           bool
+	public templateClonedFunction           bool
 	isPackageInitBlockFunction       bool
 	public comment                          string
-	public IsClosureFunction                bool
+	public isClosureFunction                bool
 
 	fn isPublic() -> (is bool) {
 		return this.accessFlags&cg.AccMethodPublic != 0
@@ -96,11 +96,11 @@ public class Function {
 	}
 	
 	fn clone() -> (ret Function, es []error) {
-		ret, es = ParseFunctionHandler(this.SourceCode, this.pos)
+		ret, es = ParseFunctionHandler(this.sourceCode, this.pos)
 		if len(es) > 0 {
 			return ret, es
 		}
-		ret.TemplateClonedFunction = true
+		ret.templateClonedFunction = true
 		return ret, es
 	}
 	fn makeLastReturnStatement() {
@@ -159,10 +159,10 @@ public class Function {
 				continue
 			}
 			if v.defaultValueExpression != null {
-				if this.HaveDefaultValue == false {
+				if this.haveDefaultValue == false {
 					this.DefaultValueStartAt = k
 				}
-				this.HaveDefaultValue = true
+				this.haveDefaultValue = true
 				t, es := v.defaultValueExpression.checkSingleValueContextExpression(this.block)
 				errs.appendAll(es)
 				if t != null {

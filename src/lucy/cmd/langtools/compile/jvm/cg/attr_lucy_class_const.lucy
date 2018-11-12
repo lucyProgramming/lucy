@@ -2,20 +2,20 @@
 
 public class AttributeLucyClassConst {
 	public constants []LucyClassConst
-
+	
 	public fn FromBs(c Class, bs []byte) {
 	    this.constants = []LucyClassConst{}
 		for len(bs) > 0 {
 			constant := new LucyClassConst()
 			constant.name = string(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
 			constant.descriptor = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].Info)
-			constant.ValueIndex = binary.BigEndian.getChar(bs[4:])
+			constant.valueIndex = binary.BigEndian.getChar(bs[4:])
 			constant.comment = string(c.ConstPool[binary.BigEndian.getChar(bs[6:])].Info)
 			bs = bs[8:]
 			this.constants.append(constant)
 		}
 	}
-
+	
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)   {
 		if this == null || len(this.constants) == 0 {
 			return null
@@ -27,7 +27,7 @@ public class AttributeLucyClassConst {
 			b := ret.Info[k*8:]
 			binary.BigEndian.putChar(b, c.insertUtf8Const(v.name))
 			binary.BigEndian.putChar(b[2:], c.insertUtf8Const(v.descriptor))
-			binary.BigEndian.putChar(b[4:], v.ValueIndex)
+			binary.BigEndian.putChar(b[4:], v.valueIndex)
 			binary.BigEndian.putChar(b[6:], c.insertUtf8Const(v.comment))
 		}
 		ret.attributeLength = (len(ret.Info))
@@ -38,7 +38,7 @@ public class AttributeLucyClassConst {
 public class LucyClassConst {
 	public name       string
 	public descriptor string
-	public ValueIndex char
+	public valueIndex char
 	public comment    string
 }
 

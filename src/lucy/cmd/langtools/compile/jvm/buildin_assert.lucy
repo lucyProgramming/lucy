@@ -20,7 +20,7 @@ class BuildinFunctionAssert {
         length := int(len(call.Args))
         lengthOffset := code.maxLocals
         code.maxLocals++
-
+        
         state.appendLocals(c, typeInt)
         loadInt32(c, code, length)
         copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, lengthOffset))

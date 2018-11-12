@@ -31,6 +31,7 @@ class BuildExpression {
     BuildExpressionUnary BuildExpressionUnary
     BuildExpressionVar BuildExpressionVar
     BuildExpressionVarAssign BuildExpressionVarAssign
+    BuildTemplateFunctionCall BuildTemplateFunctionCall
 
     fn BuildExpression(bp BuildPackage){
         this.super()
@@ -61,6 +62,7 @@ class BuildExpression {
         this.BuildExpressionUnary = new BuildExpressionUnary(this)
         this.BuildExpressionVar= new  BuildExpressionVar(this)
         this.BuildExpressionVarAssign = new  BuildExpressionVarAssign(this)
+        this.BuildTemplateFunctionCall = new BuildTemplateFunctionCall(this , bp)
     }
 
 

@@ -2,14 +2,15 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
+
 class BuildFunction {
     eb BuildExpression
-    fn BuildFunction(eb BuildExpression){
+    bb BuildBlock
+    fn BuildFunction(eb BuildExpression,bb BuildBlock){
         this.super()
         this.eb = eb
+        this.bb = bb
     }
-
-
 
     fn  mkParametersOffset(c cg.ClassHighLevel, code cg.AttributeCode,
         f ast.Function, state StackMapState) {
@@ -113,7 +114,7 @@ class BuildFunction {
                 t.Verify = new cg.StackMapUninitializedThisVariableInfo()
                 state.locals.append(t)
                 this.mkParametersOffset(c, method.code, f, state)
-                stack := this.eb.build(c, method.code, f.CallFatherConstructionExpression,
+                stack := this.eb.build(c, method.code, f.callFatherConstructionExpression,
                     context, state)
                 if stack > method.code.MaxStack {
                     method.code.MaxStack = stack
@@ -160,8 +161,8 @@ class BuildFunction {
             d.descriptor = LucyMethodSignature.Encode(f.Type)
             method.AttributeLucyMethodDescriptor = d
         }
-        if f.HaveDefaultValue {
-            method.AttributeDefaultParameters = DefaultValueParser.Encode(c, f)
+        if f.haveDefaultValue {
+            method.AttributeDefaultParameters = DefaultValueParse.Encode(c, f)
         }
         if method.isConstruction == false {
             if t := this.buildFunctionParameterAndReturnList(c, method.code, f, context, state); t > method.code.MaxStack {
@@ -183,8 +184,7 @@ class BuildFunction {
                 p := new cg.MethodParameter()
                 p.name = v.name
                 p.accessFlags = cg.MethodParameterTypeAccMandated
-                method.AttributeLucyReturnListNames.Parameters =
-                    append(method.AttributeLucyReturnListNames.Parameters, p)
+                method.AttributeLucyReturnListNames.Parameters.append(p)
             }
         }
         if len(f.Type.ReturnList) > 1 {
@@ -193,7 +193,7 @@ class BuildFunction {
                 method.code.MaxStack = t
             }
         }
-        if f.HasDefer {
+        if f.hasDefer {
             context.exceptionVarOffset = method.code.maxLocals
             method.code.maxLocals++
             method.code.Codes[method.code.CodeLength] = cg.OP_aconst_null
@@ -201,7 +201,7 @@ class BuildFunction {
             copyOPs(method.code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset))
             state.appendLocals(c, state.newObjectVariableType(ast.JavaThrowableClass))
         }
-        this.buildBlock(c, method.code, f.block, context, state)
+        this.bb.buildBlock(c, method.code, f.block, context, state)
         return
     }
     fn  buildFunctionMultiReturnOffset(c cg.ClassHighLevel, code cg.AttributeCode,

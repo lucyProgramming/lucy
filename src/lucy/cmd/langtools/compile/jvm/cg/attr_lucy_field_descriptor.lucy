@@ -13,7 +13,7 @@ public class AttributeLucyFieldDescriptor {
 		this.MethodAccessFlag = binary.BigEndian.getChar(bs[2:4])
 	}
 
-	fn AttributeLucyFieldDescriptor(Descriptor string , MethodAccessFlag char){
+	public fn AttributeLucyFieldDescriptor(Descriptor string , MethodAccessFlag char){
 		this.super()
 		this.descriptor = Descriptor
 		this.MethodAccessFlag = MethodAccessFlag

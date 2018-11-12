@@ -193,7 +193,7 @@ class ExpressionCheckMethodCall {
 			call.Method = m
 			call.Class = object.Class.superClass
 			block.statements[0].IsCallFatherConstructionStatement = true
-			block.inheritedAttribute.Function.CallFatherConstructionExpression = e
+			block.inheritedAttribute.Function.callFatherConstructionExpression = e
 			return
 		}
 		errs.append(methodsNotMatchError(e.pos, object.typeString(), ms, callArgsTypes))

@@ -3,10 +3,7 @@
 
 public class AttributeConstantValue {
 	public index char
-	public fn AttributeConstantValue(index char){
-		this.super()
-		this.index = index
-	}
+	
 	fn ToAttributeInfo(c Class) -> (info AttributeInfo) {
 		info = new AttributeInfo()
 		info.nameIndex = c.insertUtf8Const(AttributeNameConstValue)

@@ -166,7 +166,7 @@ public class ClassHighLevel {
 		return s
 	}
 
-	fn toLow() ->(c Class) {
+	public fn toLow() ->(c Class) {
     	this.Class.fromHighLevel(this)
     	return this.Class
     }

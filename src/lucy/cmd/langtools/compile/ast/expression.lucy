@@ -160,7 +160,7 @@ public class Expression {
 
 
 
-	fn isLiteral() ->(is bool)  {
+	public fn isLiteral() ->(is bool)  {
 		return this.Type == ExpressionTypeBool ||
 			this.Type == ExpressionTypeString ||
 			this.isNumber()

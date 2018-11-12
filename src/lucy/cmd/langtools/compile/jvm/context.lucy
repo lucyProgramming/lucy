@@ -83,7 +83,7 @@ class Context {
 					appendFrame.delta = delta
 					appendFrame.locals = new []cg.StackMapVerificationTypeInfo(num)
 					copy(appendFrame.locals, state.locals[len(state.locals)-num:])
-					code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, appendFrame)
+					code.AttributeStackMap.StackMaps.append(appendFrame)
 					return
 				}
 			}
@@ -96,7 +96,7 @@ class Context {
 		copy(fullFrame.locals, state.locals)
 		fullFrame.stacks = new []cg.StackMapVerificationTypeInfo(len(state.stacks))
 		copy(fullFrame.stacks, state.stacks)
-		code.AttributeStackMap.StackMaps = append(code.AttributeStackMap.StackMaps, fullFrame)
+		code.AttributeStackMap.StackMaps.append(fullFrame)
 		return
 	}
 

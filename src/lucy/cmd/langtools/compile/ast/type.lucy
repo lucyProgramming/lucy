@@ -388,7 +388,7 @@ public class Type {
 			this.Type == VariableTypeFunction
 	}
 
-	fn isInteger() -> (is bool)  {
+	public fn isInteger() -> (is bool)  {
 		return this.Type == VariableTypeByte ||
 			this.Type == VariableTypeShort ||
 			this.Type == VariableTypeInt ||
@@ -404,7 +404,7 @@ public class Type {
 			this.Type == VariableTypeDouble
 	}
 
-	fn isPrimitive() -> (is bool)  {
+	public fn isPrimitive() -> (is bool)  {
 		return this.isNumber() ||
 			this.Type == VariableTypeString ||
 			this.Type == VariableTypeBool
@@ -593,6 +593,12 @@ public class Type {
 		}
 		if leftValue.isPrimitive() &&
 			rightValue.isPrimitive() {
+
+			if leftValue.isInteger() &&
+				rightValue.isInteger() &&
+				((leftValue.Type == VariableTypeLong) == (rightValue.Type == VariableTypeLong)) {
+				return true
+			}
 			return leftValue.Type == rightValue.Type
 		}
 		if leftValue.isPointer() && rightValue.Type == VariableTypeNull {
@@ -627,6 +633,9 @@ public class Type {
 			return leftValue.functionType.equal(rightValue.functionType)
 		}
 		if leftValue.Type == VariableTypeObject && rightValue.Type == VariableTypeObject { // object
+			if leftValue.Class.name == rightValue.Class.name {
+				return true
+			}
 			if err := leftValue.Class.loadSelf(leftValue.pos); err != null {
 				errs.append(new error( sprintf("%s %s", errMsgPrefix(rightValue.pos), err.getMessage())))
 				return false

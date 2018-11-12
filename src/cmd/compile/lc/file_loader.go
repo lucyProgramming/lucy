@@ -130,15 +130,10 @@ func (this *FileLoader) LoadImport(importName string) (interface{}, error) {
 */
 func (this *FileLoader) loadInterfaces(astClass *ast.Class, c *cg.Class) error {
 	astClass.InterfaceNames = make([]*ast.NameWithPos, len(c.Interfaces))
-	for k, v := range c.Interfaces {
-		astClass.InterfaceNames[k] = &ast.NameWithPos{
-			Name: string(c.ConstPool[v].Info),
-		}
-	}
 	astClass.Interfaces = make([]*ast.Class, len(astClass.InterfaceNames))
-	for k, c := range astClass.InterfaceNames {
+	for k, v := range c.Interfaces {
 		i := &ast.Class{}
-		i.Name = c.Name
+		i.Name = string(c.ConstPool[binary.BigEndian.Uint16(c.ConstPool[v].Info)].Info)
 		i.NotImportedYet = true
 		astClass.Interfaces[k] = i
 	}

@@ -1071,7 +1071,6 @@ public class Class {
                 }
                 if v.isStatic() &&
                     v.defaultValueExpression.isLiteral() {
-                    v.DefaultValue = v.defaultValueExpression.data
                     continue
                 }
                 if v.isStatic() == false {

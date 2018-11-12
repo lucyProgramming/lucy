@@ -124,7 +124,7 @@ public class Statement {
 			}else {
 				block.defers.append(this.Defer)
 			}
-			block.inheritedAttribute.Function.HasDefer = true
+			block.inheritedAttribute.Function.hasDefer = true
 			this.Defer.block.inherit(block)
 			this.Defer.block.inheritedAttribute.Defer = this.Defer
 			es := this.Defer.block.check()
@@ -165,7 +165,7 @@ public class Statement {
 		case StatementTypeWhen:
 			return this.StatementWhen.check(block, this)
 		case StatementTypeImport:
-			if block.inheritedAttribute.Function.TemplateClonedFunction == false {
+			if block.inheritedAttribute.Function.templateClonedFunction == false {
 				errs.append(new error(sprintf("%s cannot have 'import' at this scope , non-template function",
 					errMsgPrefix(this.Import.pos))))
 				return errs

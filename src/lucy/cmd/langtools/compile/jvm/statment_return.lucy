@@ -6,9 +6,11 @@ import "lucy/binary"
 
 class BuildReturn {
     eb BuildExpression
-    fn BuildReturn(eb BuildExpression) {
+    bb BuildBlock
+    fn BuildReturn(eb BuildExpression,bb BuildBlock ) {
         this.super()
         this.eb = eb
+        this.bb = bb
     }
 
     fn  buildReturnStatement(
@@ -192,14 +194,14 @@ class BuildReturn {
             } else {
                 e.catchType = c.Class.insertClassConst(statementReturn.defers[index].exceptionClass.name) // custom c
             }
-            code.Exceptions = append(code.Exceptions, e)
+            code.Exceptions.append(e)
             //expect exception on stack
             copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
                 context.exceptionVarOffset)) // this code will make_node_objects stack is empty
             state.popStack(1)
             // build block
             context.Defer = statementReturn.defers[index]
-            this.buildBlock(c, code, statementReturn.defers[index].block, context, state)
+            this.bb.buildBlock(c, code, statementReturn.defers[index].block, context, state)
             from.addTop(state)
             context.Defer = null
             statementReturn.defers[index].resetLabels()
@@ -228,7 +230,7 @@ class BuildReturn {
                 //exception that have been handled
                 if len(statementReturn.expressions) > 0 && len(context.function.Type.ReturnList) > 1 {
                     //load when function have multi returns if read to end
-                    copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.multiValueVarOffset)...)
+                    copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.multiValueVarOffset))
                     exit := new cg.Exit(cg.OP_ifnonnull, code)
                     this.buildReturnFromReturnVars(c, code, context)
                     context.MakeStackMap(code, state, code.CodeLength)

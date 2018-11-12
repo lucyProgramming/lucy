@@ -37,7 +37,12 @@ func (this *BuildExpression) build(
 		code.CodeLength += 2
 		maxStack = 1
 	case ast.ExpressionTypeInt, ast.ExpressionTypeShort, ast.ExpressionTypeChar:
-		loadInt32(class, code, int32(e.Data.(int64)))
+		//TODO:: enum is int32
+		if i, ok := e.Data.(int32); ok {
+			loadInt32(class, code, i)
+		} else {
+			loadInt32(class, code, int32(e.Data.(int64)))
+		}
 		maxStack = 1
 	case ast.ExpressionTypeLong:
 		if e.Data.(int64) == 0 {

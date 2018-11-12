@@ -266,7 +266,7 @@ public class FunctionType {
 			vArgs.Length = len(callArgsTypes) - k
 		}
 		if len(callArgsTypes) < len(this.ParameterList) {
-			if f != null && f.HaveDefaultValue && len(callArgsTypes) >= f.DefaultValueStartAt {
+			if f != null && f.haveDefaultValue && len(callArgsTypes) >= f.DefaultValueStartAt {
 				for i := len(callArgsTypes); i < len(f.Type.ParameterList); i++ {
 					args.append(f.Type.ParameterList[i].defaultValueExpression)
 				}
