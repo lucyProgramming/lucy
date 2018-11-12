@@ -4,7 +4,7 @@
 public class AttributeInfo {
 	public	nameIndex       char
 	attributeLength int
-	Info            []byte
+	public Info            []byte
 }
 
 typealias AttributeGroupedByName =  map {string -> []AttributeInfo }

@@ -15,14 +15,14 @@ const	AccMethodStrict       char = 0x0800 //strictfp，方法使用FP-strict浮�
 const	AccMethodSynthetic    char = 0x1000 //方法在源文件中不出现，由编译器产生
  
 
-class MethodInfo {
-	accessFlags            char
-	nameIndex              char
-	descriptorIndex        char
-	attributes             []AttributeInfo
-	AttributeGroupedByName AttributeGroupedByName
+public class MethodInfo {
+	public accessFlags            char
+	public nameIndex              char
+	public descriptorIndex        char
+	public attributes             []AttributeInfo
+	public AttributeGroupedByName AttributeGroupedByName
 
-	fn IsBridge() ->(is bool)  {
+	fn isBridge() ->(is bool)  {
 		return this.accessFlags & AccMethodBridge != 0
 	}
 

@@ -43,6 +43,28 @@ public fn getLucyPath()->(paths []string){
 }
 
 
+public fn getClassPath()->(paths []string){
+	envs := os.getEnvs()
+	classPaths := envs["CLASSPATH"]
+	osName := System.getProperty("os.name").toLowerCase()
+	ps := new map{string -> bool} ()
+	if osName.startsWith("windows") {
+	    for v := range classPaths.split(";"){
+        	ps[v] = true
+        }
+	} else {  // unix style
+	    for v := range classPaths.split(":"){
+        	ps[v] = true
+        }
+	}
+	paths = new []string(ps.size())
+	i := 0 
+	for k,_ := range ps {
+		paths[i] = k
+		i++ 
+	}
+}
+
 
 public fn findPackageInWhichDirectory(lucyPaths []string , packageName string)->(which string ){
 	ps := []string{}  

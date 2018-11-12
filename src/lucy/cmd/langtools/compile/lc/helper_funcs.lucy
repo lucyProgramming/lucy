@@ -1,20 +1,24 @@
 
-func parseMethodParameter(class cg.Class, bs []byte, f ast.Function) {
-	a := &cg.AttributeMethodParameters{}
-	a.FromBs(class, bs)
+import "lucy/cmd/langtools/compile/jvm/cg"
+import "lucy/cmd/langtools/compile/ast"
+
+
+fn parseMethodParameter(c cg.Class, bs []byte, f ast.Function) {
+	a := new cg.AttributeMethodParameters()
+	a.FromBs(c, bs)
 	for k, v := range a.Parameters {
 		f.Type.ParameterList[k].name = v.name
 	}
 }
-func parseReturnListNames(class cg.Class, bs []byte, f ast.Function) {
-	a := &cg.AttributeMethodParameters{}
-	a.FromBs(class, bs)
+fn parseReturnListNames(c cg.Class, bs []byte, f ast.Function) {
+	a := new cg.AttributeMethodParameters()
+	a.FromBs(c, bs)
 	for k, v := range a.Parameters {
 		f.Type.ReturnList[k].name = v.name
 	}
 }
 
-func loadEnumForFunction(f ast.Function) error {
+fn loadEnumForFunction(f ast.Function) {
 	for _, v := range f.Type.ParameterList {
 		if v.Type.Type == ast.VariableTypeEnum {
 			err := loadEnumForVariableType(v.Type)
@@ -34,7 +38,7 @@ func loadEnumForFunction(f ast.Function) error {
 	return null
 }
 
-func loadEnumForVariableType(v ast.Type) error {
+fn loadEnumForVariableType(v ast.Type)  {
 	t, err := loader.LoadImport(v.Enum.name)
 	if err != null {
 		return err
@@ -42,7 +46,7 @@ func loadEnumForVariableType(v ast.Type) error {
 	if tt, ok := t.(ast.Enum); ok && tt != null {
 		v.Enum = tt
 	} else {
-		return new error(sprintf("'%s' is not a enum", v.Enum.name)
+		return new error(sprintf("'%s' is not a enum", v.Enum.name))
 	}
 	return null
 }

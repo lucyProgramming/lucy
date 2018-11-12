@@ -1,207 +1,197 @@
 
+import "lucy/cmd/langtools/compile/jvm/cg"
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/binary"
+
+
 
 class ClassDecoder {
 	bs        []byte
 	classFile cg.Class
 
 	
-	fn decode(bs []byte) -> (c cg.Class,err error) {
-		c.bs = bs
+	fn decode(bs []byte) -> (c cg.Class) {
+		this.bs = bs
 		if binary.BigEndian.getInt(bs) != cg.ClassMagicNumber {
-			return null, new error(sprintf("magic number is not right"))
+			panic("magic number is not right")
 		}
-		c.bs = c.bs[4:]
-		ret := new cg.Class()
-		c.classFile = ret
+		this.bs = this.bs[4:]
 		//version
-		ret.MinorVersion = binary.BigEndian.getChar(c.bs)
-		ret.MajorVersion = binary.BigEndian.getChar(c.bs[2:])
-		c.bs = c.bs[4:]
-		ret.ConstPool = []cg.ConstPool{null} // pool start 1
+		this.classFile.MinorVersion = binary.BigEndian.getChar(this.bs)
+		this.classFile.MajorVersion = binary.BigEndian.getChar(this.bs[2:])
+		this.bs = this.bs[4:]
+		this.classFile.ConstPool = []cg.ConstPool{null} // pool start 1
 		//const pool
-		if err := c.parseConstPool(); err != null {
-			return ret, err
-		}
+		this.parseConstPool()
 		//access flag
-		ret.accessFlags = binary.BigEndian.getChar(c.bs)
-		c.bs = c.bs[2:]
+		this.classFile.accessFlags = binary.BigEndian.getChar(this.bs)
+		this.bs = this.bs[2:]
 		// this class
-		ret.ThisClass = binary.BigEndian.getChar(c.bs)
-		ret.superClass = binary.BigEndian.getChar(c.bs[2:])
-		c.bs = c.bs[4:]
-		c.parseInterfaces()
-		c.parseFields()
-		c.parserMethods()
-		var err error
-		c.classFile.AttributeGroupedByName, err = c.parseAttributes()
-		return ret, err
+		this.classFile.ThisClass = binary.BigEndian.getChar(this.bs)
+		this.classFile.superClass = binary.BigEndian.getChar(this.bs[2:])
+		this.bs = this.bs[4:]
+		this.parseInterfaces()
+		this.parseFields()
+		this.parserMethods()
+		this.classFile.AttributeGroupedByName = this.parseAttributes()
+		return this.classFile
 	}
 
-	fn parseConstPool() -> (err error) {
-		length := binary.BigEndian.getChar(c.bs) - 1
-		c.bs = c.bs[2:]
+	fn parseConstPool()   {
+		length := binary.BigEndian.getChar(this.bs) - 1
+		this.bs = this.bs[2:]
 		for i := 0; i < int(length); i++ {
-			switch c.bs[0] {
+			switch this.bs[0] {
 			case cg.ConstantPoolTagUtf8:
 				p := new cg.ConstPool()
-				length := binary.BigEndian.getChar(c.bs[1:])
-				p.Tag = c.bs[0]
-				c.bs = c.bs[3:]
-				p.Info = c.bs[:length]
-				c.bs = c.bs[length:]
-				c.classFile.ConstPool = append(c.classFile.ConstPool, p)
+				length := binary.BigEndian.getChar(this.bs[1:])
+				p.Tag = this.bs[0]
+				this.bs = this.bs[3:]
+				p.Info = this.bs[:length]
+				this.bs = this.bs[length:]
+				this.classFile.ConstPool.append( p)
 			case cg.ConstantPoolTagInteger:
 				p := new cg.ConstPool()
-				p.Tag = c.bs[0]
-				p.Info = c.bs[1:5]
-				c.bs = c.bs[5:]
-				c.classFile.ConstPool = append(c.classFile.ConstPool, p)
+				p.Tag = this.bs[0]
+				p.Info = this.bs[1:5]
+				this.bs = this.bs[5:]
+				this.classFile.ConstPool.append( p)
 			case cg.ConstantPoolTagFloat:
 				p := new cg.ConstPool()
-				p.Tag = c.bs[0]
-				p.Info = c.bs[1:5]
-				c.bs = c.bs[5:]
-				c.classFile.ConstPool = append(c.classFile.ConstPool, p)
+				p.Tag = this.bs[0]
+				p.Info = this.bs[1:5]
+				this.bs = this.bs[5:]
+				this.classFile.ConstPool.append( p)
 			case cg.ConstantPoolTagFieldref:
 				p := new cg.ConstPool()
-				p.Tag = c.bs[0]
-				p.Info = c.bs[1:5]
-				c.bs = c.bs[5:]
-				c.classFile.ConstPool = append(c.classFile.ConstPool, p)
+				p.Tag = this.bs[0]
+				p.Info = this.bs[1:5]
+				this.bs = this.bs[5:]
+				this.classFile.ConstPool.append( p)
 			case cg.ConstantPoolTagMethodref:
 				p := new cg.ConstPool()
-				p.Tag = c.bs[0]
-				p.Info = c.bs[1:5]
-				c.bs = c.bs[5:]
-				c.classFile.ConstPool = append(c.classFile.ConstPool, p)
+				p.Tag = this.bs[0]
+				p.Info = this.bs[1:5]
+				this.bs = this.bs[5:]
+				this.classFile.ConstPool.append( p)
 			case cg.ConstantPoolTagInterfaceMethodref:
 				p := new cg.ConstPool()
-				p.Tag = c.bs[0]
-				p.Info = c.bs[1:5]
-				c.bs = c.bs[5:]
-				c.classFile.ConstPool = append(c.classFile.ConstPool, p)
+				p.Tag = this.bs[0]
+				p.Info = this.bs[1:5]
+				this.bs = this.bs[5:]
+				this.classFile.ConstPool.append( p)
 			case cg.ConstantPoolTagNameAndType:
 				p := new cg.ConstPool()
-				p.Tag = c.bs[0]
-				p.Info = c.bs[1:5]
-				c.bs = c.bs[5:]
-				c.classFile.ConstPool = append(c.classFile.ConstPool, p)
+				p.Tag = this.bs[0]
+				p.Info = this.bs[1:5]
+				this.bs = this.bs[5:]
+				this.classFile.ConstPool.append( p)
 			case cg.ConstantPoolTagInvokeDynamic:
 				p := new cg.ConstPool()
-				p.Tag = c.bs[0]
-				p.Info = c.bs[1:5]
-				c.bs = c.bs[5:]
-				c.classFile.ConstPool = append(c.classFile.ConstPool, p)
+				p.Tag = this.bs[0]
+				p.Info = this.bs[1:5]
+				this.bs = this.bs[5:]
+				this.classFile.ConstPool.append( p)
 			case cg.ConstantPoolTagLong:
 				p := new cg.ConstPool()
-				p.Tag = c.bs[0]
-				p.Info = c.bs[1:9]
-				c.bs = c.bs[9:]
-				c.classFile.ConstPool = append(c.classFile.ConstPool, p, null)
+				p.Tag = this.bs[0]
+				p.Info = this.bs[1:9]
+				this.bs = this.bs[9:]
+				this.classFile.ConstPool.append( p, null)
 				i++ // increment twice
 			case cg.ConstantPoolTagDouble:
 				p := new cg.ConstPool()
-				p.Tag = c.bs[0]
-				p.Info = c.bs[1:9]
-				c.bs = c.bs[9:]
-				c.classFile.ConstPool = append(c.classFile.ConstPool, p, null)
+				p.Tag = this.bs[0]
+				p.Info = this.bs[1:9]
+				this.bs = this.bs[9:]
+				this.classFile.ConstPool.append( p, null)
 				i++ // increment twice
 			case cg.ConstantPoolTagClass:
 				p := new cg.ConstPool()
-				p.Tag = c.bs[0]
-				p.Info = c.bs[1:3]
-				c.bs = c.bs[3:]
-				c.classFile.ConstPool = append(c.classFile.ConstPool, p)
+				p.Tag = this.bs[0]
+				p.Info = this.bs[1:3]
+				this.bs = this.bs[3:]
+				this.classFile.ConstPool.append( p)
 			case cg.ConstantPoolTagString:
 				p := new cg.ConstPool()
-				p.Tag = c.bs[0]
-				p.Info = c.bs[1:3]
-				c.bs = c.bs[3:]
-				c.classFile.ConstPool = append(c.classFile.ConstPool, p)
+				p.Tag = this.bs[0]
+				p.Info = this.bs[1:3]
+				this.bs = this.bs[3:]
+				this.classFile.ConstPool.append( p)
 			case cg.ConstantPoolTagMethodType:
 				p := new cg.ConstPool()
-				p.Tag = c.bs[0]
-				p.Info = c.bs[1:3]
-				c.bs = c.bs[3:]
-				c.classFile.ConstPool = append(c.classFile.ConstPool, p)
+				p.Tag = this.bs[0]
+				p.Info = this.bs[1:3]
+				this.bs = this.bs[3:]
+				this.classFile.ConstPool.append( p)
 			case cg.ConstantPoolTagMethodHandle:
 				p := new cg.ConstPool()
-				p.Tag = c.bs[0]
-				p.Info = c.bs[1:4]
-				c.bs = c.bs[4:]
-				c.classFile.ConstPool = append(c.classFile.ConstPool, p)
+				p.Tag = this.bs[0]
+				p.Info = this.bs[1:4]
+				this.bs = this.bs[4:]
+				this.classFile.ConstPool.append( p)
 			}
 		}
-		return null
 	}
 
 	fn parseInterfaces() {
-		length := binary.BigEndian.getChar(c.bs)
-		c.bs = c.bs[2:]
+		length := binary.BigEndian.getChar(this.bs)
+		this.bs = this.bs[2:]
 		for i := char(0); i < length; i++ {
-			c.classFile.interfaces = append(c.classFile.interfaces, binary.BigEndian.getChar(c.bs))
-			c.bs = c.bs[2:]
+			this.classFile.interfaces[i] = binary.BigEndian.getChar(this.bs)
+			this.bs = this.bs[2:]
 		}
 	}
 
-	fn parseFields() -> (err error) {
-		length := binary.BigEndian.getChar(c.bs)
-		c.bs = c.bs[2:]
+	fn parseFields() {
+		length := binary.BigEndian.getChar(this.bs)
+		this.bs = this.bs[2:]
 		for i := char(0); i < length; i++ {
 			f := new cg.FieldInfo()
-			f.accessFlags = binary.BigEndian.getChar(c.bs)
-			f.nameIndex = binary.BigEndian.getChar(c.bs[2:])
-			f.descriptorIndex = binary.BigEndian.getChar(c.bs[4:])
-			c.bs = c.bs[6:]
-			f.AttributeGroupedByName, err = c.parseAttributes()
-			if err != null {
-				return err
-			}
-			c.classFile.fields = append(c.classFile.fields, f)
+			f.accessFlags = binary.BigEndian.getChar(this.bs)
+			f.nameIndex = binary.BigEndian.getChar(this.bs[2:])
+			f.descriptorIndex = binary.BigEndian.getChar(this.bs[4:])
+			this.bs = this.bs[6:]
+			f.AttributeGroupedByName = this.parseAttributes()
+			this.classFile.fields.append(f)
 		}
-		return null
 	}
 
-	fn parserMethods() -> (err error) {
-		length := binary.BigEndian.getChar(c.bs)
-		c.bs = c.bs[2:]
+	fn parserMethods()  {
+		length := binary.BigEndian.getChar(this.bs)
+		this.bs = this.bs[2:]
 		for i := char(0); i < length; i++ {
 			m := new cg.MethodInfo()
-			m.accessFlags = binary.BigEndian.getChar(c.bs)
-			m.nameIndex = binary.BigEndian.getChar(c.bs[2:])
-			m.descriptorIndex = binary.BigEndian.getChar(c.bs[4:])
-			c.bs = c.bs[6:]
-			m.AttributeGroupedByName, err = c.parseAttributes()
-			if err != null {
-				return err
-			}
-			c.classFile.methods = append(c.classFile.methods, m)
+			m.accessFlags = binary.BigEndian.getChar(this.bs)
+			m.nameIndex = binary.BigEndian.getChar(this.bs[2:])
+			m.descriptorIndex = binary.BigEndian.getChar(this.bs[4:])
+			this.bs = this.bs[6:]
+			m.AttributeGroupedByName = this.parseAttributes()
+			this.classFile.methods.append(m)
 		}
-		return null
 	}
 
-	fn parseAttributes() -> (attrs  cg.AttributeGroupedByName,err error) {
-		ret := make(cg.AttributeGroupedByName)
-		length := binary.BigEndian.getChar(c.bs)
-		c.bs = c.bs[2:]
+	fn parseAttributes() -> (attrs  cg.AttributeGroupedByName) {
+		attrs = new cg.AttributeGroupedByName()
+		length := binary.BigEndian.getChar(this.bs)
+		this.bs = this.bs[2:]
 		for i := char(0); i < length; i++ {
 			a := new cg.AttributeInfo()
-			a.nameIndex = binary.BigEndian.getChar(c.bs)
-			if c.classFile.ConstPool[a.nameIndex].Tag != cg.ConstantPoolTagUtf8 {
-				return ret, new error(sprintf("name index %d is not a utf8 const", a.nameIndex))
+			a.nameIndex = binary.BigEndian.getChar(this.bs)
+			if this.classFile.ConstPool[a.nameIndex].Tag != cg.ConstantPoolTagUtf8 {
+				panic(sprintf("name index %d is not a utf8 const", a.nameIndex))
 			}
-			length := binary.BigEndian.getInt(c.bs[2:])
-			c.bs = c.bs[6:]
-			a.Info = c.bs[:length]
-			c.bs = c.bs[length:]
-			name := string(c.classFile.ConstPool[a.nameIndex].Info)
-			if _, ok := ret[name]; ok {
-				ret[name] = append(ret[name], a)
+			length := binary.BigEndian.getInt(this.bs[2:])
+			this.bs = this.bs[6:]
+			a.Info = this.bs[:length]
+			this.bs = this.bs[length:]
+			name := string(this.classFile.ConstPool[a.nameIndex].Info)
+			if attrs.keyExist(name) {
+				attrs[name].append(a)
 			} else {
-				ret[name] = []cg.AttributeInfo{a}
+				attrs[name] = []cg.AttributeInfo{a}
 			}
 		}
-		return ret, null
 	}
 	
 }

@@ -1,31 +1,40 @@
 
+import "lucy/cmd/langtools/compile/jvm/cg"
+import "lucy/cmd/langtools/compile/jvm"
+import "lucy/cmd/langtools/compile/ast"
+import "java/lang/Object"
+import "lucy/binary"
+import "java/io"
+import "lucy/os"
+
+
+
 
 /*
 	load from file implementation
 */
-class FileLoader {
+class FileLoader implements ast.LoadImport{
 	caches map { string -> Object }
-
-
-
     fn  LoadImport(importName string) -> (x Object,err error) {
+        defer {
+            e := catch()
+            if err == null && e != null{
+                err =  e
+            }
+        }
         if this.caches != null && this.caches[importName] != null {
             return this.caches[importName], null
         }
         realPaths  := []Resource{}
         for _, v := range compiler.lucyPaths {
-            p := filepath.Join(v, "class", importName)
-            f, err := os.Stat(p)
-            if err == null && f.IsDir() { // directory is package
+            if  p := v + "/class/" + importName ; new io.File(p ).isDirectory() { // directory is package
                 realPaths.append(new Resource(
                     resourceKindLucyPackage,
                     p,
                     importName
                 ))
             }
-            p = filepath.Join(v, "class", importName+".class")
-            f, err = os.Stat(p)
-            if err == null && f.IsDir() == false { // class file
+            if  p :=v + "/class/" + importName + ".class" ;  new io.File(p).isFile(){ // class file
                 realPaths.append(new Resource(
                     resourceKindLucyClass,
                     p,
@@ -35,18 +44,14 @@ class FileLoader {
         }
 
         for _, v := range compiler.ClassPaths {
-            p := filepath.Join(v, importName)
-            f, err := os.Stat(p)
-            if err == null && f.IsDir() { // directory is package
+            if p :=v + "/class/" + importName  ; new io.File(p).isDirectory() { // directory is package
                 realPaths.append(new Resource(
                     resourceKindJavaPackage,
                     p,
                     importName
                 ))
             }
-            p = filepath.Join(v, importName+".class")
-            f, err = os.Stat(p)
-            if err == null && f.IsDir() == false { // directory is package
+            if p := v + "/class/" + importName + ".class" ; new io.File(p).isFile() { // directory is package
                 realPaths.append(new Resource(
                    resourceKindJavaClass,
                    p,
@@ -59,9 +64,8 @@ class FileLoader {
         }
         realPathMap := new map { string -> []Resource } ()
         for _, v := range realPaths {
-            _, ok := realPathMap[v.realPath]
-            if ok {
-                realPathMap[v.realPath] = append(realPathMap[v.realPath], v)
+            if realPathMap.keyExist(v.realPath) {
+                realPathMap[v.realPath].append( v)
             } else {
                 realPathMap[v.realPath] = []Resource{v}
             }
@@ -88,29 +92,29 @@ class FileLoader {
             }
         }
         if realPaths[0].kind == resourceKindJavaClass {
-            c, err := this.loadClass(realPaths[0])
+            c := this.loadClass(realPaths[0])
             if c != null {
                 this.caches[importName] = c
             }
-            return c, err
+            return c, null
         } else if realPaths[0].kind == resourceKindLucyClass {
-            t, err := this.loadClass(realPaths[0])
+            t := this.loadClass(realPaths[0])
             if t != null {
                 this.caches[importName] = t
             }
-            return t, err
+            return t, null
         } else if realPaths[0].kind == resourceKindJavaPackage {
             p, err := this.loadJavaPackage(realPaths[0])
             if p != null {
                 this.caches[importName] = p
             }
-            return p, err
+            return p, null
         } else { // lucy package
             p, err := this.loadLucyPackage(realPaths[0])
             if p != null {
                 this.caches[importName] = p
             }
-            return p, err
+            return p, null
         }
     }
 
@@ -118,12 +122,12 @@ class FileLoader {
         lucy and java have no difference
     */
     fn  loadInterfaces(astClass ast.Class, c cg.Class) -> (err error) {
-        astClass.Interfaces = new []ast.Class(len(astClass.InterfaceNames))
-        for k, v := range c.Interfaces {
+        astClass.interfaces = new []ast.Class(len(c.interfaces))
+        for k, v := range c.interfaces {
             i := new ast.Class()
-            i.name = string(c.ConstPool[binary.BigEndian.Uint16(c.ConstPool[v].Info)].Info)
+            i.name = string(c.ConstPool[binary.BigEndian.getChar(c.ConstPool[v].Info)].Info)
             i.notImportedYet = true
-            astClass.Interfaces[k] = i
+            astClass.interfaces[k] = i
         }
         return null
     }
@@ -139,14 +143,13 @@ class FileLoader {
         if t := c.AttributeGroupedByName.GetByName(cg.AttributeNameSignature); t != null && len(t) > 0 {
             //TODO:: support signature???
         }
-        astClass := new ast.Class()
+        astClass = new ast.Class()
         {
             nameIndex := binary.BigEndian.getChar(c.ConstPool[c.ThisClass].Info)
             astClass.name = string(c.ConstPool[nameIndex].Info)
             if astClass.name != ast.JavaRootClass {
                 nameIndex = binary.BigEndian.getChar(c.ConstPool[c.superClass].Info)
-                astClass.superClassName = new ast.NameWithPos()
-                astClass.superClassName.name = string(c.ConstPool[nameIndex].Info)
+                astClass.superClassName = new ast.NameWithPos(string(c.ConstPool[nameIndex].Info) , null)
             }
         }
         this.loadInterfaces(astClass, c)
@@ -198,12 +201,12 @@ class FileLoader {
         return astClass, null
     }
 
-    fn  loadAsLucy(c cg.Class) -> (astClass ast.Class,err error) {
+    fn  loadAsLucy(c cg.Class) -> (astClass ast.Class) {
         if c.isSynthetic() {
-            return null, null
+            return null
         }
         if c.isInnerClass() {
-            return null, null
+            return null
         }
         //name
         astClass = new ast.Class()
@@ -212,14 +215,12 @@ class FileLoader {
             astClass.name = string(c.ConstPool[nameIndex].Info)
             if astClass.name != ast.JavaRootClass {
                 nameIndex = binary.BigEndian.getChar(c.ConstPool[c.superClass].Info)
-                astClass.superClassName = new ast.NameWithPos()
-                astClass.superClassName.name = string(c.ConstPool[nameIndex].Info)
+                astClass.superClassName = new ast.NameWithPos(string(c.ConstPool[nameIndex].Info) , null)
             }
         }
         this.loadInterfaces(astClass, c)
         astClass.accessFlags = c.accessFlags
         astClass.loadFromOutSide = true
-        var err error
         astClass.fields = new map{string -> ast.ClassField}()
         if t := c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyClassConst); len(t) > 0 {
             attr := new cg.AttributeLucyClassConst()
@@ -235,10 +236,10 @@ class FileLoader {
                 constant.name = v.name
                 constant.Type = t
                 constant.value = this.loadConst(c, v.valueIndex, t)
-                if astClass.Block.constants == null {
-                    astClass.Block.constants = new map { string -> ast.Constant } ()
+                if astClass.block.constants == null {
+                    astClass.block.constants = new map { string -> ast.Constant } ()
                 }
-                astClass.Block.constants[v.name] = constant
+                astClass.block.constants[v.name] = constant
             }
         }
         for _, v := range c.fields {
@@ -337,7 +338,7 @@ class FileLoader {
             en.Enum = e
             constValue := v.AttributeGroupedByName[cg.AttributeNameConstValue][0] // must have this attribute
             en.value = int(binary.BigEndian.getInt(c.ConstPool[binary.BigEndian.getChar(constValue.Info)].Info))
-            e.Enums = append(e.Enums, en)
+            e.Enums.append(en)
         }
         return e, null
     }
@@ -363,13 +364,12 @@ class FileLoader {
         }
     }
 
-    fn  loadLucyMainClass(pack ast.Package, c cg.Class) -> (err error) {
-        var err error
+    fn  loadLucyMainClass(pack ast.Package, c cg.Class)  {
         mainClassName := new cg.ClassHighLevel()
         mainClassName.name = pack.name + "/main"
-        pack.Block.Variables = new map{string->ast.Variable}()
-        pack.Block.constants = new map{string->ast.Constant}()
-        pack.Block.Functions = new map{string->ast.Function}()
+        pack.block.Variables = new map{string->ast.Variable}()
+        pack.block.constants = new map{string->ast.Constant}()
+        pack.block.Functions = new map{string->ast.Function}()
         for _, f := range c.fields {
             name := string(c.ConstPool[f.nameIndex].Info)
             constValue := f.AttributeGroupedByName.GetByName(cg.AttributeNameConstValue)
@@ -410,15 +410,15 @@ class FileLoader {
                         return err
                     }
                     if vd.Type.Type == ast.VariableTypeFunction && d.MethodAccessFlag&cg.AccMethodVarargs != 0 {
-                        if vd.Type.FunctionType.ParameterList[len(vd.Type.FunctionType.ParameterList)-1].Type.Type !=
+                        if vd.Type.functionType.ParameterList[len(vd.Type.functionType.ParameterList)-1].Type.Type !=
                             ast.VariableTypeJavaArray {
                             panic("not a java array")
                         }
-                        vd.Type.FunctionType.VArgs =
-                            vd.Type.FunctionType.ParameterList[len(vd.Type.FunctionType.ParameterList)-1]
-                        vd.Type.FunctionType.VArgs.Type.isVariableArgs = true
-                        vd.Type.FunctionType.ParameterList =
-                            vd.Type.FunctionType.ParameterList[:len(vd.Type.FunctionType.ParameterList)-1]
+                        vd.Type.functionType.VArgs =
+                            vd.Type.functionType.ParameterList[len(vd.Type.functionType.ParameterList)-1]
+                        vd.Type.functionType.VArgs.Type.isVariableArgs = true
+                        vd.Type.functionType.ParameterList =
+                            vd.Type.functionType.ParameterList[:len(vd.Type.functionType.ParameterList)-1]
                     }
                 }
                 if typ.Type == ast.VariableTypeEnum {
@@ -556,12 +556,12 @@ class FileLoader {
             return null, new error(sprintf("parse main class failed,err:%v", err))
         }
         delete(fisM, mainClassName)
-        mkEnums := func(e ast.Enum) {
+        mkEnums := fn(e ast.Enum) {
             if p.block.Enums == null {
-                p.block.Enums = make(map[string]ast.Enum)
+                p.block.Enums = new map { string -> ast.Enum } ()
             }
             if p.block.EnumNames == null {
-                p.block.EnumNames = make(map[string]ast.EnumName)
+                p.block.EnumNames = new map { string -> ast.EnumName } ()
             }
             p.block.Enums[filepath.Base(e.name)] = e
             for _, v := range e.Enums {
@@ -569,14 +569,8 @@ class FileLoader {
             }
         }
         for _, v := range fisM {
-            bs, err := ioutil.ReadFile(filepath.Join(r.realPath, v.name()))
-            if err != null {
-                return p, new error(sprintf("read class failed,err:%v", err)
-            }
-            c, err := (&ClassDecoder{}).decode(bs)
-            if err != null {
-                return null, new error(sprintf("decode class failed,err:%v", err)
-            }
+            b := ioutil.ReadFile(filepath.Join(r.realPath, v.name()))
+            c := (new ClassDecoder(bs)).decode()
             if len(c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyEnum)) > 0 {
                 e, err := this.loadLucyEnum(c)
                 if err != null {
@@ -585,57 +579,44 @@ class FileLoader {
                 mkEnums(e)
                 continue
             }
-            class, err := this.loadAsLucy(c)
-            if err != null {
-                return null, new error(sprintf("decode class failed,err:%v", err)
-            }
-            if class != null {
+            c := this.loadAsLucy(c)
+            if c != null {
                 if p.block.Classes == null {
-                    p.block.Classes = make(map[string]ast.Class)
+                    p.block.Classes = new map {string -> ast.Class } ()
                 }
-                p.block.Classes[filepath.Base(ast.TypeName)] = class
+                p.block.Classes[filepath.Base(ast.TypeName)] = c
             }
         }
         return p, null
     }
 
-    fn  loadJavaPackage(r *Resource) (*ast.Package, error) {
-        fis, err := ioutil.ReadDir(r.realPath)
-        if err != null {
-            return null, err
-        }
-        ret := &ast.Package{}
-        ret.Block.Classes = make(map[string]ast.Class)
+    fn  loadJavaPackage(r Resource) -> (p ast.Package) {
+        fis := new io.File(r.realPath).list()
+        p = new ast.Package()
+        p.block.Classes = new map {string -> ast.Class}()
         for _, v := range fis {
-            if strings.HasSuffix(v.name(), ".class") == false {
+            if v.endsWith(".class") == false {
                 continue
             }
-            bs, err := ioutil.ReadFile(filepath.Join(r.realPath, v.name()))
-            if err != null {
-                return null, err
-            }
-            c, err := (&ClassDecoder{}).decode(bs)
-            class, err := this.loadAsJava(c)
-            if err != null {
-                return null, err
-            }
-            if class != null {
-                if ret.Block.Classes == null {
-                    ret.Block.Classes = make(map[string]ast.Class)
+            bs := os.readFile(r.realPath + "/" + v)
+            c  := (new ClassDecoder(javaArray2Lucy(new []byte(bs.size())) , bs)).decode()
+            cc := this.loadAsJava(c)
+            if cc != null {
+                if p.Block.Classes == null {
+                    p.Block.Classes = new map{string->ast.Class}()
                 }
-                ret.Block.Classes[filepath.Base(ast.TypeName)] = class
+                p.Block.Classes[filepath.Base(ast.TypeName)] = cc
             }
 
         }
-        return ret, null
     }
 
-    fn  loadClass(r *Resource) (interface{}, error) {
-        bs, err := ioutil.ReadFile(r.realPath)
+    fn  loadClass(r Resource) -> (cc ast.Class) {
+        bs, err := os.readFile(r.realPath)
         if err != null {
             return null, err
         }
-        c, err := (&ClassDecoder{}).decode(bs)
+        c := (new ClassDecoder()).decode(javaArray2Lucy(new []byte(bs.size()),bs))
         if r.kind == resourceKindLucyClass {
             if t := c.AttributeGroupedByName[cg.AttributeNameLucyEnum]; len(t) > 0 {
                 return this.loadLucyEnum(c)

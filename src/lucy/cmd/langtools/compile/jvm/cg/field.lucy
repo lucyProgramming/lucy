@@ -11,10 +11,10 @@ public const	AccFieldSynthetic char = 0x1000 //表示字段由编译器自动产
 public const	AccFieldEnum      char = 0x4000 //enum，表示字段为枚举类型。
  
 
-class FieldInfo {
-	accessFlags            char
-	nameIndex              char
-	descriptorIndex        char
-	attributes             []AttributeInfo
-	AttributeGroupedByName AttributeGroupedByName
+public class FieldInfo {
+	public accessFlags            char
+	public nameIndex              char
+	public descriptorIndex        char
+	public attributes             []AttributeInfo
+	public AttributeGroupedByName AttributeGroupedByName
 }

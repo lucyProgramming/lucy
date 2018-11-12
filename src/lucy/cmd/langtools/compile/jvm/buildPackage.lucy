@@ -4,7 +4,7 @@ import "lucy/cmd/langtools/compile/common"
 import "java/io"
 
 
-class  BuildPackage {
+public class  BuildPackage {
 	Package         ast.Package
 	classes         map { string -> cg.ClassHighLevel }
 	mainClass       cg.ClassHighLevel
@@ -12,7 +12,7 @@ class  BuildPackage {
     BuildBlock BuildBlock
     BuildFunction BuildFunction
 
-    fn BuildPackage(){
+    public fn BuildPackage(){
         this.super()
         this.BuildExpression = new BuildExpression(this)
         this.BuildBlock = new BuildBlock(this.BuildExpression , this)

@@ -2,7 +2,7 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
 
 
-public class Constant implements GetDefaultValue{
+public class Constant  {
 	public isGlobal               bool
 	public isBuildIn              bool
 	public used                   bool
@@ -37,22 +37,6 @@ public class Constant implements GetDefaultValue{
 			//
 		}
 	}
-
-	public fn getType()->(t Type) {
-		return this.Type 
-	}
-    public fn getLongValue()->(v long){
-    	return this.longValue
-    }
-    public fn getDoubleValue()->(v double){
-    	return this.doubleValue
-    }
-    public fn getBoolValue ()-> (v bool){
-    	return this.boolValue
-    }
-    public fn getStringValue() -> (v string){
-    	return this.stringValue
-    }
 }
 
 

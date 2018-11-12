@@ -1,5 +1,9 @@
 
-
+import "lucy/cmd/langtools/compile/jvm/cg"
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm"
+import "lucy/cmd/langtools/common"
+import "lucy/os"
 
 
 public fn Main(files []string) {
@@ -7,11 +11,7 @@ public fn Main(files []string) {
 		print("no file specfied")
 		os.Exit(1)
 	}
-	compiler.NErrs2StopCompile = 10
-	compiler.Errs = []error{}
-	compiler.Files = files
-	compiler.Init()
-	compiler.compile()
+	compiler.compile(files)
 }
 
 
@@ -23,7 +23,18 @@ public class Compiler {
 	lucyPaths         []string
 	ClassPaths        []string
 	Maker             jvm.BuildPackage = new jvm.BuildPackage()
-	
+
+	fn Compiler(){
+	    this.super()
+	    this.Errs = []error{}
+	    this.NErrs2StopCompile = 10
+        this.ClassPaths = common.getClassPath()
+        this.lucyPaths = common.getLucyPath()
+	}
+
+
+
+
 	fn shouldExit() {
 		if len(compiler.Errs) > compiler.NErrs2StopCompile {
 			this.exit()
@@ -37,34 +48,23 @@ public class Compiler {
 		for _, v := range this.Errs {
 			fmt.Fprintln(os.Stderr, v)
 		}
-		os.Exit(code)
+		os.exit(code)
 	}
-	
-	fn Init() {
-		this.ClassPaths = common.GetClassPaths()
-		var err error
-		this.lucyPaths, err = common.GetLucyPaths()
-		if err != null {
-			fmt.Println(err)
-			os.Exit(3)
-		}
-	}
-	
+
 	fn dumpImports() {
 		if len(this.Errs) > 0 {
 			this.exit()
 		}
-		is := make([]string, len(this.Tops))
+		is := new []string(len(this.Tops))
 		for k, v := range this.Tops {
-			is[k] = v.Node.(*ast.Import).Import
+			is[k] = v.Node.(ast.Import).Import
 		}
 		bs, _ := json.Marshal(is)
 		fmt.Println(string(bs))
 	}
 
-	fn compile() {
-		fileNodes := make(map[string][]*ast.TopNode)
-
+	fn compile(files []string) {
+        this.Files = files
 		for _, v := range this.Files {
 
 			bs, err := ioutil.ReadFile(v)
@@ -113,7 +113,7 @@ public class Compiler {
 				bs = bs[3:]
 			}
 			length := len(this.Tops)
-			this.Errs = append(this.Errs, parser.Parse(&this.Tops, v, bs,
+			this.Errs.append(parser.Parse(this.Tops, v, bs,
 				compileCommon.CompileFlags.OnlyImport, this.NErrs2StopCompile)...)
 			fileNodes[v] = this.Tops[length:len(this.Tops)]
 			this.shouldExit()
@@ -128,7 +128,6 @@ public class Compiler {
 			fmt.Println("package name not specfied")
 			os.Exit(1)
 		}
-		c := ast.ConvertTops2Package{}
 		ast.PackageBeenCompile.name = compileCommon.CompileFlags.PackageName
 		rs, errs := c.ConvertTops2Package(this.Tops)
 		this.Errs = append(this.Errs, errs...)
@@ -142,7 +141,7 @@ public class Compiler {
 			this.exit()
 		}
 		//optimizer.Optimize(&ast.PackageBeenCompile)
-		this.Maker.Make(&ast.PackageBeenCompile)
+		this.Maker.Make(ast.PackageBeenCompile)
 		this.exit()
 	}
 }
