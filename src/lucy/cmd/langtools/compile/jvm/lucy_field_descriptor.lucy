@@ -3,7 +3,7 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/common"
 
-class LucyFieldSignature {
+public class LucyFieldSignature {
 
 
     static fn Need(variableType ast.Type)->(need bool)  {
@@ -37,7 +37,7 @@ class LucyFieldSignature {
         return Descriptor.typeDescriptor(variableType)
     }
 
-    static fn Decode(bs []byte) -> (bsSliced []byte,t ast.Type,err  error) {
+    public static fn Decode(bs []byte) -> (bsSliced []byte,t ast.Type,err  error) {
         if bs[0] == 'M' {
             bs = bs[1:]
             var kt ast.Type

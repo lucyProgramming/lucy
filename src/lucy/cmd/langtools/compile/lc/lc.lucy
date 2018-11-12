@@ -66,8 +66,7 @@ public class Compiler {
 	fn compile(files []string) {
         this.Files = files
 		for _, v := range this.Files {
-
-			bs, err := ioutil.ReadFile(v)
+			bs, err := os.readFile(v)
 			if err != null {
 				this.Errs = append(this.Errs, err)
 				continue
@@ -113,7 +112,7 @@ public class Compiler {
 				bs = bs[3:]
 			}
 			length := len(this.Tops)
-			this.Errs.append(parser.Parse(this.Tops, v, bs,
+			this.Errs.append(parser.Parse(this.Tops, v, javaArray2Lucy(bs) ,
 				compileCommon.CompileFlags.OnlyImport, this.NErrs2StopCompile)...)
 			fileNodes[v] = this.Tops[length:len(this.Tops)]
 			this.shouldExit()

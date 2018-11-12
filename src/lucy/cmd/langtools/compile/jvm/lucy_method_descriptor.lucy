@@ -1,7 +1,7 @@
 import "lucy/cmd/langtools/compile/ast"
 
 
-class LucyMethodSignature {
+public class LucyMethodSignature {
 
 	
 	static fn Need(ft ast.FunctionType) ->(n bool)  {
@@ -46,7 +46,7 @@ class LucyMethodSignature {
 	}
 
 	//rewrite types
-	static fn Decode(ft ast.FunctionType, bs []byte)-> (bsSliced []byte,err  error) {
+	public static fn Decode(ft ast.FunctionType, bs []byte)-> (bsSliced []byte,err  error) {
 		bs = bs[1:] // skip (
 		if len(ft.ParameterList) > 0 {
 			ft.ParameterList = null

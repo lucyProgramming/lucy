@@ -1,7 +1,7 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/common"
 
-class Descriptor  {
+public class Descriptor  {
 
 
 	static fn methodDescriptor(functionType ast.FunctionType) -> (s string) {
@@ -60,7 +60,7 @@ class Descriptor  {
 		panic("unHandle type signature")
 	}
 
-	static fn ParseType(bs []byte) -> (bsSlieced []byte, t ast.Type,err error) {
+	public static fn ParseType(bs []byte) -> (bsSlieced []byte, t ast.Type,err error) {
 		switch bs[0] {
 		case 'V':
 			bs = bs[1:]
@@ -135,7 +135,7 @@ class Descriptor  {
 		return bs, null, new error(sprintf("unkown type:%v", string(bs)))
 	}
 
-	static fn ParseFunctionType(bs []byte) -> (t ast.FunctionType,err error) {
+	public static fn ParseFunctionType(bs []byte) -> (t ast.FunctionType,err error) {
 		t = new ast.FunctionType()
 		if bs[0] != '(' {
 			return t, new error(sprintf("function descriptor does not start with '('"))
