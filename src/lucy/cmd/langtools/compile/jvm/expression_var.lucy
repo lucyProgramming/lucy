@@ -19,7 +19,7 @@ class BuildExpressionVar {
         state StackMapState) -> (maxStack char) {
         vs := e.data.(ast.ExpressionVar)
         //
-        for _, v := range vs.Variables {
+        for _, v := range vs.variables {
             v.localValOffset = code.maxLocals
             if v.beenCapturedAsLeftValue > 0 {
                 code.maxLocals++
@@ -27,11 +27,11 @@ class BuildExpressionVar {
                 code.maxLocals += jvmSlotSize(v.Type)
             }
         }
-        index := len(vs.Variables) - 1
+        index := len(vs.variables) - 1
         currentStack := char(0)
         for index >= 0 {
-            if vs.Variables[index].beenCapturedAsLeftValue > 0 {
-                v := vs.Variables[index]
+            if vs.variables[index].beenCapturedAsLeftValue > 0 {
+                v := vs.variables[index]
                 closure.createClosureVar(c, code, v.Type)
                 code.codes[code.codeLength] = cg.OP_dup
                 code.codeLength++
@@ -56,19 +56,19 @@ class BuildExpressionVar {
                     if t := stack + currentStack; t > maxStack {
                         maxStack = t
                     }
-                    if vs.Variables[index].isGlobal {
-                        this.eb.storeGlobalVariable(c, code, vs.Variables[index])
+                    if vs.variables[index].isGlobal {
+                        this.eb.storeGlobalVariable(c, code, vs.variables[index])
                     } else {
-                        this.eb.storeLocalVar(c, code, vs.Variables[index])
-                        if vs.Variables[index].beenCapturedAsLeftValue > 0 {
+                        this.eb.storeLocalVar(c, code, vs.variables[index])
+                        if vs.variables[index].beenCapturedAsLeftValue > 0 {
                             copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-                                vs.Variables[index].localValOffset))
+                                vs.variables[index].localValOffset))
                             state.popStack(2)
                             state.appendLocals(c,
-                                state.newObjectVariableType(closure.getMeta(vs.Variables[index].Type.Type).className))
+                                state.newObjectVariableType(closure.getMeta(vs.variables[index].Type.Type).className))
                             currentStack -= 2
                         } else {
-                            state.appendLocals(c, vs.Variables[index].Type)
+                            state.appendLocals(c, vs.variables[index].Type)
                         }
                     }
                     index++
@@ -80,19 +80,19 @@ class BuildExpressionVar {
             if t := currentStack + stack; t > maxStack {
                 maxStack = t
             }
-            if vs.Variables[index].isGlobal {
-                this.eb.storeGlobalVariable(c, code, vs.Variables[index])
+            if vs.variables[index].isGlobal {
+                this.eb.storeGlobalVariable(c, code, vs.variables[index])
             } else {
-                this.eb.storeLocalVar(c, code, vs.Variables[index])
-                if vs.Variables[index].beenCapturedAsLeftValue > 0 {
+                this.eb.storeLocalVar(c, code, vs.variables[index])
+                if vs.variables[index].beenCapturedAsLeftValue > 0 {
                     copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-                        vs.Variables[index].localValOffset))
+                        vs.variables[index].localValOffset))
                     state.popStack(2)
                     state.appendLocals(c,
-                        state.newObjectVariableType(closure.getMeta(vs.Variables[index].Type.Type).className))
+                        state.newObjectVariableType(closure.getMeta(vs.variables[index].Type.Type).className))
                     currentStack -= 2
                 } else {
-                    state.appendLocals(c, vs.Variables[index].Type)
+                    state.appendLocals(c, vs.variables[index].Type)
                 }
             }
             index++

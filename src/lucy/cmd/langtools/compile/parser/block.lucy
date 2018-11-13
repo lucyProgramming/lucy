@@ -44,7 +44,6 @@ class BlockParser  extends ParserExtends{
 		isFinal := false
 		var finalPos ast.Pos
 		comment := new CommentParser(this.parser)
-		comment.parser = this.parser
 		fn resetPrefix () {
 			isFinal = false
 			isDefer = false
@@ -391,7 +390,7 @@ class BlockParser  extends ParserExtends{
 				this.parser.errs.append(
 					new error(sprintf("%s unexpected '%s'", this.parser.errMsgPrefix(), this.parser.token.Description)))
 				this.Next(lfIsToken)
-
+				
 			default:
 				// something I cannot handle
 				return

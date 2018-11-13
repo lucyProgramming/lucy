@@ -180,7 +180,7 @@ class BuildReturn {
         }
         index := len(statementReturn.defers) - 1
         for index >= 0 { // build defer,cannot have return statement is defer
-            state := statementReturn.defers[index].StackMapState.(StackMapState)
+            state := statementReturn.defers[index].stackMapState.(StackMapState)
             state = new StackMapState(state) // clone
             state.addTop(from)
             state.pushStack(c, state.newObjectVariableType(throwableClass))

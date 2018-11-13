@@ -125,7 +125,7 @@ public class Type {
 			e.doubleValue = double(0)
 		case VariableTypeEnum:
 			e.Type = ExpressionTypeInt
-			e.longValue = long(this.Enum.DefaultValue)
+			e.longValue = long(this.Enum.defaultValue)
 		default:
 			e.Type = ExpressionTypeNull
 		}

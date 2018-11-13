@@ -60,7 +60,7 @@ public class Statement {
 		if len(this.StatementIf.elseIfList) > 0 {
 			return
 		}
-		if len(this.StatementIf.PrefixExpressions) > 0 {
+		if len(this.StatementIf.prefixExpressions) > 0 {
 			return
 		}
 		if this.StatementIf.condition.Type != ExpressionTypeBool {
@@ -134,10 +134,10 @@ public class Statement {
 			return this.block.check()
 		case StatementTypeLabel:
 			if block.inheritedAttribute.Defer != null {
-			    if block.inheritedAttribute.Defer.Labels != null {
-			        block.inheritedAttribute.Defer.Labels.append(this.StatementLabel)
+			    if block.inheritedAttribute.Defer.labels != null {
+			        block.inheritedAttribute.Defer.labels.append(this.StatementLabel)
 			    }else {
-			        block.inheritedAttribute.Defer.Labels = [this.StatementLabel]
+			        block.inheritedAttribute.Defer.labels = [this.StatementLabel]
 			    }
 			}
 		case StatementTypeClass:

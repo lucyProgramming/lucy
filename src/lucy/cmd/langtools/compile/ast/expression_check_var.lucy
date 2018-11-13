@@ -9,10 +9,10 @@ class ExpressionCheckVar {
 				errs.append(err)
 				return
 			}
-			if len(ev.Variables) == 1 {
-				ev.Variables[0].Type = ev.Type
+			if len(ev.variables) == 1 {
+				ev.variables[0].Type = ev.Type
 			} else {
-				for _, v := range ev.Variables {
+				for _, v := range ev.variables {
 					v.Type = ev.Type.Clone()
 				}
 			}
@@ -27,26 +27,26 @@ class ExpressionCheckVar {
 		if len(ev.InitValues) > 0 {
 			valueTypes := checkExpressions(block, ev.InitValues, errs, false)
 			if ev.Type != null {
-				needs := new []Type(len(ev.Variables))
+				needs := new []Type(len(ev.variables))
 				for k, _ := range needs {
 					needs[k] = ev.Type
 				}
 				convertExpressionsToNeeds(ev.InitValues, needs, valueTypes)
 			}
-			if len(ev.Variables) > len(valueTypes) {
+			if len(ev.variables) > len(valueTypes) {
 				pos := ev.InitValues[len(ev.InitValues)-1].pos // last Pos
 				errs.append(new error( sprintf("%s too few values , assign %d values to %d destinations",
 					pos.errMsgPrefix(),
 					len(valueTypes),
-					len(ev.Variables))))
-			} else if len(ev.Variables) < len(valueTypes) {
-				pos := getExtraExpressionPos(ev.InitValues, len(ev.Variables))
+					len(ev.variables))))
+			} else if len(ev.variables) < len(valueTypes) {
+				pos := getExtraExpressionPos(ev.InitValues, len(ev.variables))
 				errs.append(new error( sprintf("%s too many values , assign %d values to %d destinations",
 					pos.errMsgPrefix(),
 					len(valueTypes),
-					len(ev.Variables))))
+					len(ev.variables))))
 			}
-			for k, v := range ev.Variables {
+			for k, v := range ev.variables {
 				if k < len(valueTypes) && valueTypes[k] != null {
 					if v.Type != null {
 						if v.Type.assignAble(errs, valueTypes[k]) == false {
@@ -76,7 +76,7 @@ class ExpressionCheckVar {
 				}
 			}
 		} else {
-			for _, v := range ev.Variables {
+			for _, v := range ev.variables {
 				var err error
 				if e.isGlobal {
 					err = PackageBeenCompile.block.Insert(v.name, v.pos, v)
@@ -91,11 +91,11 @@ class ExpressionCheckVar {
 			}
 		}
 		if e.isGlobal {
-			for _, v := range ev.Variables {
+			for _, v := range ev.variables {
 				v.isGlobal = true
 			}
 			if e.isPublic {
-				for _, v := range ev.Variables {
+				for _, v := range ev.variables {
 					v.accessFlags |= cg.AccFieldPublic
 				}
 			}

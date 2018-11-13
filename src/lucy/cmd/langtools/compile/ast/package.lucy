@@ -23,13 +23,13 @@ public class Package {
 	}
 
 	fn markBuildIn() {
-		for _, v := range this.block.Variables {
+		for _, v := range this.block.variables {
 			v.isBuildIn = true
 		}
 		for _, v := range this.block.constants {
 			v.isBuildIn = true
 		}
-		for _, v := range this.block.Enums {
+		for _, v := range this.block.enums {
 			v.isBuildIn = true
 		}
 		for _, v := range this.block.Classes {
@@ -206,7 +206,7 @@ public class Package {
 		    panic("block is null")
 		}
 		this.errors.appendAll(this.block.checkConstants())
-		for _, v := range this.block.Enums {
+		for _, v := range this.block.enums {
 			v.name = this.name + "/" + v.name
 			this.errors.appendAll(v.check())
 		}

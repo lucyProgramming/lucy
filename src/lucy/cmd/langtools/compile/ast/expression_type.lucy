@@ -129,7 +129,7 @@ public class ExpressionMethodCall  {
 
 public class ExpressionVar  {
 	public Type       Type
-	public Variables  []Variable
+	public variables  []Variable
 	public InitValues []Expression
 }
 

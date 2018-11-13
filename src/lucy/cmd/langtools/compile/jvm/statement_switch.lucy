@@ -59,7 +59,7 @@ class BuildSwitch {
                 code.codeLength += 8
             }
         }
-        for _, v := range s.PrefixExpressions {
+        for _, v := range s.prefixExpressions {
             stack := this.eb.build(c, code, v, context, state)
             if stack > maxStack {
                 maxStack = stack

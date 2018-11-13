@@ -46,7 +46,7 @@ public class  BuildPackage {
         for _, v := range p.block.Classes {
             this.putClass(this.buildClass(v))
         }
-        for _, v := range p.block.Enums {
+        for _, v := range p.block.enums {
             this.putClass(this.mkEnum(v))
         }
         this.DumpClass()
@@ -102,7 +102,7 @@ public class  BuildPackage {
             c.Class.AttributeLucyComment = new cg.AttributeLucyComment()
             c.Class.AttributeLucyComment.comment = e.comment
         }
-        for _, v := range e.Enums {
+        for _, v := range e.enums {
             field := new cg.FieldHighLevel()
             if e.accessFlags&cg.AccClassPublic != 0 {
                 field.accessFlags |= cg.AccFieldPublic
@@ -171,7 +171,7 @@ public class  BuildPackage {
     }
 
     fn mkGlobalVariables() {
-        for k, v := range this.Package.block.Variables {
+        for k, v := range this.Package.block.variables {
             f := new cg.FieldHighLevel()
             f.accessFlags |= cg.AccFieldStatic
             f.descriptor = Descriptor.typeDescriptor(v.Type)

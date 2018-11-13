@@ -26,10 +26,10 @@ class StatementIfParser extends ParserExtends {
 		this.parser.ifTokenIsLfThenSkip()
 		for this.parser.token.Type == lex.TokenSemicolon {
 			if statementIf.condition != null {
-			    if statementIf.PrefixExpressions == null {
-                    statementIf.PrefixExpressions = [statementIf.condition]
+			    if statementIf.prefixExpressions == null {
+                    statementIf.prefixExpressions = [statementIf.condition]
 			    }else {
-			        statementIf.PrefixExpressions.append(statementIf.condition)
+			        statementIf.prefixExpressions.append(statementIf.condition)
 			    }
 			}
 			this.Next(lfNotToken) // skip ;

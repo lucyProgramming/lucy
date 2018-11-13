@@ -97,8 +97,8 @@ class  BuildExpressionFunction {
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, function.closureVariableOffSet))
 		//set filed
 		closureClass.fields = new map { string -> cg.FieldHighLevel} ()
-		total := len(function.Closure.Variables) + len(function.Closure.Functions) - 1
-		for v, _ := range function.Closure.Variables {
+		total := len(function.Closure.variables) + len(function.Closure.Functions) - 1
+		for v, _ := range function.Closure.variables {
 			field := new cg.FieldHighLevel()
 			field.accessFlags |= cg.AccFieldSynthetic
 			field.name = v.name

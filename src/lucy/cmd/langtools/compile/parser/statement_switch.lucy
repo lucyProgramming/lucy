@@ -22,7 +22,7 @@ class StatementSwitchParser extends ParserExtends{
 		this.parser.ifTokenIsLfThenSkip()
 		for this.parser.token.Type == lex.TokenSemicolon {
 			if statementSwitch.condition != null {
-				statementSwitch.PrefixExpressions.append(statementSwitch.condition)
+				statementSwitch.prefixExpressions.append(statementSwitch.condition)
 				statementSwitch.condition = null
 			}
 			this.parser.Next(lfNotToken)

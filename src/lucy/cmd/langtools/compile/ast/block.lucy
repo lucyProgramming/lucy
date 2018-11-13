@@ -25,11 +25,11 @@ public class Block {
 	public constants                 map{string->Constant}
 	public Functions                 map{string->Function}
 	public Classes                   map{string->Class}
-	public Enums                     map{string->Enum}
+	public enums                     map{string->Enum}
 	public EnumNames                 map{string->EnumName}
-	public Labels                    map{string->StatementLabel}
+	public labels                    map{string->StatementLabel}
 	public TypeAliases               map{string->Type}
-	public Variables                 map{string->Variable}
+	public variables                 map{string->Variable}
 	checkConstantsCalled      bool
 
     public fn nameExists(name string) -> (x Object,exist bool) {
@@ -38,8 +38,8 @@ public class Block {
                 return t, true
             }
         }
-        if this.Variables != null {
-            if t := this.Variables[name]; t != null {
+        if this.variables != null {
+            if t := this.variables[name]; t != null {
                 return t, true
             }
         }
@@ -58,8 +58,8 @@ public class Block {
                 return t, true
             }
         }
-        if this.Enums != null {
-            if t := this.Enums[name]; t != null {
+        if this.enums != null {
+            if t := this.enums[name]; t != null {
                 return t, true
             }
         }
@@ -68,8 +68,8 @@ public class Block {
                 return t, true
             }
         }
-        if this.Labels != null { // should be useless
-            if t := this.Labels[name]; t != null {
+        if this.labels != null { // should be useless
+            if t := this.labels[name]; t != null {
                 return t, true
             }
         }
@@ -82,8 +82,8 @@ public class Block {
     fn searchLabel(name string) -> (label StatementLabel) {
         outer := this
         for {
-            if outer.Labels != null {
-                if l := outer.Labels[name]; l != null {
+            if outer.labels != null {
+                if l := outer.labels[name]; l != null {
                     l.used = true
                     return l
                 }
@@ -108,8 +108,8 @@ public class Block {
                     return t
                 }
             }
-            if bb.Enums != null {
-                if t := bb.Enums[name]; t != null {
+            if bb.enums != null {
+                if t := bb.enums[name]; t != null {
                     t.used = true
                     return t
                 }
@@ -145,8 +145,8 @@ public class Block {
                 return t, null
             }
         }
-        if this.Variables != null {
-            if t := this.Variables[name]; t != null {
+        if this.variables != null {
+            if t := this.variables[name]; t != null {
                 return t, null
             }
         }
@@ -162,8 +162,8 @@ public class Block {
                 return t, null
             }
         }
-        if this.Enums != null {
-            if t := this.Enums[name]; t != null {
+        if this.enums != null {
+            if t := this.enums[name]; t != null {
                 t.used = true
                 return t, null
             }
@@ -286,7 +286,7 @@ public class Block {
             es.append(new error(sprintf("%s const '%s' has declared,but not used",
                 v.pos.errMsgPrefix(), v.name)))
         }
-        for _, v := range this.Enums {
+        for _, v := range this.enums {
             if v.used ||
                 v.isGlobal {
                 continue
@@ -310,14 +310,14 @@ public class Block {
             es.append(new error(sprintf("%s function '%s' has declared,but not used",
                 v.pos.errMsgPrefix(), v.name)))
         }
-        for _, v := range this.Labels {
+        for _, v := range this.labels {
             if v.used {
                 continue
             }
             es.append(new error(sprintf("%s enum '%s' has declared,but not used",
                 v.pos.errMsgPrefix(), v.name)))
         }
-        for _, v := range this.Variables {
+        for _, v := range this.variables {
             if v.used ||
                 v.isGlobal ||
                 v.isFunctionParameter ||
@@ -371,10 +371,10 @@ public class Block {
     }
 
     fn checkNameExist(name string, pos Pos) -> (err error) {
-        if this.Variables == null {
-            this.Variables = new map {string -> Variable } ()
+        if this.variables == null {
+            this.variables = new map {string -> Variable } ()
         }
-        if v := this.Variables[name]; v != null {
+        if v := this.variables[name]; v != null {
             errMsg := sprintf("%s name '%s' already declared as variable,first declared at:\n",
                 pos.errMsgPrefix(), name)
             errMsg += sprintf("\t%s", v.pos.errMsgPrefix())
@@ -425,10 +425,10 @@ public class Block {
             errMsg += sprintf("\t%s", t.pos.errMsgPrefix())
             return new error(errMsg)
         }
-        if this.Enums == null {
-            this.Enums = new map { string -> Enum } ()
+        if this.enums == null {
+            this.enums = new map { string -> Enum } ()
         }
-        if e := this.Enums[name]; e != null {
+        if e := this.enums[name]; e != null {
             errMsg := sprintf("%s name %s already declared as enum,first declared at:\n",
                 pos.errMsgPrefix(), name)
             errMsg += sprintf("\t%s", e.pos.errMsgPrefix())
@@ -462,16 +462,16 @@ public class Block {
         }
         // handle label
         if label ,ok := d.(StatementLabel); ok {
-            if this.Labels == null {
-                this.Labels = new map { string -> StatementLabel } ()
+            if this.labels == null {
+                this.labels = new map { string -> StatementLabel } ()
             }
-            if l := this.Labels[name]; l != null {
+            if l := this.labels[name]; l != null {
                 errMsg := sprintf("%s name '%s' already declared as enumName,first declared at:",
                     pos.errMsgPrefix(), name)
                 errMsg += sprintf("\t%s", l.statement.pos.errMsgPrefix())
                 return new error(errMsg)
             }
-            this.Labels[name] = label
+            this.labels[name] = label
             return null
         }
         err = this.checkNameExist(name, pos)
@@ -496,12 +496,12 @@ public class Block {
         }
         if v ,ok:= d.(Variable) ; ok {
             v.localValOffset = 65535 // overflow
-            this.Variables[name] = v
+            this.variables[name] = v
             return null
         }
         if e , ok:= d.(Enum) ; ok {
-            this.Enums[name] = e
-            for _, v := range e.Enums {
+            this.enums[name] = e
+            for _, v := range e.enums {
                 err := this.Insert(v.name, v.pos, v)
                 if err != null {
                     return err

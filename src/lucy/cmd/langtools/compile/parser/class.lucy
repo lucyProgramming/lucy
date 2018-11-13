@@ -9,7 +9,7 @@ class ClassParser extends  ParserExtends{
 	    this.super()
 	    this.parser = parser
 	}
-
+	
 
 	fn parseClassName() -> (name ast.NameWithPos,err error) {
 		if this.parser.token.Type != lex.TokenIdentifier {

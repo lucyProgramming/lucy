@@ -14,14 +14,3 @@ fn main(args []string) {
 	lc.Main(files ,langtoolsCommon.getLucyPath(),langtoolsCommon.getClassPath() )
 }
 
-
-
-
-
-
-
-
-
-
-
-

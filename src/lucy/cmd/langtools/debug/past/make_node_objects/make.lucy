@@ -134,7 +134,7 @@ class MakeNodesObjects {
         ret := new map{string -> Object}()
         {
             var t []Object
-            for _, v := range e.Enums {
+            for _, v := range e.enums {
                 en := new map{string -> Object}()
                 en["name"] = v.Name
                 if v.NoNeed != null {
@@ -233,9 +233,9 @@ class MakeNodesObjects {
     }
     fn makeStatementIf(s *ast.StatementIf) interface{} {
         ret := new map{string -> Object}()
-        if len(s.PrefixExpressions) > 0 {
+        if len(s.prefixExpressions) > 0 {
             var t []Object
-            for _, v := range s.PrefixExpressions {
+            for _, v := range s.prefixExpressions {
                 t = append(t, this.makeExpression(v))
             }
             ret["prefixExpressions"] = t
@@ -279,9 +279,9 @@ class MakeNodesObjects {
     }
     fn makeStatementSwitch(s *ast.StatementSwitch) interface{} {
         ret := new map{string -> Object}()
-        if len(s.PrefixExpressions) > 0 {
+        if len(s.prefixExpressions) > 0 {
             var t []Object
-            for _, v := range s.PrefixExpressions {
+            for _, v := range s.prefixExpressions {
                 t = append(t, this.makeExpression(v))
             }
             ret["prefixExpressions"] = t
@@ -656,7 +656,7 @@ class MakeNodesObjects {
             }
             {
                 var t []Object
-                for _, vv := range v.Variables {
+                for _, vv := range v.variables {
                     t = append(t, vv.Name)
                 }
                 ret["variables"] = t

@@ -65,6 +65,7 @@ func (runLucyPackage *RunLucyPackage) parseCmd(args []string) error {
 }
 
 func (runLucyPackage *RunLucyPackage) setCompiler() error {
+
 	runLucyPackage.compilerExe = filepath.Join(runLucyPackage.lucyRoot, "bin", "compile") //compiler at
 	t := runLucyPackage.compilerExe
 	if runtime.GOOS == "windows" {

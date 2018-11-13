@@ -242,7 +242,7 @@ fn functionReturnJvmSize(ft ast.FunctionType) -> (size char) {
 
 fn setEnumArray(c cg.ClassHighLevel, code cg.AttributeCode,
 	state StackMapState, context Context, e ast.Enum) -> (maxStack char) {
-	if e.DefaultValue == 0 {
+	if e.defaultValue == 0 {
 		return
 	}
 	class autoVar {
@@ -271,7 +271,7 @@ fn setEnumArray(c cg.ClassHighLevel, code cg.AttributeCode,
 	code.codes[code.codeLength] = cg.OP_dup
 	code.codeLength++
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.k))
-	loadInt32(c, code, e.DefaultValue)
+	loadInt32(c, code, e.defaultValue)
 	code.codes[code.codeLength] = cg.OP_iastore
 	code.codeLength++
 	maxStack = 3

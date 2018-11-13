@@ -337,7 +337,7 @@ class FileLoader implements ast.LoadImport{
             en.Enum = e
             constValue := v.AttributeGroupedByName[cg.AttributeNameConstValue][0] // must have this attribute
             en.value = int(binary.BigEndian.getInt(c.ConstPool[binary.BigEndian.getChar(constValue.info)].info))
-            e.Enums.append(en)
+            e.enums.append(en)
         }
         return e
     }
@@ -366,7 +366,7 @@ class FileLoader implements ast.LoadImport{
     fn  loadLucyMainClass(pack ast.Package, c cg.Class)  {
         mainClassName := new cg.ClassHighLevel()
         mainClassName.name = pack.name + "/main"
-        pack.block.Variables = new map{string->ast.Variable}()
+        pack.block.variables = new map{string->ast.Variable}()
         pack.block.constants = new map{string->ast.Constant}()
         pack.block.Functions = new map{string->ast.Function}()
         for _, f := range c.fields {
@@ -401,7 +401,7 @@ class FileLoader implements ast.LoadImport{
                 vd.jvmDescriptor = string(c.ConstPool[f.descriptorIndex].info)
                 vd.Type = typ
                 vd.isGlobal = true
-                pack.block.Variables[name] = vd
+                pack.block.variables[name] = vd
                 if t := f.GetAttributeByName(cg.AttributeNameLucyFieldDescriptor); t != null && len(t) > 0 {
                     d := new cg.AttributeLucyFieldDescriptor("" , 0 )
                     d.fromBs(c, t[0].info)
@@ -537,14 +537,14 @@ class FileLoader implements ast.LoadImport{
         this.loadLucyMainClass(p, c)
         fisM.remove(mainClassName)
          fn mkEnums(e ast.Enum) {
-            if p.block.Enums == null {
-                p.block.Enums = new map { string -> ast.Enum } ()
+            if p.block.enums == null {
+                p.block.enums = new map { string -> ast.Enum } ()
             }
             if p.block.EnumNames == null {
                 p.block.EnumNames = new map { string -> ast.EnumName } ()
             }
-            p.block.Enums[common.getBaseName(e.name)] = e
-            for _, v := range e.Enums {
+            p.block.enums[common.getBaseName(e.name)] = e
+            for _, v := range e.enums {
                 p.block.EnumNames[v.name] = v
             }
         }

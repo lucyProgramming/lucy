@@ -16,12 +16,12 @@ public class Enum   {
 	public accessFlags     char
 	public name            string
 	public pos             Pos
-	public Enums           []EnumName
+	public enums           []EnumName
 	public Init            Expression //should be a int expression
 	public used            bool
-	public DefaultValue    int
+	public defaultValue    int
 	public loadFromOutSide bool
-	public FirstValueIndex int
+	public firstValueIndex int
 	public comment         string
 	
 	fn isPublic() -> (is bool) {
@@ -44,16 +44,16 @@ public class Enum   {
 				}
 			}
 		}
-		this.DefaultValue = initV
-		for k, v := range this.Enums {
+		this.defaultValue = initV
+		for k, v := range this.enums {
 			if v.NoNeed != null {
 				errs.append(new error(sprintf("%s enum only expect 1 init value",
 					v.pos.errMsgPrefix())))
 			}
-			if k < this.FirstValueIndex {
-				v.value = initV - int(this.FirstValueIndex-k)
+			if k < this.firstValueIndex {
+				v.value = initV - int(this.firstValueIndex-k)
 			} else {
-				v.value = initV + int(k-this.FirstValueIndex)
+				v.value = initV + int(k-this.firstValueIndex)
 			}
 		}
 		return errs

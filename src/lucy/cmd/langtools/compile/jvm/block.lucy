@@ -182,7 +182,7 @@ class BuildBlock {
 			context.MakeStackMap(code, state, code.codeLength)
 		case ast.StatementTypeDefer: // nothing to do  ,defer will do after block is compiled
 			s.Defer.startPc = code.codeLength
-			s.Defer.StackMapState = (new StackMapState(state))
+			s.Defer.stackMapState = (new StackMapState(state))
 		case ast.StatementTypeClass:
 			oldName := s.Class.name
 			var name string
@@ -230,7 +230,7 @@ class BuildBlock {
 		code.codeLength++
 		index := len(ds) - 1
 		for index >= 0 { // build defer,cannot have return statement is defer
-			state := ds[index].StackMapState.(StackMapState)
+			state := ds[index].stackMapState.(StackMapState)
 			state = (new StackMapState(state))
 			state.addTop(from)
 			state.pushStack(c, state.newObjectVariableType(throwableClass))

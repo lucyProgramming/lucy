@@ -393,12 +393,12 @@ class Parser {
 			return
 		}
 		ret = new ast.ExpressionVar()
-		ret.Variables = new []ast.Variable(len(names))
+		ret.variables = new []ast.Variable(len(names))
 		for k, v := range names {
 			vd := new ast.Variable()
 			vd.name = v.name
 			vd.pos = v.pos
-			ret.Variables[k] = vd
+			ret.variables[k] = vd
 		}
 		if this.token.Type != lex.TokenAssign {
 			ret.Type, err = this.parseType()

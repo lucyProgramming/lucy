@@ -56,7 +56,7 @@ class EnumParser extends ParserExtends {
 				enumComment := comment.comment
 				if e.Init == null && value != null {
 					e.Init = value
-					e.FirstValueIndex = len(e.Enums)
+					e.firstValueIndex = len(e.enums)
 					value = null
 				}
 				enumName := new ast.EnumName()
@@ -65,7 +65,7 @@ class EnumParser extends ParserExtends {
 				enumName.NoNeed = value
 				enumName.Enum = e
 				enumName.comment = enumComment
-				e.Enums.append(enumName)
+				e.enums.append(enumName)
 				comment.reset()
 			case lex.TokenComma:
 				this.Next(lfNotToken)

@@ -3,7 +3,7 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
 class BuildExpressionLeftValue {
-
+    
     
     eb BuildExpression
     fn BuildExpressionLeftValue(eb BuildExpression){

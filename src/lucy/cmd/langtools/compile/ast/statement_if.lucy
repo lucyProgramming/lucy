@@ -1,7 +1,7 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
 
 public class StatementIf {
-	public PrefixExpressions   []Expression
+	public prefixExpressions   []Expression
 	public condition           Expression
 	public pos                 Pos
 	public initExpressionBlock Block = new Block()
@@ -12,7 +12,7 @@ public class StatementIf {
 	
 	fn check(father Block) -> (errs []error = []error{})  {
 		this.initExpressionBlock.inherit(father)
-		for _, v := range this.PrefixExpressions {
+		for _, v := range this.prefixExpressions {
 			v.isStatementExpression = true
 			_, es := v.check(this.initExpressionBlock)
 			errs.appendAll(es)

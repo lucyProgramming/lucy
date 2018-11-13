@@ -7,7 +7,7 @@ public class StatementSwitchCase  {
 }
 
 public class StatementSwitch  {
-	public PrefixExpressions    []Expression
+	public prefixExpressions    []Expression
 	initExpressionBlock  Block = new Block() 
 	public pos                  Pos
 	public EndPos               Pos
@@ -21,7 +21,7 @@ public class StatementSwitch  {
 			return errs
 		}
 		this.initExpressionBlock.inherit(block)
-		for _, v := range this.PrefixExpressions {
+		for _, v := range this.prefixExpressions {
 			v.isStatementExpression = true
 			_, es := v.check(this.initExpressionBlock)
 			errs.appendAll(es)
@@ -167,14 +167,14 @@ public class StatementSwitch  {
 			errs.appendAll(this.Default.check())
 		}
 		if conditionType.Type == VariableTypeEnum &&
-			len(enumNamesMap) < len(conditionType.Enum.Enums) &&
+			len(enumNamesMap) < len(conditionType.Enum.enums) &&
 			this.Default == null &&
 			containsBool == false {
 			//some enum are missing, not allow
 			errMsg := sprintf("%s switch for enum '%s' is not complete\n",
 				this.EndPos.errMsgPrefix(), conditionType.Enum.name)
 			errMsg += "\tyou can use 'default:' or give missing enums,which are:\n"
-			for _, v := range conditionType.Enum.Enums {
+			for _, v := range conditionType.Enum.enums {
 				ok := enumNamesMap.keyExist(v.name)
 				if ok {
 					//handled

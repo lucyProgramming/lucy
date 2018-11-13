@@ -56,7 +56,7 @@ class ExpressionCheckVarAssign {
 			if identifier.name == UnderScore {
 				continue
 			}
-			if variable := block.Variables[identifier.name]; variable != null {
+			if variable := block.variables[identifier.name]; variable != null {
 				if variableType != null {
 					if variable.Type.assignAble(errs, variableType) == false {
 						errs.append(new error( sprintf("%s cannot assign '%s' to '%s'",

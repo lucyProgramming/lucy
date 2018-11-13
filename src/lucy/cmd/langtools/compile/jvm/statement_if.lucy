@@ -20,7 +20,7 @@ class BuildIf {
         state StackMapState) ->(maxStack char) {
         ifState := new StackMapState(state)
         defer state.addTop(ifState)
-        for _, v := range s.PrefixExpressions {
+        for _, v := range s.prefixExpressions {
             stack := this.eb.build(c, code, v, context, ifState)
             if stack > maxStack {
                 maxStack = stack

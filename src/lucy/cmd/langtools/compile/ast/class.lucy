@@ -31,7 +31,7 @@ public class Class {
 	public loadFromOutSide                   bool
 	public staticBlocks                      []Block
 	public comment                           string
-	closure                           Closure
+	closure                           Closure = new Closure()
 
 
     fn haveStaticsCodes() -> (is bool)  {
@@ -190,17 +190,17 @@ public class Class {
                         errMsgPrefix(m.Function.pos))))
                 }
                 if m.isStatic() == false { // bind this
-                    if m.Function.block.Variables == null {
-                        m.Function.block.Variables = new map { string-> Variable } ()
+                    if m.Function.block.variables == null {
+                        m.Function.block.variables = new map { string-> Variable } ()
                     }
-                    m.Function.block.Variables[ThisPointerName] = new Variable()
-                    m.Function.block.Variables[ThisPointerName].name = ThisPointerName
-                    m.Function.block.Variables[ThisPointerName].pos = m.Function.pos
+                    m.Function.block.variables[ThisPointerName] = new Variable()
+                    m.Function.block.variables[ThisPointerName].name = ThisPointerName
+                    m.Function.block.variables[ThisPointerName].pos = m.Function.pos
                     {
                         t := new Type()
                         t.Type = VariableTypeObject
                         t.Class = this
-                        m.Function.block.Variables[ThisPointerName].Type = t
+                        m.Function.block.variables[ThisPointerName].Type = t
                     }
                 }
             }
