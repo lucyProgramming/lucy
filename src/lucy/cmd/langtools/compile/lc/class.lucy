@@ -13,7 +13,6 @@ class ClassDecoder {
 		this.classFile = new cg.Class()
 	}
 
-
 	fn decode() -> (c cg.Class) {
 		if binary.BigEndian.getInt(this.bs) != cg.ClassMagicNumber {
 			panic("magic number is not right")
