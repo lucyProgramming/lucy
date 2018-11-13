@@ -388,7 +388,7 @@ func (runLucyPackage *RunLucyPackage) foundError(packageName string, founds []st
 func (runLucyPackage *RunLucyPackage) buildPackage(lucyPath string, packageName string, importStack *ImportStack) (needBuild bool,
 	meta *common.PackageMeta, err error) {
 	if p, ok := runLucyPackage.packagesCompiled[packageName]; ok {
-		return false, p.meta, nil
+		return true, p.meta, nil
 	}
 	if lucyPath == "" {
 		founds := runLucyPackage.findPackageIn(packageName)
@@ -404,7 +404,6 @@ func (runLucyPackage *RunLucyPackage) buildPackage(lucyPath string, packageName 
 		return
 	}
 	if needBuild == false { //current package no need to compile,but I need to check dependies
-		need := false
 		for _, v := range meta.Imports {
 			if _, ok := runLucyPackage.packagesCompiled[v]; ok {
 				continue
@@ -414,15 +413,14 @@ func (runLucyPackage *RunLucyPackage) buildPackage(lucyPath string, packageName 
 			if err != nil {
 				return
 			}
-			needBuild, _, err = runLucyPackage.buildPackage("", v, i)
+			need, _, err := runLucyPackage.buildPackage("", v, i)
 			if err != nil {
-				return
+				return false, nil, err
 			}
-			if needBuild { // means at least one package is rebuild
-				need = true
+			if need { // means at least one package is rebuild
+				needBuild = true
 			}
 		}
-		needBuild = need
 	}
 	if needBuild == false { // no need actually
 		return
@@ -523,5 +521,6 @@ func (runLucyPackage *RunLucyPackage) buildPackage(lucyPath string, packageName 
 		meta:        meta,
 		packageName: packageName,
 	}
+	needBuild = true
 	return
 }
