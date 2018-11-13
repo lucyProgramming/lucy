@@ -403,20 +403,24 @@ func (runLucyPackage *RunLucyPackage) buildPackage(lucyPath string, packageName 
 		err = fmt.Errorf("check if need compile,err:%v", err)
 		return
 	}
+	//if packageName == "lucy/cmd/langtools/compile/jvm" {
+	//	fmt.Println("@@@@@@@@@@@@@@@@", packageName, needBuild, meta.Imports)
+	//}
 	if needBuild == false { //current package no need to compile,but I need to check dependies
 		for _, v := range meta.Imports {
-			if _, ok := runLucyPackage.packagesCompiled[v]; ok {
-				continue
-			}
 			i := (&ImportStack{}).fromLast(importStack)
 			err = i.insert(&PackageCompiled{packageName: packageName})
 			if err != nil {
 				return
 			}
 			need, _, err := runLucyPackage.buildPackage("", v, i)
+			//if packageName == "lucy/cmd/langtools/compile/jvm" {
+			//	fmt.Println(need, v)
+			//}
 			if err != nil {
 				return false, nil, err
 			}
+
 			if need { // means at least one package is rebuild
 				needBuild = true
 			}
