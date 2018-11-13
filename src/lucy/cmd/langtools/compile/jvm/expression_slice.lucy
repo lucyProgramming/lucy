@@ -37,21 +37,21 @@ class BuildExpressionSlice {
             if t := char(2) + stack; t > maxStack {
                 maxStack = t
             }
-            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                 "substring",
                 "(II)Ljava/lang/String;"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
         } else {
-            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                 "substring",
                 "(I)Ljava/lang/String;"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
         }
         return
     }
@@ -81,30 +81,30 @@ class BuildExpressionSlice {
                 maxStack = t
             }
         } else {
-            code.Codes[code.CodeLength] = cg.OP_dup
-            code.CodeLength++
-            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            code.codes[code.codeLength] = cg.OP_dup
+            code.codeLength++
+            code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new  cg.ConstantInfoMethodrefHighLevel(
                 meta.className,
                 "size",
                 "()I"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
             state.pushStack(c, slice.start.value)
             stack := this.eb.build(c, code, slice.start, context, state)
             if t := char(2) + stack; t > maxStack {
                 maxStack = t
             }
-            code.Codes[code.CodeLength] = cg.OP_swap
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_swap
+            code.codeLength++
         }
-        code.Codes[code.CodeLength] = cg.OP_invokevirtual
+        code.codes[code.codeLength] = cg.OP_invokevirtual
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             meta.className,
             "slice",
             meta.sliceDescriptor
-        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.CodeLength += 3
+        ), code.codes[code.codeLength+1:code.codeLength+3])
+        code.codeLength += 3
         return
     }
 

@@ -27,16 +27,16 @@ class BuildExpressionQuestion {
             maxStack = stack
         }
         trueExit := new cg.Exit(cg.OP_goto, code)
-        context.MakeStackMap(code, state, code.CodeLength)
-        writeExits([]cg.Exit{falseExit}, code.CodeLength)
+        context.MakeStackMap(code, state, code.codeLength)
+        writeExits([]cg.Exit{falseExit}, code.codeLength)
         stack = this.eb.build(c, code, question.False, context, state)
         if stack > maxStack {
             maxStack = stack
         }
         state.pushStack(c, e.value)
-        context.MakeStackMap(code, state, code.CodeLength)
+        context.MakeStackMap(code, state, code.codeLength)
         state.popStack(1)
-        writeExits([]cg.Exit{trueExit}, code.CodeLength)
+        writeExits([]cg.Exit{trueExit}, code.codeLength)
         return
     }
 }

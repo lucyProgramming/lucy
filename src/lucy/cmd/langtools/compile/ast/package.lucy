@@ -1,5 +1,6 @@
- 
+
 import "java/lang/Object"
+import "lucy/os"
 import "lucy/cmd/langtools/compile/common"
 
 
@@ -42,6 +43,7 @@ public class Package {
 			v.isBuildIn = true
 		}
 	}
+
 	fn loadCorePackage() -> (err error) {
 		if this.name == common.CorePackage {
 			return null
@@ -53,6 +55,7 @@ public class Package {
 		lucyBuildInPackage = pp.(Package)
 		lucyBuildInPackage.markBuildIn()
 		this.block.outer = lucyBuildInPackage.block
+		lucyBuildInPackage.block.inheritedAttribute = new InheritedAttribute()
 		return null
 	}
 
@@ -85,18 +88,130 @@ public class Package {
 		return len(this.errors)+len(errs) >= this.nErrors2Stop
 	}
 
-	fn TypeCheck() -> (es []error) {
+	fn insert(nodes []TopNode) -> ( errs []error = []error{}){
+		if len(nodes) == 0 {
+			errs = []error{new error("nothing to compile")}
+			return
+		}
+		if this.block == null {
+			this.block = new Block()
+		}
+		if this.block.inheritedAttribute == null {
+			this.block.inheritedAttribute = new InheritedAttribute()
+		}
+		if err := this.loadCorePackage(); err != null {
+			printf("load lucy buildin package failed,err:%s\n", err.getMessage())
+			os.exit(1)
+		}
+		bs := []Block{}
+		expressions := []Expression{}
+		for _, v := range nodes {
+			if t,ok := v.Node.(Block) ; ok {
+				bs.append(t)
+				continue
+			}
+			if t,ok := v.Node.(Function) ; ok {
+				t.isGlobal = true
+				err := this.block.Insert(t.name, t.pos, t)
+				if err != null {
+					errs.append(err)
+				}
+				continue
+			}
+			if t ,ok := v.Node.(Enum) ; ok {
+				t.isGlobal = true
+				err := this.block.Insert(t.name, t.pos,t)
+				if err != null {
+					errs.append(err)
+				}
+				continue
+			}
+			if t,ok := v.Node.(Class) ; ok {
+				t.isGlobal = true
+				err := this.block.Insert(t.name, t.pos, t)
+				if err != null {
+					errs.append(err)
+				}
+				continue
+			}
+
+			if t,ok := v.Node.(TypeAlias) ; ok {
+				err := this.block.Insert(t.name, t.pos, t)
+				if err != null {
+					errs.append(err)
+				}
+				continue
+			}
+			if t,ok := v.Node.(Constant) ; ok{
+				t.isGlobal = true
+				err := this.block.Insert(t.name, t.pos, t)
+				if err != null {
+					errs.append(err)
+				}
+				continue
+			}
+			if t ,ok:= v.Node.(Import) ; ok {
+				if t.alias != UnderScore {
+					err := this.insertImport(t)
+					if err != null {
+						errs.append(err)
+					}
+				} else {
+					if this.unUsedPackage == null {
+						this.unUsedPackage = new map { string -> Import}()
+					}
+					this.unUsedPackage[t.Import] = t
+				}
+				continue
+			}
+			if t ,ok:= v.Node.(Expression) ; ok {
+				if t.Type == ExpressionTypeVar || t.Type == ExpressionTypeVarAssign {
+					expressions.append(t)
+				} else {
+					errs.append(new error(sprintf("%s cannot have '%s' in top",
+						t.pos.errMsgPrefix(), t.op)))
+				}	
+			}
+		}
+		
+		if len(expressions) > 0 {
+			s := new []Statement(len(expressions))
+			for k, v := range expressions {
+			    s[k] = new  Statement()
+				s[k].Type = StatementTypeExpression
+				s[k].Expression = v
+				s[k].pos = v.pos
+			}
+			b := new Block()
+			b.pos = expressions[0].pos
+			b.statements = s
+			t := []Block{b}
+			t.appendAll(bs)
+			bs = t
+		}
+		this.mkInitFunctions(bs)
+		return
+
+	}
+
+	public fn typeCheck(nodes []TopNode) -> (es []error) {
+		if t := this.insert(nodes) ; len(t) > 0 {
+			return t
+		}
 		if this.nErrors2Stop <= 2 {
 			this.nErrors2Stop = 10
 		}
 		this.errors = []error{}
+		if this.block == null {
+		    panic("block is null")
+		}
 		this.errors.appendAll(this.block.checkConstants())
 		for _, v := range this.block.Enums {
 			v.name = this.name + "/" + v.name
 			this.errors.appendAll(v.check())
 		}
 		for _, v := range this.block.TypeAliases {
-			err := v.resolve(PackageBeenCompile.block)
+			err := v.resolve(this.block)
 			if err != null {
 				this.errors.append(err)
 			}
@@ -127,7 +242,7 @@ public class Package {
 			v.name = this.name + "/" + v.name
 			this.errors.appendAll(v.block.checkConstants())
 			v.mkDefaultConstruction()
-			v.block.inherit(PackageBeenCompile.block)
+			v.block.inherit(this.block)
 			v.block.inheritedAttribute.Class = v
 		}
 
@@ -173,7 +288,7 @@ public class Package {
 				continue
 			}
 			v.checkBlock(this.errors)
-			if PackageBeenCompile.shouldStop(null) {
+			if this.shouldStop(null) {
 				return this.errors
 			}
 		}
@@ -217,7 +332,7 @@ public class Package {
 		}
 		t, err := ImportsLoader.LoadImport(resource)
 		if pp, ok := t.(Package); ok && pp != null {
-			PackageBeenCompile.loadedPackages[resource] = pp
+			this.loadedPackages[resource] = pp
 			this.mkClassCache(pp)
 			if pp.name == common.CorePackage {
 				pp.markBuildIn()
@@ -227,7 +342,7 @@ public class Package {
 			if c.isJava == false {
 				return null, new error(sprintf("load lucy class not allow"))
 			}
-			PackageBeenCompile.loadedClasses[resource] = c
+			this.loadedClasses[resource] = c
 		}
 		return t, err
 	}
@@ -236,7 +351,7 @@ public class Package {
     /*
     //TODO::
 	fn checkUnUsedPackage() -> (errs []error=[]error{}  ) {
-		if common.CompileFlags.DisableCheckUnUse.getValue() {
+		if common.compileFlags.disableCheckUnUse.getValue() {
 			return null
 		}
 		for _, v := range this.files {

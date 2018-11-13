@@ -59,7 +59,7 @@ fn mkVoidType(pos Pos) -> (voidType Type) {
 	when access from global,should check if access from package
 */
 fn shouldAccessFromImports(name string, from Pos, alreadyHave Pos) -> (i Import,should bool) {
-	//fmt.Println(name, from, alreadyHave)
+	//print(name, from, alreadyHave)
 	// different file
 	// should access from import
 	if from.filename != alreadyHave.filename {

@@ -8,6 +8,7 @@ final class Clean {
 	lucyRoot string 
 	recursive bool 
 	verbose bool 
+	
 	fn Clean(lucyRoot string, lucyPaths []string,packageName string , recursive bool , verbose bool   ) {
 	    this.super() 
 		this.lucyRoot = lucyRoot 
@@ -16,7 +17,7 @@ final class Clean {
 		this.recursive = recursive 
 		this.verbose = verbose 
 	}
-
+	
 	fn clean() {
 		w := common.findPackageInWhichDirectory(this.lucyPaths , this.packageName)
 		dir := w + "/class/" + this.packageName

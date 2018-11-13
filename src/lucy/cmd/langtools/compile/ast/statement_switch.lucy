@@ -101,7 +101,7 @@ public class StatementSwitch  {
 						case ExpressionTypeFloat , ExpressionTypeDouble:
 							doubleValue = e.doubleValue
 						case ExpressionTypeString:
-							stringValue = e.data.(string)
+							stringValue = e.stringValue
 						default:
 						}
 						valueValid = true

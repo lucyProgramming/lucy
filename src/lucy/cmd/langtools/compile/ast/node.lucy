@@ -1,116 +1,11 @@
 import "java/lang/Object"
-import "lucy/os"
 
 public class TopNode  {
-	Node Object
+	public Node Object
 	public fn TopNode(n Object) {
 		this.super()
 		this.Node = n
 	}
 }
-
-
-
-class ConvertTops2Package {
-	
-	static fn Convert(nodes []TopNode) -> ( errs []error = []error{}) {
-		//
-		if len(nodes) == 0 {
-			errs = []error{new error("nothing to compile")}
-			return
-		}
-		if err := PackageBeenCompile.loadCorePackage(); err != null {
-			printf("load lucy buildin package failed,err:%s\n", err.getMessage())
-			os.exit(1)
-		}
-		bs := []Block{}
-		expressions := []Expression{}
-		for _, v := range nodes {
-			if t := v.Node.(Block) ; t != null {
-				bs.append(t)
-				continue
-			}
-			if t := v.Node.(Function) ; t != null {
-				t.isGlobal = true
-				err := PackageBeenCompile.block.Insert(t.name, t.pos, t)
-				if err != null {
-					errs.append(err)
-				}
-				continue
-			}
-			if t := v.Node.(Enum) ; t != null {
-				t.isGlobal = true
-				err := PackageBeenCompile.block.Insert(t.name, t.pos,t)
-				if err != null {
-					errs.append(err)
-				}
-				continue
-			}
-			if t := v.Node.(Class) ; t != null {
-				t.isGlobal = true
-				err := PackageBeenCompile.block.Insert(t.name, t.pos, t)
-				if err != null {
-					errs.append(err)
-				}
-				continue
-			}
-
-			if t := v.Node.(TypeAlias) ; t != null {
-				err := PackageBeenCompile.block.Insert(t.name, t.pos, t)
-				if err != null {
-					errs.append(err)
-				}
-				continue
-			}
-			if t := v.Node.(Constant) ; t != null {
-				t.isGlobal = true
-				err := PackageBeenCompile.block.Insert(t.name, t.pos, t)
-				if err != null {
-					errs.append(err)
-				}
-				continue
-			}
-			if t := v.Node.(Import) ; t != null {
-				if t.alias != UnderScore {
-					err := PackageBeenCompile.insertImport(t)
-					if err != null {
-						errs.append(err)
-					}
-				} else {
-					if PackageBeenCompile.unUsedPackage == null {
-						PackageBeenCompile.unUsedPackage = new map { string -> Import}()
-					}
-					PackageBeenCompile.unUsedPackage[t.Import] = t
-				}
-				continue
-			}
-			if t := v.Node.(Expression) ; t != null {
-				if t.Type == ExpressionTypeVar || t.Type == ExpressionTypeVarAssign {
-					expressions.append(t)
-				} else {
-					errs.append(new error(sprintf("%s cannot have '%s' in top",
-						t.pos.errMsgPrefix(), t.op)))
-				}	
-			}
-		}
-		
-		if len(expressions) > 0 {
-			s := new []Statement(len(expressions))
-			for k, v := range expressions {
-			    s[k] = new  Statement()
-				s[k].Type = StatementTypeExpression
-				s[k].Expression = v
-				s[k].pos = v.pos
-			}
-			b := new Block()
-			b.pos = expressions[0].pos
-			b.statements = s
-			t := []Block{b}
-			t.appendAll(bs)
-			bs = t
-		}
-		PackageBeenCompile.mkInitFunctions(bs)
-		return
-	}
-}
+ 
 

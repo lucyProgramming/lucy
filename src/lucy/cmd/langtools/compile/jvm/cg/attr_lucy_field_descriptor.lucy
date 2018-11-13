@@ -3,29 +3,29 @@ import "lucy/binary"
 
 public class AttributeLucyFieldDescriptor {
 	public descriptor       string
-	public MethodAccessFlag char
+	public methodAccessFlag char
 
-	public fn FromBs(c Class, bs []byte) {
+	public fn fromBs(c Class, bs []byte) {
 		if len(bs) != 4 {
 			panic("length is not 4")
 		}
-		this.descriptor = string(c.ConstPool[binary.BigEndian.getChar(bs[0:2])].Info)
-		this.MethodAccessFlag = binary.BigEndian.getChar(bs[2:4])
+		this.descriptor = string(c.ConstPool[binary.BigEndian.getChar(bs[0:2])].info)
+		this.methodAccessFlag = binary.BigEndian.getChar(bs[2:4])
 	}
 
-	public fn AttributeLucyFieldDescriptor(Descriptor string , MethodAccessFlag char){
+	public fn AttributeLucyFieldDescriptor(Descriptor string , methodAccessFlag char){
 		this.super()
 		this.descriptor = Descriptor
-		this.MethodAccessFlag = MethodAccessFlag
+		this.methodAccessFlag = methodAccessFlag
 	}
 
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const(AttributeNameLucyFieldDescriptor)
-		ret.Info = new []byte(4)
+		ret.info = new []byte(4)
 		ret.attributeLength = 4
-		binary.BigEndian.putChar(ret.Info, c.insertUtf8Const(this.descriptor))
-		binary.BigEndian.putChar(ret.Info[2:], this.MethodAccessFlag)
+		binary.BigEndian.putChar(ret.info, c.insertUtf8Const(this.descriptor))
+		binary.BigEndian.putChar(ret.info[2:], this.methodAccessFlag)
 		return ret
 	}
 }

@@ -38,36 +38,36 @@ class BuildExpressionIndex {
         }
         if index.Expression.value.Type == ast.VariableTypeArray {
             meta := ArrayMetas[e.value.Type]
-            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 meta.className,
                 "get",
                meta.getMethodDescription
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
             if e.value.isPointer() && e.value.Type != ast.VariableTypeString {
                 TypeConverterAndPrimitivePacker.castPointer(c, code, e.value)
             }
         } else {
             switch e.value.Type {
             case ast.VariableTypeBool, ast.VariableTypeByte:
-                code.Codes[code.CodeLength] = cg.OP_baload
+                code.codes[code.codeLength] = cg.OP_baload
             case ast.VariableTypeShort:
-                code.Codes[code.CodeLength] = cg.OP_saload
+                code.codes[code.codeLength] = cg.OP_saload
             case ast.VariableTypeChar:
-                code.Codes[code.CodeLength] = cg.OP_caload
+                code.codes[code.codeLength] = cg.OP_caload
             case ast.VariableTypeEnum ,ast.VariableTypeInt:
-                code.Codes[code.CodeLength] = cg.OP_iaload
+                code.codes[code.codeLength] = cg.OP_iaload
             case ast.VariableTypeLong:
-                code.Codes[code.CodeLength] = cg.OP_laload
+                code.codes[code.codeLength] = cg.OP_laload
             case ast.VariableTypeFloat:
-                code.Codes[code.CodeLength] = cg.OP_faload
+                code.codes[code.codeLength] = cg.OP_faload
             case ast.VariableTypeDouble:
-                code.Codes[code.CodeLength] = cg.OP_daload
+                code.codes[code.codeLength] = cg.OP_daload
             default:
-                code.Codes[code.CodeLength] = cg.OP_aaload
+                code.codes[code.codeLength] = cg.OP_aaload
             }
-            code.CodeLength++
+            code.codeLength++
         }
         return
     }
@@ -84,20 +84,20 @@ class BuildExpressionIndex {
         }
         index := e.data.(ast.ExpressionIndex)
         maxStack = this.eb.build(c, code, index.Expression, context, state)
-        code.Codes[code.CodeLength] = cg.OP_invokevirtual
+        code.codes[code.codeLength] = cg.OP_invokevirtual
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             javaStringClass,
             "getBytes",
             "()[B"
-        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.CodeLength += 3
+        ), code.codes[code.codeLength+1:code.codeLength+3])
+        code.codeLength += 3
         state.pushStack(c, state.newObjectVariableType("[B"))
         stack := this.eb.build(c, code, index.index, context, state)
         if t := char(1) + stack; t > maxStack {
             maxStack = t
         }
-        code.Codes[code.CodeLength] = cg.OP_baload
-        code.CodeLength++
+        code.codes[code.codeLength] = cg.OP_baload
+        code.codeLength++
         return
     }
     fn  buildMapIndex(
@@ -123,21 +123,21 @@ class BuildExpressionIndex {
         if index.Expression.value.Map.K.isPointer() == false {
             TypeConverterAndPrimitivePacker.packPrimitives(c, code, index.Expression.value.Map.K)
         }
-        code.Codes[code.CodeLength] = cg.OP_invokevirtual
+        code.codes[code.codeLength] = cg.OP_invokevirtual
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             mapClass,
             "get",
             "(Ljava/lang/Object;)Ljava/lang/Object;"
-        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.CodeLength += 3
+        ), code.codes[code.codeLength+1:code.codeLength+3])
+        code.codeLength += 3
         state.popStack(1)
         if index.Expression.value.Map.V.Type == ast.VariableTypeEnum {
             TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, index.Expression.value.Map.V)
         } else if index.Expression.value.Map.V.isPointer() {
             TypeConverterAndPrimitivePacker.castPointer(c, code, index.Expression.value.Map.V)
         } else {
-            code.Codes[code.CodeLength] = cg.OP_dup // increment the stack
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_dup // increment the stack
+            code.codeLength++
             if 2 > maxStack { // stack is  ... valueObjectRef valueObjectRef
                 maxStack = 2
             }
@@ -145,31 +145,31 @@ class BuildExpressionIndex {
             switch index.Expression.value.Map.V.Type {
             case ast.VariableTypeBool ,ast.VariableTypeByte ,ast.VariableTypeShort ,  ast.VariableTypeChar,
                 ast.VariableTypeInt:
-                code.Codes[code.CodeLength] = cg.OP_pop
-                code.Codes[code.CodeLength+1] = cg.OP_iconst_0
-                code.CodeLength += 2
+                code.codes[code.codeLength] = cg.OP_pop
+                code.codes[code.codeLength+1] = cg.OP_iconst_0
+                code.codeLength += 2
             case ast.VariableTypeLong:
-                code.Codes[code.CodeLength] = cg.OP_pop
-                code.Codes[code.CodeLength+1] = cg.OP_lconst_0
-                code.CodeLength += 2
+                code.codes[code.codeLength] = cg.OP_pop
+                code.codes[code.codeLength+1] = cg.OP_lconst_0
+                code.codeLength += 2
             case ast.VariableTypeFloat:
-                code.Codes[code.CodeLength] = cg.OP_pop
-                code.Codes[code.CodeLength+1] = cg.OP_fconst_0
-                code.CodeLength += 2
+                code.codes[code.codeLength] = cg.OP_pop
+                code.codes[code.codeLength+1] = cg.OP_fconst_0
+                code.codeLength += 2
             case ast.VariableTypeDouble:
-                code.Codes[code.CodeLength] = cg.OP_pop
-                code.Codes[code.CodeLength+1] = cg.OP_dconst_0
-                code.CodeLength += 2
+                code.codes[code.codeLength] = cg.OP_pop
+                code.codes[code.codeLength+1] = cg.OP_dconst_0
+                code.codeLength += 2
             }
             nullExit := new cg.Exit(cg.OP_goto, code)
             state.pushStack(c, state.newObjectVariableType(javaRootClass))
-            context.MakeStackMap(code, state, code.CodeLength)
+            context.MakeStackMap(code, state, code.codeLength)
             state.popStack(1) // pop java_root_class ref
-            writeExits([]cg.Exit{noNullExit}, code.CodeLength)
+            writeExits([]cg.Exit{noNullExit}, code.codeLength)
             TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, index.Expression.value.Map.V)
-            writeExits([]cg.Exit{nullExit}, code.CodeLength)
+            writeExits([]cg.Exit{nullExit}, code.codeLength)
             state.pushStack(c, e.value)
-            context.MakeStackMap(code, state, code.CodeLength)
+            context.MakeStackMap(code, state, code.codeLength)
             state.popStack(1)
         }
         return

@@ -58,12 +58,12 @@ func init() {
 		getMethodDescription:      "(I)S",
 	}
 	ArrayMetas[ast.VariableTypeChar] = &ArrayMeta{
-		className:                 "lucy/deps/CharInt",
-		constructorFuncDescriptor: "([I)V",
-		elementsFieldDescriptor:   "[I",
-		sliceDescriptor:           "(II)Llucy/deps/CharInt;",
-		appendDescriptor:          "(I)V",
-		appendAllDescriptor:       "(Llucy/deps/CharInt;)V",
+		className:                 "lucy/deps/ArrayChar",
+		constructorFuncDescriptor: "([C)V",
+		elementsFieldDescriptor:   "[C",
+		sliceDescriptor:           "(II)Llucy/deps/ArrayChar;",
+		appendDescriptor:          "(C)V",
+		appendAllDescriptor:       "(Llucy/deps/ArrayChar;)V",
 		setMethodDescription:      "(IC)V",
 		getMethodDescription:      "(I)C",
 	}

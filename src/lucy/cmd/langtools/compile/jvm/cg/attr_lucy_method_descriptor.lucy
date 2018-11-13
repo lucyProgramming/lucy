@@ -5,9 +5,9 @@ public class AttributeLucyMethodDescriptor {
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const(AttributeNameLucyMethodDescriptor)
-		ret.Info = new []byte(2)
+		ret.info = new []byte(2)
 		ret.attributeLength = 2
-		binary.BigEndian.putChar(ret.Info, c.insertUtf8Const(this.descriptor))
+		binary.BigEndian.putChar(ret.info, c.insertUtf8Const(this.descriptor))
 		return ret
 	}
 }

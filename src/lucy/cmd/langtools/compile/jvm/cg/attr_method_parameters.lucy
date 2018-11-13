@@ -7,24 +7,25 @@ public const	MethodParameterTypeAccMandated  = 0x8000
  
 
 public class AttributeMethodParameters  {
-	public Parameters []MethodParameter
-	public fn FromBs(c Class, bs []byte) {
+	public parameters []MethodParameter
+
+	public fn fromBs(c Class, bs []byte) {
 		if len(bs) != int(bs[0])*4+1 {
 			panic("impossible")
 		}
 		bs = bs[1:]
-		this.Parameters = []MethodParameter{}
+		this.parameters = []MethodParameter{}
 		for len(bs) > 0 {
 			p := new MethodParameter()
-			p.name = string(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
+			p.name = string(c.ConstPool[binary.BigEndian.getChar(bs)].info)
 			p.accessFlags = binary.BigEndian.getChar(bs[2:])
-			this.Parameters . append(p)
+			this.parameters . append(p)
 			bs = bs[4:]
 		}
 	}
 
 	fn ToAttributeInfo(c Class, attrName string...) -> (ret AttributeInfo)  {
-		if this == null || len(this.Parameters) == 0 {
+		if this == null || len(this.parameters) == 0 {
 			return null
 		}
 		ret = new AttributeInfo()
@@ -33,12 +34,12 @@ public class AttributeMethodParameters  {
 		} else {
 			ret.nameIndex = c.insertUtf8Const(AttributeNameMethodParameters)
 		}
-		ret.attributeLength = (len(this.Parameters)*4 + 1)
-		ret.Info = new []byte(ret.attributeLength)
-		ret.Info[0] = byte(len(this.Parameters))
-		for k, v := range this.Parameters {
-			binary.BigEndian.putChar(ret.Info[4*k+1:], c.insertUtf8Const(v.name))
-			binary.BigEndian.putChar(ret.Info[4*k+3:], v.accessFlags)
+		ret.attributeLength = (len(this.parameters)*4 + 1)
+		ret.info = new []byte(ret.attributeLength)
+		ret.info[0] = byte(len(this.parameters))
+		for k, v := range this.parameters {
+			binary.BigEndian.putChar(ret.info[4*k+1:], c.insertUtf8Const(v.name))
+			binary.BigEndian.putChar(ret.info[4*k+3:], v.accessFlags)
 		}
 		return ret
 	}

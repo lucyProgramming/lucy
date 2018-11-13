@@ -239,13 +239,16 @@ public class Block {
 
         return t, null
     }
-
+    
     fn inherit(father Block) {
         if this.outer != null {
             return
         }
         if this == father {
             panic("inherit from self")
+        }
+        if this.inheritedAttribute == null {
+            this.inheritedAttribute = new InheritedAttribute()
         }
 
         this.outer = father
@@ -259,7 +262,7 @@ public class Block {
         this.inheritedAttribute.classMethod = father.inheritedAttribute.classMethod
         this.inheritedAttribute.classAndFunctionNames = father.inheritedAttribute.classAndFunctionNames
 
-
+        
         if this.isFunctionBlock || this.isClassBlock {
             this.inheritedAttribute.forBreak = null
             this.inheritedAttribute.forStatement = null
@@ -271,7 +274,7 @@ public class Block {
     }
 
     fn checkUnUsed() -> (es []error) {
-        if common.CompileFlags.DisableCheckUnUse.getValue() {
+        if common.compileFlags.disableCheckUnUse.getValue() {
             return null
         }
         es = []error{}
@@ -458,7 +461,7 @@ public class Block {
             return err
         }
         // handle label
-        if label := d.(StatementLabel); label != null {
+        if label ,ok := d.(StatementLabel); ok {
             if this.Labels == null {
                 this.Labels = new map { string -> StatementLabel } ()
             }
@@ -479,24 +482,24 @@ public class Block {
             return new error(sprintf("%s function named '%s' is buildin",
                 pos.errMsgPrefix(), name))
         }
-        if c := d.(Class) ; d != null {
+        if c ,ok := d.(Class) ; ok {
             this.Classes[name] = c
             return null
         }
-        if f := d.(Function) ; f != null {
+        if f ,ok:= d.(Function) ; ok {
             this.Functions[name] = f
             return null
         }
-        if c := d.(Constant) ; c != null {
+        if c ,ok:= d.(Constant) ; ok {
              this.constants[name] = c
              return null
         }
-        if v := d.(Variable) ; v != null {
+        if v ,ok:= d.(Variable) ; ok {
             v.localValOffset = 65535 // overflow
             this.Variables[name] = v
             return null
         }
-        if e := d.(Enum) ; e != null {
+        if e , ok:= d.(Enum) ; ok {
             this.Enums[name] = e
             for _, v := range e.Enums {
                 err := this.Insert(v.name, v.pos, v)
@@ -506,11 +509,11 @@ public class Block {
             }
             return null
         }
-        if en := d.(EnumName) ; en != null {
+        if en ,ok:= d.(EnumName) ; ok {
             this.EnumNames[name] = en
             return null
         }
-        if t := d.(Type) ; d != null {
+        if t ,ok := d.(Type) ; ok {
              this.TypeAliases[name] = t
              return null
         }

@@ -64,7 +64,12 @@ class StatementWhenParser extends ParserExtends {
 			t := new ast.StatementWhenCase()
 			t.matches = ts
 			t.block = block
-			whenStatement.cases.append(t)
+			if whenStatement.cases == null{
+				whenStatement.cases = [t]
+			}else {
+				whenStatement.cases.append(t)
+			}
+			
 		}
 		//default value
 		if this.parser.token.Type == lex.TokenDefault {

@@ -22,48 +22,48 @@ fn jumpTo(code cg.AttributeCode, to int) {
 
 fn copyOPs(code cg.AttributeCode, op []byte) {
 	for k, v := range op {
-		code.Codes[code.CodeLength+k] = v
+		code.codes[code.codeLength+k] = v
 	}
-	code.CodeLength += len(op)
+	code.codeLength += len(op)
 }
 
 fn loadInt32(c cg.ClassHighLevel, code cg.AttributeCode, value int) {
 	switch value {
 	case int(-1):
-		code.Codes[code.CodeLength] = cg.OP_iconst_m1
-		code.CodeLength++
+		code.codes[code.codeLength] = cg.OP_iconst_m1
+		code.codeLength++
 	case int(0):
-		code.Codes[code.CodeLength] = cg.OP_iconst_0
-		code.CodeLength++
+		code.codes[code.codeLength] = cg.OP_iconst_0
+		code.codeLength++
 	case int(1):
-		code.Codes[code.CodeLength] = cg.OP_iconst_1
-		code.CodeLength++
+		code.codes[code.codeLength] = cg.OP_iconst_1
+		code.codeLength++
 	case int(2):
-		code.Codes[code.CodeLength] = cg.OP_iconst_2
-		code.CodeLength++
+		code.codes[code.codeLength] = cg.OP_iconst_2
+		code.codeLength++
 	case int(3):
-		code.Codes[code.CodeLength] = cg.OP_iconst_3
-		code.CodeLength++
+		code.codes[code.codeLength] = cg.OP_iconst_3
+		code.codeLength++
 	case int(4):
-		code.Codes[code.CodeLength] = cg.OP_iconst_4
-		code.CodeLength++
+		code.codes[code.codeLength] = cg.OP_iconst_4
+		code.codeLength++
 	case int(5):
-		code.Codes[code.CodeLength] = cg.OP_iconst_5
-		code.CodeLength++
+		code.codes[code.codeLength] = cg.OP_iconst_5
+		code.codeLength++
 	default:
 		if -128 <= value && value <= 127 {
-			code.Codes[code.CodeLength] = cg.OP_bipush
-			code.Codes[code.CodeLength+1] = byte(value)
-			code.CodeLength += 2
+			code.codes[code.codeLength] = cg.OP_bipush
+			code.codes[code.codeLength+1] = byte(value)
+			code.codeLength += 2
 		} else if -32768 <= value && value <= 32767 {
-			code.Codes[code.CodeLength] = cg.OP_sipush
-			code.Codes[code.CodeLength+1] = byte(char(value) >> 8)
-			code.Codes[code.CodeLength+2] = byte(value)
-			code.CodeLength += 3
+			code.codes[code.codeLength] = cg.OP_sipush
+			code.codes[code.codeLength+1] = byte(char(value) >> 8)
+			code.codes[code.codeLength+2] = byte(value)
+			code.codeLength += 3
 		} else {
-			code.Codes[code.CodeLength] = cg.OP_ldc_w
-			c.insertIntConst(value, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			code.codes[code.codeLength] = cg.OP_ldc_w
+			c.insertIntConst(value, code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		}
 	}
 }
@@ -108,78 +108,78 @@ fn nameTemplateFunction(function ast.Function) -> (s string = function.name) {
 
 fn insertTypeAssertClass(c cg.ClassHighLevel, code cg.AttributeCode, t ast.Type) {
 	if t.Type == ast.VariableTypeString {
-		c.insertClassConst(javaStringClass, code.Codes[code.CodeLength:code.CodeLength+2])
+		c.insertClassConst(javaStringClass, code.codes[code.codeLength:code.codeLength+2])
 	} else if t.Type == ast.VariableTypeObject {
-		c.insertClassConst(t.Class.name, code.Codes[code.CodeLength:code.CodeLength+2])
+		c.insertClassConst(t.Class.name, code.codes[code.codeLength:code.codeLength+2])
 	} else if t.Type == ast.VariableTypeArray { // arrays
 		meta := ArrayMetas[t.array.Type]
-		c.insertClassConst(meta.className, code.Codes[code.CodeLength:code.CodeLength+2])
+		c.insertClassConst(meta.className, code.codes[code.codeLength:code.codeLength+2])
 	} else {
-		c.insertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength:code.CodeLength+2])
+		c.insertClassConst(Descriptor.typeDescriptor(t), code.codes[code.codeLength:code.codeLength+2])
 	}
-	code.CodeLength += 2
+	code.codeLength += 2
 }
 
 fn newArrayBaseOnType(c cg.ClassHighLevel, code cg.AttributeCode, typ ast.Type) {
 	switch typ.Type {
 	case ast.VariableTypeBool:
-		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ArrayTypeBoolean
-		code.CodeLength += 2
+		code.codes[code.codeLength] = cg.OP_newarray
+		code.codes[code.codeLength+1] = ArrayTypeBoolean
+		code.codeLength += 2
 	case ast.VariableTypeByte:
-		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ArrayTypeByte
-		code.CodeLength += 2
+		code.codes[code.codeLength] = cg.OP_newarray
+		code.codes[code.codeLength+1] = ArrayTypeByte
+		code.codeLength += 2
 	case ast.VariableTypeShort:
-		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ArrayTypeShort
-		code.CodeLength += 2
+		code.codes[code.codeLength] = cg.OP_newarray
+		code.codes[code.codeLength+1] = ArrayTypeShort
+		code.codeLength += 2
 	case ast.VariableTypeChar:
-		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ArrayTypeChar
-		code.CodeLength += 2
+		code.codes[code.codeLength] = cg.OP_newarray
+		code.codes[code.codeLength+1] = ArrayTypeChar
+		code.codeLength += 2
 	case ast.VariableTypeEnum , ast.VariableTypeInt:
-		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ArrayTypeInt
-		code.CodeLength += 2
+		code.codes[code.codeLength] = cg.OP_newarray
+		code.codes[code.codeLength+1] = ArrayTypeInt
+		code.codeLength += 2
 	case ast.VariableTypeLong:
-		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ArrayTypeLong
-		code.CodeLength += 2
+		code.codes[code.codeLength] = cg.OP_newarray
+		code.codes[code.codeLength+1] = ArrayTypeLong
+		code.codeLength += 2
 	case ast.VariableTypeFloat:
-		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ArrayTypeFloat
-		code.CodeLength += 2
+		code.codes[code.codeLength] = cg.OP_newarray
+		code.codes[code.codeLength+1] = ArrayTypeFloat
+		code.codeLength += 2
 	case ast.VariableTypeDouble:
-		code.Codes[code.CodeLength] = cg.OP_newarray
-		code.Codes[code.CodeLength+1] = ArrayTypeDouble
-		code.CodeLength += 2
+		code.codes[code.codeLength] = cg.OP_newarray
+		code.codes[code.codeLength+1] = ArrayTypeDouble
+		code.codeLength += 2
 	case ast.VariableTypeString:
-		code.Codes[code.CodeLength] = cg.OP_anewarray
-		c.insertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+		code.codes[code.codeLength] = cg.OP_anewarray
+		c.insertClassConst(javaStringClass, code.codes[code.codeLength+1:code.codeLength+3])
+		code.codeLength += 3
 	case ast.VariableTypeMap:
-		code.Codes[code.CodeLength] = cg.OP_anewarray
-		c.insertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+		code.codes[code.codeLength] = cg.OP_anewarray
+		c.insertClassConst(mapClass, code.codes[code.codeLength+1:code.codeLength+3])
+		code.codeLength += 3
 	case ast.VariableTypeFunction:
-		code.Codes[code.CodeLength] = cg.OP_anewarray
-		c.insertClassConst(javaMethodHandleClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+		code.codes[code.codeLength] = cg.OP_anewarray
+		c.insertClassConst(javaMethodHandleClass, code.codes[code.codeLength+1:code.codeLength+3])
+		code.codeLength += 3
 	case ast.VariableTypeObject:
-		code.Codes[code.CodeLength] = cg.OP_anewarray
-		c.insertClassConst(typ.Class.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+		code.codes[code.codeLength] = cg.OP_anewarray
+		c.insertClassConst(typ.Class.name, code.codes[code.codeLength+1:code.codeLength+3])
+		code.codeLength += 3
 	case ast.VariableTypeArray:
-		code.Codes[code.CodeLength] = cg.OP_anewarray
+		code.codes[code.codeLength] = cg.OP_anewarray
 		meta := ArrayMetas[typ.array.Type]
-		c.insertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+		c.insertClassConst(meta.className, code.codes[code.codeLength+1:code.codeLength+3])
+		code.codeLength += 3
 	case ast.VariableTypeJavaArray:
-		code.Codes[code.CodeLength] = cg.OP_anewarray
+		code.codes[code.codeLength] = cg.OP_anewarray
 		c.insertClassConst(Descriptor.typeDescriptor(typ.array),
-			code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+			code.codes[code.codeLength+1:code.codeLength+3])
+		code.codeLength += 3
 	}
 }
 fn storeArrayElementOp(typ ast.VariableTypeKind) -> (op byte) {
@@ -215,15 +215,15 @@ fn popCallResult(code cg.AttributeCode, e ast.Expression, ft ast.FunctionType) -
 	if ft.VoidReturn() == false && e.isStatementExpression {
 		if len(ft.ReturnList) == 1 {
 			if jvmSlotSize(ft.ReturnList[0].Type) == 1 {
-				code.Codes[code.CodeLength] = cg.OP_pop
-				code.CodeLength++
+				code.codes[code.codeLength] = cg.OP_pop
+				code.codeLength++
 			} else {
-				code.Codes[code.CodeLength] = cg.OP_pop2
-				code.CodeLength++
+				code.codes[code.codeLength] = cg.OP_pop2
+				code.codeLength++
 			}
 		} else { // > 1
-			code.Codes[code.CodeLength] = cg.OP_pop
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_pop
+			code.codeLength++
 		}
 	}
 	return
@@ -253,35 +253,35 @@ fn setEnumArray(c cg.ClassHighLevel, code cg.AttributeCode,
 	a.k = code.maxLocals
 	a.length = code.maxLocals + 1
 	code.maxLocals += 2
-	code.Codes[code.CodeLength] = cg.OP_dup
-	code.CodeLength++
-	code.Codes[code.CodeLength] = cg.OP_arraylength
-	code.CodeLength++
+	code.codes[code.codeLength] = cg.OP_dup
+	code.codeLength++
+	code.codes[code.codeLength] = cg.OP_arraylength
+	code.codeLength++
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, a.length))
-	code.Codes[code.CodeLength] = cg.OP_iconst_0
-	code.CodeLength++
+	code.codes[code.codeLength] = cg.OP_iconst_0
+	code.codeLength++
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, a.k))
 	state.appendLocals(c,typeInt)
 	state.appendLocals(c, typeInt)
-	context.MakeStackMap(code, state, code.CodeLength)
-	offset := code.CodeLength
+	context.MakeStackMap(code, state, code.codeLength)
+	offset := code.codeLength
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.k))
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.length))
 	exit := new cg.Exit(cg.OP_if_icmpge, code)
-	code.Codes[code.CodeLength] = cg.OP_dup
-	code.CodeLength++
+	code.codes[code.codeLength] = cg.OP_dup
+	code.codeLength++
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.k))
 	loadInt32(c, code, e.DefaultValue)
-	code.Codes[code.CodeLength] = cg.OP_iastore
-	code.CodeLength++
+	code.codes[code.codeLength] = cg.OP_iastore
+	code.codeLength++
 	maxStack = 3
-	code.Codes[code.CodeLength] = cg.OP_iinc
-	code.Codes[code.CodeLength+1] = byte(a.k)
-	code.Codes[code.CodeLength+2] = 1
-	code.CodeLength += 3
+	code.codes[code.codeLength] = cg.OP_iinc
+	code.codes[code.codeLength+1] = byte(a.k)
+	code.codes[code.codeLength+2] = 1
+	code.codeLength += 3
 	jumpTo(code, offset)
-	writeExits([]cg.Exit{exit}, code.CodeLength)
-	context.MakeStackMap(code, state, code.CodeLength)
+	writeExits([]cg.Exit{exit}, code.codeLength)
+	context.MakeStackMap(code, state, code.codeLength)
 	return
 
 }

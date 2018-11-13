@@ -16,13 +16,14 @@ import "lucy/os"
 */
 class FileLoader implements ast.LoadImport{
 	caches map { string -> Object }
-    fn  LoadImport(importName string) -> (x Object,err error) {
-        defer {
+
+    public fn  LoadImport(importName string) -> (x Object,err error) {
+        /*defer {
             e := catch()
             if err == null && e != null{
                 err =  e
             }
-        }
+        }*/
         if this.caches != null && this.caches[importName] != null {
             return this.caches[importName], null
         }
@@ -44,7 +45,7 @@ class FileLoader implements ast.LoadImport{
             }
         }
 
-        for _, v := range compiler.ClassPaths {
+        for _, v := range compiler.classPaths {
             if p :=v + "/class/" + importName  ; new io.File(p).isDirectory() { // directory is package
                 realPaths.append(new Resource(
                     resourceKindJavaPackage,
@@ -111,11 +112,11 @@ class FileLoader implements ast.LoadImport{
             }
             return p, null
         } else { // lucy package
-            p, err := this.loadLucyPackage(realPaths[0])
+            p := this.loadLucyPackage(realPaths[0])
             if p != null {
                 this.caches[importName] = p
             }
-            return p, null
+            return p ,null
         }
     }
 
@@ -126,7 +127,7 @@ class FileLoader implements ast.LoadImport{
         astClass.interfaces = new []ast.Class(len(c.interfaces))
         for k, v := range c.interfaces {
             i := new ast.Class()
-            i.name = string(c.ConstPool[binary.BigEndian.getChar(c.ConstPool[v].Info)].Info)
+            i.name = string(c.ConstPool[binary.BigEndian.getChar(c.ConstPool[v].info)].info)
             i.notImportedYet = true
             astClass.interfaces[k] = i
         }
@@ -146,11 +147,11 @@ class FileLoader implements ast.LoadImport{
         }
         astClass = new ast.Class()
         {
-            nameIndex := binary.BigEndian.getChar(c.ConstPool[c.ThisClass].Info)
-            astClass.name = string(c.ConstPool[nameIndex].Info)
+            nameIndex := binary.BigEndian.getChar(c.ConstPool[c.thisClass].info)
+            astClass.name = string(c.ConstPool[nameIndex].info)
             if astClass.name != ast.JavaRootClass {
-                nameIndex = binary.BigEndian.getChar(c.ConstPool[c.superClass].Info)
-                astClass.superClassName = new ast.NameWithPos(string(c.ConstPool[nameIndex].Info) , null)
+                nameIndex = binary.BigEndian.getChar(c.ConstPool[c.superClass].info)
+                astClass.superClassName = new ast.NameWithPos(string(c.ConstPool[nameIndex].info) , null)
             }
         }
         this.loadInterfaces(astClass, c)
@@ -161,9 +162,9 @@ class FileLoader implements ast.LoadImport{
         for _, v := range c.fields {
             f := new ast.ClassField()
             f.accessFlags = v.accessFlags
-            f.jvmDescriptor = string(c.ConstPool[v.descriptorIndex].Info)
-            f.name = string(c.ConstPool[v.nameIndex].Info)
-            _, f.Type, err := jvm.Descriptor.ParseType(c.ConstPool[v.descriptorIndex].Info)
+            f.jvmDescriptor = string(c.ConstPool[v.descriptorIndex].info)
+            f.name = string(c.ConstPool[v.nameIndex].info)
+            _, f.Type, err := jvm.Descriptor.ParseType(c.ConstPool[v.descriptorIndex].info)
             if err != null {
                 panic(err)
             }
@@ -174,15 +175,15 @@ class FileLoader implements ast.LoadImport{
             m := new ast.ClassMethod()
             m.Function = new ast.Function()
             //m.loadFromOutSide = true
-            m.Function.name = string(c.ConstPool[v.nameIndex].Info)
-            m.Function.jvmDescriptor = string(c.ConstPool[v.descriptorIndex].Info)
+            m.Function.name = string(c.ConstPool[v.nameIndex].info)
+            m.Function.jvmDescriptor = string(c.ConstPool[v.descriptorIndex].info)
             m.Function.accessFlags = v.accessFlags
-            m.Function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.descriptorIndex].Info)
+            m.Function.Type, err := jvm.Descriptor.ParseFunctionType(c.ConstPool[v.descriptorIndex].info)
             if err != null {
-                return null, err
+                panic(err)
             }
-            if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != null && len(t) > 0 {
-                parseMethodParameter(c, t[0].Info, m.Function)
+            if t := v.GetAttributeByName(cg.AttributeNameMethodParameters); t != null && len(t) > 0 {
+                parseMethodParameter(c, t[0].info, m.Function)
             }
             if (v.accessFlags & cg.AccMethodVarargs) != 0 {
                 m.Function.Type.VArgs = m.Function.Type.ParameterList[len(m.Function.Type.ParameterList)-1]
@@ -211,11 +212,11 @@ class FileLoader implements ast.LoadImport{
         //name
         astClass = new ast.Class()
         {
-            nameIndex := binary.BigEndian.getChar(c.ConstPool[c.ThisClass].Info)
-            astClass.name = string(c.ConstPool[nameIndex].Info)
+            nameIndex := binary.BigEndian.getChar(c.ConstPool[c.thisClass].info)
+            astClass.name = string(c.ConstPool[nameIndex].info)
             if astClass.name != ast.JavaRootClass {
-                nameIndex = binary.BigEndian.getChar(c.ConstPool[c.superClass].Info)
-                astClass.superClassName = new ast.NameWithPos(string(c.ConstPool[nameIndex].Info) , null)
+                nameIndex = binary.BigEndian.getChar(c.ConstPool[c.superClass].info)
+                astClass.superClassName = new ast.NameWithPos(string(c.ConstPool[nameIndex].info) , null)
             }
         }
         this.loadInterfaces(astClass, c)
@@ -224,7 +225,7 @@ class FileLoader implements ast.LoadImport{
         astClass.fields = new map{string -> ast.ClassField}()
         if t := cg.GetAttributeByName(c.AttributeGroupedByName,cg.AttributeNameLucyClassConst); len(t) > 0 {
             attr := new cg.AttributeLucyClassConst()
-            attr.FromBs(c, t[0].Info)
+            attr.fromBs(c, t[0].info)
             var t ast.Type
             var err error
             for _, v := range attr.constants {
@@ -235,7 +236,8 @@ class FileLoader implements ast.LoadImport{
                 constant := new ast.Constant()
                 constant.name = v.name
                 constant.Type = t
-                constant.value = this.loadConst(c, v.valueIndex, t)
+                constant.boolValue , constant.longValue ,constant.doubleValue,constant.stringValue =
+                    this.loadConst(c, v.valueIndex, t)
                 if astClass.block.constants == null {
                     astClass.block.constants = new map { string -> ast.Constant } ()
                 }
@@ -244,27 +246,27 @@ class FileLoader implements ast.LoadImport{
         }
         for _, v := range c.fields {
             f := new ast.ClassField()
-            f.name = string(c.ConstPool[v.nameIndex].Info)
-            f.jvmDescriptor = string(c.ConstPool[v.descriptorIndex].Info)
-            _, f.Type, err = jvm.Descriptor.ParseType(c.ConstPool[v.descriptorIndex].Info)
+            f.name = string(c.ConstPool[v.nameIndex].info)
+            f.jvmDescriptor = string(c.ConstPool[v.descriptorIndex].info)
+            _, f.Type, err := jvm.Descriptor.ParseType(c.ConstPool[v.descriptorIndex].info)
             if err != null {
-                return null, err
+                panic(err)
             }
             if t := cg.GetAttributeByName(v.AttributeGroupedByName , cg.AttributeNameLucyFieldDescriptor); t != null && len(t) > 0 {
-                d := new cg.AttributeLucyFieldDescriptor()
-                d.FromBs(c, t[0].Info)
-                _, f.Type, err = jvm.LucyFieldSignature.Decode([]byte(d.Descriptor))
+                d := new cg.AttributeLucyFieldDescriptor("", 0)
+                d.fromBs(c, t[0].info)
+                _, f.Type, err = jvm.LucyFieldSignature.Decode([]byte(d.descriptor))
                 if err != null {
-                    return null, err
+                    panic(err)
                 }
-                if f.Type.Type == ast.VariableTypeFunction && d.MethodAccessFlag&cg.AccMethodVarargs != 0 {
+                if f.Type.Type == ast.VariableTypeFunction && d.methodAccessFlag&cg.AccMethodVarargs != 0 {
                     if f.Type.functionType.ParameterList[len(f.Type.functionType.ParameterList)-1].Type.Type !=
                         ast.VariableTypeJavaArray {
                         panic("not a java array")
                     }
-                    f.Type.functionType.VArgs = f.Type.FunctionType.ParameterList[len(f.Type.FunctionType.ParameterList)-1]
+                    f.Type.functionType.VArgs = f.Type.functionType.ParameterList[len(f.Type.functionType.ParameterList)-1]
                     f.Type.functionType.VArgs.Type.isVariableArgs = true
-                    f.Type.functionType.ParameterList = f.Type.FunctionType.ParameterList[:len(f.Type.FunctionType.ParameterList)-1]
+                    f.Type.functionType.ParameterList = f.Type.functionType.ParameterList[:len(f.Type.functionType.ParameterList)-1]
                 }
             }
             if f.Type.Type == ast.VariableTypeEnum {
@@ -277,35 +279,32 @@ class FileLoader implements ast.LoadImport{
         for _, v := range c.methods {
             m := new ast.ClassMethod()
             m.Function = new ast.Function()
-            m.Function.name = string(c.ConstPool[v.nameIndex].Info)
-            m.Function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[v.descriptorIndex].Info)
+            m.Function.name = string(c.ConstPool[v.nameIndex].info)
+            m.Function.Type, err := jvm.Descriptor.ParseFunctionType(c.ConstPool[v.descriptorIndex].info)
             if err != null {
-                return null, err
+                panic(err)
             }
             m.Function.accessFlags = v.accessFlags
-            m.Function.jvmDescriptor = string(c.ConstPool[v.descriptorIndex].Info)
-            if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyMethodDescriptor); t != null && len(t) > 0 {
-                index := binary.BigEndian.getChar(t[0].Info)
-                _, err = jvm.LucyMethodSignature.Decode(m.Function.Type, c.ConstPool[index].Info)
+            m.Function.jvmDescriptor = string(c.ConstPool[v.descriptorIndex].info)
+            if t := v.GetAttributeByName(cg.AttributeNameLucyMethodDescriptor); t != null && len(t) > 0 {
+                index := binary.BigEndian.getChar(t[0].info)
+                _, err = jvm.LucyMethodSignature.Decode(m.Function.Type, c.ConstPool[index].info)
                 if err != null {
-                    return null, err
+                    panic(err)
                 }
             }
-            if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyDefaultParameters); t != null && len(t) > 0 {
+            if t := v.GetAttributeByName(cg.AttributeNameLucyDefaultParameters); t != null && len(t) > 0 {
                 dp := new cg.AttributeDefaultParameters()
-                dp.fromBytes(t[0].Info)
-                jvm.DefaultValueParser.Decode(c, m.Function, dp)
+                dp.fromBytes(t[0].info)
+                jvm.DefaultValueParse.Decode(c, m.Function, dp)
             }
-            if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != null && len(t) > 0 {
-                parseMethodParameter(c, t[0].Info, m.Function)
+            if t := v.GetAttributeByName(cg.AttributeNameMethodParameters); t != null && len(t) > 0 {
+                parseMethodParameter(c, t[0].info, m.Function)
             }
-            if t := v.AttributeGroupedByName.GetByName(cg.AttributeNameLucyReturnListNames); t != null && len(t) > 0 {
-                parseReturnListNames(c, t[0].Info, m.Function)
+            if t := v.GetAttributeByName(cg.AttributeNameLucyReturnListNames); t != null && len(t) > 0 {
+                parseReturnListNames(c, t[0].info, m.Function)
             }
-            err = loadEnumForFunction(m.Function)
-            if err != null {
-                return null, err
-            }
+            loadEnumForFunction(m.Function)
             if (v.accessFlags & cg.AccMethodVarargs) != 0 {
                 m.Function.Type.VArgs = m.Function.Type.ParameterList[len(m.Function.Type.ParameterList)-1]
                 if m.Function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
@@ -317,49 +316,49 @@ class FileLoader implements ast.LoadImport{
             if astClass.methods[m.Function.name] == null {
                 astClass.methods[m.Function.name] = []ast.ClassMethod{m}
             } else {
-                astClass.methods[m.Function.name] = append(astClass.methods[m.Function.name], m)
+                astClass.methods[m.Function.name].append(m)
             }
         }
-        return astClass, null
+        return astClass
     }
 
-    fn  loadLucyEnum(c cg.Class) -> (e ast.Enum,err error) {
+    fn  loadLucyEnum(c cg.Class) -> (e ast.Enum ) {
         e = new ast.Enum()
         {
-            nameIndex := binary.BigEndian.getChar(c.ConstPool[c.ThisClass].Info)
-            e.name = string(c.ConstPool[nameIndex].Info)
+            nameIndex := binary.BigEndian.getChar(c.ConstPool[c.thisClass].info)
+            e.name = string(c.ConstPool[nameIndex].info)
         }
         e.loadFromOutSide = true
         e.accessFlags = c.accessFlags
         for _, v := range c.fields {
             en := new ast.EnumName()
-            name := string(c.ConstPool[v.nameIndex].Info)
+            name := string(c.ConstPool[v.nameIndex].info)
             en.name = name
             en.Enum = e
             constValue := v.AttributeGroupedByName[cg.AttributeNameConstValue][0] // must have this attribute
-            en.value = int(binary.BigEndian.getInt(c.ConstPool[binary.BigEndian.getChar(constValue.Info)].Info))
+            en.value = int(binary.BigEndian.getInt(c.ConstPool[binary.BigEndian.getChar(constValue.info)].info))
             e.Enums.append(en)
         }
-        return e, null
+        return e
     }
 
     fn  loadConst(c cg.Class, nameIndex char, t ast.Type) -> (boolValue bool, longValue long , doubleValue double , stringValue string) {
         switch t.Type {
         case ast.VariableTypeBool:
-            boolValue =  binary.BigEndian.getInt(c.ConstPool[nameIndex].Info) != 0
+            boolValue =  binary.BigEndian.getInt(c.ConstPool[nameIndex].info) != 0
             return
         case ast.VariableTypeByte ,ast.VariableTypeShort ,ast.VariableTypeChar,ast.VariableTypeInt:
-            longValue =  long(binary.BigEndian.getInt(c.ConstPool[nameIndex].Info))
+            longValue =  long(binary.BigEndian.getInt(c.ConstPool[nameIndex].info))
             return
         case ast.VariableTypeLong:
-            longValue = long(binary.BigEndian.getLong(c.ConstPool[nameIndex].Info))
+            longValue = long(binary.BigEndian.getLong(c.ConstPool[nameIndex].info))
             return
         case ast.VariableTypeFloat ,ast.VariableTypeDouble:
-            doubleValue =  double(binary.BigEndian.getLong(c.ConstPool[nameIndex].Info))
+            doubleValue =  double(binary.BigEndian.getLong(c.ConstPool[nameIndex].info))
             return
         case ast.VariableTypeString:
-            valueIndex := binary.BigEndian.getChar(c.ConstPool[nameIndex].Info)
-            stringValue = string(c.ConstPool[valueIndex].Info)
+            valueIndex := binary.BigEndian.getChar(c.ConstPool[nameIndex].info)
+            stringValue = string(c.ConstPool[valueIndex].info)
             return
         }
     }
@@ -371,46 +370,46 @@ class FileLoader implements ast.LoadImport{
         pack.block.constants = new map{string->ast.Constant}()
         pack.block.Functions = new map{string->ast.Function}()
         for _, f := range c.fields {
-            name := string(c.ConstPool[f.nameIndex].Info)
-            constValue := cg.v.AttributeGroupedByName(f.AttributeGroupedByName , cg.AttributeNameConstValue)
+            name := string(c.ConstPool[f.nameIndex].info)
+            constValue := f.GetAttributeByName(cg.AttributeNameConstValue)
             if len(constValue) > 1 {
-                return new error(sprintf("constant value length greater than  1 at class 'main'  field '%s'", name))
+                panic(sprintf("constant value length greater than  1 at class 'main'  field '%s'", name))
             }
-            _, typ, err := jvm.Descriptor.ParseType(c.ConstPool[f.descriptorIndex].Info)
+            _, typ, err := jvm.Descriptor.ParseType(c.ConstPool[f.descriptorIndex].info)
             if err != null {
-                return err
+                panic(err)
             }
-            if len(f.AttributeGroupedByName.GetByName(cg.AttributeNameLucyConst)) > 0 {
+            if len(f.GetAttributeByName(cg.AttributeNameLucyConst)) > 0 {
                 //const
                 constant := new ast.Constant()
                 constant.name = name
                 constant.accessFlags = f.accessFlags
                 constant.Type = typ
-                _, constant.Type, err = jvm.Descriptor.ParseType(c.ConstPool[f.descriptorIndex].Info)
+                _, constant.Type, err = jvm.Descriptor.ParseType(c.ConstPool[f.descriptorIndex].info)
                 if err != null {
-                    return err
+                   panic(err)
                 }
-                valueIndex := binary.BigEndian.getChar(constValue[0].Info)
+                valueIndex := binary.BigEndian.getChar(constValue[0].info)
                 constant.boolValue , constant.longValue, constant.doubleValue,constant.stringValue =
                     this.loadConst(c, valueIndex, constant.Type)
-                pack.Block.constants[name] = constant
+                pack.block.constants[name] = constant
             } else {
                 //global vars
                 vd := new ast.Variable()
                 vd.name = name
                 vd.accessFlags = f.accessFlags
-                vd.jvmDescriptor = string(c.ConstPool[f.descriptorIndex].Info)
+                vd.jvmDescriptor = string(c.ConstPool[f.descriptorIndex].info)
                 vd.Type = typ
                 vd.isGlobal = true
-                pack.Block.Variables[name] = vd
-                if t := f.AttributeGroupedByName.GetByName(cg.AttributeNameLucyFieldDescriptor); t != null && len(t) > 0 {
-                    d := new cg.AttributeLucyFieldDescriptor()
-                    d.FromBs(c, t[0].Info)
-                    _, vd.Type, err = jvm.LucyFieldSignature.Decode([]byte(d.Descriptor))
+                pack.block.Variables[name] = vd
+                if t := f.GetAttributeByName(cg.AttributeNameLucyFieldDescriptor); t != null && len(t) > 0 {
+                    d := new cg.AttributeLucyFieldDescriptor("" , 0 )
+                    d.fromBs(c, t[0].info)
+                    _, vd.Type, err = jvm.LucyFieldSignature.Decode([]byte(d.descriptor))
                     if err != null {
-                        return err
+                        panic(err)
                     }
-                    if vd.Type.Type == ast.VariableTypeFunction && d.MethodAccessFlag&cg.AccMethodVarargs != 0 {
+                    if vd.Type.Type == ast.VariableTypeFunction && d.methodAccessFlag&cg.AccMethodVarargs != 0 {
                         if vd.Type.functionType.ParameterList[len(vd.Type.functionType.ParameterList)-1].Type.Type !=
                             ast.VariableTypeJavaArray {
                             panic("not a java array")
@@ -429,11 +428,11 @@ class FileLoader implements ast.LoadImport{
         }
 
         for _, m := range c.methods {
-            if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyTriggerPackageInit); t != null && len(t) > 0 {
-                pack.triggerPackageInitMethodName = string(c.ConstPool[m.nameIndex].Info)
+            if t := m.GetAttributeByName(cg.AttributeNameLucyTriggerPackageInit); t != null && len(t) > 0 {
+                pack.triggerPackageInitMethodName = string(c.ConstPool[m.nameIndex].info)
                 continue
             }
-            name := string(c.ConstPool[m.nameIndex].Info)
+            name := string(c.ConstPool[m.nameIndex].info)
             if name == ast.MainFunctionName {
                 // this is main function
                 continue
@@ -441,32 +440,29 @@ class FileLoader implements ast.LoadImport{
             function := new ast.Function()
             function.name = name
             function.accessFlags = m.accessFlags
-            function.jvmDescriptor = string(c.ConstPool[m.descriptorIndex].Info)
-            function.Type, err = jvm.Descriptor.ParseFunctionType(c.ConstPool[m.descriptorIndex].Info)
+            function.jvmDescriptor = string(c.ConstPool[m.descriptorIndex].info)
+            function.Type, err := jvm.Descriptor.ParseFunctionType(c.ConstPool[m.descriptorIndex].info)
             if err != null {
-                return err
+                panic(err)
             }
-            if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyMethodDescriptor); t != null && len(t) > 0 {
-                index := binary.BigEndian.getChar(t[0].Info)
-                _, err = jvm.LucyMethodSignature.Decode(function.Type, c.ConstPool[index].Info)
+            if t := m.GetAttributeByName(cg.AttributeNameLucyMethodDescriptor); t != null && len(t) > 0 {
+                index := binary.BigEndian.getChar(t[0].info)
+                _, err := jvm.LucyMethodSignature.Decode(function.Type, c.ConstPool[index].info)
                 if err != null {
-                    return err
+                    panic(err)
                 }
             }
-            err = loadEnumForFunction(function)
-            if err != null {
-                return err
+            loadEnumForFunction(function)
+            if t := m.GetAttributeByName(cg.AttributeNameMethodParameters); t != null && len(t) > 0 {
+                parseMethodParameter(c, t[0].info, function)
             }
-            if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameMethodParameters); t != null && len(t) > 0 {
-                parseMethodParameter(c, t[0].Info, function)
+            if t := m.GetAttributeByName(cg.AttributeNameLucyReturnListNames); t != null && len(t) > 0 {
+                parseReturnListNames(c, t[0].info, function)
             }
-            if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyReturnListNames); t != null && len(t) > 0 {
-                parseReturnListNames(c, t[0].Info, function)
-            }
-            if t := m.AttributeGroupedByName.GetByName(cg.AttributeNameLucyDefaultParameters); t != null && len(t) > 0 {
+            if t := m.GetAttributeByName(cg.AttributeNameLucyDefaultParameters); t != null && len(t) > 0 {
                 dp := new cg.AttributeDefaultParameters()
-                dp.fromBytes(t[0].Info)
-                jvm.DefaultValueParser.Decode(c, function, dp)
+                dp.fromBytes(t[0].info)
+                jvm.DefaultValueParse.Decode(c, function, dp)
             }
 
             if (function.accessFlags & cg.AccMethodVarargs) != 0 {
@@ -483,112 +479,91 @@ class FileLoader implements ast.LoadImport{
             function.entrance.Class = mainClassName
             function.entrance.Descriptor = function.jvmDescriptor
             function.isGlobal = true
-            pack.Block.Functions[name] = function
+            pack.block.Functions[name] = function
         }
 
-        if pack.Block.TypeAliases == null {
-            pack.Block.TypeAliases = new map{string->ast.Type}()
+        if pack.block.TypeAliases == null {
+            pack.block.TypeAliases = new map{string->ast.Type}()
         }
-        for _, v := range c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyTypeAlias) {
+        for _, v := range c.GetAttributeByName(cg.AttributeNameLucyTypeAlias) {
             attr := new cg.AttributeLucyTypeAlias()
-            attr.FromBs(c, v.Info)
-            name, typ, err := jvm.LucyTypeAliasParser.Decode([]byte(attr.alias))
+            attr.fromBs(c, v.info)
+            name, typ, err := jvm.LucyTypeAlias.Decode([]byte(attr.alias))
             if err != null {
-                return err
+                panic(err)
             }
             alias := new ast.TypeAlias()
             alias.name = name
-            alias.Comment = attr.comment
+            alias.comment = attr.comment
             typ.alias = alias
-            pack.Block.TypeAliases[name] = typ
+            pack.block.TypeAliases[name] = typ
             if typ.Type == ast.VariableTypeEnum {
-                err = loadEnumForVariableType(typ)
-                if err != null {
-                    return err
-                }
+                loadEnumForVariableType(typ)
             }
         }
-        for _, v := range c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyTemplateFunction) {
+        for _, v := range c.GetAttributeByName(cg.AttributeNameLucyTemplateFunction) {
             attr := new cg.AttributeTemplateFunction()
-            attr.fromBytes(c, v.Info)
+            attr.fromBytes(c, v.info)
             pos := new ast.Pos()
             pos.filename = attr.filename
             pos.line = int(attr.startLine)
             pos.column = int(attr.startColumn)
             f, es := ast.ParseFunctionHandler([]byte(attr.code),pos)
             if len(es) > 0 { // looks impossible
-                return es[0]
+                panic(es[0])
             }
             f.accessFlags = attr.accessFlags
             f.TemplateFunction = new ast.TemplateFunction()
-            pack.Block.Functions[attr.name] = f
+            pack.block.Functions[attr.name] = f
         }
-        return null
     }
 
-    fn  loadLucyPackage(r Resource) -> (p ast.Package, err error) {
-        fis, err := ioutil.ReadDir(r.realPath)
-        if err != null {
-            return null, err
-        }
-        fisM := new map { string -> os.FileInfo } ()
+    fn  loadLucyPackage(r Resource) -> (p ast.Package) {
+        fis := new io.File(r.realPath).list()
+        fisM := new map { string -> bool } ()
         for _, v := range fis {
-            if strings.HasSuffix(v.name(), ".class") {
-                fisM[v.name()] = v
+            if v.endsWith(".class") {
+                fisM[v] = true
             }
         }
-
-        _, ok := fisM[mainClassName]
-        if ok == false {
-            return null, new error(sprintf("main class not found"))
+        if false == fisM.keyExist(mainClassName) {
+            panic(sprintf("main class not found"))
         }
-        bs, err := ioutil.ReadFile(filepath.Join(r.realPath, mainClassName))
-        if err != null {
-            return null, new error(sprintf("read main.class failed,err:%v", err))
-        }
-        c, err := (new ClassDecoder()).decode(bs)
-        if err != null {
-            return null, new error(sprintf("decode main class failed,err:%v", err))
-        }
+        bs , _ := os.readFile(r.realPath + "/"  + mainClassName)
+        c := (new ClassDecoder(javaArray2Lucy(bs))).decode()
         p = new ast.Package()
+        p.block = new ast.Block()
         p.name = r.name
-        err = this.loadLucyMainClass(p, c)
-        if err != null {
-            return null, new error(sprintf("parse main class failed,err:%v", err))
-        }
-        delete(fisM, mainClassName)
-        mkEnums := fn(e ast.Enum) {
+        this.loadLucyMainClass(p, c)
+        fisM.remove(mainClassName)
+         fn mkEnums(e ast.Enum) {
             if p.block.Enums == null {
                 p.block.Enums = new map { string -> ast.Enum } ()
             }
             if p.block.EnumNames == null {
                 p.block.EnumNames = new map { string -> ast.EnumName } ()
             }
-            p.block.Enums[filepath.Base(e.name)] = e
+            p.block.Enums[common.getBaseName(e.name)] = e
             for _, v := range e.Enums {
                 p.block.EnumNames[v.name] = v
             }
         }
-        for _, v := range fisM {
-            b := ioutil.ReadFile(filepath.Join(r.realPath, v.name()))
-            c := (new ClassDecoder(bs)).decode()
-            if len(c.AttributeGroupedByName.GetByName(cg.AttributeNameLucyEnum)) > 0 {
-                e, err := this.loadLucyEnum(c)
-                if err != null {
-                    return null, err
-                }
+        for name, _ := range fisM {
+            b,_ := os.readFile(r.realPath  + "/" +  name)
+            classFile := new ClassDecoder(javaArray2Lucy(b)).decode()
+            if len(classFile.GetAttributeByName(cg.AttributeNameLucyEnum)) > 0 {
+                e := this.loadLucyEnum(classFile)
                 mkEnums(e)
                 continue
             }
-            c := this.loadAsLucy(c)
+            c := this.loadAsLucy(classFile)
             if c != null {
                 if p.block.Classes == null {
                     p.block.Classes = new map {string -> ast.Class } ()
                 }
-                p.block.Classes[filepath.Base(ast.TypeName)] = c
+                p.block.Classes[common.getBaseName(common.getBaseName(c.name))] = c
             }
         }
-        return p, null
     }
 
     fn  loadJavaPackage(r Resource) -> (p ast.Package) {
@@ -603,31 +578,33 @@ class FileLoader implements ast.LoadImport{
             if err != null{
                 panic(err)
             }
-            c  := (new ClassDecoder(javaArray2Lucy(new []byte(bs.size())) , bs)).decode()
+            c  := new ClassDecoder(javaArray2Lucy(bs)).decode()
             cc := this.loadAsJava(c)
             if cc != null {
                 if p.block.Classes == null {
                     p.block.Classes = new map{string->ast.Class}()
                 }
-                p.block.Classes[filepath.Base(ast.TypeName)] = cc
+                p.block.Classes[common.getBaseName(cc.name)] = cc
             }
         }
     }
 
-    fn  loadClass(r Resource) -> (cc ast.Class) {
+    fn  loadClass(r Resource) -> (c  ast.Class) {
         bs, err := os.readFile(r.realPath)
         if err != null {
             return null
         }
-        cc = (new ClassDecoder(javaArray2Lucy(bs))).decode()
+        cc := (new ClassDecoder(javaArray2Lucy(bs))).decode()
         if r.kind == resourceKindLucyClass {
-            if t := cg.GetAttributeByName(cc .AttributeGroupedByName ,  cg.AttributeNameLucyEnum); len(t) > 0 {
-                return this.loadLucyEnum(c)
+            if t := cc.GetAttributeByName(cg.AttributeNameLucyEnum); len(t) > 0 {
+                panic("cannot load lucy enum")
+                ///this.loadLucyEnum(cc)
+                //return null
             } else {
-                return this.loadAsLucy(c)
+                return this.loadAsLucy(cc)
             }
         }
-        return this.loadAsJava(c)
+        return this.loadAsJava(cc)
     }
 
 

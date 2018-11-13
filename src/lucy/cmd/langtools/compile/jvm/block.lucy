@@ -19,8 +19,7 @@ class BuildBlock {
 		this.BuildIf = new BuildIf(eb , this)
 		this.BuildSwitch = new BuildSwitch(eb , this)
 		this.BuildReturn = new BuildReturn(eb , this)
-
-
+		
 	}
 	fn buildBlock(
 		c cg.ClassHighLevel,
@@ -67,7 +66,7 @@ class BuildBlock {
 			}
 			if s.Type == ast.StatementTypeIf && s.StatementIf.Else != null {
 				t := s.StatementIf.block.notExecuteToLastStatement
-				for _, v := range s.StatementIf.ElseIfList {
+				for _, v := range s.StatementIf.elseIfList {
 					t = t && v.block.notExecuteToLastStatement
 				}
 				t = t && s.StatementIf.Else.notExecuteToLastStatement
@@ -114,7 +113,7 @@ class BuildBlock {
 		s ast.Statement,
 		context Context,
 		state StackMapState) -> (maxStack char) {
-		//fmt.Println(s.pos)
+		//print(s.pos)
 		switch s.Type {
 		case ast.StatementTypeExpression:
 			maxStack = this.eb.build(c, code, s.Expression, context, state)
@@ -122,8 +121,8 @@ class BuildBlock {
 			s.StatementIf.exits = []cg.Exit{} //could compile multi times
 			maxStack = this.BuildIf.buildIfStatement(c, code, s.StatementIf, context, state)
 			if len(s.StatementIf.exits) > 0 {
-				writeExits(s.StatementIf.exits, code.CodeLength)
-				context.MakeStackMap(code, state, code.CodeLength)
+				writeExits(s.StatementIf.exits, code.codeLength)
+				context.MakeStackMap(code, state, code.codeLength)
 			}
 		case ast.StatementTypeBlock:
 			blockState := new StackMapState(state)
@@ -131,17 +130,17 @@ class BuildBlock {
 			this.buildBlock(c, code, s.block, context, blockState)
 			state.addTop(blockState)
 			if len(s.block.exits) > 0 {
-				writeExits(s.StatementIf.exits, code.CodeLength)
-				context.MakeStackMap(code, state, code.CodeLength)
+				writeExits(s.StatementIf.exits, code.codeLength)
+				context.MakeStackMap(code, state, code.codeLength)
 			}
 		case ast.StatementTypeFor:
 			s.StatementFor.exits = []cg.Exit{} //could compile multi times
 			maxStack = this.BuildFor.buildForStatement(c, code, s.StatementFor, context, state)
-			writeExits(s.StatementFor.exits, code.CodeLength)
-			context.MakeStackMap(code, state, code.CodeLength)
+			writeExits(s.StatementFor.exits, code.codeLength)
+			context.MakeStackMap(code, state, code.codeLength)
 		case ast.StatementTypeContinue:
 			this.buildDefers(c, code, context, s.StatementContinue.defers, state)
-			jumpTo(code, s.StatementContinue.statementFor.ContinueCodeOffset)
+			jumpTo(code, s.StatementContinue.statementFor.continueCodeOffset)
 		case ast.StatementTypeBreak:
 			this.buildDefers(c, code, context, s.StatementBreak.defers, state)
 			exit := new cg.Exit(cg.OP_goto, code)
@@ -159,12 +158,12 @@ class BuildBlock {
 			s.StatementSwitch.exits = []cg.Exit{} //could compile multi times
 			maxStack = this.BuildSwitch.buildSwitchStatement(c, code, s.StatementSwitch, context, state)
 			if len(s.StatementSwitch.exits) > 0 {
-				if code.CodeLength == context.lastStackMapOffset {
-					code.Codes[code.CodeLength] = cg.OP_nop
-					code.CodeLength++
+				if code.codeLength == context.lastStackMapOffset {
+					code.codes[code.codeLength] = cg.OP_nop
+					code.codeLength++
 				}
-				writeExits(s.StatementSwitch.exits, code.CodeLength)
-				context.MakeStackMap(code, state, code.CodeLength)
+				writeExits(s.StatementSwitch.exits, code.codeLength)
+				context.MakeStackMap(code, state, code.codeLength)
 			}
 		case ast.StatementTypeGoTo:
 			this.buildDefers(c, code, context, s.StatementGoTo.defers, state)
@@ -176,13 +175,13 @@ class BuildBlock {
 			}
 		case ast.StatementTypeLabel:
 			s.StatementLabel.codeOffsetGenerated = true
-			s.StatementLabel.codeOffset = code.CodeLength
+			s.StatementLabel.codeOffset = code.codeLength
 			if len(s.StatementLabel.exits) > 0 {
-				writeExits(s.StatementLabel.exits, code.CodeLength) // back patch
+				writeExits(s.StatementLabel.exits, code.codeLength) // back patch
 			}
-			context.MakeStackMap(code, state, code.CodeLength)
+			context.MakeStackMap(code, state, code.codeLength)
 		case ast.StatementTypeDefer: // nothing to do  ,defer will do after block is compiled
-			s.Defer.startPc = code.CodeLength
+			s.Defer.startPc = code.codeLength
 			s.Defer.StackMapState = (new StackMapState(state))
 		case ast.StatementTypeClass:
 			oldName := s.Class.name
@@ -227,25 +226,25 @@ class BuildBlock {
 		if len(ds) == 0 {
 			return
 		}
-		code.Codes[code.CodeLength] = cg.OP_aconst_null
-		code.CodeLength++
+		code.codes[code.codeLength] = cg.OP_aconst_null
+		code.codeLength++
 		index := len(ds) - 1
 		for index >= 0 { // build defer,cannot have return statement is defer
 			state := ds[index].StackMapState.(StackMapState)
 			state = (new StackMapState(state))
 			state.addTop(from)
 			state.pushStack(c, state.newObjectVariableType(throwableClass))
-			context.MakeStackMap(code, state, code.CodeLength)
+			context.MakeStackMap(code, state, code.codeLength)
 			e := new cg.ExceptionTable()
 			e.startPc = char(ds[index].startPc)
-			e.endPc = char(code.CodeLength)
-			e.handlerPc = char(code.CodeLength)
+			e.endPc = char(code.codeLength)
+			e.handlerPc = char(code.codeLength)
 			if ds[index].exceptionClass == null {
 				e.catchType = c.Class.insertClassConst(ast.DefaultExceptionClass)
 			} else {
 				e.catchType = c.Class.insertClassConst(ds[index].exceptionClass.name) // custom c
 			}
-			code.Exceptions.append(e)
+			code.exceptions.append(e)
 			//expect exception on stack
 			copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
 				context.exceptionVarOffset)) // this code will make_node_objects stack is empty
@@ -259,22 +258,22 @@ class BuildBlock {
 
 			//if need throw
 			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset))
-			code.Codes[code.CodeLength] = cg.OP_dup
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_dup
+			code.codeLength++
 			state.pushStack(c, state.newObjectVariableType(throwableClass))
-			context.MakeStackMap(code, state, code.CodeLength+6)
-			context.MakeStackMap(code, state, code.CodeLength+7)
+			context.MakeStackMap(code, state, code.codeLength+6)
+			context.MakeStackMap(code, state, code.codeLength+7)
 			state.popStack(1)
-			code.Codes[code.CodeLength] = cg.OP_ifnonnull
-			binary.BigEndian.putChar(code.Codes[code.CodeLength+1:code.CodeLength+3], 6)
-			code.Codes[code.CodeLength+3] = cg.OP_goto
-			binary.BigEndian.putChar(code.Codes[code.CodeLength+4:code.CodeLength+6], 4) // goto pop
-			code.Codes[code.CodeLength+6] = cg.OP_athrow
-			code.Codes[code.CodeLength+7] = cg.OP_pop // pop exception on stack
-			code.CodeLength += 8
+			code.codes[code.codeLength] = cg.OP_ifnonnull
+			binary.BigEndian.putChar(code.codes[code.codeLength+1:code.codeLength+3], 6)
+			code.codes[code.codeLength+3] = cg.OP_goto
+			binary.BigEndian.putChar(code.codes[code.codeLength+4:code.codeLength+6], 4) // goto pop
+			code.codes[code.codeLength+6] = cg.OP_athrow
+			code.codes[code.codeLength+7] = cg.OP_pop // pop exception on stack
+			code.codeLength += 8
 			if index != 0 {
-				code.Codes[code.CodeLength] = cg.OP_aconst_null
-				code.CodeLength++
+				code.codes[code.codeLength] = cg.OP_aconst_null
+				code.codeLength++
 			}
 			index--
 		}
@@ -379,13 +378,13 @@ class BuildBlock {
 		if t := char(1) + stack; t > maxStack {
 			maxStack = t
 		}
-		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+		code.codes[code.codeLength] = cg.OP_invokevirtual
 		c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 			javaStringClass,
 			"compareTo",
 			"(Ljava/lang/String;)I"
-		), code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+		), code.codes[code.codeLength+1:code.codeLength+3])
+		code.codeLength += 3
 		state.popStack(1)
 		switch condition.Type {
 		case ast.ExpressionTypeEq:

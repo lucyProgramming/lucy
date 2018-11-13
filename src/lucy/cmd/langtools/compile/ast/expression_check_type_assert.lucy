@@ -1,6 +1,6 @@
  
 class ExpressionCheckTypeAssert {
-	
+
 	
 	static fn check(e Expression , block Block, errs []error) -> (valueTypes []Type) {
 		assertion := e.data.(ExpressionTypeAssert)
@@ -14,7 +14,7 @@ class ExpressionCheckTypeAssert {
 			return null
 		}
 		if object.isPointer() == false {
-			errs . append(new error( sprintf("%s expression is not pointer",
+			errs.append(new error( sprintf("%s expression is not pointer",
 					errMsgPrefix(object.pos))))
 			return null
 		}

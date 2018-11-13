@@ -29,13 +29,13 @@ class BuildinFunctionPrintf {
         }
         call := e.data.(ast.ExpressionFunctionCall)
         meta := call.BuildInFunctionMeta.(ast.BuildInFunctionPrintfMeta)
-        code.Codes[code.CodeLength] = cg.OP_getstatic
+        code.codes[code.codeLength] = cg.OP_getstatic
         c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                  "java/lang/System",
                 "out",
              "Ljava/io/PrintStream;"
-        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.CodeLength += 3
+        ), code.codes[code.codeLength+1:code.codeLength+3])
+        code.codeLength += 3
         maxStack = 1
         state.pushStack(c, state.newObjectVariableType(javaPrintStreamClass))
         stack := this.eb.build(c, code, meta.Format, context, state)
@@ -44,9 +44,9 @@ class BuildinFunctionPrintf {
         }
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
         loadInt32(c, code, int(meta.ArgsLength))
-        code.Codes[code.CodeLength] = cg.OP_anewarray
-        c.insertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.CodeLength += 3
+        code.codes[code.codeLength] = cg.OP_anewarray
+        c.insertClassConst("java/lang/Object", code.codes[code.codeLength+1:code.codeLength+3])
+        code.codeLength += 3
         currentStack := char(3)
         if currentStack > maxStack {
             maxStack = currentStack
@@ -58,8 +58,8 @@ class BuildinFunctionPrintf {
         index := int(0)
         for _, v := range call.Args {
             currentStack = 3
-            code.Codes[code.CodeLength] = cg.OP_dup
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_dup
+            code.codeLength++
             loadInt32(c, code, index)
             currentStack += 2
             state.pushStack(c, objectArray)
@@ -72,19 +72,19 @@ class BuildinFunctionPrintf {
             if v.value.isPointer() == false {
                 TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.value)
             }
-            code.Codes[code.CodeLength] = cg.OP_aastore
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_aastore
+            code.codeLength++
             index++
         }
-        code.Codes[code.CodeLength] = cg.OP_invokevirtual
+        code.codes[code.codeLength] = cg.OP_invokevirtual
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaPrintStreamClass,
               "printf",
              "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/io/PrintStream;"
         ),
-            code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.Codes[code.CodeLength+3] = cg.OP_pop
-        code.CodeLength += 4
+            code.codes[code.codeLength+1:code.codeLength+3])
+        code.codes[code.codeLength+3] = cg.OP_pop
+        code.codeLength += 4
         return
     }
 

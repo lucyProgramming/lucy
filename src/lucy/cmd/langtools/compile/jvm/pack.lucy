@@ -12,96 +12,96 @@ class TypeConverterAndPrimitivePacker {
 		switch t.Type {
 		case ast.VariableTypeBool:
 			cname := "java/lang/Boolean"
-			code.Codes[code.CodeLength] = cg.OP_checkcast
-			c.insertClassConst(cname, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			code.codes[code.codeLength] = cg.OP_checkcast
+			c.insertClassConst(cname, code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
+			code.codes[code.codeLength] = cg.OP_invokevirtual
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				cname,
 				"booleanValue",
 				"()Z"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		case ast.VariableTypeByte:
 			cname := "java/lang/Byte"
-			code.Codes[code.CodeLength] = cg.OP_checkcast
-			c.insertClassConst(cname, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			code.codes[code.codeLength] = cg.OP_checkcast
+			c.insertClassConst(cname, code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
+			code.codes[code.codeLength] = cg.OP_invokevirtual
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				cname,
 				"byteValue",
 				"()B"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		case ast.VariableTypeShort:
 			cname := "java/lang/Short"
-			code.Codes[code.CodeLength] = cg.OP_checkcast
-			c.insertClassConst(cname, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			code.codes[code.codeLength] = cg.OP_checkcast
+			c.insertClassConst(cname, code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
+			code.codes[code.codeLength] = cg.OP_invokevirtual
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				cname,
 				"shortValue",
 				"()S"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		case ast.VariableTypeChar:
 			cname := "java/lang/Character"
-			code.Codes[code.CodeLength] = cg.OP_checkcast
-			c.insertClassConst(cname, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			code.codes[code.codeLength] = cg.OP_checkcast
+			c.insertClassConst(cname, code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
+			code.codes[code.codeLength] = cg.OP_invokevirtual
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				cname,
 				"shortValue",
 				"()C"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		case ast.VariableTypeEnum,ast.VariableTypeInt :
-			code.Codes[code.CodeLength] = cg.OP_checkcast
-			c.insertClassConst("java/lang/Integer", code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			code.codes[code.codeLength] = cg.OP_checkcast
+			c.insertClassConst("java/lang/Integer", code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
+			code.codes[code.codeLength] = cg.OP_invokevirtual
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaIntegerClass,
 				"intValue",
 				"()I"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		case ast.VariableTypeLong:
-			code.Codes[code.CodeLength] = cg.OP_checkcast
-			c.insertClassConst(javaLongClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			code.codes[code.codeLength] = cg.OP_checkcast
+			c.insertClassConst(javaLongClass, code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
+			code.codes[code.codeLength] = cg.OP_invokevirtual
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaLongClass,
 				"longValue",
 				"()J"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		case ast.VariableTypeFloat:
-			code.Codes[code.CodeLength] = cg.OP_checkcast
-			c.insertClassConst(javaFloatClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			code.codes[code.codeLength] = cg.OP_checkcast
+			c.insertClassConst(javaFloatClass, code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
+			code.codes[code.codeLength] = cg.OP_invokevirtual
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaFloatClass,
 				"floatValue",
 				"()F"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		case ast.VariableTypeDouble:
-			code.Codes[code.CodeLength] = cg.OP_checkcast
-			c.insertClassConst(javaDoubleClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			code.codes[code.codeLength] = cg.OP_checkcast
+			c.insertClassConst(javaDoubleClass, code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
+			code.codes[code.codeLength] = cg.OP_invokevirtual
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaDoubleClass,
 				"doubleValue",
 				"()D"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		}
 	}
 
@@ -183,29 +183,29 @@ class TypeConverterAndPrimitivePacker {
 			// no need  ,try to cast to root class
 			return
 		}
-		code.Codes[code.CodeLength] = cg.OP_checkcast
+		code.codes[code.codeLength] = cg.OP_checkcast
 		switch t.Type {
 		case ast.VariableTypeString:
-			c.insertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			c.insertClassConst(javaStringClass, code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		case ast.VariableTypeObject:
 			if t.Class.name != ast.JavaRootClass {
-				c.insertClassConst(t.Class.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-				code.CodeLength += 3
+				c.insertClassConst(t.Class.name, code.codes[code.codeLength+1:code.codeLength+3])
+				code.codeLength += 3
 			}
 		case ast.VariableTypeArray:
 			meta := ArrayMetas[t.array.Type]
-			c.insertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			c.insertClassConst(meta.className, code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		case ast.VariableTypeMap:
-			c.insertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			c.insertClassConst(mapClass, code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		case ast.VariableTypeJavaArray:
-			c.insertClassConst(Descriptor.typeDescriptor(t), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			c.insertClassConst(Descriptor.typeDescriptor(t), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		case ast.VariableTypeFunction:
-			c.insertClassConst(javaMethodHandleClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			c.insertClassConst(javaMethodHandleClass, code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		default:
 			panic("1")
 		}

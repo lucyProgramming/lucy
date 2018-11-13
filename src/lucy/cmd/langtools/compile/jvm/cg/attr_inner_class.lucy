@@ -7,19 +7,19 @@ public class InnerClass {
 	public name        string
 	public accessFlags char
 	
-	fn FromBs(c Class, bs []byte) {
-    		nameIndex := binary.BigEndian.getChar(c.ConstPool[binary.BigEndian.getChar(bs)].Info)
-    		this.innerClass = string(c.ConstPool[nameIndex].Info)
+	fn fromBs(c Class, bs []byte) {
+    		nameIndex := binary.BigEndian.getChar(c.ConstPool[binary.BigEndian.getChar(bs)].info)
+    		this.innerClass = string(c.ConstPool[nameIndex].info)
     		if 0 == binary.BigEndian.getChar(bs[2:]) {
     			//TODO:: what zero means???
     		} else {
-    			nameIndex = binary.BigEndian.getChar(c.ConstPool[binary.BigEndian.getChar(bs[2:])].Info)
-    			this.outerClass = string(c.ConstPool[nameIndex].Info)
+    			nameIndex = binary.BigEndian.getChar(c.ConstPool[binary.BigEndian.getChar(bs[2:])].info)
+    			this.outerClass = string(c.ConstPool[nameIndex].info)
     		}
     		if 0 == binary.BigEndian.getChar(bs[4:]) {
     			//TODO:: what zero means???
     		} else {
-    			this.name = string(c.ConstPool[binary.BigEndian.getChar(bs[4:])].Info)
+    			this.name = string(c.ConstPool[binary.BigEndian.getChar(bs[4:])].info)
     		}
     		this.accessFlags = binary.BigEndian.getChar(bs[6:])
     }
@@ -28,7 +28,7 @@ public class InnerClass {
 
 public class AttributeInnerClasses {
 	public Classes []InnerClass
-	public fn FromBs(c Class, bs []byte) {
+	public fn fromBs(c Class, bs []byte) {
 		length := binary.BigEndian.getChar(bs)
 		bs = bs[2:]
 		if int(length*8) != len(bs) {
@@ -37,7 +37,7 @@ public class AttributeInnerClasses {
 		this.Classes = []InnerClass{}
 		for len(bs) > 0 {
 			inner := new InnerClass()
-			inner.FromBs(c, bs[:8])
+			inner.fromBs(c, bs[:8])
 			this.Classes.append( inner)
 			bs = bs[8:]
 		}
@@ -49,17 +49,17 @@ public class AttributeInnerClasses {
 		}
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const(AttributeNameInnerClasses)
-		ret.Info = new []byte(2)
-		binary.BigEndian.putChar(ret.Info, char(len(this.Classes)))
+		ret.info = new []byte(2)
+		binary.BigEndian.putChar(ret.info, char(len(this.Classes)))
 		for _, v := range this.Classes {
 			bs8 := new []byte(8)
 			binary.BigEndian.putChar(bs8, c.insertClassConst(v.innerClass))
 			binary.BigEndian.putChar(bs8[2:], c.insertClassConst(v.outerClass))
 			binary.BigEndian.putChar(bs8[4:], c.insertUtf8Const(v.name))
 			binary.BigEndian.putChar(bs8[6:], v.accessFlags)
-			ret.Info.appendAll(bs8)
+			ret.info.appendAll(bs8)
 		}
-		ret.attributeLength = (len(ret.Info))
+		ret.attributeLength = (len(ret.info))
 		return ret
 	}
 

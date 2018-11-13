@@ -42,14 +42,30 @@ class BuildTemplateFunctionCall {
             call.TemplateFunctionCallPair.entrance = method
         }
         maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
-        code.Codes[code.CodeLength] = cg.OP_invokestatic
+        code.codes[code.codeLength] = cg.OP_invokestatic
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             call.TemplateFunctionCallPair.entrance.Class.name,
             call.TemplateFunctionCallPair.entrance.name,
             call.TemplateFunctionCallPair.entrance.Descriptor
         ),
-            code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.CodeLength += 3
+            code.codes[code.codeLength+1:code.codeLength+3])
+        code.codeLength += 3
+        if e.isStatementExpression {
+            if call.TemplateFunctionCallPair.Function.Type.VoidReturn() == false {
+                if len(call.TemplateFunctionCallPair.Function.Type.ReturnList) > 1 {
+                    code.codes[code.codeLength] = cg.OP_pop
+                    code.codeLength++
+                } else {
+                    if jvmSlotSize(e.value) == 1 {
+                        code.codes[code.codeLength] = cg.OP_pop
+                        code.codeLength++
+                    } else {
+                        code.codes[code.codeLength] = cg.OP_pop2
+                        code.codeLength++
+                    }
+                }
+            }
+        }
         return
     }
 

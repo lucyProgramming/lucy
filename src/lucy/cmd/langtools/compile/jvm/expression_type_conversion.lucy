@@ -29,13 +29,13 @@ class BuildExpressionTypeConversion {
         if conversion.Type.equal(ast.LucyBytesType) {
             currentStack = 2
             meta := ArrayMetas[ast.VariableTypeByte]
-            code.Codes[code.CodeLength] = cg.OP_new
-            c.insertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.Codes[code.CodeLength+3] = cg.OP_dup
+            code.codes[code.codeLength] = cg.OP_new
+            c.insertClassConst(meta.className, code.codes[code.codeLength+1:code.codeLength+3])
+            code.codes[code.codeLength+3] = cg.OP_dup
             t := new cg.StackMapVerificationTypeInfo()
-            t.Verify = new cg.StackMapUninitializedVariableInfo(char(code.CodeLength))
+            t.Verify = new cg.StackMapUninitializedVariableInfo(char(code.codeLength))
             state.stacks.append(t, t)
-            code.CodeLength += 4
+            code.codeLength += 4
         }
         // string(byte[])
         // string ([]byte)
@@ -43,13 +43,13 @@ class BuildExpressionTypeConversion {
             conversion.Expression.value.equal(ast.LucyBytesType)) ||
             (conversion.Type.Type == ast.VariableTypeString && conversion.Expression.value.equal(ast.JavaBytesType)) {
             currentStack = 2
-            code.Codes[code.CodeLength] = cg.OP_new
-            c.insertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.Codes[code.CodeLength+3] = cg.OP_dup
+            code.codes[code.codeLength] = cg.OP_new
+            c.insertClassConst(javaStringClass, code.codes[code.codeLength+1:code.codeLength+3])
+            code.codes[code.codeLength+3] = cg.OP_dup
             t := new cg.StackMapVerificationTypeInfo()
-            t.Verify = new cg.StackMapUninitializedVariableInfo(char(code.CodeLength))
+            t.Verify = new cg.StackMapUninitializedVariableInfo(char(code.codeLength))
             state.stacks.append( t, t)
-            code.CodeLength += 4
+            code.codeLength += 4
         }
         stack := this.eb.build(c, code, conversion.Expression, context, state)
         maxStack = currentStack + stack
@@ -68,43 +68,43 @@ class BuildExpressionTypeConversion {
         // enum(int)
         if conversion.Type.Type == ast.VariableTypeEnum &&
             conversion.Expression.value.Type == ast.VariableTypeInt {
-            code.Codes[code.CodeLength] = cg.OP_dup
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_dup
+            code.codeLength++
             loadInt32(c, code, conversion.Type.Enum.DefaultValue)
             wrongExit := new cg.Exit(cg.OP_if_icmplt, code)
-            code.Codes[code.CodeLength] = cg.OP_dup
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_dup
+            code.codeLength++
             loadInt32(c, code, conversion.Type.Enum.Enums[len(conversion.Type.Enum.Enums)-1].value)
             wrongExit2 := new cg.Exit(cg.OP_if_icmpgt, code)
             okExit := new cg.Exit(cg.OP_goto, code)
             state.pushStack(c, conversion.Expression.value)
             defer state.popStack(1)
-            context.MakeStackMap(code, state, code.CodeLength)
-            writeExits([]cg.Exit{wrongExit, wrongExit2}, code.CodeLength)
-            code.Codes[code.CodeLength] = cg.OP_pop
-            code.CodeLength++
-            code.Codes[code.CodeLength] = cg.OP_new
-            c.insertClassConst(javaExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.Codes[code.CodeLength+3] = cg.OP_dup
-            code.CodeLength += 4
-            code.Codes[code.CodeLength] = cg.OP_ldc_w
+            context.MakeStackMap(code, state, code.codeLength)
+            writeExits([]cg.Exit{wrongExit, wrongExit2}, code.codeLength)
+            code.codes[code.codeLength] = cg.OP_pop
+            code.codeLength++
+            code.codes[code.codeLength] = cg.OP_new
+            c.insertClassConst(javaExceptionClass, code.codes[code.codeLength+1:code.codeLength+3])
+            code.codes[code.codeLength+3] = cg.OP_dup
+            code.codeLength += 4
+            code.codes[code.codeLength] = cg.OP_ldc_w
             c.insertStringConst("int value not found in enum names",
-                code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+                code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
             if 3 > maxStack {
                 maxStack = 3
             }
-            code.Codes[code.CodeLength] = cg.OP_invokespecial
+            code.codes[code.codeLength] = cg.OP_invokespecial
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaExceptionClass,
                 specialMethodInit,
                 "(Ljava/lang/String;)V"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
-            code.Codes[code.CodeLength] = cg.OP_athrow
-            code.CodeLength++
-            context.MakeStackMap(code, state, code.CodeLength)
-            writeExits([]cg.Exit{okExit}, code.CodeLength)
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
+            code.codes[code.codeLength] = cg.OP_athrow
+            code.codeLength++
+            context.MakeStackMap(code, state, code.codeLength)
+            writeExits([]cg.Exit{okExit}, code.codeLength)
             return
         }
 
@@ -112,37 +112,37 @@ class BuildExpressionTypeConversion {
         if conversion.Type.equal(ast.LucyBytesType) &&
             conversion.Expression.value.Type == ast.VariableTypeString {
             //stack top must be a string
-            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                 "getBytes",
                 "()[B"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
             if 3 > maxStack { //arraybyteref arraybyteref byte[]
                 maxStack = 3
             }
             meta := ArrayMetas[ast.VariableTypeByte]
-            code.Codes[code.CodeLength] = cg.OP_invokespecial
+            code.codes[code.codeLength] = cg.OP_invokespecial
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 meta.className,
                 specialMethodInit,
                 meta.constructorFuncDescriptor
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
             return
         }
         // byte[]("hello world")
         if conversion.Type.equal(ast.LucyBytesType) &&
             conversion.Expression.value.Type == ast.VariableTypeString {
             //stack top must be a string
-            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                 "getBytes",
                "()[B"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
             if 3 > maxStack { //arraybyteref arraybyteref byte[]
                 maxStack = 3
             }
@@ -162,72 +162,72 @@ class BuildExpressionTypeConversion {
             state.appendLocals(c, typeInt)
             code.maxLocals += 2
             currentStack = 3
-            code.Codes[code.CodeLength] = cg.OP_dup
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_dup
+            code.codeLength++
             meta := ArrayMetas[ast.VariableTypeByte]
-            code.Codes[code.CodeLength] = cg.OP_getfield
+            code.codes[code.codeLength] = cg.OP_getfield
             c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                 meta.className,
                 "start",
                 "I"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
             copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, a.start))
-            code.Codes[code.CodeLength] = cg.OP_dup
-            code.CodeLength++
-            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            code.codes[code.codeLength] = cg.OP_dup
+            code.codeLength++
+            code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 meta.className,
                 "size",
                 "()I"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
             copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, a.length))
-            code.Codes[code.CodeLength] = cg.OP_getfield
+            code.codes[code.codeLength] = cg.OP_getfield
             c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                 meta.className,
                "elements",
                 meta.elementsFieldDescriptor
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.start))
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.length))
-            code.Codes[code.CodeLength] = cg.OP_ldc_w
-            c.insertStringConst("utf-8", code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            code.codes[code.codeLength] = cg.OP_ldc_w
+            c.insertStringConst("utf-8", code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
             if 6 > maxStack { // stack is ... stringRef stringRef byte[] start length "utf-8"
                 maxStack = 6
             }
-            code.Codes[code.CodeLength] = cg.OP_invokespecial
+            code.codes[code.codeLength] = cg.OP_invokespecial
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                 specialMethodInit,
                 "([BIILjava/lang/String;)V"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
             return
         }
         // string(byte[])
         if conversion.Type.Type == ast.VariableTypeString &&
             conversion.Expression.value.equal(ast.JavaBytesType) {
-            code.Codes[code.CodeLength] = cg.OP_invokespecial
+            code.codes[code.codeLength] = cg.OP_invokespecial
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                 specialMethodInit,
                 "([B)V"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
             return
         }
         if conversion.Type.Type == ast.VariableTypeString {
-            code.Codes[code.CodeLength] = cg.OP_checkcast
-            c.insertClassConst(javaStringClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            code.codes[code.codeLength] = cg.OP_checkcast
+            c.insertClassConst(javaStringClass, code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
             return
         }
         // objects
-        code.Codes[code.CodeLength] = cg.OP_checkcast
-        code.CodeLength++
+        code.codes[code.codeLength] = cg.OP_checkcast
+        code.codeLength++
         insertTypeAssertClass(c, code, conversion.Type)
         return
     }

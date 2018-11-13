@@ -11,7 +11,7 @@ public class Import {
 		import "github.com/std" as std2 should access by std2.doSomething()
 	*/
 	fn MkAccessName() -> (err error) {
-		if this.alias != "" {
+		if this.alias != null && this.alias != "" {
 			return null
 		}
 		if false == PackageNameIsValid(this.Import) {

@@ -179,12 +179,12 @@ class ExpressionConstFold {
 				is = true
 				return
 			case ExpressionTypeString:
-				left := bin.Left.data.(string)
-				right := bin.Right.data.(string)
+				left := bin.Left.stringValue
+				right := bin.Right.stringValue
 				if e.Type == ExpressionTypeAdd {
 					if len(left)+len(right) < 65536 {
 						e.Type = ExpressionTypeString
-						e.data = left + right
+						e.stringValue = left + right
 					} else {
 						return false, null
 					}
@@ -327,8 +327,8 @@ class ExpressionConstFold {
 		}
 		switch bin.Left.Type {
 		case ExpressionTypeString:
-			left := bin.Left.data.(string)
-			right := bin.Right.data.(string)
+			left := bin.Left.stringValue
+			right := bin.Right.stringValue
 			switch e.Type {
 			case ExpressionTypeEq:
 				e.boolValue = left == right

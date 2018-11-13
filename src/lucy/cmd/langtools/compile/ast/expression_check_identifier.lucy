@@ -14,7 +14,7 @@ class ExpressionCheckIdentifier {
 		switch identifier.name {
 		case magicIdentifierFile:
 			e.Type = ExpressionTypeString
-			e.data = e.pos.filename
+			e.stringValue = e.pos.filename
 			result, _ := e.checkSingleValueContextExpression(block)
 			return result, null
 		case magicIdentifierLine:
@@ -62,8 +62,7 @@ class ExpressionCheckIdentifier {
 		if d == null {
 			return null, new error(sprintf("%s '%s' not found", e.pos.errMsgPrefix(), identifier.name))
 		}
-
-		if f := d.(Function) ;f != null {
+		if f ,ok := d.(Function) ; ok {
 			f := d.(Function)
 			if f.isGlobalMain() {
 				// not allow
@@ -91,7 +90,7 @@ class ExpressionCheckIdentifier {
 			identifier.Function = f
 			return result, null
 		}
-		if t := d.(Variable) ;t != null {
+		if t ,ok := d.(Variable) ;ok {
 			if t.isBuildIn == false { // try from import
 				i, should := shouldAccessFromImports(identifier.name, e.pos, t.pos)
 				if should {
@@ -107,7 +106,7 @@ class ExpressionCheckIdentifier {
 			identifier.Variable = t
 			return result, null
 		}
-		if t := d.(Constant) ;t != null {
+		if t,ok  := d.(Constant) ;ok {
 			if t.isBuildIn == false { // try from import
 				i, should := shouldAccessFromImports(identifier.name, e.pos, t.pos)
 				if should {
@@ -120,7 +119,7 @@ class ExpressionCheckIdentifier {
 			result.pos = e.pos
 			return result, null
 		}
-		if c := d.(Class) ; c != null {
+		if c ,ok := d.(Class) ; ok {
 			if c.isBuildIn == false { // try from import
 				i, should := shouldAccessFromImports(identifier.name, e.pos, c.pos)
 				if should {
@@ -133,7 +132,7 @@ class ExpressionCheckIdentifier {
 			result.Class = c
 			return result, null
 		}
-		if enumName := d.(EnumName) ; enumName != null {
+		if enumName ,ok := d.(EnumName) ; ok {
 			if enumName.Enum.isBuildIn == false { // try from import
 				i, should := shouldAccessFromImports(identifier.name, e.pos, enumName.pos)
 				if should {

@@ -65,7 +65,7 @@ class StatementIfParser extends ParserExtends {
 			}
 		}
 		if this.parser.token.Type == lex.TokenElseif {
-			statementIf.ElseIfList, err = this.parseElseIfList()
+			statementIf.elseIfList, err = this.parseElseIfList()
 			if err != null {
 				return statementIf, err
 			}

@@ -9,14 +9,17 @@ class StackMapState {
     fn StackMapState(last StackMapState) {
     	this.super()
     	if last == null {
+    		this.locals = new []cg.StackMapVerificationTypeInfo(0)
+    		this.stacks = new []cg.StackMapVerificationTypeInfo(0)
     		return 
     	}
         this.locals = new []cg.StackMapVerificationTypeInfo(len(last.locals))
         copy(this.locals, last.locals)
+        this.stacks = new []cg.StackMapVerificationTypeInfo(0)
     }
 
 
-	fn appendLocals(c cg.ClassHighLevel, v ast.Type) {
+	fn appendLocals(c cg.ClassHighLevel, v ast.Type) { 
 		this.locals.append(this.newStackMapVerificationTypeInfo(c, v))
 	}
 

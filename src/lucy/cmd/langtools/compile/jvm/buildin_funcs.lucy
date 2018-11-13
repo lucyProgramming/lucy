@@ -38,14 +38,30 @@ class BuildinFunctionCall {
         call := e.data.(ast.ExpressionFunctionCall)
         if call.Function.loadedFromCorePackage {
             maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
-            code.Codes[code.CodeLength] = cg.OP_invokestatic
+            code.codes[code.codeLength] = cg.OP_invokestatic
             c.insertMethodRefConst(
                 new cg.ConstantInfoMethodrefHighLevel(
                     call.Function.entrance.Class.name,
                     call.Function.name,
                     call.Function.entrance.Descriptor
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
+            if e.isStatementExpression {
+                if call.Function.Type.VoidReturn() == false {
+                    if len(call.Function.Type.ReturnList) > 1 {
+                        code.codes[code.codeLength] = cg.OP_pop
+                        code.codeLength++
+                    } else {
+                        if jvmSlotSize(e.value) == 1 {
+                            code.codes[code.codeLength] = cg.OP_pop
+                            code.codeLength++
+                        } else {
+                            code.codes[code.codeLength] = cg.OP_pop2
+                            code.codeLength++
+                        }
+                    }
+                }
+            }
             return
         }
         switch call.Function.name {
@@ -59,11 +75,11 @@ class BuildinFunctionCall {
         case common.BuildInFunctionMonitorEnter, common.BuildInFunctionMonitorExit:
             maxStack = this.build(c, code, call.Args[0], context, state)
             if call.Function.name == common.BuildInFunctionMonitorEnter {
-                code.Codes[code.CodeLength] = cg.OP_monitorenter
+                code.codes[code.codeLength] = cg.OP_monitorenter
             } else { // monitor enter on exit
-                code.Codes[code.CodeLength] = cg.OP_monitorexit
+                code.codes[code.codeLength] = cg.OP_monitorexit
             }
-            code.CodeLength++
+            code.codeLength++
           */
         case common.BuildInFunctionPrintf:
             return this.BuildinFunctionPrintf.build(c, code, e, context, state)

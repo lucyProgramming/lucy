@@ -95,6 +95,9 @@ func (this *BuildPackage) buildForRangeStatementForArray(
 	code.CodeLength++
 	code.Codes[code.CodeLength] = cg.OP_iadd
 	code.CodeLength++
+	if 3 > maxStack {
+		maxStack = 3
+	}
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.Start)...)
 	//get end
 	code.Codes[code.CodeLength] = cg.OP_getfield

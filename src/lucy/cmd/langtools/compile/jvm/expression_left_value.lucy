@@ -25,13 +25,13 @@ class BuildExpressionLeftValue {
         meta := closure.getMeta(identifier.Variable.Type.Type)
         if context.function.Closure.closureVariableExist(identifier.Variable) { // capture var exits
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, char(0)))
-            code.Codes[code.CodeLength] = cg.OP_getfield
+            code.codes[code.codeLength] = cg.OP_getfield
             c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                 c.name,
                 identifier.name,
                "L" + meta.className + ";"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
         } else {
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, identifier.Variable.localValOffset))
         }
@@ -194,8 +194,8 @@ class BuildExpressionLeftValue {
                     ops[0] = cg.OP_putstatic
                     leftValueType = LeftValueKindPutStatic
                 } else {
-                    code.Codes[code.CodeLength] = cg.OP_aload_0
-                    code.CodeLength++
+                    code.codes[code.codeLength] = cg.OP_aload_0
+                    code.codeLength++
                     state.pushStack(c, state.newObjectVariableType(selection.Expression.value.Class.name))
                     ops[0] = cg.OP_putfield
                     remainStack = 1

@@ -18,20 +18,20 @@ class BuildExpressionConversion {
 		case ast.VariableTypeByte:
 			// already is
 		case ast.VariableTypeShort , ast.VariableTypeChar ,ast.VariableTypeInt :
-			code.Codes[code.CodeLength] = cg.OP_i2b
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_i2b
+			code.codeLength++
 		case ast.VariableTypeLong:
-			code.Codes[code.CodeLength] = cg.OP_l2i
-			code.Codes[code.CodeLength+1] = cg.OP_i2b
-			code.CodeLength += 2
+			code.codes[code.codeLength] = cg.OP_l2i
+			code.codes[code.codeLength+1] = cg.OP_i2b
+			code.codeLength += 2
 		case ast.VariableTypeFloat:
-			code.Codes[code.CodeLength] = cg.OP_f2i
-			code.Codes[code.CodeLength+1] = cg.OP_i2b
-			code.CodeLength += 2
+			code.codes[code.codeLength] = cg.OP_f2i
+			code.codes[code.codeLength+1] = cg.OP_i2b
+			code.codeLength += 2
 		case ast.VariableTypeDouble:
-			code.Codes[code.CodeLength] = cg.OP_d2i
-			code.Codes[code.CodeLength+1] = cg.OP_i2b
-			code.CodeLength += 2
+			code.codes[code.codeLength] = cg.OP_d2i
+			code.codes[code.codeLength+1] = cg.OP_i2b
+			code.codeLength += 2
 		}
 	}
 
@@ -42,23 +42,23 @@ class BuildExpressionConversion {
 		case ast.VariableTypeShort:
 			// already is
 		case ast.VariableTypeChar:
-			code.Codes[code.CodeLength] = cg.OP_i2s
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_i2s
+			code.codeLength++
 		case ast.VariableTypeInt:
-			code.Codes[code.CodeLength] = cg.OP_i2s
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_i2s
+			code.codeLength++
 		case ast.VariableTypeLong:
-			code.Codes[code.CodeLength] = cg.OP_l2i
-			code.Codes[code.CodeLength+1] = cg.OP_i2s
-			code.CodeLength += 2
+			code.codes[code.codeLength] = cg.OP_l2i
+			code.codes[code.codeLength+1] = cg.OP_i2s
+			code.codeLength += 2
 		case ast.VariableTypeFloat:
-			code.Codes[code.CodeLength] = cg.OP_f2i
-			code.Codes[code.CodeLength+1] = cg.OP_i2s
-			code.CodeLength += 2
+			code.codes[code.codeLength] = cg.OP_f2i
+			code.codes[code.codeLength+1] = cg.OP_i2s
+			code.codeLength += 2
 		case ast.VariableTypeDouble:
-			code.Codes[code.CodeLength] = cg.OP_d2i
-			code.Codes[code.CodeLength+1] = cg.OP_i2s
-			code.CodeLength += 2
+			code.codes[code.codeLength] = cg.OP_d2i
+			code.codes[code.codeLength+1] = cg.OP_i2s
+			code.codeLength += 2
 
 		}
 	}
@@ -72,23 +72,23 @@ class BuildExpressionConversion {
 		case ast.VariableTypeChar:
 			// already is
 		case ast.VariableTypeInt:
-			code.Codes[code.CodeLength] = cg.OP_i2c
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_i2c
+			code.codeLength++
 		case ast.VariableTypeLong:
-			code.Codes[code.CodeLength] = cg.OP_l2i
-			code.CodeLength++
-			code.Codes[code.CodeLength] = cg.OP_i2c
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_l2i
+			code.codeLength++
+			code.codes[code.codeLength] = cg.OP_i2c
+			code.codeLength++
 		case ast.VariableTypeFloat:
-			code.Codes[code.CodeLength] = cg.OP_f2i
-			code.CodeLength++
-			code.Codes[code.CodeLength] = cg.OP_i2c
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_f2i
+			code.codeLength++
+			code.codes[code.codeLength] = cg.OP_i2c
+			code.codeLength++
 		case ast.VariableTypeDouble:
-			code.Codes[code.CodeLength] = cg.OP_d2i
-			code.CodeLength++
-			code.Codes[code.CodeLength] = cg.OP_i2c
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_d2i
+			code.codeLength++
+			code.codes[code.codeLength] = cg.OP_i2c
+			code.codeLength++
 
 		}
 	}
@@ -103,14 +103,14 @@ class BuildExpressionConversion {
 		case ast.VariableTypeInt:
 			// already is
 		case ast.VariableTypeLong:
-			code.Codes[code.CodeLength] = cg.OP_l2i
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_l2i
+			code.codeLength++
 		case ast.VariableTypeFloat:
-			code.Codes[code.CodeLength] = cg.OP_f2i
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_f2i
+			code.codeLength++
 		case ast.VariableTypeDouble:
-			code.Codes[code.CodeLength] = cg.OP_d2i
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_d2i
+			code.codeLength++
 
 		}
 	}
@@ -118,16 +118,16 @@ class BuildExpressionConversion {
 	fn  stackTop2Float(code cg.AttributeCode, on ast.VariableTypeKind) {
 		switch on {
 		case ast.VariableTypeByte ,ast.VariableTypeShort ,ast.VariableTypeChar ,ast.VariableTypeInt   :
-			code.Codes[code.CodeLength] = cg.OP_i2f
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_i2f
+			code.codeLength++
 		case ast.VariableTypeLong:
-			code.Codes[code.CodeLength] = cg.OP_l2f
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_l2f
+			code.codeLength++
 		case ast.VariableTypeFloat:
 			// already is
 		case ast.VariableTypeDouble:
-			code.Codes[code.CodeLength] = cg.OP_d2f
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_d2f
+			code.codeLength++
 
 		}
 	}
@@ -135,16 +135,16 @@ class BuildExpressionConversion {
 	fn  stackTop2Long(code cg.AttributeCode, on ast.VariableTypeKind) {
 		switch on {
 		case ast.VariableTypeByte , ast.VariableTypeShort ,ast.VariableTypeChar ,ast.VariableTypeInt  :
-			code.Codes[code.CodeLength] = cg.OP_i2l
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_i2l
+			code.codeLength++
 		case ast.VariableTypeLong:
 			// already is
 		case ast.VariableTypeFloat:
-			code.Codes[code.CodeLength] = cg.OP_f2l
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_f2l
+			code.codeLength++
 		case ast.VariableTypeDouble:
-			code.Codes[code.CodeLength] = cg.OP_d2l
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_d2l
+			code.codeLength++
 
 		}
 	}
@@ -152,14 +152,14 @@ class BuildExpressionConversion {
 	fn  stackTop2Double(code cg.AttributeCode, on ast.VariableTypeKind) {
 		switch on {
 		case ast.VariableTypeByte , ast.VariableTypeShort ,ast.VariableTypeChar , ast.VariableTypeInt :
-			code.Codes[code.CodeLength] = cg.OP_i2d
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_i2d
+			code.codeLength++
 		case ast.VariableTypeLong:
-			code.Codes[code.CodeLength] = cg.OP_l2d
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_l2d
+			code.codeLength++
 		case ast.VariableTypeFloat:
-			code.Codes[code.CodeLength] = cg.OP_f2d
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_f2d
+			code.codeLength++
 		case ast.VariableTypeDouble:
 			// already is
 		}
@@ -199,78 +199,78 @@ class BuildExpressionConversion {
 		maxStack = jvmSlotSize(typ) * 2
 		switch typ.Type {
 		case ast.VariableTypeBool:
-			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			code.codes[code.codeLength] = cg.OP_invokestatic
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(Z)Ljava/lang/String;"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		case ast.VariableTypeChar:
-			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			code.codes[code.codeLength] = cg.OP_invokestatic
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(C)Ljava/lang/String;"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		case ast.VariableTypeByte ,ast.VariableTypeShort ,  ast.VariableTypeEnum ,ast.VariableTypeInt :
-			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			code.codes[code.codeLength] = cg.OP_invokestatic
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(I)Ljava/lang/String;"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		case ast.VariableTypeLong:
-			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			code.codes[code.codeLength] = cg.OP_invokestatic
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(J)Ljava/lang/String;"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		case ast.VariableTypeFloat:
-			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			code.codes[code.codeLength] = cg.OP_invokestatic
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(F)Ljava/lang/String;"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		case ast.VariableTypeDouble:
-			code.Codes[code.CodeLength] = cg.OP_invokestatic
+			code.codes[code.codeLength] = cg.OP_invokestatic
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				javaStringClass,
 				"valueOf",
 				"(D)Ljava/lang/String;"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		default:
-			code.Codes[code.CodeLength] = cg.OP_dup
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_dup
+			code.codeLength++
 			{
 				state.pushStack(c, typ)
-				context.MakeStackMap(code, state, code.CodeLength+10)
+				context.MakeStackMap(code, state, code.codeLength+10)
 				state.popStack(1)
 				state.pushStack(c, typeString)
-				context.MakeStackMap(code, state, code.CodeLength+13)
+				context.MakeStackMap(code, state, code.codeLength+13)
 				state.popStack(1)
 			}
-			code.Codes[code.CodeLength] = cg.OP_ifnonnull
-			binary.BigEndian.putChar(code.Codes[code.CodeLength+1:code.CodeLength+3], char(10))
-			code.Codes[code.CodeLength+3] = cg.OP_pop
-			code.Codes[code.CodeLength+4] = cg.OP_ldc_w
-			c.insertStringConst("null", code.Codes[code.CodeLength+5:code.CodeLength+7])
-			code.Codes[code.CodeLength+7] = cg.OP_goto
-			binary.BigEndian.putChar(code.Codes[code.CodeLength+8:code.CodeLength+10],char( 6))
-			code.Codes[code.CodeLength+10] = cg.OP_invokevirtual
+			code.codes[code.codeLength] = cg.OP_ifnonnull
+			binary.BigEndian.putChar(code.codes[code.codeLength+1:code.codeLength+3], char(10))
+			code.codes[code.codeLength+3] = cg.OP_pop
+			code.codes[code.codeLength+4] = cg.OP_ldc_w
+			c.insertStringConst("null", code.codes[code.codeLength+5:code.codeLength+7])
+			code.codes[code.codeLength+7] = cg.OP_goto
+			binary.BigEndian.putChar(code.codes[code.codeLength+8:code.codeLength+10],char( 6))
+			code.codes[code.codeLength+10] = cg.OP_invokevirtual
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				"java/lang/Object",
 				"toString",
 				"()Ljava/lang/String;"
-			), code.Codes[code.CodeLength+11:code.CodeLength+13])
-			code.CodeLength += 13
+			), code.codes[code.codeLength+11:code.codeLength+13])
+			code.codeLength += 13
 		}
 		return
 	}

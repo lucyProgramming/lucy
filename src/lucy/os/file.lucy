@@ -15,7 +15,7 @@ public fn readFile(filepath string) -> ( bs byte[],err error){
 		err = new error("file not exits")
 		return 
 	}
-	if f.isDirectory() == false {
+	if f.isDirectory() {
 		err = new error("file not a regular file")
 		return
 	}

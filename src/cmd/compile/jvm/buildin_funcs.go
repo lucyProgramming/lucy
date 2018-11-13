@@ -22,6 +22,23 @@ func (this *BuildExpression) mkBuildInFunctionCall(
 			Descriptor: call.Function.Entrance.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
+		if e.IsStatementExpression {
+			if call.Function.Type.VoidReturn() == false {
+				if len(call.Function.Type.ReturnList) > 1 {
+					code.Codes[code.CodeLength] = cg.OP_pop
+					code.CodeLength++
+				} else {
+					if jvmSlotSize(e.Value) == 1 {
+						code.Codes[code.CodeLength] = cg.OP_pop
+						code.CodeLength++
+					} else {
+						code.Codes[code.CodeLength] = cg.OP_pop2
+						code.CodeLength++
+					}
+				}
+			}
+		}
+
 		return
 	}
 	switch call.Function.Name {

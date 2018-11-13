@@ -18,8 +18,8 @@ class Context {
 
 	fn MakeStackMap(code cg.AttributeCode, state StackMapState, offset int) {
 		if this.lastStackMapOffset == offset {
-			code.AttributeStackMap.StackMaps =
-				code.AttributeStackMap.StackMaps[0 : len(code.AttributeStackMap.StackMaps)-1]
+			code.attributeStackMap.StackMaps =
+				code.attributeStackMap.StackMaps[0 : len(code.attributeStackMap.StackMaps)-1]
 			this.stackMapOffsets = this.stackMapOffsets[0 : len(this.stackMapOffsets)-1]
 			this.lastStackMapState = null
 			if len(this.stackMapOffsets) > 0 {
@@ -52,21 +52,21 @@ class Context {
 					same frame or same frame extended
 				*/
 				if delta <= 63 {
-					code.AttributeStackMap.StackMaps.append(new cg.StackMapSameFrame(byte(delta)))
+					code.attributeStackMap.StackMaps.append(new cg.StackMapSameFrame(byte(delta)))
 				} else {
-					code.AttributeStackMap.StackMaps.append(new cg.StackMapSameFrameExtended(251b, delta))
+					code.attributeStackMap.StackMaps.append(new cg.StackMapSameFrameExtended(251b, delta))
 				}
 				return
 			}
 			if len(this.lastStackMapStateLocals) == len(state.locals) && len(state.stacks) == 1 { // 1 stack or 1 stack extended
 				if delta <= 64 {
-					code.AttributeStackMap.StackMaps.append(
+					code.attributeStackMap.StackMaps.append(
 						new cg.StackMapSameLocals1StackItemFrame(
 							byte(delta + 64),
 							state.stacks[0]
 						))
 				} else {
-					code.AttributeStackMap.StackMaps.append(
+					code.attributeStackMap.StackMaps.append(
 						new cg.StackMapSameLocals1StackItemFrameExtended(
 							247,
 							delta,
@@ -83,7 +83,7 @@ class Context {
 					appendFrame.delta = delta
 					appendFrame.locals = new []cg.StackMapVerificationTypeInfo(num)
 					copy(appendFrame.locals, state.locals[len(state.locals)-num:])
-					code.AttributeStackMap.StackMaps.append(appendFrame)
+					code.attributeStackMap.StackMaps.append(appendFrame)
 					return
 				}
 			}
@@ -96,7 +96,7 @@ class Context {
 		copy(fullFrame.locals, state.locals)
 		fullFrame.stacks = new []cg.StackMapVerificationTypeInfo(len(state.stacks))
 		copy(fullFrame.stacks, state.stacks)
-		code.AttributeStackMap.StackMaps.append(fullFrame)
+		code.attributeStackMap.StackMaps.append(fullFrame)
 		return
 	}
 
@@ -107,7 +107,9 @@ class Context {
 		if pos == null {
 			return
 		}
-		if pos.filename != this.currentSourceFile {
+		if pos.filename != null && 
+			this.currentSourceFile != null && 
+			pos.filename != this.currentSourceFile {
 			c.insertSourceFile(pos.filename)
 			this.currentSourceFile = pos.filename
 			this.currentLineNumber = pos.line

@@ -13,7 +13,7 @@ const	AccMethodNative       char = 0x0100 //native，方法引用非java语言�
 const	AccMethodAbstract     char = 0x0400 //abstract，方法没有具体实现
 const	AccMethodStrict       char = 0x0800 //strictfp，方法使用FP-strict浮点格式
 const	AccMethodSynthetic    char = 0x1000 //方法在源文件中不出现，由编译器产生
- 
+
 
 public class MethodInfo {
 	public accessFlags            char
@@ -28,6 +28,9 @@ public class MethodInfo {
 
 	fn isSynthetic()  ->(is bool) {
 		return this.accessFlags & AccMethodSynthetic != 0
+	}
+	public fn GetAttributeByName( name string) -> (attrs []AttributeInfo){
+		return GetAttributeByName(this.AttributeGroupedByName , name)
 	}
 }
 

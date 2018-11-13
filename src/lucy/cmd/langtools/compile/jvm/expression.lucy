@@ -77,72 +77,72 @@ class BuildExpression {
         }
         switch e.Type {
         case ast.ExpressionTypeNull:
-            code.Codes[code.CodeLength] = cg.OP_aconst_null
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_aconst_null
+            code.codeLength++
             maxStack = 1
         case ast.ExpressionTypeBool:
             if e.boolValue {
-                code.Codes[code.CodeLength] = cg.OP_iconst_1
+                code.codes[code.codeLength] = cg.OP_iconst_1
             } else {
-                code.Codes[code.CodeLength] = cg.OP_iconst_0
+                code.codes[code.codeLength] = cg.OP_iconst_0
             }
-            code.CodeLength++
+            code.codeLength++
             maxStack = 1
         case ast.ExpressionTypeByte:
-            code.Codes[code.CodeLength] = cg.OP_bipush
-            code.Codes[code.CodeLength+1] = byte(e.longValue)
-            code.CodeLength += 2
+            code.codes[code.codeLength] = cg.OP_bipush
+            code.codes[code.codeLength+1] = byte(e.longValue)
+            code.codeLength += 2
             maxStack = 1
         case ast.ExpressionTypeInt, ast.ExpressionTypeShort, ast.ExpressionTypeChar:
             loadInt32(c, code, int(e.longValue))
             maxStack = 1
         case ast.ExpressionTypeLong:
             if e.longValue == 0 {
-                code.Codes[code.CodeLength] = cg.OP_lconst_0
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_lconst_0
+                code.codeLength++
             } else if e.longValue == 1 {
-                code.Codes[code.CodeLength] = cg.OP_lconst_1
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_lconst_1
+                code.codeLength++
             } else {
-                code.Codes[code.CodeLength] = cg.OP_ldc2_w
-                c.insertLongConst(e.longValue, code.Codes[code.CodeLength+1:code.CodeLength+3])
-                code.CodeLength += 3
+                code.codes[code.codeLength] = cg.OP_ldc2_w
+                c.insertLongConst(e.longValue, code.codes[code.codeLength+1:code.codeLength+3])
+                code.codeLength += 3
             }
             maxStack = 2
         case ast.ExpressionTypeFloat:
             if e.doubleValue == 0d {
-                code.Codes[code.CodeLength] = cg.OP_fconst_0
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_fconst_0
+                code.codeLength++
             } else if e.doubleValue == 1d{
-                code.Codes[code.CodeLength] = cg.OP_fconst_1
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_fconst_1
+                code.codeLength++
             } else if e.doubleValue == 2d {
-                code.Codes[code.CodeLength] = cg.OP_fconst_2
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_fconst_2
+                code.codeLength++
             } else {
-                code.Codes[code.CodeLength] = cg.OP_ldc_w
-                c.insertFloatConst(float(e.doubleValue), code.Codes[code.CodeLength+1:code.CodeLength+3])
-                code.CodeLength += 3
+                code.codes[code.codeLength] = cg.OP_ldc_w
+                c.insertFloatConst(float(e.doubleValue), code.codes[code.codeLength+1:code.codeLength+3])
+                code.codeLength += 3
             }
             maxStack = 1
         case ast.ExpressionTypeDouble:
             if e.doubleValue == 0d {
-                code.Codes[code.CodeLength] = cg.OP_dconst_0
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_dconst_0
+                code.codeLength++
             } else if e.doubleValue == 1d {
-                code.Codes[code.CodeLength] = cg.OP_dconst_1
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_dconst_1
+                code.codeLength++
             } else {
-                code.Codes[code.CodeLength] = cg.OP_ldc2_w
-                c.insertDoubleConst(e.doubleValue, code.Codes[code.CodeLength+1:code.CodeLength+3])
-                code.CodeLength += 3
+                code.codes[code.codeLength] = cg.OP_ldc2_w
+                c.insertDoubleConst(e.doubleValue, code.codes[code.codeLength+1:code.codeLength+3])
+                code.codeLength += 3
             }
             maxStack = 2
         case ast.ExpressionTypeString:
-            code.Codes[code.CodeLength] = cg.OP_ldc_w
-            c.insertStringConst(e.stringValue, code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
-            if len([]byte(e.data.(string))) > 65536 {
+            code.codes[code.codeLength] = cg.OP_ldc_w
+            c.insertStringConst(e.stringValue, code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
+            if len([]byte(e.stringValue)) > 65536 {
                 panic("jvm max string length is 65536")
             }
             maxStack = 1
@@ -227,9 +227,9 @@ class BuildExpression {
             }
         }
         loadInt32(c, code, int(length))
-        code.Codes[code.CodeLength] = cg.OP_anewarray
-        c.insertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.CodeLength += 3
+        code.codes[code.codeLength] = cg.OP_anewarray
+        c.insertClassConst(javaRootClass, code.codes[code.codeLength+1:code.codeLength+3])
+        code.codeLength += 3
         if 1 > maxStack {
             maxStack = 1
         }
@@ -247,8 +247,8 @@ class BuildExpression {
                 autoVar := new MultiValueAutoVar(c, code, state)
                 for kk, _ := range v.multiValues {
                     currentStack = 1
-                    code.Codes[code.CodeLength] = cg.OP_dup
-                    code.CodeLength++
+                    code.codes[code.codeLength] = cg.OP_dup
+                    code.codeLength++
                     currentStack++
                     stack = autoVar.unPack2Object(c, code, kk)
                     if t := stack + currentStack; t > maxStack {
@@ -258,15 +258,15 @@ class BuildExpression {
                     if 4 > maxStack { // current stack is  arrayRef arrayRef value index
                         maxStack = 4
                     }
-                    code.Codes[code.CodeLength] = cg.OP_swap
-                    code.Codes[code.CodeLength+1] = cg.OP_aastore
-                    code.CodeLength += 2
+                    code.codes[code.codeLength] = cg.OP_swap
+                    code.codes[code.codeLength+1] = cg.OP_aastore
+                    code.codeLength += 2
                     index++
                 }
                 continue
             }
-            code.Codes[code.CodeLength] = cg.OP_dup
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_dup
+            code.codeLength++
             state.pushStack(c, arrayListObject)
             currentStack++
             stack := this.build(c, code, v, context, state)
@@ -280,9 +280,9 @@ class BuildExpression {
             if 4 > maxStack { // current stack is  arrayRef arrayRef value index
                 maxStack = 4
             }
-            code.Codes[code.CodeLength] = cg.OP_swap
-            code.Codes[code.CodeLength+1] = cg.OP_aastore
-            code.CodeLength += 2
+            code.codes[code.codeLength] = cg.OP_swap
+            code.codes[code.codeLength+1] = cg.OP_aastore
+            code.codeLength += 2
             state.popStack(1) // @270
             index++
         }
@@ -291,7 +291,7 @@ class BuildExpression {
 
     fn storeGlobalVariable(c cg.ClassHighLevel, code cg.AttributeCode,
         v ast.Variable) {
-        code.Codes[code.CodeLength] = cg.OP_putstatic
+        code.codes[code.codeLength] = cg.OP_putstatic
         if v.jvmDescriptor == "" {
             v.jvmDescriptor = Descriptor.typeDescriptor(v.Type)
         }
@@ -299,8 +299,8 @@ class BuildExpression {
                 v.globalVarClassName,
                 v.name,
              v.jvmDescriptor
-        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.CodeLength += 3
+        ), code.codes[code.codeLength+1:code.codeLength+3])
+        code.codeLength += 3
     }
 
     fn loadLocalVar(c cg.ClassHighLevel,
@@ -332,50 +332,50 @@ class BuildExpression {
         case LeftValueKindLocalVar:
             if jvmSlotSize(stackTopType) == 1 {
                 increment = 1
-                code.Codes[code.CodeLength] = cg.OP_dup
+                code.codes[code.codeLength] = cg.OP_dup
             } else {
-                code.Codes[code.CodeLength] = cg.OP_dup2
+                code.codes[code.codeLength] = cg.OP_dup2
                 increment = 2
             }
-            code.CodeLength++
+            code.codeLength++
         case LeftValueKindPutStatic:
             if jvmSlotSize(stackTopType) == 1 {
                 increment = 1
-                code.Codes[code.CodeLength] = cg.OP_dup
+                code.codes[code.codeLength] = cg.OP_dup
             } else {
-                code.Codes[code.CodeLength] = cg.OP_dup2
+                code.codes[code.codeLength] = cg.OP_dup2
                 increment = 2
             }
-            code.CodeLength++
+            code.codeLength++
         case LeftValueKindPutField:
             if jvmSlotSize(stackTopType) == 1 {
                 increment = 1
-                code.Codes[code.CodeLength] = cg.OP_dup_x1
+                code.codes[code.codeLength] = cg.OP_dup_x1
             } else {
                 increment = 2
-                code.Codes[code.CodeLength] = cg.OP_dup2_x1
+                code.codes[code.codeLength] = cg.OP_dup2_x1
             }
-            code.CodeLength++
+            code.codeLength++
         case LeftValueKindArray, LeftValueKindLucyArray:
             if jvmSlotSize(stackTopType) == 1 {
                 increment = 1
-                code.Codes[code.CodeLength] = cg.OP_dup_x2
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_dup_x2
+                code.codeLength++
             } else {
                 increment = 2
-                code.Codes[code.CodeLength] = cg.OP_dup2_x2
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_dup2_x2
+                code.codeLength++
             }
 
         case LeftValueKindMap:
             if jvmSlotSize(stackTopType) == 1 {
                 increment = 1
-                code.Codes[code.CodeLength] = cg.OP_dup_x2
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_dup_x2
+                code.codeLength++
             } else {
                 increment = 2
-                code.Codes[code.CodeLength] = cg.OP_dup2_x2
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_dup2_x2
+                code.codeLength++
             }
         }
 

@@ -359,6 +359,11 @@ func (this *BuildPackage) buildClass(astClass *ast.Class) *cg.ClassHighLevel {
 		if vv.IsCompilerAuto {
 			method.AccessFlags |= cg.AccMethodSynthetic
 		}
+		if LucyMethodSignatureParser.Need(&vv.Function.Type) {
+			method.AttributeLucyMethodDescriptor = &cg.AttributeLucyMethodDescriptor{
+				Descriptor: LucyMethodSignatureParser.Encode(&vv.Function.Type),
+			}
+		}
 		method.Class = class
 		method.Descriptor = Descriptor.methodDescriptor(&vv.Function.Type)
 		method.IsConstruction = name == specialMethodInit
@@ -401,6 +406,11 @@ func (this *BuildPackage) mkGlobalFunctions() {
 		method.AccessFlags |= cg.AccMethodStatic
 		if f.AccessFlags&cg.AccMethodPublic != 0 || f.Name == ast.MainFunctionName {
 			method.AccessFlags |= cg.AccMethodPublic
+		}
+		if LucyMethodSignatureParser.Need(&f.Type) {
+			method.AttributeLucyMethodDescriptor = &cg.AttributeLucyMethodDescriptor{
+				Descriptor: LucyMethodSignatureParser.Encode(&f.Type),
+			}
 		}
 		if f.Comment != "" {
 			method.AttributeLucyComment = &cg.AttributeLucyComment{

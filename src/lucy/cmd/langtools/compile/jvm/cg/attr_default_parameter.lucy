@@ -5,7 +5,7 @@ public class AttributeDefaultParameters {
 	public start     char // start
 	public constants []char
 
-	fn fromBytes(bs []byte) {
+	public fn fromBytes(bs []byte) {
 	    this.constants = []char{}
 		this.start = binary.BigEndian.getChar(bs)
 		bs = bs[2:]
@@ -23,10 +23,10 @@ public class AttributeDefaultParameters {
 		info = new AttributeInfo()
 		info.nameIndex = c.insertUtf8Const(AttributeNameLucyDefaultParameters)
 		info.attributeLength = (2 * (1 + len(this.constants)))
-		info.Info = new []byte(info.attributeLength)
-		binary.BigEndian.putChar(info.Info, this.start)
+		info.info = new []byte(info.attributeLength)
+		binary.BigEndian.putChar(info.info, this.start)
 		for i := 0; i < len(this.constants); i++ {
-			binary.BigEndian.putChar(info.Info[(i+1)*2:], this.constants[i])
+			binary.BigEndian.putChar(info.info[(i+1)*2:], this.constants[i])
 		}
 		return info
 	}

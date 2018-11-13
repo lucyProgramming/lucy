@@ -36,8 +36,8 @@ class BuildFunction {
             if stack > maxStack {
                 maxStack = stack
             }
-            code.Codes[code.CodeLength] = cg.OP_dup
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_dup
+            code.codeLength++
             if t := char(2) + jvmSlotSize(v.Type); t > maxStack {
                 maxStack = t
             }
@@ -45,7 +45,7 @@ class BuildFunction {
             this.eb.storeLocalVar(c, code, v)
             v.localValOffset = code.maxLocals //rewrite offset
             code.maxLocals++
-            copyOPs(code, storeLocalVariableOps(v.Type.Type, v.localValOffset))
+            copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, v.localValOffset))
             state.appendLocals(c, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
         }
         return
@@ -66,8 +66,8 @@ class BuildFunction {
                         maxStack = stack
                     }
                     // then load
-                    code.Codes[code.CodeLength] = cg.OP_dup
-                    code.CodeLength++
+                    code.codes[code.codeLength] = cg.OP_dup
+                    code.codeLength++
                     if 2 > maxStack {
                         maxStack = 2
                     }
@@ -101,10 +101,10 @@ class BuildFunction {
         context.lastStackMapOffset = -1
         context.c = astClass
         context.function = f
-        method.code.Codes = new []byte (65536)
-        method.code.CodeLength = 0
+        method.code.codes = new []byte (65536)
+        method.code.codeLength = 0
         defer{
-            method.code.Codes = method.code.Codes[0:method.code.CodeLength]
+            method.code.codes = method.code.codes[0:method.code.codeLength]
         }
         state := new StackMapState(null)
         if method.accessFlags&cg.AccMethodStatic == 0 {
@@ -129,22 +129,22 @@ class BuildFunction {
         }
         if f.isGlobalMain() { // main function
             code := method.code
-            code.Codes[code.CodeLength] = cg.OP_new
+            code.codes[code.codeLength] = cg.OP_new
             meta := ArrayMetas[ast.VariableTypeString]
-            c.insertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.Codes[code.CodeLength+3] = cg.OP_dup
-            code.CodeLength += 4
+            c.insertClassConst(meta.className, code.codes[code.codeLength+1:code.codeLength+3])
+            code.codes[code.codeLength+3] = cg.OP_dup
+            code.codeLength += 4
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeString, char(0)))
             if 3 > code.MaxStack {
                 code.MaxStack = 3
             }
-            code.Codes[code.CodeLength] = cg.OP_invokespecial
+            code.codes[code.codeLength] = cg.OP_invokespecial
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 meta.className,
                 specialMethodInit,
                 meta.constructorFuncDescriptor
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
             copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, char(1)))
             {
                 // String[] java style
@@ -175,7 +175,12 @@ class BuildFunction {
                 p := new cg.MethodParameter()
                 p.name = v.name
                 p.accessFlags = cg.MethodParameterTypeAccMandated
-                method.AttributeMethodParameters.Parameters.append(p)
+                if method.AttributeMethodParameters.parameters == null {
+                     method.AttributeMethodParameters.parameters = [p]
+                }else {
+                    method.AttributeMethodParameters.parameters.append(p)
+                }
+                
             }
         }
         if f.Type.VoidReturn() == false {
@@ -184,7 +189,7 @@ class BuildFunction {
                 p := new cg.MethodParameter()
                 p.name = v.name
                 p.accessFlags = cg.MethodParameterTypeAccMandated
-                method.AttributeLucyReturnListNames.Parameters.append(p)
+                method.AttributeLucyReturnListNames.parameters.append(p)
             }
         }
         if len(f.Type.ReturnList) > 1 {
@@ -196,8 +201,8 @@ class BuildFunction {
         if f.hasDefer {
             context.exceptionVarOffset = method.code.maxLocals
             method.code.maxLocals++
-            method.code.Codes[method.code.CodeLength] = cg.OP_aconst_null
-            method.code.CodeLength++
+            method.code.codes[method.code.codeLength] = cg.OP_aconst_null
+            method.code.codeLength++
             copyOPs(method.code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset))
             state.appendLocals(c, state.newObjectVariableType(ast.JavaThrowableClass))
         }
@@ -206,8 +211,8 @@ class BuildFunction {
     }
     fn  buildFunctionMultiReturnOffset(c cg.ClassHighLevel, code cg.AttributeCode,
         f ast.Function, context Context, state StackMapState) -> (maxStack char) {
-        code.Codes[code.CodeLength] = cg.OP_aconst_null
-        code.CodeLength++
+        code.codes[code.codeLength] = cg.OP_aconst_null
+        code.codeLength++
         context.multiValueVarOffset = code.maxLocals
         code.maxLocals++
         copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
@@ -223,21 +228,21 @@ class BuildFunction {
             if v.isStatic() || v.defaultValueExpression == null {
                 continue
             }
-            code.Codes[code.CodeLength] = cg.OP_aload_0
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_aload_0
+            code.codeLength++
             state.pushStack(c, state.newObjectVariableType(c.name))
             stack := this.eb.build(c, code, v.defaultValueExpression, context, state)
             if t := char(1) + stack; t > code.MaxStack {
                 code.MaxStack = t
             }
             state.popStack(1)
-            code.Codes[code.CodeLength] = cg.OP_putfield
+            code.codes[code.codeLength] = cg.OP_putfield
             c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                 c.name,
                 v.name,
                 Descriptor.typeDescriptor(v.Type)
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
         }
     }
 

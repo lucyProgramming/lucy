@@ -27,9 +27,9 @@ class BuildinFunctionSprintf {
         maxStack = this.eb.build(c, code, meta.Format, context, state)
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
         loadInt32(c, code, int(meta.ArgsLength))
-        code.Codes[code.CodeLength] = cg.OP_anewarray
-        c.insertClassConst("java/lang/Object", code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.CodeLength += 3
+        code.codes[code.codeLength] = cg.OP_anewarray
+        c.insertClassConst("java/lang/Object", code.codes[code.codeLength+1:code.codeLength+3])
+        code.codeLength += 3
         currentStack := char(2)
         if currentStack > maxStack {
             maxStack = currentStack
@@ -41,8 +41,8 @@ class BuildinFunctionSprintf {
         index := int(0)
         for _, v := range call.Args {
             currentStack = 2
-            code.Codes[code.CodeLength] = cg.OP_dup
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_dup
+            code.codeLength++
             loadInt32(c, code, index)
             currentStack += 2
             state.pushStack(c, objectArray)
@@ -54,21 +54,21 @@ class BuildinFunctionSprintf {
             if v.value.isPointer() == false {
                 TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.value)
             }
-            code.Codes[code.CodeLength] = cg.OP_aastore
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_aastore
+            code.codeLength++
             index++
             state.popStack(2)
         }
-        code.Codes[code.CodeLength] = cg.OP_invokestatic
+        code.codes[code.codeLength] = cg.OP_invokestatic
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                  "format",
             "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;"
-        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.CodeLength += 3
+        ), code.codes[code.codeLength+1:code.codeLength+3])
+        code.codeLength += 3
         if e.isStatementExpression {
-            code.Codes[code.CodeLength] = cg.OP_pop
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_pop
+            code.codeLength++
         }
         return
     }

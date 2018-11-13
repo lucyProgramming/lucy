@@ -8,12 +8,10 @@ public fn Parse(
 	bs []byte,
 	onlyParseImport bool,
 	nErrors2Stop int) -> (errs []error) {
-	p := new Parser()
-	p.bs = bs
-	p.tops = tops
-	p.filename = filename
-	p.onlyParseImport = onlyParseImport
-	p.nErrors2Stop = nErrors2Stop
+	
+	p := new Parser(bs , tops , filename , onlyParseImport , nErrors2Stop  )
+	
+	
 	return p.parse()
 }
 
@@ -39,7 +37,7 @@ class Parser {
 	/*
 		call before parse source file
 	*/
-	fn Parser() {
+	fn Parser(bs []byte , tops []ast.TopNode ,filename string , onlyParseImport bool ,nErrors2Stop int ) {
 	    this.super()
 		this.ExpressionParser = new ExpressionParser(this)
 		this.FunctionParser = new FunctionParser(this)
@@ -47,6 +45,12 @@ class Parser {
 		this.ClassParser = new ClassParser(this)
 		this.BlockParser = new BlockParser(this)
 		this.EnumParser = new EnumParser(this)
+		this.errs = []error{}
+		this.bs = bs
+		this.tops = tops
+		this.filename = filename
+		this.onlyParseImport = onlyParseImport
+		this.nErrors2Stop = nErrors2Stop
 	}
 
 	fn parse() -> (errs []error ) {
@@ -301,7 +305,7 @@ class Parser {
 
 	fn mkPos() -> (pos ast.Pos) {
 		if this.token != null {
-		    pos := new ast.Pos()
+		    pos = new ast.Pos()
 		    pos.filename = this.filename
 		    pos.line = this.token.EndLine
 		    pos.column = this.token.EndColumn
@@ -722,7 +726,9 @@ class Parser {
 		}
 		names = []ast.NameWithPos{}
 		for this.token.Type == lex.TokenIdentifier {
-			names.append(new ast.NameWithPos(this.token.stringValue,this.mkPos()))
+			t := new ast.NameWithPos(this.token.stringValue,this.mkPos())
+			assert(t.pos != null)
+			names.append(t)
 			this.Next(lfIsToken)
 			if this.token.Type != lex.TokenComma {
 				// not a ,

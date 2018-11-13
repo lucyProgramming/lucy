@@ -6,7 +6,7 @@ public class StatementIf {
 	public pos                 Pos
 	public initExpressionBlock Block = new Block()
 	public block               Block
-	public ElseIfList          []StatementElseIf
+	public elseIfList          []StatementElseIf
 	public Else               	Block
 	public exits               []cg.Exit
 	
@@ -34,7 +34,7 @@ public class StatementIf {
 		}
 		this.block.inherit(this.initExpressionBlock)
 		errs.appendAll(this.block.check())
-		for _, v := range this.ElseIfList {
+		for _, v := range this.elseIfList {
 			v.block.inherit(this.initExpressionBlock)
 			if v.condition != null {
 				conditionType, es := v.condition.checkSingleValueContextExpression(v.block)

@@ -23,86 +23,99 @@ class BuildExpressionAssert {
         assertion := e.data.(ast.ExpressionTypeAssert)
         if assertion.MultiValueContext {
             maxStack = this.build(c, code, assertion.Expression, context, state)
-            code.Codes[code.CodeLength] = cg.OP_dup
-            code.CodeLength++
-            code.Codes[code.CodeLength] = cg.OP_instanceof
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_dup
+            code.codeLength++
+            code.codes[code.codeLength] = cg.OP_instanceof
+            code.codeLength++
             insertTypeAssertClass(c, code, assertion.Type)
-            code.Codes[code.CodeLength] = cg.OP_dup
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_dup
+            code.codeLength++
             {
                 state.pushStack(c, assertion.Expression.value)
                 state.pushStack(c, typeInt)
-                context.MakeStackMap(code, state, code.CodeLength+7)
+                context.MakeStackMap(code, state, code.codeLength+7)
                 state.popStack(2)
                 state.pushStack(c, typeInt )
                 state.pushStack(c, assertion.Expression.value)
-                context.MakeStackMap(code, state, code.CodeLength+11)
+                context.MakeStackMap(code, state, code.codeLength+11)
                 state.popStack(2)
             }
-            code.Codes[code.CodeLength] = cg.OP_ifeq
-            binary.BigEndian.putChar(code.Codes[code.CodeLength+1:code.CodeLength+3], char(7))
-            code.Codes[code.CodeLength+3] = cg.OP_swap
-            code.Codes[code.CodeLength+4] = cg.OP_goto
-            binary.BigEndian.putChar(code.Codes[code.CodeLength+5:code.CodeLength+7], char(7))
-            code.Codes[code.CodeLength+7] = cg.OP_pop
-            code.Codes[code.CodeLength+8] = cg.OP_pop
-            code.Codes[code.CodeLength+9] = cg.OP_iconst_0
-            code.Codes[code.CodeLength+10] = cg.OP_aconst_null
-            code.CodeLength += 11
+            code.codes[code.codeLength] = cg.OP_ifeq
+            binary.BigEndian.putChar(code.codes[code.codeLength+1:code.codeLength+3], char(7))
+            code.codes[code.codeLength+3] = cg.OP_swap
+            code.codes[code.codeLength+4] = cg.OP_goto
+            binary.BigEndian.putChar(code.codes[code.codeLength+5:code.codeLength+7], char(7))
+            code.codes[code.codeLength+7] = cg.OP_pop
+            code.codes[code.codeLength+8] = cg.OP_pop
+            code.codes[code.codeLength+9] = cg.OP_iconst_0
+            code.codes[code.codeLength+10] = cg.OP_aconst_null
+            code.codeLength += 11
             loadInt32(c, code, 2)
-            code.Codes[code.CodeLength] = cg.OP_anewarray
-            c.insertClassConst(javaRootClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            code.codes[code.codeLength] = cg.OP_anewarray
+            c.insertClassConst(javaRootClass, code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
 
             // store object
-            code.Codes[code.CodeLength] = cg.OP_dup_x1
-            code.CodeLength++
-            code.Codes[code.CodeLength] = cg.OP_swap
-            code.CodeLength++
-            code.Codes[code.CodeLength] = cg.OP_iconst_0
-            code.CodeLength++
-            code.Codes[code.CodeLength] = cg.OP_swap
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_dup_x1
+            code.codeLength++
+            code.codes[code.codeLength] = cg.OP_swap
+            code.codeLength++
+            code.codes[code.codeLength] = cg.OP_iconst_0
+            code.codeLength++
+            code.codes[code.codeLength] = cg.OP_swap
+            code.codeLength++
             if 5 > maxStack {
                 maxStack = 5
             }
-            code.Codes[code.CodeLength] = cg.OP_checkcast // convince the jvm
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_checkcast // convince the jvm
+            code.codeLength++
             insertTypeAssertClass(c, code, assertion.Type)
 
-            code.Codes[code.CodeLength] = cg.OP_aastore
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_aastore
+            code.codeLength++
 
             // store if ok
-            code.Codes[code.CodeLength] = cg.OP_dup_x1
-            code.CodeLength++
-            code.Codes[code.CodeLength] = cg.OP_swap
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_dup_x1
+            code.codeLength++
+            code.codes[code.codeLength] = cg.OP_swap
+            code.codeLength++
             TypeConverterAndPrimitivePacker.packPrimitives(c, code, typeBool)
-            code.Codes[code.CodeLength] = cg.OP_iconst_1
-            code.CodeLength++
-            code.Codes[code.CodeLength] = cg.OP_swap
-            code.CodeLength++
-            code.Codes[code.CodeLength] = cg.OP_aastore
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_iconst_1
+            code.codeLength++
+            code.codes[code.codeLength] = cg.OP_swap
+            code.codeLength++
+            code.codes[code.codeLength] = cg.OP_aastore
+            code.codeLength++
         } else {
             maxStack = this.build(c, code, assertion.Expression, context, state)
-            code.Codes[code.CodeLength] = cg.OP_dup
-            code.CodeLength++
-            code.Codes[code.CodeLength] = cg.OP_instanceof
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_dup
+            code.codeLength++
+            code.codes[code.codeLength] = cg.OP_instanceof
+            code.codeLength++
             insertTypeAssertClass(c, code, assertion.Type)
             exit := new cg.Exit(cg.OP_ifne, code)
-            code.Codes[code.CodeLength] = cg.OP_pop
-            code.Codes[code.CodeLength+1] = cg.OP_aconst_null
-            code.CodeLength += 2
-            writeExits([]cg.Exit{exit}, code.CodeLength)
+            code.codes[code.codeLength] = cg.OP_pop
+            code.codeLength++
+            code.codes[code.codeLength] = cg.OP_new
+            c.insertClassConst(javaExceptionClass, code.codes[code.codeLength+1:code.codeLength+3])
+            code.codes[code.codeLength+3] = cg.OP_dup
+            code.codeLength += 4
+            code.codes[code.codeLength] = cg.OP_ldc_w
+            c.insertStringConst("not a instance of class", code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
+            if 3 > maxStack {
+                maxStack = 3
+            }
+            c.insertMethodCall(code, cg.OP_invokespecial, javaExceptionClass,
+                specialMethodInit, "(Ljava/lang/String;)V")
+            code.codes[code.codeLength] = cg.OP_athrow
+            code.codeLength++
+            writeExits([]cg.Exit{exit}, code.codeLength)
             state.pushStack(c, assertion.Expression.value)
             defer state.popStack(1)
-            context.MakeStackMap(code, state, code.CodeLength)
-            code.Codes[code.CodeLength] = cg.OP_checkcast // convince the jvm
-            code.CodeLength++
+            context.MakeStackMap(code, state, code.codeLength)
+            code.codes[code.codeLength] = cg.OP_checkcast // convince the jvm
+            code.codeLength++
             insertTypeAssertClass(c, code, assertion.Type)
         }
 

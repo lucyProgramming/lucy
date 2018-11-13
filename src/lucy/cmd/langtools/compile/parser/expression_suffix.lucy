@@ -99,7 +99,7 @@ class ExpressionSuffix extends  ParserExtends {
 		case lex.TokenLiteralString:
 			prefix = new ast.Expression()
 			prefix.Type = ast.ExpressionTypeString
-			prefix.data = this.parser.token.stringValue
+			prefix.stringValue = this.parser.token.stringValue
 			prefix.pos = this.parser.mkPos()
 			prefix.op = "stringLiteral"
 			this.Next(lfIsToken)

@@ -8,8 +8,8 @@ public class AttributeConstantValue {
 		info = new AttributeInfo()
 		info.nameIndex = c.insertUtf8Const(AttributeNameConstValue)
 		info.attributeLength = 2
-		info.Info = new []byte(2)
-		binary.BigEndian.putChar(info.Info, this.index)
+		info.info = new []byte(2)
+		binary.BigEndian.putChar(info.info, this.index)
 		return info
 	}
 }

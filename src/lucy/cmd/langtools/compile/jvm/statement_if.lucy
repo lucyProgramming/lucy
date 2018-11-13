@@ -34,14 +34,14 @@ class BuildIf {
         }
         this.bb.buildBlock(c, code, s.block, context, trueBlockState)
         ifState.addTop(trueBlockState)
-        if s.Else != null || len(s.ElseIfList) > 0 {
+        if s.Else != null || len(s.elseIfList) > 0 {
             if s.block.notExecuteToLastStatement == false {
                 s.exits.append( new cg.Exit(cg.OP_goto, code))
             }
         }
-        for k, v := range s.ElseIfList {
-            context.MakeStackMap(code, ifState, code.CodeLength) // state is not change,all block var should be access from outside
-            writeExits([]cg.Exit{exit}, code.CodeLength)
+        for k, v := range s.elseIfList {
+            context.MakeStackMap(code, ifState, code.codeLength) // state is not change,all block var should be access from outside
+            writeExits([]cg.Exit{exit}, code.codeLength)
             elseIfState := new StackMapState(ifState)
             stack, exit =
                 this.bb.buildConditionNotOk(c, code, context, elseIfState, v.condition)
@@ -49,7 +49,7 @@ class BuildIf {
                 maxStack = stack
             }
             this.bb.buildBlock(c, code, v.block, context, elseIfState)
-            if s.Else != null || k != len(s.ElseIfList)-1 {
+            if s.Else != null || k != len(s.elseIfList)-1 {
                 if v.block.notExecuteToLastStatement == false {
                     s.exits.append( new cg.Exit(cg.OP_goto, code))
                 }
@@ -57,8 +57,8 @@ class BuildIf {
             // when done
             ifState.addTop(elseIfState)
         }
-        context.MakeStackMap(code, ifState, code.CodeLength)
-        writeExits([]cg.Exit{exit}, code.CodeLength)
+        context.MakeStackMap(code, ifState, code.codeLength)
+        writeExits([]cg.Exit{exit}, code.codeLength)
         if s.Else != null {
             elseBlockState := new StackMapState(ifState)
             this.bb.buildBlock(c, code, s.Else, context, elseBlockState)

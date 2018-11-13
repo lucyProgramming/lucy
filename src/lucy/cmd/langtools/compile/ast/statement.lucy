@@ -23,7 +23,7 @@ public enum StatementTypeKind {
 
 public class Statement {
 	public Type                      StatementTypeKind
-	public Checked                   bool // if checked
+	public checked                   bool // if checked
 	public pos                       Pos
 	public StatementIf               StatementIf
 	public Expression                Expression
@@ -57,7 +57,7 @@ public class Statement {
 	}
 	
 	fn simplifyIf() {
-		if len(this.StatementIf.ElseIfList) > 0 {
+		if len(this.StatementIf.elseIfList) > 0 {
 			return
 		}
 		if len(this.StatementIf.PrefixExpressions) > 0 {
@@ -92,7 +92,7 @@ public class Statement {
 	}
 
 	fn check(block Block) -> (errs []error) {
-		this.Checked = true
+		this.checked = true
 		errs = []error{}
 		switch this.Type {
 		case StatementTypeExpression:

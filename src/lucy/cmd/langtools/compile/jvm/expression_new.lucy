@@ -33,16 +33,16 @@ class BuildExpressionNew {
         }
         //new object
         n := e.data.(ast.ExpressionNew)
-        code.Codes[code.CodeLength] = cg.OP_new
-        c.insertClassConst(n.Type.Class.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.Codes[code.CodeLength+3] = cg.OP_dup
+        code.codes[code.codeLength] = cg.OP_new
+        c.insertClassConst(n.Type.Class.name, code.codes[code.codeLength+1:code.codeLength+3])
+        code.codes[code.codeLength+3] = cg.OP_dup
         t := new cg.StackMapVerificationTypeInfo()
-        t.Verify = new cg.StackMapUninitializedVariableInfo(char(code.CodeLength))
+        t.Verify = new cg.StackMapUninitializedVariableInfo(char(code.codeLength))
         state.stacks.append( t, t)
-        code.CodeLength += 4
+        code.codeLength += 4
         maxStack = 2
         maxStack += this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, n.Args, n.VArgs, context, state)
-        code.Codes[code.CodeLength] = cg.OP_invokespecial
+        code.codes[code.codeLength] = cg.OP_invokespecial
         d := n.Construction.Function.jvmDescriptor
         if d == "" {
             d = Descriptor.methodDescriptor(n.Construction.Function.Type)
@@ -51,8 +51,8 @@ class BuildExpressionNew {
             n.Type.Class.name,
             specialMethodInit,
             d
-        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.CodeLength += 3
+        ), code.codes[code.codeLength+1:code.codeLength+3])
+        code.codeLength += 3
         return
     }
 
@@ -62,17 +62,17 @@ class BuildExpressionNew {
         e ast.Expression,
         context Context) -> (maxStack char) {
         maxStack = 2
-        code.Codes[code.CodeLength] = cg.OP_new
-        c.insertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.Codes[code.CodeLength+3] = cg.OP_dup
-        code.CodeLength += 4
-        code.Codes[code.CodeLength] = cg.OP_invokespecial
+        code.codes[code.codeLength] = cg.OP_new
+        c.insertClassConst(mapClass, code.codes[code.codeLength+1:code.codeLength+3])
+        code.codes[code.codeLength+3] = cg.OP_dup
+        code.codeLength += 4
+        code.codes[code.codeLength] = cg.OP_invokespecial
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             mapClass,
             specialMethodInit,
             "()V"
-        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.CodeLength += 3
+        ), code.codes[code.codeLength+1:code.codeLength+3])
+        code.codeLength += 3
         return
     }
 
@@ -101,10 +101,10 @@ class BuildExpressionNew {
                 maxStack = currentStack
             }
         }
-        code.Codes[code.CodeLength] = cg.OP_multianewarray
-        c.insertClassConst(Descriptor.typeDescriptor(e.value), code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.Codes[code.CodeLength+3] = dimensions
-        code.CodeLength += 4
+        code.codes[code.codeLength] = cg.OP_multianewarray
+        c.insertClassConst(Descriptor.typeDescriptor(e.value), code.codes[code.codeLength+1:code.codeLength+3])
+        code.codes[code.codeLength+3] = dimensions
+        code.codeLength += 4
         if e.value.array.Type == ast.VariableTypeEnum {
             state.pushStack(c, e.value)
             defer state.popStack(1)
@@ -123,14 +123,14 @@ class BuildExpressionNew {
         //new
         n := e.data.(ast.ExpressionNew)
         meta := ArrayMetas[e.value.array.Type]
-        code.Codes[code.CodeLength] = cg.OP_new
-        c.insertClassConst(meta.className, code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.Codes[code.CodeLength+3] = cg.OP_dup
-        code.CodeLength += 4
+        code.codes[code.codeLength] = cg.OP_new
+        c.insertClassConst(meta.className, code.codes[code.codeLength+1:code.codeLength+3])
+        code.codes[code.codeLength+3] = cg.OP_dup
+        code.codeLength += 4
         maxStack = 2
         {
             t := new cg.StackMapVerificationTypeInfo()
-            unInit := new cg.StackMapUninitializedVariableInfo( char(code.CodeLength - 4))
+            unInit := new cg.StackMapUninitializedVariableInfo( char(code.codeLength - 4))
             t.Verify = unInit
             state.stacks.append(t, t) // 2 for dup
             defer state.popStack(2)
@@ -152,13 +152,13 @@ class BuildExpressionNew {
             }
             state.popStack(1)
         }
-        code.Codes[code.CodeLength] = cg.OP_invokespecial
+        code.codes[code.codeLength] = cg.OP_invokespecial
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             meta.className,
             specialMethodInit,
             meta.constructorFuncDescriptor
-        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.CodeLength += 3
+        ), code.codes[code.codeLength+1:code.codeLength+3])
+        code.codeLength += 3
         return
     }
 

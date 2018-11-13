@@ -33,8 +33,8 @@ class BuildExpressionVar {
             if vs.Variables[index].beenCapturedAsLeftValue > 0 {
                 v := vs.Variables[index]
                 closure.createClosureVar(c, code, v.Type)
-                code.Codes[code.CodeLength] = cg.OP_dup
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_dup
+                code.codeLength++
                 closureObj := state.newObjectVariableType(closure.getMeta(v.Type.Type).className)
                 state.pushStack(c, closureObj)
                 state.pushStack(c, closureObj)

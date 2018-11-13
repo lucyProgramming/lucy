@@ -8,6 +8,7 @@ fn registerBuildInFunctions() {
 	{
 		//print
 		buildInFunctionsMap[common.BuildInFunctionPrint] = new Function()
+		buildInFunctionsMap[common.BuildInFunctionPrint].Type = new FunctionType()
         buildInFunctionsMap[common.BuildInFunctionPrint].buildInFunctionChecker = fn(f Function, e ExpressionFunctionCall, block Block, errs []error, args []Type, pos Pos) {
             if len(e.ParameterTypes) > 0 {
                 msg := sprintf("%s buildin function expect no typed parameter",

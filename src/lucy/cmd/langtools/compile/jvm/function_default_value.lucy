@@ -3,7 +3,7 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/jvm/cg"
 import "lucy/binary"
 
-class DefaultValueParse {
+public class DefaultValueParse {
 
 	static fn Encode(
 		c cg.ClassHighLevel,
@@ -39,7 +39,7 @@ class DefaultValueParse {
 		return ret
 	}
 
-	static fn Decode(c cg.Class, f ast.Function, dp cg.AttributeDefaultParameters) {
+	public static fn Decode(c cg.Class, f ast.Function, dp cg.AttributeDefaultParameters) {
 		f.haveDefaultValue = true
 		f.DefaultValueStartAt = int(dp.start)
 		for i := char(0); i < char(len(dp.constants)); i++ {
@@ -50,40 +50,40 @@ class DefaultValueParse {
 			case ast.VariableTypeBool:
 				v.defaultValueExpression.Type = ast.ExpressionTypeBool
 				v.defaultValueExpression.boolValue =
-					binary.BigEndian.getInt(c.ConstPool[dp.constants[i]].Info) != 0
+					binary.BigEndian.getInt(c.ConstPool[dp.constants[i]].info) != 0
 			case ast.VariableTypeByte:
 				v.defaultValueExpression.Type = ast.ExpressionTypeByte
 				v.defaultValueExpression.longValue =
-					long(binary.BigEndian.getInt(c.ConstPool[dp.constants[i]].Info))
+					long(binary.BigEndian.getInt(c.ConstPool[dp.constants[i]].info))
 			case ast.VariableTypeShort:
 				v.defaultValueExpression.Type = ast.ExpressionTypeShort
 				v.defaultValueExpression.longValue =
-					long(binary.BigEndian.getInt(c.ConstPool[dp.constants[i]].Info))
+					long(binary.BigEndian.getInt(c.ConstPool[dp.constants[i]].info))
 			case ast.VariableTypeChar:
 				v.defaultValueExpression.Type = ast.ExpressionTypeChar
 				v.defaultValueExpression.longValue =
-					long(binary.BigEndian.getInt(c.ConstPool[dp.constants[i]].Info))
+					long(binary.BigEndian.getInt(c.ConstPool[dp.constants[i]].info))
 			case ast.VariableTypeInt:
 				v.defaultValueExpression.Type = ast.ExpressionTypeInt
 				v.defaultValueExpression.longValue =
-					long(binary.BigEndian.getInt(c.ConstPool[dp.constants[i]].Info))
+					long(binary.BigEndian.getInt(c.ConstPool[dp.constants[i]].info))
 			case ast.VariableTypeLong:
 				v.defaultValueExpression.Type = ast.ExpressionTypeLong
 				v.defaultValueExpression.longValue =
-					long(binary.BigEndian.getLong(c.ConstPool[dp.constants[i]].Info))
+					long(binary.BigEndian.getLong(c.ConstPool[dp.constants[i]].info))
 			case ast.VariableTypeFloat:
 				v.defaultValueExpression.Type = ast.ExpressionTypeFloat
 				v.defaultValueExpression.doubleValue =
-					double(binary.BigEndian.getInt(c.ConstPool[dp.constants[i]].Info))
+					double(binary.BigEndian.getInt(c.ConstPool[dp.constants[i]].info))
 			case ast.VariableTypeDouble:
 				v.defaultValueExpression.Type = ast.ExpressionTypeDouble
 				v.defaultValueExpression.doubleValue =
-					double(binary.BigEndian.getInt(c.ConstPool[dp.constants[i]].Info))
+					double(binary.BigEndian.getInt(c.ConstPool[dp.constants[i]].info))
 			case ast.VariableTypeString:
 				v.defaultValueExpression.Type = ast.ExpressionTypeString
-				utf8Index := binary.BigEndian.getChar(c.ConstPool[dp.constants[i]].Info)
+				utf8Index := binary.BigEndian.getChar(c.ConstPool[dp.constants[i]].info)
 				v.defaultValueExpression.stringValue =
-					string(c.ConstPool[utf8Index].Info)
+					string(c.ConstPool[utf8Index].info)
 			}
 			v.defaultValueExpression.op = sprintf("%v", v.defaultValueExpression.data)
 		}

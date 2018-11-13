@@ -31,15 +31,15 @@ class BuildExpressionIncrement {
 					maxStack = 1
 				}
 			}
-			code.Codes[code.CodeLength] = cg.OP_iinc
-			code.Codes[code.CodeLength+1] = byte(identifier.Variable.localValOffset)
+			code.codes[code.codeLength] = cg.OP_iinc
+			code.codes[code.codeLength+1] = byte(identifier.Variable.localValOffset)
 			if e.isIncrement() {
-				code.Codes[code.CodeLength+2] = 1
+				code.codes[code.codeLength+2] = 1
 			} else { // --
-				code.Codes[code.CodeLength+2] = 255 // -1
-				code.CodeLength += 3
+				code.codes[code.codeLength+2] = 255 // -1
+				code.codeLength += 3
 			}
-			code.CodeLength += 3
+			code.codeLength += 3
 			if e.isStatementExpression == false { // I still need it`s value
 				if e.Type == ast.ExpressionTypePrefixIncrement || e.Type == ast.ExpressionTypePrefixDecrement { // decrement
 					copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, identifier.Variable.localValOffset)) // load to stack top
@@ -77,72 +77,72 @@ class BuildExpressionIncrement {
 		switch e.value.Type {
 		case ast.VariableTypeByte:
 			if e.isIncrement() {
-				code.Codes[code.CodeLength] = cg.OP_iconst_1
+				code.codes[code.codeLength] = cg.OP_iconst_1
 			} else {
-				code.Codes[code.CodeLength] = cg.OP_iconst_m1
+				code.codes[code.codeLength] = cg.OP_iconst_m1
 			}
-			code.Codes[code.CodeLength+1] = cg.OP_iadd
-			code.Codes[code.CodeLength+2] = cg.OP_i2b
-			code.CodeLength += 3
+			code.codes[code.codeLength+1] = cg.OP_iadd
+			code.codes[code.codeLength+2] = cg.OP_i2b
+			code.codeLength += 3
 		case ast.VariableTypeShort:
 			if e.isIncrement() {
-				code.Codes[code.CodeLength] = cg.OP_iconst_1
+				code.codes[code.codeLength] = cg.OP_iconst_1
 			} else {
-				code.Codes[code.CodeLength] = cg.OP_iconst_m1
+				code.codes[code.codeLength] = cg.OP_iconst_m1
 			}
-			code.Codes[code.CodeLength+1] = cg.OP_iadd
-			code.Codes[code.CodeLength+2] = cg.OP_i2s
-			code.CodeLength += 3
+			code.codes[code.codeLength+1] = cg.OP_iadd
+			code.codes[code.codeLength+2] = cg.OP_i2s
+			code.codeLength += 3
 		case ast.VariableTypeChar:
 			if e.isIncrement() {
-				code.Codes[code.CodeLength] = cg.OP_iconst_1
+				code.codes[code.codeLength] = cg.OP_iconst_1
 			} else {
-				code.Codes[code.CodeLength] = cg.OP_iconst_m1
+				code.codes[code.codeLength] = cg.OP_iconst_m1
 			}
-			code.Codes[code.CodeLength+1] = cg.OP_iadd
-			code.Codes[code.CodeLength+2] = cg.OP_i2c
-			code.CodeLength += 3
+			code.codes[code.codeLength+1] = cg.OP_iadd
+			code.codes[code.codeLength+2] = cg.OP_i2c
+			code.codeLength += 3
 		case ast.VariableTypeInt:
 			if e.isIncrement() {
-				code.Codes[code.CodeLength] = cg.OP_iconst_1
+				code.codes[code.codeLength] = cg.OP_iconst_1
 			} else {
-				code.Codes[code.CodeLength] = cg.OP_iconst_m1
+				code.codes[code.codeLength] = cg.OP_iconst_m1
 			}
-			code.Codes[code.CodeLength+1] = cg.OP_iadd
-			code.CodeLength += 2
+			code.codes[code.codeLength+1] = cg.OP_iadd
+			code.codeLength += 2
 		case ast.VariableTypeLong:
 			if e.isIncrement() {
-				code.Codes[code.CodeLength] = cg.OP_lconst_1
-				code.CodeLength++
+				code.codes[code.codeLength] = cg.OP_lconst_1
+				code.codeLength++
 			} else {
-				code.Codes[code.CodeLength] = cg.OP_ldc2_w
-				c.insertLongConst(-1L, code.Codes[code.CodeLength+1:code.CodeLength+3])
-				code.CodeLength += 3
+				code.codes[code.codeLength] = cg.OP_ldc2_w
+				c.insertLongConst(-1L, code.codes[code.codeLength+1:code.codeLength+3])
+				code.codeLength += 3
 			}
-			code.Codes[code.CodeLength] = cg.OP_ladd
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_ladd
+			code.codeLength++
 		case ast.VariableTypeFloat:
 			if e.isIncrement() {
-				code.Codes[code.CodeLength] = cg.OP_fconst_1
-				code.CodeLength++
+				code.codes[code.codeLength] = cg.OP_fconst_1
+				code.codeLength++
 			} else {
-				code.Codes[code.CodeLength] = cg.OP_ldc_w
-				c.insertFloatConst(-1f, code.Codes[code.CodeLength+1:code.CodeLength+3])
-				code.CodeLength += 3
+				code.codes[code.codeLength] = cg.OP_ldc_w
+				c.insertFloatConst(-1f, code.codes[code.codeLength+1:code.codeLength+3])
+				code.codeLength += 3
 			}
-			code.Codes[code.CodeLength] = cg.OP_fadd
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_fadd
+			code.codeLength++
 		case ast.VariableTypeDouble:
 			if e.isIncrement() {
-				code.Codes[code.CodeLength] = cg.OP_dconst_1
-				code.CodeLength++
+				code.codes[code.codeLength] = cg.OP_dconst_1
+				code.codeLength++
 			} else {
-				code.Codes[code.CodeLength] = cg.OP_ldc2_w
-				c.insertDoubleConst(-1d, code.Codes[code.CodeLength+1:code.CodeLength+3])
-				code.CodeLength += 3
+				code.codes[code.codeLength] = cg.OP_ldc2_w
+				c.insertDoubleConst(-1d, code.codes[code.codeLength+1:code.codeLength+3])
+				code.codeLength += 3
 			}
-			code.Codes[code.CodeLength] = cg.OP_dadd
-			code.CodeLength++
+			code.codes[code.codeLength] = cg.OP_dadd
+			code.codeLength++
 		}
 		if e.isStatementExpression == false {
 			if e.Type == ast.ExpressionTypePrefixIncrement ||

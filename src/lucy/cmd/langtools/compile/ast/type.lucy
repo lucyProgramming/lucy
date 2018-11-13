@@ -524,7 +524,7 @@ public class Type {
 	/*
 		if there is error,this function will crash
 	*/
-	fn bindWithParameterTypes(ft FunctionType, parameterTypes map{string->Type}) -> (err error) {
+	fn bindWithParameterTypes(ft FunctionType, parameterTypes map{string->Type})  {
 		if this.Type == VariableTypeTemplate {
 			ok := parameterTypes.keyExist(this.name)
 			if ok == false {
@@ -533,20 +533,19 @@ public class Type {
 			//TODO ::
 			//*typ = *t.Clone() // real bind
 			parameterTypes[this.name].cp(this)
-			return null
+			return 
 		}
 		if this.Type == VariableTypeArray || this.Type == VariableTypeJavaArray {
-			return this.array.bindWithParameterTypes(ft, parameterTypes)
+			this.array.bindWithParameterTypes(ft, parameterTypes)
+			return
 		}
 		if this.Type == VariableTypeMap {
 			if len(this.Map.K.getParameterType(ft)) > 0 {
-				err := this.Map.K.bindWithParameterTypes(ft, parameterTypes)
-				if err != null {
-					return err
-				}
+				this.Map.K.bindWithParameterTypes(ft, parameterTypes) 
 			}
 			if len(this.Map.V.getParameterType(ft)) > 0 {
-				return this.Map.V.bindWithParameterTypes(ft, parameterTypes)
+				this.Map.V.bindWithParameterTypes(ft, parameterTypes)
+				return 
 			}
 		}
 		panic("not T")

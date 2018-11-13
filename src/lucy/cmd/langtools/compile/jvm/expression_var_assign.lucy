@@ -24,12 +24,12 @@ class BuildExpressionVarAssign {
         }
         if len(vs.Lefts) == 1 {
             v := vs.Lefts[0].data.(ast.ExpressionIdentifier).Variable
-            //fmt.Println(v.name, v.pos.errMsgPrefix())
+            //print(v.name, v.pos.errMsgPrefix())
             currentStack := char(0)
             if v.beenCapturedAsLeftValue > 0 {
                 closure.createClosureVar(c, code, v.Type)
-                code.Codes[code.CodeLength] = cg.OP_dup
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_dup
+                code.codeLength++
                 currentStack = 2
                 obj := state.newObjectVariableType(closure.getMeta(v.Type.Type).className)
                 state.pushStack(c, obj)
@@ -111,8 +111,8 @@ class BuildExpressionVarAssign {
                     if stack > maxStack {
                         maxStack = stack
                     }
-                    code.Codes[code.CodeLength] = cg.OP_dup
-                    code.CodeLength++
+                    code.codes[code.codeLength] = cg.OP_dup
+                    code.codeLength++
                     if 2 > maxStack {
                         maxStack = 2
                     }

@@ -20,25 +20,25 @@ class BuildExpressionMap{
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        code.Codes[code.CodeLength] = cg.OP_new
-        c.insertClassConst(mapClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.Codes[code.CodeLength+3] = cg.OP_dup
-        code.CodeLength += 4
+        code.codes[code.codeLength] = cg.OP_new
+        c.insertClassConst(mapClass, code.codes[code.codeLength+1:code.codeLength+3])
+        code.codes[code.codeLength+3] = cg.OP_dup
+        code.codeLength += 4
         maxStack = 2
-        code.Codes[code.CodeLength] = cg.OP_invokespecial
+        code.codes[code.codeLength] = cg.OP_invokespecial
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             mapClass,
             specialMethodInit,
            "()V"
-        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.CodeLength += 3
+        ), code.codes[code.codeLength+1:code.codeLength+3])
+        code.codeLength += 3
         values := e.data.(ast.ExpressionMap).KeyValuePairs
         hashMapObject := state.newObjectVariableType(mapClass)
         state.pushStack(c, hashMapObject)
         defer state.popStack(1)
         for _, v := range values {
-            code.Codes[code.CodeLength] = cg.OP_dup
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_dup
+            code.codeLength++
             currentStack := char(2)
             state.pushStack(c, hashMapObject)
             stack := this.eb.build(c, code, v.Key, context, state)
@@ -58,14 +58,14 @@ class BuildExpressionMap{
                 TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.value.value)
             }
             // put in hashmap
-            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 mapClass,
                 "put",
                 "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.Codes[code.CodeLength+3] = cg.OP_pop
-            code.CodeLength += 4
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codes[code.codeLength+3] = cg.OP_pop
+            code.codeLength += 4
             state.popStack(2)
         }
         return
@@ -96,16 +96,16 @@ class BuildExpressionMap{
             if variableType.isPointer() == false {
                 TypeConverterAndPrimitivePacker.packPrimitives(c, code, variableType)
             }
-            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 mapClass,
                 "containsKey",
                 "(Ljava/lang/Object;)Z"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
             if e.isStatementExpression {
-                code.Codes[code.CodeLength] = cg.OP_pop
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_pop
+                code.codeLength++
             }
         case common.MapMethodRemove:
             currentStack := char(1)
@@ -113,7 +113,7 @@ class BuildExpressionMap{
                 currentStack = 1
                 variableType := v.value
                 if k != len(call.Args)-1 {
-                    code.Codes[code.CodeLength] = cg.OP_dup
+                    code.codes[code.codeLength] = cg.OP_dup
                     currentStack++
                     if currentStack > maxStack {
                         maxStack = currentStack
@@ -128,37 +128,37 @@ class BuildExpressionMap{
                     TypeConverterAndPrimitivePacker.packPrimitives(c, code, variableType)
                 }
                 //call remove
-                code.Codes[code.CodeLength] = cg.OP_invokevirtual
+                code.codes[code.codeLength] = cg.OP_invokevirtual
                 c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                     mapClass,
                     "remove",
                     "(Ljava/lang/Object;)Ljava/lang/Object;"
-                ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-                code.Codes[code.CodeLength+3] = cg.OP_pop
-                code.CodeLength += 4
+                ), code.codes[code.codeLength+1:code.codeLength+3])
+                code.codes[code.codeLength+3] = cg.OP_pop
+                code.codeLength += 4
                 if k != len(call.Args)-1 {
                     state.popStack(1)
                 }
             }
         case common.MapMethodRemoveAll:
-            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 mapClass,
                 "clear",
                 "()V"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
         case common.MapMethodSize:
-            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 mapClass,
                 "size",
                 "()I"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
             if e.isStatementExpression {
-                code.Codes[code.CodeLength] = cg.OP_pop
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_pop
+                code.codeLength++
             }
         }
         return

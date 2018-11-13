@@ -43,8 +43,8 @@ class MultiValueAutoVar {
         copyOPs(code,
             loadLocalVariableOps(ast.VariableTypeObject, this.localVarOffset))
         loadInt32(c, code, int(valueIndex))
-        code.Codes[code.CodeLength] = cg.OP_aaload
-        code.CodeLength++
+        code.codes[code.codeLength] = cg.OP_aaload
+        code.codeLength++
         return
     }
 

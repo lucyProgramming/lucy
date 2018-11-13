@@ -11,8 +11,8 @@ class AttributeSourceFile {
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const(AttributeNameSourceFile)
 		ret.attributeLength = 2
-		ret.Info = new []byte(2)
-		binary.BigEndian.putChar(ret.Info, c.insertUtf8Const(this.file))
+		ret.info = new []byte(2)
+		binary.BigEndian.putChar(ret.info, c.insertUtf8Const(this.file))
 		return ret
 	}
 }

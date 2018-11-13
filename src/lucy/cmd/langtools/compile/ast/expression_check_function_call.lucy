@@ -243,6 +243,9 @@ class ExpressionCheckFunctionCall {
 			cloneFunction.TemplateFunction = null
 			call.TemplateFunctionCallPair.Function = cloneFunction
 			cloneFunction.parameterTypes = parameterTypes
+			for k, v := range parameterTypes {
+				v.pos = f.Type.TemplateNamesMap[k] // keep Pos
+			}
 			for _, v := range cloneFunction.Type.ParameterList {
 				if len(v.Type.getParameterType(f.Type)) > 0 {
 					v.Type = parameterTypeArray[0]

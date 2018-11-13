@@ -6,9 +6,9 @@ public class AttributeLucyComment {
 		ret = new AttributeInfo()
 		ret.attributeLength = 2
 		ret.nameIndex = c.insertUtf8Const(AttributeNameLucyComment)
-		ret.Info = new []byte(2)
+		ret.info = new []byte(2)
 		index := c.insertUtf8Const(this.comment)
-		binary.BigEndian.putChar(ret.Info, index)
+		binary.BigEndian.putChar(ret.info, index)
 		return ret
 	}
 }

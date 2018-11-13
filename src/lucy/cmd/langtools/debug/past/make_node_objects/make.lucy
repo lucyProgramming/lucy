@@ -1,0 +1,770 @@
+import "java/lang/Object"
+
+class MakeNodesObjects {
+
+    
+
+
+
+    
+    fn Make(files map { string-> []ast.TopNode } ) -> (x Object) {
+        if len(files) == 1 {
+            for _, v := range files {
+                return this.MakeNodes(v)
+            }
+        }
+        ret := new map{string -> Object}()
+        for k, v := range files {
+            ret[k] = this.MakeNodes(v)
+        }
+        return ret
+
+    }
+
+    fn MakeNodes(nodes []ast.TopNode) -> (ret []Object = []Object{}) {
+        for _, n := range nodes {
+            if t,ok := n.Node.(ast.Block) ; ok {
+                ss := this.makeBlock(n.Node.(*ast.Block))
+                ret.append(map[string]interface{}{"block": ss})
+            }
+            switch n.Node.(type) {
+
+            case *ast.Block:
+               
+            case *ast.Function:
+                ret.append(this.makeFunction(n.Node.(*ast.Function)))
+            case *ast.Enum:
+                ret.append(this.makeEnum(n.Node.(*ast.Enum)))
+            case *ast.Class:
+                ret.append(this.makeClass(n.Node.(*ast.Class)))
+            case *ast.Constant:
+                ret.append(this.makeConst(n.Node.(*ast.Constant)))
+            case *ast.Import:
+                ret.append(this.makeImport(n.Node.(*ast.Import)))
+            case *ast.Expression:
+                ret.append(this.makeExpression(n.Node.(*ast.Expression)))
+            case *ast.TypeAlias:
+                ret.append( this.makeTypeAlias(n.Node.(*ast.TypeAlias)))
+            default:
+                panic("tops have unKnow  type")
+            }
+        }
+        return ret
+    }
+
+    fn makeConst(c *ast.Constant) interface{} {
+        s := sprintf("const%d %s", c.Pos.Line, c.Name)
+        if c.Type != null {
+            s += sprintf(" base on '%s'", c.Type.TypeString())
+        }
+        var ret []Object
+        ret.append( s)
+        ret.append( map[string]interface{}{"init": this.makeExpression(c.DefaultValueExpression)})
+        return null
+    }
+    fn makeImport(i *ast.Import) interface{} {
+        s := sprintf("import@%d", i.Pos.Line)
+        s += sprintf(" '%s'", i.Import)
+        if i.Alias != "" {
+            s += sprintf(" as '%s'", i.Alias)
+        }
+        return s
+    }
+    fn makeFunction(fn *ast.Function) interface{} {
+        ret := new map{string -> Object}()
+        {
+            if len(fn.Type.ParameterList) == 1 {
+                for _, v := range fn.Type.ParameterList {
+                    p := map[string]interface{}{}
+                    p["name"] = v.Name
+                    p["type"] = v.Type.TypeString()
+                    if v.DefaultValueExpression != null {
+                        p["defaultValue"] = this.makeExpression(v.DefaultValueExpression)
+                    }
+                    ret["parameterlist"] = p
+                }
+            } else {
+                var t []Object
+                for _, v := range fn.Type.ParameterList {
+                    p := map[string]interface{}{}
+                    p["name"] = v.Name
+                    p["type"] = v.Type.TypeString()
+                    if v.DefaultValueExpression != null {
+                        p["defaultValue"] = this.makeExpression(v.DefaultValueExpression)
+                    }
+                    t = append(t, p)
+                }
+                ret["parameterlist"] = t
+            }
+        }
+        if fn.Type.VoidReturn() == false {
+            if len(fn.Type.ParameterList) == 1 {
+                for _, v := range fn.Type.ReturnList {
+                    p := map[string]interface{}{}
+                    p["name"] = v.Name
+                    p["type"] = v.Type.TypeString()
+                    if v.DefaultValueExpression != null {
+                        p["defaultValue"] = this.makeExpression(v.DefaultValueExpression)
+                    }
+                    ret["returnlist"] = p
+                }
+            } else {
+                var t []Object
+                for _, v := range fn.Type.ReturnList {
+                    p := map[string]interface{}{}
+                    p["name"] = v.Name
+                    p["type"] = v.Type.TypeString()
+                    if v.DefaultValueExpression != null {
+                        p["defaultValue"] = this.makeExpression(v.DefaultValueExpression)
+                    }
+                    t = append(t, p)
+                }
+                ret["returnlist"] = t
+            }
+        } else {
+            ret["returnlist"] = null
+        }
+        ret["block"] = this.makeBlock(&fn.Block)
+        return map[string]interface{}{
+            sprintf("fn@%d '%s'", fn.Pos.Line, fn.Name): ret,
+        }
+    }
+
+    fn makeEnum(e *ast.Enum) interface{} {
+        ret := new map{string -> Object}()
+        {
+            var t []Object
+            for _, v := range e.Enums {
+                en := new map{string -> Object}()
+                en["name"] = v.Name
+                if v.NoNeed != null {
+                    en["value"] = this.makeExpression(v.NoNeed)
+                }
+                t = append(t, en)
+            }
+            ret["enums"] = t
+        }
+        return map[string]interface{}{
+            sprintf("enum@%d '%s'", e.Pos.Line, e.Name): ret,
+        }
+    }
+
+    fn makeClass(c *ast.Class) interface{} {
+        ret := new map{string -> Object}()
+        ret["name"] = c.Name
+        ret["accessFlags"] = c.AccessFlags
+        if c.SuperClassName != null {
+            ret["superClass"] = c.SuperClassName.Name
+        }
+        if len(c.InterfaceNames) > 0 {
+            var t []Object
+            for _, v := range c.InterfaceNames {
+                t = append(t, v.Name)
+            }
+            ret["interfaces"] = t
+        }
+
+        if len(c.Block.Constants) > 0 {
+            var t []Object
+            for _, v := range c.Block.Constants {
+                t = append(t, this.makeConst(v))
+            }
+            ret["constants"] = t
+        }
+        if len(c.Fields) > 0 {
+            fields := new map{string -> Object}()
+            for _, v := range c.Fields {
+                f := new map{string -> Object}()
+                f["accessFlags"] = v.AccessFlags
+                f["name"] = v.Name
+                f["type"] = v.Type.TypeString()
+                if v.DefaultValueExpression != null {
+                    f["defaultValue"] = this.makeExpression(v.DefaultValueExpression)
+                }
+                fields[v.Name] = f
+            }
+            ret["fields"] = fields
+        }
+        if len(c.StaticBlocks) > 0 {
+            var t []Object
+            for _, v := range c.StaticBlocks {
+                t = append(t, this.makeBlock(v))
+            }
+            ret["staticBlocks"] = t
+        }
+        if len(c.Methods) > 0 {
+            methods := new map{string -> Object}()
+            for name, ms := range c.Methods {
+                if len(ms) != 1 {
+                    var t []Object
+                    for _, method := range ms {
+                        m := new map{string -> Object}()
+                        m["accessFlags"] = method.Function.AccessFlags
+                        m["function"] = this.makeFunction(method.Function)
+                        t = append(t, m)
+                    }
+                    methods[name] = t
+                } else {
+                    method := ms[0]
+                    m := new map{string -> Object}()
+                    m["accessFlags"] = method.Function.AccessFlags
+                    m["function"] = this.makeFunction(method.Function)
+                    methods[name] = m
+                }
+
+            }
+            ret["methods"] = methods
+        }
+        return map[string]interface{}{
+            sprintf("class@%d '%s'", c.Pos.Line, c.Name): ret,
+        }
+    }
+
+    fn makeTypeAlias(a *ast.TypeAlias) interface{} {
+        s := sprintf("typealias@%d '%s' base on '%s'", a.Pos.Line, a.Name, a.Type.TypeString())
+        return s
+    }
+    fn makeBlock(b *ast.Block) interface{} {
+        var ret []Object
+        for _, s := range b.Statements {
+            ret.append( this.makeStatement(s))
+        }
+        return ret
+    }
+    fn makeStatementIf(s *ast.StatementIf) interface{} {
+        ret := new map{string -> Object}()
+        if len(s.PrefixExpressions) > 0 {
+            var t []Object
+            for _, v := range s.PrefixExpressions {
+                t = append(t, this.makeExpression(v))
+            }
+            ret["prefixExpressions"] = t
+        }
+        if s.Condition != null {
+            ret["condition"] = this.makeExpression(s.Condition)
+        }
+        ret["block"] = this.makeBlock(&s.Block)
+        if len(s.ElseIfList) > 0 {
+            var t []Object
+            for _, v := range s.ElseIfList {
+                t = append(t, map[string]interface{}{
+                    "condition": this.makeExpression(v.Condition),
+                    "block":     this.makeBlock(v.Block),
+                })
+            }
+            ret["elseifList"] = t
+        }
+        if s.Else != null {
+            ret["else"] = this.makeBlock(s.Else)
+        }
+        return map[string]interface{}{
+            sprintf("if@%d", s.Pos.Line): ret,
+        }
+    }
+    fn makeStatementFor(s *ast.StatementFor) interface{} {
+        ret := new map{string -> Object}()
+        if s.Init != null {
+            ret["init"] = this.makeExpression(s.Init)
+        }
+        if s.Condition != null {
+            ret["condition"] = this.makeExpression(s.Condition)
+        }
+        if s.Increment != null {
+            ret["increment"] = this.makeExpression(s.Increment)
+        }
+        ret["block"] = this.makeBlock(s.Block)
+        return map[string]interface{}{
+            sprintf("for@%d", s.Pos.Line): ret,
+        }
+    }
+    fn makeStatementSwitch(s *ast.StatementSwitch) interface{} {
+        ret := new map{string -> Object}()
+        if len(s.PrefixExpressions) > 0 {
+            var t []Object
+            for _, v := range s.PrefixExpressions {
+                t = append(t, this.makeExpression(v))
+            }
+            ret["prefixExpressions"] = t
+        }
+        if s.Condition != null {
+            ret["condition"] = this.makeExpression(s.Condition)
+        }
+        if len(s.StatementSwitchCases) > 0 {
+            var cases []Object
+            for _, v := range s.StatementSwitchCases {
+                onecase := new map{string -> Object}()
+                var conditions []Object
+                for _, vv := range v.Matches {
+                    conditions = append(conditions, this.makeExpression(vv))
+                }
+                onecase["conditions"] = conditions
+                onecase["block"] = this.makeBlock(v.Block)
+                cases = append(cases, onecase)
+            }
+            ret["cases"] = cases
+        }
+        if s.Default != null {
+            ret["block"] = this.makeBlock(s.Default)
+        }
+        return map[string]interface{}{
+            sprintf("switch@%d", s.Pos.Line): ret,
+        }
+    }
+    fn makeStatementWhen(w *ast.StatementWhen) interface{} {
+        ret := new map{string -> Object}()
+        if w.Condition != null {
+            ret["condition"] = w.Condition.TypeString()
+        }
+        if len(w.Cases) > 0 {
+            var cases []Object
+            for _, v := range w.Cases {
+                onecase := new map{string -> Object}()
+                var conditions []Object
+                for _, vv := range v.Matches {
+                    conditions = append(conditions, vv.TypeString())
+                }
+                onecase["conditions"] = conditions
+                onecase["block"] = this.makeBlock(v.Block)
+                cases = append(cases, onecase)
+            }
+            ret["cases"] = cases
+        }
+        if w.Default != null {
+            ret["block"] = this.makeBlock(w.Default)
+        }
+        return map[string]interface{}{
+            sprintf("when%d", w.Pos.Line): ret,
+        }
+    }
+
+    fn makeStatementLabel(label *ast.StatementLabel) interface{} {
+        return sprintf("label@%d '%s'", label.Pos.Line, label.Name)
+    }
+    fn makeStatementGoto(g *ast.StatementGoTo) interface{} {
+        return sprintf("goto@%d '%s'", g.Pos.Line, g.LabelName)
+    }
+
+    fn makeStatementDefer(d *ast.StatementDefer) interface{} {
+        return map[string]interface{}{
+            sprintf("defer%d", d.Pos.Line): this.makeBlock(&d.Block),
+        }
+    }
+    fn makeStatement(s *ast.Statement) interface{} {
+        switch s.Type {
+        case ast.StatementTypeExpression:
+            return map[string]interface{}{
+                sprintf("statementExpression@%d", s.Pos.Line): this.makeExpression(s.Expression),
+            }
+        case ast.StatementTypeIf:
+            return this.makeStatementIf(s.StatementIf)
+        case ast.StatementTypeBlock:
+            return map[string]interface{}{
+                "block": this.makeBlock(s.Block),
+            }
+        case ast.StatementTypeFor:
+            return this.makeStatementFor(s.StatementFor)
+        case ast.StatementTypeContinue:
+            return sprintf("continue@%d", s.Pos.Line)
+        case ast.StatementTypeReturn:
+            if len(s.StatementReturn.Expressions) == 0 {
+                return sprintf("return@%d", s.Pos.Line)
+            } else {
+                key := sprintf("return@%d", s.Pos.Line)
+                ret := new map{string -> Object}()
+                if len(s.StatementReturn.Expressions) == 1 {
+                    ret[key] = this.makeExpression(s.StatementReturn.Expressions[0])
+                } else {
+                    var t []Object
+                    for _, v := range s.StatementReturn.Expressions {
+                        t = append(t, this.makeExpression(v))
+                    }
+                    ret[key] = t
+                }
+                return ret
+            }
+        case ast.StatementTypeBreak:
+            return sprintf("break@%d", s.Pos.Line)
+        case ast.StatementTypeSwitch:
+            return this.makeStatementSwitch(s.StatementSwitch)
+        case ast.StatementTypeWhen:
+            return this.makeStatementWhen(s.StatementWhen)
+        case ast.StatementTypeLabel:
+            return this.makeStatementLabel(s.StatementLabel)
+        case ast.StatementTypeGoTo:
+            return this.makeStatementGoto(s.StatementGoTo)
+        case ast.StatementTypeDefer:
+            return this.makeStatementDefer(s.Defer)
+        case ast.StatementTypeClass:
+            return this.makeClass(s.Class)
+        case ast.StatementTypeEnum:
+            return this.makeEnum(s.Enum)
+        case ast.StatementTypeNop:
+            return sprintf("nop")
+        case ast.StatementTypeImport:
+            return this.makeImport(s.Import)
+        case ast.StatementTypeTypeAlias:
+            return this.makeTypeAlias(s.TypeAlias)
+        }
+        return null
+    }
+
+    fn makeExpression(e *ast.Expression) interface{} {
+        if e == null {
+            return fmt.Errorf("EXPRESSION IS NULL")
+        }
+        switch e.Type {
+        case ast.ExpressionTypeNull:
+            return "null"
+        case ast.ExpressionTypeBool:
+            fallthrough
+        case ast.ExpressionTypeByte:
+            fallthrough
+        case ast.ExpressionTypeShort:
+            fallthrough
+        case ast.ExpressionTypeChar:
+            fallthrough
+        case ast.ExpressionTypeInt:
+            fallthrough
+        case ast.ExpressionTypeLong:
+            fallthrough
+        case ast.ExpressionTypeFloat:
+            fallthrough
+        case ast.ExpressionTypeDouble:
+            return e.Data
+        case ast.ExpressionTypeString:
+            return sprintf(`literal string@%d "%s"`, e.Pos.Line, e.Data.(string))
+        case ast.ExpressionTypeArray:
+            array := e.Data.(*ast.ExpressionArray)
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+
+            if array.Type != null {
+                ret["type"] = array.Type.TypeString()
+            }
+            var t []Object
+            for _, v := range array.Expressions {
+                t = append(t, this.makeExpression(v))
+            }
+            ret["elements"] = t
+            return ret
+        case ast.ExpressionTypeLogicalOr:
+            fallthrough
+        case ast.ExpressionTypeLogicalAnd:
+            fallthrough
+        case ast.ExpressionTypeOr:
+            fallthrough
+        case ast.ExpressionTypeAnd:
+            fallthrough
+        case ast.ExpressionTypeXor:
+            fallthrough
+        case ast.ExpressionTypeLsh:
+            fallthrough
+        case ast.ExpressionTypeRsh:
+            fallthrough
+        case ast.ExpressionTypeAdd:
+            fallthrough
+        case ast.ExpressionTypeSub:
+            fallthrough
+        case ast.ExpressionTypeMul:
+            fallthrough
+        case ast.ExpressionTypeDiv:
+            fallthrough
+        case ast.ExpressionTypeMod:
+            fallthrough
+        case ast.ExpressionTypeEq:
+            fallthrough
+        case ast.ExpressionTypeNe:
+            fallthrough
+        case ast.ExpressionTypeGe:
+            fallthrough
+        case ast.ExpressionTypeGt:
+            fallthrough
+        case ast.ExpressionTypeLe:
+            fallthrough
+        case ast.ExpressionTypeLt:
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            bin := e.Data.(*ast.ExpressionBinary)
+            ret["left"] = this.makeExpression(bin.Left)
+            ret["right"] = this.makeExpression(bin.Right)
+            return ret
+        case ast.ExpressionTypeAssign:
+            fallthrough
+        case ast.ExpressionTypeVarAssign:
+            fallthrough
+        case ast.ExpressionTypePlusAssign:
+            fallthrough
+        case ast.ExpressionTypeMinusAssign:
+            fallthrough
+        case ast.ExpressionTypeMulAssign:
+            fallthrough
+        case ast.ExpressionTypeDivAssign:
+            fallthrough
+        case ast.ExpressionTypeModAssign:
+            fallthrough
+        case ast.ExpressionTypeAndAssign:
+            fallthrough
+        case ast.ExpressionTypeOrAssign:
+            fallthrough
+        case ast.ExpressionTypeXorAssign:
+            fallthrough
+        case ast.ExpressionTypeLshAssign:
+            fallthrough
+        case ast.ExpressionTypeRshAssign:
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            bin := e.Data.(*ast.ExpressionBinary)
+            if bin.Left.Type == ast.ExpressionTypeList {
+                var t []Object
+                for _, v := range bin.Left.Data.([]*ast.Expression) {
+                    t = append(t, this.makeExpression(v))
+                }
+                ret["left"] = t
+            } else {
+                ret["left"] = this.makeExpression(bin.Left)
+            }
+            ret["right"] = this.makeExpression(bin.Right)
+            return ret
+        case ast.ExpressionTypeIndex:
+            index := e.Data.(*ast.ExpressionIndex)
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            ret["on"] = this.makeExpression(index.Expression)
+            ret["index"] = this.makeExpression(index.Index)
+            return ret
+        case ast.ExpressionTypeSelection:
+            selection := e.Data.(*ast.ExpressionSelection)
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            ret["on"] = this.makeExpression(selection.Expression)
+            ret["index"] = selection.Name
+            return ret
+        case ast.ExpressionTypeSelectionConst:
+            selection := e.Data.(*ast.ExpressionSelection)
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            ret["on"] = this.makeExpression(selection.Expression)
+            ret["index"] = selection.Name
+            return ret
+        case ast.ExpressionTypeMethodCall:
+            call := e.Data.(*ast.ExpressionMethodCall)
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            ret["name"] = call.Name
+            ret["on"] = this.makeExpression(call.Expression)
+            if len(call.Args) > 0 {
+                var t []Object
+                for _, v := range call.Args {
+                    t = append(t, this.makeExpression(v))
+                }
+                ret["args"] = t
+            }
+            if len(call.ParameterTypes) > 0 {
+                var t []Object
+                for _, v := range call.ParameterTypes {
+                    t = append(t, v.TypeString())
+                }
+                ret["parameterTypes"] = t
+            }
+            return ret
+        case ast.ExpressionTypeFunctionCall:
+            call := e.Data.(*ast.ExpressionFunctionCall)
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            ret["on"] = this.makeExpression(call.Expression)
+            if len(call.Args) > 0 {
+                var t []Object
+                for _, v := range call.Args {
+                    t = append(t, this.makeExpression(v))
+                }
+                ret["args"] = t
+            }
+            if len(call.ParameterTypes) > 0 {
+                var t []Object
+                for _, v := range call.ParameterTypes {
+                    t = append(t, v.TypeString())
+                }
+                ret["parameterTypes"] = t
+            }
+            return ret
+        case ast.ExpressionTypeIncrement:
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            ret["on"] = this.makeExpression(e.Data.(*ast.Expression))
+            return ret
+        case ast.ExpressionTypeDecrement:
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            ret["on"] = this.makeExpression(e.Data.(*ast.Expression))
+            return ret
+        case ast.ExpressionTypePrefixIncrement:
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            ret["on"] = this.makeExpression(e.Data.(*ast.Expression))
+            return ret
+        case ast.ExpressionTypePrefixDecrement:
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            ret["on"] = this.makeExpression(e.Data.(*ast.Expression))
+            return ret
+        case ast.ExpressionTypeNegative:
+            fallthrough
+        case ast.ExpressionTypeNot:
+            fallthrough
+        case ast.ExpressionTypeBitwiseNot:
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            ret["on"] = this.makeExpression(e.Data.(*ast.Expression))
+            return ret
+        case ast.ExpressionTypeIdentifier:
+            return e.Data.(*ast.ExpressionIdentifier).Name
+        case ast.ExpressionTypeNew:
+            n := e.Data.(*ast.ExpressionNew)
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            ret["type"] = n.Type.TypeString()
+            {
+                var t []Object
+                for _, v := range n.Args {
+                    t = append(t, this.makeExpression(v))
+                }
+                ret["args"] = t
+            }
+            return ret
+        case ast.ExpressionTypeList:
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            list := e.Data.([]*ast.Expression)
+            if len(list) == 1 {
+                return this.makeExpression(list[0])
+            }
+            var t []Object
+            for _, v := range list {
+                t = append(t, this.makeExpression(v))
+            }
+            ret["list"] = t
+
+            return ret
+        case ast.ExpressionTypeFunctionLiteral:
+            return this.makeFunction(e.Data.(*ast.Function))
+        case ast.ExpressionTypeVar:
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            v := e.Data.(*ast.ExpressionVar)
+            if v.Type != null {
+                ret["type"] = v.Type.TypeString()
+            }
+            {
+                var t []Object
+                for _, vv := range v.Variables {
+                    t = append(t, vv.Name)
+                }
+                ret["variables"] = t
+            }
+            if len(v.InitValues) > 0 {
+                var t []Object
+                for _, vv := range v.InitValues {
+                    t = append(t, this.makeExpression(vv))
+                }
+                ret["initValues"] = t
+            }
+            return ret
+        case ast.ExpressionTypeConst:
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            {
+                var t []Object
+                for _, v := range e.Data.([]*ast.Constant) {
+                    m := new map{string -> Object}()
+                    m["name"] = v.Name
+                    if v.Type != null {
+                        m["type"] = v.Type.TypeString()
+                    }
+                    if v.DefaultValueExpression != null {
+                        m["defaultValue"] = this.makeExpression(v.DefaultValueExpression)
+                    }
+                    t = append(t, m)
+                }
+                ret["constants"] = t
+            }
+            return ret
+        case ast.ExpressionTypeCheckCast:
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            cast := e.Data.(*ast.ExpressionTypeConversion)
+            ret["expression"] = this.makeExpression(cast.Expression)
+            ret["type"] = cast.Type.TypeString()
+            return ret
+        case ast.ExpressionTypeRange:
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            ret["on"] = this.makeExpression(e.Data.(*ast.Expression))
+            return ret
+        case ast.ExpressionTypeSlice:
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            slice := e.Data.(*ast.ExpressionSlice)
+            ret["expression"] = this.makeExpression(slice.ExpressionOn)
+            if slice.Start != null {
+                ret["start"] = this.makeExpression(slice.Start)
+            }
+            if slice.End != null {
+                ret["end"] = this.makeExpression(slice.Start)
+            }
+            return ret
+        case ast.ExpressionTypeMap:
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            m := e.Data.(*ast.ExpressionMap)
+            if m.Type != null {
+                ret["type"] = m.Type.TypeString()
+            }
+            {
+                var t []Object
+                for _, v := range m.KeyValuePairs {
+                    tt := new map{string -> Object}()
+                    tt["key"] = this.makeExpression(v.Key)
+                    tt["value"] = this.makeExpression(v.Value)
+                    t = append(t, tt)
+                }
+                ret["paris"] = t
+            }
+        case ast.ExpressionTypeTypeAssert:
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            cast := e.Data.(*ast.ExpressionTypeAssert)
+            ret["expression"] = this.makeExpression(cast.Expression)
+            ret["type"] = cast.Type.TypeString()
+            return ret
+        case ast.ExpressionTypeQuestion:
+            ret := new map{string -> Object}()
+            ret["op"] = e.Op
+            q := e.Data.(*ast.ExpressionQuestion)
+            ret["selection"] = this.makeExpression(q.Selection)
+            ret["true"] = this.makeExpression(q.True)
+            ret["false"] = this.makeExpression(q.False)
+            return ret
+        case ast.ExpressionTypeGlobal:
+            return e.Op // should be "global"
+        case ast.ExpressionTypeParenthesis:
+            return map[string]interface{}{
+                "()": this.makeExpression(e.Data.(*ast.Expression)),
+            }
+        case ast.ExpressionTypeVArgs:
+            return map[string]interface{}{
+                "...": this.makeExpression(e.Data.(*ast.Expression)),
+            }
+        case ast.ExpressionTypeDot:
+            return "."
+        }
+        return null
+    }
+
+
+
+
+
+
+
+}
+

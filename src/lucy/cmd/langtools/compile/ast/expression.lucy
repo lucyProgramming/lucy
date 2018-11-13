@@ -153,7 +153,7 @@ public class Expression {
 			this.doubleValue = c.doubleValue
 		case VariableTypeString:
 			this.Type = ExpressionTypeString
-			this.data = c.stringValue
+			this.stringValue = c.stringValue
 		default:
 		}
 	}
@@ -421,7 +421,7 @@ public class Expression {
 			}
 			this.value = tt
 		case ExpressionTypeVarAssign:
-			ExpressionCheckVar.check(this , block, errs)
+			ExpressionCheckVarAssign.check(this , block, errs)
 			this.value = mkVoidType(this.pos)
 			returnValueTypes = []Type{this.value}
 		case ExpressionTypeAssign:

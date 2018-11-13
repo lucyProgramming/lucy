@@ -20,7 +20,7 @@ public class  BuildPackage {
         
     }
 
-    fn Make(p ast.Package) {
+    public fn make(p ast.Package) {
         this.Package = p
         mainClass := new cg.ClassHighLevel()
         this.mainClass = mainClass
@@ -98,7 +98,7 @@ public class  BuildPackage {
         c.superClass = ast.JavaRootClass
         c.fields = new map { string -> cg.FieldHighLevel } ()
         c.Class.AttributeLucyEnum = new cg.AttributeLucyEnum()
-        if e.comment != "" {
+        if e.comment != null && e.comment != "" {
             c.Class.AttributeLucyComment = new cg.AttributeLucyComment()
             c.Class.AttributeLucyComment.comment = e.comment
         }
@@ -109,7 +109,7 @@ public class  BuildPackage {
             } else {
                 field.accessFlags |= cg.AccFieldPrivate
             }
-            if v.comment != "" {
+            if v.comment != null && v.comment != "" {
                 field.AttributeLucyComment = new cg.AttributeLucyComment()
                 field.AttributeLucyComment.comment = v.comment
             }
@@ -151,7 +151,7 @@ public class  BuildPackage {
                      f.AttributeConstantValue.index = this.mainClass.Class.insertStringConst(v.stringValue)
             }
             f.AttributeLucyConst = new cg.AttributeLucyConst()
-            if v.comment != "" {
+            if v.comment != null && v.comment != "" {
                 f.AttributeLucyComment = new cg.AttributeLucyComment()
                 f.AttributeLucyComment.comment = v.comment
             }
@@ -182,12 +182,12 @@ public class  BuildPackage {
             if LucyFieldSignature.Need(v.Type) {
                 f.AttributeLucyFieldDescriptor = new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.Encode(v.Type) , 0 )
                 if v.Type.functionType.VArgs != null {
-                    f.AttributeLucyFieldDescriptor.MethodAccessFlag |=
+                    f.AttributeLucyFieldDescriptor.methodAccessFlag |=
                         cg.AccMethodVarargs
                 }
             }
             v.globalVarClassName = this.mainClass.name
-            if v.comment != "" {
+            if v.comment != null && v.comment != "" {
                 f.AttributeLucyComment = new cg.AttributeLucyComment ()
                 f.AttributeLucyComment.comment = v.comment
             }
@@ -200,7 +200,7 @@ public class  BuildPackage {
         if len(this.Package.initFunctions) == 0 {
             needTrigger := false
             for _, v := range this.Package.loadedPackages {
-                if v.triggerPackageInitMethodName != "" {
+                if v.triggerPackageInitMethodName != null && v.triggerPackageInitMethodName != "" {
                     needTrigger = true
                     break
                 }
@@ -254,8 +254,8 @@ public class  BuildPackage {
         codes[codeLength] = cg.OP_return
         codeLength++
         codes = codes[0:codeLength]
-        method.code.Codes = codes
-        method.code.CodeLength = codeLength
+        method.code.codes = codes
+        method.code.codeLength = codeLength
         this.mainClass.appendMethod(method)
 
         // trigger init
@@ -267,9 +267,9 @@ public class  BuildPackage {
         trigger.accessFlags |= cg.AccMethodSynthetic
         trigger.Descriptor = "()V"
         trigger.code = new cg.AttributeCode()
-        trigger.code.Codes = new []byte(1)
-        trigger.code.Codes[0] = cg.OP_return
-        trigger.code.CodeLength = 1
+        trigger.code.codes = new []byte(1)
+        trigger.code.codes[0] = cg.OP_return
+        trigger.code.codeLength = 1
         trigger.AttributeLucyTriggerPackageInitMethod = new cg.AttributeLucyTriggerPackageInitMethod()
         this.mainClass.appendMethod(trigger)
         this.mainClass.triggerPackageInitMethod = trigger
@@ -316,7 +316,7 @@ public class  BuildPackage {
         } else {
             c.superClass = astClass.superClassName.name
         }
-        if astClass.comment != "" {
+        if astClass.comment != null && astClass.comment != "" {
             c.Class.AttributeLucyComment = new cg.AttributeLucyComment()
             c.Class.AttributeLucyComment.comment = astClass.comment
         }
@@ -387,7 +387,7 @@ public class  BuildPackage {
                 t := new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.Encode(v.Type) , 0 )
                 f.AttributeLucyFieldDescriptor = t
             }
-            if v.comment != "" {
+            if v.comment != null && v.comment != "" {
                 f.AttributeLucyComment = new cg.AttributeLucyComment()
                 f.AttributeLucyComment.comment = v.comment
             }
@@ -403,6 +403,10 @@ public class  BuildPackage {
             }
             if vv.isCompilerAuto {
                 method.accessFlags |= cg.AccMethodSynthetic
+            }
+            if LucyMethodSignature.Need(vv.Function.Type) {
+                method.AttributeLucyMethodDescriptor = new cg.AttributeLucyMethodDescriptor()
+                method.AttributeLucyMethodDescriptor.descriptor = LucyMethodSignature.Encode(vv.Function.Type)
             }
             method.Class = c
             method.Descriptor = Descriptor.methodDescriptor(vv.Function.Type)
@@ -451,10 +455,13 @@ public class  BuildPackage {
             if f.accessFlags&cg.AccMethodPublic != 0 || f.name == ast.MainFunctionName {
                 method.accessFlags |= cg.AccMethodPublic
             }
-            if f.comment != "" {
+            if f.comment != null && f.comment != "" {
                 method.AttributeLucyComment = new cg.AttributeLucyComment()
                 method.AttributeLucyComment.comment = f.comment
-
+            }
+            if LucyMethodSignature.Need(f.Type) {
+                method.AttributeLucyMethodDescriptor = new cg.AttributeLucyMethodDescriptor()
+                method.AttributeLucyMethodDescriptor.descriptor = LucyMethodSignature.Encode(f.Type)
             }
             if f.Type.VArgs != null {
                 method.accessFlags |= cg.AccMethodVarargs
@@ -493,18 +500,18 @@ public class  BuildPackage {
         method.Descriptor = "()V"
         method.accessFlags |= cg.AccMethodPublic
         method.code = new cg.AttributeCode()
-        method.code.Codes = new []byte(5)
-        method.code.CodeLength = 5
+        method.code.codes = new []byte(5)
+        method.code.codeLength = 5
         method.code.maxLocals = 1
-        method.code.Codes[0] = cg.OP_aload_0
-        method.code.Codes[1] = cg.OP_invokespecial
+        method.code.codes[0] = cg.OP_aload_0
+        method.code.codes[1] = cg.OP_invokespecial
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
            c.superClass,
            specialMethodInit,
            "()V"
-        ), method.code.Codes[2:4])
+        ), method.code.codes[2:4])
         method.code.MaxStack = 1
-        method.code.Codes[4] = cg.OP_return
+        method.code.codes[4] = cg.OP_return
         c.appendMethod(method)
     }
 

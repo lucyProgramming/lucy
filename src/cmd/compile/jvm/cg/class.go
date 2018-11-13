@@ -287,7 +287,7 @@ func (this *ClassHighLevel) ToLow() *Class {
 
 func (this *Class) fromHighLevel(high *ClassHighLevel) {
 	this.MajorVersion = uint16(common.CompileFlags.JvmMajorVersion)
-	this.MinorVersion = uint16(common.CompileFlags.JvmMajorVersion)
+	this.MinorVersion = uint16(common.CompileFlags.JvmMinorVersion)
 	if len(this.ConstPool) == 0 {
 		this.ConstPool = []*ConstPool{nil} // jvm const pool index begin at 1
 	}

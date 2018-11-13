@@ -1,17 +1,19 @@
 
-import "lucy/cmd/langtools/compile/jvm/cg"
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/jvm"
-import "lucy/cmd/langtools/common"
+import "lucy/cmd/langtools/compile/parser"
+import "lucy/cmd/langtools/compile/common"
 import "lucy/os"
+import "lucy/encoding/json"
 
 
-public fn Main(files []string) {
+public fn Main(files []string,lucyPaths , classPaths []string) {
 	if len(files) == 0 {
 		print("no file specfied")
-		os.Exit(1)
+		os.exit(1)
 	}
-	compiler.compile(files)
+
+	compiler.compile(files,lucyPaths,classPaths)
 }
 
 
@@ -21,18 +23,15 @@ public class Compiler {
 	Errs              []error
 	NErrs2StopCompile int
 	lucyPaths         []string
-	ClassPaths        []string
-	Maker             jvm.BuildPackage = new jvm.BuildPackage()
+	classPaths        []string
+	buildPackage             jvm.BuildPackage = new jvm.BuildPackage()
 
 	fn Compiler(){
 	    this.super()
 	    this.Errs = []error{}
 	    this.NErrs2StopCompile = 10
-        this.ClassPaths = common.getClassPath()
-        this.lucyPaths = common.getLucyPath()
+	    this.Tops = []ast.TopNode{}
 	}
-
-
 
 
 	fn shouldExit() {
@@ -46,7 +45,8 @@ public class Compiler {
 			code = 2
 		}
 		for _, v := range this.Errs {
-			fmt.Fprintln(os.Stderr, v)
+		    v.printStackTrace()
+			os.stderr.println(v.getMessage())
 		}
 		os.exit(code)
 	}
@@ -59,31 +59,34 @@ public class Compiler {
 		for k, v := range this.Tops {
 			is[k] = v.Node.(ast.Import).Import
 		}
-		bs, _ := json.Marshal(is)
-		fmt.Println(string(bs))
+		bs, _ := json.encode(is)
+		print(string(bs))
 	}
 
-	fn compile(files []string) {
+	fn compile(files []string,lucyPaths , classPaths []string) {
+	    this.lucyPaths = lucyPaths
+	    this.classPaths = classPaths
         this.Files = files
 		for _, v := range this.Files {
-			bs, err := os.readFile(v)
+			b, err := os.readFile(v)
 			if err != null {
-				this.Errs = append(this.Errs, err)
+				this.Errs.append(err)
 				continue
 			}
+			bs := javaArray2Lucy(b)
 			//UTF-16 (BE)
 			if len(bs) >= 2 &&
 				bs[0] == 0xfe &&
 				bs[1] == 0xff {
-				fmt.Printf("file:%s looks like UTF-16(BE) file\n", v)
-				os.Exit(2)
+				printf("file:%s looks like UTF-16(BE) file\n", v)
+				os.exit(2)
 			}
 			//UTF-16 (LE)
 			if len(bs) >= 2 &&
 				bs[0] == 0xff &&
 				bs[1] == 0xfe {
-				fmt.Printf("file:%s looks like UTF-16(LE) file\n", v)
-				os.Exit(2)
+				printf("file:%s looks like UTF-16(LE) file\n", v)
+				os.exit(2)
 			}
 			//UTF-32 (LE)
 			if len(bs) >= 4 &&
@@ -91,8 +94,8 @@ public class Compiler {
 				bs[1] == 0x0 &&
 				bs[2] == 0xfe &&
 				bs[3] == 0xff {
-				fmt.Printf("file:%s looks like UTF-32(LE) file\n", v)
-				os.Exit(2)
+				printf("file:%s looks like UTF-32(LE) file\n", v)
+				os.exit(2)
 			}
 			//UTF-32 (BE)
 			if len(bs) >= 4 &&
@@ -100,8 +103,8 @@ public class Compiler {
 				bs[1] == 0xfe &&
 				bs[2] == 0x0 &&
 				bs[3] == 0x0 {
-				fmt.Printf("file:%s looks like UTF-32(BE) file\n", v)
-				os.Exit(2)
+				printf("file:%s looks like UTF-32(BE) file\n", v)
+				os.exit(2)
 			}
 
 			if len(bs) >= 3 &&
@@ -111,36 +114,26 @@ public class Compiler {
 				// utf8 bom
 				bs = bs[3:]
 			}
-			length := len(this.Tops)
-			this.Errs.append(parser.Parse(this.Tops, v, javaArray2Lucy(bs) ,
-				compileCommon.CompileFlags.OnlyImport, this.NErrs2StopCompile)...)
-			fileNodes[v] = this.Tops[length:len(this.Tops)]
+			this.Errs.appendAll(parser.Parse(this.Tops, v, bs ,
+				common.compileFlags.onlyImport.getValue(), this.NErrs2StopCompile))
 			this.shouldExit()
 		}
 		// parse import only
-		if compileCommon.CompileFlags.OnlyImport {
+		if common.compileFlags.onlyImport.getValue() {
 			this.dumpImports()
 			return
 		}
 
-		if compileCommon.CompileFlags.PackageName == "" {
-			fmt.Println("package name not specfied")
-			os.Exit(1)
+		if common.compileFlags.packageName.getValue() == "" {
+			print("package name not specfied")
+			os.exit(1)
 		}
-		ast.PackageBeenCompile.name = compileCommon.CompileFlags.PackageName
-		rs, errs := c.ConvertTops2Package(this.Tops)
-		this.Errs = append(this.Errs, errs...)
-		for _, v := range rs {
-			this.Errs = append(this.Errs, v.Error())
-		}
-		this.shouldExit()
-
-		this.Errs = append(this.Errs, ast.PackageBeenCompile.TypeCheck()...)
+		ast.PackageBeenCompile.name = common.compileFlags.packageName.getValue()
+		this.Errs.appendAll(this.Errs, ast.PackageBeenCompile.typeCheck(this.Tops))
 		if len(this.Errs) > 0 {
 			this.exit()
 		}
-		//optimizer.Optimize(&ast.PackageBeenCompile)
-		this.Maker.Make(ast.PackageBeenCompile)
+		this.buildPackage.make(ast.PackageBeenCompile)
 		this.exit()
 	}
 }

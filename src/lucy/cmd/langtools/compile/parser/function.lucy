@@ -45,6 +45,7 @@ class FunctionParser extends ParserExtends{
 			this.parser.errs.append( err)
 			this.consume(untilLc)
 		}
+		f.block = new ast.Block()
 		f.block.isFunctionBlock = true
 		f.block.Fn = f
 		this.Next(lfNotToken) // skip {
@@ -76,7 +77,7 @@ class FunctionParser extends ParserExtends{
 				this.consume(untilLp)
 				goto skipTemplateNames
 			}
-			this.parser.errs.appendAll(functionType.CheckTemplateNameDuplication())
+			this.parser.errs.appendAll(functionType.checkTemplateNameDuplication())
 			this.Next(lfIsToken)
 		}
 		this.parser.unExpectNewLineAndSkip()
@@ -168,7 +169,7 @@ class FunctionParser extends ParserExtends{
 		}
 		return returnList, err
 	}
-	fn parseParameterOrReturnList() -> (returnList []ast.Variable, err error) {
+	fn parseParameterOrReturnList() -> (returnList []ast.Variable = []ast.Variable{}, err error) {
 		for this.parser.token.Type != lex.TokenRp {
 			if this.parser.token.Type == lex.TokenComma {
 				this.parser.errs.append( new error(sprintf("%s extra comma",

@@ -23,15 +23,15 @@ class BuildExpressionUnary{
             maxStack = this.eb.build(c, code, ee, context, state)
             switch e.value.Type {
             case ast.VariableTypeByte,ast.VariableTypeShort ,ast.VariableTypeChar ,ast.VariableTypeInt  :
-                code.Codes[code.CodeLength] = cg.OP_ineg
+                code.codes[code.codeLength] = cg.OP_ineg
             case ast.VariableTypeFloat:
-                code.Codes[code.CodeLength] = cg.OP_fneg
+                code.codes[code.codeLength] = cg.OP_fneg
             case ast.VariableTypeDouble:
-                code.Codes[code.CodeLength] = cg.OP_dneg
+                code.codes[code.codeLength] = cg.OP_dneg
             case ast.VariableTypeLong:
-                code.Codes[code.CodeLength] = cg.OP_lneg
+                code.codes[code.codeLength] = cg.OP_lneg
             }
-            code.CodeLength++
+            code.codeLength++
             return
         }
         if e.Type == ast.ExpressionTypeBitwiseNot {
@@ -42,35 +42,35 @@ class BuildExpressionUnary{
             }
             switch e.value.Type {
             case ast.VariableTypeByte:
-                code.Codes[code.CodeLength] = cg.OP_bipush
-                code.Codes[code.CodeLength+1] = 255
-                code.Codes[code.CodeLength+2] = cg.OP_ixor
-                code.CodeLength += 3
+                code.codes[code.codeLength] = cg.OP_bipush
+                code.codes[code.codeLength+1] = 255
+                code.codes[code.codeLength+2] = cg.OP_ixor
+                code.codeLength += 3
                 if 2 > maxStack {
                     maxStack = 2
                 }
             case ast.VariableTypeChar , ast.VariableTypeShort :
-                code.Codes[code.CodeLength] = cg.OP_sipush
-                code.Codes[code.CodeLength+1] = 255
-                code.Codes[code.CodeLength+2] = 255
-                code.Codes[code.CodeLength+3] = cg.OP_ixor
-                code.CodeLength += 4
+                code.codes[code.codeLength] = cg.OP_sipush
+                code.codes[code.codeLength+1] = 255
+                code.codes[code.codeLength+2] = 255
+                code.codes[code.codeLength+3] = cg.OP_ixor
+                code.codeLength += 4
                 if 2 > maxStack {
                     maxStack = 2
                 }
             case ast.VariableTypeInt:
-                code.Codes[code.CodeLength] = cg.OP_ldc_w
-                c.insertIntConst(-1, code.Codes[code.CodeLength+1:code.CodeLength+3])
-                code.Codes[code.CodeLength+3] = cg.OP_ixor
-                code.CodeLength += 4
+                code.codes[code.codeLength] = cg.OP_ldc_w
+                c.insertIntConst(-1, code.codes[code.codeLength+1:code.codeLength+3])
+                code.codes[code.codeLength+3] = cg.OP_ixor
+                code.codeLength += 4
                 if 2 > maxStack {
                     maxStack = 2
                 }
             case ast.VariableTypeLong:
-                code.Codes[code.CodeLength] = cg.OP_ldc2_w
-                c.insertLongConst(-1L, code.Codes[code.CodeLength+1:code.CodeLength+3])
-                code.Codes[code.CodeLength+3] = cg.OP_lxor
-                code.CodeLength += 4
+                code.codes[code.codeLength] = cg.OP_ldc2_w
+                c.insertLongConst(-1L, code.codes[code.codeLength+1:code.codeLength+3])
+                code.codes[code.codeLength+3] = cg.OP_lxor
+                code.codeLength += 4
                 if 4 > maxStack {
                     maxStack = 4
                 }
@@ -81,17 +81,17 @@ class BuildExpressionUnary{
             ee := e.data.(ast.Expression)
             maxStack = this.eb.build(c, code, ee, context, state)
             exit := new cg.Exit(cg.OP_ifeq, code)
-            code.Codes[code.CodeLength] = cg.OP_iconst_0
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_iconst_0
+            code.codeLength++
             exit2 := new cg.Exit(cg.OP_goto, code)
-            context.MakeStackMap(code, state, code.CodeLength)
-            writeExits([]cg.Exit{exit}, code.CodeLength)
-            code.Codes[code.CodeLength] = cg.OP_iconst_1
-            code.CodeLength++
+            context.MakeStackMap(code, state, code.codeLength)
+            writeExits([]cg.Exit{exit}, code.codeLength)
+            code.codes[code.codeLength] = cg.OP_iconst_1
+            code.codeLength++
             state.pushStack(c, ee.value)
             defer state.popStack(1)
-            writeExits([]cg.Exit{exit2}, code.CodeLength)
-            context.MakeStackMap(code, state, code.CodeLength)
+            writeExits([]cg.Exit{exit2}, code.codeLength)
+            context.MakeStackMap(code, state, code.codeLength)
         }
         return
     }

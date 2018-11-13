@@ -87,8 +87,21 @@ func (this *BuildExpression) buildTypeAssert(
 		insertTypeAssertClass(class, code, assert.Type)
 		exit := (&cg.Exit{}).Init(cg.OP_ifne, code)
 		code.Codes[code.CodeLength] = cg.OP_pop
-		code.Codes[code.CodeLength+1] = cg.OP_aconst_null
-		code.CodeLength += 2
+		code.CodeLength++
+		code.Codes[code.CodeLength] = cg.OP_new
+		class.InsertClassConst(javaExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.Codes[code.CodeLength+3] = cg.OP_dup
+		code.CodeLength += 4
+		code.Codes[code.CodeLength] = cg.OP_ldc_w
+		class.InsertStringConst("not a instance of class", code.Codes[code.CodeLength+1:code.CodeLength+3])
+		code.CodeLength += 3
+		if 3 > maxStack {
+			maxStack = 3
+		}
+		class.InsertMethodCall(code, cg.OP_invokespecial, javaExceptionClass,
+			specialMethodInit, "(Ljava/lang/String;)V")
+		code.Codes[code.CodeLength] = cg.OP_athrow
+		code.CodeLength++
 		writeExits([]*cg.Exit{exit}, code.CodeLength)
 		state.pushStack(class, assert.Expression.Value)
 		defer state.popStack(1)

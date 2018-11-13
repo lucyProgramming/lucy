@@ -76,20 +76,20 @@ class  BuildExpressionFunction {
 		function.entrance = method
 		closureClass.appendMethod(method)
 		//new a object to hold this closure function
-		code.Codes[code.CodeLength] = cg.OP_new
-		c.insertClassConst(closureClass.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.Codes[code.CodeLength+3] = cg.OP_dup
-		code.CodeLength += 4
+		code.codes[code.codeLength] = cg.OP_new
+		c.insertClassConst(closureClass.name, code.codes[code.codeLength+1:code.codeLength+3])
+		code.codes[code.codeLength+3] = cg.OP_dup
+		code.codeLength += 4
 		maxStack = 2 // maxStack is 2 right now
-		code.Codes[code.CodeLength] = cg.OP_invokespecial
+		code.codes[code.codeLength] = cg.OP_invokespecial
 		c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 			className,
 			specialMethodInit,
 			"()V"
-		), code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_dup
-		code.CodeLength++
+		), code.codes[code.codeLength+1:code.codeLength+3])
+		code.codeLength += 3
+		code.codes[code.codeLength] = cg.OP_dup
+		code.codeLength++
 		// store  to,wait for call
 		function.closureVariableOffSet = code.maxLocals
 		code.maxLocals++
@@ -104,8 +104,8 @@ class  BuildExpressionFunction {
 			field.name = v.name
 			closureClass.fields[v.name] = field
 			if total != 0 {
-				code.Codes[code.CodeLength] = cg.OP_dup
-				code.CodeLength++
+				code.codes[code.codeLength] = cg.OP_dup
+				code.codeLength++
 			}
 			if v.beenCapturedAsLeftValue > 0 {
 				meta := closure.getMeta(v.Type.Type)
@@ -116,13 +116,13 @@ class  BuildExpressionFunction {
 					if 3 > maxStack {
 						maxStack = 3
 					}
-					code.Codes[code.CodeLength] = cg.OP_getfield
+					code.codes[code.codeLength] = cg.OP_getfield
 					c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					    c.name,
 						v.name,
 						field.descriptor
-					), code.Codes[code.CodeLength+1:code.CodeLength+3])
-					code.CodeLength += 3
+					), code.codes[code.codeLength+1:code.codeLength+3])
+					code.codeLength += 3
 				} else { // not exits
 					copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.localValOffset))
 					if 3 > maxStack {
@@ -137,13 +137,13 @@ class  BuildExpressionFunction {
 					if 3 > maxStack {
 						maxStack = 3
 					}
-					code.Codes[code.CodeLength] = cg.OP_getfield
+					code.codes[code.codeLength] = cg.OP_getfield
 					c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 						c.name,
 						v.name,
 						field.descriptor
-					), code.Codes[code.CodeLength+1:code.CodeLength+3])
-					code.CodeLength += 3
+					), code.codes[code.codeLength+1:code.codeLength+3])
+					code.codeLength += 3
 				} else { // not exits
 					copyOPs(code, loadLocalVariableOps(v.Type.Type, v.localValOffset))
 					if 3 > maxStack {
@@ -151,13 +151,13 @@ class  BuildExpressionFunction {
 					}
 				}
 			}
-			code.Codes[code.CodeLength] = cg.OP_putfield
+			code.codes[code.codeLength] = cg.OP_putfield
 			c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 				className,
 				v.name,
 				field.descriptor
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 			total--
 		}
 		for v, _ := range function.Closure.Functions {
@@ -171,8 +171,8 @@ class  BuildExpressionFunction {
 			filed.descriptor = "L" + v.entrance.Class.name + ";"
 			closureClass.fields[v.name] = filed
 			if total != 0 {
-				code.Codes[code.CodeLength] = cg.OP_dup
-				code.CodeLength++
+				code.codes[code.codeLength] = cg.OP_dup
+				code.codeLength++
 			}
 			if context.function.Closure.closureFunctionExist(v) {
 				// I Know this at 0 offset
@@ -180,26 +180,26 @@ class  BuildExpressionFunction {
 				if 3 > maxStack {
 					maxStack = 3
 				}
-				code.Codes[code.CodeLength] = cg.OP_getfield
+				code.codes[code.codeLength] = cg.OP_getfield
 				c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					c.name,
 					v.name,
 					filed.descriptor
-				), code.Codes[code.CodeLength+1:code.CodeLength+3])
-				code.CodeLength += 3
+				), code.codes[code.codeLength+1:code.codeLength+3])
+				code.codeLength += 3
 			} else { // not exits
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.closureVariableOffSet))
 				if 3 > maxStack {
 					maxStack = 3
 				}
 			}
-			code.Codes[code.CodeLength] = cg.OP_putfield
+			code.codes[code.codeLength] = cg.OP_putfield
 			c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 				className,
 				v.name,
 				filed.descriptor
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 			total--
 		}
 		method.code = new cg.AttributeCode()
@@ -210,61 +210,61 @@ class  BuildExpressionFunction {
 	}
 	fn  packFunction2MethodHandle(c cg.ClassHighLevel, code cg.AttributeCode,
 		function ast.Function, context Context) -> (maxStack char) {
-		code.Codes[code.CodeLength] = cg.OP_invokestatic
+		code.codes[code.codeLength] = cg.OP_invokestatic
 		c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 			"java/lang/invoke/MethodHandles",
 			"lookup",
 			"()Ljava/lang/invoke/MethodHandles$Lookup;"
-		), code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		c.insertClassConst(function.entrance.Class.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_ldc_w
-		c.insertStringConst(function.entrance.name, code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_ldc_w
+		), code.codes[code.codeLength+1:code.codeLength+3])
+		code.codeLength += 3
+		code.codes[code.codeLength] = cg.OP_ldc_w
+		c.insertClassConst(function.entrance.Class.name, code.codes[code.codeLength+1:code.codeLength+3])
+		code.codeLength += 3
+		code.codes[code.codeLength] = cg.OP_ldc_w
+		c.insertStringConst(function.entrance.name, code.codes[code.codeLength+1:code.codeLength+3])
+		code.codeLength += 3
+		code.codes[code.codeLength] = cg.OP_ldc_w
 		c.insertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(
-			function.entrance.Descriptor),code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
-		code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			function.entrance.Descriptor),code.codes[code.codeLength+1:code.codeLength+3])
+		code.codeLength += 3
+		code.codes[code.codeLength] = cg.OP_invokevirtual
 		if function.isClosureFunction {
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				"java/lang/invoke/MethodHandles$Lookup",
 				"findVirtual",
 				 "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			), code.codes[code.codeLength+1:code.codeLength+3])
 		} else {
 			c.insertMethodRefConst(new       cg.ConstantInfoMethodrefHighLevel(
 				"java/lang/invoke/MethodHandles$Lookup",
 				"findStatic",
 				"(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
+			), code.codes[code.codeLength+1:code.codeLength+3])
 		}
-		code.CodeLength += 3
+		code.codeLength += 3
 		if 4 > maxStack {
 			maxStack = 4
 		}
 		if function.isClosureFunction {
 			if context.function.Closure.closureFunctionExist(function) {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, char(0)))
-				code.Codes[code.CodeLength] = cg.OP_getfield
+				code.codes[code.codeLength] = cg.OP_getfield
 				c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					c.name,
 					function.name,
 					"L" + function.entrance.Class.name + ";"
-				), code.Codes[code.CodeLength+1:code.CodeLength+3])
-				code.CodeLength += 3
+				), code.codes[code.codeLength+1:code.codeLength+3])
+				code.codeLength += 3
 			} else {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, function.closureVariableOffSet))
 			}
-			code.Codes[code.CodeLength] = cg.OP_invokevirtual
+			code.codes[code.codeLength] = cg.OP_invokevirtual
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				"java/lang/invoke/MethodHandle",
 				"bindTo",
 				"(Ljava/lang/Object;)Ljava/lang/invoke/MethodHandle;"
-			), code.Codes[code.CodeLength+1:code.CodeLength+3])
-			code.CodeLength += 3
+			), code.codes[code.codeLength+1:code.codeLength+3])
+			code.codeLength += 3
 		}
 		return
 	}

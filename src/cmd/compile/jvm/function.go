@@ -38,7 +38,7 @@ func (this *BuildPackage) mkCapturedParameters(class *cg.ClassHighLevel, code *c
 		this.storeLocalVar(class, code, v)
 		v.LocalValOffset = code.MaxLocals //rewrite offset
 		code.MaxLocals++
-		copyOPs(code, storeLocalVariableOps(v.Type.Type, v.LocalValOffset)...)
+		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, v.LocalValOffset)...)
 		state.appendLocals(class, state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
 	}
 	return

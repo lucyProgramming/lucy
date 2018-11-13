@@ -24,25 +24,25 @@ public class FunctionType {
 	}
 	
 
-	public fn CheckTemplateNameDuplication() -> (errs []error) {
+	public fn checkTemplateNameDuplication() -> (errs []error) {
 		errs = []error{}
 		m := new map {string -> Pos}()
 		for _, v := range this.TemplateNames {
 			if p := m[v.name]; p != null {
-				errMsg :=
-					sprintf("%s duplicated name '%s' , first declaraed at:\n",
+				errMsg := sprintf("%s duplicated name '%s' , first declaraed at:\n",
 						v.pos.errMsgPrefix(), v.name)
 				errMsg += sprintf("\t%s\n", p.errMsgPrefix())
 				errs.append( new error(errMsg))
 				continue
 			}
+			assert(v.pos != null)
 			m[v.name] = v.pos
 		}
 		this.TemplateNamesMap = m
 		return errs
 	}
 
-	fn haveTemplateName(name string) -> (have bool = this.TemplateNamesMap.keyExist(name)) {}
+	fn haveTemplateName(name string) -> (have bool = this.TemplateNamesMap.keyExist(name)){}
 
 
 	fn Clone() -> (ret FunctionType) {
@@ -66,7 +66,7 @@ public class FunctionType {
 	fn typeString() -> (s string) {
 		s = "("
 		for k, v := range this.ParameterList {
-			if v.name != "" {
+			if v.name != null && v.name != "" {
 				s += v.name + " "
 			}
 			s += v.Type.typeString()
@@ -81,7 +81,7 @@ public class FunctionType {
 			if len(this.ParameterList) > 0 {
 				s += ","
 			}
-			if this.VArgs.name != "" {
+			if this.VArgs.name != null && this.VArgs.name != "" {
 				s += this.VArgs.name + " "
 			}
 			s += this.VArgs.Type.typeString()
@@ -90,7 +90,7 @@ public class FunctionType {
 		if this.VoidReturn() == false {
 			s += "->( "
 			for k, v := range this.ReturnList {
-				if v.name != "" {
+				if v.name != null && v.name != "" {
 					s += v.name + " "
 				}
 				s += v.Type.typeString()
@@ -159,7 +159,7 @@ public class FunctionType {
 			if v == null {
 				continue
 			}
-			if v.name != "" {
+			if v.name != null && v.name != "" {
 				have += v.name + " "
 			}
 			have += v.typeString()

@@ -37,13 +37,13 @@ class BuildExpressionStrcat {
             bin.Right.value, context, state); t > maxStack {
             maxStack = t
         }
-        code.Codes[code.CodeLength] = cg.OP_invokevirtual
+        code.codes[code.codeLength] = cg.OP_invokevirtual
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             javaStringClass,
             `concat`,
            "(Ljava/lang/String;)Ljava/lang/String;"
-        ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-        code.CodeLength += 3
+        ), code.codes[code.codeLength+1:code.codeLength+3])
+        code.codeLength += 3
         return
 
     }

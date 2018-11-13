@@ -33,7 +33,7 @@ public class StatementLabel {
 			if v.StatementLabel == this { // this is me
 				break
 			}
-			if v.isVariableDefinition() && v.Checked == false {
+			if v.isVariableDefinition() && v.checked == false {
 				ss.append(v)
 			}
 		}

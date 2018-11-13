@@ -26,37 +26,37 @@ class BuildSwitch {
             switch t.Type {
             case ast.VariableTypeByte , ast.VariableTypeShort ,ast.VariableTypeEnum,
                 ast.VariableTypeChar , ast.VariableTypeInt :
-                code.Codes[code.CodeLength] = cg.OP_isub
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_isub
+                code.codeLength++
             case ast.VariableTypeLong:
-                code.Codes[code.CodeLength] = cg.OP_lcmp
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_lcmp
+                code.codeLength++
             case ast.VariableTypeFloat:
-                code.Codes[code.CodeLength] = cg.OP_fcmpg
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_fcmpg
+                code.codeLength++
             case ast.VariableTypeDouble:
-                code.Codes[code.CodeLength] = cg.OP_dcmpg
-                code.CodeLength++
+                code.codes[code.codeLength] = cg.OP_dcmpg
+                code.codeLength++
             case ast.VariableTypeString:
-                code.Codes[code.CodeLength] = cg.OP_invokevirtual
+                code.codes[code.codeLength] = cg.OP_invokevirtual
                 c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                     javaStringClass,
                    "compareTo",
                     "(Ljava/lang/String;)I"
-                ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-                code.CodeLength += 3
+                ), code.codes[code.codeLength+1:code.codeLength+3])
+                code.codeLength += 3
             default:
-                context.MakeStackMap(code, state, code.CodeLength+7)
+                context.MakeStackMap(code, state, code.codeLength+7)
                 state.pushStack(c, typeBool)
-                context.MakeStackMap(code, state, code.CodeLength+8)
+                context.MakeStackMap(code, state, code.codeLength+8)
                 state.popStack(1)
-                code.Codes[code.CodeLength] = cg.OP_if_acmpeq
-                binary.BigEndian.putChar(code.Codes[code.CodeLength+1:code.CodeLength+3], char(7))
-                code.Codes[code.CodeLength+3] = cg.OP_iconst_1
-                code.Codes[code.CodeLength+4] = cg.OP_goto
-                binary.BigEndian.putChar(code.Codes[code.CodeLength+5:code.CodeLength+7], char(4))
-                code.Codes[code.CodeLength+7] = cg.OP_iconst_0
-                code.CodeLength += 8
+                code.codes[code.codeLength] = cg.OP_if_acmpeq
+                binary.BigEndian.putChar(code.codes[code.codeLength+1:code.codeLength+3], char(7))
+                code.codes[code.codeLength+3] = cg.OP_iconst_1
+                code.codes[code.codeLength+4] = cg.OP_goto
+                binary.BigEndian.putChar(code.codes[code.codeLength+5:code.codeLength+7], char(4))
+                code.codes[code.codeLength+7] = cg.OP_iconst_0
+                code.codeLength += 8
             }
         }
         for _, v := range s.PrefixExpressions {
@@ -76,8 +76,8 @@ class BuildSwitch {
         state.pushStack(c, s.condition.value)
         for _, c := range s.StatementSwitchCases {
             if notMatch != null {
-                writeExits([]cg.Exit{notMatch}, code.CodeLength)
-                context.MakeStackMap(code, state, code.CodeLength)
+                writeExits([]cg.Exit{notMatch}, code.codeLength)
+                context.MakeStackMap(code, state, code.codeLength)
             }
             matches := []cg.Exit{}
             for _, ee := range c.matches {
@@ -92,11 +92,11 @@ class BuildSwitch {
                     currentStack = size
                     // mk stack ready
                     if size == 1 {
-                        code.Codes[code.CodeLength] = cg.OP_dup
+                        code.codes[code.codeLength] = cg.OP_dup
                     } else {
-                        code.Codes[code.CodeLength] = cg.OP_dup2
+                        code.codes[code.codeLength] = cg.OP_dup2
                     }
-                    code.CodeLength++
+                    code.codeLength++
                     currentStack += size
                     state.pushStack(__FUNCTION__.c, s.condition.value)
                     stack := this.eb.build(__FUNCTION__.c, code, ee, context, state)
@@ -111,15 +111,15 @@ class BuildSwitch {
             // should be goto next,here is no match
             notMatch = new cg.Exit(cg.OP_goto, code)
             // if match goto here
-            writeExits(matches, code.CodeLength)
+            writeExits(matches, code.codeLength)
             //before block,pop off stack
-            context.MakeStackMap(code, state, code.CodeLength)
+            context.MakeStackMap(code, state, code.codeLength)
             if size == 1 {
-                code.Codes[code.CodeLength] = cg.OP_pop
+                code.codes[code.codeLength] = cg.OP_pop
             } else {
-                code.Codes[code.CodeLength] = cg.OP_pop2
+                code.codes[code.codeLength] = cg.OP_pop2
             }
-            code.CodeLength++
+            code.codeLength++
             //block is here
             if c.block != null {
                 ss := new StackMapState(state)
@@ -131,14 +131,14 @@ class BuildSwitch {
                     new cg.Exit(cg.OP_goto, code)) // matched,goto switch outside
             }
         }
-        writeExits([]cg.Exit{notMatch}, code.CodeLength)
-        context.MakeStackMap(code, state, code.CodeLength)
+        writeExits([]cg.Exit{notMatch}, code.codeLength)
+        context.MakeStackMap(code, state, code.codeLength)
         if size == 1 {
-            code.Codes[code.CodeLength] = cg.OP_pop
+            code.codes[code.codeLength] = cg.OP_pop
         } else {
-            code.Codes[code.CodeLength] = cg.OP_pop2
+            code.codes[code.codeLength] = cg.OP_pop2
         }
-        code.CodeLength++
+        code.codeLength++
         state.popStack(1)
         if s.Default != null {
             ss := new StackMapState(state)

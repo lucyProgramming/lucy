@@ -4,33 +4,37 @@ import "lucy/binary"
 public class AttributeCode  {
 	public	MaxStack          char
 	public	maxLocals         char
-	public	CodeLength        int
-	public	Codes             []byte
-	public	LineNumbers       AttributeLineNumber
-	public	Exceptions        []ExceptionTable
+	public	codeLength        int
+	public	codes             []byte
+	public	lineNumbers       AttributeLineNumber
+	public	exceptions        []ExceptionTable
 			attributes        []AttributeInfo
-	public	AttributeStackMap AttributeStackMap
+	public	attributeStackMap AttributeStackMap
 	
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const("Code")
-		ret.Info = new []byte( 8)
-		binary.BigEndian.putChar(ret.Info[0:2], this.MaxStack)
-		binary.BigEndian.putChar(ret.Info[2:4], this.maxLocals)
-		binary.BigEndian.putInt(ret.Info[4:8], (this.CodeLength))
-		ret.Info . appendAll( this.Codes)
-		ret.Info . appendAll(this.mkExceptions())
+		ret.info = new []byte( 8)
+		binary.BigEndian.putChar(ret.info[0:2], this.MaxStack)
+		binary.BigEndian.putChar(ret.info[2:4], this.maxLocals)
+		binary.BigEndian.putInt(ret.info[4:8], (this.codeLength))
+		ret.info . appendAll( this.codes)
+		ret.info . appendAll(this.mkExceptions())
 		if this.attributes == null {
 		    this.attributes =  []AttributeInfo{}
 		}
-		if info := this.LineNumbers.ToAttributeInfo(c); info != null {
-			this.attributes.append(info)
+		if this.lineNumbers != null {
+			if info := this.lineNumbers.ToAttributeInfo(c); info != null {
+				this.attributes.append(info)
+			}
 		}
-		if info := this.AttributeStackMap.ToAttributeInfo(c); info != null {
-			this.attributes . append(info)
+		if this.attributeStackMap != null {
+			if info := this.attributeStackMap.ToAttributeInfo(c); info != null {
+				this.attributes.append(info)
+			}
 		}
-		ret.Info . appendAll(this.mkAttributes(c))
-		ret.attributeLength = (len(ret.Info))
+		ret.info.appendAll(this.mkAttributes(c))
+		ret.attributeLength = (len(ret.info))
 		return ret
 	}
 
@@ -38,13 +42,13 @@ public class AttributeCode  {
 		mk line number attribute
 	*/
 	public fn MKLineNumber(lineNumber int) {
-	    if this.LineNumbers == null {
-	        this.LineNumbers = new AttributeLineNumber()
+	    if this.lineNumbers == null {
+	        this.lineNumbers = new AttributeLineNumber()
 	    }
 		line := new AttributeLinePc()
-		line.startPc = char(this.CodeLength)
+		line.startPc = char(this.codeLength)
 		line.lineNumber = char(lineNumber)
-		this.LineNumbers.lineNumbers.append(line)
+		this.lineNumbers.lineNumbers.append(line)
 	}
 
 	fn mkAttributes(c Class) -> (bs []byte)  {
@@ -59,7 +63,7 @@ public class AttributeCode  {
 				bs4 := new []byte(4)
 				binary.BigEndian.putInt(bs4, (v.attributeLength))
 				bb.appendAll(bs4)
-				bb.appendAll(v.Info)
+				bb.appendAll(v.info)
 				b.appendAll(bb)
 			}
 			bs.appendAll(b)
@@ -69,10 +73,10 @@ public class AttributeCode  {
 
 	fn mkExceptions() -> (bs []byte)  {
 		bs = new []byte (2)
-		binary.BigEndian.putChar(bs, char(len(this.Exceptions)))
-		if len(this.Exceptions) > 0 {
-			b := new []byte (8*len(this.Exceptions))
-			for k, v := range this.Exceptions {
+		binary.BigEndian.putChar(bs, char(len(this.exceptions)))
+		if len(this.exceptions) > 0 {
+			b := new []byte (8*len(this.exceptions))
+			for k, v := range this.exceptions {
 				binary.BigEndian.putChar(b[k*8:], v.startPc)
 				binary.BigEndian.putChar(b[k*8+2:], v.endPc)
 				binary.BigEndian.putChar(b[k*8+4:], v.handlerPc)

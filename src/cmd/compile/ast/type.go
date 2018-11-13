@@ -511,27 +511,27 @@ func (this *Type) canBeBindWithParameterTypes(parameterTypes map[string]*Type) e
 /*
 	if there is error,this function will crash
 */
-func (this *Type) bindWithParameterTypes(ft *FunctionType, parameterTypes map[string]*Type) error {
+func (this *Type) bindWithParameterTypes(ft *FunctionType, parameterTypes map[string]*Type) {
 	if this.Type == VariableTypeTemplate {
 		t, ok := parameterTypes[this.Name]
 		if ok == false {
 			panic(fmt.Sprintf("typed parameter '%s' not found", this.Name))
 		}
 		*this = *t.Clone() // real bind
-		return nil
+		return
 	}
 	if this.Type == VariableTypeArray || this.Type == VariableTypeJavaArray {
-		return this.Array.bindWithParameterTypes(ft, parameterTypes)
+		this.Array.bindWithParameterTypes(ft, parameterTypes)
+		return
 	}
 	if this.Type == VariableTypeMap {
 		if len(this.Map.K.getParameterType(ft)) > 0 {
-			err := this.Map.K.bindWithParameterTypes(ft, parameterTypes)
-			if err != nil {
-				return err
-			}
+			this.Map.K.bindWithParameterTypes(ft, parameterTypes)
+			return
 		}
 		if len(this.Map.V.getParameterType(ft)) > 0 {
-			return this.Map.V.bindWithParameterTypes(ft, parameterTypes)
+			this.Map.V.bindWithParameterTypes(ft, parameterTypes)
+			return
 		}
 	}
 	panic("not T")

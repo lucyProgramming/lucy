@@ -20,8 +20,8 @@ public const	ConstantPoolTagInvokeDynamic      byte = 18
 
 public class ConstPool  {
 	selfIndex char // using when it`s self
-	public Tag       byte
-	public Info      []byte
+	public tag       byte
+	public info      []byte
 }
 
 class ConstantInfoClass  {
@@ -32,9 +32,9 @@ class ConstantInfoClass  {
 	}
 	fn ToConstPool() -> (p ConstPool) {
 		p = new ConstPool()
-		p.Tag = ConstantPoolTagClass
-		p.Info = new []byte(2)
-		binary.BigEndian.putChar(p.Info, this.nameIndex)
+		p.tag = ConstantPoolTagClass
+		p.info = new []byte(2)
+		binary.BigEndian.putChar(p.info, this.nameIndex)
 		return p
 	}
 }
@@ -49,9 +49,9 @@ class ConstantInfoString {
 	}
 	fn ToConstPool() -> (p ConstPool) {
 		p = new ConstPool()
-		p.Tag = ConstantPoolTagString
-		p.Info = new []byte(2)
-		binary.BigEndian.putChar(p.Info, this.index)
+		p.tag = ConstantPoolTagString
+		p.info = new []byte(2)
+		binary.BigEndian.putChar(p.info, this.index)
 		return p
 	}
 }
@@ -66,9 +66,9 @@ class ConstantInfoInteger  {
 	}
 	fn ToConstPool() -> (p ConstPool) {
 		p = new ConstPool()
-		p.Tag = ConstantPoolTagInteger
-		p.Info = new []byte(4)
-		binary.BigEndian.putInt(p.Info, (this.value))
+		p.tag = ConstantPoolTagInteger
+		p.info = new []byte(4)
+		binary.BigEndian.putInt(p.info, (this.value))
 		return p
 	}
 }
@@ -83,9 +83,9 @@ class ConstantInfoFloat  {
 	}
 	fn ToConstPool() -> (p ConstPool) {
 		p = new ConstPool()
-		p.Tag = ConstantPoolTagFloat
-		p.Info = new []byte(4)
-		binary.BigEndian.putInt(p.Info, Float.floatToIntBits(this.value))
+		p.tag = ConstantPoolTagFloat
+		p.info = new []byte(4)
+		binary.BigEndian.putInt(p.info, Float.floatToIntBits(this.value))
 		return p
 	}
 }
@@ -100,9 +100,9 @@ class ConstantInfoLong  {
 	}
 	fn ToConstPool() -> (p ConstPool) {
 		p = new ConstPool()
-		p.Tag = ConstantPoolTagLong
-		p.Info = new []byte(8)
-		binary.BigEndian.putLong(p.Info, (this.value))
+		p.tag = ConstantPoolTagLong
+		p.info = new []byte(8)
+		binary.BigEndian.putLong(p.info, (this.value))
 		return p
 	}	
 }
@@ -117,9 +117,9 @@ class ConstantInfoDouble {
 	}
 	fn ToConstPool() -> (p ConstPool) {
 		p = new ConstPool()
-		p.Tag = ConstantPoolTagDouble
-		p.Info = new []byte(8)
-		binary.BigEndian.putLong(p.Info, Double.doubleToLongBits(this.value))
+		p.tag = ConstantPoolTagDouble
+		p.info = new []byte(8)
+		binary.BigEndian.putLong(p.info, Double.doubleToLongBits(this.value))
 		return p
 	}
 }
@@ -135,10 +135,10 @@ class ConstantInfoNameAndType {
     }
 	fn ToConstPool() -> (p ConstPool) {
 		p = new ConstPool()
-		p.Tag = ConstantPoolTagNameAndType
-		p.Info = new []byte(4)
-		binary.BigEndian.putChar(p.Info, this.nameIndex)
-		binary.BigEndian.putChar(p.Info[2:], this.descriptorIndex)
+		p.tag = ConstantPoolTagNameAndType
+		p.info = new []byte(4)
+		binary.BigEndian.putChar(p.info, this.nameIndex)
+		binary.BigEndian.putChar(p.info[2:], this.descriptorIndex)
 		return p
 	}
 }
@@ -154,10 +154,10 @@ class ConstantInfoMethodref {
 	}
 	fn ToConstPool() -> (p ConstPool) {
 		p = new ConstPool()
-		p.Tag = ConstantPoolTagMethodref
-		p.Info = new []byte(4)
-		binary.BigEndian.putChar(p.Info, this.classIndex)
-		binary.BigEndian.putChar(p.Info[2:], this.nameAndTypeIndex)
+		p.tag = ConstantPoolTagMethodref
+		p.info = new []byte(4)
+		binary.BigEndian.putChar(p.info, this.classIndex)
+		binary.BigEndian.putChar(p.info[2:], this.nameAndTypeIndex)
 		return p
 	}
 }
@@ -174,10 +174,10 @@ class ConstantInfoInterfaceMethodref  {
 	}
 	fn ToConstPool() -> (p ConstPool) {
 		p = new ConstPool()
-		p.Tag = ConstantPoolTagInterfaceMethodref
-		p.Info = new []byte(4)
-		binary.BigEndian.putChar(p.Info, char(this.classIndex))
-		binary.BigEndian.putChar(p.Info[2:], char(this.nameAndTypeIndex))
+		p.tag = ConstantPoolTagInterfaceMethodref
+		p.info = new []byte(4)
+		binary.BigEndian.putChar(p.info, char(this.classIndex))
+		binary.BigEndian.putChar(p.info[2:], char(this.nameAndTypeIndex))
 		return p
 	}
 }
@@ -194,10 +194,10 @@ class ConstantInfoFieldref  {
 	}
 	fn ToConstPool() -> (p ConstPool) {
 		p = new ConstPool()
-		p.Tag = ConstantPoolTagFieldref
-		p.Info = new []byte(4)
-		binary.BigEndian.putChar(p.Info, this.classIndex)
-		binary.BigEndian.putChar(p.Info[2:], this.nameAndTypeIndex)
+		p.tag = ConstantPoolTagFieldref
+		p.info = new []byte(4)
+		binary.BigEndian.putChar(p.info, this.classIndex)
+		binary.BigEndian.putChar(p.info[2:], this.nameAndTypeIndex)
 		return p
 	}
 }
@@ -209,10 +209,10 @@ class ConstantInfoMethodHandle  {
 	referenceIndex char
 	fn ToConstPool() -> (p ConstPool) {
 		p = new ConstPool()
-		p.Tag = ConstantPoolTagMethodHandle
-		p.Info = new []byte(3)
-		p.Info[0] = byte(this.referenceKind)
-		binary.BigEndian.putChar(p.Info[1:], char(this.referenceIndex))
+		p.tag = ConstantPoolTagMethodHandle
+		p.info = new []byte(3)
+		p.info[0] = byte(this.referenceKind)
+		binary.BigEndian.putChar(p.info[1:], char(this.referenceIndex))
 		return p
 	}	
 }
@@ -229,10 +229,10 @@ class ConstantInfoUtf8  {
 	}
 	fn ToConstPool() -> (p ConstPool) {
 		p = new ConstPool()
-		p.Tag = ConstantPoolTagUtf8
-		p.Info = new []byte(2)
-		binary.BigEndian.putChar(p.Info, char(this.length))
-		p.Info . appendAll(this.bs)
+		p.tag = ConstantPoolTagUtf8
+		p.info = new []byte(2)
+		binary.BigEndian.putChar(p.info, char(this.length))
+		p.info . appendAll(this.bs)
 		return p
 	}
 }
@@ -247,9 +247,9 @@ class ConstantInfoMethodType  {
 	}
 	fn ToConstPool() -> (p ConstPool) {
 		p = new ConstPool()
-		p.Tag = ConstantPoolTagMethodType
-		p.Info = new []byte(2)
-		binary.BigEndian.putChar(p.Info, char(this.descriptorIndex))
+		p.tag = ConstantPoolTagMethodType
+		p.info = new []byte(2)
+		binary.BigEndian.putChar(p.info, char(this.descriptorIndex))
 		return p
 	}
 }
@@ -264,10 +264,10 @@ type ConstantInfoInvokeDynamic  {
 
 func (this *ConstantInfoInvokeDynamic) ToConstPool() *ConstPool {
 	info := &ConstPool{}
-	info.Tag = ConstantPoolTagInvokeDynamic
-	info.Info = new []byte(4)
-	binary.BigEndian.putChar(info.Info, this.bootstrapMethodAttrIndex)
-	binary.BigEndian.putChar(info.Info[2:], this.nameAndTypeIndex)
+	info.tag = ConstantPoolTagInvokeDynamic
+	info.info = new []byte(4)
+	binary.BigEndian.putChar(info.info, this.bootstrapMethodAttrIndex)
+	binary.BigEndian.putChar(info.info[2:], this.nameAndTypeIndex)
 	return info
 }
 */

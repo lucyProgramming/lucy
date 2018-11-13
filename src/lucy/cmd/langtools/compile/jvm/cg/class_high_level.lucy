@@ -15,6 +15,11 @@ public class ClassHighLevel {
 	public triggerPackageInitMethod MethodHighLevel
 	public templateFunctions        []AttributeTemplateFunction
 
+	public fn ClassHighLevel(){
+	    this.super()
+		this.Class = new Class()
+	}
+
 	public fn insertSourceFile(filename string) {
 		if this.sourceFiles == null {
 			this.sourceFiles = {filename -> true}
@@ -30,11 +35,11 @@ public class ClassHighLevel {
 
 	public fn insertMethodCall(code AttributeCode, op byte,
 		className, method, descriptor string) {
-		code.Codes[code.CodeLength] = op
+		code.codes[code.codeLength] = op
 		this.insertMethodRefConst(
 		    new ConstantInfoMethodrefHighLevel(     className,     method,  descriptor),
-		    code.Codes[code.CodeLength+1:code.CodeLength+3])
-		code.CodeLength += 3
+		    code.codes[code.codeLength+1:code.codeLength+3])
+		code.codeLength += 3
 	}
 	
 	/*

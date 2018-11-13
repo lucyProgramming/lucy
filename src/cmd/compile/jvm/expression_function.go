@@ -78,8 +78,6 @@ func (this *BuildPackage) buildFunctionExpression(
 		Descriptor: "()V",
 	}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
-	code.Codes[code.CodeLength] = cg.OP_dup
-	code.CodeLength++
 	// store  to,wait for call
 	function.ClosureVariableOffSet = code.MaxLocals
 	code.MaxLocals++
@@ -87,16 +85,12 @@ func (this *BuildPackage) buildFunctionExpression(
 	copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, function.ClosureVariableOffSet)...)
 	//set filed
 	closureClass.Fields = make(map[string]*cg.FieldHighLevel)
-	total := len(function.Closure.Variables) + len(function.Closure.Functions) - 1
 	for v, _ := range function.Closure.Variables {
 		field := &cg.FieldHighLevel{}
 		field.AccessFlags |= cg.AccFieldSynthetic
 		field.Name = v.Name
 		closureClass.Fields[v.Name] = field
-		if total != 0 {
-			code.Codes[code.CodeLength] = cg.OP_dup
-			code.CodeLength++
-		}
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, function.ClosureVariableOffSet)...)
 		if v.BeenCapturedAsLeftValue > 0 {
 			meta := closure.getMeta(v.Type.Type)
 			field.Descriptor = "L" + meta.className + ";"
@@ -148,7 +142,7 @@ func (this *BuildPackage) buildFunctionExpression(
 			Descriptor: field.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		total--
+
 	}
 	for v, _ := range function.Closure.Functions {
 		if v.IsClosureFunction == false {
@@ -160,10 +154,7 @@ func (this *BuildPackage) buildFunctionExpression(
 		filed.Name = v.Name
 		filed.Descriptor = "L" + v.Entrance.Class.Name + ";"
 		closureClass.Fields[v.Name] = filed
-		if total != 0 {
-			code.Codes[code.CodeLength] = cg.OP_dup
-			code.CodeLength++
-		}
+		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, function.ClosureVariableOffSet)...)
 		if context.function.Closure.ClosureFunctionExist(v) {
 			// I Know class at 0 offset
 			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0)...)
@@ -190,7 +181,7 @@ func (this *BuildPackage) buildFunctionExpression(
 			Descriptor: filed.Descriptor,
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
-		total--
+
 	}
 	method.Code = &cg.AttributeCode{}
 	// build function

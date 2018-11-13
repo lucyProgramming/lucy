@@ -14,11 +14,11 @@ func (this *BuildExpression) mkBuildInBlackHole(
 			maxStack = stack
 		}
 		if 1 == jvmSlotSize(v.value) {
-			code.Codes[code.CodeLength] = cg.OP_pop
+			code.codes[code.codeLength] = cg.OP_pop
 		} else {
-			code.Codes[code.CodeLength] = cg.OP_pop2
+			code.codes[code.codeLength] = cg.OP_pop2
 		}
-		code.CodeLength++
+		code.codeLength++
 	}
 	return
 }

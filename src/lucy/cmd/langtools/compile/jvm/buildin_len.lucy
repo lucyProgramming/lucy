@@ -25,55 +25,55 @@ class BuildinFunctionLen {
         call := e.data.(ast.ExpressionFunctionCall)
         a0 := call.Args[0]
         maxStack = this.eb.build(c, code, a0, context, state)
-        code.Codes[code.CodeLength] = cg.OP_dup
-        code.CodeLength++
+        code.codes[code.codeLength] = cg.OP_dup
+        code.codeLength++
         if 2 > maxStack {
             maxStack = 2
         }
-        code.Codes[code.CodeLength] = cg.OP_ifnonnull
-        binary.BigEndian.putChar(code.Codes[code.CodeLength+1:code.CodeLength+3], char(8))
-        code.Codes[code.CodeLength+3] = cg.OP_pop
-        code.Codes[code.CodeLength+4] = cg.OP_iconst_0
-        code.CodeLength += 5
+        code.codes[code.codeLength] = cg.OP_ifnonnull
+        binary.BigEndian.putChar(code.codes[code.codeLength+1:code.codeLength+3], char(8))
+        code.codes[code.codeLength+3] = cg.OP_pop
+        code.codes[code.codeLength+4] = cg.OP_iconst_0
+        code.codeLength += 5
         noNullExit := (new cg.Exit(cg.OP_goto, code))
         state.pushStack(c, a0.value)
-        context.MakeStackMap(code, state, code.CodeLength)
+        context.MakeStackMap(code, state, code.codeLength)
         state.popStack(1)
         if a0.value.Type == ast.VariableTypeJavaArray {
-            code.Codes[code.CodeLength] = cg.OP_arraylength
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_arraylength
+            code.codeLength++
         } else if a0.value.Type == ast.VariableTypeArray {
             meta := ArrayMetas[a0.value.array.Type]
-            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                     meta.className,
                    "size",
-                "()I"), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+                "()I"), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
         } else if a0.value.Type == ast.VariableTypeMap {
-            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                  mapClass,
                  "size",
                  "()I"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
         } else if a0.value.Type == ast.VariableTypeString {
-            code.Codes[code.CodeLength] = cg.OP_invokevirtual
+            code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                  javaStringClass,
                  "length",
                  "()I"
-            ), code.Codes[code.CodeLength+1:code.CodeLength+3])
-            code.CodeLength += 3
+            ), code.codes[code.codeLength+1:code.codeLength+3])
+            code.codeLength += 3
         }
-        writeExits([]cg.Exit{noNullExit}, code.CodeLength)
+        writeExits([]cg.Exit{noNullExit}, code.codeLength)
         state.pushStack(c, typeInt)
-        context.MakeStackMap(code, state, code.CodeLength)
+        context.MakeStackMap(code, state, code.codeLength)
         state.popStack(1)
         if e.isStatementExpression {
-            code.Codes[code.CodeLength] = cg.OP_pop
-            code.CodeLength++
+            code.codes[code.codeLength] = cg.OP_pop
+            code.codeLength++
         }
         return
     }

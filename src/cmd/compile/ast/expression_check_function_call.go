@@ -189,8 +189,10 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 	parameterTypeArray := []*Type{}
 	for k, v := range f.Type.ParameterList {
 		if v == nil ||
-			v.Type == nil ||
-			len(v.Type.getParameterType(&f.Type)) == 0 {
+			v.Type == nil {
+			continue
+		}
+		if len(v.Type.getParameterType(&f.Type)) == 0 {
 			continue
 		}
 		if k >= len(argTypes) || argTypes[k] == nil {
@@ -246,6 +248,9 @@ func (e *Expression) checkTemplateFunctionCall(block *Block, errs *[]error,
 		cloneFunction.TemplateFunction = nil
 		call.TemplateFunctionCallPair.Function = cloneFunction
 		cloneFunction.parameterTypes = parameterTypes
+		for k, v := range parameterTypes {
+			v.Pos = f.Type.TemplateNamesMap[k] // keep Pos
+		}
 		for _, v := range cloneFunction.Type.ParameterList {
 			if len(v.Type.getParameterType(&f.Type)) > 0 {
 				v.Type = parameterTypeArray[0]

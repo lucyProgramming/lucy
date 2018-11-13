@@ -19,8 +19,8 @@ public class AttributeStackMap {
 		for _, v := range this.StackMaps {
 			bs . appendAll(v.toBytes())
 		}
-		info.Info = bs
-		info.attributeLength = (len(info.Info))
+		info.info = bs
+		info.attributeLength = (len(info.info))
 		return info
 	}
 }

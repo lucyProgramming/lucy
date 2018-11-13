@@ -40,5 +40,21 @@ func (this *BuildExpression) buildTemplateFunctionCall(
 	},
 		code.Codes[code.CodeLength+1:code.CodeLength+3])
 	code.CodeLength += 3
+	if e.IsStatementExpression {
+		if call.TemplateFunctionCallPair.Function.Type.VoidReturn() == false {
+			if len(call.TemplateFunctionCallPair.Function.Type.ReturnList) > 1 {
+				code.Codes[code.CodeLength] = cg.OP_pop
+				code.CodeLength++
+			} else {
+				if jvmSlotSize(e.Value) == 1 {
+					code.Codes[code.CodeLength] = cg.OP_pop
+					code.CodeLength++
+				} else {
+					code.Codes[code.CodeLength] = cg.OP_pop2
+					code.CodeLength++
+				}
+			}
+		}
+	}
 	return
 }

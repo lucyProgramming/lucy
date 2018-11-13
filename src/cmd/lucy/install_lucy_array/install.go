@@ -41,6 +41,10 @@ func init() {
 		typename:  "short",
 	})
 	installs = append(installs, &InstallType{
+		className: "ArrayChar",
+		typename:  "char",
+	})
+	installs = append(installs, &InstallType{
 		className: "ArrayInt",
 		typename:  "int",
 	})
