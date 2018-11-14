@@ -14,15 +14,15 @@ class BuildExpressionAssert {
         this.eb = eb
     }
     
-    fn build(
+    fn buildAssert(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
         assertion := e.data.(ast.ExpressionTypeAssert)
-        if assertion.MultiValueContext {
-            maxStack = this.build(c, code, assertion.Expression, context, state)
+        if assertion.multiValueContext {
+            maxStack = this.eb.build(c, code, assertion.Expression, context, state)
             code.codes[code.codeLength] = cg.OP_dup
             code.codeLength++
             code.codes[code.codeLength] = cg.OP_instanceof
@@ -87,7 +87,7 @@ class BuildExpressionAssert {
             code.codes[code.codeLength] = cg.OP_aastore
             code.codeLength++
         } else {
-            maxStack = this.build(c, code, assertion.Expression, context, state)
+            maxStack = this.eb.build(c, code, assertion.Expression, context, state)
             code.codes[code.codeLength] = cg.OP_dup
             code.codeLength++
             code.codes[code.codeLength] = cg.OP_instanceof

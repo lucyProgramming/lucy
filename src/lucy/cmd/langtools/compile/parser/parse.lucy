@@ -711,7 +711,7 @@ class Parser {
 					this.Next(lfNotToken)
 					continue
 				} else {
-					i.alias = this.token.stringValue
+					i.accessName = this.token.stringValue
 					this.Next(lfIsToken) // skip identifier
 				}
 			}

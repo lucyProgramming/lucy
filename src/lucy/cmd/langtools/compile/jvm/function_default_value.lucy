@@ -11,29 +11,29 @@ public class DefaultValueParse {
 		ret := new cg.AttributeDefaultParameters()
 		ret.start = char(f.DefaultValueStartAt)
 		ret.constants = []char{}
-		for i := ret.start; i < char(len(f.Type.ParameterList)); i++ {
-			switch f.Type.ParameterList[i].defaultValueExpression.Type {
+		for i := ret.start; i < char(len(f.Type.parameterList)); i++ {
+			switch f.Type.parameterList[i].defaultValueExpression.Type {
 			case ast.ExpressionTypeBool:
-				if f.Type.ParameterList[i].defaultValueExpression.boolValue {
+				if f.Type.parameterList[i].defaultValueExpression.boolValue {
 					ret.constants.append( c.Class.insertIntConst(1))
 				} else {
 					ret.constants.append( c.Class.insertIntConst(0))
 				}
 			case ast.ExpressionTypeByte ,ast.ExpressionTypeShort,ast.ExpressionTypeChar, ast.ExpressionTypeInt:
-				t := f.Type.ParameterList[i].defaultValueExpression.longValue
+				t := f.Type.parameterList[i].defaultValueExpression.longValue
 				ret.constants.append( c.Class.insertIntConst(int(t)))
 			case ast.ExpressionTypeLong:
 				ret.constants.append( c.Class.insertLongConst(
-					f.Type.ParameterList[i].defaultValueExpression.longValue))
+					f.Type.parameterList[i].defaultValueExpression.longValue))
 			case ast.ExpressionTypeFloat:
 				ret.constants.append( c.Class.insertFloatConst(
-					float(f.Type.ParameterList[i].defaultValueExpression.doubleValue)))
+					float(f.Type.parameterList[i].defaultValueExpression.doubleValue)))
 			case ast.ExpressionTypeDouble:
 				ret.constants.append( c.Class.insertDoubleConst(
-					f.Type.ParameterList[i].defaultValueExpression.doubleValue))
+					f.Type.parameterList[i].defaultValueExpression.doubleValue))
 			case ast.ExpressionTypeString:
 				ret.constants.append( c.Class.insertStringConst(
-					f.Type.ParameterList[i].defaultValueExpression.stringValue))
+					f.Type.parameterList[i].defaultValueExpression.stringValue))
 			}
 		}
 		return ret
@@ -43,7 +43,7 @@ public class DefaultValueParse {
 		f.haveDefaultValue = true
 		f.DefaultValueStartAt = int(dp.start)
 		for i := char(0); i < char(len(dp.constants)); i++ {
-			v := f.Type.ParameterList[dp.start+i]
+			v := f.Type.parameterList[dp.start+i]
 			v.defaultValueExpression = new ast.Expression()
 			v.defaultValueExpression.value = v.Type
 			switch v.Type.Type {

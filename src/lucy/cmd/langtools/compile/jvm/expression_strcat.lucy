@@ -24,17 +24,17 @@ class BuildExpressionStrcat {
             state.popStack(len(state.stacks) - stackLength)
         }
         bin := e.data.(ast.ExpressionBinary)
-        maxStack = this.eb.build(c, code, bin.Left, context, state)
-        if t := this.eb.BuildExpressionConversion.stackTop2String(c, code, bin.Left.value, context, state); t > maxStack {
+        maxStack = this.eb.build(c, code, bin.left, context, state)
+        if t := this.eb.BuildExpressionConversion.stackTop2String(c, code, bin.left.value, context, state); t > maxStack {
             maxStack = t
         }
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
-        stack := this.eb.build(c, code, bin.Right, context, state)
+        stack := this.eb.build(c, code, bin.right, context, state)
         if t := char(1) + stack; t > maxStack {
             maxStack = char(t)
         }
         if t := char(1) + this.eb.BuildExpressionConversion.stackTop2String(c, code,
-            bin.Right.value, context, state); t > maxStack {
+            bin.right.value, context, state); t > maxStack {
             maxStack = t
         }
         code.codes[code.codeLength] = cg.OP_invokevirtual

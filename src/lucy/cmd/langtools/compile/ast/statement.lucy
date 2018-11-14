@@ -146,7 +146,7 @@ public class Statement {
 		    }else {
                 PackageBeenCompile.statementLevelClass.append(this.Class)
 		    }
-			err := block.Insert(this.Class.name, this.Class.pos, this.Class)
+			err := block.insert(this.Class.name, this.Class.pos, this.Class)
 			if err != null {
 				errs.append(err)
 			}
@@ -154,7 +154,7 @@ public class Statement {
 			return errs
 		case StatementTypeEnum:
 			es := this.Enum.check()
-			err := block.Insert(this.Enum.name, this.Enum.pos, this.Enum)
+			err := block.insert(this.Enum.name, this.Enum.pos, this.Enum)
 			if err != null {
 				es.append(err)
 			}
@@ -175,7 +175,8 @@ public class Statement {
 				errs.append(err)
 				return errs
 			}
-			if this.Import.alias == UnderScore {
+			if this.Import.accessName != null &&
+			    this.Import.accessName == UnderScore {
 				errs.append(new error(sprintf("%s import at block scope , must be used",
 					errMsgPrefix(this.Import.pos))))
 				return null
@@ -188,7 +189,7 @@ public class Statement {
 			if err != null {
 				return []error{err}
 			}
-			err = block.Insert(this.TypeAlias.name, this.TypeAlias.pos, this.TypeAlias.Type)
+			err = block.insert(this.TypeAlias.name, this.TypeAlias.pos, this.TypeAlias.Type)
 			if err != null {
 				return []error{err}
 			}

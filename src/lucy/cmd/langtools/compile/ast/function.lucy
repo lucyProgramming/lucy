@@ -19,7 +19,7 @@ public class Function {
 	public Type                             FunctionType = new FunctionType()
 	public Closure                          Closure = new Closure()
 	public name                             string // if name is null string,means no name function
-	public block                            Block
+	public block                            Block = new Block()
 	public pos                              Pos
 	public jvmDescriptor                    string
 	public closureVariableOffSet            char // for closure
@@ -125,7 +125,7 @@ public class Function {
 		checkReturnVarExpression bool,
 		isAbstract bool) {
 		var err error
-		for k, v := range this.Type.ParameterList {
+		for k, v := range this.Type.parameterList {
 			v.isFunctionParameter = true
 			if len(v.Type.getParameterType(this.Type)) > 0 {
 				if this.TemplateFunction == null {
@@ -137,7 +137,7 @@ public class Function {
 					errs.append(err)
 				}
 				if isAbstract == false {
-					err = this.block.Insert(v.name, v.pos, v)
+					err = this.block.insert(v.name, v.pos, v)
 					if err != null {
 						errs.append(err)
 						continue
@@ -149,12 +149,12 @@ public class Function {
 					errMsgPrefix(v.Type.pos))))
 			}
 			if v.Type.isVariableArgs {
-				if k != len(this.Type.ParameterList)-1 {
+				if k != len(this.Type.parameterList)-1 {
 					errs.append(new error( sprintf("%s only last parameter can be use as vargs",
 						errMsgPrefix(v.Type.pos))))
 				} else {
-					this.Type.ParameterList = this.Type.ParameterList[0:k]
-					this.Type.VArgs = v
+					this.Type.parameterList = this.Type.parameterList[0:k]
+					this.Type.vArgs = v
 				}
 				continue
 			}
@@ -188,7 +188,7 @@ public class Function {
 		}
 		if this.Type.VoidReturn() == false {
 			//handler return
-			for _, v := range this.Type.ReturnList {
+			for _, v := range this.Type.returnList {
 				v.isReturn = true
 				if len(v.Type.getParameterType(this.Type)) > 0 {
 					if this.TemplateFunction == null {
@@ -200,7 +200,7 @@ public class Function {
 						errs.append(err)
 					}
 					if isAbstract == false {
-						err = this.block.Insert(v.name, v.pos, v)
+						err = this.block.insert(v.name, v.pos, v)
 						if err != null {
 							errs.append(err)
 							continue
@@ -236,7 +236,7 @@ public class Function {
 		if this.Type.VoidReturn() {
 			return null
 		}
-		for _, v := range this.Type.ReturnList {
+		for _, v := range this.Type.returnList {
 			if v.defaultValueExpression == null {
 				v.defaultValueExpression = v.Type.mkDefaultValueExpression()
 				continue

@@ -58,7 +58,7 @@ class FunctionParser extends ParserExtends{
 		} else {
 			f.sourceCode =
 				this.parser.
-					bs[offset : this.parser.token.offset+1]
+					bs[offset : this.parser.token.offset]
 		}
 		this.Next(lfIsToken)
 		return f, err
@@ -71,7 +71,7 @@ class FunctionParser extends ParserExtends{
 		functionType = new ast.FunctionType()
 		if this.parser.token.Type == lex.TokenLt {
 			this.Next(lfNotToken)
-			functionType.TemplateNames, err = this.parser.parseNameList()
+			functionType.templateNames, err = this.parser.parseNameList()
 			if err != null {
 				this.consume(untilLp)
 				goto skipTemplateNames
@@ -89,7 +89,7 @@ class FunctionParser extends ParserExtends{
 		}
 		this.Next(lfNotToken)               // skip (
 		if this.parser.token.Type != lex.TokenRp { // not )
-			functionType.ParameterList, err = this.parseParameterOrReturnList()
+			functionType.parameterList, err = this.parseParameterOrReturnList()
 			if err != null {
 				this.consume(untilRp)
 				this.Next(lfNotToken)
@@ -113,7 +113,7 @@ class FunctionParser extends ParserExtends{
 			}
 			this.Next(lfNotToken) // skip (
 			if this.parser.token.Type != lex.TokenRp {
-				functionType.ReturnList, err = this.parseParameterOrReturnList()
+				functionType.returnList, err = this.parseParameterOrReturnList()
 				if err != null { // skip until next (,continue to analyse
 					this.consume(untilRp)
 					this.Next(lfIsToken)
@@ -128,12 +128,12 @@ class FunctionParser extends ParserExtends{
 			}
 			this.Next(lfIsToken) // skip )
 		} else {
-			functionType.ReturnList = new []ast.Variable(1)
-			functionType.ReturnList[0] = new ast.Variable()
-			functionType.ReturnList[0].pos = this.parser.mkPos()
-			functionType.ReturnList[0].Type = new ast.Type()
-			functionType.ReturnList[0].Type.pos = this.parser.mkPos()
-			functionType.ReturnList[0].Type.Type = ast.VariableTypeVoid
+			functionType.returnList = new []ast.Variable(1)
+			functionType.returnList[0] = new ast.Variable()
+			functionType.returnList[0].pos = this.parser.mkPos()
+			functionType.returnList[0].Type = new ast.Type()
+			functionType.returnList[0].Type.pos = this.parser.mkPos()
+			functionType.returnList[0].Type.Type = ast.VariableTypeVoid
 		}
 		return functionType, err
 	}

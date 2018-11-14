@@ -17,7 +17,7 @@ class BuildinFunctionAssert {
         context Context,
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionFunctionCall)
-        length := int(len(call.Args))
+        length := int(len(call.args))
         lengthOffset := code.maxLocals
         code.maxLocals++
         
@@ -31,7 +31,7 @@ class BuildinFunctionAssert {
         code.codeLength++
         copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, stepOffset))
         exits := []cg.Exit{}
-        for _, a := range call.Args {
+        for _, a := range call.args {
             stack := this.eb.build(c, code, a, context, state)
             if stack > maxStack {
                 maxStack = stack

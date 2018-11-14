@@ -32,10 +32,10 @@ public class StatementFor {
 		//
 		var rangeExpression Expression
 		bin := this.condition.data.(ExpressionBinary)
-		if bin.Right.Type == ExpressionTypeRange {
+		if bin.right.Type == ExpressionTypeRange {
 			rangeExpression = this.condition.data.(Expression)
-		} else if bin.Right.Type == ExpressionTypeList {
-			t := bin.Right.data.([]Expression)
+		} else if bin.right.Type == ExpressionTypeList {
+			t := bin.right.data.([]Expression)
 			if len(t) > 1 {
 				errs.append(
 					new error(sprintf("%s for range statement only allow one argument on the right",
@@ -74,10 +74,10 @@ public class StatementFor {
 			return errs
 		}
 		var lefts []Expression
-		if bin.Left.Type == ExpressionTypeList {
-			lefts = bin.Left.data.([]Expression)
+		if bin.left.Type == ExpressionTypeList {
+			lefts = bin.left.data.([]Expression)
 		} else {
-			lefts = []Expression{bin.Left}
+			lefts = []Expression{bin.left}
 		}
 		if len(lefts) > 2 {
 			errs.append(
@@ -120,7 +120,12 @@ public class StatementFor {
 				}
 				vd.pos = posV
 				vd.name = identifierV.name
-				err = this.initExpressionBlock.Insert(identifierV.name, this.condition.pos, vd)
+				if this.initExpressionBlock.inheritedAttribute.Function != null {
+					if err := this.initExpressionBlock.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(vd) ; err != null{
+						errs.append(err)
+					}
+				}
+				err = this.initExpressionBlock.insert(identifierV.name, this.condition.pos, vd)
 				if err != null {
 					errs.append(err)
 				}
@@ -142,7 +147,12 @@ public class StatementFor {
 				vd.name = identifierK.name
 				vd.Type = vt
 				vd.pos = posK
-				err = this.initExpressionBlock.Insert(identifierK.name, posK, vd)
+				if this.initExpressionBlock.inheritedAttribute.Function != null {
+					if err := this.initExpressionBlock.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(vd) ; err != null{
+						errs.append(err)
+					}
+				}
+				err = this.initExpressionBlock.insert(identifierK.name, posK, vd)
 				if err != null {
 					errs.append(err)
 				}

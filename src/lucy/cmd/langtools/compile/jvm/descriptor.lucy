@@ -6,17 +6,17 @@ public class Descriptor  {
 
 	static fn methodDescriptor(functionType ast.FunctionType) -> (s string) {
 		s = "("
-		for _, v := range functionType.ParameterList {
+		for _, v := range functionType.parameterList {
 			s += .typeDescriptor(v.Type)
 		}
-		if functionType.VArgs != null {
-			s += .typeDescriptor(functionType.VArgs.Type)
+		if functionType.vArgs != null {
+			s += .typeDescriptor(functionType.vArgs.Type)
 		}
 		s += ")"
 		if functionType.VoidReturn() {
 			s += "V"
-		} else if len(functionType.ReturnList) == 1 {
-			s += .typeDescriptor(functionType.ReturnList[0].Type)
+		} else if len(functionType.returnList) == 1 {
+			s += .typeDescriptor(functionType.returnList[0].Type)
 		} else {
 			s += "[Ljava/lang/Object;" //always this type
 		}
@@ -140,14 +140,14 @@ public class Descriptor  {
 			return t, new error(sprintf("function descriptor does not start with '('"))
 		}
 		bs = bs[1:]
-		t.ParameterList = []ast.Variable{}
+		t.parameterList = []ast.Variable{}
 		for bs[0] != ')' {
 			vd := new ast.Variable()
 			bs, vd.Type, err = .ParseType(bs)
 			if err != null {
 				return t, err
 			}
-			t.ParameterList.append(vd)
+			t.parameterList.append(vd)
 		}
 		bs = bs[1:] // skip )
 		vd := new ast.Variable()
@@ -156,7 +156,7 @@ public class Descriptor  {
 		if err != null {
 			return t, err
 		}
-		t.ReturnList = [vd]
+		t.returnList = [vd]
 		return t, null
 	}
 

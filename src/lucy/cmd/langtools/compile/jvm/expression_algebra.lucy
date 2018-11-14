@@ -10,7 +10,7 @@ class BuildExpressionArithmetic {
         this.eb = eb
     }
 
-	fn build(
+	fn buildArithmetic(
 		c cg.ClassHighLevel,
 		code cg.AttributeCode,
 		e ast.Expression,
@@ -24,10 +24,10 @@ class BuildExpressionArithmetic {
 		if e.Type == ast.ExpressionTypeOr ||
 			e.Type == ast.ExpressionTypeAnd ||
 			e.Type == ast.ExpressionTypeXor {
-			maxStack = this.build(c, code, bin.Left, context, state)
-			state.pushStack(c, bin.Left.value)
-			stack := this.build(c, code, bin.Right, context, state)
-			if t := stack + jvmSlotSize(bin.Left.value); t > maxStack {
+			maxStack = this.eb.build(c, code, bin.left, context, state)
+			state.pushStack(c, bin.left.value)
+			stack := this.eb.build(c, code, bin.right, context, state)
+			if t := stack + jvmSlotSize(bin.left.value); t > maxStack {
 				maxStack = t
 			}
 			switch e.value.Type {
@@ -57,14 +57,14 @@ class BuildExpressionArithmetic {
 			e.Type == ast.ExpressionTypeDiv ||
 			e.Type == ast.ExpressionTypeMod {
 			//handle string first
-			if bin.Left.value.Type == ast.VariableTypeString ||
-				bin.Right.value.Type == ast.VariableTypeString {
+			if bin.left.value.Type == ast.VariableTypeString ||
+				bin.right.value.Type == ast.VariableTypeString {
 				return this.eb.BuildExpressionStrcat.buildStrCat(c, code, e, context, state)
 			}
-			maxStack = this.build(c, code, bin.Left, context, state)
+			maxStack = this.eb.build(c, code, bin.left, context, state)
 			state.pushStack(c, e.value)
-			stack := this.build(c, code, bin.Right, context, state)
-			if t := jvmSlotSize(bin.Left.value) + stack; t > maxStack {
+			stack := this.eb.build(c, code, bin.right, context, state)
+			if t := jvmSlotSize(bin.left.value) + stack; t > maxStack {
 				maxStack = t
 			}
 			switch e.value.Type {
@@ -193,10 +193,10 @@ class BuildExpressionArithmetic {
 
 		if e.Type == ast.ExpressionTypeLsh ||
 			e.Type == ast.ExpressionTypeRsh {
-			maxStack = this.build(c, code, bin.Left, context, state)
-			state.pushStack(c, bin.Left.value)
-			stack := this.build(c, code, bin.Right, context, state)
-			if t := stack + jvmSlotSize(bin.Left.value); t > maxStack {
+			maxStack = this.eb.build(c, code, bin.left, context, state)
+			state.pushStack(c, bin.left.value)
+			stack := this.eb.build(c, code, bin.right, context, state)
+			if t := stack + jvmSlotSize(bin.left.value); t > maxStack {
 				maxStack = t
 			}
 			switch e.value.Type {

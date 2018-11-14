@@ -152,11 +152,11 @@ class BuildExpression {
         case ast.ExpressionTypeOr ,ast.ExpressionTypeAnd ,ast.ExpressionTypeXor ,
             ast.ExpressionTypeLsh , ast.ExpressionTypeRsh,ast.ExpressionTypeAdd, ast.ExpressionTypeSub,
             ast.ExpressionTypeMul , ast.ExpressionTypeDiv , ast.ExpressionTypeMod:
-            maxStack = this.BuildExpressionArithmetic.build(c, code, e, context, state)
+            maxStack = this.BuildExpressionArithmetic.buildArithmetic(c, code, e, context, state)
         case ast.ExpressionTypeAssign :
             maxStack = this.BuildExpressionAssign.buildAssign(c, code, e, context, state)
         case ast.ExpressionTypeVarAssign:
-            maxStack = this.BuildExpressionVarAssign.build(c, code, e, context, state)
+            maxStack = this.BuildExpressionVarAssign.buildVarAssign(c, code, e, context, state)
         case ast.ExpressionTypePlusAssign,  ast.ExpressionTypeMinusAssign ,ast.ExpressionTypeMulAssign ,
             ast.ExpressionTypeDivAssign , ast.ExpressionTypeModAssign , ast.ExpressionTypeAndAssign ,
             ast.ExpressionTypeOrAssign , ast.ExpressionTypeLshAssign ,ast.ExpressionTypeRshAssign ,
@@ -203,10 +203,12 @@ class BuildExpression {
         case ast.ExpressionTypeVar:
             maxStack = this.BuildExpressionVar.buildVar(c, code, e, context, state)
         case ast.ExpressionTypeTypeAssert:
-            maxStack = this.BuildExpressionAssert.build(c, code, e, context, state)
+            maxStack = this.BuildExpressionAssert.buildAssert(c, code, e, context, state)
         case ast.ExpressionTypeQuestion:
             maxStack = this.BuildExpressionQuestion.buildQuestion(c, code, e, context, state)
         case ast.ExpressionTypeVArgs:
+            maxStack = this.build(c, code, e.data.(ast.Expression), context, state)
+        case ast.ExpressionTypeParenthesis:
             maxStack = this.build(c, code, e.data.(ast.Expression), context, state)
         default:
             panic("missing handle:" + e.op)

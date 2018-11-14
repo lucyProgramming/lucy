@@ -77,28 +77,28 @@ public enum  ExpressionTypeKind {
 
 
 public class ExpressionTypeAssert extends ExpressionTypeConversion{
-	public MultiValueContext bool
+	public multiValueContext bool
 }
 
 
 
 public class ExpressionQuestion  {
-	public Selection Expression
+	public selection Expression
 	public True      Expression
 	public False     Expression
 }
 
 public class ExpressionSlice  {
 	public ExpressionOn Expression
-	public start, End   Expression
+	public start, end   Expression
 }
 
 
 public class ExpressionFunctionCall  {
 	public BuildInFunctionMeta      Object // for build in function only
 	public Expression               Expression
-	public Args                     []Expression
-	public VArgs                    CallVariableArgs
+	public args                     []Expression
+	public vArgs                    CallVariableArgs
 	public Function                 Function
 	public ParameterTypes           []Type // for template function
 	public TemplateFunctionCallPair TemplateFunctionInstance
@@ -107,8 +107,8 @@ public class ExpressionFunctionCall  {
 public class ExpressionMethodCall  {
 	public Class              Class // for object or class
 	public Expression         Expression
-	public Args               []Expression
-	public VArgs              CallVariableArgs
+	public args               []Expression
+	public vArgs              CallVariableArgs
 	public name               string
 	public Method             ClassMethod
 	public FieldMethodHandler ClassField
@@ -130,7 +130,7 @@ public class ExpressionVar  {
 }
 
 public class ExpressionVarAssign  {
-	public Lefts            []Expression
+	public lefts            []Expression
 	public InitValues       []Expression
 	public IfDeclaredBefore []bool // used for colon assign
 }
@@ -159,25 +159,25 @@ public class ExpressionSelection  {
 	public Field           ClassField  // expression is class or object
 	public Method          ClassMethod // pack to method handle
 	public PackageFunction Function    // expression is package , pack function to method handle
-	public PackageVariable Variable    // expression is package , get package variable
+	public packageVariable Variable    // expression is package , get package variable
 	public PackageEnumName EnumName    // expression is package , get enumName
 }
 
 
 public class ExpressionNew  {
 	public Type         Type
-	public Args         []Expression
+	public args         []Expression
 	public Construction ClassMethod
-	public VArgs        CallVariableArgs
+	public vArgs        CallVariableArgs
 }
 
 public class ExpressionMap  {
 	public Type          Type
-	public KeyValuePairs []ExpressionKV
+	public keyValuePairs []ExpressionKV
 }
 
 public class ExpressionKV  {
-	public Key   Expression
+	public key   Expression
 	public value Expression
 }
 
@@ -185,14 +185,14 @@ public class ExpressionKV  {
 	for some general purpose
 */
 public class ExpressionBinary  {
-	public Left  Expression
-	public Right Expression
+	public left  Expression
+	public right Expression
 }
 
 // for package jvm
 public class ExpressionAssign  {
-	public Lefts  []Expression
-	public Values []Expression
+	public lefts  []Expression
+	public values []Expression
 }
 
 public class ExpressionArray  {

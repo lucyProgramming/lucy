@@ -48,8 +48,8 @@ public class Expression {
 			return false
 		}
 		bin := this.data.(ExpressionBinary)
-		i1 := bin.Left.value.isInteger() && bin.Left.value.Type != VariableTypeLong
-		i2 := bin.Right.value.isInteger() && bin.Right.value.Type != VariableTypeLong
+		i1 := bin.left.value.isInteger() && bin.left.value.Type != VariableTypeLong
+		i2 := bin.right.value.isInteger() && bin.right.value.Type != VariableTypeLong
 		return i1 && i2
 	}
 
@@ -61,8 +61,8 @@ public class Expression {
 			return false
 		}
 		bin := this.data.(ExpressionBinary)
-		return bin.Left.Type == ExpressionTypeNull ||
-			bin.Right.Type == ExpressionTypeNull
+		return bin.left.Type == ExpressionTypeNull ||
+			bin.right.Type == ExpressionTypeNull
 	}
 
 	/*
@@ -73,7 +73,7 @@ public class Expression {
 			return false
 		}
 		bin := this.data.(ExpressionBinary)
-		return bin.Left.value.Type == VariableTypeString
+		return bin.left.value.Type == VariableTypeString
 	}
 
 	/*
@@ -85,7 +85,7 @@ public class Expression {
 			return false
 		}
 		bin := this.data.(ExpressionBinary)
-		return bin.Left.value.isPointer()
+		return bin.left.value.isPointer()
 	}
 
 	fn convertTo(to Type) {
@@ -296,11 +296,11 @@ public class Expression {
 			return false
 		}
 		bin := this.data.(ExpressionBinary)
-		if bin.Right.Type == ExpressionTypeRange {
+		if bin.right.Type == ExpressionTypeRange {
 			return true
 		}
-		if bin.Right.Type == ExpressionTypeList {
-			t := bin.Right.data.([]Expression)
+		if bin.right.Type == ExpressionTypeList {
+			t := bin.right.data.([]Expression)
 			if len(t) == 1 && t[0].Type == ExpressionTypeRange {
 				return true
 			}
@@ -535,7 +535,7 @@ public class Expression {
 			    PackageBeenCompile.statementLevelFunctions.append(f)
 			}
 			if this.isStatementExpression {
-				err := block.Insert(f.name, f.pos, f)
+				err := block.insert(f.name, f.pos, f)
 				if err != null {
 					errs.append(err)
 				}
@@ -561,7 +561,11 @@ public class Expression {
 			this.value = returnValueTypes[0]
 		case ExpressionTypeParenthesis:
 			ee := this.data.(Expression) // override
-			return ee.check(block)
+			returnValueTypes , errs = ee.check(block)
+			if len(returnValueTypes) > 0 {
+				this.value = returnValueTypes[0]
+			}
+			return returnValueTypes , errs
 		case ExpressionTypeVArgs:
 			var t Type
 			t, errs = this.data.(Expression).checkSingleValueContextExpression(block)
@@ -738,15 +742,15 @@ public class Expression {
 	fn binaryWrongOpErr() -> (err error) {
 		var typ1, typ2 string
 		bin := this.data.(ExpressionBinary)
-		if bin.Left.value != null {
-			typ1 = bin.Left.value.typeString()
+		if bin.left.value != null {
+			typ1 = bin.left.value.typeString()
 		} else {
-			typ1 = bin.Left.op
+			typ1 = bin.left.op
 		}
-		if bin.Right.value != null {
-			typ2 = bin.Right.value.typeString()
+		if bin.right.value != null {
+			typ2 = bin.right.value.typeString()
 		} else {
-			typ2 = bin.Right.op
+			typ2 = bin.right.op
 		}
 		return new error(sprintf("%s cannot apply '%s' on '%s' and '%s'",
 			this.pos.errMsgPrefix(),

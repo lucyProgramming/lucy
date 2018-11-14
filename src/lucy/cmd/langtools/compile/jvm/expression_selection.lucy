@@ -83,17 +83,17 @@ class BuildExpressionSelection {
 
         switch selection.Expression.value.Type {
         case ast.VariableTypePackage:
-            if selection.PackageVariable != null {
+            if selection.packageVariable != null {
                 maxStack = jvmSlotSize(e.value)
-                if selection.PackageVariable.jvmDescriptor == null ||
-                    selection.PackageVariable.jvmDescriptor == "" {
-                    selection.PackageVariable.jvmDescriptor = Descriptor.typeDescriptor(e.value)
+                if selection.packageVariable.jvmDescriptor == null ||
+                    selection.packageVariable.jvmDescriptor == "" {
+                    selection.packageVariable.jvmDescriptor = Descriptor.typeDescriptor(e.value)
                 }
                 code.codes[code.codeLength] = cg.OP_getstatic
                 c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                     selection.Expression.value.Package.name + "/main",
-                    selection.PackageVariable.name,
-                    selection.PackageVariable.jvmDescriptor
+                    selection.packageVariable.name,
+                    selection.packageVariable.jvmDescriptor
                 ), code.codes[code.codeLength+1:code.codeLength+3])
                 code.codeLength += 3
                 return

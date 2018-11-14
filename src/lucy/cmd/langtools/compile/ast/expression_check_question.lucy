@@ -2,14 +2,14 @@ class ExpressionCheckQuestion {
 	
 	static fn check(e Expression , block Block, errs []error) ->(valueType Type) {
 		question := e.data.(ExpressionQuestion)
-		condition, es := question.Selection.checkSingleValueContextExpression(block)
+		condition, es := question.selection.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if condition != null {
 			if condition.Type != VariableTypeBool {
 				errs.append(new error(sprintf("%s not a bool expression",
 						condition.pos.errMsgPrefix())))
 			}
-			if err := question.Selection.canBeUsedAsCondition(); err != null {
+			if err := question.selection.canBeUsedAsCondition(); err != null {
 				errs.append(err)
 			}
 		}

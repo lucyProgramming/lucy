@@ -58,7 +58,7 @@ class BuildForRangeArray {
             code.maxLocals++
             forState.appendLocals(c, typeInt)
             //end
-            autoVar.End = code.maxLocals
+            autoVar.end = code.maxLocals
             code.maxLocals++
             forState.appendLocals(c, typeInt)
             // K
@@ -118,7 +118,7 @@ class BuildForRangeArray {
             "I"
         ), code.codes[code.codeLength+1:code.codeLength+3])
         code.codeLength += 3
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.End))
+        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.end))
 
         // k set to -1
         if needK {
@@ -172,7 +172,7 @@ class BuildForRangeArray {
         copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.start))
 
         // load end
-        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.End))
+        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.end))
         if 2 > maxStack {
             maxStack = 2
         }

@@ -30,7 +30,7 @@ class BuildinFunctionPrint {
         ), code.codes[code.codeLength+1:code.codeLength+3])
         code.codeLength += 3
         maxStack = 1
-        if len(call.Args) == 0 {
+        if len(call.args) == 0 {
             code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 "java/io/PrintStream",
@@ -46,13 +46,13 @@ class BuildinFunctionPrint {
             state.popStack(len(state.stacks) - length)
         } 
         state.pushStack(c, state.newObjectVariableType(javaPrintStreamClass))
-        if len(call.Args) == 1 {
-            stack := this.eb.build(c, code, call.Args[0], context, state)
+        if len(call.args) == 1 {
+            stack := this.eb.build(c, code, call.args[0], context, state)
             if t := char(1) + stack; t > maxStack {
                 maxStack = t
             }
 
-            switch call.Args[0].value.Type {
+            switch call.args[0].value.Type {
             case ast.VariableTypeBool:
                 code.codes[code.codeLength] = cg.OP_invokevirtual
                 c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
@@ -126,7 +126,7 @@ class BuildinFunctionPrint {
         code.codeLength += 3
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
         defer state.popStack(1)
-        for k, v := range call.Args {
+        for k, v := range call.args {
             variableType := v.value
             stack := this.eb.build(c, code, v, context, state)
             if t := char(2) + stack; t > maxStack {
@@ -142,7 +142,7 @@ class BuildinFunctionPrint {
                  "(Ljava/lang/String;)Ljava/lang/String;"
             ), code.codes[code.codeLength+1:code.codeLength+3])
             code.codeLength += 3
-            if k != len(call.Args)-1 {
+            if k != len(call.args)-1 {
                 code.codes[code.codeLength] = cg.OP_ldc_w
                 c.insertStringConst(" ", code.codes[code.codeLength+1:code.codeLength+3])
                 code.codeLength += 3

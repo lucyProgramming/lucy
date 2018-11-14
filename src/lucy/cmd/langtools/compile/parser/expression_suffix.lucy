@@ -244,7 +244,7 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix.pos = pos
 			prefix.op = "new"
             n := new ast.ExpressionNew()
-            n.Args = es
+            n.args = es
             n.Type = t
             prefix.data = n
             this.Next(lfIsToken)
@@ -352,7 +352,7 @@ class ExpressionSuffix extends  ParserExtends {
 					slice := new ast.ExpressionSlice()
 					newExpression.data = slice
 					slice.ExpressionOn = prefix
-					slice.End = end
+					slice.end = end
 					prefix = newExpression
 					this.Next(lfIsToken) // skip ]
 				} else {
@@ -383,7 +383,7 @@ class ExpressionSuffix extends  ParserExtends {
 						newExpression.data = slice
 						slice.start = e
 						slice.ExpressionOn = prefix
-						slice.End = end
+						slice.end = end
 						prefix = newExpression
 						this.Next(lfIsToken) // skip ]
 					} else {
@@ -521,7 +521,7 @@ class ExpressionSuffix extends  ParserExtends {
 			call := new ast.ExpressionMethodCall()
 			index := on.data.(ast.ExpressionSelection)
 			call.Expression = index.Expression
-			call.Args = args
+			call.args = args
 			call.name = index.name
 			result.pos = on.pos
 			result.data = call
@@ -530,7 +530,7 @@ class ExpressionSuffix extends  ParserExtends {
 			result.op = "functionCall"
 			call := new ast.ExpressionFunctionCall()
 			call.Expression = on
-			call.Args = args
+			call.args = args
 			result.data = call
 			result.pos = pos
 		}

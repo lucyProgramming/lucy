@@ -20,7 +20,7 @@ class BuildExpressionFunctionCall {
 		state StackMapState) -> (maxStack char) {
 		call := e.data.(ast.ExpressionFunctionCall)
 		maxStack = this.eb.build(c, code, call.Expression, context, state)
-		stack := this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
+		stack := this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.args, call.vArgs, context, state)
 		if t := char(1) + stack; t > maxStack {
 			maxStack = t
 		}
@@ -57,7 +57,7 @@ class BuildExpressionFunctionCall {
 			maxStack = this.eb.build(c, code, call.Expression, context, state)
 		}
 		if call.Function.isClosureFunction == false {
-			maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
+			maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.args, call.vArgs, context, state)
 			code.codes[code.codeLength] = cg.OP_invokestatic
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				call.Function.entrance.Class.name,
@@ -82,7 +82,7 @@ class BuildExpressionFunctionCall {
 			}
 			state.pushStack(c, state.newObjectVariableType(call.Function.entrance.Class.name))
 			defer state.popStack(1)
-			stack := this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
+			stack := this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.args, call.vArgs, context, state)
 			if t := char(1) + stack; t > maxStack {
 				maxStack = t
 			}

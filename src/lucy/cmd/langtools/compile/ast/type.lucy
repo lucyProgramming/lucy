@@ -254,12 +254,12 @@ public class Type {
 				return this.Map.V.resolve(block)
 			}
 		case VariableTypeFunction:
-			for _, v := range this.functionType.ParameterList {
+			for _, v := range this.functionType.parameterList {
 				if err = v.Type.resolve(block); err != null {
 					return err
 				}
 			}
-			for _, v := range this.functionType.ReturnList {
+			for _, v := range this.functionType.returnList {
 				if err = v.Type.resolve(block); err != null {
 					return err
 				}
@@ -649,7 +649,7 @@ public class Type {
 			if leftValue.Class.name == rightValue.Class.name {
 				return true
 			}
-			if err := leftValue.Class.loadSelf(leftValue.pos); err != null {
+			if err := leftValue.Class.loadSelf(rightValue.pos); err != null {
 				errs.append(new error( sprintf("%s %s", errMsgPrefix(rightValue.pos), err.getMessage())))
 				return false
 			}
@@ -668,7 +668,7 @@ public class Type {
 				if err != null {
 					errs.append(err)
 				}
-				return has
+				return has == true
 			}
 		}
 		return false

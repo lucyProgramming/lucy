@@ -1,25 +1,36 @@
- 
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/jvm/cg"
 
-/*
-func (this *BuildExpression) mkBuildInBlackHole(
-	c cg.ClassHighLevel,
-	code cg.AttributeCode,
-	e ast.Expression,
-	context Context,
-	state StackMapState) (maxStack char) {
-	call := e.data.(ast.ExpressionFunctionCall)
-	for _, v := range call.Args {
-		stack := this.build(class, code, v, context, state)
-		if stack > maxStack {
-			maxStack = stack
+class BuildinFunctionBlackHole {
+	eb BuildExpression
+
+    fn BuildinFunctionBlackHole(eb BuildExpression){
+        this.super()
+        this.eb = eb
+    }
+
+	fn mkBuildInBlackHole(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		call := e.data.(ast.ExpressionFunctionCall)
+		for _, v := range call.args {
+			stack := this.eb.build(c, code, v, context, state)
+			if stack > maxStack {
+				maxStack = stack
+			}
+			if 1 == jvmSlotSize(v.value) {
+				code.codes[code.codeLength] = cg.OP_pop
+			} else {
+				code.codes[code.codeLength] = cg.OP_pop2
+			}
+			code.codeLength++
 		}
-		if 1 == jvmSlotSize(v.value) {
-			code.codes[code.codeLength] = cg.OP_pop
-		} else {
-			code.codes[code.codeLength] = cg.OP_pop2
-		}
-		code.codeLength++
+		return
 	}
-	return
+	 
 }
-*/
+
+

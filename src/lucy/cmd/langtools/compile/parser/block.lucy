@@ -434,7 +434,7 @@ class BlockParser  extends ParserExtends{
 			label.name = e.data.(ast.ExpressionIdentifier).name
 			block.statements.append(statement)
 			label.block = block
-			err = block.Insert(label.name, e.pos, label) // insert first,so this label can be found before it is checked
+			err = block.insert(label.name, e.pos, label) // insert first,so this label can be found before it is checked
 			if err != null {
 				this.parser.errs.append( err)
 			}

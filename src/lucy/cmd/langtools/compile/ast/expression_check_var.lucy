@@ -66,9 +66,14 @@ class ExpressionCheckVar {
 					continue
 				}
 				if e.isGlobal {
-					err = PackageBeenCompile.block.Insert(v.name, v.pos, v)
+					err = PackageBeenCompile.block.insert(v.name, v.pos, v)
 				} else {
-					err = block.Insert(v.name, v.pos, v)
+					if block.inheritedAttribute.Function != null {
+						if err := block.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(v) ; err != null{
+							errs.append(err)
+						}
+					}
+					err = block.insert(v.name, v.pos, v)
 				}
 				if err != null {
 					errs.append(err)
@@ -76,18 +81,24 @@ class ExpressionCheckVar {
 				}
 			}
 		} else {
-			for _, v := range ev.variables {
+			ev.InitValues = new []Expression(len(ev.variables))
+			for k, v := range ev.variables {
 				var err error
 				if e.isGlobal {
-					err = PackageBeenCompile.block.Insert(v.name, v.pos, v)
+					err = PackageBeenCompile.block.insert(v.name, v.pos, v)
 				} else {
-					err = block.Insert(v.name, v.pos, v)
+					if block.inheritedAttribute.Function != null {
+						if err := block.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(v) ; err != null{
+							errs.append(err)
+						}
+					}
+					err = block.insert(v.name, v.pos, v)
 				}
 				if err != null {
 					errs.append(err)
 					continue
 				}
-				ev.InitValues.append(v.Type.mkDefaultValueExpression())
+				ev.InitValues[k] = v.Type.mkDefaultValueExpression()
 			}
 		}
 		if e.isGlobal {

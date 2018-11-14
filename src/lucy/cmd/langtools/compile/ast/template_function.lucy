@@ -39,7 +39,11 @@ public class TemplateFunction  {
 		}
 		ret := new TemplateFunctionInstance ()
 		ret.parameterTypes = parameterTypes 
-		this.instances.append(ret)
+		if this.instances == null {
+			this.instances = [ret]
+		}else {
+			this.instances.append(ret)
+		}
 		return ret
 	}
 

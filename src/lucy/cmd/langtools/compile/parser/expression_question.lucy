@@ -41,7 +41,7 @@ class ExpressionQuestionParser extends ParserExtends {
 		newExpression.pos = pos
 		newExpression.Type = ast.ExpressionTypeQuestion
 		question := new ast.ExpressionQuestion()
-		question.Selection = left
+		question.selection = left
 		question.True = True
 		question.False = False
 		newExpression.data = question

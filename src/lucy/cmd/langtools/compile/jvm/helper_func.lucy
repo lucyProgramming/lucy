@@ -70,7 +70,7 @@ fn loadInt32(c cg.ClassHighLevel, code cg.AttributeCode, value int) {
 
 fn interfaceMethodArgsCount(functionType ast.FunctionType) -> (count byte) {
 	count = 1
-	for _, v := range functionType.ParameterList {
+	for _, v := range functionType.parameterList {
 		count += jvmSlotSize(v.Type)
 	}
 }
@@ -85,7 +85,7 @@ fn jvmSlotSize(typ ast.Type) -> (size char) {
 }
 
 fn nameTemplateFunction(function ast.Function) -> (s string = function.name) {
-	for _, v := range function.Type.ParameterList {
+	for _, v := range function.Type.parameterList {
 		if v.Type.isPrimitive() {
 			s += sprintf("$%s", v.Type.typeString())
 			continue
@@ -213,8 +213,8 @@ fn storeArrayElementOp(typ ast.VariableTypeKind) -> (op byte) {
 fn popCallResult(code cg.AttributeCode, e ast.Expression, ft ast.FunctionType) ->(stackSize char) {
 	stackSize = functionReturnJvmSize(ft)
 	if ft.VoidReturn() == false && e.isStatementExpression {
-		if len(ft.ReturnList) == 1 {
-			if jvmSlotSize(ft.ReturnList[0].Type) == 1 {
+		if len(ft.returnList) == 1 {
+			if jvmSlotSize(ft.returnList[0].Type) == 1 {
 				code.codes[code.codeLength] = cg.OP_pop
 				code.codeLength++
 			} else {
@@ -233,10 +233,10 @@ fn functionReturnJvmSize(ft ast.FunctionType) -> (size char) {
 	if ft.VoidReturn() {
 		return 0
 	}
-	if len(ft.ReturnList) > 1 {
+	if len(ft.returnList) > 1 {
 		return 1
 	} else {
-		return jvmSlotSize(ft.ReturnList[0].Type)
+		return jvmSlotSize(ft.returnList[0].Type)
 	}
 }
 

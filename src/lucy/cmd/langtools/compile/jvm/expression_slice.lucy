@@ -31,9 +31,9 @@ class BuildExpressionSlice {
         if t := char(1) + stack; t > maxStack {
             maxStack = t
         }
-        if slice.End != null {
+        if slice.end != null {
             state.pushStack(c, slice.start.value)
-            stack = this.eb.build(c, code, slice.End, context, state)
+            stack = this.eb.build(c, code, slice.end, context, state)
             if t := char(2) + stack; t > maxStack {
                 maxStack = t
             }
@@ -69,14 +69,14 @@ class BuildExpressionSlice {
         meta := ArrayMetas[e.value.array.Type]
         maxStack = this.eb.build(c, code, slice.ExpressionOn, context, state)
         state.pushStack(c, slice.ExpressionOn.value)
-        if slice.End != null {
+        if slice.end != null {
             // build start
             stack := this.eb.build(c, code, slice.start, context, state)
             if t := char(1) + stack; t > maxStack {
                 maxStack = t
             }
             state.pushStack(c, slice.start.value)
-            stack = this.eb.build(c, code, slice.End, context, state)
+            stack = this.eb.build(c, code, slice.end, context, state)
             if t := char(3) + stack; t > maxStack {
                 maxStack = t
             }

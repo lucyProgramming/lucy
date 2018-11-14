@@ -27,15 +27,15 @@ class BuildExpressionOpAssign {
         }
         bin := e.data.(ast.ExpressionBinary)
         maxStack, remainStack, op, leftValueKind :=
-            this.eb.BuildExpressionLeftValue.getLeftValue(c, code, bin.Left, context, state)
+            this.eb.BuildExpressionLeftValue.getLeftValue(c, code, bin.left, context, state)
         currentStack := remainStack
-        stack := this.eb.build(c, code, bin.Left, context, state)
+        stack := this.eb.build(c, code, bin.left, context, state)
         if t := currentStack + stack; t > maxStack {
             maxStack = t
         }
-        state.pushStack(c, bin.Left.value)
-        currentStack += jvmSlotSize(bin.Left.value)
-        stack = this.eb.build(c, code, bin.Right, context, state)
+        state.pushStack(c, bin.left.value)
+        currentStack += jvmSlotSize(bin.left.value)
+        stack = this.eb.build(c, code, bin.right, context, state)
         if t := currentStack + stack; t > maxStack {
             maxStack = t
         }
@@ -67,22 +67,22 @@ class BuildExpressionOpAssign {
             state.popStack(len(state.stacks) - length)
         }
         bin := e.data.(ast.ExpressionBinary)
-        if bin.Left.value.Type == ast.VariableTypeString {
+        if bin.left.value.Type == ast.VariableTypeString {
             return this.buildStrPlusAssign(c, code, e, context, state)
         }
-        maxStack, remainStack, op, leftValueKind := this.eb.BuildExpressionLeftValue.getLeftValue(c, code, bin.Left, context, state)
+        maxStack, remainStack, op, leftValueKind := this.eb.BuildExpressionLeftValue.getLeftValue(c, code, bin.left, context, state)
         //left value must can be used as right value,
-        stack := this.eb.build(c, code, bin.Left, context, state) // load it`s value
+        stack := this.eb.build(c, code, bin.left, context, state) // load it`s value
         if t := stack + remainStack; t > maxStack {
             maxStack = t
         }
         state.pushStack(c, e.value)
         currentStack := jvmSlotSize(e.value) + remainStack // incase int -> long
-        stack = this.eb.build(c, code, bin.Right, context, state)
+        stack = this.eb.build(c, code, bin.right, context, state)
         if t := currentStack + stack; t > maxStack {
             maxStack = t
         }
-        switch bin.Left.value.Type {
+        switch bin.left.value.Type {
         case ast.VariableTypeByte:
             if e.Type == ast.ExpressionTypePlusAssign {
                 code.codes[code.codeLength] = cg.OP_iadd
@@ -265,7 +265,7 @@ class BuildExpressionOpAssign {
             code.codeLength++
         }
         if e.isStatementExpression == false {
-            currentStack += this.eb.dupStackLeaveValueBelow(code, leftValueKind, bin.Left.value)
+            currentStack += this.eb.dupStackLeaveValueBelow(code, leftValueKind, bin.left.value)
             if currentStack > maxStack {
                 maxStack = currentStack
             }

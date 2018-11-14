@@ -42,7 +42,7 @@ class  BuildExpressionFunction {
 			method.accessFlags |= cg.AccMethodPrivate
 			method.accessFlags |= cg.AccMethodStatic
 			method.accessFlags |= cg.AccMethodBridge
-			if function.Type.VArgs != null {
+			if function.Type.vArgs != null {
 				method.accessFlags |= cg.AccMethodVarargs
 			}
 			function.entrance = method
@@ -68,7 +68,7 @@ class  BuildExpressionFunction {
 		method.name = function.name
 		method.accessFlags |= cg.AccMethodFinal
 		method.accessFlags |= cg.AccMethodBridge
-		if function.Type.VArgs != null {
+		if function.Type.vArgs != null {
 			method.accessFlags |= cg.AccMethodVarargs
 		}
 		method.Descriptor = Descriptor.methodDescriptor(function.Type)

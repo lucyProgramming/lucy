@@ -311,12 +311,12 @@ class BuildBlock {
 		state StackMapState,
 		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
 		bin := condition.data.(ast.ExpressionBinary)
-		stack := this.eb.build(c, code, bin.Left, context, state)
+		stack := this.eb.build(c, code, bin.left, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
-		state.pushStack(c, bin.Left.value)
-		stack = this.eb.build(c, code, bin.Right, context, state)
+		state.pushStack(c, bin.left.value)
+		stack = this.eb.build(c, code, bin.right, context, state)
 		if t := char(1) + stack; t > maxStack {
 			maxStack = t
 		}
@@ -345,10 +345,10 @@ class BuildBlock {
 		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
 		var noNullExpression ast.Expression
 		bin := condition.data.(ast.ExpressionBinary)
-		if bin.Left.Type != ast.ExpressionTypeNull {
-			noNullExpression = bin.Left
+		if bin.left.Type != ast.ExpressionTypeNull {
+			noNullExpression = bin.left
 		} else {
-			noNullExpression = bin.Right
+			noNullExpression = bin.right
 		}
 		stack := this.eb.build(c, code, noNullExpression, context, state)
 		if stack > maxStack {
@@ -370,12 +370,12 @@ class BuildBlock {
 		state StackMapState,
 		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
 		bin := condition.data.(ast.ExpressionBinary)
-		stack := this.eb.build(c, code, bin.Left, context, state)
+		stack := this.eb.build(c, code, bin.left, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
-		state.pushStack(c, bin.Left.value)
-		stack = this.eb.build(c, code, bin.Right, context, state)
+		state.pushStack(c, bin.left.value)
+		stack = this.eb.build(c, code, bin.right, context, state)
 		if t := char(1) + stack; t > maxStack {
 			maxStack = t
 		}
@@ -411,12 +411,12 @@ class BuildBlock {
 		state StackMapState,
 		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
 		bin := condition.data.(ast.ExpressionBinary)
-		stack := this.eb.build(c, code, bin.Left, context, state)
+		stack := this.eb.build(c, code, bin.left, context, state)
 		if stack > maxStack {
 			maxStack = stack
 		}
-		state.pushStack(c, bin.Left.value)
-		stack = this.eb.build(c, code, bin.Right, context, state)
+		state.pushStack(c, bin.left.value)
+		stack = this.eb.build(c, code, bin.right, context, state)
 		if t := char(1) + stack; t > maxStack {
 			maxStack = t
 		}

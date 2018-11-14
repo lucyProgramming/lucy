@@ -31,8 +31,8 @@ class ExpressionBinaryParser extends ParserExtends{
 			newExpression.op = name
 			newExpression.Type = ast.ExpressionTypeLogicalOr
 			binary := new ast.ExpressionBinary()
-			binary.Left = left
-			binary.Right = right
+			binary.left = left
+			binary.right = right
 			newExpression.data = binary
 			left = newExpression
 		}
@@ -59,8 +59,8 @@ class ExpressionBinaryParser extends ParserExtends{
 			newExpression.op = name
 			newExpression.Type = ast.ExpressionTypeLogicalAnd
 			binary := new ast.ExpressionBinary()
-			binary.Left = left
-			binary.Right = right
+			binary.left = left
+			binary.right = right
 			newExpression.data = binary
 			left = newExpression
 		}
@@ -93,8 +93,8 @@ class ExpressionBinaryParser extends ParserExtends{
 				newExpression.Type = ast.ExpressionTypeNe
 			}
 			binary := new ast.ExpressionBinary()
-			binary.Left = left
-			binary.Right = right
+			binary.left = left
+			binary.right = right
 			newExpression.data = binary
 			left = newExpression
 		}
@@ -137,8 +137,8 @@ class ExpressionBinaryParser extends ParserExtends{
 
 			}
 			binary := new ast.ExpressionBinary()
-			binary.Left = left
-			binary.Right = right
+			binary.left = left
+			binary.right = right
 			newExpression.data = binary
 			left = newExpression
 		}
@@ -165,8 +165,8 @@ class ExpressionBinaryParser extends ParserExtends{
 			newExpression.op = name
 			newExpression.Type = ast.ExpressionTypeOr
 			binary := new ast.ExpressionBinary()
-			binary.Left = left
-			binary.Right = right
+			binary.left = left
+			binary.right = right
 			newExpression.data = binary
 			left = newExpression
 		}
@@ -193,8 +193,8 @@ class ExpressionBinaryParser extends ParserExtends{
 			newExpression.op = name
 			newExpression.Type = ast.ExpressionTypeXor
 			binary := new ast.ExpressionBinary()
-			binary.Left = left
-			binary.Right = right
+			binary.left = left
+			binary.right = right
 			newExpression.data = binary
 			left = newExpression
 		}
@@ -221,8 +221,8 @@ class ExpressionBinaryParser extends ParserExtends{
 			newExpression.Type = ast.ExpressionTypeAnd
 			newExpression.op = name
 			binary := new ast.ExpressionBinary()
-			binary.Left = left
-			binary.Right = right
+			binary.left = left
+			binary.right = right
 			newExpression.data = binary
 			left = newExpression
 		}
@@ -257,8 +257,8 @@ class ExpressionBinaryParser extends ParserExtends{
 
 			}
 			binary := new ast.ExpressionBinary()
-			binary.Left = left
-			binary.Right = right
+			binary.left = left
+			binary.right = right
 			newExpression.data = binary
 			left = newExpression
 		}
@@ -291,8 +291,8 @@ class ExpressionBinaryParser extends ParserExtends{
 				newExpression.Type = ast.ExpressionTypeSub
 			}
 			binary := new ast.ExpressionBinary()
-			binary.Left = left
-			binary.Right = right
+			binary.left = left
+			binary.right = right
 			newExpression.data = binary
 			left = newExpression
 		}
@@ -328,8 +328,8 @@ class ExpressionBinaryParser extends ParserExtends{
 				newExpression.Type = ast.ExpressionTypeMod
 			}
 			binary := new ast.ExpressionBinary()
-			binary.Left = left
-			binary.Right = right
+			binary.left = left
+			binary.right = right
 			newExpression.data = binary
 			left = newExpression
 		}

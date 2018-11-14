@@ -219,12 +219,21 @@ public class Lexer {
             } else if isByte {
                 token.Type = TokenLiteralByte
                 token.longValue = longValue
+                if longValue >> 56  != 0 {
+                	err = new error("exceeds max byte")
+                }
             } else if isShort {
                 token.Type = TokenLiteralShort
                 token.longValue = longValue
+                if longValue >> 48  != 0 {
+                	err = new error("exceeds max short")
+                }
             } else {
                 token.Type = TokenLiteralInt
                 token.longValue = longValue
+                if longValue >> 32  != 0 {
+                	err = new error("exceeds max int")
+                }
             }
         }
         return
@@ -705,7 +714,8 @@ public class Lexer {
 				token.stringValue = string(bs)
 				token.Description = string(bs)
 			} else if c == '*' {
-				comment, err := this.lexMultiLineComment()
+		        var comment string
+				comment, err = this.lexMultiLineComment()
 				if err != null {
 					return null, err
 				}

@@ -30,7 +30,7 @@ class BuildTemplateFunctionCall {
             method.accessFlags |= cg.AccClassFinal
             method.accessFlags |= cg.AccMethodStatic
             method.accessFlags |= cg.AccMethodBridge
-            if call.TemplateFunctionCallPair.Function.Type.VArgs != null {
+            if call.TemplateFunctionCallPair.Function.Type.vArgs != null {
                 method.accessFlags |= cg.AccMethodVarargs
             }
             method.Descriptor = Descriptor.methodDescriptor(call.TemplateFunctionCallPair.Function.Type)
@@ -41,7 +41,7 @@ class BuildTemplateFunctionCall {
             this.bp.BuildFunction.buildFunction(c, null, method, call.TemplateFunctionCallPair.Function)
             call.TemplateFunctionCallPair.entrance = method
         }
-        maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
+        maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.args, call.vArgs, context, state)
         code.codes[code.codeLength] = cg.OP_invokestatic
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             call.TemplateFunctionCallPair.entrance.Class.name,
@@ -52,7 +52,7 @@ class BuildTemplateFunctionCall {
         code.codeLength += 3
         if e.isStatementExpression {
             if call.TemplateFunctionCallPair.Function.Type.VoidReturn() == false {
-                if len(call.TemplateFunctionCallPair.Function.Type.ReturnList) > 1 {
+                if len(call.TemplateFunctionCallPair.Function.Type.returnList) > 1 {
                     code.codes[code.codeLength] = cg.OP_pop
                     code.codeLength++
                 } else {

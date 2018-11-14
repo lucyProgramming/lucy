@@ -154,8 +154,8 @@ public class Decoder {
 			}
 			cc := f.getType()
 			if  (cc.isPrimitive()) {
-				tree :=  tree.object[f.getName()]
-				obj  :=  .decodePrimitives( cc , tree  )
+				tree2 := tree.object[f.getName()]
+				obj  := .decodePrimitives( cc , tree2  )
 				f.set(x , obj) 
 				continue  
 			}

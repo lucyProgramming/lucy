@@ -32,7 +32,7 @@ class BuildExpressionMap{
            "()V"
         ), code.codes[code.codeLength+1:code.codeLength+3])
         code.codeLength += 3
-        values := e.data.(ast.ExpressionMap).KeyValuePairs
+        values := e.data.(ast.ExpressionMap).keyValuePairs
         hashMapObject := state.newObjectVariableType(mapClass)
         state.pushStack(c, hashMapObject)
         defer state.popStack(1)
@@ -41,12 +41,12 @@ class BuildExpressionMap{
             code.codeLength++
             currentStack := char(2)
             state.pushStack(c, hashMapObject)
-            stack := this.eb.build(c, code, v.Key, context, state)
+            stack := this.eb.build(c, code, v.key, context, state)
             if t := currentStack + stack; t > maxStack {
                 maxStack = t
             }
-            if v.Key.value.isPointer() == false {
-                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.Key.value)
+            if v.key.value.isPointer() == false {
+                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.key.value)
             }
             state.pushStack(c, state.newObjectVariableType(javaRootClass))
             currentStack = 3 // stack is ... mapref mapref kref
@@ -88,8 +88,8 @@ class BuildExpressionMap{
         state.pushStack(c, hashMapVerifyType)
         switch call.name {
         case common.MapMethodKeyExist:
-            variableType := call.Args[0].value
-            stack := this.eb.build(c, code, call.Args[0], context, state)
+            variableType := call.args[0].value
+            stack := this.eb.build(c, code, call.args[0], context, state)
             if t := char(1) + stack; t > maxStack {
                 maxStack = t
             }
@@ -109,10 +109,10 @@ class BuildExpressionMap{
             }
         case common.MapMethodRemove:
             currentStack := char(1)
-            for k, v := range call.Args {
+            for k, v := range call.args {
                 currentStack = 1
                 variableType := v.value
-                if k != len(call.Args)-1 {
+                if k != len(call.args)-1 {
                     code.codes[code.codeLength] = cg.OP_dup
                     currentStack++
                     if currentStack > maxStack {
@@ -136,7 +136,7 @@ class BuildExpressionMap{
                 ), code.codes[code.codeLength+1:code.codeLength+3])
                 code.codes[code.codeLength+3] = cg.OP_pop
                 code.codeLength += 4
-                if k != len(call.Args)-1 {
+                if k != len(call.args)-1 {
                     state.popStack(1)
                 }
             }

@@ -29,7 +29,7 @@ public class Block {
 	public enums                     map{string->Enum}
 	public EnumNames                 map{string->EnumName}
 	public labels                    map{string->StatementLabel}
-	public TypeAliases               map{string->Type}
+	public typeAliases               map{string->Type}
 	public variables                 map{string->Variable}
 	checkConstantsCalled      bool
 
@@ -64,8 +64,8 @@ public class Block {
                 return t, true
             }
         }
-        if this.TypeAliases != null {
-            if t := this.TypeAliases[name]; t != null {
+        if this.typeAliases != null {
+            if t := this.typeAliases[name]; t != null {
                 return t, true
             }
         }
@@ -115,17 +115,15 @@ public class Block {
                     return t
                 }
             }
-            if bb.TypeAliases != null {
-                if t := bb.TypeAliases[name]; t != null {
+            if bb.typeAliases != null {
+                if t := bb.typeAliases[name]; t != null {
                     return t
                 }
             }
-            if bb.isFunctionBlock && bb.Fn != null {
-                if bb.Fn.parameterTypes != null {
-                    if t := bb.Fn.parameterTypes[name]; t != null {
-                        return t
-                    }
-                }
+            if bb.isFunctionBlock && bb.Fn != null && bb.Fn.parameterTypes != null  {
+                if t := bb.Fn.parameterTypes[name]; t != null {
+                    return t
+                } 
             }
             bb = bb.outer
         }
@@ -133,6 +131,10 @@ public class Block {
     }
 
     fn identifierIsWhat(x Object) -> (w string) {
+        if x == null {
+            w = "null"
+            return
+        }
         return x.getClass().getName()
     }
 
@@ -175,8 +177,8 @@ public class Block {
                 return t, null
             }
         }
-        if this.TypeAliases != null {
-            if t := this.TypeAliases[name]; t != null {
+        if this.typeAliases != null {
+            if t := this.typeAliases[name]; t != null {
                 return t, null
             }
         }
@@ -417,10 +419,10 @@ public class Block {
             errMsg += sprintf("\t%s", en.pos.errMsgPrefix())
             return new error(errMsg)
         }
-        if this.TypeAliases == null {
-            this.TypeAliases = new map { string -> Type } ()
+        if this.typeAliases == null {
+            this.typeAliases = new map { string -> Type } ()
         }
-        if t := this.TypeAliases[name]; t != null {
+        if t := this.typeAliases[name]; t != null {
             errMsg := sprintf("%s name '%s' already declared as enumName,first declared at:\n",
                 pos.errMsgPrefix(), name)
             errMsg += sprintf("\t%s", t.pos.errMsgPrefix())
@@ -457,7 +459,7 @@ public class Block {
         return null
     }
 
-    public fn Insert(name string, pos Pos, d Object) -> (err error) {
+    public fn insert(name string, pos Pos, d Object) -> (err error) {
         if err = this.nameIsValid(name, pos); err != null {
             return err
         }
@@ -503,7 +505,7 @@ public class Block {
         if e , ok:= d.(Enum) ; ok {
             this.enums[name] = e
             for _, v := range e.enums {
-                err = this.Insert(v.name, v.pos, v)
+                err = this.insert(v.name, v.pos, v)
                 if err != null {
                     return err
                 }
@@ -515,7 +517,7 @@ public class Block {
             return null
         }
         if t ,ok := d.(Type) ; ok {
-             this.TypeAliases[name] = t
+             this.typeAliases[name] = t
              return null
         }
         return null

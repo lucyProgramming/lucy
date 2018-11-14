@@ -4,8 +4,8 @@ class ExpressionCheckFunctionCall {
 	
 	static fn checkFunctionCallExpression(e Expression, block Block, errs []error) ->(valueTypes []Type) {
 		call := e.data.(ExpressionFunctionCall)
-		if call.Args == null {
-            call.Args = []Expression{}
+		if call.args == null {
+            call.args = []Expression{}
         }
 		if call.Expression.Type == ExpressionTypeIdentifier {
 			identifier := call.Expression.data.(ExpressionIdentifier)
@@ -20,20 +20,20 @@ class ExpressionCheckFunctionCall {
 					call.Expression.pos.errMsgPrefix(), identifier.name)))
 				return null
 			}
-			if f := d.(Function) ;f != null {
+			if f ,ok := d.(Function) ; ok {
                 call.Function = f
                 return .checkFunctionCall(e , block, errs, f, call)
 			}
-			if t := d.(Type) ; t != null {
+			if t  ,ok:= d.(Type) ; ok {
 				typeConversion := new ExpressionTypeConversion()
 				typeConversion.Type = d.(Type)
-				if len(call.Args) != 1 {
+				if len(call.args) != 1 {
 					errs.append(new error( sprintf("%s cast type expect 1 argument",
 						e.pos.errMsgPrefix())))
 					return null
 				}
 				e.Type = ExpressionTypeCheckCast
-				typeConversion.Expression = call.Args[0]
+				typeConversion.Expression = call.args[0]
 				e.data = typeConversion
 				ret := ExpressionCheckTypeConversion.check(e , block, errs)
 				if ret == null {
@@ -41,19 +41,19 @@ class ExpressionCheckFunctionCall {
 				}
 				return []Type{ret}
 			}
-			if c := d.(Class) ;c != null {
+			if c ,ok:= d.(Class) ; ok {
 				typeConversion := new ExpressionTypeConversion()
 				typeConversion.Type = new Type()
 				typeConversion.Type.Type = VariableTypeObject
 				typeConversion.Type.Class = d.(Class)
 				typeConversion.Type.pos = e.pos
-				if len(call.Args) != 1 {
+				if len(call.args) != 1 {
 					errs.append(new error( sprintf("%s cast type expect 1 argument",
 						e.pos.errMsgPrefix())))
 					return null
 				}
 				e.Type = ExpressionTypeCheckCast
-				typeConversion.Expression = call.Args[0]
+				typeConversion.Expression = call.args[0]
 				e.data = typeConversion
 				ret := ExpressionCheckTypeConversion.check(e , block, errs)
 				if ret == null {
@@ -61,7 +61,7 @@ class ExpressionCheckFunctionCall {
 				}
 				return []Type{ret}
 			}
-			if v := d.(Variable) ; v != null {
+			if v ,ok := d.(Variable) ; ok {
 				if isCaptureVar[0] {
 					v.beenCapturedAsRightValue++
 				}
@@ -110,13 +110,13 @@ class ExpressionCheckFunctionCall {
 	static fn checkFunctionPointerCall(e Expression , block Block, errs []error,
 		ft FunctionType, call ExpressionFunctionCall) ->(valueTypes []Type) {
 		length := len(errs)
-		callArgsTypes := checkExpressions(block, call.Args, errs, true)
+		callArgsTypes := checkExpressions(block, call.args, errs, true)
 		ret := ft.mkCallReturnTypes(e.pos)
 		if len(errs) > length {
 			return null
 		}
 		var err error
-		call.VArgs, err = ft.fitArgs(e.pos, call.Args, callArgsTypes, null)
+		call.vArgs, err = ft.fitArgs(e.pos, call.args, callArgsTypes, null)
 		if err != null {
 			errs.append(err)
 		}
@@ -126,7 +126,7 @@ class ExpressionCheckFunctionCall {
 	static fn checkFunctionCall(e Expression , block Block, errs []error, f Function, call ExpressionFunctionCall)  ->(valueTypes []Type) {
 		if f.TemplateFunction != null {
 			errsLength := len(errs)
-			callArgsTypes := checkExpressions(block, call.Args, errs, true)
+			callArgsTypes := checkExpressions(block, call.args, errs, true)
 			if len(errs) > errsLength {
 				return null
 			}
@@ -138,7 +138,7 @@ class ExpressionCheckFunctionCall {
 			}
 			ret := tf.Type.mkCallReturnTypes(e.pos)
 			var err error
-			call.VArgs, err = tf.Type.fitArgs(e.pos, call.Args, callArgsTypes, tf)
+			call.vArgs, err = tf.Type.fitArgs(e.pos, call.args, callArgsTypes, tf)
 			if err != null {
 				errs.append(err)
 			}
@@ -146,14 +146,14 @@ class ExpressionCheckFunctionCall {
 		} else { // not template function
 			ret := f.Type.mkCallReturnTypes(e.pos)
 			errsLength := len(errs)
-			callArgsTypes := checkExpressions(block, call.Args, errs, true)
+			callArgsTypes := checkExpressions(block, call.args, errs, true)
 			if len(errs) > errsLength {
 				return ret
 			}
 			if f.isBuildIn {
 				if f.loadedFromCorePackage {
 					var err error
-					call.VArgs, err = f.Type.fitArgs(e.pos,call.Args, callArgsTypes, f)
+					call.vArgs, err = f.Type.fitArgs(e.pos,call.args, callArgsTypes, f)
 					if err != null {
 						errs.append(err)
 					}
@@ -173,7 +173,7 @@ class ExpressionCheckFunctionCall {
 						errMsgPrefix(e.pos))))
 				}
 				var err error
-				call.VArgs, err = f.Type.fitArgs(e.pos, call.Args, callArgsTypes, f)
+				call.vArgs, err = f.Type.fitArgs(e.pos, call.args, callArgsTypes, f)
 				if err != null {
 					errs.append(err)
 				}
@@ -181,13 +181,13 @@ class ExpressionCheckFunctionCall {
 			}
 		}
 	}
-
+	
 	static fn checkTemplateFunctionCall(e Expression ,block Block, errs []error,
 		argTypes []Type, f Function) -> (ret Function) {
 		call := e.data.(ExpressionFunctionCall)
 		parameterTypes := new map { string -> Type } ()
 		parameterTypeArray := []Type{}
-		for k, v := range f.Type.ParameterList {
+		for k, v := range f.Type.parameterList {
 			if v == null ||
 				v.Type == null ||
 				len(v.Type.getParameterType(f.Type)) == 0 {
@@ -208,7 +208,7 @@ class ExpressionCheckFunctionCall {
 			parameterTypeArray.append(t)
 		}
 		tps := call.ParameterTypes
-		for k, v := range f.Type.ReturnList {
+		for k, v := range f.Type.returnList {
 			if v == null || v.Type == null || len(v.Type.getParameterType(f.Type)) == 0 {
 				continue
 			}
@@ -247,15 +247,15 @@ class ExpressionCheckFunctionCall {
 			call.TemplateFunctionCallPair.Function = cloneFunction
 			cloneFunction.parameterTypes = parameterTypes
 			for k, v := range parameterTypes {
-				v.pos = f.Type.TemplateNamesMap[k] // keep Pos
+				v.pos = f.Type.templateNamesMap[k] // keep Pos
 			}
-			for _, v := range cloneFunction.Type.ParameterList {
+			for _, v := range cloneFunction.Type.parameterList {
 				if len(v.Type.getParameterType(f.Type)) > 0 {
 					v.Type = parameterTypeArray[0]
 					parameterTypeArray = parameterTypeArray[1:]
 				}
 			}
-			for _, v := range cloneFunction.Type.ReturnList {
+			for _, v := range cloneFunction.Type.returnList {
 				if len(v.Type.getParameterType(f.Type)) > 0 {
 					v.Type = parameterTypeArray[0]
 					parameterTypeArray = parameterTypeArray[1:]

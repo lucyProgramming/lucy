@@ -118,18 +118,17 @@ class Context {
 		if pos == null {
 			return
 		}
-		if pos.filename != null && 
-			this.currentSourceFile != null && 
-			pos.filename != this.currentSourceFile {
-			c.insertSourceFile(pos.filename)
-			this.currentSourceFile = pos.filename
-			this.currentLineNumber = pos.line
-			code.MKLineNumber(pos.line)
-			return
+		oldFileName := this.currentSourceFile
+		oldLine := this.currentLineNumber
+		if oldFileName == null {
+			oldFileName = ""
 		}
-		if this.currentLineNumber != pos.line {
+		c.insertSourceFile(pos.filename)
+		this.currentSourceFile = pos.filename
+		this.currentLineNumber = pos.line
+		if this.currentSourceFile != oldFileName ||
+			this.currentLineNumber != oldLine  {
 			code.MKLineNumber(pos.line)
-			this.currentLineNumber = pos.line
 		}
 	}
 

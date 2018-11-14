@@ -123,9 +123,9 @@ class BuildExpressionArray {
             }
         case common.ArrayMethodAppend:
             meta := ArrayMetas[call.Expression.value.array.Type]
-            for k, v := range call.Args {
+            for k, v := range call.args {
                 currentStack := char(1)
-                if k != len(call.Args)-1 {
+                if k != len(call.args)-1 {
                     code.codes[code.codeLength] = cg.OP_dup
                     code.codeLength++
                     state.pushStack(c, call.Expression.value)
@@ -142,15 +142,15 @@ class BuildExpressionArray {
                      meta.appendDescriptor
                 ), code.codes[code.codeLength+1:code.codeLength+3])
                 code.codeLength += 3
-                if k != len(call.Args)-1 {
+                if k != len(call.args)-1 {
                     state.popStack(1)
                 }
             }
         case common.ArrayMethodAppendAll:
             meta := ArrayMetas[call.Expression.value.array.Type]
-            for k, v := range call.Args {
+            for k, v := range call.args {
                 currentStack := char(1)
-                if k != len(call.Args)-1 {
+                if k != len(call.args)-1 {
                     code.codes[code.codeLength] = cg.OP_dup
                     code.codeLength++
                     state.pushStack(c, call.Expression.value)
@@ -168,7 +168,7 @@ class BuildExpressionArray {
                     meta.appendAllDescriptor
                 ), code.codes[code.codeLength+1:code.codeLength+3])
                 code.codeLength += 3
-                if k != len(call.Args)-1 {
+                if k != len(call.args)-1 {
                     state.popStack(1)
                 }
             }

@@ -129,10 +129,10 @@ class ArrayMeta {
 	ArrayMetas[ast.VariableTypeObject] = new ArrayMeta( 
 		"lucy/deps/ArrayObject",
 		"([Ljava/lang/Object;)V",
-		"[Ljava/lang/Object;",
 		"(II)Llucy/deps/ArrayObject;",
 		"(Ljava/lang/Object;)V",
 		"(Llucy/deps/ArrayObject;)V",
+		"[Ljava/lang/Object;",
 		"(ILjava/lang/Object;)V",
 		"(I)Ljava/lang/Object;"
 	)

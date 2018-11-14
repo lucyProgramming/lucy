@@ -140,9 +140,9 @@ public class ClassHighLevel {
 		}
 		var s string
 		for k, _ := range this.sourceFiles {
-		    index := len(k)
-		    for index > 0 {
-		        if s[index] == '/' || s[index] == '\\'{
+		    index := len(k) - 1
+		    for index >= 0 {
+		        if k[index] == '/' || k[index] == '\\'{
 		            break
 		        }
 		        index --
@@ -150,17 +150,17 @@ public class ClassHighLevel {
 			s = k[:index]
 			break
 		}
-		s += "\\{"
+		s += "/{"
 		i := 0
 		for f, _ := range this.sourceFiles {
-		    index := len(f)
-            for index > 0 {
-                if s[index] == '/' || s[index] == '\\'{
+		    index := len(f) -1
+            for index >= 0 {
+                if f[index] == '/' || f[index] == '\\'{
                     break
                 }
                 index--
             }
-			s += f[index:]
+			s += f[index+1:]
 			if i != len(this.sourceFiles)-1 {
 				s += ","
 			}

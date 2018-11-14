@@ -6,12 +6,12 @@ class ExpressionCheckVarAssign {
 	static fn check(e Expression , block Block, errs []error) {
 		bin := e.data.(ExpressionBinary)
 		var lefts []Expression
-		if bin.Left.Type == ExpressionTypeList {
-			lefts = bin.Left.data.([]Expression)
+		if bin.left.Type == ExpressionTypeList {
+			lefts = bin.left.data.([]Expression)
 		} else {
-			lefts = []Expression{bin.Left}
+			lefts = []Expression{bin.left}
 		}
-		values := bin.Right.data.([]Expression)
+		values := bin.right.data.([]Expression)
 		for _, v := range values {
 			v.lefts = lefts
 		}
@@ -32,7 +32,7 @@ class ExpressionCheckVarAssign {
 		var err error
 		noNewVariable := true
 		assign := new ExpressionVarAssign()
-		assign.Lefts = lefts
+		assign.lefts = lefts
 		assign.InitValues = values
 		assign.IfDeclaredBefore = new []bool(len(lefts))
 		if block.variables == null {
@@ -87,10 +87,15 @@ class ExpressionCheckVarAssign {
 					errs.append(err)
 				}
 				if e.isGlobal {
-					err = PackageBeenCompile.block.Insert(vd.name, v.pos, vd)
+					err = PackageBeenCompile.block.insert(vd.name, v.pos, vd)
 					vd.isGlobal = true
 				} else {
-					err = block.Insert(vd.name, v.pos, vd)
+					if block.inheritedAttribute.Function != null {
+						if err := block.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(vd) ; err != null{
+							errs.append(err)
+						}
+					}
+					err = block.insert(vd.name, v.pos, vd)
 				}
 				identifier.Variable = vd
 				if err != null {

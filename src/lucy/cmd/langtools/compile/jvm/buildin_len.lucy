@@ -16,14 +16,14 @@ class BuildinFunctionLen {
 
     
 
-    fn build(
+    fn buildLen(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionFunctionCall)
-        a0 := call.Args[0]
+        a0 := call.args[0]
         maxStack = this.eb.build(c, code, a0, context, state)
         code.codes[code.codeLength] = cg.OP_dup
         code.codeLength++

@@ -39,7 +39,7 @@ class BuildExpressionCallArgs {
 		if vArgs == null {
 			return
 		}
-		if vArgs.NoArgs {
+		if vArgs.noArgs {
 			code.codes[code.codeLength] = cg.OP_aconst_null
 			code.codeLength++
 			if t := char(1) + currentStack; t > maxStack {
@@ -52,7 +52,7 @@ class BuildExpressionCallArgs {
 					maxStack = t
 				}
 			} else {
-				loadInt32(c, code, int(vArgs.Length))
+				loadInt32(c, code, int(vArgs.length))
 				newArrayBaseOnType(c, code, vArgs.Type.array)
 				state.pushStack(c, vArgs.Type)
 				currentStack++

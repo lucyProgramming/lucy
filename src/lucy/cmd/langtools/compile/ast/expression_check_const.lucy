@@ -12,7 +12,7 @@ class ExpressionCheckConst {
 				}
 				continue
 			}
-			err = block.Insert(c.name, c.pos, c)
+			err = block.insert(c.name, c.pos, c)
 			if err != null {
 				errs.append(err)
 			}

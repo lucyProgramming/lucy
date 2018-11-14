@@ -6,8 +6,8 @@ class ExpressionCheckMethodCall {
 
 	static fn check(e Expression , block Block, errs []error) -> (valueTypes []Type) {
 		call := e.data.(ExpressionMethodCall)
-		if call.Args == null {
-		    call.Args = []Expression{}
+		if call.args == null {
+		    call.args = []Expression{}
 		}
 		object, es := call.Expression.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
@@ -44,7 +44,7 @@ class ExpressionCheckMethodCall {
 				return null
 			}
 			errsLength := len(errs)
-			args := checkExpressions(block, call.Args, errs, true)
+			args := checkExpressions(block, call.args, errs, true)
 			if len(errs) > errsLength {
 				return null
 			}
@@ -66,7 +66,7 @@ class ExpressionCheckMethodCall {
 				errs.append(methodsNotMatchError(e.pos, call.name, ms, args))
 				return null
 			}
-
+			
 		case VariableTypeObject, VariableTypeClass:
 			if call.name == "finalize" {
 				errs.append(new error(sprintf("%s cannot call '%s'", e.pos.errMsgPrefix(), call.name)))
@@ -74,7 +74,7 @@ class ExpressionCheckMethodCall {
 			}
 			call.Class = object.Class
 			errsLength := len(errs)
-			callArgTypes := checkExpressions(block, call.Args, errs, true)
+			callArgTypes := checkExpressions(block, call.args, errs, true)
 			if len(errs) > errsLength {
 				return null
 			}
@@ -177,7 +177,7 @@ class ExpressionCheckMethodCall {
 			}
 		}
 		errsLength := len(errs)
-		callArgsTypes := checkExpressions(block, call.Args, errs, true)
+		callArgsTypes := checkExpressions(block, call.args, errs, true)
 		if len(errs) > errsLength {
 			return
 		}
@@ -211,7 +211,7 @@ class ExpressionCheckMethodCall {
 		}
 		fieldMethodHandler :=[]ClassField{null}
 		errsLength := len(errs)
-		callArgTypes := checkExpressions(block, call.Args, errs, true)
+		callArgTypes := checkExpressions(block, call.args, errs, true)
 		if len(errs) > errsLength {
 			return null
 		}
@@ -241,9 +241,9 @@ class ExpressionCheckMethodCall {
 			result := new Type()
 			result.Type = VariableTypeInt
 			result.pos = e.pos
-			if len(call.Args) > 0 {
+			if len(call.args) > 0 {
 				errs.append(new error(sprintf("%s method '%s' expect no arguments",
-					call.Args[0].pos.errMsgPrefix(), call.name)))
+					call.args[0].pos.errMsgPrefix(), call.name)))
 			}
 			return []Type{result}
 		default:
@@ -274,7 +274,7 @@ class ExpressionCheckMethodCall {
 				// better convert to function call
 				methodCall := e.data.(ExpressionMethodCall)
 				functionCall := new ExpressionFunctionCall()
-				functionCall.Args = methodCall.Args
+				functionCall.args = methodCall.args
 				functionCall.Function = f
 				functionCall.ParameterTypes = methodCall.ParameterTypes
 				e.Type = ExpressionTypeFunctionCall
@@ -285,12 +285,12 @@ class ExpressionCheckMethodCall {
 				methodCall.PackageFunction = f
 				ret := f.Type.mkCallReturnTypes(e.pos)
 				errsLength := len(errs)
-				callArgsTypes := checkExpressions(block, methodCall.Args, errs, true)
+				callArgsTypes := checkExpressions(block, methodCall.args, errs, true)
 				if len(errs) > errsLength {
 					return ret
 				}
 				var err error
-				methodCall.VArgs, err = f.Type.fitArgs(e.pos, call.Args, callArgsTypes, f)
+				methodCall.vArgs, err = f.Type.fitArgs(e.pos, call.args, callArgsTypes, f)
 				if err != null {
 					errs.append(err)
 				}
@@ -314,16 +314,16 @@ class ExpressionCheckMethodCall {
 			}
 			ret := v.Type.functionType.mkCallReturnTypes(e.pos)
 			errsLength := len(errs)
-			callArgsTypes := checkExpressions(block, call.Args, errs, true)
+			callArgsTypes := checkExpressions(block, call.args, errs, true)
 			if len(errs) > errsLength {
 				return ret
 			}
-			vArgs, err := v.Type.functionType.fitArgs(e.pos, call.Args, callArgsTypes, null)
+			vArgs, err := v.Type.functionType.fitArgs(e.pos, call.args, callArgsTypes, null)
 			if err != null {
 				errs.append(err)
 			}
 			call.PackageGlobalVariableFunction = v
-			call.VArgs = vArgs
+			call.vArgs = vArgs
 			return ret
 		}
 		if c := d.(Class) ; c != null {
@@ -337,29 +337,29 @@ class ExpressionCheckMethodCall {
 			conversion.Type.pos = e.pos
 			conversion.Type.Class = c
 			e.Type = ExpressionTypeCheckCast
-			if len(call.Args) >= 1 {
-				conversion.Expression = call.Args[0]
+			if len(call.args) >= 1 {
+				conversion.Expression = call.args[0]
 			}
 			e.data = conversion
-			if len(call.Args) != 1 {
+			if len(call.args) != 1 {
 				errs.append(new error(sprintf("%s cast type expect 1 argument", e.pos.errMsgPrefix())))
 				return []Type{conversion.Type.Clone()}
 			}
 			return []Type{ExpressionCheckTypeConversion.check(e , block, errs)}
 		}
 		if t := d.(Type) ; t != null {
-			if len(call.Args) != 1 {
+			if len(call.args) != 1 {
 				errs.append(new error(sprintf("%s cast type expect 1 argument",
 					e.pos.errMsgPrefix())))
-				result := p.block.TypeAliases[call.name].Clone()
+				result := p.block.typeAliases[call.name].Clone()
 				result.pos = e.pos
 				return []Type{result}
 			}
 			conversion := new ExpressionTypeConversion()
-			conversion.Type = p.block.TypeAliases[call.name]
+			conversion.Type = p.block.typeAliases[call.name]
 			e.Type = ExpressionTypeCheckCast
-			if len(call.Args) >= 1 {
-				conversion.Expression = call.Args[0]
+			if len(call.args) >= 1 {
+				conversion.Expression = call.args[0]
 			}
 			e.data = conversion
 			return []Type{ExpressionCheckTypeConversion.check(e , block, errs)}
@@ -383,18 +383,18 @@ class ExpressionCheckMethodCall {
 			result := new Type()
 			result.Type = VariableTypeInt
 			result.pos = e.pos
-			if len(call.Args) > 0 {
+			if len(call.args) > 0 {
 				errs.append(new error(sprintf("%s too mamy argument to call,method '%s' expect no arguments",
-						call.Args[0].pos.errMsgPrefix(), call.name)))
+						call.args[0].pos.errMsgPrefix(), call.name)))
 			}
 			return []Type{result}
 		case common.ArrayMethodAppend,
 			common.ArrayMethodAppendAll:
-			if len(call.Args) == 0 {
+			if len(call.args) == 0 {
 				errs.append(new error(sprintf("%s too few arguments to call %s,expect at least one argument",
 						e.pos.errMsgPrefix(), call.name)))
 			}
-			ts := checkExpressions(block, call.Args, errs, true)
+			ts := checkExpressions(block, call.args, errs, true)
 			for _, t := range ts {
 				if t == null {
 					continue
@@ -421,9 +421,9 @@ class ExpressionCheckMethodCall {
 			result.pos = e.pos
 			result.array = array.array.Clone()
 			result.array.pos = e.pos
-			if len(call.Args) > 0 {
+			if len(call.args) > 0 {
 				errs.append(new error(sprintf("%s too mamy argument to call,method '%s' expect no arguments",
-					call.Args[0].pos.errMsgPrefix(), call.name)))
+					call.args[0].pos.errMsgPrefix(), call.name)))
 			}
 			return []Type{result}
 		default:
@@ -442,16 +442,16 @@ class ExpressionCheckMethodCall {
 			ret := new Type()
 			ret.pos = e.pos
 			ret.Type = VariableTypeBool
-			if len(call.Args) != 1 {
+			if len(call.args) != 1 {
 				pos := e.pos
-				if len(call.Args) != 0 {
-					pos = call.Args[1].pos
+				if len(call.args) != 0 {
+					pos = call.args[1].pos
 				}
 				errs.append(new error(sprintf("%s call '%s' expect one argument",
 					pos.errMsgPrefix(), call.name)))
 				return []Type{ret}
 			}
-			t, es := call.Args[0].checkSingleValueContextExpression(block)
+			t, es := call.args[0].checkSingleValueContextExpression(block)
 			errs.appendAll(es)
 			if t == null {
 				return []Type{ret}
@@ -465,12 +465,12 @@ class ExpressionCheckMethodCall {
 			ret := new Type()
 			ret.pos = e.pos
 			ret.Type = VariableTypeVoid
-			if len(call.Args) == 0 {
+			if len(call.args) == 0 {
 				errs.append(new error(sprintf("%s remove expect at last 1 argement",
 					e.pos.errMsgPrefix())))
 				return []Type{ret}
 			}
-			ts := checkExpressions(block, call.Args, errs, true)
+			ts := checkExpressions(block, call.args, errs, true)
 			for _, t := range ts {
 				if t == null {
 					continue
@@ -485,7 +485,7 @@ class ExpressionCheckMethodCall {
 			ret := new Type()
 			ret.pos = e.pos
 			ret.Type = VariableTypeVoid
-			if len(call.Args) > 0 {
+			if len(call.args) > 0 {
 				errs.append(new error(sprintf("%s '%s' expect no arguments",
 					e.pos.errMsgPrefix(), common.MapMethodRemoveAll)))
 			}
@@ -494,9 +494,9 @@ class ExpressionCheckMethodCall {
 			ret := new Type()
 			ret.pos = e.pos
 			ret.Type = VariableTypeInt
-			if len(call.Args) > 0 {
+			if len(call.args) > 0 {
 				errs.append(new error(sprintf("%s too many argument to call '%s''",
-					call.Args[0].pos.errMsgPrefix(), call.name)))
+					call.args[0].pos.errMsgPrefix(), call.name)))
 			}
 			return []Type{ret}
 		default:

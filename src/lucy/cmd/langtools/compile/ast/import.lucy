@@ -2,7 +2,7 @@ import "lucy/cmd/langtools/compile/common"
 
 
 public class Import {
-	public alias  string
+	public accessName  string
 	public Import string // full name
 	public pos    Pos
 	public used   bool
@@ -11,14 +11,14 @@ public class Import {
 		import "github.com/std" as std2 should access by std2.doSomething()
 	*/
 	fn MkAccessName() -> (err error) {
-		if this.alias != null && this.alias != "" {
+		if this.accessName != null && this.accessName != "" {
 			return null
 		}
 		if false == PackageNameIsValid(this.Import) {
 			return new error(sprintf("%s '%s' is not a valid name",
 				this.pos.errMsgPrefix(), this.Import))
 		}
-		this.alias = common.getBaseName(this.Import)
+		this.accessName = common.getBaseName(this.Import)
 		return null
 	}
 }
@@ -37,16 +37,16 @@ class SourceFile {
 		if err = i.MkAccessName(); err != null {
 			return err
 		}
-		if this.Imports.keyExist(i.alias){
+		if this.Imports.keyExist(i.accessName){
 			return new error(sprintf("%s '%s' reimported",
 				i.pos.errMsgPrefix(), i.Import))
 		}
 		if this.ImportsByResources.keyExist(i.Import) {
 			return new error(sprintf("%s '%s' reimported",
-				i.pos.errMsgPrefix(), i.alias))
+				i.pos.errMsgPrefix(), i.accessName))
 		}
 		this.ImportsByResources[i.Import] = i
-		this.Imports[i.alias] = i
+		this.Imports[i.accessName] = i
 		return null
 	}
 }

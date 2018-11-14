@@ -148,6 +148,9 @@ public class Class {
 		return info.selfIndex
 	}
 	public fn insertUtf8Const(s string) -> (index char) {
+		if s == null {
+			s = ""
+		}
 		if this.utf8Constants == null {
 			this.utf8Constants = new map {string -> ConstPool}( )
 		}
@@ -413,8 +416,8 @@ public class Class {
 		//const pool
 		binary.BigEndian.putChar(bs2, this.constPoolUint16Length())
 		writer.write(bs2.getUnderlyingArray())
-		for k, v := range this.ConstPool {
-			if k == 0 {
+		for _, v := range this.ConstPool {
+			if v == null {
 				continue
 			}
 			writer.write(int(v.tag))

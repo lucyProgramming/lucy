@@ -130,7 +130,7 @@ class ExpressionParser extends  ParserExtends {
         result.op = opName
         bin := new ast.ExpressionBinary()
         result.data = bin
-        bin.Left = left
+        bin.left = left
         result.pos = pos
         if isMulti {
             var es []ast.Expression
@@ -138,11 +138,11 @@ class ExpressionParser extends  ParserExtends {
             if err != null {
                 return null, err
             }
-            bin.Right = new ast.Expression()
-            bin.Right.Type = ast.ExpressionTypeList
-            bin.Right.data = es
+            bin.right = new ast.Expression()
+            bin.right.Type = ast.ExpressionTypeList
+            bin.right.data = es
         } else {
-            bin.Right, err = this.parseExpression(false)
+            bin.right, err = this.parseExpression(false)
             if err != null {
                 return null, err
             }
@@ -255,12 +255,12 @@ class ExpressionParser extends  ParserExtends {
 				return
 			}
 			t := new ast.ExpressionKV()
-			t.Key = k
+			t.key = k
 			t.value = v
-			if m.KeyValuePairs == null {
-				m.KeyValuePairs = [t]
+			if m.keyValuePairs == null {
+				m.keyValuePairs = [t]
 			}else {
-				m.KeyValuePairs.append( t)
+				m.keyValuePairs.append( t)
 			}
 			
 			if this.parser.token.Type == lex.TokenComma {

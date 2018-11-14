@@ -103,7 +103,7 @@ class ExpressionCheckLeftValue {
                         errs.append(new error(sprintf("%s '%s.%s' is private",
                             e.pos.errMsgPrefix(), object.Package.name, selection.name)))
                     }
-                    selection.PackageVariable = v
+                    selection.packageVariable = v
                     result = v.Type.Clone()
                     result.pos = e.pos
                     e.value = result

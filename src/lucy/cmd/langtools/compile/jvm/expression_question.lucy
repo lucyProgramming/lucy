@@ -19,7 +19,7 @@ class BuildExpressionQuestion {
         context Context,
         state StackMapState) -> (maxStack char) {
         question := e.data.(ast.ExpressionQuestion)
-        maxStack = this.eb.build(c, code, question.Selection, context, state)
+        maxStack = this.eb.build(c, code, question.selection, context, state)
         falseExit := new cg.Exit(cg.OP_ifeq, code)
         //true part
         stack := this.eb.build(c, code, question.True, context, state)

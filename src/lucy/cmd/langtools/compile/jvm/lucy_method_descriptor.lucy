@@ -5,20 +5,20 @@ public class LucyMethodSignature {
 
 	
 	static fn Need(ft ast.FunctionType) ->(n bool)  {
-		for _, v := range ft.ParameterList {
+		for _, v := range ft.parameterList {
 			if LucyFieldSignature.Need(v.Type) {
 				return true
 			}
 		}
-		if ft.VArgs != null && LucyFieldSignature.Need(ft.VArgs.Type) {
+		if ft.vArgs != null && LucyFieldSignature.Need(ft.vArgs.Type) {
 			return true
 		}
-		for _, v := range ft.ReturnList {
+		for _, v := range ft.returnList {
 			if LucyFieldSignature.Need(v.Type) {
 				return true
 			}
 		}
-		if len(ft.ReturnList) > 1 {
+		if len(ft.returnList) > 1 {
 			return true
 		}
 		return false
@@ -26,18 +26,18 @@ public class LucyMethodSignature {
 
 	static fn Encode(ft ast.FunctionType) -> (descriptor string) {
 		descriptor = "("
-		for _, v := range ft.ParameterList {
+		for _, v := range ft.parameterList {
 			descriptor += LucyFieldSignature.Encode(v.Type)
 		}
-		if ft.VArgs != null {
-			descriptor += LucyFieldSignature.Encode(ft.VArgs.Type)
+		if ft.vArgs != null {
+			descriptor += LucyFieldSignature.Encode(ft.vArgs.Type)
 		}
 		descriptor += ")"
 		if ft.VoidReturn() {
 			descriptor += "V"
 		} else {
 			descriptor += "("
-			for _, v := range ft.ReturnList {
+			for _, v := range ft.returnList {
 				descriptor += LucyFieldSignature.Encode(v.Type)
 			}
 			descriptor += ")"
@@ -48,10 +48,10 @@ public class LucyMethodSignature {
 	//rewrite types
 	public static fn Decode(ft ast.FunctionType, bs []byte)-> (bsSliced []byte,err  error) {
 		bs = bs[1:] // skip (
-		if len(ft.ParameterList) > 0 {
-			ft.ParameterList = null
+		if len(ft.parameterList) > 0 {
+			ft.parameterList = null
 		}
-		ft.ParameterList = []ast.Variable{}
+		ft.parameterList = []ast.Variable{}
 		for bs[0] != ')' {
 			var t ast.Type
 			bs, t, err = LucyFieldSignature.Decode(bs)
@@ -60,7 +60,7 @@ public class LucyMethodSignature {
 			}
 			vd := new ast.Variable()
 			vd.Type = t
-			ft.ParameterList.append(vd)
+			ft.parameterList.append(vd)
 		}
 		if bs[0] != ')' {
 			return bs, new error(sprintf("function type format wrong"))
@@ -68,7 +68,7 @@ public class LucyMethodSignature {
 		bs = bs[1:] // skip )
 		if bs[0] == '(' {
 			bs = bs[1:]
-			ft.ReturnList = []ast.Variable{}
+			ft.returnList = []ast.Variable{}
 			for bs[0] != ')' {
 				v := new ast.Variable()
 				var t ast.Type
@@ -77,16 +77,16 @@ public class LucyMethodSignature {
 					return bs, err
 				}
 				v.Type = t
-				ft.ReturnList.append(v)
+				ft.returnList.append(v)
 			}
 			bs = bs[1:] // skip )
 		} else if bs[0] == 'V' {
 			bs = bs[1:] // skip V
-			ft.ReturnList = new []ast.Variable(1)
-			ft.ReturnList[0] = new ast.Variable()
-			ft.ReturnList[0].name = "returnValue"
-			ft.ReturnList[0].Type = new ast.Type()
-			ft.ReturnList[0].Type.Type = ast.VariableTypeVoid
+			ft.returnList = new []ast.Variable(1)
+			ft.returnList[0] = new ast.Variable()
+			ft.returnList[0].name = "returnValue"
+			ft.returnList[0].Type = new ast.Type()
+			ft.returnList[0].Type.Type = ast.VariableTypeVoid
 		} else {
 			return bs, new error(sprintf("function type format wrong"))
 		}

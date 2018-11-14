@@ -75,7 +75,7 @@ class BuildForRangeMap {
         if 3 > maxStack {
             maxStack = 3
         }
-        var autoVar AutoVariableForRangeMap
+        var autoVar  = new AutoVariableForRangeMap()
         {
             autoVar.KeySetsLength = code.maxLocals
             code.maxLocals++

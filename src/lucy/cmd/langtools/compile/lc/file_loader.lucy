@@ -157,6 +157,9 @@ class FileLoader implements ast.LoadImport{
             if astClass.name != ast.JavaRootClass {
                 nameIndex = binary.BigEndian.getChar(c.ConstPool[c.superClass].info)
                 astClass.superClassName = new ast.NameWithPos(string(c.ConstPool[nameIndex].info) , null)
+                astClass.superClass = new ast.Class()
+                astClass.superClass.notImportedYet = true
+                astClass.superClass.name = astClass.superClassName.name
             }
         }
         this.loadInterfaces(astClass, c)
@@ -191,12 +194,12 @@ class FileLoader implements ast.LoadImport{
                 parseMethodParameter(c, t[0].info, m.Function)
             }
             if (v.accessFlags & cg.AccMethodVarargs) != 0 {
-                m.Function.Type.VArgs = m.Function.Type.ParameterList[len(m.Function.Type.ParameterList)-1]
-                if m.Function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
+                m.Function.Type.vArgs = m.Function.Type.parameterList[len(m.Function.Type.parameterList)-1]
+                if m.Function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
                     panic("variable args is not array")
                 }
-                m.Function.Type.VArgs.Type.isVariableArgs = true
-                m.Function.Type.ParameterList = m.Function.Type.ParameterList[:len(m.Function.Type.ParameterList)-1]
+                m.Function.Type.vArgs.Type.isVariableArgs = true
+                m.Function.Type.parameterList = m.Function.Type.parameterList[:len(m.Function.Type.parameterList)-1]
             }
             if astClass.methods[m.Function.name] == null {
                 astClass.methods[m.Function.name] = []ast.ClassMethod{m}
@@ -265,13 +268,13 @@ class FileLoader implements ast.LoadImport{
                     panic(err)
                 }
                 if f.Type.Type == ast.VariableTypeFunction && d.methodAccessFlag&cg.AccMethodVarargs != 0 {
-                    if f.Type.functionType.ParameterList[len(f.Type.functionType.ParameterList)-1].Type.Type !=
+                    if f.Type.functionType.parameterList[len(f.Type.functionType.parameterList)-1].Type.Type !=
                         ast.VariableTypeJavaArray {
                         panic("not a java array")
                     }
-                    f.Type.functionType.VArgs = f.Type.functionType.ParameterList[len(f.Type.functionType.ParameterList)-1]
-                    f.Type.functionType.VArgs.Type.isVariableArgs = true
-                    f.Type.functionType.ParameterList = f.Type.functionType.ParameterList[:len(f.Type.functionType.ParameterList)-1]
+                    f.Type.functionType.vArgs = f.Type.functionType.parameterList[len(f.Type.functionType.parameterList)-1]
+                    f.Type.functionType.vArgs.Type.isVariableArgs = true
+                    f.Type.functionType.parameterList = f.Type.functionType.parameterList[:len(f.Type.functionType.parameterList)-1]
                 }
             }
             if f.Type.Type == ast.VariableTypeEnum {
@@ -311,12 +314,12 @@ class FileLoader implements ast.LoadImport{
             }
             loadEnumForFunction(m.Function)
             if (v.accessFlags & cg.AccMethodVarargs) != 0 {
-                m.Function.Type.VArgs = m.Function.Type.ParameterList[len(m.Function.Type.ParameterList)-1]
-                if m.Function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
+                m.Function.Type.vArgs = m.Function.Type.parameterList[len(m.Function.Type.parameterList)-1]
+                if m.Function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
                     panic("variable args is not array")
                 }
-                m.Function.Type.VArgs.Type.isVariableArgs = true
-                m.Function.Type.ParameterList = m.Function.Type.ParameterList[:len(m.Function.Type.ParameterList)-1]
+                m.Function.Type.vArgs.Type.isVariableArgs = true
+                m.Function.Type.parameterList = m.Function.Type.parameterList[:len(m.Function.Type.parameterList)-1]
             }
             if astClass.methods[m.Function.name] == null {
                 astClass.methods[m.Function.name] = []ast.ClassMethod{m}
@@ -416,15 +419,15 @@ class FileLoader implements ast.LoadImport{
                         panic(err)
                     }
                     if vd.Type.Type == ast.VariableTypeFunction && d.methodAccessFlag&cg.AccMethodVarargs != 0 {
-                        if vd.Type.functionType.ParameterList[len(vd.Type.functionType.ParameterList)-1].Type.Type !=
+                        if vd.Type.functionType.parameterList[len(vd.Type.functionType.parameterList)-1].Type.Type !=
                             ast.VariableTypeJavaArray {
                             panic("not a java array")
                         }
-                        vd.Type.functionType.VArgs =
-                            vd.Type.functionType.ParameterList[len(vd.Type.functionType.ParameterList)-1]
-                        vd.Type.functionType.VArgs.Type.isVariableArgs = true
-                        vd.Type.functionType.ParameterList =
-                            vd.Type.functionType.ParameterList[:len(vd.Type.functionType.ParameterList)-1]
+                        vd.Type.functionType.vArgs =
+                            vd.Type.functionType.parameterList[len(vd.Type.functionType.parameterList)-1]
+                        vd.Type.functionType.vArgs.Type.isVariableArgs = true
+                        vd.Type.functionType.parameterList =
+                            vd.Type.functionType.parameterList[:len(vd.Type.functionType.parameterList)-1]
                     }
                 }
                 if typ.Type == ast.VariableTypeEnum {
@@ -472,12 +475,12 @@ class FileLoader implements ast.LoadImport{
             }
 
             if (function.accessFlags & cg.AccMethodVarargs) != 0 {
-                function.Type.VArgs = function.Type.ParameterList[len(function.Type.ParameterList)-1]
-                if function.Type.VArgs.Type.Type != ast.VariableTypeJavaArray {
+                function.Type.vArgs = function.Type.parameterList[len(function.Type.parameterList)-1]
+                if function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
                     panic("variable args is not array")
                 }
-                function.Type.VArgs.Type.isVariableArgs = true
-                function.Type.ParameterList = function.Type.ParameterList[:len(function.Type.ParameterList)-1]
+                function.Type.vArgs.Type.isVariableArgs = true
+                function.Type.parameterList = function.Type.parameterList[:len(function.Type.parameterList)-1]
             }
 
             function.entrance = new cg.MethodHighLevel()
@@ -488,8 +491,8 @@ class FileLoader implements ast.LoadImport{
             pack.block.Functions[name] = function
         }
 
-        if pack.block.TypeAliases == null {
-            pack.block.TypeAliases = new map{string->ast.Type}()
+        if pack.block.typeAliases == null {
+            pack.block.typeAliases = new map{string->ast.Type}()
         }
         for _, v := range c.GetAttributeByName(cg.AttributeNameLucyTypeAlias) {
             attr := new cg.AttributeLucyTypeAlias()
@@ -502,7 +505,7 @@ class FileLoader implements ast.LoadImport{
             alias.name = name
             alias.comment = attr.comment
             typ.alias = alias
-            pack.block.TypeAliases[name] = typ
+            pack.block.typeAliases[name] = typ
             if typ.Type == ast.VariableTypeEnum {
                 loadEnumForVariableType(typ)
             }
@@ -575,6 +578,7 @@ class FileLoader implements ast.LoadImport{
     fn  loadJavaPackage(r Resource) -> (p ast.Package) {
         fis := new io.File(r.realPath).list()
         p = new ast.Package()
+        p.name = r.name
         p.block.Classes = new map {string -> ast.Class}()
         for _, v := range fis {
             if v.endsWith(".class") == false {

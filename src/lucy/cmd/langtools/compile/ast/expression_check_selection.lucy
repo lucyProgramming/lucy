@@ -62,7 +62,7 @@ class ExpressionCheckSelection {
                 errs.append(err)
                 return null
             }
-            if v := d.(Variable) ;v != null {
+            if v ,ok := d.(Variable) ;ok {
             	result := v.Type.Clone()
                 result.pos = e.pos
                 if v.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
@@ -70,10 +70,10 @@ class ExpressionCheckSelection {
                         e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
                 }
-                selection.PackageVariable = v
+                selection.packageVariable = v
                 return result
             }
-            if  c := d.(Constant) ; c != null {
+            if  c,ok := d.(Constant) ; ok {
 				e.fromConst(c) //
                 result := c.Type.Clone()
                 result.pos = e.pos
@@ -84,7 +84,7 @@ class ExpressionCheckSelection {
                 }
                 return result
             }
-            if c := d.(Class) ; c != null {
+            if c ,ok:= d.(Class) ; ok {
 				result := new Type()
                 result.pos = e.pos
                 result.Type = VariableTypeClass
@@ -96,7 +96,7 @@ class ExpressionCheckSelection {
                 }
                 return result
             }
-            if n := d.(EnumName) ; n != null {
+            if n ,ok:= d.(EnumName) ; ok {
             	if n.Enum.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
                     err := new error(sprintf("%s enum '%s' is not public",
                         e.pos.errMsgPrefix(), selection.name))
@@ -110,7 +110,7 @@ class ExpressionCheckSelection {
                 selection.PackageEnumName = n
                 return result
             }
-            if f := d.(Function) ; f != null {
+            if f,ok := d.(Function) ; ok {
 				if f.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
                     err := new error(sprintf("%s function '%s' is not public",
                         e.pos.errMsgPrefix(), selection.name))

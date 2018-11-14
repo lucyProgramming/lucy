@@ -30,7 +30,7 @@ class BuildReturn {
             code.codeLength++
             return
         }
-        if len(context.function.Type.ReturnList) == 1 {
+        if len(context.function.Type.returnList) == 1 {
             if len(statementReturn.expressions) > 0 {
                 maxStack = this.eb.build(c, code, statementReturn.expressions[0], context, state)
             }
@@ -38,7 +38,7 @@ class BuildReturn {
             if len(statementReturn.defers) > 0 {
                 //return value  is on stack,  store to local var
                 if len(statementReturn.expressions) > 0 {
-                    this.eb.storeLocalVar(c, code, context.function.Type.ReturnList[0])
+                    this.eb.storeLocalVar(c, code, context.function.Type.returnList[0])
                 }
                 stack := this.buildDefersForReturn(c, code, context, state, statementReturn)
                 if stack > maxStack {
@@ -46,14 +46,14 @@ class BuildReturn {
                 }
                 //restore the stack
                 if len(statementReturn.expressions) > 0 { //restore stack
-                    this.eb.loadLocalVar(c, code, context.function.Type.ReturnList[0])
+                    this.eb.loadLocalVar(c, code, context.function.Type.returnList[0])
                 }
             }
             // in this case,load local var is not under exception handle,should be ok
             if len(statementReturn.expressions) == 0 {
-                this.eb.loadLocalVar(c, code, context.function.Type.ReturnList[0])
+                this.eb.loadLocalVar(c, code, context.function.Type.returnList[0])
             }
-            switch context.function.Type.ReturnList[0].Type.Type {
+            switch context.function.Type.returnList[0].Type.Type {
             case ast.VariableTypeBool ,ast.VariableTypeByte,ast.VariableTypeShort,
                 ast.VariableTypeEnum,ast.VariableTypeChar,ast.VariableTypeInt:
                 code.codes[code.codeLength] = cg.OP_ireturn
@@ -114,10 +114,10 @@ class BuildReturn {
         if context.function.Type.VoidReturn() { // when has no return,should not call this function
             return
         }
-        if len(context.function.Type.ReturnList) == 1 {
-            this.eb.loadLocalVar(c, code, context.function.Type.ReturnList[0])
-            maxStack = jvmSlotSize(context.function.Type.ReturnList[0].Type)
-            switch context.function.Type.ReturnList[0].Type.Type {
+        if len(context.function.Type.returnList) == 1 {
+            this.eb.loadLocalVar(c, code, context.function.Type.returnList[0])
+            maxStack = jvmSlotSize(context.function.Type.returnList[0].Type)
+            switch context.function.Type.returnList[0].Type.Type {
             case ast.VariableTypeBool , ast.VariableTypeByte ,ast.VariableTypeShort,
               ast.VariableTypeChar, ast.VariableTypeEnum ,ast.VariableTypeInt   :
                 code.codes[code.codeLength] = cg.OP_ireturn
@@ -135,13 +135,13 @@ class BuildReturn {
         }
         //multi returns
         //new a array list
-        loadInt32(c, code, int(len(context.function.Type.ReturnList)))
+        loadInt32(c, code, int(len(context.function.Type.returnList)))
         code.codes[code.codeLength] = cg.OP_anewarray
         c.insertClassConst(javaRootClass, code.codes[code.codeLength+1:code.codeLength+3])
         code.codeLength += 3
         maxStack = 1 // max stack is
         index := int(0)
-        for _, v := range context.function.Type.ReturnList {
+        for _, v := range context.function.Type.returnList {
             currentStack := char(1)
             code.codes[code.codeLength] = cg.OP_dup
             code.codeLength++
@@ -228,7 +228,7 @@ class BuildReturn {
                 code.codeLength++
             } else {
                 //exception that have been handled
-                if len(statementReturn.expressions) > 0 && len(context.function.Type.ReturnList) > 1 {
+                if len(statementReturn.expressions) > 0 && len(context.function.Type.returnList) > 1 {
                     //load when function have multi returns if read to end
                     copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.multiValueVarOffset))
                     exit := new cg.Exit(cg.OP_ifnonnull, code)

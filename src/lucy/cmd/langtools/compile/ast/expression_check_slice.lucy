@@ -38,8 +38,8 @@ class ExpressionCheckSlice {
 				}
 			}
 		}
-		if on.End != null {
-			endType, es := on.End.checkSingleValueContextExpression(block)
+		if on.end != null {
+			endType, es := on.end.checkSingleValueContextExpression(block)
 			errs.appendAll(es)
 			if endType != null {
 				if endType.isInteger() == false {
@@ -47,10 +47,10 @@ class ExpressionCheckSlice {
 						endType.pos.errMsgPrefix(), endType.typeString())))
 				} else {
 					if endType.Type == VariableTypeLong {
-						on.End.convertToNumberType(VariableTypeInt)
+						on.end.convertToNumberType(VariableTypeInt)
 					}
-					if on.End.isLiteral() {
-						endIndexValue := on.End.getLongValue()
+					if on.end.isLiteral() {
+						endIndexValue := on.end.getLongValue()
 						if endIndexValue < 0 {
 							errs . append(new error( sprintf("%s endIndex '%d' is negative",
 									endType.pos.errMsgPrefix(), endIndexValue)))

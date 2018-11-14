@@ -11,7 +11,7 @@ class BuildinFunctionSprintf {
         this.eb = eb
     }
     
-    fn build(
+    fn buildSprintf(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
         e ast.Expression,
@@ -39,7 +39,7 @@ class BuildinFunctionSprintf {
         objectArray.array = state.newObjectVariableType(javaRootClass)
         state.pushStack(c, objectArray)
         index := int(0)
-        for _, v := range call.Args {
+        for _, v := range call.args {
             currentStack = 2
             code.codes[code.codeLength] = cg.OP_dup
             code.codeLength++

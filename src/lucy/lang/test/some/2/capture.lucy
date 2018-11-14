@@ -32,7 +32,6 @@ CaptureHandler := fn(c Capture) {
     c := new Capture(CaptureHandler)
     c.handler(c)
 	c.handler = fn(c Capture) {
-		blackHole(c)
 	}
 	c.handler(c)
 }

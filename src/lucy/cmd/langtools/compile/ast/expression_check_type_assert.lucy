@@ -29,7 +29,7 @@ class ExpressionCheckTypeAssert {
 			return null
 		}
 		if len(e.lefts) > 1 {
-			assertion.MultiValueContext = true
+			assertion.multiValueContext = true
 			valueTypes = new []Type(2)
 			valueTypes[0] = assertion.Type.Clone()
 			valueTypes[0].pos = e.pos

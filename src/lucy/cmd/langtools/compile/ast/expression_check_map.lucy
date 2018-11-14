@@ -10,7 +10,7 @@ class ExpressionCheckMap {
 		var mapK Type
 		var mapV Type
 		noType := m.Type == null
-		if noType && len(m.KeyValuePairs) == 0 {
+		if noType && len(m.keyValuePairs) == 0 {
 			errs.append(new error(sprintf("%s map literal has no type and no initiational values,"+
 					"cannot inference it`s type",
 					errMsgPrefix(e.pos))))
@@ -27,9 +27,9 @@ class ExpressionCheckMap {
 		longMap := new map { long -> Pos }  ()
 		doubleMap := new map { double -> Pos } ()
 		stringMap := new map { string-> Pos }()
-		for _, v := range m.KeyValuePairs {
+		for _, v := range m.keyValuePairs {
 			// map k
-			kType, es := v.Key.checkSingleValueContextExpression(block)
+			kType, es := v.key.checkSingleValueContextExpression(block)
 			errs.appendAll(es)
 			if kType != null {
 				if err := kType.rightValueValid(); err != null {
@@ -48,19 +48,19 @@ class ExpressionCheckMap {
 					if mapK.assignAble(errs, kType) == false {
 						if noType {
 							errs.append(new error(sprintf("%s mix '%s' and '%s' for map value",
-								errMsgPrefix(v.Key.pos),
+								errMsgPrefix(v.key.pos),
 								kType.typeString(), mapK.typeString())))
 						} else {
 							errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-								errMsgPrefix(v.Key.pos),
+								errMsgPrefix(v.key.pos),
 								kType.typeString(), mapK.typeString())))
 						}
 					}
 				}
 			}
 			if m.Type.Map.K != null &&
-				v.Key.isLiteral() &&
-				m.Type.Map.K.Type == v.Key.value.Type {
+				v.key.isLiteral() &&
+				m.Type.Map.K.Type == v.key.value.Type {
 				fn errMsg (pos Pos, first Pos, which string) -> (err error) {
 					errMsg := sprintf("%s  '%s' duplicate key,first declared at:\n",
 						pos.errMsgPrefix(), which)
@@ -69,25 +69,25 @@ class ExpressionCheckMap {
 				}
 				switch m.Type.Map.K.Type {
 				case VariableTypeByte ,VariableTypeChar , VariableTypeShort , VariableTypeInt , VariableTypeLong:
-					value := v.Key.longValue
+					value := v.key.longValue
 					if first := longMap[value]; first != null {
-						errs.append(errMsg(v.Key.pos, first, ""+value))
+						errs.append(errMsg(v.key.pos, first, ""+value))
 					} else {
-						longMap[value] = v.Key.pos
+						longMap[value] = v.key.pos
 					}
 				case VariableTypeFloat ,VariableTypeDouble :
-					value := v.Key.doubleValue
+					value := v.key.doubleValue
 					if first := doubleMap[value]; first != null {
-						errs.append(errMsg(v.Key.pos, first, value + ""))
+						errs.append(errMsg(v.key.pos, first, value + ""))
 					} else {
-						doubleMap[value] = v.Key.pos
+						doubleMap[value] = v.key.pos
 					}
 				case VariableTypeString:
-					value := v.Key.stringValue
+					value := v.key.stringValue
 					if first := stringMap[value]; first != null {
-						errs.append(errMsg(v.Key.pos, first, value))
+						errs.append(errMsg(v.key.pos, first, value))
 					} else {
-						stringMap[value] = v.Key.pos
+						stringMap[value] = v.key.pos
 					}
 				default:
 				}

@@ -148,7 +148,7 @@ public class  BuildPackage {
         }
     }
     fn mkGlobalTypeAlias() {
-        for name, v := range this.Package.block.TypeAliases {
+        for name, v := range this.Package.block.typeAliases {
             t := new cg.AttributeLucyTypeAlias()
             t.alias = LucyTypeAlias.Encode(name, v)
             if v.alias != null {
@@ -169,7 +169,7 @@ public class  BuildPackage {
             f.accessFlags |= cg.AccFieldVolatile
             if LucyFieldSignature.Need(v.Type) {
                 f.AttributeLucyFieldDescriptor = new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.Encode(v.Type) , 0 )
-                if v.Type.functionType.VArgs != null {
+                if v.Type.functionType.vArgs != null {
                     f.AttributeLucyFieldDescriptor.methodAccessFlag |=
                         cg.AccMethodVarargs
                 }
@@ -259,36 +259,7 @@ public class  BuildPackage {
         this.mainClass.appendMethod(trigger)
         this.mainClass.triggerPackageInitMethod = trigger
     }
-    /*
-    fn insertDefaultValue(c cg.ClassHighLevel, t ast.Type, v interface{}) -> (index char) {
-        switch t.Type {
-        case ast.VariableTypeBool:
-            if v.(bool) {
-                index = c.Class.insertIntConst(1)
-            } else {
-                index = c.Class.insertIntConst(0)
-            }
-        case ast.VariableTypeByte:
-            index = c.Class.insertIntConst(int(v.(long)))
-        case ast.VariableTypeShort:
-            index = c.Class.insertIntConst(int(v.(long)))
-        case ast.VariableTypeChar:
-            index = c.Class.insertIntConst(int(v.(long)))
-        case ast.VariableTypeInt:
-            index = c.Class.insertIntConst(int(v.(long)))
-        case ast.VariableTypeLong:
-            index = c.Class.insertLongConst(v.(long))
-        case ast.VariableTypeFloat:
-            index = c.Class.insertFloatConst(v.(float))
-        case ast.VariableTypeDouble:
-            index = c.Class.insertDoubleConst(v.(double))
-        case ast.VariableTypeString:
-            index = c.Class.insertStringConst(v.(string))
-        default:
-            panic("no match")
-        }
-        return
-    }*/
+
 
 
     fn buildClass(astClass ast.Class) -> (c cg.ClassHighLevel) {
@@ -375,7 +346,7 @@ public class  BuildPackage {
             method := new cg.MethodHighLevel()
             method.name = name
             method.accessFlags = vv.Function.accessFlags
-            if vv.Function.Type.VArgs != null {
+            if vv.Function.Type.vArgs != null {
                 method.accessFlags |= cg.AccMethodVarargs
             }
             if vv.isCompilerAuto {
@@ -436,7 +407,7 @@ public class  BuildPackage {
                 method.AttributeLucyMethodDescriptor = new cg.AttributeLucyMethodDescriptor()
                 method.AttributeLucyMethodDescriptor.descriptor = LucyMethodSignature.Encode(f.Type)
             }
-            if f.Type.VArgs != null {
+            if f.Type.vArgs != null {
                 method.accessFlags |= cg.AccMethodVarargs
             }
             ms[k] = method

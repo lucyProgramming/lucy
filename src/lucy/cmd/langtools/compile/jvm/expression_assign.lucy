@@ -22,8 +22,8 @@ class  BuildExpressionAssign {
 			state.popStack(len(state.stacks) - stackLength)
 		}
 		assign := e.data.(ast.ExpressionAssign)
-		left := assign.Lefts[0]
-		right := assign.Values[0]
+		left := assign.lefts[0]
+		right := assign.values[0]
 		var remainStack char
 		var op []byte
 		var leftValueKind LeftValueKind
@@ -63,16 +63,16 @@ class  BuildExpressionAssign {
 		context Context,
 		state StackMapState) -> (maxStack char) {
 		assign := e.data.(ast.ExpressionAssign)
-		if e.isStatementExpression == false || len(assign.Lefts) == 1 {
+		if e.isStatementExpression == false || len(assign.lefts) == 1 {
 			return this.buildExpressionAssign(c, code, e, context, state)
 		}
-		if len(assign.Values) == 1 {
-			maxStack = this.eb.build(c, code, assign.Values[0], context, state)
+		if len(assign.values) == 1 {
+			maxStack = this.eb.build(c, code, assign.values[0], context, state)
 		} else {
-			maxStack = this.eb.buildExpressions(c, code, assign.Values, context, state)
+			maxStack = this.eb.buildExpressions(c, code, assign.values, context, state)
 		}
 		autoVar := new MultiValueAutoVar(c, code, state)
-		for k, v := range assign.Lefts {
+		for k, v := range assign.lefts {
 			if v.isIdentifier(ast.UnderScore) {
 				continue
 			}

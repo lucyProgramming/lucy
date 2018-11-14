@@ -20,7 +20,7 @@ public class Class {
 	public pos                               Pos
 	public finalPos                          Pos // final pos
 	public isJava                            bool //class imported from CLASSPATH
-	public block                             Block
+	public block                             Block = new Block()
 	public accessFlags                       char
 	public fields                            map { string -> ClassField }
 	public methods                           map { string -> []ClassMethod }
@@ -125,8 +125,8 @@ public class Class {
         }
         method := new ClassMethod()
         method.Function = new Function()
-        method.Function.Type.ParameterList = new []Variable( 0)
-        method.Function.Type.ReturnList =  new []Variable( 0)
+        method.Function.Type.parameterList = new []Variable( 0)
+        method.Function.Type.returnList =  new []Variable( 0)
         f := method.Function
         f.pos = this.pos
         f.block.statements =new []Statement ( len(this.staticBlocks))
@@ -173,13 +173,13 @@ public class Class {
         for _, ms := range this.methods {
             for _, m := range ms {
                 if m.isAbstract() {
-                    for _, v := range m.Function.Type.ParameterList {
+                    for _, v := range m.Function.Type.parameterList {
                         if v.defaultValueExpression != null {
                             errs.append( new error(sprintf("%s abstract method parameter '%s' cannot have default value '%s'",
                                     errMsgPrefix(v.pos), v.name, v.defaultValueExpression.op)))
                         }
                     }
-                    for _, v := range m.Function.Type.ReturnList {
+                    for _, v := range m.Function.Type.returnList {
                         if v.defaultValueExpression != null {
                             errs.append(new error(sprintf("%s abstract method return variable '%s' cannot have default value '%s'",
                                     errMsgPrefix(v.pos), v.name, v.defaultValueExpression.op)))
@@ -190,7 +190,7 @@ public class Class {
                 m.Function.block.inheritedAttribute.Function = m.Function
                 m.Function.block.inheritedAttribute.classMethod = m
                 m.Function.checkParametersAndReturns(errs, false, m.isAbstract())
-                if len(m.Function.Type.TemplateNames) > 0 {
+                if len(m.Function.Type.templateNames) > 0 {
                     errs.append(new error(sprintf("%s cannot use template for method",
                         errMsgPrefix(m.Function.pos))))
                 }
@@ -343,12 +343,10 @@ public class Class {
         if this.name == JavaRootClass {
             return false, null
         }
-
         err = this.loadSuperClass(pos)
         if err != null {
             return false, err
         }
-
         if this.superClass == null {
             return false, null
         }
@@ -418,21 +416,20 @@ public class Class {
         if err != null {
             return null, false, err
         }
-        print(this.name , this.isJava)
         var args []Expression
         if newCase != null {
-            args = newCase.Args
+            args = newCase.args
         } else {
-            args = callFatherCase.Args
+            args = callFatherCase.args
         }
         for _, v := range this.methods[SpecialMethodInit] {
             var vArgs CallVariableArgs
             vArgs, err = v.Function.Type.fitArgs(pos, args, callArgs, v.Function)
             if err == null {
                 if newCase != null {
-                    newCase.VArgs = vArgs
+                    newCase.vArgs = vArgs
                 } else {
-                    callFatherCase.VArgs = vArgs
+                    callFatherCase.vArgs = vArgs
                 }
                 return []ClassMethod{v}, true, null
             } else {
@@ -579,7 +576,7 @@ public class Class {
                 if fromSub && m.ableAccessFromSubClass() == false {
                     continue
                 }
-                call.VArgs, err = m.Function.Type.fitArgs(pos, call.Args, callArgTypes, null)
+                call.vArgs, err = m.Function.Type.fitArgs(pos, call.args, callArgTypes, null)
                 if err == null {
                     return []ClassMethod{m}, true, null
                 } else {
@@ -627,7 +624,7 @@ public class Class {
                 if fromSub && f.ableAccessFromSubClass() == false {
                     //cannot access this field
                 } else {
-                    call.VArgs, err = this.fields[call.name].Type.functionType.fitArgs(pos, call.Args,
+                    call.vArgs, err = this.fields[call.name].Type.functionType.fitArgs(pos, call.args,
                         callArgTypes, null)
                     if err == null {
                         fieldMethodHandler[0] = f
@@ -646,7 +643,7 @@ public class Class {
                         return null, false, new error(sprintf("%s method '%s' not found",
                             pos.errMsgPrefix(), call.name))
                     }
-                    call.VArgs, err = m.Function.Type.fitArgs(pos, call.Args,
+                    call.vArgs, err = m.Function.Type.fitArgs(pos, call.args,
                         callArgTypes, m.Function)
                     if err == null {
                         return []ClassMethod{m}, true, null
@@ -683,7 +680,7 @@ public class Class {
                     //cannot access from sub
                     continue
                 }
-                call.VArgs, err = m.Function.Type.fitArgs(pos, call.Args, callArgTypes, m.Function)
+                call.vArgs, err = m.Function.Type.fitArgs(pos, call.args, callArgTypes, m.Function)
                 if err == null {
                     return []ClassMethod{m}, true, null
                 } else {
@@ -1089,10 +1086,10 @@ public class Class {
                     continue
                 }
                 bin := new ExpressionBinary()
-                bin.Right = new Expression()
-                bin.Right.Type = ExpressionTypeList
-                bin.Right.op =  "list"
-                bin.Right.data =  []Expression{v.defaultValueExpression}
+                bin.right = new Expression()
+                bin.right.Type = ExpressionTypeList
+                bin.right.op =  "list"
+                bin.right.data =  []Expression{v.defaultValueExpression}
                 {
                     selection := new ExpressionSelection()
                     selection.Expression = new Expression()
@@ -1107,9 +1104,9 @@ public class Class {
                     left.data =  selection
                     left.op =   "selection"
                     left.value = v.Type
-                    bin.Left = new Expression()
-                    bin.Left.Type = ExpressionTypeList
-                    bin.Left.data = []Expression{left}
+                    bin.left = new Expression()
+                    bin.left.Type = ExpressionTypeList
+                    bin.left.data = []Expression{left}
                 }
                 e := new Expression()
                 e.Type =  ExpressionTypeAssign
@@ -1167,7 +1164,7 @@ public class Class {
                     }
                     if isConstruction && method.Function.Type.VoidReturn() == false {
                         errs.append( new error(sprintf("%s construction method expect no return values",
-                            errMsgPrefix(method.Function.Type.ParameterList[0].pos))))
+                            errMsgPrefix(method.Function.Type.parameterList[0].pos))))
                     }
                     method.Function.block.inheritedAttribute.isConstructionMethod = isConstruction
                     method.Function.checkBlock(errs)

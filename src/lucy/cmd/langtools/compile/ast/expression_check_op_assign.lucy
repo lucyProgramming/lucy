@@ -3,16 +3,16 @@ class ExpressionCheckOpAssign {
 
 	static fn check(e Expression , block Block, errs []error) -> (valueType Type) {
 		bin := e.data.(ExpressionBinary)
-		if bin.Left.Type == ExpressionTypeList {
-			list := bin.Left.data.([]Expression)
+		if bin.left.Type == ExpressionTypeList {
+			list := bin.left.data.([]Expression)
 			if len(list) > 1 {
 				errs.append(new error(sprintf("%s expect 1 expression on left",
 						errMsgPrefix(e.pos))))
 			}
-			bin.Left = list[0]
+			bin.left = list[0]
 		}
-		left := bin.Left.getLeftValue(block, errs)
-		right, es := bin.Right.checkSingleValueContextExpression(block)
+		left := bin.left.getLeftValue(block, errs)
+		right, es := bin.right.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if left == null || right == null {
 			return
@@ -23,18 +23,18 @@ class ExpressionCheckOpAssign {
 			errs.append(err)
 			return valueType
 		}
-		if bin.Left.Type == ExpressionTypeIdentifier &&
+		if bin.left.Type == ExpressionTypeIdentifier &&
 			e.isStatementExpression == false {
 			/*
 				var a = 1
 				print(a += 1)
 			*/
-			t := bin.Left.data.(ExpressionIdentifier)
+			t := bin.left.data.(ExpressionIdentifier)
 			if t.Variable != null {
 				t.Variable.used = true
 			}
 		}
-		convertExpressionToNeed(bin.Right, left, right)
+		convertExpressionToNeed(bin.right, left, right)
 		/*
 			var  s string
 			s += "11111111"
@@ -54,12 +54,12 @@ class ExpressionCheckOpAssign {
 			if left.assignAble(errs, right) {
 				return
 			}
-			if left.isInteger() && right.isInteger() && bin.Right.isLiteral() {
-				bin.Right.convertToNumberType(left.Type)
+			if left.isInteger() && right.isInteger() && bin.right.isLiteral() {
+				bin.right.convertToNumberType(left.Type)
 				return
 			}
-			if left.isFloat() && right.isFloat() && bin.Right.isLiteral() {
-				bin.Right.convertToNumberType(left.Type)
+			if left.isFloat() && right.isFloat() && bin.right.isLiteral() {
+				bin.right.convertToNumberType(left.Type)
 				return
 			}
 		}
@@ -74,7 +74,7 @@ class ExpressionCheckOpAssign {
 			e.Type == ExpressionTypeRshAssign {
 			if left.isInteger() && right.isInteger() {
 				if right.Type == VariableTypeLong {
-					bin.Right.convertToNumberType(VariableTypeInt)
+					bin.right.convertToNumberType(VariableTypeInt)
 				}
 				return
 			}

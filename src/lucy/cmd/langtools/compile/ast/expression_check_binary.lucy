@@ -2,9 +2,9 @@ class ExpressionCheckBinary {
 	
 	static fn check(e Expression , block Block, errs []error) -> (result Type) {
 		bin := e.data.(ExpressionBinary)
-		left, es := bin.Left.checkSingleValueContextExpression(block)
+		left, es := bin.left.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
-		right, es := bin.Right.checkSingleValueContextExpression(block)
+		right, es := bin.right.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if left != null {
 			if err := left.rightValueValid(); err != null {
@@ -73,7 +73,7 @@ class ExpressionCheckBinary {
 				errs.append(e.binaryWrongOpErr())
 			}
 			if right.Type == VariableTypeLong {
-				bin.Right.convertToNumberType(VariableTypeInt)
+				bin.right.convertToNumberType(VariableTypeInt)
 			}
 			result = left.Clone()
 			result.pos = e.pos
@@ -106,14 +106,18 @@ class ExpressionCheckBinary {
 					(left.isFloat() && right.isFloat()) {
 					if left.assignAble(errs, right) == false {
 						if left.Type < right.Type {
-							bin.Left.convertToNumberType(right.Type)
+							bin.left.convertToNumberType(right.Type)
 						} else {
-							bin.Right.convertToNumberType(left.Type)
+							bin.right.convertToNumberType(left.Type)
 						}
 					}
 				} else {
 					errs.append(e.binaryWrongOpErr())
 				}
+			case VariableTypeString:
+			    if left.assignAble(errs, right) == false {
+                    errs.append(e.binaryWrongOpErr())
+                }
 			case left.isPointer():
 				if left.assignAble(errs, right) == false || e.isEqOrNe() == false {
 					errs.append(e.binaryWrongOpErr())
@@ -157,9 +161,9 @@ class ExpressionCheckBinary {
 				(left.isFloat() && right.isFloat()) {
 				if left.assignAble(errs, right) == false {
 					if left.Type < right.Type {
-						bin.Left.convertToNumberType(right.Type)
+						bin.left.convertToNumberType(right.Type)
 					} else {
-						bin.Right.convertToNumberType(left.Type)
+						bin.right.convertToNumberType(left.Type)
 					}
 				}
 			} else {

@@ -26,7 +26,7 @@ public class StatementReturn   {
 			return errs
 		}
 		returnValueTypes := checkExpressions(b, this.expressions, errs, false)
-		rs := b.inheritedAttribute.Function.Type.ReturnList
+		rs := b.inheritedAttribute.Function.Type.returnList
 		pos := this.expressions[len(this.expressions)-1].pos
 		if len(returnValueTypes) < len(rs) {
 			errs.append(new error(sprintf("%s too few arguments to return", pos.errMsgPrefix())))

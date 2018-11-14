@@ -1,6 +1,6 @@
 import "lucy/lang"
 
-fn testT <T> (  t T) ->(typeString string) {
+fn testT <T> ( t T) ->(typeString string) {
 	when T {
 		case bool:
 			typeString = "bool"
@@ -20,8 +20,8 @@ fn testT <T> (  t T) ->(typeString string) {
 			typeString = "[]Lucy"
 		case Lucy:
 			typeString = "Lucy"
-		default:
-			panic(new error("no match"))
+		//default:
+			///panic(new error("no match"))
 	}
 }
 

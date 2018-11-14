@@ -11,7 +11,7 @@ class BuildExpressionVarAssign {
         this.eb = eb
     }
     
-    fn build(
+    fn buildVarAssign(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
         e ast.Expression,
@@ -22,8 +22,8 @@ class BuildExpressionVarAssign {
         defer   {
             state.popStack(len(state.stacks) - stackLength)
         }
-        if len(vs.Lefts) == 1 {
-            v := vs.Lefts[0].data.(ast.ExpressionIdentifier).Variable
+        if len(vs.lefts) == 1 {
+            v := vs.lefts[0].data.(ast.ExpressionIdentifier).Variable
             //print(v.name, v.pos.errMsgPrefix())
             currentStack := char(0)
             if v.beenCapturedAsLeftValue > 0 {
@@ -61,7 +61,7 @@ class BuildExpressionVarAssign {
             maxStack = this.eb.buildExpressions(c, code, vs.InitValues, context, state)
         }
         autoVar := new MultiValueAutoVar(c, code, state)
-        for k, v := range vs.Lefts {
+        for k, v := range vs.lefts {
             if v.Type != ast.ExpressionTypeIdentifier {
                 stack, remainStack, ops, _ := this.eb.BuildExpressionLeftValue.getLeftValue(c, code, v, context, state)
                 if stack > maxStack {

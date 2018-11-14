@@ -8,7 +8,7 @@ public class Package {
 	public name                         string
 	public loadedPackages               map { string -> Package }
 	loadedClasses                map { string -> Class }
-	public block                        Block // package always have a default block
+	public block                        Block = new Block() // package always have a default block
 	files                        map { string -> SourceFile}
 	public initFunctions                []Function
 	public nErrors2Stop                 int // number of errors should stop compile
@@ -17,7 +17,6 @@ public class Package {
 	unUsedPackage                map{string ->  Import }
 	statementLevelFunctions      []Function
 	statementLevelClass          []Class
-
 	fn isSame(compare Package) -> (is bool) {
 		return this.name == compare.name
 	}
@@ -39,7 +38,7 @@ public class Package {
 			v.isBuildIn = true
 			v.loadedFromCorePackage = true
 		}
-		for _, v := range this.block.TypeAliases {
+		for _, v := range this.block.typeAliases {
 			v.isBuildIn = true
 		}
 	}
@@ -112,7 +111,7 @@ public class Package {
 			}
 			if t,ok := v.Node.(Function) ; ok {
 				t.isGlobal = true
-				err := this.block.Insert(t.name, t.pos, t)
+				err := this.block.insert(t.name, t.pos, t)
 				if err != null {
 					errs.append(err)
 				}
@@ -120,7 +119,7 @@ public class Package {
 			}
 			if t ,ok := v.Node.(Enum) ; ok {
 				t.isGlobal = true
-				err := this.block.Insert(t.name, t.pos,t)
+				err := this.block.insert(t.name, t.pos,t)
 				if err != null {
 					errs.append(err)
 				}
@@ -128,7 +127,7 @@ public class Package {
 			}
 			if t,ok := v.Node.(Class) ; ok {
 				t.isGlobal = true
-				err := this.block.Insert(t.name, t.pos, t)
+				err := this.block.insert(t.name, t.pos, t)
 				if err != null {
 					errs.append(err)
 				}
@@ -136,7 +135,7 @@ public class Package {
 			}
 
 			if t,ok := v.Node.(TypeAlias) ; ok {
-				err := this.block.Insert(t.name, t.pos, t)
+				err := this.block.insert(t.name, t.pos, t)
 				if err != null {
 					errs.append(err)
 				}
@@ -144,14 +143,14 @@ public class Package {
 			}
 			if t,ok := v.Node.(Constant) ; ok{
 				t.isGlobal = true
-				err := this.block.Insert(t.name, t.pos, t)
+				err := this.block.insert(t.name, t.pos, t)
 				if err != null {
 					errs.append(err)
 				}
 				continue
 			}
 			if t ,ok:= v.Node.(Import) ; ok {
-				if t.alias != null && t.alias == UnderScore{
+				if t.accessName != null && t.accessName == UnderScore{
 					if this.unUsedPackage == null {
 						this.unUsedPackage = new map { string -> Import}()
 					}
@@ -209,7 +208,7 @@ public class Package {
 			v.name = this.name + "/" + v.name
 			this.errors.appendAll(v.check())
 		}
-		for _, v := range this.block.TypeAliases {
+		for _, v := range this.block.typeAliases {
 			err := v.resolve(this.block)
 			if err != null {
 				this.errors.append(err)
@@ -224,9 +223,9 @@ public class Package {
 			v.checkParametersAndReturns(this.errors, false, false)
 			if v.isGlobalMain() {
 				defineMainOK := false
-				if len(v.Type.ParameterList) == 1 {
-					defineMainOK = v.Type.ParameterList[0].Type.Type == VariableTypeArray &&
-						v.Type.ParameterList[0].Type.array.Type == VariableTypeString
+				if len(v.Type.parameterList) == 1 {
+					defineMainOK = v.Type.parameterList[0].Type.Type == VariableTypeArray &&
+						v.Type.parameterList[0].Type.array.Type == VariableTypeString
 				}
 				if defineMainOK == false {
 					this.errors.append(new error(sprintf("%s function '%s' expect declared as 'main(args []string)'",
@@ -330,7 +329,7 @@ public class Package {
 			return t, null
 		}
 		t, err := ImportsLoader.LoadImport(resource)
-		if pp, ok := t.(Package); ok && pp != null {
+		if pp, ok := t.(Package); ok {
 			this.loadedPackages[resource] = pp
 			this.mkClassCache(pp)
 			if pp.name == common.CorePackage {

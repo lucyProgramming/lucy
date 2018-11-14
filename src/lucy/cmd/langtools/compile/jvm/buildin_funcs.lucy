@@ -14,7 +14,7 @@ class BuildinFunctionCall {
     BuildinFunctionPrint BuildinFunctionPrint
     BuildinFunctionPrintf BuildinFunctionPrintf
     BuildinFunctionSprintf BuildinFunctionSprintf
-
+    BuildinFunctionBlackHole BuildinFunctionBlackHole
 
     fn BuildinFunctionCall(eb BuildExpression){
         this.super()
@@ -26,6 +26,8 @@ class BuildinFunctionCall {
         this.BuildinFunctionPrintf = new BuildinFunctionPrintf(eb)
         this.BuildinFunctionSprintf = new BuildinFunctionSprintf(eb)
         this.BuildinFunctionAssert = new BuildinFunctionAssert(eb)
+        this.BuildinFunctionBlackHole = new BuildinFunctionBlackHole(eb)
+
     }
 
 
@@ -37,7 +39,7 @@ class BuildinFunctionCall {
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionFunctionCall)
         if call.Function.loadedFromCorePackage {
-            maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
+            maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.args, call.vArgs, context, state)
             code.codes[code.codeLength] = cg.OP_invokestatic
             c.insertMethodRefConst(
                 new cg.ConstantInfoMethodrefHighLevel(
@@ -48,7 +50,7 @@ class BuildinFunctionCall {
             code.codeLength += 3
             if e.isStatementExpression {
                 if call.Function.Type.VoidReturn() == false {
-                    if len(call.Function.Type.ReturnList) > 1 {
+                    if len(call.Function.Type.returnList) > 1 {
                         code.codes[code.codeLength] = cg.OP_pop
                         code.codeLength++
                     } else {
@@ -73,7 +75,7 @@ class BuildinFunctionCall {
             return this.BuildinFunctionCatchPanic.mkBuildInCatch(c, code, e, context)
         /*
         case common.BuildInFunctionMonitorEnter, common.BuildInFunctionMonitorExit:
-            maxStack = this.build(c, code, call.Args[0], context, state)
+            maxStack = this.build(c, code, call.args[0], context, state)
             if call.Function.name == common.BuildInFunctionMonitorEnter {
                 code.codes[code.codeLength] = cg.OP_monitorenter
             } else { // monitor enter on exit
@@ -82,13 +84,13 @@ class BuildinFunctionCall {
             code.codeLength++
           */
         case common.BuildInFunctionPrintf:
-            return this.BuildinFunctionPrintf.build(c, code, e, context, state)
+            return this.BuildinFunctionPrintf.buildPrintf(c, code, e, context, state)
         case common.BuildInFunctionSprintf:
-            return this.BuildinFunctionSprintf.build(c, code, e, context, state)
+            return this.BuildinFunctionSprintf.buildSprintf(c, code, e, context, state)
         case common.BuildInFunctionLen:
-            return this.BuildinFunctionLen.build(c, code, e, context, state)
-        //case common.BuildInFunctionBlockHole:
-        //    return this.mkBuildInBlackHole(c, code, e, context, state)
+            return this.BuildinFunctionLen.buildLen(c, code, e, context, state)
+        case common.BuildInFunctionBlockHole:
+            return this.BuildinFunctionBlackHole.mkBuildInBlackHole(c, code, e, context, state)
         case common.BuildInFunctionAssert:
             return this.BuildinFunctionAssert.build(c, code, e, context, state)
         default:

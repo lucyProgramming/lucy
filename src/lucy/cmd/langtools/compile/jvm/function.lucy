@@ -14,21 +14,21 @@ class BuildFunction {
 
     fn  mkParametersOffset(c cg.ClassHighLevel, code cg.AttributeCode,
         f ast.Function, state StackMapState) {
-        for _, v := range f.Type.ParameterList { // insert into locals
+        for _, v := range f.Type.parameterList { // insert into locals
             v.localValOffset = code.maxLocals
             code.maxLocals += jvmSlotSize(v.Type)
             state.appendLocals(c, v.Type)
         }
-        if f.Type.VArgs != null {
-            f.Type.VArgs.localValOffset = code.maxLocals
+        if f.Type.vArgs != null {
+            f.Type.vArgs.localValOffset = code.maxLocals
             code.maxLocals++
-            state.appendLocals(c, f.Type.VArgs.Type)
+            state.appendLocals(c, f.Type.vArgs.Type)
         }
     }
 
     fn  mkCapturedParameters(c cg.ClassHighLevel, code cg.AttributeCode,
         f ast.Function, state StackMapState) -> (maxStack char) {
-        for _, v := range f.Type.ParameterList {
+        for _, v := range f.Type.parameterList {
             if v.beenCapturedAsLeftValue == 0 { // not capture
                 continue
             }
@@ -56,7 +56,7 @@ class BuildFunction {
         this.mkParametersOffset(c, code, f, state)
         maxStack = this.mkCapturedParameters(c, code, f, state)
         if f.Type.VoidReturn() == false {
-            for _, v := range f.Type.ReturnList {
+            for _, v := range f.Type.returnList {
                 currentStack := char(0)
                 if v.beenCapturedAsLeftValue > 0 { //create closure object
                     v.localValOffset = code.maxLocals
@@ -171,7 +171,7 @@ class BuildFunction {
         }
         {
             method.AttributeMethodParameters = new cg.AttributeMethodParameters()
-            for _, v := range f.Type.ParameterList {
+            for _, v := range f.Type.parameterList {
                 p := new cg.MethodParameter()
                 p.name = v.name
                 p.accessFlags = cg.MethodParameterTypeAccMandated
@@ -185,7 +185,7 @@ class BuildFunction {
         }
         if f.Type.VoidReturn() == false {
             method.AttributeLucyReturnListNames = new cg.AttributeMethodParameters()
-            for _, v := range f.Type.ReturnList {
+            for _, v := range f.Type.returnList {
                 p := new cg.MethodParameter()
                 p.name = v.name
                 p.accessFlags = cg.MethodParameterTypeAccMandated
@@ -195,7 +195,7 @@ class BuildFunction {
                 method.AttributeLucyReturnListNames.append(p)
             }
         }
-        if len(f.Type.ReturnList) > 1 {
+        if len(f.Type.returnList) > 1 {
             if t := this.buildFunctionMultiReturnOffset(c, method.code,
                 f, context, state); t > method.code.MaxStack {
                 method.code.MaxStack = t

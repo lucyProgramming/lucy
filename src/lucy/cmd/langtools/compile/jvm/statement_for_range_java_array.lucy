@@ -4,7 +4,7 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 class AutoVariableForRangeJavaArray {
 	protected Elements char
-	protected End      char
+	protected end      char
 	protected K, V     char
 }
 
@@ -50,7 +50,7 @@ class BuildForRangeJavaArray {
             code.maxLocals++
             forState.appendLocals(c, typeInt)
             //end
-            autoVar.End = code.maxLocals
+            autoVar.end = code.maxLocals
             code.maxLocals++
             forState.appendLocals(c, typeInt)
 
@@ -64,7 +64,7 @@ class BuildForRangeJavaArray {
         }
         code.codes[code.codeLength] = cg.OP_arraylength
         code.codeLength++
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.End))
+        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.end))
         copyOPs(code, storeLocalVariableOps(ast.VariableTypeJavaArray, autoVar.Elements))
 
         code.codes[code.codeLength] = cg.OP_iconst_m1
@@ -110,7 +110,7 @@ class BuildForRangeJavaArray {
         copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.K))
 
         // load end
-        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.End))
+        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.end))
         if 2 > maxStack {
             maxStack = 2
         }
