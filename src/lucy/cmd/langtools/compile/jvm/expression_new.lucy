@@ -44,7 +44,7 @@ class BuildExpressionNew {
         maxStack += this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, n.Args, n.VArgs, context, state)
         code.codes[code.codeLength] = cg.OP_invokespecial
         d := n.Construction.Function.jvmDescriptor
-        if d == "" {
+        if d == null || d == "" {
             d = Descriptor.methodDescriptor(n.Construction.Function.Type)
         }
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(

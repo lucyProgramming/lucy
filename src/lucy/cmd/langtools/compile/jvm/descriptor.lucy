@@ -110,7 +110,7 @@ public class Descriptor  {
 		case 'L':
 			bs = bs[1:]
 			index := common.Bytes.indexByte(bs, ';') // end token
-			t := new ast.Type()
+			t = new ast.Type()
 			t.Type = ast.VariableTypeObject
 			t.Class = new ast.Class()
 			t.Class.name = string(bs[:index])
@@ -122,17 +122,16 @@ public class Descriptor  {
 			return bs, t, null
 		case '[':
 			bs = bs[1:]
-			var t ast.Type
-			var err error
-			bs, t, err = .ParseType(bs)
-			ret := new ast.Type()
+			var array ast.Type
+			bs, array, err = .ParseType(bs)
+			t = new ast.Type()
 			if err == null {
-				ret.Type = ast.VariableTypeJavaArray
-				ret.array = t
+				t.Type = ast.VariableTypeJavaArray
+				t.array = array
 			}
-			return bs, ret, err
+			return bs, t, err
 		}
-		return bs, null, new error(sprintf("unkown type:%v", string(bs)))
+		return bs, null, new error(sprintf("unkown type:%s", string(bs)))
 	}
 
 	public static fn ParseFunctionType(bs []byte) -> (t ast.FunctionType,err error) {

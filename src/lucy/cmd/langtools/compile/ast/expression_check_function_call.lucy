@@ -4,6 +4,9 @@ class ExpressionCheckFunctionCall {
 	
 	static fn checkFunctionCallExpression(e Expression, block Block, errs []error) ->(valueTypes []Type) {
 		call := e.data.(ExpressionFunctionCall)
+		if call.Args == null {
+            call.Args = []Expression{}
+        }
 		if call.Expression.Type == ExpressionTypeIdentifier {
 			identifier := call.Expression.data.(ExpressionIdentifier)
 			isCaptureVar := [false]

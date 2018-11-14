@@ -24,9 +24,10 @@ class MakeNodesObjects {
     fn MakeNodes(nodes []ast.TopNode) -> (ret []Object = []Object{}) {
         for _, n := range nodes {
             if t,ok := n.Node.(ast.Block) ; ok {
-                ss := this.makeBlock(n.Node.(*ast.Block))
-                ret.append(map[string]interface{}{"block": ss})
+                ss := this.makeBlock(t)
+                ret.append({"block"-> ss})
             }
+
             switch n.Node.(type) {
 
             case *ast.Block:

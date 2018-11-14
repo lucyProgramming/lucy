@@ -98,20 +98,12 @@ public class  BuildPackage {
         c.superClass = ast.JavaRootClass
         c.fields = new map { string -> cg.FieldHighLevel } ()
         c.Class.AttributeLucyEnum = new cg.AttributeLucyEnum()
-        if e.comment != null && e.comment != "" {
-            c.Class.AttributeLucyComment = new cg.AttributeLucyComment()
-            c.Class.AttributeLucyComment.comment = e.comment
-        }
         for _, v := range e.enums {
             field := new cg.FieldHighLevel()
             if e.accessFlags&cg.AccClassPublic != 0 {
                 field.accessFlags |= cg.AccFieldPublic
             } else {
                 field.accessFlags |= cg.AccFieldPrivate
-            }
-            if v.comment != null && v.comment != "" {
-                field.AttributeLucyComment = new cg.AttributeLucyComment()
-                field.AttributeLucyComment.comment = v.comment
             }
             field.name = v.name
             field.descriptor = "I"
@@ -151,10 +143,6 @@ public class  BuildPackage {
                      f.AttributeConstantValue.index = this.mainClass.Class.insertStringConst(v.stringValue)
             }
             f.AttributeLucyConst = new cg.AttributeLucyConst()
-            if v.comment != null && v.comment != "" {
-                f.AttributeLucyComment = new cg.AttributeLucyComment()
-                f.AttributeLucyComment.comment = v.comment
-            }
             f.descriptor = Descriptor.typeDescriptor(v.Type)
             this.mainClass.fields[k] = f
         }
@@ -187,10 +175,6 @@ public class  BuildPackage {
                 }
             }
             v.globalVarClassName = this.mainClass.name
-            if v.comment != null && v.comment != "" {
-                f.AttributeLucyComment = new cg.AttributeLucyComment ()
-                f.AttributeLucyComment.comment = v.comment
-            }
             f.name = v.name
             this.mainClass.fields[k] = f
         }
@@ -231,7 +215,8 @@ public class  BuildPackage {
         codeLength := int(0)
         method.code = new cg.AttributeCode()
         for _, v := range this.Package.loadedPackages {
-            if v.triggerPackageInitMethodName == "" {
+            if v.triggerPackageInitMethodName == null ||
+                v.triggerPackageInitMethodName == "" {
                 continue
             }
             codes[codeLength] = cg.OP_invokestatic
@@ -316,10 +301,6 @@ public class  BuildPackage {
         } else {
             c.superClass = astClass.superClassName.name
         }
-        if astClass.comment != null && astClass.comment != "" {
-            c.Class.AttributeLucyComment = new cg.AttributeLucyComment()
-            c.Class.AttributeLucyComment.comment = astClass.comment
-        }
         if len(astClass.block.constants) > 0 {
             attr := new cg.AttributeLucyClassConst()
             attr.constants = []cg.LucyClassConst{}
@@ -387,10 +368,6 @@ public class  BuildPackage {
                 t := new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.Encode(v.Type) , 0 )
                 f.AttributeLucyFieldDescriptor = t
             }
-            if v.comment != null && v.comment != "" {
-                f.AttributeLucyComment = new cg.AttributeLucyComment()
-                f.AttributeLucyComment.comment = v.comment
-            }
             c.fields[v.name] = f
         }
         for name, v := range astClass.methods {
@@ -454,10 +431,6 @@ public class  BuildPackage {
             method.accessFlags |= cg.AccMethodStatic
             if f.accessFlags&cg.AccMethodPublic != 0 || f.name == ast.MainFunctionName {
                 method.accessFlags |= cg.AccMethodPublic
-            }
-            if f.comment != null && f.comment != "" {
-                method.AttributeLucyComment = new cg.AttributeLucyComment()
-                method.AttributeLucyComment.comment = f.comment
             }
             if LucyMethodSignature.Need(f.Type) {
                 method.AttributeLucyMethodDescriptor = new cg.AttributeLucyMethodDescriptor()

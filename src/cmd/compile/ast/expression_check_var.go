@@ -105,5 +105,12 @@ func (e *Expression) checkVarExpression(block *Block, errs *[]error) {
 			}
 		}
 	}
+	if e.IsGlobal == false {
+		for _, v := range ev.Variables {
+			if e := block.InheritedAttribute.Function.Type.reDefineReturnVarOrParameter(v); e != nil {
+				*errs = append(*errs, e)
+			}
+		}
+	}
 
 }

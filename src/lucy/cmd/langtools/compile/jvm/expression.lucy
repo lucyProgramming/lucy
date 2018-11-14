@@ -292,7 +292,8 @@ class BuildExpression {
     fn storeGlobalVariable(c cg.ClassHighLevel, code cg.AttributeCode,
         v ast.Variable) {
         code.codes[code.codeLength] = cg.OP_putstatic
-        if v.jvmDescriptor == "" {
+        if v.jvmDescriptor == null ||
+            v.jvmDescriptor == "" {
             v.jvmDescriptor = Descriptor.typeDescriptor(v.Type)
         }
         c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(

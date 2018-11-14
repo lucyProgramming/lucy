@@ -34,18 +34,18 @@ class SourceFile {
 		if this.ImportsByResources == null {
 			this.ImportsByResources =new map { string -> Import }()
 		}
-		if err := i.MkAccessName(); err != null {
+		if err = i.MkAccessName(); err != null {
 			return err
 		}
-		if this.Imports.keyExist(i.Import){
+		if this.Imports.keyExist(i.alias){
 			return new error(sprintf("%s '%s' reimported",
 				i.pos.errMsgPrefix(), i.Import))
 		}
-		if this.ImportsByResources.keyExist(i.alias) {
+		if this.ImportsByResources.keyExist(i.Import) {
 			return new error(sprintf("%s '%s' reimported",
 				i.pos.errMsgPrefix(), i.alias))
 		}
-		this.Imports[i.Import] = i
+		this.ImportsByResources[i.Import] = i
 		this.Imports[i.alias] = i
 		return null
 	}

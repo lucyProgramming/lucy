@@ -57,7 +57,7 @@ func (TypeConverterAndPrimitivePacker) unPackPrimitives(
 		code.Codes[code.CodeLength] = cg.OP_invokevirtual
 		class.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
 			Class:      c,
-			Method:     "shortValue",
+			Method:     "charValue",
 			Descriptor: "()C",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3

@@ -3,7 +3,7 @@ import "java/lang/Object"
 
 
 public enum  ExpressionTypeKind { 
-	ExpressionTypeNull  =1 ,                                     // null
+	ExpressionTypeNull  = 1,                                     // null
 	ExpressionTypeBool,                                      // true or false
 	ExpressionTypeByte ,                                     // 'a' or 97b
 	ExpressionTypeShort  ,                                   // 100s
@@ -73,10 +73,6 @@ public enum  ExpressionTypeKind {
 	ExpressionTypeVArgs ,                                    // a ...
 	ExpressionTypeDot                                       // .
 }
-
-
-
-
 
 
 

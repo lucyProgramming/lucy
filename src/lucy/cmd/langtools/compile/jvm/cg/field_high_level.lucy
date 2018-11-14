@@ -7,5 +7,4 @@ public class FieldHighLevel {
 	public AttributeConstantValue       AttributeConstantValue
 	public AttributeLucyFieldDescriptor AttributeLucyFieldDescriptor
 	public AttributeLucyConst           AttributeLucyConst
-	public AttributeLucyComment         AttributeLucyComment
 }

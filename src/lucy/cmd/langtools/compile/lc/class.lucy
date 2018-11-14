@@ -138,7 +138,6 @@ class ClassDecoder {
 
 	fn parseInterfaces() {
 		length := binary.BigEndian.getChar(this.bs)
-		print(int(length))
 		this.bs = this.bs[2:]
 		this.classFile.interfaces = new []char(length)
 		for i := char(0); i < length; i++ {

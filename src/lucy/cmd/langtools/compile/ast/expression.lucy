@@ -24,7 +24,7 @@ public class Expression {
 
 	public fn isIdentifier(identifier string) -> (is bool) {
 		if this.Type != ExpressionTypeIdentifier {
-			return false
+			return  
 		}
 		return this.data.(ExpressionIdentifier).name == identifier
 	}
@@ -493,7 +493,7 @@ public class Expression {
 				this.value = tt
 			}
 		case ExpressionTypeCheckCast:
-			tt := ExpressionSelectConst.check(this , block, errs)
+			tt := ExpressionCheckTypeConversion.check(this , block, errs)
 			if tt != null {
 				returnValueTypes = []Type{tt}
 				this.value = tt
@@ -712,7 +712,7 @@ public class Expression {
 			panic("not number")
 		}
 		switch this.Type {
-		case ExpressionTypeByte ,ExpressionTypeChar,ExpressionTypeShort ,ExpressionTypeLong :
+		case ExpressionTypeByte , ExpressionTypeChar,ExpressionTypeShort ,ExpressionTypeInt , ExpressionTypeLong :
 			return this.longValue
 		case ExpressionTypeFloat,ExpressionTypeDouble:
 			return long(this.doubleValue)
@@ -726,8 +726,7 @@ public class Expression {
 			panic("not number")
 		}
 		switch this.Type {
-		case ExpressionTypeByte,ExpressionTypeChar, ExpressionTypeShort,
-		    ExpressionTypeInt, ExpressionTypeLong:
+		case ExpressionTypeByte , ExpressionTypeChar,ExpressionTypeShort ,ExpressionTypeInt , ExpressionTypeLong :
 			return double(this.longValue)
 		case ExpressionTypeFloat , ExpressionTypeDouble:
 			return double(this.doubleValue)

@@ -28,13 +28,15 @@ class FileLoader implements ast.LoadImport{
             return this.caches[importName], null
         }
         realPaths  := []Resource{}
+        foundInLucy := false
         for _, v := range compiler.lucyPaths {
-            if  p := v + "/class/" + importName ; new io.File(p ).isDirectory() { // directory is package
+            if  p := v + "/class/" + importName ;  new io.File(p ).isDirectory() { // directory is package
                 realPaths.append(new Resource(
                     resourceKindLucyPackage,
                     p,
                     importName
                 ))
+                foundInLucy = true
             }
             if  p :=v + "/class/" + importName + ".class" ;  new io.File(p).isFile(){ // class file
                 realPaths.append(new Resource(
@@ -42,27 +44,30 @@ class FileLoader implements ast.LoadImport{
                     p,
                     importName
                 ))
+                foundInLucy = true 
             }
         }
-
-        for _, v := range compiler.classPaths {
-            if p :=v + "/class/" + importName  ; new io.File(p).isDirectory() { // directory is package
-                realPaths.append(new Resource(
-                    resourceKindJavaPackage,
-                    p,
-                    importName
-                ))
-            }
-            if p := v + "/class/" + importName + ".class" ; new io.File(p).isFile() { // directory is package
-                realPaths.append(new Resource(
-                   resourceKindJavaClass,
-                   p,
-                   importName
-                ))
+        if foundInLucy == false {
+            for _, v := range compiler.classPaths {
+                if p := v + "/" + importName  ; new io.File(p).isDirectory() { // directory is package
+                    realPaths.append(new Resource(
+                        resourceKindJavaPackage,
+                        p,
+                        importName
+                    ))
+                }
+                if p := v + "/" + importName + ".class" ; new io.File(p).isFile() { // directory is package
+                    realPaths.append(new Resource(
+                       resourceKindJavaClass,
+                       p,
+                       importName
+                    ))
+                }
             }
         }
+        
         if len(realPaths) == 0 {
-            return null, new error(sprintf("resource '%v' not found", importName))
+            return null, new error(sprintf("resource '%s' not found", importName))
         }
         realPathMap := new map { string -> []Resource } ()
         for _, v := range realPaths {
@@ -330,6 +335,7 @@ class FileLoader implements ast.LoadImport{
         }
         e.loadFromOutSide = true
         e.accessFlags = c.accessFlags
+        e.enums = []ast.EnumName{}
         for _, v := range c.fields {
             en := new ast.EnumName()
             name := string(c.ConstPool[v.nameIndex].info)
@@ -589,7 +595,7 @@ class FileLoader implements ast.LoadImport{
         }
     }
 
-    fn  loadClass(r Resource) -> (c  ast.Class) {
+    fn  loadClass(r Resource) -> (c  Object) {
         bs, err := os.readFile(r.realPath)
         if err != null {
             return null
@@ -597,20 +603,13 @@ class FileLoader implements ast.LoadImport{
         cc := (new ClassDecoder(javaArray2Lucy(bs))).decode()
         if r.kind == resourceKindLucyClass {
             if t := cc.GetAttributeByName(cg.AttributeNameLucyEnum); len(t) > 0 {
-                panic("cannot load lucy enum")
-                ///this.loadLucyEnum(cc)
-                //return null
+                return this.loadLucyEnum(cc)
             } else {
                 return this.loadAsLucy(cc)
             }
         }
         return this.loadAsJava(cc)
     }
-
-
-
-
-
 
 }
 

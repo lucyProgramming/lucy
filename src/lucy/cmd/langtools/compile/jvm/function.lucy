@@ -189,7 +189,10 @@ class BuildFunction {
                 p := new cg.MethodParameter()
                 p.name = v.name
                 p.accessFlags = cg.MethodParameterTypeAccMandated
-                method.AttributeLucyReturnListNames.parameters.append(p)
+                if method.AttributeLucyReturnListNames == null {
+                    method.AttributeLucyReturnListNames = new cg.AttributeMethodParameters()
+                }
+                method.AttributeLucyReturnListNames.append(p)
             }
         }
         if len(f.Type.ReturnList) > 1 {

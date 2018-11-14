@@ -67,7 +67,7 @@ fn registerBuildInFunctions() {
 				errs . append(new error( sprintf("%s build function '%s' expect string argument",
 					errMsgPrefix(args[0].pos), common.BuildInFunctionCatch)))
 			}
-			className := e.Args[0].data.(string)
+			className := e.Args[0].stringValue
 			c, err := PackageBeenCompile.loadClass(className)
 			if err != null {
 				errs . append(new error(sprintf("%s %s", e.Args[0].pos.errMsgPrefix(), err.getMessage())))

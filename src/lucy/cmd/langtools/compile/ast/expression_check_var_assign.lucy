@@ -1,9 +1,8 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
- 
+
 
 class ExpressionCheckVarAssign {
-
-
+	
 	static fn check(e Expression , block Block, errs []error) {
 		bin := e.data.(ExpressionBinary)
 		var lefts []Expression
@@ -36,6 +35,9 @@ class ExpressionCheckVarAssign {
 		assign.Lefts = lefts
 		assign.InitValues = values
 		assign.IfDeclaredBefore = new []bool(len(lefts))
+		if block.variables == null {
+			block.variables = new map{string ->Variable} ()
+		}
 		for k, v := range lefts {
 			var variableType Type = null
 			if k < len(assignTypes) {

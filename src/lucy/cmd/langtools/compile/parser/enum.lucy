@@ -44,7 +44,6 @@ class EnumParser extends ParserExtends {
 				name := this.parser.token.stringValue
 				pos := this.parser.mkPos()
 				var value ast.Expression
-				var err error
 				this.Next(lfIsToken)
 				if this.parser.token.Type == lex.TokenAssign {
 					this.Next(lfNotToken)

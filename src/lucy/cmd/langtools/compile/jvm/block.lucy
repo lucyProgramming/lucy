@@ -186,7 +186,8 @@ class BuildBlock {
 		case ast.StatementTypeClass:
 			oldName := s.Class.name
 			var name string
-			if block.inheritedAttribute.classAndFunctionNames == "" {
+			if block.inheritedAttribute.classAndFunctionNames == null ||
+			    block.inheritedAttribute.classAndFunctionNames == "" {
 				name = s.Class.name
 			} else {
 				name = block.inheritedAttribute.classAndFunctionNames + "$" + s.Class.name

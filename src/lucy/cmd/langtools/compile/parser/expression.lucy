@@ -25,7 +25,8 @@ class ExpressionParser extends  ParserExtends {
 				this.Next(lfIsToken)
 				continue
 			}
-			e, err := this.parseExpression(false)
+			var e ast.Expression
+			e, err = this.parseExpression(false)
 			if err != null {
 				return es, err
 			}
@@ -73,7 +74,8 @@ class ExpressionParser extends  ParserExtends {
 		}
 		for this.parser.token.Type == lex.TokenComma && statementLevel { // read more
 			this.Next(lfNotToken)                        //  skip comma
-			left2, err := this.ExpressionQuestionParser.parseQuestionExpression() //
+			var left2 ast.Expression
+			left2, err = this.ExpressionQuestionParser.parseQuestionExpression() //
 			if err != null {
 				return null, err
 			}
@@ -131,7 +133,8 @@ class ExpressionParser extends  ParserExtends {
         bin.Left = left
         result.pos = pos
         if isMulti {
-            es, err := this.parseExpressions(lex.TokenSemicolon)
+            var es []ast.Expression
+            es, err = this.parseExpressions(lex.TokenSemicolon)
             if err != null {
                 return null, err
             }
@@ -155,7 +158,7 @@ class ExpressionParser extends  ParserExtends {
 		pos := this.parser.mkPos()
 		this.parser.unExpectNewLineAndSkip()
 		if this.parser.token.Type != lex.TokenLp {
-			err := new error(sprintf("%s not '(' after a type",
+			err = new error(sprintf("%s not '(' after a type",
 				this.parser.errMsgPrefix()))
 			this.parser.errs.append( err)
 			return null, err
@@ -167,7 +170,7 @@ class ExpressionParser extends  ParserExtends {
 		}
 		this.parser.ifTokenIsLfThenSkip()
 		if this.parser.token.Type != lex.TokenRp {
-			err := new error(sprintf("%s '(' and ')' not match", this.parser.errMsgPrefix()))
+			err = new error(sprintf("%s '(' and ')' not match", this.parser.errMsgPrefix()))
 			this.parser.errs.append( err)
 			return null, err
 		}
@@ -217,7 +220,7 @@ class ExpressionParser extends  ParserExtends {
 			this.parser.ifTokenIsLfThenSkip()
 		}
 		if this.parser.token.Type != lex.TokenLc {
-			err := new error(sprintf("%s expect '{',but '%s'", this.parser.errMsgPrefix(), this.parser.token.Description))
+			err = new error(sprintf("%s expect '{',but '%s'", this.parser.errMsgPrefix(), this.parser.token.Description))
 			this.parser.errs.append( err)
 			return null, err
 		}
@@ -231,28 +234,35 @@ class ExpressionParser extends  ParserExtends {
 		for this.parser.token.Type != lex.TokenEof &&
 			this.parser.token.Type != lex.TokenRc {
 			// key
-			k, err := this.parseExpression(false)
+			var k ast.Expression
+			k, err = this.parseExpression(false)
 			if err != null {
 				return
 			}
 			this.parser.unExpectNewLineAndSkip()
 			// arrow
 			if this.parser.token.Type != lex.TokenArrow {
-				err := new error(sprintf("%s expect '->',but '%s'",
+				err = new error(sprintf("%s expect '->',but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.Description))
 				this.parser.errs.append( err)
 				return
 			}
 			this.Next(lfNotToken) // skip ->
 			// value
-			v, err := this.parseExpression(false)
+			var v ast.Expression
+			v, err = this.parseExpression(false)
 			if err != null {
 				return
 			}
 			t := new ast.ExpressionKV()
 			t.Key = k
 			t.value = v
-			m.KeyValuePairs.append( t)
+			if m.KeyValuePairs == null {
+				m.KeyValuePairs = [t]
+			}else {
+				m.KeyValuePairs.append( t)
+			}
+			
 			if this.parser.token.Type == lex.TokenComma {
 				// read next  key value pair
 				this.Next(lfNotToken)
@@ -262,7 +272,7 @@ class ExpressionParser extends  ParserExtends {
 		}
 		this.parser.ifTokenIsLfThenSkip()
 		if this.parser.token.Type != lex.TokenRc {
-			err := new error(sprintf("%s expect '}',but '%s'",
+			err = new error(sprintf("%s expect '}',but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.Description))
 			this.parser.errs.append( err)
 			this.parser.consume(untilRc)

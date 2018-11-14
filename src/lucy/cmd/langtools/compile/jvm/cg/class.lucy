@@ -29,7 +29,6 @@ public class Class {
 	public AttributeGroupedByName  AttributeGroupedByName
 	public TypeAlias               []AttributeLucyTypeAlias
 	public AttributeLucyEnum       AttributeLucyEnum
-	public AttributeLucyComment    AttributeLucyComment
 	public AttributeLucyClassConst AttributeLucyClassConst
 	public AttributeInnerClasses   AttributeInnerClasses
 	//const caches
@@ -303,9 +302,6 @@ public class Class {
 			if f.AttributeLucyConst != null {
 				field.attributes . append(  f.AttributeLucyConst.ToAttributeInfo(this))
 			}
-			if f.AttributeLucyComment != null {
-				field.attributes . append(  f.AttributeLucyComment.ToAttributeInfo(this))
-			}
 			this.fields.append(field)
 		}
 		this.methods = []MethodInfo{}
@@ -327,9 +323,6 @@ public class Class {
 				}
 				if m.AttributeDefaultParameters != null {
 					info.attributes . append(  m.AttributeDefaultParameters.ToAttributeInfo(this))
-				}
-				if m.AttributeLucyComment != null {
-					info.attributes . append(  m.AttributeLucyComment.ToAttributeInfo(this))
 				}
 				if m.AttributeMethodParameters != null {
 					t := m.AttributeMethodParameters.ToAttributeInfo(this)
@@ -356,9 +349,6 @@ public class Class {
 		}
 		if this.AttributeLucyEnum != null {
 			this.attributes.append( this.AttributeLucyEnum.ToAttributeInfo(this))
-		}
-		if this.AttributeLucyComment != null {
-			this.attributes.append(  this.AttributeLucyComment.ToAttributeInfo(this))
 		}
 		if this.AttributeLucyClassConst != null {
 			this.attributes.append( this.AttributeLucyClassConst.ToAttributeInfo(this))
@@ -389,7 +379,7 @@ public class Class {
 			return
 		}
 		innerClass := this.AttributeGroupedByName[AttributeNameInnerClasses][0]
-		var attr AttributeInnerClasses
+		var attr  = new AttributeInnerClasses()
 		thisClassName := string(this.ConstPool[binary.BigEndian.getChar(this.ConstPool[this.thisClass].info)].info)
 		attr.fromBs(this, innerClass.info)
 		for _, v := range attr.Classes {
@@ -497,7 +487,9 @@ public class Class {
 			this.writer.write(bs2.getUnderlyingArray())
 			binary.BigEndian.putInt(bs4 , v.attributeLength)
 			this.writer.write(bs4.getUnderlyingArray())
-			this.writer.write(v.info.getUnderlyingArray() , v.info.start() , v.info.size())
+			if v.attributeLength > 0 {
+				this.writer.write(v.info.getUnderlyingArray() , v.info.start() , v.info.size())
+			}
 		}
 	}	
 	public fn GetAttributeByName( name string) -> (attrs []AttributeInfo) {

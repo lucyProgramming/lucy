@@ -1,7 +1,7 @@
 
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/jvm/cg"
-
+  
 
 class TypeConverterAndPrimitivePacker {
 
@@ -54,7 +54,7 @@ class TypeConverterAndPrimitivePacker {
 			code.codes[code.codeLength] = cg.OP_invokevirtual
 			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
 				cname,
-				"shortValue",
+				"charValue",
 				"()C"
 			), code.codes[code.codeLength+1:code.codeLength+3])
 			code.codeLength += 3

@@ -1,9 +1,7 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
 
 class ExpressionCheckLeftValue {
-	
 
-	
 	static fn getLeftValue(e Expression, block Block, errs []error) -> (result Type) {
 		switch e.Type {
 		case ExpressionTypeIdentifier:
@@ -130,7 +128,7 @@ class ExpressionCheckLeftValue {
 				identifier.name = selection.name
 				identifier.Variable = v
 				e.data = identifier
-				result := v.Type.Clone()
+				result = v.Type.Clone()
 				result.pos = e.pos
 				return result
 			default:

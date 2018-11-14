@@ -13,6 +13,12 @@ type FunctionType struct {
 	VArgs            *Variable
 }
 
+func (this *FunctionType) reDefineReturnVarOrParameter(v *Variable) error {
+	if nil == this.searchName(v.Name) {
+		return nil
+	}
+	return fmt.Errorf("%s redefine parameter or return var", v.Pos.ErrMsgPrefix())
+}
 func (this *FunctionType) CheckTemplateNameDuplication() []error {
 	errs := []error{}
 	m := make(map[string]*Pos)

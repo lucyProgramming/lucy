@@ -85,7 +85,6 @@ public class DefaultValueParse {
 				v.defaultValueExpression.stringValue =
 					string(c.ConstPool[utf8Index].info)
 			}
-			v.defaultValueExpression.op = sprintf("%v", v.defaultValueExpression.data)
 		}
 	}
 

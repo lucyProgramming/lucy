@@ -7,19 +7,12 @@ public class FunctionType {
 	public VArgs            Variable
 
 	fn reDefineParameterOrReturnVar(reDefine Variable) -> (err error){
-		for _,v := range this.ParameterList{
-			if v.name == reDefine.name {
-				return new error(sprintf("%s reDefine parameter '%s'" , 
-					v.pos.errMsgPrefix(), v.name))
-			}
-		}
-		if this.VoidReturn() == false {
-			for _,v := range this.ReturnList{
-				if v.name == reDefine.name {
-					return new error(sprintf("%s reDefine return variable '%s'" , 
-						v.pos.errMsgPrefix(), v.name))
-				}
-			}
+		
+		if v := this.searchName(reDefine.name) ; v != null {
+			errMsg := sprintf("%s reDefine parameter or return variable '%s',first declared at:\n",
+					reDefine.pos.errMsgPrefix(), v.name)
+			errMsg += sprintf("\t%s" , v.pos.errMsgPrefix())
+			return new error(errMsg)
 		}
 	}
 	
@@ -42,7 +35,10 @@ public class FunctionType {
 		return errs
 	}
 
-	fn haveTemplateName(name string) -> (have bool = this.TemplateNamesMap.keyExist(name)){}
+	fn haveTemplateName(name string) -> (have bool){
+		have = this.TemplateNamesMap != null &&  
+			this.TemplateNamesMap.keyExist(name)
+	}
 
 
 	fn Clone() -> (ret FunctionType) {
@@ -249,7 +245,7 @@ public class FunctionType {
 							t.typeString(), v.Type.typeString()))
 						return
 					}
-					vArgs.PackArray2VArgs = true
+					vArgs.packArray2VArgs = true
 					continue
 				}
 				if false == v.Type.array.assignAble(errs, t) {
@@ -263,7 +259,7 @@ public class FunctionType {
 			k := len(this.ParameterList)
 			vArgs.Length = len(callArgsTypes) - k
 			vArgs.expressions = args[k:]
-			vArgs.Length = len(callArgsTypes) - k
+			vArgs.start = k
 		}
 		if len(callArgsTypes) < len(this.ParameterList) {
 			if f != null && f.haveDefaultValue && len(callArgsTypes) >= f.DefaultValueStartAt {
@@ -298,7 +294,9 @@ public class FunctionType {
 	
 	fn wantArgs() -> (want string = "(") {
 		for k, v := range this.ParameterList {
-			want += v.name + " "
+			if v.name != null && v.name != "" {
+				want += v.name + " "
+			}
 			want += v.Type.typeString()
 			if k != len(this.ParameterList)-1 {
 				want += ","
@@ -308,7 +306,9 @@ public class FunctionType {
 			if len(this.ParameterList) > 0 {
 				want += ","
 			}
-			want += this.VArgs.name + " "
+			if this.VArgs.name != null && this.VArgs.name != "" {
+				want += this.VArgs.name + " "
+			}
 			want += this.VArgs.Type.typeString()
 		}
 		want += ")"
@@ -325,7 +325,8 @@ public class CallVariableArgs {
 		a := new int[](10)
 		print(a...)
 	*/
-	public PackArray2VArgs bool
+	public packArray2VArgs bool
 	public NoArgs          bool
 	public Type            Type
+	public start int
 }

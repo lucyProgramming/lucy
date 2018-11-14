@@ -40,12 +40,12 @@ class ExpressionCheckBinary {
 			ExpressionTypeXor == e.Type {
 			if left == null || right == null {
 				if left != null && left.isNumber() {
-					result := left.Clone()
+					result = left.Clone()
 					result.pos = e.pos
 					return result
 				}
 				if right != null && right.isNumber() {
-					result := right.Clone()
+					result = right.Clone()
 					result.pos = e.pos
 					return result
 				}
@@ -62,7 +62,7 @@ class ExpressionCheckBinary {
 			e.Type == ExpressionTypeRsh {
 			if left == null || right == null {
 				if left != null && left.isNumber() {
-					result := left.Clone()
+					result = left.Clone()
 					result.pos = e.pos
 					return result
 				}
@@ -131,12 +131,12 @@ class ExpressionCheckBinary {
 			e.Type == ExpressionTypeMod {
 			if left == null || right == null {
 				if left != null {
-					result := left.Clone()
+					result = left.Clone()
 					result.pos = e.pos
 					return result
 				}
 				if right != null {
-					result := right.Clone()
+					result = right.Clone()
 					result.pos = e.pos
 					return result
 				}

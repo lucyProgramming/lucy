@@ -9,8 +9,7 @@ class ExpressionSuffix extends  ParserExtends {
 		this.parser = parser
 		this.ep = ep 
 	}
-	fn parseSuffixExpression() -> (e ast.Expression, err error) {
-		var prefix ast.Expression
+	fn parseSuffixExpression() -> (prefix ast.Expression, err error) {
 		switch this.parser.token.Type {
 		case lex.TokenIdentifier:
 			prefix = new ast.Expression()
@@ -118,11 +117,12 @@ class ExpressionSuffix extends  ParserExtends {
 			}
 			this.parser.ifTokenIsLfThenSkip()
 			if this.parser.token.Type != lex.TokenRp {
-				err := new error(sprintf("%s '(' and ')' not matched, but '%s'",
+				err = new error(sprintf("%s '(' and ')' not matched, but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.Description))
 				this.parser.errs.append( err)
 				return null, err
 			}
+			assert(prefix != null)
 			newExpression := new ast.Expression()
 			newExpression.Type = ast.ExpressionTypeParenthesis
 			newExpression.pos = pos
@@ -200,11 +200,12 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix = newE
 		case lex.TokenFn:
 			pos := this.parser.mkPos()
-			f, err := this.parser.FunctionParser.parse(false, false)
+			var f ast.Function
+			f, err = this.parser.FunctionParser.parse(false, false)
 			if err != null {
 				return null, err
 			}
-			prefix := new ast.Expression()
+			prefix = new ast.Expression()
 			prefix.Type = ast.ExpressionTypeFunctionLiteral
 			prefix.data = f
 			prefix.pos = pos
@@ -213,13 +214,14 @@ class ExpressionSuffix extends  ParserExtends {
 			pos := this.parser.mkPos()
 			this.Next(lfIsToken)
 			this.parser.unExpectNewLineAndSkip()
-			t, err := this.parser.parseType()
+			var t ast.Type
+			t, err = this.parser.parseType()
 			if err != null {
 				return null, err
 			}
 			this.parser.unExpectNewLineAndSkip()
 			if this.parser.token.Type != lex.TokenLp {
-				err := new error(sprintf("%s missing '(' after new", this.parser.errMsgPrefix()))
+				err = new error(sprintf("%s missing '(' after new", this.parser.errMsgPrefix()))
 				this.parser.errs.append( err)
 				return null, err
 			}
@@ -233,11 +235,11 @@ class ExpressionSuffix extends  ParserExtends {
 			}
 			this.parser.ifTokenIsLfThenSkip()
 			if this.parser.token.Type != lex.TokenRp {
-				err := new error(sprintf("%s '(' and ')' not match", this.parser.errMsgPrefix()))
+				err = new error(sprintf("%s '(' and ')' not match", this.parser.errMsgPrefix()))
 				this.parser.errs.append( err)
 				return null, err
 			}
-			prefix := new ast.Expression()
+			prefix = new ast.Expression()
 			prefix.Type = ast.ExpressionTypeNew
 			prefix.pos = pos
 			prefix.op = "new"
@@ -253,7 +255,7 @@ class ExpressionSuffix extends  ParserExtends {
 			}
 		// bool(xxx)
 		case lex.TokenBool ,lex.TokenByte , lex.TokenShort , lex.TokenChar ,
-		 lex.TokenInt ,lex.TokenLong ,lex.TokenFloat ,lex.TokenDouble  :
+		 	lex.TokenInt ,lex.TokenLong ,lex.TokenFloat ,lex.TokenDouble , lex.TokenString :
 			prefix, err = this.ep.parseTypeConversionExpression()
 			if err != null {
 				return prefix, err
@@ -262,7 +264,8 @@ class ExpressionSuffix extends  ParserExtends {
 			pos := this.parser.mkPos()
 			this.Next(lfIsToken)
 			this.parser.unExpectNewLineAndSkip()
-			e, err := this.parseSuffixExpression()
+			var e ast.Expression
+			e, err = this.parseSuffixExpression()
 			if err != null {
 				return null, err
 			}
@@ -338,7 +341,7 @@ class ExpressionSuffix extends  ParserExtends {
 					}
 					this.parser.ifTokenIsLfThenSkip()
 					if this.parser.token.Type != lex.TokenRb {
-						err := new error(sprintf("%s '[' and ']' not match", this.parser.errMsgPrefix()))
+						err = new error(sprintf("%s '[' and ']' not match", this.parser.errMsgPrefix()))
 						this.parser.errs.append( err)
 						return null, err
 					}
@@ -353,7 +356,8 @@ class ExpressionSuffix extends  ParserExtends {
 					prefix = newExpression
 					this.Next(lfIsToken) // skip ]
 				} else {
-					e, err := this.ep.parseExpression(false)
+				    var e ast.Expression
+					e, err = this.ep.parseExpression(false)
 					if err != null {
 						return null, err
 					}
@@ -367,7 +371,7 @@ class ExpressionSuffix extends  ParserExtends {
 							}
 						}
 						if this.parser.token.Type != lex.TokenRb {
-							err := new error(sprintf("%s '[' and ']' not match", this.parser.errMsgPrefix()))
+							err = new error(sprintf("%s '[' and ']' not match", this.parser.errMsgPrefix()))
 							this.parser.errs.append( err)
 							return null, err
 						}
@@ -384,7 +388,7 @@ class ExpressionSuffix extends  ParserExtends {
 						this.Next(lfIsToken) // skip ]
 					} else {
 						if this.parser.token.Type != lex.TokenRb {
-							err := new error(sprintf("%s '[' and ']' not match", this.parser.errMsgPrefix()))
+							err = new error(sprintf("%s '[' and ']' not match", this.parser.errMsgPrefix()))
 							this.parser.errs.append( err)
 							return null, err
 						}
@@ -439,13 +443,14 @@ class ExpressionSuffix extends  ParserExtends {
 				} else if this.parser.token.Type == lex.TokenLp { //  a.(xxx)
 					//
 					this.Next(lfNotToken) // skip (
-					typ, err := this.parser.parseType()
+					var typ ast.Type
+					typ, err = this.parser.parseType()
 					if err != null {
 						return null, err
 					}
 					this.parser.ifTokenIsLfThenSkip()
 					if this.parser.token.Type != lex.TokenRp {
-						err := new error(sprintf("%s '(' and ')' not match", this.parser.errMsgPrefix()))
+						err = new error(sprintf("%s '(' and ')' not match", this.parser.errMsgPrefix()))
 						this.parser.errs.append( err)
 						return null, err
 					}
@@ -460,13 +465,14 @@ class ExpressionSuffix extends  ParserExtends {
 					prefix = newExpression
 					this.Next(lfIsToken) // skip  )
 				} else {
-					err := new error(sprintf("%s expect  'identifier' or '(',but '%s'",
+					err = new error(sprintf("%s expect  'identifier' or '(',but '%s'",
 						this.parser.errMsgPrefix(), this.parser.token.Description))
 					this.parser.errs.append( err)
 					return null, err
 				}
 			case lex.TokenLp:
-				newExpression, err := this.parseCallExpression(prefix)
+			    var newExpression ast.Expression
+				newExpression, err = this.parseCallExpression(prefix)
 				if err != null {
 					return null, err
 				}
@@ -496,7 +502,7 @@ class ExpressionSuffix extends  ParserExtends {
 			}
 			this.parser.ifTokenIsLfThenSkip()
 			if this.parser.token.Type != lex.TokenRp {
-				err := new error(sprintf("%s except ')' ,but '%s'",
+				err = new error(sprintf("%s except ')' ,but '%s'",
 					this.parser.errMsgPrefix(pos),
 					this.parser.token.Description))
 				this.parser.errs.append( err)
@@ -528,17 +534,17 @@ class ExpressionSuffix extends  ParserExtends {
 			result.data = call
 			result.pos = pos
 		}
-
+        /*
 		if this.parser.token.Type == lex.TokenLt { // <
-			/*
+
 				template function call return type binds
 				fn a ()->(r T) {
 
 				}
 				a<int , ... >
-			*/
+
 			this.Next(lfNotToken) // skip <
-			ts, err := this.parser.parseTypes(lex.TokenGt)
+			ts, err = this.parser.parseTypes(lex.TokenGt)
 			if err != null {
 				return result, err
 			}
@@ -556,6 +562,7 @@ class ExpressionSuffix extends  ParserExtends {
 				result.data.(ast.ExpressionMethodCall).ParameterTypes = ts
 			}
 		}
+		*/
 		return result, null
 	}
 

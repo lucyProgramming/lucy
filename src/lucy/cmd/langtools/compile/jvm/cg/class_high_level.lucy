@@ -51,7 +51,6 @@ public class ClassHighLevel {
 			return prefix
 		}
 		for i := 0; i < 65535 ; i++ {
-			var name string
 			if i == 0 {
 				name = prefix
 			} else {

@@ -49,7 +49,8 @@ class StatementSwitchParser extends ParserExtends{
 		for this.parser.token.Type == lex.TokenCase {
 			this.Next(lfIsToken) // skip case
 			this.parser.unExpectNewLineAndSkip()
-			es, err := this.parser.ExpressionParser.parseExpressions(lex.TokenColon)
+			var es []ast.Expression
+			es, err = this.parser.ExpressionParser.parseExpressions(lex.TokenColon)
 			if err != null {
 				return statementSwitch, err
 			}

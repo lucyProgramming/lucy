@@ -2,7 +2,7 @@ import "java/lang/Long"
 import "java/util/Date"
 
 class ExpressionCheckIdentifier {
-
+	
 	static fn check(e Expression , block Block) -> (valueType Type,err  error) {
 		identifier := e.data.(ExpressionIdentifier)
 		if identifier.name == UnderScore {
@@ -58,6 +58,7 @@ class ExpressionCheckIdentifier {
 				i.used = true
 				return .checkIdentifierThroughImports(e , i)
 			}
+			
 		}
 		if d == null {
 			return null, new error(sprintf("%s '%s' not found", e.pos.errMsgPrefix(), identifier.name))

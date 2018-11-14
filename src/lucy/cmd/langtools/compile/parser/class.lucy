@@ -13,7 +13,7 @@ class ClassParser extends  ParserExtends{
 
 	fn parseClassName() -> (name ast.NameWithPos,err error) {
 		if this.parser.token.Type != lex.TokenIdentifier {
-			err := new error(sprintf("%s expect identifier for class`s name,but '%s'",
+			err = new error(sprintf("%s expect identifier for class`s name,but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.Description))
 			this.parser.errs.append( err)
 			return null, err
@@ -24,7 +24,7 @@ class ClassParser extends  ParserExtends{
 		if this.parser.token.Type == lex.TokenSelection {
 			this.Next(lfNotToken) // skip .
 			if this.parser.token.Type != lex.TokenIdentifier {
-				err := new error(sprintf("%s expect identifer for class`s name,but '%s'",
+				err = new error(sprintf("%s expect identifer for class`s name,but '%s'",
 					this.parser.errMsgPrefix(),
 					this.parser.token.Description))
 				this.parser.errs.append( err)
@@ -40,7 +40,8 @@ class ClassParser extends  ParserExtends{
 	fn parseImplementsInterfaces() -> (names []ast.NameWithPos,err error) {
 		names = []ast.NameWithPos{}
 		for this.parser.token.Type != lex.TokenEof {
-			name, err := this.parseClassName()
+		    var name ast.NameWithPos
+			name, err = this.parseClassName()
 			if err != null {
 				return null, err
 			}
@@ -69,6 +70,7 @@ class ClassParser extends  ParserExtends{
 		if t != null {
 			classDefinition.name = t.name
 		}
+		classDefinition.block = new ast.Block()
 		classDefinition.block.isClassBlock = true
 		classDefinition.block.Class = classDefinition
 		if err != null {
@@ -80,7 +82,6 @@ class ClassParser extends  ParserExtends{
 		classDefinition.pos = this.parser.mkPos()
 		if this.parser.token.Type == lex.TokenExtends { // parse father expression
 			this.Next(lfNotToken) // skip extends
-			var err error
 			classDefinition.superClassName, err = this.parseClassName()
 			if err != null {
 				this.parser.errs.append( err)
@@ -155,7 +156,7 @@ class ClassParser extends  ParserExtends{
 					}
 					continue
 				}
-				err := this.validAfterStatic()
+				err = this.validAfterStatic()
 				if err != null {
 					this.parser.errs.append( err)
 					isStatic = false
@@ -183,15 +184,15 @@ class ClassParser extends  ParserExtends{
 			case lex.TokenVolatile:
 				isVolatile = true
 				this.Next(lfIsToken)
-				if err := this.validAfterVolatile(this.parser.token); err != null {
+				if err = this.validAfterVolatile(this.parser.token); err != null {
 					this.parser.errs.append( err)
 					isVolatile = false
 				}
 			case lex.TokenFinal:
 				isFinal = true
 				this.Next(lfIsToken)
-				if err := this.validAfterFinal(); err != null {
-					this.parser.errs.append( err)
+				if err = this.validAfterFinal(); err != null {
+					this.parser.errs.append(err)
 					isFinal = false
 				}
 			case lex.TokenIdentifier:
@@ -203,7 +204,7 @@ class ClassParser extends  ParserExtends{
 				resetProperty()
 			case lex.TokenConst: // const is for local use
 				this.Next(lfIsToken)
-				err := this.parseConst(classDefinition, comment)
+				err = this.parseConst(classDefinition, comment)
 				if err != null {
 					this.consume(untilSemicolonOrLf)
 					this.Next(lfNotToken)
@@ -212,7 +213,7 @@ class ClassParser extends  ParserExtends{
 			case lex.TokenSynchronized:
 				isSynchronized = true
 				this.Next(lfIsToken)
-				if err := this.validAfterSynchronized(); err != null {
+				if err = this.validAfterSynchronized(); err != null {
 					this.parser.errs.append( err)
 					isSynchronized = false
 				}
@@ -223,8 +224,8 @@ class ClassParser extends  ParserExtends{
 						new error(sprintf("%s cannot  abstact method is non-abstract class",
 							this.parser.errMsgPrefix())))
 				}
-				isAbstract := isAbstract || isInterface
-				f, err := this.parser.FunctionParser.parse(true, isAbstract)
+				var f ast.Function
+				f, err = this.parser.FunctionParser.parse(true, isAbstract || isInterface)
 				if err != null {
 					resetProperty()
 					this.Next(lfNotToken)
@@ -255,7 +256,7 @@ class ClassParser extends  ParserExtends{
 				if isStatic {
 					f.accessFlags |= cg.AccMethodStatic
 				}
-				if isAbstract {
+				if isAbstract || isInterface {
 					f.accessFlags |= cg.AccMethodAbstract
 				}
 				if isFinal {

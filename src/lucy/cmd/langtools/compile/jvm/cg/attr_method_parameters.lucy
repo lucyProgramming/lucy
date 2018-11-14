@@ -23,7 +23,13 @@ public class AttributeMethodParameters  {
 			bs = bs[4:]
 		}
 	}
-
+	public fn append(m MethodParameter){
+		if this.parameters == null {
+			this.parameters = [m]
+		}else{
+			this.parameters.append(m)
+		}
+	}
 	fn ToAttributeInfo(c Class, attrName string...) -> (ret AttributeInfo)  {
 		if this == null || len(this.parameters) == 0 {
 			return null

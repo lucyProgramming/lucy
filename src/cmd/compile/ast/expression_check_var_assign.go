@@ -91,6 +91,9 @@ func (e *Expression) checkVarAssignExpression(block *Block, errs *[]error) {
 				err = PackageBeenCompile.Block.Insert(vd.Name, v.Pos, vd)
 				vd.IsGlobal = true
 			} else {
+				if e := block.InheritedAttribute.Function.Type.reDefineReturnVarOrParameter(vd); e != nil {
+					*errs = append(*errs, e)
+				}
 				err = block.Insert(vd.Name, v.Pos, vd)
 			}
 			identifier.Variable = vd

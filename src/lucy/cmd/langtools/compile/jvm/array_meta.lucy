@@ -39,89 +39,90 @@ class ArrayMeta {
 	ArrayMetas[ast.VariableTypeBool] = new ArrayMeta (    
 		"lucy/deps/ArrayBool",  
 		"([Z)V",   
-		"[Z",     
 		"(II)Llucy/deps/ArrayBool;",
 		"(Z)V",   
 		"(Llucy/deps/ArrayBool;)V",
+		"[Z",   
 		"(IZ)V", 
 		"(I)Z"
 	)
 	ArrayMetas[ast.VariableTypeByte] = new ArrayMeta(      
 		"lucy/deps/ArrayByte",  
-		"([B)V",   "[B",     
+		"([B)V",      
 		"(II)Llucy/deps/ArrayByte;",
 		"(B)V",
 		"(Llucy/deps/ArrayByte;)V",
+		"[B",  
 		"(IB)V",      
 		"(I)B"
 	)
 	ArrayMetas[ast.VariableTypeShort] = new ArrayMeta(  
 		"lucy/deps/ArrayShort",  
 		"([S)V",   
-		"[S",     
 		"(II)Llucy/deps/ArrayShort;",
 		"(S)V",       
-		"(Llucy/deps/ArrayShort;)V",     
+		"(Llucy/deps/ArrayShort;)V",    
+		"[S",     
 		"(IS)V",     
 		"(I)S"
 	)
 	ArrayMetas[ast.VariableTypeChar] = new ArrayMeta(        
 		"lucy/deps/ArrayChar",
 		"([C)V",
-		"[C",
 		"(II)Llucy/deps/ArrayChar;",
 		"(C)V",
 		"(Llucy/deps/ArrayChar;)V",
+		"[C",
 		"(IC)V",
 		"(I)C"
 	)
 	ArrayMetas[ast.VariableTypeInt] = new ArrayMeta( 
 		 "lucy/deps/ArrayInt",
 		 "([I)V",
-		 "[I",
 		 "(II)Llucy/deps/ArrayInt;",
 		 "(I)V",
 		 "(Llucy/deps/ArrayInt;)V",
+		 "[I",
 		 "(II)V",
 		 "(I)I"
 	)
 	ArrayMetas[ast.VariableTypeLong] = new ArrayMeta( 
 		 "lucy/deps/ArrayLong",
 		 "([J)V",
-		 "[J",
 		 "(II)Llucy/deps/ArrayLong;",
 		 "(J)V",
 		 "(Llucy/deps/ArrayLong;)V",
+		 "[J",
 		 "(IJ)V",
 		 "(I)J"
 	)
 	ArrayMetas[ast.VariableTypeFloat] = new ArrayMeta( 
 		 "lucy/deps/ArrayFloat",
 		 "([F)V",
-		 "[F",
 		 "(II)Llucy/deps/ArrayFloat;",
 		 "(F)V",
 		 "(Llucy/deps/ArrayFloat;)V",
+		 "[F",
 		 "(IF)V",
 		 "(I)F"
 	)
 	ArrayMetas[ast.VariableTypeDouble] = new ArrayMeta( 
 		 "lucy/deps/ArrayDouble",
 		 "([D)V",
-		 "[D",
 		 "(II)Llucy/deps/ArrayDouble;",
 		 "(D)V",
-		"(Llucy/deps/ArrayDouble;)V",
+		 "(Llucy/deps/ArrayDouble;)V",
+		 "[D",
 		 "(ID)V",
 		 "(I)D"
 	)
 	ArrayMetas[ast.VariableTypeString] = new ArrayMeta( 
 		"lucy/deps/ArrayString",
 		"([Ljava/lang/String;)V",
-		"[Ljava/lang/String;",
 		"(II)Llucy/deps/ArrayString;",
 		"(Ljava/lang/String;)V",
 		"(Llucy/deps/ArrayString;)V",
+		"[Ljava/lang/String;",
 		"(ILjava/lang/String;)V",
 		"(I)Ljava/lang/String;"
 	)

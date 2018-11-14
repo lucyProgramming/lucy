@@ -10,8 +10,8 @@ fn divisionByZeroErr(pos Pos) -> (err error) {
 fn checkExpressions(block Block, es []Expression, errs []error, singleValueContext bool) ->(valueTypes []Type) {
 	ret := []Type{}
 	for _, v := range es {
-		ts, es := v.check(block)
-		errs.appendAll(es)
+		ts, ess := v.check(block)
+		errs.appendAll(ess)
 		if ts == null {
 			ret.append(null)
 		} else {
@@ -63,7 +63,7 @@ fn shouldAccessFromImports(name string, from Pos, alreadyHave Pos) -> (i Import,
 	// different file
 	// should access from import
 	if from.filename != alreadyHave.filename {
-		i := PackageBeenCompile.getImport(from.filename, name)
+		i = PackageBeenCompile.getImport(from.filename, name)
 		if i != null {
 			i.used = true
 			return i, true
@@ -140,7 +140,7 @@ fn checkConst(block Block, c Constant) -> (err error)  {
 		c.mkDefaultValue()
 	}
 	if c.defaultValueExpression == null {
-		err := new error(sprintf("%s const have no expression", errMsgPrefix(c.pos)))
+		err = new error(sprintf("%s const have no expression", errMsgPrefix(c.pos)))
 		return err
 	}
 	is, err := c.defaultValueExpression.constantFold()
@@ -148,7 +148,7 @@ fn checkConst(block Block, c Constant) -> (err error)  {
 		return err
 	}
 	if is == false {
-		err := new error(sprintf("%s const named '%s' is not defined by const value",
+		err = new error(sprintf("%s const named '%s' is not defined by const value",
 			c.pos.errMsgPrefix(), c.name))
 		return err
 	}
@@ -160,7 +160,7 @@ fn checkConst(block Block, c Constant) -> (err error)  {
 				(c.Type.isFloat() && t.isFloat()) {
 				c.defaultValueExpression.convertLiteralToNumberType(c.Type.Type)
 			} else {
-				err := new error(sprintf("%s cannot use '%s' as '%s' for initialization value",
+				err = new error(sprintf("%s cannot use '%s' as '%s' for initialization value",
 					c.pos.errMsgPrefix(), c.Type.typeString(), t.typeString()))
 				return err
 			}

@@ -83,7 +83,7 @@ class ExpressionCheckMap {
 						doubleMap[value] = v.Key.pos
 					}
 				case VariableTypeString:
-					value := v.Key.data.(string)
+					value := v.Key.stringValue
 					if first := stringMap[value]; first != null {
 						errs.append(errMsg(v.Key.pos, first, value))
 					} else {

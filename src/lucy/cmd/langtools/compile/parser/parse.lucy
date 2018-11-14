@@ -60,7 +60,7 @@ class Parser {
 			return null
 		}
 		for _, t := range this.parseImports() {
-			this.tops.append( new ast.TopNode(t))
+			this.tops.append(new ast.TopNode(t))
 		}
 		if this.onlyParseImport { // only parse imports
 			return this.errs
@@ -554,7 +554,7 @@ class Parser {
 		this.Next(lfIsToken) // skip type key word
 		this.unExpectNewLineAndSkip()
 		if this.token.Type != lex.TokenIdentifier {
-			err := new error(sprintf("%s expect identifer,but '%s'", this.errMsgPrefix(), this.token.Description))
+			err = new error(sprintf("%s expect identifer,but '%s'", this.errMsgPrefix(), this.token.Description))
 			this.errs.append( err)
 			return null, err
 		}
@@ -563,7 +563,7 @@ class Parser {
 		ret.name = this.token.stringValue
 		this.Next(lfIsToken) // skip identifier
 		if this.token.Type != lex.TokenAssign {
-			err := new error(sprintf("%s expect '=',but '%s'", this.errMsgPrefix(), this.token.Description))
+			err = new error(sprintf("%s expect '=',but '%s'", this.errMsgPrefix(), this.token.Description))
 			this.errs.append( err)
 			return null, err
 		}
@@ -590,7 +590,8 @@ class Parser {
 				must be type
 				// int
 			*/
-			t, err := this.parseType()
+			var t ast.Type
+			t, err = this.parseType()
 			if err != null {
 				return null, err
 			}
@@ -607,7 +608,8 @@ class Parser {
 			/*
 				a , b int
 			*/
-			t, err := this.parseType()
+			var t ast.Type
+			t, err = this.parseType()
 			if err != null {
 				return null, err
 			}
@@ -646,11 +648,13 @@ class Parser {
 	fn parseTypedNames() -> (vs []ast.Variable, err error) {
 		vs = []ast.Variable{}
 		for this.token.Type != lex.TokenEof {
-			ns, err := this.parseNameList()
+		    var ns []ast.NameWithPos
+			ns, err = this.parseNameList()
 			if err != null {
 				return vs, err
 			}
-			t, err := this.parseType()
+			var t ast.Type
+			t, err = this.parseType()
 			if err != null {
 				return vs, err
 			}

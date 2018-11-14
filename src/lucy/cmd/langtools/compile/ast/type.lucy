@@ -165,7 +165,7 @@ public class Type {
 		have type or not
 	*/
 	fn isTyped() -> (err error) {
-		if err := this.rightValueValid(); err != null {
+		if err = this.rightValueValid(); err != null {
 			return err
 		}
 		/*
@@ -184,6 +184,17 @@ public class Type {
 	public fn Clone() ->(cloned Type) {
 		cloned = new Type()
 		cloned.Type = this.Type
+		cloned.isBuildIn  = this.isBuildIn
+		cloned.isVariableArgs  = this.isVariableArgs
+		cloned.resolved      = this.  resolved
+		cloned.pos     = this.   pos    
+		cloned.name = this.  name                
+		cloned.Class  = this. Class        
+		cloned.Enum  = this.   Enum       
+		cloned.enumName = this. enumName      
+		cloned.Function  = this. Function        
+		cloned.Package   = this.Package      
+		cloned.alias     = this.alias      
 
 		//TODO:: 
 		if cloned.Type == VariableTypeArray ||
@@ -198,6 +209,7 @@ public class Type {
 		if this.Type == VariableTypeFunction {
 			cloned.functionType = this.functionType.Clone()
 		}
+
 	}
 
 	fn resolve(block Block) -> (err error) {
@@ -232,7 +244,6 @@ public class Type {
 		case VariableTypeArray, VariableTypeJavaArray:
 			return this.array.resolve(block)
 		case VariableTypeMap:
-			var err error
 			if this.Map.K != null {
 				err = this.Map.K.resolve(block)
 				if err != null {
@@ -244,12 +255,12 @@ public class Type {
 			}
 		case VariableTypeFunction:
 			for _, v := range this.functionType.ParameterList {
-				if err := v.Type.resolve(block); err != null {
+				if err = v.Type.resolve(block); err != null {
 					return err
 				}
 			}
 			for _, v := range this.functionType.ReturnList {
-				if err := v.Type.resolve(block); err != null {
+				if err = v.Type.resolve(block); err != null {
 					return err
 				}
 			}
@@ -260,6 +271,7 @@ public class Type {
 
 	fn resolveName(block Block) -> (err error ) {
 		var d  Object
+		assert(this.name != null)
 		if this.name.indexOf(".")  < 0  {
 			var loadFromImport bool
 			d = block.searchType(this.name)
@@ -302,7 +314,7 @@ public class Type {
 	}
 
 	fn getNameFromImport() -> (d Object, err error) {
-		if this.name.indexOf(".")  > 0  {
+		if this.name.indexOf(".") < 0  {
 			i := PackageBeenCompile.getImport(this.pos.filename, this.name)
 			if i != null {
 				i.used = true
@@ -311,11 +323,13 @@ public class Type {
 			return null, new error(sprintf("%s type named '%s' not found",
 				errMsgPrefix(this.pos), this.name))
 		}
-		packageAndName := this.name.split(".")
-		i := PackageBeenCompile.getImport(this.pos.filename, packageAndName[0])
+		index := this.name.indexOf(".")
+		packageName := this.name[:index]
+		className := this.name[index+1:]
+		i := PackageBeenCompile.getImport(this.pos.filename, packageName)
 		if null == i {
 			return null, new error(sprintf("%s package '%s' not imported",
-				errMsgPrefix(this.pos), packageAndName[0]))
+				errMsgPrefix(this.pos), packageName))
 		}
 		i.used = true
 		p, err := PackageBeenCompile.load(i.Import)
@@ -326,20 +340,20 @@ public class Type {
 		if pp, ok := p.(Package); ok &&
 			pp != null {
 			var exists bool
-			d, exists = pp.block.nameExists(packageAndName[1])
+			d, exists = pp.block.nameExists(className)
 			if exists == false {
 				err = new error(sprintf("%s '%s' not found",
-					errMsgPrefix(this.pos), packageAndName[1]))
+					errMsgPrefix(this.pos), className))
 			}
 			return d, err
 		} else {
 			return null, new error(sprintf("%s '%s' is not a package",
-				errMsgPrefix(this.pos), packageAndName[0]))
+				errMsgPrefix(this.pos), packageName))
 		}
 	}
 
 	fn makeTypeFrom(d Object) -> (err error)  {
-		if dd := d.(Class) ; dd != null {
+		if dd ,ok := d.(Class) ; ok{
 			if dd.loadFromOutSide && dd.isPublic() == false {
 				PackageBeenCompile.errors.append(
 				    new error(sprintf("%s class '%s' is not public",
@@ -349,17 +363,17 @@ public class Type {
 			this.Class = dd
 			return null
 		}
-		if t := d.(Type) ; t != null {
+		if t ,ok := d.(Type) ; ok{
 			pos := this.pos
 			alias := this.alias
 			resolved := this.resolved
-			//TODO ::
+			t.cp(this)
 			this.pos = pos
 			this.alias = alias
 			this.resolved = resolved
 			return null
 		}
-		if dd := d.(Enum) ; dd != null {
+		if dd ,ok:= d.(Enum) ; ok {
 			if dd.loadFromOutSide && dd.isPublic() == false {
 				PackageBeenCompile.errors.append(
 					new error(sprintf("%s enum '%s' is not public",
@@ -512,7 +526,7 @@ public class Type {
 			return this.array.canBeBindWithParameterTypes(parameterTypes)
 		}
 		if this.Type == VariableTypeMap {
-			err := this.Map.K.canBeBindWithParameterTypes(parameterTypes)
+			err = this.Map.K.canBeBindWithParameterTypes(parameterTypes)
 			if err != null {
 				return err
 			}
@@ -555,7 +569,7 @@ public class Type {
 
 	 */
 	fn canBeBindWithType(ft FunctionType, mkParameterTypes map{string->Type}, bind Type) -> (err error)  {
-		if err := bind.rightValueValid(); err != null {
+		if err = bind.rightValueValid(); err != null {
 			return err
 		}
 		if bind.Type == VariableTypeNull {
@@ -573,7 +587,7 @@ public class Type {
 		}
 		if this.Type == VariableTypeMap && bind.Type == VariableTypeMap {
 			if len(this.Map.K.getParameterType(ft)) > 0 {
-				err := this.Map.K.canBeBindWithType(ft, mkParameterTypes, bind.Map.K)
+				err = this.Map.K.canBeBindWithType(ft, mkParameterTypes, bind.Map.K)
 				if err != null {
 					return err
 				}

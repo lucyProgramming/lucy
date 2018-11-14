@@ -458,7 +458,7 @@ public class Block {
     }
 
     public fn Insert(name string, pos Pos, d Object) -> (err error) {
-        if err := this.nameIsValid(name, pos); err != null {
+        if err = this.nameIsValid(name, pos); err != null {
             return err
         }
         // handle label
@@ -503,7 +503,7 @@ public class Block {
         if e , ok:= d.(Enum) ; ok {
             this.enums[name] = e
             for _, v := range e.enums {
-                err := this.Insert(v.name, v.pos, v)
+                err = this.Insert(v.name, v.pos, v)
                 if err != null {
                     return err
                 }

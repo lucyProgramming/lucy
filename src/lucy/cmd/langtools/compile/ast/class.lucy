@@ -65,6 +65,9 @@ public class Class {
 		this.methods = load.methods
 		this.superClass = load.superClass
 		this.interfaces = load.interfaces
+        this.isJava = load.isJava 
+        this.isGlobal = load.isGlobal
+        this.isBuildIn = load.isBuildIn
         return null
     }
 
@@ -83,6 +86,7 @@ public class Class {
         m.Function = new Function()
         m.Function.accessFlags |= cg.AccMethodPublic
         m.Function.pos = this.pos
+        m.Function.block = new Block()
         m.Function.block.isFunctionBlock = true
         m.Function.block.Fn = m.Function
         m.Function.name = SpecialMethodInit
@@ -99,6 +103,7 @@ public class Class {
                 t.pos = this.pos
                 t.op = "methodCall"
                 t2 := new ExpressionIdentifier()
+                t.data = t2
                 t2.name = ThisPointerName
                 call.Expression = t
             }
@@ -235,19 +240,19 @@ public class Class {
             variableType.Type = VariableTypeName // naming
             variableType.name = this.superClassName.name
             variableType.pos = this.superClassName.pos
-            err := variableType.resolve(this.block)
+            err = variableType.resolve(this.block)
             if err != null {
                 return err
             }
             if variableType.Type != VariableTypeObject {
-                err := new error(sprintf("%s '%s' is not a class",
+                err = new error(sprintf("%s '%s' is not a class",
                     this.pos.errMsgPrefix(), this.superClassName.name))
                 return err
             }
             this.superClass = variableType.Class
             if this.IsInterface() {
                 if this.superClass.name != JavaRootClass {
-                    err := new error(sprintf("%s interface`s super-class must be '%s'",
+                    err = new error(sprintf("%s interface`s super-class must be '%s'",
                         errMsgPrefix(this.superClassName.pos), JavaRootClass))
 
                     return err
@@ -388,7 +393,7 @@ public class Class {
         }
         this.loadSuperClassCalled = true
         if this.name == JavaRootClass {
-            err := new error(sprintf("%s root class already", errMsgPrefix(pos)))
+            err = new error(sprintf("%s root class already", errMsgPrefix(pos)))
             return err
         }
         if this.superClassName == null {
@@ -396,7 +401,7 @@ public class Class {
         }
         c, err := PackageBeenCompile.loadClass(this.superClassName.name)
         if err != null {
-            err := new error(sprintf("%s %s", pos.errMsgPrefix(), err.getMessage()))
+            err = new error(sprintf("%s %s", pos.errMsgPrefix(), err.getMessage()))
             return err
         }
         this.superClass = c
@@ -413,6 +418,7 @@ public class Class {
         if err != null {
             return null, false, err
         }
+        print(this.name , this.isJava)
         var args []Expression
         if newCase != null {
             args = newCase.Args
@@ -420,7 +426,8 @@ public class Class {
             args = callFatherCase.Args
         }
         for _, v := range this.methods[SpecialMethodInit] {
-            vArgs, err := v.Function.Type.fitArgs(pos, args, callArgs, v.Function)
+            var vArgs CallVariableArgs
+            vArgs, err = v.Function.Type.fitArgs(pos, args, callArgs, v.Function)
             if err == null {
                 if newCase != null {
                     newCase.VArgs = vArgs
@@ -581,7 +588,7 @@ public class Class {
             }
         }
         for _, v := range this.interfaces {
-            err := v.loadSelf(pos)
+            err = v.loadSelf(pos)
             if err != null {
                 return null, false, err
             }
@@ -716,10 +723,14 @@ public class Class {
     }
 
     fn checkPhase1()-> (errs []error = []error{}){
-        if this.block.inheritedAttribute.classAndFunctionNames == "" {
+        if this.block.inheritedAttribute.classAndFunctionNames != null {
+            if this.block.inheritedAttribute.classAndFunctionNames == "" {
+                this.block.inheritedAttribute.classAndFunctionNames = common.getBaseName(this.name)
+            } else {
+                this.block.inheritedAttribute.classAndFunctionNames += "$" + common.getBaseName(this.name)
+            }
+        }else {
             this.block.inheritedAttribute.classAndFunctionNames = common.getBaseName(this.name)
-        } else {
-            this.block.inheritedAttribute.classAndFunctionNames += "$" + common.getBaseName(this.name)
         }
         this.mkDefaultConstruction()
         errs.appendAll(this.block.checkConstants())
@@ -924,7 +935,7 @@ public class Class {
         is := false
         c := this
         pos := this.pos
-        if err := this.loadSuperClass(pos); err != null {
+        if err = this.loadSuperClass(pos); err != null {
             return err
         }
         if this.superClass == null {
@@ -944,7 +955,7 @@ public class Class {
             }
             m[c.name] = true
             arr.append(c.name)
-            err := c.loadSuperClass(pos)
+            err = c.loadSuperClass(pos)
             if err != null {
                 return err
             }

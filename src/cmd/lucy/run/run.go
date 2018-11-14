@@ -20,7 +20,7 @@ type RunLucyPackage struct {
 	mainPackageLucyPath string
 	Package             string
 	command             string
-	compilerExe         string
+	compilerExe         []string
 	classPaths          []string
 	flags               Flags
 	packagesCompiled    map[string]*PackageCompiled
@@ -44,6 +44,8 @@ func (runLucyPackage *RunLucyPackage) parseCmd(args []string) error {
 		"build", false, "build package and no run")
 	cmd.BoolVar(&runLucyPackage.flags.verbose,
 		"v", false, "verbose")
+	cmd.BoolVar(&runLucyPackage.flags.goCompiler,
+		"go-compiler", false, "use go compiler")
 	cmd.BoolVar(&runLucyPackage.flags.help, "h", false,
 		"print help message")
 	var runArgs []string
@@ -64,18 +66,20 @@ func (runLucyPackage *RunLucyPackage) parseCmd(args []string) error {
 	return nil
 }
 
-func (runLucyPackage *RunLucyPackage) setCompiler() error {
-
-	runLucyPackage.compilerExe = filepath.Join(runLucyPackage.lucyRoot, "bin", "compile") //compiler at
-	t := runLucyPackage.compilerExe
-	if runtime.GOOS == "windows" {
-		t += ".exe"
+func (runLucyPackage *RunLucyPackage) setCompiler() {
+	if runLucyPackage.flags.goCompiler {
+		t := filepath.Join(runLucyPackage.lucyRoot, "bin", "compile") //compiler at
+		if runtime.GOOS == "windows" {
+			t += ".exe"
+		}
+		_, e := os.Stat(t)
+		if e != nil {
+			panic("compiler not found")
+		}
+		runLucyPackage.compilerExe = []string{t}
+	} else {
+		runLucyPackage.compilerExe = []string{"java", "lucy.cmd.langtools.compile.main"}
 	}
-	_, e := os.Stat(t)
-	if e != nil {
-		return fmt.Errorf("compiler not found")
-	}
-	return nil
 }
 
 func (runLucyPackage *RunLucyPackage) RunCommand(command string, args []string) {
@@ -105,11 +109,7 @@ func (runLucyPackage *RunLucyPackage) RunCommand(command string, args []string) 
 		os.Exit(2)
 	}
 	runLucyPackage.classPaths = common.GetClassPaths()
-	err = runLucyPackage.setCompiler()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(2)
-	}
+	runLucyPackage.setCompiler()
 	runLucyPackage.packagesCompiled = make(map[string]*PackageCompiled)
 	founds := runLucyPackage.findPackageIn(runLucyPackage.Package)
 	err = runLucyPackage.foundError(runLucyPackage.Package, founds)
@@ -280,8 +280,10 @@ func (runLucyPackage *RunLucyPackage) needCompile(lucyPath string, packageName s
 }
 
 func (runLucyPackage *RunLucyPackage) parseImports(files []string) ([]string, error) {
-	args := append([]string{"-only-import"}, files...)
-	cmd := exec.Command(runLucyPackage.compilerExe, args...)
+	args := runLucyPackage.compilerExe[1:]
+	args = append(args, "-only-import")
+	args = append(args, files...)
+	cmd := exec.Command(runLucyPackage.compilerExe[0], args...)
 	cmd.Stderr = os.Stderr
 	bs, err := cmd.Output()
 	if err != nil {
@@ -477,12 +479,14 @@ func (runLucyPackage *RunLucyPackage) buildPackage(lucyPath string, packageName 
 	}
 	// cd to destDir
 	os.Chdir(destinationDir)
-	args := []string{"-package-name", packageName}
+	args := runLucyPackage.compilerExe[1:]
+	args = append(args, []string{"-package-name", packageName}...)
 	if runLucyPackage.flags.compilerFlags != "" {
 		args = append(args, strings.Split(runLucyPackage.flags.compilerFlags, " ")...)
 	}
 	args = append(args, lucyFiles...)
-	cmd := exec.Command(runLucyPackage.compilerExe, args...)
+
+	cmd := exec.Command(runLucyPackage.compilerExe[0], args...)
 	cmd.Stderr = os.Stderr
 	bs, err := cmd.Output()
 	if err != nil {

@@ -3,9 +3,12 @@ import "lucy/cmd/langtools/compile/common"
 
 class ExpressionCheckMethodCall {
 	
-	
+
 	static fn check(e Expression , block Block, errs []error) -> (valueTypes []Type) {
 		call := e.data.(ExpressionMethodCall)
+		if call.Args == null {
+		    call.Args = []Expression{}
+		}
 		object, es := call.Expression.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if object == null {

@@ -6,4 +6,5 @@ type Flags struct {
 	verbose       bool
 	compilerFlags string
 	help          bool
+	goCompiler    bool
 }

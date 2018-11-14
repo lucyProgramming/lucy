@@ -49,15 +49,13 @@ class BuildinFunctionCatchPanic {
             c.insertClassConst(javaExceptionClass, code.codes[code.codeLength+1:code.codeLength+3])
             code.codes[code.codeLength+3] = cg.OP_dup
             code.codeLength += 4
-            {
-                verificationTypeInfo := new cg.StackMapVerificationTypeInfo()
-                uninitializedVariableInfo := new cg.StackMapUninitializedVariableInfo(char(code.codeLength - 4))
-                verificationTypeInfo.Verify = uninitializedVariableInfo
-                state.stacks.append( verificationTypeInfo)
-                state.stacks.append( verificationTypeInfo)
-            }
+            verificationTypeInfo := new cg.StackMapVerificationTypeInfo()
+            uninitializedVariableInfo := new cg.StackMapUninitializedVariableInfo(char(code.codeLength - 4))
+            verificationTypeInfo.Verify = uninitializedVariableInfo
+            state.stacks.append(verificationTypeInfo)
+            state.stacks.append(verificationTypeInfo)
+            
             stack := this.eb.build(c, code, call.Args[0], context, state)
-            state.popStack(2)
             if t := char(2) + stack; t > maxStack {
                 maxStack = t
             }
@@ -68,6 +66,7 @@ class BuildinFunctionCatchPanic {
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel( javaExceptionClass, specialMethodInit, "(Ljava/lang/String;)V"),
                 code.codes[code.codeLength+1:code.codeLength+3])
             code.codeLength += 3
+            state.popStack(2)
         }
         code.codes[code.codeLength] = cg.OP_athrow
         code.codeLength++

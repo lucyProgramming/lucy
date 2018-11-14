@@ -31,7 +31,6 @@ class StatementForParser extends ParserExtends{
 			statementFor.Init = statementFor.condition
 			statementFor.condition = null // mk null
 			//condition
-			var err error
 			if this.parser.token.Type != lex.TokenSemicolon {
 				statementFor.condition, err = this.parser.ExpressionParser.parseExpression(false)
 				if err != null {

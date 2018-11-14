@@ -47,16 +47,13 @@ func (this *BuildExpression) mkBuildInPanic(
 		class.InsertClassConst(javaExceptionClass, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.Codes[code.CodeLength+3] = cg.OP_dup
 		code.CodeLength += 4
-		{
-			verificationTypeInfo := &cg.StackMapVerificationTypeInfo{}
-			uninitializedVariableInfo := &cg.StackMapUninitializedVariableInfo{}
-			uninitializedVariableInfo.CodeOffset = uint16(code.CodeLength - 4)
-			verificationTypeInfo.Verify = uninitializedVariableInfo
-			state.Stacks = append(state.Stacks, verificationTypeInfo)
-			state.Stacks = append(state.Stacks, verificationTypeInfo)
-		}
+		verificationTypeInfo := &cg.StackMapVerificationTypeInfo{}
+		uninitializedVariableInfo := &cg.StackMapUninitializedVariableInfo{}
+		uninitializedVariableInfo.CodeOffset = uint16(code.CodeLength - 4)
+		verificationTypeInfo.Verify = uninitializedVariableInfo
+		state.Stacks = append(state.Stacks, verificationTypeInfo)
+		state.Stacks = append(state.Stacks, verificationTypeInfo)
 		stack := this.build(class, code, call.Args[0], context, state)
-		state.popStack(2)
 		if t := 2 + stack; t > maxStack {
 			maxStack = t
 		}
@@ -70,6 +67,7 @@ func (this *BuildExpression) mkBuildInPanic(
 			Descriptor: "(Ljava/lang/String;)V",
 		}, code.Codes[code.CodeLength+1:code.CodeLength+3])
 		code.CodeLength += 3
+		state.popStack(2)
 	}
 	code.Codes[code.CodeLength] = cg.OP_athrow
 	code.CodeLength++

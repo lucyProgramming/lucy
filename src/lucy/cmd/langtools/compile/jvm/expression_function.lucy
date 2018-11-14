@@ -31,7 +31,7 @@ class  BuildExpressionFunction {
                 }
 			}
 		}
-		if function.name == "" {
+		if function.name == null || function.name == "" {
 			function.name = function.nameLiteralFunction()
 		}
 		if function.isClosureFunction == false {

@@ -40,7 +40,7 @@ class BuildForRangeJavaArray {
         forState := new StackMapState(state)
         defer state.addTop(forState) // add top
         attr := s.RangeAttr
-        var autoVar AutoVariableForRangeJavaArray
+        var autoVar = new AutoVariableForRangeJavaArray()
         {
             autoVar.Elements = code.maxLocals
             code.maxLocals++

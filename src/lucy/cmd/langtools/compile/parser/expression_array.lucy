@@ -44,7 +44,7 @@ class ExpressionArrayParser extends ParserExtends {
 				[]byte("1111111111")
 			*/
 			this.Next(lfNotToken) // skip (
-			e, err := this.ep.parseExpression(false)
+			e, err = this.ep.parseExpression(false)
 			if err != null {
 				return null, err
 			}
@@ -92,7 +92,7 @@ class ExpressionArrayParser extends ParserExtends {
 	//{1,2,3}  {{1,2,3},{456}}
 	fn parseArrayValues() ->  (es []ast.Expression = []ast.Expression{},err error) {
 		if this.parser.token.Type != lex.TokenLc {
-			err := new error(sprintf("%s expect '{',but '%s'",
+			err = new error(sprintf("%s expect '{',but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.Description))
 			this.parser.errs.append( err)
 			return null, err
@@ -106,7 +106,8 @@ class ExpressionArrayParser extends ParserExtends {
 				continue
 			}
 			if this.parser.token.Type == lex.TokenLc {
-				ees, err := this.parseArrayValues()
+			    var ees []ast.Expression
+				ees, err = this.parseArrayValues()
 				if err != null {
 					return es, err
 				}
@@ -119,7 +120,8 @@ class ExpressionArrayParser extends ParserExtends {
 				arrayExpression.data = data
 				es.append(arrayExpression)
 			} else {
-				e, err := this.ep.parseExpression(false)
+			    var e ast.Expression
+				e, err = this.ep.parseExpression(false)
 				if e != null {
 					es.append(e)
 				}
@@ -135,7 +137,7 @@ class ExpressionArrayParser extends ParserExtends {
 		}
 		this.parser.ifTokenIsLfThenSkip()
 		if this.parser.token.Type != lex.TokenRc {
-			err := new error(sprintf("%s expect '}',but '%s'",
+			err = new error(sprintf("%s expect '}',but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.Description))
 			this.parser.errs.append( err)
 			this.parser.consume(untilRc)

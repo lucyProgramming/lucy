@@ -34,7 +34,8 @@ class BuildExpressionMethodCall {
         case ast.VariableTypeDynamicSelector:
             return this.buildMethodCallOnDynamicSelector(c, code, e, context, state)
         case ast.VariableTypeClass:
-            if call.Method.Function.jvmDescriptor == "" {
+            if call.Method.Function.jvmDescriptor == null ||
+                call.Method.Function.jvmDescriptor == "" {
                 call.Method.Function.jvmDescriptor = Descriptor.methodDescriptor(call.Method.Function.Type)
             }
             maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.Args, call.VArgs, context, state)
@@ -53,7 +54,8 @@ class BuildExpressionMethodCall {
             }
             return
         case ast.VariableTypeObject, ast.VariableTypeString:
-            if call.Method.Function.jvmDescriptor == "" {
+            if call.Method.Function.jvmDescriptor == null ||
+                call.Method.Function.jvmDescriptor == "" {
                 call.Method.Function.jvmDescriptor = Descriptor.methodDescriptor(call.Method.Function.Type)
             }
             maxStack = this.eb.build(c, code, call.Expression, context, state)

@@ -12,5 +12,4 @@ public class MethodHighLevel {
 	public	AttributeDefaultParameters            AttributeDefaultParameters
 	public	AttributeMethodParameters             AttributeMethodParameters
 	public	AttributeLucyReturnListNames          AttributeMethodParameters
-	public	AttributeLucyComment                  AttributeLucyComment
 }

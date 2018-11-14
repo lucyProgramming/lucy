@@ -25,7 +25,8 @@ class TypeParser extends ParserExtends {
 			//lookahead
 			this.Next(lfIsToken) //skip ]
 			this.parser.unExpectNewLineAndSkip()
-			array, err := this.parseType()
+			var array ast.Type
+			array, err = this.parseType()
 			if err != null {
 				return null, err
 			}
@@ -87,7 +88,7 @@ class TypeParser extends ParserExtends {
 		case lex.TokenMap:
 			this.Next(lfNotToken) // skip map key word
 			if this.parser.token.Type != lex.TokenLc {
-				err := new error(sprintf("%s expect '{',but '%s'",
+				err = new error(sprintf("%s expect '{',but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.Description))
 				this.parser.errs.append( err)
 				return null, err
@@ -100,19 +101,19 @@ class TypeParser extends ParserExtends {
 			}
 			this.parser.ifTokenIsLfThenSkip()
 			if this.parser.token.Type != lex.TokenArrow {
-				err := new error(sprintf("%s expect '->',but '%s'",
+				err = new error(sprintf("%s expect '->',but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.Description))
 				this.parser.errs.append( err)
 				return null, err
 			}
 			this.Next(lfNotToken) // skip ->
-			v, err := this.parseType()
+			v, err = this.parseType()
 			if err != null {
 				return null, err
 			}
 			this.parser.ifTokenIsLfThenSkip()
 			if this.parser.token.Type != lex.TokenRc {
-				err := new error(sprintf("%s expect '}',but '%s'",
+				err = new error(sprintf("%s expect '}',but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.Description))
 				this.parser.errs.append( err)
 				return null, err
@@ -128,7 +129,8 @@ class TypeParser extends ParserExtends {
 
 		case lex.TokenFn:
 			this.Next(lfIsToken)
-			ft, err := this.parser.FunctionParser.parseFunctionType()
+			var ft ast.FunctionType
+			ft, err = this.parser.FunctionParser.parseFunctionType()
 			if err != null {
 				return null, err
 			}
@@ -156,7 +158,7 @@ class TypeParser extends ParserExtends {
 				this.Next(lfIsToken)
 			}
 		default:
-			err := new error(sprintf("%s unkown begining '%s' token for a type",
+			err = new error(sprintf("%s unkown begining '%s' token for a type",
 				this.parser.errMsgPrefix(), this.parser.token.Description))
 			this.parser.errs.append( err)
 			return null, err
@@ -234,7 +236,8 @@ class TypeParser extends ParserExtends {
 	fn parseTypes(endTokens lex.TokenKind...) ->(ts []ast.Type,err error) {
 		ts = []ast.Type{}
 		for this.parser.token.Type != lex.TokenEof {
-			t, err := this.parseType()
+		    var t ast.Type
+			t, err = this.parseType()
 			if err != null {
 				return
 			}

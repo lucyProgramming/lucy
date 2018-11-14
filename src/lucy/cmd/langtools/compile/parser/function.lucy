@@ -17,7 +17,7 @@ class FunctionParser extends ParserExtends{
 		this.Next(lfIsToken) // skip fn key word
 		this.parser.unExpectNewLineAndSkip()
 		if needName && this.parser.token.Type != lex.TokenIdentifier {
-			err := new error(sprintf("%s expect function name,but '%s'",
+			err = new error(sprintf("%s expect function name,but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.Description))
 			this.parser.errs.append( err)
 			this.consume(untilLp)
@@ -71,7 +71,6 @@ class FunctionParser extends ParserExtends{
 		functionType = new ast.FunctionType()
 		if this.parser.token.Type == lex.TokenLt {
 			this.Next(lfNotToken)
-			var err error
 			functionType.TemplateNames, err = this.parser.parseNameList()
 			if err != null {
 				this.consume(untilLp)
@@ -177,7 +176,8 @@ class FunctionParser extends ParserExtends{
 				this.Next(lfNotToken)
 				continue
 			}
-			v, err := this.parseTypedNameDefaultValue()
+			var v []ast.Variable
+			v, err = this.parseTypedNameDefaultValue()
 			if v != null {
 				returnList.appendAll(v)
 			}

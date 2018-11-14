@@ -68,7 +68,7 @@ class BuildExpressionOpAssign {
         }
         bin := e.data.(ast.ExpressionBinary)
         if bin.Left.value.Type == ast.VariableTypeString {
-            return this.eb.BuildExpressionStrcat.buildStrCat(c, code, e, context, state)
+            return this.buildStrPlusAssign(c, code, e, context, state)
         }
         maxStack, remainStack, op, leftValueKind := this.eb.BuildExpressionLeftValue.getLeftValue(c, code, bin.Left, context, state)
         //left value must can be used as right value,

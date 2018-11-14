@@ -63,10 +63,10 @@ public class Package {
 		if this.files == null {
 			return null
 		}
-		if file := this.files[file]; file == null {
-			return null
+		if t := this.files[file]; t != null && t.Imports != null {
+			return t.Imports[accessName]
 		} else {
-			return file.Imports[accessName]
+			return null
 		}
 	}
 
@@ -151,18 +151,17 @@ public class Package {
 				continue
 			}
 			if t ,ok:= v.Node.(Import) ; ok {
-				if t.alias != UnderScore {
-					err := this.insertImport(t)
-					if err != null {
-						errs.append(err)
-					}
-				} else {
+				if t.alias != null && t.alias == UnderScore{
 					if this.unUsedPackage == null {
 						this.unUsedPackage = new map { string -> Import}()
 					}
 					this.unUsedPackage[t.Import] = t
+				}else {
+					err := this.insertImport(t)
+					if err != null {
+						errs.append(err)
+					}
 				}
-				continue
 			}
 			if t ,ok:= v.Node.(Expression) ; ok {
 				if t.Type == ExpressionTypeVar || t.Type == ExpressionTypeVarAssign {
@@ -256,7 +255,7 @@ public class Package {
 		}
 
 		for _, v := range this.block.Classes {
-			es := v.checkPhase1()
+			es = v.checkPhase1()
 			this.errors.appendAll(es)
 			if this.shouldStop(null) {
 				return this.errors
@@ -389,7 +388,7 @@ public class Package {
 		if this.loadedClasses == null {
 			this.loadedClasses = new map{ string -> Class }()
 		}
-		if c := this.loadedClasses[className];   c != null {
+		if c = this.loadedClasses[className];   c != null {
 			return c, null
 		}
 		x, err := ImportsLoader.LoadImport(className)
