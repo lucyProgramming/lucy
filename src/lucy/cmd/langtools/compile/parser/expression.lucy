@@ -123,7 +123,7 @@ class ExpressionParser extends  ParserExtends {
 
 	fn parseEquationRight(left ast.Expression , expressionType ast.ExpressionTypeKind, isMulti bool) -> (e ast.Expression, err error) {
         pos := this.parser.mkPos()
-        opName := this.parser.token.Description
+        opName := this.parser.token.description
         this.Next(lfNotToken) // skip = :=
         result := new ast.Expression()
         result.Type = expressionType
@@ -220,7 +220,7 @@ class ExpressionParser extends  ParserExtends {
 			this.parser.ifTokenIsLfThenSkip()
 		}
 		if this.parser.token.Type != lex.TokenLc {
-			err = new error(sprintf("%s expect '{',but '%s'", this.parser.errMsgPrefix(), this.parser.token.Description))
+			err = new error(sprintf("%s expect '{',but '%s'", this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append( err)
 			return null, err
 		}
@@ -243,7 +243,7 @@ class ExpressionParser extends  ParserExtends {
 			// arrow
 			if this.parser.token.Type != lex.TokenArrow {
 				err = new error(sprintf("%s expect '->',but '%s'",
-					this.parser.errMsgPrefix(), this.parser.token.Description))
+					this.parser.errMsgPrefix(), this.parser.token.description))
 				this.parser.errs.append( err)
 				return
 			}
@@ -273,7 +273,7 @@ class ExpressionParser extends  ParserExtends {
 		this.parser.ifTokenIsLfThenSkip()
 		if this.parser.token.Type != lex.TokenRc {
 			err = new error(sprintf("%s expect '}',but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.Description))
+				this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append( err)
 			this.parser.consume(untilRc)
 		}

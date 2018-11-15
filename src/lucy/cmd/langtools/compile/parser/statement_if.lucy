@@ -42,7 +42,7 @@ class StatementIfParser extends ParserExtends {
 		this.parser.ifTokenIsLfThenSkip()
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s missing '{' after condition,but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.Description))
+				this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append( err)
 			this.consume(untilLc)
 		}
@@ -51,7 +51,7 @@ class StatementIfParser extends ParserExtends {
 		this.bp.parseStatementList(statementIf.block, false)
 		if this.parser.token.Type != lex.TokenRc {
 			this.parser.errs.append( new error(sprintf("%s expect '}', but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.Description)))
+				this.parser.errMsgPrefix(), this.parser.token.description)))
 			this.consume(untilRc)
 		}
 		this.Next(lfIsToken) // skip }
@@ -90,7 +90,7 @@ class StatementIfParser extends ParserExtends {
 			this.bp.parseStatementList(statementIf.Else, false)
 			if this.parser.token.Type != lex.TokenRc {
 				err = new error(sprintf("%s expect '}', but '%s'",
-					this.parser.errMsgPrefix(), this.parser.token.Description))
+					this.parser.errMsgPrefix(), this.parser.token.description))
 				this.parser.errs.append( err)
 				this.consume(untilRc)
 			}
@@ -111,7 +111,7 @@ class StatementIfParser extends ParserExtends {
 			}
 			if this.parser.token.Type != lex.TokenLc {
 				err = new error(sprintf("%s not '{' after a expression,but '%s'",
-					this.parser.errMsgPrefix(), this.parser.token.Description))
+					this.parser.errMsgPrefix(), this.parser.token.description))
 				this.parser.errs.append(err)
 				this.consume(untilLc)
 			}
@@ -124,7 +124,7 @@ class StatementIfParser extends ParserExtends {
 			elseIfList.append(t)
 			if this.parser.token.Type != lex.TokenRc {
 				err = new error(sprintf("%s expect '}', but '%s'",
-					this.parser.errMsgPrefix(), this.parser.token.Description))
+					this.parser.errMsgPrefix(), this.parser.token.description))
 				this.parser.errs.append(err)
 				this.consume(untilRc)
 			}

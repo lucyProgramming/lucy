@@ -29,7 +29,7 @@ const	javaDoubleClass              = "java/lang/Double"
 const	javaLongClass                = "java/lang/Long"
 const	throwableClass               = "java/lang/Throwable"
 const	javaPrintStreamClass         = "java/io/PrintStream"
-const	mapClass                     = "java/util/concurrent/ConcurrentHashMap"
+const	mapClass                     = "java/util/HashMap"
 
 
 var typeInt = new  ast.Type()

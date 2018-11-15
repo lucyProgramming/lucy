@@ -27,7 +27,7 @@ class BlockParser  extends ParserExtends{
             return null
         }
         return new error(sprintf("%s not valid token '%s' after defer",
-            this.parser.errMsgPrefix(), this.parser.token.Description))
+            this.parser.errMsgPrefix(), this.parser.token.description))
     }
 
 	fn parseStatementList(block ast.Block, isGlobal bool) {
@@ -247,7 +247,7 @@ class BlockParser  extends ParserExtends{
 				this.parser.ifTokenIsLfThenSkip()
 				if this.parser.token.Type != lex.TokenRc {
 					this.parser.errs.append( new error(sprintf("%s expect '}', but '%s'",
-						this.parser.errMsgPrefix(), this.parser.token.Description)))
+						this.parser.errMsgPrefix(), this.parser.token.description)))
 					this.consume(untilRc)
 				}
 				this.Next(lfNotToken)
@@ -317,7 +317,7 @@ class BlockParser  extends ParserExtends{
 				if this.parser.token.Type != lex.TokenIdentifier {
 					this.parser.errs.append(
 						new error(sprintf("%s  missing identifier after goto statement, but '%s'",
-							this.parser.errMsgPrefix(), this.parser.token.Description)))
+							this.parser.errMsgPrefix(), this.parser.token.description)))
 					this.consume(untilSemicolonOrLf)
 					this.Next(lfNotToken)
 					continue
@@ -385,7 +385,7 @@ class BlockParser  extends ParserExtends{
 				}
 			case lex.TokenElse, lex.TokenElseif:
 				this.parser.errs.append(
-					new error(sprintf("%s unexpected '%s'", this.parser.errMsgPrefix(), this.parser.token.Description)))
+					new error(sprintf("%s unexpected '%s'", this.parser.errMsgPrefix(), this.parser.token.description)))
 				this.Next(lfIsToken)
 				
 			default:

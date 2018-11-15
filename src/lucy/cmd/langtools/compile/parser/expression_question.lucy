@@ -27,7 +27,7 @@ class ExpressionQuestionParser extends ParserExtends {
 		this.parser.unExpectNewLineAndSkip()
 		if this.parser.token.Type != lex.TokenColon {
 			err = new error(sprintf("%s expect ':' ,but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.Description))
+				this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append( err)
 			return left, err
 		}

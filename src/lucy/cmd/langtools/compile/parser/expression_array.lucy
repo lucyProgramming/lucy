@@ -93,7 +93,7 @@ class ExpressionArrayParser extends ParserExtends {
 	fn parseArrayValues() ->  (es []ast.Expression = []ast.Expression{},err error) {
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s expect '{',but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.Description))
+				this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append( err)
 			return null, err
 		}
@@ -138,7 +138,7 @@ class ExpressionArrayParser extends ParserExtends {
 		this.parser.ifTokenIsLfThenSkip()
 		if this.parser.token.Type != lex.TokenRc {
 			err = new error(sprintf("%s expect '}',but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.Description))
+				this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append( err)
 			this.parser.consume(untilRc)
 		}

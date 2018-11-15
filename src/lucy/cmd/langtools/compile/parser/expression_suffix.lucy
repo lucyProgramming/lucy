@@ -118,7 +118,7 @@ class ExpressionSuffix extends  ParserExtends {
 			this.parser.ifTokenIsLfThenSkip()
 			if this.parser.token.Type != lex.TokenRp {
 				err = new error(sprintf("%s '(' and ')' not matched, but '%s'",
-					this.parser.errMsgPrefix(), this.parser.token.Description))
+					this.parser.errMsgPrefix(), this.parser.token.description))
 				this.parser.errs.append( err)
 				return null, err
 			}
@@ -157,7 +157,7 @@ class ExpressionSuffix extends  ParserExtends {
 			newE.pos = pos
 			prefix = newE
 		case lex.TokenNot:
-			op := this.parser.token.Description
+			op := this.parser.token.description
 			pos := this.parser.mkPos()
 			this.Next(lfIsToken)
 			newE := new ast.Expression()
@@ -171,7 +171,7 @@ class ExpressionSuffix extends  ParserExtends {
 			newE.pos = pos
 			prefix = newE
 		case lex.TokenBitNot:
-			op := this.parser.token.Description
+			op := this.parser.token.description
 			pos := this.parser.mkPos()
 			this.Next(lfIsToken)
 			prefix, err = this.parseSuffixExpression()
@@ -185,7 +185,7 @@ class ExpressionSuffix extends  ParserExtends {
 			newE.pos = pos
 			prefix = newE
 		case lex.TokenSub:
-			op := this.parser.token.Description
+			op := this.parser.token.description
 			pos := this.parser.mkPos()
 			this.Next(lfIsToken)
 			prefix, err = this.parseSuffixExpression()
@@ -291,7 +291,7 @@ class ExpressionSuffix extends  ParserExtends {
 			return this.parseSuffixExpression()
 		default:
 			err = new error(sprintf("%s unkown begining of a expression, token:'%s'",
-				this.parser.errMsgPrefix(), this.parser.token.Description))
+				this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append( err)
 			return null, err
 		}
@@ -411,7 +411,7 @@ class ExpressionSuffix extends  ParserExtends {
 				if this.parser.token.Type != lex.TokenIdentifier {
 					this.parser.errs.append(
 						new error(sprintf("%s expect idnetifier , but '%s'",
-							this.parser.errMsgPrefix(), this.parser.token.Description)))
+							this.parser.errMsgPrefix(), this.parser.token.description)))
 					constName = compileAutoName()
 				} else {
 					constName = this.parser.token.stringValue
@@ -466,7 +466,7 @@ class ExpressionSuffix extends  ParserExtends {
 					this.Next(lfIsToken) // skip  )
 				} else {
 					err = new error(sprintf("%s expect  'identifier' or '(',but '%s'",
-						this.parser.errMsgPrefix(), this.parser.token.Description))
+						this.parser.errMsgPrefix(), this.parser.token.description))
 					this.parser.errs.append( err)
 					return null, err
 				}
@@ -504,7 +504,7 @@ class ExpressionSuffix extends  ParserExtends {
 			if this.parser.token.Type != lex.TokenRp {
 				err = new error(sprintf("%s except ')' ,but '%s'",
 					this.parser.errMsgPrefix(pos),
-					this.parser.token.Description))
+					this.parser.token.description))
 				this.parser.errs.append( err)
 				return null, err
 			}

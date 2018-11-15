@@ -6,9 +6,7 @@ public class MakeNodesObjects {
 
     
     
-
-
-        
+           
     public fn Make(files map { string-> []ast.TopNode } ) -> (x Object) {
         if len(files) == 1 {
             for _, v := range files {
@@ -20,7 +18,6 @@ public class MakeNodesObjects {
             ret[k] = this.MakeNodes(v)
         }
         return ret
-
     }
 
     fn MakeNodes(nodes []ast.TopNode) -> (ret []Object = []Object{}) {
@@ -50,7 +47,6 @@ public class MakeNodesObjects {
             if t,ok := n.Node.(ast.TypeAlias) ; ok {
                ret.append( this.makeTypeAlias(t))
             }
-         
         }
         return ret
     }
@@ -60,10 +56,8 @@ public class MakeNodesObjects {
         if c.Type != null {
             s += sprintf(" base on '%s'", c.Type.typeString())
         }
-        var ret []Object
-        ret.append( s)
-        ret.append({"init"-> this.makeExpression(c.defaultValueExpression)})
-        return null
+        s += this.makeExpression(c.defaultValueExpression).toString()
+        return s
     }
     fn makeImport(i ast.Import) -> (x Object) {
         s := sprintf("import@%d", i.pos.line)
@@ -87,15 +81,15 @@ public class MakeNodesObjects {
                     ret["parameterlist"] = p
                 }
             } else {
-                var t []Object
-                for _, v := range f.Type.parameterList {
+                var t  = new Object[](len(f.Type.parameterList))
+                for k, v := range f.Type.parameterList {
                     p := new map{string->Object}()
                     p["name"] = v.name
                     p["type"] = v.Type.typeString()
                     if v.defaultValueExpression != null {
                         p["defaultValue"] = this.makeExpression(v.defaultValueExpression)
                     }
-                    t.append( p)
+                    t[k] = p 
                 }
                 ret["parameterlist"] = t
             }
@@ -112,20 +106,20 @@ public class MakeNodesObjects {
                     ret["returnlist"] = p
                 }
             } else {
-                var t []Object
-                for _, v := range f.Type.returnList {
+                var t = new Object[](len(f.Type.returnList))
+                for k, v := range f.Type.returnList {
                     p := new map{string->Object}()
                     p["name"] = v.name
                     p["type"] = v.Type.typeString()
                     if v.defaultValueExpression != null {
                         p["defaultValue"] = this.makeExpression(v.defaultValueExpression)
                     }
-                    t.append( p)
+                    t[k] =  p
                 }
                 ret["returnlist"] = t
             }
         } else {
-            ret["returnlist"] = null
+            ret["returnlist"] = "null"
         }
         ret["block"] = this.makeBlock(f.block)
         return {
@@ -136,14 +130,14 @@ public class MakeNodesObjects {
     fn makeEnum(e ast.Enum) ->(x Object)  {
         ret := new map{string -> Object}()
         {
-            var t []Object
-            for _, v := range e.enums {
+            var t  = new Object[](len(e.enums))
+            for k, v := range e.enums {
                 en := new map{string -> Object}()
                 en["name"] = v.name
                 if v.NoNeed != null {
                     en["value"] = this.makeExpression(v.NoNeed)
                 }
-                t.append( en)
+                t[k] = en
             }
             ret["enums"] = t
         }
@@ -160,17 +154,19 @@ public class MakeNodesObjects {
             ret["superClass"] = c.superClassName.name
         }
         if len(c.interfaceNames) > 0 {
-            var t []Object
-            for _, v := range c.interfaceNames {
-                t.append( v.name)
+            t := new Object[](len(c.interfaceNames))
+            for k, v := range c.interfaceNames {
+                t[k] =  v.name
             }
             ret["interfaces"] = t
         }
 
         if len(c.block.constants) > 0 {
-            var t []Object
+            t := new Object[](len(c.block.constants))
+            var i int
             for _, v := range c.block.constants {
-                t.append( this.makeConst(v))
+                t[i] =  this.makeConst(v)
+                i++
             }
             ret["constants"] = t
         }
@@ -189,9 +185,9 @@ public class MakeNodesObjects {
             ret["fields"] = fields
         }
         if len(c.staticBlocks) > 0 {
-            var t []Object
-            for _, v := range c.staticBlocks {
-                t.append( this.makeBlock(v))
+            var t = new Object[](len(c.staticBlocks))
+            for k, v := range c.staticBlocks {
+                t[k] = this.makeBlock(v)
             }
             ret["staticBlocks"] = t
         }
@@ -199,12 +195,12 @@ public class MakeNodesObjects {
             methods := new map{string -> Object}()
             for name, ms := range c.methods {
                 if len(ms) != 1 {
-                    var t []Object
-                    for _, method := range ms {
+                    var t  = new Object[](len(ms))
+                    for k, method := range ms {
                         m := new map{string -> Object}()
                         m["accessFlags"] = sprintf("0x%x"  , method.Function.accessFlags)
                         m["function"] = this.makeFunction(method.Function)
-                        t.append( m)
+                        t[k] = m
                     }
                     methods[name] = t
                 } else {
@@ -228,18 +224,18 @@ public class MakeNodesObjects {
         return s
     }
     fn makeBlock(b ast.Block) ->(x Object) {
-        var ret []Object
-        for _, s := range b.statements {
-            ret.append( this.makeStatement(s))
+        var ret  = new Object[](len(b.statements))
+        for k, s := range b.statements {
+            ret[k] = this.makeStatement(s) 
         }
         return ret
     }
     fn makeStatementIf(s ast.StatementIf) ->(x Object) {
         ret := new map{string -> Object}()
         if len(s.prefixExpressions) > 0 {
-            var t []Object
-            for _, v := range s.prefixExpressions {
-                t.append( this.makeExpression(v))
+            var t  = new Object[](len(s.prefixExpressions))
+            for k, v := range s.prefixExpressions {
+                t[k] =  this.makeExpression(v)
             }
             ret["prefixExpressions"] = t
         }
@@ -283,9 +279,9 @@ public class MakeNodesObjects {
     fn makeStatementSwitch(s ast.StatementSwitch) ->(x Object) {
         ret := new map{string -> Object}()
         if len(s.prefixExpressions) > 0 {
-            var t []Object
-            for _, v := range s.prefixExpressions {
-                t.append( this.makeExpression(v))
+            var t = new Object[](len(s.prefixExpressions))
+            for k, v := range s.prefixExpressions {
+                t[k] = this.makeExpression(v)
             }
             ret["prefixExpressions"] = t
         }
@@ -377,9 +373,9 @@ public class MakeNodesObjects {
                 if len(s.StatementReturn.expressions) == 1 {
                     ret[key] = this.makeExpression(s.StatementReturn.expressions[0])
                 } else {
-                    var t []Object
-                    for _, v := range s.StatementReturn.expressions {
-                        t.append( this.makeExpression(v))
+                    var t Object[] = new Object[](len(s.StatementReturn.expressions))
+                    for k, v := range s.StatementReturn.expressions {
+                        t[k] = this.makeExpression(v)
                     }
                     ret[key] = t
                 }
@@ -444,9 +440,9 @@ public class MakeNodesObjects {
             if array.Type != null {
                 ret["type"] = array.Type.typeString()
             }
-            var t []Object
-            for _, v := range array.expressions {
-                t.append( this.makeExpression(v))
+            var t Object[] = new Object[](len(array.expressions))
+            for k, v := range array.expressions {
+                t[k] = this.makeExpression(v)
             }
             ret["elements"] = t
             return ret
@@ -468,9 +464,9 @@ public class MakeNodesObjects {
             ret["op"] = e.op
             bin := e.data.(ast.ExpressionBinary)
             if bin.left.Type == ast.ExpressionTypeList {
-                var t []Object
-                for _, v := range bin.left.data.([]ast.Expression) {
-                    t.append( this.makeExpression(v))
+                var t Object[] = new Object[](len(bin.left.data.([]ast.Expression)))
+                for k, v := range bin.left.data.([]ast.Expression) {
+                    t[k] =  this.makeExpression(v) 
                 }
                 ret["left"] = t
             } else {
@@ -506,16 +502,16 @@ public class MakeNodesObjects {
             ret["name"] = call.name
             ret["on"] = this.makeExpression(call.Expression)
             if len(call.args) > 0 {
-                var t []Object
-                for _, v := range call.args {
-                    t.append( this.makeExpression(v))
+                var t Object[] = new Object[](len(call.args))
+                for k, v := range call.args {
+                    t[k] = this.makeExpression(v)
                 }
                 ret["args"] = t
             }
             if len(call.ParameterTypes) > 0 {
-                var t []Object
-                for _, v := range call.ParameterTypes {
-                    t.append( v.typeString())
+                var t Object[] = new Object[](len(call.ParameterTypes))
+                for k, v := range call.ParameterTypes {
+                    t[k] =  v.typeString()
                 }
                 ret["parameterTypes"] = t
             }
@@ -526,16 +522,16 @@ public class MakeNodesObjects {
             ret["op"] = e.op
             ret["on"] = this.makeExpression(call.Expression)
             if len(call.args) > 0 {
-                var t []Object
-                for _, v := range call.args {
-                    t.append( this.makeExpression(v))
+                var t Object[] = new Object[](len(call.args))
+                for k, v := range call.args {
+                    t[k] = this.makeExpression(v)
                 }
                 ret["args"] = t
             }
             if len(call.ParameterTypes) > 0 {
-                var t []Object
-                for _, v := range call.ParameterTypes {
-                    t.append( v.typeString())
+                var t Object[] = new Object[](len(call.ParameterTypes))
+                for k, v := range call.ParameterTypes {
+                    t[k] = v.typeString()
                 }
                 ret["parameterTypes"] = t
             }
@@ -573,9 +569,9 @@ public class MakeNodesObjects {
             ret["op"] = e.op
             ret["type"] = n.Type.typeString()
             {
-                var t []Object
-                for _, v := range n.args {
-                    t.append( this.makeExpression(v))
+                var t Object[] = new Object[](len(n.args))
+                for k, v := range n.args {
+                    t[k] =  this.makeExpression(v) 
                 }
                 ret["args"] = t
             }
@@ -587,9 +583,9 @@ public class MakeNodesObjects {
             if len(list) == 1 {
                 return this.makeExpression(list[0])
             }
-            var t []Object
-            for _, v := range list {
-                t.append( this.makeExpression(v))
+            var t Object[] = new Object[](len(list))
+            for k, v := range list {
+                t[k] = this.makeExpression(v)
             }
             ret["list"] = t
 
@@ -604,16 +600,16 @@ public class MakeNodesObjects {
                 ret["type"] = v.Type.typeString()
             }
             {
-                var t []Object
-                for _, vv := range v.variables {
-                    t.append( vv.name)
+                var t Object[] = new Object[](len(v.variables))
+                for kk, vv := range v.variables {
+                    t[kk] = vv.name
                 }
                 ret["variables"] = t
             }
             if len(v.InitValues) > 0 {
-                var t []Object
-                for _, vv := range v.InitValues {
-                    t.append( this.makeExpression(vv))
+                var t Object[] = new Object[](len(v.InitValues))
+                for kk, vv := range v.InitValues {
+                    t[kk] =  this.makeExpression(vv)
                 }
                 ret["initValues"] = t
             }
@@ -622,8 +618,8 @@ public class MakeNodesObjects {
             ret := new map{string -> Object}()
             ret["op"] = e.op
             {
-                var t []Object
-                for _, v := range e.data.([]ast.Constant) {
+                var t Object[] = new Object[](len(e.data.([]ast.Constant)))
+                for k, v := range e.data.([]ast.Constant) {
                     m := new map{string -> Object}()
                     m["name"] = v.name
                     if v.Type != null {
@@ -632,7 +628,7 @@ public class MakeNodesObjects {
                     if v.defaultValueExpression != null {
                         m["defaultValue"] = this.makeExpression(v.defaultValueExpression)
                     }
-                    t.append( m)
+                    t[k] =  m
                 }
                 ret["constants"] = t
             }
@@ -669,12 +665,12 @@ public class MakeNodesObjects {
                 ret["type"] = m.Type.typeString()
             }
             {
-                var t []Object
-                for _, v := range m.keyValuePairs {
+                var t Object[] = new Object[](len(m.keyValuePairs))
+                for k, v := range m.keyValuePairs {
                     tt := new map{string -> Object}()
                     tt["key"] = this.makeExpression(v.key)
                     tt["value"] = this.makeExpression(v.value)
-                    t.append( tt)
+                    t[k] =  tt
                 }
                 ret["paris"] = t
             }

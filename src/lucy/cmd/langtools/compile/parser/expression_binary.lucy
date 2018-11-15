@@ -19,7 +19,7 @@ class ExpressionBinaryParser extends ParserExtends{
 		}
 		for this.parser.token.Type == lex.TokenLogicalOr {
 			pos := this.parser.mkPos()
-			name := this.parser.token.Description
+			name := this.parser.token.description
 			this.Next(lfNotToken)
 			var right ast.Expression
 			right, err = this.parseLogicalAndExpression()
@@ -47,7 +47,7 @@ class ExpressionBinaryParser extends ParserExtends{
 		}
 		for this.parser.token.Type == lex.TokenLogicalAnd {
 			pos := this.parser.mkPos()
-			name := this.parser.token.Description
+			name := this.parser.token.description
 			this.Next(lfNotToken)
 			var right ast.Expression
 			right, err = this.parseEqualExpression()
@@ -76,7 +76,7 @@ class ExpressionBinaryParser extends ParserExtends{
 		for this.parser.token.Type == lex.TokenEqual ||
 			this.parser.token.Type == lex.TokenNe {
 			typ := this.parser.token.Type
-			name := this.parser.token.Description
+			name := this.parser.token.description
 			pos := this.parser.mkPos()
 			this.Next(lfNotToken)
 			var right ast.Expression
@@ -112,7 +112,7 @@ class ExpressionBinaryParser extends ParserExtends{
 			this.parser.token.Type == lex.TokenLt ||
 			this.parser.token.Type == lex.TokenLe {
 			typ := this.parser.token.Type
-			name := this.parser.token.Description
+			name := this.parser.token.description
 			pos := this.parser.mkPos()
 			this.Next(lfNotToken)
 			var right ast.Expression
@@ -153,7 +153,7 @@ class ExpressionBinaryParser extends ParserExtends{
 		}
 		for this.parser.token.Type == lex.TokenOr {
 			pos := this.parser.mkPos()
-			name := this.parser.token.Description
+			name := this.parser.token.description
 			this.Next(lfNotToken)
 			var right ast.Expression
 			right, err = this.parseXorExpression()
@@ -181,7 +181,7 @@ class ExpressionBinaryParser extends ParserExtends{
 		}
 		for this.parser.token.Type == lex.TokenXor {
 			pos := this.parser.mkPos()
-			name := this.parser.token.Description
+			name := this.parser.token.description
 			this.Next(lfNotToken)
 			var right ast.Expression
 			right, err = this.parseAndExpression()
@@ -209,7 +209,7 @@ class ExpressionBinaryParser extends ParserExtends{
 		}
 		for this.parser.token.Type == lex.TokenAnd {
 			pos := this.parser.mkPos()
-			name := this.parser.token.Description
+			name := this.parser.token.description
 			this.Next(lfNotToken)
 			var right ast.Expression
 			right, err = this.parseShiftExpression()
@@ -238,7 +238,7 @@ class ExpressionBinaryParser extends ParserExtends{
 		for this.parser.token.Type == lex.TokenLsh ||
 			this.parser.token.Type == lex.TokenRsh {
 			typ := this.parser.token.Type
-			name := this.parser.token.Description
+			name := this.parser.token.description
 			pos := this.parser.mkPos()
 			this.Next(lfNotToken)
 			var right ast.Expression
@@ -274,7 +274,7 @@ class ExpressionBinaryParser extends ParserExtends{
 		for this.parser.token.Type == lex.TokenAdd ||
 			this.parser.token.Type == lex.TokenSub {
 			typ := this.parser.token.Type
-			name := this.parser.token.Description
+			name := this.parser.token.description
 			pos := this.parser.mkPos()
 			this.Next(lfNotToken)
 			var right ast.Expression
@@ -309,7 +309,7 @@ class ExpressionBinaryParser extends ParserExtends{
 			this.parser.token.Type == lex.TokenDiv ||
 			this.parser.token.Type == lex.TokenMod {
 			typ := this.parser.token.Type
-			name := this.parser.token.Description
+			name := this.parser.token.description
 			pos := this.parser.mkPos()
 			this.Next(lfNotToken)
 			var right ast.Expression

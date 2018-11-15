@@ -260,18 +260,18 @@ public class Lexer {
 		identifier := string(bs)
 		if ok := keywordsMap.keyExist(identifier); ok {
 			token.Type = keywordsMap[identifier]
-			token.Description = identifier
+			token.description = identifier
 			if token.Type == TokenElse {
 				is := this.tryLexElseIf()
 				if is {
 					token.Type = TokenElseif
-					token.Description = "else if"
+					token.description = "else if"
 				}
 			}
 		} else {
 			token.Type = TokenIdentifier
 			token.stringValue = identifier
-			token.Description = "identifier_" + identifier
+			token.description = "identifier_" + identifier
 		}
 		token.EndLine = this.line
 		token.EndColumn = this.column
@@ -434,7 +434,7 @@ public class Lexer {
 			err = new error("string literal start new line")
 		}
 		token.stringValue = string(bs)
-		token.Description = string(bs)
+		token.description = string(bs)
 		return
 	}
 	
@@ -502,7 +502,7 @@ public class Lexer {
 		c, eof := this.getChar()
 		if eof {
 			token.Type = TokenEof
-			token.Description = "EOF"
+			token.description = "EOF"
 			return
 		}
 		for c == ' ' ||
@@ -514,7 +514,7 @@ public class Lexer {
 		token.startColumn = this.column - 1
 		if eof {
 			token.Type = TokenEof
-			token.Description = "EOF"
+			token.description = "EOF"
 			return
 		}
 		if this.isLetter(c) || c == '_' || c == '$' { // start of a identifier
@@ -528,184 +528,184 @@ public class Lexer {
 		switch c {
 		case '?':
 			token.Type = TokenQuestion
-			token.Description = "?"
+			token.description = "?"
 		case '(':
 			token.Type = TokenLp
-			token.Description = "("
+			token.description = "("
 		case ')':
 			token.Type = TokenRp
-			token.Description = ")"
+			token.description = ")"
 		case '{':
 			token.Type = TokenLc
-			token.Description = "{"
+			token.description = "{"
 		case '}':
 			token.Type = TokenRc
-			token.Description = "}"
+			token.description = "}"
 		case '[':
 			token.Type = TokenLb
-			token.Description = "["
+			token.description = "["
 		case ']':
 			token.Type = TokenRb
-			token.Description = "]"
+			token.description = "]"
 		case ';':
 			token.Type = TokenSemicolon
-			token.Description = ";"
+			token.description = ";"
 		case ',':
 			token.Type = TokenComma
-			token.Description = ","
+			token.description = ","
 		case '&':
 			c, eof = this.getChar()
 			if c == '&' {
 				token.Type = TokenLogicalAnd
-				token.Description = "&&"
+				token.description = "&&"
 			} else if c == '=' {
 				token.Type = TokenAndAssign
-				token.Description = "&="
+				token.description = "&="
 			} else {
 				this.unGetChar()
 				token.Type = TokenAnd
-				token.Description = "&"
+				token.description = "&"
 			}
 		case '|':
 			c, eof = this.getChar()
 			if c == '|' {
 				token.Type = TokenLogicalOr
-				token.Description = "||"
+				token.description = "||"
 			} else if c == '=' {
 				token.Type = TokenOrAssign
-				token.Description = "|="
+				token.description = "|="
 			} else {
 				this.unGetChar()
 				token.Type = TokenOr
-				token.Description = "|"
+				token.description = "|"
 			}
 		case '=':
 			c, eof = this.getChar()
 			if c == '=' {
 				token.Type = TokenEqual
-				token.Description = "=="
+				token.description = "=="
 			} else {
 				this.unGetChar()
 				token.Type = TokenAssign
-				token.Description = "="
+				token.description = "="
 			}
 		case '!':
 			c, eof = this.getChar()
 			if c == '=' {
 				token.Type = TokenNe
-				token.Description = "!="
+				token.description = "!="
 			} else {
 				this.unGetChar()
 				token.Type = TokenNot
-				token.Description = "!"
+				token.description = "!"
 			}
 		case '>':
 			c, eof = this.getChar()
 			if c == '=' {
 				token.Type = TokenGe
-				token.Description = ">="
+				token.description = ">="
 			} else if c == '>' {
 				c, eof = this.getChar()
 				if c == '=' {
 					token.Type = TokenRshAssign
-					token.Description = ">>="
+					token.description = ">>="
 				} else {
 					this.unGetChar()
 					token.Type = TokenRsh
-					token.Description = ">>"
+					token.description = ">>"
 				}
 			} else {
 				this.unGetChar()
 				token.Type = TokenGt
-				token.Description = ">"
+				token.description = ">"
 			}
 		case '<':
 			c, eof = this.getChar()
 			if c == '=' {
 				token.Type = TokenLe
-				token.Description = "<="
+				token.description = "<="
 			} else if c == '<' {
 				c, eof = this.getChar()
 				if c == '=' {
 					token.Type = TokenLshAssign
-					token.Description = "<<="
+					token.description = "<<="
 				} else {
 					this.unGetChar()
 					token.Type = TokenLsh
-					token.Description = "<<"
+					token.description = "<<"
 				}
 			} else {
 				this.unGetChar()
 				token.Type = TokenLt
-				token.Description = "<"
+				token.description = "<"
 			}
 		case '^':
 			c, eof = this.getChar()
 			if c == '=' {
 				token.Type = TokenXorAssign
-				token.Description = "^="
+				token.description = "^="
 			} else {
 				this.unGetChar()
 				token.Type = TokenXor
-				token.Description = "^"
+				token.description = "^"
 			}
 		case '~':
 			token.Type = TokenBitNot
-			token.Description = "~"
+			token.description = "~"
 		case '+':
 			c, eof = this.getChar()
 			if c == '+' {
 				token.Type = TokenIncrement
-				token.Description = "++"
+				token.description = "++"
 			} else if c == '=' {
 				token.Type = TokenAddAssign
-				token.Description = "+="
+				token.description = "+="
 			} else {
 				this.unGetChar()
 				token.Type = TokenAdd
-				token.Description = "+"
+				token.description = "+"
 			}
 		case '-':
 			c, eof = this.getChar()
 			if c == '-' {
 				token.Type = TokenDecrement
-				token.Description = "--"
+				token.description = "--"
 			} else if c == '=' {
 				token.Type = TokenSubAssign
-				token.Description = "-="
+				token.description = "-="
 			} else if c == '>' {
 				token.Type = TokenArrow
-				token.Description = "->"
+				token.description = "->"
 			} else {
 				this.unGetChar()
 				token.Type = TokenSub
-				token.Description = "-"
+				token.description = "-"
 			}
 		case '*':
 			c, eof = this.getChar()
 			if c == '=' {
 				token.Type = TokenMulAssign
-				token.Description = "*="
+				token.description = "*="
 			} else {
 				this.unGetChar()
 				token.Type = TokenMul
-				token.Description = "*"
+				token.description = "*"
 			}
 		case '%':
 			c, eof = this.getChar()
 			if c == '=' {
 				token.Type = TokenModAssign
-				token.Description = "%="
+				token.description = "%="
 			} else {
 				this.unGetChar()
 				token.Type = TokenMod
-				token.Description = "%"
+				token.description = "%"
 			}
 		case '/':
 			c, eof = this.getChar()
 			if c == '=' {
 				token.Type = TokenDivAssign
-				token.Description = "/="
+				token.description = "/="
 			} else if c == '/' {
 				bs := []byte{}
 				for c != '\n' && eof == false {
@@ -714,7 +714,7 @@ public class Lexer {
 				}
 				token.Type = TokenComment
 				token.stringValue = string(bs)
-				token.Description = string(bs)
+				token.description = string(bs)
 			} else if c == '*' {
 		        var comment string
 				comment, err = this.lexMultiLineComment()
@@ -723,22 +723,22 @@ public class Lexer {
 				}
 				token.Type = TokenMultiLineComment
 				token.stringValue = comment
-				token.Description = comment
+				token.description = comment
 			} else {
 				this.unGetChar()
 				token.Type = TokenDiv
-				token.Description = "/"
+				token.description = "/"
 			}
 		case '\n':
 			token.Type = TokenLf
-			token.Description = "\\n"
+			token.description = "\\n"
 		case '.':
 			if this.lexVArgs() {
 				token.Type = TokenVArgs
-				token.Description = "..."
+				token.description = "..."
 			} else {
 				token.Type = TokenSelection
-				token.Description = "."
+				token.description = "."
 			}
 		case '`':
 			bs := []byte{}
@@ -749,7 +749,7 @@ public class Lexer {
 			}
 			token.Type = TokenLiteralString
 			token.stringValue = string(bs)
-			token.Description = string(bs)
+			token.description = string(bs)
 		case '"':
 			return this.lexString('"')
 		case '\'':
@@ -773,13 +773,13 @@ public class Lexer {
 			c, eof = this.getChar()
 			if c == '=' {
 				token.Type = TokenVarAssign
-				token.Description = ":="
+				token.description = ":="
 			} else if c == ':' {
 				token.Type = TokenSelectConst
-				token.Description = "::"
+				token.description = "::"
 			} else {
 				token.Type = TokenColon
-				token.Description = ":"
+				token.description = ":"
 				this.unGetChar()
 			}
 		default:

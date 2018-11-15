@@ -88,7 +88,7 @@ class TypeParser extends ParserExtends {
 			this.Next(lfNotToken) // skip map key word
 			if this.parser.token.Type != lex.TokenLc {
 				err = new error(sprintf("%s expect '{',but '%s'",
-					this.parser.errMsgPrefix(), this.parser.token.Description))
+					this.parser.errMsgPrefix(), this.parser.token.description))
 				this.parser.errs.append( err)
 				return null, err
 			}
@@ -101,7 +101,7 @@ class TypeParser extends ParserExtends {
 			this.parser.ifTokenIsLfThenSkip()
 			if this.parser.token.Type != lex.TokenArrow {
 				err = new error(sprintf("%s expect '->',but '%s'",
-					this.parser.errMsgPrefix(), this.parser.token.Description))
+					this.parser.errMsgPrefix(), this.parser.token.description))
 				this.parser.errs.append( err)
 				return null, err
 			}
@@ -113,7 +113,7 @@ class TypeParser extends ParserExtends {
 			this.parser.ifTokenIsLfThenSkip()
 			if this.parser.token.Type != lex.TokenRc {
 				err = new error(sprintf("%s expect '}',but '%s'",
-					this.parser.errMsgPrefix(), this.parser.token.Description))
+					this.parser.errMsgPrefix(), this.parser.token.description))
 				this.parser.errs.append( err)
 				return null, err
 			}
@@ -143,12 +143,12 @@ class TypeParser extends ParserExtends {
 			this.parser.unExpectNewLineAndSkip()
 			if this.parser.token.Type != lex.TokenSelection {
 				return null, new error(sprintf("%s expect '.' , but '%s'",
-					this.parser.errMsgPrefix(), this.parser.token.Description))
+					this.parser.errMsgPrefix(), this.parser.token.description))
 			}
 			this.Next(lfNotToken)
 			if this.parser.token.Type != lex.TokenIdentifier {
 				this.parser.errs.append( new error(sprintf("%s expect identifier , but '%s'",
-					this.parser.errMsgPrefix(), this.parser.token.Description)))
+					this.parser.errMsgPrefix(), this.parser.token.description)))
 			} else {
 				ret = new ast.Type()
                 ret.Type = ast.VariableTypeGlobal
@@ -158,7 +158,7 @@ class TypeParser extends ParserExtends {
 			}
 		default:
 			err = new error(sprintf("%s unkown begining '%s' token for a type",
-				this.parser.errMsgPrefix(), this.parser.token.Description))
+				this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append( err)
 			return null, err
 		}

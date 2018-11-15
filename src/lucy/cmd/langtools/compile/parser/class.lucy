@@ -14,7 +14,7 @@ class ClassParser extends  ParserExtends{
 	fn parseClassName() -> (name ast.NameWithPos,err error) {
 		if this.parser.token.Type != lex.TokenIdentifier {
 			err = new error(sprintf("%s expect identifier for class`s name,but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.Description))
+				this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append( err)
 			return null, err
 		}
@@ -26,7 +26,7 @@ class ClassParser extends  ParserExtends{
 			if this.parser.token.Type != lex.TokenIdentifier {
 				err = new error(sprintf("%s expect identifer for class`s name,but '%s'",
 					this.parser.errMsgPrefix(),
-					this.parser.token.Description))
+					this.parser.token.description))
 				this.parser.errs.append( err)
 			} else {
 				className += "." + this.parser.token.stringValue
@@ -100,7 +100,7 @@ class ClassParser extends  ParserExtends{
 		this.parser.ifTokenIsLfThenSkip()
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s expect '{' but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.Description))
+				this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append( err)
 			return null, err
 		}
@@ -145,7 +145,7 @@ class ClassParser extends  ParserExtends{
 					if this.parser.token.Type != lex.TokenRc {
 						this.parser.errs.append(
 							new error(sprintf("%s expect '}' , but '%s'", this.parser.errMsgPrefix(),
-								this.parser.token.Description)))
+								this.parser.token.description)))
 					} else {
 						this.Next(lfNotToken) // skip }
 						if classDefinition.staticBlocks == null {
@@ -167,7 +167,7 @@ class ClassParser extends  ParserExtends{
 				accessControlToken = this.parser.token
 				this.Next(lfIsToken)
 				this.parser.unExpectNewLineAndSkip()
-				err = this.validAfterAccessControlToken(accessControlToken.Description)
+				err = this.validAfterAccessControlToken(accessControlToken.description)
 				if err != null {
 					this.parser.errs.append( err)
 					accessControlToken = null // set to null
@@ -281,7 +281,7 @@ class ClassParser extends  ParserExtends{
 			default:
 				this.parser.errs.append(
 					new error(sprintf("%s unexpected '%s'",
-						this.parser.errMsgPrefix(), this.parser.token.Description)))
+						this.parser.errMsgPrefix(), this.parser.token.description)))
 				this.Next(lfNotToken)
 			}
 		}

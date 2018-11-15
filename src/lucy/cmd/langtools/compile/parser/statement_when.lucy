@@ -24,14 +24,14 @@ class StatementWhenParser extends ParserExtends {
 		this.parser.ifTokenIsLfThenSkip()
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s expect '{',but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.Description))
+				this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append( err)
 			this.consume(untilLc)
 		}
 		this.Next(lfNotToken) // skip {  , must be case
 		if this.parser.token.Type != lex.TokenCase {
 			err = new error(sprintf("%s expect 'case',but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.Description))
+				this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append( err)
 			return null, err
 		}
@@ -48,7 +48,7 @@ class StatementWhenParser extends ParserExtends {
 			this.parser.unExpectNewLineAndSkip()
 			if this.parser.token.Type != lex.TokenColon {
 				err = new error(sprintf("%s expect ':',but '%s'",
-					this.parser.errMsgPrefix(), this.parser.token.Description))
+					this.parser.errMsgPrefix(), this.parser.token.description))
 				this.parser.errs.append( err)
 				return whenStatement, err
 			}
@@ -93,7 +93,7 @@ class StatementWhenParser extends ParserExtends {
 		}
 		if this.parser.token.Type != lex.TokenRc {
 			err = new error(sprintf("%s expect '}',but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.Description))
+				this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append( err)
 			return whenStatement, err
 		}

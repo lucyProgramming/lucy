@@ -7,7 +7,7 @@ public class Token {
 	public startColumn int
 	public EndLine     int
 	public EndColumn   int
-	public Description string
+	public description string
 	public stringValue string 
 	public longValue long 
 	public doubleValue double 
@@ -16,7 +16,7 @@ public class Token {
 
 
 public enum  TokenKind {
-	TokenFn    = 1,                      // fn
+	TokenFn    = 1,                  // fn
 	TokenEnum    ,                   // enum
 	TokenConst   ,                   // const
 	TokenIf    ,                     // if

@@ -13,7 +13,7 @@ class EnumParser extends ParserExtends {
 		this.parser.unExpectNewLineAndSkip()
 		if this.parser.token.Type != lex.TokenIdentifier {
 			err = new error(sprintf("%s expect 'identifier' for enum name, but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.Description))
+				this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append(err)
 			enumName = compileAutoName()
 			this.consume(untilLc)
@@ -27,7 +27,7 @@ class EnumParser extends ParserExtends {
 		e.pos = this.parser.mkPos()
 		comment := new CommentParser(this.parser)
 		if this.parser.token.Type != lex.TokenLc {
-			err = new error(sprintf("%s expect '{',but '%s'", this.parser.errMsgPrefix(), this.parser.token.Description))
+			err = new error(sprintf("%s expect '{',but '%s'", this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append(err)
 			this.consume(untilLc)
 		}
@@ -75,14 +75,14 @@ class EnumParser extends ParserExtends {
 				this.Next(lfNotToken)
 			default:
 				this.parser.errs.append( new error(sprintf("%s token '%s' is not except",
-					this.parser.errMsgPrefix(), this.parser.token.Description)))
+					this.parser.errMsgPrefix(), this.parser.token.description)))
 				this.Next(lfNotToken)
 				comment.reset()
 			}
 		}
 		this.parser.ifTokenIsLfThenSkip()
 		if this.parser.token.Type != lex.TokenRc {
-			err = new error(sprintf("%s expect '}',but '%s'", this.parser.errMsgPrefix(), this.parser.token.Description))
+			err = new error(sprintf("%s expect '}',but '%s'", this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append( err)
 			this.consume(untilRc)
 		}
