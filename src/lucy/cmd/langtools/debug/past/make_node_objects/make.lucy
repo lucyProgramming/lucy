@@ -20,32 +20,33 @@ public class MakeNodesObjects {
         return ret
     }
 
-    fn MakeNodes(nodes []ast.TopNode) -> (ret []Object = []Object{}) {
-        for _, n := range nodes {
+    fn MakeNodes(nodes []ast.TopNode) -> (ret Object[]) {
+        ret = new Object[](len(nodes))
+        for k, n := range nodes {
             if t,ok := n.Node.(ast.Block) ; ok {
                 ss := this.makeBlock(t)
-                ret.append({"block"-> ss})
+                ret[k] = ({"block"-> ss})
             }
             if t,ok := n.Node.(ast.Function) ; ok {
-                ret.append(this.makeFunction(t))
+                ret[k] = (this.makeFunction(t))
             }
             if t,ok := n.Node.(ast.Enum) ; ok {
-                ret.append(this.makeEnum(t))
+                ret[k] = (this.makeEnum(t))
             }
             if t,ok := n.Node.(ast.Class) ; ok {
-                ret.append(this.makeClass(t))
+                ret[k] = (this.makeClass(t))
             }
             if t,ok := n.Node.(ast.Constant) ; ok {
-                ret.append(this.makeConst(t))
+                ret[k] = (this.makeConst(t))
             }
             if t,ok := n.Node.(ast.Import) ; ok {
-                ret.append(this.makeImport(t))
+                ret[k] = (this.makeImport(t))
             }
             if t,ok := n.Node.(ast.Expression) ; ok {
-               ret.append(this.makeExpression(t))
+               ret[k] = (this.makeExpression(t))
             }
             if t,ok := n.Node.(ast.TypeAlias) ; ok {
-               ret.append( this.makeTypeAlias(t))
+               ret[k] = ( this.makeTypeAlias(t))
             }
         }
         return ret
