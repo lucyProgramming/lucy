@@ -304,7 +304,7 @@ class Parser {
 		if this.token != null {
 		    pos = new ast.Pos()
 		    pos.filename = this.filename
-		    pos.line = this.token.EndLine
+		    pos.line = this.token.endLine
 		    pos.column = this.token.EndColumn
 		    pos.offset = this.lexer.GetOffSet()
 			return
@@ -322,14 +322,14 @@ class Parser {
 		if this.lastToken == null {
 			return &ast.Pos{
 				filename: this.filename,
-				line:     this.token.EndLine,
+				line:     this.token.endLine,
 				column:   this.token.EndColumn,
 				offset:   this.lexer.GetOffSet(),
 			}
 		} else {
 			return &ast.Pos{
 				filename: this.filename,
-				line:     this.lastToken.EndLine,
+				line:     this.lastToken.endLine,
 				column:   this.lastToken.EndColumn,
 			}
 		}

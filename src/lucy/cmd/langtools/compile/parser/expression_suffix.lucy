@@ -497,7 +497,7 @@ class ExpressionSuffix extends  ParserExtends {
 			if this.parser.lastToken != null {
 				pos = new ast.Pos()
 				pos.filename = this.parser.filename
-				pos.line = this.parser.lastToken.EndLine
+				pos.line = this.parser.lastToken.endLine
 				pos.column = this.parser.lastToken.EndColumn
 			}
 			this.parser.ifTokenIsLfThenSkip()

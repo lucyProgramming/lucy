@@ -5,7 +5,7 @@ public class Token {
 	public offset      int // bs offset
 	public startLine   int
 	public startColumn int
-	public EndLine     int
+	public endLine     int
 	public EndColumn   int
 	public description string
 	public stringValue string 

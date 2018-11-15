@@ -191,7 +191,7 @@ public class Lexer {
 		} else {
 			this.unGetChar()
 		}
-		token.EndLine = this.line
+		token.endLine = this.line
 		token.EndColumn = this.column
         if haveFloatPart {
             integerPart.append('.')
@@ -273,7 +273,7 @@ public class Lexer {
 			token.stringValue = identifier
 			token.description = "identifier_" + identifier
 		}
-		token.EndLine = this.line
+		token.endLine = this.line
 		token.EndColumn = this.column
 		return
 	}
@@ -428,7 +428,7 @@ public class Lexer {
 				err = new error("unknown escape sequence")
 			}
 		}
-		token.EndLine = this.line
+		token.endLine = this.line
 		token.EndColumn = this.column
 		if c == '\n' {
 			err = new error("string literal start new line")
@@ -786,7 +786,7 @@ public class Lexer {
 			err = new error(sprintf("unkown beginning of token:%x", c))
 			return null, err
 		}
-		token.EndLine = this.line
+		token.endLine = this.line
 		token.EndColumn = this.column
 		return
 	}
