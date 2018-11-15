@@ -1,5 +1,4 @@
 
-import "java/lang/Long"
 import "java/lang/Double"
 import "java/lang/String"
 
@@ -15,7 +14,7 @@ public class Lexer {
 	public fn GetOffSet() -> (offset int) {
 		return this.offset
 	}
-
+	
 	fn getChar()-> (c byte, eof bool) {
 		if this.offset == this.end {
 			eof = true
@@ -76,7 +75,7 @@ public class Lexer {
 		return c - '0' //also valid for digit
 	}
 
-	fn parseInt64(bs []byte) ->(v long, err error) {
+	fn parseLong(bs []byte) ->(value long, err error) {
 		base := long(10)
 		if bs[0] == '0' {
 			base = 8
@@ -206,7 +205,10 @@ public class Lexer {
                 token.doubleValue = floatValue
             }
         } else {
-            longValue := Long.parseLong(string(integerPart))
+            longValue ,e := this.parseLong(integerPart)
+            if e != null {
+                err = e
+            }
             if isDouble {
                 token.Type = TokenLiteralDouble
                 token.doubleValue = double(longValue)

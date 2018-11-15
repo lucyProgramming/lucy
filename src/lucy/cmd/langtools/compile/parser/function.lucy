@@ -58,7 +58,7 @@ class FunctionParser extends ParserExtends{
 		} else {
 			f.sourceCode =
 				this.parser.
-					bs[offset : this.parser.token.offset]
+					bs[offset:this.parser.lexer.GetOffSet()]
 		}
 		this.Next(lfIsToken)
 		return f, err

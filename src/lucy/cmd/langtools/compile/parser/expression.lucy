@@ -1,7 +1,7 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
-
+     
 class ExpressionParser extends  ParserExtends {
 	ExpressionArrayParser ExpressionArrayParser
 	ExpressionBinaryParser ExpressionBinaryParser

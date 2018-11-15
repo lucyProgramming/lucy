@@ -9,7 +9,7 @@ fn main(args []string) {
 	lucyFiles :=new map { string-> []ast.TopNode}()
 	nodes :=  []ast.TopNode{}
 	errs := []error{}
-	if len(args) == 1 {
+	if len(args) == 0 {
 		print("no file to parse")
 		os.exit(1)
 	}
@@ -72,7 +72,7 @@ fn main(args []string) {
 		print(v)
 	}
 	ret := (new make_node_objects.MakeNodesObjects()).Make(lucyFiles)
-	bs, _ := json.Marshal(ret)
+	bs, _ := json.encode(ret)
 	print(string(bs))
 }
 

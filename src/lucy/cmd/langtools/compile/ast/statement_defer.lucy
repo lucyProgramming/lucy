@@ -5,7 +5,7 @@ public class StatementDefer {
 	public labels         []StatementLabel
 	public startPc        int         // for jvm
 	public stackMapState  Object // *jvm.StackMapState
-	public block          Block
+	public block          Block = new Block()
 	public exceptionClass Class
 	
 	public fn resetLabels() {

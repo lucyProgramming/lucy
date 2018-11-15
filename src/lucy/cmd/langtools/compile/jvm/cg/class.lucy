@@ -346,9 +346,9 @@ public class Class {
 			this.attributes = []AttributeInfo{}
 		}
 		//source file
-		this.attributes . append(new AttributeSourceFile(high.getSourceFile()).ToAttributeInfo(this))
+		this.attributes.append(new AttributeSourceFile(high.getSourceFile()).ToAttributeInfo(this))
 		for _, v := range this.TypeAlias {
-			this.attributes.append( v.ToAttributeInfo(this))
+			this.attributes.append(v.ToAttributeInfo(this))
 		}
 		if this.AttributeLucyEnum != null {
 			this.attributes.append( this.AttributeLucyEnum.ToAttributeInfo(this))
@@ -364,6 +364,7 @@ public class Class {
 		for _, v := range high.templateFunctions {
 			this.attributes.append(v.ToAttributeInfo(this))
 		}
+
 		this.ifConstPoolOverMaxSize()
 		return
 	}

@@ -148,13 +148,16 @@ public class  BuildPackage {
         }
     }
     fn mkGlobalTypeAlias() {
+        this.mainClass.Class.TypeAlias = new []cg.AttributeLucyTypeAlias(len(this.Package.block.typeAliases))
+        var i = 0 
         for name, v := range this.Package.block.typeAliases {
             t := new cg.AttributeLucyTypeAlias()
             t.alias = LucyTypeAlias.Encode(name, v)
             if v.alias != null {
                 t.comment = v.alias.comment
             }
-            this.mainClass.Class.TypeAlias.append(t)
+            this.mainClass.Class.TypeAlias[i] = t
+            i++
         }
     }
 
@@ -169,10 +172,13 @@ public class  BuildPackage {
             f.accessFlags |= cg.AccFieldVolatile
             if LucyFieldSignature.Need(v.Type) {
                 f.AttributeLucyFieldDescriptor = new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.Encode(v.Type) , 0 )
-                if v.Type.functionType.vArgs != null {
-                    f.AttributeLucyFieldDescriptor.methodAccessFlag |=
-                        cg.AccMethodVarargs
+                if v.Type.Type == ast.VariableTypeFunction {
+                    if v.Type.functionType.vArgs != null {
+                        f.AttributeLucyFieldDescriptor.methodAccessFlag |=
+                            cg.AccMethodVarargs
+                    }
                 }
+                
             }
             v.globalVarClassName = this.mainClass.name
             f.name = v.name
@@ -304,8 +310,9 @@ public class  BuildPackage {
         }
         c.fields = new map {string -> cg.FieldHighLevel } ()
         c.methods = new map { string -> []cg.MethodHighLevel } ()
-        for _, v := range astClass.interfaces {
-            c.interfaces.append(v.name)
+        c.interfaces = new []string(len(astClass.interfaces))
+        for k, v := range astClass.interfaces {
+            c.interfaces[k] = v.name
         }
         for _, v := range astClass.fields {
             f := new cg.FieldHighLevel()

@@ -56,6 +56,8 @@ public class Statement {
 			this.Expression.Type == ExpressionTypeVar
 	}
 	
+	/*
+
 	fn simplifyIf() {
 		if len(this.StatementIf.elseIfList) > 0 {
 			return
@@ -90,6 +92,7 @@ public class Statement {
 			this.StatementFor = null
 		}
 	}
+	*/
 
 	fn check(block Block) -> (errs []error) {
 		this.checked = true
@@ -99,11 +102,11 @@ public class Statement {
 			return this.checkStatementExpression(block)
 		case StatementTypeIf:
 			es := this.StatementIf.check(block)
-			this.simplifyIf()
+			//this.simplifyIf()
 			return es
 		case StatementTypeFor:
 			es := this.StatementFor.check(block)
-			this.simplifyFor()
+			//this.simplifyFor()
 			return es
 		case StatementTypeSwitch:
 			return this.StatementSwitch.check(block)

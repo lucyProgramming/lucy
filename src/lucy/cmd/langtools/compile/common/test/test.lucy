@@ -1,0 +1,21 @@
+
+
+
+
+
+import "lucy/cmd/langtools/compile/common"
+
+
+
+
+
+
+
+
+fn main (args []string) {
+	
+	
+	print(common.Bytes.indexByte([]byte("([Ljava/lang/Thread;)[[Ljava/lang/StackTraceElement;") , ';'))
+
+
+}

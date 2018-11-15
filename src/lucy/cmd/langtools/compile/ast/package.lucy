@@ -135,7 +135,8 @@ public class Package {
 			}
 
 			if t,ok := v.Node.(TypeAlias) ; ok {
-				err := this.block.insert(t.name, t.pos, t)
+				err := this.block.insert(t.name, t.pos, t.Type)
+				t.Type.alias = t
 				if err != null {
 					errs.append(err)
 				}

@@ -186,7 +186,7 @@ class FileLoader implements ast.LoadImport{
             m.Function.name = string(c.ConstPool[v.nameIndex].info)
             m.Function.jvmDescriptor = string(c.ConstPool[v.descriptorIndex].info)
             m.Function.accessFlags = v.accessFlags
-            m.Function.Type, err := jvm.Descriptor.ParseFunctionType(c.ConstPool[v.descriptorIndex].info)
+            m.Function.Type, err := jvm.Descriptor.ParseFunctionType([]byte(m.Function.jvmDescriptor))
             if err != null {
                 panic(err)
             }

@@ -36,9 +36,9 @@ var	untilSemicolonOrLf = {
  
 
 fn ParseFunction(bs []byte, pos ast.Pos) -> (f ast.Function,es []error) {
-	parser := new Parser(bs , null ,pos.filename , false,10 )
-	parser.lexer = lex.New(parser.bs, pos.line, pos.column)
-	parser.Next(lfNotToken) //
+	parser := new Parser(bs , null ,pos.filename , false , 10 )
+	parser.lexer = lex.New(bs, pos.line, pos.column)
+	parser.Next(lfNotToken) // read fn 
 	f, err := parser.FunctionParser.parse(true, false)
 	if err != null {
 		parser.errs.append(err)

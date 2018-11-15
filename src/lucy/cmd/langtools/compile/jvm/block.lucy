@@ -145,7 +145,7 @@ class BuildBlock {
 			this.buildDefers(c, code, context, s.StatementBreak.defers, state)
 			exit := new cg.Exit(cg.OP_goto, code)
 			if s.StatementBreak.statementFor != null {
-				s.StatementBreak.statementFor.exits.append( exit)
+				s.StatementBreak.statementFor.exits.append(exit)
 			} else if s.StatementBreak.statementSwitch != null { // switch
 				s.StatementBreak.statementSwitch.exits.append(exit)
 			} else {
@@ -171,7 +171,12 @@ class BuildBlock {
 				jumpTo(code, s.StatementGoTo.statementLabel.codeOffset)
 			} else {
 				exit := new cg.Exit(cg.OP_goto, code)
-				s.StatementGoTo.statementLabel.exits.append(exit)
+				if s.StatementGoTo.statementLabel.exits == null {
+					s.StatementGoTo.statementLabel.exits = [exit]
+				}else {
+					s.StatementGoTo.statementLabel.exits.append(exit)
+				}
+				
 			}
 		case ast.StatementTypeLabel:
 			s.StatementLabel.codeOffsetGenerated = true
@@ -245,7 +250,7 @@ class BuildBlock {
 			} else {
 				e.catchType = c.Class.insertClassConst(ds[index].exceptionClass.name) // custom c
 			}
-			code.exceptions.append(e)
+			code.appendException(e)
 			//expect exception on stack
 			copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
 				context.exceptionVarOffset)) // this code will make_node_objects stack is empty

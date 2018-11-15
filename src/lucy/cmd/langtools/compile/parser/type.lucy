@@ -64,7 +64,6 @@ class TypeParser extends ParserExtends {
 			ret.Type = ast.VariableTypeFloat
 			ret.pos = pos
 			this.Next(lfIsToken)
-
 		case lex.TokenDouble:
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeDouble
@@ -160,10 +159,6 @@ class TypeParser extends ParserExtends {
 		default:
 			err = new error(sprintf("%s unkown begining '%s' token for a type",
 				this.parser.errMsgPrefix(), this.parser.token.Description))
-			this.parser.errs.append( err)
-			return null, err
-		}
-		if err != null {
 			this.parser.errs.append( err)
 			return null, err
 		}

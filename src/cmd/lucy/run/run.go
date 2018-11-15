@@ -461,19 +461,6 @@ func (runLucyPackage *RunLucyPackage) buildPackage(lucyPath string, packageName 
 			return
 		}
 	}
-	//before compile delete old class and maintain.json
-	{
-		fis, _ := ioutil.ReadDir(destinationDir)
-		for _, f := range fis {
-			if strings.HasSuffix(f.Name(), ".class") || f.Name() == common.LucyMaintainFile {
-				file := filepath.Join(destinationDir, f.Name())
-				err := os.Remove(file)
-				if err != nil {
-					fmt.Printf("delete old compiled file[%s] failed,err:%v\n", file, err)
-				}
-			}
-		}
-	}
 	if runLucyPackage.flags.verbose {
 		fmt.Printf("# %s\n", packageName) // compile this package
 	}
@@ -490,6 +477,7 @@ func (runLucyPackage *RunLucyPackage) buildPackage(lucyPath string, packageName 
 	cmd.Stderr = os.Stderr
 	bs, err := cmd.Output()
 	if err != nil {
+		fmt.Println(string(bs))
 		err = fmt.Errorf("compiler err:%v", err)
 		return
 	}

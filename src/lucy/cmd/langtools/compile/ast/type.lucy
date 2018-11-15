@@ -26,7 +26,6 @@ public enum  VariableTypeKind {
 	VariableTypePackage,
 	VariableTypeNull,
 	VariableTypeGlobal,
-	VariableTypeMagicFunction,
 	VariableTypeDynamicSelector 
 }
 
@@ -59,7 +58,6 @@ public class Type {
 	    t.Type = this.Type
 	    t.isBuildIn = this.isBuildIn
 	    t.isVariableArgs = this.isVariableArgs
-	    t.resolved = this.resolved
 	    t.pos = this.pos
 	    t.name = this.name
 	    t.array = this.array
@@ -67,6 +65,7 @@ public class Type {
 	    t.Enum = this.Enum
 	    t.enumName = this.enumName
 	    t.Function = this.Function
+	    t.functionType = this.functionType
 	    t.Map = this.Map
 	    t.Package = this.Package
 	    t.alias = this.alias
@@ -75,6 +74,7 @@ public class Type {
 		if this.isPointer() == false {
 			return false
 		}
+		return true
 		// object or string
 		if this.Type == VariableTypeObject || this.Type == VariableTypeString {
 			return true
@@ -101,7 +101,7 @@ public class Type {
 		switch this.Type {
 		case VariableTypeBool:
 			e.Type = ExpressionTypeBool
-			e.longValue = 0
+			e.boolValue = false
 		case VariableTypeByte:
 			e.Type = ExpressionTypeByte
 			e.longValue =  0
@@ -152,9 +152,6 @@ public class Type {
 		case VariableTypeClass:
 			return new error(sprintf("%s use class '%s' without selector",
 				this.pos.errMsgPrefix(), this.Class.name))
-		case VariableTypeMagicFunction:
-			return new error(sprintf("%s use '%s' without selector",
-				this.pos.errMsgPrefix(), magicIdentifierFunction))
 		default:
 			return new error(sprintf("%s '%s' is not right value valid",
 				this.pos.errMsgPrefix(), this.typeString()))
@@ -228,8 +225,7 @@ public class Type {
 					errMsgPrefix(this.pos), this.name))
 			}
 			pos := this.pos // keep pos
-			//TODO:: copy
-			//*typ = *block.inheritedAttribute.Function.parameterTypes[this.name]
+			block.inheritedAttribute.Function.parameterTypes[this.name].cp(this)
 			this.pos = pos // keep pos
 			return null
 		case VariableTypeName:
@@ -271,7 +267,6 @@ public class Type {
 
 	fn resolveName(block Block) -> (err error ) {
 		var d  Object
-		assert(this.name != null)
 		if this.name.indexOf(".")  < 0  {
 			var loadFromImport bool
 			d = block.searchType(this.name)
@@ -487,8 +482,6 @@ public class Type {
 			ret = prefix + "null"
 		case VariableTypeGlobal:
 			ret = prefix + this.name
-		case VariableTypeMagicFunction:
-			ret = prefix + magicIdentifierFunction
 		}
 	}
 
@@ -566,7 +559,7 @@ public class Type {
 	}
 
 	/*
-
+		
 	 */
 	fn canBeBindWithType(ft FunctionType, mkParameterTypes map{string->Type}, bind Type) -> (err error)  {
 		if err = bind.rightValueValid(); err != null {
@@ -691,6 +684,8 @@ public class Type {
 				leftValue.isVariableArgs != compareTo.isVariableArgs {
 				return false
 			}
+			assert(leftValue != null)
+			assert(compareTo.array != null)
 			return leftValue.array.equal(compareTo.array)
 		}
 		if leftValue.Type == VariableTypeMap {

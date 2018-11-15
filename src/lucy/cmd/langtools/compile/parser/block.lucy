@@ -20,7 +20,7 @@ class BlockParser  extends ParserExtends{
 
 	}
 	
-
+		
     fn validAfterDefer() -> (err error) {
         if this.parser.ExpressionParser.looksLikeExpression() ||
             this.parser.token.Type == lex.TokenLc {
@@ -293,25 +293,24 @@ class BlockParser  extends ParserExtends{
 				pos := this.parser.mkPos()
 				this.Next(lfIsToken)
 				this.parser.validStatementEnding()
-				{
-				    t := new ast.Statement()
-				    t.Type = ast.StatementTypeContinue
-				    t.pos = pos
-				    t.StatementContinue = new ast.StatementContinue()
-				    t.StatementContinue.pos = pos
-				    block.statements.append(t)
-				}
+			    c := new ast.Statement()
+			    c.Type = ast.StatementTypeContinue
+			    c.pos = pos
+			    c.StatementContinue = new ast.StatementContinue()
+			    c.StatementContinue.pos = pos
+			    block.statements.append(c)
+				
 			case lex.TokenBreak:
 				pos := this.parser.mkPos()
 				this.Next(lfIsToken)
 				this.parser.validStatementEnding()
-				{
-				    t := new ast.Statement()
-				    t.Type = ast.StatementTypeBreak
-				    t.pos = pos
-				    t.StatementBreak = new ast.StatementBreak()
-				    t.StatementBreak.pos = pos
-				}
+			    b := new ast.Statement()
+			    b.Type = ast.StatementTypeBreak
+			    b.pos = pos
+			    b.StatementBreak = new ast.StatementBreak()
+			    b.StatementBreak.pos = pos
+				block.statements.append(b)
+
 			case lex.TokenGoto:
 				pos := this.parser.mkPos()
 				this.Next(lfIsToken) // skip goto key word
@@ -326,13 +325,11 @@ class BlockParser  extends ParserExtends{
 				statementGoto := new ast.StatementGoTo()
 				statementGoto.pos = pos
 				statementGoto.labelName = this.parser.token.stringValue
-				{
-				    t := new ast.Statement()
-				    t.Type = ast.StatementTypeGoTo
-				    t.pos = pos
-				    t.StatementGoTo = statementGoto
-				    block.statements.append(t)
-				}
+				g := new ast.Statement()
+				g.Type = ast.StatementTypeGoTo
+				g.pos = pos
+				g.StatementGoTo = statementGoto
+				block.statements.append(g)
 				this.Next(lfIsToken)
 				this.parser.validStatementEnding()
 				this.Next(lfNotToken)

@@ -118,6 +118,10 @@ class ExpressionCheckBinary {
 			    if left.assignAble(errs, right) == false {
                     errs.append(e.binaryWrongOpErr())
                 }
+            case VariableTypeNull:
+            	if right.isPointer () == false || e.isEqOrNe() == false {
+            		errs.append(e.binaryWrongOpErr())
+            	}
 			case left.isPointer():
 				if left.assignAble(errs, right) == false || e.isEqOrNe() == false {
 					errs.append(e.binaryWrongOpErr())

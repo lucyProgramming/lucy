@@ -37,15 +37,6 @@ class ExpressionCheckIdentifier {
 			result.pos = e.pos
 			result.Class = block.inheritedAttribute.Class
 			return result, null
-		case magicIdentifierFunction:
-			if block.inheritedAttribute.Function.isPackageInitBlockFunction {
-				return null,new error(sprintf("%s '%s' must in function scope", e.pos.errMsgPrefix(), identifier.name))
-			}
-			result := new Type()
-			result.Type = VariableTypeMagicFunction
-			result.pos = e.pos
-			result.Function = block.inheritedAttribute.Function
-			return result, null
 		}
 		isCaptureVar := [false]
 		d, err := block.searchIdentifier(e.pos, identifier.name, isCaptureVar)

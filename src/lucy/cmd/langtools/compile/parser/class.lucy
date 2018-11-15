@@ -74,7 +74,8 @@ class ClassParser extends  ParserExtends{
 		classDefinition.block.isClassBlock = true
 		classDefinition.block.Class = classDefinition
 		if err != null {
-			if classDefinition.name == "" {
+			if classDefinition.name == null ||
+				classDefinition.name == "" {
 				compileAutoName()
 			}
 			this.consume(untilLc)

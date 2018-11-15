@@ -63,40 +63,40 @@ func (this *Statement) isVariableDefinition() bool {
 		this.Expression.Type == ExpressionTypeVar
 }
 
-func (this *Statement) simplifyIf() {
-	if len(this.StatementIf.ElseIfList) > 0 {
-		return
-	}
-	if len(this.StatementIf.PrefixExpressions) > 0 {
-		return
-	}
-	if this.StatementIf.Condition.Type != ExpressionTypeBool {
-		return
-	}
-	c := this.StatementIf.Condition.Data.(bool)
-	if c {
-		this.Type = StatementTypeBlock
-		this.Block = &this.StatementIf.Block
-	} else {
-		if this.StatementIf.Else != nil {
-			this.Type = StatementTypeBlock
-			this.Block = this.StatementIf.Else
-		} else {
-			this.Type = StatementTypeNop
-		}
-	}
-}
-
-func (this *Statement) simplifyFor() {
-	if this.StatementFor.Init == nil &&
-		this.StatementFor.Increment == nil &&
-		this.StatementFor.Condition != nil &&
-		this.StatementFor.Condition.Type == ExpressionTypeBool &&
-		this.StatementFor.Condition.Data.(bool) == false {
-		this.Type = StatementTypeNop
-		this.StatementFor = nil
-	}
-}
+//func (this *Statement) simplifyIf() {
+//	if len(this.StatementIf.ElseIfList) > 0 {
+//		return
+//	}
+//	if len(this.StatementIf.PrefixExpressions) > 0 {
+//		return
+//	}
+//	if this.StatementIf.Condition.Type != ExpressionTypeBool {
+//		return
+//	}
+//	c := this.StatementIf.Condition.Data.(bool)
+//	if c {
+//		this.Type = StatementTypeBlock
+//		this.Block = &this.StatementIf.Block
+//	} else {
+//		if this.StatementIf.Else != nil {
+//			this.Type = StatementTypeBlock
+//			this.Block = this.StatementIf.Else
+//		} else {
+//			this.Type = StatementTypeNop
+//		}
+//	}
+//}
+//
+//func (this *Statement) simplifyFor() {
+//	if this.StatementFor.Init == nil &&
+//		this.StatementFor.Increment == nil &&
+//		this.StatementFor.Condition != nil &&
+//		this.StatementFor.Condition.Type == ExpressionTypeBool &&
+//		this.StatementFor.Condition.Data.(bool) == false {
+//		this.Type = StatementTypeNop
+//		this.StatementFor = nil
+//	}
+//}
 func (this *Statement) check(block *Block) []error {
 	defer func() {
 		this.Checked = true
@@ -107,11 +107,9 @@ func (this *Statement) check(block *Block) []error {
 		return this.checkStatementExpression(block)
 	case StatementTypeIf:
 		es := this.StatementIf.check(block)
-		this.simplifyIf()
 		return es
 	case StatementTypeFor:
 		es := this.StatementFor.check(block)
-		this.simplifyFor()
 		return es
 	case StatementTypeSwitch:
 		return this.StatementSwitch.check(block)

@@ -88,8 +88,6 @@ class  BuildExpressionFunction {
 			"()V"
 		), code.codes[code.codeLength+1:code.codeLength+3])
 		code.codeLength += 3
-		code.codes[code.codeLength] = cg.OP_dup
-		code.codeLength++
 		// store  to,wait for call
 		function.closureVariableOffSet = code.maxLocals
 		code.maxLocals++
@@ -97,16 +95,12 @@ class  BuildExpressionFunction {
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, function.closureVariableOffSet))
 		//set filed
 		closureClass.fields = new map { string -> cg.FieldHighLevel} ()
-		total := len(function.Closure.variables) + len(function.Closure.Functions) - 1
 		for v, _ := range function.Closure.variables {
 			field := new cg.FieldHighLevel()
 			field.accessFlags |= cg.AccFieldSynthetic
 			field.name = v.name
 			closureClass.fields[v.name] = field
-			if total != 0 {
-				code.codes[code.codeLength] = cg.OP_dup
-				code.codeLength++
-			}
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, function.closureVariableOffSet))
 			if v.beenCapturedAsLeftValue > 0 {
 				meta := closure.getMeta(v.Type.Type)
 				field.descriptor = "L" + meta.className + ";"
@@ -158,7 +152,7 @@ class  BuildExpressionFunction {
 				field.descriptor
 			), code.codes[code.codeLength+1:code.codeLength+3])
 			code.codeLength += 3
-			total--
+
 		}
 		for v, _ := range function.Closure.Functions {
 			if v.isClosureFunction == false {
@@ -170,10 +164,7 @@ class  BuildExpressionFunction {
 			filed.name = v.name
 			filed.descriptor = "L" + v.entrance.Class.name + ";"
 			closureClass.fields[v.name] = filed
-			if total != 0 {
-				code.codes[code.codeLength] = cg.OP_dup
-				code.codeLength++
-			}
+			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, function.closureVariableOffSet))
 			if context.function.Closure.closureFunctionExist(v) {
 				// I Know this at 0 offset
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0))
@@ -200,7 +191,6 @@ class  BuildExpressionFunction {
 				filed.descriptor
 			), code.codes[code.codeLength+1:code.codeLength+3])
 			code.codeLength += 3
-			total--
 		}
 		method.code = new cg.AttributeCode()
 		// build function

@@ -264,7 +264,7 @@ class ExpressionCheckMethodCall {
 			errs.append(new error(sprintf("%s function '%s' not found", e.pos.errMsgPrefix(), call.name)))
 			return null
 		}
-		if f := d.(Function) ;f != null {
+		if f ,ok := d.(Function) ; ok {
 			if f.isPublic() == false &&
 				p.isSame(PackageBeenCompile) == false {
 				errs.append(new error(sprintf("%s function '%s' is not public",
@@ -297,7 +297,7 @@ class ExpressionCheckMethodCall {
 				return ret
 			}
 		}
-		if v := d.(Variable) ; v != null {
+		if v ,ok:= d.(Variable) ; ok {
 			if v.isPublic() == false && p.isSame(PackageBeenCompile) == false {
 				errs . append(new error( sprintf("%s variable '%s' is not public",
 					e.pos.errMsgPrefix(), call.name)))
@@ -326,7 +326,7 @@ class ExpressionCheckMethodCall {
 			call.vArgs = vArgs
 			return ret
 		}
-		if c := d.(Class) ; c != null {
+		if c,ok := d.(Class) ; ok {
 			if c.isPublic() == false && p.isSame(PackageBeenCompile) == false {
 				errs.append(new error(sprintf("%s class '%s' is not public",
 					e.pos.errMsgPrefix(), call.name)))
@@ -347,7 +347,7 @@ class ExpressionCheckMethodCall {
 			}
 			return []Type{ExpressionCheckTypeConversion.check(e , block, errs)}
 		}
-		if t := d.(Type) ; t != null {
+		if t ,ok:= d.(Type) ; ok {
 			if len(call.args) != 1 {
 				errs.append(new error(sprintf("%s cast type expect 1 argument",
 					e.pos.errMsgPrefix())))

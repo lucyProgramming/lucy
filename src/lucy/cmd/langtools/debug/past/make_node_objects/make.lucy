@@ -2,14 +2,14 @@ import "java/lang/Object"
 import "lucy/cmd/langtools/compile/ast"
 
 
-class MakeNodesObjects {
+public class MakeNodesObjects {
 
+    
     
 
 
-
-    
-    fn Make(files map { string-> []ast.TopNode } ) -> (x Object) {
+        
+    public fn Make(files map { string-> []ast.TopNode } ) -> (x Object) {
         if len(files) == 1 {
             for _, v := range files {
                 return this.MakeNodes(v)
@@ -56,9 +56,9 @@ class MakeNodesObjects {
     }
 
     fn makeConst(c ast.Constant) -> (x Object) {
-        s := sprintf("const%d %s", c.Pos.line, c.name)
+        s := sprintf("const%d %s", c.pos.line, c.name)
         if c.Type != null {
-            s += sprintf(" base on '%s'", c.Type.TypeString())
+            s += sprintf(" base on '%s'", c.Type.typeString())
         }
         var ret []Object
         ret.append( s)
@@ -155,30 +155,30 @@ class MakeNodesObjects {
     fn makeClass(c ast.Class) ->(x Object) {
         ret := new map{string -> Object}()
         ret["name"] = c.name
-        ret["accessFlags"] = c.AccessFlags
-        if c.SuperClassName != null {
-            ret["superClass"] = c.SuperClassName.name
+        ret["accessFlags"] = sprintf("0x%x" , c.accessFlags )
+        if c.superClassName != null {
+            ret["superClass"] = c.superClassName.name
         }
-        if len(c.InterfaceNames) > 0 {
+        if len(c.interfaceNames) > 0 {
             var t []Object
-            for _, v := range c.InterfaceNames {
+            for _, v := range c.interfaceNames {
                 t.append( v.name)
             }
             ret["interfaces"] = t
         }
 
-        if len(c.Block.Constants) > 0 {
+        if len(c.block.constants) > 0 {
             var t []Object
-            for _, v := range c.Block.Constants {
+            for _, v := range c.block.constants {
                 t.append( this.makeConst(v))
             }
             ret["constants"] = t
         }
-        if len(c.Fields) > 0 {
+        if len(c.fields) > 0 {
             fields := new map{string -> Object}()
-            for _, v := range c.Fields {
+            for _, v := range c.fields {
                 f := new map{string -> Object}()
-                f["accessFlags"] = v.AccessFlags
+                f["accessFlags"] = sprintf("0x%x" , v.accessFlags)
                 f["name"] = v.name
                 f["type"] = v.Type.typeString()
                 if v.defaultValueExpression != null {
@@ -188,21 +188,21 @@ class MakeNodesObjects {
             }
             ret["fields"] = fields
         }
-        if len(c.StaticBlocks) > 0 {
+        if len(c.staticBlocks) > 0 {
             var t []Object
-            for _, v := range c.StaticBlocks {
+            for _, v := range c.staticBlocks {
                 t.append( this.makeBlock(v))
             }
             ret["staticBlocks"] = t
         }
-        if len(c.Methods) > 0 {
+        if len(c.methods) > 0 {
             methods := new map{string -> Object}()
-            for name, ms := range c.Methods {
+            for name, ms := range c.methods {
                 if len(ms) != 1 {
                     var t []Object
                     for _, method := range ms {
                         m := new map{string -> Object}()
-                        m["accessFlags"] = method.Function.AccessFlags
+                        m["accessFlags"] = sprintf("0x%x"  , method.Function.accessFlags)
                         m["function"] = this.makeFunction(method.Function)
                         t.append( m)
                     }
@@ -210,7 +210,7 @@ class MakeNodesObjects {
                 } else {
                     method := ms[0]
                     m := new map{string -> Object}()
-                    m["accessFlags"] = method.Function.AccessFlags
+                    m["accessFlags"] = sprintf("0x%x"  , method.Function.accessFlags)
                     m["function"] = this.makeFunction(method.Function)
                     methods[name] = m
                 }
@@ -224,7 +224,7 @@ class MakeNodesObjects {
     }
 
     fn makeTypeAlias(a ast.TypeAlias) ->(x Object) {
-        s := sprintf("typealias@%d '%s' base on '%s'", a.pos.line, a.name, a.Type.TypeString())
+        s := sprintf("typealias@%d '%s' base on '%s'", a.pos.line, a.name, a.Type.typeString())
         return s
     }
     fn makeBlock(b ast.Block) ->(x Object) {
@@ -243,17 +243,17 @@ class MakeNodesObjects {
             }
             ret["prefixExpressions"] = t
         }
-        if s.Condition != null {
-            ret["condition"] = this.makeExpression(s.Condition)
+        if s.condition != null {
+            ret["condition"] = this.makeExpression(s.condition)
         }
-        ret["block"] = this.makeBlock(s.Block)
-        if len(s.ElseIfList) > 0 {
-            var t []Object
-            for _, v := range s.ElseIfList {
-                t.append( {
-                    "condition" -> this.makeExpression(v.Condition),
-                    "block" ->     this.makeBlock(v.Block),
-                })
+        ret["block"] = this.makeBlock(s.block)
+        if len(s.elseIfList) > 0 {
+            t := new Object[](len(s.elseIfList))
+            for k, v := range s.elseIfList {
+                t[k] =  {
+                    "condition" -> this.makeExpression(v.condition),
+                    "block" ->     this.makeBlock(v.block)
+                }
             }
             ret["elseifList"] = t
         }
@@ -269,13 +269,13 @@ class MakeNodesObjects {
         if s.Init != null {
             ret["init"] = this.makeExpression(s.Init)
         }
-        if s.Condition != null {
-            ret["condition"] = this.makeExpression(s.Condition)
+        if s.condition != null {
+            ret["condition"] = this.makeExpression(s.condition)
         }
         if s.Increment != null {
             ret["increment"] = this.makeExpression(s.Increment)
         }
-        ret["block"] = this.makeBlock(s.Block)
+        ret["block"] = this.makeBlock(s.block)
         return  {
             sprintf("for@%d", s.pos.line) -> ret,
         }
@@ -289,20 +289,20 @@ class MakeNodesObjects {
             }
             ret["prefixExpressions"] = t
         }
-        if s.Condition != null {
-            ret["condition"] = this.makeExpression(s.Condition)
+        if s.condition != null {
+            ret["condition"] = this.makeExpression(s.condition)
         }
         if len(s.StatementSwitchCases) > 0 {
-            var cases []Object
-            for _, v := range s.StatementSwitchCases {
+            var cases = new Object[](len(s.StatementSwitchCases))
+            for k, v := range s.StatementSwitchCases {
                 onecase := new map{string -> Object}()
-                var conditions []Object
-                for _, vv := range v.Matches {
-                    conditions = append(conditions, this.makeExpression(vv))
+                conditions := new Object[](len(v.matches))
+                for kk, vv := range v.matches {
+                    conditions[kk] =  this.makeExpression(vv)
                 }
                 onecase["conditions"] = conditions
-                onecase["block"] = this.makeBlock(v.Block)
-                cases = append(cases, onecase)
+                onecase["block"] = this.makeBlock(v.block)
+                cases[k] = onecase
             }
             ret["cases"] = cases
         }
@@ -315,20 +315,20 @@ class MakeNodesObjects {
     }
     fn makeStatementWhen(w ast.StatementWhen) ->(x Object) {
         ret := new map{string -> Object}()
-        if w.Condition != null {
-            ret["condition"] = w.Condition.typeString()
+        if w.condition != null {
+            ret["condition"] = w.condition.typeString()
         }
-        if len(w.Cases) > 0 {
-            var cases []Object
-            for _, v := range w.Cases {
+        if len(w.cases) > 0 {
+            var cases = new Object[](len(w.cases))
+            for k, v := range w.cases {
                 onecase := new map{string -> Object}()
-                var conditions []Object
-                for _, vv := range v.Matches {
-                    conditions = append(conditions, vv.TypeString())
+                var conditions  = new Object[](len(v.matches))
+                for kk, vv := range v.matches {
+                    conditions[kk]  = vv.typeString()
                 }
                 onecase["conditions"] = conditions
-                onecase["block"] = this.makeBlock(v.Block)
-                cases = append(cases, onecase)
+                onecase["block"] = this.makeBlock(v.block)
+                cases[k] =  onecase
             }
             ret["cases"] = cases
         }
@@ -349,7 +349,7 @@ class MakeNodesObjects {
 
     fn makeStatementDefer(d ast.StatementDefer) ->(x Object) {
         return  {
-            sprintf("defer%d", d.pos.line) -> this.makeBlock(d.Block),
+            sprintf("defer%d", d.pos.line) -> this.makeBlock(d.block),
         }
     }
     fn makeStatement(s ast.Statement) ->(x Object) {
@@ -362,23 +362,23 @@ class MakeNodesObjects {
             return this.makeStatementIf(s.StatementIf)
         case ast.StatementTypeBlock:
             return  {
-                "block" ->  this.makeBlock(s.Block),
+                "block" ->  this.makeBlock(s.block),
             }
         case ast.StatementTypeFor:
             return this.makeStatementFor(s.StatementFor)
         case ast.StatementTypeContinue:
             return sprintf("continue@%d", s.pos.line)
         case ast.StatementTypeReturn:
-            if len(s.StatementReturn.Expressions) == 0 {
+            if len(s.StatementReturn.expressions) == 0 {
                 return sprintf("return@%d", s.pos.line)
             } else {
                 key := sprintf("return@%d", s.pos.line)
                 ret := new map{string -> Object}()
-                if len(s.StatementReturn.Expressions) == 1 {
-                    ret[key] = this.makeExpression(s.StatementReturn.Expressions[0])
+                if len(s.StatementReturn.expressions) == 1 {
+                    ret[key] = this.makeExpression(s.StatementReturn.expressions[0])
                 } else {
                     var t []Object
-                    for _, v := range s.StatementReturn.Expressions {
+                    for _, v := range s.StatementReturn.expressions {
                         t.append( this.makeExpression(v))
                     }
                     ret[key] = t
@@ -413,29 +413,29 @@ class MakeNodesObjects {
 
     fn makeExpression(e ast.Expression) ->(x Object) {
         if e == null {
-            return fmt.Errorf("EXPRESSION IS NULL")
+            return new error("EXPRESSION IS NULL")
         }
         switch e.Type {
         case ast.ExpressionTypeNull:
             return "null"
         case ast.ExpressionTypeBool:
-            fallthrough
+            return e.boolValue + ""
         case ast.ExpressionTypeByte:
-            fallthrough
+            return e.longValue + ""
         case ast.ExpressionTypeShort:
-            fallthrough
+            return e.longValue + ""
         case ast.ExpressionTypeChar:
-            fallthrough
+            return e.longValue + ""
         case ast.ExpressionTypeInt:
-            fallthrough
+             return e.longValue + ""
         case ast.ExpressionTypeLong:
-            fallthrough
+            return e.longValue + ""
         case ast.ExpressionTypeFloat:
-            fallthrough
+            return e.doubleValue + ""
         case ast.ExpressionTypeDouble:
-            return e.Data
+            return e.doubleValue + ""
         case ast.ExpressionTypeString:
-            return sprintf(`literal string@%d "%s"`, e.pos.line, e.data.(string))
+            return sprintf(`literal string@%d "%s"`, e.pos.line, e.stringValue)
         case ast.ExpressionTypeArray:
             array := e.data.(ast.ExpressionArray)
             ret := new map{string -> Object}()
@@ -445,95 +445,45 @@ class MakeNodesObjects {
                 ret["type"] = array.Type.typeString()
             }
             var t []Object
-            for _, v := range array.Expressions {
+            for _, v := range array.expressions {
                 t.append( this.makeExpression(v))
             }
             ret["elements"] = t
             return ret
-        case ast.ExpressionTypeLogicalOr:
-            fallthrough
-        case ast.ExpressionTypeLogicalAnd:
-            fallthrough
-        case ast.ExpressionTypeOr:
-            fallthrough
-        case ast.ExpressionTypeAnd:
-            fallthrough
-        case ast.ExpressionTypeXor:
-            fallthrough
-        case ast.ExpressionTypeLsh:
-            fallthrough
-        case ast.ExpressionTypeRsh:
-            fallthrough
-        case ast.ExpressionTypeAdd:
-            fallthrough
-        case ast.ExpressionTypeSub:
-            fallthrough
-        case ast.ExpressionTypeMul:
-            fallthrough
-        case ast.ExpressionTypeDiv:
-            fallthrough
-        case ast.ExpressionTypeMod:
-            fallthrough
-        case ast.ExpressionTypeEq:
-            fallthrough
-        case ast.ExpressionTypeNe:
-            fallthrough
-        case ast.ExpressionTypeGe:
-            fallthrough
-        case ast.ExpressionTypeGt:
-            fallthrough
-        case ast.ExpressionTypeLe:
-            fallthrough
-        case ast.ExpressionTypeLt:
+        case ast.ExpressionTypeLogicalOr,ast.ExpressionTypeLogicalAnd, ast.ExpressionTypeOr,
+             ast.ExpressionTypeAnd, ast.ExpressionTypeXor, ast.ExpressionTypeLsh,ast.ExpressionTypeRsh,
+             ast.ExpressionTypeAdd,ast.ExpressionTypeSub, ast.ExpressionTypeMul, ast.ExpressionTypeDiv,
+             ast.ExpressionTypeMod,ast.ExpressionTypeEq, ast.ExpressionTypeNe,ast.ExpressionTypeGe,ast.ExpressionTypeGt,
+             ast.ExpressionTypeLe,ast.ExpressionTypeLt:
             ret := new map{string -> Object}()
             ret["op"] = e.op
             bin := e.data.(ast.ExpressionBinary)
-            ret["left"] = this.makeExpression(bin.Left)
-            ret["right"] = this.makeExpression(bin.Right)
+            ret["left"] = this.makeExpression(bin.left)
+            ret["right"] = this.makeExpression(bin.right)
             return ret
-        case ast.ExpressionTypeAssign:
-            fallthrough
-        case ast.ExpressionTypeVarAssign:
-            fallthrough
-        case ast.ExpressionTypePlusAssign:
-            fallthrough
-        case ast.ExpressionTypeMinusAssign:
-            fallthrough
-        case ast.ExpressionTypeMulAssign:
-            fallthrough
-        case ast.ExpressionTypeDivAssign:
-            fallthrough
-        case ast.ExpressionTypeModAssign:
-            fallthrough
-        case ast.ExpressionTypeAndAssign:
-            fallthrough
-        case ast.ExpressionTypeOrAssign:
-            fallthrough
-        case ast.ExpressionTypeXorAssign:
-            fallthrough
-        case ast.ExpressionTypeLshAssign:
-            fallthrough
-        case ast.ExpressionTypeRshAssign:
+        case ast.ExpressionTypeAssign,ast.ExpressionTypeVarAssign,ast.ExpressionTypePlusAssign,ast.ExpressionTypeMinusAssign,
+            ast.ExpressionTypeMulAssign, ast.ExpressionTypeDivAssign, ast.ExpressionTypeModAssign, ast.ExpressionTypeAndAssign,
+            ast.ExpressionTypeOrAssign,ast.ExpressionTypeXorAssign,ast.ExpressionTypeLshAssign, ast.ExpressionTypeRshAssign:
             ret := new map{string -> Object}()
             ret["op"] = e.op
             bin := e.data.(ast.ExpressionBinary)
-            if bin.Left.Type == ast.ExpressionTypeList {
+            if bin.left.Type == ast.ExpressionTypeList {
                 var t []Object
-                for _, v := range bin.Left.Data.([]ast.Expression) {
+                for _, v := range bin.left.data.([]ast.Expression) {
                     t.append( this.makeExpression(v))
                 }
                 ret["left"] = t
             } else {
-                ret["left"] = this.makeExpression(bin.Left)
+                ret["left"] = this.makeExpression(bin.left)
             }
-            ret["right"] = this.makeExpression(bin.Right)
+            ret["right"] = this.makeExpression(bin.right)
             return ret
         case ast.ExpressionTypeIndex:
             index := e.data.(ast.ExpressionIndex)
             ret := new map{string -> Object}()
             ret["op"] = e.op
             ret["on"] = this.makeExpression(index.Expression)
-            ret["index"] = this.makeExpression(index.Index)
+            ret["index"] = this.makeExpression(index.index)
             return ret
         case ast.ExpressionTypeSelection:
             selection := e.data.(ast.ExpressionSelection)
@@ -555,9 +505,9 @@ class MakeNodesObjects {
             ret["op"] = e.op
             ret["name"] = call.name
             ret["on"] = this.makeExpression(call.Expression)
-            if len(call.Args) > 0 {
+            if len(call.args) > 0 {
                 var t []Object
-                for _, v := range call.Args {
+                for _, v := range call.args {
                     t.append( this.makeExpression(v))
                 }
                 ret["args"] = t
@@ -565,7 +515,7 @@ class MakeNodesObjects {
             if len(call.ParameterTypes) > 0 {
                 var t []Object
                 for _, v := range call.ParameterTypes {
-                    t.append( v.TypeString())
+                    t.append( v.typeString())
                 }
                 ret["parameterTypes"] = t
             }
@@ -575,9 +525,9 @@ class MakeNodesObjects {
             ret := new map{string -> Object}()
             ret["op"] = e.op
             ret["on"] = this.makeExpression(call.Expression)
-            if len(call.Args) > 0 {
+            if len(call.args) > 0 {
                 var t []Object
-                for _, v := range call.Args {
+                for _, v := range call.args {
                     t.append( this.makeExpression(v))
                 }
                 ret["args"] = t
@@ -585,7 +535,7 @@ class MakeNodesObjects {
             if len(call.ParameterTypes) > 0 {
                 var t []Object
                 for _, v := range call.ParameterTypes {
-                    t.append( v.TypeString())
+                    t.append( v.typeString())
                 }
                 ret["parameterTypes"] = t
             }
@@ -610,11 +560,7 @@ class MakeNodesObjects {
             ret["op"] = e.op
             ret["on"] = this.makeExpression(e.data.(ast.Expression))
             return ret
-        case ast.ExpressionTypeNegative:
-            fallthrough
-        case ast.ExpressionTypeNot:
-            fallthrough
-        case ast.ExpressionTypeBitwiseNot:
+        case ast.ExpressionTypeNegative , ast.ExpressionTypeNot,ast.ExpressionTypeBitwiseNot:
             ret := new map{string -> Object}()
             ret["op"] = e.op
             ret["on"] = this.makeExpression(e.data.(ast.Expression))
@@ -628,7 +574,7 @@ class MakeNodesObjects {
             ret["type"] = n.Type.typeString()
             {
                 var t []Object
-                for _, v := range n.Args {
+                for _, v := range n.args {
                     t.append( this.makeExpression(v))
                 }
                 ret["args"] = t
@@ -708,11 +654,11 @@ class MakeNodesObjects {
             ret["op"] = e.op
             slice := e.data.(ast.ExpressionSlice)
             ret["expression"] = this.makeExpression(slice.ExpressionOn)
-            if slice.Start != null {
-                ret["start"] = this.makeExpression(slice.Start)
+            if slice.start != null {
+                ret["start"] = this.makeExpression(slice.start)
             }
-            if slice.End != null {
-                ret["end"] = this.makeExpression(slice.Start)
+            if slice.end != null {
+                ret["end"] = this.makeExpression(slice.end)
             }
             return ret
         case ast.ExpressionTypeMap:
@@ -724,10 +670,10 @@ class MakeNodesObjects {
             }
             {
                 var t []Object
-                for _, v := range m.KeyValuePairs {
+                for _, v := range m.keyValuePairs {
                     tt := new map{string -> Object}()
-                    tt["key"] = this.makeExpression(v.Key)
-                    tt["value"] = this.makeExpression(v.Value)
+                    tt["key"] = this.makeExpression(v.key)
+                    tt["value"] = this.makeExpression(v.value)
                     t.append( tt)
                 }
                 ret["paris"] = t

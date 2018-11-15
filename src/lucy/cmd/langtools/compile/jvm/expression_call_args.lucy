@@ -39,7 +39,7 @@ class BuildExpressionCallArgs {
 		if vArgs == null {
 			return
 		}
-		if vArgs.noArgs {
+		if vArgs.NoArgs {
 			code.codes[code.codeLength] = cg.OP_aconst_null
 			code.codeLength++
 			if t := char(1) + currentStack; t > maxStack {

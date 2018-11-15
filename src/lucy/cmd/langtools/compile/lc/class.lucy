@@ -1,16 +1,17 @@
+
 import "lucy/cmd/langtools/compile/jvm/cg"
 import "lucy/binary"
 
 
 
 class ClassDecoder {
-	bs        []byte
-	classFile cg.Class
+	bs        []byte ;
+	classFile cg.Class ;
 
 	fn ClassDecoder(bs []byte){
-		this.super()
-		this.bs = bs
-		this.classFile = new cg.Class()
+		this.super() ;
+		this.bs = bs ;
+		this.classFile = new cg.Class();
 	}
 
 	fn decode() -> (c cg.Class) {
@@ -19,14 +20,14 @@ class ClassDecoder {
 		}
 		this.bs = this.bs[4:]
 		//version
-		this.classFile.minorVersion = binary.BigEndian.getChar(this.bs)
-		this.classFile.majorVersion = binary.BigEndian.getChar(this.bs[2:])
-		this.bs = this.bs[4:]
+		this.classFile.minorVersion = binary.BigEndian.getChar(this.bs);
+		this.classFile.majorVersion = binary.BigEndian.getChar(this.bs[2:]);
+		this.bs = this.bs[4:] ;
 		this.classFile.ConstPool = []cg.ConstPool{null} // pool start 1
 		//const pool
 		this.parseConstPool()
 		//access flag
-		this.classFile.accessFlags = binary.BigEndian.getChar(this.bs)
+		this.classFile.accessFlags = binary.BigEndian.getChar(this.bs) //11
 		this.bs = this.bs[2:]
 		// this class
 		this.classFile.thisClass = binary.BigEndian.getChar(this.bs)

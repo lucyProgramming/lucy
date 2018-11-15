@@ -13,22 +13,6 @@ class ExpressionCheckSelection {
             return null
         }
         switch object.Type {
-        case VariableTypeMagicFunction:
-            v := object.Function.Type.searchName(selection.name)
-            if v == null {
-                err := new error(sprintf("%s '%s' not found",
-                    e.pos.errMsgPrefix(), selection.name))
-                errs.append(err)
-                return null
-            }
-            e.value = v.Type.Clone()
-            e.value.pos = e.pos
-            e.Type = ExpressionTypeIdentifier
-            identifier := new ExpressionIdentifier()
-            identifier.name = selection.name
-            identifier.Variable = v
-            e.data = identifier
-            return e.value
         case VariableTypeDynamicSelector:
             if selection.name == SUPER {
                 errs . append(new error( sprintf("%s access '%s' at '%s' not allow",

@@ -74,16 +74,16 @@ class BuildSwitch {
         size := jvmSlotSize(s.condition.value)
         currentStack := size
         state.pushStack(c, s.condition.value)
-        for _, c := range s.StatementSwitchCases {
+        for _, ca := range s.StatementSwitchCases {
             if notMatch != null {
                 writeExits([]cg.Exit{notMatch}, code.codeLength)
                 context.MakeStackMap(code, state, code.codeLength)
             }
             matches := []cg.Exit{}
-            for _, ee := range c.matches {
+            for _, ee := range ca.matches {
                 if ee.value.Type == ast.VariableTypeBool {
                     currentStack = size
-                    stack := this.eb.build(__FUNCTION__.c, code, ee, context, state)
+                    stack := this.eb.build(c, code, ee, context, state)
                     if t := currentStack + stack; t > maxStack {
                         maxStack = t
                     }
@@ -98,8 +98,8 @@ class BuildSwitch {
                     }
                     code.codeLength++
                     currentStack += size
-                    state.pushStack(__FUNCTION__.c, s.condition.value)
-                    stack := this.eb.build(__FUNCTION__.c, code, ee, context, state)
+                    state.pushStack(c, s.condition.value)
+                    stack := this.eb.build(c, code, ee, context, state)
                     if t := currentStack + stack; t > maxStack {
                         maxStack = t
                     }
@@ -121,12 +121,12 @@ class BuildSwitch {
             }
             code.codeLength++
             //block is here
-            if c.block != null {
+            if ca.block != null {
                 ss := new StackMapState(state)
-                this.bb.buildBlock(__FUNCTION__.c, code, c.block, context, ss)
+                this.bb.buildBlock(c, code, ca.block, context, ss)
                 state.addTop(ss)
             }
-            if c.block == null || c.block.notExecuteToLastStatement == false {
+            if ca.block == null || ca.block.notExecuteToLastStatement == false {
                 s.exits.append(
                     new cg.Exit(cg.OP_goto, code)) // matched,goto switch outside
             }

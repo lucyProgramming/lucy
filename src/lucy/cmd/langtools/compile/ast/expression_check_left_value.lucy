@@ -114,23 +114,6 @@ class ExpressionCheckLeftValue {
                     e.pos.errMsgPrefix(), selection.name)))
                 return null
 
-			case VariableTypeMagicFunction:
-				v := object.Function.Type.searchName(selection.name)
-				if v == null {
-					err := new error(sprintf("%s '%s' not found", e.pos.errMsgPrefix(), selection.name))
-					errs.append(err)
-					return null
-				}
-				e.value = v.Type.Clone()
-				e.value.pos = e.pos
-				e.Type = ExpressionTypeIdentifier
-				identifier := new ExpressionIdentifier()
-				identifier.name = selection.name
-				identifier.Variable = v
-				e.data = identifier
-				result = v.Type.Clone()
-				result.pos = e.pos
-				return result
 			default:
 				errs.append(new error(sprintf("%s cannot access '%s' on '%s'",
 					e.pos.errMsgPrefix(), selection.name, object.typeString())))

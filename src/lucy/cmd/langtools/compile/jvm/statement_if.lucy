@@ -36,7 +36,7 @@ class BuildIf {
         ifState.addTop(trueBlockState)
         if s.Else != null || len(s.elseIfList) > 0 {
             if s.block.notExecuteToLastStatement == false {
-                s.exits.append( new cg.Exit(cg.OP_goto, code))
+                s.exits.append(new cg.Exit(cg.OP_goto, code))
             }
         }
         for k, v := range s.elseIfList {

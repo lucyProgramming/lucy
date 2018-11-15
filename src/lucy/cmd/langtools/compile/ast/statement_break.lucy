@@ -1,4 +1,4 @@
- 
+
 
 public class StatementBreak {
 	public defers              []StatementDefer
@@ -16,11 +16,18 @@ public class StatementBreak {
 				this.pos.errMsgPrefix()))}
 		}
 		if t, ok := block.inheritedAttribute.forBreak.(StatementFor); ok {
-			this.StatementFor = t
-		} else if t, ok := block.inheritedAttribute.forBreak.(StatementSwitch); ok {
-			this.StatementSwitch = t
-		} else {
-			this.switchTemplateBlock = block.inheritedAttribute.forBreak.(Block)
+			this.statementFor = t
+		} 
+		if t, ok := block.inheritedAttribute.forBreak.(StatementSwitch); ok {
+			this.statementSwitch = t
+		}
+		if t, ok := block.inheritedAttribute.forBreak.(Block); ok{
+			this.switchTemplateBlock = t
+		}
+		if this.statementFor == null &&
+			this.statementSwitch == null &&
+			this.switchTemplateBlock == null {
+			panic("not happening")
 		}
 		this.defers = []StatementDefer{}
 		this.mkDefers(block)

@@ -8,10 +8,8 @@ public fn Parse(
 	bs []byte,
 	onlyParseImport bool,
 	nErrors2Stop int) -> (errs []error) {
-	
-	p := new Parser(bs , tops , filename , onlyParseImport , nErrors2Stop  )
-	
-	
+	p := new Parser(bs , tops , filename , onlyParseImport , nErrors2Stop)
+	p.lexer = lex.New(bs, 1, 1)
 	return p.parse()
 }
 
@@ -54,7 +52,6 @@ class Parser {
 	}
 
 	fn parse() -> (errs []error ) {
-		this.lexer = lex.New(this.bs, 1, 1)
 		this.Next(lfNotToken) //
 		if this.token.Type == lex.TokenEof {
 			return null
@@ -298,7 +295,7 @@ class Parser {
 		if this.isStatementEnding() {
 			return null
 		}
-		err = new error(sprintf("%s expect semicolon or new line", this.errMsgPrefix()))
+		err = new error(sprintf("%s expect semicolon or new line , but '%s'", this.errMsgPrefix() , this.token.Description))
 		this.errs.append(err)
 		return err
 	}
@@ -435,12 +432,13 @@ class Parser {
 				this.token = tok
 			}
 			if err != null {
-				this.errs.append(
-					new error(sprintf("%s %s", this.errMsgPrefix(), err.getMessage())))
+				panic(err)
+				this.errs.append(new error(sprintf("%s %s", this.errMsgPrefix(), err.getMessage())))
 			}
 			if tok == null {
 				continue
 			}
+			//print(tok.Description)123
 			this.token = tok
 			if lfIsToken {
 				break
@@ -451,6 +449,8 @@ class Parser {
 		}
 		return
 	}
+
+
 
 	/*
 		pos.errMsgPrefix() only receive one argument
@@ -679,9 +679,11 @@ class Parser {
 	fn parseImports() -> (imports []ast.Import = []ast.Import{}) {
 		for this.token.Type == lex.TokenImport ||
 			this.token.Type == lex.TokenComment ||
-			this.token.Type == lex.TokenMultiLineComment {
+			this.token.Type == lex.TokenMultiLineComment ||
+			this.token.Type == lex.TokenLf {
 			if this.token.Type == lex.TokenComment ||
-				this.token.Type == lex.TokenMultiLineComment {
+				this.token.Type == lex.TokenMultiLineComment ||
+				this.token.Type == lex.TokenLf  {
 				this.Next(lfNotToken)
 				continue
 			}
@@ -714,9 +716,9 @@ class Parser {
 					i.accessName = this.token.stringValue
 					this.Next(lfIsToken) // skip identifier
 				}
+				this.validStatementEnding()
+				this.Next(lfNotToken)
 			}
-			this.validStatementEnding()
-			this.Next(lfNotToken)
 		}
 	}
 

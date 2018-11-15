@@ -98,7 +98,7 @@ public class FunctionType {
 		return s
 	}
 
-	fn searchName(name string) -> (v Variable) {
+	fn searchName(name string) -> (variable Variable) {
 		if name == "" {
 			return null
 		}
@@ -214,7 +214,7 @@ public class FunctionType {
 		f Function) -> (vArgs CallVariableArgs, err error) {
 		if this.vArgs != null {
 			vArgs = new CallVariableArgs()
-			vArgs.noArgs = true
+			vArgs.NoArgs = true
 			vArgs.Type = this.vArgs.Type
 			vArgs.start = len(this.parameterList)
 		}
@@ -260,7 +260,7 @@ public class FunctionType {
 					return
 				}
 			}
-			vArgs.noArgs = false
+			vArgs.NoArgs = false
 			k := len(this.parameterList)
 			vArgs.length = len(callArgsTypes) - k
 			vArgs.expressions = args[k:]
@@ -330,7 +330,7 @@ public class CallVariableArgs {
 		print(a...)
 	*/
 	public packArray2VArgs bool
-	public noArgs          bool
+	public NoArgs          bool
 	public Type            Type
 	public start int
 }

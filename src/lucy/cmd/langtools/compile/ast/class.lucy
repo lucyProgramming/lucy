@@ -542,7 +542,7 @@ public class Class {
         name string,
         call ExpressionMethodCall,
         callArgTypes []Type,
-        fromSub bool) -> (ms []ClassMethod, matched bool, err error) {
+        fromSub bool) -> (ms []ClassMethod = []ClassMethod{} , matched bool, err error) {
         ms, matched, err = this.accessInterfaceMethod(pos, errs, name, call, callArgTypes, fromSub)
         if err != null {
             return null, false, err
@@ -566,7 +566,7 @@ public class Class {
         name string,
         call ExpressionMethodCall,
         callArgTypes []Type,
-        fromSub bool) -> (ms []ClassMethod, matched bool, err error) {
+        fromSub bool) -> (ms []ClassMethod = []ClassMethod{} , matched bool, err error) {
         err = this.loadSelf(pos)
         if err != null {
             return null, false, err
@@ -609,7 +609,7 @@ public class Class {
         call ExpressionMethodCall,
         callArgTypes []Type,
         fromSub bool,
-        fieldMethodHandler []ClassField) -> (ms []ClassMethod, matched bool, err error) {
+        fieldMethodHandler []ClassField) -> (ms []ClassMethod = []ClassMethod{}, matched bool, err error) {
         err = this.loadSelf(pos)
         if err != null {
             return null, false, err
@@ -624,6 +624,8 @@ public class Class {
                 if fromSub && f.ableAccessFromSubClass() == false {
                     //cannot access this field
                 } else {
+                    print(pos.filename , pos.line ,  this.name , call.name)
+                    assert(this.fields[call.name].Type.functionType != null)
                     call.vArgs, err = this.fields[call.name].Type.functionType.fitArgs(pos, call.args,
                         callArgTypes, null)
                     if err == null {
@@ -673,7 +675,7 @@ public class Class {
         errs []error,
         call ExpressionMethodCall,
         callArgTypes []Type,
-        fromSub bool) -> (ms []ClassMethod, matched bool, err error) {
+        fromSub bool) -> (ms []ClassMethod = []ClassMethod{} , matched bool, err error) {
         if this.methods != null {
             for _, m := range this.methods[call.name] {
                 if fromSub == true && m.ableAccessFromSubClass() == false {

@@ -1,9 +1,9 @@
 import "java/lang/Object"
 import "lucy/cmd/langtools/compile/jvm/cg"
 import "lucy/cmd/langtools/compile/common"
-     
+      
 
-     
+
 public class Block {
 	public exits []cg.Exit // for switch template
 	/*
@@ -120,7 +120,7 @@ public class Block {
                     return t
                 }
             }
-            if bb.isFunctionBlock && bb.Fn != null && bb.Fn.parameterTypes != null  {
+            if bb.isFunctionBlock && bb.Fn.parameterTypes != null  {
                 if t := bb.Fn.parameterTypes[name]; t != null {
                     return t
                 } 
@@ -516,11 +516,11 @@ public class Block {
             this.EnumNames[name] = en
             return null
         }
-        if t ,ok := d.(Type) ; ok {
+        if t,ok := d.(Type) ; ok {
              this.typeAliases[name] = t
              return null
         }
-        return null
+        panic("not happening")
     }
 }
 

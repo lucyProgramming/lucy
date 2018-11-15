@@ -232,7 +232,7 @@ class ExpressionCheckFunctionCall {
 			}
 			t := v.Type.Clone()
 			t.bindWithParameterTypes(f.Type, parameterTypes)
-			parameterTypeArray.append( t)
+			parameterTypeArray.append(t)
 			tps = tps[1:]
 		}
 		call.TemplateFunctionCallPair = f.TemplateFunction.insert(parameterTypeArray)

@@ -3,7 +3,7 @@ import "lucy/cmd/langtools/compile/common"
 
 public class Descriptor  {
 
-
+	
 	static fn methodDescriptor(functionType ast.FunctionType) -> (s string) {
 		s = "("
 		for _, v := range functionType.parameterList {

@@ -11,6 +11,14 @@ public class AttributeCode  {
 			attributes        []AttributeInfo
 	public	attributeStackMap AttributeStackMap
 	
+
+	public fn appendException(e ExceptionTable){
+		if this.exceptions == null {
+			this.exceptions = [e]
+		}else {
+			this.exceptions.append(e)
+		}
+	}
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const("Code")

@@ -129,7 +129,7 @@ public class Expression {
 		switch c.Type.Type {
 		case VariableTypeBool:
 			this.Type = ExpressionTypeBool
-			this.longValue = c.longValue
+			this.boolValue = c.boolValue
 		case VariableTypeByte:
 			this.Type = ExpressionTypeByte
 			this.longValue = c.longValue
@@ -214,7 +214,8 @@ public class Expression {
 			this.Type == ExpressionTypeCheckCast ||
 			this.Type == ExpressionTypeSlice ||
 			this.Type == ExpressionTypeMap ||
-			this.Type == ExpressionTypeQuestion {
+			this.Type == ExpressionTypeQuestion  ||
+			this.Type == ExpressionTypeParenthesis	{
 			return null
 		}
 		return new error(sprintf("%s cannot use '%s' as condition",

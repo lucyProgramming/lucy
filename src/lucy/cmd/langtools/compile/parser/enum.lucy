@@ -63,8 +63,13 @@ class EnumParser extends ParserExtends {
 				enumName.pos = pos
 				enumName.NoNeed = value
 				enumName.Enum = e
+
 				enumName.comment = enumComment
-				e.enums.append(enumName)
+				if e.enums == null {
+					e.enums = [enumName]
+				}else {
+					e.enums.append(enumName)
+				}
 				comment.reset()
 			case lex.TokenComma:
 				this.Next(lfNotToken)

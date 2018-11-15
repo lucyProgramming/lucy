@@ -194,7 +194,7 @@ class BuildReturn {
             } else {
                 e.catchType = c.Class.insertClassConst(statementReturn.defers[index].exceptionClass.name) // custom c
             }
-            code.exceptions.append(e)
+            code.appendException(e)
             //expect exception on stack
             copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
                 context.exceptionVarOffset)) // this code will make_node_objects stack is empty
