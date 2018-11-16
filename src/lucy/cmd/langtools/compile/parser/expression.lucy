@@ -22,7 +22,7 @@ class ExpressionParser extends  ParserExtends {
 		for this.parser.token.Type != lex.TokenEof {
 			if this.parser.token.Type == lex.TokenComment ||
 				this.parser.token.Type == lex.TokenMultiLineComment {
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				continue
 			}
 			var e ast.Expression
@@ -45,11 +45,11 @@ class ExpressionParser extends  ParserExtends {
 			}
 			// == ,
 			commnaPos := this.parser.mkPos()
-			this.Next(lfNotToken) // skip ,
+			this.next(lfNotToken) // skip ,
 			for this.parser.token.Type == lex.TokenComma {
 				this.parser.errs.append(
 					new error(sprintf("%s missing expression", this.parser.errMsgPrefix())))
-				this.Next(lfNotToken) // skip ,
+				this.next(lfNotToken) // skip ,
 			}
 			for _, v := range endTokens {
 				if v == this.parser.token.Type {
@@ -73,7 +73,7 @@ class ExpressionParser extends  ParserExtends {
 			return null, err
 		}
 		for this.parser.token.Type == lex.TokenComma && statementLevel { // read more
-			this.Next(lfNotToken)                        //  skip comma
+			this.next(lfNotToken)                        //  skip comma
 			var left2 ast.Expression
 			left2, err = this.ExpressionQuestionParser.parseQuestionExpression() //
 			if err != null {
@@ -124,7 +124,7 @@ class ExpressionParser extends  ParserExtends {
 	fn parseEquationRight(left ast.Expression , expressionType ast.ExpressionTypeKind, isMulti bool) -> (e ast.Expression, err error) {
         pos := this.parser.mkPos()
         opName := this.parser.token.description
-        this.Next(lfNotToken) // skip = :=
+        this.next(lfNotToken) // skip = :=
         result := new ast.Expression()
         result.Type = expressionType
         result.op = opName
@@ -163,7 +163,7 @@ class ExpressionParser extends  ParserExtends {
 			this.parser.errs.append( err)
 			return null, err
 		}
-		this.Next(lfNotToken) // skip (
+		this.next(lfNotToken) // skip (
 		on, err := this.parseExpression(false)
 		if err != null {
 			return null, err
@@ -174,7 +174,7 @@ class ExpressionParser extends  ParserExtends {
 			this.parser.errs.append( err)
 			return null, err
 		}
-		this.Next(lfIsToken) // skip )
+		this.next(lfIsToken) // skip )
 		e = new ast.Expression()
 		e.Type = ast.ExpressionTypeCheckCast
 		e.pos = pos
@@ -224,7 +224,7 @@ class ExpressionParser extends  ParserExtends {
 			this.parser.errs.append( err)
 			return null, err
 		}
-		this.Next(lfNotToken) // skip {
+		this.next(lfNotToken) // skip {
 		e = new ast.Expression()
 		e.Type =  ast.ExpressionTypeMap
 		e.op = "mapLiteral"
@@ -247,7 +247,7 @@ class ExpressionParser extends  ParserExtends {
 				this.parser.errs.append( err)
 				return
 			}
-			this.Next(lfNotToken) // skip ->
+			this.next(lfNotToken) // skip ->
 			// value
 			var v ast.Expression
 			v, err = this.parseExpression(false)
@@ -265,7 +265,7 @@ class ExpressionParser extends  ParserExtends {
 			
 			if this.parser.token.Type == lex.TokenComma {
 				// read next  key value pair
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 			} else {
 				break
 			}
@@ -278,7 +278,7 @@ class ExpressionParser extends  ParserExtends {
 			this.parser.consume(untilRc)
 		}
 		e.pos = this.parser.mkPos()
-		this.Next(lfIsToken) // skip }
+		this.next(lfIsToken) // skip }
 	}
 
 

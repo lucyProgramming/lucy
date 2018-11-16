@@ -16,7 +16,6 @@ func printUsage() {
 	install                install directory and it's sub directories 
 	run                    run a lucy package
 	clean                  clean compiled files
-	pack                   make_node_objects jar
 	test                   test a package`
 	fmt.Println(msg)
 }
@@ -48,8 +47,8 @@ func main() {
 		(&run.RunLucyPackage{}).RunCommand("run", args)
 	case "install_lucy_array":
 		(&install_lucy_array.InstallLucyArray{}).RunCommand("install_lucy_array", nil)
-	case "pack":
-		args := []string{"lucy/cmd/langtools/pack"}
+	case "tool":
+		args := []string{"lucy/cmd/langtools/tool"}
 		args = append(args, os.Args[2:]...)
 		(&run.RunLucyPackage{}).RunCommand("run", args)
 	default:

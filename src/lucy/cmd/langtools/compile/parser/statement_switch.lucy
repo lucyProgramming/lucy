@@ -12,7 +12,7 @@ class StatementSwitchParser extends ParserExtends{
 	fn parseSwitch() -> (statementSwitch ast.StatementSwitch,err error) {
 		statementSwitch = new ast.StatementSwitch()
 		statementSwitch.pos = this.parser.mkPos()
-		this.Next(lfIsToken) // skip switch key word
+		this.next(lfIsToken) // skip switch key word
 		this.parser.unExpectNewLineAndSkip()
 		statementSwitch.EndPos = this.parser.mkPos()
 		statementSwitch.condition, err = this.parser.ExpressionParser.parseExpression(false)
@@ -25,7 +25,7 @@ class StatementSwitchParser extends ParserExtends{
 				statementSwitch.prefixExpressions.append(statementSwitch.condition)
 				statementSwitch.condition = null
 			}
-			this.parser.Next(lfNotToken)
+			this.parser.next(lfNotToken)
 			statementSwitch.condition, err = this.parser.ExpressionParser.parseExpression(false)
 			if err != null {
 				this.consume(untilLc)
@@ -38,7 +38,7 @@ class StatementSwitchParser extends ParserExtends{
 			this.parser.errs.append( err)
 			this.consume(untilLc)
 		}
-		this.Next(lfIsToken) // skip {  , must be case
+		this.next(lfIsToken) // skip {  , must be case
 		this.parser.expectNewLineAndSkip()
 		if this.parser.token.Type != lex.TokenCase {
 			err = new error(sprintf("%s expect 'case',but '%s'",
@@ -47,7 +47,7 @@ class StatementSwitchParser extends ParserExtends{
 			return null, err
 		}
 		for this.parser.token.Type == lex.TokenCase {
-			this.Next(lfIsToken) // skip case
+			this.next(lfIsToken) // skip case
 			this.parser.unExpectNewLineAndSkip()
 			var es []ast.Expression
 			es, err = this.parser.ExpressionParser.parseExpressions(lex.TokenColon)
@@ -60,7 +60,7 @@ class StatementSwitchParser extends ParserExtends{
 				this.parser.errs.append( err)
 				return statementSwitch, err
 			}
-			this.Next(lfIsToken) // skip :
+			this.next(lfIsToken) // skip :
 			this.parser.expectNewLineAndSkip()
 			var block ast.Block
 			if this.parser.token.Type != lex.TokenCase &&
@@ -81,14 +81,14 @@ class StatementSwitchParser extends ParserExtends{
 		}
 		//default value
 		if this.parser.token.Type == lex.TokenDefault {
-			this.Next(lfIsToken) // skip default key word
+			this.next(lfIsToken) // skip default key word
 			this.parser.unExpectNewLineAndSkip()
 			if this.parser.token.Type != lex.TokenColon {
 				err = new error(sprintf("%s missing colon after 'default'",
 					this.parser.errMsgPrefix()))
 				this.parser.errs.append( err)
 			} else {
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 			}
 			this.parser.expectNewLineAndSkip()
 			block := new ast.Block()
@@ -106,7 +106,7 @@ class StatementSwitchParser extends ParserExtends{
 			return statementSwitch, err
 		}
 		statementSwitch.EndPos = this.parser.mkPos()
-		this.Next(lfNotToken) //  skip }
+		this.next(lfNotToken) //  skip }
 		return statementSwitch, null
 	}
 

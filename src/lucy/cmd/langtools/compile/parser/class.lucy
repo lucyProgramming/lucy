@@ -20,9 +20,9 @@ class ClassParser extends  ParserExtends{
 		}
 		className := this.parser.token.stringValue
 		pos := this.parser.mkPos()
-		this.Next(lfNotToken)
+		this.next(lfNotToken)
 		if this.parser.token.Type == lex.TokenSelection {
-			this.Next(lfNotToken) // skip .
+			this.next(lfNotToken) // skip .
 			if this.parser.token.Type != lex.TokenIdentifier {
 				err = new error(sprintf("%s expect identifer for class`s name,but '%s'",
 					this.parser.errMsgPrefix(),
@@ -30,7 +30,7 @@ class ClassParser extends  ParserExtends{
 				this.parser.errs.append( err)
 			} else {
 				className += "." + this.parser.token.stringValue
-				this.Next(lfNotToken) // skip name identifier
+				this.next(lfNotToken) // skip name identifier
 			}
 		}
 		name = new ast.NameWithPos(className ,pos )
@@ -47,7 +47,7 @@ class ClassParser extends  ParserExtends{
 			}
 			names.append(name)
 			if this.parser.token.Type == lex.TokenComma {
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 			} else {
 				break
 			}
@@ -64,7 +64,7 @@ class ClassParser extends  ParserExtends{
 		if isAbstract {
 			classDefinition.accessFlags |= cg.AccClassAbstract
 		}
-		this.Next(lfIsToken) // skip class key word
+		this.next(lfIsToken) // skip class key word
 		this.parser.unExpectNewLineAndSkip()
 		t, err := this.parseClassName()
 		if t != null {
@@ -82,7 +82,7 @@ class ClassParser extends  ParserExtends{
 		}
 		classDefinition.pos = this.parser.mkPos()
 		if this.parser.token.Type == lex.TokenExtends { // parse father expression
-			this.Next(lfNotToken) // skip extends
+			this.next(lfNotToken) // skip extends
 			classDefinition.superClassName, err = this.parseClassName()
 			if err != null {
 				this.parser.errs.append( err)
@@ -90,7 +90,7 @@ class ClassParser extends  ParserExtends{
 			}
 		}
 		if this.parser.token.Type == lex.TokenImplements {
-			this.Next(lfNotToken) // skip key word
+			this.next(lfNotToken) // skip key word
 			classDefinition.interfaceNames, err = this.parseImplementsInterfaces()
 			if err != null {
 				this.parser.errs.append( err)
@@ -105,7 +105,7 @@ class ClassParser extends  ParserExtends{
 			return null, err
 		}
 		
-		this.Next(lfNotToken) // skip {
+		this.next(lfNotToken) // skip {
 		comment := new CommentParser(this.parser)
 		comment.parser = this.parser
 		var isStatic           bool
@@ -129,17 +129,17 @@ class ClassParser extends  ParserExtends{
 			case lex.TokenComment, lex.TokenMultiLineComment:
 				comment.read()
 			case lex.TokenRc:
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 				return
 			case lex.TokenSemicolon, lex.TokenLf:
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 				continue
 			case lex.TokenStatic:
 				isStatic = true
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				this.parser.unExpectNewLineAndSkip()
 				if this.parser.token.Type == lex.TokenLc {
-					this.Next(lfNotToken) // skip {
+					this.next(lfNotToken) // skip {
 					block := new ast.Block()
 					this.parser.BlockParser.parseStatementList(block, false)
 					if this.parser.token.Type != lex.TokenRc {
@@ -147,7 +147,7 @@ class ClassParser extends  ParserExtends{
 							new error(sprintf("%s expect '}' , but '%s'", this.parser.errMsgPrefix(),
 								this.parser.token.description)))
 					} else {
-						this.Next(lfNotToken) // skip }
+						this.next(lfNotToken) // skip }
 						if classDefinition.staticBlocks == null {
                             classDefinition.staticBlocks = [block]
 						}else {
@@ -165,7 +165,7 @@ class ClassParser extends  ParserExtends{
 			//access private
 			case lex.TokenPublic, lex.TokenProtected, lex.TokenPrivate:
 				accessControlToken = this.parser.token
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				this.parser.unExpectNewLineAndSkip()
 				err = this.validAfterAccessControlToken(accessControlToken.description)
 				if err != null {
@@ -173,7 +173,7 @@ class ClassParser extends  ParserExtends{
 					accessControlToken = null // set to null
 				}
 			case lex.TokenAbstract:
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				this.parser.unExpectNewLineAndSkip()
 				err = this.validAfterAbstract()
 				if err != null {
@@ -184,14 +184,14 @@ class ClassParser extends  ParserExtends{
 				}
 			case lex.TokenVolatile:
 				isVolatile = true
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				if err = this.validAfterVolatile(this.parser.token); err != null {
 					this.parser.errs.append( err)
 					isVolatile = false
 				}
 			case lex.TokenFinal:
 				isFinal = true
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				if err = this.validAfterFinal(); err != null {
 					this.parser.errs.append(err)
 					isFinal = false
@@ -200,20 +200,20 @@ class ClassParser extends  ParserExtends{
 				err = this.parseField(classDefinition, this.parser.errs, isStatic, isVolatile, accessControlToken, comment)
 				if err != null {
 					this.consume(untilSemicolonOrLf)
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 				}
 				resetProperty()
 			case lex.TokenConst: // const is for local use
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				err = this.parseConst(classDefinition, comment)
 				if err != null {
 					this.consume(untilSemicolonOrLf)
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					continue
 				}
 			case lex.TokenSynchronized:
 				isSynchronized = true
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				if err = this.validAfterSynchronized(); err != null {
 					this.parser.errs.append( err)
 					isSynchronized = false
@@ -226,10 +226,10 @@ class ClassParser extends  ParserExtends{
 							this.parser.errMsgPrefix())))
 				}
 				var f ast.Function
-				f, err = this.parser.FunctionParser.parse(true, isAbstract || isInterface)
+				f, err = this.parser.FunctionParser.parse(true, isAbstract || isInterface , false)
 				if err != null {
 					resetProperty()
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					continue
 				}
 				f.comment = comment.comment
@@ -282,7 +282,7 @@ class ClassParser extends  ParserExtends{
 				this.parser.errs.append(
 					new error(sprintf("%s unexpected '%s'",
 						this.parser.errMsgPrefix(), this.parser.token.description)))
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 			}
 		}
 		return
@@ -295,7 +295,7 @@ class ClassParser extends  ParserExtends{
 		}
 		constComment := comment.comment
 		if this.parser.token.Type == lex.TokenComment {
-			this.Next(lfIsToken)
+			this.next(lfIsToken)
 		} else {
 			this.parser.validStatementEnding()
 		}
@@ -332,7 +332,7 @@ class ClassParser extends  ParserExtends{
 		}
 		var initValues []ast.Expression
 		if this.parser.token.Type == lex.TokenAssign {
-			this.parser.Next(lfNotToken) // skip = or :=
+			this.parser.next(lfNotToken) // skip = or :=
 			initValues, err = this.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
 			if err != null {
 				this.consume(untilSemicolonOrLf)
@@ -340,7 +340,7 @@ class ClassParser extends  ParserExtends{
 		}
 		fieldComment := comment.comment
 		if this.parser.token.Type == lex.TokenComment {
-			this.Next(lfIsToken)
+			this.next(lfIsToken)
 		} else {
 			this.parser.validStatementEnding()
 		}

@@ -13,7 +13,7 @@ class StatementWhenParser extends ParserExtends {
 	protected fn parseWhen() -> (whenStatement ast.StatementWhen , err error) {
 		whenStatement = new ast.StatementWhen()
 		whenStatement.pos = this.parser.mkPos()
-		this.parser.Next(lfIsToken)
+		this.parser.next(lfIsToken)
 		this.parser.unExpectNewLineAndSkip()
 		condition, err := this.parser.parseType()
 		if err != null {
@@ -28,7 +28,7 @@ class StatementWhenParser extends ParserExtends {
 			this.parser.errs.append( err)
 			this.consume(untilLc)
 		}
-		this.Next(lfNotToken) // skip {  , must be case
+		this.next(lfNotToken) // skip {  , must be case
 		if this.parser.token.Type != lex.TokenCase {
 			err = new error(sprintf("%s expect 'case',but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))
@@ -37,7 +37,7 @@ class StatementWhenParser extends ParserExtends {
 		}
 
 		for this.parser.token.Type == lex.TokenCase {
-			this.Next(lfIsToken) // skip case
+			this.next(lfIsToken) // skip case
 			this.parser.unExpectNewLineAndSkip()
 			var ts []ast.Type
 			ts, err = this.parser.parseTypes(lex.TokenColon)
@@ -52,7 +52,7 @@ class StatementWhenParser extends ParserExtends {
 				this.parser.errs.append( err)
 				return whenStatement, err
 			}
-			this.Next(lfIsToken) // skip :
+			this.next(lfIsToken) // skip :
 			this.parser.expectNewLineAndSkip()
 			var block ast.Block
 			if this.parser.token.Type != lex.TokenCase &&
@@ -74,14 +74,14 @@ class StatementWhenParser extends ParserExtends {
 		}
 		//default value
 		if this.parser.token.Type == lex.TokenDefault {
-			this.Next(lfIsToken) // skip default key word
+			this.next(lfIsToken) // skip default key word
 			this.parser.unExpectNewLineAndSkip()
 			if this.parser.token.Type != lex.TokenColon {
 				err = new error(sprintf("%s missing colon after default",
 					this.parser.errMsgPrefix()))
 				this.parser.errs.append( err)
 			} else {
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				this.parser.expectNewLineAndSkip()
 			}
 			if this.parser.token.Type != lex.TokenRc {
@@ -97,7 +97,7 @@ class StatementWhenParser extends ParserExtends {
 			this.parser.errs.append( err)
 			return whenStatement, err
 		}
-		this.Next(lfNotToken) //  skip }
+		this.next(lfNotToken) //  skip }
 	}
 
 

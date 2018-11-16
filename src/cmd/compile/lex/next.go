@@ -4,7 +4,6 @@ import "fmt"
 
 func (this *Lexer) Next() (token *Token, err error) {
 	token = &Token{}
-	var c byte
 	c, eof := this.getChar()
 	if eof {
 		token.Type = TokenEof
@@ -15,14 +14,16 @@ func (this *Lexer) Next() (token *Token, err error) {
 		c == '\t' ||
 		c == '\r' { // skip empty
 		c, eof = this.getChar()
+
 	}
-	token.StartLine = this.line
-	token.StartColumn = this.column - 1
+
 	if eof {
 		token.Type = TokenEof
 		token.Description = "EOF"
 		return
 	}
+	token.StartLine = this.line
+	token.StartColumn = this.column - 1
 	if this.isLetter(c) || c == '_' || c == '$' { // start of a identifier
 		return this.lexIdentifier(c)
 	}
@@ -289,6 +290,8 @@ func (this *Lexer) Next() (token *Token, err error) {
 		}
 	default:
 		err = fmt.Errorf("unkown beginning of token:%x", c)
+
+		panic(err)
 		return nil, err
 	}
 	token.EndLine = this.line

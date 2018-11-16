@@ -79,7 +79,7 @@ class Context {
 				} else {
 					code.attributeStackMap.append(
 						new cg.StackMapSameLocals1StackItemFrameExtended(
-							247,
+							247b,
 							delta,
 							state.stacks[0]
 						))

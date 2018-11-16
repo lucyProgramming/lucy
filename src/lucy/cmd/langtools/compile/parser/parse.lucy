@@ -52,7 +52,7 @@ class Parser {
 	}
 
 	fn parse() -> (errs []error ) {
-		this.Next(lfNotToken) //
+		this.next(lfNotToken) //
 		if this.token.Type == lex.TokenEof {
 			return null
 		}
@@ -85,25 +85,25 @@ class Parser {
 			case lex.TokenComment, lex.TokenMultiLineComment:
 				comment.read()
 			case lex.TokenSemicolon, lex.TokenLf: // empty statement, no big deal
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 				continue
 			case lex.TokenPublic:
 				accessControlToken = this.token
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				this.unExpectNewLineAndSkip()
 				if err := this.validAfterPublic(); err != null {
 					accessControlToken = null
 				}
 				continue
 			case lex.TokenAbstract:
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				this.unExpectNewLineAndSkip()
 				if err := this.validAfterAbstract(); err == null {
 					isAbstract = true
 				}
 			case lex.TokenFinal:
 				pos := this.mkPos()
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				this.unExpectNewLineAndSkip()
 				if err := this.validAfterFinal(); err != null {
 					isFinal = false
@@ -114,11 +114,11 @@ class Parser {
 				continue
 			case lex.TokenVar:
 				pos := this.mkPos()
-				this.Next(lfIsToken) // skip var key word
+				this.next(lfIsToken) // skip var key word
 				vs, err := this.parseVar()
 				if err != null {
 					this.consume(untilSemicolonOrLf)
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					continue
 				}
 				isPublic := isPublic()
@@ -147,9 +147,9 @@ class Parser {
 				}
 				resetProperty()
 			case lex.TokenFn:
-				f, err := this.FunctionParser.parse(true, false)
+				f, err := this.FunctionParser.parse(true, false,true)
 				if err != null {
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					continue
 				}
 				f.comment = comment.comment
@@ -161,14 +161,14 @@ class Parser {
 				resetProperty()
 			case lex.TokenLc:
 				b := new ast.Block()
-				this.Next(lfNotToken) // skip {
+				this.next(lfNotToken) // skip {
 				this.BlockParser.parseStatementList(b, true)
 				if this.token.Type != lex.TokenRc {
 					this.errs.append( new error(sprintf("%s expect '}', but '%s'",
 						this.errMsgPrefix(), this.token.description)))
 					this.consume(untilRc)
 				}
-				this.Next(lfNotToken) // skip }
+				this.next(lfNotToken) // skip }
 				this.tops.append( new ast.TopNode(b))
 
 			case lex.TokenClass, lex.TokenInterface:
@@ -192,11 +192,11 @@ class Parser {
 				}
 				resetProperty()
 			case lex.TokenConst:
-				this.Next(lfIsToken) // skip const key word
+				this.next(lfIsToken) // skip const key word
 				cs, err := this.parseConst()
 				if err != null {
 					this.consume(untilSemicolonOrLf)
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					resetProperty()
 					continue
 				}
@@ -213,7 +213,7 @@ class Parser {
 				a, err := this.parseTypeAlias(comment)
 				if err != null {
 					this.consume(untilSemicolonOrLf)
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					resetProperty()
 					continue
 				}
@@ -237,7 +237,7 @@ class Parser {
 				} else {
 					this.errs.append( new error(sprintf("%s token '%s' is not except",
 						this.errMsgPrefix(), this.token.description)))
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 				}
 			}
 		}
@@ -305,8 +305,8 @@ class Parser {
 		    pos = new ast.Pos()
 		    pos.filename = this.filename
 		    pos.line = this.token.endLine
-		    pos.column = this.token.EndColumn
-		    pos.offset = this.lexer.GetOffSet()
+		    pos.column = this.token.endColumn
+		    pos.offset = this.lexer.getOffSet()
 			return
 		} else {
 			line, column := this.lexer.GetLineAndColumn()
@@ -323,14 +323,14 @@ class Parser {
 			return &ast.Pos{
 				filename: this.filename,
 				line:     this.token.endLine,
-				column:   this.token.EndColumn,
-				offset:   this.lexer.GetOffSet(),
+				column:   this.token.endColumn,
+				offset:   this.lexer.getOffSet(),
 			}
 		} else {
 			return &ast.Pos{
 				filename: this.filename,
 				line:     this.lastToken.endLine,
-				column:   this.lastToken.EndColumn,
+				column:   this.lastToken.endColumn,
 			}
 		}
 	}
@@ -365,7 +365,7 @@ class Parser {
 			this.errs.append( err)
 			return
 		}
-		this.Next(lfNotToken) // skip =
+		this.next(lfNotToken) // skip =
 		es, err := this.ExpressionParser.parseExpressions(lex.TokenSemicolon)
 		if err != null {
 			return
@@ -404,7 +404,7 @@ class Parser {
 			}
 		}
 		if this.token.Type == lex.TokenAssign {
-			this.Next(lfNotToken) // skip = or :=
+			this.next(lfNotToken) // skip = or :=
 			ret.InitValues, err = this.ExpressionParser.parseExpressions(lex.TokenSemicolon)
 			if err != null {
 				return
@@ -413,7 +413,7 @@ class Parser {
 		return
 	}
 
-	fn Next(lfIsToken bool) {
+	fn next(lfIsToken bool) {
 		if this.consumeFoundValidToken {
 			this.consumeFoundValidToken = false
 			return
@@ -427,7 +427,7 @@ class Parser {
 			}
 		}
 		for {
-			tok, err = this.lexer.Next()
+			tok, err = this.lexer.next()
 			if tok != null {
 				this.token = tok
 			}
@@ -512,19 +512,19 @@ class Parser {
 			if until.keyExist(this.token.Type) {
 				return
 			}
-			this.Next(lfIsToken)
+			this.next(lfIsToken)
 		}
 	}
 
 	fn ifTokenIsLfThenSkip() {
 		if this.token.Type == lex.TokenLf {
-			this.Next(lfNotToken)
+			this.next(lfNotToken)
 		}
 	}
 
 	fn unExpectNewLineAndSkip() {
 		if err := this.unExpectNewLine(); err != null {
-			this.Next(lfNotToken)
+			this.next(lfNotToken)
 		}
 	}
 	fn unExpectNewLine() -> (err error) {
@@ -537,7 +537,7 @@ class Parser {
 	}
 	fn expectNewLineAndSkip() {
 		if err := this.expectNewLine(); err == null {
-			this.Next(lfNotToken)
+			this.next(lfNotToken)
 		}
 	}
 	fn expectNewLine() -> (err error)  {
@@ -551,7 +551,7 @@ class Parser {
 	}
 
 	fn parseTypeAlias(comment CommentParser) -> (alias ast.TypeAlias, err error) {
-		this.Next(lfIsToken) // skip type key word
+		this.next(lfIsToken) // skip type key word
 		this.unExpectNewLineAndSkip()
 		if this.token.Type != lex.TokenIdentifier {
 			err = new error(sprintf("%s expect identifer,but '%s'", this.errMsgPrefix(), this.token.description))
@@ -561,20 +561,20 @@ class Parser {
 		ret := new ast.TypeAlias()
 		ret.pos = this.mkPos()
 		ret.name = this.token.stringValue
-		this.Next(lfIsToken) // skip identifier
+		this.next(lfIsToken) // skip identifier
 		if this.token.Type != lex.TokenAssign {
 			err = new error(sprintf("%s expect '=',but '%s'", this.errMsgPrefix(), this.token.description))
 			this.errs.append( err)
 			return null, err
 		}
-		this.Next(lfNotToken) // skip =
+		this.next(lfNotToken) // skip =
 		ret.Type, err = this.parseType()
 		if err != null {
 			return null, err
 		}
 		ret.comment = comment.comment
 		if this.token.Type == lex.TokenComment {
-			this.Next(lfIsToken)
+			this.next(lfIsToken)
 		}
 		return ret, err
 	}
@@ -668,7 +668,7 @@ class Parser {
 			if this.token.Type != lex.TokenComma { // not a comma
 				break
 			} else {
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 			}
 		}
 		return vs, null
@@ -684,40 +684,40 @@ class Parser {
 			if this.token.Type == lex.TokenComment ||
 				this.token.Type == lex.TokenMultiLineComment ||
 				this.token.Type == lex.TokenLf  {
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 				continue
 			}
-			this.Next(lfIsToken) // skip import key word
+			this.next(lfIsToken) // skip import key word
 			this.unExpectNewLineAndSkip()
 			if this.token.Type != lex.TokenLiteralString {
 				this.errs.append( new error(sprintf("%s expect 'package' after import,but '%s'",
 					this.errMsgPrefix(), this.token.description)))
 				this.consume(untilSemicolonOrLf)
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 				continue
 			}
 			i := new ast.Import()
 			i.pos = this.mkPos()
 			i.Import = this.token.stringValue
 			imports.append(i)
-			this.Next(lfIsToken) // skip name
+			this.next(lfIsToken) // skip name
 			if this.token.Type == lex.TokenAs {
 				/*
 					import "xxxxxxxxxxx" as yyy
 				*/
-				this.Next(lfNotToken) // skip as
+				this.next(lfNotToken) // skip as
 				if this.token.Type != lex.TokenIdentifier {
 					this.errs.append( new error(sprintf("%s expect 'identifier' after 'as',but '%s'",
 						this.errMsgPrefix(), this.token.description)))
 					this.consume(untilSemicolonOrLf)
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					continue
 				} else {
 					i.accessName = this.token.stringValue
-					this.Next(lfIsToken) // skip identifier
+					this.next(lfIsToken) // skip identifier
 				}
 				this.validStatementEnding()
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 			}
 		}
 	}
@@ -735,12 +735,12 @@ class Parser {
 			t := new ast.NameWithPos(this.token.stringValue,this.mkPos())
 			assert(t.pos != null)
 			names.append(t)
-			this.Next(lfIsToken)
+			this.next(lfIsToken)
 			if this.token.Type != lex.TokenComma {
 				// not a ,
 				break
 			} else {
-				this.Next(lfNotToken) // skip comma
+				this.next(lfNotToken) // skip comma
 				if this.token.Type != lex.TokenIdentifier {
 					err = new error(sprintf("%s not a 'identifier' after a comma,but '%s'",
 						this.errMsgPrefix(), this.token.description))

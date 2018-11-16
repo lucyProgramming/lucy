@@ -10,3 +10,5 @@ type PackageMeta struct {
 	CompileTime  int64                `json:"compileTime"`  // unix seconds
 	Classes      []string             `json:"classes"`
 }
+
+

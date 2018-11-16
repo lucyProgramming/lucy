@@ -22,17 +22,12 @@ fn main(args []string) {
 		printUsage()
 		os.exit(2)
 	}
-	
 	paths  := common.getLucyPath()
-	
-	
 	w  := common.findPackageInWhichDirectory( paths ,packageName[0] )
-	
 	new Install(lucyRoot ,
 		w + "/src/" + packageName[0] ,
 		packageName[0] ,
 		verbose.getValue() ) . install ()
-
 }
 
 

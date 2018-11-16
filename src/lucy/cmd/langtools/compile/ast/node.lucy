@@ -1,10 +1,10 @@
 import "java/lang/Object"
 
 public class TopNode  {
-	public Node Object
+	public node Object
 	public fn TopNode(n Object) {
 		this.super()
-		this.Node = n
+		this.node = n
 	}
 }
  

@@ -29,8 +29,8 @@ public class  BuildPackage {
         mainClass.accessFlags |= cg.AccClassSynthetic
         mainClass.superClass = ast.JavaRootClass
         mainClass.name = p.name + "/main"
-        if p.block.Functions != null {
-            for _, v := range p.block.Functions {
+        if p.block.functions != null {
+            for _, v := range p.block.functions {
                 mainClass.insertSourceFile(v.pos.filename)
                 break
             }
@@ -171,7 +171,7 @@ public class  BuildPackage {
             }
             f.accessFlags |= cg.AccFieldVolatile
             if LucyFieldSignature.Need(v.Type) {
-                f.AttributeLucyFieldDescriptor = new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.Encode(v.Type) , 0 )
+                f.AttributeLucyFieldDescriptor = new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.Encode(v.Type) , char(0) )
                 if v.Type.Type == ast.VariableTypeFunction {
                     if v.Type.functionType.vArgs != null {
                         f.AttributeLucyFieldDescriptor.methodAccessFlag |=
@@ -343,7 +343,7 @@ public class  BuildPackage {
             }
             f.descriptor = Descriptor.typeDescriptor(v.Type)
             if LucyFieldSignature.Need(v.Type) {
-                t := new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.Encode(v.Type) , 0 )
+                t := new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.Encode(v.Type) , char(0 ))
                 f.AttributeLucyFieldDescriptor = t
             }
             c.fields[v.name] = f
@@ -377,7 +377,7 @@ public class  BuildPackage {
 
     fn mkGlobalFunctions() {
         ms := new map { string -> cg.MethodHighLevel }()
-        for k, f := range this.Package.block.Functions { // first round
+        for k, f := range this.Package.block.functions { // first round
             if f.TemplateFunction != null {
                 t := new cg.AttributeTemplateFunction()
                 t.name = f.name
@@ -422,7 +422,7 @@ public class  BuildPackage {
             method.code = new cg.AttributeCode()
             this.mainClass.appendMethod(method)
         }
-        for k, f := range this.Package.block.Functions {
+        for k, f := range this.Package.block.functions {
             if f.isBuildIn || f.TemplateFunction != null { //
                 continue
             }

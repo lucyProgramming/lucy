@@ -16,7 +16,7 @@ class StatementForParser extends ParserExtends{
 		statementFor = new ast.StatementFor()
 		statementFor.pos = this.parser.mkPos()
 		statementFor.block = new ast.Block()
-		this.Next(lfIsToken) // skip for
+		this.next(lfIsToken) // skip for
 		this.parser.unExpectNewLineAndSkip()
 		if this.parser.token.Type != lex.TokenLc &&
 			this.parser.token.Type != lex.TokenSemicolon { // not '{' and not ';'
@@ -27,7 +27,7 @@ class StatementForParser extends ParserExtends{
 			}
 		}
 		if this.parser.token.Type == lex.TokenSemicolon {
-			this.Next(lfNotToken) // skip ;
+			this.next(lfNotToken) // skip ;
 			statementFor.Init = statementFor.condition
 			statementFor.condition = null // mk null
 			//condition
@@ -44,7 +44,7 @@ class StatementForParser extends ParserExtends{
 					goto parseBlock
 				}
 			}
-			this.Next(lfIsToken)
+			this.next(lfIsToken)
 			this.parser.unExpectNewLineAndSkip()
 			if this.parser.token.Type != lex.TokenLc {
 				statementFor.Increment, err = this.parser.ExpressionParser.parseExpression(true)
@@ -62,14 +62,14 @@ class StatementForParser extends ParserExtends{
 			this.parser.errs.append( err)
 			return
 		}
-		this.Next(lfNotToken) // skip {
+		this.next(lfNotToken) // skip {
 		this.bp.parseStatementList(statementFor.block, false)
 		if this.parser.token.Type != lex.TokenRc {
 			this.parser.errs.append( new error(sprintf("%s expect '}', but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description)))
 			this.consume(untilRc)
 		}
-		this.Next(lfNotToken) // skip }
+		this.next(lfNotToken) // skip }
 		return statementFor, null
 	}
 	

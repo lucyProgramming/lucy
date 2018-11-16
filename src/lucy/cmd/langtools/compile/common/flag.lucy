@@ -21,6 +21,13 @@ public class Flags {
 		this.disableCheckUnUse = this.parser.boolOption("-disable-check-unuse")
 		this.release = this.parser.boolOption("-release")
 	}
+	public fn parseArgs(args []string)->(files []string) {
+		var err error 
+		files,err = this.parser.parse(args)
+		if err != null {
+			panic(err)
+		}
+	}
 }
 
 public var compileFlags = new  Flags()

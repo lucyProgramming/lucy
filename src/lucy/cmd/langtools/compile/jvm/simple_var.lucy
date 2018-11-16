@@ -16,7 +16,7 @@ fn storeLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs 
 	switch variableType {
 	case ast.VariableTypeBool,ast.VariableTypeByte ,ast.VariableTypeShort,ast.VariableTypeEnum,
 	  ast.VariableTypeChar , ast.VariableTypeInt:
-		switch offset {
+		switch int(offset) {
 		case 0:
 			return []byte{cg.OP_istore_0}
 		case 1:
@@ -29,7 +29,7 @@ fn storeLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs 
 			return []byte{cg.OP_istore, byte(offset)}
 		}
 	case ast.VariableTypeLong:
-		switch offset {
+		switch int(offset) {
 		case 0:
 			return []byte{cg.OP_lstore_0}
 		case 1:
@@ -42,7 +42,7 @@ fn storeLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs 
 			return []byte{cg.OP_lstore, byte(offset)}
 		}
 	case ast.VariableTypeFloat:
-		switch offset {
+		switch int(offset) {
 		case 0:
 			return []byte{cg.OP_fstore_0}
 		case 1:
@@ -55,7 +55,7 @@ fn storeLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs 
 			return []byte{cg.OP_fstore, byte(offset)}
 		}
 	case ast.VariableTypeDouble:
-		switch offset {
+		switch int(offset) {
 		case 0:
 			return []byte{cg.OP_dstore_0}
 		case 1:
@@ -68,7 +68,7 @@ fn storeLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs 
 			return []byte{cg.OP_dstore, byte(offset)}
 		}
 	default:
-		switch offset {
+		switch int(offset) {
 		case 0:
 			return []byte{cg.OP_astore_0}
 		case 1:
@@ -94,7 +94,7 @@ fn loadLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs [
 	switch variableType {
 	case ast.VariableTypeBool,ast.VariableTypeByte ,ast.VariableTypeShort,ast.VariableTypeEnum,
     	  ast.VariableTypeChar , ast.VariableTypeInt:
-		switch offset {
+		switch int(offset) {
 		case 0:
 			return []byte{cg.OP_iload_0}
 		case 1:
@@ -107,7 +107,7 @@ fn loadLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs [
 			return []byte{cg.OP_iload, byte(offset)}
 		}
 	case ast.VariableTypeLong:
-		switch offset {
+		switch int(offset) {
 		case 0:
 			return []byte{cg.OP_lload_0}
 		case 1:
@@ -120,7 +120,7 @@ fn loadLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs [
 			return []byte{cg.OP_lload, byte(offset)}
 		}
 	case ast.VariableTypeFloat:
-		switch offset {
+		switch int(offset) {
 		case 0:
 			return []byte{cg.OP_fload_0}
 		case 1:
@@ -133,7 +133,7 @@ fn loadLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs [
 			return []byte{cg.OP_fload, byte(offset)}
 		}
 	case ast.VariableTypeDouble:
-		switch offset {
+		switch int(offset) {
 		case 0:
 			return []byte{cg.OP_dload_0}
 		case 1:
@@ -146,7 +146,7 @@ fn loadLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs [
 			return []byte{cg.OP_dload, byte(offset)}
 		}
 	default:
-		switch offset {
+		switch int(offset) {
 		case 0:
 			return []byte{cg.OP_aload_0}
 		case 1:

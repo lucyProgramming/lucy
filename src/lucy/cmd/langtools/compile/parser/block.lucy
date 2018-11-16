@@ -67,11 +67,11 @@ class BlockParser  extends ParserExtends{
 				comment.read()
 			case lex.TokenSemicolon, lex.TokenLf: // may be empty statement
 				resetPrefix()
-				this.Next(lfNotToken) // look up next
+				this.next(lfNotToken) // look up next
 				continue
 			case lex.TokenFinal:
 				pos := this.parser.mkPos()
-				this.parser.Next(lfIsToken)
+				this.parser.next(lfIsToken)
 				this.parser.unExpectNewLineAndSkip()
 				if err := this.parser.validAfterFinal(); err != null {
 					isFinal = false
@@ -82,7 +82,7 @@ class BlockParser  extends ParserExtends{
 				continue
 			case lex.TokenDefer:
 				pos := this.parser.mkPos()
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				if err := this.validAfterDefer(); err != null {
 					this.parser.errs.append( err)
 				} else {
@@ -91,11 +91,11 @@ class BlockParser  extends ParserExtends{
 				}
 			case lex.TokenVar:
 				pos := this.parser.mkPos()
-				this.Next(lfIsToken) // skip var key word
+				this.next(lfIsToken) // skip var key word
 				vs, err := this.parser.parseVar()
 				if err != null {
 					this.consume(untilSemicolonOrLf)
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					continue
 				}
 				statement := new ast.Statement()
@@ -114,7 +114,7 @@ class BlockParser  extends ParserExtends{
 				statement, err := this.StatementIfParser.parseIf()
 				if err != null {
 					this.consume(untilRc)
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					continue
 				}
 				{
@@ -130,7 +130,7 @@ class BlockParser  extends ParserExtends{
 				statement, err := this.StatementForParser.parseFor()
 				if err != null {
 					this.consume(untilRc)
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					continue
 				}
 				statement.block.isForBlock = true
@@ -142,7 +142,7 @@ class BlockParser  extends ParserExtends{
                     block.statements.append(t)
 				}
 			case lex.TokenAbstract:
-				this.parser.Next(lfIsToken)
+				this.parser.next(lfIsToken)
 				this.parser.unExpectNewLineAndSkip()
 				if err := this.parser.validAfterAbstract(); err == null {
 					isAbstract = true
@@ -152,7 +152,7 @@ class BlockParser  extends ParserExtends{
 				statement, err := this.StatementSwitchParser.parseSwitch()
 				if err != null {
 					this.consume(untilRc)
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					continue
 				}
 				{
@@ -167,7 +167,7 @@ class BlockParser  extends ParserExtends{
 				statement, err := this.StatementWhenParser.parseWhen()
 				if err != null {
 					this.consume(untilRc)
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					continue
 				}
 				{
@@ -179,11 +179,11 @@ class BlockParser  extends ParserExtends{
 				}
 			case lex.TokenConst:
 				pos := this.parser.mkPos()
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				cs, err := this.parser.parseConst()
 				if err != null {
 					this.consume(untilSemicolonOrLf)
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					continue
 				}
 				statement := new ast.Statement()
@@ -200,7 +200,7 @@ class BlockParser  extends ParserExtends{
 				block.statements.append(statement)
 				this.parser.validStatementEnding()
 				if this.parser.token.Type == lex.TokenSemicolon {
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 				}
 			case lex.TokenReturn:
 				if isGlobal {
@@ -210,7 +210,7 @@ class BlockParser  extends ParserExtends{
 				}
 				st := new ast.StatementReturn()
 				st.pos = this.parser.mkPos()
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				{
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeReturn
@@ -226,23 +226,23 @@ class BlockParser  extends ParserExtends{
 					this.parser.token.Type == lex.TokenLf ||
 					this.parser.token.Type == lex.TokenComma ||
 					this.parser.token.Type == lex.TokenMultiLineComment {
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					continue
 				}
 				var es []ast.Expression
 				es, err = this.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
 				if err != null {
 					this.consume(untilSemicolonOrLf)
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					continue
 				}
 				st.expressions = es
 				this.parser.validStatementEnding()
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 			case lex.TokenLc:
 				pos := this.parser.mkPos()
 				newBlock := new ast.Block()
-				this.Next(lfNotToken) // skip {
+				this.next(lfNotToken) // skip {
 				this.parseStatementList(newBlock, false)
 				this.parser.ifTokenIsLfThenSkip()
 				if this.parser.token.Type != lex.TokenRc {
@@ -250,7 +250,7 @@ class BlockParser  extends ParserExtends{
 						this.parser.errMsgPrefix(), this.parser.token.description)))
 					this.consume(untilRc)
 				}
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 				if isDefer {
 					d := new ast.StatementDefer()
 					d.block = newBlock
@@ -278,7 +278,7 @@ class BlockParser  extends ParserExtends{
 							this.parser.errMsgPrefix())))
 				}
 				pos := this.parser.mkPos()
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				this.parser.validStatementEnding()
 				{
 				    t := new ast.Statement()
@@ -291,7 +291,7 @@ class BlockParser  extends ParserExtends{
 				}
 			case lex.TokenContinue:
 				pos := this.parser.mkPos()
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				this.parser.validStatementEnding()
 			    c := new ast.Statement()
 			    c.Type = ast.StatementTypeContinue
@@ -302,7 +302,7 @@ class BlockParser  extends ParserExtends{
 				
 			case lex.TokenBreak:
 				pos := this.parser.mkPos()
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				this.parser.validStatementEnding()
 			    b := new ast.Statement()
 			    b.Type = ast.StatementTypeBreak
@@ -313,13 +313,13 @@ class BlockParser  extends ParserExtends{
 
 			case lex.TokenGoto:
 				pos := this.parser.mkPos()
-				this.Next(lfIsToken) // skip goto key word
+				this.next(lfIsToken) // skip goto key word
 				if this.parser.token.Type != lex.TokenIdentifier {
 					this.parser.errs.append(
 						new error(sprintf("%s  missing identifier after goto statement, but '%s'",
 							this.parser.errMsgPrefix(), this.parser.token.description)))
 					this.consume(untilSemicolonOrLf)
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					continue
 				}
 				statementGoto := new ast.StatementGoTo()
@@ -330,15 +330,15 @@ class BlockParser  extends ParserExtends{
 				g.pos = pos
 				g.StatementGoTo = statementGoto
 				block.statements.append(g)
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				this.parser.validStatementEnding()
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 			case lex.TokenTypeAlias:
 				pos := this.parser.mkPos()
 				alias, err := this.parser.parseTypeAlias(comment)
 				if err != null {
 					this.consume(untilSemicolonOrLf)
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					continue
 				}
 				this.parser.validStatementEnding()
@@ -347,7 +347,7 @@ class BlockParser  extends ParserExtends{
 				statement.Type = ast.StatementTypeTypeAlias
 				statement.TypeAlias = alias
 				block.statements.append(statement)
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 			case lex.TokenClass, lex.TokenInterface:
 				pos := this.parser.mkPos()
 				c, _ := this.parser.ClassParser.parse(isAbstract)
@@ -386,7 +386,7 @@ class BlockParser  extends ParserExtends{
 			case lex.TokenElse, lex.TokenElseif:
 				this.parser.errs.append(
 					new error(sprintf("%s unexpected '%s'", this.parser.errMsgPrefix(), this.parser.token.description)))
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				
 			default:
 				// something I cannot handle
@@ -401,7 +401,7 @@ class BlockParser  extends ParserExtends{
 		e, err := this.parser.ExpressionParser.parseExpression(true)
 		if err != null {
 			this.consume(untilSemicolonOrLf)
-			this.Next(lfNotToken)
+			this.next(lfNotToken)
 			return
 		}
 		if e.Type == ast.ExpressionTypeIdentifier &&
@@ -414,7 +414,7 @@ class BlockParser  extends ParserExtends{
 			}
 			isLabel = true
 			pos := this.parser.mkPos()
-			this.Next(lfIsToken) // skip :
+			this.next(lfIsToken) // skip :
 			if this.parser.token.Type != lex.TokenLf {
 				this.parser.errs.append(
 					new error(sprintf("%s expect new line",

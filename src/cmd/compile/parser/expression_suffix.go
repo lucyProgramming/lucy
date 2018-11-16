@@ -210,7 +210,7 @@ func (ep *ExpressionParser) parseSuffixExpression() (*ast.Expression, error) {
 		prefix = newE
 	case lex.TokenFn:
 		pos := ep.parser.mkPos()
-		f, err := ep.parser.FunctionParser.parse(false, false)
+		f, err := ep.parser.FunctionParser.parse(false, false, true)
 		if err != nil {
 			return nil, err
 		}

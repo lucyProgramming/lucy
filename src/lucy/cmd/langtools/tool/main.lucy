@@ -1,0 +1,51 @@
+
+import "lucy/os"
+
+typealias tool = fn(args []string)
+
+
+
+
+fn getTools() -> (tools map{string->tool}) {
+	tools = new map{string -> tool} ()
+
+}
+
+
+fn printUsage(){	 
+	
+}
+
+
+
+fn main(args []string) {
+	tools := getTools()
+	if len(args) == 0 {
+		printUsage()
+		os.exit(1)
+	}
+	if false == tools.keyExist(args[0])	{
+		printf("tool '%s' not found\n" , args[0])
+		printUsage()
+ 		os.exit(1)
+	}
+	tools[args[0]](args[1:])
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

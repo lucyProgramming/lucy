@@ -1,0 +1,6 @@
+ 
+
+type PackageCompiled struct {
+	packageName string
+	meta        *common.PackageMeta
+}

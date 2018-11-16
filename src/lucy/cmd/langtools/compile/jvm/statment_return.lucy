@@ -217,9 +217,9 @@ class BuildReturn {
             context.MakeStackMap(code, state, code.codeLength+7)
             state.popStack(1)
             code.codes[code.codeLength] = cg.OP_ifnonnull
-            binary.BigEndian.putChar(code.codes[code.codeLength+1:code.codeLength+3], 6)
+            binary.BigEndian.putChar(code.codes[code.codeLength+1:code.codeLength+3], char(6))
             code.codes[code.codeLength+3] = cg.OP_goto
-            binary.BigEndian.putChar(code.codes[code.codeLength+4:code.codeLength+6], 4) // goto pop
+            binary.BigEndian.putChar(code.codes[code.codeLength+4:code.codeLength+6], char(4)) // goto pop
             code.codes[code.codeLength+6] = cg.OP_athrow
             code.codes[code.codeLength+7] = cg.OP_pop // pop exception on stack
             code.codeLength += 8

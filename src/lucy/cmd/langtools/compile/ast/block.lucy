@@ -3,7 +3,7 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 import "lucy/cmd/langtools/compile/common"
       
 
-
+  
 public class Block {
 	public exits []cg.Exit // for switch template
 	/*
@@ -21,10 +21,10 @@ public class Block {
 	public pos                       Pos
 	public endPos                    Pos
 	public outer                     Block
-	public inheritedAttribute        InheritedAttribute
+	public inheritedAttribute        InheritedAttribute = new InheritedAttribute()
 	public statements                []Statement
 	public constants                 map{string->Constant}
-	public Functions                 map{string->Function}
+	public functions                 map{string->Function}
 	public Classes                   map{string->Class}
 	public enums                     map{string->Enum}
 	public EnumNames                 map{string->EnumName}
@@ -32,10 +32,10 @@ public class Block {
 	public typeAliases               map{string->Type}
 	public variables                 map{string->Variable}
 	checkConstantsCalled      bool
-
+    
     public fn nameExists(name string) -> (x Object,exist bool) {
-        if this.Functions != null {
-            if t := this.Functions[name]; t != null {
+        if this.functions != null {
+            if t := this.functions[name]; t != null {
                 return t, true
             }
         }
@@ -142,8 +142,8 @@ public class Block {
         search identifier
     */
     fn searchIdentifier(from Pos, name string, isCaptureVar []bool) -> (x Object,err error) {
-        if this.Functions != null {
-            if t := this.Functions[name]; t != null {
+        if this.functions != null {
+            if t := this.functions[name]; t != null {
                 t.used = true
                 return t, null
             }
@@ -305,7 +305,7 @@ public class Block {
             es.append(new error(sprintf("%s class '%s' has declared,but not used",
                 v.pos.errMsgPrefix(), v.name)))
         }
-        for _, v := range this.Functions {
+        for _, v := range this.functions {
             if v.used ||
                 v.isGlobal {
                 continue
@@ -392,10 +392,10 @@ public class Block {
             errMsg += sprintf("\t%s", c.pos.errMsgPrefix())
             return new error(errMsg)
         }
-        if this.Functions == null {
-            this.Functions = new map  { string -> Function } ()
+        if this.functions == null {
+            this.functions = new map  { string -> Function } ()
         }
-        if f := this.Functions[name]; f != null {
+        if f := this.functions[name]; f != null {
             errMsg := sprintf("%s name '%s' already declared as function,first declared at:\n",
                 pos.errMsgPrefix(), name)
             errMsg += sprintf("\t%s", f.pos.errMsgPrefix())
@@ -490,7 +490,7 @@ public class Block {
             return null
         }
         if f ,ok:= d.(Function) ; ok {
-            this.Functions[name] = f
+            this.functions[name] = f
             return null
         }
         if c ,ok:= d.(Constant) ; ok {
@@ -498,7 +498,7 @@ public class Block {
              return null
         }
         if v ,ok:= d.(Variable) ; ok {
-            v.localValOffset = 65535 // overflow
+            v.localValOffset = char(65535) // overflow
             this.variables[name] = v
             return null
         }

@@ -21,7 +21,7 @@ func (this *FunctionParser) consume(until map[lex.TokenKind]bool) {
 /*
 	when canBeAbstract is true , means can have no body
 */
-func (this *FunctionParser) parse(needName bool, isAbstract bool) (f *ast.Function, err error) {
+func (this *FunctionParser) parse(needName bool, isAbstract bool, needSource bool) (f *ast.Function, err error) {
 	f = &ast.Function{}
 	offset := this.parser.token.Offset
 	this.Next(lfIsToken) // skip fn key word
@@ -65,9 +65,11 @@ func (this *FunctionParser) parse(needName bool, isAbstract bool) (f *ast.Functi
 		this.parser.errs = append(this.parser.errs, err)
 		this.consume(untilRc)
 	} else {
-		f.SourceCode =
-			this.parser.
-				bs[offset : this.parser.token.Offset+1]
+		if needSource {
+			f.SourceCode =
+				this.parser.
+					bs[offset : this.parser.token.Offset+1]
+		}
 	}
 	this.Next(lfIsToken)
 	return f, err

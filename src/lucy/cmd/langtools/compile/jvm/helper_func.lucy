@@ -71,7 +71,7 @@ fn loadInt32(c cg.ClassHighLevel, code cg.AttributeCode, value int) {
 fn interfaceMethodArgsCount(functionType ast.FunctionType) -> (count byte) {
 	count = 1
 	for _, v := range functionType.parameterList {
-		count += jvmSlotSize(v.Type)
+		count += byte(jvmSlotSize(v.Type))
 	}
 }
 

@@ -8,7 +8,7 @@ class ClosureMeta {
 
 public class Closure {
 	public variables map{ Variable -> ClosureMeta }
-	public Functions map{ Function -> ClosureMeta }	
+	public functions map{ Function -> ClosureMeta }
 	
 	public fn closureVariableExist(v Variable) ->(exists bool) {
 		if this.variables == null {
@@ -18,14 +18,14 @@ public class Closure {
 	}
 
 	public fn closureFunctionExist(v Function)  ->(exists bool)  {
-		if this.Functions == null {
+		if this.functions == null {
 			return false
 		}
-		return this.Functions.keyExist(v)
+		return this.functions.keyExist(v)
 	}
 
 	fn captureCount(f Function) ->(sum int = len(this.variables)) {
-		for v, _ := range this.Functions {
+		for v, _ := range this.functions {
 			if f == v {
 				continue
 			}
@@ -45,15 +45,15 @@ public class Closure {
 	}
 
 	fn insertFunction(pos Pos, f Function) {
-		if this.Functions == null {
-			this.Functions = new map { Function -> ClosureMeta }()
+		if this.functions == null {
+			this.functions = new map { Function -> ClosureMeta }()
 		}
-		this.Functions[f] = new ClosureMeta()
-		this.Functions[f].pos = pos 
+		this.functions[f] = new ClosureMeta()
+		this.functions[f].pos = pos
 	}
 	
 	fn search(name string) -> ( x Object) {
-		for f, _ := range this.Functions {
+		for f, _ := range this.functions {
 			if f.name == name {
 				return f
 			}

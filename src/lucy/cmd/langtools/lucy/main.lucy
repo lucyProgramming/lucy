@@ -1,0 +1,54 @@
+import "lucy/os"
+import "lucy/cmd/langtools/lucy/run"
+
+
+
+
+fn printUsage() {
+	msg := `lucy is a new programing language build on jvm
+	version                print version
+	build                  build package and don't run
+	install                install directory and it's sub directories 
+	run                    run a lucy package
+	clean                  clean compiled files
+	pack                   make_node_objects jar
+	test                   test a package`
+	fmt.Println(msg)
+}
+
+fn main(args []string) {
+	if len(args) == 1 {
+		printUsage()
+		os.exit(0)
+	}
+	switch args[0] {
+	case "version":
+		printf("lucy-%s\n", "0.0.1")
+		os.exit(0)
+	case "build":
+		(new run.RunLucyPackage()).RunCommand("run", append([]string{"-build"}, args[1:]...))
+	case "run":
+		(new run.RunLucyPackage()).RunCommand(args[0], args[1:])
+	case "install":
+		args := []string{"lucy/cmd/langtools/install"}
+		args = append(args, args[1:]...)
+		(new run.RunLucyPackage()).RunCommand("run", args)
+	case "clean":
+		args := []string{"lucy/cmd/langtools/clean"}
+		args = append(args, args[1:]...)
+		(new run.RunLucyPackage()).RunCommand("run", args)
+	case "test":
+		args := []string{"lucy/cmd/langtools/test"}
+		args = append(args, args[1:]...)
+		(new run.RunLucyPackage()).RunCommand("run", args)
+	case "install_lucy_array":
+		(new install_lucy_array.InstallLucyArray()).RunCommand("install_lucy_array", nil)
+	case "pack":
+		args := []string{"lucy/cmd/langtools/pack"}
+		args = append(args, args[1:]...)
+		(new run.RunLucyPackage()).RunCommand("run", args)
+	default:
+		printUsage()
+		os.exit(1)
+	}
+}

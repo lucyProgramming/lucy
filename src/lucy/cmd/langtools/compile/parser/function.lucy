@@ -11,10 +11,10 @@ class FunctionParser extends ParserExtends{
 	/*
 		when canBeAbstract is true , means can have no body
 	*/
-	fn parse(needName bool, isAbstract bool) -> (f ast.Function, err error) {
+	fn parse(needName bool, isAbstract bool , needSource bool ) -> (f ast.Function, err error) {
 		f = new ast.Function()
 		offset := this.parser.token.offset
-		this.Next(lfIsToken) // skip fn key word
+		this.next(lfIsToken) // skip fn key word
 		this.parser.unExpectNewLineAndSkip()
 		if needName && this.parser.token.Type != lex.TokenIdentifier {
 			err = new error(sprintf("%s expect function name,but '%s'",
@@ -25,7 +25,7 @@ class FunctionParser extends ParserExtends{
 		f.pos = this.parser.mkPos()
 		if this.parser.token.Type == lex.TokenIdentifier {
 			f.name = this.parser.token.stringValue
-			this.Next(lfNotToken)
+			this.next(lfNotToken)
 		}
 		f.Type, err = this.parseFunctionType()
 		if err != null {
@@ -48,7 +48,7 @@ class FunctionParser extends ParserExtends{
 		f.block = new ast.Block()
 		f.block.isFunctionBlock = true
 		f.block.Fn = f
-		this.Next(lfNotToken) // skip {
+		this.next(lfNotToken) // skip {
 		this.parser.BlockParser.parseStatementList(f.block, false)
 		if this.parser.token.Type != lex.TokenRc {
 			err = new error(sprintf("%s expect '}', but '%s'",
@@ -56,11 +56,13 @@ class FunctionParser extends ParserExtends{
 			this.parser.errs.append( err)
 			this.consume(untilRc)
 		} else {
-			f.sourceCode =
+			if needSource {
+				f.sourceCode =
 				this.parser.
-					bs[offset:this.parser.lexer.GetOffSet()]
+					bs[offset:this.parser.lexer.getOffSet()]
+			}
 		}
-		this.Next(lfIsToken)
+		this.next(lfIsToken)
 		return f, err
 	}
 
@@ -70,14 +72,14 @@ class FunctionParser extends ParserExtends{
 	fn parseFunctionType() -> (functionType ast.FunctionType, err error) {
 		functionType = new ast.FunctionType()
 		if this.parser.token.Type == lex.TokenLt {
-			this.Next(lfNotToken)
+			this.next(lfNotToken)
 			functionType.templateNames, err = this.parser.parseNameList()
 			if err != null {
 				this.consume(untilLp)
 				goto skipTemplateNames
 			}
 			this.parser.errs.appendAll(functionType.checkTemplateNameDuplication())
-			this.Next(lfIsToken)
+			this.next(lfIsToken)
 		}
 		this.parser.unExpectNewLineAndSkip()
 	skipTemplateNames:
@@ -87,12 +89,12 @@ class FunctionParser extends ParserExtends{
 			this.parser.errs.append( err)
 			return
 		}
-		this.Next(lfNotToken)               // skip (
+		this.next(lfNotToken)               // skip (
 		if this.parser.token.Type != lex.TokenRp { // not )
 			functionType.parameterList, err = this.parseParameterOrReturnList()
 			if err != null {
 				this.consume(untilRp)
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 			}
 		}
 		this.parser.ifTokenIsLfThenSkip()
@@ -102,21 +104,21 @@ class FunctionParser extends ParserExtends{
 			this.parser.errs.append( err)
 			return
 		}
-		this.Next(lfIsToken)                   // skip )
+		this.next(lfIsToken)                   // skip )
 		if this.parser.token.Type == lex.TokenArrow { // ->  parse return list
-			this.Next(lfNotToken) // skip ->
+			this.next(lfNotToken) // skip ->
 			if this.parser.token.Type != lex.TokenLp {
 				err = new error(sprintf("%s fn declared wrong, not '(' after '->'",
 					this.parser.errMsgPrefix()))
 				this.parser.errs.append( err)
 				return
 			}
-			this.Next(lfNotToken) // skip (
+			this.next(lfNotToken) // skip (
 			if this.parser.token.Type != lex.TokenRp {
 				functionType.returnList, err = this.parseParameterOrReturnList()
 				if err != null { // skip until next (,continue to analyse
 					this.consume(untilRp)
-					this.Next(lfIsToken)
+					this.next(lfIsToken)
 				}
 			}
 			this.parser.ifTokenIsLfThenSkip()
@@ -126,7 +128,7 @@ class FunctionParser extends ParserExtends{
 				this.parser.errs.append( err)
 				return
 			}
-			this.Next(lfIsToken) // skip )
+			this.next(lfIsToken) // skip )
 		} else {
 			functionType.returnList = new []ast.Variable(1)
 			functionType.returnList[0] = new ast.Variable()
@@ -149,21 +151,21 @@ class FunctionParser extends ParserExtends{
 		if this.parser.token.Type != lex.TokenAssign {
 			return
 		}
-		this.Next(lfIsToken) // skip =
+		this.next(lfIsToken) // skip =
 		for k, v := range returnList {
 			var er error
 			v.defaultValueExpression, er = this.parser.ExpressionParser.parseExpression(false)
 			if er != null {
 				this.consume(untilComma)
 				err = er
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 				continue
 			}
 			if this.parser.token.Type != lex.TokenComma ||
 				k == len(returnList)-1 {
 				break
 			} else {
-				this.Next(lfNotToken) // skip ,
+				this.next(lfNotToken) // skip ,
 			}
 		}
 		return returnList, err
@@ -173,7 +175,7 @@ class FunctionParser extends ParserExtends{
 			if this.parser.token.Type == lex.TokenComma {
 				this.parser.errs.append( new error(sprintf("%s extra comma",
 					this.parser.errMsgPrefix())))
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 				continue
 			}
 			var v []ast.Variable
@@ -185,7 +187,7 @@ class FunctionParser extends ParserExtends{
 				break
 			}
 			if this.parser.token.Type == lex.TokenComma {
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 			} else {
 				break
 			}

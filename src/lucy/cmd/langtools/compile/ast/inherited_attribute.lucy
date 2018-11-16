@@ -10,4 +10,9 @@ public class InheritedAttribute {
 	public Defer         StatementDefer
 	classMethod           ClassMethod
 	public classAndFunctionNames string
+	
+	fn InheritedAttribute(){
+	    this.super()
+		this.classAndFunctionNames = ""
+	}
 }

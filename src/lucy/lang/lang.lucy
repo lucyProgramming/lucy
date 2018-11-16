@@ -12,7 +12,8 @@ public class Lucy extends javaRootClass {}
 
 
 public fn copy < destArray, srcArray > (dest destArray , src srcArray , start int = 0 , end int = -1) -> (r destArray = dest) {
-	if src == null {
+	if src == null  || 
+		src.size() == 0 {
 		return 
 	}
 	if end == -1 {

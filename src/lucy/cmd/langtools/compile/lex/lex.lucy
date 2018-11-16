@@ -11,7 +11,7 @@ public class Lexer {
 	public fn GetLineAndColumn() -> (line int, column int) {
 		return this.line, this.column
 	}
-	public fn GetOffSet() -> (offset int) {
+	public fn getOffSet() -> (offset int) {
 		return this.offset
 	}
 	
@@ -192,7 +192,7 @@ public class Lexer {
 			this.unGetChar()
 		}
 		token.endLine = this.line
-		token.EndColumn = this.column
+		token.endColumn = this.column
         if haveFloatPart {
             integerPart.append('.')
             integerPart.appendAll(floatPart )
@@ -274,7 +274,7 @@ public class Lexer {
 			token.description = "identifier_" + identifier
 		}
 		token.endLine = this.line
-		token.EndColumn = this.column
+		token.endColumn = this.column
 		return
 	}
 
@@ -429,7 +429,7 @@ public class Lexer {
 			}
 		}
 		token.endLine = this.line
-		token.EndColumn = this.column
+		token.endColumn = this.column
 		if c == '\n' {
 			err = new error("string literal start new line")
 		}
@@ -496,7 +496,7 @@ public class Lexer {
 		return true
 	}
 	
-	public fn Next()  -> (token Token, err error) {
+	public fn next()  -> (token Token, err error) {
 		token = new Token()
 		var c byte
 		c, eof := this.getChar()
@@ -787,7 +787,7 @@ public class Lexer {
 			return null, err
 		}
 		token.endLine = this.line
-		token.EndColumn = this.column
+		token.endColumn = this.column
 		return
 	}
 	

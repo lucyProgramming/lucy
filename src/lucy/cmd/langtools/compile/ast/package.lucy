@@ -34,7 +34,7 @@ public class Package {
 		for _, v := range this.block.Classes {
 			v.isBuildIn = true
 		}
-		for _, v := range this.block.Functions {
+		for _, v := range this.block.functions {
 			v.isBuildIn = true
 			v.loadedFromCorePackage = true
 		}
@@ -105,11 +105,11 @@ public class Package {
 		bs := []Block{}
 		expressions := []Expression{}
 		for _, v := range nodes {
-			if t,ok := v.Node.(Block) ; ok {
+			if t,ok := v.node.(Block) ; ok {
 				bs.append(t)
 				continue
 			}
-			if t,ok := v.Node.(Function) ; ok {
+			if t,ok := v.node.(Function) ; ok {
 				t.isGlobal = true
 				err := this.block.insert(t.name, t.pos, t)
 				if err != null {
@@ -117,7 +117,7 @@ public class Package {
 				}
 				continue
 			}
-			if t ,ok := v.Node.(Enum) ; ok {
+			if t ,ok := v.node.(Enum) ; ok {
 				t.isGlobal = true
 				err := this.block.insert(t.name, t.pos,t)
 				if err != null {
@@ -125,7 +125,7 @@ public class Package {
 				}
 				continue
 			}
-			if t,ok := v.Node.(Class) ; ok {
+			if t,ok := v.node.(Class) ; ok {
 				t.isGlobal = true
 				err := this.block.insert(t.name, t.pos, t)
 				if err != null {
@@ -134,7 +134,7 @@ public class Package {
 				continue
 			}
 
-			if t,ok := v.Node.(TypeAlias) ; ok {
+			if t,ok := v.node.(TypeAlias) ; ok {
 				err := this.block.insert(t.name, t.pos, t.Type)
 				t.Type.alias = t
 				if err != null {
@@ -142,7 +142,7 @@ public class Package {
 				}
 				continue
 			}
-			if t,ok := v.Node.(Constant) ; ok{
+			if t,ok := v.node.(Constant) ; ok{
 				t.isGlobal = true
 				err := this.block.insert(t.name, t.pos, t)
 				if err != null {
@@ -150,7 +150,7 @@ public class Package {
 				}
 				continue
 			}
-			if t ,ok:= v.Node.(Import) ; ok {
+			if t ,ok:= v.node.(Import) ; ok {
 				if t.accessName != null && t.accessName == UnderScore{
 					if this.unUsedPackage == null {
 						this.unUsedPackage = new map { string -> Import}()
@@ -163,7 +163,7 @@ public class Package {
 					}
 				}
 			}
-			if t ,ok:= v.Node.(Expression) ; ok {
+			if t ,ok:= v.node.(Expression) ; ok {
 				if t.Type == ExpressionTypeVar || t.Type == ExpressionTypeVarAssign {
 					expressions.append(t)
 				} else {
@@ -215,7 +215,7 @@ public class Package {
 				this.errors.append(err)
 			}
 		}
-		for _, v := range this.block.Functions {
+		for _, v := range this.block.functions {
 			if v.isBuildIn {
 				continue
 			}
@@ -261,7 +261,7 @@ public class Package {
 				return this.errors
 			}
 		}
-		for _, v := range this.block.Functions {
+		for _, v := range this.block.functions {
 			if v.TemplateFunction != null {
 				continue
 			}
@@ -279,7 +279,7 @@ public class Package {
 				return this.errors
 			}
 		}
-		for _, v := range this.block.Functions {
+		for _, v := range this.block.functions {
 			if v.isBuildIn {
 				continue
 			}
@@ -295,7 +295,7 @@ public class Package {
 			v.isClosureFunction = v.Closure.captureCount(v) > 0
 		}
 		for _, v := range this.statementLevelClass {
-			for f, meta := range v.closure.Functions {
+			for f, meta := range v.closure.functions {
 				if f.isClosureFunction == false {
 					continue
 				}

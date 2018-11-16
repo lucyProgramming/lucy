@@ -164,7 +164,7 @@ func (this *Parser) Parse() []error {
 			}
 			resetProperty()
 		case lex.TokenFn:
-			f, err := this.FunctionParser.parse(true, false)
+			f, err := this.FunctionParser.parse(true, false, true)
 			if err != nil {
 				this.Next(lfNotToken)
 				continue

@@ -534,6 +534,7 @@ func (this *FileLoader) loadLucyMainClass(pack *ast.Package, c *cg.Class) error 
 			Line:     int(attr.StartLine),
 			Column:   int(attr.StartColumn),
 		})
+		f.SourceCode = []byte(attr.Code)
 		if len(es) > 0 { // looks impossible
 			return es[0]
 		}

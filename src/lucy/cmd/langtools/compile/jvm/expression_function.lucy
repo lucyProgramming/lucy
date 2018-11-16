@@ -154,7 +154,7 @@ class  BuildExpressionFunction {
 			code.codeLength += 3
 
 		}
-		for v, _ := range function.Closure.Functions {
+		for v, _ := range function.Closure.functions {
 			if v.isClosureFunction == false {
 				continue
 			}
@@ -167,7 +167,7 @@ class  BuildExpressionFunction {
 			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, function.closureVariableOffSet))
 			if context.function.Closure.closureFunctionExist(v) {
 				// I Know this at 0 offset
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, 0))
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, char(0)))
 				if 3 > maxStack {
 					maxStack = 3
 				}

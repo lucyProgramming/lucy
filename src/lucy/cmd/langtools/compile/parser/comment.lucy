@@ -18,16 +18,16 @@ class CommentParser extends ParserExtends{
 					this.comment = ""
 				}
 				this.comment += this.parser.token.stringValue
-				this.parser.Next(lfIsToken)
+				this.parser.next(lfIsToken)
 			}
 		} else {
 			this.comment = this.parser.token.stringValue
-			this.parser.Next(lfIsToken)
+			this.parser.next(lfIsToken)
 		}
 		if this.parser.token.Type != lex.TokenLf {
 			return
 		}
-		this.parser.Next(lfIsToken)
+		this.parser.next(lfIsToken)
 		if this.parser.token.Type == lex.TokenLf {
 			this.reset()
 			return

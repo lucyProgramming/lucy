@@ -156,10 +156,9 @@ class FileLoader implements ast.LoadImport{
             astClass.name = string(c.ConstPool[nameIndex].info)
             if astClass.name != ast.JavaRootClass {
                 nameIndex = binary.BigEndian.getChar(c.ConstPool[c.superClass].info)
-                astClass.superClassName = new ast.NameWithPos(string(c.ConstPool[nameIndex].info) , null)
                 astClass.superClass = new ast.Class()
                 astClass.superClass.notImportedYet = true
-                astClass.superClass.name = astClass.superClassName.name
+                astClass.superClass.name = string(c.ConstPool[nameIndex].info)
             }
         }
         this.loadInterfaces(astClass, c)
@@ -224,7 +223,9 @@ class FileLoader implements ast.LoadImport{
             astClass.name = string(c.ConstPool[nameIndex].info)
             if astClass.name != ast.JavaRootClass {
                 nameIndex = binary.BigEndian.getChar(c.ConstPool[c.superClass].info)
-                astClass.superClassName = new ast.NameWithPos(string(c.ConstPool[nameIndex].info) , null)
+                astClass.superClass = new ast.Class()
+                astClass.superClass.notImportedYet = true
+                astClass.superClass.name = string(c.ConstPool[nameIndex].info)
             }
         }
         this.loadInterfaces(astClass, c)
@@ -261,7 +262,7 @@ class FileLoader implements ast.LoadImport{
                 panic(err)
             }
             if t := cg.GetAttributeByName(v.AttributeGroupedByName , cg.AttributeNameLucyFieldDescriptor); t != null && len(t) > 0 {
-                d := new cg.AttributeLucyFieldDescriptor("", 0)
+                d := new cg.AttributeLucyFieldDescriptor("", char(0))
                 d.fromBs(c, t[0].info)
                 _, f.Type, err = jvm.LucyFieldSignature.Decode([]byte(d.descriptor))
                 if err != null {
@@ -377,7 +378,7 @@ class FileLoader implements ast.LoadImport{
         mainClassName.name = pack.name + "/main"
         pack.block.variables = new map{string->ast.Variable}()
         pack.block.constants = new map{string->ast.Constant}()
-        pack.block.Functions = new map{string->ast.Function}()
+        pack.block.functions = new map{string->ast.Function}()
         for _, f := range c.fields {
             name := string(c.ConstPool[f.nameIndex].info)
             constValue := f.GetAttributeByName(cg.AttributeNameConstValue)
@@ -412,7 +413,7 @@ class FileLoader implements ast.LoadImport{
                 vd.isGlobal = true
                 pack.block.variables[name] = vd
                 if t := f.GetAttributeByName(cg.AttributeNameLucyFieldDescriptor); t != null && len(t) > 0 {
-                    d := new cg.AttributeLucyFieldDescriptor("" , 0 )
+                    d := new cg.AttributeLucyFieldDescriptor("" , char(0))
                     d.fromBs(c, t[0].info)
                     _, vd.Type, err = jvm.LucyFieldSignature.Decode([]byte(d.descriptor))
                     if err != null {
@@ -488,7 +489,7 @@ class FileLoader implements ast.LoadImport{
             function.entrance.Class = mainClassName
             function.entrance.Descriptor = function.jvmDescriptor
             function.isGlobal = true
-            pack.block.Functions[name] = function
+            pack.block.functions[name] = function
         }
 
         if pack.block.typeAliases == null {
@@ -521,9 +522,10 @@ class FileLoader implements ast.LoadImport{
             if len(es) > 0 { // looks impossible
                 panic(es[0])
             }
+            f.sourceCode = []byte(attr.code)
             f.accessFlags = attr.accessFlags
             f.TemplateFunction = new ast.TemplateFunction()
-            pack.block.Functions[attr.name] = f
+            pack.block.functions[attr.name] = f
         }
     }
 

@@ -9,7 +9,7 @@ class EnumParser extends ParserExtends {
 
 	fn parse() -> (e ast.Enum, err error) {
 		var enumName string
-		this.Next(lfIsToken) // skip enum
+		this.next(lfIsToken) // skip enum
 		this.parser.unExpectNewLineAndSkip()
 		if this.parser.token.Type != lex.TokenIdentifier {
 			err = new error(sprintf("%s expect 'identifier' for enum name, but '%s'",
@@ -20,7 +20,7 @@ class EnumParser extends ParserExtends {
 
 		} else {
 			enumName = this.parser.token.stringValue
-			this.Next(lfNotToken) // skip enum name
+			this.next(lfNotToken) // skip enum name
 		}
 		e = new ast.Enum()
 		e.name = enumName
@@ -31,12 +31,12 @@ class EnumParser extends ParserExtends {
 			this.parser.errs.append(err)
 			this.consume(untilLc)
 		}
-		this.Next(lfNotToken)
+		this.next(lfNotToken)
 		for this.parser.token.Type != lex.TokenRc &&
 			this.parser.token.Type != lex.TokenEof {
 			switch this.parser.token.Type {
 			case lex.TokenLf:
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 			case lex.TokenMultiLineComment,
 				lex.TokenComment:
 				comment.read()
@@ -44,9 +44,9 @@ class EnumParser extends ParserExtends {
 				name := this.parser.token.stringValue
 				pos := this.parser.mkPos()
 				var value ast.Expression
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				if this.parser.token.Type == lex.TokenAssign {
-					this.Next(lfNotToken)
+					this.next(lfNotToken)
 					value, err = this.parser.ExpressionParser.parseExpression(false)
 					if err != null {
 						this.consume(untilSemicolonOrLf)
@@ -72,11 +72,11 @@ class EnumParser extends ParserExtends {
 				}
 				comment.reset()
 			case lex.TokenComma:
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 			default:
 				this.parser.errs.append( new error(sprintf("%s token '%s' is not except",
 					this.parser.errMsgPrefix(), this.parser.token.description)))
-				this.Next(lfNotToken)
+				this.next(lfNotToken)
 				comment.reset()
 			}
 		}
@@ -86,7 +86,7 @@ class EnumParser extends ParserExtends {
 			this.parser.errs.append( err)
 			this.consume(untilRc)
 		}
-		this.Next(lfNotToken)
+		this.next(lfNotToken)
 		return e, err
 	}
 

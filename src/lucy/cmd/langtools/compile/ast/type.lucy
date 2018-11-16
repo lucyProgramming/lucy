@@ -104,22 +104,22 @@ public class Type {
 			e.boolValue = false
 		case VariableTypeByte:
 			e.Type = ExpressionTypeByte
-			e.longValue =  0
+			e.longValue =  long(0)
 		case VariableTypeShort:
 			e.Type = ExpressionTypeInt
-			e.longValue =  0
+			e.longValue =  long(0)
 		case VariableTypeChar:
 			e.Type = ExpressionTypeInt
-			e.longValue =  0
+			e.longValue =  long(0)
 		case VariableTypeInt:
 			e.Type = ExpressionTypeInt
-			e.longValue =  0
+			e.longValue =  long(0)
 		case VariableTypeLong:
 			e.Type = ExpressionTypeLong
-			e.longValue = 0
+			e.longValue = long(0)
 		case VariableTypeFloat:
 			e.Type = ExpressionTypeFloat
-			e.doubleValue = float(0)
+			e.doubleValue = double(0)
 		case VariableTypeDouble:
 			e.Type = ExpressionTypeDouble
 			e.doubleValue = double(0)
@@ -600,11 +600,11 @@ public class Type {
 		if leftValue.isPrimitive() &&
 			rightValue.isPrimitive() {
 
-			if leftValue.isInteger() &&
-				rightValue.isInteger() &&
-				((leftValue.Type == VariableTypeLong) == (rightValue.Type == VariableTypeLong)) {
-				return true
-			}
+			//if leftValue.isInteger() &&
+			//	rightValue.isInteger() &&
+			//	((leftValue.Type == VariableTypeLong) == (rightValue.Type == VariableTypeLong)) {
+			//	return true
+			//}
 			return leftValue.Type == rightValue.Type
 		}
 		if leftValue.isPointer() && rightValue.Type == VariableTypeNull {

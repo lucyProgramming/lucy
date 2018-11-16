@@ -286,7 +286,7 @@ func (this *ClassParser) parse(isAbstract bool) (classDefinition *ast.Class, err
 						this.parser.errMsgPrefix()))
 			}
 			isAbstract := isAbstract || isInterface
-			f, err := this.parser.FunctionParser.parse(true, isAbstract)
+			f, err := this.parser.FunctionParser.parse(true, isAbstract, true)
 			if err != nil {
 				resetProperty()
 				this.Next(lfNotToken)

@@ -19,7 +19,7 @@ class ExpressionQuestionParser extends ParserExtends {
 			return left, null
 		}
 		pos := this.parser.mkPos()
-		this.Next(lfNotToken) // skip ?
+		this.next(lfNotToken) // skip ?
 		True, err := this.ep.ExpressionBinaryParser.parseLogicalOrExpression()
 		if err != null {
 			return left, null
@@ -31,7 +31,7 @@ class ExpressionQuestionParser extends ParserExtends {
 			this.parser.errs.append( err)
 			return left, err
 		}
-		this.Next(lfNotToken) // skip :
+		this.next(lfNotToken) // skip :
 		False, err :=  this.ep.ExpressionBinaryParser.parseLogicalOrExpression()
 		if err != null {
 			return left, null

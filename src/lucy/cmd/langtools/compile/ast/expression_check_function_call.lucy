@@ -263,10 +263,10 @@ class ExpressionCheckFunctionCall {
 			}
 			//check this function
 			cloneFunction.block.inherit(PackageBeenCompile.block)
-			if cloneFunction.block.Functions == null {
-				cloneFunction.block.Functions = new map { string -> Function } ()
+			if cloneFunction.block.functions == null {
+				cloneFunction.block.functions = new map { string -> Function } ()
 			}
-			cloneFunction.block.Functions[cloneFunction.name] = cloneFunction
+			cloneFunction.block.functions[cloneFunction.name] = cloneFunction
 			cloneFunction.block.inheritedAttribute.Function = cloneFunction
 			cloneFunction.checkParametersAndReturns(errs, true, false)
 			cloneFunction.checkBlock(errs)

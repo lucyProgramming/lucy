@@ -2,15 +2,10 @@
 
 import "lucy/cmd/langtools/compile/lc"
 import "lucy/cmd/langtools/compile/common"
-import "lucy/os"
 import "lucy/cmd/langtools/common" as langtoolsCommon
 
 fn main(args []string) {
-	files,err := common.compileFlags.parser.parse(args)
-	if err != null {
-		printf("parse flag failed,err:%s\n",err.getMessage())
-		os.exit(1)
-	}
+	files  := common.compileFlags.parseArgs(args)
 	lc.Main(files ,langtoolsCommon.getLucyPath(),langtoolsCommon.getClassPath() )
 }
 

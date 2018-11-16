@@ -10,7 +10,7 @@ class ExpressionArrayParser extends ParserExtends {
 		this.ep = ep 
 	}
 	fn parseArrayExpression() -> (e ast.Expression, err error) {
-		this.parser.Next(lfIsToken) // skip [
+		this.parser.next(lfIsToken) // skip [
 		this.parser.unExpectNewLineAndSkip()
 		if this.parser.token.Type != lex.TokenRb {
 			/*
@@ -24,7 +24,7 @@ class ExpressionArrayParser extends ParserExtends {
 				return null, err
 			}
 			pos := this.parser.mkPos()
-			this.Next(lfIsToken) // skip ]
+			this.next(lfIsToken) // skip ]
 			e = new ast.Expression()
 			e.Type = ast.ExpressionTypeArray
 			e.data = arr
@@ -32,7 +32,7 @@ class ExpressionArrayParser extends ParserExtends {
 			e.op = "arrayLiteral"
 			return
 		}
-		this.Next(lfIsToken) // skip ]
+		this.next(lfIsToken) // skip ]
 		this.parser.unExpectNewLineAndSkip()
 		array, err := this.parser.parseType()
 		if err != null {
@@ -43,7 +43,7 @@ class ExpressionArrayParser extends ParserExtends {
 			/*
 				[]byte("1111111111")
 			*/
-			this.Next(lfNotToken) // skip (
+			this.next(lfNotToken) // skip (
 			e, err = this.ep.parseExpression(false)
 			if err != null {
 				return null, err
@@ -65,7 +65,7 @@ class ExpressionArrayParser extends ParserExtends {
 			data.Type.array = array
 			data.Expression = e
 			ret.data = data
-			this.Next(lfIsToken) // skip )
+			this.next(lfIsToken) // skip )
 			return ret, null
 		}
 		this.parser.unExpectNewLineAndSkip()
@@ -97,12 +97,12 @@ class ExpressionArrayParser extends ParserExtends {
 			this.parser.errs.append( err)
 			return null, err
 		}
-		this.Next(lfNotToken) // skip {
+		this.next(lfNotToken) // skip {
 		for this.parser.token.Type != lex.TokenEof &&
 			this.parser.token.Type != lex.TokenRc {
 			if this.parser.token.Type == lex.TokenComment ||
 				this.parser.token.Type == lex.TokenMultiLineComment {
-				this.Next(lfIsToken)
+				this.next(lfIsToken)
 				continue
 			}
 			if this.parser.token.Type == lex.TokenLc {
@@ -130,7 +130,7 @@ class ExpressionArrayParser extends ParserExtends {
 				}
 			}
 			if this.parser.token.Type == lex.TokenComma {
-				this.Next(lfNotToken) // skip ,
+				this.next(lfNotToken) // skip ,
 			} else {
 				break
 			}
@@ -142,7 +142,7 @@ class ExpressionArrayParser extends ParserExtends {
 			this.parser.errs.append( err)
 			this.parser.consume(untilRc)
 		}
-		this.Next(lfIsToken)
+		this.next(lfIsToken)
 		return es, null
 	}
 
