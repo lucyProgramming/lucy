@@ -1,0 +1,20 @@
+{
+	"compiledFrom": {
+		"common.lucy": {
+			"lastModify": 1542023119
+		},
+		"fns.lucy": {
+			"lastModify": 1541410662
+		},
+		"meta.lucy": {
+			"lastModify": 1532825332
+		}
+	},
+	"imports": [
+		"lucy/os"
+	],
+	"compileTime": 1542365863,
+	"classes": [
+		"main.class"
+	]
+}

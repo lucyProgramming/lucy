@@ -1,0 +1,260 @@
+{
+	"compiledFrom": {
+		"array_meta.lucy": {
+			"lastModify": 1542192151
+		},
+		"block.lucy": {
+			"lastModify": 1542364114
+		},
+		"buildPackage.lucy": {
+			"lastModify": 1542364114
+		},
+		"buildin_assert.lucy": {
+			"lastModify": 1542192151
+		},
+		"buildin_black_hole.lucy": {
+			"lastModify": 1542192151
+		},
+		"buildin_catch_panic.lucy": {
+			"lastModify": 1542364114
+		},
+		"buildin_funcs.lucy": {
+			"lastModify": 1542192151
+		},
+		"buildin_len.lucy": {
+			"lastModify": 1542192151
+		},
+		"buildin_print.lucy": {
+			"lastModify": 1542192151
+		},
+		"buildin_printf.lucy": {
+			"lastModify": 1542192151
+		},
+		"buildin_sprintf.lucy": {
+			"lastModify": 1542192151
+		},
+		"closure.lucy": {
+			"lastModify": 1542108579
+		},
+		"context.lucy": {
+			"lastModify": 1542364114
+		},
+		"descriptor.lucy": {
+			"lastModify": 1542276696
+		},
+		"expression.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_algebra.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_array.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_assign.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_call_args.lucy": {
+			"lastModify": 1542276696
+		},
+		"expression_conversion.lucy": {
+			"lastModify": 1542108579
+		},
+		"expression_function.lucy": {
+			"lastModify": 1542364114
+		},
+		"expression_function_call.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_identifier.lucy": {
+			"lastModify": 1542108579
+		},
+		"expression_increment.lucy": {
+			"lastModify": 1542108579
+		},
+		"expression_index.lucy": {
+			"lastModify": 1542108579
+		},
+		"expression_left_value.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_logical.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_map_literal.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_method_call.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_new.lucy": {
+			"lastModify": 1542276696
+		},
+		"expression_op_assign.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_question.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_relation.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_selection.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_slice.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_strcat.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_template_function.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_type_assert.lucy": {
+			"lastModify": 1542192151
+		},
+		"expression_type_conversion.lucy": {
+			"lastModify": 1542108579
+		},
+		"expression_unary.lucy": {
+			"lastModify": 1542108579
+		},
+		"expression_var.lucy": {
+			"lastModify": 1542108579
+		},
+		"expression_var_assign.lucy": {
+			"lastModify": 1542192151
+		},
+		"function.lucy": {
+			"lastModify": 1542192151
+		},
+		"function_default_value.lucy": {
+			"lastModify": 1542192151
+		},
+		"helper_func.lucy": {
+			"lastModify": 1542364114
+		},
+		"lucy_field_descriptor.lucy": {
+			"lastModify": 1542023621
+		},
+		"lucy_method_descriptor.lucy": {
+			"lastModify": 1542192151
+		},
+		"multi_return_packer.lucy": {
+			"lastModify": 1542108579
+		},
+		"pack.lucy": {
+			"lastModify": 1542192151
+		},
+		"simple_var.lucy": {
+			"lastModify": 1542364114
+		},
+		"stackmap.lucy": {
+			"lastModify": 1542108579
+		},
+		"statement_for.lucy": {
+			"lastModify": 1542108579
+		},
+		"statement_for_range_array.lucy": {
+			"lastModify": 1542192151
+		},
+		"statement_for_range_java_array.lucy": {
+			"lastModify": 1542192151
+		},
+		"statement_for_range_map.lucy": {
+			"lastModify": 1542192151
+		},
+		"statement_if.lucy": {
+			"lastModify": 1542276696
+		},
+		"statement_switch.lucy": {
+			"lastModify": 1542276696
+		},
+		"statment_return.lucy": {
+			"lastModify": 1542364114
+		},
+		"type_alias.lucy": {
+			"lastModify": 1542108579
+		},
+		"var.lucy": {
+			"lastModify": 1542276696
+		}
+	},
+	"imports": [
+		"lucy/binary",
+		"lucy/cmd/langtools/compile/common",
+		"lucy/cmd/langtools/compile/ast",
+		"lucy/cmd/langtools/compile/jvm/cg"
+	],
+	"compileTime": 1542365861,
+	"classes": [
+		"ArrayMeta.class",
+		"AutoVariableForRangeArray.class",
+		"AutoVariableForRangeJavaArray.class",
+		"AutoVariableForRangeMap.class",
+		"BuildBlock.class",
+		"BuildExpression.class",
+		"BuildExpressionArithmetic.class",
+		"BuildExpressionArray.class",
+		"BuildExpressionAssert.class",
+		"BuildExpressionAssign.class",
+		"BuildExpressionCallArgs.class",
+		"BuildExpressionConversion.class",
+		"BuildExpressionFunction.class",
+		"BuildExpressionFunctionCall.class",
+		"BuildExpressionIdentifier.class",
+		"BuildExpressionIncrement.class",
+		"BuildExpressionIndex.class",
+		"BuildExpressionLeftValue.class",
+		"BuildExpressionLogical.class",
+		"BuildExpressionMap.class",
+		"BuildExpressionMethodCall.class",
+		"BuildExpressionNew.class",
+		"BuildExpressionOpAssign.class",
+		"BuildExpressionQuestion.class",
+		"BuildExpressionRelation.class",
+		"BuildExpressionSelection.class",
+		"BuildExpressionSlice.class",
+		"BuildExpressionStrcat.class",
+		"BuildExpressionTypeConversion.class",
+		"BuildExpressionUnary.class",
+		"BuildExpressionVar.class",
+		"BuildExpressionVarAssign.class",
+		"BuildFor.class",
+		"BuildForRangeArray.class",
+		"BuildForRangeJavaArray.class",
+		"BuildForRangeMap.class",
+		"BuildFunction.class",
+		"BuildIf.class",
+		"BuildPackage.class",
+		"BuildReturn.class",
+		"BuildSwitch.class",
+		"BuildTemplateFunctionCall.class",
+		"BuildinFunctionAssert.class",
+		"BuildinFunctionBlackHole.class",
+		"BuildinFunctionCall.class",
+		"BuildinFunctionCatchPanic.class",
+		"BuildinFunctionLen.class",
+		"BuildinFunctionPrint.class",
+		"BuildinFunctionPrintf.class",
+		"BuildinFunctionSprintf.class",
+		"Closure.class",
+		"ClosureKind.class",
+		"ClosureObjectMeta.class",
+		"Context.class",
+		"DefaultValueParse.class",
+		"Descriptor.class",
+		"LeftValueKind.class",
+		"LucyFieldSignature.class",
+		"LucyMethodSignature.class",
+		"LucyTypeAlias.class",
+		"MultiValueAutoVar.class",
+		"StackMapState.class",
+		"TypeConverterAndPrimitivePacker.class",
+		"buildTypeConversion$autoVar.class",
+		"closureFunction$buildSwitchStatement$literal25.class",
+		"main.class",
+		"setEnumArray$autoVar.class"
+	]
+}

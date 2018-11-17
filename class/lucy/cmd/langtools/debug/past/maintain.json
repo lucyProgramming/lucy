@@ -1,0 +1,18 @@
+{
+	"compiledFrom": {
+		"main.lucy": {
+			"lastModify": 1542276696
+		}
+	},
+	"imports": [
+		"lucy/cmd/langtools/compile/ast",
+		"lucy/os",
+		"lucy/encoding/json",
+		"lucy/cmd/langtools/debug/past/make_node_objects",
+		"lucy/cmd/langtools/compile/parser"
+	],
+	"compileTime": 1542324389,
+	"classes": [
+		"main.class"
+	]
+}

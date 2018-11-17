@@ -9,6 +9,8 @@ type ClosureMeta struct {
 	pos *Pos
 }
 
+
+
 func (this *Closure) ClosureVariableExist(v *Variable) bool {
 	if this.Variables == nil {
 		return false

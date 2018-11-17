@@ -4,9 +4,6 @@ import "java/lang/Runnable"
 import "java/lang/Thread"
 
 
-
-
-
 public final class Run implements Runnable{
 	private f fn() 
 	public fn Run(f fn () ) {
@@ -20,5 +17,5 @@ public final class Run implements Runnable{
 		r := new Run(f)
 		new Thread(r) . start() 
 	}
-	
+
 }

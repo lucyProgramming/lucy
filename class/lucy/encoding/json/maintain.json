@@ -1,0 +1,26 @@
+{
+	"compiledFrom": {
+		"decoder.lucy": {
+			"lastModify": 1542192151
+		},
+		"encoder.lucy": {
+			"lastModify": 1541897289
+		},
+		"json.lucy": {
+			"lastModify": 1540890869
+		},
+		"number.lucy": {
+			"lastModify": 1540977283
+		}
+	},
+	"imports": null,
+	"compileTime": 1542365858,
+	"classes": [
+		"Decoder.class",
+		"Encoder.class",
+		"JsonSyntaxTreeNode.class",
+		"JsonSyntaxTreeType.class",
+		"Number.class",
+		"main.class"
+	]
+}

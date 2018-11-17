@@ -1,0 +1,959 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BookmarkManager">
+    <bookmark url="file://E:/lucypath/src/test/config/config.lucy" line="26" />
+    <bookmark url="file://$PROJECT_DIR$/src/cmd/common/common.go" description="func GetLucyPaths() []string {&#10;" line="33" />
+    <bookmark url="file://$PROJECT_DIR$/src/cmd/compile/jvm/expression_strcat.go" line="41" />
+    <bookmark url="file://$PROJECT_DIR$/src/cmd/compile/parser/block.go" line="53" />
+    <bookmark url="file://$PROJECT_DIR$/src/cmd/compile/ast/expression_check.go" />
+    <bookmark url="file://$PROJECT_DIR$/src/cmd/compile/parser/imports.go" line="23" />
+    <bookmark url="file://$PROJECT_DIR$/src/cmd/compile/ast/buildin_func_meta.go" line="11" />
+    <bookmark url="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/buildin_assert.lucy" line="48" />
+    <bookmark url="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/buildin_funcs.lucy" line="43" />
+    <bookmark url="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/expression_function_call.lucy" line="27" />
+    <bookmark url="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/expression_map_literal.lucy" line="34" />
+    <bookmark url="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/expression_method_call.lucy" line="45" />
+    <bookmark url="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/expression_method_call.lucy" line="234" />
+    <bookmark url="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/expression_new.lucy" line="113" />
+    <bookmark url="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/expression_type_assert.lucy" line="34" />
+    <bookmark url="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/expression_unary.lucy" line="18" />
+    <bookmark url="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/expression_var.lucy" line="18" />
+    <bookmark url="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/pack.lucy" line="142" />
+    <bookmark url="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/stackmap.lucy" line="14" />
+    <bookmark url="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/type.lucy" line="419" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="ed937956-647e-4137-9a98-87959d00e668" name="Default" comment="" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DatabaseView">
+    <option name="SHOW_INTERMEDIATE" value="true" />
+    <option name="GROUP_DATA_SOURCES" value="true" />
+    <option name="GROUP_SCHEMA" value="true" />
+    <option name="GROUP_CONTENTS" value="false" />
+    <option name="SORT_POSITIONED" value="false" />
+    <option name="SHOW_EMPTY_GROUPS" value="false" />
+    <option name="AUTO_SCROLL_FROM_SOURCE" value="false" />
+    <option name="HIDDEN_KINDS">
+      <set />
+    </option>
+    <expand />
+    <select />
+  </component>
+  <component name="ExportToHTMLSettings">
+    <option name="OUTPUT_DIRECTORY" value="D:\gopath\src\gitee.com\yuyang-fine\lucy\exportToHTML" />
+  </component>
+  <component name="FavoritesManager">
+    <favorites_list name="lucy" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file leaf-file-name="lex.lucy" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lex/lex.lucy">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+      <file leaf-file-name="token.lucy" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lex/token.lucy">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="189">
+              <caret line="7" column="18" selection-start-line="7" selection-start-column="18" selection-end-line="7" selection-end-column="18" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="class.lucy" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/class.lucy">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="486">
+              <caret line="18" column="8" selection-start-line="18" selection-start-column="8" selection-end-line="18" selection-end-column="8" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="file_loader.lucy" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/file_loader.lucy">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="216">
+              <caret line="602" selection-start-line="602" selection-end-line="602" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="helper_funcs.lucy" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/helper_funcs.lucy">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="27">
+              <caret line="1" selection-start-line="1" selection-end-line="2" selection-end-column="39" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="lc.lucy" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/lc.lucy">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="318">
+              <caret line="119" column="28" selection-start-line="119" selection-start-column="28" selection-end-line="119" selection-end-column="28" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="package_loader.lucy" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/package_loader.lucy">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="135">
+              <caret line="5" column="25" selection-start-line="5" selection-start-column="25" selection-end-line="5" selection-end-column="25" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="var.lucy" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/var.lucy">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="486">
+              <caret line="18" selection-start-line="18" selection-end-line="18" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="var.lucy" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lex/var.lucy">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="243">
+              <caret line="9" column="14" selection-start-line="9" selection-start-column="14" selection-end-line="9" selection-end-column="14" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>ClosureObjectMetas</find>
+      <find>IsStatic</find>
+      <find>IsProtected</find>
+      <find>IsPrivate</find>
+      <find>HaveStaticsCodes</find>
+      <find>IsFinal</find>
+      <find>IsAbstract</find>
+      <find>IsFirstStatementCallFatherConstruction</find>
+      <find>ClosureVariableExist</find>
+      <find>ClosureFunctionExist</find>
+      <find>CaptureCount</find>
+      <find>InsertVar</find>
+      <find>InsertFunction</find>
+      <find>IsCompilerAuto</find>
+      <find>err</find>
+      <find>class</find>
+      <find>func</find>
+      <find>c.</find>
+      <find>IsBridge</find>
+      <find>this.classFile.methods = append(this.classFile.methods,</find>
+      <find>this.classFile.ConstPool = append(this.classFile.ConstPool,</find>
+      <find>ret</find>
+      <find>.FunctionType</find>
+      <find>BigEndian.Uint16</find>
+      <find>loadConst</find>
+      <find>isInnerClass</find>
+      <find>typealias</find>
+      <find>buildPackage</find>
+      <find>AttributeLucyComment</find>
+      <find>EndLine</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>branchBytes</replace>
+      <replace>isConstruction</replace>
+      <replace>.code</replace>
+      <replace>AccessFlags</replace>
+      <replace>startLine</replace>
+      <replace>startColumn</replace>
+      <replace>accessFlags</replace>
+      <replace>fromBytes</replace>
+      <replace>closureObjectMetas</replace>
+      <replace>isStatic</replace>
+      <replace>isProtected</replace>
+      <replace>isPrivate</replace>
+      <replace>haveStaticsCodes</replace>
+      <replace>isFinal</replace>
+      <replace>isAbstract</replace>
+      <replace>isFirstStatementCallFatherConstruction</replace>
+      <replace>closureVariableExist</replace>
+      <replace>closureFunctionExist</replace>
+      <replace>captureCount</replace>
+      <replace>insertVar</replace>
+      <replace>insertFunction</replace>
+      <replace>isCompilerAuto</replace>
+      <replace>c</replace>
+      <replace>fn</replace>
+      <replace>this.</replace>
+      <replace>isBridge</replace>
+      <replace>this.classFile.ConstPool.append(</replace>
+      <replace>this.classFile</replace>
+      <replace>.functionType</replace>
+      <replace>endLine</replace>
+    </replaceStrings>
+  </component>
+  <component name="GOROOT" path="C:\Go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/statement_switch.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/expression_check_function_call.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/expression_check_method_call.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/expression_check_identifier.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/expression_check_selection.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/parser/type.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/type.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/inherited_attribute.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/statement_label.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/parser/block.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/statement_goto.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/statement_return.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/statement_continue.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/statement_when.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/statement_break.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/package.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/pos.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/statement_defer.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lex/lex.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/attr_const_value.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/attr_default_parameter.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/attr_inner_class.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/attr_lucy_field_descriptor.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/attr_lucy_method_descriptor.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/high_level.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/attr_lucy_class_const.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/class.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/field.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/method.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/exit.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/method_high_level.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/attr_template_function.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/closure.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/class_filed.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/class.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/closure.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/block.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/default_value.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/class_method.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/expression.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/helper_funcs.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/helper_funcs.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/var.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/const.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/common/common.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/lc.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/file_loader.lucy" />
+        <option value="$PROJECT_DIR$/src/cmd/compile/ast/type.go" />
+        <option value="$PROJECT_DIR$/src/cmd/lucy/run/run.go" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/class.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lex/token.lucy" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="NodePackageJsonFileManager">
+    <packageJsonPaths />
+  </component>
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="-8" />
+    <option name="y" value="-1" />
+    <option name="width" value="1940" />
+    <option name="height" value="1096" />
+  </component>
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectView">
+    <navigator proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="cmd" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="cmd" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="cmd" type="462c0819:PsiDirectoryNode" />
+              <item name="langtools" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="cmd" type="462c0819:PsiDirectoryNode" />
+              <item name="langtools" type="462c0819:PsiDirectoryNode" />
+              <item name="compile" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="cmd" type="462c0819:PsiDirectoryNode" />
+              <item name="langtools" type="462c0819:PsiDirectoryNode" />
+              <item name="compile" type="462c0819:PsiDirectoryNode" />
+              <item name="lc" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="cmd" type="462c0819:PsiDirectoryNode" />
+              <item name="langtools" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="AndroidView" />
+      <pane id="PackagesPane" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DefaultGoTemplateProperty" value="Go File" />
+    <property name="NewWatcherDialog.advanced.open" value="true" />
+    <property name="SearchEverywhereHistoryKey" value="run.go&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/lucy/run/run.go&#10;type.lucy&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/lucy/cmd/langtools/compile/parser/type.lucy&#10;condition.go&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/condition.go&#10;cg.go&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg.go&#10;cg.lucy&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/lucy/cmd/langtools/compile/jvm/cg.lucy&#10;expression_alge&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/lucy/cmd/langtools/compile/jvm/expression_algebra.lucy&#10;expression_qu&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/expression_question.go&#10;lex.go&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/lex/lex.go&#10;tem&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/lucy/install_lucy_array/template.go&#10;expression_check_slic&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/ast/expression_check_slice.go&#10;make&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/debug/past/make_node_objects/make.go&#10;make.go&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/debug/past/make_node_objects/make.go&#10;block.go&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/ast/block.go&#10;expression.go&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/parser/expression.go&#10;file&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/lc/file_loader.go&#10;print&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/buildin_print.go&#10;class.go&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg/class.go&#10;slice&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/expression_slice.go&#10;expression_check_method&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/ast/expression_check_method_call.go&#10;type&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/ast/type.go&#10;functionTy&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/ast/function_type.go&#10;function&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/ast/function.go&#10;class&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/ast/class.go&#10;expression_ide&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/expression_identifier.go&#10;cont&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/context.go&#10;expression_bina&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/parser/expression_binary.go&#10;expression&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/parser/expression_binary.go&#10;cg&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/cg.go&#10;lucy_load&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/lc/lucy_loader.go&#10;lex&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/lex/lex.go&#10;block&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/block.go&#10;expression_check&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/ast/expression_check_dot.go&#10;r&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/ast/expression_check_const.go&#10;strcat&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/expression_strcat.go&#10;statement_for&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/statement_for_range_array.go&#10;helper&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/ast/helper_funcs.go&#10;colon&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/expression_colon_assign.go&#10;state&#9;FILE&#9;file://D:/gopath/src/gitee.com/yuyang-fine/lucy/src/cmd/compile/jvm/statement_for.go" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="configurable.Global.GOPATH.is.expanded" value="true" />
+    <property name="configurable.Module.GOPATH.is.expanded" value="false" />
+    <property name="configurable.Project.GOPATH.is.expanded" value="true" />
+    <property name="go.gopath.indexing.explicitly.defined" value="true" />
+    <property name="go.sdk.automatically.set" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/bin" />
+    <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager" selected="Go Build.lucy">
+    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="lucy" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <kind value="FILE" />
+    </configuration>
+    <configuration name="clean" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="lucy" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <parameters value="run   -go-compiler  lucy/cmd/langtools/clean   -r lucy -v" />
+      <kind value="PACKAGE" />
+      <package value="gitee.com/yuyang-fine/lucy/src/cmd/lucy" />
+    </configuration>
+    <configuration name="compile" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="lucy" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <kind value="PACKAGE" />
+      <package value="gitee.com/yuyang-fine/lucy/src/cmd/compile" />
+      <output_directory value="D:\gopath\src\gitee.com\yuyang-fine\lucy\bin" />
+      <option name="run" value="false" />
+    </configuration>
+    <configuration name="install lucy array" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="lucy" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <parameters value="install_lucy_array" />
+      <kind value="PACKAGE" />
+      <package value="gitee.com/yuyang-fine/lucy/src/cmd/lucy" />
+    </configuration>
+    <configuration name="install lucy" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="lucy" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <parameters value="install -v  lucy  " />
+      <kind value="PACKAGE" />
+      <package value="gitee.com/yuyang-fine/lucy/src/cmd/lucy" />
+    </configuration>
+    <configuration name="lucy go compiler" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="lucy" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <parameters value="run  -go-compiler -v lucy/cmd/langtools/compile" />
+      <kind value="PACKAGE" />
+      <package value="gitee.com/yuyang-fine/lucy/src/cmd/lucy" />
+    </configuration>
+    <configuration name="lucy" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="lucy" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <parameters value="run   -forceReBuild -v lucy/cmd/langtools/compile" />
+      <kind value="PACKAGE" />
+      <package value="gitee.com/yuyang-fine/lucy/src/cmd/lucy" />
+    </configuration>
+    <configuration name="past" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="lucy" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <parameters value="run -v lucy/cmd/langtools/debug/past" />
+      <kind value="PACKAGE" />
+      <package value="gitee.com/yuyang-fine/lucy/src/cmd/lucy" />
+    </configuration>
+    <configuration name="test lucy/encoding/json" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="lucy" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <parameters value="test lucy/encoding/json" />
+      <kind value="PACKAGE" />
+      <package value="gitee.com/yuyang-fine/lucy/src/cmd/lucy" />
+    </configuration>
+    <configuration name="test lucy/lang" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="lucy" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <parameters value="test lucy/lang" />
+      <kind value="PACKAGE" />
+      <package value="gitee.com/yuyang-fine/lucy/src/cmd/lucy" />
+    </configuration>
+    <configuration name="test lucy/os" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="lucy" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <parameters value="test lucy/os" />
+      <kind value="PACKAGE" />
+      <package value="gitee.com/yuyang-fine/lucy/src/cmd/lucy" />
+    </configuration>
+    <configuration name="test lucy/os/flag" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="lucy" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <parameters value="test lucy/os/flag" />
+      <kind value="PACKAGE" />
+      <package value="gitee.com/yuyang-fine/lucy/src/cmd/lucy" />
+    </configuration>
+    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
+      <module name="lucy" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <framework value="gotest" />
+      <kind value="DIRECTORY" />
+    </configuration>
+    <configuration name="gobench compile" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true">
+      <module name="lucy" />
+      <working_directory value="$PROJECT_DIR$/src/cmd/compile" />
+      <framework value="gobench" />
+      <kind value="DIRECTORY" />
+      <directory value="$PROJECT_DIR$/src/cmd/compile" />
+    </configuration>
+    <list>
+      <item itemvalue="Go Build.clean" />
+      <item itemvalue="Go Build.install lucy" />
+      <item itemvalue="Go Build.compile" />
+      <item itemvalue="Go Build.past" />
+      <item itemvalue="Go Build.install lucy array" />
+      <item itemvalue="Go Build.lucy go compiler" />
+      <item itemvalue="Go Build.lucy" />
+      <item itemvalue="Go Build.test lucy/lang" />
+      <item itemvalue="Go Build.test lucy/encoding/json" />
+      <item itemvalue="Go Build.test lucy/os" />
+      <item itemvalue="Go Build.test lucy/os/flag" />
+      <item itemvalue="Go Test.gobench compile" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go Test.gobench compile" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ed937956-647e-4137-9a98-87959d00e668" name="Default" comment="" />
+      <created>1535412511095</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1535412511095</updated>
+      <workItem from="1535412512720" duration="637000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TestHistory">
+    <history-entry file="gobench_compile - 2018.04.21 at 16h 43m 29s.xml">
+      <configuration name="gobench compile" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="gobench_compile - 2018.10.17 at 17h 19m 35s.xml">
+      <configuration name="gobench compile" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="637000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <layout>
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48583877" visible="true" weight="0.26012793" />
+      <window_info anchor="bottom" id="TODO" order="5" weight="0.3293348" />
+      <window_info anchor="bottom" id="Event Log" order="6" sideWeight="0.51599145" side_tool="true" weight="0.65757906" />
+      <window_info anchor="right" id="Database" order="9" weight="0.32995737" />
+      <window_info anchor="bottom" id="Find" order="10" sideWeight="0.48667377" weight="0.4154853" />
+      <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Version Control" order="9" weight="0.22791712" />
+      <window_info anchor="bottom" id="Run" order="11" sideWeight="0.48400852" weight="0.606325" />
+      <window_info id="Structure" order="6" sideWeight="0.41003272" side_tool="true" weight="0.21641791" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.61395854" />
+      <window_info id="Favorites" order="1" sideWeight="0.5141612" side_tool="true" weight="0.2468017" />
+      <window_info anchor="bottom" id="Debug" order="2" weight="0.4" />
+      <window_info anchor="right" id="Palette" order="3" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="4" weight="0.25" />
+      <window_info anchor="right" id="Capture Analysis" order="5" />
+      <window_info anchor="bottom" id="Inspection" order="4" weight="0.4" />
+      <window_info anchor="right" id="Theme Preview" order="6" />
+      <window_info anchor="right" id="Commander" order="1" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="2" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection Results" order="0" weight="0.41330424" />
+      <window_info id="Designer" order="2" />
+      <window_info id="Image Layers" order="4" />
+      <window_info id="UI Designer" order="3" />
+      <window_info anchor="right" x="0" y="0" width="434" height="856" id="Documentation" order="0" side_tool="true" weight="0.32995737" />
+      <window_info anchor="right" id="Palette&#9;" order="7" />
+      <window_info anchor="bottom" id="Message" order="1" />
+      <window_info anchor="bottom" id="Cvs" order="3" weight="0.25" />
+      <window_info id="Capture Tool" order="5" />
+      <window_info anchor="right" id="Maven Projects" order="8" />
+    </layout>
+    <layout-to-restore>
+      <window_info anchor="right" id="Palette" order="3" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="4" weight="0.25" />
+      <window_info anchor="right" id="Capture Analysis" order="5" />
+      <window_info active="true" anchor="bottom" id="Run" order="11" sideWeight="0.48454157" visible="true" weight="0.46455833" />
+      <window_info anchor="right" id="Theme Preview" order="6" />
+      <window_info id="Favorites" order="1" sideWeight="0.5141612" side_tool="true" weight="0.2468017" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48583877" weight="0.25746268" />
+      <window_info id="Structure" order="6" sideWeight="0.41003272" side_tool="true" weight="0.21641791" />
+      <window_info anchor="right" id="Commander" order="1" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="2" weight="0.25" />
+      <window_info anchor="bottom" id="TODO" order="5" weight="0.3293348" />
+      <window_info anchor="bottom" id="Version Control" order="9" weight="0.22791712" />
+      <window_info anchor="bottom" id="Inspection Results" order="0" weight="0.41330424" />
+      <window_info id="Designer" order="2" />
+      <window_info id="UI Designer" order="3" />
+      <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
+      <window_info anchor="right" x="0" y="0" width="434" height="856" id="Documentation" order="0" side_tool="true" weight="0.32995737" />
+      <window_info anchor="right" id="Database" order="9" weight="0.32995737" />
+      <window_info anchor="right" id="Palette&#9;" order="7" />
+      <window_info anchor="bottom" id="Terminal" order="8" weight="0.61395854" />
+      <window_info anchor="bottom" id="Event Log" order="6" sideWeight="0.5154584" side_tool="true" weight="0.6248637" />
+      <window_info anchor="bottom" id="Find" order="10" sideWeight="0.48667377" weight="0.4154853" />
+      <window_info anchor="bottom" id="Cvs" order="3" weight="0.25" />
+      <window_info anchor="bottom" id="Debug" order="2" weight="0.4" />
+      <window_info id="Capture Tool" order="5" />
+      <window_info anchor="bottom" id="Message" order="1" />
+      <window_info id="Image Layers" order="4" />
+      <window_info anchor="right" id="Maven Projects" order="8" />
+      <window_info anchor="bottom" id="Inspection" order="4" weight="0.4" />
+    </layout-to-restore>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/src/cmd/lucy/main.go</url>
+          <line>17</line>
+          <option name="timeStamp" value="31" />
+        </line-breakpoint>
+      </breakpoints>
+      <option name="time" value="34" />
+    </breakpoint-manager>
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/method.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="351">
+          <caret line="19" column="31" selection-start-line="19" selection-start-column="31" selection-end-line="19" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/exit.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="14" selection-start-line="14" selection-end-line="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/method_high_level.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="8" column="16" selection-start-line="8" selection-start-column="16" selection-end-line="8" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/attr_template_function.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret line="13" column="29" selection-start-line="13" selection-start-column="29" selection-end-line="13" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/constPool.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-2025" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/const.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="486">
+          <caret line="18" column="33" selection-start-line="18" selection-start-column="33" selection-end-line="18" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/class.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="182">
+          <caret line="463" column="53" selection-start-line="463" selection-start-column="53" selection-end-line="463" selection-end-column="53" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/closure.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="513">
+          <caret line="19" column="4" lean-forward="true" selection-start-line="19" selection-start-column="4" selection-end-line="19" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/closure.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="54" column="8" selection-start-line="54" selection-start-column="8" selection-end-line="54" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/enum.lucy">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/class.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1755">
+          <caret line="179" column="16" selection-start-line="179" selection-start-column="16" selection-end-line="179" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/class_filed.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="81">
+          <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/class_method.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="6" column="16" lean-forward="true" selection-start-line="6" selection-start-column="16" selection-end-line="6" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/default_value.lucy" />
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/expression_check_binary.lucy">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/helper_funcs.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="714">
+          <caret line="188" selection-start-line="188" selection-end-line="188" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/expression.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="324">
+          <caret line="157" column="9" lean-forward="true" selection-start-line="157" selection-start-column="9" selection-end-line="157" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/helper_func.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="27">
+          <caret line="1" lean-forward="true" selection-start-line="1" selection-end-line="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/expression_check_const.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="5" column="23" lean-forward="true" selection-start-line="5" selection-start-column="23" selection-end-line="5" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/buildin_sprintf.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="7" column="4" lean-forward="true" selection-start-line="7" selection-start-column="4" selection-end-line="7" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/buildin_print.lucy">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/buildin_len.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="120">
+          <caret line="17" lean-forward="true" selection-start-line="17" selection-end-line="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/buildin_printf.lucy">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cmd/compile/ast/pos.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="124">
+          <caret line="16" selection-start-line="16" selection-end-line="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cmd/compile/ast/class.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="286">
+          <caret line="69" column="40" selection-start-line="69" selection-start-column="40" selection-end-line="69" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/const.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="351">
+          <caret line="28" column="31" lean-forward="true" selection-start-line="28" selection-start-column="31" selection-end-line="28" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/common/common.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="119">
+          <caret line="55" column="33" selection-start-line="55" selection-start-column="33" selection-end-line="55" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cmd/compile/ast/function.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="453">
+          <caret line="89" column="19" selection-start-line="89" selection-start-column="19" selection-end-line="89" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cmd/compile/ast/expression_check_function_call.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="435">
+          <caret line="268" selection-start-line="268" selection-end-line="268" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cmd/compile/ast/helper_funcs.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="121">
+          <caret line="62" column="5" selection-start-line="62" selection-start-column="5" selection-end-line="62" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/expression_check_left_value.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="108">
+          <caret line="4" lean-forward="true" selection-start-line="4" selection-end-line="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/expression_check_method_call.lucy">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/expression_check_map.lucy">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cmd/compile/ast/node.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="540">
+          <caret line="29" column="38" selection-start-line="29" selection-start-column="38" selection-end-line="29" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cmd/compile/ast/package.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="208">
+          <caret line="29" column="21" selection-start-line="29" selection-start-column="21" selection-end-line="29" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cmd/compile/ast/type.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="337">
+          <caret line="254" column="26" selection-start-line="254" selection-start-column="26" selection-end-line="254" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cmd/compile/ast/expression.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-621">
+          <caret line="96" column="25" selection-start-line="96" selection-start-column="25" selection-end-line="96" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cmd/common/package_meta.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="8" column="4" selection-start-line="8" selection-start-column="4" selection-end-line="8" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/block.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="204">
+          <caret line="149" column="8" lean-forward="true" selection-start-line="149" selection-start-column="8" selection-end-line="149" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/cmd/lucy/run/run.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="327">
+          <caret line="410" column="19" lean-forward="true" selection-start-line="410" selection-start-column="19" selection-end-line="410" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/main.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="5" column="27" lean-forward="true" selection-start-line="5" selection-start-column="27" selection-end-line="5" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/attr_lucy_comment.lucy" />
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lex/lex.lucy">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lex/var.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="243">
+          <caret line="9" column="14" selection-start-line="9" selection-start-column="14" selection-end-line="9" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lex/token.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="7" column="18" selection-start-line="7" selection-start-column="18" selection-end-line="7" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/class.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="486">
+          <caret line="18" column="8" selection-start-line="18" selection-start-column="8" selection-end-line="18" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/file_loader.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="602" selection-start-line="602" selection-end-line="602" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/helper_funcs.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="27">
+          <caret line="1" selection-start-line="1" selection-end-line="2" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/lc.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="318">
+          <caret line="119" column="28" selection-start-line="119" selection-start-column="28" selection-end-line="119" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/package_loader.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="5" column="25" selection-start-line="5" selection-start-column="25" selection-end-line="5" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/var.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="486">
+          <caret line="18" selection-start-line="18" selection-end-line="18" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>

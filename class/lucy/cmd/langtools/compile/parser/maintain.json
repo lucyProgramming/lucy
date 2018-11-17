@@ -1,0 +1,88 @@
+{
+	"compiledFrom": {
+		"block.lucy": {
+			"lastModify": 1542364114
+		},
+		"class.lucy": {
+			"lastModify": 1542364114
+		},
+		"comment.lucy": {
+			"lastModify": 1542364114
+		},
+		"enum.lucy": {
+			"lastModify": 1542364114
+		},
+		"expression.lucy": {
+			"lastModify": 1542364114
+		},
+		"expression_array.lucy": {
+			"lastModify": 1542364114
+		},
+		"expression_binary.lucy": {
+			"lastModify": 1542364114
+		},
+		"expression_question.lucy": {
+			"lastModify": 1542364114
+		},
+		"expression_suffix.lucy": {
+			"lastModify": 1542364114
+		},
+		"function.lucy": {
+			"lastModify": 1542364114
+		},
+		"parse.lucy": {
+			"lastModify": 1542364114
+		},
+		"parser_extends.lucy": {
+			"lastModify": 1542364114
+		},
+		"statamtent_for.lucy": {
+			"lastModify": 1542364114
+		},
+		"statement_if.lucy": {
+			"lastModify": 1542364114
+		},
+		"statement_switch.lucy": {
+			"lastModify": 1542364114
+		},
+		"statement_when.lucy": {
+			"lastModify": 1542364114
+		},
+		"type.lucy": {
+			"lastModify": 1542364114
+		},
+		"var.lucy": {
+			"lastModify": 1542364114
+		}
+	},
+	"imports": [
+		"lucy/cmd/langtools/compile/ast",
+		"lucy/cmd/langtools/compile/lex",
+		"lucy/cmd/langtools/compile/jvm/cg"
+	],
+	"compileTime": 1542365857,
+	"classes": [
+		"BlockParser.class",
+		"ClassParser.class",
+		"CommentParser.class",
+		"EnumParser.class",
+		"ExpressionArrayParser.class",
+		"ExpressionBinaryParser.class",
+		"ExpressionParser.class",
+		"ExpressionQuestionParser.class",
+		"ExpressionSuffix.class",
+		"FunctionParser.class",
+		"Parser.class",
+		"ParserExtends.class",
+		"StatementForParser.class",
+		"StatementIfParser.class",
+		"StatementSwitchParser.class",
+		"StatementWhenParser.class",
+		"TypeParser.class",
+		"closureFunction$isPublic.class",
+		"closureFunction$resetPrefix.class",
+		"closureFunction$resetProperty$1.class",
+		"closureFunction$resetProperty.class",
+		"main.class"
+	]
+}

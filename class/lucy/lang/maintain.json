@@ -1,0 +1,20 @@
+{
+	"compiledFrom": {
+		"error.lucy": {
+			"lastModify": 1539680939
+		},
+		"lang.lucy": {
+			"lastModify": 1542364114
+		},
+		"run.lucy": {
+			"lastModify": 1539348451
+		}
+	},
+	"imports": null,
+	"compileTime": 1542365845,
+	"classes": [
+		"Lucy.class",
+		"Run.class",
+		"main.class"
+	]
+}

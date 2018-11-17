@@ -7,6 +7,9 @@ import (
 	"math"
 )
 
+
+
+
 type Block struct {
 	Exits []*cg.Exit // for switch template
 	/*
@@ -36,6 +39,9 @@ type Block struct {
 	Variables                 map[string]*Variable
 	checkConstantsCalled      bool
 }
+
+
+
 
 func (this *Block) NameExists(name string) (interface{}, bool) {
 	if this.Functions != nil {

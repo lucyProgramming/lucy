@@ -4,6 +4,13 @@ import (
 	"fmt"
 )
 
+
+
+
+
+
+
+
 /*
 	in array type must equal
 */

@@ -23,7 +23,6 @@ enum JsonSyntaxTreeType {
 }
 
 
-
 class JsonSyntaxTreeNode  {
 	Type JsonSyntaxTreeType
 	boolValue bool 

@@ -1,0 +1,171 @@
+{
+	"compiledFrom": {
+		"attr.lucy": {
+			"lastModify": 1542192151
+		},
+		"attr_code.lucy": {
+			"lastModify": 1542276696
+		},
+		"attr_const_value.lucy": {
+			"lastModify": 1542108579
+		},
+		"attr_default_parameter.lucy": {
+			"lastModify": 1542108579
+		},
+		"attr_inner_class.lucy": {
+			"lastModify": 1542108579
+		},
+		"attr_line_number.lucy": {
+			"lastModify": 1542108579
+		},
+		"attr_lucy_class_const.lucy": {
+			"lastModify": 1542108579
+		},
+		"attr_lucy_const.lucy": {
+			"lastModify": 1542016480
+		},
+		"attr_lucy_enum.lucy": {
+			"lastModify": 1542364114
+		},
+		"attr_lucy_field_descriptor.lucy": {
+			"lastModify": 1542108579
+		},
+		"attr_lucy_method_descriptor.lucy": {
+			"lastModify": 1542108579
+		},
+		"attr_lucy_trigger_package_init_method.lucy": {
+			"lastModify": 1542016480
+		},
+		"attr_lucy_type_alias.lucy": {
+			"lastModify": 1542108579
+		},
+		"attr_method_parameters.lucy": {
+			"lastModify": 1542192151
+		},
+		"attr_runtime_visible_annotation.lucy": {
+			"lastModify": 1541671950
+		},
+		"attr_sginature.lucy": {
+			"lastModify": 1542108579
+		},
+		"attr_source_file.lucy": {
+			"lastModify": 1542108579
+		},
+		"attr_stack_map.lucy": {
+			"lastModify": 1542192151
+		},
+		"attr_template_function.lucy": {
+			"lastModify": 1542108579
+		},
+		"class.lucy": {
+			"lastModify": 1542276696
+		},
+		"class_high_level.lucy": {
+			"lastModify": 1542192151
+		},
+		"const.lucy": {
+			"lastModify": 1541761872
+		},
+		"constPool.lucy": {
+			"lastModify": 1542108579
+		},
+		"exit.lucy": {
+			"lastModify": 1542108579
+		},
+		"field.lucy": {
+			"lastModify": 1542108579
+		},
+		"field_high_level.lucy": {
+			"lastModify": 1542192151
+		},
+		"helper_func.lucy": {
+			"lastModify": 1541496612
+		},
+		"high_level.lucy": {
+			"lastModify": 1541898689
+		},
+		"method.lucy": {
+			"lastModify": 1542108579
+		},
+		"method_high_level.lucy": {
+			"lastModify": 1542192151
+		},
+		"op.lucy": {
+			"lastModify": 1541761872
+		}
+	},
+	"imports": [
+		"lucy/binary",
+		"lucy/cmd/langtools/compile/common"
+	],
+	"compileTime": 1542365853,
+	"classes": [
+		"AttributeCode.class",
+		"AttributeConstantValue.class",
+		"AttributeDefaultParameters.class",
+		"AttributeInfo.class",
+		"AttributeInnerClasses.class",
+		"AttributeLineNumber.class",
+		"AttributeLinePc.class",
+		"AttributeLucyClassConst.class",
+		"AttributeLucyConst.class",
+		"AttributeLucyEnum.class",
+		"AttributeLucyFieldDescriptor.class",
+		"AttributeLucyMethodDescriptor.class",
+		"AttributeLucyTriggerPackageInitMethod.class",
+		"AttributeLucyTypeAlias.class",
+		"AttributeMethodParameters.class",
+		"AttributeSourceFile.class",
+		"AttributeStackMap.class",
+		"AttributeTemplateFunction.class",
+		"Class.class",
+		"ClassHighLevel.class",
+		"ConstPool.class",
+		"ConstantInfoClass.class",
+		"ConstantInfoDouble.class",
+		"ConstantInfoFieldref.class",
+		"ConstantInfoFieldrefHighLevel.class",
+		"ConstantInfoFloat.class",
+		"ConstantInfoInteger.class",
+		"ConstantInfoInterfaceMethodref.class",
+		"ConstantInfoInterfaceMethodrefHighLevel.class",
+		"ConstantInfoLong.class",
+		"ConstantInfoMethodHandle.class",
+		"ConstantInfoMethodType.class",
+		"ConstantInfoMethodTypeHighLevel.class",
+		"ConstantInfoMethodref.class",
+		"ConstantInfoMethodrefHighLevel.class",
+		"ConstantInfoNameAndType.class",
+		"ConstantInfoNameAndTypeHighLevel.class",
+		"ConstantInfoString.class",
+		"ConstantInfoUtf8.class",
+		"ExceptionTable.class",
+		"Exit.class",
+		"FieldHighLevel.class",
+		"FieldInfo.class",
+		"InnerClass.class",
+		"LucyClassConst.class",
+		"MethodHighLevel.class",
+		"MethodInfo.class",
+		"MethodParameter.class",
+		"StackMap.class",
+		"StackMapAppendFrame.class",
+		"StackMapChopFrame.class",
+		"StackMapDoubleVariableInfo.class",
+		"StackMapFloatVariableInfo.class",
+		"StackMapFullFrame.class",
+		"StackMapIntegerVariableInfo.class",
+		"StackMapLongVariableInfo.class",
+		"StackMapNullVariableInfo.class",
+		"StackMapObjectVariableInfo.class",
+		"StackMapSameFrame.class",
+		"StackMapSameFrameExtended.class",
+		"StackMapSameLocals1StackItemFrame.class",
+		"StackMapSameLocals1StackItemFrameExtended.class",
+		"StackMapTopVariableInfo.class",
+		"StackMapUninitializedThisVariableInfo.class",
+		"StackMapUninitializedVariableInfo.class",
+		"StackMapVerificationTypeInfo.class",
+		"main.class"
+	]
+}
