@@ -50,7 +50,6 @@
         "vscode": "^1.1.21",
         "tslint": "^5.8.0",
         "@types/node": "^8.10.25",
-        "@types/mocha": "^2.2.42",
-        "supports-color": "^5.5.0"
+        "@types/mocha": "^2.2.42"
     }
 }

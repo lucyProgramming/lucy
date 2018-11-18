@@ -24,43 +24,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ed937956-647e-4137-9a98-87959d00e668" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/.gitattributes" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/.vscode/extensions.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/.vscode/launch.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/.vscode/settings.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/.vscode/tasks.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/.vscodeignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/CHANGELOG.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/language-configuration.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/package-lock.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/package.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/snippets/lucy.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/src/extension.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/src/test/extension.test.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/src/test/index.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/syntaxes/lucy.tmLanguage.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/tsconfig.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/tslint.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/ide/vscode/vsc-extension-quickstart.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/maintain.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lex/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lex/maintain.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/maintain.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/debug/past/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/debug/past/main.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/debug/past/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/debug/past/maintain.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/debug/past/make_node_objects/MakeNodesObjects.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/debug/past/make_node_objects/MakeNodesObjects.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/debug/past/make_node_objects/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/debug/past/make_node_objects/maintain.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/lucy/encoding/json/Decoder.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/encoding/json/Decoder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/lucy/encoding/json/JsonSyntaxTreeNode.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/encoding/json/JsonSyntaxTreeNode.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/lucy/encoding/json/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/encoding/json/maintain.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/lucy/lang/Run.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/lang/Run.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/lucy/lang/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/lang/maintain.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/class/lucy/os/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/os/maintain.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/clean/clean.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/clean/clean.lucy" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/debug/past/main.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/debug/past/main.lucy" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/debug/past/make_node_objects/make.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/debug/past/make_node_objects/make.lucy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ide/vscode/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/ide/vscode/package.json" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -90,7 +54,17 @@
     <favorites_list name="lucy" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
+    <leaf>
+      <file leaf-file-name="get.go" pinned="false" current-in-tab="true">
+        <entry file="file://C:/Go/src/cmd/go/internal/get/get.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-54">
+              <caret line="7" column="8" lean-forward="true" selection-start-line="7" selection-start-column="8" selection-end-line="7" selection-end-column="8" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -254,6 +228,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -263,69 +238,57 @@
             </path>
             <path>
               <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+            </path>
+            <path>
+              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="Go SDK 1.10.1" type="20ee2d1f:SyntheticLibraryElementNode" />
+            </path>
+            <path>
+              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="Go SDK 1.10.1" type="20ee2d1f:SyntheticLibraryElementNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="Go SDK 1.10.1" type="20ee2d1f:SyntheticLibraryElementNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="cmd" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="Go SDK 1.10.1" type="20ee2d1f:SyntheticLibraryElementNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="cmd" type="462c0819:PsiDirectoryNode" />
+              <item name="go" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="Go SDK 1.10.1" type="20ee2d1f:SyntheticLibraryElementNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="lucy" type="462c0819:PsiDirectoryNode" />
               <item name="cmd" type="462c0819:PsiDirectoryNode" />
+              <item name="go" type="462c0819:PsiDirectoryNode" />
+              <item name="internal" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
+              <item name="Go SDK 1.10.1" type="20ee2d1f:SyntheticLibraryElementNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="lucy" type="462c0819:PsiDirectoryNode" />
               <item name="cmd" type="462c0819:PsiDirectoryNode" />
-              <item name="langtools" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="lucy" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="lucy" type="462c0819:PsiDirectoryNode" />
-              <item name="cmd" type="462c0819:PsiDirectoryNode" />
-              <item name="langtools" type="462c0819:PsiDirectoryNode" />
-              <item name="compile" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="lucy" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="lucy" type="462c0819:PsiDirectoryNode" />
-              <item name="cmd" type="462c0819:PsiDirectoryNode" />
-              <item name="langtools" type="462c0819:PsiDirectoryNode" />
-              <item name="compile" type="462c0819:PsiDirectoryNode" />
-              <item name="lc" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="lucy" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="lucy" type="462c0819:PsiDirectoryNode" />
-              <item name="cmd" type="462c0819:PsiDirectoryNode" />
-              <item name="langtools" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="go" type="462c0819:PsiDirectoryNode" />
+              <item name="internal" type="462c0819:PsiDirectoryNode" />
+              <item name="get" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="AndroidView" />
       <pane id="PackagesPane" />
     </panes>
@@ -523,8 +486,9 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48583877" visible="true" weight="0.26279318" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.48583877" visible="true" weight="0.26545843" />
       <window_info anchor="bottom" id="TODO" order="5" weight="0.3293348" />
       <window_info anchor="bottom" id="Event Log" order="6" sideWeight="0.51599145" side_tool="true" weight="0.65757906" />
       <window_info anchor="right" id="Database" order="9" weight="0.32995737" />
@@ -544,10 +508,10 @@
       <window_info anchor="right" id="Ant Build" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Inspection Results" order="0" weight="0.41330424" />
       <window_info id="Designer" order="2" />
-      <window_info id="UI Designer" order="3" />
-      <window_info anchor="right" id="Palette&#9;" order="7" />
-      <window_info anchor="right" x="0" y="0" width="434" height="856" id="Documentation" order="0" side_tool="true" weight="0.32995737" />
       <window_info id="Image Layers" order="4" />
+      <window_info id="UI Designer" order="3" />
+      <window_info anchor="right" x="0" y="0" width="434" height="856" id="Documentation" order="0" side_tool="true" weight="0.32995737" />
+      <window_info anchor="right" id="Palette&#9;" order="7" />
       <window_info anchor="bottom" id="Message" order="1" />
       <window_info anchor="bottom" id="Cvs" order="3" weight="0.25" />
       <window_info id="Capture Tool" order="5" />
@@ -556,17 +520,17 @@
     </layout>
     <layout-to-restore>
       <window_info anchor="right" id="Palette" order="3" />
-      <window_info anchor="bottom" id="Message" order="1" />
+      <window_info anchor="bottom" id="Find" order="10" sideWeight="0.48667377" weight="0.4154853" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="4" weight="0.25" />
       <window_info anchor="right" id="Capture Analysis" order="5" />
       <window_info active="true" anchor="bottom" id="Run" order="11" sideWeight="0.48454157" visible="true" weight="0.46455833" />
       <window_info anchor="right" id="Theme Preview" order="6" />
-      <window_info anchor="bottom" id="Cvs" order="3" weight="0.25" />
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48583877" weight="0.25746268" />
       <window_info id="Structure" order="6" sideWeight="0.41003272" side_tool="true" weight="0.21641791" />
       <window_info anchor="right" id="Commander" order="1" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="2" weight="0.25" />
       <window_info anchor="bottom" id="TODO" order="5" weight="0.3293348" />
+      <window_info anchor="bottom" id="Version Control" order="9" weight="0.22791712" />
       <window_info anchor="bottom" id="Inspection Results" order="0" weight="0.41330424" />
       <window_info id="Designer" order="2" />
       <window_info id="UI Designer" order="3" />
@@ -577,10 +541,10 @@
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.61395854" />
       <window_info anchor="bottom" id="Event Log" order="6" sideWeight="0.5154584" side_tool="true" weight="0.6248637" />
       <window_info anchor="bottom" id="Inspection" order="4" weight="0.4" />
-      <window_info anchor="bottom" id="Version Control" order="9" weight="0.22791712" />
+      <window_info anchor="bottom" id="Cvs" order="3" weight="0.25" />
       <window_info anchor="bottom" id="Debug" order="2" weight="0.4" />
       <window_info id="Capture Tool" order="5" />
-      <window_info anchor="bottom" id="Find" order="10" sideWeight="0.48667377" weight="0.4154853" />
+      <window_info anchor="bottom" id="Message" order="1" />
       <window_info id="Image Layers" order="4" />
       <window_info anchor="right" id="Maven Projects" order="8" />
       <window_info id="Favorites" order="1" sideWeight="0.5141612" side_tool="true" weight="0.2468017" />
@@ -605,20 +569,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/method.lucy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="351">
-          <caret line="19" column="31" selection-start-line="19" selection-start-column="31" selection-end-line="19" selection-end-column="31" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/exit.lucy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="14" selection-start-line="14" selection-end-line="14" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/method_high_level.lucy">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="216">
@@ -917,6 +867,16 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="486">
           <caret line="18" column="8" selection-start-line="18" selection-start-column="8" selection-end-line="18" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://C:/Go/src/cmd/go/internal/base/base.go">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://C:/Go/src/cmd/go/internal/get/get.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-54">
+          <caret line="7" column="8" lean-forward="true" selection-start-line="7" selection-start-column="8" selection-end-line="7" selection-end-column="8" />
         </state>
       </provider>
     </entry>
