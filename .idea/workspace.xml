@@ -23,7 +23,45 @@
     <bookmark url="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/type.lucy" line="419" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed937956-647e-4137-9a98-87959d00e668" name="Default" comment="" />
+    <list default="true" id="ed937956-647e-4137-9a98-87959d00e668" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/.gitattributes" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/.vscode/extensions.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/.vscode/launch.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/.vscode/settings.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/.vscode/tasks.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/.vscodeignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/CHANGELOG.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/language-configuration.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/package-lock.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/package.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/snippets/lucy.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/src/extension.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/src/test/extension.test.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/src/test/index.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/syntaxes/lucy.tmLanguage.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/tsconfig.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/tslint.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/ide/vscode/vsc-extension-quickstart.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lex/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lex/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/debug/past/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/debug/past/main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/debug/past/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/debug/past/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/debug/past/make_node_objects/MakeNodesObjects.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/debug/past/make_node_objects/MakeNodesObjects.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/debug/past/make_node_objects/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/debug/past/make_node_objects/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/encoding/json/Decoder.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/encoding/json/Decoder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/encoding/json/JsonSyntaxTreeNode.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/encoding/json/JsonSyntaxTreeNode.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/encoding/json/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/encoding/json/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/lang/Run.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/lang/Run.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/lang/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/lang/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/os/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/os/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/clean/clean.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/clean/clean.lucy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/debug/past/main.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/debug/past/main.lucy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/debug/past/make_node_objects/make.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/debug/past/make_node_objects/make.lucy" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -52,85 +90,7 @@
     <favorites_list name="lucy" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="lex.lucy" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lex/lex.lucy">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file leaf-file-name="token.lucy" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lex/token.lucy">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="189">
-              <caret line="7" column="18" selection-start-line="7" selection-start-column="18" selection-end-line="7" selection-end-column="18" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="class.lucy" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/class.lucy">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="486">
-              <caret line="18" column="8" selection-start-line="18" selection-start-column="8" selection-end-line="18" selection-end-column="8" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="file_loader.lucy" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/file_loader.lucy">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="216">
-              <caret line="602" selection-start-line="602" selection-end-line="602" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="helper_funcs.lucy" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/helper_funcs.lucy">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="27">
-              <caret line="1" selection-start-line="1" selection-end-line="2" selection-end-column="39" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="lc.lucy" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/lc.lucy">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="318">
-              <caret line="119" column="28" selection-start-line="119" selection-start-column="28" selection-end-line="119" selection-end-column="28" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="package_loader.lucy" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/package_loader.lucy">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="5" column="25" selection-start-line="5" selection-start-column="25" selection-end-line="5" selection-end-column="25" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="var.lucy" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/var.lucy">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="486">
-              <caret line="18" selection-start-line="18" selection-end-line="18" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="var.lucy" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lex/var.lucy">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="243">
-              <caret line="9" column="14" selection-start-line="9" selection-start-column="14" selection-end-line="9" selection-end-column="14" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -272,8 +232,13 @@
     <detection-done>true</detection-done>
     <sorting>DEFINITION_ORDER</sorting>
   </component>
+  <component name="NodeModulesDirectoryManager">
+    <handled-path value="$PROJECT_DIR$/src/ide/vscode/node_modules" />
+  </component>
   <component name="NodePackageJsonFileManager">
-    <packageJsonPaths />
+    <packageJsonPaths>
+      <path value="$PROJECT_DIR$/src/ide/vscode/package.json" />
+    </packageJsonPaths>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="-8" />
@@ -289,7 +254,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -361,6 +325,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
       <pane id="AndroidView" />
       <pane id="PackagesPane" />
     </panes>
@@ -392,7 +357,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Go Build.lucy">
+  <component name="RunManager" selected="Go Build.past">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="lucy" />
       <working_directory value="$PROJECT_DIR$/" />
@@ -559,14 +524,13 @@
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48583877" visible="true" weight="0.26012793" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48583877" visible="true" weight="0.26279318" />
       <window_info anchor="bottom" id="TODO" order="5" weight="0.3293348" />
       <window_info anchor="bottom" id="Event Log" order="6" sideWeight="0.51599145" side_tool="true" weight="0.65757906" />
       <window_info anchor="right" id="Database" order="9" weight="0.32995737" />
-      <window_info anchor="bottom" id="Find" order="10" sideWeight="0.48667377" weight="0.4154853" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="9" weight="0.22791712" />
-      <window_info anchor="bottom" id="Run" order="11" sideWeight="0.48400852" weight="0.606325" />
+      <window_info anchor="bottom" id="Run" order="11" sideWeight="0.48400852" weight="0.49291167" />
       <window_info id="Structure" order="6" sideWeight="0.41003272" side_tool="true" weight="0.21641791" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.61395854" />
       <window_info id="Favorites" order="1" sideWeight="0.5141612" side_tool="true" weight="0.2468017" />
@@ -580,28 +544,29 @@
       <window_info anchor="right" id="Ant Build" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Inspection Results" order="0" weight="0.41330424" />
       <window_info id="Designer" order="2" />
-      <window_info id="Image Layers" order="4" />
       <window_info id="UI Designer" order="3" />
-      <window_info anchor="right" x="0" y="0" width="434" height="856" id="Documentation" order="0" side_tool="true" weight="0.32995737" />
       <window_info anchor="right" id="Palette&#9;" order="7" />
+      <window_info anchor="right" x="0" y="0" width="434" height="856" id="Documentation" order="0" side_tool="true" weight="0.32995737" />
+      <window_info id="Image Layers" order="4" />
       <window_info anchor="bottom" id="Message" order="1" />
       <window_info anchor="bottom" id="Cvs" order="3" weight="0.25" />
       <window_info id="Capture Tool" order="5" />
+      <window_info anchor="bottom" id="Find" order="10" sideWeight="0.48667377" weight="0.4154853" />
       <window_info anchor="right" id="Maven Projects" order="8" />
     </layout>
     <layout-to-restore>
       <window_info anchor="right" id="Palette" order="3" />
+      <window_info anchor="bottom" id="Message" order="1" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="4" weight="0.25" />
       <window_info anchor="right" id="Capture Analysis" order="5" />
       <window_info active="true" anchor="bottom" id="Run" order="11" sideWeight="0.48454157" visible="true" weight="0.46455833" />
       <window_info anchor="right" id="Theme Preview" order="6" />
-      <window_info id="Favorites" order="1" sideWeight="0.5141612" side_tool="true" weight="0.2468017" />
+      <window_info anchor="bottom" id="Cvs" order="3" weight="0.25" />
       <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48583877" weight="0.25746268" />
       <window_info id="Structure" order="6" sideWeight="0.41003272" side_tool="true" weight="0.21641791" />
       <window_info anchor="right" id="Commander" order="1" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="2" weight="0.25" />
       <window_info anchor="bottom" id="TODO" order="5" weight="0.3293348" />
-      <window_info anchor="bottom" id="Version Control" order="9" weight="0.22791712" />
       <window_info anchor="bottom" id="Inspection Results" order="0" weight="0.41330424" />
       <window_info id="Designer" order="2" />
       <window_info id="UI Designer" order="3" />
@@ -611,14 +576,14 @@
       <window_info anchor="right" id="Palette&#9;" order="7" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.61395854" />
       <window_info anchor="bottom" id="Event Log" order="6" sideWeight="0.5154584" side_tool="true" weight="0.6248637" />
-      <window_info anchor="bottom" id="Find" order="10" sideWeight="0.48667377" weight="0.4154853" />
-      <window_info anchor="bottom" id="Cvs" order="3" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="4" weight="0.4" />
+      <window_info anchor="bottom" id="Version Control" order="9" weight="0.22791712" />
       <window_info anchor="bottom" id="Debug" order="2" weight="0.4" />
       <window_info id="Capture Tool" order="5" />
-      <window_info anchor="bottom" id="Message" order="1" />
+      <window_info anchor="bottom" id="Find" order="10" sideWeight="0.48667377" weight="0.4154853" />
       <window_info id="Image Layers" order="4" />
       <window_info anchor="right" id="Maven Projects" order="8" />
-      <window_info anchor="bottom" id="Inspection" order="4" weight="0.4" />
+      <window_info id="Favorites" order="1" sideWeight="0.5141612" side_tool="true" weight="0.2468017" />
     </layout-to-restore>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -913,20 +878,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/class.lucy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="486">
-          <caret line="18" column="8" selection-start-line="18" selection-start-column="8" selection-end-line="18" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/file_loader.lucy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="602" selection-start-line="602" selection-end-line="602" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/helper_funcs.lucy">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="27">
@@ -936,7 +887,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/lc.lucy">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="318">
+        <state relative-caret-position="3213">
           <caret line="119" column="28" selection-start-line="119" selection-start-column="28" selection-end-line="119" selection-end-column="28" />
         </state>
       </provider>
@@ -950,8 +901,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/var.lucy">
       <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/file_loader.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="602" selection-start-line="602" selection-end-line="602" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/class.lucy">
+      <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="486">
-          <caret line="18" selection-start-line="18" selection-end-line="18" />
+          <caret line="18" column="8" selection-start-line="18" selection-start-column="8" selection-end-line="18" selection-end-column="8" />
         </state>
       </provider>
     </entry>

@@ -173,11 +173,11 @@
 		}
 	},
 	"imports": [
-		"lucy/cmd/langtools/compile/common",
 		"lucy/os",
-		"lucy/cmd/langtools/compile/jvm/cg"
+		"lucy/cmd/langtools/compile/jvm/cg",
+		"lucy/cmd/langtools/compile/common"
 	],
-	"compileTime": 1542365854,
+	"compileTime": 1542505220,
 	"classes": [
 		"Block.class",
 		"BuildInFunctionPanicMeta.class",

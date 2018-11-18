@@ -7,11 +7,11 @@
 			"lastModify": 1542364114
 		},
 		"run.lucy": {
-			"lastModify": 1539348451
+			"lastModify": 1542441305
 		}
 	},
 	"imports": null,
-	"compileTime": 1542365845,
+	"compileTime": 1542505215,
 	"classes": [
 		"Lucy.class",
 		"Run.class",

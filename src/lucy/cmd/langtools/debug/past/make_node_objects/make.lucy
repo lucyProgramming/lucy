@@ -1,26 +1,25 @@
-import "java/lang/Object"
-import "lucy/cmd/langtools/compile/ast"
+import "java/lang/Object" as Object 
+import "lucy/cmd/langtools/compile/ast" as ast 
 
 
 public class MakeNodesObjects {
+  
+    
 
-    
-    
-           
-    public fn Make(files map { string-> []ast.TopNode } ) -> (x Object) {
+    public fn make(files map { string-> []ast.TopNode } ) -> (x Object) {
         if len(files) == 1 {
             for _, v := range files {
-                return this.MakeNodes(v)
+                return this.makeNodes(v)
             }
         }
         ret := new map{string -> Object}()
         for k, v := range files {
-            ret[k] = this.MakeNodes(v)
+            ret[k] = this.makeNodes(v)
         }
         return ret
     }
 
-    fn MakeNodes(nodes []ast.TopNode) -> (ret Object[]) {
+    fn makeNodes(nodes []ast.TopNode) -> (ret Object[]) {
         ret = new Object[](len(nodes))
         for k, n := range nodes {
             if t,ok := n.node.(ast.Block) ; ok {

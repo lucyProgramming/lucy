@@ -1,7 +1,7 @@
 {
 	"compiledFrom": {
 		"lex.lucy": {
-			"lastModify": 1542364114
+			"lastModify": 1542504937
 		},
 		"token.lucy": {
 			"lastModify": 1542364114
@@ -11,7 +11,7 @@
 		}
 	},
 	"imports": null,
-	"compileTime": 1542365856,
+	"compileTime": 1542505223,
 	"classes": [
 		"Lexer.class",
 		"Token.class",

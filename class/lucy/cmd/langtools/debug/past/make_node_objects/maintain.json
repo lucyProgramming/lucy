@@ -1,13 +1,13 @@
 {
 	"compiledFrom": {
 		"make.lucy": {
-			"lastModify": 1542324382
+			"lastModify": 1542505171
 		}
 	},
 	"imports": [
 		"lucy/cmd/langtools/compile/ast"
 	],
-	"compileTime": 1542324388,
+	"compileTime": 1542505221,
 	"classes": [
 		"MakeNodesObjects.class",
 		"main.class"

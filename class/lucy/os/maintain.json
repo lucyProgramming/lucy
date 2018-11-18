@@ -4,7 +4,7 @@
 			"lastModify": 1541065161
 		},
 		"file.lucy": {
-			"lastModify": 1542108579
+			"lastModify": 1542418940
 		},
 		"os.lucy": {
 			"lastModify": 1539348451
@@ -16,7 +16,7 @@
 	"imports": [
 		"lucy/io"
 	],
-	"compileTime": 1542365848,
+	"compileTime": 1542505218,
 	"classes": [
 		"Command.class",
 		"closureFunction$start$literal68.class",

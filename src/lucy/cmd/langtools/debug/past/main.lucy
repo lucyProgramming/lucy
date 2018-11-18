@@ -71,7 +71,7 @@ fn main(args []string) {
 	for _, v := range errs {
 		print(v)
 	}
-	ret := (new make_node_objects.MakeNodesObjects()).Make(lucyFiles)
+	ret := (new make_node_objects.MakeNodesObjects()).make(lucyFiles)
 	bs, _ := json.encode(ret)
 	print(string(bs))
 }

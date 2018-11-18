@@ -10,7 +10,7 @@ final class Clean {
 	verbose bool 
 	
 	fn Clean(lucyRoot string, lucyPaths []string,packageName string , recursive bool , verbose bool   ) {
-	    this.super() 
+	    this.super()
 		this.lucyRoot = lucyRoot 
 		this.lucyPaths = lucyPaths
 		this.packageName = packageName
