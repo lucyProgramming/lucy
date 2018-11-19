@@ -16,7 +16,7 @@
 	"imports": [
 		"lucy/os/flag"
 	],
-	"compileTime": 1542365850,
+	"compileTime": 1542620995,
 	"classes": [
 		"Bytes.class",
 		"Flags.class",

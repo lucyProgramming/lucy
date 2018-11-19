@@ -30,7 +30,7 @@ public enum  TokenKind {
 	TokenBool  ,                     // bool
 	TokenTrue   ,                    // true
 	TokenFalse  ,                    // false
-	TokenLp    ,,                     // (
+	TokenLp    ,                     // (
 	TokenRp    ,                     // )
 	TokenLc   ,                      // {
 	TokenRc   ,                      // }

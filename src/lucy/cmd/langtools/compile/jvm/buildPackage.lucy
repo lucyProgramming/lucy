@@ -249,7 +249,9 @@ public class  BuildPackage {
         method.code.codeLength = codeLength
         this.mainClass.appendMethod(method)
 
-        // trigger init
+        /*
+            trigger init
+
         trigger := new cg.MethodHighLevel()
         trigger.name = this.mainClass.newMethodName("triggerPackageInit")
         trigger.accessFlags |= cg.AccMethodPublic
@@ -264,6 +266,7 @@ public class  BuildPackage {
         trigger.AttributeLucyTriggerPackageInitMethod = new cg.AttributeLucyTriggerPackageInitMethod()
         this.mainClass.appendMethod(trigger)
         this.mainClass.triggerPackageInitMethod = trigger
+         */
     }
 
 

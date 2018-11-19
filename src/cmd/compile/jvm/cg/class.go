@@ -332,9 +332,9 @@ func (this *Class) fromHighLevel(high *ClassHighLevel) {
 			if m.AttributeLucyMethodDescriptor != nil {
 				info.Attributes = append(info.Attributes, m.AttributeLucyMethodDescriptor.ToAttributeInfo(this))
 			}
-			if m.AttributeLucyTriggerPackageInitMethod != nil {
-				info.Attributes = append(info.Attributes, m.AttributeLucyTriggerPackageInitMethod.ToAttributeInfo(this))
-			}
+			//if m.AttributeLucyTriggerPackageInitMethod != nil {
+			//	info.Attributes = append(info.Attributes, m.AttributeLucyTriggerPackageInitMethod.ToAttributeInfo(this))
+			//}
 			if m.AttributeDefaultParameters != nil {
 				info.Attributes = append(info.Attributes, m.AttributeDefaultParameters.ToAttributeInfo(this))
 			}

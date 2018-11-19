@@ -12,6 +12,7 @@ public class Encoder {
 	indent string  
 	indents string 
 	
+
 	public fn Encoder(x Object, indents string  = "", indent string  = "" ) {
 		this.super()
 		this.x = x
@@ -97,7 +98,7 @@ public class Encoder {
 			name == "java.lang.Double"
 	}
 
-
+	
 	private static fn validForMapKey(x Object) {
 		c := x.getClass()
 		typeName := c.getTypeName()

@@ -10,7 +10,7 @@ public class ClassField {
 	public comment                string
 	public accessFlags            char
 	public jvmDescriptor          string    
-
+	
 
 	public fn isStatic() ->(is bool) {
 		return (this.accessFlags & cg.AccFieldStatic) != 0

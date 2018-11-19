@@ -248,20 +248,20 @@ func (this *BuildPackage) mkInitFunctions() {
 	this.mainClass.AppendMethod(method)
 
 	// trigger init
-	trigger := &cg.MethodHighLevel{}
-	trigger.Name = this.mainClass.NewMethodName("triggerPackageInit")
-	trigger.AccessFlags |= cg.AccMethodPublic
-	trigger.AccessFlags |= cg.AccMethodBridge
-	trigger.AccessFlags |= cg.AccMethodStatic
-	trigger.AccessFlags |= cg.AccMethodSynthetic
-	trigger.Descriptor = "()V"
-	trigger.Code = &cg.AttributeCode{}
-	trigger.Code.Codes = make([]byte, 1)
-	trigger.Code.Codes[0] = cg.OP_return
-	trigger.Code.CodeLength = 1
-	trigger.AttributeLucyTriggerPackageInitMethod = &cg.AttributeLucyTriggerPackageInitMethod{}
-	this.mainClass.AppendMethod(trigger)
-	this.mainClass.TriggerPackageInitMethod = trigger
+	//trigger := &cg.MethodHighLevel{}
+	//trigger.Name = this.mainClass.NewMethodName("triggerPackageInit")
+	//trigger.AccessFlags |= cg.AccMethodPublic
+	//trigger.AccessFlags |= cg.AccMethodBridge
+	//trigger.AccessFlags |= cg.AccMethodStatic
+	//trigger.AccessFlags |= cg.AccMethodSynthetic
+	//trigger.Descriptor = "()V"
+	//trigger.Code = &cg.AttributeCode{}
+	//trigger.Code.Codes = make([]byte, 1)
+	//trigger.Code.Codes[0] = cg.OP_return
+	//trigger.Code.CodeLength = 1
+	//trigger.AttributeLucyTriggerPackageInitMethod = &cg.AttributeLucyTriggerPackageInitMethod{}
+	//this.mainClass.AppendMethod(trigger)
+	//this.mainClass.TriggerPackageInitMethod = trigger
 }
 
 func (this *BuildPackage) insertDefaultValue(c *cg.ClassHighLevel, t *ast.Type, v interface{}) (index uint16) {

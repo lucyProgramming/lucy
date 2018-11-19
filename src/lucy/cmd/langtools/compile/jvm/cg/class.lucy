@@ -321,9 +321,9 @@ public class Class {
 				if m.AttributeLucyMethodDescriptor != null {
 					info.attributes . append( m.AttributeLucyMethodDescriptor.ToAttributeInfo(this))
 				}
-				if m.AttributeLucyTriggerPackageInitMethod != null {
-					info.attributes . append(  m.AttributeLucyTriggerPackageInitMethod.ToAttributeInfo(this))
-				}
+				//if m.AttributeLucyTriggerPackageInitMethod != null {
+					//info.attributes . append(  m.AttributeLucyTriggerPackageInitMethod.ToAttributeInfo(this))
+				//}
 				if m.AttributeDefaultParameters != null {
 					info.attributes . append(  m.AttributeDefaultParameters.ToAttributeInfo(this))
 				}

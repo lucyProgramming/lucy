@@ -34,7 +34,7 @@
 			"lastModify": 1542108579
 		},
 		"attr_lucy_trigger_package_init_method.lucy": {
-			"lastModify": 1542016480
+			"lastModify": 1542620916
 		},
 		"attr_lucy_type_alias.lucy": {
 			"lastModify": 1542108579
@@ -58,7 +58,7 @@
 			"lastModify": 1542108579
 		},
 		"class.lucy": {
-			"lastModify": 1542276696
+			"lastModify": 1542620936
 		},
 		"class_high_level.lucy": {
 			"lastModify": 1542192151
@@ -88,7 +88,7 @@
 			"lastModify": 1542108579
 		},
 		"method_high_level.lucy": {
-			"lastModify": 1542192151
+			"lastModify": 1542620930
 		},
 		"op.lucy": {
 			"lastModify": 1541761872
@@ -98,7 +98,7 @@
 		"lucy/binary",
 		"lucy/cmd/langtools/compile/common"
 	],
-	"compileTime": 1542365853,
+	"compileTime": 1542621001,
 	"classes": [
 		"AttributeCode.class",
 		"AttributeConstantValue.class",
@@ -112,7 +112,6 @@
 		"AttributeLucyEnum.class",
 		"AttributeLucyFieldDescriptor.class",
 		"AttributeLucyMethodDescriptor.class",
-		"AttributeLucyTriggerPackageInitMethod.class",
 		"AttributeLucyTypeAlias.class",
 		"AttributeMethodParameters.class",
 		"AttributeSourceFile.class",

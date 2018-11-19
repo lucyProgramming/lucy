@@ -4,7 +4,7 @@
 			"lastModify": 1542449330
 		},
 		"encoder.lucy": {
-			"lastModify": 1541897289
+			"lastModify": 1542542953
 		},
 		"json.lucy": {
 			"lastModify": 1540890869
@@ -14,7 +14,7 @@
 		}
 	},
 	"imports": null,
-	"compileTime": 1542505217,
+	"compileTime": 1542621009,
 	"classes": [
 		"Decoder.class",
 		"Encoder.class",

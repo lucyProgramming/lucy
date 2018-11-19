@@ -4,14 +4,14 @@
 			"lastModify": 1542504937
 		},
 		"token.lucy": {
-			"lastModify": 1542364114
+			"lastModify": 1542542800
 		},
 		"var.lucy": {
 			"lastModify": 1541763658
 		}
 	},
 	"imports": null,
-	"compileTime": 1542505223,
+	"compileTime": 1542621004,
 	"classes": [
 		"Lexer.class",
 		"Token.class",

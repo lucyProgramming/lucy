@@ -5,11 +5,11 @@
 		}
 	},
 	"imports": [
-		"lucy/cmd/langtools/compile/lc",
 		"lucy/cmd/langtools/compile/common",
-		"lucy/cmd/langtools/common"
+		"lucy/cmd/langtools/common",
+		"lucy/cmd/langtools/compile/lc"
 	],
-	"compileTime": 1542365863,
+	"compileTime": 1542621011,
 	"classes": [
 		"main.class"
 	]
