@@ -29,6 +29,9 @@ class FileLoader implements ast.LoadImport{
                 err =  e
             }
         }*/
+        if x = this.caches[importName] ; x != null {
+            return 
+        }
         realPaths  := []Resource{}
         foundInLucy := false
         for _, v := range this.lucyPaths {
@@ -103,15 +106,27 @@ class FileLoader implements ast.LoadImport{
         }
         if realPaths[0].kind == resourceKindJavaClass {
             c := this.loadClass(realPaths[0])
+            if cc ,ok := c.(ast.Class) ; ok  {
+                this.caches[cc.name] = cc
+            }
             return c, null
         } else if realPaths[0].kind == resourceKindLucyClass {
             t := this.loadClass(realPaths[0])
+            if tt,ok := t.(ast.Class) ; ok  {
+                this.caches[tt.name] = tt
+            }
             return t, null
         } else if realPaths[0].kind == resourceKindJavaPackage {
             p := this.loadJavaPackage(realPaths[0])
+            if p != null {
+                this.caches[p.name] = p
+            }
             return p, null
         } else { // lucy package
             p := this.loadLucyPackage(realPaths[0])
+            if p != null {
+                this.caches[p.name] = p
+            }
             return p ,null
         }
     }
@@ -563,6 +578,7 @@ class FileLoader implements ast.LoadImport{
                 if p.block.Classes == null {
                     p.block.Classes = new map {string -> ast.Class } ()
                 }
+                this.caches[c.name] = c
                 p.block.Classes[common.getBaseName(common.getBaseName(c.name))] = c
             }
         }
@@ -587,6 +603,7 @@ class FileLoader implements ast.LoadImport{
                 if p.block.Classes == null {
                     p.block.Classes = new map{string->ast.Class}()
                 }
+                this.caches[cc.name] = cc
                 p.block.Classes[common.getBaseName(cc.name)] = cc
             }
         }

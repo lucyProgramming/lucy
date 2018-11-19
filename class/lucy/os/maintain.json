@@ -7,7 +7,7 @@
 			"lastModify": 1542418940
 		},
 		"os.lucy": {
-			"lastModify": 1539348451
+			"lastModify": 1542621174
 		},
 		"std.lucy": {
 			"lastModify": 1536749131
@@ -16,7 +16,7 @@
 	"imports": [
 		"lucy/io"
 	],
-	"compileTime": 1542620997,
+	"compileTime": 1542630828,
 	"classes": [
 		"Command.class",
 		"closureFunction$start$literal68.class",

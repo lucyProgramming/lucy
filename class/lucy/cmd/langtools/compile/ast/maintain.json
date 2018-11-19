@@ -1,16 +1,16 @@
 {
 	"compiledFrom": {
 		"block.lucy": {
-			"lastModify": 1542364114
+			"lastModify": 1542621174
 		},
 		"buildin_func_meta.lucy": {
 			"lastModify": 1541830928
 		},
 		"buildin_function.lucy": {
-			"lastModify": 1542192151
+			"lastModify": 1542630465
 		},
 		"class.lucy": {
-			"lastModify": 1542276696
+			"lastModify": 1542621174
 		},
 		"class_filed.lucy": {
 			"lastModify": 1542542592
@@ -28,7 +28,7 @@
 			"lastModify": 1542108579
 		},
 		"expression.lucy": {
-			"lastModify": 1542276696
+			"lastModify": 1542621174
 		},
 		"expression_check_array.lucy": {
 			"lastModify": 1541897985
@@ -43,22 +43,22 @@
 			"lastModify": 1542192151
 		},
 		"expression_check_function_call.lucy": {
-			"lastModify": 1542364114
+			"lastModify": 1542621174
 		},
 		"expression_check_identifier.lucy": {
-			"lastModify": 1542276696
+			"lastModify": 1542621174
 		},
 		"expression_check_index.lucy": {
 			"lastModify": 1541898514
 		},
 		"expression_check_left_value.lucy": {
-			"lastModify": 1542276696
+			"lastModify": 1542621174
 		},
 		"expression_check_map.lucy": {
 			"lastModify": 1542192151
 		},
 		"expression_check_method_call.lucy": {
-			"lastModify": 1542276696
+			"lastModify": 1542621174
 		},
 		"expression_check_new.lucy": {
 			"lastModify": 1542192151
@@ -73,7 +73,7 @@
 			"lastModify": 1541898368
 		},
 		"expression_check_selection.lucy": {
-			"lastModify": 1542276696
+			"lastModify": 1542621174
 		},
 		"expression_check_slice.lucy": {
 			"lastModify": 1542192151
@@ -88,43 +88,46 @@
 			"lastModify": 1541898368
 		},
 		"expression_check_var.lucy": {
-			"lastModify": 1542192151
+			"lastModify": 1542621174
 		},
 		"expression_check_var_assign.lucy": {
-			"lastModify": 1542192151
+			"lastModify": 1542621174
 		},
 		"expression_const_fold.lucy": {
-			"lastModify": 1542192151
+			"lastModify": 1542621174
 		},
 		"expression_type.lucy": {
 			"lastModify": 1542192151
 		},
 		"function.lucy": {
-			"lastModify": 1542192151
+			"lastModify": 1542621174
 		},
 		"function_type.lucy": {
 			"lastModify": 1542276696
 		},
 		"helper_funcs.lucy": {
-			"lastModify": 1542192151
+			"lastModify": 1542621174
 		},
 		"import.lucy": {
-			"lastModify": 1542276696
+			"lastModify": 1542621174
 		},
 		"inherited_attribute.lucy": {
-			"lastModify": 1542364114
+			"lastModify": 1542621174
+		},
+		"loaded.lucy": {
+			"lastModify": 1542621174
 		},
 		"node.lucy": {
 			"lastModify": 1542364114
 		},
 		"package.lucy": {
-			"lastModify": 1542364114
+			"lastModify": 1542621174
 		},
 		"pos.lucy": {
 			"lastModify": 1541898366
 		},
 		"statement.lucy": {
-			"lastModify": 1542276696
+			"lastModify": 1542621174
 		},
 		"statement_break.lucy": {
 			"lastModify": 1542276696
@@ -139,10 +142,10 @@
 			"lastModify": 1542192151
 		},
 		"statement_goto.lucy": {
-			"lastModify": 1541898367
+			"lastModify": 1542621174
 		},
 		"statement_if.lucy": {
-			"lastModify": 1542108579
+			"lastModify": 1542621174
 		},
 		"statement_label.lucy": {
 			"lastModify": 1542108579
@@ -160,13 +163,13 @@
 			"lastModify": 1542192151
 		},
 		"type.lucy": {
-			"lastModify": 1542364114
+			"lastModify": 1542621174
 		},
 		"type_alias.lucy": {
 			"lastModify": 1541895963
 		},
 		"var.lucy": {
-			"lastModify": 1542276696
+			"lastModify": 1542621174
 		},
 		"variable.lucy": {
 			"lastModify": 1541895539
@@ -177,7 +180,7 @@
 		"lucy/cmd/langtools/compile/jvm/cg",
 		"lucy/cmd/langtools/compile/common"
 	],
-	"compileTime": 1542621003,
+	"compileTime": 1542630834,
 	"classes": [
 		"Block.class",
 		"BuildInFunctionPanicMeta.class",
@@ -239,6 +242,7 @@
 		"Import.class",
 		"InheritedAttribute.class",
 		"LoadImport.class",
+		"Loaded.class",
 		"Map.class",
 		"NameWithPos.class",
 		"Package.class",

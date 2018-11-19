@@ -13,7 +13,7 @@ fn registerBuildInFunctions() {
             if len(e.ParameterTypes) > 0 {
                 msg := sprintf("%s buildin function expect no typed parameter",
                                           e.ParameterTypes[0].pos.errMsgPrefix() )
-                errs . append( new error(msg))
+                errs.append( new error(msg))
             }
         }
 

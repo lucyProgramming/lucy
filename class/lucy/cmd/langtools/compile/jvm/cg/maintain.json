@@ -58,7 +58,7 @@
 			"lastModify": 1542108579
 		},
 		"class.lucy": {
-			"lastModify": 1542620936
+			"lastModify": 1542621174
 		},
 		"class_high_level.lucy": {
 			"lastModify": 1542192151
@@ -95,10 +95,9 @@
 		}
 	},
 	"imports": [
-		"lucy/binary",
-		"lucy/cmd/langtools/compile/common"
+		"lucy/binary"
 	],
-	"compileTime": 1542621001,
+	"compileTime": 1542630830,
 	"classes": [
 		"AttributeCode.class",
 		"AttributeConstantValue.class",

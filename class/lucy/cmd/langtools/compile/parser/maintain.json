@@ -1,7 +1,7 @@
 {
 	"compiledFrom": {
 		"block.lucy": {
-			"lastModify": 1542364114
+			"lastModify": 1542628332
 		},
 		"class.lucy": {
 			"lastModify": 1542364114
@@ -28,10 +28,10 @@
 			"lastModify": 1542364114
 		},
 		"function.lucy": {
-			"lastModify": 1542364114
+			"lastModify": 1542621174
 		},
 		"parse.lucy": {
-			"lastModify": 1542364114
+			"lastModify": 1542621174
 		},
 		"parser_extends.lucy": {
 			"lastModify": 1542364114
@@ -60,7 +60,7 @@
 		"lucy/cmd/langtools/compile/lex",
 		"lucy/cmd/langtools/compile/jvm/cg"
 	],
-	"compileTime": 1542621006,
+	"compileTime": 1542630836,
 	"classes": [
 		"BlockParser.class",
 		"ClassParser.class",

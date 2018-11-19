@@ -4,14 +4,14 @@
 			"lastModify": 1539680939
 		},
 		"lang.lucy": {
-			"lastModify": 1542364114
+			"lastModify": 1542621174
 		},
 		"run.lucy": {
 			"lastModify": 1542441305
 		}
 	},
 	"imports": null,
-	"compileTime": 1542620993,
+	"compileTime": 1542630824,
 	"classes": [
 		"Lucy.class",
 		"Run.class",

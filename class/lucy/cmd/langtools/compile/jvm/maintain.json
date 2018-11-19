@@ -7,7 +7,7 @@
 			"lastModify": 1542364114
 		},
 		"buildPackage.lucy": {
-			"lastModify": 1542620954
+			"lastModify": 1542621174
 		},
 		"buildin_assert.lucy": {
 			"lastModify": 1542192151
@@ -187,7 +187,7 @@
 		"lucy/binary",
 		"lucy/cmd/langtools/compile/common"
 	],
-	"compileTime": 1542621008,
+	"compileTime": 1542630838,
 	"classes": [
 		"ArrayMeta.class",
 		"AutoVariableForRangeArray.class",

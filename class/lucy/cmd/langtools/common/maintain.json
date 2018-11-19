@@ -7,14 +7,16 @@
 			"lastModify": 1541410662
 		},
 		"meta.lucy": {
-			"lastModify": 1532825332
+			"lastModify": 1542621174
 		}
 	},
 	"imports": [
 		"lucy/os"
 	],
-	"compileTime": 1542620998,
+	"compileTime": 1542630818,
 	"classes": [
+		"FileMeta.class",
+		"PackageMeta.class",
 		"main.class"
 	]
 }

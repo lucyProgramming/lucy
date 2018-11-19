@@ -7,7 +7,7 @@
 			"lastModify": 1541671950
 		},
 		"flag.lucy": {
-			"lastModify": 1542364114
+			"lastModify": 1542621174
 		},
 		"fns.lucy": {
 			"lastModify": 1541761872
@@ -16,7 +16,7 @@
 	"imports": [
 		"lucy/os/flag"
 	],
-	"compileTime": 1542620995,
+	"compileTime": 1542630832,
 	"classes": [
 		"Bytes.class",
 		"Flags.class",
