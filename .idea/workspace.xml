@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="BookmarkManager">
-    <bookmark url="file://E:/lucypath/src/test/config/config.lucy" line="26" />
     <bookmark url="file://$PROJECT_DIR$/src/cmd/common/common.go" description="func GetLucyPaths() []string {&#10;" line="33" />
     <bookmark url="file://$PROJECT_DIR$/src/cmd/compile/jvm/expression_strcat.go" line="41" />
     <bookmark url="file://$PROJECT_DIR$/src/cmd/compile/parser/block.go" line="53" />
@@ -23,8 +22,324 @@
     <bookmark url="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/type.lucy" line="419" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed937956-647e-4137-9a98-87959d00e668" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/src/ide/vscode/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/ide/vscode/package.json" afterDir="false" />
+    <list default="true" readonly="true" id="ed937956-647e-4137-9a98-87959d00e668" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/watcherTasks.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/binary/BigEndian.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/binary/BigEndian.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/binary/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/binary/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/common/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/common/main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/common/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/common/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Block.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Block.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/BuildInFunctionPanicMeta.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/BuildInFunctionPanicMeta.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/BuildInFunctionPrintfMeta.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/BuildInFunctionPrintfMeta.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/BuildInFunctionSprintfMeta.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/BuildInFunctionSprintfMeta.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/CallVariableArgs.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/CallVariableArgs.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Class.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Class.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ClassField.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ClassField.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ClassMethod.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ClassMethod.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Closure.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Closure.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ClosureMeta.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ClosureMeta.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Constant.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Constant.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Enum.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Enum.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/EnumName.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/EnumName.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Expression.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Expression.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionArray.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionArray.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionAssign.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionAssign.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionBinary.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionBinary.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckAssign.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckAssign.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckBinary.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckBinary.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckConst.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckConst.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckFunctionCall.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckFunctionCall.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckIdentifier.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckIdentifier.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckIndex.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckIndex.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckLeftValue.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckLeftValue.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckMap.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckMap.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckMethodCall.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckMethodCall.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckNew.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckNew.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckOpAssign.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckOpAssign.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckQuestion.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckQuestion.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckSelection.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckSelection.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckSlice.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckSlice.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckTypeAssert.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckTypeAssert.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckTypeConversion.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckTypeConversion.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckUnary.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckUnary.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckVar.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckVar.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckVarAssign.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionCheckVarAssign.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionConstFold.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionConstFold.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionFunctionCall.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionFunctionCall.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionIdentifier.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionIdentifier.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionIndex.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionIndex.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionKV.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionKV.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionMap.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionMap.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionMethodCall.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionMethodCall.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionNew.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionNew.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionQuestion.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionQuestion.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionSelectConst.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionSelectConst.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionSelection.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionSelection.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionSlice.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionSlice.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionTypeAssert.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionTypeAssert.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionTypeConversion.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionTypeConversion.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionTypeKind.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionTypeKind.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionVar.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionVar.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionVarAssign.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExpressionVarAssign.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExprssionCheckArray.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ExprssionCheckArray.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ForRangeAttr.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/ForRangeAttr.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Function.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Function.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/FunctionType.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/FunctionType.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Import.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Import.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/InheritedAttribute.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/InheritedAttribute.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/LoadImport.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/LoadImport.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Map.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Map.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/NameWithPos.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/NameWithPos.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Package.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Package.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Pos.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Pos.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/SourceFile.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/SourceFile.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Statement.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Statement.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementBreak.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementBreak.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementContinue.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementContinue.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementDefer.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementDefer.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementElseIf.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementElseIf.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementFor.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementFor.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementGoTo.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementGoTo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementIf.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementIf.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementLabel.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementLabel.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementReturn.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementReturn.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementSwitch.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementSwitch.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementSwitchCase.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementSwitchCase.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementTypeKind.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementTypeKind.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementWhen.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementWhen.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementWhenCase.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/StatementWhenCase.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/TemplateFunction.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/TemplateFunction.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/TemplateFunctionInstance.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/TemplateFunctionInstance.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/TopNode.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/TopNode.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Type.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Type.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/TypeAlias.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/TypeAlias.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Variable.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/Variable.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/VariableTypeKind.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/VariableTypeKind.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/closureFunction$equal.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/closureFunction$equal.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/closureFunction$errMsg.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/closureFunction$errMsg.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/ast/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/common/Bytes.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/common/Bytes.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/common/Flags.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/common/Flags.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/common/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/common/main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/common/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/common/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/ArrayMeta.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/ArrayMeta.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/AutoVariableForRangeArray.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/AutoVariableForRangeArray.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/AutoVariableForRangeJavaArray.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/AutoVariableForRangeJavaArray.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/AutoVariableForRangeMap.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/AutoVariableForRangeMap.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildBlock.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildBlock.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpression.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpression.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionArithmetic.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionArithmetic.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionArray.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionArray.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionAssert.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionAssert.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionAssign.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionAssign.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionCallArgs.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionCallArgs.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionConversion.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionConversion.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionFunction.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionFunction.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionFunctionCall.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionFunctionCall.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionIdentifier.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionIdentifier.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionIncrement.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionIncrement.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionIndex.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionIndex.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionLeftValue.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionLeftValue.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionLogical.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionLogical.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionMap.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionMap.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionMethodCall.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionMethodCall.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionNew.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionNew.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionOpAssign.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionOpAssign.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionQuestion.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionQuestion.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionRelation.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionRelation.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionSelection.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionSelection.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionSlice.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionSlice.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionStrcat.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionStrcat.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionTypeConversion.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionTypeConversion.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionUnary.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionUnary.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionVar.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionVar.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionVarAssign.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildExpressionVarAssign.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildFor.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildFor.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildForRangeArray.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildForRangeArray.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildForRangeJavaArray.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildForRangeJavaArray.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildForRangeMap.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildForRangeMap.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildFunction.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildFunction.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildIf.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildIf.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildPackage.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildPackage.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildReturn.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildReturn.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildSwitch.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildSwitch.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildTemplateFunctionCall.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildTemplateFunctionCall.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildinFunctionAssert.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildinFunctionAssert.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildinFunctionBlackHole.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildinFunctionBlackHole.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildinFunctionCall.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildinFunctionCall.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildinFunctionCatchPanic.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildinFunctionCatchPanic.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildinFunctionLen.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildinFunctionLen.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildinFunctionPrint.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildinFunctionPrint.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildinFunctionPrintf.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildinFunctionPrintf.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildinFunctionSprintf.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/BuildinFunctionSprintf.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/Closure.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/Closure.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/ClosureKind.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/ClosureKind.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/ClosureObjectMeta.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/ClosureObjectMeta.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/Context.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/Context.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/DefaultValueParse.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/DefaultValueParse.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/Descriptor.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/Descriptor.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/LeftValueKind.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/LeftValueKind.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/LucyFieldSignature.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/LucyFieldSignature.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/LucyMethodSignature.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/LucyMethodSignature.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/LucyTypeAlias.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/LucyTypeAlias.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/MultiValueAutoVar.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/MultiValueAutoVar.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/StackMapState.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/StackMapState.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/TypeConverterAndPrimitivePacker.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/TypeConverterAndPrimitivePacker.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/buildTypeConversion$autoVar.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/buildTypeConversion$autoVar.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeCode.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeCode.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeConstantValue.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeConstantValue.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeDefaultParameters.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeDefaultParameters.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeInfo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeInnerClasses.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeInnerClasses.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLineNumber.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLineNumber.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLinePc.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLinePc.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLucyClassConst.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLucyClassConst.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLucyConst.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLucyConst.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLucyEnum.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLucyEnum.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLucyFieldDescriptor.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLucyFieldDescriptor.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLucyMethodDescriptor.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLucyMethodDescriptor.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLucyTriggerPackageInitMethod.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLucyTriggerPackageInitMethod.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLucyTypeAlias.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeLucyTypeAlias.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeMethodParameters.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeMethodParameters.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeSourceFile.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeSourceFile.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeStackMap.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeStackMap.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeTemplateFunction.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/AttributeTemplateFunction.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/Class.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/Class.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ClassHighLevel.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ClassHighLevel.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstPool.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstPool.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoClass.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoClass.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoDouble.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoDouble.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoFieldref.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoFieldref.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoFieldrefHighLevel.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoFieldrefHighLevel.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoFloat.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoFloat.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoInteger.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoInteger.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoInterfaceMethodref.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoInterfaceMethodref.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoInterfaceMethodrefHighLevel.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoInterfaceMethodrefHighLevel.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoLong.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoLong.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoMethodHandle.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoMethodHandle.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoMethodType.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoMethodType.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoMethodTypeHighLevel.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoMethodTypeHighLevel.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoMethodref.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoMethodref.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoMethodrefHighLevel.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoMethodrefHighLevel.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoNameAndType.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoNameAndType.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoNameAndTypeHighLevel.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoNameAndTypeHighLevel.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoString.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoString.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoUtf8.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ConstantInfoUtf8.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ExceptionTable.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/ExceptionTable.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/Exit.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/Exit.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/FieldHighLevel.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/FieldHighLevel.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/FieldInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/FieldInfo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/InnerClass.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/InnerClass.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/LucyClassConst.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/LucyClassConst.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/MethodHighLevel.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/MethodHighLevel.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/MethodInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/MethodInfo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/MethodParameter.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/MethodParameter.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMap.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMap.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapAppendFrame.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapAppendFrame.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapChopFrame.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapChopFrame.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapDoubleVariableInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapDoubleVariableInfo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapFloatVariableInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapFloatVariableInfo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapFullFrame.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapFullFrame.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapIntegerVariableInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapIntegerVariableInfo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapLongVariableInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapLongVariableInfo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapNullVariableInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapNullVariableInfo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapObjectVariableInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapObjectVariableInfo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapSameFrame.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapSameFrame.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapSameFrameExtended.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapSameFrameExtended.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapSameLocals1StackItemFrame.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapSameLocals1StackItemFrame.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapSameLocals1StackItemFrameExtended.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapSameLocals1StackItemFrameExtended.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapTopVariableInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapTopVariableInfo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapUninitializedThisVariableInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapUninitializedThisVariableInfo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapUninitializedVariableInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapUninitializedVariableInfo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapVerificationTypeInfo.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/StackMapVerificationTypeInfo.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/cg/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/closureFunction$buildSwitchStatement$literal25.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/closureFunction$buildSwitchStatement$literal25.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/setEnumArray$autoVar.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/jvm/setEnumArray$autoVar.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lc/ClassDecoder.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lc/ClassDecoder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lc/Compiler.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lc/Compiler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lc/FileLoader.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lc/FileLoader.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lc/Resource.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lc/Resource.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lc/closureFunction$mkEnums.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lc/closureFunction$mkEnums.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lc/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lc/main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lc/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lc/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lc/resourceKind.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lc/resourceKind.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lex/Lexer.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lex/Lexer.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lex/Token.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lex/Token.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lex/TokenKind.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lex/TokenKind.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lex/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lex/main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lex/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/lex/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/BlockParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/BlockParser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/ClassParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/ClassParser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/CommentParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/CommentParser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/EnumParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/EnumParser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/ExpressionArrayParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/ExpressionArrayParser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/ExpressionBinaryParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/ExpressionBinaryParser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/ExpressionParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/ExpressionParser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/ExpressionQuestionParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/ExpressionQuestionParser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/ExpressionSuffix.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/ExpressionSuffix.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/FunctionParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/FunctionParser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/Parser.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/Parser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/ParserExtends.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/ParserExtends.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/StatementForParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/StatementForParser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/StatementIfParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/StatementIfParser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/StatementSwitchParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/StatementSwitchParser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/StatementWhenParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/StatementWhenParser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/TypeParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/TypeParser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/closureFunction$isPublic.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/closureFunction$isPublic.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/closureFunction$resetPrefix.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/closureFunction$resetPrefix.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/closureFunction$resetProperty$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/closureFunction$resetProperty$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/closureFunction$resetProperty.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/closureFunction$resetProperty.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/cmd/langtools/compile/parser/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/encoding/json/Decoder.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/encoding/json/Decoder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/encoding/json/Encoder.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/encoding/json/Encoder.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/encoding/json/JsonSyntaxTreeNode.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/encoding/json/JsonSyntaxTreeNode.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/encoding/json/JsonSyntaxTreeType.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/encoding/json/JsonSyntaxTreeType.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/encoding/json/Number.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/encoding/json/Number.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/encoding/json/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/encoding/json/main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/encoding/json/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/encoding/json/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/io/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/io/main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/io/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/io/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/lang/Lucy.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/lang/Lucy.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/lang/Run.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/lang/Run.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/lang/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/lang/main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/lang/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/lang/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/os/Command.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/os/Command.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/os/closureFunction$start$literal68.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/os/closureFunction$start$literal68.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/os/closureFunction$start$literal73.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/os/closureFunction$start$literal73.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/os/closureFunction$start$literal78.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/os/closureFunction$start$literal78.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/os/flag/BoolOption.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/os/flag/BoolOption.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/os/flag/FlagParser.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/os/flag/FlagParser.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/os/flag/FloatOption.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/os/flag/FloatOption.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/os/flag/IntOption.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/os/flag/IntOption.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/os/flag/Option.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/os/flag/Option.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/os/flag/OptionType.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/os/flag/OptionType.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/os/flag/StringOption.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/os/flag/StringOption.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/os/flag/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/os/flag/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/os/main.class" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/os/main.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/class/lucy/os/maintain.json" beforeDir="false" afterPath="$PROJECT_DIR$/class/lucy/os/maintain.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ide/vscode/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/ide/vscode/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/common/meta.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/common/meta.lucy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/function.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/function.lucy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/import.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/import.lucy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/package.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/package.lucy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/var.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/var.lucy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/parser/function.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/parser/function.lucy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/install_lucy_array/install.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/install_lucy_array/install.lucy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/main.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/main.lucy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/flag.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/flag.lucy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/import_cycle.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/import_cycle.lucy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/package_compiled.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/package_compiled.lucy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/run.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/run.lucy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lucy/os/os.lucy" beforeDir="false" afterPath="$PROJECT_DIR$/src/lucy/os/os.lucy" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -54,12 +369,12 @@
     <favorites_list name="lucy" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file leaf-file-name="get.go" pinned="false" current-in-tab="true">
-        <entry file="file://C:/Go/src/cmd/go/internal/get/get.go">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="run.lucy" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/run.lucy">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-54">
-              <caret line="7" column="8" lean-forward="true" selection-start-line="7" selection-start-column="8" selection-end-line="7" selection-end-column="8" />
+            <state relative-caret-position="313">
+              <caret line="121" lean-forward="true" selection-start-line="121" selection-end-line="121" />
             </state>
           </provider>
         </entry>
@@ -75,24 +390,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>ClosureObjectMetas</find>
-      <find>IsStatic</find>
-      <find>IsProtected</find>
-      <find>IsPrivate</find>
-      <find>HaveStaticsCodes</find>
-      <find>IsFinal</find>
-      <find>IsAbstract</find>
-      <find>IsFirstStatementCallFatherConstruction</find>
-      <find>ClosureVariableExist</find>
-      <find>ClosureFunctionExist</find>
-      <find>CaptureCount</find>
-      <find>InsertVar</find>
-      <find>InsertFunction</find>
-      <find>IsCompilerAuto</find>
-      <find>err</find>
-      <find>class</find>
-      <find>func</find>
-      <find>c.</find>
       <find>IsBridge</find>
       <find>this.classFile.methods = append(this.classFile.methods,</find>
       <find>this.classFile.ConstPool = append(this.classFile.ConstPool,</find>
@@ -105,23 +402,26 @@
       <find>buildPackage</find>
       <find>AttributeLucyComment</find>
       <find>EndLine</find>
+      <find>func (runLucyPackage *RunLucyPackage)</find>
+      <find>make(map[string]*PackageCompiled)</find>
+      <find>fmt.Sprintf</find>
+      <find>struct{}{}</find>
+      <find>nil</find>
+      <find>fmt.Println</find>
+      <find>i.</find>
+      <find>fmt.Errorf</find>
+      <find>fmt.Errorf(</find>
+      <find>.Imports</find>
+      <find>fmt.Printf</find>
+      <find>runLucyPackage.</find>
+      <find>PackageBeenCompile</find>
+      <find>ImportsByResources</find>
+      <find>os.Exit</find>
+      <find>LastModify</find>
+      <find>CompiledFrom</find>
+      <find>Help</find>
     </findStrings>
     <replaceStrings>
-      <replace>branchBytes</replace>
-      <replace>isConstruction</replace>
-      <replace>.code</replace>
-      <replace>AccessFlags</replace>
-      <replace>startLine</replace>
-      <replace>startColumn</replace>
-      <replace>accessFlags</replace>
-      <replace>fromBytes</replace>
-      <replace>closureObjectMetas</replace>
-      <replace>isStatic</replace>
-      <replace>isProtected</replace>
-      <replace>isPrivate</replace>
-      <replace>haveStaticsCodes</replace>
-      <replace>isFinal</replace>
-      <replace>isAbstract</replace>
       <replace>isFirstStatementCallFatherConstruction</replace>
       <replace>closureVariableExist</replace>
       <replace>closureFunctionExist</replace>
@@ -130,13 +430,28 @@
       <replace>insertFunction</replace>
       <replace>isCompilerAuto</replace>
       <replace>c</replace>
-      <replace>fn</replace>
-      <replace>this.</replace>
       <replace>isBridge</replace>
       <replace>this.classFile.ConstPool.append(</replace>
       <replace>this.classFile</replace>
       <replace>.functionType</replace>
       <replace>endLine</replace>
+      <replace>fn</replace>
+      <replace>new map{string -&gt; PackageCompiled}()</replace>
+      <replace>sprintf</replace>
+      <replace>null</replace>
+      <replace>true</replace>
+      <replace>print</replace>
+      <replace />
+      <replace>new error(sprintf(</replace>
+      <replace>.imports</replace>
+      <replace>printf</replace>
+      <replace>this.</replace>
+      <replace>packageBeenCompile</replace>
+      <replace>importsByResources</replace>
+      <replace>os.exit</replace>
+      <replace>lastModify</replace>
+      <replace>compiledFrom</replace>
+      <replace>help</replace>
     </replaceStrings>
   </component>
   <component name="GOROOT" path="C:\Go" />
@@ -146,13 +461,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/statement_switch.lucy" />
-        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/expression_check_function_call.lucy" />
-        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/expression_check_method_call.lucy" />
-        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/expression_check_identifier.lucy" />
-        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/expression_check_selection.lucy" />
-        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/parser/type.lucy" />
-        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/type.lucy" />
         <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/inherited_attribute.lucy" />
         <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/statement_label.lucy" />
         <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/parser/block.lucy" />
@@ -197,6 +505,13 @@
         <option value="$PROJECT_DIR$/src/cmd/lucy/run/run.go" />
         <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lc/class.lucy" />
         <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/lex/token.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/flag.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/common/meta.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/package_compiled.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/import_cycle.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/var.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/import.lucy" />
+        <option value="$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/run.lucy" />
       </list>
     </option>
   </component>
@@ -238,52 +553,42 @@
             </path>
             <path>
               <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-            </path>
-            <path>
-              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Go SDK 1.10.1" type="20ee2d1f:SyntheticLibraryElementNode" />
-            </path>
-            <path>
-              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Go SDK 1.10.1" type="20ee2d1f:SyntheticLibraryElementNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Go SDK 1.10.1" type="20ee2d1f:SyntheticLibraryElementNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
               <item name="cmd" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Go SDK 1.10.1" type="20ee2d1f:SyntheticLibraryElementNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
               <item name="cmd" type="462c0819:PsiDirectoryNode" />
-              <item name="go" type="462c0819:PsiDirectoryNode" />
+              <item name="langtools" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="lucy" type="462c0819:PsiDirectoryNode" />
+              <item name="cmd" type="462c0819:PsiDirectoryNode" />
+              <item name="langtools" type="462c0819:PsiDirectoryNode" />
+              <item name="compile" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
               <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Go SDK 1.10.1" type="20ee2d1f:SyntheticLibraryElementNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="cmd" type="462c0819:PsiDirectoryNode" />
-              <item name="go" type="462c0819:PsiDirectoryNode" />
-              <item name="internal" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="lucy" type="b2602c69:ProjectViewProjectNode" />
-              <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
-              <item name="Go SDK 1.10.1" type="20ee2d1f:SyntheticLibraryElementNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="cmd" type="462c0819:PsiDirectoryNode" />
-              <item name="go" type="462c0819:PsiDirectoryNode" />
-              <item name="internal" type="462c0819:PsiDirectoryNode" />
-              <item name="get" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -320,7 +625,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Go Build.past">
+  <component name="RunManager" selected="Go Build.lucy compiler">
     <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="lucy" />
       <working_directory value="$PROJECT_DIR$/" />
@@ -360,6 +665,14 @@
       <kind value="PACKAGE" />
       <package value="gitee.com/yuyang-fine/lucy/src/cmd/lucy" />
     </configuration>
+    <configuration name="lucy compiler" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="lucy" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <parameters value="run    -v lucy/cmd/langtools/compile" />
+      <kind value="PACKAGE" />
+      <package value="gitee.com/yuyang-fine/lucy/src/cmd/lucy" />
+    </configuration>
     <configuration name="lucy go compiler" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="lucy" />
       <working_directory value="$PROJECT_DIR$/" />
@@ -368,12 +681,13 @@
       <kind value="PACKAGE" />
       <package value="gitee.com/yuyang-fine/lucy/src/cmd/lucy" />
     </configuration>
-    <configuration name="lucy" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <configuration name="lucy lucy" type="GoApplicationRunConfiguration" factoryName="Go Application">
       <module name="lucy" />
       <working_directory value="$PROJECT_DIR$/" />
       <go_parameters value="-i" />
-      <parameters value="run   -forceReBuild -v lucy/cmd/langtools/compile" />
+      <parameters value="run -v lucy/cmd/langtools/lucy" />
       <kind value="PACKAGE" />
+      <filePath value="gitee" />
       <package value="gitee.com/yuyang-fine/lucy/src/cmd/lucy" />
     </configuration>
     <configuration name="past" type="GoApplicationRunConfiguration" factoryName="Go Application">
@@ -437,7 +751,8 @@
       <item itemvalue="Go Build.past" />
       <item itemvalue="Go Build.install lucy array" />
       <item itemvalue="Go Build.lucy go compiler" />
-      <item itemvalue="Go Build.lucy" />
+      <item itemvalue="Go Build.lucy compiler" />
+      <item itemvalue="Go Build.lucy lucy" />
       <item itemvalue="Go Build.test lucy/lang" />
       <item itemvalue="Go Build.test lucy/encoding/json" />
       <item itemvalue="Go Build.test lucy/os" />
@@ -451,7 +766,8 @@
     </recent_temporary>
   </component>
   <component name="SvnConfiguration">
-    <configuration />
+    <configuration>C:\Users\Administrator\AppData\Roaming\Subversion</configuration>
+    <supportedVersion>125</supportedVersion>
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -488,17 +804,18 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.48583877" visible="true" weight="0.26545843" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48583877" visible="true" weight="0.2675906" />
       <window_info anchor="bottom" id="TODO" order="5" weight="0.3293348" />
       <window_info anchor="bottom" id="Event Log" order="6" sideWeight="0.51599145" side_tool="true" weight="0.65757906" />
       <window_info anchor="right" id="Database" order="9" weight="0.32995737" />
+      <window_info anchor="bottom" id="Find" order="10" sideWeight="0.48667377" weight="0.4154853" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Run" order="11" sideWeight="0.48400852" weight="0.61504906" />
       <window_info anchor="bottom" id="Version Control" order="9" weight="0.22791712" />
-      <window_info anchor="bottom" id="Run" order="11" sideWeight="0.48400852" weight="0.49291167" />
       <window_info id="Structure" order="6" sideWeight="0.41003272" side_tool="true" weight="0.21641791" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.61395854" />
-      <window_info id="Favorites" order="1" sideWeight="0.5141612" side_tool="true" weight="0.2468017" />
       <window_info anchor="bottom" id="Debug" order="2" weight="0.4" />
+      <window_info id="Favorites" order="1" sideWeight="0.5141612" side_tool="true" weight="0.2468017" />
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="4" weight="0.25" />
       <window_info anchor="right" id="Capture Analysis" order="5" />
@@ -508,43 +825,42 @@
       <window_info anchor="right" id="Ant Build" order="2" weight="0.25" />
       <window_info anchor="bottom" id="Inspection Results" order="0" weight="0.41330424" />
       <window_info id="Designer" order="2" />
-      <window_info id="Image Layers" order="4" />
       <window_info id="UI Designer" order="3" />
-      <window_info anchor="right" x="0" y="0" width="434" height="856" id="Documentation" order="0" side_tool="true" weight="0.32995737" />
       <window_info anchor="right" id="Palette&#9;" order="7" />
+      <window_info anchor="right" x="0" y="0" width="434" height="856" id="Documentation" order="0" side_tool="true" weight="0.32995737" />
+      <window_info id="Image Layers" order="4" />
       <window_info anchor="bottom" id="Message" order="1" />
       <window_info anchor="bottom" id="Cvs" order="3" weight="0.25" />
       <window_info id="Capture Tool" order="5" />
-      <window_info anchor="bottom" id="Find" order="10" sideWeight="0.48667377" weight="0.4154853" />
       <window_info anchor="right" id="Maven Projects" order="8" />
     </layout>
     <layout-to-restore>
       <window_info anchor="right" id="Palette" order="3" />
-      <window_info anchor="bottom" id="Find" order="10" sideWeight="0.48667377" weight="0.4154853" />
+      <window_info anchor="right" id="Ant Build" order="2" weight="0.25" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="4" weight="0.25" />
       <window_info anchor="right" id="Capture Analysis" order="5" />
-      <window_info active="true" anchor="bottom" id="Run" order="11" sideWeight="0.48454157" visible="true" weight="0.46455833" />
+      <window_info active="true" anchor="bottom" id="Run" order="11" sideWeight="0.48400852" visible="true" weight="0.50054526" />
       <window_info anchor="right" id="Theme Preview" order="6" />
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48583877" weight="0.25746268" />
+      <window_info anchor="bottom" id="Message" order="1" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48583877" weight="0.2675906" />
       <window_info id="Structure" order="6" sideWeight="0.41003272" side_tool="true" weight="0.21641791" />
       <window_info anchor="right" id="Commander" order="1" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="2" weight="0.25" />
       <window_info anchor="bottom" id="TODO" order="5" weight="0.3293348" />
-      <window_info anchor="bottom" id="Version Control" order="9" weight="0.22791712" />
+      <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Inspection Results" order="0" weight="0.41330424" />
       <window_info id="Designer" order="2" />
+      <window_info anchor="bottom" id="Cvs" order="3" weight="0.25" />
       <window_info id="UI Designer" order="3" />
-      <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Debug" order="2" weight="0.4" />
       <window_info anchor="right" x="0" y="0" width="434" height="856" id="Documentation" order="0" side_tool="true" weight="0.32995737" />
       <window_info anchor="right" id="Database" order="9" weight="0.32995737" />
       <window_info anchor="right" id="Palette&#9;" order="7" />
       <window_info anchor="bottom" id="Terminal" order="8" weight="0.61395854" />
-      <window_info anchor="bottom" id="Event Log" order="6" sideWeight="0.5154584" side_tool="true" weight="0.6248637" />
+      <window_info anchor="bottom" id="Event Log" order="6" sideWeight="0.51599145" side_tool="true" weight="0.65757906" />
       <window_info anchor="bottom" id="Inspection" order="4" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="3" weight="0.25" />
-      <window_info anchor="bottom" id="Debug" order="2" weight="0.4" />
+      <window_info anchor="bottom" id="Version Control" order="9" weight="0.22791712" />
       <window_info id="Capture Tool" order="5" />
-      <window_info anchor="bottom" id="Message" order="1" />
+      <window_info anchor="bottom" id="Find" order="10" sideWeight="0.48667377" weight="0.4154853" />
       <window_info id="Image Layers" order="4" />
       <window_info anchor="right" id="Maven Projects" order="8" />
       <window_info id="Favorites" order="1" sideWeight="0.5141612" side_tool="true" weight="0.2468017" />
@@ -569,81 +885,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/method_high_level.lucy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="8" column="16" selection-start-line="8" selection-start-column="16" selection-end-line="8" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/attr_template_function.lucy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="13" column="29" selection-start-line="13" selection-start-column="29" selection-end-line="13" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/constPool.lucy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2025" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/const.lucy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="486">
-          <caret line="18" column="33" selection-start-line="18" selection-start-column="33" selection-end-line="18" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/cg/class.lucy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="182">
-          <caret line="463" column="53" selection-start-line="463" selection-start-column="53" selection-end-line="463" selection-end-column="53" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/jvm/closure.lucy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="513">
-          <caret line="19" column="4" lean-forward="true" selection-start-line="19" selection-start-column="4" selection-end-line="19" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/closure.lucy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="405">
-          <caret line="54" column="8" selection-start-line="54" selection-start-column="8" selection-end-line="54" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/enum.lucy">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/class.lucy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1755">
-          <caret line="179" column="16" selection-start-line="179" selection-start-column="16" selection-end-line="179" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/class_filed.lucy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="81">
-          <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/class_method.lucy">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="6" column="16" lean-forward="true" selection-start-line="6" selection-start-column="16" selection-end-line="6" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/default_value.lucy" />
-    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/expression_check_binary.lucy">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/helper_funcs.lucy">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="714">
@@ -875,8 +1116,82 @@
     </entry>
     <entry file="file://C:/Go/src/cmd/go/internal/get/get.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-54">
-          <caret line="7" column="8" lean-forward="true" selection-start-line="7" selection-start-column="8" selection-end-line="7" selection-end-column="8" />
+        <state relative-caret-position="506">
+          <caret line="22" column="1" selection-start-line="22" selection-start-column="1" selection-end-line="22" selection-end-column="1" />
+          <folding>
+            <element signature="e#223#465#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/flag.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="299">
+          <caret line="13" column="43" selection-start-line="13" selection-start-column="43" selection-end-line="13" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/common/bytes.lucy">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/common/const.lucy">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/common/flag.lucy">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/common/fns.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="184">
+          <caret line="8" column="1" lean-forward="true" selection-start-line="8" selection-start-column="1" selection-end-line="8" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/common/test/test.lucy">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/package_compiled.lucy">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/common/meta.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="46">
+          <caret line="2" column="23" selection-start-line="2" selection-start-column="23" selection-end-line="2" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/import_cycle.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="569">
+          <caret line="28" column="45" selection-start-line="28" selection-start-column="45" selection-end-line="28" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/lang/lang.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="226">
+          <caret line="26" selection-start-line="26" selection-end-line="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/import.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="132">
+          <caret line="26" column="18" lean-forward="true" selection-start-line="26" selection-start-column="18" selection-end-line="26" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/compile/ast/var.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="132">
+          <caret line="40" column="1" selection-start-line="40" selection-start-column="1" selection-end-line="40" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/lucy/cmd/langtools/lucy/run/run.lucy">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="313">
+          <caret line="121" lean-forward="true" selection-start-line="121" selection-end-line="121" />
         </state>
       </provider>
     </entry>

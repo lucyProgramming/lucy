@@ -10,7 +10,6 @@ public fn getEnv(k string)->(	v string = System.getenv(k) ){ }
 
 
 
-
 /*
 	all envs
 */

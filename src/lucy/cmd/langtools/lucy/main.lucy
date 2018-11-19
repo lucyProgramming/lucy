@@ -13,7 +13,7 @@ fn printUsage() {
 	clean                  clean compiled files
 	pack                   make_node_objects jar
 	test                   test a package`
-	fmt.Println(msg)
+	print(msg)
 }
 
 fn main(args []string) {
@@ -42,7 +42,7 @@ fn main(args []string) {
 		args = append(args, args[1:]...)
 		(new run.RunLucyPackage()).RunCommand("run", args)
 	case "install_lucy_array":
-		(new install_lucy_array.InstallLucyArray()).RunCommand("install_lucy_array", nil)
+		(new install_lucy_array.InstallLucyArray()).RunCommand("install_lucy_array", null)
 	case "pack":
 		args := []string{"lucy/cmd/langtools/pack"}
 		args = append(args, args[1:]...)

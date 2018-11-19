@@ -4,7 +4,6 @@ public interface  LoadImport {
 	public fn LoadImport(importName string) -> (Object, error)
 }
 
- 
 const	magicIdentifierFile     = "__FILE__"
 const	magicIdentifierLine     = "__LINE__"
 const	magicIdentifierTime     = "__TIME__"
@@ -31,7 +30,7 @@ fn isMagicIdentifier(name string) ->(is bool)  {
 
  
 public var ImportsLoader       LoadImport
-public var	 PackageBeenCompile = new  Package()
+public var PackageBeenCompile = new  Package()
 var	buildInFunctionsMap = new map {string -> Function }()
 var	lucyBuildInPackage  Package
 	 

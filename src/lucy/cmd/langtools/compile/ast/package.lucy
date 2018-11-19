@@ -62,8 +62,8 @@ public class Package {
 		if this.files == null {
 			return null
 		}
-		if t := this.files[file]; t != null && t.Imports != null {
-			return t.Imports[accessName]
+		if t := this.files[file]; t != null && t.imports != null {
+			return t.imports[accessName]
 		} else {
 			return null
 		}
@@ -354,7 +354,7 @@ public class Package {
 			return null
 		}
 		for _, v := range this.files {
-			for _, i := range v.Imports {
+			for _, i := range v.imports {
 				if i.used == false {
 					errs = append(errs, new error(sprintf("%s '%s' imported not used",
 						errMsgPrefix(i.pos), i.Import)))

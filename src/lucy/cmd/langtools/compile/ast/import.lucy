@@ -25,28 +25,28 @@ public class Import {
 
 //different from different source file
 class SourceFile {
-	Imports            map { string -> Import }  // accessName -> *Import
-	ImportsByResources map { string -> Import }  // resourceName -> *Import
+	imports            map { string -> Import }  // accessName -> *Import
+	importsByResources map { string -> Import }  // resourceName -> *Import
 	fn insertImport(i Import) ->(err error)  {
-		if this.Imports == null {
-			this.Imports = new  map { string -> Import }()
+		if this.imports == null {
+			this.imports = new  map { string -> Import }()
 		}
-		if this.ImportsByResources == null {
-			this.ImportsByResources =new map { string -> Import }()
+		if this.importsByResources == null {
+			this.importsByResources =new map { string -> Import }()
 		}
 		if err = i.MkAccessName(); err != null {
 			return err
 		}
-		if this.Imports.keyExist(i.accessName){
+		if this.imports.keyExist(i.accessName){
 			return new error(sprintf("%s '%s' reimported",
 				i.pos.errMsgPrefix(), i.Import))
 		}
-		if this.ImportsByResources.keyExist(i.Import) {
+		if this.importsByResources.keyExist(i.Import) {
 			return new error(sprintf("%s '%s' reimported",
 				i.pos.errMsgPrefix(), i.accessName))
 		}
-		this.ImportsByResources[i.Import] = i
-		this.Imports[i.accessName] = i
+		this.importsByResources[i.Import] = i
+		this.imports[i.accessName] = i
 		return null
 	}
 }

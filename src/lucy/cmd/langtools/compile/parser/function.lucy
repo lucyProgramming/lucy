@@ -100,7 +100,7 @@ class FunctionParser extends ParserExtends{
 		this.parser.ifTokenIsLfThenSkip()
 		if this.parser.token.Type != lex.TokenRp { // not )
 			err = new error(sprintf("%s fn declared wrong,missing ')',but '%s'",
-				this.parser.errMsgPrefix()))
+				this.parser.errMsgPrefix() , this.parser.token.description))
 			this.parser.errs.append( err)
 			return
 		}

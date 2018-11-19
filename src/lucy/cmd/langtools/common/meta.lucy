@@ -1,18 +1,18 @@
 
-/*
+
 public class PackageMeta {
-	public compiledFrom map { string -> FileMeta } ;  // filename -> meta
-	public imports      string[]        ;     //lucy package that imported
-	public compileTime  long          ;      // unix seconds
-	public classes      string[] ;  
+	public compiledFrom FileMeta[]
+	public imports      string[]
+	public compileTime  long
+	public classes      string[]
 }
 
 
 public class FileMeta {
-	public lastModify long ;  // unix seconds
+	public lastModify long
 }
 
-*/
+
 
 
 
