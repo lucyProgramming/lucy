@@ -187,16 +187,7 @@ func (this *BuildPackage) mkGlobalVariables() {
 
 func (this *BuildPackage) mkInitFunctions() {
 	if len(this.Package.InitFunctions) == 0 {
-		needTrigger := false
-		for _, v := range this.Package.LoadedPackages {
-			if v.TriggerPackageInitMethodName != "" {
-				needTrigger = true
-				break
-			}
-		}
-		if needTrigger == false {
-			return
-		}
+		return
 	}
 	blockMethods := []*cg.MethodHighLevel{}
 	for _, v := range this.Package.InitFunctions {
@@ -219,18 +210,6 @@ func (this *BuildPackage) mkInitFunctions() {
 	codes := make([]byte, 65536)
 	codeLength := int(0)
 	method.Code = &cg.AttributeCode{}
-	for _, v := range this.Package.LoadedPackages {
-		if v.TriggerPackageInitMethodName == "" {
-			continue
-		}
-		codes[codeLength] = cg.OP_invokestatic
-		this.mainClass.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{
-			Class:      v.Name + "/main", // main class
-			Method:     v.TriggerPackageInitMethodName,
-			Descriptor: "()V",
-		}, codes[codeLength+1:codeLength+3])
-		codeLength += 3
-	}
 	for _, v := range blockMethods {
 		codes[codeLength] = cg.OP_invokestatic
 		this.mainClass.InsertMethodRefConst(cg.ConstantInfoMethodrefHighLevel{

@@ -49,7 +49,7 @@ class ExpressionCheckSelection {
             if v ,ok := d.(Variable) ;ok {
             	result := v.Type.Clone()
                 result.pos = e.pos
-                if v.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
+                if v.isPublic() == false && object.Package.isSame(block.inheritedAttribute.p) == false {
                     err := new error(sprintf("%s variable '%s' is not public",
                         e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
@@ -61,7 +61,7 @@ class ExpressionCheckSelection {
 				e.fromConst(c) //
                 result := c.Type.Clone()
                 result.pos = e.pos
-                if c.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
+                if c.isPublic() == false && object.Package.isSame(block.inheritedAttribute.p) == false {
                     err := new error(sprintf("%s const '%s' is not public",
                         e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
@@ -73,7 +73,7 @@ class ExpressionCheckSelection {
                 result.pos = e.pos
                 result.Type = VariableTypeClass
                 result.Class = c
-                if c.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
+                if c.isPublic() == false && object.Package.isSame(block.inheritedAttribute.p) == false {
                     err := new error(sprintf("%s class '%s' is not public",
                         e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
@@ -81,7 +81,7 @@ class ExpressionCheckSelection {
                 return result
             }
             if n ,ok:= d.(EnumName) ; ok {
-            	if n.Enum.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
+            	if n.Enum.isPublic() == false && object.Package.isSame(block.inheritedAttribute.p) == false {
                     err := new error(sprintf("%s enum '%s' is not public",
                         e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
@@ -95,7 +95,7 @@ class ExpressionCheckSelection {
                 return result
             }
             if f,ok := d.(Function) ; ok {
-				if f.isPublic() == false && object.Package.isSame(PackageBeenCompile) == false {
+				if f.isPublic() == false && object.Package.isSame(block.inheritedAttribute.p) == false {
                     err := new error(sprintf("%s function '%s' is not public",
                         e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)

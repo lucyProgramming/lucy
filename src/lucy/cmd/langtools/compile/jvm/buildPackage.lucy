@@ -11,7 +11,7 @@ public class  BuildPackage {
 	BuildExpression BuildExpression
     BuildBlock BuildBlock
     BuildFunction BuildFunction
-
+    dir string
     public fn BuildPackage(){
         this.super()
         this.BuildExpression = new BuildExpression(this)
@@ -20,8 +20,9 @@ public class  BuildPackage {
         
     }
 
-    public fn make(p ast.Package) {
+    public fn make(p ast.Package,dir string ) {
         this.Package = p
+        this.dir = dir
         mainClass := new cg.ClassHighLevel()
         this.mainClass = mainClass
         mainClass.accessFlags |= cg.AccClassPublic
@@ -188,16 +189,7 @@ public class  BuildPackage {
 
     fn mkInitFunctions() {
         if len(this.Package.initFunctions) == 0 {
-            needTrigger := false
-            for _, v := range this.Package.loadedPackages {
-                if v.triggerPackageInitMethodName != null && v.triggerPackageInitMethodName != "" {
-                    needTrigger = true
-                    break
-                }
-            }
-            if needTrigger == false {
-                return
-            }
+            return
         }
         blockMethods := []cg.MethodHighLevel{}
         for _, v := range this.Package.initFunctions {
@@ -220,19 +212,6 @@ public class  BuildPackage {
         codes := new []byte (65536)
         codeLength := int(0)
         method.code = new cg.AttributeCode()
-        for _, v := range this.Package.loadedPackages {
-            if v.triggerPackageInitMethodName == null ||
-                v.triggerPackageInitMethodName == "" {
-                continue
-            }
-            codes[codeLength] = cg.OP_invokestatic
-            this.mainClass.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-                   v.name + "/main", // main c
-                    v.triggerPackageInitMethodName,
-                "()V"
-            ), codes[codeLength+1:codeLength+3])
-            codeLength += 3
-        }
         for _, v := range blockMethods {
             codes[codeLength] = cg.OP_invokestatic
             this.mainClass.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
@@ -435,11 +414,11 @@ public class  BuildPackage {
 
     fn DumpClass() {
         //dump main c
-        f := new io.FileOutputStream("main.class", false)
+        f := new io.FileOutputStream(this.dir + "/main.class", false)
         defer f.close()
         this.mainClass.toLow().outPut(f)
         for _, c := range this.classes {
-            f := new io.FileOutputStream(common.getBaseName(c.name)+".class", false)
+            f := new io.FileOutputStream(this.dir + "/" + common.getBaseName(c.name)+".class", false)
             defer f.close()
             c.toLow().outPut(f)
         }

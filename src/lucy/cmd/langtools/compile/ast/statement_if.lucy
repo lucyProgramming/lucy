@@ -7,7 +7,7 @@ public class StatementIf {
 	public initExpressionBlock Block = new Block()
 	public block               Block
 	public elseIfList          []StatementElseIf
-	public Else               	Block
+	public Else               Block
 	public exits               []cg.Exit
 	
 	fn check(father Block) -> (errs []error = []error{})  {

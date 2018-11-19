@@ -18,20 +18,20 @@ fn parseReturnListNames(c cg.Class, bs []byte, f ast.Function) {
 	}
 }
 
-fn loadEnumForFunction(f ast.Function) {
+fn loadEnumForFunction(loader ast.LoadImport , f ast.Function) {
 	for _, v := range f.Type.parameterList {
 		if v.Type.Type == ast.VariableTypeEnum {
-			loadEnumForVariableType(v.Type)
+			loadEnumForVariableType(loader , v.Type)
 		}
 	}
 	for _, v := range f.Type.returnList {
 		if v.Type.Type == ast.VariableTypeEnum {
-			loadEnumForVariableType(v.Type)
+			loadEnumForVariableType(loader , v.Type)
 		}
 	}
 }
 
-fn loadEnumForVariableType(v ast.Type)  {
+fn loadEnumForVariableType(loader ast.LoadImport , v ast.Type)  {
 	t, err := loader.LoadImport(v.Enum.name)
 	if err != null {
 		panic(err)

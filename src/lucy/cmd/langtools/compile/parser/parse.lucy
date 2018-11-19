@@ -2,6 +2,18 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
+
+/*
+public fn ParseJavaBytes(tops []ast.TopNode,
+	filename string,
+	bs byte[],
+	onlyParseImport bool,
+	nErrors2Stop int) -> (errs []error){
+	return Parse(tops , filename , javaArray2Lucy(bs)，onlyParseImport，nErrors2Stop )
+}
+*/
+
+
 public fn Parse(
 	tops []ast.TopNode,
 	filename string,
@@ -432,7 +444,6 @@ class Parser {
 				this.token = tok
 			}
 			if err != null {
-				panic(err)
 				this.errs.append(new error(sprintf("%s %s", this.errMsgPrefix(), err.getMessage())))
 			}
 			if tok == null {

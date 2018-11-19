@@ -1,18 +1,5 @@
 
-import "lucy/cmd/langtools/compile/ast"
-import "java/lang/Object"
-
-
-var	compiler  = new Compiler()
-var	loader  = new  FileLoader()
-
-
-{
-	ast.ImportsLoader = loader
-	loader.caches = new map{string -> Object}()
-}
-
 
 
 const	mainClassName = "main.class"
-
+   

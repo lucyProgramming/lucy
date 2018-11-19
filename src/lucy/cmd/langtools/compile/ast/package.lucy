@@ -1,13 +1,11 @@
 
-import "java/lang/Object"
 import "lucy/os"
 import "lucy/cmd/langtools/compile/common"
 
 
 public class Package {
 	public name                         string
-	public loadedPackages               map { string -> Package }
-	loadedClasses                map { string -> Class }
+	
 	public block                        Block = new Block() // package always have a default block
 	files                        map { string -> SourceFile}
 	public initFunctions                []Function
@@ -17,6 +15,12 @@ public class Package {
 	unUsedPackage                map{string ->  Import }
 	statementLevelFunctions      []Function
 	statementLevelClass          []Class
+	flags 						common.Flags
+	public fn Package(flags common.Flags){
+		this.super()
+		this.flags = flags
+	}
+
 	fn isSame(compare Package) -> (is bool) {
 		return this.name == compare.name
 	}
@@ -47,7 +51,7 @@ public class Package {
 		if this.name == common.CorePackage {
 			return null
 		}
-		pp, err := this.load(common.CorePackage)
+		pp, err := loaded.load(common.CorePackage)
 		if err != null {
 			return err
 		}
@@ -62,8 +66,8 @@ public class Package {
 		if this.files == null {
 			return null
 		}
-		if t := this.files[file]; t != null && t.Imports != null {
-			return t.Imports[accessName]
+		if t := this.files[file]; t != null && t.imports != null {
+			return t.imports[accessName]
 		} else {
 			return null
 		}
@@ -194,6 +198,7 @@ public class Package {
 	}
 
 	public fn typeCheck(nodes []TopNode) -> (es []error) {
+		this.block.inheritedAttribute.p = this
 		if t := this.insert(nodes) ; len(t) > 0 {
 			return t
 		}
@@ -310,41 +315,7 @@ public class Package {
 		return this.errors
 	}
 
-	/*
-		load package or class
-	*/
-	fn load(resource string) -> (x Object, err error) {
-		if resource == "" {
-			panic("null string")
-		}
-		if this.loadedClasses == null {
-			this.loadedClasses = new map {string -> Class}()
-		}
-		if t := this.loadedClasses[resource]; t != null {
-			return t, null
-		}
-		if this.loadedPackages == null {
-			this.loadedPackages = new map { string -> Package} ()
-		}
-		if t := this.loadedPackages[resource]; t != null {
-			return t, null
-		}
-		t, err := ImportsLoader.LoadImport(resource)
-		if pp, ok := t.(Package); ok {
-			this.loadedPackages[resource] = pp
-			this.mkClassCache(pp)
-			if pp.name == common.CorePackage {
-				pp.markBuildIn()
-			}
-		}
-		if c, ok := t.(Class); ok && c != null {
-			if c.isJava == false {
-				return null, new error(sprintf("load lucy class not allow"))
-			}
-			this.loadedClasses[resource] = c
-		}
-		return t, err
-	}
+	
 
 
     /*
@@ -354,7 +325,7 @@ public class Package {
 			return null
 		}
 		for _, v := range this.files {
-			for _, i := range v.Imports {
+			for _, i := range v.imports {
 				if i.used == false {
 					errs = append(errs, new error(sprintf("%s '%s' imported not used",
 						errMsgPrefix(i.pos), i.Import)))
@@ -384,30 +355,7 @@ public class Package {
     */
 
 
-	fn loadClass(className string) -> (c Class,err error) {
-		if this.loadedClasses == null {
-			this.loadedClasses = new map{ string -> Class }()
-		}
-		if c = this.loadedClasses[className];   c != null {
-			return c, null
-		}
-		x, err := ImportsLoader.LoadImport(className)
-		if err != null {
-			return null, err
-		}
-		if t, ok := x.(Class); ok == false || t == null {
-			return null, new error(sprintf("'%s' is not class", className))
-		}
-		cc := x.(Class)
-		this.loadedClasses[className] = cc
-		return cc, null
-	}
 
-	fn mkClassCache(loadedPackage Package) {
-		for _, v := range loadedPackage.block.Classes {
-			this.loadedClasses[v.name] = v // binary name
-		}
-	}
 
 	fn insertImport(i Import) -> (err error) {
 		if this.files == null {

@@ -144,10 +144,10 @@ public class Statement {
 			    }
 			}
 		case StatementTypeClass:
-		    if PackageBeenCompile.statementLevelClass == null {
-                PackageBeenCompile.statementLevelClass = []Class{this.Class}
+		    if block.inheritedAttribute.p.statementLevelClass == null {
+                block.inheritedAttribute.p.statementLevelClass = []Class{this.Class}
 		    }else {
-                PackageBeenCompile.statementLevelClass.append(this.Class)
+                block.inheritedAttribute.p.statementLevelClass.append(this.Class)
 		    }
 			err := block.insert(this.Class.name, this.Class.pos, this.Class)
 			if err != null {
@@ -184,7 +184,7 @@ public class Statement {
 					errMsgPrefix(this.Import.pos))))
 				return null
 			}
-			if err := PackageBeenCompile.insertImport(this.Import); err != null {
+			if err := block.inheritedAttribute.p.insertImport(this.Import); err != null {
 				errs.append(err)
 			}
 		case StatementTypeTypeAlias:

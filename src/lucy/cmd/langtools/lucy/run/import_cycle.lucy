@@ -3,34 +3,38 @@
 class ImportStack {
 	Stacks []PackageCompiled
 	M      map { string -> PackageCompiled }
+    
 
-
-    fn fromLast(last ImportStack) ->(ImportStack)  {
-        i.Stacks = make([]*PackageCompiled, len(last.Stacks))
-        copy(i.Stacks, last.Stacks)
-        i.M = make(map[string]*PackageCompiled)
+    fn fromLast(last ImportStack) ->(self ImportStack)  {
+        self = this
+        this.Stacks = new []PackageCompiled(len(last.Stacks))
+        copy(this.Stacks, last.Stacks)
+        this.M = new map { string -> PackageCompiled } ()
         for k, v := range last.M {
-            i.M[k] = v
+            this.M[k] = v
         }
-        return i
     }
 
     /*
         check if import cycling
     */
-    fn insert(c PackageCompiled) error {
-        if _, ok := i.M[c.packageName]; ok {
-            errMsg := fmt.Sprintf("package named '%s' import cycling\n", c.packageName)
+    fn insert(c PackageCompiled) ->(err error) {
+        if this.M.keyExist(c.packageName) {
+            errMsg := sprintf("package named '%s' import cycling\n", c.packageName)
             errMsg += "\t"
-            for _, v := range i.Stacks {
-                errMsg += fmt.Sprintf("'%s' -> ", v.packageName)
+            for _, v := range this.Stacks {
+                errMsg += sprintf("'%s' -> ", v.packageName)
             }
             errMsg += c.packageName
-            return fmt.Errorf(errMsg)
+            return new error(sprintf(errMsg))
         }
-        i.Stacks = append(i.Stacks, c)
-        i.M[c.packageName] = c
-        return nil
+        if this.Stacks == null {
+            this.Stacks = [c]
+        }else {
+            this.Stacks.append(c)
+        }
+        this.M[c.packageName] = c
+        return null
     }
 }
 

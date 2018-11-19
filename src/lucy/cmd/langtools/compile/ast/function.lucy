@@ -126,6 +126,9 @@ public class Function {
 		isAbstract bool) {
 		var err error
 		for k, v := range this.Type.parameterList {
+			if v.name == null {
+				v.name = ""
+			}
 			v.isFunctionParameter = true
 			if len(v.Type.getParameterType(this.Type)) > 0 {
 				if this.TemplateFunction == null {
@@ -189,6 +192,9 @@ public class Function {
 		if this.Type.VoidReturn() == false {
 			//handler return
 			for _, v := range this.Type.returnList {
+				if v.name == null {
+					v.name = ""
+				}
 				v.isReturn = true
 				if len(v.Type.getParameterType(this.Type)) > 0 {
 					if this.TemplateFunction == null {

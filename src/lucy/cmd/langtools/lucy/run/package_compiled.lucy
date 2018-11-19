@@ -1,6 +1,6 @@
- 
+import "lucy/cmd/langtools/common"
 
-type PackageCompiled struct {
+class PackageCompiled {
 	packageName string
-	meta        *common.PackageMeta
+	meta        common.PackageMeta
 }

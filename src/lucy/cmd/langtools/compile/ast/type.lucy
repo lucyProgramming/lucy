@@ -231,12 +231,12 @@ public class Type {
 		case VariableTypeName:
 			return this.resolveName(block)
 		case VariableTypeGlobal:
-			d, exists := PackageBeenCompile.block.nameExists(this.name)
+			d, exists := block.inheritedAttribute.p.block.nameExists(this.name)
 			if exists == false {
 				return new error(sprintf("%s '%s' not found",
 					errMsgPrefix(this.pos), this.name))
 			}
-			return this.makeTypeFrom(d)
+			return this.makeTypeFrom(block , d)
 		case VariableTypeArray, VariableTypeJavaArray:
 			return this.array.resolve(block)
 		case VariableTypeMap:
@@ -273,27 +273,27 @@ public class Type {
 			if d != null {
 				if t, ok := d.(Class); ok &&
 					t.isBuildIn == false {
-					_, loadFromImport = shouldAccessFromImports(this.name, this.pos, t.pos)
+					_, loadFromImport = shouldAccessFromImports(block , this.name, this.pos, t.pos)
 				}
 				if t, ok := d.(Type); ok &&
 						t.isBuildIn == false {
-						_, loadFromImport = shouldAccessFromImports(this.name, this.pos, t.pos)
+						_, loadFromImport = shouldAccessFromImports(block , this.name, this.pos, t.pos)
 				}
 				if t, ok := d.(Enum); ok &&
 						t.isBuildIn == false {
-						_, loadFromImport = shouldAccessFromImports(this.name, this.pos, t.pos)
+						_, loadFromImport = shouldAccessFromImports(block , this.name, this.pos, t.pos)
 				}
 			} else {
 				loadFromImport = true
 			}
 			if loadFromImport {
-				d, err = this.getNameFromImport()
+				d, err = this.getNameFromImport(block)
 				if err != null {
 					return err
 				}
 			}
 		} else { // a.b  in type situation,must be package name
-			d, err = this.getNameFromImport()
+			d, err = this.getNameFromImport(block)
 			if err != null {
 				return err
 			}
@@ -301,19 +301,19 @@ public class Type {
 		if d == null {
 			return new error(sprintf("%s type named '%s' not found", errMsgPrefix(this.pos), this.name))
 		}
-		err = this.makeTypeFrom(d)
+		err = this.makeTypeFrom(block , d)
 		if err != null {
 			return err
 		}
 		return null
 	}
 
-	fn getNameFromImport() -> (d Object, err error) {
+	fn getNameFromImport(block Block) -> (d Object, err error) {
 		if this.name.indexOf(".") < 0  {
-			i := PackageBeenCompile.getImport(this.pos.filename, this.name)
+			i := block.inheritedAttribute.p.getImport(this.pos.filename, this.name)
 			if i != null {
 				i.used = true
-				return PackageBeenCompile.load(i.Import)
+				return loaded.load(i.Import)
 			}
 			return null, new error(sprintf("%s type named '%s' not found",
 				errMsgPrefix(this.pos), this.name))
@@ -321,13 +321,13 @@ public class Type {
 		index := this.name.indexOf(".")
 		packageName := this.name[:index]
 		className := this.name[index+1:]
-		i := PackageBeenCompile.getImport(this.pos.filename, packageName)
+		i := block.inheritedAttribute.p.getImport(this.pos.filename, packageName)
 		if null == i {
 			return null, new error(sprintf("%s package '%s' not imported",
 				errMsgPrefix(this.pos), packageName))
 		}
 		i.used = true
-		p, err := PackageBeenCompile.load(i.Import)
+		p, err := loaded.load(i.Import)
 		if err != null {
 			return null, new error(sprintf("%s %.getMessage()",
 				errMsgPrefix(this.pos), err.getMessage()))
@@ -347,16 +347,15 @@ public class Type {
 		}
 	}
 
-	fn makeTypeFrom(d Object) -> (err error)  {
+	fn makeTypeFrom(block Block , d Object) -> (err error)  {
 		if dd ,ok := d.(Class) ; ok{
 			if dd.loadFromOutSide && dd.isPublic() == false {
-				PackageBeenCompile.errors.append(
-				    new error(sprintf("%s class '%s' is not public",
-						       errMsgPrefix(this.pos), dd.name)))
+                err = new error(sprintf("%s class '%s' is not public",
+                           errMsgPrefix(this.pos), dd.name))
 			}
 			this.Type = VariableTypeObject
 			this.Class = dd
-			return null
+			return err
 		}
 		if t ,ok := d.(Type) ; ok{
 			pos := this.pos
@@ -370,7 +369,7 @@ public class Type {
 		}
 		if dd ,ok:= d.(Enum) ; ok {
 			if dd.loadFromOutSide && dd.isPublic() == false {
-				PackageBeenCompile.errors.append(
+				block.inheritedAttribute.p.errors.append(
 					new error(sprintf("%s enum '%s' is not public",
 						errMsgPrefix(this.pos), dd.name)))
 			}

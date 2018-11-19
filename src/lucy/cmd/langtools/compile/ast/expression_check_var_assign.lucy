@@ -87,7 +87,7 @@ class ExpressionCheckVarAssign {
 					errs.append(err)
 				}
 				if e.isGlobal {
-					err = PackageBeenCompile.block.insert(vd.name, v.pos, vd)
+					err = block.inheritedAttribute.p.block.insert(vd.name, v.pos, vd)
 					vd.isGlobal = true
 				} else {
 					if block.inheritedAttribute.Function != null {

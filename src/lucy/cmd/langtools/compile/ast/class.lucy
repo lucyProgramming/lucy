@@ -56,7 +56,7 @@ public class Class {
             return null
         }
         this.notImportedYet = false
-        load, err := PackageBeenCompile.loadClass(this.name)
+        load, err := loaded.loadClass(this.name)
         if err != null {
             return new error(sprintf("%s %s", pos.errMsgPrefix(), err.getMessage()))
         }
@@ -220,7 +220,7 @@ public class Class {
         this.resolveFatherCalled = true
         if this.superClassName == null {
             superClassName := ""
-            if PackageBeenCompile.name == common.CorePackage {
+            if this.block.inheritedAttribute.p.name == common.CorePackage {
                 superClassName = JavaRootClass
             } else {
                 if this.IsInterface() {
@@ -397,7 +397,7 @@ public class Class {
         if this.superClassName == null {
             this.superClassName = new NameWithPos(JavaRootClass ,this.pos )
         }
-        c, err := PackageBeenCompile.loadClass(this.superClassName.name)
+        c, err := loaded.loadClass(this.superClassName.name)
         if err != null {
             err = new error(sprintf("%s %s", pos.errMsgPrefix(), err.getMessage()))
             return err
@@ -624,7 +624,6 @@ public class Class {
                 if fromSub && f.ableAccessFromSubClass() == false {
                     //cannot access this field
                 } else {
-                    print(pos.filename , pos.line ,  this.name , call.name)
                     assert(this.fields[call.name].Type.functionType != null)
                     call.vArgs, err = this.fields[call.name].Type.functionType.fitArgs(pos, call.args,
                         callArgTypes, null)
@@ -749,7 +748,7 @@ public class Class {
 
     fn checkPhase2()-> (errs []error = []error{}){
         errs.appendAll(this.checkFields())
-        if PackageBeenCompile.shouldStop(errs) {
+        if this.block.inheritedAttribute.p.shouldStop(errs) {
             return errs
         }
         this.mkClassInitMethod()
@@ -780,9 +779,6 @@ public class Class {
             }
         }
         errs.appendAll(this.checkMethods())
-        if PackageBeenCompile.shouldStop(errs) {
-            return errs
-        }
         errs.appendAll(this.checkIfOverrideFinalMethod())
         errs.appendAll(this.resolveInterfaces())
         if this.IsInterface() {

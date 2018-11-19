@@ -10,6 +10,7 @@ public class InheritedAttribute {
 	public Defer         StatementDefer
 	classMethod           ClassMethod
 	public classAndFunctionNames string
+	p Package 
 	
 	fn InheritedAttribute(){
 	    this.super()

@@ -1,7 +1,7 @@
 
 import "java/io"
 import "lucy/binary"
-import "lucy/cmd/langtools/compile/common"
+
 
 public const	AccClassPublic     char = 0x0001 // 可以被包的类外访问。
 public const	AccClassFinal      char = 0x0010 //不允许有子类。
@@ -274,8 +274,8 @@ public class Class {
 
 
 	fn fromHighLevel(high ClassHighLevel) {
-		this.majorVersion = char(common.compileFlags.jvmMajorVersion.getValue())
-		this.minorVersion = char(common.compileFlags.jvmMinorVersion.getValue())
+		this.majorVersion = char(52)
+		this.minorVersion = char(0)
 		if len(this.ConstPool) == 0 {
 			this.ConstPool = []ConstPool{null} // jvm const pool index begin at 1
 		}

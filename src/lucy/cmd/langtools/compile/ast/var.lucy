@@ -4,7 +4,6 @@ public interface  LoadImport {
 	public fn LoadImport(importName string) -> (Object, error)
 }
 
- 
 const	magicIdentifierFile     = "__FILE__"
 const	magicIdentifierLine     = "__LINE__"
 const	magicIdentifierTime     = "__TIME__"
@@ -29,17 +28,18 @@ fn isMagicIdentifier(name string) ->(is bool)  {
 		name == magicIdentifierClass
 }
 
- 
+
 public var ImportsLoader       LoadImport
-public var	 PackageBeenCompile = new  Package()
-var	buildInFunctionsMap = new map {string -> Function }()
+//public var packageBeenCompile  Package
+var	buildInFunctionsMap = new map { string -> Function }()
 var	lucyBuildInPackage  Package
-	 
+
 public var	ParseFunctionHandler fn(bs []byte, pos Pos) -> (f Function, es []error)
 var	javaStringClass      Class
 public var	LucyBytesType       Type // []byte
 public var	JavaBytesType        Type // byte[]
- 
+var loaded = new Loaded()
+
 {
 	LucyBytesType = new Type()
 	LucyBytesType.Type = VariableTypeArray

@@ -1,10 +1,22 @@
+import "lucy/os/flag"
 
 
 class Flags {
-	forceReBuild  bool
-	build         bool
-	verbose       bool
-	compilerFlags string
-	help          bool
-	goCompiler    bool
+	forceReBuild  flag.BoolOption
+	build         flag.BoolOption
+	verbose       flag.BoolOption
+	compilerFlags flag.StringOption 
+	help          flag.BoolOption
+    parser         flag.FlagParser
+
+	fn Flags(){
+	    this.super()
+        this.parser = new flag.FlagParser()
+        this.forceReBuild = this.parser.boolOption( "-forceReBuild", false, "force rebuild all package")
+        this.compilerFlags = this.parser.stringOption("-cf", "", "compiler flags")
+        this.build = this.parser.boolOption("-build", false, "build package and no run")
+        this.verbose = this.parser.boolOption("-v", false, "verbose")
+        this.help = this.parser.boolOption("-h", false, "print help message")
+	}
+
 }

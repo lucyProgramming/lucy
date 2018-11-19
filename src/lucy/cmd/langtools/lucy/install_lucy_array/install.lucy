@@ -77,14 +77,14 @@ func init() {
 func (installLucyArray *InstallLucyArray) RunCommand(command string, args []string) {
 	path := os.Getenv("LUCYROOT")
 	if path == "" {
-		fmt.Println("env variable LUCYPATH is not set")
+		print("env variable LUCYPATH is not set")
 		os.Exit(1)
 	}
 	dest := filepath.Join(path, "lib/lucy/deps")
 	os.MkdirAll(dest, 0755) // ignore errors
 	err := os.Chdir(dest)
-	if err != nil {
-		fmt.Println(err)
+	if err != null {
+		print(err)
 		os.Exit(1)
 	}
 	for _, v := range installs {
@@ -94,15 +94,15 @@ func (installLucyArray *InstallLucyArray) RunCommand(command string, args []stri
 		t = strings.Replace(t, "DEFAULT_INIT", v.defaultValue, -1)
 		t = strings.Replace(t, "IMPORTS", v.imports, -1)
 		err := ioutil.WriteFile(javaFile, []byte(t), 0644)
-		if err != nil {
-			fmt.Println(err)
+		if err != null {
+			print(err)
 			os.Exit(2)
 		}
 		cmd := exec.Command("javac", javaFile)
 		out, err := cmd.Output()
-		if err != nil {
-			fmt.Println(err)
-			if out != nil && len(out) > 0 {
+		if err != null {
+			print(err)
+			if out != null && len(out) > 0 {
 				os.Stdout.Write(out)
 			}
 			os.Exit(3)

@@ -58,12 +58,12 @@ fn mkVoidType(pos Pos) -> (voidType Type) {
 /*
 	when access from global,should check if access from package
 */
-fn shouldAccessFromImports(name string, from Pos, alreadyHave Pos) -> (i Import,should bool) {
+fn shouldAccessFromImports(block Block,name string, from Pos, alreadyHave Pos) -> (i Import,should bool) {
 	//print(name, from, alreadyHave)
 	// different file
 	// should access from import
 	if from.filename != alreadyHave.filename {
-		i = PackageBeenCompile.getImport(from.filename, name)
+		i = block.inheritedAttribute.p.getImport(from.filename, name)
 		if i != null {
 			i.used = true
 			return i, true
@@ -71,7 +71,7 @@ fn shouldAccessFromImports(name string, from Pos, alreadyHave Pos) -> (i Import,
 			return null, false
 		}
 	}
-	i = PackageBeenCompile.getImport(from.filename, name)
+	i = block.inheritedAttribute.p.getImport(from.filename, name)
 	if i == null {
 		return null, false
 	}

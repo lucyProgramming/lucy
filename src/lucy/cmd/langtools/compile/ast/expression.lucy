@@ -530,10 +530,10 @@ public class Expression {
 			}
 		case ExpressionTypeFunctionLiteral:
 			f := this.data.(Function)
-			if PackageBeenCompile.statementLevelFunctions == null {
-                PackageBeenCompile.statementLevelFunctions = [f]
+			if block.inheritedAttribute.p.statementLevelFunctions == null {
+                block.inheritedAttribute.p.statementLevelFunctions = [f]
 			}else {
-			    PackageBeenCompile.statementLevelFunctions.append(f)
+			    block.inheritedAttribute.p.statementLevelFunctions.append(f)
 			}
 			if this.isStatementExpression {
 				err := block.insert(f.name, f.pos, f)
@@ -558,7 +558,7 @@ public class Expression {
 			returnValueTypes[0] = new Type()
 			returnValueTypes[0].Type = VariableTypePackage
 			returnValueTypes[0].pos = this.pos
-			returnValueTypes[0].Package = PackageBeenCompile
+			returnValueTypes[0].Package = block.inheritedAttribute.p
 			this.value = returnValueTypes[0]
 		case ExpressionTypeParenthesis:
 			ee := this.data.(Expression) // override

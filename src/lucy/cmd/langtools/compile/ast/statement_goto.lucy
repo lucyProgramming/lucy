@@ -1,5 +1,6 @@
  
 
+
 public class StatementGoTo {
 	public defers         []StatementDefer
 	public labelName      string

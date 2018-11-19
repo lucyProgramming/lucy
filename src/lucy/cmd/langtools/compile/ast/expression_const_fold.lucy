@@ -142,7 +142,7 @@ class ExpressionConstFold {
 				}
 				//if this.Type == ExpressionTypeAdd || this.Type == ExpressionTypeSub {
 				//	if t := this.longValue < 0; t != (bin.left.longValue < 0) && t != (bin.left.longValue < 0) {
-				//		PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.longExceeds(this.data.(long)))
+				//		packageBeenCompile.errors = append(packageBeenCompile.errors, this.longExceeds(this.data.(long)))
 				//	}
 				//}
 				e.Type = bin.left.Type
@@ -173,7 +173,7 @@ class ExpressionConstFold {
 				}
 				//if this.Type == ExpressionTypeAdd || this.Type == ExpressionTypeSub {
 				//	if t := this.doubleValue < 0; t != (bin.left.doubleValue < 0) && t != (bin.left.doubleValue < 0) {
-				//		PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.floatExceeds())
+				//		packageBeenCompile.errors = append(packageBeenCompile.errors, this.floatExceeds())
 				//	}
 				//}
 				e.Type = bin.left.Type
@@ -223,19 +223,19 @@ class ExpressionConstFold {
 			//	switch bin.left.Type {
 			//	case ExpressionTypeByte:
 			//		if t := this.longValue; (t >> 8) != 0 {
-			//			PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.byteExceeds(t))
+			//			packageBeenCompile.errors = append(packageBeenCompile.errors, this.byteExceeds(t))
 			//		}
 			//	case ExpressionTypeShort:
 			//		if t := this.longValue; (t >> 16) != 0 {
-			//			PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.shortExceeds(t))
+			//			packageBeenCompile.errors = append(packageBeenCompile.errors, this.shortExceeds(t))
 			//		}
 			//	case ExpressionTypeChar:
 			//		if t := this.longValue; (t >> 16) != 0 {
-			//			PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.charExceeds(t))
+			//			packageBeenCompile.errors = append(packageBeenCompile.errors, this.charExceeds(t))
 			//		}
 			//	case ExpressionTypeInt:
 			//		if t := this.longValue; (t >> 32) != 0 {
-			//			PackageBeenCompile.errors = append(PackageBeenCompile.errors, this.intExceeds(t))
+			//			packageBeenCompile.errors = append(packageBeenCompile.errors, this.intExceeds(t))
 			//		}
 			//	}
 			//}
