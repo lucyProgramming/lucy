@@ -10,7 +10,7 @@ import (
 
 type Package struct {
 	Name                         string
-	LoadedPackages               map[string]*Package
+	loadedPackages               map[string]*Package
 	loadedClasses                map[string]*Class
 	Block                        Block // package always have a default block
 	files                        map[string]*SourceFile
@@ -217,15 +217,15 @@ func (this *Package) load(resource string) (interface{}, error) {
 	if t, ok := this.loadedClasses[resource]; ok {
 		return t, nil
 	}
-	if this.LoadedPackages == nil {
-		this.LoadedPackages = make(map[string]*Package)
+	if this.loadedPackages == nil {
+		this.loadedPackages = make(map[string]*Package)
 	}
-	if t, ok := this.LoadedPackages[resource]; ok {
+	if t, ok := this.loadedPackages[resource]; ok {
 		return t, nil
 	}
 	t, err := ImportsLoader.LoadImport(resource)
 	if pp, ok := t.(*Package); ok && pp != nil {
-		PackageBeenCompile.LoadedPackages[resource] = pp
+		PackageBeenCompile.loadedPackages[resource] = pp
 		this.mkClassCache(pp)
 		if pp.Name == common.CorePackage {
 			pp.markBuildIn()

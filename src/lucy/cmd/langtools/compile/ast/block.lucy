@@ -1,6 +1,5 @@
 import "java/lang/Object"
 import "lucy/cmd/langtools/compile/jvm/cg"
-import "lucy/cmd/langtools/compile/common"
       
 
   
@@ -264,7 +263,7 @@ public class Block {
         this.inheritedAttribute.Defer = father.inheritedAttribute.Defer
         this.inheritedAttribute.classMethod = father.inheritedAttribute.classMethod
         this.inheritedAttribute.classAndFunctionNames = father.inheritedAttribute.classAndFunctionNames
-
+        this.inheritedAttribute.p = father.inheritedAttribute.p
         
         if this.isFunctionBlock || this.isClassBlock {
             this.inheritedAttribute.forBreak = null
@@ -277,7 +276,7 @@ public class Block {
     }
 
     fn checkUnUsed() -> (es []error) {
-        if common.compileFlags.disableCheckUnUse.getValue() {
+        if this.inheritedAttribute.p.flags.disableCheckUnUse.getValue() {
             return null
         }
         es = []error{}
@@ -343,7 +342,7 @@ public class Block {
             }
             this.inheritedAttribute.statementOffset = k
             errs.appendAll(s.check(this))
-            if PackageBeenCompile.shouldStop(errs) {
+            if this.inheritedAttribute.p.shouldStop(errs) {
                 return errs
             }
         }

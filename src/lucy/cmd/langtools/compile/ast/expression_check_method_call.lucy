@@ -266,7 +266,7 @@ class ExpressionCheckMethodCall {
 		}
 		if f ,ok := d.(Function) ; ok {
 			if f.isPublic() == false &&
-				p.isSame(PackageBeenCompile) == false {
+				p.isSame(block.inheritedAttribute.p) == false {
 				errs.append(new error(sprintf("%s function '%s' is not public",
 					e.pos.errMsgPrefix(), call.name)))
 			}
@@ -298,7 +298,7 @@ class ExpressionCheckMethodCall {
 			}
 		}
 		if v ,ok:= d.(Variable) ; ok {
-			if v.isPublic() == false && p.isSame(PackageBeenCompile) == false {
+			if v.isPublic() == false && p.isSame(block.inheritedAttribute.p) == false {
 				errs . append(new error( sprintf("%s variable '%s' is not public",
 					e.pos.errMsgPrefix(), call.name)))
 			}
@@ -327,7 +327,7 @@ class ExpressionCheckMethodCall {
 			return ret
 		}
 		if c,ok := d.(Class) ; ok {
-			if c.isPublic() == false && p.isSame(PackageBeenCompile) == false {
+			if c.isPublic() == false && p.isSame(block.inheritedAttribute.p) == false {
 				errs.append(new error(sprintf("%s class '%s' is not public",
 					e.pos.errMsgPrefix(), call.name)))
 			}

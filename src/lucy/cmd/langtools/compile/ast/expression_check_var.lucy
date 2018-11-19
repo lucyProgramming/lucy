@@ -66,7 +66,7 @@ class ExpressionCheckVar {
 					continue
 				}
 				if e.isGlobal {
-					err = PackageBeenCompile.block.insert(v.name, v.pos, v)
+					err = block.inheritedAttribute.p.block.insert(v.name, v.pos, v)
 				} else {
 					if block.inheritedAttribute.Function != null {
 						if err := block.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(v) ; err != null{
@@ -85,7 +85,7 @@ class ExpressionCheckVar {
 			for k, v := range ev.variables {
 				var err error
 				if e.isGlobal {
-					err = PackageBeenCompile.block.insert(v.name, v.pos, v)
+					err = block.inheritedAttribute.p.block.insert(v.name, v.pos, v)
 				} else {
 					if block.inheritedAttribute.Function != null {
 						if err := block.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(v) ; err != null{

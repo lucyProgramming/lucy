@@ -99,7 +99,7 @@ class ExpressionCheckLeftValue {
 				}
 				if v := variable.(Variable) ;v != null {
 				    if v.accessFlags&cg.AccFieldPublic == 0 &&
-                        object.Package.isSame(PackageBeenCompile) == false {
+                        object.Package.isSame(block.inheritedAttribute.p) == false {
                         errs.append(new error(sprintf("%s '%s.%s' is private",
                             e.pos.errMsgPrefix(), object.Package.name, selection.name)))
                     }

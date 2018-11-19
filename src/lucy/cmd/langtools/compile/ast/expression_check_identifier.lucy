@@ -44,10 +44,10 @@ class ExpressionCheckIdentifier {
 			return null, err
 		}
 		if d == null {
-			i := PackageBeenCompile.getImport(e.pos.filename, identifier.name)
+			i := block.inheritedAttribute.p.getImport(e.pos.filename, identifier.name)
 			if i != null {
 				i.used = true
-				return .checkIdentifierThroughImports(e , i)
+				return .checkIdentifierThroughImports(block,e , i)
 			}
 			
 		}
@@ -70,9 +70,9 @@ class ExpressionCheckIdentifier {
 			}
 			// try from import
 			if f.isBuildIn == false {
-				i, should := shouldAccessFromImports(identifier.name, e.pos, f.pos)
+				i, should := shouldAccessFromImports(block , identifier.name, e.pos, f.pos)
 				if should {
-					return .checkIdentifierThroughImports(e , i)
+					return .checkIdentifierThroughImports(block,e , i)
 				}
 			}
 			result := new Type()
@@ -84,9 +84,9 @@ class ExpressionCheckIdentifier {
 		}
 		if t ,ok := d.(Variable) ;ok {
 			if t.isBuildIn == false { // try from import
-				i, should := shouldAccessFromImports(identifier.name, e.pos, t.pos)
+				i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
 				if should {
-					return .checkIdentifierThroughImports(e , i)
+					return .checkIdentifierThroughImports(block,e , i)
 				}
 			}
 			if isCaptureVar[0] {
@@ -100,9 +100,9 @@ class ExpressionCheckIdentifier {
 		}
 		if t,ok  := d.(Constant) ;ok {
 			if t.isBuildIn == false { // try from import
-				i, should := shouldAccessFromImports(identifier.name, e.pos, t.pos)
+				i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
 				if should {
-					return .checkIdentifierThroughImports(e , i)
+					return .checkIdentifierThroughImports(block,e , i)
 				}
 			}
 			t.used = true
@@ -113,9 +113,9 @@ class ExpressionCheckIdentifier {
 		}
 		if c ,ok := d.(Class) ; ok {
 			if c.isBuildIn == false { // try from import
-				i, should := shouldAccessFromImports(identifier.name, e.pos, c.pos)
+				i, should := shouldAccessFromImports(block , identifier.name, e.pos, c.pos)
 				if should {
-					return .checkIdentifierThroughImports(e , i)
+					return .checkIdentifierThroughImports(block,e , i)
 				}
 			}
 			result := new Type()
@@ -126,9 +126,9 @@ class ExpressionCheckIdentifier {
 		}
 		if enumName ,ok := d.(EnumName) ; ok {
 			if enumName.Enum.isBuildIn == false { // try from import
-				i, should := shouldAccessFromImports(identifier.name, e.pos, enumName.pos)
+				i, should := shouldAccessFromImports(block , identifier.name, e.pos, enumName.pos)
 				if should {
-					return .checkIdentifierThroughImports(e , i)
+					return .checkIdentifierThroughImports(block,e , i)
 				}
 			}
 			result := new Type()
@@ -143,8 +143,8 @@ class ExpressionCheckIdentifier {
 			e.pos.errMsgPrefix(), identifier.name, block.identifierIsWhat(d)))
 	}
 	
-	static fn checkIdentifierThroughImports(e Expression , it Import) -> (valueType Type,err  error) {
-		p, err := PackageBeenCompile.load(it.Import)
+	static fn checkIdentifierThroughImports(block Block , e Expression , it Import) -> (valueType Type,err  error) {
+		p, err := loaded.load(it.Import)
 		if err != null {
 			return null, new error(sprintf("%s %s", e.pos.errMsgPrefix(), err.getMessage()))
 		}

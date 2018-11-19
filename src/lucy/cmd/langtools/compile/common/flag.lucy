@@ -10,12 +10,12 @@ public class Flags {
 	public disableCheckUnUse flag.BoolOption
 	public release           flag.BoolOption
 	public parser 			flag.FlagParser
-
-	fn Flags(){
+	
+	public fn Flags(){
 		this.super()
 		this.parser = new flag.FlagParser()
 		this.onlyImport = this.parser.boolOption("-only-import")
-		this.packageName = this.parser.stringOption("-package-name")
+		this.packageName = this.parser.stringOption("-package-name" , "")
 		this.jvmMajorVersion = this.parser.intOption("-jvm-major-version" , 52)
 		this.jvmMinorVersion = this.parser.intOption("-jvm-minor-version" , 0 )
 		this.disableCheckUnUse = this.parser.boolOption("-disable-check-unuse")
@@ -30,5 +30,5 @@ public class Flags {
 	}
 }
 
-public var compileFlags = new  Flags()
+//public var compileFlags = new  Flags()
  

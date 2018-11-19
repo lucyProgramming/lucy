@@ -3,7 +3,7 @@
 class ImportStack {
 	Stacks []PackageCompiled
 	M      map { string -> PackageCompiled }
-
+    
 
     fn fromLast(last ImportStack) ->(self ImportStack)  {
         self = this
@@ -19,16 +19,20 @@ class ImportStack {
         check if import cycling
     */
     fn insert(c PackageCompiled) ->(err error) {
-        if _, ok := this.M[c.packageName]; ok {
-            errMsg := fmt.Sprintf("package named '%s' import cycling\n", c.packageName)
+        if this.M.keyExist(c.packageName) {
+            errMsg := sprintf("package named '%s' import cycling\n", c.packageName)
             errMsg += "\t"
             for _, v := range this.Stacks {
-                errMsg += fmt.Sprintf("'%s' -> ", v.packageName)
+                errMsg += sprintf("'%s' -> ", v.packageName)
             }
             errMsg += c.packageName
             return new error(sprintf(errMsg))
         }
-        this.Stacks = append(this.Stacks, c)
+        if this.Stacks == null {
+            this.Stacks = [c]
+        }else {
+            this.Stacks.append(c)
+        }
         this.M[c.packageName] = c
         return null
     }

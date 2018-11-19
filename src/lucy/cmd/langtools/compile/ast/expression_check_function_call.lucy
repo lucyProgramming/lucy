@@ -262,7 +262,7 @@ class ExpressionCheckFunctionCall {
 				}
 			}
 			//check this function
-			cloneFunction.block.inherit(PackageBeenCompile.block)
+			cloneFunction.block.inherit(block.inheritedAttribute.p.block)
 			if cloneFunction.block.functions == null {
 				cloneFunction.block.functions = new map { string -> Function } ()
 			}

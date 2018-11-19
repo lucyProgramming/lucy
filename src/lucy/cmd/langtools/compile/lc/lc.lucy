@@ -7,11 +7,16 @@ import "lucy/os"
 import "lucy/encoding/json"
 
 
-public fn Main(files []string,lucyPaths , classPaths []string) {
+public fn Main(dir string , flags common.Flags , files []string , lucyPaths , classPaths []string) {
+    var	compiler  = new Compiler()
+    var	loader  = new  FileLoader(lucyPaths , classPaths)
+    ast.ImportsLoader = loader
 	if len(files) == 0 {
 		print("no file specfied")
 		os.exit(1)
 	}
+	compiler.flags = flags
+	compiler.dir = dir 
 	compiler.compile(files,lucyPaths,classPaths)
 }
 
@@ -23,7 +28,10 @@ public class Compiler {
 	NErrs2StopCompile int
 	lucyPaths         []string
 	classPaths        []string
-	buildPackage             jvm.BuildPackage = new jvm.BuildPackage()
+	buildPackage        jvm.BuildPackage = new jvm.BuildPackage()
+    flags common.Flags
+    dir string
+
 
 	fn Compiler(){
 	    this.super()
@@ -34,7 +42,7 @@ public class Compiler {
 
 
 	fn shouldExit() {
-		if len(compiler.Errs) > compiler.NErrs2StopCompile {
+		if len(this.Errs) > this.NErrs2StopCompile {
 			this.exit()
 		}
 	}
@@ -114,26 +122,26 @@ public class Compiler {
 				bs = bs[3:]
 			}
 			this.Errs.appendAll(parser.Parse(this.Tops, v, bs ,
-				common.compileFlags.onlyImport.getValue(), this.NErrs2StopCompile))
+				this.flags.onlyImport.getValue(), this.NErrs2StopCompile))
 			this.shouldExit()
 		}
 		// parse import only
-		if common.compileFlags.onlyImport.getValue() {
+		if this.flags.onlyImport.getValue() {
 			this.dumpImports()
 			return
 		}
-
-		if common.compileFlags.packageName.getValue() == "" {
+		if this.flags.packageName.getValue() ==null ||
+		    this.flags.packageName.getValue() == "" {
 			print("package name not specfied")
 			os.exit(1)
 		}
-		ast.PackageBeenCompile.name = common.compileFlags.packageName.getValue()
-		this.Errs.appendAll(this.Errs, ast.PackageBeenCompile.typeCheck(this.Tops))
+		p := new ast.Package(this.flags)
+		p.name = this.flags.packageName.getValue()
+		this.Errs.appendAll(this.Errs, p.typeCheck(this.Tops))
 		if len(this.Errs) > 0 {
 			this.exit()
 		}
-		this.buildPackage.make(ast.PackageBeenCompile)
-		this.exit()
+		this.buildPackage.make(p,this.dir)
 	}
 }
 

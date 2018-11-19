@@ -1,10 +1,17 @@
 import "lucy/cmd/langtools/common"
 import "lucy/os"
-import "lucy/enconding/json"
+import "lucy/encoding/json"
 import "java/io"
+import "lucy/io" as lucyIo
+import "java/lang/System"
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/lc"
+import "lucy/cmd/langtools/compile/parser"
+import "lucy/cmd/langtools/compile/common" as compileCommon 
+import "java/lang/Runtime"
 
 
-class RunLucyPackage {
+public class RunLucyPackage {
 	lucyRoot            string
 	lucyPaths           []string
 	mainPackageLucyPath string
@@ -12,19 +19,18 @@ class RunLucyPackage {
 	command             string
 	compilerExe         []string
 	classPaths          []string
-	flags               Flags
+	flags               Flags = new Flags()
 	packagesCompiled    map{string -> PackageCompiled}
 	lucyProgramArgs     []string // lucy application args
-
-    fn RunCommand(command string, args []string) {
+    
+    public fn RunCommand(command string, args []string) {
         this.command = command
         err := this.parseCmd(args) // skip run
         if err != null {
-            print(err)
             this.help()
             return
         }
-        if this.flags.help {
+        if this.flags.help.getValue() {
             this.help()
             return
         }
@@ -32,31 +38,18 @@ class RunLucyPackage {
             print("no package to run")
             os.exit(1)
         }
-        this.lucyRoot, err = common.GetLucyRoot()
-        if err != null {
-            print(err)
-            os.exit(1)
-        }
-        this.lucyPaths, err = common.GetLucyPaths()
-        if err != null {
-            print(err)
-            os.exit(2)
-        }
-        this.classPaths = common.GetClassPaths()
-        this.setCompiler()
+        this.lucyRoot = common.getLucyRoot()
+        this.lucyPaths = common.getLucyPath()
+        this.classPaths = common.getClassPath()
         this.packagesCompiled = new map{string -> PackageCompiled}()
         founds := this.findPackageIn(this.Package)
-        err = this.foundError(this.Package, founds)
-        if err != null {
-            print(err)
-            os.exit(2)
-        }
+        this.foundError(this.Package, founds)
         this.mainPackageLucyPath = founds[0]
         //
         {
-            _, _, err = this.buildPackage("", common.CorePackage, new ImportStack())
+            _, _, err = this.buildPackage("", "lucy/lang", new ImportStack())
             if err != null {
-                printf("build  buildin package '%s' failed,err:%v\n", common.CorePackage, err)
+                printf("build  buildin package '%s' failed,err:%v\n", "lucy/lang", err)
                 os.exit(3)
             }
         }
@@ -65,78 +58,77 @@ class RunLucyPackage {
             print(err)
             os.exit(3)
         }
-        if this.flags.build {
+        if this.flags.build.getValue() {
             os.exit(0)
         }
-        //
-        cmd := exec.Command("java",
-            append([]string{this.Package + "/" + "main"}, this.lucyProgramArgs...)...)
-        cmd.Stderr = os.Stderr
-        cmd.Stdin = os.Stdin
-        cmd.Stdout = os.Stdout
+        cmdArray := []string{"java" , this.Package + "/" + "main"}
+        cmdArray.appendAll(this.lucyProgramArgs)
         //set CLASSPATHS
         classpath := new map{string -> bool}() // if duplicate
         for _, v := range this.classPaths {
             classpath[v] = true
         }
         for _, v := range this.lucyPaths {
-            classpath[filepath.Join(v, common.DirForCompiledClass)] = true
+            classpath[v + "/class"] = true
         }
-        classpath[filepath.Join(this.lucyRoot, "lib")] = true
+        classpath[this.lucyRoot + "/lib"] = true
         classPathArray := new []string(len(classpath))
         {
             i := 0
-            for k := range classpath {
+            for k , _ := range classpath {
                 classPathArray[i] = k
                 i++
             }
         }
-        if runtime.GOOS == "windows" {
-            cmd.Env = append(cmd.Env, sprintf("CLASSPATH=%s", strings.Join(classPathArray, ";")))
-        } else { // unix style
-            cmd.Env = append(cmd.Env, sprintf("CLASSPATH=%s", strings.Join(classPathArray, ":")))
+        var envs  []string 
+        {
+            //TODO ::  unix systems
+            s := ""
+            for k,v := range classPathArray{
+                if k != len(classPathArray) {
+                    s += v + ";"
+                }else {
+                    s += v
+                }
+            }
+            envs = ["CLASSPATH=" + s]
         }
         {
-            envs := os.Environ()
-            ts := []string{}
-            for _, v := range envs {
-                if strings.HasPrefix(v, "CLASSPATH=") {
+            for k, v := range os.getEnvs() {
+                if v.startsWith("CLASSPATH=") {
                     continue
                 }
-                ts = append(ts, v)
+                envs.append(k+ "=" + v )
             }
-            cmd.Env = append(cmd.Env, ts...)
         }
-
-        err = cmd.Start()
-        if err != null {
-            print(err)
-            os.exit(5)
-        }
-        err = cmd.Wait()
-        if err != null {
-            print(err)
-            os.exit(6)
-        }
+        p := Runtime.getRuntime().exec(
+            copy(new string[](len(cmdArray)) ,cmdArray ) ,
+            copy(new string[](len(envs)) ,envs )
+        )
+        Run.runFn(fn() {
+            lucyIo.ioCopy(os.stderr , p.getErrorStream())
+        })
+        Run.runFn(fn() {
+            lucyIo.ioCopy(os.stdout , p.getInputStream())
+        })
     }
-
+    
     fn help() {
         print("run a lucy package")
-        this.flagSet.Usage()
     }
 
     fn parseCmd(args []string) ->(err error) {
         var lucyProgramArgs []string
         runArgs := []string{}
         for k, v := range args {
-            if strings.HasPrefix(v, "-") == false {
+            if v.startsWith("-") == false {
                 this.Package = v
                 lucyProgramArgs = args[k+1:]
                 break
             }
             runArgs.append(v)
         }
-        err = cmd.Parse(runArgs)
+        _, err = this.flags.parser.parse(runArgs)
         if err != null {
             return err
         }
@@ -144,34 +136,14 @@ class RunLucyPackage {
         return null
     }
 
-    fn setCompiler() {
-        if this.flags.goCompiler {
-            t := filepath.Join(this.lucyRoot, "bin", "compile") //compiler at
-            if runtime.GOOS == "windows" {
-                t += ".exe"
-            }
-            _, e := os.Stat(t)
-            if e != null {
-                panic("compiler not found")
-            }
-            this.compilerExe = []string{t}
-        } else {
-            this.compilerExe = []string{"java", "lucy.cmd.langtools.compile.main"}
-        }
-    }
-
-
-
     /*
         find package in which directory
     */
-    fn findPackageIn(packageName string) -> (paths []string) {
+    fn findPackageIn(packageName string) -> (paths []string = []string{}) {
         pathHavePackage := []string{}
         for _, v := range this.lucyPaths {
-            dir := filepath.Join(v, common.DirForLucySourceFile, packageName)
-            f, err := os.Stat(dir)
-            if err == null && f.IsDir() {
-                pathHavePackage = append(pathHavePackage, v)
+            if new io.File(v + "/src/" + packageName).isDirectory() {
+                pathHavePackage.append(v)
             }
         }
         return pathHavePackage
@@ -181,113 +153,120 @@ class RunLucyPackage {
         check package if need rebuild
     */
     fn needCompile(lucyPath string, packageName string) -> (meta common.PackageMeta,
-        need bool, lucyFiles []string, err error) {
-        need = true
-        sourceFileDir := filepath.Join(lucyPath, common.DirForLucySourceFile, packageName)
-        fis, err := ioutil.ReadDir(sourceFileDir)
-        if err != null { // shit happens
-            return
+        need bool, lucyFiles []LucyFile) {
+        if p := this.packagesCompiled[packageName]; p != null {
+            return p.meta, false, null
         }
-        fisM := new map{string -> os.FileInfo}()
+        need = true
+        sourceFileDir := lucyPath +"/src/" + packageName
+        fis := new io.File(sourceFileDir).list()
+        fisM := new map{string -> LucyFile}()
+        lucyFiles = []LucyFile {}
         for _, v := range fis {
-            if strings.HasSuffix(v.Name(), ".lucy") {
-                lucyFiles = append(lucyFiles, filepath.Join(sourceFileDir, v.Name()))
-                fisM[v.Name()] = v
+            if v.endsWith( ".lucy") {
+                t := new LucyFile()
+                t.realpathName = sourceFileDir + "/" +  v
+                t.name = v 
+                tt ,e := os.readFile(t.realpathName)
+                if e != null {
+                    panic(e)
+                }
+                t.bs = javaArray2Lucy(tt)
+                lucyFiles.append(t)
+                fisM[v] = t
             }
         }
         if len(lucyFiles) == 0 {
-            err = new error(sprintf("no lucy source files in '%s'",
-                filepath.Join(lucyPath, common.DirForLucySourceFile, packageName)))
+            panic(sprintf("no lucy source files in '%s'", sourceFileDir))
             return
         }
-        if p, ok := this.packagesCompiled[packageName]; ok {
-            return p.meta, false, null, null
-        }
-        if this.flags.forceReBuild {
+        if this.flags.forceReBuild.getValue() {
             return
         }
-        destinationDir := filepath.Join(lucyPath, "class", packageName)
-        bs, err := ioutil.ReadFile(filepath.Join(destinationDir, common.LucyMaintainFile))
-        if err != null { // maintain file is missing
-            err = null
+        destinationDir := lucyPath +  "/class/" +  packageName
+        bs, err := os.readFile(destinationDir + "/maintain.json")
+        if err != null {
             return
         }
         meta = new common.PackageMeta()
-        err = json.Unmarshal(bs, meta)
+        _, err = json.decode(javaArray2Lucy(bs), meta)
         if err != null { // this is not happening
             err = null
             return
         }
         // new or add
+        compiledFrom := new map{string -> common.FileMeta}()
+        for v := range meta.compiledFrom {
+            compiledFrom[v.name] = v 
+        }
         for _, v := range fisM {
-            if meta.compiledFrom == null {
+            if v := compiledFrom[v.name]; v == null { // new file
                 return
             }
-            if _, ok := meta.compiledFrom[v.Name()]; ok == false { // new file
-                return
-            }
-            if v.ModTime().Unix() > (meta.compiledFrom[v.Name()].lastModify) { // modified
+            if v.lastModify > (compiledFrom[v.name].lastModify) { // modified
                 return
             }
         }
         // file missing
         for f := range meta.compiledFrom {
-            _, ok := fisM[f]
-            if ok == false {
+            if fisM.keyExist(f.name) == false {
                 return
             }
         }
         // if class file is missing
-        fis, err = ioutil.ReadDir(destinationDir)
-        fisM = new map{string ->os.FileInfo }()
-        for _, v := range fis {
-            if strings.HasSuffix(v.Name(), ".class") {
-                fisM[v.Name()] = v
+        {
+            fis := new io.File(destinationDir).list()
+            fisM := new map{string -> bool }()
+            for _, v := range fis {
+                if v.endsWith(".class") {
+                    fisM[v] = true
+                }
             }
-        }
-        for _, v := range meta.Classes {
-            _, ok := fisM[v]
-            if ok == false {
-                return
+            for _, v := range meta.classes {
+                if fisM.keyExist(v) {
+                    return
+                }
             }
         }
         need = false
         return
     }
 
-    fn parseImports(files []string) -> (imports []string,err error) {
-
+    fn parseImports(files []LucyFile) -> (imports []string = []string{}) {
+        importNodes := []ast.TopNode{}
+        for _,v := range files {
+            parser.Parse(importNodes ,  v.realpathName , v.bs , true ,10)
+        }
+        m := new map{string->bool}()
+        for _,v := range importNodes{
+            name := v.node.(ast.Import)
+            if m.keyExist(name.Import) {
+                continue
+            }
+            m[name.Import] = true
+            imports.append(name.Import)
+        }
+        return this.javaPackageFilter(imports)
     }
 
-    fn javaPackageFilter(is []string) -> (lucyPackages []string, err error) {
-        existInClassPath := fn(name string) -> (found []string) {
-            for _, v := range this.classPaths {
-                dir := filepath.Join(v, name)
-                f, _ := os.Stat(dir)
-                if f != null && f.IsDir() {
-                    fis, _ := ioutil.ReadDir(dir)
-                    for _, ff := range fis {
-                        if strings.HasSuffix(ff.Name(), ".class") {
-                            found = append(found, v)
-                            break
-                        }
-                    }
+    fn javaPackageFilter(is []string) -> (lucyPackages []string = []string{}) {
+        var that = this
+        existInClassPath := fn(name string) -> (found []string = []string{}) {
+            for _, v := range that.classPaths {
+                if new io.File(v +"/" + name).isDirectory() {
+                    found.append(v)
                     continue
                 }
-                dir = filepath.Join(v, name+".class")
-                f, _ = os.Stat(dir)
-                if f != null && f.IsDir() == false {
-                    found = append(found, v)
+                if new io.File(v + "/" + name + ".class").isFile() {
+                    found.append(v)
                 }
             }
             return
         }
-        existInLucyPath := fn(name string) -> (found []string) {
-            for _, v := range this.lucyPaths {
-                dir := filepath.Join(v, common.DirForLucySourceFile, name)
-                f, _ := os.Stat(dir)
-                if f != null && f.IsDir() {
-                    found = append(found, v)
+        existInLucyPath := fn(name string) -> (found []string = []string{}) {
+            for _, v := range that.lucyPaths {
+                if new io.File(v + "/src/" + name).isDirectory() {
+                    found.append(v)
                 }
             }
             return
@@ -301,12 +280,11 @@ class RunLucyPackage {
         for _, i := range is {
             found := existInLucyPath(i)
             if len(found) > 1 {
-                err = new error(sprintf("not 1 package named '%s' in $LUCYPATH", i))
-                return
+                panic(sprintf("not 1 package named '%s' in $LUCYPATH", i))
             }
             if len(found) == 1 { // perfect found in lucyPath
-                if i != common.CorePackage {
-                    lucyPackages = append(lucyPackages, i)
+                if i != "lucy/lang" {
+                    lucyPackages.append(i)
                 }
                 continue
             }
@@ -314,27 +292,26 @@ class RunLucyPackage {
             if len(found) > 1 {
                 errMsg := sprintf("not 1 package named '%s' in $CLASSPATH,which CLASSPATH are:\n", i)
                 errMsg += formatPaths(this.classPaths)
-                return null, new error(errMsg)
+                panic(errMsg)
             }
             if len(found) == 0 {
                 errMsg := sprintf("package named '%s' not found in $CLASSPATH,which CLASSPATH are:\n", i)
                 errMsg += formatPaths(this.classPaths)
-                return null, new error(errMsg)
+                panic(errMsg)
             }
         }
-        return
     }
 
-    fn foundError(packageName string, founds []string) ->(err error) {
+    fn foundError(packageName string, founds []string) {
         if len(founds) == 0 {
-            return new error(sprintf("package '%s' not found", packageName))
+            panic(sprintf("package '%s' not found", packageName))
         }
         if len(founds) > 1 {
-
+            panic(sprintf("package '%s' in '%s'", packageName,  founds + ""))
         }
-        return null
-    }
 
+    }
+    
     fn buildPackage(lucyPath string, packageName string, importStack ImportStack) -> (needBuild bool,
         meta common.PackageMeta, err error) {
         if p := this.packagesCompiled[packageName]; p != null  {
@@ -342,17 +319,10 @@ class RunLucyPackage {
         }
         if lucyPath == "" {
             founds := this.findPackageIn(packageName)
-            err = this.foundError(packageName, founds)
-            if err != null {
-                return false, null, err
-            }
+            this.foundError(packageName, founds)
             lucyPath = founds[0]
         }
-        meta, needBuild, lucyFiles, err := this.needCompile(lucyPath, packageName)
-        if err != null {
-            err = new error(sprintf("check if need compile,err:%v", err))
-            return
-        }
+        meta, needBuild, lucyFiles := this.needCompile(lucyPath, packageName)
         if needBuild == false { //current package no need to compile,but I need to check dependies
             for _, v := range meta.imports {
                 i := (new ImportStack()).fromLast(importStack)
@@ -375,10 +345,7 @@ class RunLucyPackage {
             return
         }
         //compile this package really
-        is, err := this.parseImports(lucyFiles)
-        if err != null {
-            return
-        }
+        is := this.parseImports(lucyFiles)
         for _, i := range is {
             im := (new ImportStack()).fromLast(importStack)
             t := new PackageCompiled()
@@ -399,35 +366,39 @@ class RunLucyPackage {
         if this.flags.verbose.getValue() {
             printf("# %s\n", packageName) // compile this package
         }
-        //TODO :: call build
-
+        files := new []string(len(lucyFiles))
+        for k,v := range lucyFiles{
+            files[k] = v.realpathName
+        }
+        f := new compileCommon.Flags()
+        f.parseArgs(["-package-name" , packageName])
+        lc.Main(destinationDir , f , files , this.lucyPaths , this.classPaths)
         // make_node_objects maitain.json
         meta = new common.PackageMeta()
-        meta.compiledFrom =  new common.FileMeta[](len(lucyFiles))
+        meta.compiledFrom = new common.FileMeta[](len(lucyFiles))
         for k, v := range lucyFiles {
             t := new common.FileMeta()
-            t.lastModify = new io.File(v).lastModified() / 1000L
-            meta.compiledFrom[common.getBaseName(v)] = t
+            t.lastModify = new io.File(v.realpathName).lastModified() / 1000L
+            meta.compiledFrom[k] = t
         }
-        meta.CompileTime = time.Now().Unix()
-        meta.imports = is
-        fis, err := ioutil.ReadDir(destinationDir)
-        if err != null {
-            return
-        }
-        for _, v := range fis {
-            if strings.HasSuffix(v.Name(), ".class") {
-                meta.Classes = append(meta.Classes, v.Name())
+        meta.compileTime = System.currentTimeMillis()
+        meta.imports = copy(new string[](len(is)) , is)
+        fis := new io.File(destinationDir).list()
+        {
+            classFiles := []string{}
+            for k, v := range fis {
+                if v.endsWith(".class") {
+                    classFiles.append(v)
+                }
             }
+            meta.classes = copy(new string[](len(classFiles)) ,classFiles )
         }
-        bs, err = json.MarshalIndent(meta, "", "\t")
+        bs, err := json.encode(meta , "\t")
         if err != null {
             return
         }
-        err = ioutil.WriteFile(
-            filepath.Join(lucyPath, common.DirForCompiledClass, packageName, common.LucyMaintainFile),
-            bs,
-            0644)
+        err = os.writeFile(lucyPath + "/class/" + packageName + "/maintain.json",
+            copy(new byte[](len(bs)) ,bs ))
         t := new PackageCompiled()
         t.meta = meta
         t.packageName = packageName

@@ -47,7 +47,7 @@ fn registerBuildInFunctions() {
 			}
 			if len(e.args) == 0 {
 				if block.inheritedAttribute.Defer.exceptionClass == null {
-					c, err := PackageBeenCompile.loadClass(DefaultExceptionClass)
+					c, err := loaded.loadClass(DefaultExceptionClass)
 					if err != null {
 						errs . append(new error( sprintf("%s load exception class failed,err:%s",
 							pos.errMsgPrefix(), err.getMessage())))
@@ -68,7 +68,7 @@ fn registerBuildInFunctions() {
 					errMsgPrefix(args[0].pos), common.BuildInFunctionCatch)))
 			}
 			className := e.args[0].stringValue
-			c, err := PackageBeenCompile.loadClass(className)
+			c, err := loaded.loadClass(className)
 			if err != null {
 				errs . append(new error(sprintf("%s %s", e.args[0].pos.errMsgPrefix(), err.getMessage())))
 				return

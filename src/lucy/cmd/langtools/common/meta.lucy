@@ -10,6 +10,7 @@ public class PackageMeta {
 
 public class FileMeta {
 	public lastModify long
+	public name string 
 }
 
 

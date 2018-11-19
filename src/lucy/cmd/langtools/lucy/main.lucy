@@ -17,7 +17,7 @@ fn printUsage() {
 }
 
 fn main(args []string) {
-	if len(args) == 1 {
+	if len(args) == 0 {
 		printUsage()
 		os.exit(0)
 	}
@@ -26,27 +26,29 @@ fn main(args []string) {
 		printf("lucy-%s\n", "0.0.1")
 		os.exit(0)
 	case "build":
-		(new run.RunLucyPackage()).RunCommand("run", append([]string{"-build"}, args[1:]...))
+	    t := ["-build"]
+	    t.appendAll(args[1:])
+		(new run.RunLucyPackage()).RunCommand("run", t )
 	case "run":
 		(new run.RunLucyPackage()).RunCommand(args[0], args[1:])
 	case "install":
-		args := []string{"lucy/cmd/langtools/install"}
-		args = append(args, args[1:]...)
-		(new run.RunLucyPackage()).RunCommand("run", args)
+		runArgs := []string{"lucy/cmd/langtools/install"}
+		runArgs.appendAll( args[1:])
+		(new run.RunLucyPackage()).RunCommand("run", runArgs)
 	case "clean":
-		args := []string{"lucy/cmd/langtools/clean"}
-		args = append(args, args[1:]...)
-		(new run.RunLucyPackage()).RunCommand("run", args)
+		runArgs := []string{"lucy/cmd/langtools/clean"}
+		runArgs.appendAll( args[1:])
+		(new run.RunLucyPackage()).RunCommand("run", runArgs)
 	case "test":
-		args := []string{"lucy/cmd/langtools/test"}
-		args = append(args, args[1:]...)
-		(new run.RunLucyPackage()).RunCommand("run", args)
-	case "install_lucy_array":
-		(new install_lucy_array.InstallLucyArray()).RunCommand("install_lucy_array", null)
+		runArgs := []string{"lucy/cmd/langtools/test"}
+		runArgs.appendAll( args[1:])
+		(new run.RunLucyPackage()).RunCommand("run", runArgs)
+	//case "install_lucy_array":
+	//	(new install_lucy_array.InstallLucyArray()).RunCommand("install_lucy_array", null)
 	case "pack":
-		args := []string{"lucy/cmd/langtools/pack"}
-		args = append(args, args[1:]...)
-		(new run.RunLucyPackage()).RunCommand("run", args)
+		runArgs := []string{"lucy/cmd/langtools/pack"}
+		runArgs.appendAll( args[1:])
+		(new run.RunLucyPackage()).RunCommand("run", runArgs)
 	default:
 		printUsage()
 		os.exit(1)

@@ -1,0 +1,7 @@
+
+class LucyFile {
+	realpathName string 
+	name string 
+	bs []byte 
+	lastModify long
+}

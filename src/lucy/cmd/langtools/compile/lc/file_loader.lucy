@@ -15,8 +15,12 @@ import "lucy/os"
 	load from file implementation
 */
 class FileLoader implements ast.LoadImport{
-	caches map { string -> Object }
-
+    lucyPaths , classPaths []string
+    fn FileLoader(lucyPaths , classPaths []string){
+        this.super()
+        this.lucyPaths = lucyPaths
+        this.classPaths = classPaths
+    }
     public fn  LoadImport(importName string) -> (x Object,err error) {
         /*defer {
             e := catch()
@@ -24,31 +28,30 @@ class FileLoader implements ast.LoadImport{
                 err =  e
             }
         }*/
-        if this.caches != null && this.caches[importName] != null {
-            return this.caches[importName], null
-        }
         realPaths  := []Resource{}
         foundInLucy := false
-        for _, v := range compiler.lucyPaths {
-            if  p := v + "/class/" + importName ;  new io.File(p ).isDirectory() { // directory is package
+        for _, v := range this.lucyPaths {
+            if  p := v + "/class/" + importName ; new io.File(p ).isDirectory() { // directory is package
                 realPaths.append(new Resource(
                     resourceKindLucyPackage,
                     p,
                     importName
                 ))
                 foundInLucy = true
+                continue 
             }
-            if  p :=v + "/class/" + importName + ".class" ;  new io.File(p).isFile(){ // class file
+            if  p :=v + "/class/" + importName + ".class" ; new io.File(p).isFile(){ // class file
                 realPaths.append(new Resource(
                     resourceKindLucyClass,
                     p,
                     importName
                 ))
                 foundInLucy = true 
+                continue
             }
         }
         if foundInLucy == false {
-            for _, v := range compiler.classPaths {
+            for _, v := range this.classPaths {
                 if p := v + "/" + importName  ; new io.File(p).isDirectory() { // directory is package
                     realPaths.append(new Resource(
                         resourceKindJavaPackage,
@@ -65,7 +68,6 @@ class FileLoader implements ast.LoadImport{
                 }
             }
         }
-        
         if len(realPaths) == 0 {
             return null, new error(sprintf("resource '%s' not found", importName))
         }
@@ -100,27 +102,15 @@ class FileLoader implements ast.LoadImport{
         }
         if realPaths[0].kind == resourceKindJavaClass {
             c := this.loadClass(realPaths[0])
-            if c != null {
-                this.caches[importName] = c
-            }
             return c, null
         } else if realPaths[0].kind == resourceKindLucyClass {
             t := this.loadClass(realPaths[0])
-            if t != null {
-                this.caches[importName] = t
-            }
             return t, null
         } else if realPaths[0].kind == resourceKindJavaPackage {
             p := this.loadJavaPackage(realPaths[0])
-            if p != null {
-                this.caches[importName] = p
-            }
             return p, null
         } else { // lucy package
             p := this.loadLucyPackage(realPaths[0])
-            if p != null {
-                this.caches[importName] = p
-            }
             return p ,null
         }
     }
@@ -279,7 +269,7 @@ class FileLoader implements ast.LoadImport{
                 }
             }
             if f.Type.Type == ast.VariableTypeEnum {
-                loadEnumForVariableType(f.Type)
+                loadEnumForVariableType(this , f.Type)
             }
             f.accessFlags = v.accessFlags
             astClass.fields[f.name] = f
@@ -313,7 +303,7 @@ class FileLoader implements ast.LoadImport{
             if t := v.GetAttributeByName(cg.AttributeNameLucyReturnListNames); t != null && len(t) > 0 {
                 parseReturnListNames(c, t[0].info, m.Function)
             }
-            loadEnumForFunction(m.Function)
+            loadEnumForFunction(this , m.Function)
             if (v.accessFlags & cg.AccMethodVarargs) != 0 {
                 m.Function.Type.vArgs = m.Function.Type.parameterList[len(m.Function.Type.parameterList)-1]
                 if m.Function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
@@ -432,7 +422,7 @@ class FileLoader implements ast.LoadImport{
                     }
                 }
                 if typ.Type == ast.VariableTypeEnum {
-                    loadEnumForVariableType(typ)
+                    loadEnumForVariableType(this , typ)
                 }
             }
         }
@@ -462,7 +452,7 @@ class FileLoader implements ast.LoadImport{
                     panic(err)
                 }
             }
-            loadEnumForFunction(function)
+            loadEnumForFunction(this , function)
             if t := m.GetAttributeByName(cg.AttributeNameMethodParameters); t != null && len(t) > 0 {
                 parseMethodParameter(c, t[0].info, function)
             }
@@ -508,7 +498,7 @@ class FileLoader implements ast.LoadImport{
             typ.alias = alias
             pack.block.typeAliases[name] = typ
             if typ.Type == ast.VariableTypeEnum {
-                loadEnumForVariableType(typ)
+                loadEnumForVariableType(this , typ)
             }
         }
         for _, v := range c.GetAttributeByName(cg.AttributeNameLucyTemplateFunction) {
@@ -542,7 +532,7 @@ class FileLoader implements ast.LoadImport{
         }
         bs , _ := os.readFile(r.realPath + "/"  + mainClassName)
         c := (new ClassDecoder(javaArray2Lucy(bs))).decode()
-        p = new ast.Package()
+        p = new ast.Package(null)
         p.block = new ast.Block()
         p.name = r.name
         this.loadLucyMainClass(p, c)
@@ -579,7 +569,7 @@ class FileLoader implements ast.LoadImport{
 
     fn  loadJavaPackage(r Resource) -> (p ast.Package) {
         fis := new io.File(r.realPath).list()
-        p = new ast.Package()
+        p = new ast.Package(null)
         p.name = r.name
         p.block.Classes = new map {string -> ast.Class}()
         for _, v := range fis {
