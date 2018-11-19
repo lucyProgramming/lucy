@@ -449,7 +449,8 @@ public class MakeNodesObjects {
         case ast.ExpressionTypeLogicalOr,ast.ExpressionTypeLogicalAnd, ast.ExpressionTypeOr,
              ast.ExpressionTypeAnd, ast.ExpressionTypeXor, ast.ExpressionTypeLsh,ast.ExpressionTypeRsh,
              ast.ExpressionTypeAdd,ast.ExpressionTypeSub, ast.ExpressionTypeMul, ast.ExpressionTypeDiv,
-             ast.ExpressionTypeMod,ast.ExpressionTypeEq, ast.ExpressionTypeNe,ast.ExpressionTypeGe,ast.ExpressionTypeGt,
+             ast.ExpressionTypeMod,ast.ExpressionTypeEq, ast.ExpressionTypeNe,ast.ExpressionTypeGe,
+             ast.ExpressionTypeGt,
              ast.ExpressionTypeLe,ast.ExpressionTypeLt:
             ret := new map{string -> Object}()
             ret["op"] = e.op
@@ -457,9 +458,11 @@ public class MakeNodesObjects {
             ret["left"] = this.makeExpression(bin.left)
             ret["right"] = this.makeExpression(bin.right)
             return ret
-        case ast.ExpressionTypeAssign,ast.ExpressionTypeVarAssign,ast.ExpressionTypePlusAssign,ast.ExpressionTypeMinusAssign,
+        case ast.ExpressionTypeAssign,ast.ExpressionTypeVarAssign,ast.ExpressionTypePlusAssign,
+            ast.ExpressionTypeMinusAssign,
             ast.ExpressionTypeMulAssign, ast.ExpressionTypeDivAssign, ast.ExpressionTypeModAssign, ast.ExpressionTypeAndAssign,
-            ast.ExpressionTypeOrAssign,ast.ExpressionTypeXorAssign,ast.ExpressionTypeLshAssign, ast.ExpressionTypeRshAssign:
+            ast.ExpressionTypeOrAssign,ast.ExpressionTypeXorAssign,ast.ExpressionTypeLshAssign,
+            ast.ExpressionTypeRshAssign:
             ret := new map{string -> Object}()
             ret["op"] = e.op
             bin := e.data.(ast.ExpressionBinary)
