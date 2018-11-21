@@ -39,7 +39,7 @@ public class BigEndian {
 		bs[3] = byte(v >> 32)
 		bs[4] = byte(v >> 24)
 		bs[5] = byte(v >> 16)
-		bs[6] = byte(v >> 7)
+		bs[6] = byte(v >> 8)
 		bs[7] = byte(v)
 	} 
 

@@ -140,7 +140,7 @@ class FileLoader implements ast.LoadImport{
             i := new ast.Class()
             i.name = string(c.ConstPool[binary.BigEndian.getChar(c.ConstPool[v].info)].info)
             i.notImportedYet = true
-            astClass.interfaces[k] = i
+            astClass.interfaces[k] = i 
         }
 
     }

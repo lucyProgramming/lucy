@@ -16,7 +16,6 @@ fn registerBuildInFunctions() {
                 errs.append( new error(msg))
             }
         }
-
 	}
 	{
 		//catch

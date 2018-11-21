@@ -556,7 +556,7 @@ public class Type {
 		}
 		panic("not T")
 	}
-
+	
 	/*
 		
 	 */
@@ -598,12 +598,6 @@ public class Type {
 		}
 		if leftValue.isPrimitive() &&
 			rightValue.isPrimitive() {
-
-			//if leftValue.isInteger() &&
-			//	rightValue.isInteger() &&
-			//	((leftValue.Type == VariableTypeLong) == (rightValue.Type == VariableTypeLong)) {
-			//	return true
-			//}
 			return leftValue.Type == rightValue.Type
 		}
 		if leftValue.isPointer() && rightValue.Type == VariableTypeNull {
@@ -625,7 +619,6 @@ public class Type {
 			}
 			return leftValue.array.assignAble(errs, rightValue.array)
 		}
-
 		if leftValue.Type == VariableTypeEnum && rightValue.Type == VariableTypeEnum {
 			return leftValue.Enum.name == rightValue.Enum.name // same enum
 		}
@@ -642,7 +635,7 @@ public class Type {
 				return true
 			}
 			if err := leftValue.Class.loadSelf(rightValue.pos); err != null {
-				errs.append(new error( sprintf("%s %s", errMsgPrefix(rightValue.pos), err.getMessage())))
+				errs.append(new error(sprintf("%s %s", errMsgPrefix(rightValue.pos), err.getMessage())))
 				return false
 			}
 			if err := rightValue.Class.loadSelf(rightValue.pos); err != null {

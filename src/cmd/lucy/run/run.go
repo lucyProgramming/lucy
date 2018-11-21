@@ -477,6 +477,7 @@ func (runLucyPackage *RunLucyPackage) buildPackage(lucyPath string, packageName 
 	bs, err := cmd.Output()
 	if err != nil {
 		fmt.Println(string(bs))
+		fmt.Println(err )
 		err = fmt.Errorf("compiler err:%v", err)
 		return
 	}

@@ -43,8 +43,6 @@ fn main(args []string) {
 		runArgs := []string{"lucy/cmd/langtools/test"}
 		runArgs.appendAll( args[1:])
 		(new run.RunLucyPackage()).RunCommand("run", runArgs)
-	//case "install_lucy_array":
-	//	(new install_lucy_array.InstallLucyArray()).RunCommand("install_lucy_array", null)
 	case "pack":
 		runArgs := []string{"lucy/cmd/langtools/pack"}
 		runArgs.appendAll( args[1:])

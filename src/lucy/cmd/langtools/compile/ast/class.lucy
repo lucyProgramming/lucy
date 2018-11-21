@@ -355,11 +355,13 @@ public class Class {
     }
 
     fn implementedInterface(pos Pos, inter string) -> (implemented bool,err  error) {
+        assert(inter != null )
         err = this.loadSelf(pos)
         if err != null {
             return false, err
         }
         for _, v := range this.interfaces {
+            assert( v != null , v.name != null )
             if v.name == inter {
                 return true, null
             }

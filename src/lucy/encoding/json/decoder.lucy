@@ -69,7 +69,6 @@ public class Decoder {
 	
 	
 	
-	
 	private fn decodeFromTree(tree JsonSyntaxTreeNode , x Object) -> (x2 Object  ){
 		c := x.getClass()
 		if c.isArray () {
@@ -190,11 +189,15 @@ public class Decoder {
 	
 	
 	private fn skipWhiteSpace() {
-		b := this.bs[this.offset++] //read next 
+		b := this.bs[this.offset] //read next 
+		inFor := false
 		for b == ' ' || b == '\t' || b == '\n' || b == '\r' || b == '\f' || b == '\v' { 
 			b = this.bs[this.offset++]
+			inFor = true
 		}
-		this.offset --   // 
+		if inFor {
+			this.offset --   // 
+		}	
 	}
 	
 	private fn parseJsonSyntaxTree() -> (n JsonSyntaxTreeNode ) {
@@ -244,13 +247,14 @@ public class Decoder {
 		n = new JsonSyntaxTreeNode()
 		n.Type = JsonSyntaxTreeTypeArray
 		n.arrayElements = []JsonSyntaxTreeNode{}
-		b := this.bs[this.offset ++ ]
+		b := this.bs[this.offset++] // skip [ 
 		for b != ']' {
 			value := this.parseJsonSyntaxTree()
 			n.arrayElements.append(value)
 			this.skipWhiteSpace()
-			b = this.bs[this.offset++]
-			if b == ',' {	
+			b = this.bs[this.offset]
+			if b == ',' {
+				this.offset++
 			}else if b == ']' {
 				break 
 			}else {
@@ -260,6 +264,7 @@ public class Decoder {
 		if b != ']' {
 		    panic("'[' and ']' not match")
 		}
+		this.offset++
 		return n
 	}
 
@@ -273,34 +278,28 @@ public class Decoder {
 			k  := this.parseJsonSyntaxTree()
 			if k.Type != JsonSyntaxTreeTypeString {
 			    panic("expect string for object key , but:" + k.nodeType())
-
 			}
 			this.skipWhiteSpace()
-			b = this.bs[this.offset++]  
+			b = this.bs[this.offset]  
 			if b != ':' {
 			    panic("expect colon, but :" +  this.getErrMsg())
-
 			}
+			this.offset++
 			v := this.parseJsonSyntaxTree()
 			n.object[k.stringValue] = v
 			this.skipWhiteSpace()
 			b = this.bs[this.offset]
 			if b == ',' {
 				this.offset++ 	
-				this.skipWhiteSpace()
-				b = this.bs[this.offset]
-				if b == '}' {
-				    panic(sprintf("expect key value list, but '%s'",this.getErrMsg()))
-				}
 			}else if b == '}' {
 					//nothing to do 
+					break 
 			}else {
 			    panic(sprintf("expect '}' or ',' but '%s'",this.getErrMsg()))
 			}
 		}
 		if b != '}' {
 		    panic("expect } , but " + string(this.bs[this.offset:]))
-
 		}
 		this.offset ++ // skip } 
 		return   
@@ -414,11 +413,12 @@ public class Decoder {
 	} 
 
 	private fn parseNumber() -> (n Number  ) {
-		n  = new Number()
-		b := this.bs[this.offset ++ ]
+		n = new Number()
+		b := this.bs[this.offset]
 		if b == '-' {
+		    this.offset++
 			n.isNegative = true 
-			b = this.bs[this.offset++]
+			b = this.bs[this.offset]
 			if false == .isDigit(b) {
 				panic("expect number after '-'")
 			}
@@ -430,27 +430,33 @@ public class Decoder {
 				n.integerPart.append(b)
 				b = this.bs[this.offset++]
 			}
+			this.offset -- 
 		}
+		b = this.bs[this.offset]
 		if b == '.' {
+			this.offset++
 			n.isFloat = true  
-			b = this.bs[this.offset++]
+			b = this.bs[this.offset]
 			if .isDigit(b) == false  {
 				panic("expect number after '.'")
-
 			}
 			for .isDigit(b) {
 				n.floatPart.append(b)
 				b = this.bs[this.offset++]
 			}
+			this.offset--
 		}
+		b = this.bs[this.offset]
 		if b == 'e' || b == 'E' {
-			b = this.bs[ this.offset ++ ]
+			this.offset++
+			b = this.bs[ this.offset]
 			if b == '+' {
-				b = this.bs[this.offset ++ ]
+				this.offset++
 			}else if b == '-' {
-				b = this.bs[this.offset ++ ]
+				this.offset ++ 
 				n.eIsNegative = true
 			}
+			b = this.bs[this.offset]
 			if false ==  .isDigit(b) {
 				panic("expect number after 'e' or 'E' ," + this.getErrMsg() )
 			}
@@ -458,6 +464,7 @@ public class Decoder {
 				n.e.append(b)
 				b = this.bs[this.offset ++ ]
 			}
+			this.offset--
 		}
 	}
 	

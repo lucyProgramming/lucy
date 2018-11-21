@@ -111,6 +111,10 @@ public class RunLucyPackage {
         Run.runFn(fn() {
             lucyIo.ioCopy(os.stdout , p.getInputStream())
         })
+        Run.runFn(fn() {
+            lucyIo.ioCopy(p.getOutputStream(),os.stdin )
+        })
+        os.exit(p.waitFor())  // wait for exit 
     }
     
     fn help() {
@@ -200,6 +204,7 @@ public class RunLucyPackage {
             compiledFrom[v.name] = v 
         }
         for _, v := range fisM {
+            print(v.name , compiledFrom)
             if v := compiledFrom[v.name]; v == null { // new file
                 return
             }
@@ -379,6 +384,7 @@ public class RunLucyPackage {
         for k, v := range lucyFiles {
             t := new common.FileMeta()
             t.lastModify = new io.File(v.realpathName).lastModified() / 1000L
+            print(t.lastModify ,new io.File(v.realpathName).lastModified() ,  new io.File(v.realpathName).lastModified() / 1000L )
             meta.compiledFrom[k] = t
         }
         meta.compileTime = System.currentTimeMillis()

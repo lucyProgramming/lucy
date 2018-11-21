@@ -1,7 +1,6 @@
-package install_lucy_array
 
-const (
-	array_template = `
+
+const array_template = `
 package lucy.deps;
 import java.lang.reflect.* ; 
 IMPORTS
@@ -119,4 +118,4 @@ public class ArrayTTT   {
 }
 
 `
-)
+

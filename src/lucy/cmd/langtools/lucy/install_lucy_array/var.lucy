@@ -1,0 +1,65 @@
+
+
+
+class InstallType {
+	className    string
+	typename     string
+	imports      string
+	public fn InstallType(className , typename string , imports string = "" ){
+		this.super()
+		this.className = className
+		this.typename = typename
+		this.imports = imports
+	}
+}
+
+
+var  installs = []InstallType{}
+
+
+{
+	installs.append( new InstallType(
+		"ArrayBool",
+		"boolean"
+	))
+	installs.append( new InstallType(
+		"ArrayByte",
+		"byte"
+	))
+	installs.append( new InstallType(
+		"ArrayShort",
+		"short"
+	))
+	installs.append( new InstallType(
+		"ArrayChar",
+		"char"
+	))
+	installs.append( new InstallType(
+		"ArrayInt",
+		"int"
+	))
+	installs.append( new InstallType(
+		"ArrayLong",
+		"long"
+	))
+	installs.append( new InstallType(
+		"ArrayFloat",
+		"float"
+	))
+	installs.append( new InstallType(
+		"ArrayDouble",
+		"double"
+	))
+	installs.append( new InstallType(
+		"ArrayObject",
+		"Object",
+		`
+		import java.lang.Object;
+`
+	))
+
+	installs.append( new InstallType(
+		"ArrayString",
+		"String"
+	))
+}
