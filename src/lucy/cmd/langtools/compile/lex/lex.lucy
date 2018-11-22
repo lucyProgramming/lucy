@@ -275,7 +275,7 @@ public class Lexer {
 			token.Type = TokenIdentifier
 			token.stringValue = identifier
 			token.description = "identifier_" + identifier
-			if this.locateOffset <= startOffset && this.locateOffset<= this.offset {
+			if this.locateOffset <= startOffset && this.locateOffset < this.offset {
 				token.isLocatedIdentifier = true 
 			}
 		}

@@ -1,5 +1,15 @@
+import "lucy/os"
+
+const usage = `
+
+		
+`
 
 
+fn printUsageAndExit(code int ){
+	
+
+}
 
 
 

@@ -19,6 +19,10 @@ public class Package {
 		for lucy tool goto definition
 	*/
 	public locatedIdentifierPos Pos  
+	/*
+		for lucy tool hover
+	*/
+	hover Hover
 	
 
 

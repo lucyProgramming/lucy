@@ -1,5 +1,6 @@
  
 
+
 public class Pos {
 	public filename string
 	public line     int
@@ -12,6 +13,13 @@ public class Pos {
 	public fn errMsgPrefix() -> (prefix string) {
 		return sprintf("%s:%d:%d:", this.filename, this.line, this.column)
 	}
+	public loadFromOutSide LoadFromOutSide
+}
+
+
+public LoadFromOutSide {
+	public packageName string 
+	public name string 	
 }
 
 

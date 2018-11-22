@@ -13,6 +13,9 @@ public class StatementGoTo {
 			return new error(sprintf("%s label named '%s' not found",
 				this.pos.errMsgPrefix(), this.labelName))
 		}
+		if this.isLocated {
+			b.inheritedAttribute.p.locatedIdentifierPos = lable.pos 
+		}
 		this.statementLabel = label
 		this.defers = []StatementDefer{}
 		this.mkDefers(b)

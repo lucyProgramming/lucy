@@ -1,5 +1,3 @@
-import "lucy/os/flag"
-
 
 class Flags {
 	
@@ -7,17 +5,18 @@ class Flags {
 	file flag.StringOption
 	pos flag.IntOption  
 	parser flag.FlagParser
-
+	to flag.StringOption
 	fn Flags(){
 		this.super()
 		this.parser = new flag.FlagParser()
 		this.parser.files = this.parser.StringOption("-files")
 		this.parser.file = this.parser.StringOption("-file")
 		this.parser.pos = this.parser.IntOption("-files" , -1)
+		this.parser.to = this.parser.StringOption("-to")
 	}
 
 	
-	fn parseArgs(args []string) ->(files []string , pos int) {
+	fn parseArgs(args []string) ->(files []string , to string ,  pos int) {
 		nodefine,err := this.parser.parse(args)
 		if err != null {
 			panic(err)
@@ -34,6 +33,7 @@ class Flags {
 			print("pos not provided or negative...")
 			printUsageAndExit(1)
 		}
+		pos = this.parser.pos.getValue()
 		if this.parser.files.getValue() == "" {
 			print("files not provided")
 			rintUsageAndExit(1)
@@ -45,7 +45,10 @@ class Flags {
 				printUsageAndExit(2)
 			}
 		}
-		pos = this.parser.pos.getValue()
+		if this.to.getValue() == "" {
+			print("files not provided")
+			rintUsageAndExit(1)
+		}
+		to = this.to.getValue()
 	}
 }
-

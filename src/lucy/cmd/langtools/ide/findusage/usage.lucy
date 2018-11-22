@@ -1,6 +1,5 @@
 import "lucy/os"
 
-
 const usage = `
     find definition of a element.
        -files  files should from the same package 
@@ -12,6 +11,10 @@ fn printUsageAndExit(code int ){
 	print(usage)
 	os.exit(code)
 }
+
+
+
+
 
 
 
