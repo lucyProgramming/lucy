@@ -1,0 +1,56 @@
+import "lucy/os"
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/parser"
+import "lucy/cmd/langtools/lucy/run"
+
+
+
+
+public fn readLucyFiles(filenames []string) -> (lucyFiles []LucyFile = []LucyFile{}){
+	for v := range filenames {
+		t := new LucyFiles()
+		t.realPathName  = v 
+		bs,err := os.readFile(v)
+		if err != null {
+			panic(err)
+		}
+		t.bs = javaArray2Lucy(bs)
+		lucyFiles.append(t)
+	}
+}
+
+public fn parseImports(lucyFiles []LucyFiles) -> (imports []string = []string{} ){
+	nodes := []ast.TopNode{}
+	for _,v := range lucyFiles {
+		parser.parse(nodes , v.realPathName , v.bs , true , 10)
+	}
+	for v := range nodes {
+		imports.append(v.node.(ast.Import).Import)
+	}
+}
+
+public fn parseAst(lucyFiles []LucyFiles) ->(nodes []ast.TopNode = []ast.TopNode{} , errs []error = []error{}){
+	for _,v := range lucyFiles {
+		errs.appendAll(parser.parse(nodes , v.realPathName , v.bs , false , 10))
+	}
+}
+
+public parseAstAndTypeCheck(lucyFiles []LucyFiles) -> (p ast.Package,errs []error){
+	nodes ,es := parseAst(lucyFiles)
+	p = new ast.Package()
+	errs = p.typeCheck(nodes)
+	if len(es) > 0 {
+		if len(errs) == 0 {
+			errs = es
+		}else {
+			errs.appendAll(es)
+		}
+	}
+}
+
+public fn buildImports(imports []string){
+	for v := range imports {
+		args := ["-build" , v ]
+		new run.RunLucyPackage().RunCommand("run" ,args )
+	}
+}

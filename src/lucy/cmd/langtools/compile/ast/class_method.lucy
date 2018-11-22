@@ -4,7 +4,7 @@ public class ClassMethod {
 	public isCompilerAuto bool
 	public Function       Function
 
-	fn narrowDownAccessRange(implementation ClassMethod) ->(is bool ) {
+	public fn narrowDownAccessRange(implementation ClassMethod) ->(is bool ) {
 		if this.isPublic() {
             return !implementation.isPublic()
         }
@@ -18,7 +18,7 @@ public class ClassMethod {
         return false
 	}
 	
-	fn accessString() ->(s string) {
+	public fn accessString() ->(s string) {
 		if this.isPublic() {
 			return "public"
 		}
@@ -31,17 +31,17 @@ public class ClassMethod {
 		return `default ""`
 	}
 
-	fn isAccessFlagDefault() ->(is bool ) {
+	public fn isAccessFlagDefault() ->(is bool ) {
 		return this.Function.accessFlags&
 			(cg.AccMethodPublic|
 				cg.AccMethodPrivate|
 				cg.AccMethodProtected) == 0
 	}
 
-	fn isPublic() ->(is bool ) {
+	public fn isPublic() ->(is bool ) {
 		return (this.Function.accessFlags & cg.AccMethodPublic) != 0
 	}
-	fn isProtected() ->(is bool ) {
+	public fn isProtected() ->(is bool ) {
 		return (this.Function.accessFlags & cg.AccMethodProtected) != 0
 	}
 
@@ -49,17 +49,17 @@ public class ClassMethod {
 		return (this.Function.accessFlags & cg.AccMethodStatic) != 0
 	}
 
-	fn isPrivate() ->(is bool ) {
+	public fn isPrivate() ->(is bool ) {
 		return (this.Function.accessFlags & cg.AccMethodPrivate) != 0
 	}
-	fn isFinal() ->(is bool ) {
+	public fn isFinal() ->(is bool ) {
 		return (this.Function.accessFlags & cg.AccMethodFinal) != 0
 	}
 	public fn isAbstract() ->(is bool ) {
 		return (this.Function.accessFlags & cg.AccMethodAbstract) != 0
 	}
 
-	fn ableAccessFromSubClass() ->(is bool ) {
+	public fn ableAccessFromSubClass() ->(is bool ) {
 		return this.isPublic() ||
 			this.isProtected()
 	}

@@ -6,8 +6,10 @@ public class Lexer {
 	bs                   []byte
 	lastLine, lastColumn int
 	line, column         int
-	offset , end          int
+	offset , end         int
+	locateOffset         int
 	
+	 
 	public fn GetLineAndColumn() -> (line int, column int) {
 		return this.line, this.column
 	}
@@ -246,6 +248,7 @@ public class Lexer {
 		token.startLine = this.line
 		token.startColumn = this.column - 1 // c is read
 		token.offset = this.offset - 1      // c is read
+		startOffset := token.offset
 		bs := []byte{c}
 		c, eof := this.getChar()
 		for eof == false {
@@ -272,7 +275,11 @@ public class Lexer {
 			token.Type = TokenIdentifier
 			token.stringValue = identifier
 			token.description = "identifier_" + identifier
+			if this.locateOffset <= startOffset && this.locateOffset<= this.offset {
+				token.isLocatedIdentifier = true 
+			}
 		}
+		
 		token.endLine = this.line
 		token.endColumn = this.column
 		return

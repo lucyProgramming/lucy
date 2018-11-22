@@ -19,6 +19,7 @@ public class Pos {
 public class NameWithPos {
 	public name string
 	public pos  Pos
+	public isLocated bool 
 	public fn NameWithPos(name string ,Pos  Pos ){
 	    this.super()
 		this.name = name

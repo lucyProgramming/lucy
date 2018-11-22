@@ -15,17 +15,26 @@ class ExpressionCheckIdentifier {
 		case magicIdentifierFile:
 			e.Type = ExpressionTypeString
 			e.stringValue = e.pos.filename
+			if identifier.isLocated {
+				block.inheritedAttribute.p.locatedIdentifierPos = e.pos 
+			}
 			result, _ := e.checkSingleValueContextExpression(block)
 			return result, null
 		case magicIdentifierLine:
 			e.Type = ExpressionTypeInt
 			e.data = Long.valueOf(long(0))
 			result, _ := e.checkSingleValueContextExpression(block)
+			if identifier.isLocated {
+				block.inheritedAttribute.p.locatedIdentifierPos = e.pos 
+			}
 			return result, null
 		case magicIdentifierTime:
 			e.Type = ExpressionTypeLong
 			e.data = Long.valueOf(new Date().getTime())
 			result, _ := e.checkSingleValueContextExpression(block)
+			if identifier.isLocated {
+				block.inheritedAttribute.p.locatedIdentifierPos = e.pos 
+			}
 			return result, null
 		case magicIdentifierClass:
 			if block.inheritedAttribute.Class == null {
@@ -47,7 +56,7 @@ class ExpressionCheckIdentifier {
 			i := block.inheritedAttribute.p.getImport(e.pos.filename, identifier.name)
 			if i != null {
 				i.used = true
-				return .checkIdentifierThroughImports(block,e , i)
+				return .checkIdentifierThroughImports(block , identifier , e , i)
 			}
 			
 		}
@@ -72,8 +81,11 @@ class ExpressionCheckIdentifier {
 			if f.isBuildIn == false {
 				i, should := shouldAccessFromImports(block , identifier.name, e.pos, f.pos)
 				if should {
-					return .checkIdentifierThroughImports(block,e , i)
+					return .checkIdentifierThroughImports(block,identifier , e , i)
 				}
+			}
+			if identifier.isLocated {
+				block.inheritedAttribute.p.locatedIdentifierPos = f.pos 
 			}
 			result := new Type()
 			result.Type = VariableTypeFunction
@@ -86,11 +98,14 @@ class ExpressionCheckIdentifier {
 			if t.isBuildIn == false { // try from import
 				i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
 				if should {
-					return .checkIdentifierThroughImports(block,e , i)
+					return .checkIdentifierThroughImports(block,identifier, e , i)
 				}
 			}
 			if isCaptureVar[0] {
 				t.beenCapturedAsRightValue++
+			}
+			if identifier.isLocated {
+				block.inheritedAttribute.p.locatedIdentifierPos = t.pos 
 			}
 			t.used = true
 			result := t.Type.Clone()
@@ -102,8 +117,11 @@ class ExpressionCheckIdentifier {
 			if t.isBuildIn == false { // try from import
 				i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
 				if should {
-					return .checkIdentifierThroughImports(block,e , i)
+					return .checkIdentifierThroughImports(block,identifier , e , i)
 				}
+			}
+			if identifier.isLocated {
+				block.inheritedAttribute.p.locatedIdentifierPos = t.pos 
 			}
 			t.used = true
 			e.fromConst(t)
@@ -115,8 +133,11 @@ class ExpressionCheckIdentifier {
 			if c.isBuildIn == false { // try from import
 				i, should := shouldAccessFromImports(block , identifier.name, e.pos, c.pos)
 				if should {
-					return .checkIdentifierThroughImports(block,e , i)
+					return .checkIdentifierThroughImports(block,identifier, e , i)
 				}
+			}
+			if identifier.isLocated {
+				block.inheritedAttribute.p.locatedIdentifierPos = c.pos 
 			}
 			result := new Type()
 			result.Type = VariableTypeClass
@@ -128,8 +149,11 @@ class ExpressionCheckIdentifier {
 			if enumName.Enum.isBuildIn == false { // try from import
 				i, should := shouldAccessFromImports(block , identifier.name, e.pos, enumName.pos)
 				if should {
-					return .checkIdentifierThroughImports(block,e , i)
+					return .checkIdentifierThroughImports(block,identifier, e , i)
 				}
+			}
+			if identifier.isLocated {
+				block.inheritedAttribute.p.locatedIdentifierPos = enumName.pos 
 			}
 			result := new Type()
 			result.pos = enumName.pos
@@ -143,10 +167,13 @@ class ExpressionCheckIdentifier {
 			e.pos.errMsgPrefix(), identifier.name, block.identifierIsWhat(d)))
 	}
 	
-	static fn checkIdentifierThroughImports(block Block , e Expression , it Import) -> (valueType Type,err  error) {
+	static fn checkIdentifierThroughImports(block Block , identifier ExpressionIdentifier ,  e Expression , it Import) -> (valueType Type,err  error) {
 		p, err := loaded.load(it.Import)
 		if err != null {
 			return null, new error(sprintf("%s %s", e.pos.errMsgPrefix(), err.getMessage()))
+		}
+		if identifier.isLocated {
+			block.inheritedAttribute.p.locatedIdentifierPos = it.pos  
 		}
 		valueType = new Type()
 		valueType.pos = e.pos

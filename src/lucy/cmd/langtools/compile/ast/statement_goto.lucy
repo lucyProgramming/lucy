@@ -6,6 +6,7 @@ public class StatementGoTo {
 	public labelName      string
 	public statementLabel StatementLabel
 	public pos            Pos
+	public isLocated bool 
 	fn checkStatementGoTo(b Block) -> (err error) {
 		label := b.searchLabel(this.labelName)
 		if label == null {

@@ -1,0 +1,4 @@
+import "lucy/cmd/langtools/compile/ast"
+
+class Result extends ast.Pos {
+}

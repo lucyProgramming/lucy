@@ -324,6 +324,7 @@ class BlockParser  extends ParserExtends{
 				}
 				statementGoto := new ast.StatementGoTo()
 				statementGoto.pos = pos
+				statementGoto.isLocated = this.parser.token.isLocatedIdentifier 
 				statementGoto.labelName = this.parser.token.stringValue
 				g := new ast.Statement()
 				g.Type = ast.StatementTypeGoTo

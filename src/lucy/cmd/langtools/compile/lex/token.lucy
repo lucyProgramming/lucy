@@ -12,6 +12,7 @@ public class Token {
 	public longValue long 
 	public doubleValue double 
 	public boolValue bool 
+	public isLocatedIdentifier bool 
 }
 
 

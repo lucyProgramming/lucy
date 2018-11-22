@@ -25,7 +25,6 @@ class Install {
 	}
 	
 	
-	
 	fn installDir(dir string , packageName string ) {
 		f := new io.File(dir) 
 		fs := f.listFiles()

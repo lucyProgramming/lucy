@@ -2,10 +2,8 @@
 import "lucy/os"
 import "lucy/cmd/langtools/compile/common"
 
-
 public class Package {
 	public name                         string
-	
 	public block                        Block = new Block() // package always have a default block
 	files                        map { string -> SourceFile}
 	public initFunctions                []Function
@@ -16,6 +14,14 @@ public class Package {
 	statementLevelFunctions      []Function
 	statementLevelClass          []Class
 	flags 						common.Flags
+	
+	/*
+		for lucy tool goto definition
+	*/
+	public locatedIdentifierPos Pos  
+	
+
+
 	public fn Package(flags common.Flags){
 		this.super()
 		this.flags = flags

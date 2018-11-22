@@ -1,0 +1,42 @@
+import "lucy/cmd/langtools/compile/ast"
+
+class Fmt {
+    nodes ast.TopNode
+    writer io.OutputStream
+
+    fn Fmt(nodes ast.TopNode ,writer io.OutputStream){
+        this.super()
+        this.nodes = nodes
+        this.writer = writer
+    }
+    
+    
+    fn fmt(){
+        
+    }
+    
+    fn fmtClass (c ast.Class,indents string) {
+        
+    }
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

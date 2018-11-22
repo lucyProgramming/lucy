@@ -15,5 +15,3 @@ public fn ioCopy(dest io.OutputStream , in io.InputStream) {
 		dest.write(bs , 0 , n) 
 	}
 }
-
-
