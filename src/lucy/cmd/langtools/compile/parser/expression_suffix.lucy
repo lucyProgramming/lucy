@@ -18,7 +18,7 @@ class ExpressionSuffix extends  ParserExtends {
 			identifier := new ast.ExpressionIdentifier()
 			identifier.name = this.parser.token.stringValue
 			prefix.data = identifier
-			identifier.isLocated  = this.parser.token.isLocatedIdentifier 
+			identifier.locateDefinition  = this.parser.token.locateDefinition 
 			prefix.pos = this.parser.mkPos()
 			this.next(lfIsToken)
 		case lex.TokenTrue:

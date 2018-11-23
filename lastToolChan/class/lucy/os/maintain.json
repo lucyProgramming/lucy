@@ -1,0 +1,31 @@
+{
+	"compileTime":1542959087922,
+	"compiledFrom":[
+			{
+			"lastModify":1541048045,
+			"name":null
+		},
+			{
+			"lastModify":1542077195,
+			"name":null
+		},
+			{
+			"lastModify":1542611084,
+			"name":null
+		},
+			{
+			"lastModify":1536720045,
+			"name":null
+		}
+	],
+	"imports":[
+			"lucy/io"
+	],
+	"classes":[
+			"closureFunction$start$literal68.class",
+			"closureFunction$start$literal73.class",
+			"closureFunction$start$literal78.class",
+			"Command.class",
+			"main.class"
+	]
+}

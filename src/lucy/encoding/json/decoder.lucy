@@ -12,7 +12,6 @@ import "java/lang/Character"
 import "java/lang/String" 
 import "java/lang/reflect/array"
 
-
 enum JsonSyntaxTreeType {
 	JsonSyntaxTreeTypeArray = 1 ,
 	JsonSyntaxTreeTypeObject ,
@@ -29,7 +28,7 @@ class JsonSyntaxTreeNode  {
 	numberValue Number   // number value
 	stringValue string 
 	arrayElements []JsonSyntaxTreeNode 
-	object map{ string -> JsonSyntaxTreeNode } 
+	object map { string -> JsonSyntaxTreeNode } 
 	fn nodeType() -> (name string ) {
 		switch this.Type {
 			case JsonSyntaxTreeTypeArray :
@@ -267,7 +266,7 @@ public class Decoder {
 		this.offset++
 		return n
 	}
-
+	
 	private fn parseObject() -> (n JsonSyntaxTreeNode )  {
 		this.offset++  // skip { 
 		b := this.bs[this.offset]

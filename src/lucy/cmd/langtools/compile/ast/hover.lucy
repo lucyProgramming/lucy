@@ -10,9 +10,9 @@ class Hover {
 }
 
 
-class HoverLoadFromOutside string {
-	packageName string 
-	name string 
+class HoverLoadFromOutside {
+	public packageName string
+	public name string
 }
 
 

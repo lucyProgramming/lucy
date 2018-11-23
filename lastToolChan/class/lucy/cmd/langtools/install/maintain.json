@@ -1,0 +1,22 @@
+{
+	"compileTime":1542958690079,
+	"compiledFrom":[
+			{
+			"lastModify":1542856343,
+			"name":null
+		},
+			{
+			"lastModify":1542336528,
+			"name":null
+		}
+	],
+	"imports":[
+			"lucy/os",
+			"lucy/cmd/langtools/common",
+			"lucy/os/flag"
+	],
+	"classes":[
+			"Install.class",
+			"main.class"
+	]
+}

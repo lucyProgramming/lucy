@@ -1,16 +1,36 @@
 import "lucy/cmd/langtools/compile/parser"
 import "lucy/cmd/langtools/ide/utils"
+import "java/io"
+import "java/nio/file/FileSystems"
+import "lucy/encoding/json"
 
 
-public fn gotoDefinition(args []string) {
+public fn main(args []string) {
 	f := new Flags()
-    files , file , pos := f.parseArgs(args)
-    lucyFiles := utils.readLucyFiles(files)
-    for v := lucyFiles{
-        if v.realPathName == file {
-            
+    file , pos := f.parseArgs(args)
+    lucyPath , packageName := utils.locateLucyFile(file)
+    var lucyFiles []utils.LucyFile 
+    {
+        t := []string{}
+        p := lucyPath + "/" + packageName
+        for v := range new io.File(p).list() {
+            if v.endsWith(".lucy") {
+                t.append(p + "/" + v)
+            }
+        }
+        lucyFiles = utils.readLucyFiles(t)
+    }
+    fileSystem := FileSystems.getDefault()
+    for v := range lucyFiles {
+        if fileSystem.getPath(file).getFileName().toString() == 
+            fileSystem.getPath(v.realPathName).getFileName().toString(){
+            v.locateDefinition = pos 
         }
     }
-	imports := utils.parseImports()
-    
+    result := new FindDefinition(lucyFiles,packageName , true ).find()
+    bs,err := json.encode(result)
+    if err != null {
+        panic(err)
+    }
+    print(string(bs))
 }

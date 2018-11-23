@@ -16,8 +16,8 @@ class FindDefinition {
         //parse ast and typecheck
         p,_ := utils.parseAstAndTypeCheck(this.lucyFiles)
         if p.locatedIdentifierPos == null {
-            if p.locatedIdentifierPos.loadFromOutside != null {
-                return this.loadFromOutside(p.locatedIdentifierPos.loadFromOutside)
+            if p.locatedIdentifierPos.loadDefinitionFromOutside != null {
+                return this.loadDefinitionFromOutside(p.locatedIdentifierPos.loadDefinitionFromOutside)
             }
             result = new  Result()
             result.filename = p.locatedIdentifierPos.filename 
@@ -29,7 +29,7 @@ class FindDefinition {
     
 
 
-    fn loadFromOutside(out ast.LoadFromOutside) -> (result Result) {
+    fn loadDefinitionFromOutside(out ast.LoadDefinitionFromOutside) -> (result Result) {
         
     }
     

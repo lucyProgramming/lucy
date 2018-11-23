@@ -135,8 +135,7 @@ public class Compiler {
 			print("package name not specfied")
 			os.exit(1)
 		}
-		p := new ast.Package(this.flags)
-		p.name = this.flags.packageName.getValue()
+		p := new ast.Package(this.flags.packageName.getValue() , this.flags.disableCheckUnUse.getValue())
 		this.Errs.appendAll(this.Errs, p.typeCheck(this.Tops))
 		if len(this.Errs) > 0 {
 			this.exit()

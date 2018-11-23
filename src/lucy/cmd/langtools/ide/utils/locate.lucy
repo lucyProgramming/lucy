@@ -1,0 +1,36 @@
+
+import "lucy/cmd/langtools/common" 
+
+public fn locateLucyFile(file string ) -> (lucyPath string , pacakgenName string ) {
+    lucyPaths := common.getLucyPath()
+    eles := common.getPathElements(file)
+    lucyPaths2 := []string{}
+    for path := range lucyPaths {
+        prefixNotMatch := false
+        t := common.getPathElements(path)
+        for kk,vv := range t {
+            if vv != eles[kk] {
+                prefixNotMatch = true
+                break
+            }
+        }
+        if prefixNotMatch {
+            continue
+        }
+        lucyPaths2.append(path)
+        tt := eles[len(t):len(eles)-1]
+        pacakgenName = ""
+        for kk,vv := range tt{
+            pacakgenName += vv
+            if kk != len(tt) -1 {
+                pacakgenName += "/"
+            }
+        }
+    }
+    if len(lucyPaths2) > 1 {
+        panic("file located at 2 locations:" + lucyPaths)
+    }
+    lucyPath = lucyPaths2[0]
+}
+
+

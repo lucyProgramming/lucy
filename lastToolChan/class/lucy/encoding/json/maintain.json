@@ -1,0 +1,31 @@
+{
+	"compileTime":1542959088134,
+	"compiledFrom":[
+			{
+			"lastModify":1542955289,
+			"name":null
+		},
+			{
+			"lastModify":1542674634,
+			"name":null
+		},
+			{
+			"lastModify":1540883840,
+			"name":null
+		},
+			{
+			"lastModify":1540949119,
+			"name":null
+		}
+	],
+	"imports":[
+	],
+	"classes":[
+			"Decoder.class",
+			"Encoder.class",
+			"JsonSyntaxTreeNode.class",
+			"JsonSyntaxTreeType.class",
+			"main.class",
+			"Number.class"
+	]
+}

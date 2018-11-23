@@ -15,7 +15,7 @@ class ExpressionCheckIdentifier {
 		case magicIdentifierFile:
 			e.Type = ExpressionTypeString
 			e.stringValue = e.pos.filename
-			if identifier.isLocated {
+			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locatedIdentifierPos = e.pos 
 			}
 			result, _ := e.checkSingleValueContextExpression(block)
@@ -24,7 +24,7 @@ class ExpressionCheckIdentifier {
 			e.Type = ExpressionTypeInt
 			e.data = Long.valueOf(long(0))
 			result, _ := e.checkSingleValueContextExpression(block)
-			if identifier.isLocated {
+			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locatedIdentifierPos = e.pos 
 			}
 			return result, null
@@ -32,7 +32,7 @@ class ExpressionCheckIdentifier {
 			e.Type = ExpressionTypeLong
 			e.data = Long.valueOf(new Date().getTime())
 			result, _ := e.checkSingleValueContextExpression(block)
-			if identifier.isLocated {
+			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locatedIdentifierPos = e.pos 
 			}
 			return result, null
@@ -84,7 +84,7 @@ class ExpressionCheckIdentifier {
 					return .checkIdentifierThroughImports(block,identifier , e , i)
 				}
 			}
-			if identifier.isLocated {
+			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locatedIdentifierPos = f.pos 
 			}
 			result := new Type()
@@ -104,7 +104,7 @@ class ExpressionCheckIdentifier {
 			if isCaptureVar[0] {
 				t.beenCapturedAsRightValue++
 			}
-			if identifier.isLocated {
+			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locatedIdentifierPos = t.pos 
 			}
 			t.used = true
@@ -120,7 +120,7 @@ class ExpressionCheckIdentifier {
 					return .checkIdentifierThroughImports(block,identifier , e , i)
 				}
 			}
-			if identifier.isLocated {
+			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locatedIdentifierPos = t.pos 
 			}
 			t.used = true
@@ -136,7 +136,7 @@ class ExpressionCheckIdentifier {
 					return .checkIdentifierThroughImports(block,identifier, e , i)
 				}
 			}
-			if identifier.isLocated {
+			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locatedIdentifierPos = c.pos 
 			}
 			result := new Type()
@@ -152,7 +152,7 @@ class ExpressionCheckIdentifier {
 					return .checkIdentifierThroughImports(block,identifier, e , i)
 				}
 			}
-			if identifier.isLocated {
+			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locatedIdentifierPos = enumName.pos 
 			}
 			result := new Type()
@@ -172,7 +172,7 @@ class ExpressionCheckIdentifier {
 		if err != null {
 			return null, new error(sprintf("%s %s", e.pos.errMsgPrefix(), err.getMessage()))
 		}
-		if identifier.isLocated {
+		if identifier.locateDefinition {
 			block.inheritedAttribute.p.locatedIdentifierPos = it.pos  
 		}
 		valueType = new Type()

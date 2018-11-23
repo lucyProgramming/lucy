@@ -12,8 +12,6 @@ fn printUsageAndExit(code int){
 	os.exit(code)
 }
 
-
-
 fn main(args []string){
 	recursive := flagParser.boolOption("-r" , false , "clean sub directory too")
 	verbose := flagParser.boolOption("-v" , false , "verbose")

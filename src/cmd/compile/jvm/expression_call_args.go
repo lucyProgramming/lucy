@@ -29,8 +29,8 @@ func (this *BuildExpression) buildCallArgs(
 		return
 	}
 	if vArgs.NoArgs {
-		code.Codes[code.CodeLength] = cg.OP_aconst_null
-		code.CodeLength++
+		loadInt32(class, code,  0 )
+		newArrayBaseOnType(class, code, vArgs.Type.Array)
 		if t := 1 + currentStack; t > maxStack {
 			maxStack = t
 		}

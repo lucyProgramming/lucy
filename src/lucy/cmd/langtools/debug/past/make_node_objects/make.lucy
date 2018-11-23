@@ -3,9 +3,7 @@ import "lucy/cmd/langtools/compile/ast" as ast
 
 
 public class MakeNodesObjects {
-  
     
-
     public fn make(files map { string-> []ast.TopNode } ) -> (x Object) {
         if len(files) == 1 {
             for _, v := range files {

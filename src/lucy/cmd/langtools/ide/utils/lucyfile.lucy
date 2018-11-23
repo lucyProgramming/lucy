@@ -1,15 +1,17 @@
 
-class LucyFile {
+public class LucyFile {
 	public realPathName string 
 	public bs []byte
     
     /*
         when locate is bigger than zero,means to trying to locate something
     */
-    public locate int 
+    public locateDefinition int 
+
+    
     fn LucyFile(){
         this.super()
-        this.locate = -1 
+        this.locateDefinition = -1 
     }
     
 }

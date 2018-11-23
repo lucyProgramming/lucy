@@ -4,11 +4,9 @@ import "lucy/cmd/langtools/compile/parser"
 import "lucy/cmd/langtools/lucy/run"
 
 
-
-
 public fn readLucyFiles(filenames []string) -> (lucyFiles []LucyFile = []LucyFile{}){
 	for v := range filenames {
-		t := new LucyFiles()
+		t := new LucyFile()
 		t.realPathName  = v 
 		bs,err := os.readFile(v)
 		if err != null {
@@ -18,26 +16,26 @@ public fn readLucyFiles(filenames []string) -> (lucyFiles []LucyFile = []LucyFil
 		lucyFiles.append(t)
 	}
 }
-
-public fn parseImports(lucyFiles []LucyFiles) -> (imports []string = []string{} ){
+  
+public fn parseImports(lucyFiles []LucyFile) -> (imports []string = []string{} ){
 	nodes := []ast.TopNode{}
 	for _,v := range lucyFiles {
-		parser.parse(nodes , v.realPathName , v.bs , true , 10)
+		parser.Parse(nodes , v.realPathName , v.bs , true , 10)
 	}
 	for v := range nodes {
 		imports.append(v.node.(ast.Import).Import)
 	}
 }
 
-public fn parseAst(lucyFiles []LucyFiles) ->(nodes []ast.TopNode = []ast.TopNode{} , errs []error = []error{}){
+public fn parseAst(lucyFiles []LucyFile) ->(nodes []ast.TopNode = []ast.TopNode{} , errs []error = []error{}){
 	for _,v := range lucyFiles {
-		errs.appendAll(parser.parse(nodes , v.realPathName , v.bs , false , 10))
+		errs.appendAll(parser.Parse(nodes , v.realPathName , v.bs , false , 10 ,v.locateDefinition))
 	}
 }
 
-public parseAstAndTypeCheck(lucyFiles []LucyFiles) -> (p ast.Package,errs []error){
+public fn parseAstAndTypeCheck(packageName string , lucyFiles []LucyFile) -> (p ast.Package,errs []error){
 	nodes ,es := parseAst(lucyFiles)
-	p = new ast.Package()
+	p = new ast.Package(packageName , true)
 	errs = p.typeCheck(nodes)
 	if len(es) > 0 {
 		if len(errs) == 0 {

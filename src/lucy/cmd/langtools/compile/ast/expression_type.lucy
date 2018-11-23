@@ -146,7 +146,7 @@ public class ExpressionIdentifier  {
 	public Function Function
 	public EnumName EnumName
 	public comment  string
-	public isLocated bool 
+	public locateDefinition bool 
 }
 
 public class ExpressionIndex  {

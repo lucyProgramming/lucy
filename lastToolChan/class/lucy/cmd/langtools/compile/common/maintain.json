@@ -1,0 +1,29 @@
+{
+	"compileTime":1542959088616,
+	"compiledFrom":[
+			{
+			"lastModify":1542250128,
+			"name":null
+		},
+			{
+			"lastModify":1541665806,
+			"name":null
+		},
+			{
+			"lastModify":1542607098,
+			"name":null
+		},
+			{
+			"lastModify":1541725825,
+			"name":null
+		}
+	],
+	"imports":[
+			"lucy/os/flag"
+	],
+	"classes":[
+			"Bytes.class",
+			"Flags.class",
+			"main.class"
+	]
+}

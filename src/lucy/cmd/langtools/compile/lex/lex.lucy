@@ -7,7 +7,7 @@ public class Lexer {
 	lastLine, lastColumn int
 	line, column         int
 	offset , end         int
-	locateOffset         int
+	locateDefinition         int
 	
 	 
 	public fn GetLineAndColumn() -> (line int, column int) {
@@ -195,6 +195,7 @@ public class Lexer {
 		}
 		token.endLine = this.line
 		token.endColumn = this.column
+		token.endOffset = this.offset
         if haveFloatPart {
             integerPart.append('.')
             integerPart.appendAll(floatPart )
@@ -275,11 +276,13 @@ public class Lexer {
 			token.Type = TokenIdentifier
 			token.stringValue = identifier
 			token.description = "identifier_" + identifier
-			if this.locateOffset <= startOffset && this.locateOffset < this.offset {
-				token.isLocatedIdentifier = true 
+			if this.locateDefinition > 0 {
+				if this.locateDefinition >= startOffset && this.locateDefinition < this.offset {
+					token.locateDefinition = true 
+				}
 			}
 		}
-		
+		token.endOffset = this.offset 
 		token.endLine = this.line
 		token.endColumn = this.column
 		return
@@ -436,6 +439,7 @@ public class Lexer {
 			}
 		}
 		token.endLine = this.line
+		token.endOffset = this.offset 
 		token.endColumn = this.column
 		if c == '\n' {
 			err = new error("string literal start new line")
@@ -793,6 +797,7 @@ public class Lexer {
 			err = new error(sprintf("unkown beginning of token:%x", c))
 			return null, err
 		}
+		token.endOffset = this.offset 
 		token.endLine = this.line
 		token.endColumn = this.column
 		return

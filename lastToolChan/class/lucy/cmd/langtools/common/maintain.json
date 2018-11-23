@@ -1,0 +1,25 @@
+{
+	"compileTime":1542959088051,
+	"compiledFrom":[
+			{
+			"lastModify":1542943612,
+			"name":null
+		},
+			{
+			"lastModify":1542934729,
+			"name":null
+		},
+			{
+			"lastModify":1542957625,
+			"name":null
+		}
+	],
+	"imports":[
+			"lucy/os"
+	],
+	"classes":[
+			"FileMeta.class",
+			"main.class",
+			"PackageMeta.class"
+	]
+}

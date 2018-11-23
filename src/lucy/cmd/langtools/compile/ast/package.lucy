@@ -13,7 +13,7 @@ public class Package {
 	unUsedPackage                map{string ->  Import }
 	statementLevelFunctions      []Function
 	statementLevelClass          []Class
-	flags 						common.Flags
+	disableCheckUnuse  						bool 
 	
 	/*
 		for lucy tool goto definition
@@ -26,9 +26,11 @@ public class Package {
 	
 
 
-	public fn Package(flags common.Flags){
+	public fn Package(name string,disableCheckUnuse bool){
 		this.super()
-		this.flags = flags
+		assert(name != null )
+		this.disableCheckUnuse = disableCheckUnuse
+		this.name =  name
 	}
 
 	fn isSame(compare Package) -> (is bool) {

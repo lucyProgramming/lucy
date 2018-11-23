@@ -1,0 +1,106 @@
+import "lucy/cmd/langtools/compile/lex"
+import "lucy/os"
+
+
+
+/*
+    ptl is short for "print token list"
+    this tool is use for parse a lucy and print token list for debugging
+*/
+fn main(args []string) {
+	if len(args) == 0 {
+		print("no file to parse")
+		os.exit(1)
+	}
+	v := args[0]
+	if v.endsWith(".lucy") == false {
+		printf("'%s' not a lucy file\n", v)
+		os.exit(2)
+	}
+	b, err := os.readFile(v)
+	if err != null {
+		panic(err)
+	}
+	bs := javaArray2Lucy(b)
+	//UTF-16 (BE)
+	if len(bs) >= 2 &&
+		bs[0] == 0xfe &&
+		bs[1] == 0xff {
+		printf("file:%s looks like UTF-16(BE) file\n", v)
+		os.exit(2)
+	}
+	//UTF-16 (LE)
+	if len(bs) >= 2 &&
+		bs[0] == 0xff &&
+		bs[1] == 0xfe {
+		printf("file:%s looks like UTF-16(LE) file\n", v)
+		os.exit(2)
+	}
+	//UTF-32 (LE)
+	if len(bs) >= 4 &&
+		bs[0] == 0x0 &&
+		bs[1] == 0x0 &&
+		bs[2] == 0xfe &&
+		bs[3] == 0xff {
+		printf("file:%s looks like UTF-32(LE) file\n", v)
+		os.exit(2)
+	}
+	//UTF-32 (BE)
+	if len(bs) >= 4 &&
+		bs[0] == 0xff &&
+		bs[1] == 0xfe &&
+		bs[2] == 0x0 &&
+		bs[3] == 0x0 {
+		printf("file:%s looks like UTF-32(BE) file\n", v)
+		os.exit(2)
+	}
+	if len(bs) >= 3 &&
+		bs[0] == 0xef &&
+		bs[1] == 0xbb &&
+		bs[2] == 0xbf {
+		// utf8 bom
+		bs = bs[3:]
+	} 
+	lexer := lex.New(bs , 1,1)
+	tok,err := lexer.next()
+	if err != null {
+		print(err.getMessage())
+	}
+	for !(tok != null && tok.Type == lex.TokenEof) {
+		printToken(tok)
+		tok,err = lexer.next()
+		if err != null {
+			print(err.getMessage())
+		}
+	}
+}
+
+
+fn printToken(tok lex.Token) {
+	if tok == null {
+		return 
+	}
+	printf("'%s' (%d,offset(%d,%d) , startAt(%d,%d) , endAt(%d,%d))\n" , 
+		tok.description ,  tok.Type , tok.offset , tok.endOffset ,
+		tok.startLine, tok.startColumn , tok.endLine, tok.endColumn	)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

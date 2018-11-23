@@ -2,8 +2,7 @@ import "lucy/os"
 
 
 const usage = `
-    find definition of a element.
-       -files  files should from the same package 
+    find definition of a element. 
        -file   file to be located
        -pos    pos to be located , must be positive
 `

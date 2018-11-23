@@ -1,4 +1,4 @@
-
+/* 
 import "lucy/os"
 import "lucy/cmd/langtools/ide/rename"
 import "lucy/cmd/langtools/ide/gotodefinition"
@@ -35,4 +35,4 @@ fn main(args []string) {
 	tools[args[0]](args[1:])
 }
 
-
+*/

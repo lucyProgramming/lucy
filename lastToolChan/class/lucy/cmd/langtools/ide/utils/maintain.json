@@ -1,0 +1,33 @@
+{
+	"compileTime":1542959079573,
+	"compiledFrom":[
+			{
+			"lastModify":1542949389,
+			"name":null
+		},
+			{
+			"lastModify":1542948287,
+			"name":null
+		},
+			{
+			"lastModify":1542943865,
+			"name":null
+		},
+			{
+			"lastModify":1542949386,
+			"name":null
+		}
+	],
+	"imports":[
+			"lucy/os",
+			"lucy/cmd/langtools/compile/ast",
+			"lucy/cmd/langtools/compile/parser",
+			"lucy/cmd/langtools/lucy/run",
+			"lucy/cmd/langtools/compile/lc",
+			"lucy/cmd/langtools/common"
+	],
+	"classes":[
+			"LucyFile.class",
+			"main.class"
+	]
+}

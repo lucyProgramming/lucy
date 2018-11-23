@@ -6,15 +6,15 @@ public class StatementGoTo {
 	public labelName      string
 	public statementLabel StatementLabel
 	public pos            Pos
-	public isLocated bool 
+	public locateDefinition bool 
 	fn checkStatementGoTo(b Block) -> (err error) {
 		label := b.searchLabel(this.labelName)
 		if label == null {
 			return new error(sprintf("%s label named '%s' not found",
 				this.pos.errMsgPrefix(), this.labelName))
 		}
-		if this.isLocated {
-			b.inheritedAttribute.p.locatedIdentifierPos = lable.pos 
+		if this.locateDefinition {
+			b.inheritedAttribute.p.locatedIdentifierPos = label.pos
 		}
 		this.statementLabel = label
 		this.defers = []StatementDefer{}

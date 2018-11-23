@@ -1,0 +1,25 @@
+{
+	"compileTime":1542959090319,
+	"compiledFrom":[
+			{
+			"lastModify":1542955219,
+			"name":null
+		},
+			{
+			"lastModify":1542952538,
+			"name":null
+		},
+			{
+			"lastModify":1542952495,
+			"name":null
+		}
+	],
+	"imports":[
+	],
+	"classes":[
+			"Lexer.class",
+			"main.class",
+			"Token.class",
+			"TokenKind.class"
+	]
+}

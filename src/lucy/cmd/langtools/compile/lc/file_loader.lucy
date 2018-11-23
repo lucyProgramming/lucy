@@ -13,10 +13,10 @@ import "lucy/os"
 /*
 	load from file implementation
 */
-class FileLoader implements ast.LoadImport{
+public class FileLoader implements ast.LoadImport{
     lucyPaths , classPaths []string
     caches map{string -> Object}
-    fn FileLoader(lucyPaths , classPaths []string){
+    public fn FileLoader(lucyPaths , classPaths []string){
         this.super()
         this.lucyPaths = lucyPaths
         this.classPaths = classPaths
@@ -548,9 +548,7 @@ class FileLoader implements ast.LoadImport{
         }
         bs , _ := os.readFile(r.realPath + "/"  + mainClassName)
         c := (new ClassDecoder(javaArray2Lucy(bs))).decode()
-        p = new ast.Package(null)
-        p.block = new ast.Block()
-        p.name = r.name
+        p = new ast.Package(r.name , true)
         this.loadLucyMainClass(p, c)
         fisM.remove(mainClassName)
          fn mkEnums(e ast.Enum) {
@@ -586,8 +584,7 @@ class FileLoader implements ast.LoadImport{
 
     fn  loadJavaPackage(r Resource) -> (p ast.Package) {
         fis := new io.File(r.realPath).list()
-        p = new ast.Package(null)
-        p.name = r.name
+        p = new ast.Package(r.name , true )
         p.block.Classes = new map {string -> ast.Class}()
         for _, v := range fis {
             if v.endsWith(".class") == false {

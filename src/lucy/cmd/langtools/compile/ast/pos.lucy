@@ -10,24 +10,22 @@ public class Pos {
 		for template function only currently
 	*/
 	public offset int
+	public endOffset int 
 	public fn errMsgPrefix() -> (prefix string) {
 		return sprintf("%s:%d:%d:", this.filename, this.line, this.column)
 	}
-	public loadFromOutSide LoadFromOutSide
+	public loadDefinitionFromOutside LoadDefinitionFromOutside
 }
 
 
-public LoadFromOutSide {
-	public packageName string 
-	public name string 	
-}
+
 
 
 
 public class NameWithPos {
 	public name string
 	public pos  Pos
-	public isLocated bool 
+	public locateDefinition bool 
 	public fn NameWithPos(name string ,Pos  Pos ){
 	    this.super()
 		this.name = name

@@ -2,7 +2,8 @@
 
 public class Token {
 	public Type        TokenKind
-	public offset      int // bs offset
+	public offset      int // start offset
+	public endOffset  int 
 	public startLine   int
 	public startColumn int
 	public endLine     int
@@ -12,7 +13,7 @@ public class Token {
 	public longValue long 
 	public doubleValue double 
 	public boolValue bool 
-	public isLocatedIdentifier bool 
+	public locateDefinition bool 
 }
 
 

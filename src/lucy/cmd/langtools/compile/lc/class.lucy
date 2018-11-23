@@ -7,7 +7,7 @@ import "lucy/binary"
 class ClassDecoder {
 	bs        []byte ;
 	classFile cg.Class ;
-
+	
 	fn ClassDecoder(bs []byte){
 		this.super() ;
 		this.bs = bs ;

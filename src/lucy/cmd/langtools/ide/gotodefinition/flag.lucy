@@ -3,21 +3,17 @@ import "lucy/os/flag"
 
 class Flags {
 	
-	files flag.StringOption 
 	file flag.StringOption
-	pos flag.IntOption  
+	pos flag.IntOption
 	parser flag.FlagParser
 
 	fn Flags(){
 		this.super()
 		this.parser = new flag.FlagParser()
-		this.parser.files = this.parser.StringOption("-files")
-		this.parser.file = this.parser.StringOption("-file")
-		this.parser.pos = this.parser.IntOption("-files" , -1)
+		this.file = this.parser.stringOption("-file")
+		this.pos = this.parser.intOption("-pos" , -1)
 	}
-
-	
-	fn parseArgs(args []string) ->(files []string , pos int) {
+	fn parseArgs(args []string) ->(file string , pos int) {
 		nodefine,err := this.parser.parse(args)
 		if err != null {
 			panic(err)
@@ -28,24 +24,14 @@ class Flags {
 		}
 		if this.file.getValue() == "" {
 			print("file not provided")
-			rintUsageAndExit(1)
+			printUsageAndExit(1)
 		}
 		if this.pos.getValue() < 0 {
 			print("pos not provided or negative...")
 			printUsageAndExit(1)
 		}
-		if this.parser.files.getValue() == "" {
-			print("files not provided")
-			rintUsageAndExit(1)
-		}
-		files = this.parser.files.getValue().split(" ")
-		for v := range files {
-			if v.endsWith(".lucy") == false {
-				printf("'%s' not lucy source file\n" , v)
-				printUsageAndExit(2)
-			}
-		}
-		pos = this.parser.pos.getValue()
+		pos = this.pos.getValue()
+		file = this.file.getValue()
 	}
 }
 

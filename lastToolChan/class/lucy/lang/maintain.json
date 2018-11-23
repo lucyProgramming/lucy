@@ -1,0 +1,24 @@
+{
+	"compileTime":1542959087777,
+	"compiledFrom":[
+			{
+			"lastModify":1539671987,
+			"name":null
+		},
+			{
+			"lastModify":1542611477,
+			"name":null
+		},
+			{
+			"lastModify":1542588953,
+			"name":null
+		}
+	],
+	"imports":[
+	],
+	"classes":[
+			"Lucy.class",
+			"main.class",
+			"Run.class"
+	]
+}

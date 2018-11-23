@@ -310,7 +310,7 @@ class BlockParser  extends ParserExtends{
 			    b.StatementBreak = new ast.StatementBreak()
 			    b.StatementBreak.pos = pos
 				block.statements.append(b)
-
+			
 			case lex.TokenGoto:
 				pos := this.parser.mkPos()
 				this.next(lfIsToken) // skip goto key word
@@ -324,7 +324,7 @@ class BlockParser  extends ParserExtends{
 				}
 				statementGoto := new ast.StatementGoTo()
 				statementGoto.pos = pos
-				statementGoto.isLocated = this.parser.token.isLocatedIdentifier 
+				statementGoto.locateDefinition = this.parser.token.locateDefinition 
 				statementGoto.labelName = this.parser.token.stringValue
 				g := new ast.Statement()
 				g.Type = ast.StatementTypeGoTo

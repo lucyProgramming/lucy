@@ -276,10 +276,10 @@ public class Block {
     }
 
     fn checkUnUsed() -> (es []error) {
-        if this.inheritedAttribute.p.flags.disableCheckUnUse.getValue() {
-            return null
-        }
         es = []error{}
+        if this.inheritedAttribute.p.disableCheckUnuse  {
+            return es
+        }
         for _, v := range this.constants {
             if v.used ||
                 v.isGlobal {

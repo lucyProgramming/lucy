@@ -2,7 +2,7 @@
 import "lucy/os"
 import "java/lang/System"
 import "java/io"
-
+import "java/nio/file/FileSystems"
 
 public fn getLucyRoot()->(path string){
 	envs := os.getEnvs()
@@ -94,9 +94,18 @@ public fn findPackageInWhichDirectory(lucyPaths []string , packageName string)->
 	}
 	lucyRoot = getLucyRoot()
 	lucyPaths = getLucyPath()
-	
  }
 
+
+
+public fn getPathElements(filepath string ) ->(elements []string) {
+	fileSystem := FileSystems.getDefault()
+	t := fileSystem.getPath(filepath)
+	elements = new []string(t.getNameCount())
+	for i := 0 ;  i < t.getNameCount();i++{
+		elements[i] = t.getName(i).toString()
+	}
+}
 
 
 

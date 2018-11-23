@@ -63,41 +63,9 @@ public class RunLucyPackage {
         }
         cmdArray := []string{"java" , this.Package + "/" + "main"}
         cmdArray.appendAll(this.lucyProgramArgs)
-        //set CLASSPATHS
-        classpath := new map{string -> bool}() // if duplicate
-        for _, v := range this.classPaths {
-            classpath[v] = true
-        }
-        for _, v := range this.lucyPaths {
-            classpath[v + "/class"] = true
-        }
-        classpath[this.lucyRoot + "/lib"] = true
-        classPathArray := new []string(len(classpath))
-        {
-            i := 0
-            for k , _ := range classpath {
-                classPathArray[i] = k
-                i++
-            }
-        }
         var envs  []string 
         {
-            //TODO ::  unix systems
-            s := ""
-            for k,v := range classPathArray{
-                if k != len(classPathArray) {
-                    s += v + ";"
-                }else {
-                    s += v
-                }
-            }
-            envs = ["CLASSPATH=" + s]
-        }
-        {
             for k, v := range os.getEnvs() {
-                if v.startsWith("CLASSPATH=") {
-                    continue
-                }
                 envs.append(k+ "=" + v )
             }
         }
@@ -204,7 +172,6 @@ public class RunLucyPackage {
             compiledFrom[v.name] = v 
         }
         for _, v := range fisM {
-            print(v.name , compiledFrom)
             if v := compiledFrom[v.name]; v == null { // new file
                 return
             }
@@ -384,7 +351,6 @@ public class RunLucyPackage {
         for k, v := range lucyFiles {
             t := new common.FileMeta()
             t.lastModify = new io.File(v.realpathName).lastModified() / 1000L
-            print(t.lastModify ,new io.File(v.realpathName).lastModified() ,  new io.File(v.realpathName).lastModified() / 1000L )
             meta.compiledFrom[k] = t
         }
         meta.compileTime = System.currentTimeMillis()

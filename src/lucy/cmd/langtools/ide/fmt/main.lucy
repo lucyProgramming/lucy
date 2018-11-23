@@ -1,7 +1,7 @@
 
 
 
-public fn fmt(args []string) {
+public fn main(args []string) {
 
     
 }

@@ -2,8 +2,6 @@ import "java/lang/Object"
 import "lucy/cmd/langtools/compile/common"
 
 class Loaded {
-	
-	
 	/*
 		load package or class
 	*/
