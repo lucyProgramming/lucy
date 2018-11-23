@@ -88,7 +88,7 @@ public class RunLucyPackage {
     fn help() {
         print("run a lucy package")
     }
-
+    
     fn parseCmd(args []string) ->(err error) {
         var lucyProgramArgs []string
         runArgs := []string{}

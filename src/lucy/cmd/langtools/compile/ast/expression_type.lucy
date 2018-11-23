@@ -118,8 +118,7 @@ public class ExpressionMethodCall  {
 	public ParameterTypes                []Type
 	public PackageFunction               Function
 	public PackageGlobalVariableFunction Variable
-
-	
+	public locateDefinition  bool 
 }
 
 
@@ -162,6 +161,7 @@ public class ExpressionSelection  {
 	public PackageFunction Function    // expression is package , pack function to method handle
 	public packageVariable Variable    // expression is package , get package variable
 	public PackageEnumName EnumName    // expression is package , get enumName
+	public locateDefinition  bool 
 }
 
 

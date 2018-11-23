@@ -21,7 +21,7 @@ public class StatementGoTo {
 		this.mkDefers(b)
 		return this.statementLabel.Ready(this.pos)
 	}
-
+	
 	fn mkDefers(currentBlock Block) {
 		bs := []Block{}
 		for this.statementLabel.block != currentBlock {

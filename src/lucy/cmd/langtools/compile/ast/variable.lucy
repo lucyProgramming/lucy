@@ -18,6 +18,7 @@ public class Variable {
 	public jvmDescriptor            string // jvm
 	public comment                  string
 	public globalVarClassName 		string
+	public locateDefinition  bool 
 	fn isPublic() -> (is bool) {
 		return this.accessFlags&
 			cg.AccFieldPublic != 0

@@ -13,7 +13,6 @@ class InstallLucyArray {
 
 	}
 
-
 	fn RunCommand(command string, args []string) {
 		path := os.getEnv("LUCYROOT")
 		if path == "" {
