@@ -35,10 +35,10 @@ public fn getLucyPath()->(paths []string){
         }
 	}
 	paths = new []string(ps.size())
-	i := 0 
+	i := 0
 	for k,_ := range ps {
 		paths[i] = k
-		i++ 
+		i++
 	}
 }
 
@@ -58,27 +58,26 @@ public fn getClassPath()->(paths []string){
         }
 	}
 	paths = new []string(ps.size())
-	i := 0 
+	i := 0
 	for k,_ := range ps {
 		paths[i] = k
-		i++ 
+		i++
 	}
 }
 
-
 public fn findPackageInWhichDirectory(lucyPaths []string , packageName string)->(which string ){
-	ps := []string{}  
+	ps := []string{}
 	for _,v := range lucyPaths {
 		if true == new io.File(v + "/src/" + packageName).isDirectory() {
 			ps.append(v)
 		}
 	}
 	if ps.size() == 0 {
-		panic(sprintf("package '%s' not found" , packageName))  
+		panic(sprintf("package '%s' not found" , packageName))
 	}
 	if ps.size() > 1 {
 		errMsg := sprintf("more than 1 package named '%s'" , packageName)
-		panic(errMsg)   
+		panic(errMsg)
 	}
 	which = ps[0]
 }
@@ -87,7 +86,7 @@ public fn findPackageInWhichDirectory(lucyPaths []string , packageName string)->
 
 
 
- 
+
  public fn getPaths()->(lucyRoot string ,lucyPaths []string ,err error ) {
 	defer {
 		err = catch()
@@ -106,13 +105,3 @@ public fn getPathElements(filepath string ) ->(elements []string) {
 		elements[i] = t.getName(i).toString()
 	}
 }
-
-
-
-
-
-
-
-
-
-
