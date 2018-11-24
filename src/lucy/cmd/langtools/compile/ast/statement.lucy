@@ -18,7 +18,9 @@ public enum StatementTypeKind {
 	StatementTypeEnum,
 	StatementTypeNop,
 	StatementTypeImport,
-	StatementTypeTypeAlias 
+	StatementTypeTypeAlias ,
+	StatementTypeComment ,
+	StatementTypeCommentMultiLine 
 }
 
 public class Statement {
@@ -41,6 +43,7 @@ public class Statement {
 	public Class                     Class
 	public Enum                      Enum
 	public Import                    Import
+	public comment 	                 string  
 	isStaticFieldDefaultValue bool
 	/*
 		this.super()
@@ -98,6 +101,9 @@ public class Statement {
 		this.checked = true
 		errs = []error{}
 		switch this.Type {
+		case StatementTypeComment ,
+			StatementTypeCommentMultiLine:
+			s.Type = StatementTypeNop
 		case StatementTypeExpression:
 			return this.checkStatementExpression(block)
 		case StatementTypeIf:

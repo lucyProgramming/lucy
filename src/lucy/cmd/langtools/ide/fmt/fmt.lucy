@@ -11,9 +11,384 @@ class Fmt {
     }
     
     
-    fn fmt(){
+    fn fmt() -> (format string = ""){
+        for k, n := range this.nodes {
+            if t,ok := n.node.(ast.Block) ; ok {
+                format += this.formatBlock(t)
+            }
+            if t,ok := n.node.(ast.Function) ; ok {
+                format += this.formatFunction(t)
+            }
+            if t,ok := n.node.(ast.Enum) ; ok {
+                format += this.formatEnum(t)
+            }
+            if t,ok := n.node.(ast.Class) ; ok {
+                format += this.formatClass(t)
+            }
+            if t,ok := n.node.(ast.Constant) ; ok {
+                format += this.formatConstant(t)
+            }
+            if t,ok := n.node.(ast.Import) ; ok {
+                format += this.formatImport(t)
+            }
+            if t,ok := n.node.(ast.Expression) ; ok {
+               format += this.formatExpression(t)
+            }
+            if t,ok := n.node.(ast.TypeAlias) ; ok {
+               format += this.formatTypealais(t)
+            }
+        }
+        return ret
+    }
+
+
+
+
+    fn formatClass(ident string , c ast.Class) -> (format string = "") {
+
+    }
+    fn formatEnum(ident string , c ast.Class) -> (format string = "") {
+
+    }
+    fn formatImport(ident string , c ast.Class) -> (format string = "") {
+
+    }
+
+    fn formatBlock(ident string , block ast.Block) -> (format string = ""){
+        for s := range block.statements {
+            format += this.formatStatement(ident + "    " ,s)
+        }
+    }
+
+    fn formatStatement(ident string , s ast.Statement) -> (format string = ""){
+        switch s.Type{
+            ast.StatementTypeExpression:
+                format += this.formatExpression(ident , s.Expression)
+            ast.StatementTypeIf:
+                format += this.formatIf(ident , s.StatementIf)
+            ast.StatementTypeBlock:
+                format += this.formatBlock(ident , s.Block)
+            ast.StatementTypeFor:
+                format += this.formatFor(ident , s.Block)
+            ast.StatementTypeContinue:
+                for += "continue\n"
+            ast.StatementTypeReturn:
+                format += this.formatFor(ident , s.Block)
+            ast.StatementTypeBreak:
+                for += "break\n"
+            ast.StatementTypeSwitch:
+                format += this.formatSwitch(ident , s.Block)
+            ast.StatementTypeWhen:
+                format += this.formatWhen(ident , s.Block)
+            ast.StatementTypeLabel:
+                format += s.StatementLabel.name + ":\n"
+            ast.StatementTypeGoTo:
+                format += this.formatGoto(ident , s.Block)
+            ast.StatementTypeDefer:
+                format += this.formatDefer(ident , s.Block)
+            ast.StatementTypeClass:
+                format += this.formatClass(ident , s.Block)
+            ast.StatementTypeEnum:
+                format += this.formatEnum(ident , s.Enum)
+            ast.StatementTypeNop:
+               //nothing
+            ast.StatementTypeImport:
+                format += this.formatImport(ident , s.Enum)
+            ast.StatementTypeTypeAlias :
+                format += this.formatTypealias(ident , s.Enum)
+            ast.StatementTypeComment:
+
+            ast.StatementTypeCommentMultiLine:
+        }
+    }
+
+    fn formatDefer(ident string ,s ast.StatementIf)-> (format string = "") {
+
+    }
+    fn formatIf(ident string ,s ast.StatementIf)-> (format string = "") {
+
+    }
+    fn formatGoto(ident string ,s ast.StatementIf)-> (format string = "") {
+
+    }
+    fn formatFor(ident string ,s ast.StatementFor)-> (format string = "") {
         
     }
+    fn formatSwitch(ident string ,s ast.StatementIf)-> (format string = "") {
+        
+    }
+    fn formatWhen(ident string ,s ast.StatementIf)-> (format string = "") {
+        
+    }
+    fn formatReturn(ident string ,s ast.StatementIf)-> (format string = "") {
+        
+    }
+
+    fn formatExpression(ident string ,e ast.Expression)-> (format string = "") {
+        switch e.Type {
+            case ast.ExpressionTypeNull:
+                return ident + "null"
+            case ast.ExpressionTypeBool:
+                return ident + e.boolValue
+            case ast.ExpressionTypeByte, ast.ExpressionTypeShort,ast.ExpressionTypeChar, ast.ExpressionTypeInt,
+                ast.ExpressionTypeLong, ast.ExpressionTypeFloat , ast.ExpressionTypeDouble, ast.ExpressionTypeString:
+                return ident + e.raw;
+            case ast.ExpressionTypeArray:
+                array := e.data.(ast.ExpressionArray)
+                if array.Type == null {
+                    format = ident + "["
+                    for k,v := range array.expressions{
+                        format += this.formatExpression(ident + "    " , v)
+                        if k != len(array.expressions) {
+                            format += " , "
+                        }
+                    }
+                    format += ident + "]"
+                }else {
+                    format = ident + "[]" + array.Type.typeString() + ""
+                    for k,v := range array.expressions{
+                        format += this.formatExpression(ident + "    " , v)
+                        if k != len(array.expressions) {
+                            format += " , "
+                        }
+                    }
+                    format += ident + "}"
+                }
+            case ast.ExpressionTypeLogicalOr,ast.ExpressionTypeLogicalAnd,  ast.ExpressionTypeOr    ,ast.ExpressionTypeAnd ,
+                ast.ExpressionTypeXor, ast.ExpressionTypeLsh  ast.ExpressionTypeRsh ,ast.ExpressionTypeAdd, 
+                ast.ExpressionTypeSub , ast.ExpressionTypeMul  ,ast.ExpressionTypeDiv ,ast.ExpressionTypeMod:
+                bin := e.data.(ast.ExpressionBinary)
+                format = ident + this.formatExpression("" , bin.left) + " "+ 
+                    e.op + " " + this.formatExpression("" , bin.right)
+            case ast.ExpressionTypeVarAssign:
+
+            case ast.ExpressionTypeAssign,  ,ast.ExpressionTypePlusAssign ,
+                ast.ExpressionTypeMinusAssign ,ast.ExpressionTypeMulAssign ,ast.ExpressionTypeDivAssign ,
+                ast.ExpressionTypeModAssign,  ast.ExpressionTypeAndAssign ,ast.ExpressionTypeOrAssign  ,
+                ast.ExpressionTypeXorAssign ,ast.ExpressionTypeLshAssign , ast.ExpressionTypeRshAssign ,
+                ast.ExpressionTypeEq , ast.ExpressionTypeNe ,   st.ExpressionTypeGe,
+                ast.ExpressionTypeGt  , ast.ExpressionTypeLe  ,   ast.ExpressionTypeLt:
+                bin := e.date.(ast.ExpressionBinary)
+                var lefts []ast.Expression
+                if bin.left.Type == ast.ExpressionTypeList {
+                    lefts = bin.left.data.([]ast.Expression)
+                }else {
+                    lefts = [bin.left]
+                }
+                var rights []ast.Expression
+                if bin.right.Type == ast.ExpressionTypeList {
+                    rights = bin.right.data.([]ast.Expression)
+                }else {
+                    rights = [bin.right]
+                }
+                format = ident 
+                for k,v := range lefts {
+                    format += this.formatExpression("" , v)
+                    if k != len(lefts) {
+                        format += " , "
+                    }
+                }
+                format += " " + e.op + " "
+                for k,v := range rights {
+                    format += this.formatExpression("" , v)
+                    if k != len(rights) {
+                        format += " , "
+                    }
+                }
+            case ast.ExpressionTypeIndex:   
+                index := e.data.(ast.ExpressionIndex)
+                format = ident 
+                format += this.formatExpression("" , index.Expression)+"["
+                format += this.formatExpression("" , index.index)
+                format += "]"
+            case ast.ExpressionTypeSelection : 
+                selection := e.data.(ast.ExpressionSelection)
+                format = ident 
+                if selection.Expression.Type == ast.ExpressionTypeDot {
+                    format += "." + selection.name    
+                }else {
+                    format += this.formatExpression("" , selection.Expression)+"." + 
+                    selection.name    
+                }                               
+            case ast.ExpressionTypeSelectionConst: 
+                selection := e.data.(ExpressionSelection)
+                format = ident 
+                format += this.formatExpression("" , selection.Expression)+"::" + 
+                selection.name     
+            case ast.ExpressionTypeMethodCall : 
+                call := e.data.(ast.ExpressionMethodCall)
+                format = ident
+                if call.Expression.Type == ast.ExpressionTypeDot {
+                    format += "." + call.name
+                }else {
+                    format += this.formatExpression("" ,call.Expression) + "." + call.name + " ("
+                }
+                for k,v := range call.args {
+                    format += this.formatExpression(v)
+                    if k != len(call.args) - 1 {
+                        format += " , "
+                    }
+                }
+                format += " )"                           
+            case ast.ExpressionTypeFunctionCall:  
+                call := e.data.(ast.ExpressionFunctionCall)
+                format = ident
+                format += this.formatExpression("" , call.Expression) + " ("
+                for k,v := range call.args {
+                    format += this.formatExpression(v)
+                    if k != len(call.args) - 1 {
+                        format += " , "
+                    }
+                }
+                format += ")"                                
+            case ast.ExpressionTypeIncrement: 
+                format = ident
+                format += this.formatExpression("" , e.date.(ast.Expression)) + "++"                            
+            case ast.ExpressionTypeDecrement:                                 
+                format = ident
+                format += this.formatExpression("" , e.date.(ast.Expression)) + "--"    
+            case ast.ExpressionTypePrefixIncrement :
+                format = ident
+                format += "++" + this.formatExpression("" , e.date.(ast.Expression))                           
+            case ast.ExpressionTypePrefixDecrement:  
+                format = ident
+                format += "--" + this.formatExpression("" , e.date.(ast.Expression))                     
+            case ast.ExpressionTypeNegative ,ast.ExpressionTypeNot,ast.ExpressionTypeBitwiseNot:
+                format = ident
+                format += e.op + this.formatExpression("" , e.date.(ast.Expression))                             
+            case ast.ExpressionTypeIdentifier:
+                format = ident + e.data.(ast.ExpressionIdentifier)
+            case ast.ExpressionTypeNew: 
+                n := e.data.(ast.ExpressionNew)
+                format = ident
+                format += "new " + n.Type.typeString()+ " ("
+                for k,v := range n.args {
+                    format += this.formatExpression(v)
+                    if k != len(call.args) - 1 {
+                        format += " , "
+                    }
+                }
+                format += ")"
+            case ast.ExpressionTypeList: 
+                list := e.date.([]ast.Expression)  
+                format = ident
+                for k,v := range list {
+                    format += this.formatExpression("" , v )
+                    if k != len(list) - 1 {
+                        format += " , "
+                    }
+                }                              
+            case ast.ExpressionTypeFunctionLiteral:
+
+            case ast.ExpressionTypeVar:  
+                v := e.data.(ast.ExpressionVar)
+                format = ident
+                format += "var "
+                for k,v := range v.variables {
+                    format += v.name 
+                    if k != len(v.variables) -1 {
+                        format += " , "
+                    }
+                }  
+                if v.Type != null {
+                    format += " " + v.Type.typeString()
+                }
+                if len(v.InitValues) > 0 {
+                    format += " = "
+                    for k,v := range v.InitValues {
+                        format += this.formatExpression("" , v ) 
+                        if k != len(v.variables) -1 {
+                            format += " , "
+                        }
+                    }  
+                }                            
+            case ast.ExpressionTypeConst: 
+                cs := e.data.([]Constant)
+                for v := range cs {
+                    t := indent + "cosnt " + v.name + " "
+                    if v.Type != null {
+                        t += t.Type.typeString() + " "
+                    }
+                    t += "="
+                    t += this.formatExpression("" , t.defaultValueExpression) + "\n"
+                    format += t 
+                }                                 
+            case ast.ExpressionTypeCheckCast:
+                c := e.data.(ast.ExpressionTypeConversion) 
+                format =  indent
+                format += c.Type.typeString() + "("
+                format += this.formatExpression("" , c.Expression)
+                format += ")"                         
+            case ast.ExpressionTypeRange:
+                format =  indent + "range " + this.formatExpression("" , e.data.(ast.Expression))
+            case ast.ExpressionTypeSlice: 
+                s := e.data.(ast.ExpressionSlice)
+                format =  indent
+                format += this.formatExpression("" , s.ExpressionOn ) + "["
+                if s.start != null {
+                    format += this.formatExpression("" , s.start ) + "["
+                }
+                if s.end != null {
+                    format += this.formatExpression("" , s.end ) + "["
+                }
+                format += " : "
+                format += "]"                                
+            case ast.ExpressionTypeMap:    
+                m := e.data.(ast.ExpressionMap)
+                format =  indent
+                if m.Type == null {
+                    format += "{"
+                    for k,v := range m.ExpressionMap{
+                        format += this.formatExpression("" , k) + " -> " 
+                        format += this.formatExpression("" , v)
+                        if k != len(m.ExpressionMap) - 1 {
+                            format += " , "
+                        } 
+                    }
+                    format += "}"
+                }else {
+                    format += sprintf("map{%s -> %s}{" , m.Type.Map.K.typeString() ,  m.Type.Map.V.typeString())
+                    for k,v := range m.ExpressionMap{
+                        format += this.formatExpression("" , k) + " -> " 
+                        format += this.formatExpression("" , v)
+                        if k != len(m.ExpressionMap) - 1 {
+                            format += " , "
+                        } 
+                    }
+                    format += "}"
+                }                             
+            case ast.ExpressionTypeTypeAssert:
+                a := e.data.(ast.ExpressionTypeAssert)   
+                format = indent 
+                format += this.formatExpression("" , a.Expression ) + ".("  
+                format += a.Type.typeString()
+                format += ")"                        
+            case ast.ExpressionTypeQuestion: 
+                q := e.data.(ast.ExpressionQuestion)
+                format = indent 
+                q += this.formatExpression("" , q.selection)  
+                format += "?"
+                format += this.formatExpression("" , q.True) 
+                format += ":"
+                format += this.formatExpression("" , q.False)                              
+            case ast.ExpressionTypeGlobal:                  
+                return indent + "global"               
+            case ast.ExpressionTypeParenthesis : 
+                return indent + "(" + this.formatExpression("" , e.data.(ast.Expression)) + ")"                                
+            case ast.ExpressionTypeVArgs:   
+                return      indent + this.formatExpression("" , e.data.(ast.Expression)) + "..."                            
+            case ast.ExpressionTypeDot:   
+                return indent + "."
+            default:
+                panic("not possible")                           
+        }
+    }
+
+
+
+
+
+
     
     fn fmtClass (c ast.Class,indents string) {
         
