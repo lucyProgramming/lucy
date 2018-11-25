@@ -1,4 +1,4 @@
- 
+
 
 
 public enum StatementTypeKind {
@@ -20,7 +20,7 @@ public enum StatementTypeKind {
 	StatementTypeImport,
 	StatementTypeTypeAlias ,
 	StatementTypeComment ,
-	StatementTypeCommentMultiLine 
+	StatementTypeCommentMultiLine
 }
 
 public class Statement {
@@ -43,7 +43,7 @@ public class Statement {
 	public Class                     Class
 	public Enum                      Enum
 	public Import                    Import
-	public comment 	                 string  
+	public comment 	                 string
 	isStaticFieldDefaultValue bool
 	/*
 		this.super()
@@ -58,7 +58,7 @@ public class Statement {
 		return this.Expression.Type == ExpressionTypeVarAssign ||
 			this.Expression.Type == ExpressionTypeVar
 	}
-	
+
 	/*
 
 	fn simplifyIf() {
@@ -103,16 +103,14 @@ public class Statement {
 		switch this.Type {
 		case StatementTypeComment ,
 			StatementTypeCommentMultiLine:
-			s.Type = StatementTypeNop
+			this.Type = StatementTypeNop
 		case StatementTypeExpression:
 			return this.checkStatementExpression(block)
 		case StatementTypeIf:
 			es := this.StatementIf.check(block)
-			//this.simplifyIf()
 			return es
 		case StatementTypeFor:
 			es := this.StatementFor.check(block)
-			//this.simplifyFor()
 			return es
 		case StatementTypeSwitch:
 			return this.StatementSwitch.check(block)
@@ -206,7 +204,7 @@ public class Statement {
 		}
 		return null
 	}
-	
+
 	fn checkStatementExpression(block Block) ->(errs []error = []error{})  {
 		this.Expression.isStatementExpression = true
 		if err := this.Expression.canBeUsedAsStatement(); err != null {
@@ -217,4 +215,3 @@ public class Statement {
 		return errs
 	}
 }
-

@@ -7,7 +7,7 @@ import "java/lang/System"
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lc"
 import "lucy/cmd/langtools/compile/parser"
-import "lucy/cmd/langtools/compile/common" as compileCommon 
+import "lucy/cmd/langtools/compile/common" as compileCommon
 import "java/lang/Runtime"
 
 
@@ -22,7 +22,7 @@ public class RunLucyPackage {
 	flags               Flags = new Flags()
 	packagesCompiled    map{string -> PackageCompiled}
 	lucyProgramArgs     []string // lucy application args
-    
+
     public fn RunCommand(command string, args []string) {
         this.command = command
         err := this.parseCmd(args) // skip run
@@ -63,15 +63,17 @@ public class RunLucyPackage {
         }
         cmdArray := []string{"java" , this.Package + "/" + "main"}
         cmdArray.appendAll(this.lucyProgramArgs)
-        var envs  []string 
+        var envs  []string = new string[](len(os.getEnvs()))
         {
+						var i = 0
             for k, v := range os.getEnvs() {
-                envs.append(k+ "=" + v )
+              	envs[i] = k+ "=" + v
+								i++
             }
         }
         p := Runtime.getRuntime().exec(
             copy(new string[](len(cmdArray)) ,cmdArray ) ,
-            copy(new string[](len(envs)) ,envs )
+            envs
         )
         Run.runFn(fn() {
             lucyIo.ioCopy(os.stderr , p.getErrorStream())
@@ -82,13 +84,13 @@ public class RunLucyPackage {
         Run.runFn(fn() {
             lucyIo.ioCopy(p.getOutputStream(),os.stdin )
         })
-        os.exit(p.waitFor())  // wait for exit 
+        os.exit(p.waitFor())  // wait for exit
     }
-    
+
     fn help() {
         print("run a lucy package")
     }
-    
+
     fn parseCmd(args []string) ->(err error) {
         var lucyProgramArgs []string
         runArgs := []string{}
@@ -138,7 +140,7 @@ public class RunLucyPackage {
             if v.endsWith( ".lucy") {
                 t := new LucyFile()
                 t.realpathName = sourceFileDir + "/" +  v
-                t.name = v 
+                t.name = v
                 tt ,e := os.readFile(t.realpathName)
                 if e != null {
                     panic(e)
@@ -169,7 +171,7 @@ public class RunLucyPackage {
         // new or add
         compiledFrom := new map{string -> common.FileMeta}()
         for v := range meta.compiledFrom {
-            compiledFrom[v.name] = v 
+            compiledFrom[v.name] = v
         }
         for _, v := range fisM {
             if v := compiledFrom[v.name]; v == null { // new file
@@ -283,7 +285,7 @@ public class RunLucyPackage {
         }
 
     }
-    
+
     fn buildPackage(lucyPath string, packageName string, importStack ImportStack) -> (needBuild bool,
         meta common.PackageMeta, err error) {
         if p := this.packagesCompiled[packageName]; p != null  {
@@ -380,4 +382,3 @@ public class RunLucyPackage {
     }
 
 }
-
