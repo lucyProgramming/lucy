@@ -29,6 +29,7 @@ public class NameWithPos {
 	public locateDefinition  bool 
 	public findUsage bool 
 	public getHover bool 
+	public rename bool 
 	public fn NameWithPos(name string ,Pos  Pos ){
 	    this.super()
 		this.name = name

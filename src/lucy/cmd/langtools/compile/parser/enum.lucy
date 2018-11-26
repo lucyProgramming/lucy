@@ -21,6 +21,7 @@ class EnumParser extends ParserExtends {
 			e.name = this.parser.token.stringValue
 			e.findUsage = this.parser.token.findUsage
 			e.locateDefinition = this.parser.token.locateDefinition
+			e.rename = this.parser.token.rename
 			this.next(lfNotToken) // skip enum name
 		}
 		e.pos = this.parser.mkPos()
@@ -40,7 +41,11 @@ class EnumParser extends ParserExtends {
 				lex.TokenComment:
 				comment.read()
 			case lex.TokenIdentifier:
-				name := this.parser.token.stringValue
+				enumName := new ast.EnumName()
+				enumName.name = this.parser.token.stringValue
+				enumName.locateDefinition = this.parser.token.locateDefinition
+				enumName.findUsage  = this.parser.token.findUsage
+				enumName.rename  = this.parser.token.rename
 				pos := this.parser.mkPos()
 				var value ast.Expression
 				this.next(lfIsToken)
@@ -57,12 +62,9 @@ class EnumParser extends ParserExtends {
 					e.firstValueIndex = len(e.enums)
 					value = null
 				}
-				enumName := new ast.EnumName()
-				enumName.name = name
 				enumName.pos = pos
 				enumName.NoNeed = value
 				enumName.Enum = e
-
 				enumName.comment = enumComment
 				if e.enums == null {
 					e.enums = [enumName]

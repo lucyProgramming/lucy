@@ -37,6 +37,7 @@ public class Function {
 	public isClosureFunction                bool
 	public locateDefinition     bool 
 	public findUsage  bool 
+	public rename bool 
 
 	fn isPublic() -> (is bool) {
 		return this.accessFlags&cg.AccMethodPublic != 0
@@ -132,6 +133,9 @@ public class Function {
 			if v.name == null {
 				v.name = ""
 			}
+			if v.locateDefinition {
+				this.block.inheritedAttribute.p.locateDefinition = v.pos
+			}
 			v.isFunctionParameter = true
 			if len(v.Type.getParameterType(this.Type)) > 0 {
 				if this.TemplateFunction == null {
@@ -198,6 +202,9 @@ public class Function {
 				if v.name == null {
 					v.name = ""
 				}
+				if v.locateDefinition {
+					this.block.inheritedAttribute.p.locateDefinition = v.pos
+				}
 				v.isReturn = true
 				if len(v.Type.getParameterType(this.Type)) > 0 {
 					if this.TemplateFunction == null {
@@ -240,7 +247,7 @@ public class Function {
 			}
 		}
 	}
-
+	
 	fn checkReturnVarExpression() -> (errs []error= []error{}) {
 		if this.Type.VoidReturn() {
 			return null

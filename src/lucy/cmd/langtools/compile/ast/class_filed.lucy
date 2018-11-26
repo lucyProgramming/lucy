@@ -13,6 +13,7 @@ public class ClassField {
 	public locateDefinition bool 
 	//public getHover  bool 
 	public findUsage  bool 
+	public rename  bool
 
 	public fn isStatic() ->(is bool) {
 		return (this.accessFlags & cg.AccFieldStatic) != 0

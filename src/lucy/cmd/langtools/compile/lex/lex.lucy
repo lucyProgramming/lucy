@@ -305,6 +305,8 @@ public class Lexer {
 		return
 	}
 	
+
+	
 	fn tryLexElseIf() -> (is bool) {
 		c, eof := this.getChar()
 		for c == ' ' || c == '\t' {

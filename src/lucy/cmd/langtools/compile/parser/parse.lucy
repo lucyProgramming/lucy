@@ -19,9 +19,9 @@ public fn Parse(
 	filename string,
 	bs []byte,
 	onlyParseImport bool,
-	nErrors2Stop int , locateDefinition int ,getHover int , findUsage int  ) -> (errs []error) {
+	nErrors2Stop int , locateDefinition int ,getHover int , findUsage int ,rename int  ) -> (errs []error) {
 	p := new Parser(bs , tops , filename , onlyParseImport , nErrors2Stop )
-	p.lexer = lex.New(bs, 1, 1 , locateDefinition , getHover , findUsage)
+	p.lexer = lex.New(bs, 1, 1 , locateDefinition , getHover , findUsage ,rename)
 	return p.parse()
 }
 
@@ -574,6 +574,9 @@ class Parser {
 		ret := new ast.TypeAlias()
 		ret.pos = this.mkPos()
 		ret.name = this.token.stringValue
+		ret.locateDefinition = this.token.locateDefinition
+		ret.findUsage = this.token.findUsage
+		ret.rename = this.token.rename
 		this.next(lfIsToken) // skip identifier
 		if this.token.Type != lex.TokenAssign {
 			err = new error(sprintf("%s expect '=',but '%s'", this.errMsgPrefix(), this.token.description))
@@ -610,6 +613,7 @@ class Parser {
 			}
 			v := new ast.Variable()
 			v.Type = t
+			v.name = ""
 			v.pos = this.mkPos()
 			return []ast.Variable{v}, null
 		}
@@ -630,6 +634,9 @@ class Parser {
 			for k, v := range names {
 				vd := new ast.Variable()
 				vs[k] = vd
+				vd.locateDefinition = v.locateDefinition
+				vd.findUsage = v.findUsage
+				vd.rename = v.rename
 				vd.name = v.name
 				vd.pos = v.pos
 				vd.Type = t.Clone()
@@ -647,6 +654,7 @@ class Parser {
 				vd := new ast.Variable()
 				vs[k] = vd
 				vd.pos = v.pos
+				vd.name = ""
 				vd.Type = new ast.Type()
 				vd.Type.Type = ast.VariableTypeName
 				vd.Type.pos = v.pos
@@ -749,6 +757,7 @@ class Parser {
 			t.locateDefinition = this.token.locateDefinition
 			t.findUsage = this.token.findUsage
 			t.getHover = this.token.getHover
+			t.rename = this.token.rename 
 			assert(t.pos != null)
 			names.append(t)
 			this.next(lfIsToken)

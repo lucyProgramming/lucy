@@ -7,6 +7,10 @@ public class EnumName {
 	public value   int // int is bigger enough
 	public comment string
 	public NoNeed  Expression
+	public locateDefinition 	bool 
+	public findUsage  bool 
+	public rename 	bool 
+	public getHover  bool 
 }
 
 
@@ -26,6 +30,8 @@ public class Enum   {
 	
 	public locateDefinition 	bool 
 	public findUsage  bool 
+	public rename 	bool 
+	public getHover  bool 
 
 	
 

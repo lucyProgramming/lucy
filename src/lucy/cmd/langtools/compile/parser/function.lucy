@@ -27,6 +27,7 @@ class FunctionParser extends ParserExtends{
 			f.name = this.parser.token.stringValue
 			f.locateDefinition = this.parser.token.locateDefinition
 			f.findUsage = this.parser.token.findUsage
+			f.rename = this.parser.token.rename
 			this.next(lfNotToken)
 		}
 		f.Type, err = this.parseFunctionType()

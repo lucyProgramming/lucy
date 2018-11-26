@@ -122,7 +122,7 @@ public class Compiler {
 				bs = bs[3:]
 			}
 			this.Errs.appendAll(parser.Parse(this.Tops, v, bs ,
-				this.flags.onlyImport.getValue(), this.NErrs2StopCompile, -1 , -1 , -1))
+				this.flags.onlyImport.getValue(), this.NErrs2StopCompile, -1 , -1 , -1 , -1))
 			this.shouldExit()
 		}
 		// parse import only

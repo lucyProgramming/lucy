@@ -21,6 +21,7 @@ class ExpressionSuffix extends  ParserExtends {
 			identifier.locateDefinition  = this.parser.token.locateDefinition 
 			identifier.getHover  = this.parser.token.getHover 
 			identifier.findUsage  = this.parser.token.findUsage 
+			identifier.rename  = this.parser.token.rename
 			prefix.pos = this.parser.mkPos()
 			this.next(lfIsToken)
 		case lex.TokenTrue:
@@ -411,6 +412,8 @@ class ExpressionSuffix extends  ParserExtends {
 				pos := this.parser.mkPos()
 				this.next(lfNotToken) // skip ::
 				var constName string
+				newExpression := new ast.Expression()
+				selection := new ast.ExpressionSelection()
 				if this.parser.token.Type != lex.TokenIdentifier {
 					this.parser.errs.append(
 						new error(sprintf("%s expect idnetifier , but '%s'",
@@ -418,13 +421,14 @@ class ExpressionSuffix extends  ParserExtends {
 					constName = compileAutoName()
 				} else {
 					constName = this.parser.token.stringValue
+					selection.locateDefinition = this.parser.token.locateDefinition
+					selection.findUsage = this.parser.token.findUsage
+					selection.rename = this.parser.token.rename
 					this.next(lfIsToken)
 				}
-				newExpression := new ast.Expression()
 				newExpression.pos = pos
 				newExpression.op = "selectConst"
 				newExpression.Type = ast.ExpressionTypeSelectionConst
-				selection := new ast.ExpressionSelection()
 				selection.Expression = prefix
 				selection.name = constName
 				newExpression.data = selection
@@ -441,6 +445,7 @@ class ExpressionSuffix extends  ParserExtends {
 					selection.locateDefinition = this.parser.token.locateDefinition
 					selection.findUsage  = this.parser.token.findUsage
 					selection.getHover  = this.parser.token.getHover
+					selection.rename  = this.parser.token.rename
 					selection.Expression = prefix
 					selection.name = this.parser.token.stringValue
 					newExpression.data = selection

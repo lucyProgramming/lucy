@@ -7,6 +7,9 @@ public class StatementGoTo {
 	public statementLabel StatementLabel
 	public pos            Pos
 	public locateDefinition bool 
+	public findUsage bool
+	public rename bool
+	
 	fn checkStatementGoTo(b Block) -> (err error) {
 		label := b.searchLabel(this.labelName)
 		if label == null {

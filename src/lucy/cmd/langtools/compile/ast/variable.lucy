@@ -18,9 +18,9 @@ public class Variable {
 	public jvmDescriptor            string // jvm
 	public comment                  string
 	public globalVarClassName 		string
-	
 	public locateDefinition 	bool 
 	public findUsage  bool 
+	public rename bool 
 	
 	
 	fn isPublic() -> (is bool) {

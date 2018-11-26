@@ -18,8 +18,11 @@ class ClassParser extends  ParserExtends{
 			this.parser.errs.append( err)
 			return null, err
 		}
+		name = new ast.NameWithPos("" ,null )
 		className := this.parser.token.stringValue
-		pos := this.parser.mkPos()
+		name.locateDefinition = this.parser.token.locateDefinition
+		name.findUsage = this.parser.token.findUsage
+		name.rename  = this.parser.token.rename
 		this.next(lfNotToken)
 		if this.parser.token.Type == lex.TokenSelection {
 			this.next(lfNotToken) // skip .
@@ -27,13 +30,17 @@ class ClassParser extends  ParserExtends{
 				err = new error(sprintf("%s expect identifer for class`s name,but '%s'",
 					this.parser.errMsgPrefix(),
 					this.parser.token.description))
-				this.parser.errs.append( err)
+				this.parser.errs.append(err)
 			} else {
 				className += "." + this.parser.token.stringValue
+				name.locateDefinition = name.locateDefinition || this.parser.token.locateDefinition
+				name.findUsage = name.findUsage || this.parser.token.findUsage
+				name.rename  = name.rename || this.parser.token.rename
 				this.next(lfNotToken) // skip name identifier
 			}
 		}
-		name = new ast.NameWithPos(className ,pos )
+		name.name = className
+		name.pos = this.parser.mkPos()
 
 	}
 
@@ -358,6 +365,7 @@ class ClassParser extends  ParserExtends{
 			f := new ast.ClassField()
 			f.locateDefinition = v.locateDefinition
 			f.findUsage = v.findUsage 
+			f.rename = v.rename
 			f.name = v.name
 			f.pos = v.pos
 			f.Type = t.Clone()

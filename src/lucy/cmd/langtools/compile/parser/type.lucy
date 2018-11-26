@@ -154,6 +154,10 @@ class TypeParser extends ParserExtends {
                 ret.Type = ast.VariableTypeGlobal
                 ret.pos = pos
                 ret.name = this.parser.token.stringValue
+				ret.locateDefinition = this.parser.token.locateDefinition
+				ret.findUsage = this.parser.token.findUsage
+				ret.rename = this.parser.token.rename
+				ret.getHover = this.parser.token.getHover
 				this.next(lfIsToken)
 			}
 		default:
@@ -215,6 +219,8 @@ class TypeParser extends ParserExtends {
 		ret.Type = ast.VariableTypeName
 		ret.locateDefinition = this.parser.token.locateDefinition
 		ret.findUsage  = this.parser.token.findUsage
+		ret.rename = this.parser.token.rename 
+		ret.getHover = this.parser.token.getHover 
 		this.next(lfIsToken) // skip name identifier
 		for this.parser.token.Type == lex.TokenSelection {
 			this.next(lfNotToken) // skip .
@@ -225,6 +231,8 @@ class TypeParser extends ParserExtends {
 			name += "." + this.parser.token.stringValue
 			ret.locateDefinition = ret.locateDefinition || this.parser.token.locateDefinition
 			ret.findUsage = ret.findUsage || this.parser.token.findUsage
+			ret.rename = ret.rename || this.parser.token.rename
+			ret.getHover = ret.getHover || this.parser.token.getHover
 			ret.pos = this.parser.mkPos() //  override pos
 			this.next(lfIsToken)   // skip identifier
 		}
