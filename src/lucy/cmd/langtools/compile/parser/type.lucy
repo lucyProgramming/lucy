@@ -213,6 +213,8 @@ class TypeParser extends ParserExtends {
 		name := this.parser.token.stringValue
 		ret.pos =  this.parser.mkPos()
 		ret.Type = ast.VariableTypeName
+		ret.locateDefinition = this.parser.token.locateDefinition
+		ret.findUsage  = this.parser.token.findUsage
 		this.next(lfIsToken) // skip name identifier
 		for this.parser.token.Type == lex.TokenSelection {
 			this.next(lfNotToken) // skip .
@@ -221,6 +223,8 @@ class TypeParser extends ParserExtends {
 					this.parser.errMsgPrefix()))
 			}
 			name += "." + this.parser.token.stringValue
+			ret.locateDefinition = ret.locateDefinition || this.parser.token.locateDefinition
+			ret.findUsage = ret.findUsage || this.parser.token.findUsage
 			ret.pos = this.parser.mkPos() //  override pos
 			this.next(lfIsToken)   // skip identifier
 		}

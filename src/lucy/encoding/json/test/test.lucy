@@ -1,85 +1,64 @@
 
 import "lucy/encoding/json"
 
+public class PackageMeta {
+	public compiledFrom FileMeta[]
+	public imports      string[]
+	public compileTime  long
+	public classes      string[]
+}
 
-public class xxx {
-	public boolValue bool
-	public y string  
-	public intValue int  
-	public floatValue float 
-	public stringValue string  
-	public c map { int -> string }  
-	public d map { string  -> int }  
-	
-	public fn toString()->(s string ){
-		s = sprintf("boolValue:%b\n" , this.boolValue )		
-		s += sprintf("intValue:%d\n" , this.intValue )	
-		s += sprintf("stringValue:%s\n" , this.stringValue )	
-		s += sprintf("floatValue:%s\n" , this.floatValue )	
-	}
+
+public class FileMeta {
+	public lastModify long
+	public name string 
 }
 
 fn main(args []string) {
-	x := new xxx()
-	x.y = "11111111111"
-	x.c = new map { int -> string }()
-	x.c[1] = "hello world"
-	x.c[2] = "hello world"
-    x.d = { "hello world" -> 1 , "11111111111111111" -> 222 }
-	x.intValue = 100
-	x.floatValue = 99.9999
-	x.stringValue = "hello world"
-	bs,err := json.encode(x , "\t" )
-	if err != null {
-		print(err)
-	}
-	print(string(bs))
-	x2 := new xxx[](2)
-	for k, _:= range x2 {
-		if k == 0 {
-			continue  
-		}
-		x2[k] = new xxx()
-	} 
-	bs,err = json.encode(x2 , "\t")
-	if err != null {
-		print(err)
-	}
-	print(string(bs))
-	print("#############################")
-	y := new xxx ()
-	s := `
+	var bs = []byte(`
 		{
-			"boolValue" : true , 
-			"intValue" : 110e2 ,
-			"stringValue" :"\u4e2d\u6587hello world",
-			"floatValue" : -8772.12388239121
-		} 
-	`
-	_ , err = json.decode([]byte(s) , y )
+	"compiledFrom": [
+		{
+			"lastModify": 1539671987,
+			"name": "error.lucy"
+		},
+		{
+			"lastModify": 1542611477,
+			"name": "lang.lucy"
+		},
+		{
+			"lastModify": 1542588953,
+			"name": "run.lucy"
+		}
+	],
+	"imports": null,
+	"compileTime": 1543198172,
+	"classes": [
+		"Lucy.class",
+		"Run.class",
+		"main.class"
+	]
+}
+	`)
+
+	m := new PackageMeta()
+	_,err := json.decode(bs , m  )
 	if err != null {
 		panic(err)
 	}
 
-	print(y)
-	s = `
-		[
-			1 ,2 
-		]
-	`
-	
-	arr := new byte[](0)
-	
-	arr2 , err := json.decode([]byte(s) ,arr )
-	if err != null {
-		panic(err)
+	print(m.compileTime)
+	for v := range m.compiledFrom {
+		assert(v != null)
+		print(v.name , v.lastModify)
 	}
-	if len(byte[](arr2)) != 2 {
-		panic(new error("not 2"))
-	}
-	for v := range byte[](arr2)  {
+	for v := range m.imports{
 		print(v)
 	}
+	for v := range m.classes{
+		print(v)
+	}
+
 	
 	
 	

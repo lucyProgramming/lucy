@@ -21,6 +21,7 @@ public class Expression {
 	public longValue long
 	public doubleValue double
 	public stringValue string 
+	public literalRaw string 
 
 	public fn isIdentifier(identifier string) -> (is bool) {
 		if this.Type != ExpressionTypeIdentifier {

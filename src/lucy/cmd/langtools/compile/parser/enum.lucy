@@ -8,22 +8,21 @@ class EnumParser extends ParserExtends {
 	}
 
 	fn parse() -> (e ast.Enum, err error) {
-		var enumName string
+		e = new ast.Enum()
 		this.next(lfIsToken) // skip enum
 		this.parser.unExpectNewLineAndSkip()
 		if this.parser.token.Type != lex.TokenIdentifier {
 			err = new error(sprintf("%s expect 'identifier' for enum name, but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append(err)
-			enumName = compileAutoName()
+			e.name = compileAutoName()
 			this.consume(untilLc)
-
 		} else {
-			enumName = this.parser.token.stringValue
+			e.name = this.parser.token.stringValue
+			e.findUsage = this.parser.token.findUsage
+			e.locateDefinition = this.parser.token.locateDefinition
 			this.next(lfNotToken) // skip enum name
 		}
-		e = new ast.Enum()
-		e.name = enumName
 		e.pos = this.parser.mkPos()
 		comment := new CommentParser(this.parser)
 		if this.parser.token.Type != lex.TokenLc {

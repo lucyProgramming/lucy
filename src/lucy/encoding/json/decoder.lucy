@@ -143,6 +143,7 @@ public class Decoder {
 		if tree.Type != JsonSyntaxTreeTypeObject  {
 		    panic(sprintf("cannot decode '%s' to 'object'" , tree.nodeType()))
 		}
+		x2 = x
 		fs := c.getFields()
 		for f := range fs {
 			if tree.object == null || 
@@ -156,7 +157,12 @@ public class Decoder {
 				f.set(x , obj) 
 				continue  
 			}
-			t:= this.decodeObjectFromTree( tree.object[f.getName()] , f.get(x) , cc )
+			if cc.isArray() {
+				t := this.decodeArrayFromTree(tree.object[f.getName()] , f.get(x) , cc )
+				f.set(x , t)
+				continue
+			}
+			t := this.decodeObjectFromTree(tree.object[f.getName()] , f.get(x) , cc )
 			f.set(x , t )
 		}
 	}
@@ -171,7 +177,7 @@ public class Decoder {
 		if tree.Type != JsonSyntaxTreeTypeArray {
 		    panic(sprintf("cannot decode '%s' to 'array'" , tree.nodeType()))
 		}
-		x2 = array.newInstance( componentClass, tree.arrayElements.size())
+		x2 = array.newInstance(componentClass, tree.arrayElements.size())
 		for k,v := range tree.arrayElements {
 			if componentClass.isPrimitive() {
 				t  := .decodePrimitives(componentClass ,v )
@@ -246,7 +252,9 @@ public class Decoder {
 		n = new JsonSyntaxTreeNode()
 		n.Type = JsonSyntaxTreeTypeArray
 		n.arrayElements = []JsonSyntaxTreeNode{}
-		b := this.bs[this.offset++] // skip [ 
+		this.offset ++  // skip [ 
+		this.skipWhiteSpace()
+		b := this.bs[this.offset]  
 		for b != ']' {
 			value := this.parseJsonSyntaxTree()
 			n.arrayElements.append(value)
@@ -425,11 +433,14 @@ public class Decoder {
 		if b == '0' { // 
 			n.integerPart.append(b)
 		}else {
+			n.integerPart.append(b)
+			this.offset++
+			b = this.bs[this.offset++]
 			for .isDigit(b) {
 				n.integerPart.append(b)
 				b = this.bs[this.offset++]
 			}
-			this.offset -- 
+			this.offset--
 		}
 		b = this.bs[this.offset]
 		if b == '.' {

@@ -118,7 +118,10 @@ public class ExpressionMethodCall  {
 	public ParameterTypes                []Type
 	public PackageFunction               Function
 	public PackageGlobalVariableFunction Variable
-	public locateDefinition  bool 
+	public locateDefinition bool 
+	public getHover  bool 
+	public findUsage  bool 
+
 }
 
 
@@ -146,6 +149,8 @@ public class ExpressionIdentifier  {
 	public EnumName EnumName
 	public comment  string
 	public locateDefinition bool 
+	public getHover  bool 
+	public findUsage  bool 
 }
 
 public class ExpressionIndex  {
@@ -162,6 +167,8 @@ public class ExpressionSelection  {
 	public packageVariable Variable    // expression is package , get package variable
 	public PackageEnumName EnumName    // expression is package , get enumName
 	public locateDefinition  bool 
+	public getHover  bool 
+	public findUsage  bool 
 }
 
 

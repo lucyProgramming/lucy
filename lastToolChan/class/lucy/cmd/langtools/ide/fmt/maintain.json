@@ -1,0 +1,30 @@
+{
+	"compiledFrom": [
+		{
+			"lastModify": 1542872912,
+			"name": "flag.lucy"
+		},
+		{
+			"lastModify": 1543217411,
+			"name": "fmt.lucy"
+		},
+		{
+			"lastModify": 1542933537,
+			"name": "main.lucy"
+		},
+		{
+			"lastModify": 1542933346,
+			"name": "usage.lucy"
+		}
+	],
+	"imports": [
+		"lucy/os",
+		"lucy/cmd/langtools/compile/ast"
+	],
+	"compileTime": 1543217415,
+	"classes": [
+		"Flags.class",
+		"Fmt.class",
+		"main.class"
+	]
+}

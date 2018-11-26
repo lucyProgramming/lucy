@@ -9,11 +9,11 @@ class ClassDecoder {
 	classFile cg.Class ;
 	
 	fn ClassDecoder(bs []byte){
-		this.super() ;
+		this.super();
 		this.bs = bs ;
 		this.classFile = new cg.Class();
 	}
-
+	
 	fn decode() -> (c cg.Class) {
 		if binary.BigEndian.getInt(this.bs) != cg.ClassMagicNumber {
 			panic("magic number is not right")

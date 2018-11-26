@@ -63,12 +63,12 @@ public class RunLucyPackage {
         }
         cmdArray := []string{"java" , this.Package + "/" + "main"}
         cmdArray.appendAll(this.lucyProgramArgs)
-        var envs  []string = new string[](len(os.getEnvs()))
+        var envs = new string[](len(os.getEnvs()))
         {
-						var i = 0
+			var i = 0
             for k, v := range os.getEnvs() {
               	envs[i] = k+ "=" + v
-								i++
+				i++
             }
         }
         p := Runtime.getRuntime().exec(
@@ -165,22 +165,25 @@ public class RunLucyPackage {
         meta = new common.PackageMeta()
         _, err = json.decode(javaArray2Lucy(bs), meta)
         if err != null { // this is not happening
+            print(err)
             err = null
             return
         }
-        // new or add
-        compiledFrom := new map{string -> common.FileMeta}()
+        compiledFrom := new map{ string -> common.FileMeta }()
         for v := range meta.compiledFrom {
             compiledFrom[v.name] = v
         }
+        // new or add
+
         for _, v := range fisM {
             if v := compiledFrom[v.name]; v == null { // new file
                 return
             }
-            if v.lastModify > (compiledFrom[v.name].lastModify) { // modified
+            if (new io.File(v.realpathName).lastModified()/1000L) > (compiledFrom[v.name].lastModify) { // modified
                 return
             }
         }
+
         // file missing
         for f := range meta.compiledFrom {
             if fisM.keyExist(f.name) == false {
@@ -191,13 +194,14 @@ public class RunLucyPackage {
         {
             fis := new io.File(destinationDir).list()
             fisM := new map{string -> bool }()
+
             for _, v := range fis {
                 if v.endsWith(".class") {
                     fisM[v] = true
                 }
             }
             for _, v := range meta.classes {
-                if fisM.keyExist(v) {
+                if fisM.keyExist(v) == false {
                     return
                 }
             }
@@ -209,7 +213,7 @@ public class RunLucyPackage {
     fn parseImports(files []LucyFile) -> (imports []string = []string{}) {
         importNodes := []ast.TopNode{}
         for _,v := range files {
-            parser.Parse(importNodes ,  v.realpathName , v.bs , true ,10)
+            parser.Parse(importNodes ,  v.realpathName , v.bs , true ,10 , -1,-1,-1)
         }
         m := new map{string->bool}()
         for _,v := range importNodes{
@@ -352,6 +356,7 @@ public class RunLucyPackage {
         meta.compiledFrom = new common.FileMeta[](len(lucyFiles))
         for k, v := range lucyFiles {
             t := new common.FileMeta()
+            t.name = v.name
             t.lastModify = new io.File(v.realpathName).lastModified() / 1000L
             meta.compiledFrom[k] = t
         }

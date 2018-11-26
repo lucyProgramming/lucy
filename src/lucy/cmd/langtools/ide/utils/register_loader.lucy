@@ -1,0 +1,13 @@
+//register load 
+
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/lc"
+import "lucy/cmd/langtools/common"
+
+public fn registerLoader(lucyPaths ,classPaths []string ){
+    ast.ImportsLoader = new PackageLoader(lucyPaths , classPaths)
+}
+
+{
+    registerLoader(common.getLucyPath(),common.getClassPath())
+}

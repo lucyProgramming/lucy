@@ -243,20 +243,24 @@ func (runLucyPackage *RunLucyPackage) needCompile(lucyPath string, packageName s
 		return
 	}
 	// new or add
+	compiledFrom :=make (map[string] *common.FileMeta )
+	for _ ,v := range meta.CompiledFrom{
+		compiledFrom[v.Name ] = v
+	}
 	for _, v := range fisM {
 		if meta.CompiledFrom == nil {
 			return
 		}
-		if _, ok := meta.CompiledFrom[v.Name()]; ok == false { // new file
+		if _, ok := compiledFrom[v.Name()]; ok == false { // new file
 			return
 		}
-		if v.ModTime().Unix() > (meta.CompiledFrom[v.Name()].LastModify) { // modified
+		if v.ModTime().Unix() > (compiledFrom[v.Name()].LastModify) { // modified
 			return
 		}
 	}
 	// file missing
-	for f := range meta.CompiledFrom {
-		_, ok := fisM[f]
+	for _,f := range meta.CompiledFrom {
+		_, ok := fisM[f.Name ]
 		if ok == false {
 			return
 		}
@@ -483,15 +487,16 @@ func (runLucyPackage *RunLucyPackage) buildPackage(lucyPath string, packageName 
 	}
 	// make_node_objects maitain.json
 	meta = &common.PackageMeta{}
-	meta.CompiledFrom = make(map[string]*common.FileMeta)
-	for _, v := range lucyFiles {
+	meta.CompiledFrom = make([]*common.FileMeta , len(lucyFiles) )
+	for k, v := range lucyFiles {
 		var f os.FileInfo
 		f, err = os.Stat(v)
 		if err != nil {
 			return
 		}
-		meta.CompiledFrom[filepath.Base(v)] = &common.FileMeta{
+		meta.CompiledFrom[k] = &common.FileMeta{
 			LastModify: f.ModTime().Unix(),
+			Name: filepath.Base(v) ,
 		}
 	}
 	meta.CompileTime = time.Now().Unix()

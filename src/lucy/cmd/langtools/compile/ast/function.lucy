@@ -35,10 +35,13 @@ public class Function {
 	isPackageInitBlockFunction       bool
 	public comment                          string
 	public isClosureFunction                bool
+	public locateDefinition     bool 
+	public findUsage  bool 
 
 	fn isPublic() -> (is bool) {
 		return this.accessFlags&cg.AccMethodPublic != 0
 	}
+	
 
 	public fn nameLiteralFunction() -> (name string) {
 		if this.name != null && this.name != "" {

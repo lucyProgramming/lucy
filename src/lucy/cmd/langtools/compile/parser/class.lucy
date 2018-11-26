@@ -69,6 +69,8 @@ class ClassParser extends  ParserExtends{
 		t, err := this.parseClassName()
 		if t != null {
 			classDefinition.name = t.name
+			classDefinition.findUsage = t.findUsage
+			classDefinition.locateDefinition = t.locateDefinition
 		}
 		classDefinition.block = new ast.Block()
 		classDefinition.block.isClassBlock = true
@@ -287,7 +289,7 @@ class ClassParser extends  ParserExtends{
 		}
 		return
 	}
-
+	
 	fn parseConst(classDefinition ast.Class, comment CommentParser) -> (err error) {
 		cs, err := this.parser.parseConst()
 		if err != null {
@@ -354,6 +356,8 @@ class ClassParser extends  ParserExtends{
 				continue
 			}
 			f := new ast.ClassField()
+			f.locateDefinition = v.locateDefinition
+			f.findUsage = v.findUsage 
 			f.name = v.name
 			f.pos = v.pos
 			f.Type = t.Clone()

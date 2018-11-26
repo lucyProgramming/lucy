@@ -24,6 +24,11 @@ public class Enum   {
 	public firstValueIndex int
 	public comment         string
 	
+	public locateDefinition 	bool 
+	public findUsage  bool 
+
+	
+
 	fn isPublic() -> (is bool) {
 		return this.accessFlags&cg.AccClassPublic != 0
 	}

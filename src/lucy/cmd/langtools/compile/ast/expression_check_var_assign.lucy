@@ -69,6 +69,9 @@ class ExpressionCheckVarAssign {
 				}
 				identifier.Variable = variable
 				assign.IfDeclaredBefore[k] = true
+				if identifier.locateDefinition {
+					block.inheritedAttribute.p.locateDefinition = variable.pos 
+				}
 			} else { // should be no error
 				noNewVariable = false
 				vd := new Variable()
@@ -79,6 +82,9 @@ class ExpressionCheckVarAssign {
 				vd.pos = v.pos
 				if variableType == null {
 					continue
+				}
+				if identifier.locateDefinition {
+					block.inheritedAttribute.p.locateDefinition = v.pos  
 				}
 				vd.comment = identifier.comment
 				vd.Type = variableType.Clone()

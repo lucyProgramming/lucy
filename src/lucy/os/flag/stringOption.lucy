@@ -15,11 +15,11 @@ public final class StringOption  extends Option{
 	protected fn reset() {
 		this.stringValue = .stringDefaultValue 
 	}
+	protected fn parse(s string)  {	
+		.stringValue = s 
+	}
 	
-	
-	protected fn parse(s string)  {	.stringValue = s }
-	
-	public fn getValue() -> (v string = this.stringValue ){ }
+	public fn getValue() -> (v string = this.stringValue ){   }
 
 	
 }

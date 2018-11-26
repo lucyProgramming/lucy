@@ -1,3 +1,4 @@
+import "lucy/os/flag"
 
 
 class Flags {
@@ -13,7 +14,7 @@ class Flags {
 		this.pos = this.parser.intOption("-pos" , -1)
 	}
 	
-	fn parseArgs(args []string) ->(file []string , pos int) {
+	fn parseArgs(args []string) ->(file string , pos int) {
 		nodefine,err := this.parser.parse(args)
 		if err != null {
 			panic(err)
@@ -24,13 +25,13 @@ class Flags {
 		}
 		if this.file.getValue() == "" {
 			print("file not provided")
-			rintUsageAndExit(1)
+			printUsageAndExit(1)
 		}
 		if this.pos.getValue() < 0 {
 			print("pos not provided or negative...")
 			printUsageAndExit(1)
 		}
-		pos = this.parser.pos.getValue()
+		pos = this.pos.getValue()
 		file = this.file.getValue()
 	}
 }

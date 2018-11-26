@@ -274,7 +274,7 @@ public class Block {
             this.inheritedAttribute.Defer = null
         }
     }
-
+    
     fn checkUnUsed() -> (es []error) {
         es = []error{}
         if this.inheritedAttribute.p.disableCheckUnuse  {
@@ -293,7 +293,7 @@ public class Block {
                 v.isGlobal {
                 continue
             }
-            es.append( new error(sprintf("%s enum '%s' has declared,but not used",
+            es.append(new error(sprintf("%s enum '%s' has declared,but not used",
                 v.pos.errMsgPrefix(), v.name)))
         }
         for _, v := range this.Classes {

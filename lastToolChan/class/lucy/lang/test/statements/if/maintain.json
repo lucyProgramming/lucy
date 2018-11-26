@@ -1,0 +1,17 @@
+{
+	"compiledFrom": [
+		{
+			"lastModify": 1532669713,
+			"name": "if.lucy"
+		},
+		{
+			"lastModify": 1532669692,
+			"name": "test.lucy"
+		}
+	],
+	"imports": null,
+	"compileTime": 1543217478,
+	"classes": [
+		"main.class"
+	]
+}

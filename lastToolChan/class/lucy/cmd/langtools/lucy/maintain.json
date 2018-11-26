@@ -1,16 +1,16 @@
 {
-	"compileTime":1542959090898,
-	"compiledFrom":[
-			{
-			"lastModify":1542958972,
-			"name":null
+	"compiledFrom": [
+		{
+			"lastModify": 1543212497,
+			"name": "main.lucy"
 		}
 	],
-	"imports":[
-			"lucy/os",
-			"lucy/cmd/langtools/lucy/run"
+	"imports": [
+		"lucy/os",
+		"lucy/cmd/langtools/lucy/run"
 	],
-	"classes":[
-			"main.class"
+	"compileTime": 1543217471,
+	"classes": [
+		"main.class"
 	]
 }

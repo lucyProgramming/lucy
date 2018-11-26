@@ -14,8 +14,8 @@ import "lucy/os"
 	load from file implementation
 */
 public class FileLoader implements ast.LoadImport{
-    lucyPaths , classPaths []string
-    caches map{string -> Object}
+    public lucyPaths , classPaths []string
+    public caches map{string -> Object}
     public fn FileLoader(lucyPaths , classPaths []string){
         this.super()
         this.lucyPaths = lucyPaths
@@ -145,7 +145,7 @@ public class FileLoader implements ast.LoadImport{
 
     }
 
-    fn  loadAsJava(c cg.Class) -> (astClass ast.Class) {
+    public fn  loadAsJava(c cg.Class) -> (astClass ast.Class) {
         if c.isSynthetic() {
             return null
         }
@@ -582,7 +582,7 @@ public class FileLoader implements ast.LoadImport{
         }
     }
 
-    fn  loadJavaPackage(r Resource) -> (p ast.Package) {
+    public fn  loadJavaPackage(r Resource) -> (p ast.Package) {
         fis := new io.File(r.realPath).list()
         p = new ast.Package(r.name , true )
         p.block.Classes = new map {string -> ast.Class}()
@@ -606,7 +606,7 @@ public class FileLoader implements ast.LoadImport{
         }
     }
 
-    fn  loadClass(r Resource) -> (c  Object) {
+    public fn  loadClass(r Resource) -> (c  Object) {
         bs, err := os.readFile(r.realPath)
         if err != null {
             return null

@@ -1,0 +1,47 @@
+import "lucy/cmd/langtools/ide/utils"
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/common" as langtoolsCommon 
+import "java/io"
+import "lucy/os"
+
+
+
+class FindDefinition {
+    lucyFiles []utils.LucyFile 
+    packageName string
+    printErr bool 
+    fn FindDefinition(lucyFiles []utils.LucyFile , packageName string , printErr bool ){
+        this.super()
+        this.lucyFiles = lucyFiles
+        this.packageName = packageName
+        this.printErr = printErr 
+    }
+    
+    fn find() -> (result ast.Pos){
+        //parse ast and typecheck
+        p , es := utils.parseAstAndTypeCheck(this.packageName , this.lucyFiles)
+        if this.printErr{
+            for v := range es{
+                os.stderr.println(v.getMessage())
+            }
+        }
+        if p.locateDefinition != null {
+            if p.locateDefinition.loadDefinitionFromOutside != null {
+                return this.loadDefinitionFromOutside(p.locateDefinition.loadDefinitionFromOutside)
+            }
+            return p.locateDefinition
+        }
+    }
+    
+    fn loadDefinitionFromOutside(out ast.LoadDefinitionFromOutside) -> (result ast.Pos) {
+        
+    }
+
+}
+
+
+
+
+
+
+

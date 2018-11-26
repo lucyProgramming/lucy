@@ -1,12 +1,12 @@
-import "lucy/cmd/langtools/compile/lex"
-import "lucy/os"
-
-
 
 /*
     ptl is short for "print token list"
-    this tool is use for parse a lucy and print token list for debugging
+    this tool is use for parse a lucy file ".lucy" and print token list for debugging
 */
+
+import "lucy/cmd/langtools/compile/lex"
+import "lucy/os"
+
 fn main(args []string) {
 	if len(args) == 0 {
 		print("no file to parse")
@@ -61,7 +61,7 @@ fn main(args []string) {
 		// utf8 bom
 		bs = bs[3:]
 	} 
-	lexer := lex.New(bs , 1,1)
+	lexer := lex.New(bs , 1,1,-1,-1,-1)
 	tok,err := lexer.next()
 	if err != null {
 		print(err.getMessage())

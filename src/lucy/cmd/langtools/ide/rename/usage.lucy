@@ -2,13 +2,10 @@ import "lucy/os"
 
 const usage = `
     find definition of a element.
-       -files  files should from the same package 
        -file   file to be located
        -pos    pos to be located , must be positive
        -to     rename to what
 `
-
-
 
 fn printUsageAndExit(code int ){
 	print(usage)

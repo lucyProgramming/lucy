@@ -37,6 +37,6 @@ public final class IntOption  extends Option{
 		this.intValue = value 
 	} 
 	
-	public fn getValue() -> (v int = this.intValue ){ }
+	public fn getValue() -> (v int = this.intValue ){   }
 
 }

@@ -4,8 +4,6 @@ class ClosureMeta {
 	pos Pos
 }
 
-
-
 public class Closure {
 	public variables map{ Variable -> ClosureMeta }
 	public functions map{ Function -> ClosureMeta }

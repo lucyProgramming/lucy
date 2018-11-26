@@ -16,7 +16,7 @@ class ExpressionCheckIdentifier {
 			e.Type = ExpressionTypeString
 			e.stringValue = e.pos.filename
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locatedIdentifierPos = e.pos 
+				block.inheritedAttribute.p.locateDefinition = e.pos 
 			}
 			result, _ := e.checkSingleValueContextExpression(block)
 			return result, null
@@ -25,7 +25,7 @@ class ExpressionCheckIdentifier {
 			e.data = Long.valueOf(long(0))
 			result, _ := e.checkSingleValueContextExpression(block)
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locatedIdentifierPos = e.pos 
+				block.inheritedAttribute.p.locateDefinition = e.pos 
 			}
 			return result, null
 		case magicIdentifierTime:
@@ -33,7 +33,7 @@ class ExpressionCheckIdentifier {
 			e.data = Long.valueOf(new Date().getTime())
 			result, _ := e.checkSingleValueContextExpression(block)
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locatedIdentifierPos = e.pos 
+				block.inheritedAttribute.p.locateDefinition = e.pos 
 			}
 			return result, null
 		case magicIdentifierClass:
@@ -85,7 +85,7 @@ class ExpressionCheckIdentifier {
 				}
 			}
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locatedIdentifierPos = f.pos 
+				block.inheritedAttribute.p.locateDefinition = f.pos 
 			}
 			result := new Type()
 			result.Type = VariableTypeFunction
@@ -105,7 +105,7 @@ class ExpressionCheckIdentifier {
 				t.beenCapturedAsRightValue++
 			}
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locatedIdentifierPos = t.pos 
+				block.inheritedAttribute.p.locateDefinition = t.pos 
 			}
 			t.used = true
 			result := t.Type.Clone()
@@ -121,7 +121,7 @@ class ExpressionCheckIdentifier {
 				}
 			}
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locatedIdentifierPos = t.pos 
+				block.inheritedAttribute.p.locateDefinition = t.pos 
 			}
 			t.used = true
 			e.fromConst(t)
@@ -137,7 +137,7 @@ class ExpressionCheckIdentifier {
 				}
 			}
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locatedIdentifierPos = c.pos 
+				block.inheritedAttribute.p.locateDefinition = c.pos 
 			}
 			result := new Type()
 			result.Type = VariableTypeClass
@@ -153,7 +153,7 @@ class ExpressionCheckIdentifier {
 				}
 			}
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locatedIdentifierPos = enumName.pos 
+				block.inheritedAttribute.p.locateDefinition = enumName.pos 
 			}
 			result := new Type()
 			result.pos = enumName.pos
@@ -173,7 +173,7 @@ class ExpressionCheckIdentifier {
 			return null, new error(sprintf("%s %s", e.pos.errMsgPrefix(), err.getMessage()))
 		}
 		if identifier.locateDefinition {
-			block.inheritedAttribute.p.locatedIdentifierPos = it.pos  
+			block.inheritedAttribute.p.locateDefinition = it.pos  
 		}
 		valueType = new Type()
 		valueType.pos = e.pos

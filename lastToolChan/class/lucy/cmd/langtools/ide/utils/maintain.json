@@ -1,21 +1,25 @@
 {
-	"compileTime":1542959079573,
+	"compileTime":1543216046002,
 	"compiledFrom":[
 			{
-			"lastModify":1542949389,
-			"name":null
-		},
-			{
-			"lastModify":1542948287,
-			"name":null
+			"lastModify":1543214284,
+			"name":"fns.lucy"
 		},
 			{
 			"lastModify":1542943865,
-			"name":null
+			"name":"locate.lucy"
 		},
 			{
-			"lastModify":1542949386,
-			"name":null
+			"lastModify":1543207163,
+			"name":"lucyfile.lucy"
+		},
+			{
+			"lastModify":1543214587,
+			"name":"package_loader.lucy"
+		},
+			{
+			"lastModify":1543213617,
+			"name":"register_loader.lucy"
 		}
 	],
 	"imports":[
@@ -23,11 +27,12 @@
 			"lucy/cmd/langtools/compile/ast",
 			"lucy/cmd/langtools/compile/parser",
 			"lucy/cmd/langtools/lucy/run",
-			"lucy/cmd/langtools/compile/lc",
-			"lucy/cmd/langtools/common"
+			"lucy/cmd/langtools/common",
+			"lucy/cmd/langtools/compile/lc"
 	],
 	"classes":[
 			"LucyFile.class",
-			"main.class"
+			"main.class",
+			"PackageLoader.class"
 	]
 }

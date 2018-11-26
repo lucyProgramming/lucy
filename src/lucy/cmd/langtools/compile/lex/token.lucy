@@ -10,10 +10,13 @@ public class Token {
 	public endColumn   int
 	public description string
 	public stringValue string 
-	public longValue long 
-	public doubleValue double 
-	public boolValue bool 
+	public longValue  long 
+	public doubleValue  double 
+	public boolValue  bool 
 	public locateDefinition bool 
+	public getHover  bool 
+	public findUsage  bool 
+	public rename bool 
 }
 
 

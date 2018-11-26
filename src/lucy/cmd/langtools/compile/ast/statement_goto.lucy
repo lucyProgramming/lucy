@@ -14,7 +14,7 @@ public class StatementGoTo {
 				this.pos.errMsgPrefix(), this.labelName))
 		}
 		if this.locateDefinition {
-			b.inheritedAttribute.p.locatedIdentifierPos = label.pos
+			b.inheritedAttribute.p.locateDefinition = label.pos
 		}
 		this.statementLabel = label
 		this.defers = []StatementDefer{}

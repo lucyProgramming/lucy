@@ -18,14 +18,13 @@ public class Package {
 	/*
 		for lucy tool goto definition
 	*/
-	public locatedIdentifierPos Pos  
+	public locateDefinition Pos  
 	/*
 		for lucy tool hover
 	*/
 	hover Hover
+	javaPackage JavaPackage
 	
-
-
 	public fn Package(name string,disableCheckUnuse bool){
 		this.super()
 		assert(name != null )
@@ -227,6 +226,9 @@ public class Package {
 			this.errors.appendAll(v.check())
 		}
 		for _, v := range this.block.typeAliases {
+			if v.locateDefinition {
+				this.locateDefinition = v.pos 
+			}
 			err := v.resolve(this.block)
 			if err != null {
 				this.errors.append(err)

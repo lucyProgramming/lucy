@@ -111,7 +111,11 @@ class ExpressionCheckVar {
 				}
 			}
 		}
-
+		for _, v := range ev.variables {
+			if v.locateDefinition{
+				block.inheritedAttribute.p.locateDefinition = v.pos 
+			}
+		}
 	}	
 } 
 

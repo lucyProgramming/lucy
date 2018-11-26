@@ -51,7 +51,8 @@ public class Type {
 	public Map            Map
 	public Package        Package
 	public alias          TypeAlias
-	
+	public locateDefinition  bool 
+	public findUsage  bool 
 
 	// copy to t 
 	fn cp(t Type) {
@@ -213,6 +214,9 @@ public class Type {
 		if this.resolved {
 			return null
 		}
+		if this.locateDefinition {
+			block.inheritedAttribute.p.locateDefinition = this.pos 
+		}
 		this.resolved = true // single threading
 		switch this.Type {
 		case VariableTypeTemplate:
@@ -225,6 +229,10 @@ public class Type {
 					errMsgPrefix(this.pos), this.name))
 			}
 			pos := this.pos // keep pos
+			if this.locateDefinition {
+				block.inheritedAttribute.p.locateDefinition = 
+					block.inheritedAttribute.Function.parameterTypes[this.name].pos 
+			}
 			block.inheritedAttribute.Function.parameterTypes[this.name].cp(this)
 			this.pos = pos // keep pos
 			return null
@@ -348,13 +356,16 @@ public class Type {
 	}
 
 	fn makeTypeFrom(block Block , d Object) -> (err error)  {
-		if dd ,ok := d.(Class) ; ok{
-			if dd.loadFromOutSide && dd.isPublic() == false {
+		if c ,ok := d.(Class) ; ok{
+			if c.loadFromOutSide && c.isPublic() == false {
                 err = new error(sprintf("%s class '%s' is not public",
-                           errMsgPrefix(this.pos), dd.name))
+                           errMsgPrefix(this.pos), c.name))
+			}
+			if this.locateDefinition {
+				block.inheritedAttribute.p.locateDefinition = c.pos
 			}
 			this.Type = VariableTypeObject
-			this.Class = dd
+			this.Class = c 
 			return err
 		}
 		if t ,ok := d.(Type) ; ok{
@@ -362,6 +373,9 @@ public class Type {
 			alias := this.alias
 			resolved := this.resolved
 			t.cp(this)
+			if this.locateDefinition {
+				block.inheritedAttribute.p.locateDefinition = t.pos
+			}
 			this.pos = pos
 			this.alias = alias
 			this.resolved = resolved
@@ -372,6 +386,9 @@ public class Type {
 				block.inheritedAttribute.p.errors.append(
 					new error(sprintf("%s enum '%s' is not public",
 						errMsgPrefix(this.pos), dd.name)))
+			}
+			if this.locateDefinition {
+				block.inheritedAttribute.p.locateDefinition = dd.pos 
 			}
 			this.Type = VariableTypeEnum
 			this.Enum = dd

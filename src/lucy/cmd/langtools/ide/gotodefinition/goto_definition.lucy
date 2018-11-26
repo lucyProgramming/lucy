@@ -3,10 +3,10 @@ import "lucy/cmd/langtools/ide/utils"
 import "java/io"
 import "java/nio/file/FileSystems"
 import "lucy/encoding/json"
+import "lucy/cmd/langtools/compile/ast"
 
-
-public fn main(args []string) {
-	f := new Flags()
+public fn findDefinition(args []string) -> (result ast.Pos) {
+    f := new Flags()
     file , pos := f.parseArgs(args)
     lucyPath , packageName := utils.locateLucyFile(file)
     var lucyFiles []utils.LucyFile 
@@ -27,8 +27,11 @@ public fn main(args []string) {
             v.locateDefinition = pos 
         }
     }
-    result := new FindDefinition(lucyFiles,packageName , true ).find()
-    bs,err := json.encode(result)
+    result = new FindDefinition(lucyFiles,packageName , true ).find()
+}
+
+public fn main(args []string) {
+    bs , err := json.encode(findDefinition(args))
     if err != null {
         panic(err)
     }

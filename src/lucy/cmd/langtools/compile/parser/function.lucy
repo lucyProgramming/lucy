@@ -25,6 +25,8 @@ class FunctionParser extends ParserExtends{
 		f.pos = this.parser.mkPos()
 		if this.parser.token.Type == lex.TokenIdentifier {
 			f.name = this.parser.token.stringValue
+			f.locateDefinition = this.parser.token.locateDefinition
+			f.findUsage = this.parser.token.findUsage
 			this.next(lfNotToken)
 		}
 		f.Type, err = this.parseFunctionType()

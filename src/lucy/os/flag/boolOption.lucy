@@ -4,7 +4,7 @@
 public final class BoolOption  extends Option{
 	private boolDefaultValue bool 
 	private boolValue bool 
-	
+
 	fn BoolOption(d bool) {
 		this.super() 
 		.boolDefaultValue = d 
@@ -18,8 +18,9 @@ public final class BoolOption  extends Option{
 	//special case 
 	protected fn parse(s string)   {
 		this.boolValue = !this.boolDefaultValue
-	} 
-	public fn getValue() -> (b bool = this.boolValue){ }
+	}
+	// if flag is nerver parse then panic
+	public fn getValue() -> (b bool = this.boolValue) {}
 	
 	
 }

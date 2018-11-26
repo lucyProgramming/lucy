@@ -16,7 +16,7 @@ public class MakeNodesObjects {
         }
         return ret
     }
-
+    
     fn makeNodes(nodes []ast.TopNode) -> (ret Object[]) {
         ret = new Object[](len(nodes))
         for k, n := range nodes {

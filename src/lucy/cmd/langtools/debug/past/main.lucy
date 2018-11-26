@@ -1,9 +1,8 @@
 /*
-    past is short for "print abstrach syntex tree"
+    past is short for "print abstract syntax tree"
     this tool is use for parse a lucy and print "ast" debugging
 	this tool print ast in "json"
 */
-
 
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/os"
@@ -71,7 +70,7 @@ fn main(args []string) {
 			bs = bs[3:]
 		}
 		length := len(nodes)
-		es := parser.Parse(nodes, v, bs, false, 10)
+		es := parser.Parse(nodes, v, bs, false, 10 , -1,-1,-1)
 		lucyFiles[v] = nodes[length:len(nodes)]
 		errs.appendAll(es)
 	}

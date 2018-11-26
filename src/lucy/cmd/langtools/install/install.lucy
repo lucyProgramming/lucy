@@ -52,11 +52,10 @@ class Install {
         cmd.stderr = os.stderr  
         cmd.start()
         if err := cmd.wait() ;  err != null {
-			printf("install failed,err:%s\n" ,err .toString())
-			os.exit(2)
+			printf("install failed,err:%s\n" ,err.toString())
         }
 	}
-
+	
 	
 	
 

@@ -1,5 +1,5 @@
 
-public fn New(bs []byte, startLine, startColumn int,locateDefinition int = -1) -> (lex Lexer) {
+public fn New(bs []byte, startLine, startColumn int,locateDefinition , getHover , findUsage ,rename int ) -> (lex Lexer) {
 	lex = new Lexer()
 	lex.bs = bs
 	lex.end = len(bs)
@@ -8,5 +8,7 @@ public fn New(bs []byte, startLine, startColumn int,locateDefinition int = -1) -
 	lex.lastLine = startLine
 	lex.lastColumn = startColumn
 	lex.locateDefinition = locateDefinition
-	return lex
+	lex.getHover = getHover
+	lex.findUsage = findUsage
+	lex.rename = rename 
 }

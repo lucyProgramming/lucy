@@ -55,24 +55,3 @@ public fn exit(code int){	System.exit(code) }
 */
 
 public fn gc(){	System.gc() }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

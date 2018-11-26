@@ -8,7 +8,9 @@ public class Lexer {
 	line, column         int
 	offset , end         int
 	locateDefinition         int
-	
+	getHover int 
+	findUsage int 
+	rename int 
 	 
 	public fn GetLineAndColumn() -> (line int, column int) {
 		return this.line, this.column
@@ -281,13 +283,28 @@ public class Lexer {
 					token.locateDefinition = true 
 				}
 			}
+			if this.getHover > 0 {
+				if this.getHover >= startOffset && this.getHover < this.offset {
+					token.getHover = true 
+				}
+			}
+			if this.findUsage > 0 {
+				if this.findUsage >= startOffset && this.findUsage < this.offset {
+					token.findUsage = true 
+				}
+			}
+			if this.rename > 0 {
+				if this.rename >= startOffset && this.rename < this.offset {
+					token.rename = true 
+				}
+			}
 		}
 		token.endOffset = this.offset 
 		token.endLine = this.line
 		token.endColumn = this.column
 		return
 	}
-
+	
 	fn tryLexElseIf() -> (is bool) {
 		c, eof := this.getChar()
 		for c == ' ' || c == '\t' {

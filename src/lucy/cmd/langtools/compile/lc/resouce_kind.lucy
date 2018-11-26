@@ -1,0 +1,24 @@
+
+
+
+
+public enum  resourceKind{
+	resourceKindJavaClass = 1,
+	resourceKindJavaPackage,
+	resourceKindLucyClass,
+	resourceKindLucyPackage
+}
+
+public class Resource {
+	public kind     resourceKind
+	public realPath string
+	public name     string
+	public fn Resource(kind resourceKind , realPath string , name  string) {
+	    this.super()
+	    this.kind = kind
+	    this.realPath = realPath
+	    this.name = name
+	}
+}
+
+

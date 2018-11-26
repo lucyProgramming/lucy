@@ -11,6 +11,7 @@ public class Pos {
 	*/
 	public offset int
 	public endOffset int 
+
 	public fn errMsgPrefix() -> (prefix string) {
 		return sprintf("%s:%d:%d:", this.filename, this.line, this.column)
 	}
@@ -26,6 +27,8 @@ public class NameWithPos {
 	public name string
 	public pos  Pos
 	public locateDefinition  bool 
+	public findUsage bool 
+	public getHover bool 
 	public fn NameWithPos(name string ,Pos  Pos ){
 	    this.super()
 		this.name = name

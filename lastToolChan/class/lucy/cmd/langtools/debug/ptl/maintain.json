@@ -1,0 +1,16 @@
+{
+	"compileTime":1543214689664,
+	"compiledFrom":[
+			{
+			"lastModify":1543213367,
+			"name":"main.lucy"
+		}
+	],
+	"imports":[
+			"lucy/cmd/langtools/compile/lex",
+			"lucy/os"
+	],
+	"classes":[
+			"main.class"
+	]
+}

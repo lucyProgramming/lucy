@@ -2,6 +2,7 @@ import "lucy/os"
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/parser"
 import "lucy/cmd/langtools/lucy/run"
+import "java/io"
 
 
 public fn readLucyFiles(filenames []string) -> (lucyFiles []LucyFile = []LucyFile{}){
@@ -16,11 +17,11 @@ public fn readLucyFiles(filenames []string) -> (lucyFiles []LucyFile = []LucyFil
 		lucyFiles.append(t)
 	}
 }
-  
+
 public fn parseImports(lucyFiles []LucyFile) -> (imports []string = []string{} ){
 	nodes := []ast.TopNode{}
 	for _,v := range lucyFiles {
-		parser.Parse(nodes , v.realPathName , v.bs , true , 10)
+		parser.Parse(nodes , v.realPathName , v.bs , true , 10 , -1 ,-1 ,-1)
 	}
 	for v := range nodes {
 		imports.append(v.node.(ast.Import).Import)
@@ -29,7 +30,7 @@ public fn parseImports(lucyFiles []LucyFile) -> (imports []string = []string{} )
 
 public fn parseAst(lucyFiles []LucyFile) ->(nodes []ast.TopNode = []ast.TopNode{} , errs []error = []error{}){
 	for _,v := range lucyFiles {
-		errs.appendAll(parser.Parse(nodes , v.realPathName , v.bs , false , 10 ,v.locateDefinition))
+		errs.appendAll(parser.Parse(nodes , v.realPathName , v.bs , false , 10 ,v.locateDefinition , v.getHover , v.findUsage ))
 	}
 }
 
@@ -46,9 +47,20 @@ public fn parseAstAndTypeCheck(packageName string , lucyFiles []LucyFile) -> (p 
 	}
 }
 
-public fn buildImports(imports []string){
-	for v := range imports {
-		args := ["-build" , v ]
-		new run.RunLucyPackage().RunCommand("run" ,args )
+
+public fn getLucyFiles(dir string) ->(lucyFiles []string = []string{}) {
+	list := new io.File(dir).list()
+	for v := range list {
+		if v.endsWith(".lucy") {
+			lucyFiles.append(dir + "/" + v)
+		}
 	}
 }
+
+//load package from souce code 
+// public fn buildImports(imports []string){
+// 	for v := range imports {
+// 		args := ["-build" , v ]
+// 		new run.RunLucyPackage().RunCommand("run" ,args )
+// 	}
+// } 

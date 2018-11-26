@@ -2,8 +2,10 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 public class ClassMethod {
 	public isCompilerAuto bool
-	public Function       Function
+	public Function       Function 
+	public findUsage  bool 
 
+	
 	public fn narrowDownAccessRange(implementation ClassMethod) ->(is bool ) {
 		if this.isPublic() {
             return !implementation.isPublic()

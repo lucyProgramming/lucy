@@ -192,6 +192,9 @@ public class Statement {
 				errs.append(err)
 			}
 		case StatementTypeTypeAlias:
+			if this.TypeAlias.locateDefinition {
+				block.inheritedAttribute.p.locateDefinition = this.pos 
+			}
 			err := this.TypeAlias.Type.resolve(block)
 			if err != null {
 				return []error{err}

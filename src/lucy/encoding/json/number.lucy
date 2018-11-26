@@ -48,14 +48,13 @@ class Number {
 			}
 		}
 	}
-
+	
 	private static fn mkAscii0Bytes(length int) -> (bs []byte ){
 		bs = new []byte(length)
 		for k,_ := range bs {
 			bs[k] = '0'  
 		}
 	}
-	
 	fn getLong() -> ( longValue long){
 		this.prepare()
 		for v := range this.integerPart {
@@ -65,7 +64,6 @@ class Number {
 			longValue = -longValue
 		}
 	}
-	
 	fn getDouble() -> (doubleValue double) {
 		this.prepare()
 		for v := range this.integerPart {

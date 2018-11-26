@@ -19,6 +19,8 @@ class ExpressionSuffix extends  ParserExtends {
 			identifier.name = this.parser.token.stringValue
 			prefix.data = identifier
 			identifier.locateDefinition  = this.parser.token.locateDefinition 
+			identifier.getHover  = this.parser.token.getHover 
+			identifier.findUsage  = this.parser.token.findUsage 
 			prefix.pos = this.parser.mkPos()
 			this.next(lfIsToken)
 		case lex.TokenTrue:
@@ -436,6 +438,9 @@ class ExpressionSuffix extends  ParserExtends {
 					newExpression.op = "selection"
 					newExpression.Type = ast.ExpressionTypeSelection
 					selection := new ast.ExpressionSelection()
+					selection.locateDefinition = this.parser.token.locateDefinition
+					selection.findUsage  = this.parser.token.findUsage
+					selection.getHover  = this.parser.token.getHover
 					selection.Expression = prefix
 					selection.name = this.parser.token.stringValue
 					newExpression.data = selection
@@ -520,12 +525,15 @@ class ExpressionSuffix extends  ParserExtends {
 			result.Type = ast.ExpressionTypeMethodCall
 			result.op = "methodCall"
 			call := new ast.ExpressionMethodCall()
-			index := on.data.(ast.ExpressionSelection)
-			call.Expression = index.Expression
-			call.args = args
-			call.name = index.name
+			selection := on.data.(ast.ExpressionSelection)
+			call.name = selection.name
+			call.locateDefinition = selection.locateDefinition
+			call.findUsage  = selection.findUsage
+			call.getHover  = selection.getHover
+			call.Expression = selection.Expression
+			call.args = args	
 			result.pos = on.pos
-			result.data = call
+			result.data = call	
 		} else {
 			result.Type = ast.ExpressionTypeFunctionCall
 			result.op = "functionCall"

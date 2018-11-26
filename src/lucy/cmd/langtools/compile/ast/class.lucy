@@ -15,6 +15,7 @@ public class Class {
 	loadSuperClassCalled              bool
 	resolveInterfacesCalled           bool
 	resolveFieldsAndMethodsTypeCalled bool
+
 	public notImportedYet                    bool   // not imported
 	public name                              string // binary name
 	public pos                               Pos
@@ -32,7 +33,8 @@ public class Class {
 	public staticBlocks                      []Block
 	public comment                           string
 	closure                           Closure = new Closure()
-
+    public locateDefinition 	bool 
+	public findUsage  bool  
 
     fn haveStaticsCodes() -> (is bool)  {
         return len(this.staticBlocks) > 0
@@ -240,6 +242,7 @@ public class Class {
             variableType.Type = VariableTypeName // naming
             variableType.name = this.superClassName.name
             variableType.pos = this.superClassName.pos
+            variableType.locateDefinition = this.superClassName.locateDefinition 
             err = variableType.resolve(this.block)
             if err != null {
                 return err
@@ -1060,6 +1063,9 @@ public class Class {
         }
         staticFieldAssignStatements := []Statement{}
         for _, v := range this.fields {
+            if v.locateDefinition {
+                this.block.inheritedAttribute.p.locateDefinition = v.pos 
+            }
             if v.defaultValueExpression != null {
                 assignment, es := v.defaultValueExpression.
                     checkSingleValueContextExpression(this.methods[SpecialMethodInit][0].Function.block)

@@ -15,15 +15,15 @@ class FindDefinition {
     fn find() -> (result Result){
         //parse ast and typecheck
         p,_ := utils.parseAstAndTypeCheck(this.lucyFiles)
-        if p.locatedIdentifierPos == null {
-            if p.locatedIdentifierPos.loadDefinitionFromOutside != null {
-                return this.loadDefinitionFromOutside(p.locatedIdentifierPos.loadDefinitionFromOutside)
+        if p.locateDefinition == null {
+            if p.locateDefinition.loadDefinitionFromOutside != null {
+                return this.loadDefinitionFromOutside(p.locateDefinition.loadDefinitionFromOutside)
             }
             result = new  Result()
-            result.filename = p.locatedIdentifierPos.filename 
-            result.line = p.locatedIdentifierPos.line 
-            result.column = p.locatedIdentifierPos.column 
-            result.offset = p.locatedIdentifierPos.offset 
+            result.filename = p.locateDefinition.filename 
+            result.line = p.locateDefinition.line 
+            result.column = p.locateDefinition.column 
+            result.offset = p.locateDefinition.offset 
         }
     }
     

@@ -6,4 +6,5 @@ public class TypeAlias {
 	public 	pos     Pos
 	public 	comment string
 	public locateDefinition  bool 
+	public findUsage  bool 
 }

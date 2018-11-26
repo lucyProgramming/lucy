@@ -59,7 +59,7 @@ public final class FloatOption  extends Option{
 		.floatValue = value 
 		
 	} 
-	public fn getValue() -> (v float = this.floatValue ){ }
+	public fn getValue() -> (v float = this.floatValue ){  }
 	
 
 	

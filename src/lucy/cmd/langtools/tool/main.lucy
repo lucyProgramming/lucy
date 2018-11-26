@@ -4,18 +4,15 @@ import "lucy/os"
 typealias tool = fn(args []string)
 
 
-
-
 fn getTools() -> (tools map{string->tool}) {
 	tools = new map{string -> tool} ()
-
+	
 }
 
 
 fn printUsage(){	 
-	
-}
 
+}
 
 
 fn main(args []string) {

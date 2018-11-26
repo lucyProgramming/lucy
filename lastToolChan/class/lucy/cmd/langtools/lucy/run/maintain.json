@@ -1,25 +1,25 @@
 {
-	"compileTime":1542959090882,
+	"compileTime":1543216045895,
 	"compiledFrom":[
 			{
 			"lastModify":1542603513,
-			"name":null
+			"name":"flag.lucy"
 		},
 			{
 			"lastModify":1542603077,
-			"name":null
+			"name":"import_cycle.lucy"
 		},
 			{
 			"lastModify":1542603516,
-			"name":null
+			"name":"lucy_file.lucy"
 		},
 			{
 			"lastModify":1542593786,
-			"name":null
+			"name":"package_compiled.lucy"
 		},
 			{
-			"lastModify":1542959071,
-			"name":null
+			"lastModify":1543207118,
+			"name":"run.lucy"
 		}
 	],
 	"imports":[
@@ -34,16 +34,17 @@
 			"lucy/cmd/langtools/compile/common"
 	],
 	"classes":[
-			"closureFunction$javaPackageFilter$literal226.class",
-			"closureFunction$javaPackageFilter$literal238.class",
-			"closureFunction$javaPackageFilter$literal258.class",
-			"closureFunction$javaPackageFilter$literal270.class",
-			"closureFunction$RunCommand$literal108.class",
-			"closureFunction$RunCommand$literal111.class",
-			"closureFunction$RunCommand$literal114.class",
-			"closureFunction$RunCommand$literal76.class",
-			"closureFunction$RunCommand$literal79.class",
-			"closureFunction$RunCommand$literal82.class",
+			"closureFunction$javaPackageFilter$literal232.class",
+			"closureFunction$javaPackageFilter$literal233.class",
+			"closureFunction$javaPackageFilter$literal235.class",
+			"closureFunction$javaPackageFilter$literal236.class",
+			"closureFunction$javaPackageFilter$literal244.class",
+			"closureFunction$javaPackageFilter$literal245.class",
+			"closureFunction$javaPackageFilter$literal247.class",
+			"closureFunction$javaPackageFilter$literal248.class",
+			"closureFunction$RunCommand$literal78.class",
+			"closureFunction$RunCommand$literal81.class",
+			"closureFunction$RunCommand$literal84.class",
 			"Flags.class",
 			"ImportStack.class",
 			"LucyFile.class",

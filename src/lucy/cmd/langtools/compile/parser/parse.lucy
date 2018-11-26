@@ -19,9 +19,9 @@ public fn Parse(
 	filename string,
 	bs []byte,
 	onlyParseImport bool,
-	nErrors2Stop int , locateDefinition int = -1 ) -> (errs []error) {
+	nErrors2Stop int , locateDefinition int ,getHover int , findUsage int  ) -> (errs []error) {
 	p := new Parser(bs , tops , filename , onlyParseImport , nErrors2Stop )
-	p.lexer = lex.New(bs, 1, 1 , locateDefinition)
+	p.lexer = lex.New(bs, 1, 1 , locateDefinition , getHover , findUsage)
 	return p.parse()
 }
 
@@ -318,7 +318,8 @@ class Parser {
 		    pos.filename = this.filename
 		    pos.line = this.token.endLine
 		    pos.column = this.token.endColumn
-		    pos.offset = this.lexer.getOffSet()
+		    pos.offset = this.token.offset
+			 pos.endOffset = this.token.endOffset
 			return
 		} else {
 			line, column := this.lexer.GetLineAndColumn()
@@ -394,7 +395,7 @@ class Parser {
 		}
 		return
 	}
-
+	
 	// str := "hello world"   a,b = 123 or a b ;
 	fn parseVar() -> (ret ast.ExpressionVar, err error) {
 		names, err := this.parseNameList()
@@ -405,6 +406,7 @@ class Parser {
 		ret.variables = new []ast.Variable(len(names))
 		for k, v := range names {
 			vd := new ast.Variable()
+			vd.locateDefinition = v.locateDefinition
 			vd.name = v.name
 			vd.pos = v.pos
 			ret.variables[k] = vd
@@ -566,7 +568,7 @@ class Parser {
 		this.unExpectNewLineAndSkip()
 		if this.token.Type != lex.TokenIdentifier {
 			err = new error(sprintf("%s expect identifer,but '%s'", this.errMsgPrefix(), this.token.description))
-			this.errs.append( err)
+			this.errs.append(err)
 			return null, err
 		}
 		ret := new ast.TypeAlias()
@@ -744,6 +746,9 @@ class Parser {
 		names = []ast.NameWithPos{}
 		for this.token.Type == lex.TokenIdentifier {
 			t := new ast.NameWithPos(this.token.stringValue,this.mkPos())
+			t.locateDefinition = this.token.locateDefinition
+			t.findUsage = this.token.findUsage
+			t.getHover = this.token.getHover
 			assert(t.pos != null)
 			names.append(t)
 			this.next(lfIsToken)

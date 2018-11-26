@@ -1,0 +1,22 @@
+{
+	"compiledFrom": [
+		{
+			"lastModify": 1542588953,
+			"name": "clean.lucy"
+		},
+		{
+			"lastModify": 1542957014,
+			"name": "main.lucy"
+		}
+	],
+	"imports": [
+		"lucy/cmd/langtools/common",
+		"lucy/os",
+		"lucy/os/flag"
+	],
+	"compileTime": 1543216218,
+	"classes": [
+		"Clean.class",
+		"main.class"
+	]
+}
