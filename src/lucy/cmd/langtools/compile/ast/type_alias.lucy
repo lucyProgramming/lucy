@@ -8,4 +8,5 @@ public class TypeAlias {
 	public locateDefinition  bool 
 	public findUsage  bool 
 	public rename bool 
+    findUsageInstances []Usage 
 }

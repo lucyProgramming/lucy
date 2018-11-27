@@ -23,6 +23,7 @@ class ClassParser extends  ParserExtends{
 		name.locateDefinition = this.parser.token.locateDefinition
 		name.findUsage = this.parser.token.findUsage
 		name.rename  = this.parser.token.rename
+		pos := this.parser.mkPos()
 		this.next(lfNotToken)
 		if this.parser.token.Type == lex.TokenSelection {
 			this.next(lfNotToken) // skip .
@@ -36,14 +37,14 @@ class ClassParser extends  ParserExtends{
 				name.locateDefinition = name.locateDefinition || this.parser.token.locateDefinition
 				name.findUsage = name.findUsage || this.parser.token.findUsage
 				name.rename  = name.rename || this.parser.token.rename
+				pos = this.parser.mkPos()
 				this.next(lfNotToken) // skip name identifier
 			}
 		}
 		name.name = className
-		name.pos = this.parser.mkPos()
-
+		name.pos = pos 
 	}
-
+	
 	fn parseImplementsInterfaces() -> (names []ast.NameWithPos,err error) {
 		names = []ast.NameWithPos{}
 		for this.parser.token.Type != lex.TokenEof {
@@ -75,6 +76,7 @@ class ClassParser extends  ParserExtends{
 		this.parser.unExpectNewLineAndSkip()
 		t, err := this.parseClassName()
 		if t != null {
+			classDefinition.pos = t.pos 
 			classDefinition.name = t.name
 			classDefinition.findUsage = t.findUsage
 			classDefinition.locateDefinition = t.locateDefinition
@@ -89,7 +91,9 @@ class ClassParser extends  ParserExtends{
 			}
 			this.consume(untilLc)
 		}
-		classDefinition.pos = this.parser.mkPos()
+		if null == classDefinition.pos {
+			classDefinition.pos = this.parser.mkPos()
+		} 
 		if this.parser.token.Type == lex.TokenExtends { // parse father expression
 			this.next(lfNotToken) // skip extends
 			classDefinition.superClassName, err = this.parseClassName()

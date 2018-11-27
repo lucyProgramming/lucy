@@ -252,7 +252,7 @@ public class Block {
         if this.inheritedAttribute == null {
             this.inheritedAttribute = new InheritedAttribute()
         }
-
+        
         this.outer = father
         this.inheritedAttribute.forBreak = father.inheritedAttribute.forBreak
         this.inheritedAttribute.statementOffset = father.inheritedAttribute.statementOffset

@@ -5,8 +5,8 @@ import "java/lang/Object"
 import "java/io"
 
 
-class PackageLoader extends lc.FileLoader {
-
+public class PackageLoader extends lc.FileLoader {
+    
     public fn PackageLoader(lucyPaths , classPaths []string){
         this.super(lucyPaths ,classPaths )
     }

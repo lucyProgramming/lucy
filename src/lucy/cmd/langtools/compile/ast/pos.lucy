@@ -11,11 +11,13 @@ public class Pos {
 	*/
 	public offset int
 	public endOffset int 
-
+	public loadDefinitionFromOutside LoadDefinitionFromOutside
+	public locateDefinitionIsGoto  bool // very special case 
+	
 	public fn errMsgPrefix() -> (prefix string) {
 		return sprintf("%s:%d:%d:", this.filename, this.line, this.column)
 	}
-	public loadDefinitionFromOutside LoadDefinitionFromOutside
+	
 }
 
 

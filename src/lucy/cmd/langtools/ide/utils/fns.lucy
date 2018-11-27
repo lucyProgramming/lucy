@@ -48,7 +48,6 @@ public fn parseAstAndTypeCheck(packageName string , lucyFiles []LucyFile) -> (p 
 	}
 }
 
-
 public fn getLucyFiles(dir string) ->(lucyFiles []string = []string{}) {
 	list := new io.File(dir).list()
 	for v := range list {

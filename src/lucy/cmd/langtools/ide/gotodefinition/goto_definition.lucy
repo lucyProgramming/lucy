@@ -5,14 +5,13 @@ import "java/nio/file/FileSystems"
 import "lucy/encoding/json"
 import "lucy/cmd/langtools/compile/ast"
 
-public fn findDefinition(args []string) -> (result ast.Pos) {
-    f := new Flags()
-    file , pos := f.parseArgs(args)
+
+public fn findDefinition(file string , pos int) -> (result ast.Pos) {
     lucyPath , packageName := utils.locateLucyFile(file)
     var lucyFiles []utils.LucyFile 
     {
         t := []string{}
-        p := lucyPath + "/" + packageName
+        p := lucyPath + "/src/" + packageName
         for v := range new io.File(p).list() {
             if v.endsWith(".lucy") {
                 t.append(p + "/" + v)
@@ -30,10 +29,3 @@ public fn findDefinition(args []string) -> (result ast.Pos) {
     result = new FindDefinition(lucyFiles,packageName , true ).find()
 }
 
-public fn main(args []string) {
-    bs , err := json.encode(findDefinition(args))
-    if err != null {
-        panic(err)
-    }
-    print(string(bs))
-}

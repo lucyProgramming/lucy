@@ -10,15 +10,17 @@ public class StatementLabel {
 	public exits               []cg.Exit
 	public statement           Statement
 	public pos                 Pos
+	public findUsage bool 
+	public findUsageInstances []Usage  
+
 
 	/*
-	defer {
-		xxx:
-	}
-	defer block could be compile multi times,
-	should reset the label
+		defer {
+			xxx:
+		}
+		defer block could be compile multi times,
+		should reset the label
 	*/
-
 	
 	fn Reset() {
 		this.codeOffsetGenerated = false

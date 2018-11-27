@@ -33,27 +33,23 @@ public class FunctionType {
 		this.templateNamesMap = m
 		return errs
 	}
-
+	
 	fn haveTemplateName(name string) -> (have bool){
 		have = this.templateNamesMap != null &&
 			this.templateNamesMap.keyExist(name)
 	}
-
-
 	fn Clone() -> (ret FunctionType) {
 		ret = new FunctionType()
 		ret.parameterList = new []Variable(len(this.parameterList))
 		for k, _ := range ret.parameterList {
 			p := new Variable()
-			//TODO :: clone
-			p.Type = this.parameterList[k].Type.Clone()
+			this.parameterList[k].cp(p)
 			ret.parameterList[k] = p
 		}
 		ret.returnList = new []Variable(len(this.returnList))
 		for k, _ := range ret.returnList {
 			p := new Variable()
-			//TODO :: clone
-			p.Type = this.returnList[k].Type.Clone()
+			this.returnList[k].cp(p)
 			ret.returnList[k] = p
 		}
 		return

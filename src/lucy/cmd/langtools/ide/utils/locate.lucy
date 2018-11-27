@@ -1,5 +1,7 @@
 
 import "lucy/cmd/langtools/common" 
+import "java/io"
+
 
 public fn locateLucyFile(file string ) -> (lucyPath string , pacakgenName string ) {
     lucyPaths := common.getLucyPath()
@@ -17,10 +19,13 @@ public fn locateLucyFile(file string ) -> (lucyPath string , pacakgenName string
         if prefixNotMatch {
             continue
         }
+        if new io.File(path + "/src").isDirectory() == false {
+            continue
+        }
         lucyPaths2.append(path)
-        tt := eles[len(t):len(eles)-1]
+        tt := eles[len(t) + 1 : len(eles)-1]
         pacakgenName = ""
-        for kk,vv := range tt{
+        for kk , vv := range tt {
             pacakgenName += vv
             if kk != len(tt) -1 {
                 pacakgenName += "/"

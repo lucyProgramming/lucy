@@ -33,9 +33,10 @@ class Fmt {
             }
         }
     }
-
+    
     fn formatTypealais(indent string , a ast.TypeAlias ) -> (format string = "") {
-        
+        format = indent
+        format += sprintf ("typealias %s = %s" , a.name ,a.Type.typeString())
     }
     fn formatConstant(indent string , f ast.Constant ) -> (format string = "") {
         
@@ -98,9 +99,11 @@ class Fmt {
             case ast.StatementTypeComment:
                 format += "//" + this.comment  
             case ast.StatementTypeCommentMultiLine:
-                format += "/*" + this.comment + "*/\n"   
+                format += "/*" + this.comment + "*/"   
         }
+        format += "\n"
     }
+
     
     fn formatTypealias(indent string ,a ast.TypeAlias )-> (format string = "") {
 

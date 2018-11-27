@@ -22,6 +22,17 @@ public class FileLoader implements ast.LoadImport{
         this.classPaths = classPaths
         this.caches = new map{string -> Object}()
     }
+
+    public fn setCache(name string , cache Object) {
+        if this.caches == null {
+            this.caches = new map{string -> Object}() 
+        }
+        this.caches[name] = cache 
+    }
+
+    public fn getCache(name string ) -> (cache Object = this.caches[name]){}
+    
+
     public fn  LoadImport(importName string) -> (x Object,err error) {
         /*defer {
             e := catch()

@@ -295,7 +295,7 @@ class ExpressionCheckMethodCall {
 		}
 		return null
 	}
-
+	
 	static fn checkMethodCallExpressionOnPackage(
 	    e Expression ,
 		block Block,

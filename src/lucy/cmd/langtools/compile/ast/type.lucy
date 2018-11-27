@@ -363,6 +363,12 @@ public class Type {
                 err = new error(sprintf("%s class '%s' is not public",
                            errMsgPrefix(this.pos), c.name))
 			}
+			if c.findUsageInstances != null {
+				t := new Usage() 
+				t.Type = "declaration"
+				t.pos = this.pos 
+				c.findUsageInstances.append(t)
+			}
 			if this.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = c.pos
 			}

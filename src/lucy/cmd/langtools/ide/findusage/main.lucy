@@ -1,15 +1,58 @@
 
+import "lucy/cmd/langtools/ide/utils"
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/ide/gotodefinition"
+import "lucy/encoding/json"
+import "java/nio/file/FileSystems"
+import "java/lang/Object"
+import "lucy/cmd/langtools/common"
 
 
+fn main(args []string) {
+    f := new Flags()
+    file , pos := f.parseArgs(args)
+    definition := gotodefinition.findDefinition(file , pos)
+    if definition == null {
+        print("null")
+        return 
+    }
+    lucyPath , packageName := utils.locateLucyFile(definition.filename)
+    var lucyFiles = utils.readLucyFiles(utils.getLucyFiles(lucyPath + "/src/" + packageName))    
+    fileSystem := FileSystems.getDefault()
+    for v := range lucyFiles {
+        if fileSystem.getPath(file).getFileName().toString() == 
+            fileSystem.getPath(v.realPathName).getFileName().toString(){
+            v.findUsage = definition.offset 
+        }
+    }
+    result := sortUsages(new FindUsage(lucyFiles , packageName , true , common.getLucyPath() ).find())
+    bs,err := json.encode(result)
+    if err != null {
+        panic(err)
+    }
+    print(string(bs))
+}
 
-
-
-
-
-
-
-
-
-
-
-
+fn sortUsages (usages []ast.Usage) -> (result Object){
+    if len(usages) == 0 {
+        return null 
+    }
+    m := new map{string -> []ast.Usage} () 
+    for v := range usages{
+        if m[v.Type] == null {
+            m[v.Type] = [v]
+        }else {
+            m[v.Type].append(v)
+        }
+    }
+    if len(m) == 1 {
+        for v := range m {
+            return copy(new ast.Usage[](len(v)) , v)
+        }
+    }
+    m2 := new map{string -> ast.Usage[]} ()
+    for k,v := range m {
+        m2[k] = copy(new ast.Usage[](len(v)) , v)
+    } 
+    return m2
+}

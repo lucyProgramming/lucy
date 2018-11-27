@@ -7,21 +7,34 @@ public class StatementGoTo {
 	public statementLabel StatementLabel
 	public pos            Pos
 	public locateDefinition bool 
-	public findUsage bool
-	public rename bool
+	public findUsage bool  // useless 
+	public rename bool // useless 
 	
-	fn checkStatementGoTo(b Block) -> (err error) {
-		label := b.searchLabel(this.labelName)
+	fn checkStatementGoTo(block Block) -> (err error) {
+		label := block.searchLabel(this.labelName)
 		if label == null {
 			return new error(sprintf("%s label named '%s' not found",
 				this.pos.errMsgPrefix(), this.labelName))
 		}
 		if this.locateDefinition {
-			b.inheritedAttribute.p.locateDefinition = label.pos
+			block.inheritedAttribute.p.locateDefinition = label.pos
+		}
+		if  label.findUsage {
+			var u = new Usage()
+			u.Type = "" 
+			u.pos = this.pos 
+			if label.findUsageInstances == null {
+				label.findUsageInstances = [u]
+			}else {
+				label.findUsageInstances.append(u)
+			}
+			if block.inheritedAttribute.p.findUsage == null {
+				block.inheritedAttribute.p.findUsage = label.findUsageInstances 
+			}
 		}
 		this.statementLabel = label
 		this.defers = []StatementDefer{}
-		this.mkDefers(b)
+		this.mkDefers(block)
 		return this.statementLabel.Ready(this.pos)
 	}
 	

@@ -35,7 +35,9 @@ public class Class {
 	closure                           Closure = new Closure()
     public locateDefinition 	bool 
 	public findUsage  bool  
+    findUsageInstances []Usage 
 
+    
     fn haveStaticsCodes() -> (is bool)  {
         return len(this.staticBlocks) > 0
     }
@@ -214,7 +216,7 @@ public class Class {
         }
         return errs
     }
-
+    
     fn resolveFather() -> (err error) {
         if this.resolveFatherCalled {
             return null
@@ -242,7 +244,7 @@ public class Class {
             variableType.Type = VariableTypeName // naming
             variableType.name = this.superClassName.name
             variableType.pos = this.superClassName.pos
-            variableType.locateDefinition = this.superClassName.locateDefinition 
+            variableType.locateDefinition = this.superClassName.locateDefinition
             err = variableType.resolve(this.block)
             if err != null {
                 return err
@@ -253,6 +255,14 @@ public class Class {
                 return err
             }
             this.superClass = variableType.Class
+            if variableType.Class.findUsageInstances != null {
+                u := variableType.Class.findUsageInstances[len(variableType.Class.findUsageInstances) -1 ]
+                if variableType.Class.IsInterface() {
+                    u.Type = "extend"
+                }else {
+                    u.Type = "implement"
+                }
+            }
             if this.IsInterface() {
                 if this.superClass.name != JavaRootClass {
                     err = new error(sprintf("%s interface`s super-class must be '%s'",
@@ -276,6 +286,7 @@ public class Class {
             t.Type = VariableTypeName
             t.pos = i.pos
             t.name = i.name
+            t.locateDefinition = i.locateDefinition
             err := t.resolve(this.block)
             if err != null {
                 errs.append(err)
@@ -285,6 +296,10 @@ public class Class {
                 errs.append(new error(sprintf("%s '%s' is not a object , but '%s'",
                     errMsgPrefix(i.pos), i.name, t.typeString())))
                 continue
+            }
+            if t.Class.findUsageInstances != null {
+                u := t.Class.findUsageInstances[len(t.Class.findUsageInstances) -1 ]
+                u.Type = "implement"
             }
             if t.Class.IsInterface() == false {
                 errs.append(new error(sprintf("%s '%s' is not a interface",

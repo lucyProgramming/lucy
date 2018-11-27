@@ -1,0 +1,88 @@
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/ide/utils"
+import "lucy/os"
+import "java/io"
+
+class FindUsage {
+    lucyFiles []utils.LucyFile
+    packageName string
+    printErr bool
+    lucyPaths []string
+    
+    fn FindUsage(lucyFiles []utils.LucyFile , packageName string , printErr bool , lucyPaths []string ) {
+        this.super()
+        this.lucyFiles = lucyFiles
+        this.packageName = packageName
+        this.printErr = printErr
+        this.lucyPaths = lucyPaths
+    }
+    
+    fn find() -> (result []ast.Usage){
+        p , es := utils.parseAstAndTypeCheck(this.packageName , this.lucyFiles)
+        if this.printErr{
+            for v := range es{
+                os.stderr.println(v.getMessage())
+            }
+        }
+        /* 
+            set this package to cache 
+            when another trying to load this pacakge could use the cache and the "findUsage" has created in memory
+        */
+        utils.packageLoader.setCache(this.packageName , p)
+        if p.findUsageIsGlobal {
+            this.searchLucyPath()        
+        }
+        return p.findUsage 
+    }
+    
+    fn searchLucyPath() {
+        for _,v := range this.lucyPaths {
+            this.searchDir("" , v + "/src/")
+        }
+    }
+    
+    fn searchDir(packageName string , dir string ) {
+        list := (new io.File(dir)).list()
+        containsLucyFile := false 
+        for v := range list {
+            if subDir := dir + "/" + v ; new io.File(subDir).isDirectory() {
+                this.searchDir(packageName + "/" + v , subDir)
+                continue
+            }
+            if v.endsWith(".lucy") {
+                containsLucyFile = true
+            }
+        }
+        if containsLucyFile == false {
+            // no lucy files
+            return 
+        }
+        if utils.packageLoader.getCache(packageName) != null {
+            //handled 
+            // when handle subdirectory may 
+            return 
+        }
+        lucyFiles := utils.readLucyFiles(utils.getLucyFiles(dir))
+        imported := false 
+        for v := range utils.parseImports(lucyFiles) {
+            if v == this.packageName {
+                imported = true 
+                break 
+            }
+        }
+        if imported == false {
+            return 
+        }
+        _ , es := utils.parseAstAndTypeCheck(packageName , lucyFiles )
+        if this.printErr{
+            for v := range es{
+                os.stderr.println(v.getMessage())
+            }
+        }
+    }
+    
+
+
+}
+
+

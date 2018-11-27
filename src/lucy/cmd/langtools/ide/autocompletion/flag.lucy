@@ -1,0 +1,37 @@
+import "lucy/os/flag"
+
+
+class Flags {
+	
+	file flag.StringOption
+	pos flag.IntOption  
+	parser flag.FlagParser
+	
+	fn Flags(){
+		this.super()
+		this.parser = new flag.FlagParser()
+		this.file = this.parser.stringOption("-file")
+		this.pos = this.parser.intOption("-pos" , -1)
+	}
+	
+	fn parseArgs(args []string) ->(file string , pos int) {
+		nodefine,err := this.parser.parse(args)
+		if err != null {
+			panic(err)
+		}
+		if len(nodefine) > 0 {
+			print("args provides but not used:" + nodefine)
+			printUsageAndExit(1)
+		}
+		if this.file.getValue() == "" {
+			print("file not provided")
+			printUsageAndExit(1)
+		}
+		if this.pos.getValue() < 0 {
+			print("pos not provided or negative...")
+			printUsageAndExit(1)
+		}
+		pos = this.pos.getValue()
+		file = this.file.getValue()
+	}
+}

@@ -4,10 +4,12 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lc"
 import "lucy/cmd/langtools/common"
 
-public fn registerLoader(lucyPaths ,classPaths []string ){
-    ast.ImportsLoader = new PackageLoader(lucyPaths , classPaths)
+public var packageLoader = new PackageLoader(common.getLucyPath() , common.getClassPath())
+
+public fn registerLoader(){
+    ast.ImportsLoader = packageLoader 
 }
 
 {
-    registerLoader(common.getLucyPath(),common.getClassPath())
+    registerLoader()
 }

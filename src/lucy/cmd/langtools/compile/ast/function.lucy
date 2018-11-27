@@ -38,7 +38,9 @@ public class Function {
 	public locateDefinition     bool 
 	public findUsage  bool 
 	public rename bool 
+	findUsageInstances []Usage 
 
+	
 	fn isPublic() -> (is bool) {
 		return this.accessFlags&cg.AccMethodPublic != 0
 	}

@@ -37,6 +37,14 @@ class ExpressionCheckNew {
 				errMsgPrefix(no.Type.pos), no.Type.Class.name)))
 			return null
 		}
+		if no.Type.Class.findUsage {
+			// type must resolved 
+			// so must len(no.Type.Class.findUsageInstances) >= 1 
+			u := no.Type.Class.findUsageInstances[len(no.Type.Class.findUsageInstances) - 1]
+			u.Type = "instaniation"
+			u.pos = e.pos 
+			// set to ok 
+		}
 		ret := no.Type.Clone()
 		ret.Type = VariableTypeObject
 		ret.pos = e.pos

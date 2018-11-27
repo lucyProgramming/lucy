@@ -16,6 +16,8 @@ public class Constant  {
 	public longValue long
 	public doubleValue double
 	public boolValue bool
+	public findUsage  bool  
+    findUsageInstances []Usage 
 	
 	fn isPublic() -> (is bool) {
 		return this.accessFlags|cg.AccFieldPublic != 0

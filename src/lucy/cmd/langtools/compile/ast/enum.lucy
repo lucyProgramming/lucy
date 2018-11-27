@@ -11,6 +11,7 @@ public class EnumName {
 	public findUsage  bool 
 	public rename 	bool 
 	public getHover  bool 
+    findUsageInstances []Usage 
 }
 
 
@@ -31,7 +32,8 @@ public class Enum   {
 	public locateDefinition 	bool 
 	public findUsage  bool 
 	public rename 	bool 
-	public getHover  bool 
+	public getHover  bool  
+    findUsageInstances []Usage 
 
 	
 

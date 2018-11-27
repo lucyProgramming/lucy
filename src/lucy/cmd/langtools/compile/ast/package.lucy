@@ -13,18 +13,25 @@ public class Package {
 	unUsedPackage                map{string ->  Import }
 	statementLevelFunctions      []Function
 	statementLevelClass          []Class
-	disableCheckUnuse  						bool 
+	disableCheckUnuse  				bool 
+	javaPackage JavaPackage
 	
 	/*
 		for lucy tool goto definition
 	*/
-	public locateDefinition Pos  
+	public locateDefinition Pos 
+
 	/*
 		for lucy tool hover
 	*/
 	hover Hover
-	javaPackage JavaPackage
-	
+	/*
+		for usage 
+	*/
+	public findUsage []Usage 
+	public findUsageIsGlobal bool 
+
+
 	public fn Package(name string,disableCheckUnuse bool){
 		this.super()
 		assert(name != null )
@@ -205,8 +212,8 @@ public class Package {
 		}
 		this.mkInitFunctions(bs)
 		return
-
 	}
+
 
 	public fn typeCheck(nodes []TopNode) -> (es []error) {
 		this.block.inheritedAttribute.p = this
@@ -221,7 +228,24 @@ public class Package {
 		    panic("block is null")
 		}
 		this.errors.appendAll(this.block.checkConstants())
+		for _, v := range this.block.constants {
+			if v.findUsage {
+				v.findUsageInstances = []Usage{}
+				this.findUsageIsGlobal = true 
+				this.findUsage = v.findUsageInstances
+			}
+		}
 		for _, v := range this.block.enums {
+			if v.findUsage {
+				v.findUsageInstances = []Usage{}
+				this.findUsageIsGlobal = true 
+				this.findUsage = v.findUsageInstances
+			}
+			for _,vv := range v.enums {
+				vv.findUsageInstances = []Usage{}
+				this.findUsageIsGlobal = true 
+				this.findUsage = vv.findUsageInstances
+			}
 			v.name = this.name + "/" + v.name
 			this.errors.appendAll(v.check())
 		}
@@ -229,12 +253,22 @@ public class Package {
 			if v.locateDefinition {
 				this.locateDefinition = v.pos 
 			}
+			if v.findUsage {
+				v.alias.findUsageInstances = []Usage{}
+				this.findUsageIsGlobal = true 
+				this.findUsage = v.alias.findUsageInstances
+			}
 			err := v.resolve(this.block)
 			if err != null {
 				this.errors.append(err)
 			}
 		}
 		for _, v := range this.block.functions {
+			if v.findUsage {
+				v.findUsageInstances = []Usage{}
+				this.findUsageIsGlobal = true 
+				this.findUsage = v.findUsageInstances
+			}
 			if v.isBuildIn {
 				continue
 			}
@@ -258,6 +292,14 @@ public class Package {
 		}
 		for _, v := range this.block.Classes {
 			v.name = this.name + "/" + v.name
+			if v.findUsage {
+				v.findUsageInstances = []Usage{}
+				this.findUsageIsGlobal = true 
+				this.findUsage = v.findUsageInstances
+			}
+			if v.locateDefinition {
+				this.locateDefinition = v.pos 
+			}
 			this.errors.appendAll(v.block.checkConstants())
 			v.mkDefaultConstruction()
 			v.block.inherit(this.block)
@@ -319,7 +361,7 @@ public class Package {
 					continue
 				}
 				this.errors.append( new error(sprintf("%s trying to access capture function '%s' from outside",
-						meta.pos.errMsgPrefix(), f.name)))
+					meta.pos.errMsgPrefix(), f.name)))
 			}
 		}
 		if this.shouldStop(null) {
