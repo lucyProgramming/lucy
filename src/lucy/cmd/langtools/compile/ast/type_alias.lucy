@@ -9,4 +9,5 @@ public class TypeAlias {
 	public findUsage  bool 
 	public rename bool 
     findUsageInstances []Usage 
+	used bool 
 }

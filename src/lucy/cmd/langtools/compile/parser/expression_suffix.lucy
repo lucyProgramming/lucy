@@ -508,8 +508,10 @@ class ExpressionSuffix extends  ParserExtends {
 			if this.parser.lastToken != null {
 				pos = new ast.Pos()
 				pos.filename = this.parser.filename
-				pos.line = this.parser.lastToken.endLine
-				pos.column = this.parser.lastToken.endColumn
+				pos.endLine = this.parser.lastToken.endLine
+				pos.endColumn = this.parser.lastToken.endColumn
+				pos.startLine = this.parser.lastToken.startLine
+				pos.startColumn = this.parser.lastToken.startColumn
 			}
 			this.parser.ifTokenIsLfThenSkip()
 			if this.parser.token.Type != lex.TokenRp {

@@ -7,7 +7,7 @@ import "lucy/os"
 import "lucy/encoding/json"
 
 
-public fn Main(dir string , flags common.Flags , files []string , lucyPaths , classPaths []string) {
+public fn Main (destinationDir string , flags common.Flags , files []string , lucyPaths , classPaths []string , ifErrExit bool) {
     var	compiler  = new Compiler()
     var	loader  = new  FileLoader(lucyPaths , classPaths)
     ast.ImportsLoader = loader
@@ -16,7 +16,7 @@ public fn Main(dir string , flags common.Flags , files []string , lucyPaths , cl
 		os.exit(1)
 	}
 	compiler.flags = flags
-	compiler.dir = dir 
+	compiler.destinationDir =	destinationDir 
 	compiler.compile(files,lucyPaths,classPaths)
 }
 
@@ -30,7 +30,7 @@ public class Compiler {
 	classPaths        []string
 	buildPackage        jvm.BuildPackage = new jvm.BuildPackage()
     flags common.Flags
-    dir string
+	destinationDir string
 
 
 	fn Compiler(){
@@ -140,7 +140,7 @@ public class Compiler {
 		if len(this.Errs) > 0 {
 			this.exit()
 		}
-		this.buildPackage.make(p,this.dir)
+		this.buildPackage.make(p,this.destinationDir)
 	}
 }
 

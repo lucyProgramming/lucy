@@ -2,7 +2,7 @@
 
 
 class ExpressionCheckSelection {
-
+    
     static fn check(e Expression , block Block, errs []error) -> (valueType Type) {
         selection := e.data.(ExpressionSelection)
         object, es := selection.Expression.checkSingleValueContextExpression(block)
@@ -43,7 +43,7 @@ class ExpressionCheckSelection {
                 return result
             }
         case VariableTypePackage:
-            d, ok := object.Package.block.nameExists(selection.name)
+            d, ok := object.Package.block.nameExists(selection.name , e.pos)
             if ok == false {
                 err := new error(sprintf("%s '%s' not found",
                     e.pos.errMsgPrefix(), selection.name))

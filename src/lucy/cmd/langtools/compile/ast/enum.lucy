@@ -11,6 +11,7 @@ public class EnumName {
 	public findUsage  bool 
 	public rename 	bool 
 	public getHover  bool 
+	used bool 
     findUsageInstances []Usage 
 }
 

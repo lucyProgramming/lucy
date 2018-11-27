@@ -40,9 +40,7 @@ class ExpressionCheckNew {
 		if no.Type.Class.findUsage {
 			// type must resolved 
 			// so must len(no.Type.Class.findUsageInstances) >= 1 
-			u := no.Type.Class.findUsageInstances[len(no.Type.Class.findUsageInstances) - 1]
-			u.Type = "instaniation"
-			u.pos = e.pos 
+			correctLastUsageType("instaniation" , no.Type.Class.findUsageInstances)
 			// set to ok 
 		}
 		ret := no.Type.Clone()
@@ -73,8 +71,8 @@ class ExpressionCheckNew {
 	static fn checkNewMapExpression(e Expression , block Block, newMap ExpressionNew,
 		errs []error) ->(valueType Type)  {
 		if len(newMap.args) > 0 {
-			errs . append(new error( sprintf("%s new 'map' expect no arguments",
-					errMsgPrefix(newMap.args[0].pos))))
+			errs.append(new error( sprintf("%s new 'map' expect no arguments",
+				errMsgPrefix(newMap.args[0].pos))))
 		}
 		ret := newMap.Type.Clone()
 		ret.pos = e.pos

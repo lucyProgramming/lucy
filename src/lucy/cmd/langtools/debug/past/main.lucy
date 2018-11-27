@@ -61,7 +61,7 @@ fn main(args []string) {
 			printf("file:%s looks like UTF-32(BE) file\n", v)
 			os.exit(2)
 		}
-
+		
 		if len(bs) >= 3 &&
 			bs[0] == 0xef &&
 			bs[1] == 0xbb &&
@@ -70,7 +70,7 @@ fn main(args []string) {
 			bs = bs[3:]
 		}
 		length := len(nodes)
-		es := parser.Parse(nodes, v, bs, false, 10 , -1,-1,-1)
+		es := parser.Parse(nodes, v, bs, false, 10 , -1,-1,-1 , -1)
 		lucyFiles[v] = nodes[length:len(nodes)]
 		errs.appendAll(es)
 	}

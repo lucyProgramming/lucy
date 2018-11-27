@@ -1,0 +1,30 @@
+{
+	"compileTime":1543305422454,
+	"compiledFrom":[
+			{
+			"lastModify":1543298466,
+			"name":"find_hover.lucy"
+		},
+			{
+			"lastModify":1543305418,
+			"name":"flag.lucy"
+		},
+			{
+			"lastModify":1543305103,
+			"name":"main.lucy"
+		},
+			{
+			"lastModify":1543298512,
+			"name":"usage.lucy"
+		}
+	],
+	"imports":[
+			"lucy/os/flag",
+			"lucy/os"
+	],
+	"classes":[
+			"FindHover.class",
+			"Flags.class",
+			"main.class"
+	]
+}

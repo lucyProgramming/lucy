@@ -112,13 +112,22 @@ public class StatementFor {
 			}
 			if identifierV.name != UnderScore {
 				vd := new Variable()
+				vd.locateDefinition = identifierV.locateDefinition
+				vd.findUsage = identifierV.findUsage 
+				vd.pos = posV
+				if vd.locateDefinition{
+					this.initExpressionBlock.inheritedAttribute.p.locateDefinition = vd.pos 
+				}
+				if vd.findUsage {
+					vd.findUsageInstances = []Usage{}
+					this.initExpressionBlock.inheritedAttribute.p.findUsage = vd.findUsageInstances 
+				}
 				if rangeOn.Type == VariableTypeArray ||
 					rangeOn.Type == VariableTypeJavaArray {
 					vd.Type = rangeOn.array.Clone()
 				} else {
 					vd.Type = rangeOn.Map.V.Clone()
 				}
-				vd.pos = posV
 				vd.name = identifierV.name
 				if this.initExpressionBlock.inheritedAttribute.Function != null {
 					if err := this.initExpressionBlock.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(vd) ; err != null{
@@ -147,6 +156,15 @@ public class StatementFor {
 				vd.name = identifierK.name
 				vd.Type = vt
 				vd.pos = posK
+				vd.locateDefinition = identifierK.locateDefinition
+				vd.findUsage = identifierK.findUsage 
+				if vd.locateDefinition {
+					this.initExpressionBlock.inheritedAttribute.p.locateDefinition = vd.pos 
+				}
+				if vd.findUsage {
+					vd.findUsageInstances = []Usage{}
+					this.initExpressionBlock.inheritedAttribute.p.findUsage = vd.findUsageInstances 
+				}
 				if this.initExpressionBlock.inheritedAttribute.Function != null {
 					if err := this.initExpressionBlock.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(vd) ; err != null{
 						errs.append(err)

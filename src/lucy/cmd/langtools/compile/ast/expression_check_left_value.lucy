@@ -30,6 +30,9 @@ class ExpressionCheckLeftValue {
                 if isCaptureVar[0] {
                     v.beenCapturedAsLeftValue++
                 }
+				if v.findUsageInstances != null {
+					correctLastUsageType("value write" , v.findUsageInstances)
+				}
                 // variable is modifying , capture right value should not be ok
                 // if no variable not change,after been captured, right value should ok too
                 v.beenCapturedAsLeftValue += v.beenCapturedAsRightValue
@@ -91,7 +94,7 @@ class ExpressionCheckLeftValue {
 				}
 				return null
 			case VariableTypePackage:
-				variable, exists := object.Package.block.nameExists(selection.name)
+				variable, exists := object.Package.block.nameExists(selection.name , e.pos)
 				if exists == false {
 					errs.append(new error(sprintf("%s '%s.%s' not found",
 						e.pos.errMsgPrefix(), object.Package.name, selection.name)))

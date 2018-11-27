@@ -81,7 +81,7 @@ fn shouldAccessFromImports(block Block,name string, from Pos, alreadyHave Pos) -
 		from
 		alreadyHave
 	*/
-	should = from.line < alreadyHave.line
+	should = from.endLine < alreadyHave.endLine
 	if should {
 		i.used = true
 	}
@@ -122,14 +122,14 @@ fn searchBuildIns(name string) -> (t Object)  {
 	t = buildInFunctionsMap[name]
 	if t != null {
 		//check
-		if _, exists := lucyBuildInPackage.block.nameExists(name); exists {
+		if _, exists := lucyBuildInPackage.block.nameExists(name , null ); exists {
 			panic(sprintf("%s both exits in 'build function' and 'core package'",
 				name))
 		}
 		return t
 	}
 	if lucyBuildInPackage != null { // avoid lucy/lang package
-		t, _ = lucyBuildInPackage.block.nameExists(name)
+		t, _ = lucyBuildInPackage.block.nameExists(name , null )
 		return t
 	}
 	return null
@@ -224,3 +224,8 @@ fn convertExpressionsToNeeds(es []Expression, needs []Type, eval []Type) {
 fn PackageNameIsValid(name string) -> (valid bool) {
 	return true
 }
+
+fn correctLastUsageType(t string , usage []Usage) ->(u Usage) {
+	u = usage[len(usage) -1]
+	u.Type = t 
+} 

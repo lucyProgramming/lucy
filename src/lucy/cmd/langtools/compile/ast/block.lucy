@@ -32,58 +32,113 @@ public class Block {
 	public variables                 map{string->Variable}
 	checkConstantsCalled      bool
     
-    public fn nameExists(name string) -> (x Object,exist bool) {
+    public fn nameExists(name string , pos Pos) -> (x Object,exist bool) {
         if this.functions != null {
             if t := this.functions[name]; t != null {
+                if t.findUsageInstances != null {
+                    u := new Usage() 
+                    u.Type = "value read"
+                    u.pos = pos
+                    t.findUsageInstances.append(u)
+                }
+                t.used = true
                 return t, true
             }
         }
         if this.variables != null {
             if t := this.variables[name]; t != null {
+                if t.findUsageInstances != null {
+                    u := new Usage() 
+                    u.Type = "value read"
+                    u.pos = pos
+                    t.findUsageInstances.append(u)
+                }
                 return t, true
             }
         }
         if this.constants != null {
             if t := this.constants[name]; t != null {
+                if t.findUsageInstances != null {
+                    u := new Usage() 
+                    u.Type = "value read"
+                    u.pos = pos 
+                    t.findUsageInstances.append(u)
+                }
+                t.used = true
                 return t, true
             }
         }
         if this.EnumNames != null {
             if t := this.EnumNames[name]; t != null {
+                if t.findUsageInstances != null {
+                    u := new Usage() 
+                    u.Type = "value read"
+                    u.pos = pos 
+                    t.findUsageInstances.append(u)
+                }
+                t.used = true
                 return t, true
             }
         }
         if this.Classes != null {
             if t := this.Classes[name]; t != null {
+                if t.findUsageInstances != null {
+                    u := new Usage() 
+                    u.Type = "declaration"
+                    u.pos = pos 
+                    t.findUsageInstances.append(u)
+                }
+                t.used = true
                 return t, true
             }
         }
         if this.enums != null {
             if t := this.enums[name]; t != null {
+                if t.findUsageInstances != null {
+                    u := new Usage() 
+                    u.Type = "declaration"
+                    u.pos = pos 
+                    t.findUsageInstances.append(u)
+                }
+                t.used = true
                 return t, true
             }
         }
         if this.typeAliases != null {
             if t := this.typeAliases[name]; t != null {
-                return t, true
-            }
-        }
-        if this.labels != null { // should be useless
-            if t := this.labels[name]; t != null {
+                if t.alias != null &&   t.alias.findUsageInstances != null {
+                    u := new Usage() 
+                    u.Type = "declaration"
+                    u.pos = pos 
+                    t.alias.findUsageInstances.append(u)
+                }
+                if t.alias != null {
+                    t.alias.used = true
+                }
                 return t, true
             }
         }
         return null, false
     }
-
+    
     /*
         search label
     */
-    fn searchLabel(name string) -> (label StatementLabel) {
+    fn searchLabel(name string , pos Pos ) -> (label StatementLabel) {
         outer := this
         for {
             if outer.labels != null {
                 if l := outer.labels[name]; l != null {
+                    if l.findUsage {
+                        u := new Usage() 
+                        u.Type = "declaration"
+                        u.pos = pos
+                        if l.findUsageInstances == null {
+                            l.findUsageInstances = [u]
+                        }else {
+                            l.findUsageInstances.append(u)
+                        }  
+			        }
                     l.used = true
                     return l
                 }
@@ -99,23 +154,41 @@ public class Block {
     /*
         search type
     */
-    fn searchType(name string) -> (x Object)  {
+    fn searchType(name string,pos Pos) -> (x Object)  {
         bb := this
         for bb != null {
             if bb.Classes != null {
                 if t := bb.Classes[name]; t != null {
                     t.used = true
+                    if t.findUsageInstances != null {
+                        u := new Usage() 
+                        u.Type = "declaration"
+                        u.pos = pos
+                        t.findUsageInstances.append(u)
+			        }
                     return t
                 }
             }
             if bb.enums != null {
                 if t := bb.enums[name]; t != null {
                     t.used = true
+                    if t.findUsageInstances != null {
+                        u := new Usage() 
+                        u.Type = "declaration"
+                        u.pos = pos
+                        t.findUsageInstances.append(u)
+			        }
                     return t
                 }
             }
             if bb.typeAliases != null {
                 if t := bb.typeAliases[name]; t != null {
+                    if t.alias.findUsageInstances != null {
+                        u := new Usage() 
+                        u.Type = "declaration"
+                        u.pos = pos
+                        t.alias.findUsageInstances.append(u)
+                    }
                     return t
                 }
             }
@@ -136,50 +209,13 @@ public class Block {
         }
         return x.getClass().getName()
     }
-
+    
     /*
         search identifier
     */
     fn searchIdentifier(from Pos, name string, isCaptureVar []bool) -> (x Object,err error) {
-        if this.functions != null {
-            if t := this.functions[name]; t != null {
-                t.used = true
-                return t, null
-            }
-        }
-        if this.variables != null {
-            if t := this.variables[name]; t != null {
-                return t, null
-            }
-        }
-        if this.constants != null {
-            if t := this.constants[name]; t != null {
-                t.used = true
-                return t, null
-            }
-        }
-        if this.EnumNames != null {
-            if t := this.EnumNames[name]; t != null {
-                t.Enum.used = true
-                return t, null
-            }
-        }
-        if this.enums != null {
-            if t := this.enums[name]; t != null {
-                t.used = true
-                return t, null
-            }
-        }
-        if this.Classes != null {
-            if t := this.Classes[name]; t != null {
-                t.used = true
-                return t, null
-            }
-        }
-        if this.typeAliases != null {
-            if t := this.typeAliases[name]; t != null {
-                return t, null
-            }
+        if x , _  = this.nameExists(name , from ) ; x != null {
+            return x , null 
         }
         if this.isFunctionBlock && this.Fn != null {
             if this.Fn.parameterTypes != null {
@@ -523,3 +559,45 @@ public class Block {
     }
 }
 
+
+
+// if this.functions != null {
+//     if t := this.functions[name]; t != null {
+//         t.used = true
+//         return t, null
+//     }
+// }
+// if this.variables != null {
+//     if t := this.variables[name]; t != null {
+//         return t, null
+//     }
+// }
+// if this.constants != null {
+//     if t := this.constants[name]; t != null {
+//         t.used = true
+//         return t, null
+//     }
+// }
+// if this.EnumNames != null {
+//     if t := this.EnumNames[name]; t != null {
+//         t.Enum.used = true
+//         return t, null
+//     }
+// }
+// if this.enums != null {
+//     if t := this.enums[name]; t != null {
+//         t.used = true
+//         return t, null
+//     }
+// }
+// if this.Classes != null {
+//     if t := this.Classes[name]; t != null {
+//         t.used = true
+//         return t, null
+//     }
+// }
+// if this.typeAliases != null {
+//     if t := this.typeAliases[name]; t != null {
+//         return t, null
+//     }
+// }

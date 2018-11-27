@@ -58,9 +58,8 @@ public class Statement {
 		return this.Expression.Type == ExpressionTypeVarAssign ||
 			this.Expression.Type == ExpressionTypeVar
 	}
-
+	
 	/*
-
 	fn simplifyIf() {
 		if len(this.StatementIf.elseIfList) > 0 {
 			return
@@ -157,6 +156,13 @@ public class Statement {
 			if err != null {
 				errs.append(err)
 			}
+			if this.Class.locateDefinition {
+				block.inheritedAttribute.p.locateDefinition = this.Class.pos 
+			}
+			if this.Class.findUsage {
+				this.Class.findUsageInstances = []Usage{}
+				block.inheritedAttribute.p.findUsage = this.Class.findUsageInstances
+			}
 			errs.appendAll(this.Class.check(block))
 			return errs
 		case StatementTypeEnum:
@@ -164,6 +170,20 @@ public class Statement {
 			err := block.insert(this.Enum.name, this.Enum.pos, this.Enum)
 			if err != null {
 				es.append(err)
+			}
+			if this.Enum.locateDefinition {
+				block.inheritedAttribute.p.locateDefinition = this.Enum.pos 
+			}
+			if this.Enum.findUsage {
+				this.Enum.findUsageInstances = []Usage{}
+				block.inheritedAttribute.p.findUsage = this.Enum.findUsageInstances
+			}
+			for _ , vv := range this.Enum.enums {
+				if vv.locateDefinition {
+					block.inheritedAttribute.p.locateDefinition = vv.pos 
+				}
+				vv.findUsageInstances = []Usage{}
+				block.inheritedAttribute.p.findUsage = vv.findUsageInstances
 			}
 			return es
 		case StatementTypeNop:
@@ -194,6 +214,10 @@ public class Statement {
 		case StatementTypeTypeAlias:
 			if this.TypeAlias.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = this.pos 
+			}
+			if this.TypeAlias.findUsage {
+				this.TypeAlias.findUsageInstances = []Usage{}
+				block.inheritedAttribute.p.findUsage = this.TypeAlias.findUsageInstances
 			}
 			err := this.TypeAlias.Type.resolve(block)
 			if err != null {

@@ -1,17 +1,21 @@
 {
-	"compileTime":1543216046108,
+	"compileTime":1543305389171,
 	"compiledFrom":[
 			{
-			"lastModify":1543215564,
-			"name":"definition.lucy"
+			"lastModify":1543220226,
+			"name":"find_definition.lucy"
 		},
 			{
-			"lastModify":1543201171,
+			"lastModify":1543295326,
 			"name":"flag.lucy"
 		},
 			{
-			"lastModify":1543201114,
+			"lastModify":1543295395,
 			"name":"goto_definition.lucy"
+		},
+			{
+			"lastModify":1543298036,
+			"name":"main.lucy"
 		},
 			{
 			"lastModify":1543201118,

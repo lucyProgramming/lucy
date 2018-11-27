@@ -17,6 +17,7 @@ public class Constant  {
 	public doubleValue double
 	public boolValue bool
 	public findUsage  bool  
+	public locateDefinition bool 
     findUsageInstances []Usage 
 	
 	fn isPublic() -> (is bool) {

@@ -10,6 +10,7 @@ class ExpressionCheckFunctionCall {
 		if call.Expression.Type == ExpressionTypeIdentifier {
 			identifier := call.Expression.data.(ExpressionIdentifier)
 			isCaptureVar := [false]
+			//TODO:: try from import , must be cast types.
 			d, err := block.searchIdentifier(call.Expression.pos, identifier.name, isCaptureVar)
 			if err != null {
 				errs.append(err)
@@ -24,7 +25,7 @@ class ExpressionCheckFunctionCall {
                 call.Function = f
                 return .checkFunctionCall(e , block, errs, f, call)
 			}
-			if t  ,ok:= d.(Type) ; ok {
+			if t ,ok:= d.(Type) ; ok {
 				typeConversion := new ExpressionTypeConversion()
 				typeConversion.Type = d.(Type)
 				if len(call.args) != 1 {

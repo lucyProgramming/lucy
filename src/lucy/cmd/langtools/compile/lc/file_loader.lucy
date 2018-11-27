@@ -533,8 +533,8 @@ public class FileLoader implements ast.LoadImport{
             attr.fromBytes(c, v.info)
             pos := new ast.Pos()
             pos.filename = attr.filename
-            pos.line = int(attr.startLine)
-            pos.column = int(attr.startColumn)
+            pos.endLine = int(attr.startLine)
+            pos.endColumn = int(attr.startColumn)
             f, es := ast.ParseFunctionHandler([]byte(attr.code),pos)
             if len(es) > 0 { // looks impossible
                 panic(es[0])
@@ -545,7 +545,7 @@ public class FileLoader implements ast.LoadImport{
             pack.block.functions[attr.name] = f
         }
     }
-
+    
     fn  loadLucyPackage(r Resource) -> (p ast.Package) {
         fis := new io.File(r.realPath).list()
         fisM := new map { string -> bool } ()

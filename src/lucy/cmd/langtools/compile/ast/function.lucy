@@ -70,10 +70,10 @@ public class Function {
 		if this.name == null || this.name == "" {
 			if this.block.inheritedAttribute.classAndFunctionNames == null ||
 				this.block.inheritedAttribute.classAndFunctionNames == "" {
-				this.name = sprintf("literal$%d", this.pos.line)
+				this.name = sprintf("literal$%d", this.pos.endLine)
 			} else {
 				this.name = sprintf("%s$literal%d",
-					this.block.inheritedAttribute.classAndFunctionNames, this.pos.line)
+					this.block.inheritedAttribute.classAndFunctionNames, this.pos.endLine)
 			}
 		}
 		name := this.name
@@ -137,6 +137,10 @@ public class Function {
 			}
 			if v.locateDefinition {
 				this.block.inheritedAttribute.p.locateDefinition = v.pos
+			}
+			if v.findUsage {
+				v.findUsageInstances = []Usage{}
+				this.block.inheritedAttribute.p.findUsage = v.findUsageInstances
 			}
 			v.isFunctionParameter = true
 			if len(v.Type.getParameterType(this.Type)) > 0 {
@@ -206,6 +210,10 @@ public class Function {
 				}
 				if v.locateDefinition {
 					this.block.inheritedAttribute.p.locateDefinition = v.pos
+				}
+				if v.findUsage {
+					v.findUsageInstances = []Usage{}
+					this.block.inheritedAttribute.p.findUsage = v.findUsageInstances
 				}
 				v.isReturn = true
 				if len(v.Type.getParameterType(this.Type)) > 0 {

@@ -1,30 +1,30 @@
 {
-	"compiledFrom": [
-		{
-			"lastModify": 1542872912,
-			"name": "flag.lucy"
+	"compileTime":1543299569953,
+	"compiledFrom":[
+			{
+			"lastModify":1543219373,
+			"name":"flag.lucy"
 		},
-		{
-			"lastModify": 1543217411,
-			"name": "fmt.lucy"
+			{
+			"lastModify":1543299566,
+			"name":"fmt.lucy"
 		},
-		{
-			"lastModify": 1542933537,
-			"name": "main.lucy"
+			{
+			"lastModify":1543219370,
+			"name":"main.lucy"
 		},
-		{
-			"lastModify": 1542933346,
-			"name": "usage.lucy"
+			{
+			"lastModify":1543294274,
+			"name":"usage.lucy"
 		}
 	],
-	"imports": [
-		"lucy/os",
-		"lucy/cmd/langtools/compile/ast"
+	"imports":[
+			"lucy/cmd/langtools/compile/ast",
+			"lucy/os"
 	],
-	"compileTime": 1543217415,
-	"classes": [
-		"Flags.class",
-		"Fmt.class",
-		"main.class"
+	"classes":[
+			"Flags.class",
+			"Fmt.class",
+			"main.class"
 	]
 }

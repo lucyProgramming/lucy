@@ -1,8 +1,8 @@
 {
-	"compileTime":1543216045541,
+	"compileTime":1543305388658,
 	"compiledFrom":[
 			{
-			"lastModify":1542174640,
+			"lastModify":1543297786,
 			"name":"array_meta.lucy"
 		},
 			{
@@ -42,7 +42,7 @@
 			"name":"buildin_sprintf.lucy"
 		},
 			{
-			"lastModify":1542674634,
+			"lastModify":1543301266,
 			"name":"buildPackage.lucy"
 		},
 			{
@@ -50,7 +50,7 @@
 			"name":"closure.lucy"
 		},
 			{
-			"lastModify":1542341374,
+			"lastModify":1543298817,
 			"name":"context.lucy"
 		},
 			{
@@ -66,7 +66,7 @@
 			"name":"expression_algebra.lucy"
 		},
 			{
-			"lastModify":1542178972,
+			"lastModify":1543301371,
 			"name":"expression_array.lucy"
 		},
 			{

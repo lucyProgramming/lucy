@@ -3,8 +3,10 @@
 
 public class Pos {
 	public filename string
-	public line     int
-	public column   int
+	public startLine   int
+	public startColumn int
+	public endLine     int
+	public endColumn   int
 	/*
 		offset at bs , for special use。
 		for template function only currently
@@ -15,7 +17,7 @@ public class Pos {
 	public locateDefinitionIsGoto  bool // very special case 
 	
 	public fn errMsgPrefix() -> (prefix string) {
-		return sprintf("%s:%d:%d:", this.filename, this.line, this.column)
+		return sprintf("%s:%d:%d:", this.filename, this.endLine, this.endColumn)
 	}
 	
 }

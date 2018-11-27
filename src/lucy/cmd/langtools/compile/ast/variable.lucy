@@ -21,6 +21,7 @@ public class Variable {
 	public locateDefinition 	bool 
 	public findUsage  bool 
 	public rename bool 
+	public findUsageInstances []Usage 
 	
 	
 	fn isPublic() -> (is bool) {

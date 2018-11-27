@@ -1,0 +1,12 @@
+import "lucy/encoding/json"
+
+
+public fn main(args []string) {
+    f := new Flags()
+    file , pos := f.parseArgs(args)
+    bs , err := json.encode(findDefinition(file , pos ) , "\t")
+    if err != null {
+        panic(err)
+    }
+    print(string(bs))
+}

@@ -3,7 +3,6 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 import "lucy/cmd/langtools/compile/common"
 import "java/io"
 
-
 public class  BuildPackage {
 	Package         ast.Package
 	classes         map { string -> cg.ClassHighLevel }
@@ -61,7 +60,7 @@ public class  BuildPackage {
             } else {
                 autoName = sprintf("%s$%d", prefix, i)
             }
-            if _, exists := this.Package.block.nameExists(autoName); exists {
+            if _, exists := this.Package.block.nameExists(autoName , null ); exists {
                 continue
             }
             autoName = this.Package.name + "/" + autoName
@@ -364,8 +363,8 @@ public class  BuildPackage {
                 t := new cg.AttributeTemplateFunction()
                 t.name = f.name
                 t.filename = f.pos.filename
-                t.startLine = char(f.pos.line)
-                t.startColumn = char(f.pos.column)
+                t.startLine = char(f.pos.endLine)
+                t.startColumn = char(f.pos.endColumn)
                 t.code = string(f.sourceCode)
                 if this.mainClass.templateFunctions == null {
                     this.mainClass.templateFunctions = [t]

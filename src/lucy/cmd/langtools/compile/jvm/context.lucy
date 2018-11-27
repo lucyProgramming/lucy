@@ -125,10 +125,10 @@ class Context {
 		}
 		c.insertSourceFile(pos.filename)
 		this.currentSourceFile = pos.filename
-		this.currentLineNumber = pos.line
+		this.currentLineNumber = pos.endLine
 		if this.currentSourceFile != oldFileName ||
 			this.currentLineNumber != oldLine  {
-			code.MKLineNumber(pos.line)
+			code.MKLineNumber(pos.endLine)
 		}
 	}
 

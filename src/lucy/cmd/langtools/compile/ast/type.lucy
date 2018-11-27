@@ -209,7 +209,6 @@ public class Type {
 		if this.Type == VariableTypeFunction {
 			cloned.functionType = this.functionType.Clone()
 		}
-
 	}
 
 	fn resolve(block Block) -> (err error) {
@@ -241,7 +240,7 @@ public class Type {
 		case VariableTypeName:
 			return this.resolveName(block)
 		case VariableTypeGlobal:
-			d, exists := block.inheritedAttribute.p.block.nameExists(this.name)
+			d, exists := block.inheritedAttribute.p.block.nameExists(this.name , this.pos )
 			if exists == false {
 				return new error(sprintf("%s '%s' not found",
 					errMsgPrefix(this.pos), this.name))
@@ -279,7 +278,7 @@ public class Type {
 		var d  Object
 		if this.name.indexOf(".")  < 0  {
 			var loadFromImport bool
-			d = block.searchType(this.name)
+			d = block.searchType(this.name,this.pos)
 			if d != null {
 				if t, ok := d.(Class); ok &&
 					t.isBuildIn == false {
@@ -345,7 +344,7 @@ public class Type {
 		if pp, ok := p.(Package); ok &&
 			pp != null {
 			var exists bool
-			d, exists = pp.block.nameExists(className)
+			d, exists = pp.block.nameExists(className , this.pos)
 			if exists == false {
 				err = new error(sprintf("%s '%s' not found",
 					errMsgPrefix(this.pos), className))
@@ -362,12 +361,6 @@ public class Type {
 			if c.loadFromOutSide && c.isPublic() == false {
                 err = new error(sprintf("%s class '%s' is not public",
                            errMsgPrefix(this.pos), c.name))
-			}
-			if c.findUsageInstances != null {
-				t := new Usage() 
-				t.Type = "declaration"
-				t.pos = this.pos 
-				c.findUsageInstances.append(t)
 			}
 			if this.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = c.pos

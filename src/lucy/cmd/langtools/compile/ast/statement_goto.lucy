@@ -11,26 +11,13 @@ public class StatementGoTo {
 	public rename bool // useless 
 	
 	fn checkStatementGoTo(block Block) -> (err error) {
-		label := block.searchLabel(this.labelName)
+		label := block.searchLabel(this.labelName , this.pos)
 		if label == null {
 			return new error(sprintf("%s label named '%s' not found",
 				this.pos.errMsgPrefix(), this.labelName))
 		}
 		if this.locateDefinition {
 			block.inheritedAttribute.p.locateDefinition = label.pos
-		}
-		if  label.findUsage {
-			var u = new Usage()
-			u.Type = "" 
-			u.pos = this.pos 
-			if label.findUsageInstances == null {
-				label.findUsageInstances = [u]
-			}else {
-				label.findUsageInstances.append(u)
-			}
-			if block.inheritedAttribute.p.findUsage == null {
-				block.inheritedAttribute.p.findUsage = label.findUsageInstances 
-			}
 		}
 		this.statementLabel = label
 		this.defers = []StatementDefer{}

@@ -1,5 +1,6 @@
 import "java/io"
 import "lucy/os"
+import "lucy/cmd/langtools/lucy/run"
 
 
 class Install {
@@ -24,7 +25,6 @@ class Install {
 		this.installDir(this.dir , this.packageName)
 	}
 	
-	
 	fn installDir(dir string , packageName string ) {
 		f := new io.File(dir) 
 		fs := f.listFiles()
@@ -44,19 +44,11 @@ class Install {
 		if this.verbose {
 			printf("install:%s\n" , packageName)
 		}
-		args := new string[](2)
-		args[0] = "build"  
-        args[1] =  packageName
-        cmd := new os.Command(this.lucyRoot + "/bin/lucy", args  , null ,null)
-        cmd.stdout = os.stdout 
-        cmd.stderr = os.stderr  
-        cmd.start()
-        if err := cmd.wait() ;  err != null {
+		err := new run.RunLucyPackage().RunCommand("install" , ["-build" , packageName ])
+        if err != null {
 			printf("install failed,err:%s\n" ,err.toString())
         }
 	}
-	
-	
 	
 
 }

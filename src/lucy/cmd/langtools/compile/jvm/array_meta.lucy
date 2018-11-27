@@ -31,7 +31,6 @@ class ArrayMeta {
 		this.elementsFieldDescriptor = elementsFieldDescriptor
 		this.setMethodDescription = setMethodDescription
 		this.getMethodDescription = getMethodDescription
-
 	}
 }
 

@@ -169,6 +169,14 @@ public class Class {
                     errMsgPrefix(v.pos))))
                 continue
             }
+            if v.locateDefinition {
+                this.block.inheritedAttribute.p.locateDefinition = v.pos 
+            }
+            if v.findUsage {
+                v.findUsageInstances = []Usage{}
+                this.block.inheritedAttribute.p.findUsage = v.findUsageInstances
+                this.block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal 
+            }
             err = v.Type.resolve(this.block)
             if err != null {
                 errs.append(err)
@@ -176,6 +184,14 @@ public class Class {
         }
         for _, ms := range this.methods {
             for _, m := range ms {
+                if m.locateDefinition {
+                    this.block.inheritedAttribute.p.locateDefinition = m.Function.pos 
+                }
+                if m.findUsage {
+                    m.findUsageInstances = []Usage{}
+                    this.block.inheritedAttribute.p.findUsage = m.findUsageInstances
+                    this.block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal 
+                }
                 if m.isAbstract() {
                     for _, v := range m.Function.Type.parameterList {
                         if v.defaultValueExpression != null {
@@ -481,7 +497,14 @@ public class Class {
                 // break find
                 return null, notFoundErr
             } else {
-                return this.fields[name], null
+                f = this.fields[name]
+                if f.(ClassField).findUsageInstances != null {
+                    u := new Usage()
+                    u.Type = "value read"
+                    u.pos = pos 
+                    f.(ClassField).findUsageInstances.append(u)
+                }
+                return f, null
             }
         }
         if this.methods != null && null != this.methods[name] {
@@ -489,6 +512,12 @@ public class Class {
             if fromSub && m.ableAccessFromSubClass() == false {
                 return null, notFoundErr
             } else {
+                if m.findUsageInstances != null {
+                    u := new Usage()
+                    u.Type = "value read"
+                    u.pos = pos 
+                    m.findUsageInstances.append(u)
+                }
                 return m, null
             }
         }
@@ -536,7 +565,14 @@ public class Class {
                     // private field
                     return null, notFoundErr
                 } else {
-                    return this.fields[name], null
+                    f = this.fields[name]
+                    if f.findUsageInstances != null {
+                        u := new Usage()
+                        u.Type = "value read"
+                        u.pos = pos 
+                        f.findUsageInstances.append(u)
+                    }
+                    return f, null
                 }
             }
             if this.name == JavaRootClass { // root class
@@ -598,6 +634,12 @@ public class Class {
                 }
                 call.vArgs, err = m.Function.Type.fitArgs(pos, call.args, callArgTypes, null)
                 if err == null {
+                    if m.findUsageInstances != null {
+                        u := new Usage()
+                        u.Type = "value read"
+                        u.pos = pos 
+                        m.findUsageInstances.append(u)
+                    }
                     return []ClassMethod{m}, true, null
                 } else {
                     return null, false, err
@@ -649,6 +691,12 @@ public class Class {
                         callArgTypes, null)
                     if err == null {
                         fieldMethodHandler[0] = f
+                        if f.findUsageInstances != null {
+                            u := new Usage()
+                            u.Type = "value read"
+                            u.pos = pos 
+                            f.findUsageInstances.append(u)
+                        }
                         matched = true
                         return
                     } else {
@@ -666,6 +714,12 @@ public class Class {
                     }
                     call.vArgs, err = m.Function.Type.fitArgs(pos, call.args,
                         callArgTypes, m.Function)
+                    if m.findUsageInstances != null {
+                        u := new Usage()
+                        u.Type = "value read"
+                        u.pos = pos 
+                        m.findUsageInstances.append(u)
+                    }
                     if err == null {
                         return []ClassMethod{m}, true, null
                     } else {
@@ -674,7 +728,6 @@ public class Class {
                 }
             }
         }
-
         err = this.loadSuperClass(pos)
         if err != null {
             return ms, false, err
@@ -775,7 +828,7 @@ public class Class {
         for name, ms := range this.methods {
             if this.fields != null && this.fields[name] != null {
                 f := this.fields[name]
-                if f.pos.line < ms[0].Function.pos.line {
+                if f.pos.endLine < ms[0].Function.pos.endLine {
                     errMsg := sprintf("%s method named '%s' already declared as field,at:\n",
                         errMsgPrefix(ms[0].Function.pos), name)
                     errMsg += sprintf("\t%s", errMsgPrefix(f.pos))

@@ -86,6 +86,12 @@ class ExpressionCheckVarAssign {
 				if identifier.locateDefinition {
 					block.inheritedAttribute.p.locateDefinition = v.pos  
 				}
+				vd.findUsage = identifier.findUsage  
+				if vd.findUsage {
+					vd.findUsageInstances = []Usage{}
+					block.inheritedAttribute.p.findUsage = vd.findUsageInstances
+					block.inheritedAttribute.p.findUsageIsGlobal = e.isGlobal 
+				}
 				vd.comment = identifier.comment
 				vd.Type = variableType.Clone()
 				vd.Type.pos = e.pos

@@ -88,18 +88,18 @@ class Fmt {
                 format += this.formatDefer(indent , s.Defer )
             case ast.StatementTypeClass:
                 format += this.formatClass(indent , s.Class)
-            case ast.StatementTypeEnum:y
+            case ast.StatementTypeEnum:
                 format += this.formatEnum(indent , s.Enum)
             case ast.StatementTypeNop:
                //nothing
             case ast.StatementTypeImport:
                 format += this.formatImport(indent , s.Import)
             case ast.StatementTypeTypeAlias :
-                format += this.formatTypealias(indent , s.TpeAlias)
+                format += this.formatTypealias(indent , s.TypeAlias)
             case ast.StatementTypeComment:
-                format += "//" + this.comment  
+                format += "//" + s.comment  
             case ast.StatementTypeCommentMultiLine:
-                format += "/*" + this.comment + "*/"   
+                format += "/*" + s.comment + "*/"   
         }
         format += "\n"
     }

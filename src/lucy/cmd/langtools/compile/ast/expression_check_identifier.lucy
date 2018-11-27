@@ -58,7 +58,6 @@ class ExpressionCheckIdentifier {
 				i.used = true
 				return .checkIdentifierThroughImports(block , identifier , e , i)
 			}
-			
 		}
 		if d == null {
 			return null, new error(sprintf("%s '%s' not found", e.pos.errMsgPrefix(), identifier.name))
@@ -107,6 +106,9 @@ class ExpressionCheckIdentifier {
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = t.pos 
 			}
+			if t.findUsageInstances != null {
+				correctLastUsageType("value read" , t.findUsageInstances)
+			}
 			t.used = true
 			result := t.Type.Clone()
 			result.pos = e.pos
@@ -138,6 +140,9 @@ class ExpressionCheckIdentifier {
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = c.pos 
+			}
+			if c.findUsageInstances != null {
+				correctLastUsageType("value read" , c.findUsageInstances)
 			}
 			result := new Type()
 			result.Type = VariableTypeClass

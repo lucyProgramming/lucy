@@ -10,8 +10,8 @@ class Flags {
 	fn Flags(){
 		this.super()
 		this.parser = new flag.FlagParser()
-		this.file = this.parser.StringOption("-file")
-		this.pos = this.parser.IntOption("-files" , -1)
+		this.file = this.parser.stringOption("-file")
+		this.pos = this.parser.intOption("-files" , -1)
 	}
 
 	
@@ -26,13 +26,13 @@ class Flags {
 		}
 		if this.file.getValue() == "" {
 			print("file not provided")
-			rintUsageAndExit(1)
+			printUsageAndExit(1)
 		}
 		if this.pos.getValue() < 0 {
 			print("pos not provided or negative...")
 			printUsageAndExit(1)
 		}
-		pos = this.parser.pos.getValue()
+		pos = this.pos.getValue()
 		file = this.file.getValue()
 	}
 }

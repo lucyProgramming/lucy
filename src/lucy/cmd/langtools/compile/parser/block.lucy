@@ -17,7 +17,6 @@ class BlockParser  extends ParserExtends{
         this.StatementIfParser = new StatementIfParser(parser,this)
         this.StatementWhenParser = new StatementWhenParser(parser,this)
         this.StatementSwitchParser = new StatementSwitchParser(parser,this)
-
 	}
 	
 		

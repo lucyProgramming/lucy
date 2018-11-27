@@ -316,8 +316,10 @@ class Parser {
 		if this.token != null {
 		    pos = new ast.Pos()
 		    pos.filename = this.filename
-		    pos.line = this.token.endLine
-		    pos.column = this.token.endColumn
+		    pos.startLine = this.token.startLine
+		    pos.startColumn = this.token.startColumn
+			pos.endLine = this.token.endLine
+		    pos.endColumn = this.token.endColumn
 		    pos.offset = this.token.offset
 			 pos.endOffset = this.token.endOffset
 			return
@@ -325,8 +327,8 @@ class Parser {
 			line, column := this.lexer.GetLineAndColumn()
 			pos = new  ast.Pos()
 			pos.filename = this.filename
-			pos.line = line
-			pos.column = column
+			pos.endLine = line
+			pos.endColumn = column
 			return
 		}
 	}

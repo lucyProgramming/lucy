@@ -22,13 +22,16 @@ class FunctionParser extends ParserExtends{
 			this.parser.errs.append( err)
 			this.consume(untilLp)
 		}
-		f.pos = this.parser.mkPos()
 		if this.parser.token.Type == lex.TokenIdentifier {
 			f.name = this.parser.token.stringValue
 			f.locateDefinition = this.parser.token.locateDefinition
 			f.findUsage = this.parser.token.findUsage
 			f.rename = this.parser.token.rename
+			f.pos = this.parser.mkPos()
 			this.next(lfNotToken)
+		}
+		if f.pos == null {
+			f.pos = this.parser.mkPos()
 		}
 		f.Type, err = this.parseFunctionType()
 		if err != null {
@@ -88,7 +91,7 @@ class FunctionParser extends ParserExtends{
 	skipTemplateNames:
 		if this.parser.token.Type != lex.TokenLp {
 			err = new error(sprintf("%s fn declared wrong,missing '(',but '%s'",
-				this.parser.errMsgPrefix()))
+				this.parser.errMsgPrefix() , this.parser.token.description ))
 			this.parser.errs.append( err)
 			return
 		}

@@ -18,12 +18,3 @@ fn main(args []string){
 	new Test(lucyRoot , lcyPaths ,args[0]) .test()
 }
 
-
-
-
-
-
-
-
-
-

@@ -11,9 +11,10 @@ public class ClassField {
 	public accessFlags            char
 	public jvmDescriptor          string    
 	public locateDefinition bool 
-	//public getHover  bool 
 	public findUsage  bool 
 	public rename  bool
+	public findUsageInstances  []Usage 
+
 
 	public fn isStatic() ->(is bool) {
 		return (this.accessFlags & cg.AccFieldStatic) != 0

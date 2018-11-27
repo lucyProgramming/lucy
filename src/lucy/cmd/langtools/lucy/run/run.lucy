@@ -23,9 +23,9 @@ public class RunLucyPackage {
 	packagesCompiled    map{string -> PackageCompiled}
 	lucyProgramArgs     []string // lucy application args
 
-    public fn RunCommand(command string, args []string) {
+    public fn RunCommand(command string, args []string) -> (err error){
         this.command = command
-        err := this.parseCmd(args) // skip run
+        err = this.parseCmd(args) // skip run
         if err != null {
             this.help()
             return
@@ -35,8 +35,7 @@ public class RunLucyPackage {
             return
         }
         if this.Package == "" {
-            print("no package to run")
-            os.exit(1)
+            return new error("no package to run")
         }
         this.lucyRoot = common.getLucyRoot()
         this.lucyPaths = common.getLucyPath()
@@ -50,16 +49,16 @@ public class RunLucyPackage {
             _, _, err = this.buildPackage("", "lucy/lang", new ImportStack())
             if err != null {
                 printf("build  buildin package '%s' failed,err:%v\n", "lucy/lang", err)
-                os.exit(3)
+                return err 
             }
         }
         _, _, err = this.buildPackage(this.mainPackageLucyPath, this.Package, new ImportStack())
         if err != null {
             print(err)
-            os.exit(3)
+            return 
         }
         if this.flags.build.getValue() {
-            os.exit(0)
+            return
         }
         cmdArray := []string{"java" , this.Package + "/" + "main"}
         cmdArray.appendAll(this.lucyProgramArgs)
@@ -350,7 +349,7 @@ public class RunLucyPackage {
         }
         f := new compileCommon.Flags()
         f.parseArgs(["-package-name" , packageName])
-        lc.Main(destinationDir , f , files , this.lucyPaths , this.classPaths)
+        lc.Main(destinationDir , f , files , this.lucyPaths , this.classPaths , true)
         // make_node_objects maitain.json
         meta = new common.PackageMeta()
         meta.compiledFrom = new common.FileMeta[](len(lucyFiles))

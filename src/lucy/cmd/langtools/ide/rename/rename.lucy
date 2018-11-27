@@ -1,4 +1,4 @@
 
-public fn rename (args []string) {
+// public fn rename (args []string) {
     
-}
+// }

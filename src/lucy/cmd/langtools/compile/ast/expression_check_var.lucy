@@ -115,6 +115,11 @@ class ExpressionCheckVar {
 			if v.locateDefinition{
 				block.inheritedAttribute.p.locateDefinition = v.pos 
 			}
+			if v.findUsage {
+				v.findUsageInstances = []Usage{}
+				block.inheritedAttribute.p.findUsage = v.findUsageInstances
+				block.inheritedAttribute.p.findUsageIsGlobal = e.isGlobal 
+			}
 		}
 	}	
 } 

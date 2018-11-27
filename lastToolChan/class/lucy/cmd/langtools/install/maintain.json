@@ -1,8 +1,8 @@
 {
-	"compileTime":1543217466315,
+	"compileTime":1543305517629,
 	"compiledFrom":[
 			{
-			"lastModify":1543217460,
+			"lastModify":1543300443,
 			"name":"install.lucy"
 		},
 			{
@@ -12,6 +12,7 @@
 	],
 	"imports":[
 			"lucy/os",
+			"lucy/cmd/langtools/lucy/run",
 			"lucy/cmd/langtools/common",
 			"lucy/os/flag"
 	],

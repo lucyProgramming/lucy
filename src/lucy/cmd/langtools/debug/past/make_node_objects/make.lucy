@@ -50,7 +50,7 @@ public class MakeNodesObjects {
     }
 
     fn makeConst(c ast.Constant) -> (x Object) {
-        s := sprintf("const%d %s", c.pos.line, c.name)
+        s := sprintf("const%d %s", c.pos.endLine, c.name)
         if c.Type != null {
             s += sprintf(" base on '%s'", c.Type.typeString())
         }
@@ -58,7 +58,7 @@ public class MakeNodesObjects {
         return s
     }
     fn makeImport(i ast.Import) -> (x Object) {
-        s := sprintf("import@%d", i.pos.line)
+        s := sprintf("import@%d", i.pos.endLine)
         s += sprintf(" '%s'", i.Import)
         if i.accessName != "" {
             s += sprintf(" as '%s'", i.accessName)
@@ -121,7 +121,7 @@ public class MakeNodesObjects {
         }
         ret["block"] = this.makeBlock(f.block)
         return {
-            sprintf("fn@%d '%s'", f.pos.line, f.name) -> ret,
+            sprintf("fn@%d '%s'", f.pos.endLine, f.name) -> ret,
         }
     }
 
@@ -140,7 +140,7 @@ public class MakeNodesObjects {
             ret["enums"] = t
         }
         return {
-            sprintf("enum@%d '%s'", e.pos.line, e.name)-> ret,
+            sprintf("enum@%d '%s'", e.pos.endLine, e.name)-> ret,
         }
     }
 
@@ -213,12 +213,12 @@ public class MakeNodesObjects {
             ret["methods"] = methods
         }
         return {
-            sprintf("class@%d '%s'", c.pos.line, c.name)-> ret,
+            sprintf("class@%d '%s'", c.pos.endLine, c.name)-> ret,
         }
     }
 
     fn makeTypeAlias(a ast.TypeAlias) ->(x Object) {
-        s := sprintf("typealias@%d '%s' base on '%s'", a.pos.line, a.name, a.Type.typeString())
+        s := sprintf("typealias@%d '%s' base on '%s'", a.pos.endLine, a.name, a.Type.typeString())
         return s
     }
     fn makeBlock(b ast.Block) ->(x Object) {
@@ -255,7 +255,7 @@ public class MakeNodesObjects {
             ret["else"] = this.makeBlock(s.Else)
         }
         return {
-            sprintf("if@%d", s.pos.line) -> ret,
+            sprintf("if@%d", s.pos.endLine) -> ret,
         }
     }
     fn makeStatementFor(s ast.StatementFor) ->(x Object) {
@@ -271,7 +271,7 @@ public class MakeNodesObjects {
         }
         ret["block"] = this.makeBlock(s.block)
         return  {
-            sprintf("for@%d", s.pos.line) -> ret,
+            sprintf("for@%d", s.pos.endLine) -> ret,
         }
     }
     fn makeStatementSwitch(s ast.StatementSwitch) ->(x Object) {
@@ -304,7 +304,7 @@ public class MakeNodesObjects {
             ret["block"] = this.makeBlock(s.Default)
         }
         return  {
-            sprintf("switch@%d", s.pos.line) -> ret,
+            sprintf("switch@%d", s.pos.endLine) -> ret,
         }
     }
     fn makeStatementWhen(w ast.StatementWhen) ->(x Object) {
@@ -330,27 +330,27 @@ public class MakeNodesObjects {
             ret["block"] = this.makeBlock(w.Default)
         }
         return  {
-            sprintf("when%d", w.pos.line)-> ret,
+            sprintf("when%d", w.pos.endLine)-> ret,
         }
     }
 
     fn makeStatementLabel(label ast.StatementLabel) ->(x Object) {
-        return sprintf("label@%d '%s'", label.pos.line, label.name)
+        return sprintf("label@%d '%s'", label.pos.endLine, label.name)
     }
     fn makeStatementGoto(g ast.StatementGoTo) ->(x Object) {
-        return sprintf("goto@%d '%s'", g.pos.line, g.labelName)
+        return sprintf("goto@%d '%s'", g.pos.endLine, g.labelName)
     }
 
     fn makeStatementDefer(d ast.StatementDefer) ->(x Object) {
         return  {
-            sprintf("defer%d", d.pos.line) -> this.makeBlock(d.block),
+            sprintf("defer%d", d.pos.endLine) -> this.makeBlock(d.block),
         }
     }
     fn makeStatement(s ast.Statement) ->(x Object) {
         switch s.Type {
         case ast.StatementTypeExpression:
             return  {
-                sprintf("statementExpression@%d", s.pos.line) ->  this.makeExpression(s.Expression),
+                sprintf("statementExpression@%d", s.pos.endLine) ->  this.makeExpression(s.Expression),
             }
         case ast.StatementTypeIf:
             return this.makeStatementIf(s.StatementIf)
@@ -361,12 +361,12 @@ public class MakeNodesObjects {
         case ast.StatementTypeFor:
             return this.makeStatementFor(s.StatementFor)
         case ast.StatementTypeContinue:
-            return sprintf("continue@%d", s.pos.line)
+            return sprintf("continue@%d", s.pos.endLine)
         case ast.StatementTypeReturn:
             if len(s.StatementReturn.expressions) == 0 {
-                return sprintf("return@%d", s.pos.line)
+                return sprintf("return@%d", s.pos.endLine)
             } else {
-                key := sprintf("return@%d", s.pos.line)
+                key := sprintf("return@%d", s.pos.endLine)
                 ret := new map{string -> Object}()
                 if len(s.StatementReturn.expressions) == 1 {
                     ret[key] = this.makeExpression(s.StatementReturn.expressions[0])
@@ -380,7 +380,7 @@ public class MakeNodesObjects {
                 return ret
             }
         case ast.StatementTypeBreak:
-            return sprintf("break@%d", s.pos.line)
+            return sprintf("break@%d", s.pos.endLine)
         case ast.StatementTypeSwitch:
             return this.makeStatementSwitch(s.StatementSwitch)
         case ast.StatementTypeWhen:
@@ -429,7 +429,7 @@ public class MakeNodesObjects {
         case ast.ExpressionTypeDouble:
             return e.doubleValue + ""
         case ast.ExpressionTypeString:
-            return sprintf(`literal string@%d "%s"`, e.pos.line, e.stringValue)
+            return sprintf(`literal string@%d "%s"`, e.pos.endLine, e.stringValue)
         case ast.ExpressionTypeArray:
             array := e.data.(ast.ExpressionArray)
             ret := new map{string -> Object}()

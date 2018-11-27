@@ -7,7 +7,7 @@ const usage = `
        -pos    pos to be located , must be positive
 `
 
-fn printUsageAndExit(code int ){
+fn printUsageAndExit(code int){
 	print(usage)
 	os.exit(code)
 }

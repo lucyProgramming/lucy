@@ -254,6 +254,8 @@ class ClassParser extends  ParserExtends{
 				}
 				m := new ast.ClassMethod()
 				m.Function = f
+				m.locateDefinition = f.locateDefinition
+				m.findUsage = f.findUsage
 				if accessControlToken != null {
 					switch accessControlToken.Type {
 					case lex.TokenPrivate:
@@ -368,7 +370,7 @@ class ClassParser extends  ParserExtends{
 			}
 			f := new ast.ClassField()
 			f.locateDefinition = v.locateDefinition
-			f.findUsage = v.findUsage 
+			f.findUsage = v.findUsage
 			f.rename = v.rename
 			f.name = v.name
 			f.pos = v.pos
