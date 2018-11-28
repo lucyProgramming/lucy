@@ -436,6 +436,69 @@ public class Type {
 			this.Type == VariableTypeBool
 	}
 
+	public fn typeName(prefix string = "") ->(ret string) {
+		switch this.Type {
+		case VariableTypeBool:
+			return prefix +  "bool"
+		case VariableTypeByte:
+			return prefix +  "byte"
+		case VariableTypeChar:
+			return prefix +  "char"
+		case VariableTypeShort:
+			return prefix +  "short"
+		case VariableTypeInt:
+			return prefix +  "int"
+		case VariableTypeLong:
+			return prefix +  "long"
+		case VariableTypeFloat:
+			return prefix +  "float"
+		case VariableTypeDouble:
+			return prefix +  "double"
+		case VariableTypeString:
+			return prefix +  "string"
+		case VariableTypeObject: // class name
+			return prefix + this.name
+		case VariableTypeMap:
+			ret =prefix + "map{"
+			ret += this.Map.K.typeName()
+			ret += " -> "
+			ret += this.Map.V.typeName()
+			ret += "}"
+			return ret 
+		case VariableTypeArray:
+			return this.array.typeName(prefix + "[]")
+		case VariableTypeJavaArray:
+			if this.isVariableArgs {
+				ret = prefix + this.array.typeName() + "..."
+				return ret 
+			} else {
+				ret = prefix + this.array.typeName() + "[]"
+				return ret 
+			}
+		case VariableTypeFunction:
+			ret = prefix + "fn " + this.functionType.typeName()
+			return 
+		case VariableTypeEnum:
+			ret = prefix + this.name 
+		case VariableTypeClass:
+			panic("not happening")
+		case VariableTypeName:
+			ret = prefix + this.name // resolve wrong, but typeString is ok to return
+		case VariableTypeTemplate:
+			ret = prefix + this.name
+		case VariableTypeDynamicSelector:
+			panic("not happening")
+		case VariableTypeVoid:
+			ret = prefix + "void"
+		case VariableTypePackage:
+			panic("not happening")
+		case VariableTypeNull:
+			panic("not happening")
+		case VariableTypeGlobal:
+			ret = prefix + this.name
+		}
+	}
+
 	public fn typeString(prefix string = "") ->(ret string) {
 		if this.alias != null {
 			return prefix + this.alias.name
@@ -660,7 +723,7 @@ public class Type {
 				errs.append(err)
 				return false
 			}
-			if leftValue.Class.IsInterface() {
+			if leftValue.Class.isInterface() {
 				i, err := rightValue.Class.implementedInterface(leftValue.pos, leftValue.Class.name)
 				if err != null {
 					errs.append(err)

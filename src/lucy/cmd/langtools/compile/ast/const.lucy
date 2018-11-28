@@ -9,6 +9,7 @@ public class Constant  {
 	public pos                    Pos
 	public Type                   Type
 	public name                   string
+	public shortName string 
 	public defaultValueExpression Expression
 	public accessFlags            char
 	public comment                string
@@ -20,7 +21,7 @@ public class Constant  {
 	public locateDefinition bool 
     findUsageInstances []Usage 
 	
-	fn isPublic() -> (is bool) {
+	public fn isPublic() -> (is bool) {
 		return this.accessFlags|cg.AccFieldPublic != 0
 	}
 

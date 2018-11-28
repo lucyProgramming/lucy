@@ -39,3 +39,40 @@ public fn locateLucyFile(file string ) -> (lucyPath string , pacakgenName string
 }
 
 
+public fn locateDir (dir string) -> (lucyPath string , pacakgenName string ) {
+    lucyPaths := common.getLucyPath()
+    eles := common.getPathElements(dir)
+    lucyPaths2 := []string{}
+    for path := range lucyPaths {
+        prefixNotMatch := false
+        t := common.getPathElements(path)
+        for kk,vv := range t {
+            if vv != eles[kk] {
+                prefixNotMatch = true
+                break
+            }
+        }
+        if prefixNotMatch {
+            continue
+        }
+        if new io.File(path + "/src").isDirectory() == false {
+            continue
+        }
+        lucyPaths2.append(path)
+        tt := eles[len(t) + 1 : len(eles)]
+        pacakgenName = ""
+        for kk , vv := range tt {
+            pacakgenName += vv
+            if kk != len(tt) -1 {
+                pacakgenName += "/"
+            }
+        }
+    }
+    if len(lucyPaths2) > 1 {
+        panic("file located at 2 locations:" + lucyPaths)
+    }
+    lucyPath = lucyPaths2[0]
+}
+
+
+

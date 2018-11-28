@@ -1,17 +1,33 @@
+import "lucy/cmd/langtools/ide"
+import "lucy/os"
 
 
 
 public fn main(args []string) {
-    
-    
+    files , std := new Flags().parseArgs(args)
+    if len(files) == 0 {
+        print("no file provide")
+        printUsageAndExit(1)
+    }
+    if len(files) > 1 && std {
+        print("mix up multi file and std")
+        printUsageAndExit(1)
+    }
+    lucyFiles := ide.readLucyFiles(files)
+    for v := range lucyFiles {
+        nodes , es := ide.parseAst([v])
+        if len(es) > 0 {
+            for e := range es {
+                os.stderr.println(e.getMessage())
+            }
+            continue 
+        }
+        s := new ide.Fmt().fmt(nodes)
+        if std {
+            print(s)
+        }
+    }
 }
-
-
-
-
-
-
-
 
 
 

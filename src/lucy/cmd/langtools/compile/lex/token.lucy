@@ -65,7 +65,7 @@ public enum  TokenKind {
 	TokenMul   ,                     // *
 	TokenDiv    ,                    // a/c
 	TokenMod    ,                    // a%b
-	TokenIncrement ,                 // a++
+	Tokenincrement ,                 // a++
 	TokenDecrement  ,                // a--
 	TokenSelection  ,                // a.do()
 	TokenVar       ,                 // var a

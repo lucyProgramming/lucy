@@ -17,14 +17,16 @@ public class Variable {
 	public localValOffset           char // offset in stack frame
 	public jvmDescriptor            string // jvm
 	public comment                  string
+	public crlf 					bool  // constains crlf  
 	public globalVarClassName 		string
 	public locateDefinition 	bool 
 	public findUsage  bool 
 	public rename bool 
 	public findUsageInstances []Usage 
+
 	
 	
-	fn isPublic() -> (is bool) {
+	public fn isPublic() -> (is bool) {
 		return this.accessFlags&
 			cg.AccFieldPublic != 0
 	}

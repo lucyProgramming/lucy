@@ -34,7 +34,7 @@ var i int = 1
 
 
 
-fn  testIncrement <T> (noUse T) {
+fn  testincrement <T> (noUse T) {
 	var a T = T(1)
 	a++
 	if a != T(2) {

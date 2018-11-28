@@ -6,7 +6,6 @@ class EnumParser extends ParserExtends {
 		this.super()
 		this.parser = parser
 	}
-
 	fn parse() -> (e ast.Enum, err error) {
 		e = new ast.Enum()
 		this.next(lfIsToken) // skip enum
@@ -22,9 +21,12 @@ class EnumParser extends ParserExtends {
 			e.findUsage = this.parser.token.findUsage
 			e.locateDefinition = this.parser.token.locateDefinition
 			e.rename = this.parser.token.rename
+			e.pos = this.parser.mkPos()
 			this.next(lfNotToken) // skip enum name
 		}
-		e.pos = this.parser.mkPos()
+		if e.pos == null {
+			e.pos = this.parser.mkPos()
+		}
 		comment := new CommentParser(this.parser)
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s expect '{',but '%s'", this.parser.errMsgPrefix(), this.parser.token.description))

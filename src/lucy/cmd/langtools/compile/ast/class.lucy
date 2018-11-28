@@ -42,16 +42,16 @@ public class Class {
         return len(this.staticBlocks) > 0
     }
 
-    public fn IsInterface() -> (is bool)  {
+    public fn isInterface() -> (is bool)  {
         return this.accessFlags&cg.AccClassInterface != 0
     }
     public fn isAbstract() -> (is bool)  {
         return this.accessFlags&cg.AccClassAbstract != 0
     }
-    fn isFinal() -> (is bool)  {
+    public fn isFinal() -> (is bool)  {
         return this.accessFlags&cg.AccClassFinal != 0
     }
-    fn isPublic() -> (is bool)  {
+    public fn isPublic() -> (is bool)  {
         return this.accessFlags&cg.AccClassPublic != 0
     }
     
@@ -76,7 +76,7 @@ public class Class {
     }
 
     fn mkDefaultConstruction() {
-        if this.IsInterface() {
+        if this.isInterface() {
             return
         }
         if this.methods == null {
@@ -243,7 +243,7 @@ public class Class {
             if this.block.inheritedAttribute.p.name == common.CorePackage {
                 superClassName = JavaRootClass
             } else {
-                if this.IsInterface() {
+                if this.isInterface() {
                     superClassName = JavaRootClass
                 } else {
                     superClassName = LucyRootClass
@@ -273,13 +273,13 @@ public class Class {
             this.superClass = variableType.Class
             if variableType.Class.findUsageInstances != null {
                 u := variableType.Class.findUsageInstances[len(variableType.Class.findUsageInstances) -1 ]
-                if variableType.Class.IsInterface() {
+                if variableType.Class.isInterface() {
                     u.Type = "extend"
                 }else {
                     u.Type = "implement"
                 }
             }
-            if this.IsInterface() {
+            if this.isInterface() {
                 if this.superClass.name != JavaRootClass {
                     err = new error(sprintf("%s interface`s super-class must be '%s'",
                         errMsgPrefix(this.superClassName.pos), JavaRootClass))
@@ -317,7 +317,7 @@ public class Class {
                 u := t.Class.findUsageInstances[len(t.Class.findUsageInstances) -1 ]
                 u.Type = "implement"
             }
-            if t.Class.IsInterface() == false {
+            if t.Class.isInterface() == false {
                 errs.append(new error(sprintf("%s '%s' is not a interface",
                     errMsgPrefix(i.pos), i.name)))
                 continue
@@ -854,7 +854,7 @@ public class Class {
         errs.appendAll(this.checkMethods())
         errs.appendAll(this.checkIfOverrideFinalMethod())
         errs.appendAll(this.resolveInterfaces())
-        if this.IsInterface() {
+        if this.isInterface() {
             errs.appendAll( this.checkOverrideInterfaceMethod())
         }
         if this.isAbstract() {
@@ -916,7 +916,7 @@ public class Class {
     }
 
     fn interfaceMethodExists(name string) ->(c Class) {
-        if this.IsInterface() == false {
+        if this.isInterface() == false {
             panic("not a interface")
         }
         if this.methods != null && len(this.methods[name]) > 0 {
@@ -1082,7 +1082,7 @@ public class Class {
     }
 
     fn suitableForInterfaces()-> (errs []error = []error{}){
-        if this.IsInterface() {
+        if this.isInterface() {
             return errs
         }
         for _, i := range this.interfaces {
@@ -1122,7 +1122,7 @@ public class Class {
     }
 
     fn checkFields()-> (errs []error = []error{}){
-        if this.IsInterface() {
+        if this.isInterface() {
             for _, v := range this.fields {
                 errs.append(new error(sprintf("%s interface '%s' expect no field named '%s'",
                     errMsgPrefix(v.pos), this.name, v.name)))
@@ -1214,7 +1214,7 @@ public class Class {
     }
 
     fn checkMethods()-> (errs []error = []error{}){
-        if this.IsInterface() {
+        if this.isInterface() {
             return errs
         }
         for name, methods := range this.methods {
@@ -1223,7 +1223,7 @@ public class Class {
                 if method.isAbstract() {
                     //nothing
                 } else {
-                    if this.IsInterface() {
+                    if this.isInterface() {
                         errs.append( new error(sprintf("%s interface method cannot have implementation",
                             errMsgPrefix(method.Function.pos))))
                         continue
@@ -1249,7 +1249,7 @@ public class Class {
     }
 
     fn checkModifierOk()-> (errs []error = []error{}){
-        if this.IsInterface() && this.isFinal() {
+        if this.isInterface() && this.isFinal() {
             errs.append(new error(sprintf("%s interface '%s' cannot be final",
                 errMsgPrefix(this.finalPos), this.name)))
         }

@@ -203,9 +203,9 @@ public class Expression {
 			this.Type == ExpressionTypeSelection ||
 			this.Type == ExpressionTypeMethodCall ||
 			this.Type == ExpressionTypeFunctionCall ||
-			this.Type == ExpressionTypeIncrement ||
+			this.Type == ExpressionTypeincrement ||
 			this.Type == ExpressionTypeDecrement ||
-			this.Type == ExpressionTypePrefixIncrement ||
+			this.Type == ExpressionTypePrefixincrement ||
 			this.Type == ExpressionTypePrefixDecrement ||
 			this.Type == ExpressionTypeNegative ||
 			this.Type == ExpressionTypeNot ||
@@ -239,9 +239,9 @@ public class Expression {
 			this.Type == ExpressionTypeXorAssign ||
 			this.Type == ExpressionTypeLshAssign ||
 			this.Type == ExpressionTypeRshAssign ||
-			this.Type == ExpressionTypeIncrement ||
+			this.Type == ExpressionTypeincrement ||
 			this.Type == ExpressionTypeDecrement ||
-			this.Type == ExpressionTypePrefixIncrement ||
+			this.Type == ExpressionTypePrefixincrement ||
 			this.Type == ExpressionTypePrefixDecrement ||
 			this.Type == ExpressionTypeVar ||
 			this.Type == ExpressionTypeConst {
@@ -276,16 +276,16 @@ public class Expression {
 	/*
 		check out this expression is increment or decrement
 	*/
-	public fn isIncrement() -> (is bool) {
-		if this.Type == ExpressionTypeIncrement ||
-			this.Type == ExpressionTypePrefixIncrement ||
+	public fn isincrement() -> (is bool) {
+		if this.Type == ExpressionTypeincrement ||
+			this.Type == ExpressionTypePrefixincrement ||
 			this.Type == ExpressionTypeDecrement ||
 			this.Type == ExpressionTypePrefixDecrement {
 		} else {
 			panic("not increment or decrement at all")
 		}
-		return this.Type == ExpressionTypeIncrement ||
-			this.Type == ExpressionTypePrefixIncrement
+		return this.Type == ExpressionTypeincrement ||
+			this.Type == ExpressionTypePrefixincrement
 	}
 
 	/*
@@ -432,8 +432,8 @@ public class Expression {
 				returnValueTypes = []Type{tt}
 			}
 			this.value = tt
-		case ExpressionTypeIncrement , ExpressionTypeDecrement ,ExpressionTypePrefixIncrement ,ExpressionTypePrefixDecrement  :
-			tt := ExpressionCheckUnary.checkIncrementExpression(this , block, errs)
+		case ExpressionTypeincrement , ExpressionTypeDecrement ,ExpressionTypePrefixincrement ,ExpressionTypePrefixDecrement  :
+			tt := ExpressionCheckUnary.checkincrementExpression(this , block, errs)
 			if tt != null {
 				returnValueTypes = []Type{tt}
 			}

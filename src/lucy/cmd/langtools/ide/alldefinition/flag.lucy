@@ -1,0 +1,33 @@
+import "lucy/os/flag"
+
+
+class Flags {
+
+	dir flag.StringOption
+	pos flag.IntOption  
+	parser flag.FlagParser
+
+	fn Flags(){
+		this.super()
+		this.parser = new flag.FlagParser()
+		this.dir = this.parser.stringOption("-dir")
+	}
+
+	
+	fn parseArgs(args []string) ->(dir string) {
+		nodefine,err := this.parser.parse(args)
+		if err != null {
+			panic(err)
+		}
+		if len(nodefine) > 0 {
+			print("args provides but not used:" + nodefine)
+			printUsageAndExit(1)
+		}
+		if this.dir.getValue() == "" {
+			print("file not provided")
+			printUsageAndExit(1)
+		}
+		dir = this.dir.getValue()
+	}
+}
+

@@ -1,5 +1,29 @@
+import "lucy/os/flag"
 
 class Flags {
+
+    std flag.BoolOption 
+    parser flag.FlagParser
     
-    
+    fn Flags(){
+        this.super()
+        this.parser = new flag.FlagParser()
+        this.std = this.parser.boolOption("-std")
+
+    }
+
+    fn parseArgs(args []string) ->(files []string , std bool ) {
+        var err error 
+        files ,err = this.parser.parse(args)
+        if err != null {
+            panic(err)
+        }
+        for f := range files {
+            if f.endsWith(".lucy") == false {
+                printf("'%s' not a lucy file\n" , f)
+                printUsageAndExit(1)
+            }
+        }
+        std = this.std.getValue()
+    }
 }

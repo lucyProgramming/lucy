@@ -2,7 +2,6 @@ import "java/lang/Object"
 import "lucy/cmd/langtools/compile/jvm/cg"
       
 
-  
 public class Block {
 	public exits []cg.Exit // for switch template
 	/*

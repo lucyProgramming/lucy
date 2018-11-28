@@ -1,17 +1,18 @@
 {
-	"compiledFrom": [
-		{
-			"lastModify": 1532669713,
-			"name": "if.lucy"
+	"compileTime":1543365446454,
+	"compiledFrom":[
+			{
+			"lastModify":1543306053,
+			"name":"if.lucy"
 		},
-		{
-			"lastModify": 1532669692,
-			"name": "test.lucy"
+			{
+			"lastModify":1532669692,
+			"name":"test.lucy"
 		}
 	],
-	"imports": null,
-	"compileTime": 1543217478,
-	"classes": [
-		"main.class"
+	"imports":[
+	],
+	"classes":[
+			"main.class"
 	]
 }

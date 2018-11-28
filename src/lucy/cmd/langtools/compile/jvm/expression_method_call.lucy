@@ -86,7 +86,7 @@ class BuildExpressionMethodCall {
                 code.codeLength += 3
                 return
             }
-            if call.Class.IsInterface() {
+            if call.Class.isInterface() {
                 code.codes[code.codeLength] = cg.OP_invokeinterface
                 c.insertInterfaceMethodrefConst(new cg.ConstantInfoInterfaceMethodrefHighLevel(
                     call.Class.name,

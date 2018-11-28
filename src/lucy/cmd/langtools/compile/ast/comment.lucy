@@ -1,0 +1,6 @@
+
+public class Comment {
+    public comment string 
+    public isMulti bool 
+
+}

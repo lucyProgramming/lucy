@@ -266,8 +266,8 @@ public class MakeNodesObjects {
         if s.condition != null {
             ret["condition"] = this.makeExpression(s.condition)
         }
-        if s.Increment != null {
-            ret["increment"] = this.makeExpression(s.Increment)
+        if s.increment != null {
+            ret["increment"] = this.makeExpression(s.increment)
         }
         ret["block"] = this.makeBlock(s.block)
         return  {
@@ -537,7 +537,7 @@ public class MakeNodesObjects {
                 ret["parameterTypes"] = t
             }
             return ret
-        case ast.ExpressionTypeIncrement:
+        case ast.ExpressionTypeincrement:
             ret := new map{string -> Object}()
             ret["op"] = e.op
             ret["on"] = this.makeExpression(e.data.(ast.Expression))
@@ -547,7 +547,7 @@ public class MakeNodesObjects {
             ret["op"] = e.op
             ret["on"] = this.makeExpression(e.data.(ast.Expression))
             return ret
-        case ast.ExpressionTypePrefixIncrement:
+        case ast.ExpressionTypePrefixincrement:
             ret := new map{string -> Object}()
             ret["op"] = e.op
             ret["on"] = this.makeExpression(e.data.(ast.Expression))

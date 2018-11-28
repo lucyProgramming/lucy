@@ -1,12 +1,12 @@
 {
-	"compileTime":1543281199884,
+	"compileTime":1543365446382,
 	"compiledFrom":[
 			{
-			"lastModify":1539151346,
+			"lastModify":1543299801,
 			"name":"main.lucy"
 		},
 			{
-			"lastModify":1542865404,
+			"lastModify":1543299635,
 			"name":"test.lucy"
 		}
 	],

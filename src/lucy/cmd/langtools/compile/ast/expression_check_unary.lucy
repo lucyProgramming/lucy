@@ -35,7 +35,7 @@ class ExpressionCheckUnary {
 		return result
 	}
 
-	static fn checkIncrementExpression(e Expression  , block Block, errs []error) ->(valueType Type) {
+	static fn checkincrementExpression(e Expression  , block Block, errs []error) ->(valueType Type) {
 		on := e.data.(Expression)
 		increment := on.getLeftValue(block, errs)
 		if increment == null {

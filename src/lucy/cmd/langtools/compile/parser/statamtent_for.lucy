@@ -47,7 +47,7 @@ class StatementForParser extends ParserExtends{
 			this.next(lfIsToken)
 			this.parser.unExpectNewLineAndSkip()
 			if this.parser.token.Type != lex.TokenLc {
-				statementFor.Increment, err = this.parser.ExpressionParser.parseExpression(true)
+				statementFor.increment, err = this.parser.ExpressionParser.parseExpression(true)
 				if err != null {
 					this.consume(untilLc)
 					goto parseBlock

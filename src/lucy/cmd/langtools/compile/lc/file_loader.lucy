@@ -198,7 +198,6 @@ public class FileLoader implements ast.LoadImport{
         for _, v := range c.methods {
             m := new ast.ClassMethod()
             m.Function = new ast.Function()
-            //m.loadFromOutSide = true
             m.Function.name = string(c.ConstPool[v.nameIndex].info)
             m.Function.jvmDescriptor = string(c.ConstPool[v.descriptorIndex].info)
             m.Function.accessFlags = v.accessFlags

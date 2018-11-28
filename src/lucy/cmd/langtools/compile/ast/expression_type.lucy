@@ -49,9 +49,9 @@ public enum  ExpressionTypeKind {
 	ExpressionTypeSelectionConst,                            // ::
 	ExpressionTypeMethodCall ,                               // a.b()
 	ExpressionTypeFunctionCall ,                             // a()
-	ExpressionTypeIncrement ,                               // a++
+	ExpressionTypeincrement ,                               // a++
 	ExpressionTypeDecrement  ,                               // a--
-	ExpressionTypePrefixIncrement    ,                       // ++ a
+	ExpressionTypePrefixincrement    ,                       // ++ a
 	ExpressionTypePrefixDecrement ,                          // -- a
 	ExpressionTypeNegative    ,                              // -a
 	ExpressionTypeNot    ,                                   // !a

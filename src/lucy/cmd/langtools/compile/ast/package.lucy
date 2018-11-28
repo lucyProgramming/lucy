@@ -31,6 +31,7 @@ public class Package {
 	public findUsage []Usage 
 	public findUsageIsGlobal bool 
 
+	public findAllDefinition bool 
 
 	public fn Package(name string,disableCheckUnuse bool){
 		this.super()
@@ -127,6 +128,9 @@ public class Package {
 		bs := []Block{}
 		expressions := []Expression{}
 		for _, v := range nodes {
+			if _,ok := v.node.(Comment) ; ok {
+				continue
+			}
 			if t,ok := v.node.(Block) ; ok {
 				bs.append(t)
 				continue
@@ -214,7 +218,6 @@ public class Package {
 		return
 	}
 
-
 	public fn typeCheck(nodes []TopNode) -> (es []error) {
 		this.block.inheritedAttribute.p = this
 		if t := this.insert(nodes) ; len(t) > 0 {
@@ -301,11 +304,12 @@ public class Package {
 				this.locateDefinition = v.pos 
 			}
 			this.errors.appendAll(v.block.checkConstants())
-			v.mkDefaultConstruction()
 			v.block.inherit(this.block)
 			v.block.inheritedAttribute.Class = v
 		}
-
+		for _, v := range this.block.Classes { 
+			v.mkDefaultConstruction()
+		} 
 		for _, v := range this.block.Classes {
 			err := v.resolveFather()
 			if err != null {
@@ -322,17 +326,22 @@ public class Package {
 				return this.errors
 			}
 		}
-		for _, v := range this.block.functions {
-			if v.TemplateFunction != null {
-				continue
-			}
-			this.errors.appendAll( v.checkReturnVarExpression())
-		}
+		
 		for _, v := range this.initFunctions {
 			this.errors.appendAll( v.check(this.block))
 			if this.shouldStop(null) {
 				return this.errors
 			}
+		}
+		if this.findAllDefinition {
+			return this.errors
+		}
+		
+		for _, v := range this.block.functions {
+			if v.TemplateFunction != null {
+				continue
+			}
+			this.errors.appendAll(v.checkReturnVarExpression())
 		}
 		for _, v := range this.block.Classes {
 			this.errors.appendAll( v.checkPhase2())

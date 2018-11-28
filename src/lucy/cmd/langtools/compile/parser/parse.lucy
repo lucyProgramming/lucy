@@ -68,8 +68,22 @@ class Parser {
 		if this.token.Type == lex.TokenEof {
 			return null
 		}
-		for _, t := range this.parseImports() {
-			this.tops.append(new ast.TopNode(t))
+		for this.token.Type == lex.TokenComment || 
+			this.token.Type == lex.TokenMultiLineComment || 
+			this.token.Type == lex.TokenImport {
+			if this.token.Type == lex.TokenImport {
+				for _, t := range this.parseImports() {
+					this.tops.append(new ast.TopNode(t))
+				}
+				continue
+			}
+			if this.onlyParseImport == false {
+				c := new ast.Comment()
+				c.isMulti = this.token.Type == lex.TokenMultiLineComment
+				c.comment = this.token.stringValue
+				this.tops.append(new ast.TopNode(c))
+			}
+			this.next(lfNotToken)
 		}
 		if this.onlyParseImport { // only parse imports
 			return this.errs
@@ -321,7 +335,7 @@ class Parser {
 			pos.endLine = this.token.endLine
 		    pos.endColumn = this.token.endColumn
 		    pos.offset = this.token.offset
-			 pos.endOffset = this.token.endOffset
+			pos.endOffset = this.token.endOffset
 			return
 		} else {
 			line, column := this.lexer.GetLineAndColumn()
@@ -697,16 +711,10 @@ class Parser {
 		return vs, null
 	}
 
-
- 
 	fn parseImports() -> (imports []ast.Import = []ast.Import{}) {
 		for this.token.Type == lex.TokenImport ||
-			this.token.Type == lex.TokenComment ||
-			this.token.Type == lex.TokenMultiLineComment ||
 			this.token.Type == lex.TokenLf {
-			if this.token.Type == lex.TokenComment ||
-				this.token.Type == lex.TokenMultiLineComment ||
-				this.token.Type == lex.TokenLf  {
+			if this.token.Type == lex.TokenLf {
 				this.next(lfNotToken)
 				continue
 			}
@@ -737,6 +745,7 @@ class Parser {
 					continue
 				} else {
 					i.accessName = this.token.stringValue
+					i.alias = this.token.stringValue
 					this.next(lfIsToken) // skip identifier
 				}
 				this.validStatementEnding()

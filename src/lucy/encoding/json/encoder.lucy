@@ -32,7 +32,15 @@ public class Encoder {
 			return []byte(this.x.toString())
 		} 
 		if this.c.getTypeName() == "java.lang.String" {
-			return []byte(sprintf(`"%s"` , this.x.toString()))
+			s := []byte{'"'} 
+			for k,v := range []byte(this.x.toString()) {
+				s.append(v)
+				if v == '\\'{
+					s.append('\\')
+				}
+			}
+			s.append('"')
+			return s
 		}
 		if isMap(this.c) {
 			return this.encodeMap()
@@ -42,9 +50,7 @@ public class Encoder {
 		}
 		return this.encodeObject()
 	}
-	
-
-	
+		
 
 	private fn encodeMap() -> (bs []byte){
 		x , _ := this.x.(AbstractMap)

@@ -3,44 +3,32 @@ import "lucy/os"
 import "java/io"
 import "java/lang/CharSequence"
 
-
-
 class InstallLucyArray {
-
 	
-	fn Help(command string) {
 
+	fn help(command string) {
+		
 	}
-
+	
 	fn RunCommand(command string, args []string) {
 		path := os.getEnv("LUCYROOT")
 		if path == "" {
 			print("env variable LUCYPATH is not set")
 			os.exit(1)
 		}
-		dest := path + "/lib/lucy/deps"
+		dest := path + "/lib/lucy/deps/"
 		new io.File(dest).mkdirs()
 		for _, v := range installs {
 			javaFile := v.className + ".java"
 			t := array_template.replace("ArrayTTT".(CharSequence), v.className.(CharSequence))
 			t = t.replace("TTT".(CharSequence),v.typename .(CharSequence))
 			t = t.replace("IMPORTS".(CharSequence), v.imports.(CharSequence))
-			err := os.writeFile(javaFile, byte[](t), 0644)
+			dest := dest + javaFile
+			err := os.writeFile(dest , byte[](t))
 			if err != null {
 				panic(err)
 			}
-			cmd := exec.Command("javac", javaFile)
-			out, err := cmd.Output()
-			if err != null {
-				print(err)
-				if out != null && len(out) > 0 {
-					os.Stdout.Write(out)
-				}
-				os.exit(3)
-			}
+			print("install:" , dest)
 		}
 	}
-
-
 }
-

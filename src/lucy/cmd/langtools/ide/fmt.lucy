@@ -1,57 +1,101 @@
+
+//11111111111
 import "lucy/cmd/langtools/compile/ast"
+//22222
 import "java/io"
 
-
-class Fmt {
-
-    
-    fn fmt(nodes []ast.TopNode) -> (format string = ""){
+/* 
+    hello world
+*/
+public class Fmt {
+    public fn fmt(nodes []ast.TopNode) -> (format string = ""){
         for k, n := range nodes {
+            if t,ok := n.node.(ast.Comment) ; ok {
+                if t.isMulti {
+                    format += "\n" + sprintf("/*%s*/\n" , t.comment) + "\n"
+                }else {
+                    format += "\n" + "//" + t.comment + "\n"
+                }
+            }
+
             if t,ok := n.node.(ast.Block) ; ok {
-                format += this.formatBlock("" , t)
+                format += this.formatBlock("" , t) + "\n"
             }
             if t,ok := n.node.(ast.Function) ; ok {
-                format += this.formatFunction("" , t)
+                format += this.formatFunction("" , t) + "\n"
             }
             if t,ok := n.node.(ast.Enum) ; ok {
-                format += this.formatEnum("" , t)
+                format += this.formatEnum("" , t) + "\n"
             }
             if t,ok := n.node.(ast.Class) ; ok {
-                format += this.formatClass("" , t)
+                format += this.formatClass("" , t) + "\n"
             }
             if t,ok := n.node.(ast.Constant) ; ok {
-                format += this.formatConstant("" , t)
+                format += this.formatConstant("" , t)  + "\n"
             }
             if t,ok := n.node.(ast.Import) ; ok {
-                format += this.formatImport("" , t)
+                format += this.formatImport("" , t) + "\n"
             }
             if t,ok := n.node.(ast.Expression) ; ok {
-               format += this.formatExpression("" , t)
+               format += this.formatExpression("" , t) + "\n"
             }
             if t,ok := n.node.(ast.TypeAlias) ; ok {
-               format += this.formatTypealais("" , t)
+               format += this.formatTypealais("" , t) + "\n"
             }
         }
     }
     
     fn formatTypealais(indent string , a ast.TypeAlias ) -> (format string = "") {
         format = indent
-        format += sprintf ("typealias %s = %s" , a.name ,a.Type.typeString())
+        format += sprintf ("typealias %s = %s" , a.name ,a.Type.typeName())
     }
-    fn formatConstant(indent string , f ast.Constant ) -> (format string = "") {
-        
+    fn formatConstant(indent string , c ast.Constant ) -> (format string = "") {
+        format = indent
+        format += "const " + c.name
+        if c.Type != null {
+            format += " " + c.Type.typeName()
+        }
+        format += " =" +  c.defaultValueExpression.literalRaw
     }
+
     fn formatFunction(indent string , f ast.Function ) -> (format string = "") {
+        format = indent 
+        format += "fn "
+        if f.name != null && f.name != "" {
+            format += f.name + " "
+        }
+        format += "{"
         
+        format += indent + "}"
     }
+
     fn formatClass(indent string , c ast.Class) -> (format string = "") {
 
     }
-    fn formatEnum(indent string , c ast.Enum) -> (format string = "") {
 
+    fn formatEnum(indent string , e ast.Enum) -> (format string = "") {
+        format = indent 
+        format += "enum " + e.shortName + " {"
+        for k,v := range e.enums{
+            format += "    " + v.name
+            if v.NoNeed != null {
+                format += " " + this.formatExpression("" , v.NoNeed)
+            }
+            if k != len(e.enums) -1 {
+                format += ","
+            }
+            format += "\n"
+
+        }
+        format += "}"
     }
-    fn formatImport(indent string , c ast.Import) -> (format string = "") {
 
+    fn formatImport(indent string , i ast.Import) -> (format string = "") {
+        format = indent
+        format += "import \"" + i.Import + "\""
+        if i.alias != null {
+            format += " as " + i.alias 
+        }
     }
 
     fn formatBlock(indent string , block ast.Block) -> (format string = ""){
@@ -97,37 +141,82 @@ class Fmt {
             case ast.StatementTypeTypeAlias :
                 format += this.formatTypealias(indent , s.TypeAlias)
             case ast.StatementTypeComment:
-                format += "//" + s.comment  
+                format += "\n" + "//" + s.comment  
             case ast.StatementTypeCommentMultiLine:
-                format += "/*" + s.comment + "*/"   
+                format += "\n" + "/*" + s.comment + "*/"   
         }
         format += "\n"
     }
-
-    
-    fn formatTypealias(indent string ,a ast.TypeAlias )-> (format string = "") {
-
+    fn formatTypealias(indent string ,a ast.TypeAlias)-> (format string = "") {
+        format = indent
+        format += sprintf("typealias %s = %s" , a.name , a.aliasName) 
     }
-    fn formatDefer(indent string ,s ast.StatementDefer)-> (format string = "") {
-        
+    fn formatDefer(indent string ,d ast.StatementDefer)-> (format string = "") {
+        format = indent
+        format += "defer {"
+        format += this.formatBlock(indent + "    " ,  d.block)
+        format += indent + "}"
     }
     fn formatIf(indent string ,s ast.StatementIf)-> (format string = "") {
-
+        format = indent
+        format += "if "
+        for v := range s.prefixExpressions {
+            format += this.formatExpression("" , v)
+            format += " ; "
+        }
+        format += this.formatExpression("" , s.condition)
+        format += " {"
+        format += this.formatBlock(indent + "    " , s.block )
+        format += indent + "}"
+        for _,v := range s.elseIfList{
+            format += " else if " + this.formatExpression("" , v.condition) + " {"
+            format += this.formatBlock(indent + "    " , v.block )
+            format += indent + "}"
+        }
+        if s.Else != null {
+            format += " else { "
+            format += this.formatBlock(indent + "    " , s.Else)
+            format += indent + "}"
+        }
     }
     fn formatGoto(indent string , s ast.StatementGoTo)-> (format string = "") {
-        
+        format = indent
+        format += "goto " + s.labelName
     }
     fn formatFor(indent string ,s ast.StatementFor)-> (format string = "") {
-        
+        format = indent
+        format += "for"
+        if s.Init != null {
+            format += " " + this.formatExpression("" , s.Init)
+        }
+        if s.condition != null {
+            if s.Init != null {
+                format += ";"
+            }
+            format += " " + this.formatExpression("" , s.condition)
+        }
+        if s.increment != null {
+            format += " " + this.formatExpression("" , s.increment)
+        }
     }
+
     fn formatSwitch(indent string ,s ast.StatementSwitch)-> (format string = "") {
         
     }
-    fn formatWhen(indent string ,s ast.StatementWhen)-> (format string = "") {
-        
+    fn formatWhen(indent string ,w ast.StatementWhen)-> (format string = "") {
+        format = indent
+        format += "when"
+
     }
     fn formatReturn(indent string ,s ast.StatementReturn)-> (format string = "") {
-        
+        format = indent 
+        format += "return "
+        for k,v := range s.expressions{
+            format += this.formatExpression("" , v)
+            if k != len(s.expressions) - 1 {
+                format += " , "
+            }
+        }
     }
 
     fn formatExpression(indent string ,e ast.Expression)-> (format string = "") {
@@ -151,7 +240,7 @@ class Fmt {
                     }
                     format += indent + "]"
                 }else {
-                    format = indent + "[]" + array.Type.typeString() + ""
+                    format = indent + "[]" + array.Type.typeName() + ""
                     for k,v := range array.expressions{
                         format += this.formatExpression(indent + "    " , v)
                         if k != len(array.expressions) {
@@ -247,13 +336,13 @@ class Fmt {
                     }
                 }
                 format += ")"                                
-            case ast.ExpressionTypeIncrement: 
+            case ast.ExpressionTypeincrement: 
                 format = indent
                 format += this.formatExpression("" , e.data.(ast.Expression)) + "++"                            
             case ast.ExpressionTypeDecrement:                                 
                 format = indent
                 format += this.formatExpression("" , e.data.(ast.Expression)) + "--"    
-            case ast.ExpressionTypePrefixIncrement :
+            case ast.ExpressionTypePrefixincrement :
                 format = indent
                 format += "++" + this.formatExpression("" , e.data.(ast.Expression))                           
             case ast.ExpressionTypePrefixDecrement:  
@@ -267,7 +356,7 @@ class Fmt {
             case ast.ExpressionTypeNew: 
                 n := e.data.(ast.ExpressionNew)
                 format = indent
-                format += "new " + n.Type.typeString()+ " ("
+                format += "new " + n.Type.typeName()+ " ("
                 for k,v := range n.args {
                     format += this.formatExpression("" , v)
                     if k != len(n.args) - 1 {
@@ -285,7 +374,7 @@ class Fmt {
                     }
                 }                              
             case ast.ExpressionTypeFunctionLiteral:
-
+                this.formatFunction(indent , e.data.(ast.Function))
             case ast.ExpressionTypeVar:  
                 vs := e.data.(ast.ExpressionVar)
                 format = indent
@@ -297,7 +386,7 @@ class Fmt {
                     }
                 }  
                 if vs.Type != null {
-                    format += " " + vs.Type.typeString()
+                    format += " " + vs.Type.typeName()
                 }
                 if len(vs.InitValues) > 0 {
                     format += " = "
@@ -313,7 +402,7 @@ class Fmt {
                 for v := range cs {
                     t := indent + "cosnt " + v.name + " "
                     if v.Type != null {
-                        t += v.Type.typeString() + " "
+                        t += v.Type.typeName() + " "
                     }
                     t += "="
                     t += this.formatExpression("" , v.defaultValueExpression) + "\n"
@@ -322,7 +411,7 @@ class Fmt {
             case ast.ExpressionTypeCheckCast:
                 c := e.data.(ast.ExpressionTypeConversion) 
                 format =  indent
-                format += c.Type.typeString() + "("
+                format += c.Type.typeName() + "("
                 format += this.formatExpression("" , c.Expression)
                 format += ")"                         
             case ast.ExpressionTypeRange:
@@ -353,7 +442,7 @@ class Fmt {
                     }
                     format += "}"
                 }else {
-                    format += sprintf("map{%s -> %s}{" , m.Type.Map.K.typeString() ,  m.Type.Map.V.typeString())
+                    format += sprintf("map{%s -> %s}{" , m.Type.Map.K.typeName() ,  m.Type.Map.V.typeName())
                     for k,v := range m.keyValuePairs{
                         format += this.formatExpression("" , v.key) + " -> " 
                         format += this.formatExpression("" , v.value)
@@ -367,7 +456,7 @@ class Fmt {
                 a := e.data.(ast.ExpressionTypeAssert)   
                 format = indent 
                 format += this.formatExpression("" , a.Expression ) + ".("  
-                format += a.Type.typeString()
+                format += a.Type.typeName()
                 format += ")"                        
             case ast.ExpressionTypeQuestion: 
                 q := e.data.(ast.ExpressionQuestion)

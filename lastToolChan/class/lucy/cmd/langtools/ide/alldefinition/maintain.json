@@ -1,0 +1,33 @@
+{
+	"compileTime":1543368974954,
+	"compiledFrom":[
+			{
+			"lastModify":1543368741,
+			"name":"alldefinition.lucy"
+		},
+			{
+			"lastModify":1543367309,
+			"name":"flag.lucy"
+		},
+			{
+			"lastModify":1543368681,
+			"name":"main.lucy"
+		},
+			{
+			"lastModify":1543366161,
+			"name":"usage.lucy"
+		}
+	],
+	"imports":[
+			"lucy/cmd/langtools/compile/ast",
+			"lucy/cmd/langtools/ide/utils",
+			"lucy/os",
+			"lucy/os/flag",
+			"lucy/encoding/json"
+	],
+	"classes":[
+			"AllDefinition.class",
+			"Flags.class",
+			"main.class"
+	]
+}

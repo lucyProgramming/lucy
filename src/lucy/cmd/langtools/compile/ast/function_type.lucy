@@ -15,7 +15,6 @@ public class FunctionType {
 		}
 	}
 	
-
 	public fn checkTemplateNameDuplication() -> (errs []error) {
 		errs = []error{}
 		m := new map {string -> Pos}()
@@ -53,6 +52,46 @@ public class FunctionType {
 			ret.returnList[k] = p
 		}
 		return
+	}
+
+	fn typeName () ->(s string) {
+		s = "("
+		for k, v := range this.parameterList {
+			if v.name != null && v.name != "" {
+				s += v.name + " "
+			}
+			s += v.Type.typeName()
+			if v.defaultValueExpression != null {
+				s += " = " + v.defaultValueExpression.op
+			}
+			if k != len(this.parameterList)-1 {
+				s += ","
+			}
+		}
+		if this.vArgs != null {
+			if len(this.parameterList) > 0 {
+				s += ","
+			}
+			if this.vArgs.name != null && this.vArgs.name != "" {
+				s += this.vArgs.name + " "
+			}
+			s += this.vArgs.Type.typeName()
+		}
+		s += ")"
+		if this.VoidReturn() == false {
+			s += "->( "
+			for k, v := range this.returnList {
+				if v.name != null && v.name != "" {
+					s += v.name + " "
+				}
+				s += v.Type.typeName()
+				if k != len(this.returnList)-1 {
+					s += ","
+				}
+			}
+			s += ")"
+		}
+		return s
 	}
 	fn typeString() -> (s string) {
 		s = "("

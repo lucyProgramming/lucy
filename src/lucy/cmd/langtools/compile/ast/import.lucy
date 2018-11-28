@@ -6,12 +6,14 @@ public class Import {
 	public Import string // full name
 	public pos    Pos
 	public used   bool
+	public alias string 
 	/*
 		import "github.com/lucy" should access by lucy.doSomething()
 		import "github.com/std" as std2 should access by std2.doSomething()
 	*/
 	fn MkAccessName() -> (err error) {
 		if this.accessName != null && this.accessName != "" {
+			this.alias = this.accessName
 			return null
 		}
 		if false == PackageNameIsValid(this.Import) {

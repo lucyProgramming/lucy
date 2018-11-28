@@ -27,7 +27,7 @@ class ExpressionCheckNew {
 				no.Type.pos.errMsgPrefix(), err.getMessage())))
 			return null
 		}
-		if no.Type.Class.IsInterface() {
+		if no.Type.Class.isInterface() {
 			errs . append(new error( sprintf("%s '%s' is interface",
 				errMsgPrefix(no.Type.pos), no.Type.Class.name)))
 			return null

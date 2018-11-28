@@ -1,5 +1,5 @@
 
-import "lucy/cmd/langtools/ide/utils"
+import "lucy/cmd/langtools/ide"
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/ide/gotodefinition"
 import "lucy/encoding/json"
@@ -16,8 +16,8 @@ fn main(args []string) {
         print("null")
         return 
     }
-    lucyPath , packageName := utils.locateLucyFile(definition.filename)
-    var lucyFiles = utils.readLucyFiles(utils.getLucyFiles(lucyPath + "/src/" + packageName))    
+    lucyPath , packageName := ide.locateLucyFile(definition.filename)
+    var lucyFiles = ide.readLucyFiles(ide.getLucyFiles(lucyPath + "/src/" + packageName))    
     fileSystem := FileSystems.getDefault()
     for v := range lucyFiles {
         if fileSystem.getPath(file).getFileName().toString() == 
@@ -34,25 +34,26 @@ fn main(args []string) {
 }
 
 fn sortUsages (usages []ast.Usage) -> (result Object){
-    if len(usages) == 0 {
-        return null 
-    }
-    m := new map{string -> []ast.Usage} () 
-    for v := range usages{
-        if m[v.Type] == null {
-            m[v.Type] = [v]
-        }else {
-            m[v.Type].append(v)
-        }
-    }
-    if len(m) == 1 {
-        for v := range m {
-            return copy(new ast.Usage[](len(v)) , v)
-        }
-    }
-    m2 := new map{string -> ast.Usage[]} ()
-    for k,v := range m {
-        m2[k] = copy(new ast.Usage[](len(v)) , v)
-    } 
-    return m2
+    // if len(usages) == 0 {
+    //     return null 
+    // }
+    // m := new map{string -> []ast.Usage} () 
+    // for v := range usages{
+    //     if m[v.Type] == null {
+    //         m[v.Type] = [v]
+    //     }else {
+    //         m[v.Type].append(v)
+    //     }
+    // }
+    // if len(m) == 1 {
+    //     for v := range m {
+    //         return copy(new ast.Usage[](len(v)) , v)
+    //     }
+    // }
+    // m2 := new map{string -> ast.Usage[]} ()
+    // for k,v := range m {
+    //     m2[k] = copy(new ast.Usage[](len(v)) , v)
+    // } 
+    // return m2
+    return copy(new ast.Usage[](len(usages)) , usages )
 }

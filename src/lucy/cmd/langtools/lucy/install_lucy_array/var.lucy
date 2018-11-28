@@ -13,9 +13,7 @@ class InstallType {
 	}
 }
 
-
 var  installs = []InstallType{}
-
 
 {
 	installs.append( new InstallType(
@@ -55,8 +53,7 @@ var  installs = []InstallType{}
 		"Object",
 		`
 		import java.lang.Object;
-`
-	))
+`	))
 
 	installs.append( new InstallType(
 		"ArrayString",

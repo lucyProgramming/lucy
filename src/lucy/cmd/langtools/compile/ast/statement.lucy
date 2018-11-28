@@ -86,7 +86,7 @@ public class Statement {
 
 	fn simplifyFor() {
 		if this.StatementFor.Init == null &&
-			this.StatementFor.Increment == null &&
+			this.StatementFor.increment == null &&
 			this.StatementFor.condition != null &&
 			this.StatementFor.condition.Type == ExpressionTypeBool &&
 			this.StatementFor.condition.boolValue == false  {
@@ -100,9 +100,8 @@ public class Statement {
 		this.checked = true
 		errs = []error{}
 		switch this.Type {
-		case StatementTypeComment ,
+		case StatementTypeComment,
 			StatementTypeCommentMultiLine:
-			this.Type = StatementTypeNop
 		case StatementTypeExpression:
 			return this.checkStatementExpression(block)
 		case StatementTypeIf:

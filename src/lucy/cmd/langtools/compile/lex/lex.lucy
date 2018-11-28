@@ -685,7 +685,7 @@ public class Lexer {
 		case '+':
 			c, eof = this.getChar()
 			if c == '+' {
-				token.Type = TokenIncrement
+				token.Type = Tokenincrement
 				token.description = "++"
 			} else if c == '=' {
 				token.Type = TokenAddAssign

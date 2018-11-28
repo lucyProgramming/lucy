@@ -5,7 +5,7 @@ public class StatementReturn   {
 	public expressions []Expression
 	public pos         Pos
 
-
+	
 	fn mkDefers(b Block) {
 		if b.isFunctionBlock == false { // not top block
 			this.mkDefers(b.outer) // recursive

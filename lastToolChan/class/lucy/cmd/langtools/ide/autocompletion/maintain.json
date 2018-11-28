@@ -1,5 +1,5 @@
 {
-	"compileTime":1543299524787,
+	"compileTime":1543365351039,
 	"compiledFrom":[
 			{
 			"lastModify":1543298956,
@@ -10,7 +10,7 @@
 			"name":"main.lucy"
 		},
 			{
-			"lastModify":1543281931,
+			"lastModify":1543365075,
 			"name":"usage.lucy"
 		}
 	],

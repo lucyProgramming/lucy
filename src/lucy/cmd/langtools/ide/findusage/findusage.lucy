@@ -1,15 +1,15 @@
 import "lucy/cmd/langtools/compile/ast"
-import "lucy/cmd/langtools/ide/utils"
+import "lucy/cmd/langtools/ide"
 import "lucy/os"
 import "java/io"
 
 class FindUsage {
-    lucyFiles []utils.LucyFile
+    lucyFiles []ide.LucyFile
     packageName string
     printErr bool
     lucyPaths []string
     
-    fn FindUsage(lucyFiles []utils.LucyFile , packageName string , printErr bool , lucyPaths []string ) {
+    fn FindUsage(lucyFiles []ide.LucyFile , packageName string , printErr bool , lucyPaths []string ) {
         this.super()
         this.lucyFiles = lucyFiles
         this.packageName = packageName
@@ -18,7 +18,7 @@ class FindUsage {
     }
     
     fn find() -> (result []ast.Usage){
-        p , es := utils.parseAstAndTypeCheck(this.packageName , this.lucyFiles)
+        p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles)
         if this.printErr{
             for v := range es{
                 os.stderr.println(v.getMessage())
@@ -28,7 +28,7 @@ class FindUsage {
             set this package to cache 
             when another trying to load this pacakge could use the cache and the "findUsage" has created in memory
         */
-        utils.packageLoader.setCache(this.packageName , p)
+        ide.packageLoader.setCache(this.packageName , p)
         if p.findUsageIsGlobal {
             this.searchLucyPath()        
         }
@@ -57,14 +57,14 @@ class FindUsage {
             // no lucy files
             return 
         }
-        if utils.packageLoader.getCache(packageName) != null {
+        if ide.packageLoader.getCache(packageName) != null {
             //handled 
             // when handle subdirectory may 
             return 
         }
-        lucyFiles := utils.readLucyFiles(utils.getLucyFiles(dir))
+        lucyFiles := ide.readLucyFiles(ide.getLucyFiles(dir))
         imported := false 
-        for v := range utils.parseImports(lucyFiles) {
+        for v := range ide.parseImports(lucyFiles) {
             if v == this.packageName {
                 imported = true 
                 break 
@@ -73,7 +73,7 @@ class FindUsage {
         if imported == false {
             return 
         }
-        _ , es := utils.parseAstAndTypeCheck(packageName , lucyFiles )
+        _ , es := ide.parseAstAndTypeCheck(packageName , lucyFiles )
         if this.printErr{
             for v := range es{
                 os.stderr.println(v.getMessage())

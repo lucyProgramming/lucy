@@ -13,7 +13,7 @@ class BuildExpression {
     BuildExpressionFunction BuildExpressionFunction
     BuildExpressionFunctionCall BuildExpressionFunctionCall
     BuildExpressionIdentifier BuildExpressionIdentifier
-    BuildExpressionIncrement BuildExpressionIncrement
+    BuildExpressionincrement BuildExpressionincrement
     BuildExpressionIndex BuildExpressionIndex
     BuildExpressionLeftValue BuildExpressionLeftValue
     BuildExpressionLogical BuildExpressionLogical
@@ -44,7 +44,7 @@ class BuildExpression {
         this.BuildExpressionFunction = new BuildExpressionFunction(this,bp)
         this.BuildExpressionFunctionCall = new  BuildExpressionFunctionCall(this)
         this.BuildExpressionIdentifier = new  BuildExpressionIdentifier(this)
-        this.BuildExpressionIncrement = new BuildExpressionIncrement(this)
+        this.BuildExpressionincrement = new BuildExpressionincrement(this)
         this.BuildExpressionIndex = new BuildExpressionIndex(this)
         this.BuildExpressionLeftValue = new  BuildExpressionLeftValue(this)
         this.BuildExpressionLogical = new BuildExpressionLogical(this)
@@ -174,9 +174,9 @@ class BuildExpression {
         case ast.ExpressionTypeFunctionCall:
             maxStack = this.BuildExpressionFunctionCall.buildFunctionCall(c, code, e, context, state)
         //
-        case ast.ExpressionTypeIncrement ,ast.ExpressionTypeDecrement ,
-             ast.ExpressionTypePrefixIncrement,ast.ExpressionTypePrefixDecrement:
-            maxStack = this.BuildExpressionIncrement.buildSelfIncrement(c, code, e, context, state)
+        case ast.ExpressionTypeincrement ,ast.ExpressionTypeDecrement ,
+             ast.ExpressionTypePrefixincrement,ast.ExpressionTypePrefixDecrement:
+            maxStack = this.BuildExpressionincrement.buildSelfincrement(c, code, e, context, state)
         //
         case ast.ExpressionTypeBitwiseNot ,ast.ExpressionTypeNegative , ast.ExpressionTypeNot :
 

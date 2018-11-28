@@ -57,8 +57,8 @@ class BuildFor {
         }
         s.continueCodeOffset = code.codeLength
         context.MakeStackMap(code, forState, code.codeLength)
-        if s.Increment != null {
-            stack := this.eb.build(c, code, s.Increment, context, forState)
+        if s.increment != null {
+            stack := this.eb.build(c, code, s.increment, context, forState)
             if stack > maxStack {
                 maxStack = stack
             }

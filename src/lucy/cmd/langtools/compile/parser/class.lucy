@@ -233,7 +233,7 @@ class ClassParser extends  ParserExtends{
 				}
 			case lex.TokenFn:
 				if isAbstract &&
-					(classDefinition.isAbstract() == false && classDefinition.IsInterface() == false) {
+					(classDefinition.isAbstract() == false && classDefinition.isInterface() == false) {
 					this.parser.errs.append(
 						new error(sprintf("%s cannot  abstact method is non-abstract class",
 							this.parser.errMsgPrefix())))

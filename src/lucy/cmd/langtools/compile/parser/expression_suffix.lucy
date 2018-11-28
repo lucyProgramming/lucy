@@ -134,7 +134,7 @@ class ExpressionSuffix extends  ParserExtends {
 			newExpression.op = "(" + prefix.op + ")"
 			prefix = newExpression
 			this.next(lfIsToken)
-		case lex.TokenIncrement:
+		case lex.Tokenincrement:
 			pos := this.parser.mkPos()
 			this.next(lfIsToken) // skip ++
 			prefix, err = this.parseSuffixExpression()
@@ -144,7 +144,7 @@ class ExpressionSuffix extends  ParserExtends {
 			newE := new ast.Expression()
 			newE.pos = pos
 			newE.op = "++()"
-			newE.Type = ast.ExpressionTypePrefixIncrement
+			newE.Type = ast.ExpressionTypePrefixincrement
 			newE.data = prefix
 			prefix = newE
 		case lex.TokenDecrement:
@@ -299,7 +299,7 @@ class ExpressionSuffix extends  ParserExtends {
 			this.parser.errs.append( err)
 			return null, err
 		}
-		for this.parser.token.Type == lex.TokenIncrement ||
+		for this.parser.token.Type == lex.Tokenincrement ||
 			this.parser.token.Type == lex.TokenDecrement ||
 			this.parser.token.Type == lex.TokenLp ||
 			this.parser.token.Type == lex.TokenLb ||
@@ -315,12 +315,12 @@ class ExpressionSuffix extends  ParserExtends {
 				newExpression.pos = this.parser.mkPos()
 				this.next(lfIsToken)
 				return newExpression, null
-			case lex.TokenIncrement,
+			case lex.Tokenincrement,
 				lex.TokenDecrement:
 				newExpression := new ast.Expression()
-				if this.parser.token.Type == lex.TokenIncrement {
+				if this.parser.token.Type == lex.Tokenincrement {
 					newExpression.op = "()++"
-					newExpression.Type = ast.ExpressionTypeIncrement
+					newExpression.Type = ast.ExpressionTypeincrement
 				} else {
 					newExpression.op = "()--"
 					newExpression.Type = ast.ExpressionTypeDecrement

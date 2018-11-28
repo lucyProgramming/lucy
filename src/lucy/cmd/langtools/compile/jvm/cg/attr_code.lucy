@@ -10,7 +10,6 @@ public class AttributeCode  {
 	public	exceptions        []ExceptionTable
 			attributes        []AttributeInfo
 	public	attributeStackMap AttributeStackMap
-	
 
 	public fn appendException(e ExceptionTable){
 		if this.exceptions == null {
@@ -78,7 +77,7 @@ public class AttributeCode  {
 		}
 		return bs
 	}
-
+	
 	fn mkExceptions() -> (bs []byte)  {
 		bs = new []byte (2)
 		binary.BigEndian.putChar(bs, char(len(this.exceptions)))

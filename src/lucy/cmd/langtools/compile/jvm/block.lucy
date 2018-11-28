@@ -97,14 +97,13 @@ class BuildBlock {
 		}
 		return
 	}
-
+	
 	fn statementIsUnConditionJump(s ast.Statement) ->(is bool) {
 		return s.Type == ast.StatementTypeReturn ||
 			s.Type == ast.StatementTypeGoTo ||
 			s.Type == ast.StatementTypeContinue ||
 			s.Type == ast.StatementTypeBreak
 	}
-
 
 	fn buildStatement(
 		c cg.ClassHighLevel,
@@ -115,6 +114,9 @@ class BuildBlock {
 		state StackMapState) -> (maxStack char) {
 		//print(s.pos)
 		switch s.Type {
+		case ast.StatementTypeComment,
+			ast.StatementTypeCommentMultiLine:
+			
 		case ast.StatementTypeExpression:
 			maxStack = this.eb.build(c, code, s.Expression, context, state)
 		case ast.StatementTypeIf:

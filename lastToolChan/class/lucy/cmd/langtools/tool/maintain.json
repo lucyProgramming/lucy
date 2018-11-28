@@ -1,15 +1,15 @@
 {
-	"compiledFrom": [
-		{
-			"lastModify": 1542352762,
-			"name": "main.lucy"
+	"compileTime":1543365446403,
+	"compiledFrom":[
+			{
+			"lastModify":1543220134,
+			"name":"main.lucy"
 		}
 	],
-	"imports": [
-		"lucy/os"
+	"imports":[
+			"lucy/os"
 	],
-	"compileTime": 1543217472,
-	"classes": [
-		"main.class"
+	"classes":[
+			"main.class"
 	]
 }

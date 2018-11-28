@@ -24,7 +24,7 @@ public class StatementFor {
 	*/
 	public Init      Expression
 	public condition Expression
-	public Increment Expression
+	public increment Expression
 	public block     Block
 
 
@@ -243,7 +243,7 @@ public class StatementFor {
 		this.initExpressionBlock.inheritedAttribute.forBreak = this
 		this.block.inherit(this.initExpressionBlock)
 		if this.Init == null &&
-			this.Increment == null &&
+			this.increment == null &&
 			this.condition != null &&
 			this.condition.canBeUsedForRange() {
 			// for k,v := range arr
@@ -268,12 +268,12 @@ public class StatementFor {
 					errMsgPrefix(this.condition.pos), t.typeString())))
 			}
 		}
-		if this.Increment != null {
-			this.Increment.isStatementExpression = true
-			if err := this.Increment.canBeUsedAsStatement(); err != null {
+		if this.increment != null {
+			this.increment.isStatementExpression = true
+			if err := this.increment.canBeUsedAsStatement(); err != null {
 				errs.append(err)
 			}
-			_, es := this.Increment.check(this.initExpressionBlock)
+			_, es := this.increment.check(this.initExpressionBlock)
 			errs.appendAll(es)
 		}
 		if len(errs) > 0 {

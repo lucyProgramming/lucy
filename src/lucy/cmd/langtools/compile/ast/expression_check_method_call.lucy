@@ -77,7 +77,7 @@ class ExpressionCheckMethodCall {
 			if len(errs) > errsLength {
 				return null
 			}
-			if object.Class.IsInterface() {
+			if object.Class.isInterface() {
 				if object.Type == VariableTypeClass {
 					errs.append(new error(sprintf("%s cannot make_node_objects call on interface '%s'",
 						e.pos.errMsgPrefix(), object.Class.name)))
@@ -148,6 +148,7 @@ class ExpressionCheckMethodCall {
 				err := call.Expression.methodAccessAble(block, m)
 				if err != null {
 					errs.append(err)
+					panic(err)
 				}
 				call.Method = m
 				return m.Function.Type.mkCallReturnTypes(e.pos)
