@@ -15,9 +15,10 @@ public class Class {
 	loadSuperClassCalled              bool
 	resolveInterfacesCalled           bool
 	resolveFieldsAndMethodsTypeCalled bool
-
+    
 	public notImportedYet                    bool   // not imported
 	public name                              string // binary name
+    public shortName                         string // short name
 	public pos                               Pos
 	public finalPos                          Pos // final pos
 	public isJava                            bool //class imported from CLASSPATH
@@ -36,6 +37,16 @@ public class Class {
     public locateDefinition 	bool 
 	public findUsage  bool  
     findUsageInstances []Usage 
+    
+    public fmts []Object   // use for format 
+    
+    public fn appendFmt(f Object ){
+        if this.fmts == null {
+            this.fmts = [f]
+        }else {
+            this.fmts.append(f)
+        }
+    }
 
     
     fn haveStaticsCodes() -> (is bool)  {

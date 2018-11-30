@@ -20,7 +20,8 @@ public enum StatementTypeKind {
 	StatementTypeImport,
 	StatementTypeTypeAlias ,
 	StatementTypeComment ,
-	StatementTypeCommentMultiLine
+	StatementTypeCommentMultiLine , 
+	StatementTypeEmptyLine 
 }
 
 public class Statement {
@@ -102,6 +103,9 @@ public class Statement {
 		switch this.Type {
 		case StatementTypeComment,
 			StatementTypeCommentMultiLine:
+			//nothing
+		case StatementTypeEmptyLine:
+			//noting
 		case StatementTypeExpression:
 			return this.checkStatementExpression(block)
 		case StatementTypeIf:

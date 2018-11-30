@@ -2,5 +2,8 @@
 public class Comment {
     public comment string 
     public isMulti bool 
+}
 
+public class Line {
+    // indicate a line 
 }

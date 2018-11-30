@@ -136,7 +136,7 @@ class ExpressionParser extends  ParserExtends {
             var es []ast.Expression
             es, err = this.parseExpressions(lex.TokenSemicolon)
             if err != null {
-                return null, err
+                return left, err
             }
             bin.right = new ast.Expression()
             bin.right.Type = ast.ExpressionTypeList
@@ -144,7 +144,7 @@ class ExpressionParser extends  ParserExtends {
         } else {
             bin.right, err = this.parseExpression(false)
             if err != null {
-                return null, err
+                return left, err
             }
         }
         return result, err
@@ -166,15 +166,15 @@ class ExpressionParser extends  ParserExtends {
 		this.next(lfNotToken) // skip (
 		on, err := this.parseExpression(false)
 		if err != null {
-			return null, err
+			return on, err
 		}
-		this.parser.ifTokenIsLfThenSkip()
+		this.parser.ifTokenIsLfThenSkip(true)
 		if this.parser.token.Type != lex.TokenRp {
 			err = new error(sprintf("%s '(' and ')' not match", this.parser.errMsgPrefix()))
-			this.parser.errs.append( err)
-			return null, err
+			this.parser.errs.append( err)	 
+		}else {
+			this.next(lfIsToken) // skip )
 		}
-		this.next(lfIsToken) // skip )
 		e = new ast.Expression()
 		e.Type = ast.ExpressionTypeCheckCast
 		e.pos = pos
@@ -217,7 +217,7 @@ class ExpressionParser extends  ParserExtends {
 			if err != null {
 				return null, err
 			}
-			this.parser.ifTokenIsLfThenSkip()
+			this.parser.ifTokenIsLfThenSkip(true)
 		}
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s expect '{',but '%s'", this.parser.errMsgPrefix(), this.parser.token.description))
@@ -270,7 +270,7 @@ class ExpressionParser extends  ParserExtends {
 				break
 			}
 		}
-		this.parser.ifTokenIsLfThenSkip()
+		this.parser.ifTokenIsLfThenSkip(true)
 		if this.parser.token.Type != lex.TokenRc {
 			err = new error(sprintf("%s expect '}',but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))

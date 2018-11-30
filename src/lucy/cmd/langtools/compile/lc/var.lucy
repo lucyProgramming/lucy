@@ -1,5 +1,6 @@
+import "java/lang/Object"
 
 
+const mainClassName = "main.class"
 
-const	mainClassName = "main.class"
-   
+var caches = new  map{string -> Object} () 

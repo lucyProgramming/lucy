@@ -98,7 +98,7 @@ class TypeParser extends ParserExtends {
 			if err != null {
 				return null, err
 			}
-			this.parser.ifTokenIsLfThenSkip()
+			this.parser.ifTokenIsLfThenSkip(true)
 			if this.parser.token.Type != lex.TokenArrow {
 				err = new error(sprintf("%s expect '->',but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.description))
@@ -110,7 +110,7 @@ class TypeParser extends ParserExtends {
 			if err != null {
 				return null, err
 			}
-			this.parser.ifTokenIsLfThenSkip()
+			this.parser.ifTokenIsLfThenSkip(true)
 			if this.parser.token.Type != lex.TokenRc {
 				err = new error(sprintf("%s expect '}',but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.description))

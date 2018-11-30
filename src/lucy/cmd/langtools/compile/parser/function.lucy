@@ -44,7 +44,7 @@ class FunctionParser extends ParserExtends{
 		if isAbstract {
 			return f, null
 		}
-		this.parser.ifTokenIsLfThenSkip()
+		this.parser.ifTokenIsLfThenSkip(true)
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s except '{' but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))
@@ -103,7 +103,7 @@ class FunctionParser extends ParserExtends{
 				this.next(lfNotToken)
 			}
 		}
-		this.parser.ifTokenIsLfThenSkip()
+		this.parser.ifTokenIsLfThenSkip(true)
 		if this.parser.token.Type != lex.TokenRp { // not )
 			err = new error(sprintf("%s fn declared wrong,missing ')',but '%s'",
 				this.parser.errMsgPrefix() , this.parser.token.description))
@@ -127,7 +127,7 @@ class FunctionParser extends ParserExtends{
 					this.next(lfIsToken)
 				}
 			}
-			this.parser.ifTokenIsLfThenSkip()
+			this.parser.ifTokenIsLfThenSkip(true)
 			if this.parser.token.Type != lex.TokenRp {
 				err = new error(sprintf("%s fn declared wrong,expected ')',but '%s'",
 					this.parser.errMsgPrefix() , this.parser.token.description))
@@ -159,8 +159,7 @@ class FunctionParser extends ParserExtends{
 		}
 		this.next(lfIsToken) // skip =
 		for k, v := range returnList {
-			var er error
-			v.defaultValueExpression, er = this.parser.ExpressionParser.parseExpression(false)
+			v.defaultValueExpression, er := this.parser.ExpressionParser.parseExpression(false)
 			if er != null {
 				this.consume(untilComma)
 				err = er

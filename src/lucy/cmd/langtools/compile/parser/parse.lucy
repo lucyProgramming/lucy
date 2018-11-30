@@ -109,10 +109,18 @@ class Parser {
 			}
 			switch this.token.Type {
 			case lex.TokenComment, lex.TokenMultiLineComment:
+				c := new ast.Comment()
+				c.comment = this.token.stringValue 
+				c.isMulti = this.token.Type == lex.TokenMultiLineComment
+				this.tops.append(new ast.TopNode(c))
 				comment.read()
-			case lex.TokenSemicolon, lex.TokenLf: // empty statement, no big deal
+			case lex.TokenSemicolon: // empty statement, no big deal
 				this.next(lfNotToken)
 				continue
+			case lex.TokenLf:
+				this.tops.append(new ast.TopNode(new ast.Line()))
+				this.next(lfNotToken)  //TODO::delete more lines 
+				continue 
 			case lex.TokenPublic:
 				accessControlToken = this.token
 				this.next(lfIsToken)
@@ -157,6 +165,7 @@ class Parser {
 				e.op = "var"
 				this.tops.append( new ast.TopNode(e))
 				resetProperty()
+				this.ifTokenIsLfThenSkip(false)
 			case lex.TokenEnum:
 				e, err := this.EnumParser.parse()
 				if err != null {
@@ -172,6 +181,7 @@ class Parser {
 					this.tops.append( new ast.TopNode(e))
 				}
 				resetProperty()
+				this.ifTokenIsLfThenSkip(false)
 			case lex.TokenFn:
 				f, err := this.FunctionParser.parse(true, false,true)
 				if err != null {
@@ -185,6 +195,7 @@ class Parser {
 				}
 				this.tops.append( new ast.TopNode(f))
 				resetProperty()
+				this.ifTokenIsLfThenSkip(false)
 			case lex.TokenLc:
 				b := new ast.Block()
 				this.next(lfNotToken) // skip {
@@ -196,7 +207,7 @@ class Parser {
 				}
 				this.next(lfNotToken) // skip }
 				this.tops.append( new ast.TopNode(b))
-
+				this.ifTokenIsLfThenSkip(false)
 			case lex.TokenClass, lex.TokenInterface:
 				c, err := this.ClassParser.parse(isAbstract)
 				if err != null {
@@ -217,6 +228,7 @@ class Parser {
 					c.finalPos = finalPos
 				}
 				resetProperty()
+				this.ifTokenIsLfThenSkip(false)
 			case lex.TokenConst:
 				this.next(lfIsToken) // skip const key word
 				cs, err := this.parseConst()
@@ -234,6 +246,7 @@ class Parser {
 					this.tops.append( new ast.TopNode(v))
 				}
 				resetProperty()
+				this.ifTokenIsLfThenSkip(false)
 				continue
 			case lex.TokenTypeAlias:
 				a, err := this.parseTypeAlias(comment)
@@ -243,22 +256,23 @@ class Parser {
 					resetProperty()
 					continue
 				}
-				this.tops.append( new ast.TopNode(a))
+				this.tops.append(new ast.TopNode(a))
+				this.ifTokenIsLfThenSkip(false)
 			case lex.TokenImport:
 				pos := this.mkPos()
 				this.parseImports()
 				this.errs.append( new error(sprintf("%s cannot have import at this scope",
 					this.errMsgPrefix(pos))))
+				this.ifTokenIsLfThenSkip(false)
 			case lex.TokenEof:
 				break
 			default:
 				if this.ExpressionParser.looksLikeExpression() {
-					e, err := this.ExpressionParser.parseExpression(true)
-					if err != null {
-						continue
+					e, _ := this.ExpressionParser.parseExpression(true)
+					if e != null {
+						e.isPublic = isPublic()
+						e.isGlobal = true
 					}
-					e.isPublic = isPublic()
-					e.isGlobal = true
 					this.tops.append( new ast.TopNode( e))
 				} else {
 					this.errs.append( new error(sprintf("%s token '%s' is not except",
@@ -321,7 +335,8 @@ class Parser {
 		if this.isStatementEnding() {
 			return null
 		}
-		err = new error(sprintf("%s expect semicolon or new line , but '%s'", this.errMsgPrefix() , this.token.description))
+		err = new error(sprintf("%s expect semicolon or new line , but '%s'", 
+			this.errMsgPrefix() , this.token.description))
 		this.errs.append(err)
 		return err
 	}
@@ -545,9 +560,13 @@ class Parser {
 		}
 	}
 
-	fn ifTokenIsLfThenSkip() {
+	fn ifTokenIsLfThenSkip(skipMulti bool) {
 		if this.token.Type == lex.TokenLf {
-			this.next(lfNotToken)
+			if skipMulti {
+				this.next(lfNotToken)
+			}else {
+				this.next(lfIsToken)
+			}
 		}
 	}
 

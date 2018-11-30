@@ -26,7 +26,7 @@ class BuildinFunctionSprintf {
         meta := call.BuildInFunctionMeta.(ast.BuildInFunctionSprintfMeta)
         maxStack = this.eb.build(c, code, meta.Format, context, state)
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
-        loadInt32(c, code, int(meta.ArgsLength))
+        loadInt32(c, code, int(meta.argsLength))
         code.codes[code.codeLength] = cg.OP_anewarray
         c.insertClassConst("java/lang/Object", code.codes[code.codeLength+1:code.codeLength+3])
         code.codeLength += 3

@@ -2,15 +2,15 @@
 
 public class BuildInFunctionPrintfMeta  {
 	public Format     Expression
-	public ArgsLength int
+	public argsLength int
 }
 
 public class BuildInFunctionSprintfMeta  {
 	public Format     Expression
-	public ArgsLength int
+	public argsLength int
 }
 
 
 public class BuildInFunctionPanicMeta  {
-	public ArgThrowable bool
+	public argThrowable bool
 }

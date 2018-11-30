@@ -38,9 +38,14 @@ class EnumParser extends ParserExtends {
 			this.parser.token.Type != lex.TokenEof {
 			switch this.parser.token.Type {
 			case lex.TokenLf:
-				this.next(lfNotToken)
+				e.appendFmt(new ast.Line())
+				this.next(lfNotToken)  //TODO::delete more lines 
 			case lex.TokenMultiLineComment,
 				lex.TokenComment:
+				c := new ast.Comment()
+				c.comment = this.parser.token.stringValue 
+				c.isMulti = this.parser.token.Type == lex.TokenMultiLineComment
+				e.appendFmt(c)
 				comment.read()
 			case lex.TokenIdentifier:
 				enumName := new ast.EnumName()
@@ -53,10 +58,7 @@ class EnumParser extends ParserExtends {
 				this.next(lfIsToken)
 				if this.parser.token.Type == lex.TokenAssign {
 					this.next(lfNotToken)
-					value, err = this.parser.ExpressionParser.parseExpression(false)
-					if err != null {
-						this.consume(untilSemicolonOrLf)
-					}
+					value, _ = this.parser.ExpressionParser.parseExpression(false)
 				}
 				enumComment := comment.comment
 				if e.Init == null && value != null {
@@ -73,6 +75,7 @@ class EnumParser extends ParserExtends {
 				}else {
 					e.enums.append(enumName)
 				}
+				e.appendFmt(enumName)
 				comment.reset()
 			case lex.TokenComma:
 				this.next(lfNotToken)
@@ -83,7 +86,7 @@ class EnumParser extends ParserExtends {
 				comment.reset()
 			}
 		}
-		this.parser.ifTokenIsLfThenSkip()
+		this.parser.ifTokenIsLfThenSkip(true)
 		if this.parser.token.Type != lex.TokenRc {
 			err = new error(sprintf("%s expect '}',but '%s'", this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append( err)

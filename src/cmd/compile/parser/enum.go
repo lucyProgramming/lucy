@@ -44,6 +44,7 @@ func (this *Parser) parseEnum() (e *ast.Enum, err error) {
 			this.Next(lfNotToken)
 		case lex.TokenMultiLineComment,
 			lex.TokenComment:
+			
 			comment.read()
 		case lex.TokenIdentifier:
 			name := this.token.Data.(string)

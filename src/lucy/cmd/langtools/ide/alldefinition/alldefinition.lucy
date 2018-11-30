@@ -28,7 +28,7 @@ class AllDefinition {
             }
         }
         p := new ast.Package(this.packageName , true)
-        p.findAllDefinition = true // make the process faster
+        p.onlyAnalyzeGlobals = true // make the process faster
         errs = p.typeCheck(nodes)
         if this.printErr {
             for v := range errs{

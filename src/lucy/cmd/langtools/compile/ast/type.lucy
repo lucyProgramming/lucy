@@ -498,7 +498,7 @@ public class Type {
 			ret = prefix + this.name
 		}
 	}
-
+	
 	public fn typeString(prefix string = "") ->(ret string) {
 		if this.alias != null {
 			return prefix + this.alias.name

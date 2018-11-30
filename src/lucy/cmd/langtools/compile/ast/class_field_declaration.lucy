@@ -1,0 +1,15 @@
+
+
+public class ClassFieldDeclaration {
+    public nameList []NameWithPos 
+    public Type Type 
+    public initValues []Expression
+    public inlineComment string 
+    public fields []ClassField
+}
+
+
+
+
+
+

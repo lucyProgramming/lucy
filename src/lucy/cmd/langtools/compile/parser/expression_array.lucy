@@ -18,7 +18,7 @@ class ExpressionArrayParser extends ParserExtends {
 			*/
 			arr := new ast.ExpressionArray()
 			arr.expressions, err = this.ep.parseExpressions(lex.TokenRb)
-			this.parser.ifTokenIsLfThenSkip()
+			this.parser.ifTokenIsLfThenSkip(true)
 			if this.parser.token.Type != lex.TokenRb {
 				err = new error(sprintf("%s '[' and ']' not match", this.parser.errMsgPrefix()))
 				return null, err
@@ -46,7 +46,7 @@ class ExpressionArrayParser extends ParserExtends {
 			this.next(lfNotToken) // skip (
 			e, err = this.ep.parseExpression(false)
 			if err != null {
-				return null, err
+				return e, err  // incase e is not null
 			}
 			if this.parser.token.Type != lex.TokenRp {
 				err = new error(sprintf("%s '(' and  ')' not match",
@@ -135,7 +135,7 @@ class ExpressionArrayParser extends ParserExtends {
 				break
 			}
 		}
-		this.parser.ifTokenIsLfThenSkip()
+		this.parser.ifTokenIsLfThenSkip(true)
 		if this.parser.token.Type != lex.TokenRc {
 			err = new error(sprintf("%s expect '}',but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))

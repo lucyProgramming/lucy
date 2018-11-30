@@ -12,7 +12,7 @@ public class PackageLoader extends lc.FileLoader {
     }
     
     public fn LoadImport(importName string) -> (x Object , err error) {
-        if x = this.caches[importName] ; x != null {
+        if x = this.getCache(importName) ; x != null {
             return 
         }
         realPaths  := []lc.Resource{}

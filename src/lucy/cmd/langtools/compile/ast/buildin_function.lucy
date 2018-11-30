@@ -105,7 +105,7 @@ fn registerBuildInFunctions() {
 				meta := new BuildInFunctionPanicMeta()
 				e.BuildInFunctionMeta = meta
 				if args[0].Type == VariableTypeObject {
-					meta.ArgThrowable, _ = args[0].Class.haveSuperClass(args[0].pos, JavaThrowableClass)
+					meta.argThrowable, _ = args[0].Class.haveSuperClass(args[0].pos, JavaThrowableClass)
 				}
 			}
 		buildInFunctionsMap[common.BuildInFunctionPanic].isBuildIn = true
@@ -196,7 +196,7 @@ fn registerBuildInFunctions() {
 			meta := new BuildInFunctionSprintfMeta()
 			e.BuildInFunctionMeta = meta
 			meta.Format = e.args[0]
-			meta.ArgsLength = len(args) - 1
+			meta.argsLength = len(args) - 1
 			e.args = e.args[1:]
 		}
 	}
@@ -230,7 +230,7 @@ fn registerBuildInFunctions() {
 			}
 		}
 	}
-
+	
 	{
 		// printf
 		buildInFunctionsMap[common.BuildInFunctionPrintf] = new Function()
@@ -272,7 +272,7 @@ fn registerBuildInFunctions() {
 				}
 				meta.Format = e.args[0]
 				e.args = e.args[1:]
-				meta.ArgsLength = len(args)
+				meta.argsLength = len(args)
 			}
 		
 	}

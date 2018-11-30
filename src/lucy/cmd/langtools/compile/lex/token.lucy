@@ -16,6 +16,7 @@ public class Token {
 	public locateDefinition bool 
 	public getHover  bool 
 	public findUsage  bool 
+	public literalRaw string 
 	public rename bool 
 }
 

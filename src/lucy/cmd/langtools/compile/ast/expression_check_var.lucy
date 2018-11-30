@@ -1,7 +1,7 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
 
 class ExpressionCheckVar {
-
+	
 	static fn check(e Expression , block Block, errs []error) {
 		ev := e.data.(ExpressionVar)
 		if ev.Type != null {

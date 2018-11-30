@@ -2,6 +2,9 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
 
+
+
+
 class StatementForParser extends ParserExtends{
 	bp BlockParser
 
@@ -55,7 +58,7 @@ class StatementForParser extends ParserExtends{
 			}
 		}
 	parseBlock:
-		this.parser.ifTokenIsLfThenSkip()
+		this.parser.ifTokenIsLfThenSkip(true)
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s expect '{',but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))

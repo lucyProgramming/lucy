@@ -9,8 +9,6 @@ import "java/lang/Object" as javaRootClass;
 public class Lucy extends javaRootClass {}
 
 
-
-
 public fn copy < destArray, srcArray > (dest destArray , src srcArray , start int = 0 , end int = -1) -> (r destArray = dest) {
 	if src == null  || 
 		src.size() == 0 {
@@ -23,7 +21,6 @@ public fn copy < destArray, srcArray > (dest destArray , src srcArray , start in
 		dest[i] = src[i] ; 
 	}
 }
-
 
 public fn javaArray2Lucy  <array > (java array[] ,start int = 0 , end int = -1) -> (lucy []array) {
 	import "lucy/deps"

@@ -2,6 +2,8 @@
 import "lucy/os"
 import "lucy/cmd/langtools/compile/common"
 
+
+
 public class Package {
 	public name                         string
 	public block                        Block = new Block() // package always have a default block
@@ -31,7 +33,7 @@ public class Package {
 	public findUsage []Usage 
 	public findUsageIsGlobal bool 
 
-	public findAllDefinition bool 
+	public onlyAnalyzeGlobals bool 
 
 	public fn Package(name string,disableCheckUnuse bool){
 		this.super()
@@ -129,6 +131,9 @@ public class Package {
 		expressions := []Expression{}
 		for _, v := range nodes {
 			if _,ok := v.node.(Comment) ; ok {
+				continue
+			}
+			if _,ok := v.node.(Line) ; ok {
 				continue
 			}
 			if t,ok := v.node.(Block) ; ok {
@@ -326,17 +331,15 @@ public class Package {
 				return this.errors
 			}
 		}
-		
 		for _, v := range this.initFunctions {
 			this.errors.appendAll( v.check(this.block))
 			if this.shouldStop(null) {
 				return this.errors
 			}
 		}
-		if this.findAllDefinition {
+		if this.onlyAnalyzeGlobals {
 			return this.errors
 		}
-		
 		for _, v := range this.block.functions {
 			if v.TemplateFunction != null {
 				continue

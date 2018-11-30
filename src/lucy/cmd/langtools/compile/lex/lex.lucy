@@ -120,6 +120,7 @@ public class Lexer {
 		integerPart := []byte{c}
 		isHex := false
 		isOctal := false
+		startOffset := this.offset - 1
 		if c == '0' { // enter when first char is '0'
 			c, eof = this.getChar()
 			if c == 'x' || c == 'X' {
@@ -198,6 +199,7 @@ public class Lexer {
 		token.endLine = this.line
 		token.endColumn = this.column
 		token.endOffset = this.offset
+		token.literalRaw = string(this.bs[startOffset : this.offset])
         if haveFloatPart {
             integerPart.append('.')
             integerPart.appendAll(floatPart )
@@ -464,6 +466,7 @@ public class Lexer {
 			err = new error("string literal start new line")
 		}
 		token.stringValue = string(bs)
+		token.literalRaw = string([endChar]) + token.stringValue + string([endChar])
 		token.description = string(bs)
 		return
 	}

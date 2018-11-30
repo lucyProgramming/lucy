@@ -2,7 +2,6 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-
 class ClassParser extends  ParserExtends{
 
 	fn ClassParser(parser Parser){
@@ -78,6 +77,7 @@ class ClassParser extends  ParserExtends{
 		if t != null {
 			classDefinition.pos = t.pos 
 			classDefinition.name = t.name
+			classDefinition.shortName = t.name
 			classDefinition.findUsage = t.findUsage
 			classDefinition.locateDefinition = t.locateDefinition
 		}
@@ -110,7 +110,7 @@ class ClassParser extends  ParserExtends{
 				this.consume(untilLc)
 			}
 		}
-		this.parser.ifTokenIsLfThenSkip()
+		this.parser.ifTokenIsLfThenSkip(true)
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s expect '{' but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))
@@ -140,11 +140,18 @@ class ClassParser extends  ParserExtends{
 			}
 			switch this.parser.token.Type {
 			case lex.TokenComment, lex.TokenMultiLineComment:
+				c := new ast.Comment()
+				c.comment = this.parser.token.stringValue 
+				c.isMulti = this.parser.token.Type == lex.TokenMultiLineComment
+				classDefinition.appendFmt(c)
 				comment.read()
+			case lex.TokenLf:
+				classDefinition.appendFmt(new ast.Line())
+				this.next(lfNotToken)  //TODO::delete more lines 
 			case lex.TokenRc:
 				this.next(lfNotToken)
 				return
-			case lex.TokenSemicolon, lex.TokenLf:
+			case lex.TokenSemicolon:
 				this.next(lfNotToken)
 				continue
 			case lex.TokenStatic:
@@ -256,6 +263,7 @@ class ClassParser extends  ParserExtends{
 				m.Function = f
 				m.locateDefinition = f.locateDefinition
 				m.findUsage = f.findUsage
+				m.rename = f.rename
 				if accessControlToken != null {
 					switch accessControlToken.Type {
 					case lex.TokenPrivate:
@@ -278,6 +286,7 @@ class ClassParser extends  ParserExtends{
 				if isFinal {
 					f.accessFlags |= cg.AccMethodFinal
 				}
+				classDefinition.appendFmt(m)
 				if f.name == classDefinition.name && isInterface == false {
 					f.name = ast.SpecialMethodInit
 				}
@@ -358,10 +367,18 @@ class ClassParser extends  ParserExtends{
 			this.next(lfIsToken)
 		} else {
 			this.parser.validStatementEnding()
+			this.parser.ifTokenIsLfThenSkip(false)
 		}
 		if classDefinition.fields == null {
 			classDefinition.fields = new map { string -> ast.ClassField } ()
 		}
+		fd := new ast.ClassFieldDeclaration()
+		fd.nameList = names 
+		fd.Type = t 
+		fd.initValues = initValues
+		fd.inlineComment = fieldComment
+		fd.fields = new []ast.ClassField(len(names)) 
+		classDefinition.appendFmt(fd)
 		for k, v := range names {
 			if classDefinition.fields.keyExist(v.name) {
 				this.parser.errs.append( new error(sprintf("%s field %s is alreay declared",
@@ -380,6 +397,7 @@ class ClassParser extends  ParserExtends{
 				f.defaultValueExpression = initValues[k]
 			}
 			f.comment = fieldComment
+			fd.fields[k] = f 
 			if isStatic {
 				f.accessFlags |= cg.AccFieldStatic
 			}

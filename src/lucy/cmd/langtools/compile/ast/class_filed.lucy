@@ -1,6 +1,5 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-
 public class ClassField {
 	public Class                  Class
 	public defaultValueExpression Expression
@@ -15,7 +14,6 @@ public class ClassField {
 	public rename  bool
 	public findUsageInstances  []Usage 
 
-
 	public fn isStatic() ->(is bool) {
 		return (this.accessFlags & cg.AccFieldStatic) != 0
 	}
@@ -27,6 +25,9 @@ public class ClassField {
 	}
 	public fn isPrivate() ->(is bool) {
 		return (this.accessFlags & cg.AccFieldPrivate) != 0
+	}
+	public fn isFinal() ->(is bool) {
+		return (this.accessFlags & cg.AccFieldFinal) != 0
 	}
 	public fn ableAccessFromSubClass() ->(accessable bool) {
 		return this.isPublic() ||

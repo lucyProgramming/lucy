@@ -1,4 +1,6 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
+import "java/lang/Object"
+
 
 public class EnumName {
 	public Enum    Enum
@@ -36,8 +38,16 @@ public class Enum   {
 	public getHover  bool  
     findUsageInstances []Usage 
 
+	public fmts []Object   // use for format 
+    
+    public fn appendFmt(f Object ){
+        if this.fmts == null {
+            this.fmts = [f]
+        }else {
+            this.fmts.append(f)
+        }
+    }
 	
-
 	public fn isPublic() -> (is bool) {
 		return this.accessFlags&cg.AccClassPublic != 0
 	}

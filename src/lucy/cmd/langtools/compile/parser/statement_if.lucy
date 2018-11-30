@@ -23,7 +23,7 @@ class StatementIfParser extends ParserExtends {
 			this.next(lfNotToken)
 		}
 		statementIf.condition = condition
-		this.parser.ifTokenIsLfThenSkip()
+		this.parser.ifTokenIsLfThenSkip(true)
 		for this.parser.token.Type == lex.TokenSemicolon {
 			if statementIf.condition != null {
 			    if statementIf.prefixExpressions == null {
@@ -39,7 +39,7 @@ class StatementIfParser extends ParserExtends {
 				this.next(lfNotToken)
 			}
 		}
-		this.parser.ifTokenIsLfThenSkip()
+		this.parser.ifTokenIsLfThenSkip(true)
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s missing '{' after condition,but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))

@@ -19,7 +19,7 @@ class StatementSwitchParser extends ParserExtends{
 		if err != null {
 			this.consume(untilLc)
 		}
-		this.parser.ifTokenIsLfThenSkip()
+		this.parser.ifTokenIsLfThenSkip(true)
 		for this.parser.token.Type == lex.TokenSemicolon {
 			if statementSwitch.condition != null {
 				statementSwitch.prefixExpressions.append(statementSwitch.condition)
@@ -30,7 +30,7 @@ class StatementSwitchParser extends ParserExtends{
 			if err != null {
 				this.consume(untilLc)
 			}
-			this.parser.ifTokenIsLfThenSkip()
+			this.parser.ifTokenIsLfThenSkip(true)
 		}
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s expect '{',but '%s'",
@@ -106,7 +106,7 @@ class StatementSwitchParser extends ParserExtends{
 			return statementSwitch, err
 		}
 		statementSwitch.EndPos = this.parser.mkPos()
-		this.next(lfNotToken) //  skip }
+		this.next(lfIsToken) //  skip }
 		return statementSwitch, null
 	}
 

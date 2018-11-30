@@ -2,8 +2,6 @@ import "lucy/cmd/langtools/common"
 import "lucy/os"
 import "lucy/os/flag"
 
-
-
 flagParser := new flag.FlagParser()
 
 fn printUsageAndExit(code int){
@@ -11,6 +9,7 @@ fn printUsageAndExit(code int){
 	print(flagParser.helpMsg())
 	os.exit(code)
 }
+
 
 fn main(args []string){
 	recursive := flagParser.boolOption("-r" , false , "clean sub directory too")
