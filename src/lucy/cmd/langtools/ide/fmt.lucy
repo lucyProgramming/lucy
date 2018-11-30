@@ -496,14 +496,14 @@ public class Fmt {
                     }
                     format += "]"
                 }else {
-                    format = indent + "[]" + array.Type.typeName() + ""
+                    format =  array.Type.typeName() + "{"
                     for k,v := range array.expressions{
                         format += this.formatExpression(indent + "    " , v)
                         if k != len(array.expressions) -1 {
                             format += " , "
                         }
                     }
-                    format += indent + "}"
+                    format += "}"
                 }
             case ast.ExpressionTypeLogicalOr,ast.ExpressionTypeLogicalAnd,  ast.ExpressionTypeOr    ,ast.ExpressionTypeAnd ,
                 ast.ExpressionTypeXor, ast.ExpressionTypeLsh , ast.ExpressionTypeRsh ,ast.ExpressionTypeAdd, 
