@@ -18,7 +18,7 @@ public class AttributeLucyFieldDescriptor {
 		this.descriptor = Descriptor
 		this.methodAccessFlag = methodAccessFlag
 	}
-
+	
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const(AttributeNameLucyFieldDescriptor)

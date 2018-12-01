@@ -300,8 +300,9 @@ public class RunLucyPackage {
             lucyPath = founds[0]
         }
         meta, needBuild, lucyFiles := this.needCompile(lucyPath, packageName)
+
         if needBuild == false { //current package no need to compile,but I need to check dependies
-            for _, v := range meta.imports {
+            for k, v := range meta.imports {
                 i := (new ImportStack()).fromLast(importStack)
                 t := new PackageCompiled()
                 t.packageName = packageName
@@ -309,11 +310,15 @@ public class RunLucyPackage {
                 if err != null {
                     return
                 }
-                need, _, e := this.buildPackage("", v, i)
+                need, m, e := this.buildPackage("", v.name, i)
                 if e != null {
                     return false, null, e
                 }
                 if need { // means at least one package is rebuild
+                    needBuild = true
+                }
+                if m.compileTime > v.linkTime {
+                    // dependency is recompile 
                     needBuild = true
                 }
             }
@@ -323,7 +328,8 @@ public class RunLucyPackage {
         }
         //compile this package really
         is := this.parseImports(lucyFiles)
-        for _, i := range is {
+        importsMetas := new []common.PackageMeta(len(is))
+        for k, i := range is {
             im := (new ImportStack()).fromLast(importStack)
             t := new PackageCompiled()
             t.packageName = packageName
@@ -331,10 +337,12 @@ public class RunLucyPackage {
             if err != null {
                 return
             }
-            _, _, err = this.buildPackage("", i, im) // compile depend
+            var m common.PackageMeta
+            _, m, err = this.buildPackage("", i, im) // compile depend
             if err != null {
                 return
             }
+            importsMetas[k] = m 
         }
         //build this package
         //read  files
@@ -359,8 +367,13 @@ public class RunLucyPackage {
             t.lastModify = new io.File(v.realpathName).lastModified() / 1000L
             meta.compiledFrom[k] = t
         }
-        meta.compileTime = System.currentTimeMillis()
-        meta.imports = copy(new string[](len(is)) , is)
+        meta.compileTime = System.currentTimeMillis() / long(1000)
+        meta.imports = new common.Import[](len(is))
+        for k,_ := range meta.imports {
+            meta.imports[k] = new common.Import()
+            meta.imports[k].name = is[k]
+            meta.imports[k].linkTime = importsMetas[k].compileTime 
+        }
         fis := new io.File(destinationDir).list()
         {
             classFiles := []string{}
@@ -369,7 +382,7 @@ public class RunLucyPackage {
                     classFiles.append(v)
                 }
             }
-            meta.classes = copy(new string[](len(classFiles)) ,classFiles )
+            meta.classes = copy(new string[](len(classFiles)),classFiles )
         }
         bs, err := json.encode(meta , "\t")
         if err != null {

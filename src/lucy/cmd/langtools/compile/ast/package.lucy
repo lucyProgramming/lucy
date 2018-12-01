@@ -12,7 +12,6 @@ public class Package {
 	public nErrors2Stop                 int // number of errors should stop compile
 	errors                       []error
 	public triggerPackageInitMethodName string //
-	unUsedPackage                map{string ->  Import }
 	statementLevelFunctions      []Function
 	statementLevelClass          []Class
 	disableCheckUnuse  				bool 
@@ -34,6 +33,10 @@ public class Package {
 	public findUsageIsGlobal bool 
 
 	public onlyAnalyzeGlobals bool 
+
+	public renameIsGlobal bool 
+
+
 
 	public fn Package(name string,disableCheckUnuse bool){
 		this.super()
@@ -183,10 +186,7 @@ public class Package {
 			}
 			if t ,ok:= v.node.(Import) ; ok {
 				if t.accessName != null && t.accessName == UnderScore{
-					if this.unUsedPackage == null {
-						this.unUsedPackage = new map { string -> Import}()
-					}
-					this.unUsedPackage[t.Import] = t
+					errs.append(new error(sprintf("%s '%s' is not a valid name" , t.pos.errMsgPrefix()  , UnderScore)))
 				}else {
 					err := this.insertImport(t)
 					if err != null {
@@ -379,70 +379,63 @@ public class Package {
 		if this.shouldStop(null) {
 			return this.errors
 		}
-		//this.errors.appendAll(this.checkUnUsedPackage()...)
+		this.errors.appendAll(this.checkUnUsedPackage())
 		return this.errors
 	}
-
 	
-
-
-    /*
-    //TODO::
 	fn checkUnUsedPackage() -> (errs []error=[]error{}  ) {
-		if common.compileFlags.disableCheckUnUse.getValue() {
+		if this.disableCheckUnuse {
 			return null
 		}
 		for _, v := range this.files {
 			for _, i := range v.imports {
 				if i.used == false {
-					errs = append(errs, new error(sprintf("%s '%s' imported not used",
+					errs.append(new error(sprintf("%s '%s' imported not used",
 						errMsgPrefix(i.pos), i.Import)))
-				}
-			}
-		}
-		for _, i := range this.unUsedPackage {
-			pp, err := this.load(i.Import)
-			if err != null {
-				errs = append(errs, new error(sprintf("%s %s",
-					errMsgPrefix(i.pos), err.getMessage())))
-				continue
-			}
-			if ppp, ok := pp.(Package); ok == false {
-				errs = append(errs, new error(sprintf("%s '%s' not a package",
-					errMsgPrefix(i.pos), i.Import)))
-			} else {
-				if ppp.triggerPackageInitMethodName == "" {
-					errs.append(new error(sprintf("%s  package named '%s' have no global vars and package "+
-							        "init blocks, no need to trigger package init method",
-							        errMsgPrefix(i.pos), i.Import)))
 				}
 			}
 		}
 		return errs
 	}
-    */
-
-
-
-
-	fn insertImport(i Import) -> (err error) {
+	
+	fn insertSouceFiles(filenames []string) {
 		if this.files == null {
-			this.files = new map { string -> SourceFile } ()
+			this.files = new map {string->SourceFile} ()
+		}
+		for v := range filenames {
+			x := this.files[v]
+			if x == null {
+				x = new SourceFile(v)
+				this.files[v] = x
+			}
+		}
+	}
+
+	public fn insertImport(i Import) -> (err error) {
+		if this.files == null {
+			this.files = new map {string->SourceFile} ()
 		}
 		x := this.files[i.pos.filename]
 		if x == null {
-			x = new SourceFile()
+			x = new SourceFile(i.pos.filename)
 			this.files[i.pos.filename] = x
 		}
 		return x.insertImport(i)
-	}	
+	}
+
+	public fn setFileDirty(filename string ) {
+		//set right file is "isDirty"
+		this.files[filename].isDirty = true
+	}
+
+	public fn getDirtyFiles() ->(files map{string->bool}) {
+		files = new map{string->bool}()
+		for f := range this.files {
+			if f.isDirty {
+				files[f.filename] = true 
+			}
+		}
+	}
+
+
 }
-
-
-
-
-
-
-
-
-

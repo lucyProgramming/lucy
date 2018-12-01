@@ -26,7 +26,7 @@ class ExpressionCheckLeftValue {
 					e.pos.errMsgPrefix(), identifier.name)))
 				return null
 			}
-			if v := d.(Variable) ; v != null {
+			if v ,ok := d.(Variable) ; ok {
                 if isCaptureVar[0] {
                     v.beenCapturedAsLeftValue++
                 }

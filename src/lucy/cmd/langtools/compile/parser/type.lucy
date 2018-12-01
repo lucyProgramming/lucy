@@ -130,8 +130,8 @@ class TypeParser extends ParserExtends {
 			this.next(lfIsToken)
 			var ft ast.FunctionType
 			ft, err = this.parser.FunctionParser.parseFunctionType()
-			if err != null {
-				return null, err
+			if ft == null {
+				return null , err 
 			}
 			ret = new ast.Type()
 			ret.Type =  ast.VariableTypeFunction

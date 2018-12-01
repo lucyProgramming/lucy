@@ -29,6 +29,17 @@ public class Import {
 class SourceFile {
 	imports            map { string -> Import }  // accessName -> *Import
 	importsByResources map { string -> Import }  // resourceName -> *Import
+	filename          string 
+	/*
+		rename will modify this file 
+	*/
+	isDirty bool 
+	
+	fn SourceFile(filename string) {
+		this.super()
+		this.filename = filename
+	}
+
 	fn insertImport(i Import) ->(err error)  {
 		if this.imports == null {
 			this.imports = new  map { string -> Import }()

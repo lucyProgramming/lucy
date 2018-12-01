@@ -1,12 +1,6 @@
 
-//11111111111
 import "lucy/cmd/langtools/compile/ast"
-//22222
-import "java/io"
 
-/* 
-    hello world
-*/
 public class Fmt {
     public fn fmt(nodes []ast.TopNode) -> (format string = ""){
         for k, n := range nodes {
@@ -693,21 +687,4 @@ public class Fmt {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

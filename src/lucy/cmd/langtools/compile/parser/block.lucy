@@ -135,7 +135,6 @@ class BlockParser  extends ParserExtends{
 				    t.pos = pos
 				    block.statements.append(t)
 				}
-				this.parser.ifTokenIsLfThenSkip(false)
 			case lex.TokenFor:
 				pos := this.parser.mkPos()
 				statement, err := this.StatementForParser.parseFor()
@@ -152,7 +151,6 @@ class BlockParser  extends ParserExtends{
 				    t.pos = pos
                     block.statements.append(t)
 				}
-				this.parser.ifTokenIsLfThenSkip(false)
 			case lex.TokenAbstract:
 				this.parser.next(lfIsToken)
 				this.parser.unExpectNewLineAndSkip()
@@ -174,7 +172,6 @@ class BlockParser  extends ParserExtends{
 				    t.pos = pos
 				    block.statements.append(t)
 				}
-				this.parser.ifTokenIsLfThenSkip(false)
 			case lex.TokenWhen:
 				pos := this.parser.mkPos()
 				statement, err := this.StatementWhenParser.parseWhen()
@@ -190,7 +187,6 @@ class BlockParser  extends ParserExtends{
 				    t.pos = pos
                     block.statements.append(t)
 				}
-				this.parser.ifTokenIsLfThenSkip(false)
 			case lex.TokenConst:
 				pos := this.parser.mkPos()
 				this.next(lfIsToken)
@@ -213,10 +209,10 @@ class BlockParser  extends ParserExtends{
 				}
 				block.statements.append(statement)
 				this.parser.validStatementEnding()
+				this.parser.ifTokenIsLfThenSkip(false)
 				if this.parser.token.Type == lex.TokenSemicolon {
 					this.next(lfNotToken)
 				}
-				this.parser.ifTokenIsLfThenSkip(false)
 			case lex.TokenReturn:
 				if isGlobal {
 					this.parser.errs.append(
@@ -225,7 +221,7 @@ class BlockParser  extends ParserExtends{
 				}
 				st := new ast.StatementReturn()
 				st.pos = this.parser.mkPos()
-				this.next(lfIsToken)
+				this.next(lfIsToken)  // skip return key workd
 				{
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeReturn
@@ -245,12 +241,11 @@ class BlockParser  extends ParserExtends{
 					continue
 				}
 				var es []ast.Expression
-				es, err = this.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon,lex.TokenLf)
+				es, err = this.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon , lex.TokenLf)
+				st.expressions = es
 				if err == null {
 					this.parser.validStatementEnding()
-					this.parser.ifTokenIsLfThenSkip(false)
-				}				
-				st.expressions = es
+				}
 			case lex.TokenLc:
 				pos := this.parser.mkPos()
 				newBlock := new ast.Block()
@@ -262,7 +257,7 @@ class BlockParser  extends ParserExtends{
 						this.parser.errMsgPrefix(), this.parser.token.description)))
 					this.consume(untilRc)
 				}
-				this.next(lfNotToken)
+				this.next(lfNotToken)  // skip }
 				if isDefer {
 					d := new ast.StatementDefer()
 					d.block = newBlock
@@ -282,7 +277,6 @@ class BlockParser  extends ParserExtends{
 					block.statements.append(t)
 				}
 				resetPrefix()
-				this.parser.ifTokenIsLfThenSkip(false)
 			case lex.TokenPass:
 				if isGlobal == false {
 					this.parser.errs.append(
@@ -290,9 +284,9 @@ class BlockParser  extends ParserExtends{
 							this.parser.errMsgPrefix())))
 				}
 				pos := this.parser.mkPos()
-				this.parser.ifTokenIsLfThenSkip(false)
 				this.next(lfIsToken)
 				this.parser.validStatementEnding()
+				this.parser.ifTokenIsLfThenSkip(false)
 				{
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeReturn
@@ -304,9 +298,9 @@ class BlockParser  extends ParserExtends{
 				}
 			case lex.TokenContinue:
 				pos := this.parser.mkPos()
-				this.parser.ifTokenIsLfThenSkip(false)
 				this.next(lfIsToken)
 				this.parser.validStatementEnding()
+				this.parser.ifTokenIsLfThenSkip(false)
 			    c := new ast.Statement()
 			    c.Type = ast.StatementTypeContinue
 			    c.pos = pos
@@ -315,9 +309,9 @@ class BlockParser  extends ParserExtends{
 			    block.statements.append(c)
 			case lex.TokenBreak:
 				pos := this.parser.mkPos()
-				this.parser.ifTokenIsLfThenSkip(false)
 				this.next(lfIsToken)
 				this.parser.validStatementEnding()
+				this.parser.ifTokenIsLfThenSkip(false)
 			    b := new ast.Statement()
 			    b.Type = ast.StatementTypeBreak
 			    b.pos = pos
@@ -349,7 +343,6 @@ class BlockParser  extends ParserExtends{
 				this.next(lfIsToken)
 				this.parser.validStatementEnding()
 				this.parser.ifTokenIsLfThenSkip(false)
-				this.next(lfNotToken)
 			case lex.TokenTypeAlias:
 				pos := this.parser.mkPos()
 				alias, err := this.parser.parseTypeAlias(comment)

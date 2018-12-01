@@ -1,7 +1,5 @@
 import "lucy/cmd/langtools/ide"
 import "lucy/cmd/langtools/compile/ast"
-import "lucy/cmd/langtools/common" as langtoolsCommon 
-import "java/io"
 import "lucy/os"
 
 

@@ -1,7 +1,6 @@
 //register load 
 
 import "lucy/cmd/langtools/compile/ast"
-import "lucy/cmd/langtools/compile/lc"
 import "lucy/cmd/langtools/common"
 
 public var packageLoader = new PackageLoader(common.getLucyPath() , common.getClassPath())

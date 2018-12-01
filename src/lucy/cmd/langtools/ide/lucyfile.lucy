@@ -18,5 +18,4 @@ public class LucyFile {
         this.findUsage = -1 
         this.rename = -1
     }
-    
 }

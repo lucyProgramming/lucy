@@ -21,6 +21,7 @@ public fn Main (destinationDir string , flags common.Flags , files []string , lu
 }
 
 
+
 public class Compiler {
 	Tops              []ast.TopNode
 	Files             []string

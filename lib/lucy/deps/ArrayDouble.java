@@ -25,7 +25,6 @@ public class ArrayDouble   {
 		this.end = values.length;
 		this.cap = values.length;
 		this.elements = values;
-		
 	}
 	public ArrayDouble(){
 		

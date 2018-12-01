@@ -133,7 +133,7 @@ class BuildExpressionTypeConversion {
             return
         }
         // byte[]("hello world")
-        if conversion.Type.equal(ast.LucyBytesType) &&
+        if conversion.Type.equal(ast.JavaBytesType) &&
             conversion.Expression.value.Type == ast.VariableTypeString {
             //stack top must be a string
             code.codes[code.codeLength] = cg.OP_invokevirtual

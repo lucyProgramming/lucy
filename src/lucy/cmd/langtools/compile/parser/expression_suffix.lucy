@@ -217,8 +217,8 @@ class ExpressionSuffix extends  ParserExtends {
 			pos := this.parser.mkPos()
 			var f ast.Function
 			f, err = this.parser.FunctionParser.parse(false, false,true)
-			if err != null {
-				return null, err
+			if f == null {
+				return null , err 
 			}
 			prefix = new ast.Expression()
 			prefix.Type = ast.ExpressionTypeFunctionLiteral

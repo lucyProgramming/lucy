@@ -15,7 +15,7 @@ import "lucy/os"
 */
 public class FileLoader implements ast.LoadImport{
     public lucyPaths , classPaths []string
-    public caches map{string -> Object}
+    public caches map{ string -> Object }
     public fn FileLoader(lucyPaths , classPaths []string){
         this.super()
         this.lucyPaths = lucyPaths
@@ -35,10 +35,13 @@ public class FileLoader implements ast.LoadImport{
         if cache != null {
             return cache 
         }
-        return caches[name] 
+        if cache =  caches[name] ; cache != null {
+            //print("hit java cache" , name )
+        } 
+        return cache 
     }
  
-
+    
     public fn  LoadImport(importName string) -> (x Object,err error) {
         /*defer {
             e := catch()

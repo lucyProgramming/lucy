@@ -20,10 +20,6 @@ fn main(args []string) {
 		os.exit(1)
 	}
 	for _, v := range args {
-		if v.endsWith(".lucy") == false {
-			printf("'%s' not a lucy file\n", v)
-			os.exit(2)
-		}
 		b, err := os.readFile(v)
 		if err != null {
 			panic(err)
@@ -78,7 +74,7 @@ fn main(args []string) {
 		print(v)
 	}
 	ret := (new make_node_objects.MakeNodesObjects()).make(lucyFiles)
-	bs, _ := json.encode(ret)
+	bs, _ := json.encode(ret , "\t")
 	print(string(bs))
 }
 

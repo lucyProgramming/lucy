@@ -5,12 +5,7 @@ import "java/lang/CharSequence"
 
 class InstallLucyArray {
 	
-
-	fn help(command string) {
-		
-	}
-	
-	fn RunCommand(command string, args []string) {
+	fn install() {
 		path := os.getEnv("LUCYROOT")
 		if path == "" {
 			print("env variable LUCYPATH is not set")
@@ -30,5 +25,17 @@ class InstallLucyArray {
 			}
 			print("install:" , dest)
 		}
+		print("please use 'javac' compile the installed files")
 	}
 }
+
+
+
+public fn install(args []string) {
+	new InstallLucyArray().install()
+}
+
+
+
+
+

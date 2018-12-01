@@ -1,53 +1,46 @@
+import "lucy/os/flag"
 
-// class Flags {
-	
-// 	files flag.StringOption 
-// 	file flag.StringOption
-// 	pos flag.IntOption  
-// 	parser flag.FlagParser
-// 	to flag.StringOption
-// 	fn Flags(){
-// 		this.super()
-// 		this.parser = new flag.FlagParser()
-// 		this.parser.file = this.parser.StringOption("-file")
-// 		this.parser.pos = this.parser.IntOption("-files" , -1)
-// 		this.parser.to = this.parser.StringOption("-to")
-// 	}
 
+
+
+class Flags {
 	
-// 	fn parseArgs(args []string) ->(files []string , to string ,  pos int) {
-// 		nodefine,err := this.parser.parse(args)
-// 		if err != null {
-// 			panic(err)
-// 		}
-// 		if len(nodefine) > 0 {
-// 			print("args provides but not used:" + nodefine)
-// 			printUsageAndExit(1)
-// 		}
-// 		if this.file.getValue() == "" {
-// 			print("file not provided")
-// 			rintUsageAndExit(1)
-// 		}
-// 		if this.pos.getValue() < 0 {
-// 			print("pos not provided or negative...")
-// 			printUsageAndExit(1)
-// 		}
-// 		pos = this.parser.pos.getValue()
-// 		if this.parser.files.getValue() == "" {
-// 			print("files not provided")
-// 			rintUsageAndExit(1)
-// 		}
-// 		files = this.parser.files.getValue().split(" ")
-// 		for v := range files {
-// 			if v.endsWith(".lucy") == false {
-// 				printf("'%s' not lucy source file\n" , v)
-// 				printUsageAndExit(2)
-// 			}
-// 		}
-// 		if this.to.getValue() == "" {
-// 			print("files not provided")
-// 			rintUsageAndExit(1)
-// 		}
-// 		to = this.to.getValue()
-// 	}
-// }
+	file flag.StringOption
+	pos flag.IntOption  
+	parser flag.FlagParser
+	to flag.StringOption
+
+	fn Flags(){
+		this.super()
+		this.parser = new flag.FlagParser()
+		this.file = this.parser.stringOption("-file")
+		this.pos = this.parser.intOption("-files" , -1)
+		this.to = this.parser.stringOption("-to")
+	}
+	
+	fn parseArgs(args []string) ->(file string , to string ,  pos int) {
+		nodefine,err := this.parser.parse(args)
+		if err != null {
+			panic(err)
+		}
+		if len(nodefine) > 0 {
+			print("args provides but not used:" + nodefine)
+			printUsageAndExit(1)
+		}
+		if this.file.getValue() == "" {
+			print("file not provided")
+			printUsageAndExit(1)
+		}
+		if this.pos.getValue() < 0 {
+			print("pos not provided or negative...")
+			printUsageAndExit(1)
+		}
+		if this.to.getValue() == "" {
+			print("files not provided")
+			printUsageAndExit(1)
+		}
+        pos = this.pos.getValue()
+		to = this.to.getValue()
+        file = this.file.getValue() 
+	}
+}

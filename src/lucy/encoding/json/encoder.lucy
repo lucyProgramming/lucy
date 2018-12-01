@@ -16,15 +16,15 @@ public class Encoder {
 	public fn Encoder(x Object, indents string  = "", indent string  = "" ) {
 		this.super()
 		this.x = x
+		this.indents = indents 
+		this.indent = indent  
 		if x != null {
 			this.c = x.getClass()
 		}
-		this.indents = indents 
-		this.indent = indent  
 	}
 	
 	
-	public fn encode()->(bs []byte ){
+	public fn encode()->( bs []byte ){
 		if this.x == null {
 			return []byte("null")
 		}
@@ -34,6 +34,10 @@ public class Encoder {
 		if this.c.getTypeName() == "java.lang.String" {
 			s := []byte{'"'} 
 			for k,v := range []byte(this.x.toString()) {
+				if v == '"' {
+					bs.appendAll(['\\' , '"'])
+					continue
+				}
 				s.append(v)
 				if v == '\\'{
 					s.append('\\')
@@ -123,15 +127,17 @@ public class Encoder {
 
 
 	private fn encodeArray() -> (bs []byte ){
+		if 0 == array.getLength(this.x){
+			return ['[' , ']']
+		}
 		bs = []byte("[")
 		if this.indent != "" {
 			bs.append('\n')
 		}
 		length := array.getLength(this.x)
 		for i := 0; i < length; i ++ {
-			bs.appendAll([]byte(this.indents))
-			bs2  :=  new Encoder( array.get(this.x  , i) , this.indents + this.indent ,  this.indent  ) . encode()
-			bs.appendAll([]byte(this.indents + this.indent) )
+			bs.appendAll([]byte(this.indents + this.indent))
+			bs2  :=  new Encoder(array.get(this.x ,i), this.indents + this.indent , this.indent  ) . encode()
 			bs.appendAll(bs2)
 			if i != length -1 {
 				bs.append(',')
@@ -140,9 +146,13 @@ public class Encoder {
 				bs.append('\n')
 			}
 		}
-		bs.appendAll( []byte(this.indents +  "]"))
+		if this.indent != "" { 
+			bs.appendAll([]byte(this.indents +  "]"))
+		}else {
+			bs.append(']')
+		}
 	}
-
+	
 	
 	private fn encodeObject()->  (bs []byte ){
 		bs = []byte("{")
@@ -173,7 +183,10 @@ public class Encoder {
 				}
 			}
 		}
-		bs.appendAll([]byte(this.indents +  "}"))
+		if this.indent != "" {
+			bs.appendAll([]byte(this.indents +  "}"))
+		}else {
+			bs.append('}')
+		}
 	}
 }
-

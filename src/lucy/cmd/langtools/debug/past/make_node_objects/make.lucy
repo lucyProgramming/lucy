@@ -60,7 +60,7 @@ public class MakeNodesObjects {
     fn makeImport(i ast.Import) -> (x Object) {
         s := sprintf("import@%d", i.pos.endLine)
         s += sprintf(" '%s'", i.Import)
-        if i.accessName != "" {
+        if i.alias != null &&   i.alias != "" {
             s += sprintf(" as '%s'", i.accessName)
         }
         return s
@@ -147,7 +147,7 @@ public class MakeNodesObjects {
     fn makeClass(c ast.Class) ->(x Object) {
         ret := new map{string -> Object}()
         ret["name"] = c.name
-        ret["accessFlags"] = sprintf("0x%x" , c.accessFlags )
+        ret["accessFlags"] = sprintf("0x%x" , int(c.accessFlags))
         if c.superClassName != null {
             ret["superClass"] = c.superClassName.name
         }
@@ -172,7 +172,7 @@ public class MakeNodesObjects {
             fields := new map{string -> Object}()
             for _, v := range c.fields {
                 f := new map{string -> Object}()
-                f["accessFlags"] = sprintf("0x%x" , v.accessFlags)
+                f["accessFlags"] = sprintf("0x%x" , int(v.accessFlags))
                 f["name"] = v.name
                 f["type"] = v.Type.typeString()
                 if v.defaultValueExpression != null {
@@ -196,7 +196,7 @@ public class MakeNodesObjects {
                     var t  = new Object[](len(ms))
                     for k, method := range ms {
                         m := new map{string -> Object}()
-                        m["accessFlags"] = sprintf("0x%x"  , method.Function.accessFlags)
+                        m["accessFlags"] = sprintf("0x%x"  ,int(method.Function.accessFlags))
                         m["function"] = this.makeFunction(method.Function)
                         t[k] = m
                     }
@@ -204,7 +204,7 @@ public class MakeNodesObjects {
                 } else {
                     method := ms[0]
                     m := new map{string -> Object}()
-                    m["accessFlags"] = sprintf("0x%x"  , method.Function.accessFlags)
+                    m["accessFlags"] = sprintf("0x%x"  , int(method.Function.accessFlags))
                     m["function"] = this.makeFunction(method.Function)
                     methods[name] = m
                 }
@@ -213,7 +213,7 @@ public class MakeNodesObjects {
             ret["methods"] = methods
         }
         return {
-            sprintf("class@%d '%s'", c.pos.endLine, c.name)-> ret,
+            sprintf("class@%d '%s'", c.pos.endLine, c.name) -> ret,
         }
     }
 
@@ -258,6 +258,8 @@ public class MakeNodesObjects {
             sprintf("if@%d", s.pos.endLine) -> ret,
         }
     }
+
+    
     fn makeStatementFor(s ast.StatementFor) ->(x Object) {
         ret := new map{string -> Object}()
         if s.Init != null {
@@ -429,7 +431,7 @@ public class MakeNodesObjects {
         case ast.ExpressionTypeDouble:
             return e.doubleValue + ""
         case ast.ExpressionTypeString:
-            return sprintf(`literal string@%d "%s"`, e.pos.endLine, e.stringValue)
+            return sprintf(`literal string@%s`, e.pos.endLine, e.stringValue)
         case ast.ExpressionTypeArray:
             array := e.data.(ast.ExpressionArray)
             ret := new map{string -> Object}()

@@ -117,7 +117,6 @@ class ClassParser extends  ParserExtends{
 			this.parser.errs.append( err)
 			return null, err
 		}
-		
 		this.next(lfNotToken) // skip {
 		comment := new CommentParser(this.parser)
 		comment.parser = this.parser
@@ -246,10 +245,8 @@ class ClassParser extends  ParserExtends{
 							this.parser.errMsgPrefix())))
 				}
 				var f ast.Function
-				f, err = this.parser.FunctionParser.parse(true, isAbstract || isInterface , false)
-				if err != null {
-					resetProperty()
-					this.next(lfNotToken)
+				f, _ = this.parser.FunctionParser.parse(true, isAbstract || isInterface , false)
+				if f == null {
 					continue
 				}
 				f.comment = comment.comment

@@ -489,8 +489,7 @@ public class Lexer {
 			return string(bs), new error("unexpect EOF")
 		}
 		if eof || c == '/' {
-			return string(bs[:len(bs)-1]), // slice out '*'
-				null
+			return string(bs[:len(bs)-1]),  null	
 		}
 		goto redo
 	}
@@ -522,7 +521,6 @@ public class Lexer {
 		if '\\' != this.bs[this.offset] {
 			return false
 		}
-
 		if 'u' != this.bs[this.offset+1] && 'U' != this.bs[this.offset+1] {
 			return false
 		}

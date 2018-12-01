@@ -162,6 +162,11 @@ class ExpressionCheckSelection {
                     errs.append(err)
                     return null
                 }
+                if selection.name == "main" {
+                    err := new error(sprintf("%s function '%s' is a a special entrance",
+                        e.pos.errMsgPrefix(), selection.name))
+                    errs.append(err)
+                }
                 if selection.locateDefinition {
                     if object.Package.isSame(block.inheritedAttribute.p) || object.Package.javaPackage == null  {
                         // current package 

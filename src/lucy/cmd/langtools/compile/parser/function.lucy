@@ -59,8 +59,9 @@ class FunctionParser extends ParserExtends{
 		if this.parser.token.Type != lex.TokenRc {
 			err = new error(sprintf("%s expect '}', but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))
-			this.parser.errs.append( err)
+			this.parser.errs.append(err)
 			this.consume(untilRc)
+			// panic(err)
 		} else {
 			if needSource {
 				f.sourceCode =

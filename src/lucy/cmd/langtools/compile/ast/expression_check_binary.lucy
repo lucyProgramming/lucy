@@ -180,4 +180,3 @@ class ExpressionCheckBinary {
 		return null
 	}	
 } 
-

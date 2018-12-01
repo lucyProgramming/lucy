@@ -7,5 +7,3 @@ public class TopNode  {
 		this.node = n
 	}
 }
- 
-

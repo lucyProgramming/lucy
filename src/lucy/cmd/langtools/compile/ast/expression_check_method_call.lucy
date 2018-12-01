@@ -148,7 +148,6 @@ class ExpressionCheckMethodCall {
 				err := call.Expression.methodAccessAble(block, m)
 				if err != null {
 					errs.append(err)
-					panic(err)
 				}
 				call.Method = m
 				return m.Function.Type.mkCallReturnTypes(e.pos)
@@ -161,7 +160,7 @@ class ExpressionCheckMethodCall {
 			return null
 		}
 	}
-
+	
 	/*
 		this.super()
 	*/
@@ -312,6 +311,10 @@ class ExpressionCheckMethodCall {
 			if f.isPublic() == false &&
 				p.isSame(block.inheritedAttribute.p) == false {
 				errs.append(new error(sprintf("%s function '%s' is not public",
+					e.pos.errMsgPrefix(), call.name)))
+			}
+			if f.name == "main" {
+				errs.append(new error(sprintf("%s function '%s' is a entrance",
 					e.pos.errMsgPrefix(), call.name)))
 			}
 			if call.locateDefinition {

@@ -2,16 +2,23 @@
 
 public class PackageMeta {
 	public compiledFrom FileMeta[]
-	public imports      string[]
-	public compileTime  long
+	public imports      Import[]
+	public compileTime  long // in seconds
 	public classes      string[]
 }
 
 
+public class Import {
+	public name string 
+	public linkTime long  // in seconds 
+}
+
 public class FileMeta {
-	public lastModify long
+	public lastModify long // in seconds 
 	public name string 
 }
+
+
 
 
 

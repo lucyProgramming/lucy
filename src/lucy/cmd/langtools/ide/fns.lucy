@@ -1,7 +1,6 @@
 import "lucy/os"
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/parser"
-import "lucy/cmd/langtools/lucy/run"
 import "java/io"
 
 

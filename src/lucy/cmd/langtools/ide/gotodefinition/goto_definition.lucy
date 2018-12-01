@@ -1,8 +1,7 @@
-import "lucy/cmd/langtools/compile/parser"
+
 import "lucy/cmd/langtools/ide"
 import "java/io"
 import "java/nio/file/FileSystems"
-import "lucy/encoding/json"
 import "lucy/cmd/langtools/compile/ast"
 
 

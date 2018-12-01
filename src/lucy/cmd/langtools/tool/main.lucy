@@ -1,29 +1,26 @@
 
 import "lucy/os"
+import "lucy/cmd/langtools/tool/install_lucy_array"
+
 
 typealias tool = fn(args []string)
 
 
 fn getTools() -> (tools map{string->tool}) {
 	tools = new map{string -> tool} ()
-	
+	tools["install_lucy_array"] = install_lucy_array.install
 }
-
-
-fn printUsage(){	 
-
-}
-
 
 fn main(args []string) {
 	tools := getTools()
 	if len(args) == 0 {
-		printUsage()
+		print("tool not provide")
+		printUsageAndExit(1)
 		os.exit(1)
 	}
 	if false == tools.keyExist(args[0])	{
 		printf("tool '%s' not found\n" , args[0])
-		printUsage()
+		printUsageAndExit(2)
  		os.exit(1)
 	}
 	tools[args[0]](args[1:])

@@ -733,6 +733,7 @@ class Parser {
 	fn parseImports() -> (imports []ast.Import = []ast.Import{}) {
 		for this.token.Type == lex.TokenImport ||
 			this.token.Type == lex.TokenLf {
+			
 			if this.token.Type == lex.TokenLf {
 				this.next(lfNotToken)
 				continue

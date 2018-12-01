@@ -41,10 +41,13 @@ public var	JavaBytesType        Type // byte[]
 var loaded = new Loaded()
 
 {
+	// []byte
 	LucyBytesType = new Type()
 	LucyBytesType.Type = VariableTypeArray
 	LucyBytesType.array = new Type()
 	LucyBytesType.array.Type = VariableTypeByte
+
+	//byte[]
 	JavaBytesType = new Type()
 	JavaBytesType.Type = VariableTypeJavaArray
 	JavaBytesType.array = new Type()
