@@ -1,30 +1,35 @@
 {
-	"compileTime":1543368975948,
+	"compileTime":1543641258,
 	"compiledFrom":[
-			{
-			"lastModify":1543219373,
+		{
+			"lastModify":1543401097,
 			"name":"flag.lucy"
 		},
-			{
-			"lastModify":1543299566,
-			"name":"fmt.lucy"
-		},
-			{
-			"lastModify":1543219370,
+		{
+			"lastModify":1543401097,
 			"name":"main.lucy"
 		},
-			{
-			"lastModify":1543365665,
+		{
+			"lastModify":1543401097,
 			"name":"usage.lucy"
 		}
 	],
 	"imports":[
-			"lucy/cmd/langtools/compile/ast",
-			"lucy/os"
+		{
+			"name":"lucy/os/flag",
+			"linkTime":1543630787
+		},
+		{
+			"name":"lucy/cmd/langtools/ide",
+			"linkTime":1543641257
+		},
+		{
+			"name":"lucy/os",
+			"linkTime":1543630787
+		}
 	],
 	"classes":[
-			"Flags.class",
-			"Fmt.class",
-			"main.class"
+		"Flags.class",
+		"main.class"
 	]
 }

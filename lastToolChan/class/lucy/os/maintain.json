@@ -1,31 +1,34 @@
 {
-	"compileTime":1543281199786,
+	"compileTime":1543647398,
 	"compiledFrom":[
-			{
-			"lastModify":1541048045,
+		{
+			"lastModify":1541065161,
 			"name":"cmd.lucy"
 		},
-			{
-			"lastModify":1542077195,
+		{
+			"lastModify":1543647373,
 			"name":"file.lucy"
 		},
-			{
-			"lastModify":1543215199,
+		{
+			"lastModify":1543225175,
 			"name":"os.lucy"
 		},
-			{
-			"lastModify":1536720045,
+		{
+			"lastModify":1536749131,
 			"name":"std.lucy"
 		}
 	],
 	"imports":[
-			"lucy/io"
+		{
+			"name":"lucy/io",
+			"linkTime":1543630786
+		}
 	],
 	"classes":[
-			"closureFunction$start$literal68.class",
-			"closureFunction$start$literal73.class",
-			"closureFunction$start$literal78.class",
-			"Command.class",
-			"main.class"
+		"closureFunction$start$literal68.class",
+		"closureFunction$start$literal73.class",
+		"closureFunction$start$literal78.class",
+		"Command.class",
+		"main.class"
 	]
 }

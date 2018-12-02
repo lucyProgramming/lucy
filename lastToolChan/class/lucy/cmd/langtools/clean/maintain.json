@@ -1,21 +1,30 @@
 {
-	"compiledFrom": [
+	"compileTime":1543641255,
+	"compiledFrom":[
 		{
-			"lastModify": 1542588953,
-			"name": "clean.lucy"
+			"lastModify":1542505379,
+			"name":"clean.lucy"
 		},
 		{
-			"lastModify": 1542957014,
-			"name": "main.lucy"
+			"lastModify":1543586080,
+			"name":"main.lucy"
 		}
 	],
-	"imports": [
-		"lucy/cmd/langtools/common",
-		"lucy/os",
-		"lucy/os/flag"
+	"imports":[
+		{
+			"name":"lucy/cmd/langtools/common",
+			"linkTime":1543630787
+		},
+		{
+			"name":"lucy/os",
+			"linkTime":1543630787
+		},
+		{
+			"name":"lucy/os/flag",
+			"linkTime":1543630787
+		}
 	],
-	"compileTime": 1543216218,
-	"classes": [
+	"classes":[
 		"Clean.class",
 		"main.class"
 	]

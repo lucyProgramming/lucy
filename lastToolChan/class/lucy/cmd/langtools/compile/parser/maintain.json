@@ -1,106 +1,115 @@
 {
-	"compileTime":1543367111451,
+	"compileTime":1543647400,
 	"compiledFrom":[
-			{
-			"lastModify":1543302711,
+		{
+			"lastModify":1543627135,
 			"name":"block.lucy"
 		},
-			{
-			"lastModify":1543302831,
+		{
+			"lastModify":1543624839,
 			"name":"class.lucy"
 		},
-			{
-			"lastModify":1542329403,
+		{
+			"lastModify":1542364114,
 			"name":"comment.lucy"
 		},
-			{
-			"lastModify":1543280249,
+		{
+			"lastModify":1543586080,
 			"name":"enum.lucy"
 		},
-			{
-			"lastModify":1542329404,
+		{
+			"lastModify":1543625031,
 			"name":"expression.lucy"
 		},
-			{
-			"lastModify":1543211236,
+		{
+			"lastModify":1543586080,
 			"name":"expression_array.lucy"
 		},
-			{
-			"lastModify":1542329403,
+		{
+			"lastModify":1542364114,
 			"name":"expression_binary.lucy"
 		},
-			{
-			"lastModify":1542329403,
+		{
+			"lastModify":1543627233,
 			"name":"expression_question.lucy"
 		},
-			{
-			"lastModify":1543298726,
+		{
+			"lastModify":1543624917,
 			"name":"expression_suffix.lucy"
 		},
-			{
-			"lastModify":1543304599,
+		{
+			"lastModify":1543625484,
 			"name":"function.lucy"
 		},
-			{
-			"lastModify":1543298775,
+		{
+			"lastModify":1543624332,
 			"name":"parse.lucy"
 		},
-			{
-			"lastModify":1543298912,
+		{
+			"lastModify":1542364114,
 			"name":"parser_extends.lucy"
 		},
-			{
-			"lastModify":1542329403,
+		{
+			"lastModify":1543586080,
 			"name":"statamtent_for.lucy"
 		},
-			{
-			"lastModify":1542329403,
+		{
+			"lastModify":1543586080,
 			"name":"statement_if.lucy"
 		},
-			{
-			"lastModify":1542329404,
+		{
+			"lastModify":1543586080,
 			"name":"statement_switch.lucy"
 		},
-			{
-			"lastModify":1542329403,
+		{
+			"lastModify":1543586080,
 			"name":"statement_when.lucy"
 		},
-			{
-			"lastModify":1543280249,
+		{
+			"lastModify":1543624860,
 			"name":"type.lucy"
 		},
-			{
-			"lastModify":1543298793,
+		{
+			"lastModify":1543624718,
 			"name":"var.lucy"
 		}
 	],
 	"imports":[
-			"lucy/cmd/langtools/compile/ast",
-			"lucy/cmd/langtools/compile/lex",
-			"lucy/cmd/langtools/compile/jvm/cg"
+		{
+			"name":"lucy/cmd/langtools/compile/ast",
+			"linkTime":1543647399
+		},
+		{
+			"name":"lucy/cmd/langtools/compile/lex",
+			"linkTime":1543630790
+		},
+		{
+			"name":"lucy/cmd/langtools/compile/jvm/cg",
+			"linkTime":1543630787
+		}
 	],
 	"classes":[
-			"BlockParser.class",
-			"ClassParser.class",
-			"closureFunction$isPublic.class",
-			"closureFunction$resetPrefix.class",
-			"closureFunction$resetProperty$1.class",
-			"closureFunction$resetProperty.class",
-			"CommentParser.class",
-			"EnumParser.class",
-			"ExpressionArrayParser.class",
-			"ExpressionBinaryParser.class",
-			"ExpressionParser.class",
-			"ExpressionQuestionParser.class",
-			"ExpressionSuffix.class",
-			"FunctionParser.class",
-			"main.class",
-			"Parser.class",
-			"ParserExtends.class",
-			"StatementForParser.class",
-			"StatementIfParser.class",
-			"StatementSwitchParser.class",
-			"StatementWhenParser.class",
-			"TypeParser.class"
+		"BlockParser.class",
+		"ClassParser.class",
+		"closureFunction$isPublic.class",
+		"closureFunction$resetPrefix.class",
+		"closureFunction$resetProperty$1.class",
+		"closureFunction$resetProperty.class",
+		"CommentParser.class",
+		"EnumParser.class",
+		"ExpressionArrayParser.class",
+		"ExpressionBinaryParser.class",
+		"ExpressionParser.class",
+		"ExpressionQuestionParser.class",
+		"ExpressionSuffix.class",
+		"FunctionParser.class",
+		"main.class",
+		"Parser.class",
+		"ParserExtends.class",
+		"StatementForParser.class",
+		"StatementIfParser.class",
+		"StatementSwitchParser.class",
+		"StatementWhenParser.class",
+		"TypeParser.class"
 	]
 }

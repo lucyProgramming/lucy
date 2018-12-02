@@ -1,35 +1,56 @@
 {
-	"compileTime":1543368975851,
+	"compileTime":1543641258,
 	"compiledFrom":[
-			{
-			"lastModify":1543367074,
+		{
+			"lastModify":1543493494,
 			"name":"findusage.lucy"
 		},
-			{
-			"lastModify":1543298006,
+		{
+			"lastModify":1543225175,
 			"name":"flag.lucy"
 		},
-			{
-			"lastModify":1543365909,
+		{
+			"lastModify":1543497203,
 			"name":"main.lucy"
 		},
-			{
-			"lastModify":1543298027,
+		{
+			"lastModify":1543312303,
 			"name":"usage.lucy"
 		}
 	],
 	"imports":[
-			"lucy/cmd/langtools/compile/ast",
-			"lucy/cmd/langtools/ide/utils",
-			"lucy/os",
-			"lucy/os/flag",
-			"lucy/cmd/langtools/ide/gotodefinition",
-			"lucy/encoding/json",
-			"lucy/cmd/langtools/common"
+		{
+			"name":"lucy/cmd/langtools/compile/ast",
+			"linkTime":1543631968
+		},
+		{
+			"name":"lucy/cmd/langtools/ide",
+			"linkTime":1543641257
+		},
+		{
+			"name":"lucy/os",
+			"linkTime":1543630787
+		},
+		{
+			"name":"lucy/os/flag",
+			"linkTime":1543630787
+		},
+		{
+			"name":"lucy/cmd/langtools/ide/gotodefinition",
+			"linkTime":1543641258
+		},
+		{
+			"name":"lucy/encoding/json",
+			"linkTime":1543630787
+		},
+		{
+			"name":"lucy/cmd/langtools/common",
+			"linkTime":1543630787
+		}
 	],
 	"classes":[
-			"FindUsage.class",
-			"Flags.class",
-			"main.class"
+		"FindUsage.class",
+		"Flags.class",
+		"main.class"
 	]
 }

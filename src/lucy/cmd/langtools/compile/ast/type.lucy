@@ -98,7 +98,7 @@ public class Type {
 	fn mkDefaultValueExpression() -> (d Expression) {
 		e := new Expression()
 		e.op = "defaultValueByCompiler"
-		e.isCompileAuto = true
+		e.isCompilerAuto = true
 		e.pos = this.pos
 		e.value = this.Clone()
 		switch this.Type {

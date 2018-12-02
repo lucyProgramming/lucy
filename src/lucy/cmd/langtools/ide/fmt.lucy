@@ -17,28 +17,30 @@ public class Fmt {
                 }
             }
             if t,ok := n.node.(ast.Block) ; ok {
-                format += this.formatBlock("" , t) + "\n"
+                format += "{\n"
+                format += this.formatBlock("" , t) + "\n\n"
+                format += "}\n"
             }
             if t,ok := n.node.(ast.Function) ; ok {
-                format += this.formatFunction("" , t ,false ) + "\n"
+                format += this.formatFunction("" , t ,false ) + "\n\n"
             }
             if t,ok := n.node.(ast.Enum) ; ok {
-                format += this.formatEnum("" , t) + "\n"
+                format += this.formatEnum("" , t) + "\n\n"
             }
             if t,ok := n.node.(ast.Class) ; ok {
-                format += this.formatClass("" , t) + "\n"
+                format += this.formatClass("" , t) + "\n\n"
             }
             if t,ok := n.node.(ast.Constant) ; ok {
-                format += this.formatConstant("" , t)  + "\n"
+                format += this.formatConstant("" , t)  + "\n\n"
             }
             if t,ok := n.node.(ast.Import) ; ok {
                 format += this.formatImport("" , t) + "\n"
             }
             if t,ok := n.node.(ast.Expression) ; ok {
-               format += this.formatExpression("" , t) + "\n"
+               format += this.formatExpression("" , t) + "\n\n"
             }
             if t,ok := n.node.(ast.TypeAlias) ; ok {
-               format += this.formatTypealais("" , t) + "\n"
+               format += this.formatTypealais("" , t) + "\n\n"
             }
         }
     }
@@ -60,37 +62,93 @@ public class Fmt {
     fn formatFunction(indent string , f ast.Function,isAbstract bool) -> (format string = "") {
         format += "fn "
         if f.name != null && f.name != "" {
-            format += f.name + " "
+            format += f.name 
         }
         format += "("
+        indent2 := indent
+        if f.Type.lpContainsLf {
+            indent2 += "    "
+            format += "\n"
+            format += indent2
+        }
+        if f.Type.lpContainsInlineComment != null {
+            indent2 += "    "
+            format += " // " + f.Type.lpContainsInlineComment
+            format += indent2
+        }
         for k , v := range f.Type.parameterList {
             if v.name != null && v.name != "" {
                 format += v.name + " "
             }
             format += v.Type.typeName() 
-            if k != len(f.Type.parameterList) - 1 {
+            if v.defaultValueExpression != null && v.defaultValueExpression.isCompilerAuto == false {
+                format += " = "
+                format += this.formatExpression(indent2 , v.defaultValueExpression)
+            }
+            if k != len(f.Type.parameterList) - 1 || f.Type.vArgs != null {
                 format += " , "
             }
+            if v.containsLf {
+                format += "\n"
+                indent2 += "    "
+                format += indent2
+            }
+            if v.inlineComment != null {
+                format += " // " +  v.inlineComment
+                indent2 += "    "
+                format += indent2
+            }
+        }
+        if f.Type.vArgs != null {
+            if f.Type.vArgs.name != null && f.Type.vArgs.name != "" {
+                format += f.Type.vArgs.name + " "
+            }
+            format += f.Type.vArgs.Type.typeName() 
         }
         format += ")"
         if f.Type.VoidReturn() == false {
             format += "-> ("
+            indent2 = indent
+            if f.Type.returnLpContainsLf {
+                indent2 += "    "
+                format += "\n"
+                format += indent2
+            }
+            if f.Type.returnLpContainsInlineComment != null {
+                indent2 += "    "
+                format += "// " + f.Type.returnLpContainsInlineComment
+                format += indent2
+            }
             for k , v := range f.Type.returnList {
                 if v.name != null && v.name != "" {
                     format += v.name + " "
                 }
                 format += v.Type.typeName() 
+                if v.defaultValueExpression != null && v.defaultValueExpression.isCompilerAuto == false {
+                    format += " = "
+                    format += this.formatExpression(indent2 , v.defaultValueExpression)
+                }
                 if k != len(f.Type.returnList) - 1 {
                     format += " , "
                 }
+                if v.containsLf {
+                    format += "\n"
+                    indent2 += "    "
+                    format += indent2
+                }
+                if v.inlineComment != null {
+                    format += "// " +  v.inlineComment
+                    indent2 += "    "
+                    format += indent2
+                }
             }
             format += ")" 
-        } 
+        }
         format += " {\n"
         format += this.formatBlock(indent+"    ", f.block)
-        format += indent + "}"
+        format += indent + "}\n"
     }
-
+    
 
     fn formatClass(indent string , c ast.Class) -> (format string = "") {
         format = indent 
@@ -135,7 +193,7 @@ public class Fmt {
                     }
                     k--
                 }
-                maxName,maxAccessRange , hasFinal , hasStatic := 
+                maxName,maxAccessRange , maxTypeName ,hasFinal , hasStatic := 
                     this.getFieldDeclarationGroupMeta(fields)
                 for k,f := range fields {
                     d := indent + "    "
@@ -174,7 +232,22 @@ public class Fmt {
                     }
                     d += " "
                     d += f.fields[0].Type.typeName()
-                    d += "\n"
+                    if len(f.initValues) > 0 {
+                        d += " = "
+                        list := new ast.Expression()
+                        list.Type = ast.ExpressionTypeList 
+                        list.data = f.initValues
+                        d += this.formatExpression(this.mkSpacing(len(d)) , list)
+                    }else {
+                        if t := len(maxTypeName) - len(f.fields[0].Type.typeName()) ; t > 0 {
+                            d += this.mkSpacing(t)
+                        }
+                    }
+                    if f.inlineComment != null {
+                        d += " //" + f.inlineComment
+                    }else {
+                        d += "\n"
+                    }
                     format += d 
                 }
                 continue
@@ -203,6 +276,9 @@ public class Fmt {
             if method.isAbstract() {
                 m += "abstract "
             }
+            if method.Function.name == "<init>" {
+                method.Function.name = c.shortName
+            }
             m += this.formatFunction( indent + "    ", method.Function , method.isAbstract())
             format += m + "\n"
         }
@@ -227,7 +303,8 @@ public class Fmt {
 
     }
 
-    fn getFieldDeclarationGroupMeta(fs []ast.ClassFieldDeclaration) ->(maxName string = "" , maxAccessRange string = "" , hasFinal bool , hasStatic bool) {
+    fn getFieldDeclarationGroupMeta(fs []ast.ClassFieldDeclaration) ->(maxName string = "" ,
+        maxAccessRange string = "" , maxTypeName string = "", hasFinal bool , hasStatic bool) {
         for f := range fs {
             if f.fields[0].isPublic() {
                 maxAccessRange = maxAccessRange == "" ? "public" : maxAccessRange
@@ -244,9 +321,13 @@ public class Fmt {
             if f.fields[0].isStatic() {
                 hasStatic = true 
             }
+            if typeName := f.fields[0].Type.typeName() ; len(typeName) > len(maxTypeName) {
+                maxTypeName = typeName
+            }
             if name := this.getFieldDeclarationName(f) ; len(name) > len(maxName){
                 maxName = name 
             }
+
         }
     }
 
@@ -321,21 +402,23 @@ public class Fmt {
             case ast.StatementTypeIf:
                 format += this.formatIf(indent , s.StatementIf)
             case ast.StatementTypeBlock:
-                format += this.formatBlock(indent , s.block)
+                format += indent + "{\n"
+                format += this.formatBlock(indent + "    ", s.block)
+                format += indent + "}\n"
             case ast.StatementTypeFor:
                 format += this.formatFor(indent , s.StatementFor)
             case ast.StatementTypeContinue:
-                format += "continue" + "\n"
+                format += indent + "continue" + "\n"
             case ast.StatementTypeReturn:
                 format += this.formatReturn(indent , s.StatementReturn)
             case ast.StatementTypeBreak:
-                format += "break" + "\n"
+                format += indent + "break" + "\n"
             case ast.StatementTypeSwitch:
                 format += this.formatSwitch(indent , s.StatementSwitch)
             case ast.StatementTypeWhen:
                 format += this.formatWhen(indent , s.StatementWhen)
             case ast.StatementTypeLabel:
-                format += s.StatementLabel.name + ":\n"
+                format += indent[:len(indent) -4] + s.StatementLabel.name + ":\n"
             case ast.StatementTypeGoTo:
                 format += this.formatGoto(indent,s.StatementGoTo)
             case ast.StatementTypeDefer:
@@ -365,9 +448,9 @@ public class Fmt {
     }
     fn formatDefer(indent string ,d ast.StatementDefer)-> (format string = "") {
         format = indent
-        format += "defer {"
+        format += "defer {\n"
         format += this.formatBlock(indent + "    " ,  d.block)
-        format += indent + "}"
+        format += indent + "}\n"
     }
     fn formatIf(indent string ,s ast.StatementIf)-> (format string = "") {
         format = indent
@@ -399,25 +482,46 @@ public class Fmt {
             format += indent + "}\n"
         }
     }
+
     fn formatGoto(indent string , s ast.StatementGoTo)-> (format string = "") {
         format = indent
         format += "goto " + s.labelName
     }
+
     fn formatFor(indent string ,s ast.StatementFor)-> (format string = "") {
         format = indent
-        format += "for"
-        if s.Init != null {
-            format += " " + this.formatExpression(indent , s.Init)
-        }
-        if s.condition != null {
-            if s.Init != null {
-                format += ";"
+        format += "for "
+        if s.Init != null  && s.condition == null &&  s.increment ==null {
+            if s.inlineComment == null {
+                format += "{\n"
+            }else {
+                format += "{ // " + s.inlineComment 
             }
-            format += " " + this.formatExpression(indent , s.condition)
+        }else if s.Init != null  && s.condition != null &&  s.increment ==null {
+            format += this.formatExpression(indent + "    " , s.condition) + " "
+            if s.inlineComment == null {
+                format += "{\n"
+            }else {
+                format += "{ // " + s.inlineComment 
+            }   
+        }else {
+            if s.Init != null {
+                format += this.formatExpression(indent + "    " , s.Init) + " "
+            }
+            if s.condition != null {
+                format += this.formatExpression(indent + "    " , s.condition) + " "
+            }
+            if s.increment != null {
+                format += this.formatExpression(indent + "    " , s.condition) + " "
+            }
+            if s.inlineComment == null {
+                format += "{\n"
+            }else {
+                format += "{ // " + s.inlineComment 
+            }   
         }
-        if s.increment != null {
-            format += " " + this.formatExpression(indent , s.increment)
-        }
+        format += this.formatBlock(indent + "    " , s.block)
+        format += indent + "}\n"
     }
     
     fn formatSwitch(indent string ,s ast.StatementSwitch)-> (format string = "") {
@@ -431,7 +535,7 @@ public class Fmt {
             format += " ; "
         }
         format += this.formatExpression(indent , s.condition)
-        format += " {"
+        format += " {\n"
         for c := range s.StatementSwitchCases {
             format += indent + "    case"
             for k,e := range c.matches {
@@ -441,13 +545,13 @@ public class Fmt {
                 }
             }
             format += ":\n"
-            format += this.formatBlock("       " , c.block)
+            format += this.formatBlock(indent + "       " , c.block)
         }
         if s.Default != null {
             format += indent + "    default:\n" 
-            format += this.formatBlock("       " , s.Default)
+            format += this.formatBlock(indent + "       " , s.Default)
         }
-        format += indent + "}"
+        format += indent + "}\n"
     }
 
     fn formatWhen(indent string ,w ast.StatementWhen)-> (format string = "") {
@@ -474,9 +578,14 @@ public class Fmt {
                 format = "null"
             case ast.ExpressionTypeBool:
                 return "" + e.boolValue
-            case ast.ExpressionTypeByte, ast.ExpressionTypeShort,ast.ExpressionTypeChar,
+            case ast.ExpressionTypeByte, 
+                ast.ExpressionTypeShort,
+                ast.ExpressionTypeChar,
                 ast.ExpressionTypeInt,
-                ast.ExpressionTypeLong, ast.ExpressionTypeFloat , ast.ExpressionTypeDouble, ast.ExpressionTypeString:
+                ast.ExpressionTypeLong, 
+                ast.ExpressionTypeFloat , 
+                ast.ExpressionTypeDouble,
+                 ast.ExpressionTypeString:
                 return e.literalRaw 
             case ast.ExpressionTypeArray:
                 array := e.data.(ast.ExpressionArray)
@@ -499,26 +608,78 @@ public class Fmt {
                     }
                     format += "}"
                 }
-            case ast.ExpressionTypeLogicalOr,ast.ExpressionTypeLogicalAnd,  ast.ExpressionTypeOr    ,ast.ExpressionTypeAnd ,
-                ast.ExpressionTypeXor, ast.ExpressionTypeLsh , ast.ExpressionTypeRsh ,ast.ExpressionTypeAdd, 
-                ast.ExpressionTypeSub , ast.ExpressionTypeMul  ,ast.ExpressionTypeDiv ,ast.ExpressionTypeMod:
+            case ast.ExpressionTypeLogicalOr,
+                ast.ExpressionTypeLogicalAnd,  
+                ast.ExpressionTypeOr ,
+                ast.ExpressionTypeAnd ,
+                ast.ExpressionTypeXor, 
+                ast.ExpressionTypeLsh , 
+                ast.ExpressionTypeRsh ,
+                ast.ExpressionTypeAdd, 
+                ast.ExpressionTypeSub ,
+                ast.ExpressionTypeMul ,
+                ast.ExpressionTypeDiv , 
+                ast.ExpressionTypeMod:
                 bin := e.data.(ast.ExpressionBinary)
-                format = this.formatExpression(indent , bin.left) + " "+ 
-                    e.op + " " + this.formatExpression(indent , bin.right)
+                if bin.containsLf {
+                    format = this.formatExpression(indent , bin.left) + " " + 
+                    e.op + "\n"
+                    format += indent + "    " + this.formatExpression(indent + "    ", bin.right)
+                }else if bin.inlineComment != null {
+                    format = this.formatExpression(indent , bin.left) + " " + 
+                    e.op + " //" + bin.inlineComment
+                    format += indent + "    " + this.formatExpression(indent + "    ", bin.right)
+                }else {
+                    format = this.formatExpression(indent , bin.left) + " "+ 
+                        e.op + " " + this.formatExpression(indent , bin.right)
+                }
             case ast.ExpressionTypeVarAssign:
-
-            case ast.ExpressionTypeAssign, ast.ExpressionTypePlusAssign ,
-                ast.ExpressionTypeMinusAssign ,ast.ExpressionTypeMulAssign ,ast.ExpressionTypeDivAssign ,
-                ast.ExpressionTypeModAssign,  ast.ExpressionTypeAndAssign ,ast.ExpressionTypeOrAssign  ,
-                ast.ExpressionTypeXorAssign ,ast.ExpressionTypeLshAssign , ast.ExpressionTypeRshAssign ,
-                ast.ExpressionTypeEq , ast.ExpressionTypeNe ,   ast.ExpressionTypeGe,
-                ast.ExpressionTypeGt  , ast.ExpressionTypeLe  ,   ast.ExpressionTypeLt:
-                bin := e.data.(ast.ExpressionBinary) 
-                
-                format = this.formatExpression(indent , bin.left ) + " " + e.op + " " + this.formatExpression(indent , bin.right )
+                bin := e.data.(ast.ExpressionBinary)
+                if bin.containsLf {
+                    format = this.formatExpression(indent , bin.left) + " " + 
+                    e.op + "\n"
+                    format += indent + "    " + this.formatExpression(indent + "    ", bin.right)
+                }else if bin.inlineComment != null {
+                    format = this.formatExpression(indent , bin.left) + " " + 
+                    e.op + " //" + bin.inlineComment
+                    format += indent + "    " + this.formatExpression(indent + "    ", bin.right)
+                }else {
+                    format = this.formatExpression(indent , bin.left) + " "+ 
+                        e.op + " " + this.formatExpression(indent , bin.right)
+                }
+            case ast.ExpressionTypeAssign, 
+                ast.ExpressionTypePlusAssign ,
+                ast.ExpressionTypeMinusAssign ,
+                ast.ExpressionTypeMulAssign ,
+                ast.ExpressionTypeDivAssign ,
+                ast.ExpressionTypeModAssign, 
+                ast.ExpressionTypeAndAssign ,
+                ast.ExpressionTypeOrAssign  ,
+                ast.ExpressionTypeXorAssign ,
+                ast.ExpressionTypeLshAssign , 
+                ast.ExpressionTypeRshAssign ,
+                ast.ExpressionTypeEq , 
+                ast.ExpressionTypeNe ,   
+                ast.ExpressionTypeGe,
+                ast.ExpressionTypeGt  , 
+                ast.ExpressionTypeLe  ,   
+                ast.ExpressionTypeLt:
+                bin := e.data.(ast.ExpressionBinary)
+                if bin.containsLf {
+                    format = this.formatExpression(indent , bin.left) + " " + 
+                    e.op + "\n"
+                    format += indent + "    " + this.formatExpression(indent + "    ", bin.right)
+                }else if bin.inlineComment != null {
+                    format = this.formatExpression(indent , bin.left) + " " + 
+                    e.op + " //" + bin.inlineComment
+                    format += indent + "    " + this.formatExpression(indent + "    ", bin.right)
+                }else {
+                    format = this.formatExpression(indent , bin.left) + " "+ 
+                        e.op + " " + this.formatExpression(indent , bin.right)
+                }
             case ast.ExpressionTypeIndex:   
                 index := e.data.(ast.ExpressionIndex)
-                format += this.formatExpression(indent , index.Expression)+"["
+                format += this.formatExpression(indent , index.Expression) + "["
                 format += this.formatExpression(indent , index.index)
                 format += "]"
             case ast.ExpressionTypeSelection : 
@@ -538,7 +699,7 @@ public class Fmt {
                 if call.Expression.Type == ast.ExpressionTypeDot {
                     format += "." + call.name
                 }else {
-                    format += this.formatExpression(indent ,call.Expression) + "." + call.name + " ("
+                    format += this.formatExpression(indent ,call.Expression) + "." + call.name + "("
                 }
                 for k,v := range call.args {
                     format += this.formatExpression(indent ,v)
@@ -546,11 +707,11 @@ public class Fmt {
                         format += " , "
                     }
                 }
-                format += " )"                           
+                format += ")"                           
             case ast.ExpressionTypeFunctionCall:  
                 call := e.data.(ast.ExpressionFunctionCall)
-                format += this.formatExpression(indent , call.Expression) + " ("
-                for k,v := range call.args {
+                format += this.formatExpression(indent , call.Expression) + "("
+                for k , v := range call.args {
                     format += this.formatExpression( indent, v)
                     if k != len(call.args) - 1 {
                         format += " , "
@@ -571,7 +732,7 @@ public class Fmt {
                 format = e.data.(ast.ExpressionIdentifier).name
             case ast.ExpressionTypeNew: 
                 n := e.data.(ast.ExpressionNew)
-                format += "new " + n.Type.typeName()+ " ("
+                format += "new " + n.Type.typeName()+ "("
                 for k,v := range n.args {
                     format += this.formatExpression(indent , v)
                     if k != len(n.args) - 1 {

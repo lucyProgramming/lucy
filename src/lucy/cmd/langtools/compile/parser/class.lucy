@@ -359,8 +359,16 @@ class ClassParser extends  ParserExtends{
 				this.consume(untilSemicolonOrLf)
 			}
 		}
+		fd := new ast.ClassFieldDeclaration()
+		fd.nameList = names 
+		fd.Type = t 
+		fd.initValues = initValues
+		fd.fields = new []ast.ClassField(len(names)) 
+		classDefinition.appendFmt(fd)
+		
 		fieldComment := comment.comment
 		if this.parser.token.Type == lex.TokenComment {
+			fd.inlineComment = this.parser.token.stringValue
 			this.next(lfIsToken)
 		} else {
 			this.parser.validStatementEnding()
@@ -369,13 +377,6 @@ class ClassParser extends  ParserExtends{
 		if classDefinition.fields == null {
 			classDefinition.fields = new map { string -> ast.ClassField } ()
 		}
-		fd := new ast.ClassFieldDeclaration()
-		fd.nameList = names 
-		fd.Type = t 
-		fd.initValues = initValues
-		fd.inlineComment = fieldComment
-		fd.fields = new []ast.ClassField(len(names)) 
-		classDefinition.appendFmt(fd)
 		for k, v := range names {
 			if classDefinition.fields.keyExist(v.name) {
 				this.parser.errs.append( new error(sprintf("%s field %s is alreay declared",
@@ -390,6 +391,8 @@ class ClassParser extends  ParserExtends{
 			f.pos = v.pos
 			f.Type = t.Clone()
 			f.accessFlags = 0
+			f.containsLf = v.containsLf 
+			f.inlineComment = v.inlineComment 
 			if k < len(initValues) {
 				f.defaultValueExpression = initValues[k]
 			}

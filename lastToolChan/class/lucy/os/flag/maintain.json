@@ -1,41 +1,40 @@
 {
-	"compileTime":1543212579998,
+	"compileTime":1543630787,
 	"compiledFrom":[
-			{
-			"lastModify":1543212568,
+		{
+			"lastModify":1543225175,
 			"name":"boolOption.lucy"
 		},
-			{
-			"lastModify":1541484989,
+		{
+			"lastModify":1540977283,
 			"name":"flagParser.lucy"
 		},
-			{
-			"lastModify":1543212562,
+		{
+			"lastModify":1543225175,
 			"name":"floatOption.lucy"
 		},
-			{
-			"lastModify":1543212573,
+		{
+			"lastModify":1543225175,
 			"name":"intOption.lucy"
 		},
-			{
-			"lastModify":1543212520,
+		{
+			"lastModify":1540300109,
 			"name":"option.lucy"
 		},
-			{
-			"lastModify":1543212577,
+		{
+			"lastModify":1543225175,
 			"name":"stringOption.lucy"
 		}
 	],
-	"imports":[
-	],
+	"imports":[],
 	"classes":[
-			"BoolOption.class",
-			"FlagParser.class",
-			"FloatOption.class",
-			"IntOption.class",
-			"main.class",
-			"Option.class",
-			"OptionType.class",
-			"StringOption.class"
+		"BoolOption.class",
+		"FlagParser.class",
+		"FloatOption.class",
+		"IntOption.class",
+		"main.class",
+		"Option.class",
+		"OptionType.class",
+		"StringOption.class"
 	]
 }

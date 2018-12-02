@@ -5,6 +5,12 @@ public class FunctionType {
 	public parameterList    []Variable
 	public returnList       []Variable
 	public vArgs            Variable
+	public lpContainsLf   bool 
+	public lpContainsInlineComment   string 
+
+	public returnLpContainsLf bool 
+	public returnLpContainsInlineComment  string 
+	
 
 	fn reDefineParameterOrReturnVar(reDefine Variable) -> (err error){
 		if v := this.searchName(reDefine.name) ; v != null {

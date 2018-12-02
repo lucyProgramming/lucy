@@ -1,11 +1,15 @@
 
-
 public class ClassFieldDeclaration {
     public nameList []NameWithPos 
     public Type Type 
     public initValues []Expression
-    public inlineComment string 
     public fields []ClassField
+    /* 
+		a // this is a inline comment
+	*/
+	public inlineComment string   //   in
+	
+	//public containsLf bool    // constains "\n"
 }
 
 

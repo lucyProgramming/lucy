@@ -70,7 +70,8 @@ class Parser {
 		}
 		for this.token.Type == lex.TokenComment || 
 			this.token.Type == lex.TokenMultiLineComment || 
-			this.token.Type == lex.TokenImport {
+			this.token.Type == lex.TokenImport  || 
+			this.token.Type == lex.TokenLf {
 			if this.token.Type == lex.TokenImport {
 				for _, t := range this.parseImports() {
 					this.tops.append(new ast.TopNode(t))
@@ -78,12 +79,17 @@ class Parser {
 				continue
 			}
 			if this.onlyParseImport == false {
-				c := new ast.Comment()
-				c.isMulti = this.token.Type == lex.TokenMultiLineComment
-				c.comment = this.token.stringValue
-				this.tops.append(new ast.TopNode(c))
+				if this.token.Type == lex.TokenComment || 
+					this.token.Type == lex.TokenMultiLineComment{
+					c := new ast.Comment()
+					c.isMulti = this.token.Type == lex.TokenMultiLineComment
+					c.comment = this.token.stringValue
+					this.tops.append(new ast.TopNode(c))
+				}else {  // must be lf 
+					this.tops.append(new ast.TopNode(new ast.Line()))
+				}
 			}
-			this.next(lfNotToken)
+			this.next(lfIsToken)
 		}
 		if this.onlyParseImport { // only parse imports
 			return this.errs
@@ -390,6 +396,8 @@ class Parser {
 			vd := new ast.Constant()
 			vd.name = v.name
 			vd.pos = v.pos
+			vd.containsLf = v.containsLf 
+			vd.inlineComment = v.inlineComment 
 			constants[k] = vd
 		}
 		var variableType ast.Type
@@ -440,6 +448,8 @@ class Parser {
 			vd.locateDefinition = v.locateDefinition
 			vd.name = v.name
 			vd.pos = v.pos
+			vd.containsLf = v.containsLf 
+			vd.inlineComment = v.inlineComment 
 			ret.variables[k] = vd
 		}
 		if this.token.Type != lex.TokenAssign {
@@ -674,6 +684,8 @@ class Parser {
 				vd.rename = v.rename
 				vd.name = v.name
 				vd.pos = v.pos
+				vd.containsLf = v.containsLf 
+				vd.inlineComment = v.inlineComment 
 				vd.Type = t.Clone()
 				vd.Type.pos = v.pos // override pos
 			}
@@ -690,6 +702,8 @@ class Parser {
 				vs[k] = vd
 				vd.pos = v.pos
 				vd.name = ""
+				vd.containsLf = v.containsLf 
+				vd.inlineComment = v.inlineComment 
 				vd.Type = new ast.Type()
 				vd.Type.Type = ast.VariableTypeName
 				vd.Type.pos = v.pos
@@ -718,6 +732,8 @@ class Parser {
 				vd := new ast.Variable()
 				vd.name = v.name
 				vd.pos = v.pos
+				vd.containsLf = v.containsLf 
+				vd.inlineComment = v.inlineComment 
 				vd.Type = t.Clone()
 				vs.append(vd)
 			}
@@ -733,7 +749,6 @@ class Parser {
 	fn parseImports() -> (imports []ast.Import = []ast.Import{}) {
 		for this.token.Type == lex.TokenImport ||
 			this.token.Type == lex.TokenLf {
-			
 			if this.token.Type == lex.TokenLf {
 				this.next(lfNotToken)
 				continue
@@ -769,11 +784,11 @@ class Parser {
 					this.next(lfIsToken) // skip identifier
 				}
 				this.validStatementEnding()
-				this.next(lfNotToken)
+				this.next(lfIsToken)
 			}
 		}
 	}
-
+	
 	//at least one name
 	fn parseNameList() -> (names []ast.NameWithPos, err error) {
 		if this.token.Type != lex.TokenIdentifier {
@@ -788,22 +803,33 @@ class Parser {
 			t.locateDefinition = this.token.locateDefinition
 			t.findUsage = this.token.findUsage
 			t.getHover = this.token.getHover
-			t.rename = this.token.rename 
-			assert(t.pos != null)
+			t.rename = this.token.rename
 			names.append(t)
 			this.next(lfIsToken)
 			if this.token.Type != lex.TokenComma {
 				// not a ,
 				break
-			} else {
-				this.next(lfNotToken) // skip comma
-				if this.token.Type != lex.TokenIdentifier {
-					err = new error(sprintf("%s not a 'identifier' after a comma,but '%s'",
-						this.errMsgPrefix(), this.token.description))
-					this.errs.append( err)
-					return names, err
-				}
 			}
+			// current is ","
+			this.next(lfIsToken) 
+			if this.token.Type == lex.TokenLf {
+				// , containsLf
+				t.containsLf = true
+				this.next(lfNotToken)
+			}else if this.token.Type == lex.TokenComment {
+				t.inlineComment = this.token.stringValue
+				this.next(lfNotToken)  // skip comment 
+			}else {
+				//nothing
+			}
+			if this.token.Type != lex.TokenIdentifier {
+				err = new error(sprintf("%s not a 'identifier' after a comma,but '%s'",
+					this.errMsgPrefix(), this.token.description))
+				this.errs.append( err)
+				return names, err
+			}
+
+			
 		}
 		return
 	}

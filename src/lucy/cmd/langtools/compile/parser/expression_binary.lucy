@@ -20,7 +20,18 @@ class ExpressionBinaryParser extends ParserExtends{
 		for this.parser.token.Type == lex.TokenLogicalOr {
 			pos := this.parser.mkPos()
 			name := this.parser.token.description
-			this.next(lfNotToken)
+			this.next(lfIsToken)
+			var containsLf bool 
+			var inlineComment string 
+			if this.parser.token.Type == lex.TokenLf {
+				containsLf = true 
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenComment {
+				inlineComment = this.parser.token.stringValue
+				this.next(lfNotToken)
+			}else {
+				//nothing
+			}
 			var right ast.Expression
 			right, err = this.parseLogicalAndExpression()
 			if err != null {
@@ -31,6 +42,8 @@ class ExpressionBinaryParser extends ParserExtends{
 			newExpression.op = name
 			newExpression.Type = ast.ExpressionTypeLogicalOr
 			binary := new ast.ExpressionBinary()
+			binary.containsLf = containsLf
+			binary.inlineComment = inlineComment
 			binary.left = left
 			binary.right = right
 			newExpression.data = binary
@@ -48,7 +61,18 @@ class ExpressionBinaryParser extends ParserExtends{
 		for this.parser.token.Type == lex.TokenLogicalAnd {
 			pos := this.parser.mkPos()
 			name := this.parser.token.description
-			this.next(lfNotToken)
+			this.next(lfIsToken)
+			var containsLf bool 
+			var inlineComment string 
+			if this.parser.token.Type == lex.TokenLf {
+				containsLf = true 
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenComment {
+				inlineComment = this.parser.token.stringValue
+				this.next(lfNotToken)
+			}else {
+				//nothing
+			}
 			var right ast.Expression
 			right, err = this.parseEqualExpression()
 			if err != null {
@@ -59,6 +83,8 @@ class ExpressionBinaryParser extends ParserExtends{
 			newExpression.op = name
 			newExpression.Type = ast.ExpressionTypeLogicalAnd
 			binary := new ast.ExpressionBinary()
+			binary.containsLf = containsLf
+			binary.inlineComment = inlineComment
 			binary.left = left
 			binary.right = right
 			newExpression.data = binary
@@ -78,7 +104,18 @@ class ExpressionBinaryParser extends ParserExtends{
 			typ := this.parser.token.Type
 			name := this.parser.token.description
 			pos := this.parser.mkPos()
-			this.next(lfNotToken)
+			this.next(lfIsToken)
+			var containsLf bool 
+			var inlineComment string 
+			if this.parser.token.Type == lex.TokenLf {
+				containsLf = true 
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenComment {
+				inlineComment = this.parser.token.stringValue
+				this.next(lfNotToken)
+			}else {
+				//nothing
+			}
 			var right ast.Expression
 			right, err = this.parseRelationExpression()
 			if err != null {
@@ -93,6 +130,8 @@ class ExpressionBinaryParser extends ParserExtends{
 				newExpression.Type = ast.ExpressionTypeNe
 			}
 			binary := new ast.ExpressionBinary()
+			binary.containsLf = containsLf
+			binary.inlineComment = inlineComment
 			binary.left = left
 			binary.right = right
 			newExpression.data = binary
@@ -114,7 +153,18 @@ class ExpressionBinaryParser extends ParserExtends{
 			typ := this.parser.token.Type
 			name := this.parser.token.description
 			pos := this.parser.mkPos()
-			this.next(lfNotToken)
+			this.next(lfIsToken)
+			var containsLf bool 
+			var inlineComment string 
+			if this.parser.token.Type == lex.TokenLf {
+				containsLf = true 
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenComment {
+				inlineComment = this.parser.token.stringValue
+				this.next(lfNotToken)
+			}else {
+				//nothing
+			}
 			var right ast.Expression
 			right, err = this.parseOrExpression()
 			if err != null {
@@ -134,9 +184,10 @@ class ExpressionBinaryParser extends ParserExtends{
 
 			} else {
 				newExpression.Type = ast.ExpressionTypeLe
-
 			}
 			binary := new ast.ExpressionBinary()
+			binary.containsLf = containsLf
+			binary.inlineComment = inlineComment
 			binary.left = left
 			binary.right = right
 			newExpression.data = binary
@@ -154,7 +205,18 @@ class ExpressionBinaryParser extends ParserExtends{
 		for this.parser.token.Type == lex.TokenOr {
 			pos := this.parser.mkPos()
 			name := this.parser.token.description
-			this.next(lfNotToken)
+			this.next(lfIsToken)
+			var containsLf bool 
+			var inlineComment string 
+			if this.parser.token.Type == lex.TokenLf {
+				containsLf = true 
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenComment {
+				inlineComment = this.parser.token.stringValue
+				this.next(lfNotToken)
+			}else {
+				//nothing
+			}
 			var right ast.Expression
 			right, err = this.parseXorExpression()
 			if err != null {
@@ -165,6 +227,8 @@ class ExpressionBinaryParser extends ParserExtends{
 			newExpression.op = name
 			newExpression.Type = ast.ExpressionTypeOr
 			binary := new ast.ExpressionBinary()
+			binary.containsLf = containsLf
+			binary.inlineComment = inlineComment
 			binary.left = left
 			binary.right = right
 			newExpression.data = binary
@@ -182,7 +246,18 @@ class ExpressionBinaryParser extends ParserExtends{
 		for this.parser.token.Type == lex.TokenXor {
 			pos := this.parser.mkPos()
 			name := this.parser.token.description
-			this.next(lfNotToken)
+			this.next(lfIsToken)
+			var containsLf bool 
+			var inlineComment string 
+			if this.parser.token.Type == lex.TokenLf {
+				containsLf = true 
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenComment {
+				inlineComment = this.parser.token.stringValue
+				this.next(lfNotToken)
+			}else {
+				//nothing
+			}
 			var right ast.Expression
 			right, err = this.parseAndExpression()
 			if err != null {
@@ -193,6 +268,8 @@ class ExpressionBinaryParser extends ParserExtends{
 			newExpression.op = name
 			newExpression.Type = ast.ExpressionTypeXor
 			binary := new ast.ExpressionBinary()
+			binary.containsLf = containsLf
+			binary.inlineComment = inlineComment
 			binary.left = left
 			binary.right = right
 			newExpression.data = binary
@@ -210,7 +287,18 @@ class ExpressionBinaryParser extends ParserExtends{
 		for this.parser.token.Type == lex.TokenAnd {
 			pos := this.parser.mkPos()
 			name := this.parser.token.description
-			this.next(lfNotToken)
+			this.next(lfIsToken)
+			var containsLf bool 
+			var inlineComment string 
+			if this.parser.token.Type == lex.TokenLf {
+				containsLf = true 
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenComment {
+				inlineComment = this.parser.token.stringValue
+				this.next(lfNotToken)
+			}else {
+				//nothing
+			}
 			var right ast.Expression
 			right, err = this.parseShiftExpression()
 			if err != null {
@@ -221,6 +309,8 @@ class ExpressionBinaryParser extends ParserExtends{
 			newExpression.Type = ast.ExpressionTypeAnd
 			newExpression.op = name
 			binary := new ast.ExpressionBinary()
+			binary.containsLf = containsLf
+			binary.inlineComment = inlineComment
 			binary.left = left
 			binary.right = right
 			newExpression.data = binary
@@ -240,7 +330,18 @@ class ExpressionBinaryParser extends ParserExtends{
 			typ := this.parser.token.Type
 			name := this.parser.token.description
 			pos := this.parser.mkPos()
-			this.next(lfNotToken)
+			this.next(lfIsToken)
+			var containsLf bool 
+			var inlineComment string 
+			if this.parser.token.Type == lex.TokenLf {
+				containsLf = true 
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenComment {
+				inlineComment = this.parser.token.stringValue
+				this.next(lfNotToken)
+			}else {
+				//nothing
+			}
 			var right ast.Expression
 			right, err = this.parseAddExpression()
 			if err != null {
@@ -251,12 +352,12 @@ class ExpressionBinaryParser extends ParserExtends{
 			newExpression.op = name
 			if typ == lex.TokenLsh {
 				newExpression.Type = ast.ExpressionTypeLsh
-
 			} else {
 				newExpression.Type = ast.ExpressionTypeRsh
-
 			}
 			binary := new ast.ExpressionBinary()
+			binary.containsLf = containsLf
+			binary.inlineComment = inlineComment
 			binary.left = left
 			binary.right = right
 			newExpression.data = binary
@@ -276,7 +377,18 @@ class ExpressionBinaryParser extends ParserExtends{
 			typ := this.parser.token.Type
 			name := this.parser.token.description
 			pos := this.parser.mkPos()
-			this.next(lfNotToken)
+			this.next(lfIsToken)
+			var containsLf bool 
+			var inlineComment string 
+			if this.parser.token.Type == lex.TokenLf {
+				containsLf = true 
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenComment {
+				inlineComment = this.parser.token.stringValue
+				this.next(lfNotToken)
+			}else {
+				//nothing
+			}
 			var right ast.Expression
 			right, err = this.parseMulExpression()
 			if err != null {
@@ -291,6 +403,8 @@ class ExpressionBinaryParser extends ParserExtends{
 				newExpression.Type = ast.ExpressionTypeSub
 			}
 			binary := new ast.ExpressionBinary()
+			binary.containsLf = containsLf
+			binary.inlineComment = inlineComment
 			binary.left = left
 			binary.right = right
 			newExpression.data = binary
@@ -311,7 +425,18 @@ class ExpressionBinaryParser extends ParserExtends{
 			typ := this.parser.token.Type
 			name := this.parser.token.description
 			pos := this.parser.mkPos()
-			this.next(lfNotToken)
+			this.next(lfIsToken)
+			var containsLf bool 
+			var inlineComment string 
+			if this.parser.token.Type == lex.TokenLf {
+				containsLf = true 
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenComment {
+				inlineComment = this.parser.token.stringValue
+				this.next(lfNotToken)
+			}else {
+				//nothing
+			}
 			var right ast.Expression
 			right, err = this.ep.ExpressionSuffix.parseSuffixExpression()
 			if err != null {
@@ -328,6 +453,10 @@ class ExpressionBinaryParser extends ParserExtends{
 				newExpression.Type = ast.ExpressionTypeMod
 			}
 			binary := new ast.ExpressionBinary()
+			binary.containsLf = containsLf
+			binary.inlineComment = inlineComment
+			binary.containsLf = containsLf
+			binary.inlineComment = inlineComment
 			binary.left = left
 			binary.right = right
 			newExpression.data = binary

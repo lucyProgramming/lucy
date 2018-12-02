@@ -23,7 +23,13 @@ public class Variable {
 	public findUsage  bool 
 	public rename bool 
 	public findUsageInstances []Usage 
-
+	
+	/* 
+		a // this is a inline comment
+	*/
+	public inlineComment string   //   in
+	
+	public containsLf bool    // constains "\n"
 	
 	
 	public fn isPublic() -> (is bool) {

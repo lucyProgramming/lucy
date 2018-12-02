@@ -1,31 +1,30 @@
 {
-	"compileTime":1543281783828,
+	"compileTime":1543630787,
 	"compiledFrom":[
-			{
-			"lastModify":1543281692,
+		{
+			"lastModify":1543312303,
 			"name":"decoder.lucy"
 		},
-			{
-			"lastModify":1542674634,
+		{
+			"lastModify":1543630500,
 			"name":"encoder.lucy"
 		},
-			{
-			"lastModify":1540883840,
+		{
+			"lastModify":1540890869,
 			"name":"json.lucy"
 		},
-			{
-			"lastModify":1543218196,
+		{
+			"lastModify":1543627884,
 			"name":"number.lucy"
 		}
 	],
-	"imports":[
-	],
+	"imports":[],
 	"classes":[
-			"Decoder.class",
-			"Encoder.class",
-			"JsonSyntaxTreeNode.class",
-			"JsonSyntaxTreeType.class",
-			"main.class",
-			"Number.class"
+		"Decoder.class",
+		"Encoder.class",
+		"JsonSyntaxTreeNode.class",
+		"JsonSyntaxTreeType.class",
+		"main.class",
+		"Number.class"
 	]
 }

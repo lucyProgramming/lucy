@@ -6,8 +6,10 @@ import "lucy/cmd/langtools/compile/common"
 import "lucy/os"
 import "lucy/encoding/json"
 
-
-public fn Main (destinationDir string , flags common.Flags , files []string , lucyPaths , classPaths []string , ifErrExit bool) {
+public fn Main ( // hello world
+	destinationDir string , 
+flags common.Flags , files []string ,
+ lucyPaths , classPaths []string , ifErrExit bool) {
     var	compiler  = new Compiler()
     var	loader  = new  FileLoader(lucyPaths , classPaths)
     ast.ImportsLoader = loader
@@ -23,8 +25,8 @@ public fn Main (destinationDir string , flags common.Flags , files []string , lu
 
 
 public class Compiler {
-	Tops              []ast.TopNode
-	Files             []string
+	Tops              []ast.TopNode   
+	Files             []string  
 	Errs              []error
 	NErrs2StopCompile int
 	lucyPaths         []string

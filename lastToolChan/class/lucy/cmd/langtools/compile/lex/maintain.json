@@ -1,25 +1,24 @@
 {
-	"compileTime":1543298690351,
+	"compileTime":1543630790,
 	"compiledFrom":[
-			{
-			"lastModify":1543280249,
+		{
+			"lastModify":1543627075,
 			"name":"lex.lucy"
 		},
-			{
-			"lastModify":1543219592,
+		{
+			"lastModify":1543586080,
 			"name":"token.lucy"
 		},
-			{
-			"lastModify":1543298527,
+		{
+			"lastModify":1543225175,
 			"name":"var.lucy"
 		}
 	],
-	"imports":[
-	],
+	"imports":[],
 	"classes":[
-			"Lexer.class",
-			"main.class",
-			"Token.class",
-			"TokenKind.class"
+		"Lexer.class",
+		"main.class",
+		"Token.class",
+		"TokenKind.class"
 	]
 }

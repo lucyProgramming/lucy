@@ -1,25 +1,29 @@
 {
-	"compileTime":1543281199844,
+	"compileTime":1543647400,
 	"compiledFrom":[
-			{
-			"lastModify":1543192412,
+		{
+			"lastModify":1543026347,
 			"name":"common.lucy"
 		},
-			{
-			"lastModify":1542934729,
+		{
+			"lastModify":1542965008,
 			"name":"fns.lucy"
 		},
-			{
-			"lastModify":1543196266,
+		{
+			"lastModify":1543629780,
 			"name":"meta.lucy"
 		}
 	],
 	"imports":[
-			"lucy/os"
+		{
+			"name":"lucy/os",
+			"linkTime":1543647398
+		}
 	],
 	"classes":[
-			"FileMeta.class",
-			"main.class",
-			"PackageMeta.class"
+		"FileMeta.class",
+		"Import.class",
+		"main.class",
+		"PackageMeta.class"
 	]
 }

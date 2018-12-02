@@ -21,6 +21,13 @@ public class Constant  {
 	public locateDefinition bool 
     findUsageInstances []Usage 
 	
+	/* 
+		a // this is a inline comment
+	*/
+	public inlineComment string   //   in
+	
+	public containsLf bool    // constains "\n"
+	
 	public fn isPublic() -> (is bool) {
 		return this.accessFlags|cg.AccFieldPublic != 0
 	}

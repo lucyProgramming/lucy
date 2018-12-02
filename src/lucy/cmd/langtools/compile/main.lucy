@@ -5,8 +5,7 @@ import "lucy/cmd/langtools/compile/common"
 import "lucy/cmd/langtools/common" as langtoolsCommon
 
 fn main(args []string) {
-    f := new common.Flags()
+    f :=  new common.Flags() 
 	files  := f.parseArgs(args)
 	lc.Main("./" , f , files ,langtoolsCommon.getLucyPath(),langtoolsCommon.getClassPath() , true )
 }
-

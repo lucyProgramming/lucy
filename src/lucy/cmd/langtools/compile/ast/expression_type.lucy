@@ -198,6 +198,11 @@ public class ExpressionKV  {
 public class ExpressionBinary  {
 	public left  Expression
 	public right Expression
+	/* 
+		a // this is a inline comment
+	*/
+	public inlineComment string   //   in
+	public containsLf bool    // constains "\n"
 }
 
 // for package jvm

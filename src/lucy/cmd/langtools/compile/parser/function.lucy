@@ -73,8 +73,6 @@ class FunctionParser extends ParserExtends{
 		return f, err
 	}
 
-
-
 	//(a,b int)->(total int)
 	fn parseFunctionType() -> (functionType ast.FunctionType, err error) {
 		functionType = new ast.FunctionType()
@@ -96,7 +94,17 @@ class FunctionParser extends ParserExtends{
 			this.parser.errs.append( err)
 			return
 		}
-		this.next(lfNotToken)               // skip (
+		this.next(lfIsToken)               // skip (
+		if this.parser.token.Type == lex.TokenLf {
+			// , containsLf
+			functionType.lpContainsLf = true 
+			this.next(lfNotToken)
+		}else if this.parser.token.Type == lex.TokenComment {
+			functionType.lpContainsInlineComment = this.parser.token.stringValue 
+			this.next(lfNotToken)
+		}else {
+			//nothing
+		}
 		if this.parser.token.Type != lex.TokenRp { // not )
 			functionType.parameterList, err = this.parseParameterOrReturnList()
 			if err != null {
@@ -120,7 +128,17 @@ class FunctionParser extends ParserExtends{
 				this.parser.errs.append( err)
 				return
 			}
-			this.next(lfNotToken) // skip (
+			this.next(lfIsToken) // skip (
+			if this.parser.token.Type == lex.TokenLf {
+				// , containsLf
+				functionType.returnLpContainsLf = true 
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenComment {
+				functionType.returnLpContainsInlineComment = this.parser.token.stringValue 
+				this.next(lfNotToken)
+			}else {
+				//nothing
+			}
 			if this.parser.token.Type != lex.TokenRp {
 				functionType.returnList, err = this.parseParameterOrReturnList()
 				if err != null { // skip until next (,continue to analyse
@@ -151,7 +169,6 @@ class FunctionParser extends ParserExtends{
 		parse default value
 		a int = ""
 		int = 1
-
 	*/
 	fn parseTypedNameDefaultValue() -> (returnList []ast.Variable, err error) {
 		returnList, err = this.parser.parseTypedName()
@@ -192,10 +209,21 @@ class FunctionParser extends ParserExtends{
 			if err != null {
 				break
 			}
-			if this.parser.token.Type == lex.TokenComma {
-				this.next(lfNotToken)
-			} else {
+			if this.parser.token.Type != lex.TokenComma{
 				break
+			}
+			this.next(lfIsToken)
+			if this.parser.token.Type == lex.TokenLf {
+				// , containsLf
+				t := v[ len(v) -1 ]
+				t.containsLf = true
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenComment {
+				t := v[ len(v) -1 ]
+				t.inlineComment = this.parser.token.stringValue
+				this.next(lfNotToken)  // skip comment 
+			}else {
+				//nothing
 			}
 		}
 		return

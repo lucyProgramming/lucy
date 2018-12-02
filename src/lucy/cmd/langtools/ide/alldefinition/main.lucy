@@ -4,7 +4,6 @@ import "lucy/os"
 import "lucy/encoding/json"
 
 
-
 fn main (args []string) {
     dir := new Flags().parseArgs(args)
     lucyFileNames := ide.getLucyFiles(dir)

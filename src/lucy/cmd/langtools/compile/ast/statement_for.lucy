@@ -26,6 +26,7 @@ public class StatementFor {
 	public condition Expression
 	public increment Expression
 	public block     Block
+	public inlineComment string 
 
 
 	fn checkRange() ->(errs []error= []error{})  {

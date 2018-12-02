@@ -196,6 +196,7 @@ public class Lexer {
 		} else {
 			this.unGetChar()
 		}
+		token.offset = startOffset 
 		token.endLine = this.line
 		token.endColumn = this.column
 		token.endOffset = this.offset
@@ -342,6 +343,7 @@ public class Lexer {
 		token.startLine = this.line
 		token.startColumn = this.column - 1
 		token.Type = TokenLiteralString
+		token.offset = this.offset - 1 
 		bs := []byte{}
 		var c byte
 		c, eof := this.getChar()
@@ -466,7 +468,7 @@ public class Lexer {
 			err = new error("string literal start new line")
 		}
 		token.stringValue = string(bs)
-		token.literalRaw = string([endChar]) + token.stringValue + string([endChar])
+		token.literalRaw = string(this.bs[token.offset : this.offset ] )
 		token.description = string(bs)
 		return
 	}
@@ -778,6 +780,7 @@ public class Lexer {
 				bs. append(c)
 				c, eof = this.getChar()
 			}
+			token.literalRaw = string(this.bs[token.offset - 1 : this.offset ])
 			token.Type = TokenLiteralString
 			token.stringValue = string(bs)
 			token.description = string(bs)

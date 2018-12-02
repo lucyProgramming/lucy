@@ -9,7 +9,7 @@ public class Expression {
 	*/
 	public isPublic              bool // for global
 	public isGlobal              bool
-	public isCompileAuto         bool // compile auto expression
+	public isCompilerAuto        bool // compile auto expression
 	public value                 Type
 	public multiValues           []Type
 	public pos                   Pos
@@ -99,7 +99,7 @@ public class Expression {
 		c.Type = to
 		this.value = to
 		this.Type = ExpressionTypeCheckCast
-		this.isCompileAuto = true
+		this.isCompilerAuto = true
 		this.op = "checkcast"
 		this.data = c
 	}

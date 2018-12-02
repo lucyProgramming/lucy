@@ -119,16 +119,26 @@ class ExpressionParser extends  ParserExtends {
 		}
 		return left, null
 	}
-
+	
 
 	fn parseEquationRight(left ast.Expression , expressionType ast.ExpressionTypeKind, isMulti bool) -> (e ast.Expression, err error) {
         pos := this.parser.mkPos()
         opName := this.parser.token.description
-        this.next(lfNotToken) // skip = :=
+		bin := new ast.ExpressionBinary()
+		this.next(lfIsToken)
+		// skip = :=
+		if this.parser.token.Type == lex.TokenLf {
+			bin.containsLf = true 
+			this.next(lfNotToken)
+		}else if this.parser.token.Type == lex.TokenComment {
+			bin.inlineComment = this.parser.token.stringValue
+			this.next(lfNotToken)
+		}else {
+			//nothing
+		}
         result := new ast.Expression()
         result.Type = expressionType
         result.op = opName
-        bin := new ast.ExpressionBinary()
         result.data = bin
         bin.left = left
         result.pos = pos

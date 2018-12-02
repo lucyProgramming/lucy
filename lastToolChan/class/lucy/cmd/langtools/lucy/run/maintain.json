@@ -1,60 +1,76 @@
 {
-	"compileTime":1543367282886,
+	"compileTime":1543642062,
 	"compiledFrom":[
-			{
-			"lastModify":1542603513,
+		{
+			"lastModify":1542621174,
 			"name":"flag.lucy"
 		},
-			{
-			"lastModify":1542603077,
+		{
+			"lastModify":1542621174,
 			"name":"import_cycle.lucy"
 		},
-			{
-			"lastModify":1542603516,
+		{
+			"lastModify":1542621174,
 			"name":"lucy_file.lucy"
 		},
-			{
-			"lastModify":1543300464,
+		{
+			"lastModify":1542621174,
 			"name":"package_compiled.lucy"
 		},
-			{
-			"lastModify":1543300042,
+		{
+			"lastModify":1543630693,
 			"name":"run.lucy"
 		}
 	],
 	"imports":[
-			"lucy/os/flag",
-			"lucy/cmd/langtools/common",
-			"lucy/os",
-			"lucy/encoding/json",
-			"lucy/io",
-			"lucy/cmd/langtools/compile/ast",
-			"lucy/cmd/langtools/compile/lc",
-			"lucy/cmd/langtools/compile/parser",
-			"lucy/cmd/langtools/compile/common"
+		{
+			"name":"lucy/os/flag",
+			"linkTime":1543630787
+		},
+		{
+			"name":"lucy/cmd/langtools/common",
+			"linkTime":1543630787
+		},
+		{
+			"name":"lucy/os",
+			"linkTime":1543630787
+		},
+		{
+			"name":"lucy/encoding/json",
+			"linkTime":1543630787
+		},
+		{
+			"name":"lucy/io",
+			"linkTime":1543630786
+		},
+		{
+			"name":"lucy/cmd/langtools/compile/ast",
+			"linkTime":1543642060
+		},
+		{
+			"name":"lucy/cmd/langtools/compile/lc",
+			"linkTime":1543642062
+		},
+		{
+			"name":"lucy/cmd/langtools/compile/parser",
+			"linkTime":1543642060
+		},
+		{
+			"name":"lucy/cmd/langtools/compile/common",
+			"linkTime":1543630787
+		}
 	],
 	"classes":[
-			"closureFunction$javaPackageFilter$literal231.class",
-			"closureFunction$javaPackageFilter$literal232.class",
-			"closureFunction$javaPackageFilter$literal233.class",
-			"closureFunction$javaPackageFilter$literal235.class",
-			"closureFunction$javaPackageFilter$literal236.class",
-			"closureFunction$javaPackageFilter$literal243.class",
-			"closureFunction$javaPackageFilter$literal244.class",
-			"closureFunction$javaPackageFilter$literal245.class",
-			"closureFunction$javaPackageFilter$literal247.class",
-			"closureFunction$javaPackageFilter$literal248.class",
-			"closureFunction$RunCommand$literal77.class",
-			"closureFunction$RunCommand$literal78.class",
-			"closureFunction$RunCommand$literal80.class",
-			"closureFunction$RunCommand$literal81.class",
-			"closureFunction$RunCommand$literal83.class",
-			"closureFunction$RunCommand$literal84.class",
-			"Flags.class",
-			"ImportStack.class",
-			"LucyFile.class",
-			"main.class",
-			"PackageCompiled.class",
-			"RunLucyPackage.class"
+		"closureFunction$javaPackageFilter$literal231.class",
+		"closureFunction$javaPackageFilter$literal243.class",
+		"closureFunction$RunCommand$literal77.class",
+		"closureFunction$RunCommand$literal80.class",
+		"closureFunction$RunCommand$literal83.class",
+		"Flags.class",
+		"ImportStack.class",
+		"LucyFile.class",
+		"main.class",
+		"PackageCompiled.class",
+		"RunLucyPackage.class"
 	]
 }

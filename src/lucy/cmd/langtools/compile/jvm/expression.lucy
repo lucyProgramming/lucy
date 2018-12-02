@@ -72,7 +72,7 @@ class BuildExpression {
         e ast.Expression,
         context Context,
         state StackMapState) -> (maxStack char) {
-        if e.isCompileAuto == false {
+        if e.isCompilerAuto == false {
             context.appendLimeNumberAndSourceFile(e.pos, code, c)
         }
         switch e.Type {

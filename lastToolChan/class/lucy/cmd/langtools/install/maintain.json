@@ -1,23 +1,35 @@
 {
-	"compileTime":1543305517629,
+	"compileTime":1543641254,
 	"compiledFrom":[
-			{
-			"lastModify":1543300443,
+		{
+			"lastModify":1543312303,
 			"name":"install.lucy"
 		},
-			{
-			"lastModify":1542336528,
+		{
+			"lastModify":1542364114,
 			"name":"main.lucy"
 		}
 	],
 	"imports":[
-			"lucy/os",
-			"lucy/cmd/langtools/lucy/run",
-			"lucy/cmd/langtools/common",
-			"lucy/os/flag"
+		{
+			"name":"lucy/os",
+			"linkTime":1543630787
+		},
+		{
+			"name":"lucy/cmd/langtools/lucy/run",
+			"linkTime":1543641254
+		},
+		{
+			"name":"lucy/cmd/langtools/common",
+			"linkTime":1543630787
+		},
+		{
+			"name":"lucy/os/flag",
+			"linkTime":1543630787
+		}
 	],
 	"classes":[
-			"Install.class",
-			"main.class"
+		"Install.class",
+		"main.class"
 	]
 }

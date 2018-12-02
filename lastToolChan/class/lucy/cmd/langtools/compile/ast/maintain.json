@@ -1,356 +1,376 @@
 {
-	"compileTime":1543367111096,
+	"compileTime":1543647399,
 	"compiledFrom":[
-			{
-			"lastModify":1543305384,
+		{
+			"lastModify":1543493205,
 			"name":"block.lucy"
 		},
-			{
-			"lastModify":1543218244,
+		{
+			"lastModify":1543586080,
 			"name":"buildin_function.lucy"
 		},
-			{
-			"lastModify":1543218292,
+		{
+			"lastModify":1543586080,
 			"name":"buildin_func_meta.lucy"
 		},
-			{
-			"lastModify":1543305268,
+		{
+			"lastModify":1543586080,
 			"name":"class.lucy"
 		},
-			{
-			"lastModify":1543301455,
+		{
+			"lastModify":1543586080,
+			"name":"class_field_declaration.lucy"
+		},
+		{
+			"lastModify":1543586080,
 			"name":"class_filed.lucy"
 		},
-			{
-			"lastModify":1543301485,
+		{
+			"lastModify":1543312303,
 			"name":"class_method.lucy"
 		},
-			{
-			"lastModify":1543219839,
+		{
+			"lastModify":1543225175,
 			"name":"closure.lucy"
 		},
-			{
-			"lastModify":1543304387,
+		{
+			"lastModify":1543586080,
+			"name":"comment.lucy"
+		},
+		{
+			"lastModify":1543401097,
 			"name":"const.lucy"
 		},
-			{
-			"lastModify":1543215578,
+		{
+			"lastModify":1543225175,
 			"name":"definition.lucy"
 		},
-			{
-			"lastModify":1543305330,
+		{
+			"lastModify":1543586080,
 			"name":"enum.lucy"
 		},
-			{
-			"lastModify":1543303778,
+		{
+			"lastModify":1543401097,
 			"name":"expression.lucy"
 		},
-			{
-			"lastModify":1543209925,
+		{
+			"lastModify":1543225175,
 			"name":"expression_check_array.lucy"
 		},
-			{
-			"lastModify":1543296385,
+		{
+			"lastModify":1542192151,
 			"name":"expression_check_assign.lucy"
 		},
-			{
-			"lastModify":1542257624,
+		{
+			"lastModify":1543629096,
 			"name":"expression_check_binary.lucy"
 		},
-			{
-			"lastModify":1543304414,
+		{
+			"lastModify":1543312303,
 			"name":"expression_check_const.lucy"
 		},
-			{
-			"lastModify":1543306062,
+		{
+			"lastModify":1543312303,
 			"name":"expression_check_function_call.lucy"
 		},
-			{
-			"lastModify":1543304439,
+		{
+			"lastModify":1543312303,
 			"name":"expression_check_identifier.lucy"
 		},
-			{
-			"lastModify":1541984338,
+		{
+			"lastModify":1543628817,
 			"name":"expression_check_index.lucy"
 		},
-			{
-			"lastModify":1543301226,
+		{
+			"lastModify":1543644107,
 			"name":"expression_check_left_value.lucy"
 		},
-			{
-			"lastModify":1543294652,
+		{
+			"lastModify":1543230679,
 			"name":"expression_check_map.lucy"
 		},
-			{
-			"lastModify":1543297110,
+		{
+			"lastModify":1543629103,
 			"name":"expression_check_method_call.lucy"
 		},
-			{
-			"lastModify":1543297517,
+		{
+			"lastModify":1543401097,
 			"name":"expression_check_new.lucy"
 		},
-			{
-			"lastModify":1542178902,
+		{
+			"lastModify":1542192151,
 			"name":"expression_check_op_assign.lucy"
 		},
-			{
-			"lastModify":1542178746,
+		{
+			"lastModify":1542192151,
 			"name":"expression_check_question.lucy"
 		},
-			{
-			"lastModify":1543305038,
+		{
+			"lastModify":1543628700,
 			"name":"expression_check_selection.lucy"
 		},
-			{
-			"lastModify":1541984338,
+		{
+			"lastModify":1541898368,
 			"name":"expression_check_select_const.lucy"
 		},
-			{
-			"lastModify":1542178781,
+		{
+			"lastModify":1542192151,
 			"name":"expression_check_slice.lucy"
 		},
-			{
-			"lastModify":1542178716,
+		{
+			"lastModify":1542192151,
 			"name":"expression_check_type_assert.lucy"
 		},
-			{
-			"lastModify":1541984338,
+		{
+			"lastModify":1541898367,
 			"name":"expression_check_type_conversion.lucy"
 		},
-			{
-			"lastModify":1542179474,
+		{
+			"lastModify":1543401097,
 			"name":"expression_check_unary.lucy"
 		},
-			{
-			"lastModify":1543301866,
+		{
+			"lastModify":1543586080,
 			"name":"expression_check_var.lucy"
 		},
-			{
-			"lastModify":1543301842,
+		{
+			"lastModify":1543312303,
 			"name":"expression_check_var_assign.lucy"
 		},
-			{
-			"lastModify":1542597142,
+		{
+			"lastModify":1542621174,
 			"name":"expression_const_fold.lucy"
 		},
-			{
-			"lastModify":1543280249,
+		{
+			"lastModify":1543401097,
 			"name":"expression_type.lucy"
 		},
-			{
-			"lastModify":1543301608,
+		{
+			"lastModify":1543401097,
 			"name":"function.lucy"
 		},
-			{
-			"lastModify":1543284623,
+		{
+			"lastModify":1543401097,
 			"name":"function_type.lucy"
 		},
-			{
-			"lastModify":1543298687,
+		{
+			"lastModify":1543312303,
 			"name":"helper_funcs.lucy"
 		},
-			{
-			"lastModify":1542938221,
+		{
+			"lastModify":1542965008,
 			"name":"hover.lucy"
 		},
-			{
-			"lastModify":1542595041,
+		{
+			"lastModify":1543642843,
 			"name":"import.lucy"
 		},
-			{
-			"lastModify":1542611870,
+		{
+			"lastModify":1542621174,
 			"name":"inherited_attribute.lucy"
 		},
-			{
-			"lastModify":1543206315,
+		{
+			"lastModify":1543225175,
 			"name":"java_package.lucy"
 		},
-			{
-			"lastModify":1542947902,
+		{
+			"lastModify":1542965008,
 			"name":"loaded.lucy"
 		},
-			{
-			"lastModify":1542342762,
+		{
+			"lastModify":1543642969,
 			"name":"node.lucy"
 		},
-			{
-			"lastModify":1543366901,
+		{
+			"lastModify":1543647222,
 			"name":"package.lucy"
 		},
-			{
-			"lastModify":1543298599,
+		{
+			"lastModify":1543401097,
 			"name":"pos.lucy"
 		},
-			{
-			"lastModify":1543302679,
+		{
+			"lastModify":1543586080,
 			"name":"statement.lucy"
 		},
-			{
-			"lastModify":1542256549,
+		{
+			"lastModify":1542276696,
 			"name":"statement_break.lucy"
 		},
-			{
-			"lastModify":1541984338,
+		{
+			"lastModify":1541898368,
 			"name":"statement_continue.lucy"
 		},
-			{
-			"lastModify":1542249407,
+		{
+			"lastModify":1542276696,
 			"name":"statement_defer.lucy"
 		},
-			{
-			"lastModify":1543302155,
+		{
+			"lastModify":1543642935,
 			"name":"statement_for.lucy"
 		},
-			{
-			"lastModify":1543298642,
+		{
+			"lastModify":1543312303,
 			"name":"statement_goto.lucy"
 		},
-			{
-			"lastModify":1542598062,
+		{
+			"lastModify":1542621174,
 			"name":"statement_if.lucy"
 		},
-			{
-			"lastModify":1543282713,
+		{
+			"lastModify":1543312303,
 			"name":"statement_label.lucy"
 		},
-			{
-			"lastModify":1542178275,
+		{
+			"lastModify":1543401097,
 			"name":"statement_return.lucy"
 		},
-			{
-			"lastModify":1542259276,
+		{
+			"lastModify":1542276696,
 			"name":"statement_switch.lucy"
 		},
-			{
-			"lastModify":1542244866,
+		{
+			"lastModify":1541898367,
 			"name":"statement_when.lucy"
 		},
-			{
-			"lastModify":1542175016,
+		{
+			"lastModify":1543228376,
 			"name":"template_function.lucy"
 		},
-			{
-			"lastModify":1543298155,
+		{
+			"lastModify":1543586080,
 			"name":"type.lucy"
 		},
-			{
-			"lastModify":1543305347,
+		{
+			"lastModify":1543586080,
 			"name":"type_alias.lucy"
 		},
-			{
-			"lastModify":1543282533,
+		{
+			"lastModify":1543312303,
 			"name":"usage.lucy"
 		},
-			{
-			"lastModify":1542613743,
+		{
+			"lastModify":1543631941,
 			"name":"var.lucy"
 		},
-			{
-			"lastModify":1543296202,
+		{
+			"lastModify":1543401097,
 			"name":"variable.lucy"
 		}
 	],
 	"imports":[
-			"lucy/cmd/langtools/compile/jvm/cg",
-			"lucy/cmd/langtools/compile/common",
-			"lucy/os"
+		{
+			"name":"lucy/cmd/langtools/compile/jvm/cg",
+			"linkTime":1543630787
+		},
+		{
+			"name":"lucy/cmd/langtools/compile/common",
+			"linkTime":1543630787
+		},
+		{
+			"name":"lucy/os",
+			"linkTime":1543647398
+		}
 	],
 	"classes":[
-			"Block.class",
-			"BuildInFunctionPanicMeta.class",
-			"BuildInFunctionPrintfMeta.class",
-			"BuildInFunctionSprintfMeta.class",
-			"CallVariableArgs.class",
-			"Class.class",
-			"ClassField.class",
-			"ClassMethod.class",
-			"Closure.class",
-			"closureFunction$equal.class",
-			"closureFunction$errMsg.class",
-			"ClosureMeta.class",
-			"Constant.class",
-			"Enum.class",
-			"EnumName.class",
-			"Expression.class",
-			"ExpressionArray.class",
-			"ExpressionAssign.class",
-			"ExpressionBinary.class",
-			"ExpressionCheckAssign.class",
-			"ExpressionCheckBinary.class",
-			"ExpressionCheckConst.class",
-			"ExpressionCheckFunctionCall.class",
-			"ExpressionCheckIdentifier.class",
-			"ExpressionCheckIndex.class",
-			"ExpressionCheckLeftValue.class",
-			"ExpressionCheckMap.class",
-			"ExpressionCheckMethodCall.class",
-			"ExpressionCheckNew.class",
-			"ExpressionCheckOpAssign.class",
-			"ExpressionCheckQuestion.class",
-			"ExpressionCheckSelection.class",
-			"ExpressionCheckSlice.class",
-			"ExpressionCheckTypeAssert.class",
-			"ExpressionCheckTypeConversion.class",
-			"ExpressionCheckUnary.class",
-			"ExpressionCheckVar.class",
-			"ExpressionCheckVarAssign.class",
-			"ExpressionConstFold.class",
-			"ExpressionFunctionCall.class",
-			"ExpressionIdentifier.class",
-			"ExpressionIndex.class",
-			"ExpressionKV.class",
-			"ExpressionMap.class",
-			"ExpressionMethodCall.class",
-			"ExpressionNew.class",
-			"ExpressionQuestion.class",
-			"ExpressionSelectConst.class",
-			"ExpressionSelection.class",
-			"ExpressionSlice.class",
-			"ExpressionTypeAssert.class",
-			"ExpressionTypeConversion.class",
-			"ExpressionTypeKind.class",
-			"ExpressionVar.class",
-			"ExpressionVarAssign.class",
-			"ExprssionCheckArray.class",
-			"ForRangeAttr.class",
-			"Function.class",
-			"FunctionType.class",
-			"Hover.class",
-			"HoverLoadFromOutside.class",
-			"Import.class",
-			"InheritedAttribute.class",
-			"JavaPackage.class",
-			"LoadDefinitionFromOutside.class",
-			"Loaded.class",
-			"LoadImport.class",
-			"main.class",
-			"Map.class",
-			"NameWithPos.class",
-			"Package.class",
-			"Pos.class",
-			"SourceFile.class",
-			"Statement.class",
-			"StatementBreak.class",
-			"StatementContinue.class",
-			"StatementDefer.class",
-			"StatementElseIf.class",
-			"StatementFor.class",
-			"StatementGoTo.class",
-			"StatementIf.class",
-			"StatementLabel.class",
-			"StatementReturn.class",
-			"StatementSwitch.class",
-			"StatementSwitchCase.class",
-			"StatementTypeKind.class",
-			"StatementWhen.class",
-			"StatementWhenCase.class",
-			"TemplateFunction.class",
-			"TemplateFunctionInstance.class",
-			"TopNode.class",
-			"Type.class",
-			"TypeAlias.class",
-			"Usage.class",
-			"Variable.class",
-			"VariableTypeKind.class"
+		"Block.class",
+		"BuildInFunctionPanicMeta.class",
+		"BuildInFunctionPrintfMeta.class",
+		"BuildInFunctionSprintfMeta.class",
+		"CallVariableArgs.class",
+		"Class.class",
+		"ClassField.class",
+		"ClassFieldDeclaration.class",
+		"ClassMethod.class",
+		"Closure.class",
+		"closureFunction$equal.class",
+		"closureFunction$errMsg.class",
+		"ClosureMeta.class",
+		"Comment.class",
+		"Constant.class",
+		"Enum.class",
+		"EnumName.class",
+		"Expression.class",
+		"ExpressionArray.class",
+		"ExpressionAssign.class",
+		"ExpressionBinary.class",
+		"ExpressionCheckAssign.class",
+		"ExpressionCheckBinary.class",
+		"ExpressionCheckConst.class",
+		"ExpressionCheckFunctionCall.class",
+		"ExpressionCheckIdentifier.class",
+		"ExpressionCheckIndex.class",
+		"ExpressionCheckLeftValue.class",
+		"ExpressionCheckMap.class",
+		"ExpressionCheckMethodCall.class",
+		"ExpressionCheckNew.class",
+		"ExpressionCheckOpAssign.class",
+		"ExpressionCheckQuestion.class",
+		"ExpressionCheckSelection.class",
+		"ExpressionCheckSlice.class",
+		"ExpressionCheckTypeAssert.class",
+		"ExpressionCheckTypeConversion.class",
+		"ExpressionCheckUnary.class",
+		"ExpressionCheckVar.class",
+		"ExpressionCheckVarAssign.class",
+		"ExpressionConstFold.class",
+		"ExpressionFunctionCall.class",
+		"ExpressionIdentifier.class",
+		"ExpressionIndex.class",
+		"ExpressionKV.class",
+		"ExpressionMap.class",
+		"ExpressionMethodCall.class",
+		"ExpressionNew.class",
+		"ExpressionQuestion.class",
+		"ExpressionSelectConst.class",
+		"ExpressionSelection.class",
+		"ExpressionSlice.class",
+		"ExpressionTypeAssert.class",
+		"ExpressionTypeConversion.class",
+		"ExpressionTypeKind.class",
+		"ExpressionVar.class",
+		"ExpressionVarAssign.class",
+		"ExprssionCheckArray.class",
+		"ForRangeAttr.class",
+		"Function.class",
+		"FunctionType.class",
+		"Hover.class",
+		"HoverLoadFromOutside.class",
+		"Import.class",
+		"InheritedAttribute.class",
+		"JavaPackage.class",
+		"Line.class",
+		"LoadDefinitionFromOutside.class",
+		"Loaded.class",
+		"LoadImport.class",
+		"main.class",
+		"Map.class",
+		"NameWithPos.class",
+		"Package.class",
+		"Pos.class",
+		"SourceFile.class",
+		"Statement.class",
+		"StatementBreak.class",
+		"StatementContinue.class",
+		"StatementDefer.class",
+		"StatementElseIf.class",
+		"StatementFor.class",
+		"StatementGoTo.class",
+		"StatementIf.class",
+		"StatementLabel.class",
+		"StatementReturn.class",
+		"StatementSwitch.class",
+		"StatementSwitchCase.class",
+		"StatementTypeKind.class",
+		"StatementWhen.class",
+		"StatementWhenCase.class",
+		"TemplateFunction.class",
+		"TemplateFunctionInstance.class",
+		"TopNode.class",
+		"Type.class",
+		"TypeAlias.class",
+		"Usage.class",
+		"Variable.class",
+		"VariableTypeKind.class"
 	]
 }

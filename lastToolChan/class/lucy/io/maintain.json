@@ -1,14 +1,13 @@
 {
-	"compileTime":1543281199703,
+	"compileTime":1543630786,
 	"compiledFrom":[
-			{
-			"lastModify":1542860762,
+		{
+			"lastModify":1542880363,
 			"name":"io.lucy"
 		}
 	],
-	"imports":[
-	],
+	"imports":[],
 	"classes":[
-			"main.class"
+		"main.class"
 	]
 }
