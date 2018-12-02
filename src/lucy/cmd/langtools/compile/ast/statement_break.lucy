@@ -6,6 +6,7 @@ public class StatementBreak {
 	public statementSwitch     StatementSwitch
 	public switchTemplateBlock Block
 	public pos                 Pos
+	public inlineComment string 
 
 	fn check(block Block) ->(errs []error)  {
 		if block.inheritedAttribute.forBreak == null {

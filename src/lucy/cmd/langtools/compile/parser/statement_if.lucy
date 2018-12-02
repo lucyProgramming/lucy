@@ -46,7 +46,13 @@ class StatementIfParser extends ParserExtends {
 			this.parser.errs.append( err)
 			this.consume(untilLc)
 		}
-		this.next(lfNotToken) //skip {
+		this.next(lfIsToken) //skip {
+		if this.parser.token.Type == lex.TokenComment {
+			statementIf.inlineComment = this.parser.token.stringValue 
+			this.next(lfNotToken)
+		}else if this.parser.token.Type == lex.TokenLf {
+			this.next(lfNotToken)
+		}
 		statementIf.block = new ast.Block()
 		this.bp.parseStatementList(statementIf.block, false)
 		if this.parser.token.Type != lex.TokenRc {
@@ -85,7 +91,13 @@ class StatementIfParser extends ParserExtends {
 				this.parser.errs.append( err)
 				this.consume(untilLc)
 			}
-			this.next(lfNotToken) // skip {
+			this.next(lfIsToken) // skip {
+			if this.parser.token.Type == lex.TokenComment {
+				statementIf.elseInlineComment = this.parser.token.stringValue 
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenLf {
+				this.next(lfNotToken)
+			}
 			statementIf.Else = new ast.Block()
 			this.bp.parseStatementList(statementIf.Else, false)
 			if this.parser.token.Type != lex.TokenRc {
@@ -94,7 +106,7 @@ class StatementIfParser extends ParserExtends {
 				this.parser.errs.append( err)
 				this.consume(untilRc)
 			}
-			this.next(lfNotToken) // skip }
+			this.next(lfIsToken) // skip }
 		}
 		return statementIf, err
 	}
@@ -115,10 +127,16 @@ class StatementIfParser extends ParserExtends {
 				this.parser.errs.append(err)
 				this.consume(untilLc)
 			}
-			this.next(lfNotToken) // skip {
+			t := new ast.StatementElseIf()
+			this.next(lfIsToken) // skip {
+			if this.parser.token.Type == lex.TokenComment {
+				t.inlineComment = this.parser.token.stringValue 
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenLf {
+				this.next(lfNotToken)
+			}
 			block := new ast.Block()
 			this.bp.parseStatementList(block, false)
-			t := new ast.StatementElseIf()
 			t.condition = condition
 			t.block = block
 			elseIfList.append(t)

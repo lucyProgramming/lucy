@@ -4,6 +4,7 @@ public class StatementContinue {
 	public statementFor StatementFor
 	public defers       []StatementDefer
 	public pos          Pos
+	public inlineComment string 
 	
 	fn check(block Block) -> (errs []error) {
 		if block.inheritedAttribute.forStatement == null {

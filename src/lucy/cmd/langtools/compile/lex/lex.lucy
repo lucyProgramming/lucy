@@ -825,7 +825,6 @@ public class Lexer {
 		token.endColumn = this.column
 		return
 	}
-	
 }
 
 

@@ -204,14 +204,14 @@ class Parser {
 				this.ifTokenIsLfThenSkip(false)
 			case lex.TokenLc:
 				b := new ast.Block()
-				this.next(lfNotToken) // skip {
+				this.next(lfIsToken) // skip {
 				this.BlockParser.parseStatementList(b, true)
 				if this.token.Type != lex.TokenRc {
 					this.errs.append( new error(sprintf("%s expect '}', but '%s'",
 						this.errMsgPrefix(), this.token.description)))
 					this.consume(untilRc)
 				}
-				this.next(lfNotToken) // skip }
+				this.next(lfIsToken) // skip }
 				this.tops.append( new ast.TopNode(b))
 				this.ifTokenIsLfThenSkip(false)
 			case lex.TokenClass, lex.TokenInterface:
@@ -593,17 +593,13 @@ class Parser {
 		}
 		return err
 	}
-	fn expectNewLineAndSkip() {
-		if err := this.expectNewLine(); err == null {
-			this.next(lfNotToken)
-		}
-	}
+
 	fn expectNewLine() -> (err error)  {
 		if this.token.Type != lex.TokenLf &&
 			this.token.Type != lex.TokenComment {
 			err = new error(sprintf("%s expect new line , but '%s'",
 				this.errMsgPrefix(), this.token.description))
-			this.errs.append( err)
+			this.errs.append(err)
 		}
 		return err
 	}
@@ -695,7 +691,7 @@ class Parser {
 				syntax a,b
 				not valid type after name list, "a" and "b" must indicate types
 			*/
-
+			
 			vs = new []ast.Variable(len(names))
 			for k, v := range names {
 				vd := new ast.Variable()
@@ -745,7 +741,7 @@ class Parser {
 		}
 		return vs, null
 	}
-
+	
 	fn parseImports() -> (imports []ast.Import = []ast.Import{}) {
 		for this.token.Type == lex.TokenImport ||
 			this.token.Type == lex.TokenLf {

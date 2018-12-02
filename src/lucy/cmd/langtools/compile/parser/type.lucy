@@ -257,7 +257,17 @@ class TypeParser extends ParserExtends {
 				}
 				break
 			}
-			this.next(lfNotToken) // skip ,
+			this.next(lfIsToken) 
+			if this.parser.token.Type == lex.TokenLf {
+				// , containsLf
+				t.containsLf = true
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenComment {
+				t.inlineComment = this.parser.token.stringValue
+				this.next(lfNotToken)  // skip comment 
+			}else {
+				//nothing
+			}
 			for _, v := range endTokens {
 				if v == this.parser.token.Type {
 					this.parser.errs.append( new error(sprintf("%s extra comma", this.parser.errMsgPrefix())))

@@ -11,4 +11,5 @@ public class TypeAlias {
 	public rename bool 
     findUsageInstances []Usage 
 	used bool 
+	public inlineComment string 
 }

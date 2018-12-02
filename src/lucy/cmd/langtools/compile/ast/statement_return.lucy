@@ -4,7 +4,8 @@ public class StatementReturn   {
 	public defers      []StatementDefer
 	public expressions []Expression
 	public pos         Pos
-
+	public inlineComment string 
+	
 	
 	fn mkDefers(b Block) {
 		if b.isFunctionBlock == false { // not top block

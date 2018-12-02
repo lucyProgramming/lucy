@@ -3,6 +3,7 @@
 public class StatementWhenCase {
 	public matches []Type
 	public block   Block
+	public inlineComment string 
 }
 
 
@@ -11,6 +12,8 @@ public class StatementWhen {
 	public condition Type
 	public cases     []StatementWhenCase
 	public Default   Block
+	public inlineComment string 
+	public elseInlineComment string 
 	/*
 		switchStatement will be override
 	*/

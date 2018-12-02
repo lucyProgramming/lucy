@@ -39,12 +39,17 @@ class StatementSwitchParser extends ParserExtends{
 			this.consume(untilLc)
 		}
 		this.next(lfIsToken) // skip {  , must be case
-		this.parser.expectNewLineAndSkip()
+		this.parser.expectNewLine()
+		if this.parser.token.Type == lex.TokenComment {
+			statementSwitch.inlineComment = this.parser.token.stringValue 
+			this.next(lfNotToken)
+		}else if this.parser.token.Type == lex.TokenLf {
+			this.next(lfNotToken)
+		}
 		if this.parser.token.Type != lex.TokenCase {
 			err = new error(sprintf("%s expect 'case',but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append( err)
-			return null, err
 		}
 		for this.parser.token.Type == lex.TokenCase {
 			this.next(lfIsToken) // skip case
@@ -61,7 +66,14 @@ class StatementSwitchParser extends ParserExtends{
 				return statementSwitch, err
 			}
 			this.next(lfIsToken) // skip :
-			this.parser.expectNewLineAndSkip()
+			this.parser.expectNewLine()
+			t := new ast.StatementSwitchCase()
+			if this.parser.token.Type == lex.TokenComment {
+				t.inlineComment = this.parser.token.stringValue 
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenLf {
+				this.next(lfNotToken)
+			}
 			var block ast.Block
 			if this.parser.token.Type != lex.TokenCase &&
 				this.parser.token.Type != lex.TokenDefault &&
@@ -70,7 +82,6 @@ class StatementSwitchParser extends ParserExtends{
 				block.isSwitchBlock = true
 				this.bp.parseStatementList(block, false)
 			}
-			t := new ast.StatementSwitchCase()
 			t.matches = es
 			t.block = block
 			if statementSwitch.StatementSwitchCases == null {
@@ -88,9 +99,15 @@ class StatementSwitchParser extends ParserExtends{
 					this.parser.errMsgPrefix()))
 				this.parser.errs.append( err)
 			} else {
-				this.next(lfIsToken)
+				this.next(lfIsToken) // skip :
+				this.parser.expectNewLine()
+				if this.parser.token.Type == lex.TokenComment {
+					statementSwitch.defaultInlineComment = this.parser.token.stringValue 
+					this.next(lfNotToken)
+				}else if this.parser.token.Type == lex.TokenLf {
+					this.next(lfNotToken)
+				}
 			}
-			this.parser.expectNewLineAndSkip()
 			block := new ast.Block()
 			block.isSwitchBlock = true
 			statementSwitch.Default = block

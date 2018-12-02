@@ -45,6 +45,8 @@ public class Statement {
 	public Enum                      Enum
 	public Import                    Import
 	public comment 	                 string
+	public inlineComment   string 
+
 	isStaticFieldDefaultValue bool
 	/*
 		this.super()

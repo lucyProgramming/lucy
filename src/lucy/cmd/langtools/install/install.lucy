@@ -1,5 +1,4 @@
 import "java/io"
-import "lucy/os"
 import "lucy/cmd/langtools/lucy/run"
 
 

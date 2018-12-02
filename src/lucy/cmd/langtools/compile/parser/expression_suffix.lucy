@@ -419,34 +419,58 @@ class ExpressionSuffix extends  ParserExtends {
 						this.next(lfIsToken)
 					}
 				}
-			case lex.TokenSelectConst:
-				pos := this.parser.mkPos()
-				this.next(lfNotToken) // skip ::
-				var constName string
-				newExpression := new ast.Expression()
-				selection := new ast.ExpressionSelection()
-				if this.parser.token.Type != lex.TokenIdentifier {
-					this.parser.errs.append(
-						new error(sprintf("%s expect idnetifier , but '%s'",
-							this.parser.errMsgPrefix(), this.parser.token.description)))
-					constName = compileAutoName()
-				} else {
-					constName = this.parser.token.stringValue
-					selection.locateDefinition = this.parser.token.locateDefinition
-					selection.findUsage = this.parser.token.findUsage
-					selection.rename = this.parser.token.rename
-					this.next(lfIsToken)
-				}
-				newExpression.pos = pos
-				newExpression.op = "selectConst"
-				newExpression.Type = ast.ExpressionTypeSelectionConst
-				selection.Expression = prefix
-				selection.name = constName
-				newExpression.data = selection
-				prefix = newExpression
+			// case lex.TokenSelectConst:
+			// 	pos := this.parser.mkPos()
+			// 	var containsLf bool 
+			// 	var inlineComment string 
+			// 	this.next(lfIsToken)
+			// 	if this.parser.token.Type == lex.TokenLf {
+			// 		containsLf = true 
+			// 		this.next(lfNotToken)
+			// 	}else  if this.parser.token.Type == lex.TokenComment {
+			// 		inlineComment = this.parser.token.stringValue 
+			// 		this.next(lfNotToken)
+			// 	}else {
+			// 		// nothing
+			// 	}
+			// 	var constName string
+			// 	newExpression := new ast.Expression()
+			// 	selection := new ast.ExpressionSelection()
+			// 	selection.containsLf = containsLf
+			// 	selection.inlineComment = inlineComment 
+			// 	if this.parser.token.Type != lex.TokenIdentifier {
+			// 		this.parser.errs.append(
+			// 			new error(sprintf("%s expect idnetifier , but '%s'",
+			// 				this.parser.errMsgPrefix(), this.parser.token.description)))
+			// 		constName = compileAutoName()
+			// 	} else {
+			// 		constName = this.parser.token.stringValue
+			// 		selection.locateDefinition = this.parser.token.locateDefinition
+			// 		selection.findUsage = this.parser.token.findUsage
+			// 		selection.rename = this.parser.token.rename
+			// 		this.next(lfIsToken)
+			// 	}
+			// 	newExpression.pos = pos
+			// 	newExpression.op = "selectConst"
+			// 	newExpression.Type = ast.ExpressionTypeSelectionConst
+			// 	selection.Expression = prefix
+			// 	selection.name = constName
+			// 	newExpression.data = selection
+			// 	prefix = newExpression
 			case lex.TokenSelection:
 				pos := this.parser.mkPos()
-				this.next(lfNotToken) // skip .
+				var containsLf bool 
+				var inlineComment string 
+				this.next(lfIsToken)
+				if this.parser.token.Type == lex.TokenLf {
+					containsLf = true 
+					this.next(lfNotToken)
+				}else  if this.parser.token.Type == lex.TokenComment {
+					inlineComment = this.parser.token.stringValue 
+					this.next(lfNotToken)
+				}else {
+					// nothing
+				}
 				if this.parser.token.Type == lex.TokenIdentifier {
 					newExpression := new ast.Expression()
 					newExpression.pos = pos
@@ -459,6 +483,8 @@ class ExpressionSuffix extends  ParserExtends {
 					selection.rename  = this.parser.token.rename
 					selection.Expression = prefix
 					selection.name = this.parser.token.stringValue
+					selection.containsLf = containsLf
+					selection.inlineComment  = inlineComment
 					newExpression.data = selection
 					prefix = newExpression
 					this.next(lfIsToken)

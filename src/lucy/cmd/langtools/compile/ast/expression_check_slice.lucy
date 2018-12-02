@@ -9,7 +9,7 @@ class ExpressionCheckSlice {
 		}
 		if sliceOn.Type != VariableTypeArray &&
 			sliceOn.Type != VariableTypeString {
-			errs . append(new error( sprintf("%s cannot have slice on '%s'",
+			errs.append(new error( sprintf("%s cannot have slice on '%s'",
 				sliceOn.pos.errMsgPrefix(), sliceOn.typeString())))
 		}
 		//start
@@ -59,7 +59,7 @@ class ExpressionCheckSlice {
 							startType.isInteger() &&
 							on.start.isLiteral() {
 							if on.start.getLongValue() > endIndexValue {
-								errs . append(new error( sprintf("%s startIndex '%d' is greater than endIndex '%d'",
+								errs.append(new error( sprintf("%s startIndex '%d' is greater than endIndex '%d'",
 										endType.pos.errMsgPrefix(), on.start.getLongValue(), endIndexValue)))
 							}
 						}

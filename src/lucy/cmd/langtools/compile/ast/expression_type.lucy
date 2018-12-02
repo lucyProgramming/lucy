@@ -172,6 +172,12 @@ public class ExpressionSelection  {
 	public getHover  bool 
 	public findUsage  bool 
 	public rename  bool 
+	/* 
+		a // this is a inline comment
+	*/
+	public inlineComment string   //   in
+	public containsLf bool    // constains "\n"
+	
 }
 
 

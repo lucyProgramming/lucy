@@ -158,7 +158,7 @@ class ClassParser extends  ParserExtends{
 				this.next(lfIsToken)
 				this.parser.unExpectNewLineAndSkip()
 				if this.parser.token.Type == lex.TokenLc {
-					this.next(lfNotToken) // skip {
+					this.next(lfIsToken) // skip {
 					block := new ast.Block()
 					this.parser.BlockParser.parseStatementList(block, false)
 					if this.parser.token.Type != lex.TokenRc {
@@ -166,7 +166,7 @@ class ClassParser extends  ParserExtends{
 							new error(sprintf("%s expect '}' , but '%s'", this.parser.errMsgPrefix(),
 								this.parser.token.description)))
 					} else {
-						this.next(lfNotToken) // skip }
+						this.next(lfIsToken) // skip }
 						if classDefinition.staticBlocks == null {
                             classDefinition.staticBlocks = [block]
 						}else {

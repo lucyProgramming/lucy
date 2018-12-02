@@ -1,8 +1,10 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
-class StatementWhenParser extends ParserExtends {
+//TODO :: format 
 
+class StatementWhenParser extends ParserExtends {
+	
 	bp BlockParser
 	fn StatementWhenParser(parser Parser ,bp BlockParser){
 		this.super()
@@ -10,7 +12,7 @@ class StatementWhenParser extends ParserExtends {
 		this.bp = bp
 	}
 	
-	protected fn parseWhen() -> (whenStatement ast.StatementWhen , err error) {
+	fn parseWhen() -> (whenStatement ast.StatementWhen , err error) {
 		whenStatement = new ast.StatementWhen()
 		whenStatement.pos = this.parser.mkPos()
 		this.parser.next(lfIsToken)
@@ -28,14 +30,18 @@ class StatementWhenParser extends ParserExtends {
 			this.parser.errs.append( err)
 			this.consume(untilLc)
 		}
-		this.next(lfNotToken) // skip {  , must be case
+		this.next(lfIsToken) // skip {  , must be case
+		if this.parser.token.Type == lex.TokenComment {
+			whenStatement.inlineComment = this.parser.token.stringValue 
+			this.next(lfNotToken)
+		}else if this.parser.token.Type == lex.TokenLf {
+			this.next(lfNotToken)
+		}
 		if this.parser.token.Type != lex.TokenCase {
 			err = new error(sprintf("%s expect 'case',but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))
-			this.parser.errs.append( err)
-			return null, err
+			this.parser.errs.append(err)
 		}
-
 		for this.parser.token.Type == lex.TokenCase {
 			this.next(lfIsToken) // skip case
 			this.parser.unExpectNewLineAndSkip()
@@ -52,8 +58,15 @@ class StatementWhenParser extends ParserExtends {
 				this.parser.errs.append( err)
 				return whenStatement, err
 			}
+			t := new ast.StatementWhenCase()
 			this.next(lfIsToken) // skip :
-			this.parser.expectNewLineAndSkip()
+			this.parser.expectNewLine()
+			if this.parser.token.Type == lex.TokenComment {
+				t.inlineComment = this.parser.token.stringValue 
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenLf {
+				this.next(lfNotToken)
+			}
 			var block ast.Block
 			if this.parser.token.Type != lex.TokenCase &&
 				this.parser.token.Type != lex.TokenDefault &&
@@ -62,7 +75,6 @@ class StatementWhenParser extends ParserExtends {
 				block.isSwitchBlock = true
 				this.bp.parseStatementList(block, false)
 			}
-			t := new ast.StatementWhenCase()
 			t.matches = ts
 			t.block = block
 			if whenStatement.cases == null{
@@ -82,7 +94,12 @@ class StatementWhenParser extends ParserExtends {
 				this.parser.errs.append( err)
 			} else {
 				this.next(lfIsToken)
-				this.parser.expectNewLineAndSkip()
+				if this.parser.token.Type == lex.TokenComment {
+					whenStatement.elseInlineComment = this.parser.token.stringValue 
+					this.next(lfNotToken)
+				}else if this.parser.token.Type == lex.TokenLf {
+					this.next(lfNotToken)
+				}
 			}
 			if this.parser.token.Type != lex.TokenRc {
 				block := new ast.Block()

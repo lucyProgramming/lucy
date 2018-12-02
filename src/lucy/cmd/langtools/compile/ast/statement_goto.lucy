@@ -9,6 +9,7 @@ public class StatementGoTo {
 	public locateDefinition bool 
 	public findUsage bool  // useless 
 	public rename bool // useless 
+	public inlineComment string 
 	
 	fn checkStatementGoTo(block Block) -> (err error) {
 		label := block.searchLabel(this.labelName , this.pos)

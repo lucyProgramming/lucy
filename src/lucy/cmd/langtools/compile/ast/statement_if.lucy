@@ -9,6 +9,8 @@ public class StatementIf {
 	public elseIfList          []StatementElseIf
 	public Else               Block
 	public exits               []cg.Exit
+	public inlineComment string 
+	public elseInlineComment string 
 	
 	fn check(father Block) -> (errs []error = []error{})  {
 		this.initExpressionBlock.inherit(father)
@@ -63,4 +65,5 @@ public class StatementIf {
 public class StatementElseIf {
 	public condition Expression
 	public block     Block
+	public inlineComment string 
 }

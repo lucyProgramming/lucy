@@ -55,6 +55,13 @@ public class Type {
 	public findUsage  bool 
 	public rename bool 
 	public getHover bool 
+	/* 
+		a // this is a inline comment
+	*/
+	public inlineComment string   //   in
+	
+	public containsLf bool    // constains "\n"
+
 	
 	// copy to t 
 	fn cp(t Type) {

@@ -4,6 +4,7 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 public class StatementSwitchCase  {
 	public matches []Expression
 	public block   Block
+	public inlineComment string 
 }
 
 public class StatementSwitch  {
@@ -15,6 +16,8 @@ public class StatementSwitch  {
 	public StatementSwitchCases []StatementSwitchCase
 	public Default              Block
 	public exits                []cg.Exit
+	public inlineComment string 
+	public defaultInlineComment string 
 	
 	fn check(block Block) ->(errs []error = []error{})  {
 		if this.condition == null { // must be a error at parse stage

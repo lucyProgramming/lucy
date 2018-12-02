@@ -45,7 +45,17 @@ class ExpressionParser extends  ParserExtends {
 			}
 			// == ,
 			commnaPos := this.parser.mkPos()
-			this.next(lfNotToken) // skip ,
+			this.next(lfIsToken)
+			// skip = :=
+			if this.parser.token.Type == lex.TokenLf {
+				e.containsLf = true 
+				this.next(lfNotToken)
+			}else if this.parser.token.Type == lex.TokenComment {
+				e.inlineComment = this.parser.token.stringValue
+				this.next(lfNotToken)
+			}else {
+				//nothing
+			}
 			for this.parser.token.Type == lex.TokenComma {
 				this.parser.errs.append(
 					new error(sprintf("%s missing expression", this.parser.errMsgPrefix())))

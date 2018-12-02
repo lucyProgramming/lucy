@@ -65,14 +65,20 @@ class StatementForParser extends ParserExtends{
 			this.parser.errs.append( err)
 			return
 		}
-		this.next(lfNotToken) // skip {
+		this.next(lfIsToken) // skip {
+		if this.parser.token.Type == lex.TokenComment {
+			statementFor.inlineComment = this.parser.token.stringValue 
+			this.next(lfNotToken)
+		}else if this.parser.token.Type == lex.TokenLf {
+			this.next(lfNotToken)
+		}
 		this.bp.parseStatementList(statementFor.block, false)
 		if this.parser.token.Type != lex.TokenRc {
 			this.parser.errs.append( new error(sprintf("%s expect '}', but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description)))
 			this.consume(untilRc)
 		}
-		this.next(lfNotToken) // skip }
+		this.next(lfIsToken) // skip }
 		return statementFor, null
 	}
 	

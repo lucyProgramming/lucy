@@ -1,7 +1,6 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/ide"
 import "lucy/os"
-import "java/io"
 import "java/lang/Object"
 import "java/lang/Boolean"
 import "java/lang/Long"

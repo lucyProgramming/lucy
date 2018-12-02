@@ -12,7 +12,7 @@ public class StatementLabel {
 	public pos                 Pos
 	public findUsage bool 
 	public findUsageInstances []Usage  
-
+	public inlineComment string 
 
 	/*
 		defer {
