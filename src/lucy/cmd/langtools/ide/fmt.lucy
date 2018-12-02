@@ -642,7 +642,6 @@ public class Fmt {
     }
 
     fn formatExpression(indent string , e ast.Expression)-> (format string = "") {
-        e.indent = indent 
         switch e.Type {
             case ast.ExpressionTypeNull:
                 format = "null"
