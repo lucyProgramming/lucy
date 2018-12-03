@@ -18,6 +18,7 @@ public class Token {
 	public findUsage  bool 
 	public literalRaw string 
 	public rename bool 
+	public autoCompletion bool 
 }
 
 
@@ -131,10 +132,9 @@ public enum  TokenKind {
 	TokenWhen  ,                     // when
 	TokenComment       ,             //
 	TokenMultiLineComment  ,         //
+	TokenAutoCompletion ,           // special token for aotocompletion 
 	TokenEof                        // end of file
 }
-
-
 
 
 var keywordsMap = {

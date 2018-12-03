@@ -10,12 +10,13 @@ public class LucyFile {
     public getHover int 
     public findUsage int 
     public rename int 
-    
+    public autoCompletion int 
     fn LucyFile(){
         this.super()
         this.locateDefinition = -1 
         this.getHover = -1 
         this.findUsage = -1 
         this.rename = -1
+        this.autoCompletion = -1 
     }
 }

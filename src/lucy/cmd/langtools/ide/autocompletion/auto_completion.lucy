@@ -1,0 +1,31 @@
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/ide"
+
+class AutoCompletion {
+    lucyFiles []ide.LucyFile
+    packageName string 
+    
+    fn AutoCompletion(lucyFiles []ide.LucyFile , packageName string) {
+        this.super()
+        this.lucyFiles = lucyFiles
+        this.packageName = packageName
+    }
+    
+    fn getAutoCompletion() ->(result []ast.AutoCompletionItem) {
+        ide.packageLoader.onlyAnalyzeGlobals = true 
+        defer ide.packageLoader.onlyAnalyzeGlobals = false 
+        var p ast.Package 
+        {  // defer is block-level this will not panic the whole program
+            defer {
+                e := catch()
+                if e != null {
+                    print(e.getMessage())
+                }
+            }
+            nodes , _ := ide.parseAst(this.lucyFiles)
+            p = new ast.Package(this.packageName , true)
+            p.typeCheck(nodes)
+        }
+        return p.autoCompletionItems
+    }
+}

@@ -17,7 +17,7 @@ class FindDefinition {
     
     fn find() -> (result ast.Pos){
         //parse ast and typecheck
-        p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles)
+        p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles , false)
         if this.printErr{
             for v := range es{
                 os.stderr.println(v.getMessage())
@@ -32,9 +32,9 @@ class FindDefinition {
     }
     
     fn loadDefinitionFromOutside(out ast.LoadDefinitionFromOutside) -> (result ast.Pos) {
-        
+        // primary load definition from class file
     }
-
+    
 }
 
 

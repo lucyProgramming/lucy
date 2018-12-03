@@ -69,3 +69,7 @@ fn loadJavaStringClass(pos Pos) ->(err error) {
 		panic("loaded java string class is not a class")
 	}
 }
+
+fn panicDeliberately(reason string) {
+	panic(reason)
+}

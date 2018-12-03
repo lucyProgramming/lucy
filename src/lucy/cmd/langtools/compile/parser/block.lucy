@@ -71,6 +71,11 @@ class BlockParser  extends ParserExtends{
 				s.comment = this.parser.token.stringValue
 				block.statements.append(s)
 				comment.read()
+			case lex.TokenAutoCompletion:
+				s := new ast.Statement()
+				s.Type = ast.StatementTypeAutoCompletion
+				block.statements.append(s)
+				this.next(lfIsToken)
 			case lex.TokenSemicolon: // may be empty statement
 				resetPrefix()
 				this.next(lfNotToken) // look up next
@@ -500,6 +505,7 @@ class BlockParser  extends ParserExtends{
 			}
 			if isDefer {
 				d := new ast.StatementDefer()
+				d.isOneStatement = true 
 				d.pos = deferPos
 			    {
 			        t := new ast.Statement()

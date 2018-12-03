@@ -7,13 +7,9 @@ import "java/nio/file/FileSystems"
 import "java/lang/Object"
 import "lucy/cmd/langtools/common"
 
-
-fn main(args []string) {
-    f := new Flags()
-    file , pos := f.parseArgs(args)
+public fn findUsage(file string , pos int) ->(result Object){
     definition := gotodefinition.findDefinition(file , pos)
     if definition == null {
-        print("null")
         return 
     }
     lucyPath , packageName := ide.locateLucyFile(definition.filename)
@@ -25,7 +21,13 @@ fn main(args []string) {
             v.findUsage = definition.offset 
         }
     }
-    result := sortUsages(new FindUsage(lucyFiles , packageName , true , common.getLucyPath() ).find())
+    result = sortUsages(new FindUsage(lucyFiles , packageName , true , common.getLucyPath() ).find())
+}
+
+fn main(args []string) {
+    f := new Flags()
+    file , pos := f.parseArgs(args)
+    result := findUsage(file , pos)
     bs,err := json.encode(result)
     if err != null {
         panic(err)

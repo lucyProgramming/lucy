@@ -436,14 +436,14 @@ public class Type {
 		return this.Type == VariableTypeFloat ||
 			this.Type == VariableTypeDouble
 	}
-
+	
 	public fn isPrimitive() -> (is bool)  {
 		return this.isNumber() ||
 			this.Type == VariableTypeString ||
 			this.Type == VariableTypeBool
 	}
 
-	public fn typeName(prefix string = "") ->(ret string) {
+	public fn typeName(prefix string = "" ) ->(ret string) {
 		switch this.Type {
 		case VariableTypeBool:
 			return prefix +  "bool"
@@ -463,7 +463,7 @@ public class Type {
 			return prefix +  "double"
 		case VariableTypeString:
 			return prefix +  "string"
-		case VariableTypeObject: // class name
+		case VariableTypeObject: // must resolved form a name
 			return prefix + this.name
 		case VariableTypeMap:
 			ret =prefix + "map{"
@@ -496,7 +496,7 @@ public class Type {
 		case VariableTypeDynamicSelector:
 			panic("not happening")
 		case VariableTypeVoid:
-			ret = prefix + "void"
+			panic("not happening")
 		case VariableTypePackage:
 			panic("not happening")
 		case VariableTypeNull:
@@ -532,7 +532,7 @@ public class Type {
 		case VariableTypeObject: // class name
 			return prefix +  "object@" + this.Class.name
 		case VariableTypeMap:
-			ret =prefix + "map{"
+			ret = prefix + "map{"
 			ret += this.Map.K.typeString()
 			ret += " -> "
 			ret += this.Map.V.typeString()
@@ -568,7 +568,7 @@ public class Type {
 		case VariableTypeNull:
 			ret = prefix + "null"
 		case VariableTypeGlobal:
-			ret = prefix + this.name
+			ret = prefix + "global." +this.name
 		}
 	}
 

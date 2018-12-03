@@ -10,7 +10,6 @@ public class BuildInFunctionSprintfMeta  {
 	public argsLength int
 }
 
-
 public class BuildInFunctionPanicMeta  {
 	public argThrowable bool
 }

@@ -8,6 +8,7 @@ public class StatementDefer {
 	public block          Block = new Block()
 	public exceptionClass Class
 	public inlineComment string 
+	public isOneStatement bool 
 	public fn resetLabels() {
 		for _, v := range this.labels {
 			v.Reset()

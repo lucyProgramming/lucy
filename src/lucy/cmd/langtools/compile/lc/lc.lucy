@@ -6,7 +6,8 @@ import "lucy/cmd/langtools/compile/common"
 import "lucy/os"
 import "lucy/encoding/json"
 
-public fn Main ( destinationDir string , flags common.Flags , files []string ,lucyPaths , classPaths []string , ifErrExit bool) {
+public fn Main ( destinationDir string , 
+	flags common.Flags , files []string ,lucyPaths , classPaths []string , ifErrExit bool) -> (hasMain bool ){
     var	compiler  = new Compiler()
     var	loader  = new  FileLoader(lucyPaths , classPaths)
     ast.ImportsLoader = loader
@@ -16,7 +17,7 @@ public fn Main ( destinationDir string , flags common.Flags , files []string ,lu
 	}
 	compiler.flags = flags
 	compiler.destinationDir =	destinationDir 
-	compiler.compile(files,lucyPaths,classPaths)
+	return compiler.compile(files,lucyPaths,classPaths)
 }
 
 
@@ -70,7 +71,7 @@ public class Compiler {
 		print(string(bs))
 	}
 
-	fn compile(files []string,lucyPaths , classPaths []string) {
+	fn compile(files []string,lucyPaths , classPaths []string) -> (hasMain bool ) {
 	    this.lucyPaths = lucyPaths
 	    this.classPaths = classPaths
         this.Files = files
@@ -122,7 +123,7 @@ public class Compiler {
 				bs = bs[3:]
 			}
 			this.Errs.appendAll(parser.Parse(this.Tops, v, bs ,
-				this.flags.onlyImport.getValue(), this.NErrs2StopCompile, -1 , -1 , -1 , -1))
+				this.flags.onlyImport.getValue(), this.NErrs2StopCompile, -1 , -1 , -1 , -1 , -1))
 			this.shouldExit()
 		}
 		// parse import only
@@ -141,6 +142,7 @@ public class Compiler {
 			this.exit()
 		}
 		this.buildPackage.make(p,this.destinationDir)
+		return p.hasMain 
 	}
 }
 

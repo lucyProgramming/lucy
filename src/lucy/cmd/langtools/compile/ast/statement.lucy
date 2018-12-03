@@ -21,7 +21,8 @@ public enum StatementTypeKind {
 	StatementTypeTypeAlias ,
 	StatementTypeComment ,
 	StatementTypeCommentMultiLine , 
-	StatementTypeEmptyLine 
+	StatementTypeEmptyLine  , 
+	StatementTypeAutoCompletion 
 }
 
 public class Statement {
@@ -60,44 +61,12 @@ public class Statement {
 		}
 		return this.Expression.Type == ExpressionTypeVarAssign ||
 			this.Expression.Type == ExpressionTypeVar
+
+			
 	}
 	
-	/*
-	fn simplifyIf() {
-		if len(this.StatementIf.elseIfList) > 0 {
-			return
-		}
-		if len(this.StatementIf.prefixExpressions) > 0 {
-			return
-		}
-		if this.StatementIf.condition.Type != ExpressionTypeBool {
-			return
-		}
-		c := this.StatementIf.condition.boolValue
-		if c {
-			this.Type = StatementTypeBlock
-			this.block = this.StatementIf.block
-		} else {
-			if this.StatementIf.Else != null {
-				this.Type = StatementTypeBlock
-				this.block = this.StatementIf.Else
-			} else {
-				this.Type = StatementTypeNop
-			}
-		}
-	}
+	
 
-	fn simplifyFor() {
-		if this.StatementFor.Init == null &&
-			this.StatementFor.increment == null &&
-			this.StatementFor.condition != null &&
-			this.StatementFor.condition.Type == ExpressionTypeBool &&
-			this.StatementFor.condition.boolValue == false  {
-			this.Type = StatementTypeNop
-			this.StatementFor = null
-		}
-	}
-	*/
 
 	fn check(block Block) -> (errs []error) {
 		this.checked = true
@@ -108,6 +77,9 @@ public class Statement {
 			//nothing
 		case StatementTypeEmptyLine:
 			//noting
+		case StatementTypeAutoCompletion:
+			block.inheritedAttribute.p.autoCompletionItems = this.mkAutoCompletionItems(block)
+			panicDeliberately("auto completion finish")
 		case StatementTypeExpression:
 			return this.checkStatementExpression(block)
 		case StatementTypeIf:
@@ -194,6 +166,7 @@ public class Statement {
 		case StatementTypeNop:
 			//nop , should be never execute to here
 			//
+
 		case StatementTypeWhen:
 			return this.StatementWhen.check(block, this)
 		case StatementTypeImport:
@@ -236,6 +209,48 @@ public class Statement {
 		}
 		return null
 	}
+	
+	/*
+		fn xxx () {
+			auto_completion_is_here 
+		}
+	*/
+	fn mkAutoCompletionItems(block Block) -> (items []AutoCompletionItem = []AutoCompletionItem {} ) {
+		names := new map{string -> bool}()
+		block.walk(fn (b Block){
+			for name ,v := range b.variables {
+				if names.keyExist(name) {
+					continue 
+				}
+				item  := new AutoCompletionItem()
+				item.Type = "variable"
+				item.name = name 
+				items.append(item)
+				names[name] = true 
+			}
+			for name ,v := range b.functions {
+				if names.keyExist(name) {
+					continue
+				}
+				item  := new AutoCompletionItem()
+				item.Type = "function"
+				item.name = name 
+				item.functionDefinition = v.readableMsg()
+				items.append(item)
+				names[name] = true 
+			}
+			for name ,v := range b.Classes {
+				if names.keyExist(name) {
+					continue
+				}
+				item  := new AutoCompletionItem()
+				item.Type = "class"
+				item.name = name 
+				items.append(item)
+				names[name] = true 
+			}
+		}) 
+	}
 
 	fn checkStatementExpression(block Block) ->(errs []error = []error{})  {
 		this.Expression.isStatementExpression = true
@@ -246,4 +261,42 @@ public class Statement {
 		errs.appendAll(es)
 		return errs
 	}
+
+
+	/*
+	fn simplifyIf() {
+		if len(this.StatementIf.elseIfList) > 0 {
+			return
+		}
+		if len(this.StatementIf.prefixExpressions) > 0 {
+			return
+		}
+		if this.StatementIf.condition.Type != ExpressionTypeBool {
+			return
+		}
+		c := this.StatementIf.condition.boolValue
+		if c {
+			this.Type = StatementTypeBlock
+			this.block = this.StatementIf.block
+		} else {
+			if this.StatementIf.Else != null {
+				this.Type = StatementTypeBlock
+				this.block = this.StatementIf.Else
+			} else {
+				this.Type = StatementTypeNop
+			}
+		}
+	}
+
+	fn simplifyFor() {
+		if this.StatementFor.Init == null &&
+			this.StatementFor.increment == null &&
+			this.StatementFor.condition != null &&
+			this.StatementFor.condition.Type == ExpressionTypeBool &&
+			this.StatementFor.condition.boolValue == false  {
+			this.Type = StatementTypeNop
+			this.StatementFor = null
+		}
+	}
+	*/
 }

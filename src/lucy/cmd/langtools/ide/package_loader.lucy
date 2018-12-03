@@ -6,7 +6,8 @@ import "java/io"
 
 
 public class PackageLoader extends lc.FileLoader {
-    
+    public onlyAnalyzeGlobals bool 
+
     public fn PackageLoader(lucyPaths , classPaths []string){
         this.super(lucyPaths ,classPaths )
     }
@@ -98,8 +99,8 @@ public class PackageLoader extends lc.FileLoader {
 
     public fn  loadLucyPackage(r lc.Resource) -> (p ast.Package) {
         lucyFiles := readLucyFiles(getLucyFiles(r.realPath))
-        p , _ =  parseAstAndTypeCheck(r.name ,lucyFiles)
-    } 
+        p , _ =  parseAstAndTypeCheck(r.name , lucyFiles , this.onlyAnalyzeGlobals)
+    }
 }
 
 

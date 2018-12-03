@@ -31,6 +31,17 @@ public class Block {
 	public variables                 map{string->Variable}
 	checkConstantsCalled      bool
     
+    /* 
+    
+    */
+    fn walk (f fn (block Block)) {
+        b := this 
+        for b != null {
+            f(b)
+            b = b.outer
+        }
+    }
+
     public fn nameExists(name string , pos Pos) -> (x Object,exist bool) {
         if this.functions != null {
             if t := this.functions[name]; t != null {
@@ -287,7 +298,6 @@ public class Block {
         if this.inheritedAttribute == null {
             this.inheritedAttribute = new InheritedAttribute()
         }
-        
         this.outer = father
         this.inheritedAttribute.forBreak = father.inheritedAttribute.forBreak
         this.inheritedAttribute.statementOffset = father.inheritedAttribute.statementOffset
@@ -557,46 +567,3 @@ public class Block {
         panic("not happening")
     }
 }
-
-
-
-// if this.functions != null {
-//     if t := this.functions[name]; t != null {
-//         t.used = true
-//         return t, null
-//     }
-// }
-// if this.variables != null {
-//     if t := this.variables[name]; t != null {
-//         return t, null
-//     }
-// }
-// if this.constants != null {
-//     if t := this.constants[name]; t != null {
-//         t.used = true
-//         return t, null
-//     }
-// }
-// if this.EnumNames != null {
-//     if t := this.EnumNames[name]; t != null {
-//         t.Enum.used = true
-//         return t, null
-//     }
-// }
-// if this.enums != null {
-//     if t := this.enums[name]; t != null {
-//         t.used = true
-//         return t, null
-//     }
-// }
-// if this.Classes != null {
-//     if t := this.Classes[name]; t != null {
-//         t.used = true
-//         return t, null
-//     }
-// }
-// if this.typeAliases != null {
-//     if t := this.typeAliases[name]; t != null {
-//         return t, null
-//     }
-// }

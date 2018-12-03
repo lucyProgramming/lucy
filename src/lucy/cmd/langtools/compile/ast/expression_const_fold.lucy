@@ -1,7 +1,5 @@
 
-
 class ExpressionConstFold {
-
 
 	static fn constantFold(e Expression) -> (is bool, err error) {
 		if e.isLiteral() {
@@ -21,6 +19,7 @@ class ExpressionConstFold {
 			}
 			e.Type = ee.Type
 			e.longValue = ~ee.longValue
+			e.literalRaw = "~" + ee.literalRaw
 		    return
 		}
 		// !
@@ -37,6 +36,7 @@ class ExpressionConstFold {
 			}
 			e.Type = ExpressionTypeBool
 			e.boolValue = !ee.boolValue
+			e.literalRaw = "!" + ee.literalRaw
 			return
 		}
 		// -
@@ -69,8 +69,8 @@ class ExpressionConstFold {
                 e.doubleValue = -ee.doubleValue
 			case ExpressionTypeDouble:
 				e.doubleValue = -ee.doubleValue
-            default:
 			}
+			e.literalRaw = "-" + ee.literalRaw
 			return
 		}
 		// && and ||
@@ -95,6 +95,7 @@ class ExpressionConstFold {
 			} else {
 				e.boolValue = bin.left.boolValue || bin.right.boolValue
 			}
+			e.literalRaw = bin.left.literalRaw + " " + e.op + " " + bin.right.literalRaw
 			e.Type = ExpressionTypeBool
 			return
 		}
@@ -145,6 +146,7 @@ class ExpressionConstFold {
 				//		packageBeenCompile.errors = append(packageBeenCompile.errors, this.longExceeds(this.data.(long)))
 				//	}
 				//}
+				e.literalRaw = bin.left.literalRaw + " " + e.op + " " + bin.right.literalRaw 
 				e.Type = bin.left.Type
 				is = true
 				return
@@ -176,6 +178,7 @@ class ExpressionConstFold {
 				//		packageBeenCompile.errors = append(packageBeenCompile.errors, this.floatExceeds())
 				//	}
 				//}
+				e.literalRaw = bin.left.literalRaw + " " + e.op + " " +  bin.right.literalRaw 
 				e.Type = bin.left.Type
 				is = true
 				return
@@ -185,6 +188,7 @@ class ExpressionConstFold {
 				if e.Type == ExpressionTypeAdd {
 					if len(left)+len(right) < 65536 {
 						e.Type = ExpressionTypeString
+						e.literalRaw = bin.left.literalRaw + " " + e.op + " " +  bin.right.literalRaw 
 						e.stringValue = left + right
 					} else {
 						return false, null
@@ -239,6 +243,7 @@ class ExpressionConstFold {
 			//		}
 			//	}
 			//}
+			e.literalRaw = bin.left.literalRaw + " " + e.op + " " +  bin.right.literalRaw 
 			e.Type = bin.left.Type
 			return
 
@@ -271,6 +276,7 @@ class ExpressionConstFold {
             } else {
                 e.longValue = bin.left.longValue ^ bin.right.longValue
             }
+			e.literalRaw = bin.left.literalRaw + " " + e.op + " " +  bin.right.literalRaw 
 			is = true
 			e.Type = bin.left.Type
 			return
@@ -290,6 +296,7 @@ class ExpressionConstFold {
 			is = true
 			e.Type = ExpressionTypeBool
 			e.boolValue = !ee.boolValue
+			e.literalRaw = "!" + ee.literalRaw
 			return
 		}
 		//  == != > < >= <=
@@ -310,99 +317,98 @@ class ExpressionConstFold {
 			}
 			if bin.left.Type != bin.right.Type {
 				return
-			} 
-
+			}
 			if bin.left.Type != bin.right.Type {
-			return false, null
-		}
-		if bin.left.Type == ExpressionTypeBool &&
-			bin.right.Type == ExpressionTypeBool &&
-			e.isEqOrNe() {
-			if e.Type == ExpressionTypeEq {
-				e.boolValue = bin.left.boolValue == bin.right.boolValue
-			} else {
-				e.boolValue = bin.left.boolValue != bin.right.boolValue
+				return false, null
 			}
-			e.Type = ExpressionTypeBool
-			return
-		}
-		switch bin.left.Type {
-		case ExpressionTypeString:
-			left := bin.left.stringValue
-			right := bin.right.stringValue
-			switch e.Type {
-			case ExpressionTypeEq:
-				e.boolValue = left == right
-			case ExpressionTypeNe:
-				e.boolValue = left != right
-			case ExpressionTypeGe:
-				e.boolValue = left >= right
-			case ExpressionTypeGt:
-				e.boolValue = left > right
-			case ExpressionTypeLe:
-				e.boolValue = left <= right
-			case ExpressionTypeLt:
-				e.boolValue = left < right
-			default:
+			if bin.left.Type == ExpressionTypeBool &&
+				bin.right.Type == ExpressionTypeBool &&
+				e.isEqOrNe() {
+				if e.Type == ExpressionTypeEq {
+					e.boolValue = bin.left.boolValue == bin.right.boolValue
+				} else {
+					e.boolValue = bin.left.boolValue != bin.right.boolValue
+				}
+				e.Type = ExpressionTypeBool
+				if e.boolValue {
+					e.literalRaw = "true"
+				}else {
+					e.literalRaw = "false"
+				}
+				is = true
+				return
+			}		
+			switch bin.left.Type {
+				case ExpressionTypeString:
+					left := bin.left.stringValue
+					right := bin.right.stringValue
+					switch e.Type {
+					case ExpressionTypeEq:
+						e.boolValue = left == right
+					case ExpressionTypeNe:
+						e.boolValue = left != right
+					case ExpressionTypeGe:
+						e.boolValue = left >= right
+					case ExpressionTypeGt:
+						e.boolValue = left > right
+					case ExpressionTypeLe:
+						e.boolValue = left <= right
+					case ExpressionTypeLt:
+						e.boolValue = left < right
+					}
+					is = true
+					e.Type = ExpressionTypeBool
+					return
+				case ExpressionTypeByte ,ExpressionTypeShort ,  ExpressionTypeChar , ExpressionTypeInt,ExpressionTypeLong:
+					left := bin.left.longValue
+					right := bin.right.longValue
+					switch e.Type {
+					case ExpressionTypeEq:
+						e.boolValue = left == right
+					case ExpressionTypeNe:
+						e.boolValue = left != right
+					case ExpressionTypeGe:
+						e.boolValue = left >= right
+					case ExpressionTypeGt:
+						e.boolValue = left > right
+					case ExpressionTypeLe:
+						e.boolValue = left <= right
+					case ExpressionTypeLt:
+						e.boolValue = left < right
+					}
+					is = true
+					e.Type = ExpressionTypeBool
+					return
+				case ExpressionTypeFloat , ExpressionTypeDouble:
+					left := bin.left.doubleValue
+					right := bin.right.doubleValue
+					switch e.Type {
+					case ExpressionTypeEq:
+						e.boolValue = left == right
+					case ExpressionTypeNe:
+						e.boolValue = left != right
+					case ExpressionTypeGe:
+						e.boolValue = left >= right
+					case ExpressionTypeGt:
+						e.boolValue = left > right
+					case ExpressionTypeLe:
+						e.boolValue = left <= right
+					case ExpressionTypeLt:
+						e.boolValue = left < right
+					}
+					is = true
+					e.Type = ExpressionTypeBool
+					return
+					return false , null 
 			}
-			is = true
-			e.Type = ExpressionTypeBool
 			return
-		case ExpressionTypeByte ,ExpressionTypeShort ,  ExpressionTypeChar , ExpressionTypeInt,ExpressionTypeLong:
-			left := bin.left.longValue
-			right := bin.right.longValue
-			switch e.Type {
-			case ExpressionTypeEq:
-				e.boolValue = left == right
-			case ExpressionTypeNe:
-				e.boolValue = left != right
-			case ExpressionTypeGe:
-				e.boolValue = left >= right
-			case ExpressionTypeGt:
-				e.boolValue = left > right
-			case ExpressionTypeLe:
-				e.boolValue = left <= right
-			case ExpressionTypeLt:
-				e.boolValue = left < right
-            default:
-			}
-			is = true
-			e.Type = ExpressionTypeBool
-			return
-		case ExpressionTypeFloat , ExpressionTypeDouble:
-			left := bin.left.doubleValue
-			right := bin.right.doubleValue
-			switch e.Type {
-			case ExpressionTypeEq:
-				e.boolValue = left == right
-			case ExpressionTypeNe:
-				e.boolValue = left != right
-			case ExpressionTypeGe:
-				e.boolValue = left >= right
-			case ExpressionTypeGt:
-				e.boolValue = left > right
-			case ExpressionTypeLe:
-				e.boolValue = left <= right
-			case ExpressionTypeLt:
-				e.boolValue = left < right
-            default:
-			}
-			is = true
-			e.Type = ExpressionTypeBool
-			return
-        default:
-        	return false , null 
-		}
-		return
 		}
 	}
-
-	
 	
 
-	
-	 
+
 }
+
 
 
 

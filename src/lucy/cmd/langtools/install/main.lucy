@@ -9,7 +9,6 @@ fn printUsage() {
 	print(flagParser.helpMsg()) 
 }
 
-
 fn main(args []string) {
 	var lucyRoot = common.getLucyRoot()
 	var verbose = flagParser.boolOption("-v" , false  , "package name" ) 

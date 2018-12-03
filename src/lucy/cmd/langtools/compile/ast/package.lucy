@@ -16,7 +16,7 @@ public class Package {
 	statementLevelClass          []Class
 	disableCheckUnuse  				bool 
 	javaPackage JavaPackage
-	
+	public hasMain bool 
 	/*
 		for lucy tool goto definition
 	*/
@@ -36,8 +36,8 @@ public class Package {
 
 	public renameIsGlobal bool 
 
-
-
+	public autoCompletionItems []AutoCompletionItem
+	
 	public fn Package(name string,disableCheckUnuse bool){
 		this.super()
 		assert(name != null )
@@ -284,6 +284,7 @@ public class Package {
 			v.block.inheritedAttribute.Function = v
 			v.checkParametersAndReturns(this.errors, false, false)
 			if v.isGlobalMain() {
+				this.hasMain = true
 				defineMainOK := false
 				if len(v.Type.parameterList) == 1 {
 					defineMainOK = v.Type.parameterList[0].Type.Type == VariableTypeArray &&

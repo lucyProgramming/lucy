@@ -119,6 +119,7 @@ class BuildBlock {
 			//nothing 
 		case ast.StatementTypeEmptyLine:
 			// noting 
+			
 		case ast.StatementTypeExpression:
 			maxStack = this.eb.build(c, code, s.Expression, context, state)
 		case ast.StatementTypeIf:

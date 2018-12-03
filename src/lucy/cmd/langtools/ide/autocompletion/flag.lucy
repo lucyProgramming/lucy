@@ -2,9 +2,8 @@ import "lucy/os/flag"
 
 
 class Flags {
-	
 	file flag.StringOption
-	pos flag.IntOption  
+	pos flag.IntOption
 	parser flag.FlagParser
 	
 	fn Flags(){

@@ -1,9 +1,37 @@
 
+import "lucy/encoding/json"
+import "lucy/cmd/langtools/ide"
+import "java/nio/file/FileSystems"
+import "lucy/cmd/langtools/compile/ast"
+import "java/lang/System"
+
+
+public fn autoCompletion(file string , pos int) -> (result []ast.AutoCompletionItem){
+    lucyPath , packageName := ide.locateLucyFile(file)
+    var lucyFiles = ide.readLucyFiles(ide.getLucyFiles(lucyPath + "/src/" + packageName))    
+    fileSystem := FileSystems.getDefault()
+    for v := range lucyFiles {
+        if fileSystem.getPath(file).getFileName().toString() == 
+            fileSystem.getPath(v.realPathName).getFileName().toString(){
+            v.autoCompletion = pos 
+        }
+    }
+    result = new AutoCompletion(lucyFiles , packageName).getAutoCompletion()
+}
+
 
 
 fn main(args []string) {
-    
-
+    a := System.currentTimeMillis()
+    file,pos := new Flags().parseArgs(args)
+    items := autoCompletion(file,pos)
+    result := copy(new ast.AutoCompletionItem[](len(items)) ,   items)
+    bs,err := json.encode(result)
+    if err != null {
+        panic(err)
+    }
+    print(string(bs))
+    print(System.currentTimeMillis() - a )
 }
 
 

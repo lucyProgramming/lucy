@@ -1,0 +1,7 @@
+
+public class AutoCompletionItem {
+    public Type string 
+    public name string 
+    public functionDefinition string  // used by function
+    public suggest string   // used by function
+}

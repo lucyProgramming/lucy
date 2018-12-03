@@ -4,10 +4,7 @@ import "lucy/cmd/langtools/ide/gotodefinition"
 import "java/nio/file/FileSystems"
 import "lucy/cmd/langtools/common"
 
-
-fn main(args []string) {
-    f := new Flags()
-    file , to , pos := f.parseArgs(args)
+public fn rename( file string, to string, pos int) {
     definition := gotodefinition.findDefinition(file , pos)
     if definition == null {
         print("null")
@@ -19,8 +16,14 @@ fn main(args []string) {
     for v := range lucyFiles {
         if fileSystem.getPath(file).getFileName().toString() == 
             fileSystem.getPath(v.realPathName).getFileName().toString(){
-            v.findUsage = definition.offset 
+            v.rename = definition.offset 
         }
     }
     new ReName(lucyFiles , packageName , true ,common.getClassPath(), common.getLucyPath() , to ).rename()
+}
+
+fn main(args []string) {
+    f := new Flags()
+    file , to , pos := f.parseArgs(args)
+    rename(file, to , pos)
 }

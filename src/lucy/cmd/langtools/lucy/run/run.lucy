@@ -60,6 +60,11 @@ public class RunLucyPackage {
         if this.flags.build.getValue() {
             return
         }
+        //TODO :: 
+        // if false == meta.hasMain {
+        //     print("no main function")
+        //     os.exit(4)
+        // }
         cmdArray := []string{"java" , this.Package + "/" + "main"}
         cmdArray.appendAll(this.lucyProgramArgs)
         var envs = new string[](len(os.getEnvs()))
@@ -212,7 +217,7 @@ public class RunLucyPackage {
     fn parseImports(files []LucyFile) -> (imports []string = []string{}) {
         importNodes := []ast.TopNode{}
         for _,v := range files {
-            parser.Parse(importNodes ,  v.realpathName , v.bs , true ,10 , -1,-1,-1 , -1)
+            parser.Parse(importNodes ,  v.realpathName , v.bs , true ,10 , -1,-1,-1 ,-1 , -1)
         }
         m := new map{string->bool}()
         for _,v := range importNodes{
@@ -357,7 +362,7 @@ public class RunLucyPackage {
         }
         f := new compileCommon.Flags()
         f.parseArgs(["-package-name" , packageName])
-        lc.Main(destinationDir , f , files , this.lucyPaths , this.classPaths , true)
+        hasMain := lc.Main(destinationDir , f , files , this.lucyPaths , this.classPaths , true)
         // make_node_objects maitain.json
         meta = new common.PackageMeta()
         meta.compiledFrom = new common.FileMeta[](len(lucyFiles))
@@ -392,6 +397,7 @@ public class RunLucyPackage {
             copy(new byte[](len(bs)) ,bs ))
         t := new PackageCompiled()
         t.meta = meta
+        meta.hasMain = hasMain  
         t.packageName = packageName
         this.packagesCompiled[packageName] = t
         needBuild = true

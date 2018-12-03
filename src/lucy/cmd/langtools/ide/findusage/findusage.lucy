@@ -18,7 +18,7 @@ class FindUsage {
     }
     
     fn find() -> (result []ast.Usage){
-        p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles)
+        p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles ,false )
         if this.printErr{
             for v := range es{
                 os.stderr.println(v.getMessage())
@@ -73,7 +73,7 @@ class FindUsage {
         if imported == false {
             return 
         }
-        _ , es := ide.parseAstAndTypeCheck(packageName , lucyFiles )
+        _ , es := ide.parseAstAndTypeCheck(packageName , lucyFiles,false )
         if this.printErr{
             for v := range es{
                 os.stderr.println(v.getMessage())

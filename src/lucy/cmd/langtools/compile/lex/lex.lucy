@@ -11,6 +11,7 @@ public class Lexer {
 	getHover int 
 	findUsage int 
 	rename int 
+	autoCompletion int 
 	 
 	public fn GetLineAndColumn() -> (line int, column int) {
 		return this.line, this.column
@@ -301,6 +302,11 @@ public class Lexer {
 					token.rename = true 
 				}
 			}
+			if this.autoCompletion > 0 {
+				if this.autoCompletion >= startOffset && this.autoCompletion < this.offset {
+					token.autoCompletion = true 
+				}
+			}
 		}
 		token.endOffset = this.offset 
 		token.endLine = this.line
@@ -541,6 +547,10 @@ public class Lexer {
 		for c == ' ' ||
 			c == '\t' ||
 			c == '\r' { // skip empty
+			if this.offset - 1 == this.autoCompletion {
+				token.Type = TokenAutoCompletion
+				return  
+			}
 			c, eof = this.getChar()
 		}
 		token.startLine = this.line
@@ -557,7 +567,7 @@ public class Lexer {
 			eof, err = this.lexNumber(token, c)
 			return
 		}
-		token.offset = this.offset
+		token.offset = this.offset - 1
 		switch c {
 		case '?':
 			token.Type = TokenQuestion

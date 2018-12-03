@@ -68,15 +68,15 @@ public class FunctionType {
 			}
 			s += v.Type.typeName()
 			if v.defaultValueExpression != null {
-				s += " = " + v.defaultValueExpression.op
+				s += " = " + v.defaultValueExpression.literalRaw 
 			}
 			if k != len(this.parameterList)-1 {
-				s += ","
+				s += " , "
 			}
 		}
 		if this.vArgs != null {
 			if len(this.parameterList) > 0 {
-				s += ","
+				s += " , "
 			}
 			if this.vArgs.name != null && this.vArgs.name != "" {
 				s += this.vArgs.name + " "

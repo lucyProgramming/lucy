@@ -5,6 +5,7 @@ public class PackageMeta {
 	public imports      Import[]
 	public compileTime  long // in seconds
 	public classes      string[]
+	public hasMain bool 
 }
 
 

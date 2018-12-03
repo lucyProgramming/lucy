@@ -2,18 +2,23 @@
 import "lucy/cmd/langtools/ide"
 import "lucy/os"
 import "lucy/encoding/json"
+import "java/lang/Object"
 
-
-fn main (args []string) {
-    dir := new Flags().parseArgs(args)
+public fn getAllDefinition (dir string ) -> (result Object){
     lucyFileNames := ide.getLucyFiles(dir)
     if len(lucyFileNames) == 0 {
         print("the directory contains no lucy file")
         os.exit(1)
     }
     lucyPath , packageName := ide.locateDir(dir)
-    result := new AllDefinition(ide.readLucyFiles(lucyFileNames) , packageName ,  lucyPath , true).getAllDefinition()
-    bs,err := json.encode(result , "\t")
+    result = new AllDefinition(ide.readLucyFiles(lucyFileNames) , packageName ,  lucyPath , true).getAllDefinition()
+}
+
+
+
+fn main (args []string) {
+    dir := new Flags().parseArgs(args)
+     bs,err := json.encode(getAllDefinition(dir) , "\t")
     if err != null {
         print(err)
     }

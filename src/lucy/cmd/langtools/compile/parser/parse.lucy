@@ -19,9 +19,9 @@ public fn Parse(
 	filename string,
 	bs []byte,
 	onlyParseImport bool,
-	nErrors2Stop int , locateDefinition int ,getHover int , findUsage int ,rename int  ) -> (errs []error) {
+	nErrors2Stop int , locateDefinition int ,getHover int , findUsage int ,rename int , autoCompletion int   ) -> (errs []error) {
 	p := new Parser(bs , tops , filename , onlyParseImport , nErrors2Stop )
-	p.lexer = lex.New(bs, 1, 1 , locateDefinition , getHover , findUsage ,rename)
+	p.lexer = lex.New(bs, 1, 1 , locateDefinition , getHover , findUsage , rename , autoCompletion)
 	return p.parse()
 }
 

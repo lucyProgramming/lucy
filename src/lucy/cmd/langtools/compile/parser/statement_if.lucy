@@ -43,7 +43,7 @@ class StatementIfParser extends ParserExtends {
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s missing '{' after condition,but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))
-			this.parser.errs.append( err)
+			this.parser.errs.append(err)
 			this.consume(untilLc)
 		}
 		this.next(lfIsToken) //skip {

@@ -19,7 +19,7 @@ class PackageLoader extends  ide.PackageLoader {
         for _,v := range lucyFiles {
             length := len(tops)
             errs.appendAll(
-                parser.Parse(tops , v.realPathName , v.bs , false , 10 , -1 , -1 , -1 ,  -1) 
+                parser.Parse(tops , v.realPathName , v.bs , false , 10 , -1 , -1 , -1 , -1 , -1) 
             )
             this.rename.lucyAstNodes[v.realPathName] = tops[length : len(tops)]
         }
