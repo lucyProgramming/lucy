@@ -215,41 +215,8 @@ public class Statement {
 			auto_completion_is_here 
 		}
 	*/
-	fn mkAutoCompletionItems(block Block) -> (items []AutoCompletionItem = []AutoCompletionItem {} ) {
-		names := new map{string -> bool}()
-		block.walk(fn (b Block){
-			for name ,v := range b.variables {
-				if names.keyExist(name) {
-					continue 
-				}
-				item  := new AutoCompletionItem()
-				item.Type = "variable"
-				item.name = name 
-				items.append(item)
-				names[name] = true 
-			}
-			for name ,v := range b.functions {
-				if names.keyExist(name) {
-					continue
-				}
-				item  := new AutoCompletionItem()
-				item.Type = "function"
-				item.name = name 
-				item.functionDefinition = v.readableMsg()
-				items.append(item)
-				names[name] = true 
-			}
-			for name ,v := range b.Classes {
-				if names.keyExist(name) {
-					continue
-				}
-				item  := new AutoCompletionItem()
-				item.Type = "class"
-				item.name = name 
-				items.append(item)
-				names[name] = true 
-			}
-		}) 
+	fn mkAutoCompletionItems(block Block) -> (items []AutoCompletionItem ) {
+		items = searchRightValueForAutoCompletionItems(block)
 	}
 
 	fn checkStatementExpression(block Block) ->(errs []error = []error{})  {
