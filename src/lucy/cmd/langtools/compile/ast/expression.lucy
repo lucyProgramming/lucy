@@ -325,17 +325,19 @@ public class Expression {
 			return len(this.multiValues) > 1
 		}
 		return false
-
 	}
 
 	
-
+	
 	fn check(block Block) -> (returnValueTypes []Type, errs []error = []error{}) {
 		_, err := this.constantFold()
 		if err != null {
 			return null, []error{err}
 		}
 		switch this.Type {
+		case ExpressionTypeAutoCompletion:
+			block.inheritedAttribute.p.autoCompletionItems = searchRightValueForAutoCompletionItems(block)
+			panicDeliberately("auto completion finish")
 		case ExpressionTypeNull:
 		    this.value = new Type()
 		    this.value.Type = VariableTypeNull

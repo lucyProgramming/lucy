@@ -230,7 +230,6 @@ fn correctLastUsageType(t string , usage []Usage) ->(u Usage) {
 	u.Type = t 
 } 
 
-
 fn searchRightValueForAutoCompletionItems(block Block) -> (items []AutoCompletionItem = []AutoCompletionItem {} ) {
 	names := new map{string -> bool}()
 	block.walk(fn (b Block){
@@ -252,6 +251,7 @@ fn searchRightValueForAutoCompletionItems(block Block) -> (items []AutoCompletio
 			item.Type = "function"
 			item.name = name 
 			item.functionDefinition = v.readableMsg()
+			item.suggest = v.mkSuggest()
 			items.append(item)
 			names[name] = true 
 		}

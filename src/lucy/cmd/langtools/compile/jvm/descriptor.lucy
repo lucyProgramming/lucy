@@ -56,6 +56,8 @@ public class Descriptor  {
 			return "L" + javaMethodHandleClass + ";"
 		case ast.VariableTypeJavaArray:
 			return "[" + .typeDescriptor(typ.array)
+		default:
+			
 		}
 		panic("unHandle type signature")
 	}

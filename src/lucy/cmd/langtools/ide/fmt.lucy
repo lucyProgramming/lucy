@@ -409,7 +409,7 @@ public class Fmt {
             format += this.formatStatement(indent , s)
         }
     }
-
+    
     fn formatStatement(indent string , s ast.Statement) -> (format string = ""){
         switch s.Type {
             case ast.StatementTypeExpression:
@@ -467,6 +467,8 @@ public class Fmt {
             case ast.StatementTypeCommentMultiLine:
                 format += indent + "/*\n" + s.comment 
                 format += indent + "*/\n"   
+            case ast.StatementTypeAutoCompletion:
+                // not possible 
         }
     }
     fn formatTypealias(indent string ,a ast.TypeAlias)-> (format string = "") {

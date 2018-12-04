@@ -116,10 +116,17 @@ class BuildBlock {
 		switch s.Type {
 		case ast.StatementTypeComment,
 			ast.StatementTypeCommentMultiLine:
-			//nothing 
+			//handle at ast
 		case ast.StatementTypeEmptyLine:
-			// noting 
-			
+			//handle at ast
+		case ast.StatementTypeAutoCompletion:
+			//handle at ast
+		case ast.StatementTypeImport:
+			//handle at ast
+		case ast.StatementTypeEnum:
+			//TODO::build 
+		case ast.StatementTypeWhen:
+			//handle at ast
 		case ast.StatementTypeExpression:
 			maxStack = this.eb.build(c, code, s.Expression, context, state)
 		case ast.StatementTypeIf:

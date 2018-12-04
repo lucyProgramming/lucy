@@ -1,6 +1,6 @@
 class ExpressionCheckOpAssign {
 	
-
+	
 	static fn check(e Expression , block Block, errs []error) -> (valueType Type) {
 		bin := e.data.(ExpressionBinary)
 		if bin.left.Type == ExpressionTypeList {

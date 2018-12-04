@@ -63,6 +63,7 @@ public class StatementSwitch  {
 		var doubleValue double
 		var stringValue string
 		var enumName string
+		containsBool := false 
 		for _, v := range this.StatementSwitchCases {
 			for _, e := range v.matches {
 				valueValid := false
@@ -72,6 +73,7 @@ public class StatementSwitch  {
 					continue
 				}
 				if t.Type == VariableTypeBool { // bool condition
+					containsBool = true 
 					continue
 				}
 				if conditionType.assignAble(errs, t) == false {
@@ -167,7 +169,7 @@ public class StatementSwitch  {
 			this.Default.inheritedAttribute.forBreak = this
 			errs.appendAll(this.Default.check())
 		}
-		/*
+		
 		if conditionType.Type == VariableTypeEnum &&
 			len(enumNamesMap) < len(conditionType.Enum.enums) &&
 			this.Default == null &&
@@ -176,10 +178,12 @@ public class StatementSwitch  {
 			errMsg := sprintf("%s switch for enum '%s' is not complete\n",
 				this.EndPos.errMsgPrefix(), conditionType.Enum.name)
 			errMsg += "\tyou can use 'default:' or give missing enums,which are:\n"
+			var i = 0 
 			for _, v := range conditionType.Enum.enums {
 				ok := enumNamesMap.keyExist(v.name)
 				if ok {
 					//handled
+					i++
 					continue
 				}
 				if enumPackageName == "" {
@@ -188,8 +192,10 @@ public class StatementSwitch  {
 					errMsg += sprintf("\t\tcase %s.%s:\n", enumPackageName, v.name)
 				}
 			}
-			errs.append(new error(errMsg))
-		}*/
+			if i > (len(conditionType.Enum.enums) / 2 + len(conditionType.Enum.enums) % 2 ) {
+				errs.append(new error(errMsg))
+			}
+		}
 		return errs
 	}	
 }

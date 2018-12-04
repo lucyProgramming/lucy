@@ -12,6 +12,11 @@ class ExpressionSuffix extends  ParserExtends {
 
 	fn parseSuffixExpression() -> (prefix ast.Expression, err error) {
 		switch this.parser.token.Type {
+		case lex.TokenAutoCompletion:
+			prefix = new ast.Expression()
+			prefix.Type = ast.ExpressionTypeAutoCompletion 
+			prefix.pos = this.parser.mkPos()
+			this.next(lfIsToken)
 		case lex.TokenIdentifier:
 			prefix = new ast.Expression()
 			prefix.op = this.parser.token.stringValue
@@ -419,6 +424,7 @@ class ExpressionSuffix extends  ParserExtends {
 						this.next(lfIsToken)
 					}
 				}
+			//TODO:: 
 			// case lex.TokenSelectConst:
 			// 	pos := this.parser.mkPos()
 			// 	var containsLf bool 
@@ -512,6 +518,16 @@ class ExpressionSuffix extends  ParserExtends {
 					newExpression.data = typeAssert
 					prefix = newExpression
 					this.next(lfIsToken) // skip  )
+				} else if  this.parser.token.Type == lex.TokenAutoCompletion {
+					newExpression := new ast.Expression()
+					newExpression.pos = pos
+					newExpression.op = "selection"
+					newExpression.Type = ast.ExpressionTypeSelection
+					selection := new ast.ExpressionSelection()
+					selection.autoCompletion = true  
+					newExpression.data = selection
+					prefix = newExpression
+					this.next(lfIsToken)
 				} else {
 					err = new error(sprintf("%s expect  'identifier' or '(',but '%s'",
 						this.parser.errMsgPrefix(), this.parser.token.description))

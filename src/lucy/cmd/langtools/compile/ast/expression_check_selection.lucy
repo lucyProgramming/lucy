@@ -10,10 +10,15 @@ class ExpressionCheckSelection {
         if object == null {
             return null
         }
+        if selection.autoCompletion {
+            ExpressionCheckSelection.autoCompletion(object , block )
+            return 
+        }
+
         switch object.Type {
         case VariableTypeDynamicSelector:
             if selection.name == SUPER {
-                errs . append(new error( sprintf("%s access '%s' at '%s' not allow",
+                errs.append(new error( sprintf("%s access '%s' at '%s' not allow",
                     e.pos.errMsgPrefix(), SUPER, object.typeString())))
                 return null
             }
@@ -255,7 +260,7 @@ class ExpressionCheckSelection {
                 result.pos = e.pos
                 return result
             }
-
+            
         default:
             errs . append(new error( sprintf("%s cannot access '%s' on '%s'",
                 e.pos.errMsgPrefix(), selection.name, object.typeString())))
@@ -263,6 +268,28 @@ class ExpressionCheckSelection {
         }
         return null
     }
+    
+    static fn autoCompletion(object Type , block Block) {
+        switch object.Type {
+        case VariableTypeDynamicSelector:
+            
+        case VariableTypePackage:
+            
+        case VariableTypeObject:
+            
+        case VariableTypeClass:
+            
+            
+        default:
+            errs.append(new error( sprintf("%s cannot access '%s' on '%s'",
+                e.pos.errMsgPrefix(), selection.name, object.typeString())))
+            return null
+        }
+        return null
+
+    }   
+
+
 
 }
 

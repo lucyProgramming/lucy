@@ -6,8 +6,6 @@ import (
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/lc"
 )
 
-
-
 func main() {
 	flag.BoolVar(&common.CompileFlags.OnlyImport,
 		"only-import", false, "only parse import package")

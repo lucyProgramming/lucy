@@ -19,8 +19,7 @@ public final class StringOption  extends Option{
 		.stringValue = s 
 	}
 	
-	public fn getValue() -> (v string = this.stringValue ){   }
-
+	public fn getValue() -> (v string = this.stringValue ){}
 	
 }
 

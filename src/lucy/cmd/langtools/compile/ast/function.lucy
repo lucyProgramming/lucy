@@ -9,6 +9,7 @@ typealias buildInFunctionChecker = fn(
 	args []Type,
 	pos Pos) // usEed in build function
 
+
 public class Function {
 	public callFatherConstructionExpression Expression
 	public TemplateFunction                 TemplateFunction
@@ -45,6 +46,27 @@ public class Function {
 		return this.accessFlags&cg.AccMethodPublic != 0
 	}
 	
+	fn mkSuggest() ->(s string ) {
+		parameterOrNotNull := true  
+		for _ , v := range this.Type.parameterList {
+			if v.name == null {
+				parameterOrNotNull = false 
+				break 
+			}
+		}
+		if parameterOrNotNull == false {
+			return sprintf("%s()" , this.name)
+		}
+		s = sprintf("%s(" , this.name)
+		for k , v := range this.Type.parameterList {
+			s += v.name 
+			if k != len(this.Type.parameterList) - 1 {
+				s += " , "
+			}
+		}
+		s += ")"
+	}
+
 
 	public fn nameLiteralFunction() -> (name string) {
 		if this.name != null && this.name != "" {

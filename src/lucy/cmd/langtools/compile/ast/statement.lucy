@@ -78,7 +78,7 @@ public class Statement {
 		case StatementTypeEmptyLine:
 			//noting
 		case StatementTypeAutoCompletion:
-			block.inheritedAttribute.p.autoCompletionItems = this.mkAutoCompletionItems(block)
+			block.inheritedAttribute.p.autoCompletionItems = searchRightValueForAutoCompletionItems(block)
 			panicDeliberately("auto completion finish")
 		case StatementTypeExpression:
 			return this.checkStatementExpression(block)
@@ -210,14 +210,6 @@ public class Statement {
 		return null
 	}
 	
-	/*
-		fn xxx () {
-			auto_completion_is_here 
-		}
-	*/
-	fn mkAutoCompletionItems(block Block) -> (items []AutoCompletionItem ) {
-		items = searchRightValueForAutoCompletionItems(block)
-	}
 
 	fn checkStatementExpression(block Block) ->(errs []error = []error{})  {
 		this.Expression.isStatementExpression = true

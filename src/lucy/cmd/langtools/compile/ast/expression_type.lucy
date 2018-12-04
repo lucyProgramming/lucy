@@ -71,7 +71,8 @@ public enum  ExpressionTypeKind {
 	ExpressionTypeGlobal  ,                                  // global.XXX
 	ExpressionTypeParenthesis ,                              // ( a )
 	ExpressionTypeVArgs ,                                    // a ...
-	ExpressionTypeDot                                       // .
+	ExpressionTypeDot ,                                      // .
+	ExpressionTypeAutoCompletion    						//auto completion 
 }
 
 
@@ -177,6 +178,7 @@ public class ExpressionSelection  {
 	*/
 	public inlineComment string   //   in
 	public containsLf bool    // constains "\n"
+	public autoCompletion bool 
 	
 }
 
