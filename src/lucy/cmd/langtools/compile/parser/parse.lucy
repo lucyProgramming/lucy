@@ -397,6 +397,10 @@ class Parser {
 			vd := new ast.Constant()
 			vd.name = v.name
 			vd.pos = v.pos
+			vd.locateDefinition = v.locateDefinition
+			vd.rename = v.rename 
+			vd.getHover = v.getHover
+			vd.findUsage = v.findUsage 
 			vd.containsLf = v.containsLf 
 			vd.inlineComment = v.inlineComment 
 			constants[k] = vd

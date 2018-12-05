@@ -136,6 +136,10 @@ fn searchBuildIns(name string) -> (t Object)  {
 }
 
 fn checkConst(block Block, c Constant) -> (err error)  {
+	if c.locateDefinition {
+		block.inheritedAttribute.p.locateDefinition = c.pos
+		panicDeliberately("definition found") 
+	}
 	if c.Type != null {
 		c.mkDefaultValue()
 	}

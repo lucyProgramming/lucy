@@ -20,7 +20,9 @@ public class Constant  {
 	public findUsage  bool  
 	public locateDefinition bool 
     findUsageInstances []Usage 
-	
+	public rename bool 
+	public getHover bool 
+ 	
 	/* 
 		a // this is a inline comment
 	*/

@@ -23,7 +23,7 @@ public fn rename( file string, to string, pos int) {
 }
 
 fn main(args []string) {
-    f := new Flags()
-    file , to , pos := f.parseArgs(args)
-    rename(file, to , pos)
+    // f := new Flags()
+    // file , to , pos := f.parseArgs(args)
+    // rename(file, to , pos)
 }

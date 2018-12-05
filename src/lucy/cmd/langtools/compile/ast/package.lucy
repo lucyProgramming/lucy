@@ -222,7 +222,7 @@ public class Package {
 		this.mkInitFunctions(bs)
 		return
 	}
-
+	
 	public fn typeCheck(nodes []TopNode) -> (es []error) {
 		this.block.inheritedAttribute.p = this
 		if t := this.insert(nodes) ; len(t) > 0 {
