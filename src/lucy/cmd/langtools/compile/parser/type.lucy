@@ -212,11 +212,11 @@ class TypeParser extends ParserExtends {
 			this.parser.token.Type == lex.TokenIdentifier ||
 			this.parser.token.Type == lex.TokenFn
 	}
-
+	
 	fn parseIdentifierType() -> (ret ast.Type = new ast.Type(),err error) {
-		name := this.parser.token.stringValue
-		ret.pos =  this.parser.mkPos()
+		ret.pos = this.parser.mkPos()
 		ret.Type = ast.VariableTypeName
+		ret.name = this.parser.token.stringValue
 		ret.locateDefinition = this.parser.token.locateDefinition
 		ret.findUsage  = this.parser.token.findUsage
 		ret.rename = this.parser.token.rename 
@@ -228,7 +228,7 @@ class TypeParser extends ParserExtends {
 				return null, new error(sprintf("%s not a identifier after dot",
 					this.parser.errMsgPrefix()))
 			}
-			name += "." + this.parser.token.stringValue
+			ret.name += "." + this.parser.token.stringValue
 			ret.locateDefinition = ret.locateDefinition || this.parser.token.locateDefinition
 			ret.findUsage = ret.findUsage || this.parser.token.findUsage
 			ret.rename = ret.rename || this.parser.token.rename
@@ -236,10 +236,13 @@ class TypeParser extends ParserExtends {
 			ret.pos = this.parser.mkPos() //  override pos
 			this.next(lfIsToken)   // skip identifier
 		}
-		ret.name = name
+		// if ret.locateDefinition {
+		// 	print(ret.name)
+		// }
+
 		return ret, null
 	}
-
+	
 	fn parseTypes(endTokens lex.TokenKind...) ->(ts []ast.Type,err error) {
 		ts = []ast.Type{}
 		for this.parser.token.Type != lex.TokenEof {

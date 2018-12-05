@@ -17,6 +17,7 @@ class ExpressionCheckIdentifier {
 			e.stringValue = e.pos.filename
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = e.pos 
+				panicDeliberately("definition found")
 			}
 			result, _ := e.checkSingleValueContextExpression(block)
 			return result, null
@@ -26,6 +27,7 @@ class ExpressionCheckIdentifier {
 			result, _ := e.checkSingleValueContextExpression(block)
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = e.pos 
+				panicDeliberately("definition found")
 			}
 			return result, null
 		case magicIdentifierTime:
@@ -34,6 +36,7 @@ class ExpressionCheckIdentifier {
 			result, _ := e.checkSingleValueContextExpression(block)
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = e.pos 
+				panicDeliberately("definition found")
 			}
 			return result, null
 		case magicIdentifierClass:
@@ -63,7 +66,6 @@ class ExpressionCheckIdentifier {
 			return null, new error(sprintf("%s '%s' not found", e.pos.errMsgPrefix(), identifier.name))
 		}
 		if f ,ok := d.(Function) ; ok {
-			f := d.(Function)
 			if f.isGlobalMain() {
 				// not allow
 				return null, new error(sprintf("%s fucntion is global main", errMsgPrefix(e.pos)))
@@ -85,6 +87,7 @@ class ExpressionCheckIdentifier {
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = f.pos 
+				panicDeliberately("definition found")
 			}
 			result := new Type()
 			result.Type = VariableTypeFunction
@@ -105,6 +108,7 @@ class ExpressionCheckIdentifier {
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = t.pos 
+				panicDeliberately("definition found")
 			}
 			if t.findUsageInstances != null {
 				correctLastUsageType("value read" , t.findUsageInstances)
@@ -123,7 +127,8 @@ class ExpressionCheckIdentifier {
 				}
 			}
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = t.pos 
+				block.inheritedAttribute.p.locateDefinition = t.pos
+				panicDeliberately("definition found") 
 			}
 			t.used = true
 			e.fromConst(t)
@@ -140,6 +145,7 @@ class ExpressionCheckIdentifier {
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = c.pos 
+				panicDeliberately("definition found")
 			}
 			if c.findUsageInstances != null {
 				correctLastUsageType("value read" , c.findUsageInstances)
@@ -159,6 +165,7 @@ class ExpressionCheckIdentifier {
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = enumName.pos 
+				panicDeliberately("definition found")
 			}
 			result := new Type()
 			result.pos = enumName.pos
@@ -178,7 +185,8 @@ class ExpressionCheckIdentifier {
 			return null, new error(sprintf("%s %s", e.pos.errMsgPrefix(), err.getMessage()))
 		}
 		if identifier.locateDefinition {
-			block.inheritedAttribute.p.locateDefinition = it.pos  
+			block.inheritedAttribute.p.locateDefinition = it.pos 
+			panicDeliberately("definition found") 
 		}
 		valueType = new Type()
 		valueType.pos = e.pos

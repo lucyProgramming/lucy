@@ -193,11 +193,15 @@ public class Type {
 		cloned.Type = this.Type
 		cloned.isBuildIn  = this.isBuildIn
 		cloned.isVariableArgs  = this.isVariableArgs
-		cloned.resolved      = this.  resolved
-		cloned.pos     = this.   pos    
-		cloned.name = this.  name                
-		cloned.Class  = this. Class        
-		cloned.Enum  = this.   Enum       
+		cloned.resolved      = this.resolved
+		cloned.pos     = this.pos    
+		cloned.name = this.name                
+		cloned.Class  = this.Class        
+		cloned.Enum  = this.Enum
+		cloned.locateDefinition = this.locateDefinition
+		cloned.findUsage = this.findUsage 
+		cloned.rename = this.rename 
+		cloned.getHover = this.getHover 
 		cloned.enumName = this. enumName      
 		cloned.Function  = this. Function        
 		cloned.Package   = this.Package      
@@ -222,9 +226,6 @@ public class Type {
 		if this.resolved {
 			return null
 		}
-		if this.locateDefinition {
-			block.inheritedAttribute.p.locateDefinition = this.pos 
-		}
 		this.resolved = true // single threading
 		switch this.Type {
 		case VariableTypeTemplate:
@@ -240,6 +241,7 @@ public class Type {
 			if this.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = 
 					block.inheritedAttribute.Function.parameterTypes[this.name].pos 
+				panicDeliberately("definition found")
 			}
 			block.inheritedAttribute.Function.parameterTypes[this.name].cp(this)
 			this.pos = pos // keep pos
@@ -371,6 +373,7 @@ public class Type {
 			}
 			if this.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = c.pos
+				panicDeliberately("definition found")
 			}
 			this.Type = VariableTypeObject
 			this.Class = c 
@@ -383,6 +386,7 @@ public class Type {
 			t.cp(this)
 			if this.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = t.pos
+				panicDeliberately("definition found")
 			}
 			this.pos = pos
 			this.alias = alias
@@ -397,6 +401,7 @@ public class Type {
 			}
 			if this.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = dd.pos 
+				panicDeliberately("definition found")
 			}
 			this.Type = VariableTypeEnum
 			this.Enum = dd

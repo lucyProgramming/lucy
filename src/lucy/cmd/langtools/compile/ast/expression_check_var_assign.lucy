@@ -71,6 +71,7 @@ class ExpressionCheckVarAssign {
 				assign.IfDeclaredBefore[k] = true
 				if identifier.locateDefinition {
 					block.inheritedAttribute.p.locateDefinition = variable.pos 
+					panicDeliberately("definition found")
 				}
 			} else { // should be no error
 				noNewVariable = false
@@ -85,6 +86,7 @@ class ExpressionCheckVarAssign {
 				}
 				if identifier.locateDefinition {
 					block.inheritedAttribute.p.locateDefinition = v.pos  
+					panicDeliberately("definition found")
 				}
 				vd.findUsage = identifier.findUsage  
 				if vd.findUsage {

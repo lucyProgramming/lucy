@@ -16,7 +16,7 @@ public const	ConstantPoolTagNameAndType        byte = 12
 public const	ConstantPoolTagMethodHandle       byte = 15
 public const	ConstantPoolTagMethodType         byte = 16
 public const	ConstantPoolTagInvokeDynamic      byte = 18
- 
+
 
 public class ConstPool  {
 	selfIndex char // using when it`s self

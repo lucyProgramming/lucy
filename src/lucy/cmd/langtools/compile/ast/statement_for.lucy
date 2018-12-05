@@ -161,6 +161,7 @@ public class StatementFor {
 				vd.findUsage = identifierK.findUsage 
 				if vd.locateDefinition {
 					this.initExpressionBlock.inheritedAttribute.p.locateDefinition = vd.pos 
+					panicDeliberately("definition found")
 				}
 				if vd.findUsage {
 					vd.findUsageInstances = []Usage{}

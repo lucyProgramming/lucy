@@ -9,7 +9,7 @@ final class Clean {
 	recursive bool 
 	verbose bool 
 	
-	fn Clean(lucyRoot string, lucyPaths []string,packageName string , recursive bool , verbose bool   ) {
+	fn Clean(lucyRoot string, lucyPaths []string,packageName string , recursive bool , verbose bool) {
 	    this.super()
 		this.lucyRoot = lucyRoot 
 		this.lucyPaths = lucyPaths
@@ -21,14 +21,14 @@ final class Clean {
 	fn clean() {
 		w := common.findPackageInWhichDirectory(this.lucyPaths , this.packageName)
 		dir := w + "/class/" + this.packageName
-		this.cleanDir(dir) 
+		this.cleanDir(dir)
 	}
 	private fn cleanDir(dir string) {
 		f := new File(dir)
 		fs := f.listFiles()
 		for f := range fs {
 			if f.isDirectory () && this.recursive {
-				sub := sprintf("%s/%s" , dir , f.getName() )
+				sub := sprintf("%s/%s" , dir , f.getName())
 				this.cleanDir(sub)
 				continue 
 			}

@@ -356,6 +356,7 @@ class Parser {
 			pos.endLine = this.token.endLine
 		    pos.endColumn = this.token.endColumn
 		    pos.offset = this.token.offset
+			pos.columnOffset = this.token.columnOffset 
 			pos.endOffset = this.token.endOffset
 			return
 		} else {

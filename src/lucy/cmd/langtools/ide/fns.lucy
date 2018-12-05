@@ -40,6 +40,9 @@ public fn parseAstAndTypeCheck(packageName string , lucyFiles []LucyFile , onlyA
 	nodes ,es := parseAst(lucyFiles)
 	p = new ast.Package(packageName , true)
 	p.onlyAnalyzeGlobals = onlyAnalyzeGlobals
+	defer {
+		catch()  // catch panic return p as normal
+	}
 	errs = p.typeCheck(nodes)
 	if len(es) > 0 {
 		if len(errs) == 0 {
@@ -58,11 +61,3 @@ public fn getLucyFiles(dir string) ->(lucyFiles []string = []string{}) {
 		}
 	}
 }
-
-//load package from souce code 
-// public fn buildImports(imports []string){
-// 	for v := range imports {
-// 		args := ["-build" , v ]
-// 		new run.RunLucyPackage().RunCommand("run" ,args )
-// 	}
-// } 

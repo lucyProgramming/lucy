@@ -6,6 +6,7 @@ import "lucy/cmd/langtools/compile/ast"
 
 
 public fn findDefinition(file string , pos int) -> (result ast.Pos) {
+    ide.packageLoader.onlyAnalyzeGlobals = true // set true
     lucyPath , packageName := ide.locateLucyFile(file)
     var lucyFiles []ide.LucyFile 
     {

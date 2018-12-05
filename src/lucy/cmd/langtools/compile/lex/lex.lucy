@@ -12,7 +12,9 @@ public class Lexer {
 	findUsage int 
 	rename int 
 	autoCompletion int 
-	 
+	columnOffset int 
+	lastColumnOffset int 
+
 	public fn GetLineAndColumn() -> (line int, column int) {
 		return this.line, this.column
 	}
@@ -30,27 +32,32 @@ public class Lexer {
 		c = this.bs[offset]
 		this.lastLine = this.line
 		this.lastColumn = this.column
+		this.lastColumnOffset = this.columnOffset 
 		if c == '\n' {
 			this.line++
 			this.column = 1
+			this.columnOffset = 0
 		} else {
 			if c == '\t' {
 				this.column += 4 // TODO:: 4 OR 8
 			} else {
-				this.column++
+                this.column++
 			}
+			this.columnOffset++
 		}
 		return
 	}
 	
 	fn unGetChar() {
 		this.offset--
-		this.line, this.column = this.lastLine, this.lastColumn
+		this.line, this.column , this.columnOffset  = 
+			this.lastLine, this.lastColumn , this.lastColumnOffset
 	}
 
 	fn unGetChar2(offset int) {
 		this.offset -= offset
 		this.column -= offset
+		this.columnOffset -= offset
 	}
 
 	fn isLetter(c byte) -> (is bool) {
@@ -249,7 +256,12 @@ public class Lexer {
         }
         return
 	}
-
+	
+	fn getLineAndColumnFromPos(pos int) ->(line int , column int) {
+		line = pos >> 16
+		column = int(short(pos))
+	}
+	
 	fn lexIdentifier(c byte) -> (token Token, err error) {
 		token = new Token()
 		token.startLine = this.line
@@ -258,6 +270,7 @@ public class Lexer {
 		startOffset := token.offset
 		bs := []byte{c}
 		c, eof := this.getChar()
+		columnOffset := this.columnOffset - 1 
 		for eof == false {
 			if this.isLetter(c) || c == '_' || this.isDigit(c) || c == '$' {
 				bs.append(c)
@@ -268,6 +281,11 @@ public class Lexer {
 			}
 		}
 		identifier := string(bs)
+		token.endOffset = this.offset 
+		token.endLine = this.line
+		token.endColumn = this.column
+		token.columnOffset = this.columnOffset
+	 	
 		if ok := keywordsMap.keyExist(identifier); ok {
 			token.Type = keywordsMap[identifier]
 			token.description = identifier
@@ -282,22 +300,29 @@ public class Lexer {
 			token.Type = TokenIdentifier
 			token.stringValue = identifier
 			token.description = "identifier_" + identifier
-			if this.locateDefinition > 0 {
-				if this.locateDefinition >= startOffset && this.locateDefinition < this.offset {
+			if this.locateDefinition != -1 {
+				line , column := this.getLineAndColumnFromPos(this.locateDefinition)
+				// if identifier == "ArrayMeta" &&  line == token.startLine {
+				// 	print( column , columnOffset , this.columnOffset)
+				// }
+                if line == token.startLine && column >= columnOffset && column <= this.columnOffset  {
 					token.locateDefinition = true 
+					// print("locate:" , identifier )
+					// panic(identifier)
+
 				}
 			}
-			if this.getHover > 0 {
+			if this.getHover  != -1 {
 				if this.getHover >= startOffset && this.getHover < this.offset {
 					token.getHover = true 
 				}
 			}
-			if this.findUsage > 0 {
+			if this.findUsage  != -1 {
 				if this.findUsage >= startOffset && this.findUsage < this.offset {
 					token.findUsage = true 
 				}
 			}
-			if this.rename > 0 {
+			if this.rename  != -1 {
 				if this.rename >= startOffset && this.rename < this.offset {
 					token.rename = true 
 				}
@@ -308,9 +333,7 @@ public class Lexer {
 				}
 			}
 		}
-		token.endOffset = this.offset 
-		token.endLine = this.line
-		token.endColumn = this.column
+		
 		return
 	}
 	

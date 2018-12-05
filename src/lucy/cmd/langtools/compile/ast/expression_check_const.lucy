@@ -6,7 +6,8 @@ class ExpressionCheckConst {
 		cs := e.data.([]Constant)
 		for _, c := range cs {
 			if c.locateDefinition {
-                block.inheritedAttribute.p.locateDefinition = c.pos 
+                block.inheritedAttribute.p.locateDefinition = c.pos
+				panicDeliberately("definition found") 
             }
             if c.findUsage {
                 c.findUsageInstances = []Usage{}

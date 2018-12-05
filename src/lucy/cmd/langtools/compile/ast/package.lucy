@@ -85,7 +85,7 @@ public class Package {
 		lucyBuildInPackage.block.inheritedAttribute = new InheritedAttribute()
 		return null
 	}
-
+	
 	fn getImport(file string, accessName string) -> (i Import) {
 		if this.files == null {
 			return null

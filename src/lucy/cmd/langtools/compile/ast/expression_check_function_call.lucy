@@ -23,9 +23,17 @@ class ExpressionCheckFunctionCall {
 			}
 			if f ,ok := d.(Function) ; ok {
                 call.Function = f
+				if identifier.locateDefinition {
+					block.inheritedAttribute.p.locateDefinition = f.pos 
+					panicDeliberately("definition found")
+				}
                 return .checkFunctionCall(e , block, errs, f, call)
 			}
 			if t ,ok:= d.(Type) ; ok {
+				if identifier.locateDefinition {
+					block.inheritedAttribute.p.locateDefinition = t.pos
+					panicDeliberately("definition found")
+				}
 				typeConversion := new ExpressionTypeConversion()
 				typeConversion.Type = d.(Type)
 				if len(call.args) != 1 {
@@ -43,6 +51,10 @@ class ExpressionCheckFunctionCall {
 				return []Type{ret}
 			}
 			if c ,ok:= d.(Class) ; ok {
+				if identifier.locateDefinition {
+					block.inheritedAttribute.p.locateDefinition = c.pos
+					panicDeliberately("definition found")
+				}
 				typeConversion := new ExpressionTypeConversion()
 				typeConversion.Type = new Type()
 				typeConversion.Type.Type = VariableTypeObject
@@ -63,6 +75,10 @@ class ExpressionCheckFunctionCall {
 				return []Type{ret}
 			}
 			if v ,ok := d.(Variable) ; ok {
+				if identifier.locateDefinition {
+					block.inheritedAttribute.p.locateDefinition = v.pos
+					panicDeliberately("definition found")
+				}
 				if isCaptureVar[0] {
 					v.beenCapturedAsRightValue++
 				}

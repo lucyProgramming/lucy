@@ -44,8 +44,22 @@ public class Variable {
 		v.name = this.name
 		v.Type = this.Type.Clone()
 		v.comment = this.comment
+		v.locateDefinition = this.locateDefinition
+		v.findUsage = this.findUsage
+		v.rename = this.rename
 	}
 
 
 }
 
+// class kkkk {
+// 	bb int 
+// }
+// class a{
+//   bb int
+
+//  fn aaa(f kkkk){
+  
+//   bb := f.bb;
+// }
+// }

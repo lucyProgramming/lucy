@@ -11,6 +11,7 @@ class ExpressionCheckLeftValue {
 					e.pos.errMsgPrefix(), identifier.name)))
 				return null
 			}
+			
 			if identifier.name == ThisPointerName {
 				errs.append(new error(sprintf("%s '%s' cannot be used as left value",
 					e.pos.errMsgPrefix(), ThisPointerName)))
@@ -30,6 +31,10 @@ class ExpressionCheckLeftValue {
                 if isCaptureVar[0] {
                     v.beenCapturedAsLeftValue++
                 }
+				if identifier.locateDefinition {
+					block.inheritedAttribute.p.locateDefinition = v.pos 
+					panicDeliberately("definition found")
+				}
 				if v.findUsageInstances != null {
 					correctLastUsageType("value write" , v.findUsageInstances)
 				}
@@ -71,6 +76,10 @@ class ExpressionCheckLeftValue {
 				if field == null {
 					return null
 				}
+				if selection.locateDefinition {
+					block.inheritedAttribute.p.locateDefinition = field.pos
+					panicDeliberately("definition found") 
+				}
 				selection.Field = field
 				result = field.Type.Clone()
 				result.pos = e.pos
@@ -83,6 +92,10 @@ class ExpressionCheckLeftValue {
 				}
 				selection.Field = field
 				if field != null {
+					if selection.locateDefinition {
+						block.inheritedAttribute.p.locateDefinition = field.pos
+						panicDeliberately("definition found") 
+					}
 					err := selection.Expression.fieldAccessAble(block, field)
 					if err != null {
 						errs.append(err)
@@ -100,19 +113,22 @@ class ExpressionCheckLeftValue {
 						e.pos.errMsgPrefix(), object.Package.name, selection.name)))
 					return null
 				}
-				if v := variable.(Variable) ;v != null {
+				if v ,ok := variable.(Variable) ; ok {
 				    if v.accessFlags&cg.AccFieldPublic == 0 &&
                         object.Package.isSame(block.inheritedAttribute.p) == false {
                         errs.append(new error(sprintf("%s '%s.%s' is private",
                             e.pos.errMsgPrefix(), object.Package.name, selection.name)))
                     }
+					if selection.locateDefinition {
+						block.inheritedAttribute.p.locateDefinition = v.pos 
+						panicDeliberately("definition found")
+					}
                     selection.packageVariable = v
                     result = v.Type.Clone()
                     result.pos = e.pos
                     e.value = result
                     return result
 				}
-
                 errs.append(new error(sprintf("%s '%s' is not variable",
                     e.pos.errMsgPrefix(), selection.name)))
                 return null

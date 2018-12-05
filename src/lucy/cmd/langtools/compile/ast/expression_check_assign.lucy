@@ -12,7 +12,7 @@ class ExpressionCheckAssign {
 		for _, v := range values {
 			v.lefts = lefts
 		}
-		valueTypes := checkExpressions(block, values, errs, false)
+        valueTypes := checkExpressions(block, values, errs, false)
 		leftTypes := []Type{}
 		for _, v := range lefts {
 			if v.isIdentifier(UnderScore) {

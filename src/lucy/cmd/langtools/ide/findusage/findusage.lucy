@@ -7,14 +7,14 @@ class FindUsage {
     lucyFiles []ide.LucyFile
     packageName string
     printErr bool
-    lucyPaths []string
+    lucyPath []string
     
-    fn FindUsage(lucyFiles []ide.LucyFile , packageName string , printErr bool , lucyPaths []string ) {
+    fn FindUsage(lucyFiles []ide.LucyFile , packageName string , printErr bool , lucyPath []string ) {
         this.super()
         this.lucyFiles = lucyFiles
         this.packageName = packageName
         this.printErr = printErr
-        this.lucyPaths = lucyPaths
+        this.lucyPath = lucyPath
     }
     
     fn find() -> (result []ast.Usage){
@@ -36,7 +36,7 @@ class FindUsage {
     }
     
     fn searchLucyPath() {
-        for _,v := range this.lucyPaths {
+        for _,v := range this.lucyPath {
             this.searchDir("" , v + "/src/")
         }
     }

@@ -72,4 +72,5 @@ fn loadJavaStringClass(pos Pos) ->(err error) {
 
 fn panicDeliberately(reason string) {
 	panic(reason)
+	//still have bugs
 }

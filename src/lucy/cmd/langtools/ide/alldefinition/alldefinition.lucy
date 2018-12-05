@@ -6,6 +6,7 @@ import "java/lang/Boolean"
 import "java/lang/Long"
 import "java/lang/Double"
 
+
 class AllDefinition {
     lucyFiles []ide.LucyFile
     packageName string

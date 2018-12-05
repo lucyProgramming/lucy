@@ -135,6 +135,7 @@ public class Statement {
 			}
 			if this.Class.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = this.Class.pos 
+				panicDeliberately("definition found")
 			}
 			if this.Class.findUsage {
 				this.Class.findUsageInstances = []Usage{}
@@ -150,6 +151,7 @@ public class Statement {
 			}
 			if this.Enum.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = this.Enum.pos 
+				panicDeliberately("definition found")
 			}
 			if this.Enum.findUsage {
 				this.Enum.findUsageInstances = []Usage{}
@@ -158,6 +160,7 @@ public class Statement {
 			for _ , vv := range this.Enum.enums {
 				if vv.locateDefinition {
 					block.inheritedAttribute.p.locateDefinition = vv.pos 
+					panicDeliberately("definition found")
 				}
 				vv.findUsageInstances = []Usage{}
 				block.inheritedAttribute.p.findUsage = vv.findUsageInstances
@@ -192,6 +195,7 @@ public class Statement {
 		case StatementTypeTypeAlias:
 			if this.TypeAlias.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = this.pos 
+				panicDeliberately("definition found")
 			}
 			if this.TypeAlias.findUsage {
 				this.TypeAlias.findUsageInstances = []Usage{}

@@ -178,7 +178,6 @@ fn checkConst(block Block, c Constant) -> (err error)  {
 		case VariableTypeString:
 			c.stringValue = c.defaultValueExpression.stringValue
 	}
-    
 	return null
 }
 

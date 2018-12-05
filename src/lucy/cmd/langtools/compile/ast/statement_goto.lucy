@@ -19,6 +19,7 @@ public class StatementGoTo {
 		}
 		if this.locateDefinition {
 			block.inheritedAttribute.p.locateDefinition = label.pos
+			panicDeliberately("definition found")
 		}
 		this.statementLabel = label
 		this.defers = []StatementDefer{}

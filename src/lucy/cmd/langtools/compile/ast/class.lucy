@@ -182,6 +182,7 @@ public class Class {
             }
             if v.locateDefinition {
                 this.block.inheritedAttribute.p.locateDefinition = v.pos 
+                panicDeliberately("definition found")
             }
             if v.findUsage {
                 v.findUsageInstances = []Usage{}
@@ -197,6 +198,7 @@ public class Class {
             for _, m := range ms {
                 if m.locateDefinition {
                     this.block.inheritedAttribute.p.locateDefinition = m.Function.pos 
+                    panicDeliberately("definition found")
                 }
                 if m.findUsage {
                     m.findUsageInstances = []Usage{}
@@ -1144,6 +1146,7 @@ public class Class {
         for _, v := range this.fields {
             if v.locateDefinition {
                 this.block.inheritedAttribute.p.locateDefinition = v.pos 
+                panicDeliberately("definition found")
             }
             if v.defaultValueExpression != null {
                 assignment, es := v.defaultValueExpression.

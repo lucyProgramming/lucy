@@ -153,12 +153,17 @@ public class Function {
 		checkReturnVarExpression bool,
 		isAbstract bool) {
 		var err error
+		if this.locateDefinition {
+			this.block.inheritedAttribute.p.locateDefinition = this.pos 
+			panicDeliberately("definition found")
+		}
 		for k, v := range this.Type.parameterList {
 			if v.name == null {
 				v.name = ""
 			}
 			if v.locateDefinition {
 				this.block.inheritedAttribute.p.locateDefinition = v.pos
+				panicDeliberately("definition found")
 			}
 			if v.findUsage {
 				v.findUsageInstances = []Usage{}

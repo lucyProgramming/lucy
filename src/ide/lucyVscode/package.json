@@ -7,10 +7,10 @@
         "vscode": "^1.29.0"
     },
     "categories": [
-        "Other"
+        "Programming Languages"
     ],
     "activationEvents": [
-        "onCommand:extension.sayHello"
+        "onLanguage:lucy"
     ],
     "main": "./out/extension",
     "contributes": {
