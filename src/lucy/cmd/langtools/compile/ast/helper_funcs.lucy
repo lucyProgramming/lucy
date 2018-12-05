@@ -266,3 +266,9 @@ fn searchRightValueForAutoCompletionItems(block Block) -> (items []AutoCompletio
 		}
 	}) 
 }
+
+
+fn panicDeliberately(reason string) {
+	panic(reason)
+	//still have bugs
+}

@@ -442,7 +442,7 @@ public class  BuildPackage {
            specialMethodInit,
            "()V"
         ), method.code.codes[2:4])
-        method.code.MaxStack = 1
+        method.code.maxStack = 1
         method.code.codes[4] = cg.OP_return
         c.appendMethod(method)
     }

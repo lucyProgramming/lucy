@@ -5,13 +5,16 @@ import * as vscode from 'vscode';
 
 const child_process = require('child_process');
 const fs = require('fs');
+const path = require('path');
+const process = require('process');
 module.exports = class GoDefinitionProvider implements vscode.DefinitionProvider {
     public provideDefinition(
         document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken):
         Thenable<vscode.Location> {
-        let holeText = document.getText();
-        let bufferFileName =  document.fileName + ".buffer";
+        // let holeText = document.getText();
+        // let bufferFileName =  document.fileName + ".buffer";
         //fs.writeFileSync(bufferFileName);
+        console.log(document.uri.toString());
         let args = [
             "lucy.cmd.langtools.ide.gotodefinition.main",
             "-file",
@@ -20,7 +23,7 @@ module.exports = class GoDefinitionProvider implements vscode.DefinitionProvider
             position.line + 1 ,
             "-column",
             position.character
-        ]
+        ];
         {
             let s =  "java ";
             for (var i = 0 ; i < args.length ; i++) {
@@ -34,12 +37,12 @@ module.exports = class GoDefinitionProvider implements vscode.DefinitionProvider
         let result = child_process.execFileSync("java", args );
         let pos = JSON.parse(result);
         if (!pos) {
-            return null;
+            return ;
         }
-        let uri2 = new vscode.Uri("file" , "" , pos.filename , "" , "" , "");
+        let uri2 =  vscode.Uri.file(path.normalize(pos.filename)) ; 
         let position2 = new vscode.Position(pos.endLine - 1 , pos.columnOffset);
         //fs.unlink(bufferFileName);
         return new vscode.Location(uri2, position2);
         }
-    }
+    };
 };

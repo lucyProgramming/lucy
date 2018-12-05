@@ -43,8 +43,8 @@ class BuildBlock {
 				continue
 			}
 			maxStack := this.buildStatement(c, code, b, s, context, state)
-			if maxStack > code.MaxStack {
-				code.MaxStack = maxStack
+			if maxStack > code.maxStack {
+				code.maxStack = maxStack
 			}
 			if len(state.stacks) > 0 {
 				var ss []string

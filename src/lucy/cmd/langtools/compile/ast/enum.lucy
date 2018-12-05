@@ -53,7 +53,17 @@ public class Enum   {
 	}
 
 	
-	fn check() -> (errs []error = []error{}) {
+	fn check(block Block) -> (errs []error = []error{}) {
+		if this.locateDefinition {
+			block.inheritedAttribute.p.locateDefinition = this.pos
+			panicDeliberately("definition found")	
+		}
+		for v := range this.enums {
+			if v.locateDefinition {
+				block.inheritedAttribute.p.locateDefinition = v.pos 
+				panicDeliberately("definition found")
+			}
+		}
 		var initV int = 0
 		if this.Init != null {
 			if is, err := this.Init.constantFold(); err != null {

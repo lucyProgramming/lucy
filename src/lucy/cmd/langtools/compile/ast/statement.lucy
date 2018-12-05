@@ -144,7 +144,7 @@ public class Statement {
 			errs.appendAll(this.Class.check(block))
 			return errs
 		case StatementTypeEnum:
-			es := this.Enum.check()
+			es := this.Enum.check(block)
 			err := block.insert(this.Enum.name, this.Enum.pos, this.Enum)
 			if err != null {
 				es.append(err)

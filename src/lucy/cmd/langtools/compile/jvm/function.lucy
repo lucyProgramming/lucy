@@ -116,8 +116,8 @@ class BuildFunction {
                 this.mkParametersOffset(c, method.code, f, state)
                 stack := this.eb.build(c, method.code, f.callFatherConstructionExpression,
                     context, state)
-                if stack > method.code.MaxStack {
-                    method.code.MaxStack = stack
+                if stack > method.code.maxStack {
+                    method.code.maxStack = stack
                 }
                 state.locals[0] = state.newStackMapVerificationTypeInfo(c, state.newObjectVariableType(c.name))
                 this.mkFieldDefaultValue(c, method.code, astClass, context, state)
@@ -135,8 +135,8 @@ class BuildFunction {
             code.codes[code.codeLength+3] = cg.OP_dup
             code.codeLength += 4
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeString, char(0)))
-            if 3 > code.MaxStack {
-                code.MaxStack = 3
+            if 3 > code.maxStack {
+                code.maxStack = 3
             }
             code.codes[code.codeLength] = cg.OP_invokespecial
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
@@ -165,8 +165,8 @@ class BuildFunction {
             method.AttributeDefaultParameters = DefaultValueParse.Encode(c, f)
         }
         if method.isConstruction == false {
-            if t := this.buildFunctionParameterAndReturnList(c, method.code, f, context, state); t > method.code.MaxStack {
-                method.code.MaxStack = t
+            if t := this.buildFunctionParameterAndReturnList(c, method.code, f, context, state); t > method.code.maxStack {
+                method.code.maxStack = t
             }
         }
         {
@@ -197,8 +197,8 @@ class BuildFunction {
         }
         if len(f.Type.returnList) > 1 {
             if t := this.buildFunctionMultiReturnOffset(c, method.code,
-                f, context, state); t > method.code.MaxStack {
-                method.code.MaxStack = t
+                f, context, state); t > method.code.maxStack {
+                method.code.maxStack = t
             }
         }
         if f.hasDefer {
@@ -235,8 +235,8 @@ class BuildFunction {
             code.codeLength++
             state.pushStack(c, state.newObjectVariableType(c.name))
             stack := this.eb.build(c, code, v.defaultValueExpression, context, state)
-            if t := char(1) + stack; t > code.MaxStack {
-                code.MaxStack = t
+            if t := char(1) + stack; t > code.maxStack {
+                code.maxStack = t
             }
             state.popStack(1)
             code.codes[code.codeLength] = cg.OP_putfield

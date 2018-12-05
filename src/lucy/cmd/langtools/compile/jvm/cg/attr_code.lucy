@@ -2,7 +2,7 @@ import "lucy/binary"
  
 
 public class AttributeCode  {
-	public	MaxStack          char
+	public	maxStack          char
 	public	maxLocals         char
 	public	codeLength        int
 	public	codes             []byte
@@ -23,7 +23,7 @@ public class AttributeCode  {
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const("Code")
 		ret.info = new []byte( 8)
-		binary.BigEndian.putChar(ret.info[0:2], this.MaxStack)
+		binary.BigEndian.putChar(ret.info[0:2], this.maxStack)
 		binary.BigEndian.putChar(ret.info[2:4], this.maxLocals)
 		binary.BigEndian.putInt(ret.info[4:8], (this.codeLength))
 		ret.info . appendAll( this.codes)

@@ -255,7 +255,7 @@ public class Package {
 				this.findUsage = vv.findUsageInstances
 			}
 			v.name = this.name + "/" + v.name
-			this.errors.appendAll(v.check())
+			this.errors.appendAll(v.check(this.block))
 		}
 		for _, v := range this.block.typeAliases {
 			if v.locateDefinition {
