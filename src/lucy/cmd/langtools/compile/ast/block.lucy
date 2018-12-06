@@ -383,6 +383,9 @@ public class Block {
             if this.inheritedAttribute.p.shouldStop(errs) {
                 return errs
             }
+            if this.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+                return errs 
+            }
         }
         errs.appendAll( this.checkUnUsed())
         return errs

@@ -43,7 +43,7 @@ public class Package {
 		this.disableCheckUnuse = disableCheckUnuse
 		this.name =  name
 	}
-	public fn locateDefinitionFetched() ->(fetched bool) {
+	public fn locateDefinitionOrAutoCompletionFetched() ->(fetched bool) {
 		fetched  = this.locateDefinition != null 	 
 	}
 	
@@ -250,17 +250,17 @@ public class Package {
 				this.findUsage = v.findUsageInstances
 			}
 		}
-		if this.locateDefinitionFetched() {
+		if this.locateDefinitionOrAutoCompletionFetched() {
 			return this.errors 
 		}
 		for _, v := range this.block.enums {
 			v.name = this.name + "/" + v.name
 			this.errors.appendAll(v.check(this.block))
-			if this.locateDefinitionFetched() {
+			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors 
 			}
 		}
-		if this.locateDefinitionFetched() {
+		if this.locateDefinitionOrAutoCompletionFetched() {
 			return this.errors 
 		}
 		for _, v := range this.block.typeAliases {
@@ -280,7 +280,7 @@ public class Package {
 			if err != null {
 				this.errors.append(err)
 			}
-			if this.locateDefinitionFetched() {
+			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors 
 			}
 		}
@@ -320,7 +320,7 @@ public class Package {
 			if this.shouldStop(null) {
 				return this.errors
 			}
-			if this.locateDefinitionFetched() {
+			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors 
 			}
 		}
@@ -340,11 +340,11 @@ public class Package {
 			this.errors.appendAll(v.block.checkConstants())
 			v.block.inherit(this.block)
 			v.block.inheritedAttribute.Class = v
-			if this.locateDefinitionFetched() {
+			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors 
 			}
 		}
-		if this.locateDefinitionFetched() {
+		if this.locateDefinitionOrAutoCompletionFetched() {
 			return this.errors 
 		}
 		for _, v := range this.block.Classes { 
@@ -357,7 +357,7 @@ public class Package {
 			}
 			this.errors.appendAll(v.resolveInterfaces())
 			this.errors.appendAll (v.resolveFieldsAndMethodsType())
-			if this.locateDefinitionFetched() {
+			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors 
 			}
 		}
@@ -368,7 +368,7 @@ public class Package {
 			if this.shouldStop(null) {
 				return this.errors
 			}
-			if this.locateDefinitionFetched() {
+			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors 
 			}
 		}
@@ -377,7 +377,7 @@ public class Package {
 			if this.shouldStop(null) {
 				return this.errors
 			}
-			if this.locateDefinitionFetched() {
+			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors 
 			}
 		}
@@ -389,7 +389,7 @@ public class Package {
 				continue
 			}
 			this.errors.appendAll(v.checkReturnVarExpression())
-			if this.locateDefinitionFetched() {
+			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors 
 			}
 		}
@@ -398,7 +398,7 @@ public class Package {
 			if this.shouldStop(null) {
 				return this.errors
 			}
-			if this.locateDefinitionFetched() {
+			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors 
 			}
 		}
@@ -413,7 +413,7 @@ public class Package {
 			if this.shouldStop(null) {
 				return this.errors
 			}
-			if this.locateDefinitionFetched() {
+			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors 
 			}
 		}
