@@ -120,7 +120,10 @@ public class StatementFor {
 					this.initExpressionBlock.inheritedAttribute.p.locateDefinition = vd.pos 
 				}
 				if vd.findUsage {
-					vd.findUsageInstances = []Usage{}
+					u := new Usage()
+					u.Type = "declaration"
+					u.pos = vd.pos 
+					vd.findUsageInstances = []Usage{u}
 					this.initExpressionBlock.inheritedAttribute.p.findUsage = vd.findUsageInstances 
 				}
 				if rangeOn.Type == VariableTypeArray ||
@@ -161,10 +164,13 @@ public class StatementFor {
 				vd.findUsage = identifierK.findUsage 
 				if vd.locateDefinition {
 					this.initExpressionBlock.inheritedAttribute.p.locateDefinition = vd.pos 
-					panicDeliberately("definition found")
+					
 				}
 				if vd.findUsage {
-					vd.findUsageInstances = []Usage{}
+					u := new Usage()
+					u.Type = "declaration"
+					u.pos = vd.pos 
+					vd.findUsageInstances = []Usage{u}
 					this.initExpressionBlock.inheritedAttribute.p.findUsage = vd.findUsageInstances 
 				}
 				if this.initExpressionBlock.inheritedAttribute.Function != null {

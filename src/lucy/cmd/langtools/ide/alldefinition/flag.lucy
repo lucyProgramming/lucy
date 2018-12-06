@@ -12,7 +12,6 @@ class Flags {
 		this.parser = new flag.FlagParser()
 		this.dir = this.parser.stringOption("-dir")
 	}
-
 	
 	fn parseArgs(args []string) ->(dir string) {
 		nodefine,err := this.parser.parse(args)

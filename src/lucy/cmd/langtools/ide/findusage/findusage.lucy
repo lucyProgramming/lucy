@@ -18,9 +18,10 @@ class FindUsage {
     }
     
     fn find() -> (result []ast.Usage){
-        p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles ,false )
+        p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles , false )
         if this.printErr{
             for v := range es{
+                
                 os.stderr.println(v.getMessage())
             }
         }
@@ -34,20 +35,23 @@ class FindUsage {
         }
         return p.findUsage 
     }
-    
     fn searchLucyPath() {
         for _,v := range this.lucyPath {
             this.searchDir("" , v + "/src/")
         }
     }
-    
     fn searchDir(packageName string , dir string ) {
         list := (new io.File(dir)).list()
         containsLucyFile := false 
         for v := range list {
             if subDir := dir + "/" + v ; new io.File(subDir).isDirectory() {
-                this.searchDir(packageName + "/" + v , subDir)
-                continue
+                if packageName == "" {
+                    this.searchDir(v , subDir)
+                    continue
+                }else {
+                    this.searchDir(packageName + "/" + v , subDir)
+                    continue
+                }
             }
             if v.endsWith(".lucy") {
                 containsLucyFile = true
@@ -57,25 +61,19 @@ class FindUsage {
             // no lucy files
             return 
         }
+        if packageName == "lucy/lang" {
+            return 
+        }
         if ide.packageLoader.getCache(packageName) != null {
             //handled 
             // when handle subdirectory may 
             return 
         }
         lucyFiles := ide.readLucyFiles(ide.getLucyFiles(dir))
-        imported := false 
-        for v := range ide.parseImports(lucyFiles) {
-            if v == this.packageName {
-                imported = true 
-                break 
-            }
-        }
-        if imported == false {
-            return 
-        }
-        _ , es := ide.parseAstAndTypeCheck(packageName , lucyFiles,false )
-        if this.printErr{
-            for v := range es{
+        _ , es := ide.parseAstAndTypeCheck(packageName , lucyFiles , false )
+        if this.printErr {
+            for v := range es {
+                v.printStackTrace()
                 os.stderr.println(v.getMessage())
             }
         }

@@ -91,12 +91,8 @@ class ExpressionCheckMethodCall {
 				}
 				if matched {
 					if call.locateDefinition {
-						if object.Class.loadFromOutSide == false {
-							block.inheritedAttribute.p.locateDefinition = ms[0].Function.pos
-							panicDeliberately("definition found") 
-						}else {
-							//TODO :: 
-						}
+						block.inheritedAttribute.p.locateDefinition = ms[0].Function.pos
+						//TODO:: if java 	
 					}
 					if ms[0].isStatic() {
 						errs.append(new error(sprintf("%s method '%s' is static",
@@ -124,12 +120,8 @@ class ExpressionCheckMethodCall {
 			}
 			if fieldMethodHandler[0] != null {
 				if call.locateDefinition {
-					if object.Class.loadFromOutSide == false {
-						block.inheritedAttribute.p.locateDefinition = fieldMethodHandler[0].pos
-						panicDeliberately("definition found") 
-					}else {
-						//TODO :: 
-					}
+					block.inheritedAttribute.p.locateDefinition = fieldMethodHandler[0].pos
+					//TODO if java 
 				}
 				err := call.Expression.fieldAccessAble(block, fieldMethodHandler[0])
 				if err != null {
@@ -141,12 +133,8 @@ class ExpressionCheckMethodCall {
 			if matched {
 				m := ms[0]
 				if call.locateDefinition {
-					if object.Class.loadFromOutSide == false {
-						block.inheritedAttribute.p.locateDefinition = ms[0].Function.pos 
-						panicDeliberately("definition found")
-					}else {
-						//TODO :: 
-					}
+					block.inheritedAttribute.p.locateDefinition = ms[0].Function.pos 
+					//TODO if java 
 				}
 				err := call.Expression.methodAccessAble(block, m)
 				if err != null {
@@ -215,7 +203,7 @@ class ExpressionCheckMethodCall {
 			if call.locateDefinition {
 				if object.Class.loadFromOutSide == false {
 					block.inheritedAttribute.p.locateDefinition = m.Function.pos
-					panicDeliberately("definition found") 
+					 
 				}else {
 					//TODO :: 
 				}
@@ -256,7 +244,7 @@ class ExpressionCheckMethodCall {
 				if call.locateDefinition {
 					if object.Class.loadFromOutSide == false {
 						block.inheritedAttribute.p.locateDefinition = fieldMethodHandler[0].pos 
-						panicDeliberately("definition found")
+						
 					}else {
 						//TODO :: 
 					}
@@ -269,7 +257,7 @@ class ExpressionCheckMethodCall {
 				if call.locateDefinition {
 					if object.Class.loadFromOutSide == false {
 						block.inheritedAttribute.p.locateDefinition = method.Function.pos 
-						panicDeliberately("definition found")
+						
 					}else {
 						//TODO :: 
 					}
@@ -326,7 +314,7 @@ class ExpressionCheckMethodCall {
 			if call.locateDefinition {
 				if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
 					block.inheritedAttribute.p.locateDefinition = f.pos
-					panicDeliberately("definition found") 
+					 
 				}else {
 					//TODO :: 
 				}
@@ -362,7 +350,7 @@ class ExpressionCheckMethodCall {
 			if call.locateDefinition {
 				if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
 					block.inheritedAttribute.p.locateDefinition = v.pos 
-					panicDeliberately("definition found")
+					
 				}else {
 					//TODO :: 
 				}
@@ -399,7 +387,7 @@ class ExpressionCheckMethodCall {
 			if call.locateDefinition {
 				if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
 					block.inheritedAttribute.p.locateDefinition = c.pos 
-					panicDeliberately("definition found")
+					
 				}else {
 					//TODO :: 
 				}
@@ -428,7 +416,7 @@ class ExpressionCheckMethodCall {
 			if call.locateDefinition {
 				if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
 					block.inheritedAttribute.p.locateDefinition = t.pos
-					panicDeliberately("definition found") 
+					 
 				}else {
 					//TODO :: 
 				}

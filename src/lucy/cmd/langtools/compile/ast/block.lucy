@@ -45,7 +45,7 @@ public class Block {
     public fn nameExists(name string , pos Pos) -> (x Object,exist bool) {
         if this.functions != null {
             if t := this.functions[name]; t != null {
-                if t.findUsageInstances != null {
+                if t.findUsage {
                     u := new Usage() 
                     u.Type = "value read"
                     u.pos = pos
@@ -57,7 +57,7 @@ public class Block {
         }
         if this.variables != null {
             if t := this.variables[name]; t != null {
-                if t.findUsageInstances != null {
+                if t.findUsage {
                     u := new Usage() 
                     u.Type = "value read"
                     u.pos = pos
@@ -68,7 +68,7 @@ public class Block {
         }
         if this.constants != null {
             if t := this.constants[name]; t != null {
-                if t.findUsageInstances != null {
+                if t.findUsage {
                     u := new Usage() 
                     u.Type = "value read"
                     u.pos = pos 
@@ -80,7 +80,7 @@ public class Block {
         }
         if this.EnumNames != null {
             if t := this.EnumNames[name]; t != null {
-                if t.findUsageInstances != null {
+                if t.findUsage {
                     u := new Usage() 
                     u.Type = "value read"
                     u.pos = pos 
@@ -92,7 +92,7 @@ public class Block {
         }
         if this.Classes != null {
             if t := this.Classes[name]; t != null {
-                if t.findUsageInstances != null {
+                if t.findUsage {
                     u := new Usage() 
                     u.Type = "declaration"
                     u.pos = pos 
@@ -104,7 +104,7 @@ public class Block {
         }
         if this.enums != null {
             if t := this.enums[name]; t != null {
-                if t.findUsageInstances != null {
+                if t.findUsage {
                     u := new Usage() 
                     u.Type = "declaration"
                     u.pos = pos 
@@ -116,7 +116,7 @@ public class Block {
         }
         if this.typeAliases != null {
             if t := this.typeAliases[name]; t != null {
-                if t.alias != null &&   t.alias.findUsageInstances != null {
+                if t.alias != null &&   t.alias.findUsage {
                     u := new Usage() 
                     u.Type = "declaration"
                     u.pos = pos 
@@ -232,13 +232,6 @@ public class Block {
                 if t := this.Fn.parameterTypes[name]; t != null {
                     return t, null
                 }
-            }
-        }
-        // search closure
-        if this.inheritedAttribute.Function != null {
-            v := this.inheritedAttribute.Function.Closure.search(name)
-            if v != null {
-                return v, null
             }
         }
         if this.isFunctionBlock &&
@@ -498,7 +491,8 @@ public class Block {
             return new error(sprintf("%s '%s' is not a magic identifier", pos.errMsgPrefix(), name))
         }
         if searchBuildIns(name) != null {
-            return new error(sprintf("%s '%s' is buildin", pos.errMsgPrefix(), name))
+            err = new error(sprintf("%s '%s' is buildin", pos.errMsgPrefix(), name))
+            return err 
         }
         return null
     }

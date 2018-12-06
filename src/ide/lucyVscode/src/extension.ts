@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
 
 const GoDefinitionProvider = require("./goto_definition");
 const GoReferenceProvider = require("./findusage");
+const GoDocumentSymbolProvider = require("./alldefinition");
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -21,6 +22,9 @@ export function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(
         vscode.languages.registerReferenceProvider(
             sel, new GoReferenceProvider()));
+        context.subscriptions.push(
+            vscode.languages.registerDocumentSymbolProvider(
+                sel, new GoDocumentSymbolProvider()));
    
 }
 

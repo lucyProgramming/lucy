@@ -28,7 +28,6 @@ public fn parseImports(lucyFiles []LucyFile) -> (imports []string = []string{} )
 	}
 }
 
-
 public fn parseAst(lucyFiles []LucyFile) ->(nodes []ast.TopNode = []ast.TopNode{} , errs []error = []error{}){
 	for _,v := range lucyFiles {
 		errs.appendAll(parser.Parse(nodes , v.realPathName , v.bs , false , 10 , 
@@ -36,7 +35,9 @@ public fn parseAst(lucyFiles []LucyFile) ->(nodes []ast.TopNode = []ast.TopNode{
 	}
 }
 
+
 public fn parseAstAndTypeCheck(packageName string , lucyFiles []LucyFile , onlyAnalyzeGlobals bool ) -> (p ast.Package,errs []error){
+	
 	nodes ,es := parseAst(lucyFiles)
 	p = new ast.Package(packageName , true)
 	p.onlyAnalyzeGlobals = onlyAnalyzeGlobals
@@ -54,6 +55,8 @@ public fn parseAstAndTypeCheck(packageName string , lucyFiles []LucyFile , onlyA
 }
 
 public fn getLucyFiles(dir string) ->(lucyFiles []string = []string{}) {
+	
+	
 	list := new io.File(dir).list()
 	for v := range list {
 		if v.endsWith(".lucy") {

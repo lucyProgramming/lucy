@@ -48,7 +48,7 @@ class BuildFor {
         }
         var firstTimeExit cg.Exit
         if s.condition != null {
-            stack, exit := this.bb.buildConditionNotOk(c, code, context, forState, s.condition)
+            stack, exit := this.bb.buildConditionNotOkExit(c, code, context, forState, s.condition)
             if stack > maxStack {
                 maxStack = stack
             }
@@ -64,7 +64,7 @@ class BuildFor {
             }
         }
         if s.condition != null {
-            stack, exit := this.bb.buildConditionNotOk(c, code, context, forState, s.condition)
+            stack, exit := this.bb.buildConditionNotOkExit(c, code, context, forState, s.condition)
             if stack > maxStack {
                 maxStack = stack
             }

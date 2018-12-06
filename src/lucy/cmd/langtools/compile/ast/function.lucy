@@ -142,7 +142,7 @@ public class Function {
 		t.pos =  this.block.endPos
 		this.block.statements.append( t)
 	}
-
+	
 	public fn isGlobalMain() -> (is bool) {
 		return this.isGlobal &&
 			this.name == MainFunctionName
@@ -155,7 +155,6 @@ public class Function {
 		var err error
 		if this.locateDefinition {
 			this.block.inheritedAttribute.p.locateDefinition = this.pos 
-			panicDeliberately("definition found")
 		}
 		for k, v := range this.Type.parameterList {
 			if v.name == null {
@@ -163,10 +162,13 @@ public class Function {
 			}
 			if v.locateDefinition {
 				this.block.inheritedAttribute.p.locateDefinition = v.pos
-				panicDeliberately("definition found")
+				
 			}
 			if v.findUsage {
-				v.findUsageInstances = []Usage{}
+				u := new Usage()
+                u.Type = "declaration"
+                u.pos = v.pos 
+				v.findUsageInstances = []Usage{u}
 				this.block.inheritedAttribute.p.findUsage = v.findUsageInstances
 			}
 			v.isFunctionParameter = true
@@ -239,7 +241,10 @@ public class Function {
 					this.block.inheritedAttribute.p.locateDefinition = v.pos
 				}
 				if v.findUsage {
-					v.findUsageInstances = []Usage{}
+					u := new Usage()
+					u.Type = "declaration"
+					u.pos = v.pos 
+					v.findUsageInstances = []Usage{u}
 					this.block.inheritedAttribute.p.findUsage = v.findUsageInstances
 				}
 				v.isReturn = true

@@ -337,7 +337,7 @@ public class Expression {
 		switch this.Type {
 		case ExpressionTypeAutoCompletion:
 			block.inheritedAttribute.p.autoCompletionItems = searchRightValueForAutoCompletionItems(block)
-			panicDeliberately("auto completion finish")
+			
 		case ExpressionTypeNull:
 		    this.value = new Type()
 		    this.value.Type = VariableTypeNull
@@ -728,7 +728,11 @@ public class Expression {
 			panic("not number")
 		}
 		switch this.Type {
-		case ExpressionTypeByte , ExpressionTypeChar,ExpressionTypeShort ,ExpressionTypeInt , ExpressionTypeLong :
+		case ExpressionTypeByte ,
+			ExpressionTypeChar,
+			ExpressionTypeShort ,
+			ExpressionTypeInt , 
+			ExpressionTypeLong :
 			return this.longValue
 		case ExpressionTypeFloat,ExpressionTypeDouble:
 			return long(this.doubleValue)

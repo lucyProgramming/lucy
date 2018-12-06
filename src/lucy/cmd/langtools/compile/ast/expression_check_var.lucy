@@ -114,10 +114,13 @@ class ExpressionCheckVar {
 		for _, v := range ev.variables {
 			if v.locateDefinition{
 				block.inheritedAttribute.p.locateDefinition = v.pos 
-				panicDeliberately("definition found")
+				
 			}
 			if v.findUsage {
-				v.findUsageInstances = []Usage{}
+				u := new Usage()
+                u.Type = "declaration"
+                u.pos = v.pos 
+				v.findUsageInstances = []Usage{u}
 				block.inheritedAttribute.p.findUsage = v.findUsageInstances
 				block.inheritedAttribute.p.findUsageIsGlobal = e.isGlobal 
 			}

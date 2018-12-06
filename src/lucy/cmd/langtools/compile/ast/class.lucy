@@ -182,10 +182,13 @@ public class Class {
             }
             if v.locateDefinition {
                 this.block.inheritedAttribute.p.locateDefinition = v.pos 
-                panicDeliberately("definition found")
+                
             }
             if v.findUsage {
-                v.findUsageInstances = []Usage{}
+                u := new Usage()
+                u.Type = "declaration"
+                u.pos = v.pos 
+                v.findUsageInstances = []Usage{u}
                 this.block.inheritedAttribute.p.findUsage = v.findUsageInstances
                 this.block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal 
             }
@@ -198,10 +201,13 @@ public class Class {
             for _, m := range ms {
                 if m.locateDefinition {
                     this.block.inheritedAttribute.p.locateDefinition = m.Function.pos 
-                    panicDeliberately("definition found")
+                    
                 }
                 if m.findUsage {
-                    m.findUsageInstances = []Usage{}
+                    u := new Usage()
+                    u.Type = "declaration"
+                    u.pos = m.Function.pos  
+                    m.findUsageInstances = []Usage{u}
                     this.block.inheritedAttribute.p.findUsage = m.findUsageInstances
                     this.block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal 
                 }
@@ -1146,7 +1152,7 @@ public class Class {
         for _, v := range this.fields {
             if v.locateDefinition {
                 this.block.inheritedAttribute.p.locateDefinition = v.pos 
-                panicDeliberately("definition found")
+                
             }
             if v.defaultValueExpression != null {
                 assignment, es := v.defaultValueExpression.
@@ -1232,6 +1238,9 @@ public class Class {
             return errs
         }
         for name, methods := range this.methods {
+            if this.block.inheritedAttribute.p.locateDefinition != null {
+                return errs
+            }
             for _, method := range methods {
                 errs.appendAll( method.checkModifierOk())
                 if method.isAbstract() {

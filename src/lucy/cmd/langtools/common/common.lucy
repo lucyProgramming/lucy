@@ -20,7 +20,6 @@ public fn getLucyPath()->(paths []string){
 	}
 	if envs.keyExist("LUCYPATH") == false {
 		panic("env variable LUCYPATH is not set")
-
 	}
 	ps := { envs["LUCYROOT"] -> true }
 	lucyPath := envs["LUCYPATH"]
@@ -65,9 +64,9 @@ public fn getClassPath()->(paths []string){
 	}
 }
 
-public fn findPackageInWhichDirectory(lucyPaths []string , packageName string)->(which string ){
+public fn findPackageInWhichDirectory(lucyPath []string , packageName string)->(which string ){
 	ps := []string{}
-	for _,v := range lucyPaths {
+	for _,v := range lucyPath {
 		if true == new io.File(v + "/src/" + packageName).isDirectory() {
 			ps.append(v)
 		}
@@ -87,12 +86,12 @@ public fn findPackageInWhichDirectory(lucyPaths []string , packageName string)->
 
 
 
- public fn getPaths()->(lucyRoot string ,lucyPaths []string ,err error ) {
+ public fn getPaths()->(lucyRoot string ,lucyPath []string ,err error ) {
 	defer {
 		err = catch()
 	}
 	lucyRoot = getLucyRoot()
-	lucyPaths = getLucyPath()
+	lucyPath = getLucyPath()
  }
 
 

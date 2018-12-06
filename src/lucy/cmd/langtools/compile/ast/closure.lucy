@@ -1,4 +1,4 @@
-import "java/lang/Object"
+
 
 class ClosureMeta {
 	pos Pos
@@ -48,15 +48,6 @@ public class Closure {
 		}
 		this.functions[f] = new ClosureMeta()
 		this.functions[f].pos = pos
-	}
-	
-	fn search(name string) -> ( x Object) {
-		for f, _ := range this.functions {
-			if f.name == name {
-				return f
-			}
-		}
-		return null
 	}
 }
 

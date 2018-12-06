@@ -8,7 +8,6 @@ public class BigEndian {
 		bs[1] = byte(v)
 	} 
 
-
 	public static fn getChar(bs []byte) ->(v char){
         _ = bs[1]
 		v =  ((char(bs[0]) << 8) & char(0xff00))  | ((char(bs[1]) << 0) & char(0xff))
@@ -55,8 +54,6 @@ public class BigEndian {
             ((long(bs[6]) << 40) & 0xff00L) |
             ((long(bs[7]) << 32) & 0xffL)
 	}
-
-
-	
 }
+
 

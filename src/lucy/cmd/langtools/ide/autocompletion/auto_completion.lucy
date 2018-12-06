@@ -4,7 +4,6 @@ import "lucy/cmd/langtools/ide"
 class AutoCompletion {
     lucyFiles []ide.LucyFile
     packageName string 
-    
     fn AutoCompletion(lucyFiles []ide.LucyFile , packageName string) {
         this.super()
         this.lucyFiles = lucyFiles

@@ -158,7 +158,8 @@ class BuildExpressionLeftValue {
                     ops = []byte{cg.OP_sastore}
                 case ast.VariableTypeChar:
                     ops = []byte{cg.OP_castore}
-                case ast.VariableTypeEnum , ast.VariableTypeInt:
+                case ast.VariableTypeEnum , 
+                    ast.VariableTypeInt:
                     ops = []byte{cg.OP_iastore}
                 case ast.VariableTypeLong:
                     ops = []byte{cg.OP_lastore}

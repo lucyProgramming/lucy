@@ -22,8 +22,12 @@ class Closure  {
 
 	fn getMeta(t ast.VariableTypeKind) -> (meta ClosureObjectMeta) {
 		switch t {
-		case ast.VariableTypeBool ,ast.VariableTypeByte ,ast.VariableTypeShort ,
-		    ast.VariableTypeEnum , ast.VariableTypeChar , ast.VariableTypeInt:
+		case ast.VariableTypeBool , 
+			ast.VariableTypeByte ,
+			ast.VariableTypeShort ,
+		    ast.VariableTypeEnum , 
+			ast.VariableTypeChar , 
+			ast.VariableTypeInt:
 			meta = this.closureObjectMetas[ClosureClassInt]
 		case ast.VariableTypeLong:
 			meta = this.closureObjectMetas[ClosureClassLong]
@@ -47,8 +51,12 @@ class Closure  {
 		maxStack = 2
 		var meta ClosureObjectMeta
 		switch v.Type {
-		case ast.VariableTypeBool ,ast.VariableTypeByte ,ast.VariableTypeShort ,
-            ast.VariableTypeEnum , ast.VariableTypeChar , ast.VariableTypeInt:
+		case ast.VariableTypeBool ,
+			ast.VariableTypeByte ,
+			ast.VariableTypeShort ,
+            ast.VariableTypeEnum ,
+			 ast.VariableTypeChar , 
+			 ast.VariableTypeInt:
 			meta = this.closureObjectMetas[ClosureClassInt]
 		case ast.VariableTypeLong:
 			meta = this.closureObjectMetas[ClosureClassLong]
@@ -78,8 +86,12 @@ class Closure  {
 	fn storeLocalClosureVar(c cg.ClassHighLevel, code cg.AttributeCode, v ast.Variable) {
 		var meta ClosureObjectMeta
 		switch v.Type.Type {
-		case ast.VariableTypeBool ,ast.VariableTypeByte ,ast.VariableTypeShort ,
-             ast.VariableTypeEnum , ast.VariableTypeChar , ast.VariableTypeInt:
+		case ast.VariableTypeBool ,
+			ast.VariableTypeByte ,
+			ast.VariableTypeShort ,
+             ast.VariableTypeEnum ,
+			  ast.VariableTypeChar ,
+			   ast.VariableTypeInt:
 			meta = this.closureObjectMetas[ClosureClassInt]
 		case ast.VariableTypeLong:
 			meta = this.closureObjectMetas[ClosureClassLong]
@@ -118,8 +130,12 @@ class Closure  {
 	fn unPack(c cg.ClassHighLevel, code cg.AttributeCode, v ast.Type) {
 		var meta ClosureObjectMeta
 		switch v.Type {
-		case ast.VariableTypeBool ,ast.VariableTypeByte ,ast.VariableTypeShort ,
-             ast.VariableTypeEnum , ast.VariableTypeChar , ast.VariableTypeInt:
+		case ast.VariableTypeBool , 
+			ast.VariableTypeByte ,
+			ast.VariableTypeShort ,
+             ast.VariableTypeEnum , 
+			 ast.VariableTypeChar ,
+			 ast.VariableTypeInt:
 			meta = this.closureObjectMetas[ClosureClassInt]
 		case ast.VariableTypeLong:
 			meta = this.closureObjectMetas[ClosureClassLong]

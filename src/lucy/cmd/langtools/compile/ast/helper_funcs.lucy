@@ -138,7 +138,7 @@ fn searchBuildIns(name string) -> (t Object)  {
 fn checkConst(block Block, c Constant) -> (err error)  {
 	if c.locateDefinition {
 		block.inheritedAttribute.p.locateDefinition = c.pos
-		panicDeliberately("definition found") 
+		 
 	}
 	if c.Type != null {
 		c.mkDefaultValue()
@@ -224,7 +224,7 @@ fn convertExpressionsToNeeds(es []Expression, needs []Type, eval []Type) {
 }
 
 // check out package name is valid or not
-fn PackageNameIsValid(name string) -> (valid bool) {
+fn packageNameIsValid(name string) -> (valid bool) {
 	return true
 }
 
@@ -269,10 +269,4 @@ fn searchRightValueForAutoCompletionItems(block Block) -> (items []AutoCompletio
 			names[name] = true 
 		}
 	}) 
-}
-
-
-fn panicDeliberately(reason string) {
-	panic(reason)
-	//still have bugs
 }

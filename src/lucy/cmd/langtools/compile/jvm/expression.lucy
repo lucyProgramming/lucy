@@ -93,7 +93,9 @@ class BuildExpression {
             code.codes[code.codeLength+1] = byte(e.longValue)
             code.codeLength += 2
             maxStack = 1
-        case ast.ExpressionTypeInt, ast.ExpressionTypeShort, ast.ExpressionTypeChar:
+        case ast.ExpressionTypeInt,
+            ast.ExpressionTypeShort, 
+            ast.ExpressionTypeChar:
             loadInt32(c, code, int(e.longValue))
             maxStack = 1
         case ast.ExpressionTypeLong:

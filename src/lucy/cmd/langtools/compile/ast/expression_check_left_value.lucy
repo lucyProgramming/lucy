@@ -11,7 +11,6 @@ class ExpressionCheckLeftValue {
 					e.pos.errMsgPrefix(), identifier.name)))
 				return null
 			}
-			
 			if identifier.name == ThisPointerName {
 				errs.append(new error(sprintf("%s '%s' cannot be used as left value",
 					e.pos.errMsgPrefix(), ThisPointerName)))
@@ -32,8 +31,7 @@ class ExpressionCheckLeftValue {
                     v.beenCapturedAsLeftValue++
                 }
 				if identifier.locateDefinition {
-					block.inheritedAttribute.p.locateDefinition = v.pos 
-					panicDeliberately("definition found")
+					block.inheritedAttribute.p.locateDefinition = v.pos
 				}
 				if v.findUsageInstances != null {
 					correctLastUsageType("value write" , v.findUsageInstances)
@@ -78,7 +76,7 @@ class ExpressionCheckLeftValue {
 				}
 				if selection.locateDefinition {
 					block.inheritedAttribute.p.locateDefinition = field.pos
-					panicDeliberately("definition found") 
+					 
 				}
 				selection.Field = field
 				result = field.Type.Clone()
@@ -94,7 +92,7 @@ class ExpressionCheckLeftValue {
 				if field != null {
 					if selection.locateDefinition {
 						block.inheritedAttribute.p.locateDefinition = field.pos
-						panicDeliberately("definition found") 
+						 
 					}
 					err := selection.Expression.fieldAccessAble(block, field)
 					if err != null {
@@ -121,7 +119,7 @@ class ExpressionCheckLeftValue {
                     }
 					if selection.locateDefinition {
 						block.inheritedAttribute.p.locateDefinition = v.pos 
-						panicDeliberately("definition found")
+						
 					}
                     selection.packageVariable = v
                     result = v.Type.Clone()

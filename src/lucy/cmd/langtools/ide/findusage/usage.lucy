@@ -1,9 +1,11 @@
 import "lucy/os"
 
+
 const usage = `
-    find definition of a element.
+    find definition of a element. 
        -file   file to be located
-       -pos    pos to be located , must be positive
+       -line   zero-base line offset
+       -column zero-base line column
 `
 
 fn printUsageAndExit(code int ){

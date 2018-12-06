@@ -3,23 +3,23 @@ import "lucy/cmd/langtools/common"
 import "java/io/File"
 
 final class Clean {
-	lucyPaths []string 
+	lucyPath []string 
 	packageName string 
 	lucyRoot string 
 	recursive bool 
 	verbose bool 
 	
-	fn Clean(lucyRoot string, lucyPaths []string,packageName string , recursive bool , verbose bool) {
+	fn Clean(lucyRoot string, lucyPath []string,packageName string , recursive bool , verbose bool) {
 	    this.super()
 		this.lucyRoot = lucyRoot 
-		this.lucyPaths = lucyPaths
+		this.lucyPath = lucyPath
 		this.packageName = packageName
 		this.recursive = recursive 
 		this.verbose = verbose 
 	}
 	
 	fn clean() {
-		w := common.findPackageInWhichDirectory(this.lucyPaths , this.packageName)
+		w := common.findPackageInWhichDirectory(this.lucyPath , this.packageName)
 		dir := w + "/class/" + this.packageName
 		this.cleanDir(dir)
 	}

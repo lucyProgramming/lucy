@@ -3,19 +3,19 @@ import "lucy/os"
 import "lucy/cmd/langtools/common"
 
 final class Test {
-	lucyPaths []string
+	lucyPath []string
 	packageName string 
 	lucyRoot string
-	public fn Test(lucyRoot string , lucyPaths []string , packageName string){
+	public fn Test(lucyRoot string , lucyPath []string , packageName string){
 	    this.super()
 		this.lucyRoot = lucyRoot
-		this.lucyPaths = lucyPaths
+		this.lucyPath = lucyPath
 		this.packageName = packageName
 	}
 	
 	//real test method
 	public fn test(){
-    	w := common.findPackageInWhichDirectory(this.lucyPaths , this.packageName)
+    	w := common.findPackageInWhichDirectory(this.lucyPath , this.packageName)
 		//check is test exist
 		dir := w + "/src/" + this.packageName + "/test" 
 		if f := new io.File(dir) ;  f.isDirectory() == false {

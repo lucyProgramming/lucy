@@ -33,11 +33,15 @@ public class ClassHighLevel {
 		binary.BigEndian.putChar(location, this.Class.insertMethodrefConst(mr))
 	}
 
-	public fn insertMethodCall(code AttributeCode, op byte,
-		className, method, descriptor string) {
+	public fn insertMethodCall(
+		code AttributeCode, 
+		op byte,
+		className, 
+		method, 
+		descriptor string) {
 		code.codes[code.codeLength] = op
 		this.insertMethodRefConst(
-		    new ConstantInfoMethodrefHighLevel(     className,     method,  descriptor),
+		    new ConstantInfoMethodrefHighLevel(className,     method,  descriptor),
 		    code.codes[code.codeLength+1:code.codeLength+3])
 		code.codeLength += 3
 	}

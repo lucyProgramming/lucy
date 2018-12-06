@@ -130,7 +130,8 @@ class BuildForRangeJavaArray {
                 code.codes[code.codeLength] = cg.OP_saload
             case ast.VariableTypeChar:
                 code.codes[code.codeLength] = cg.OP_caload
-            case ast.VariableTypeEnum , ast.VariableTypeInt:
+            case ast.VariableTypeEnum ,
+                ast.VariableTypeInt:
                 code.codes[code.codeLength] = cg.OP_iaload
             case ast.VariableTypeLong:
                 code.codes[code.codeLength] = cg.OP_laload

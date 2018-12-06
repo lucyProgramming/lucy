@@ -1,7 +1,6 @@
 import "java/lang/Object"
 
 
-
 public enum  ExpressionTypeKind { 
 	ExpressionTypeNull  = 1,                                     // null
 	ExpressionTypeBool,                                      // true or false

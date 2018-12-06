@@ -29,7 +29,6 @@ public enum  VariableTypeKind {
 	VariableTypeDynamicSelector 
 }
 
-
 public class Map {
 	public K Type
 	public V Type
@@ -241,7 +240,7 @@ public class Type {
 			if this.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = 
 					block.inheritedAttribute.Function.parameterTypes[this.name].pos 
-				panicDeliberately("definition found")
+				
 			}
 			block.inheritedAttribute.Function.parameterTypes[this.name].cp(this)
 			this.pos = pos // keep pos
@@ -373,7 +372,7 @@ public class Type {
 			}
 			if this.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = c.pos
-				panicDeliberately("definition found")
+				
 			}
 			this.Type = VariableTypeObject
 			this.Class = c 
@@ -386,7 +385,7 @@ public class Type {
 			t.cp(this)
 			if this.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = t.pos
-				panicDeliberately("definition found")
+				
 			}
 			this.pos = pos
 			this.alias = alias
@@ -401,7 +400,7 @@ public class Type {
 			}
 			if this.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = dd.pos 
-				panicDeliberately("definition found")
+				
 			}
 			this.Type = VariableTypeEnum
 			this.Enum = dd

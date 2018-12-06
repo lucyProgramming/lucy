@@ -7,9 +7,9 @@ import "lucy/os"
 import "lucy/encoding/json"
 
 public fn Main ( destinationDir string , 
-	flags common.Flags , files []string ,lucyPaths , classPaths []string , ifErrExit bool) -> (hasMain bool ){
+	flags common.Flags , files []string ,lucyPath , classPaths []string , ifErrExit bool) -> (hasMain bool ){
     var	compiler  = new Compiler()
-    var	loader  = new  FileLoader(lucyPaths , classPaths)
+    var	loader  = new  FileLoader(lucyPath , classPaths)
     ast.ImportsLoader = loader
 	if len(files) == 0 {
 		print("no file specfied")
@@ -17,7 +17,7 @@ public fn Main ( destinationDir string ,
 	}
 	compiler.flags = flags
 	compiler.destinationDir =	destinationDir 
-	return compiler.compile(files,lucyPaths,classPaths)
+	return compiler.compile(files,lucyPath,classPaths)
 }
 
 
@@ -27,7 +27,7 @@ public class Compiler {
 	Files             []string  
 	Errs              []error
 	NErrs2StopCompile int
-	lucyPaths         []string
+	lucyPath         []string
 	classPaths        []string
 	buildPackage        jvm.BuildPackage = new jvm.BuildPackage()
     flags common.Flags
@@ -71,8 +71,8 @@ public class Compiler {
 		print(string(bs))
 	}
 
-	fn compile(files []string,lucyPaths , classPaths []string) -> (hasMain bool ) {
-	    this.lucyPaths = lucyPaths
+	fn compile(files []string,lucyPath , classPaths []string) -> (hasMain bool ) {
+	    this.lucyPath = lucyPath
 	    this.classPaths = classPaths
         this.Files = files
 		for _, v := range this.Files {

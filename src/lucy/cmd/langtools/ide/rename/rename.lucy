@@ -11,19 +11,19 @@ class ReName {
     lucyFiles []ide.LucyFile
     packageName string
     printErr bool
-    lucyPaths []string
+    lucyPath []string
     classPath []string 
     to string 
     lucyAstNodes map{ filename->[]ast.TopNode } 
     otherPackageErrors []error 
 
-    public fn ReName(lucyFiles []ide.LucyFile , packageName string , printErr bool , classPath, lucyPaths []string ,to string  ) {
+    public fn ReName(lucyFiles []ide.LucyFile , packageName string , printErr bool , classPath, lucyPath []string ,to string  ) {
         this.super()
         this.lucyFiles = lucyFiles
         this.packageName = packageName
         this.printErr = printErr
         this.classPath = classPath
-        this.lucyPaths = lucyPaths
+        this.lucyPath = lucyPath
         this.to = to 
     }
 
@@ -57,7 +57,7 @@ class ReName {
             }
             os.exit(1)
         } 
-        packageLoader := new PackageLoader(this.classPath , this.lucyPaths , this)
+        packageLoader := new PackageLoader(this.classPath , this.lucyPath , this)
         ast.ImportsLoader = packageLoader
         /*
             set this package to cache 
@@ -94,7 +94,7 @@ class ReName {
 
 
     public  fn searchLucyPath() {
-        for _,v := range this.lucyPaths {
+        for _,v := range this.lucyPath {
             this.searchDir("" , v + "/src/")
         }
     }
@@ -103,7 +103,11 @@ class ReName {
         list := (new io.File(dir)).list()
         containsLucyFile := false 
         for v := range list {
-            if subDir := dir + "/" + v ; new io.File(subDir).isDirectory() {
+            subDir := dir + "/" + v 
+            if packageName == "" {
+                this.searchDir(v , subDir)
+                continue
+            }else {
                 this.searchDir(packageName + "/" + v , subDir)
                 continue
             }
@@ -121,18 +125,8 @@ class ReName {
             return 
         }
         lucyFiles := ide.readLucyFiles(ide.getLucyFiles(dir))
-        imported := false 
-        for v := range ide.parseImports(lucyFiles) {
-            if v == this.packageName {
-                imported = true 
-                break 
-            }
-        }
-        if imported == false {
-            return 
-        }
         _ , es := ide.parseAstAndTypeCheck(packageName , lucyFiles ,false)
-        if this.printErr{
+        if this.printErr {
             for v := range es{
                 os.stderr.println(v.getMessage())
             }

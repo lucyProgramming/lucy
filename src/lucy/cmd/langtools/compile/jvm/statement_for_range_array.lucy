@@ -185,7 +185,8 @@ class BuildForRangeArray {
             copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.start))
             // load value
             switch attr.rangeOn.value.array.Type {
-            case ast.VariableTypeBool ,ast.VariableTypeByte:
+            case ast.VariableTypeBool , 
+                ast.VariableTypeByte:
                 code.codes[code.codeLength] = cg.OP_baload
             case ast.VariableTypeShort:
                 code.codes[code.codeLength] = cg.OP_saload

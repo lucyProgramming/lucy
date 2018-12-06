@@ -23,10 +23,10 @@ fn main(args []string){
 		printUsageAndExit(1)
 	}
 	lucyRoot := common.getLucyRoot()
-	lucyPaths  := common.getLucyPath()
+	lucyPath  := common.getLucyPath()
 	new Clean(
 		lucyRoot ,
-		lucyPaths ,  
+		lucyPath ,  
 		packageName[0] , 
 		recursive.getValue() ,
 		verbose.getValue()

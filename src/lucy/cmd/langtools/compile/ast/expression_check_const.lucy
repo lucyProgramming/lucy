@@ -6,7 +6,10 @@ class ExpressionCheckConst {
 		cs := e.data.([]Constant)
 		for _, c := range cs {
             if c.findUsage {
-                c.findUsageInstances = []Usage{}
+				u := new Usage()
+                u.Type = "declaration"
+                u.pos = c.pos 
+                c.findUsageInstances = []Usage{u}
                 block.inheritedAttribute.p.findUsage = c.findUsageInstances
             }
 			err := checkConst(block, c)

@@ -1,27 +1,22 @@
 
 import "lucy/cmd/langtools/ide"
 import "lucy/cmd/langtools/compile/ast"
-import "lucy/cmd/langtools/ide/gotodefinition"
 import "lucy/encoding/json"
 import "java/nio/file/FileSystems"
 import "java/lang/Object"
 import "lucy/cmd/langtools/common"
 
 public fn findUsage(file string , pos int) ->(result Object){
-    definition := gotodefinition.findDefinition(file , pos)
-    if definition == null {
-        return 
-    }
-    lucyPath , packageName := ide.locateLucyFile(definition.filename)
+    lucyPath , packageName := ide.locateLucyFile(file)
     var lucyFiles = ide.readLucyFiles(ide.getLucyFiles(lucyPath + "/src/" + packageName))    
     fileSystem := FileSystems.getDefault()
     for v := range lucyFiles {
         if fileSystem.getPath(file).getFileName().toString() == 
             fileSystem.getPath(v.realPathName).getFileName().toString(){
-            v.findUsage = definition.offset 
+            v.findUsage = pos 
         }
     }
-    result = sortUsages(new FindUsage(lucyFiles , packageName , true , common.getLucyPath() ).find())
+    result = sortUsages(new FindUsage(lucyFiles , packageName , true , common.getLucyPath()).find())
 }
 
 fn main(args []string) {

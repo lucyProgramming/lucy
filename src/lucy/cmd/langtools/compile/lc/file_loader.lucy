@@ -14,11 +14,11 @@ import "lucy/os"
 	load from file implementation
 */
 public class FileLoader implements ast.LoadImport{
-    public lucyPaths , classPaths []string
+    public lucyPath , classPaths []string
     public caches map{ string -> Object }
-    public fn FileLoader(lucyPaths , classPaths []string){
+    public fn FileLoader(lucyPath , classPaths []string){
         this.super()
-        this.lucyPaths = lucyPaths
+        this.lucyPath = lucyPath
         this.classPaths = classPaths
         this.caches = new map{string -> Object}()
     }
@@ -40,7 +40,6 @@ public class FileLoader implements ast.LoadImport{
         } 
         return cache 
     }
- 
     
     public fn  LoadImport(importName string) -> (x Object,err error) {
         /*defer {
@@ -54,7 +53,7 @@ public class FileLoader implements ast.LoadImport{
         }
         realPaths  := []Resource{}
         foundInLucy := false
-        for _, v := range this.lucyPaths {
+        for _, v := range this.lucyPath {
             if  p := v + "/class/" + importName ; new io.File(p ).isDirectory() { // directory is package
                 realPaths.append(new Resource(
                     resourceKindLucyPackage,
@@ -383,7 +382,10 @@ public class FileLoader implements ast.LoadImport{
         case ast.VariableTypeBool:
             boolValue =  binary.BigEndian.getInt(c.ConstPool[nameIndex].info) != 0
             return
-        case ast.VariableTypeByte ,ast.VariableTypeShort ,ast.VariableTypeChar,ast.VariableTypeInt:
+        case ast.VariableTypeByte,
+            ast.VariableTypeShort,
+            ast.VariableTypeChar, 
+            ast.VariableTypeInt:
             longValue =  long(binary.BigEndian.getInt(c.ConstPool[nameIndex].info))
             return
         case ast.VariableTypeLong:

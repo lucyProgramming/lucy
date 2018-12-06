@@ -17,7 +17,7 @@ public class Pos {
 	public loadDefinitionFromOutside LoadDefinitionFromOutside 
 	
 	public fn errMsgPrefix() -> (prefix string) {
-		return sprintf("%s:%d:%d:", this.filename, this.endLine, this.endColumn)
+		return sprintf("%s:%d:%d:", this.filename, this.endLine + 1, this.endColumn + 1 )
 	}
 	
 }

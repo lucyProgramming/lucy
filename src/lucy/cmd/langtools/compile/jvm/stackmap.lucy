@@ -78,8 +78,12 @@ class StackMapState {
 		t ast.Type) -> (ret cg.StackMapVerificationTypeInfo) {
 		ret = new cg.StackMapVerificationTypeInfo()
 		switch t.Type {
-		case ast.VariableTypeBool ,ast.VariableTypeByte , ast.VariableTypeShort,
-		    ast.VariableTypeEnum ,ast.VariableTypeChar ,  ast.VariableTypeInt:
+		case ast.VariableTypeBool , 
+			ast.VariableTypeByte ,
+			 ast.VariableTypeShort,
+		    ast.VariableTypeEnum ,
+			ast.VariableTypeChar , 
+			ast.VariableTypeInt:
 			ret.Verify = new cg.StackMapIntegerVariableInfo()
 		case ast.VariableTypeLong:
 			ret.Verify = new cg.StackMapLongVariableInfo()

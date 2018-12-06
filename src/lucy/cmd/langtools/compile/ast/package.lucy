@@ -1,13 +1,13 @@
 
 import "lucy/os"
 import "lucy/cmd/langtools/compile/common"
-
+import "java/lang/Object"
 
 
 public class Package {
 	public name                         string
 	public block                        Block = new Block() // package always have a default block
-	files                        map { string -> SourceFile}
+	files                        map {string -> SourceFile}
 	public initFunctions                []Function
 	public nErrors2Stop                 int // number of errors should stop compile
 	errors                       []error
@@ -40,11 +40,13 @@ public class Package {
 	
 	public fn Package(name string,disableCheckUnuse bool){
 		this.super()
-		assert(name != null )
 		this.disableCheckUnuse = disableCheckUnuse
 		this.name =  name
 	}
-
+	public fn locateDefinitionFetched() ->(fetched bool) {
+		fetched  = this.locateDefinition != null 	 
+	}
+	
 	fn isSame(compare Package) -> (is bool) {
 		return this.name == compare.name
 	}
@@ -75,12 +77,15 @@ public class Package {
 		if this.name == common.CorePackage {
 			return null
 		}
-		pp, err := loaded.load(common.CorePackage)
-		if err != null {
-			return err
+		if lucyBuildInPackage == null {
+			var pp Object
+			pp, err = loaded.load(common.CorePackage)
+			if err != null {
+				return err
+			}
+			lucyBuildInPackage = pp.(Package)
+			lucyBuildInPackage.markBuildIn()
 		}
-		lucyBuildInPackage = pp.(Package)
-		lucyBuildInPackage.markBuildIn()
 		this.block.outer = lucyBuildInPackage.block
 		lucyBuildInPackage.block.inheritedAttribute = new InheritedAttribute()
 		return null
@@ -110,7 +115,6 @@ public class Package {
 			f.used = true
 		}
 	}
-
 	fn shouldStop(errs []error) -> (should bool) {
 		return len(this.errors)+len(errs) >= this.nErrors2Stop
 	}
@@ -167,7 +171,7 @@ public class Package {
 				}
 				continue
 			}
-
+			
 			if t,ok := v.node.(TypeAlias) ; ok {
 				err := this.block.insert(t.name, t.pos, t.Type)
 				t.Type.alias = t
@@ -222,7 +226,7 @@ public class Package {
 		this.mkInitFunctions(bs)
 		return
 	}
-	
+
 	public fn typeCheck(nodes []TopNode) -> (es []error) {
 		this.block.inheritedAttribute.p = this
 		if t := this.insert(nodes) ; len(t) > 0 {
@@ -238,31 +242,37 @@ public class Package {
 		this.errors.appendAll(this.block.checkConstants())
 		for _, v := range this.block.constants {
 			if v.findUsage {
-				v.findUsageInstances = []Usage{}
+				u := new Usage()
+                u.Type = "declaration"
+                u.pos = v.pos 
+				v.findUsageInstances = []Usage{u}
 				this.findUsageIsGlobal = true 
 				this.findUsage = v.findUsageInstances
 			}
 		}
+		if this.locateDefinitionFetched() {
+			return this.errors 
+		}
 		for _, v := range this.block.enums {
-			if v.findUsage {
-				v.findUsageInstances = []Usage{}
-				this.findUsageIsGlobal = true 
-				this.findUsage = v.findUsageInstances
-			}
-			for _,vv := range v.enums {
-				vv.findUsageInstances = []Usage{}
-				this.findUsageIsGlobal = true 
-				this.findUsage = vv.findUsageInstances
-			}
 			v.name = this.name + "/" + v.name
 			this.errors.appendAll(v.check(this.block))
+			if this.locateDefinitionFetched() {
+				return this.errors 
+			}
+		}
+		if this.locateDefinitionFetched() {
+			return this.errors 
 		}
 		for _, v := range this.block.typeAliases {
 			if v.locateDefinition {
-				this.locateDefinition = v.pos 
+				this.locateDefinition = v.pos
+				return this.errors 
 			}
 			if v.findUsage {
-				v.alias.findUsageInstances = []Usage{}
+				u := new Usage()
+                u.Type = "declaration"
+                u.pos = v.pos 
+				v.alias.findUsageInstances = []Usage{u}
 				this.findUsageIsGlobal = true 
 				this.findUsage = v.alias.findUsageInstances
 			}
@@ -270,13 +280,25 @@ public class Package {
 			if err != null {
 				this.errors.append(err)
 			}
+			if this.locateDefinitionFetched() {
+				return this.errors 
+			}
 		}
+
 		for _, v := range this.block.functions {
+			if v.locateDefinition {
+				this.locateDefinition = v.pos 
+			}
 			if v.findUsage {
-				v.findUsageInstances = []Usage{}
+				u := new Usage()
+                u.Type = "declaration"
+                u.pos = v.pos 
+				v.findUsageInstances = []Usage{u}
 				this.findUsageIsGlobal = true 
 				this.findUsage = v.findUsageInstances
 			}
+		}
+		for _, v := range this.block.functions {
 			if v.isBuildIn {
 				continue
 			}
@@ -298,11 +320,17 @@ public class Package {
 			if this.shouldStop(null) {
 				return this.errors
 			}
+			if this.locateDefinitionFetched() {
+				return this.errors 
+			}
 		}
 		for _, v := range this.block.Classes {
 			v.name = this.name + "/" + v.name
 			if v.findUsage {
-				v.findUsageInstances = []Usage{}
+				u := new Usage()
+                u.Type = "declaration"
+                u.pos = v.pos 
+				v.findUsageInstances = []Usage{u}
 				this.findUsageIsGlobal = true 
 				this.findUsage = v.findUsageInstances
 			}
@@ -312,6 +340,12 @@ public class Package {
 			this.errors.appendAll(v.block.checkConstants())
 			v.block.inherit(this.block)
 			v.block.inheritedAttribute.Class = v
+			if this.locateDefinitionFetched() {
+				return this.errors 
+			}
+		}
+		if this.locateDefinitionFetched() {
+			return this.errors 
 		}
 		for _, v := range this.block.Classes { 
 			v.mkDefaultConstruction()
@@ -323,6 +357,9 @@ public class Package {
 			}
 			this.errors.appendAll(v.resolveInterfaces())
 			this.errors.appendAll (v.resolveFieldsAndMethodsType())
+			if this.locateDefinitionFetched() {
+				return this.errors 
+			}
 		}
 
 		for _, v := range this.block.Classes {
@@ -331,11 +368,17 @@ public class Package {
 			if this.shouldStop(null) {
 				return this.errors
 			}
+			if this.locateDefinitionFetched() {
+				return this.errors 
+			}
 		}
 		for _, v := range this.initFunctions {
 			this.errors.appendAll( v.check(this.block))
 			if this.shouldStop(null) {
 				return this.errors
+			}
+			if this.locateDefinitionFetched() {
+				return this.errors 
 			}
 		}
 		if this.onlyAnalyzeGlobals {
@@ -346,11 +389,17 @@ public class Package {
 				continue
 			}
 			this.errors.appendAll(v.checkReturnVarExpression())
+			if this.locateDefinitionFetched() {
+				return this.errors 
+			}
 		}
 		for _, v := range this.block.Classes {
 			this.errors.appendAll( v.checkPhase2())
 			if this.shouldStop(null) {
 				return this.errors
+			}
+			if this.locateDefinitionFetched() {
+				return this.errors 
 			}
 		}
 		for _, v := range this.block.functions {
@@ -363,6 +412,9 @@ public class Package {
 			v.checkBlock(this.errors)
 			if this.shouldStop(null) {
 				return this.errors
+			}
+			if this.locateDefinitionFetched() {
+				return this.errors 
 			}
 		}
 		for _, v := range this.statementLevelFunctions {

@@ -54,8 +54,12 @@ class BuildReturn {
                 this.eb.loadLocalVar(c, code, context.function.Type.returnList[0])
             }
             switch context.function.Type.returnList[0].Type.Type {
-            case ast.VariableTypeBool ,ast.VariableTypeByte,ast.VariableTypeShort,
-                ast.VariableTypeEnum,ast.VariableTypeChar,ast.VariableTypeInt:
+            case ast.VariableTypeBool ,
+                ast.VariableTypeByte,
+                ast.VariableTypeShort,
+                ast.VariableTypeEnum,
+                ast.VariableTypeChar,
+                ast.VariableTypeInt:
                 code.codes[code.codeLength] = cg.OP_ireturn
             case ast.VariableTypeLong:
                 code.codes[code.codeLength] = cg.OP_lreturn
@@ -118,8 +122,12 @@ class BuildReturn {
             this.eb.loadLocalVar(c, code, context.function.Type.returnList[0])
             maxStack = jvmSlotSize(context.function.Type.returnList[0].Type)
             switch context.function.Type.returnList[0].Type.Type {
-            case ast.VariableTypeBool , ast.VariableTypeByte ,ast.VariableTypeShort,
-              ast.VariableTypeChar, ast.VariableTypeEnum ,ast.VariableTypeInt   :
+            case ast.VariableTypeBool,
+                ast.VariableTypeByte ,
+                ast.VariableTypeShort,
+                ast.VariableTypeChar, 
+                ast.VariableTypeEnum , 
+                ast.VariableTypeInt:
                 code.codes[code.codeLength] = cg.OP_ireturn
             case ast.VariableTypeLong:
                 code.codes[code.codeLength] = cg.OP_lreturn

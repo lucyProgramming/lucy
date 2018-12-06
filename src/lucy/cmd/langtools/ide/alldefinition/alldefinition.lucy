@@ -45,16 +45,14 @@ class AllDefinition {
         result["variables"] = vs
         for _ , v := range p.block.variables {
             vv := new map{string -> Object}()
-            // vv["ispublic"] = this.packBool(v.isPublic())
             vv["pos"] = v.pos
             vv["type"] = v.Type.typeString()
-            vs[v.name ] = vv
+            vs[v.name] = vv
         }
         cs := new map{string -> Object}()
         result["constants"] = cs
         for _ , v := range p.block.constants {
             vv := new map{string -> Object}()
-            // vv["ispublic"] = this.packBool(v.isPublic())
             vv["pos"] = v.pos
             vv["type"] = v.Type.typeString()
             cs[v.name] = vv
@@ -63,7 +61,6 @@ class AllDefinition {
         result["functions"] = fs
         for _ , v := range p.block.functions {
             vv := new map{string -> Object}()
-            // vv["ispublic"] = this.packBool(v.isPublic())
             vv["pos"] = v.pos
             vv["definition"] = v.readableMsg() 
             fs[v.name] = vv
@@ -72,7 +69,6 @@ class AllDefinition {
         result["enums"] = es
         for name , v := range p.block.enums {
             vv := new map{string -> Object}()
-            // vv["ispublic"] = this.packBool(v.isPublic())
             vv["pos"] = v.pos
             es[name] = vv
             enumConsts := new Object[](len(v.enums))
@@ -90,10 +86,6 @@ class AllDefinition {
         for name , v := range p.block.Classes {
             vv := new map{string -> Object}()
             vv["pos"] = v.pos
-            // vv["isFinal"] = this.packBool(v.isFinal())
-            // vv["isAbstract"] = this.packBool(v.isAbstract())
-            // vv["isPublic"] = this.packBool(v.isPublic())
-            // vv["isInterface"] = this.packBool(v.isPublic())
             fs := new map{string -> Object} ()
             vv["fileds"] = fs 
             for _ , f := range v.fields{
@@ -117,7 +109,7 @@ class AllDefinition {
             classes[name] = vv
         }
     }
-
+    
     fn packBool(v bool) -> (o Boolean = Boolean.valueOf(v)) { }
     fn packLong(v long) -> (o Long = Long.valueOf(v)) { }
     fn packDouble(v double) -> (o Double = Double.valueOf(v)) { }

@@ -20,8 +20,15 @@ class ArrayMeta {
 	elementsFieldDescriptor   string
 	setMethodDescription      string
 	getMethodDescription      string
-	fn ArrayMeta(className , constructorFuncDescriptor ,sliceDescriptor ,appendDescriptor,appendAllDescriptor , elementsFieldDescriptor ,
-		setMethodDescription , 	getMethodDescription string){
+	fn ArrayMeta(
+		className , 
+		constructorFuncDescriptor ,
+		sliceDescriptor , 
+		appendDescriptor,
+		appendAllDescriptor ,
+		elementsFieldDescriptor ,
+		setMethodDescription ,
+		getMethodDescription string){
 		this.super()
 		this.className = className
 		this.constructorFuncDescriptor = constructorFuncDescriptor

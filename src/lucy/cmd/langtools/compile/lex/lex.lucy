@@ -305,7 +305,7 @@ public class Lexer {
 				// if identifier == "ArrayMeta" &&  line == token.startLine {
 				// 	print( column , columnOffset , this.columnOffset)
 				// }
-                if line == token.startLine && column >= columnOffset && column <= this.columnOffset  {
+                if line == token.startLine && column >= columnOffset -1 && column <= this.columnOffset  {
 					token.locateDefinition = true 
 					// print("locate:" , identifier )
 					// panic(identifier)
@@ -318,8 +318,12 @@ public class Lexer {
 				}
 			}
 			if this.findUsage  != -1 {
-				if this.findUsage >= startOffset && this.findUsage < this.offset {
+				line , column := this.getLineAndColumnFromPos(this.findUsage)
+				if line == token.startLine && column >= columnOffset -1 && column <= this.columnOffset  {
 					token.findUsage = true 
+					// print("locate:" , identifier )
+					// panic(identifier)
+
 				}
 			}
 			if this.rename  != -1 {

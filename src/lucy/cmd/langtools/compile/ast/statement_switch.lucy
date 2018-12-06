@@ -98,8 +98,11 @@ public class StatementSwitch  {
 				if conditionType.isPrimitive() {
 					if e.isLiteral() {
 						switch e.Type {
-						case ExpressionTypeByte , ExpressionTypeShort,
-							ExpressionTypeChar,ExpressionTypeInt , ExpressionTypeLong:
+						case ExpressionTypeByte , 
+							ExpressionTypeShort,
+							ExpressionTypeChar,
+							ExpressionTypeInt , 
+							ExpressionTypeLong:
 							longValue = e.longValue
 						case ExpressionTypeFloat , ExpressionTypeDouble:
 							doubleValue = e.doubleValue

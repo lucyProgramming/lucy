@@ -17,7 +17,7 @@ class ExpressionCheckIdentifier {
 			e.stringValue = e.pos.filename
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = e.pos 
-				panicDeliberately("definition found")
+				
 			}
 			result, _ := e.checkSingleValueContextExpression(block)
 			return result, null
@@ -27,7 +27,7 @@ class ExpressionCheckIdentifier {
 			result, _ := e.checkSingleValueContextExpression(block)
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = e.pos 
-				panicDeliberately("definition found")
+				
 			}
 			return result, null
 		case magicIdentifierTime:
@@ -36,7 +36,7 @@ class ExpressionCheckIdentifier {
 			result, _ := e.checkSingleValueContextExpression(block)
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = e.pos 
-				panicDeliberately("definition found")
+				
 			}
 			return result, null
 		case magicIdentifierClass:
@@ -87,7 +87,6 @@ class ExpressionCheckIdentifier {
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = f.pos 
-				panicDeliberately("definition found")
 			}
 			result := new Type()
 			result.Type = VariableTypeFunction
@@ -108,7 +107,6 @@ class ExpressionCheckIdentifier {
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = t.pos 
-				panicDeliberately("definition found")
 			}
 			if t.findUsageInstances != null {
 				correctLastUsageType("value read" , t.findUsageInstances)
@@ -128,7 +126,6 @@ class ExpressionCheckIdentifier {
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = t.pos
-				panicDeliberately("definition found") 
 			}
 			t.used = true
 			e.fromConst(t)
@@ -145,7 +142,7 @@ class ExpressionCheckIdentifier {
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = c.pos 
-				panicDeliberately("definition found")
+				
 			}
 			if c.findUsageInstances != null {
 				correctLastUsageType("value read" , c.findUsageInstances)
@@ -165,7 +162,6 @@ class ExpressionCheckIdentifier {
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = enumName.pos 
-				panicDeliberately("definition found")
 			}
 			result := new Type()
 			result.pos = enumName.pos
@@ -186,7 +182,7 @@ class ExpressionCheckIdentifier {
 		}
 		if identifier.locateDefinition {
 			block.inheritedAttribute.p.locateDefinition = it.pos 
-			panicDeliberately("definition found") 
+			 
 		}
 		valueType = new Type()
 		valueType.pos = e.pos

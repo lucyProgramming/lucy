@@ -28,7 +28,7 @@ class BuildIf {
         }
         trueBlockState := new StackMapState(ifState)
         stack, exit :=
-            this.bb.buildConditionNotOk(c, code, context, trueBlockState, s.condition)
+            this.bb.buildConditionNotOkExit(c, code, context, trueBlockState, s.condition)
         if stack > maxStack {
             maxStack = stack
         }
@@ -44,7 +44,7 @@ class BuildIf {
             writeExits([]cg.Exit{exit}, code.codeLength)
             elseIfState := new StackMapState(ifState)
             stack, exit =
-                this.bb.buildConditionNotOk(c, code, context, elseIfState, v.condition)
+                this.bb.buildConditionNotOkExit(c, code, context, elseIfState, v.condition)
             if stack > maxStack {
                 maxStack = stack
             }

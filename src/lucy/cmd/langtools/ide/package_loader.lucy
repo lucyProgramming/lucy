@@ -7,9 +7,9 @@ import "java/io"
 
 public class PackageLoader extends lc.FileLoader {
     public onlyAnalyzeGlobals bool 
-
-    public fn PackageLoader(lucyPaths , classPaths []string){
-        this.super(lucyPaths ,classPaths )
+    
+    public fn PackageLoader(lucyPath , classPaths []string){
+        this.super(lucyPath ,classPaths )
     }
     
     public fn LoadImport(importName string) -> (x Object , err error) {
@@ -18,7 +18,7 @@ public class PackageLoader extends lc.FileLoader {
         }
         realPaths  := []lc.Resource{}
         foundInLucy := false
-        for _, v := range this.lucyPaths {
+        for _, v := range this.lucyPath {
             if  p := v + "/src/" + importName ;  new io.File(p).isDirectory() { // directory is package
                 realPaths.append(new lc.Resource(
                     lc.resourceKindLucyPackage,

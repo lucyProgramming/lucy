@@ -92,8 +92,12 @@ fn loadLocalVariableOps(variableType ast.VariableTypeKind, offset char) -> (bs [
 		panic("over 255")
 	}
 	switch variableType {
-	case ast.VariableTypeBool,ast.VariableTypeByte ,ast.VariableTypeShort,ast.VariableTypeEnum,
-    	  ast.VariableTypeChar , ast.VariableTypeInt:
+	case ast.VariableTypeBool,
+		ast.VariableTypeByte ,
+		ast.VariableTypeShort,
+		ast.VariableTypeEnum,
+    	ast.VariableTypeChar ,
+		ast.VariableTypeInt:
 		switch int(offset) {
 		case 0:
 			return []byte{cg.OP_iload_0}

@@ -7,7 +7,7 @@ class FunctionParser extends ParserExtends{
         this.super()
         this.parser = parser
     }
-
+	
 	/*
 		when canBeAbstract is true , means can have no body
 	*/

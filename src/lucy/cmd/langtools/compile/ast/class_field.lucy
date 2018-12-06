@@ -13,7 +13,7 @@ public class ClassField {
 	public findUsage  bool 
 	public rename  bool
 	public findUsageInstances  []Usage 
-
+	
 	/* 
 		a // this is a inline comment
 	*/

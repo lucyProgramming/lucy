@@ -21,7 +21,7 @@ public fn Parse(
 	onlyParseImport bool,
 	nErrors2Stop int , locateDefinition int ,getHover int , findUsage int ,rename int , autoCompletion int   ) -> (errs []error) {
 	p := new Parser(bs , tops , filename , onlyParseImport , nErrors2Stop )
-	p.lexer = lex.New(bs, 1, 1 , locateDefinition , getHover , findUsage , rename , autoCompletion)
+	p.lexer = lex.New(bs, 0, 0 , locateDefinition , getHover , findUsage , rename , autoCompletion)
 	return p.parse()
 }
 
@@ -451,6 +451,8 @@ class Parser {
 		for k, v := range names {
 			vd := new ast.Variable()
 			vd.locateDefinition = v.locateDefinition
+			vd.findUsage = v.findUsage
+			vd.rename = v.rename
 			vd.name = v.name
 			vd.pos = v.pos
 			vd.containsLf = v.containsLf 

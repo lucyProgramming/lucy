@@ -11,12 +11,12 @@ public class Import {
 		import "github.com/lucy" should access by lucy.doSomething()
 		import "github.com/std" as std2 should access by std2.doSomething()
 	*/
-	fn MkAccessName() -> (err error) {
+	fn mkAccessName() -> (err error) {
 		if this.accessName != null && this.accessName != "" {
 			this.alias = this.accessName
 			return null
 		}
-		if false == PackageNameIsValid(this.Import) {
+		if false == packageNameIsValid(this.Import) {
 			return new error(sprintf("%s '%s' is not a valid name",
 				this.pos.errMsgPrefix(), this.Import))
 		}
@@ -47,7 +47,7 @@ class SourceFile {
 		if this.importsByResources == null {
 			this.importsByResources =new map { string -> Import }()
 		}
-		if err = i.MkAccessName(); err != null {
+		if err = i.mkAccessName(); err != null {
 			return err
 		}
 		if this.imports.keyExist(i.accessName){

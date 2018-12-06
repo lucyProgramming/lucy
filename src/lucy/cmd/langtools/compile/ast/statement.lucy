@@ -1,6 +1,5 @@
 
 
-
 public enum StatementTypeKind {
 	StatementTypeExpression = 1 ,
 	StatementTypeIf,
@@ -79,7 +78,7 @@ public class Statement {
 			//noting
 		case StatementTypeAutoCompletion:
 			block.inheritedAttribute.p.autoCompletionItems = searchRightValueForAutoCompletionItems(block)
-			panicDeliberately("auto completion finish")
+			
 		case StatementTypeExpression:
 			return this.checkStatementExpression(block)
 		case StatementTypeIf:
@@ -135,10 +134,12 @@ public class Statement {
 			}
 			if this.Class.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = this.Class.pos 
-				panicDeliberately("definition found")
 			}
 			if this.Class.findUsage {
-				this.Class.findUsageInstances = []Usage{}
+				u := new Usage()
+                u.Type = "declaration"
+                u.pos = this.Class.pos 
+				this.Class.findUsageInstances = []Usage{u}
 				block.inheritedAttribute.p.findUsage = this.Class.findUsageInstances
 			}
 			errs.appendAll(this.Class.check(block))
@@ -148,22 +149,6 @@ public class Statement {
 			err := block.insert(this.Enum.name, this.Enum.pos, this.Enum)
 			if err != null {
 				es.append(err)
-			}
-			if this.Enum.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = this.Enum.pos 
-				panicDeliberately("definition found")
-			}
-			if this.Enum.findUsage {
-				this.Enum.findUsageInstances = []Usage{}
-				block.inheritedAttribute.p.findUsage = this.Enum.findUsageInstances
-			}
-			for _ , vv := range this.Enum.enums {
-				if vv.locateDefinition {
-					block.inheritedAttribute.p.locateDefinition = vv.pos 
-					panicDeliberately("definition found")
-				}
-				vv.findUsageInstances = []Usage{}
-				block.inheritedAttribute.p.findUsage = vv.findUsageInstances
 			}
 			return es
 		case StatementTypeNop:
@@ -178,7 +163,7 @@ public class Statement {
 					errMsgPrefix(this.Import.pos))))
 				return errs
 			}
-			err := this.Import.MkAccessName()
+			err := this.Import.mkAccessName()
 			if err != null {
 				errs.append(err)
 				return errs
@@ -195,10 +180,13 @@ public class Statement {
 		case StatementTypeTypeAlias:
 			if this.TypeAlias.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = this.pos 
-				panicDeliberately("definition found")
+				
 			}
 			if this.TypeAlias.findUsage {
-				this.TypeAlias.findUsageInstances = []Usage{}
+				u := new Usage()
+				u.Type = "declaration"
+				u.pos = this.TypeAlias.pos 
+				this.TypeAlias.findUsageInstances = []Usage{u}
 				block.inheritedAttribute.p.findUsage = this.TypeAlias.findUsageInstances
 			}
 			err := this.TypeAlias.Type.resolve(block)

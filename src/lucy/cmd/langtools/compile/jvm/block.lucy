@@ -300,7 +300,7 @@ class BuildBlock {
 	/*
 		compile condition for false  &&  generate exit
 	*/
-	fn buildConditionNotOk(
+	fn buildConditionNotOkExit(
 		c cg.ClassHighLevel,
 		code cg.AttributeCode,
 		context Context,

@@ -13,7 +13,7 @@ import "java/lang/Runtime"
 
 public class RunLucyPackage {
 	lucyRoot            string
-	lucyPaths           []string
+	lucyPath           []string
 	mainPackageLucyPath string
 	Package             string
 	command             string
@@ -38,7 +38,7 @@ public class RunLucyPackage {
             return new error("no package to run")
         }
         this.lucyRoot = common.getLucyRoot()
-        this.lucyPaths = common.getLucyPath()
+        this.lucyPath = common.getLucyPath()
         this.classPaths = common.getClassPath()
         this.packagesCompiled = new map{string -> PackageCompiled}()
         founds := this.findPackageIn(this.Package)
@@ -119,7 +119,7 @@ public class RunLucyPackage {
     */
     fn findPackageIn(packageName string) -> (paths []string = []string{}) {
         pathHavePackage := []string{}
-        for _, v := range this.lucyPaths {
+        for _, v := range this.lucyPath {
             if new io.File(v + "/src/" + packageName).isDirectory() {
                 pathHavePackage.append(v)
             }
@@ -246,7 +246,7 @@ public class RunLucyPackage {
             return
         }
         existInLucyPath := fn(name string) -> (found []string = []string{}) {
-            for _, v := range that.lucyPaths {
+            for _, v := range that.lucyPath {
                 if new io.File(v + "/src/" + name).isDirectory() {
                     found.append(v)
                 }
@@ -362,7 +362,7 @@ public class RunLucyPackage {
         }
         f := new compileCommon.Flags()
         f.parseArgs(["-package-name" , packageName])
-        hasMain := lc.Main(destinationDir , f , files , this.lucyPaths , this.classPaths , true)
+        hasMain := lc.Main(destinationDir , f , files , this.lucyPath , this.classPaths , true)
         // make_node_objects maitain.json
         meta = new common.PackageMeta()
         meta.compiledFrom = new common.FileMeta[](len(lucyFiles))

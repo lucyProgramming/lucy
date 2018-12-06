@@ -46,10 +46,9 @@ public class MakeNodesObjects {
                ret[k] = ( this.makeTypeAlias(t))
             }
         }
-        return ret
     }
 
-    fn makeConst(c ast.Constant) -> (x Object) {
+    fn makeConst(c ast.Constant) -> (x string) {
         s := sprintf("const%d %s", c.pos.endLine, c.name)
         if c.Type != null {
             s += sprintf(" base on '%s'", c.Type.typeString())
@@ -57,7 +56,7 @@ public class MakeNodesObjects {
         s += this.makeExpression(c.defaultValueExpression).toString()
         return s
     }
-    fn makeImport(i ast.Import) -> (x Object) {
+    fn makeImport(i ast.Import) -> (x string) {
         s := sprintf("import@%d", i.pos.endLine)
         s += sprintf(" '%s'", i.Import)
         if i.alias != null &&   i.alias != "" {
@@ -403,6 +402,7 @@ public class MakeNodesObjects {
             return this.makeImport(s.Import)
         case ast.StatementTypeTypeAlias:
             return this.makeTypeAlias(s.TypeAlias)
+        default:
         }
         return null
     }
@@ -446,10 +446,21 @@ public class MakeNodesObjects {
             }
             ret["elements"] = t
             return ret
-        case ast.ExpressionTypeLogicalOr,ast.ExpressionTypeLogicalAnd, ast.ExpressionTypeOr,
-             ast.ExpressionTypeAnd, ast.ExpressionTypeXor, ast.ExpressionTypeLsh,ast.ExpressionTypeRsh,
-             ast.ExpressionTypeAdd,ast.ExpressionTypeSub, ast.ExpressionTypeMul, ast.ExpressionTypeDiv,
-             ast.ExpressionTypeMod,ast.ExpressionTypeEq, ast.ExpressionTypeNe,ast.ExpressionTypeGe,
+        case ast.ExpressionTypeLogicalOr ,
+            ast.ExpressionTypeLogicalAnd,
+            ast.ExpressionTypeOr,
+            ast.ExpressionTypeAnd, 
+            ast.ExpressionTypeXor,
+             ast.ExpressionTypeLsh,
+             ast.ExpressionTypeRsh,
+             ast.ExpressionTypeAdd,
+             ast.ExpressionTypeSub,
+             ast.ExpressionTypeMul,
+             ast.ExpressionTypeDiv,
+             ast.ExpressionTypeMod,
+             ast.ExpressionTypeEq, 
+             ast.ExpressionTypeNe,
+             ast.ExpressionTypeGe,
              ast.ExpressionTypeGt,
              ast.ExpressionTypeLe,ast.ExpressionTypeLt:
             ret := new map{string -> Object}()
@@ -704,15 +715,10 @@ public class MakeNodesObjects {
             }
         case ast.ExpressionTypeDot:
             return "."
+        case ast.ExpressionTypeAutoCompletion:
+            panic("not happening")
         }
         return null
     }
-
-
-
-
-
-
-
 }
 

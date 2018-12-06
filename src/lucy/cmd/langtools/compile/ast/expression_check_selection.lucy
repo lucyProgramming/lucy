@@ -32,7 +32,7 @@ class ExpressionCheckSelection {
                 result.pos = e.pos
                 if selection.locateDefinition{
                     block.inheritedAttribute.p.locateDefinition = field.pos
-                    panicDeliberately("definition found")
+                    
                 }
                 return result
             } else {
@@ -44,7 +44,7 @@ class ExpressionCheckSelection {
                 result.pos = e.pos
                 if selection.locateDefinition {
                     block.inheritedAttribute.p.locateDefinition = method.Function.pos
-                    panicDeliberately("definition found")   
+                       
                 }
                 return result
             }
@@ -68,7 +68,7 @@ class ExpressionCheckSelection {
                     if object.Package.isSame(block.inheritedAttribute.p) || object.Package.javaPackage == null  {
                         // current package 
                         block.inheritedAttribute.p.locateDefinition = v.pos
-                        panicDeliberately("definition found")
+                        
                     }else {
                         t := new Pos()
                         block.inheritedAttribute.p.locateDefinition = t
@@ -76,7 +76,7 @@ class ExpressionCheckSelection {
                         t.loadDefinitionFromOutside.packageName = object.Package.name
                         t.loadDefinitionFromOutside.name = selection.name 
                         t.loadDefinitionFromOutside.javaPackage = object.Package.javaPackage
-                        panicDeliberately("definition found")
+                        
                     }
                 }
                 selection.packageVariable = v
@@ -95,7 +95,7 @@ class ExpressionCheckSelection {
                     if object.Package.isSame(block.inheritedAttribute.p) || object.Package.javaPackage == null  {
                         // current package 
                         block.inheritedAttribute.p.locateDefinition = c.pos
-                        panicDeliberately("definition found")
+                        
                     }else {
                         t := new Pos()
                         block.inheritedAttribute.p.locateDefinition = t
@@ -103,7 +103,7 @@ class ExpressionCheckSelection {
                         t.loadDefinitionFromOutside.packageName = object.Package.name
                         t.loadDefinitionFromOutside.name = selection.name 
                         t.loadDefinitionFromOutside.javaPackage = object.Package.javaPackage 
-                        panicDeliberately("definition found")
+                        
                     }
                 }
                 return result
@@ -121,7 +121,7 @@ class ExpressionCheckSelection {
                 if selection.locateDefinition {
                     if object.Package.isSame(block.inheritedAttribute.p) || object.Package.javaPackage == null  {
                         block.inheritedAttribute.p.locateDefinition = c.pos
-                        panicDeliberately("definition found")
+                        
                     }else {
                         t := new Pos()
                         block.inheritedAttribute.p.locateDefinition = t
@@ -129,7 +129,7 @@ class ExpressionCheckSelection {
                         t.loadDefinitionFromOutside.packageName = object.Package.name
                         t.loadDefinitionFromOutside.name = selection.name 
                         t.loadDefinitionFromOutside.javaPackage = object.Package.javaPackage 
-                        panicDeliberately("definition found")
+                        
                     }
                 }
                 
@@ -145,7 +145,7 @@ class ExpressionCheckSelection {
                     if object.Package.isSame(block.inheritedAttribute.p) || object.Package.javaPackage == null  {
                         // current package 
                         block.inheritedAttribute.p.locateDefinition = n.pos
-                        panicDeliberately("definition found")
+                        
                     }else {
                         t := new Pos()
                         block.inheritedAttribute.p.locateDefinition = t
@@ -153,7 +153,7 @@ class ExpressionCheckSelection {
                         t.loadDefinitionFromOutside.packageName = object.Package.name
                         t.loadDefinitionFromOutside.name = selection.name 
                         t.loadDefinitionFromOutside.javaPackage = object.Package.javaPackage 
-                        panicDeliberately("definition found")
+                        
                     }
                 }
                 result := new Type()
@@ -185,7 +185,7 @@ class ExpressionCheckSelection {
                     if object.Package.isSame(block.inheritedAttribute.p) || object.Package.javaPackage == null  {
                         // current package 
                         block.inheritedAttribute.p.locateDefinition = f.pos
-                        panicDeliberately("definition found")
+                        
                     }else {
                         t := new Pos()
                         block.inheritedAttribute.p.locateDefinition = t
@@ -193,7 +193,7 @@ class ExpressionCheckSelection {
                         t.loadDefinitionFromOutside.packageName = object.Package.name
                         t.loadDefinitionFromOutside.name = selection.name 
                         t.loadDefinitionFromOutside.javaPackage = object.Package.javaPackage 
-                        panicDeliberately("definition found")
+                        
                     }
                 }
                 result := new Type()
@@ -245,7 +245,7 @@ class ExpressionCheckSelection {
                 if selection.locateDefinition {
                     if object.Class.loadFromOutSide  == false {      
                         block.inheritedAttribute.p.locateDefinition = field.pos
-                        panicDeliberately("definition found")
+                        
                     }else {
                         //TODO :: locateDefinition
                     }
@@ -263,7 +263,7 @@ class ExpressionCheckSelection {
                 if selection.locateDefinition {
                     if object.Class.loadFromOutSide  == false {      
                         block.inheritedAttribute.p.locateDefinition = field.pos
-                        panicDeliberately("definition found")
+                        
                     }
                 }
                 selection.Method = method
