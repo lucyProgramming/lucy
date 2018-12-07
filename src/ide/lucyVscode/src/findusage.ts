@@ -5,7 +5,6 @@ import * as vscode from 'vscode';
 const child_process = require('child_process');
 const fs = require('fs');
 
-
 module.exports = class GoReferenceProvider implements vscode.ReferenceProvider {
     public provideReferences(
         document: vscode.TextDocument, position: vscode.Position,
@@ -21,19 +20,19 @@ module.exports = class GoReferenceProvider implements vscode.ReferenceProvider {
             position.character
         ];
         var result = child_process.execFileSync("java", args );
-        var pos = JSON.parse(result);
-        if (!pos) {
+        var usages = JSON.parse(result);
+        if (!usages) {
             console.log("definition not found");
             return null ;
         }
         args = [
             "lucy.cmd.langtools.ide.findusage.main",
             "-file",
-            pos.filename,
+            usages.filename,
             "-line",
-            pos.endLine ,
+            usages.endLine ,
             "-column",
-            pos.columnOffset -1 
+            usages.endColumnOffset -1 
         ];
         {
             let s =  "java ";
@@ -46,16 +45,16 @@ module.exports = class GoReferenceProvider implements vscode.ReferenceProvider {
             console.log(s);
         }
         result = child_process.execFileSync("java", args);
-        pos = JSON.parse(result);
-        if (!pos) {
+        usages = JSON.parse(result);
+        if (!usages) {
             return null;
         }
-        console.log(pos);
+        console.log(usages);
         var items = new Array();
-        for(var i = 0 ; i < pos.length ; i ++ ) {
-            let v = pos[i];
+        for(var i = 0 ; i < usages.length ; i ++ ) {
+            let v = usages[i];
             var uri2 = vscode.Uri.file(v.pos.filename);
-            var position2 = new vscode.Position(v.pos.endLine,v.pos.columnOffset);
+            var position2 = new vscode.Position(v.pos.endLine,v.pos.endColumnOffset);
             var location =  new vscode.Location(uri2, position2);
             items[i] = location; 
         } 

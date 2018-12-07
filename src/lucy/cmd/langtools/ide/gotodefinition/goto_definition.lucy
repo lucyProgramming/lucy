@@ -20,12 +20,14 @@ public fn findDefinition(file string , pos int) -> (result ast.Pos) {
         lucyFiles = ide.readLucyFiles(t)
     }
     fileSystem := FileSystems.getDefault()
+    searchFile := ""
     for v := range lucyFiles {
         if fileSystem.getPath(file).getFileName().toString() == 
             fileSystem.getPath(v.realPathName).getFileName().toString(){
             v.locateDefinition = pos 
+            searchFile = v.realPathName
         }
     }
-    result = new FindDefinition(lucyFiles,packageName , true ).find()
+    result = new FindDefinition(lucyFiles,packageName , true , searchFile).find()
 }
 

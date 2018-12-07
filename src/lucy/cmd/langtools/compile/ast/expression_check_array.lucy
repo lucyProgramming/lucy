@@ -9,7 +9,7 @@ class ExprssionCheckArray {
 		arr := e.data.(ExpressionArray)
 		if arr.Type == null && len(arr.expressions) == 0 {
 			errs.append(new error(sprintf("%s array literal has no type and no expression, cannot inference it`s type ",
-					errMsgPrefix(e.pos))))
+				errMsgPrefix(e.pos))))
 			return null
 		}
 		var noType = true
@@ -61,5 +61,3 @@ class ExprssionCheckArray {
 		valueType.pos = e.pos
 	}
 } 
-
-

@@ -364,7 +364,7 @@ public class  BuildPackage {
                 t.name = f.name
                 t.filename = f.pos.filename
                 t.startLine = char(f.pos.endLine)
-                t.startColumn = char(f.pos.endColumn)
+                t.startColumn = char(f.pos.endColumnOffset)
                 t.code = string(f.sourceCode)
                 if this.mainClass.templateFunctions == null {
                     this.mainClass.templateFunctions = [t]

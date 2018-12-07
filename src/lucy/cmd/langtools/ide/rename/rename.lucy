@@ -16,7 +16,8 @@ class ReName {
     to string 
     lucyAstNodes map{ filename->[]ast.TopNode } 
     otherPackageErrors []error 
-
+    packageLoader PackageLoader 
+    
     public fn ReName(lucyFiles []ide.LucyFile , packageName string , printErr bool , classPath, lucyPath []string ,to string  ) {
         this.super()
         this.lucyFiles = lucyFiles
@@ -58,6 +59,7 @@ class ReName {
             os.exit(1)
         } 
         packageLoader := new PackageLoader(this.classPath , this.lucyPath , this)
+        this.packageLoader = packageLoader
         ast.ImportsLoader = packageLoader
         /*
             set this package to cache 
@@ -125,12 +127,13 @@ class ReName {
             return 
         }
         lucyFiles := ide.readLucyFiles(ide.getLucyFiles(dir))
-        _ , es := ide.parseAstAndTypeCheck(packageName , lucyFiles ,false)
+        p , es := ide.parseAstAndTypeCheck(packageName , lucyFiles ,false , "")
         if this.printErr {
             for v := range es{
                 os.stderr.println(v.getMessage())
             }
         }
+        this.packageLoader.setCache(packageName , p )
     }
 
 

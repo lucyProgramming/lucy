@@ -32,7 +32,6 @@ class ExpressionCheckSelection {
                 result.pos = e.pos
                 if selection.locateDefinition{
                     block.inheritedAttribute.p.locateDefinition = field.pos
-                    
                 }
                 return result
             } else {
@@ -76,7 +75,6 @@ class ExpressionCheckSelection {
                         t.loadDefinitionFromOutside.packageName = object.Package.name
                         t.loadDefinitionFromOutside.name = selection.name 
                         t.loadDefinitionFromOutside.javaPackage = object.Package.javaPackage
-                        
                     }
                 }
                 selection.packageVariable = v
@@ -95,7 +93,6 @@ class ExpressionCheckSelection {
                     if object.Package.isSame(block.inheritedAttribute.p) || object.Package.javaPackage == null  {
                         // current package 
                         block.inheritedAttribute.p.locateDefinition = c.pos
-                        
                     }else {
                         t := new Pos()
                         block.inheritedAttribute.p.locateDefinition = t
@@ -103,7 +100,6 @@ class ExpressionCheckSelection {
                         t.loadDefinitionFromOutside.packageName = object.Package.name
                         t.loadDefinitionFromOutside.name = selection.name 
                         t.loadDefinitionFromOutside.javaPackage = object.Package.javaPackage 
-                        
                     }
                 }
                 return result
@@ -153,7 +149,6 @@ class ExpressionCheckSelection {
                         t.loadDefinitionFromOutside.packageName = object.Package.name
                         t.loadDefinitionFromOutside.name = selection.name 
                         t.loadDefinitionFromOutside.javaPackage = object.Package.javaPackage 
-                        
                     }
                 }
                 result := new Type()
@@ -275,7 +270,7 @@ class ExpressionCheckSelection {
             }
             
         default:
-            errs . append(new error( sprintf("%s cannot access '%s' on '%s'",
+            errs.append(new error( sprintf("%s cannot access '%s' on '%s'",
                 e.pos.errMsgPrefix(), selection.name, object.typeString())))
             return null
         }
@@ -285,16 +280,71 @@ class ExpressionCheckSelection {
     static fn autoCompletion(object Type , block Block) {
         switch object.Type {
         case VariableTypeDynamicSelector:
-            
+            .autoCompletionForDynamicSelector(object.Class , block)
         case VariableTypePackage:
-            
+            .autoCompletionForPackage(object.Package , block )
         case VariableTypeObject:
-            
+            .autoCompletionForObject(object.Class , block)
         case VariableTypeClass:
-            
-
+            .autoCompletionClass(object.Class , block)
         }
-    }   
+    }
+    static fn autoCompletionForPackage(p Package , block Block) {
+        items := []AutoCompletionItem{}
+        for name , _ := range p.block.constants {
+            item := new AutoCompletionItem()
+            item.Type = "constant"
+            item.name = name
+            items.append(item)
+        }
+        for name , _ := range p.block.variables {
+            item := new AutoCompletionItem()
+            item.Type = "variable"
+            item.name = name
+            items.append(item)
+        }
+        for name , v := range p.block.functions {
+            item := new AutoCompletionItem()
+            item.Type = "function"
+            item.name = name
+            item.suggest = v.mkSuggest()
+            items.append(item)
+        }
+        for name , _ := range p.block.Classes {
+            item := new AutoCompletionItem()
+            item.Type = "class"
+            item.name = name
+            items.append(item)
+        }
+        for name , _ := range p.block.EnumNames {
+            item := new AutoCompletionItem()
+            item.Type = "enumItem"
+            item.name = name
+            items.append(item)
+        }
+        block.inheritedAttribute.p.autoCompletionItems = items
+    } 
+    
+    static fn autoCompletionForDynamicSelector(object Class , block Block) {
+        // items := []AutoCompletionItem{}
+        // accessFromSub := false 
+        // for object != null {
+            
+        //     accessFromSub = true    
+        // }
+        // block.inheritedAttribute.p.autoCompletionItems = items
+    } 
+    
+    static fn autoCompletionForObject(object Class , block Block) {
+        
+    } 
+    static fn autoCompletionClass(object Class , block Block) {
+        
+    } 
+
+
+
+
 
 
 

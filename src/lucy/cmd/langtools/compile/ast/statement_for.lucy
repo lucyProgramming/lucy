@@ -19,7 +19,7 @@ public class StatementFor {
 	initExpressionBlock Block = new Block()
 	/*
 		for i := 0 ; i < 10 ;i ++ {
-
+			
 		}
 	*/
 	public Init      Expression
@@ -72,6 +72,7 @@ public class StatementFor {
 			rangeOn.Type != VariableTypeMap {
 			errs.append( new error(sprintf("%s cannot range on '%s'",
 				errMsgPrefix(rangeExpression.pos), rangeOn.typeString())))
+			errs.appendAll( this.block.check())
 			return errs
 		}
 		var lefts []Expression
@@ -96,7 +97,6 @@ public class StatementFor {
 					errs.append(
 						new error(sprintf("%s not a identifier on left",
 							errMsgPrefix(v.pos))))
-					return errs
 				}
 			}
 			var identifierK ExpressionIdentifier
@@ -123,7 +123,7 @@ public class StatementFor {
 					u := new Usage()
 					u.Type = "declaration"
 					u.pos = vd.pos 
-					vd.findUsageInstances = []Usage{u}
+					vd.findUsageInstances = [u]
 					this.initExpressionBlock.inheritedAttribute.p.findUsage = vd.findUsageInstances 
 				}
 				if rangeOn.Type == VariableTypeArray ||
@@ -170,7 +170,7 @@ public class StatementFor {
 					u := new Usage()
 					u.Type = "declaration"
 					u.pos = vd.pos 
-					vd.findUsageInstances = []Usage{u}
+					vd.findUsageInstances = [u]
 					this.initExpressionBlock.inheritedAttribute.p.findUsage = vd.findUsageInstances 
 				}
 				if this.initExpressionBlock.inheritedAttribute.Function != null {
@@ -202,14 +202,14 @@ public class StatementFor {
 			if this.RangeAttr.expressionKey != null {
 				receiverKType = this.RangeAttr.expressionKey.getLeftValue(this.initExpressionBlock, errs)
 				if receiverKType == null {
-					return errs
+					goto checkBlock 
 				}
 			}
 			var receiverVType Type
 			if this.RangeAttr.expressionValue != null {
 				receiverVType = this.RangeAttr.expressionValue.getLeftValue(this.initExpressionBlock, errs)
 				if receiverVType == null {
-					return errs
+					goto checkBlock 
 				}
 			}
 			var kType, vType Type
@@ -229,7 +229,7 @@ public class StatementFor {
 						errMsgPrefix(this.RangeAttr.expressionKey.pos),
 						receiverKType.typeString(), kType.typeString()))
 					errs.append(err)
-					return errs
+					goto checkBlock 
 				}
 			}
 			if receiverVType != null {
@@ -238,10 +238,11 @@ public class StatementFor {
 						errMsgPrefix(this.RangeAttr.expressionKey.pos),
 						receiverKType.typeString(), kType.typeString()))
 					errs.append(err)
-					return errs
+					goto checkBlock 
 				}
 			}
 		}
+	checkBlock:
 		errs.appendAll( this.block.check())
 		return errs
 	}
@@ -283,9 +284,6 @@ public class StatementFor {
 			}
 			_, es := this.increment.check(this.initExpressionBlock)
 			errs.appendAll(es)
-		}
-		if len(errs) > 0 {
-			return errs
 		}
 		errs.appendAll( this.block.check())
 		return errs

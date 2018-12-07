@@ -472,7 +472,6 @@ class BlockParser  extends ParserExtends{
 						this.parser.errMsgPrefix())))
 			}
 			isLabel = true
-			pos := this.parser.mkPos()
 			this.next(lfIsToken) // skip :
 			if this.parser.token.Type != lex.TokenLf {
 				this.parser.errs.append(
@@ -480,19 +479,24 @@ class BlockParser  extends ParserExtends{
 						this.parser.errMsgPrefix())))
 			}
 			statement := new ast.Statement()
-			statement.pos = pos
+			statement.pos = pos 
 			statement.Type = ast.StatementTypeLabel
 			label := new ast.StatementLabel()
-			label.pos = pos
-			label.codeOffset = -1
 			statement.StatementLabel = label
-			label.statement = statement
-			label.name = e.data.(ast.ExpressionIdentifier).name
 			block.statements.append(statement)
+			
+			label.pos = e.pos 
+			label.codeOffset = -1
+			label.statement = statement
+			identifier := e.data.(ast.ExpressionIdentifier)
+			label.name = identifier.name
+			label.findUsage = identifier.findUsage
+			label.rename = identifier.rename
+			label.locateDefinition = identifier.locateDefinition 
 			label.block = block
 			err = block.insert(label.name, e.pos, label) // insert first,so this label can be found before it is checked
 			if err != null {
-				this.parser.errs.append( err)
+				this.parser.errs.append(err)
 			}
 		} else {
 			this.parser.validStatementEnding()

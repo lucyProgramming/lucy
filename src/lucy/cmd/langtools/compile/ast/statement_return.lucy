@@ -15,7 +15,7 @@ public class StatementReturn   {
 			this.defers.appendAll(b.defers)
 		}
 	}
-
+	
 	fn check(b Block) -> (errs []error = []error {} ) {
 		if b.inheritedAttribute.Defer != null {
 			return []error{new error(sprintf("%s cannot has 'return' in 'defer'",

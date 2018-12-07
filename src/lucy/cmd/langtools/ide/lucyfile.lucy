@@ -11,6 +11,8 @@ public class LucyFile {
     public findUsage int 
     public rename int 
     public autoCompletion int 
+    
+    
     fn LucyFile(){
         this.super()
         this.locateDefinition = -1 

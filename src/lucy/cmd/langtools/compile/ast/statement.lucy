@@ -122,6 +122,16 @@ public class Statement {
 			        block.inheritedAttribute.Defer.labels = [this.StatementLabel]
 			    }
 			}
+			if this.StatementLabel.findUsage {
+				u := new Usage()
+				u.Type = "declaration"
+				u.pos = this.StatementLabel.pos 
+				this.StatementLabel.findUsageInstances = [u]
+				block.inheritedAttribute.p.findUsage = this.StatementLabel.findUsageInstances
+			}
+			if this.StatementLabel.locateDefinition{
+				block.inheritedAttribute.p.locateDefinition = this.StatementLabel.pos 
+			}
 		case StatementTypeClass:
 		    if block.inheritedAttribute.p.statementLevelClass == null {
                 block.inheritedAttribute.p.statementLevelClass = []Class{this.Class}
@@ -139,7 +149,7 @@ public class Statement {
 				u := new Usage()
                 u.Type = "declaration"
                 u.pos = this.Class.pos 
-				this.Class.findUsageInstances = []Usage{u}
+				this.Class.findUsageInstances = [u]
 				block.inheritedAttribute.p.findUsage = this.Class.findUsageInstances
 			}
 			errs.appendAll(this.Class.check(block))
@@ -154,7 +164,6 @@ public class Statement {
 		case StatementTypeNop:
 			//nop , should be never execute to here
 			//
-
 		case StatementTypeWhen:
 			return this.StatementWhen.check(block, this)
 		case StatementTypeImport:
@@ -180,13 +189,12 @@ public class Statement {
 		case StatementTypeTypeAlias:
 			if this.TypeAlias.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = this.pos 
-				
 			}
 			if this.TypeAlias.findUsage {
 				u := new Usage()
 				u.Type = "declaration"
 				u.pos = this.TypeAlias.pos 
-				this.TypeAlias.findUsageInstances = []Usage{u}
+				this.TypeAlias.findUsageInstances = [u]
 				block.inheritedAttribute.p.findUsage = this.TypeAlias.findUsageInstances
 			}
 			err := this.TypeAlias.Type.resolve(block)

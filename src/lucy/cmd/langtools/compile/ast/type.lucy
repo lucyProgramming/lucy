@@ -35,6 +35,7 @@ public class Map {
 }
 
 public class Type {
+
 	public Type           VariableTypeKind
 	public isBuildIn      bool // build in type alias
 	public isVariableArgs bool // int ...
@@ -384,8 +385,11 @@ public class Type {
 			resolved := this.resolved
 			t.cp(this)
 			if this.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = t.pos
-				
+				if t.alias == null {
+					block.inheritedAttribute.p.locateDefinition = t.pos
+				}else {
+					block.inheritedAttribute.p.locateDefinition = t.alias.pos
+				}
 			}
 			this.pos = pos
 			this.alias = alias

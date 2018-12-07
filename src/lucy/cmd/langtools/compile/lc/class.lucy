@@ -176,7 +176,7 @@ class ClassDecoder {
 			this.classFile.methods[i] = m 
 		}
 	}
-
+	
 	fn parseAttributes() -> (attrs  cg.AttributeGroupedByName) {
 		attrs = new cg.AttributeGroupedByName()
 		length := binary.BigEndian.getChar(this.bs)

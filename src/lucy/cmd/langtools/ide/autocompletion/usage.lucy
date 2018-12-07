@@ -11,4 +11,3 @@ fn printUsageAndExit(code int ){
 	print(usage)
 	os.exit(code)
 }
-

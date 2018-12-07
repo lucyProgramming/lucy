@@ -545,7 +545,7 @@ public class FileLoader implements ast.LoadImport{
             pos := new ast.Pos()
             pos.filename = attr.filename
             pos.endLine = int(attr.startLine)
-            pos.endColumn = int(attr.startColumn)
+            pos.endColumnOffset = int(attr.startColumn)
             f, es := ast.ParseFunctionHandler([]byte(attr.code),pos)
             if len(es) > 0 { // looks impossible
                 panic(es[0])

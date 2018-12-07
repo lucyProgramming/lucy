@@ -99,7 +99,7 @@ public class PackageLoader extends lc.FileLoader {
 
     public fn  loadLucyPackage(r lc.Resource) -> (p ast.Package) {
         lucyFiles := readLucyFiles(getLucyFiles(r.realPath))
-        p , _ =  parseAstAndTypeCheck(r.name , lucyFiles , this.onlyAnalyzeGlobals)
+        p , _ =  parseAstAndTypeCheck(r.name , lucyFiles , this.onlyAnalyzeGlobals , "")
     }
 }
 

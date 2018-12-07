@@ -6,25 +6,30 @@ import * as vscode from 'vscode';
 const GoDefinitionProvider = require("./goto_definition");
 const GoReferenceProvider = require("./findusage");
 const GoDocumentSymbolProvider = require("./alldefinition");
+const GoCompletionItemProvider = require("./auto_completion");
+
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
     
-    let sel : vscode.DocumentSelector = { scheme: 'file', language: 'lucy' } ; 
+    let lucySelector : vscode.DocumentSelector = { scheme: 'file', language: 'lucy' } ; 
 
     // Use the console to output diagnostic information (console.log) and errors (console.error)
     // This line of code will only be executed once when your extension is activated
     console.log('Congratulations, your extension "lucy" is now active!');
     context.subscriptions.push(
         vscode.languages.registerDefinitionProvider(
-            sel, new GoDefinitionProvider()));
+            lucySelector, new GoDefinitionProvider()));
         context.subscriptions.push(
         vscode.languages.registerReferenceProvider(
-            sel, new GoReferenceProvider()));
+            lucySelector, new GoReferenceProvider()));
         context.subscriptions.push(
             vscode.languages.registerDocumentSymbolProvider(
-                sel, new GoDocumentSymbolProvider()));
+                lucySelector, new GoDocumentSymbolProvider()));
+        context.subscriptions.push(
+            vscode.languages.registerCompletionItemProvider(
+                lucySelector, new GoCompletionItemProvider(), '.'));
    
 }
 

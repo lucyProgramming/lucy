@@ -69,6 +69,8 @@ public class Block {
         if this.constants != null {
             if t := this.constants[name]; t != null {
                 if t.findUsage {
+                    e := new error("")
+                    e.printStackTrace() 
                     u := new Usage() 
                     u.Type = "value read"
                     u.pos = pos 
@@ -138,19 +140,20 @@ public class Block {
         outer := this
         for {
             if outer.labels != null {
-                if l := outer.labels[name]; l != null {
-                    if l.findUsage {
+                if lable := outer.labels[name]; lable != null {
+                    if lable.findUsage {
                         u := new Usage() 
                         u.Type = "declaration"
                         u.pos = pos
-                        if l.findUsageInstances == null {
-                            l.findUsageInstances = [u]
+                        if lable.findUsageInstances == null {
+                            lable.findUsageInstances = [u]
+                            this.inheritedAttribute.p.findUsage = lable.findUsageInstances
                         }else {
-                            l.findUsageInstances.append(u)
+                            lable.findUsageInstances.append(u)
                         }  
 			        }
-                    l.used = true
-                    return l
+                    lable.used = true
+                    return lable
                 }
             }
             if outer.isFunctionBlock {

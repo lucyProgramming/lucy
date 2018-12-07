@@ -8,7 +8,6 @@ public class MethodHighLevel {
 	public	accessFlags                           char
 	public	code                                  AttributeCode
 	public	AttributeLucyMethodDescriptor         AttributeLucyMethodDescriptor
-	//public	AttributeLucyTriggerPackageInitMethod AttributeLucyTriggerPackageInitMethod
 	public	AttributeDefaultParameters            AttributeDefaultParameters
 	public	AttributeMethodParameters             AttributeMethodParameters
 	public	AttributeLucyReturnListNames          AttributeMethodParameters

@@ -22,11 +22,11 @@ public class MethodInfo {
 	public attributes             []AttributeInfo
 	public AttributeGroupedByName AttributeGroupedByName
 
-	fn isBridge() ->(is bool)  {
+	fn isBridge() -> (is bool)  {
 		return this.accessFlags & AccMethodBridge != 0
 	}
 
-	fn isSynthetic()  ->(is bool) {
+	fn isSynthetic() -> (is bool) {
 		return this.accessFlags & AccMethodSynthetic != 0
 	}
 	public fn GetAttributeByName( name string) -> (attrs []AttributeInfo){

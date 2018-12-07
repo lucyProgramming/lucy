@@ -36,12 +36,12 @@ module.exports = class GoDefinitionProvider implements vscode.DefinitionProvider
             console.log(s);
         }
         let result = child_process.execFileSync("java", args );
-        let pos = JSON.parse(result);
-        if (!pos) {
+        let definition = JSON.parse(result);
+        if (!definition) {
             return ;
         }
-        let uri2 =  vscode.Uri.file(path.normalize(pos.filename)) ; 
-        let position2 = new vscode.Position(pos.endLine, pos.columnOffset);
+        let uri2 =  vscode.Uri.file(path.normalize(definition.filename)) ; 
+        let position2 = new vscode.Position(definition.endLine, definition.endColumnOffset);
         //fs.unlink(bufferFileName);
         return new vscode.Location(uri2, position2);
         }

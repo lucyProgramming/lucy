@@ -13,7 +13,8 @@ public class StatementLabel {
 	public findUsage bool 
 	public findUsageInstances []Usage  
 	public inlineComment string 
-
+	public rename bool 
+	public locateDefinition bool 
 	/*
 		defer {
 			xxx:

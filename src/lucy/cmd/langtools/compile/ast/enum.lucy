@@ -62,7 +62,7 @@ public class Enum   {
 			u := new Usage()
 			u.Type = "declaration"
 			u.pos = this.pos 
-			this.findUsageInstances = []Usage{u}
+			this.findUsageInstances = [u]
 			block.inheritedAttribute.p.findUsage = this.findUsageInstances
 			block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal
 		}
@@ -75,12 +75,12 @@ public class Enum   {
 				u := new Usage()
 				u.Type = "declaration"
 				u.pos = vv.pos 
-				vv.findUsageInstances = []Usage{u}
+				vv.findUsageInstances = [u]
 				block.inheritedAttribute.p.findUsage = vv.findUsageInstances
 				block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal
 			}
 		}
-
+		
 		var initV int = 0
 		if this.Init != null {
 			if is, err := this.Init.constantFold(); err != null {

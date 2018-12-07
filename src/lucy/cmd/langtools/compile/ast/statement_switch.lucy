@@ -20,9 +20,6 @@ public class StatementSwitch  {
 	public defaultInlineComment string 
 	
 	fn check(block Block) ->(errs []error = []error{})  {
-		if this.condition == null { // must be a error at parse stage
-			return errs
-		}
 		this.initExpressionBlock.inherit(block)
 		for _, v := range this.prefixExpressions {
 			v.isStatementExpression = true
@@ -33,6 +30,8 @@ public class StatementSwitch  {
 			}
 		}
 		if this.condition == null {
+			//TODO:: still check body
+			
 			return errs
 		}
 		conditionType, es := this.condition.checkSingleValueContextExpression(this.initExpressionBlock)

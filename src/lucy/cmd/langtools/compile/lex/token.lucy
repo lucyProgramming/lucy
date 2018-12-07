@@ -5,9 +5,8 @@ public class Token {
 	public offset      int // start offset
 	public endOffset  int 
 	public startLine   int
-	public startColumn int
 	public endLine     int
-	public endColumn   int
+	public endColumnOffset int 
 	public description string
 	public stringValue string 
 	public longValue  long 
@@ -19,7 +18,6 @@ public class Token {
 	public literalRaw string 
 	public rename bool 
 	public autoCompletion bool 
-	public columnOffset int 
 }
 
 
@@ -189,11 +187,3 @@ var keywordsMap = {
 		"when"->         TokenWhen
 }
  
-
-
-
-
-
-
-
-

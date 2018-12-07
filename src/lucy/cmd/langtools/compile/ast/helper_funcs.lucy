@@ -186,7 +186,7 @@ fn checkConst(block Block, c Constant) -> (err error)  {
 }
 
 fn convertExpressionToNeed(e Expression, need Type, eval Type) {
-	convertExpressionsToNeeds([]Expression{e}, []Type{need}, []Type{eval})
+	convertExpressionsToNeeds([e], [need], [eval] )
 }
 
 

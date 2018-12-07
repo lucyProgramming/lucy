@@ -4,27 +4,15 @@ import "lucy/cmd/langtools/ide"
 class AutoCompletion {
     lucyFiles []ide.LucyFile
     packageName string 
-    fn AutoCompletion(lucyFiles []ide.LucyFile , packageName string) {
+    searchFile string 
+    fn AutoCompletion(lucyFiles []ide.LucyFile , packageName string ,searchFile string ) {
         this.super()
         this.lucyFiles = lucyFiles
         this.packageName = packageName
+        this.searchFile = searchFile 
     }
-    
-    fn getAutoCompletion() ->(result []ast.AutoCompletionItem) {
-        ide.packageLoader.onlyAnalyzeGlobals = true 
-        defer ide.packageLoader.onlyAnalyzeGlobals = false 
-        var p ast.Package 
-        {  // defer is block-level this will not panic the whole program
-            defer {
-                e := catch()
-                if e != null {
-                    print(e.getMessage())
-                }
-            }
-            nodes , _ := ide.parseAst(this.lucyFiles)
-            p = new ast.Package(this.packageName , true)
-            p.typeCheck(nodes)
-        }
+    fn getAutoCompletion() -> (result []ast.AutoCompletionItem) {
+        p , _ := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles , false , this.searchFile)
         return p.autoCompletionItems
     }
 }

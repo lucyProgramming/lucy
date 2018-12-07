@@ -2,7 +2,9 @@
     "name": "lucy",
     "displayName": "lucy",
     "description": "lucy language support",
+    "keywords": ["lucy" , "plugin"],
     "version": "0.0.1",
+    "publisher": "yu",
     "engines": {
         "vscode": "^1.29.0"
     },

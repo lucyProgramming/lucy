@@ -2,7 +2,7 @@
 
 
 
-public enum  resourceKind{
+public enum  resourceKind {
 	resourceKindJavaClass = 1,
 	resourceKindJavaPackage,
 	resourceKindLucyClass,

@@ -80,9 +80,10 @@ fn printToken(tok lex.Token) {
 	if tok == null {
 		return 
 	}
-	printf("'%s' (%d,offset(%d,%d) , startAt(%d,%d) , endAt(%d,%d))\n" , 
-		tok.description ,  tok.Type , tok.offset , tok.endOffset ,
-		tok.startLine, tok.startColumn , tok.endLine, tok.endColumn	)
+	
+	// printf("'%s' (%d,offset(%d,%d) , startAt(%d,%d) , endAt(%d,%d))\n" , 
+	// 	tok.description ,  tok.Type , tok.offset , tok.endOffset ,
+	// 	tok.startLine , tok.endLine, tok.endColumn	)
 }
 
 

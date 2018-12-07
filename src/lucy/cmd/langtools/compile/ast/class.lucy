@@ -188,7 +188,7 @@ public class Class {
                 u := new Usage()
                 u.Type = "declaration"
                 u.pos = v.pos 
-                v.findUsageInstances = []Usage{u}
+                v.findUsageInstances = [u]
                 this.block.inheritedAttribute.p.findUsage = v.findUsageInstances
                 this.block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal 
             }
@@ -207,7 +207,7 @@ public class Class {
                     u := new Usage()
                     u.Type = "declaration"
                     u.pos = m.Function.pos  
-                    m.findUsageInstances = []Usage{u}
+                    m.findUsageInstances = [u]
                     this.block.inheritedAttribute.p.findUsage = m.findUsageInstances
                     this.block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal 
                 }

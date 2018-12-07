@@ -60,7 +60,7 @@ public class Class {
 			return con.selfIndex
 		}
 		info := new ConstantInfoMethodType ( this.insertUtf8Const(n.descriptor) ).ToConstPool()
-		info.selfIndex = this.constPoolUint16Length()
+		info.selfIndex = this.constPoolLength()
 		this.ConstPool.append(info)
 		this.methodTypeConstants[n.toString()] = info
 		return info.selfIndex
@@ -80,7 +80,7 @@ public class Class {
 			this.insertClassConst(n.Class),
 			this.insertNameAndType( new ConstantInfoNameAndTypeHighLevel(     n.Method,  n.descriptor ) )
 		).ToConstPool()
-		info.selfIndex = this.constPoolUint16Length()
+		info.selfIndex = this.constPoolLength()
 		this.ConstPool.append(info)
 		this.interfaceMethodrefConstants[n.toString()] = info
 		return info.selfIndex
@@ -102,7 +102,7 @@ public class Class {
                        n.Method,
                        n.descriptor) )
 			) .ToConstPool()
-		info.selfIndex = this.constPoolUint16Length()
+		info.selfIndex = this.constPoolLength()
 		this.ConstPool.append(info)
 		this.methodrefConstants[n.toString()] = info
 		return info.selfIndex
@@ -122,7 +122,7 @@ public class Class {
 			       this.insertUtf8Const(n.name),
 			    this.insertUtf8Const(n.descriptor)
 		    ).ToConstPool()
-		info.selfIndex = this.constPoolUint16Length()
+		info.selfIndex = this.constPoolLength()
 		this.ConstPool.append(info)
 		this.nameAndTypeConstants[n.toString()] = info
 		return info.selfIndex
@@ -142,7 +142,7 @@ public class Class {
 			this.insertNameAndType(new ConstantInfoNameAndTypeHighLevel(   f.Field,  f.descriptor)
 			)
 		).ToConstPool()
-		info.selfIndex = this.constPoolUint16Length()
+		info.selfIndex = this.constPoolLength()
 		this.ConstPool.append(info)
 		this.fieldRefConstants[f.toString()] = info
 		return info.selfIndex
@@ -161,7 +161,7 @@ public class Class {
 			return con.selfIndex
 		}
 		info := (new ConstantInfoUtf8(s)).ToConstPool()
-		info.selfIndex = this.constPoolUint16Length()
+		info.selfIndex = this.constPoolLength()
 		this.ConstPool.append(info)
 		this.utf8Constants[s] = info
 		return info.selfIndex
@@ -178,7 +178,7 @@ public class Class {
 			return con.selfIndex
 		}
 		info := new ConstantInfoInteger(i).ToConstPool()
-		info.selfIndex = this.constPoolUint16Length()
+		info.selfIndex = this.constPoolLength()
 		this.ConstPool.append(info)
 		this.intConstants[i] = info
 		return info.selfIndex
@@ -194,7 +194,7 @@ public class Class {
 			return con.selfIndex
 		}
 		info := new ConstantInfoLong(i).ToConstPool()
-		info.selfIndex = this.constPoolUint16Length()
+		info.selfIndex = this.constPoolLength()
 		this.ConstPool.append(info , null )
 		this.longConstants[i] = info
 		return info.selfIndex
@@ -211,7 +211,7 @@ public class Class {
 			return con.selfIndex
 		}
 		info := new ConstantInfoFloat(f).ToConstPool()
-		info.selfIndex = this.constPoolUint16Length()
+		info.selfIndex = this.constPoolLength()
 		this.ConstPool.append(info)
 		this.floatConstants[f] = info
 		return info.selfIndex
@@ -228,7 +228,7 @@ public class Class {
 			return con.selfIndex
 		}
 		info := (new ConstantInfoDouble(f)).ToConstPool()
-		info.selfIndex = this.constPoolUint16Length()
+		info.selfIndex = this.constPoolLength()
 		this.ConstPool.append(info , null )
 		this.doubleConstants[f] = info
 		return info.selfIndex
@@ -245,7 +245,7 @@ public class Class {
 			return con.selfIndex
 		}
 		info := new ConstantInfoClass(this.insertUtf8Const(name)).ToConstPool()
-		info.selfIndex = this.constPoolUint16Length()
+		info.selfIndex = this.constPoolLength()
 		this.ConstPool.append(info  )
 		this.classConstants[name] = info
 		return info.selfIndex
@@ -265,7 +265,7 @@ public class Class {
 			return con.selfIndex
 		}
 		info := new ConstantInfoString(this.insertUtf8Const(s)).ToConstPool()
-		info.selfIndex = this.constPoolUint16Length()
+		info.selfIndex = this.constPoolLength()
 		this.ConstPool . append( info)
 		this.stringConstants[s] = info
 		return info.selfIndex
@@ -285,7 +285,7 @@ public class Class {
 		this.interfaces = []char {}
 		for _, i := range high.interfaces {
 			inter := (new ConstantInfoClass(this.insertUtf8Const(i))).ToConstPool()
-			index := this.constPoolUint16Length()
+			index := this.constPoolLength()
 			this.interfaces . append(index)
 			this.ConstPool . append(inter)
 		}
@@ -369,7 +369,7 @@ public class Class {
 		return
 	}
 	
-	fn constPoolUint16Length() -> (length char){
+	fn constPoolLength() -> (length char){
 		return char(len(this.ConstPool))
 	}
 	fn ifConstPoolOverMaxSize() {
@@ -377,7 +377,7 @@ public class Class {
 			panic(sprintf("const pool max size is:%d", ConstantPoolMaxSize))
 		}
 	}
-
+	
 	public fn isInnerClass() -> (is bool) {
 		if len(this.AttributeGroupedByName[AttributeNameInnerClasses]) == 0 {
 			return
@@ -415,7 +415,7 @@ public class Class {
 		binary.BigEndian.putChar(bs2, char(this.majorVersion))
 		writer.write(bs2.getUnderlyingArray())
 		//const pool
-		binary.BigEndian.putChar(bs2, this.constPoolUint16Length())
+		binary.BigEndian.putChar(bs2, this.constPoolLength())
 		writer.write(bs2.getUnderlyingArray())
 		for _, v := range this.ConstPool {
 			if v == null {

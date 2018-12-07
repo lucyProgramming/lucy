@@ -274,8 +274,15 @@ class ExpressionSuffix extends  ParserExtends {
 				return prefix, err
 			}
 		// bool(xxx)
-		case lex.TokenBool ,lex.TokenByte , lex.TokenShort , lex.TokenChar ,
-		 	lex.TokenInt ,lex.TokenLong ,lex.TokenFloat ,lex.TokenDouble , lex.TokenString :
+		case lex.TokenBool ,
+			lex.TokenByte , 
+			lex.TokenShort , 
+			lex.TokenChar ,
+		 	lex.TokenInt , 
+			lex.TokenLong , 
+			lex.TokenFloat , 
+			lex.TokenDouble , 
+			lex.TokenString :
 			prefix, err = this.ep.parseTypeConversionExpression()
 			if err != null {
 				return prefix, err
@@ -467,11 +474,24 @@ class ExpressionSuffix extends  ParserExtends {
 				pos := this.parser.mkPos()
 				var containsLf bool 
 				var inlineComment string 
-				this.next(lfIsToken)
+				autoCompletion := this.parser.token.autoCompletion 
+				this.next(lfIsToken)  // skip . 
+				if autoCompletion {
+					newExpression := new ast.Expression()
+					newExpression.pos = pos
+					newExpression.op = "selection"
+					newExpression.Type = ast.ExpressionTypeSelection
+					selection := new ast.ExpressionSelection()
+					selection.autoCompletion = true 
+					selection.Expression = prefix
+					newExpression.data = selection
+					prefix = newExpression
+					continue
+				}
 				if this.parser.token.Type == lex.TokenLf {
 					containsLf = true 
 					this.next(lfNotToken)
-				}else  if this.parser.token.Type == lex.TokenComment {
+				}else if this.parser.token.Type == lex.TokenComment {
 					inlineComment = this.parser.token.stringValue 
 					this.next(lfNotToken)
 				}else {
@@ -487,6 +507,7 @@ class ExpressionSuffix extends  ParserExtends {
 					selection.findUsage  = this.parser.token.findUsage
 					selection.getHover  = this.parser.token.getHover
 					selection.rename  = this.parser.token.rename
+					selection.autoCompletion = autoCompletion 
 					selection.Expression = prefix
 					selection.name = this.parser.token.stringValue
 					selection.containsLf = containsLf
@@ -562,9 +583,7 @@ class ExpressionSuffix extends  ParserExtends {
 				pos = new ast.Pos()
 				pos.filename = this.parser.filename
 				pos.endLine = this.parser.lastToken.endLine
-				pos.endColumn = this.parser.lastToken.endColumn
 				pos.startLine = this.parser.lastToken.startLine
-				pos.startColumn = this.parser.lastToken.startColumn
 			}
 			this.parser.ifTokenIsLfThenSkip(true)
 			if this.parser.token.Type != lex.TokenRp {

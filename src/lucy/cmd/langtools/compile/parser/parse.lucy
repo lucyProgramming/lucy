@@ -107,7 +107,8 @@ class Parser {
 			comment.reset()
 		}
 		fn isPublic () -> (is bool) {
-			return accessControlToken != null && accessControlToken.Type == lex.TokenPublic
+			return accessControlToken != null && 
+				accessControlToken.Type == lex.TokenPublic
 		}
 		for this.token.Type != lex.TokenEof {
 			if len(this.errs) > this.nErrors2Stop {
@@ -352,19 +353,16 @@ class Parser {
 		    pos = new ast.Pos()
 		    pos.filename = this.filename
 		    pos.startLine = this.token.startLine
-		    pos.startColumn = this.token.startColumn
 			pos.endLine = this.token.endLine
-		    pos.endColumn = this.token.endColumn
 		    pos.offset = this.token.offset
-			pos.columnOffset = this.token.columnOffset 
+			pos.endColumnOffset = this.token.endColumnOffset 
 			pos.endOffset = this.token.endOffset
 			return
 		} else {
-			line, column := this.lexer.GetLineAndColumn()
+			line, _ := this.lexer.GetLineAndColumn()
 			pos = new  ast.Pos()
 			pos.filename = this.filename
 			pos.endLine = line
-			pos.endColumn = column
 			return
 		}
 	}

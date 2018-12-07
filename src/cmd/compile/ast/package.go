@@ -3,9 +3,10 @@ package ast
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/common"
 	compileCommon "gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
-	"path/filepath"
 )
 
 type Package struct {

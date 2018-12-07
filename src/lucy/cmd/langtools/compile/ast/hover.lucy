@@ -9,7 +9,6 @@ class Hover {
 	public hoverLoadFromOutside HoverLoadFromOutside
 }
 
-
 class HoverLoadFromOutside {
 	public packageName string
 	public name string

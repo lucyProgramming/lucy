@@ -17,6 +17,8 @@ public class Package {
 	disableCheckUnuse  				bool 
 	javaPackage JavaPackage
 	public hasMain bool 
+	public searchFile string 
+
 	/*
 		for lucy tool goto definition
 	*/
@@ -38,13 +40,22 @@ public class Package {
 
 	public autoCompletionItems []AutoCompletionItem
 	
+	public fn needSearch(file string) ->(need bool){
+		// print(file , this.searchFile)
+		if this.searchFile == null || this.searchFile == "" {
+			return true 
+		}
+		need = this.searchFile == file
+	}
+
 	public fn Package(name string,disableCheckUnuse bool){
 		this.super()
 		this.disableCheckUnuse = disableCheckUnuse
 		this.name =  name
 	}
 	public fn locateDefinitionOrAutoCompletionFetched() ->(fetched bool) {
-		fetched  = this.locateDefinition != null 	 
+		fetched = this.locateDefinition != null || 
+			len(this.autoCompletionItems) > 0 
 	}
 	
 	fn isSame(compare Package) -> (is bool) {
@@ -227,10 +238,10 @@ public class Package {
 		return
 	}
 
-	public fn typeCheck(nodes []TopNode) -> (es []error) {
+	public fn typeCheck(nodes []TopNode) -> (es []error = []error{}) {
 		this.block.inheritedAttribute.p = this
 		if t := this.insert(nodes) ; len(t) > 0 {
-			return t
+			es.appendAll(t)
 		}
 		if this.nErrors2Stop <= 2 {
 			this.nErrors2Stop = 10
@@ -245,7 +256,7 @@ public class Package {
 				u := new Usage()
                 u.Type = "declaration"
                 u.pos = v.pos 
-				v.findUsageInstances = []Usage{u}
+				v.findUsageInstances = [u]
 				this.findUsageIsGlobal = true 
 				this.findUsage = v.findUsageInstances
 			}
@@ -264,15 +275,15 @@ public class Package {
 			return this.errors 
 		}
 		for _, v := range this.block.typeAliases {
-			if v.locateDefinition {
-				this.locateDefinition = v.pos
+			if v.alias.locateDefinition {
+				this.locateDefinition = v.alias.pos
 				return this.errors 
 			}
-			if v.findUsage {
+			if v.alias.findUsage {
 				u := new Usage()
                 u.Type = "declaration"
                 u.pos = v.pos 
-				v.alias.findUsageInstances = []Usage{u}
+				v.alias.findUsageInstances = [u]
 				this.findUsageIsGlobal = true 
 				this.findUsage = v.alias.findUsageInstances
 			}
@@ -293,11 +304,12 @@ public class Package {
 				u := new Usage()
                 u.Type = "declaration"
                 u.pos = v.pos 
-				v.findUsageInstances = []Usage{u}
+				v.findUsageInstances = [u]
 				this.findUsageIsGlobal = true 
 				this.findUsage = v.findUsageInstances
 			}
 		}
+
 		for _, v := range this.block.functions {
 			if v.isBuildIn {
 				continue
@@ -314,7 +326,7 @@ public class Package {
 				}
 				if defineMainOK == false {
 					this.errors.append(new error(sprintf("%s function '%s' expect declared as 'main(args []string)'",
-							errMsgPrefix(v.pos), MainFunctionName)))
+						errMsgPrefix(v.pos), MainFunctionName)))
 				}
 			}
 			if this.shouldStop(null) {
@@ -330,7 +342,7 @@ public class Package {
 				u := new Usage()
                 u.Type = "declaration"
                 u.pos = v.pos 
-				v.findUsageInstances = []Usage{u}
+				v.findUsageInstances = [u]
 				this.findUsageIsGlobal = true 
 				this.findUsage = v.findUsageInstances
 			}
@@ -384,8 +396,12 @@ public class Package {
 		if this.onlyAnalyzeGlobals {
 			return this.errors
 		}
+		
 		for _, v := range this.block.functions {
 			if v.TemplateFunction != null {
+				continue
+			}
+			if this.needSearch(v.pos.filename) == false {
 				continue
 			}
 			this.errors.appendAll(v.checkReturnVarExpression())
@@ -394,6 +410,9 @@ public class Package {
 			}
 		}
 		for _, v := range this.block.Classes {
+			if this.needSearch(v.pos.filename) == false {
+				continue
+			}
 			this.errors.appendAll( v.checkPhase2())
 			if this.shouldStop(null) {
 				return this.errors
@@ -404,6 +423,9 @@ public class Package {
 		}
 		for _, v := range this.block.functions {
 			if v.isBuildIn {
+				continue
+			}
+			if this.needSearch(v.pos.filename) == false {
 				continue
 			}
 			if v.TemplateFunction != null {

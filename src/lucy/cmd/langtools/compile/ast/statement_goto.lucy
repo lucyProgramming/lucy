@@ -19,7 +19,6 @@ public class StatementGoTo {
 		}
 		if this.locateDefinition {
 			block.inheritedAttribute.p.locateDefinition = label.pos
-			
 		}
 		this.statementLabel = label
 		this.defers = []StatementDefer{}

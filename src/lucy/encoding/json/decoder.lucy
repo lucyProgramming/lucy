@@ -415,7 +415,7 @@ public class Decoder {
 		is = .isDigit(b) ||
 			(b >= 'a' && b <= 'f') || 
 			(b >= 'A' && b <= 'Z')
-	} 
+	}
 
 	private fn parseNumber() -> (n Number  ) {
 		n = new Number()

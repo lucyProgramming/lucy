@@ -8,8 +8,8 @@ class FindUsage {
     packageName string
     printErr bool
     lucyPath []string
-    
-    fn FindUsage(lucyFiles []ide.LucyFile , packageName string , printErr bool , lucyPath []string ) {
+
+    fn FindUsage(lucyFiles []ide.LucyFile , packageName string , printErr bool , lucyPath []string) {
         this.super()
         this.lucyFiles = lucyFiles
         this.packageName = packageName
@@ -18,7 +18,7 @@ class FindUsage {
     }
     
     fn find() -> (result []ast.Usage){
-        p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles , false )
+        p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles , false , "")
         if this.printErr{
             for v := range es{
                 
@@ -70,13 +70,15 @@ class FindUsage {
             return 
         }
         lucyFiles := ide.readLucyFiles(ide.getLucyFiles(dir))
-        _ , es := ide.parseAstAndTypeCheck(packageName , lucyFiles , false )
+        p , es := ide.parseAstAndTypeCheck(packageName , lucyFiles , false,"")
         if this.printErr {
             for v := range es {
                 v.printStackTrace()
                 os.stderr.println(v.getMessage())
             }
         }
+        // set this package to jvm 
+        ide.packageLoader.setCache(packageName , p )
     }
 }
 

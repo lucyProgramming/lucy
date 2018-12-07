@@ -15,8 +15,8 @@ class ExpressionParser extends  ParserExtends {
 		this.ExpressionBinaryParser = new ExpressionBinaryParser(parser , this)
 		this.ExpressionQuestionParser = new ExpressionQuestionParser(parser , this)
 		this.ExpressionSuffix = new ExpressionSuffix(parser , this)
-
 	}
+	
 
 	fn parseExpressions(endTokens lex.TokenKind...) ->(es []ast.Expression =[]ast.Expression{}  , err error) {
 		for this.parser.token.Type != lex.TokenEof {

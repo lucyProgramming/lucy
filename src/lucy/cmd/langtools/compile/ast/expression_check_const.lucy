@@ -9,7 +9,7 @@ class ExpressionCheckConst {
 				u := new Usage()
                 u.Type = "declaration"
                 u.pos = c.pos 
-                c.findUsageInstances = []Usage{u}
+                c.findUsageInstances = [u]
                 block.inheritedAttribute.p.findUsage = c.findUsageInstances
             }
 			err := checkConst(block, c)

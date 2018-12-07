@@ -17,7 +17,9 @@ class BuildExpressionConversion {
 		switch on {
 		case ast.VariableTypeByte:
 			// already is
-		case ast.VariableTypeShort , ast.VariableTypeChar ,ast.VariableTypeInt :
+		case ast.VariableTypeShort ,
+			ast.VariableTypeChar , 
+			ast.VariableTypeInt :
 			code.codes[code.codeLength] = cg.OP_i2b
 			code.codeLength++
 		case ast.VariableTypeLong:

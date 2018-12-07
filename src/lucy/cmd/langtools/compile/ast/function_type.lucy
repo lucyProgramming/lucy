@@ -307,7 +307,7 @@ public class FunctionType {
 			vArgs.expressions = args[k:]
 		}
 		if len(callArgsTypes) < len(this.parameterList) {
-			if f != null && f.haveDefaultValue && len(callArgsTypes) >= f.DefaultValueStartAt {
+			if f != null && f.haveDefaultValue && len(callArgsTypes) >= f.defaultValueStartAt {
 				for i := len(callArgsTypes); i < len(f.Type.parameterList); i++ {
 					args.append(f.Type.parameterList[i].defaultValueExpression)
 				}

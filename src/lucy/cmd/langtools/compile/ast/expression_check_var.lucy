@@ -120,7 +120,7 @@ class ExpressionCheckVar {
 				u := new Usage()
                 u.Type = "declaration"
                 u.pos = v.pos 
-				v.findUsageInstances = []Usage{u}
+				v.findUsageInstances = [u]
 				block.inheritedAttribute.p.findUsage = v.findUsageInstances
 				block.inheritedAttribute.p.findUsageIsGlobal = e.isGlobal 
 			}

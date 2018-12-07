@@ -15,7 +15,7 @@ public fn decode( bs []byte , x Object ) -> (x2 Object , err error ){
 	defer {
         err = catch()
     }
-	x2 =  new Decoder( x , bs   ).decode()
+	x2 =  new Decoder(x , bs).decode()
 }
 
 
