@@ -40,6 +40,8 @@ public class Function {
 	public findUsage  bool 
 	public rename bool 
 	findUsageInstances []Usage 
+	public startLine int 
+	public endLine int 
 
 	
 	public fn isPublic() -> (is bool) {

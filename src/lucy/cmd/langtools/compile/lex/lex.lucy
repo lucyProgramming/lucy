@@ -322,13 +322,7 @@ public class Lexer {
 					token.rename = true 
 				}
 			}
-			if this.autoCompletion > 0 {
-				if this.autoCompletion >= startOffset && this.autoCompletion < this.offset {
-					token.autoCompletion = true 
-				}
-			}
 		}
-		
 		return
 	}
 	

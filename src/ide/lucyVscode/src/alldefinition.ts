@@ -27,38 +27,29 @@ module.exports = class GoDocumentSymbolProvider implements vscode.DocumentSymbol
         console.log(definitions);
         var i = 0 ;
         var infos = new Array();
-        for(var name in definitions.variables) {
-            let v = definitions.variables[name];
+        for(var pro in definitions) {
+            let v = definitions[pro];
             let location = new vscode.Location(vscode.Uri.file(v.pos.filename) , new vscode.Position(v.pos.endLine , v.pos.endColumnOffset));
-            let info = new vscode.SymbolInformation(name ,  vscode.SymbolKind.Variable  , "" , location );
-            infos[i] = info;
-            i++;
-        }
-        for(var name in definitions.constants) {
-            let v = definitions.constants[name];
-            let location = new vscode.Location(vscode.Uri.file(v.pos.filename) , new vscode.Position(v.pos.endLine , v.pos.endColumnOffset));
-            let info = new vscode.SymbolInformation(name ,  vscode.SymbolKind.Constant  , "" , location );
-            infos[i] = info;
-            i++;
-        }
-        for(var name in definitions.functions) {
-            let v = definitions.functions[name];
-            let location = new vscode.Location(vscode.Uri.file(v.pos.filename) , new vscode.Position(v.pos.endLine , v.pos.endColumnOffset));
-            let info = new vscode.SymbolInformation(name ,  vscode.SymbolKind.Function  , "" , location );
-            infos[i] = info;
-            i++;
-        }
-        for(var name in definitions.classes) {
-            let v = definitions.classes[name];
-            let location = new vscode.Location(vscode.Uri.file(v.pos.filename) , new vscode.Position(v.pos.endLine , v.pos.endColumnOffset));
-            let info = new vscode.SymbolInformation(name ,  vscode.SymbolKind.Function  , "" , location );
-            infos[i] = info;
-            i++;
-        }
-        for(var name in definitions.enums) {
-            let v = definitions.enums[name];
-            let location = new vscode.Location(vscode.Uri.file(v.pos.filename) , new vscode.Position(v.pos.endLine , v.pos.endColumnOffset));
-            let info = new vscode.SymbolInformation(name ,  vscode.SymbolKind.Function  , "" , location );
+            console.log(v.name , location);
+            var kind : vscode.SymbolKind ;
+            switch(v.Type) {
+                case "variable":
+                    kind = vscode.SymbolKind.Variable;
+                    break;
+                case "function":
+                    kind = vscode.SymbolKind.Function;
+                    break;
+                case "constant":
+                    kind = vscode.SymbolKind.Constant;
+                    break;
+                case "class":
+                    kind = vscode.SymbolKind.Class;
+                    break;
+                case "enum":
+                    kind = vscode.SymbolKind.Enum;
+                    break;
+            }
+            let info = new vscode.SymbolInformation(v.name , kind  , "" , location);
             infos[i] = info;
             i++;
         }

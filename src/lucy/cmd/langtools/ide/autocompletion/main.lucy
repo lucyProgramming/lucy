@@ -23,9 +23,8 @@ public fn autoCompletion(file string ,bufferFile string , pos int) -> (result []
             v.autoCompletion = pos 
         }
     }
-    result = new AutoCompletion(lucyFiles , packageName , bufferFile).getAutoCompletion()
+    result = new AutoCompletion(lucyFiles , packageName , bufferFile , pos >> 16).getAutoCompletion()
 }
-
 
 fn main(args []string) {
     file , bufferFile , pos := new Flags().parseArgs(args)
@@ -37,9 +36,4 @@ fn main(args []string) {
     }
     print(string(bs))
 }
-
-
-
-
-
 

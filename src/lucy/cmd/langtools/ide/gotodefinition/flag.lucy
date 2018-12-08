@@ -6,7 +6,9 @@ class Flags {
 	file flag.StringOption
 	line flag.IntOption
 	column flag.IntOption
+	bufferFile flag.StringOption
 	parser flag.FlagParser
+
 
 	fn Flags(){
 		this.super()
@@ -14,8 +16,9 @@ class Flags {
 		this.file = this.parser.stringOption("-file")
 		this.line = this.parser.intOption("-line" , -1)
 		this.column = this.parser.intOption("-column" , -1)
+		this.bufferFile = this.parser.stringOption("-bufferFile")
 	}
-	fn parseArgs(args []string) ->(file string , pos int) {
+	fn parseArgs(args []string) ->(file string ,  bufferFile string, pos int) {
 		nodefine,err := this.parser.parse(args)
 		if err != null {
 			panic(err)
@@ -37,10 +40,12 @@ class Flags {
 			printUsageAndExit(1)
 		}
 		file = this.file.getValue()
+		bufferFile = this.bufferFile.getValue()
 		pos = (this.line.getValue() << 16 ) | (this.column.getValue())
 		if pos == -1 {
 			panic("pos == -1")
 		}
+
 	}
 }
 

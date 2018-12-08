@@ -9,7 +9,6 @@ class ClassParser extends  ParserExtends{
 	    this.parser = parser
 	}
 	
-
 	fn parseClassName() -> (name ast.NameWithPos,err error) {
 		if this.parser.token.Type != lex.TokenIdentifier {
 			err = new error(sprintf("%s expect identifier for class`s name,but '%s'",
@@ -64,6 +63,13 @@ class ClassParser extends  ParserExtends{
 	fn parse(isAbstract bool) -> (classDefinition ast.Class, err error) {
 		isInterface := this.parser.token.Type == lex.TokenInterface
 		classDefinition = new ast.Class()
+		classDefinition.startLine = this.parser.token.startLine 
+		defer {
+			if classDefinition.endLine == 0 {
+				//default value 
+				classDefinition.endLine = this.parser.token.startLine
+			}
+		}
 		if isInterface {
 			classDefinition.accessFlags |= cg.AccClassInterface
 			classDefinition.accessFlags |= cg.AccClassAbstract

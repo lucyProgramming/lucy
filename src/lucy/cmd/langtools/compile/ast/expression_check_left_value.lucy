@@ -60,6 +60,10 @@ class ExpressionCheckLeftValue {
 			if object == null {
 				return null
 			}
+			if selection.autoCompletion {
+				ExpressionCheckSelection.autoCompletion(object , block )
+				return 
+			}
 			switch object.Type {
 			case VariableTypeDynamicSelector:
 				if selection.name == SUPER {
@@ -144,5 +148,118 @@ class ExpressionCheckLeftValue {
 		}
 		return null
 	}
+
+	static fn autoCompletion(object Type , block Block) {
+        switch object.Type {
+        case VariableTypeDynamicSelector:
+            .autoCompletionForDynamicSelector(object.Class , block)
+        case VariableTypePackage:
+            .autoCompletionForPackage(object.Package , block )
+        case VariableTypeObject:
+            .autoCompletionForObject(object.Class , block)
+        case VariableTypeClass:
+            .autoCompletionClass(object.Class , block)
+        }
+    }
+    
+    static fn autoCompletionForPackage(p Package , block Block) {
+        items := []AutoCompletionItem{}
+        for name , _ := range p.block.variables {
+            item := new AutoCompletionItem()
+            item.Type = "variable"
+            item.name = name
+            items.append(item)
+        }
+        block.inheritedAttribute.p.autoCompletionItems = items
+    } 
+    
+    static fn autoCompletionForDynamicSelector(object Class , block Block) {
+        items := []AutoCompletionItem{}
+        accessFromSub := false 
+        // in this case must be lucy class 
+        m := new map{string->bool} ()
+        for object != null {
+			for v := range object.fields {
+				if m.keyExist(v.name) {
+					continue  
+				}
+				if accessFromSub && v.ableAccessFromSubClass() == false {
+					continue
+				}
+				item := new AutoCompletionItem()
+				item.Type = "field"
+				item.name =  v.name
+				items.append(item)
+			}
+            object.loadSuperClass(new Pos()) 
+            if object.superClass == null {
+                break
+            }
+            object = object.superClass 
+            accessFromSub = true    
+        }
+        block.inheritedAttribute.p.autoCompletionItems = items
+    } 
+    
+    static fn autoCompletionForObject(object Class , block Block) {
+        items := []AutoCompletionItem{}
+        accessFromSub := false 
+        // in this case must be lucy class 
+        m := new map{string->bool} ()
+        for object != null {
+			for v := range object.fields {
+				if m.keyExist(v.name) {
+					continue  
+				}
+				if v.isStatic() {
+					continue 
+				}
+				if accessFromSub && v.ableAccessFromSubClass() == false {
+					continue
+				}
+				item := new AutoCompletionItem()
+				item.Type = "field"
+				item.name =  v.name
+				items.append(item)
+			} 
+            object.loadSuperClass(new Pos()) 
+            if object.superClass == null {
+                break
+            }
+            object = object.superClass 
+            accessFromSub = true
+        }
+        block.inheritedAttribute.p.autoCompletionItems = items
+    } 
+    static fn autoCompletionClass(c Class , block Block) {
+        items := []AutoCompletionItem{}
+        accessFromSub := false 
+        // in this case must be lucy class 
+        m := new map{string->bool} ()
+        for c != null {
+			for v := range c.fields {
+				if m.keyExist(v.name) {
+					continue  
+				}
+				if v.isStatic() == false {
+					continue 
+				}
+				if accessFromSub && v.ableAccessFromSubClass() == false {
+					continue
+				}
+				item := new AutoCompletionItem()
+				item.Type = "field"
+				item.name =  v.name
+				items.append(item)
+			}
+            c.loadSuperClass(new Pos()) 
+            if c.superClass == null {
+                break
+            }
+            c = c.superClass 
+            accessFromSub = true    
+        }
+        block.inheritedAttribute.p.autoCompletionItems = items
+    } 
 
 } 

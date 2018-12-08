@@ -10,7 +10,6 @@ public class ForRangeAttr {
 }
 
 
-
 public class StatementFor {
 	public RangeAttr           ForRangeAttr
 	public exits               []cg.Exit
@@ -27,7 +26,7 @@ public class StatementFor {
 	public increment Expression
 	public block     Block
 	public inlineComment string 
-
+	
 
 	fn checkRange() ->(errs []error= []error{})  {
 		//

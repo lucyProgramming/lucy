@@ -36,7 +36,10 @@ public class Class {
 	closure                           Closure = new Closure()
     public locateDefinition 	bool 
 	public findUsage  bool  
-    findUsageInstances []Usage 
+    findUsageInstances []Usage
+     
+    public startLine int 
+	public endLine int 
     
     public fmts []Object   // use for format 
     
@@ -871,17 +874,38 @@ public class Class {
             }
         }
         errs.appendAll(this.checkMethods())
+        if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+            return errs  
+        }
         errs.appendAll(this.checkIfOverrideFinalMethod())
+        if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+            return errs  
+        }
         errs.appendAll(this.resolveInterfaces())
+        if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+            return errs  
+        }
         if this.isInterface() {
             errs.appendAll( this.checkOverrideInterfaceMethod())
+        }
+        if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+            return errs  
         }
         if this.isAbstract() {
             errs.appendAll( this.checkOverrideAbstractMethod())
         }
-        errs.appendAll( this.suitableForInterfaces())
+        if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+            return errs  
+        }
+        errs.appendAll(this.suitableForInterfaces())
+        if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+            return errs  
+        }
         if this.superClass != null {
             errs.appendAll(this.suitableSubClassForAbstract(this.superClass))
+        }
+        if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+            return errs  
         }
         return errs
     }
@@ -1237,11 +1261,18 @@ public class Class {
         if this.isInterface() {
             return errs
         }
+        if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+            return errs  
+        }
         for name, methods := range this.methods {
-            if this.block.inheritedAttribute.p.locateDefinition != null {
+            if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
                 return errs
             }
             for _, method := range methods {
+                if this.block.inheritedAttribute.p.matchFileAndLine(method.Function.pos.filename , 
+                    method.Function.name , method.Function.startLine , method.Function.endLine ) == false {
+                    continue 
+                }
                 errs.appendAll( method.checkModifierOk())
                 if method.isAbstract() {
                     //nothing

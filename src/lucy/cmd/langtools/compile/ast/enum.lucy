@@ -65,6 +65,7 @@ public class Enum   {
 			this.findUsageInstances = [u]
 			block.inheritedAttribute.p.findUsage = this.findUsageInstances
 			block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal
+		 	return 
 		}
 		for _ , vv := range this.enums {
 			if vv.locateDefinition {
@@ -78,9 +79,12 @@ public class Enum   {
 				vv.findUsageInstances = [u]
 				block.inheritedAttribute.p.findUsage = vv.findUsageInstances
 				block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal
+				return
 			}
 		}
-		
+		if block.inheritedAttribute.p.onlyAnalyzeGlobals {
+			return 
+		}
 		var initV int = 0
 		if this.Init != null {
 			if is, err := this.Init.constantFold(); err != null {

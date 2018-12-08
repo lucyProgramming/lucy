@@ -25,10 +25,25 @@ module.exports = class GoCompletionItemProvider implements vscode.CompletionItem
             "-bufferFile",
             bufferFile
         ];
+        {
+            let s =  "java ";
+            for (var i = 0 ; i < args.length ; i++) {
+                s += args[i] ; 
+                if(i !== args.length - 1 ) {
+                    s += " ";
+                }
+            }
+            console.log(s);
+        }
+        let now = new Date() . getTime();
         let result = child_process.execFileSync("java", args);
-        console.log(result.toString());
+        console.log("call java used:",new Date().getTime() - now , "ms");
         let lucyItems = JSON.parse(result);
         if (!lucyItems) {
+            return null;
+        }
+        if(lucyItems.length === 0 ){
+            console.log("auto completion length is 0");
             return null;
         }
         var items = new Array();
@@ -54,6 +69,7 @@ module.exports = class GoCompletionItemProvider implements vscode.CompletionItem
                     break;
                 case "method":
                     kind = vscode.CompletionItemKind.Method;
+                    v.name = v.suggest;
                     break;
                 case "enumItem":
                     kind = vscode.CompletionItemKind.EnumMember;

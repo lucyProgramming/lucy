@@ -49,6 +49,10 @@ class ExpressionCheckSelection {
             }
         case VariableTypePackage:
             d, ok := object.Package.block.nameExists(selection.name , e.pos)
+            if selection.locateDefinition {
+                block.inheritedAttribute.p.locateDefinition = getPos(d)
+                return 
+            }
             if ok == false {
                 err := new error(sprintf("%s '%s' not found",
                     e.pos.errMsgPrefix(), selection.name))
@@ -63,20 +67,6 @@ class ExpressionCheckSelection {
                         e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
                 }
-                if selection.locateDefinition {
-                    if object.Package.isSame(block.inheritedAttribute.p) || object.Package.javaPackage == null  {
-                        // current package 
-                        block.inheritedAttribute.p.locateDefinition = v.pos
-                        
-                    }else {
-                        t := new Pos()
-                        block.inheritedAttribute.p.locateDefinition = t
-                        t.loadDefinitionFromOutside = new LoadDefinitionFromOutside()
-                        t.loadDefinitionFromOutside.packageName = object.Package.name
-                        t.loadDefinitionFromOutside.name = selection.name 
-                        t.loadDefinitionFromOutside.javaPackage = object.Package.javaPackage
-                    }
-                }
                 selection.packageVariable = v
                 return result
             }
@@ -89,19 +79,6 @@ class ExpressionCheckSelection {
                         e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
                 }
-                if selection.locateDefinition {
-                    if object.Package.isSame(block.inheritedAttribute.p) || object.Package.javaPackage == null  {
-                        // current package 
-                        block.inheritedAttribute.p.locateDefinition = c.pos
-                    }else {
-                        t := new Pos()
-                        block.inheritedAttribute.p.locateDefinition = t
-                        t.loadDefinitionFromOutside = new LoadDefinitionFromOutside()
-                        t.loadDefinitionFromOutside.packageName = object.Package.name
-                        t.loadDefinitionFromOutside.name = selection.name 
-                        t.loadDefinitionFromOutside.javaPackage = object.Package.javaPackage 
-                    }
-                }
                 return result
             }
             if c ,ok:= d.(Class) ; ok {
@@ -113,22 +90,7 @@ class ExpressionCheckSelection {
                     err := new error(sprintf("%s class '%s' is not public",
                         e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
-                }
-                if selection.locateDefinition {
-                    if object.Package.isSame(block.inheritedAttribute.p) || object.Package.javaPackage == null  {
-                        block.inheritedAttribute.p.locateDefinition = c.pos
-                        
-                    }else {
-                        t := new Pos()
-                        block.inheritedAttribute.p.locateDefinition = t
-                        t.loadDefinitionFromOutside = new LoadDefinitionFromOutside()
-                        t.loadDefinitionFromOutside.packageName = object.Package.name
-                        t.loadDefinitionFromOutside.name = selection.name 
-                        t.loadDefinitionFromOutside.javaPackage = object.Package.javaPackage 
-                        
-                    }
-                }
-                
+                }     
                 return result
             }
             if n ,ok:= d.(EnumName) ; ok {
@@ -136,20 +98,6 @@ class ExpressionCheckSelection {
                     err := new error(sprintf("%s enum '%s' is not public",
                         e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
-                }
-                if selection.locateDefinition {
-                    if object.Package.isSame(block.inheritedAttribute.p) || object.Package.javaPackage == null  {
-                        // current package 
-                        block.inheritedAttribute.p.locateDefinition = n.pos
-                        
-                    }else {
-                        t := new Pos()
-                        block.inheritedAttribute.p.locateDefinition = t
-                        t.loadDefinitionFromOutside = new LoadDefinitionFromOutside()
-                        t.loadDefinitionFromOutside.packageName = object.Package.name
-                        t.loadDefinitionFromOutside.name = selection.name 
-                        t.loadDefinitionFromOutside.javaPackage = object.Package.javaPackage 
-                    }
                 }
                 result := new Type()
                 result.pos = e.pos
@@ -175,21 +123,6 @@ class ExpressionCheckSelection {
                     err := new error(sprintf("%s function '%s' is a a special entrance",
                         e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
-                }
-                if selection.locateDefinition {
-                    if object.Package.isSame(block.inheritedAttribute.p) || object.Package.javaPackage == null  {
-                        // current package 
-                        block.inheritedAttribute.p.locateDefinition = f.pos
-                        
-                    }else {
-                        t := new Pos()
-                        block.inheritedAttribute.p.locateDefinition = t
-                        t.loadDefinitionFromOutside = new LoadDefinitionFromOutside()
-                        t.loadDefinitionFromOutside.packageName = object.Package.name
-                        t.loadDefinitionFromOutside.name = selection.name 
-                        t.loadDefinitionFromOutside.javaPackage = object.Package.javaPackage 
-                        
-                    }
                 }
                 result := new Type()
                 result.pos = e.pos
@@ -289,6 +222,7 @@ class ExpressionCheckSelection {
             .autoCompletionClass(object.Class , block)
         }
     }
+    
     static fn autoCompletionForPackage(p Package , block Block) {
         items := []AutoCompletionItem{}
         for name , _ := range p.block.constants {
@@ -326,27 +260,248 @@ class ExpressionCheckSelection {
     } 
     
     static fn autoCompletionForDynamicSelector(object Class , block Block) {
-        // items := []AutoCompletionItem{}
-        // accessFromSub := false 
-        // for object != null {
-            
-        //     accessFromSub = true    
-        // }
-        // block.inheritedAttribute.p.autoCompletionItems = items
+        items := []AutoCompletionItem{}
+        accessFromSub := false 
+        // in this case must be lucy class 
+        m := new map{string->bool} ()
+        for object != null {
+            if object.isJava == false {
+                for v := range object.fields {
+                    if m.keyExist(v.name) {
+                        continue  
+                    }
+                    if accessFromSub && v.ableAccessFromSubClass() == false {
+                        continue
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "field"
+                    item.name =  v.name
+                    items.append(item)
+                }
+                for methods := range object.methods {
+                    method := methods[0]
+                    if m.keyExist(method.Function.name) {
+                        continue
+                    }
+                    if accessFromSub  && method.ableAccessFromSubClass() == false {
+                        continue 
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "method"
+                    item.name =  method.Function.name
+                    item.suggest = method.Function.mkSuggest()
+                    items.append(item)
+                }
+            }else {
+                for v := range object.fields {
+                    if m.keyExist(v.name) {
+                        continue  
+                    }
+                    if accessFromSub && v.ableAccessFromSubClass() == false {
+                        continue
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "field"
+                    item.name =  v.name
+                    items.append(item)
+                }
+                for methods := range object.methods {
+                    for method := range methods {
+                        if accessFromSub  && method.ableAccessFromSubClass() == false {
+                            continue 
+                        }
+                        item := new AutoCompletionItem()
+                        item.Type = "method"
+                        item.name =  method.Function.name
+                        item.suggest = method.Function.mkSuggest()
+                        items.append(item)
+                    }
+                }
+            }  
+            object.loadSuperClass(new Pos()) 
+            if object.superClass == null {
+                break
+            }
+            object = object.superClass 
+            accessFromSub = true    
+        }
+        block.inheritedAttribute.p.autoCompletionItems = items
     } 
     
     static fn autoCompletionForObject(object Class , block Block) {
-        
+        items := []AutoCompletionItem{}
+        accessFromSub := false 
+        // in this case must be lucy class 
+        m := new map{string->bool} ()
+        for object != null {
+            if object.isJava == false {
+                for v := range object.fields {
+                    if m.keyExist(v.name) {
+                        continue  
+                    }
+                    if v.isStatic() {
+                        continue 
+                    }
+                    if accessFromSub && v.ableAccessFromSubClass() == false {
+                        continue
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "field"
+                    item.name =  v.name
+                    items.append(item)
+                }
+                for methods := range object.methods {
+                    method := methods[0]
+                    if m.keyExist(method.Function.name) {
+                        continue
+                    }
+                    if method.isStatic() {
+                        continue 
+                    }
+                    if method.Function.name == SpecialMethodInit || method.Function.name == classInitMethod  {
+                        continue 
+                    }
+                    if accessFromSub  && method.ableAccessFromSubClass() == false {
+                        continue 
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "method"
+                    item.name =  method.Function.name
+                    item.suggest = method.Function.mkSuggest()
+                    items.append(item)
+                }
+            }else {
+                for v := range object.fields {
+                    if m.keyExist(v.name) {
+                        continue  
+                    }
+                    if v.isStatic() {
+                        continue 
+                    }
+                    if accessFromSub && v.ableAccessFromSubClass() == false {
+                        continue
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "field"
+                    item.name =  v.name
+                    items.append(item)
+                }
+                for methods := range object.methods {
+                    for method := range methods {
+                        if method.isStatic() {
+                            continue 
+                        }
+                        if method.Function.name == SpecialMethodInit || method.Function.name == classInitMethod  {
+                            continue 
+                        }
+                        if accessFromSub  && method.ableAccessFromSubClass() == false {
+                            continue 
+                        }
+                        item := new AutoCompletionItem()
+                        item.Type = "method"
+                        item.name =  method.Function.name
+                        item.suggest = method.Function.mkSuggest()
+                        items.append(item)
+                    }
+                }
+            }  
+            object.loadSuperClass(new Pos()) 
+            if object.superClass == null {
+                break
+            }
+            object = object.superClass 
+            accessFromSub = true
+        }
+        block.inheritedAttribute.p.autoCompletionItems = items
     } 
-    static fn autoCompletionClass(object Class , block Block) {
-        
+    static fn autoCompletionClass(c Class , block Block) {
+        items := []AutoCompletionItem{}
+        accessFromSub := false 
+        // in this case must be lucy class 
+        m := new map{string->bool} ()
+        for c != null {
+            if c.isJava == false {
+                for v := range c.fields {
+                    if m.keyExist(v.name) {
+                        continue  
+                    }
+                    if v.isStatic() == false {
+                        continue 
+                    }
+                    if accessFromSub && v.ableAccessFromSubClass() == false {
+                        continue
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "field"
+                    item.name =  v.name
+                    items.append(item)
+                }
+                for methods := range c.methods {
+                    method := methods[0]
+                    if m.keyExist(method.Function.name) {
+                        continue
+                    }
+                    if method.Function.name == SpecialMethodInit || method.Function.name == classInitMethod  {
+                        continue 
+                    }
+                    if method.isStatic()  == false {
+                        continue 
+                    }
+                    if accessFromSub  && method.ableAccessFromSubClass() == false {
+                        continue 
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "method"
+                    item.name =  method.Function.name
+                    item.suggest = method.Function.mkSuggest()
+                    items.append(item)
+                }
+            }else {
+                for v := range c.fields {
+                    if m.keyExist(v.name) {
+                        continue  
+                    }
+                    if v.isStatic() {
+                        continue 
+                    }
+                    if accessFromSub && v.ableAccessFromSubClass() == false {
+                        continue
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "field"
+                    item.name =  v.name
+                    items.append(item)
+                }
+                for methods := range c.methods {
+                    for method := range methods {
+                        if method.isStatic() == false {
+                            continue 
+                        }
+                        if   method.Function.name == classInitMethod  || 
+                            method.Function.name == classInitMethod {
+                            continue 
+                        }
+                        if accessFromSub  && method.ableAccessFromSubClass() == false {
+                            continue 
+                        }
+                        item := new AutoCompletionItem()
+                        item.Type = "method"
+                        item.name =  method.Function.name
+                        item.suggest = method.Function.mkSuggest()
+                        items.append(item)
+                    }
+                }
+            }  
+            c.loadSuperClass(new Pos()) 
+            if c.superClass == null {
+                break
+            }
+            c = c.superClass 
+            accessFromSub = true    
+        }
+        block.inheritedAttribute.p.autoCompletionItems = items
     } 
-
-
-
-
-
-
+    
 
 }
 

@@ -21,6 +21,7 @@ class AllDefinition {
     }
     
     fn getAllDefinition() -> (alldefinition Object){
+        ide.packageLoader.onlyAnalyzeGlobals = true 
         nodes , errs := ide.parseAst(this.lucyFiles)
         if this.printErr {
             for v := range errs{
@@ -37,78 +38,71 @@ class AllDefinition {
         }
         return this.mkResult(p)
     }
-    
-    fn mkResult(p ast.Package) ->(result map{string -> Object} = new map{string -> Object}()) {
-        result["package"] = this.packageName
-        result["LUCYPATH"] = this.lucyPath
-        vs := new map{string -> Object}()
-        result["variables"] = vs
-        for _ , v := range p.block.variables {
-            vv := new map{string -> Object}()
-            vv["pos"] = v.pos
-            vv["type"] = v.Type.typeString()
-            vs[v.name] = vv
+        
+    fn mkResult(p ast.Package) ->(result Definition[]) {
+        items := []Definition{}
+        for name , v := range p.block.variables {
+            item := new Definition()
+            item.Type = "variable"
+            item.pos = v.pos 
+            item.name = name
+            items.append(item)
         }
-        cs := new map{string -> Object}()
-        result["constants"] = cs
-        for _ , v := range p.block.constants {
-            vv := new map{string -> Object}()
-            vv["pos"] = v.pos
-            vv["type"] = v.Type.typeString()
-            cs[v.name] = vv
+        for name , v := range p.block.constants {
+            item := new Definition()
+            item.Type = "constant"
+            item.pos = v.pos 
+            item.name = name
+            items.append(item)
         }
-        fs := new map{string -> Object}()
-        result["functions"] = fs
-        for _ , v := range p.block.functions {
-            vv := new map{string -> Object}()
-            vv["pos"] = v.pos
-            vv["definition"] = v.readableMsg() 
-            fs[v.name] = vv
+        for name , v := range p.block.functions {
+            item := new Definition()
+            item.Type = "function"
+            item.pos = v.pos 
+            item.name = name
+            items.append(item)
         }
-        es := new map{string -> Object}()
-        result["enums"] = es
         for name , v := range p.block.enums {
-            vv := new map{string -> Object}()
-            vv["pos"] = v.pos
-            es[name] = vv
-            enumConsts := new Object[](len(v.enums))
-            vv["enums"] = enumConsts
-            for kk , vv := range v.enums {
-                vvv := new map{string -> Object}()
-                vvv["pos"] = vv.pos
-                vvv["value"] = this.packLong(long(vv.value))
-                vvv["name"] = vv.name 
-                enumConsts[kk] = vvv
-            }
+            item := new Definition()
+            item.Type = "enum"
+            item.pos = v.pos 
+            item.name = name
+            items.append(item)
         }
-        classes := new map{string -> Object}()
-        result["classes"] = classes
         for name , v := range p.block.Classes {
-            vv := new map{string -> Object}()
-            vv["pos"] = v.pos
-            fs := new map{string -> Object} ()
-            vv["fileds"] = fs 
-            for _ , f := range v.fields{
-                ff := new map{string -> Object} ()
-                ff["pos"] = f.pos 
-                ff["type"] = f.Type.typeString()
-                fs[f.name] = ff 
+            item := new Definition()
+            item.Type = "enum"
+            item.pos = v.pos 
+            item.name = name
+            items.append(item)
+            innerLength := len(v.fields)
+            for v := range v.methods {
+                innerLength += len(v)
             }
-            ms := new map{string -> Object} ()
-            vv["methods"] = ms
-            for _ , vv := range v.methods {
-                m := vv[0]
-                if m.isCompilerAuto {
-                    continue  
-                }
-                mm := new map{string -> Object} ()
-                mm["pos"] = m.Function.pos 
-                mm["type"] = m.Function.readableMsg()
-                ms[m.Function.name] = mm 
+            item.inners = new Definition[](innerLength)
+            var i = 0 
+            for _, v := range v.fields {
+                itemField := new Definition()
+                itemField.Type = "field"
+                itemField.name = v.name
+                itemField.pos = v.pos 
+                item.inners[i] = itemField
+                i++
             }
-            classes[name] = vv
+            for _, v := range v.methods {
+                for method := range v {
+                    itemMethod := new Definition()
+                    itemMethod.Type = "method"
+                    itemMethod.name = method.Function.name 
+                    itemMethod.pos = method.Function.pos 
+                    item.inners[i] = itemMethod
+                    i++
+                }   
+            }
         }
+        return copy(new Definition[](len(items)) , items)
     }
+
     
     fn packBool(v bool) -> (o Boolean = Boolean.valueOf(v)) { }
     fn packLong(v long) -> (o Long = Long.valueOf(v)) { }

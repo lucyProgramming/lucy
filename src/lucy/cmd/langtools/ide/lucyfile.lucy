@@ -1,4 +1,5 @@
 
+
 public class LucyFile {
 	public realPathName string 
 	public bs []byte
@@ -11,14 +12,13 @@ public class LucyFile {
     public findUsage int 
     public rename int 
     public autoCompletion int 
-    
-    
+
     fn LucyFile(){
         this.super()
         this.locateDefinition = -1 
         this.getHover = -1 
         this.findUsage = -1 
         this.rename = -1
-        this.autoCompletion = -1 
+        this.autoCompletion = -1
     }
 }

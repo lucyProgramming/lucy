@@ -37,6 +37,7 @@ class ExpressionCheckAssign {
 				len(valueTypes),
 				len(lefts))))
 		}
+		
 		for k, v := range leftTypes {
 			if v == null { // get left value error or "_"
 				continue

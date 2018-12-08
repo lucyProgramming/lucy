@@ -270,3 +270,30 @@ fn searchRightValueForAutoCompletionItems(block Block) -> (items []AutoCompletio
 		}
 	}) 
 }
+
+fn getPos(x Object)  -> (pos Pos){
+	if t, ok := x.(Constant) ; ok {
+		return t.pos
+	}
+	if t, ok := x.(Class) ; ok {
+		return t.pos
+	}
+	if t, ok := x.(Variable) ; ok {
+		return t.pos
+	}
+	if t, ok := x.(Function) ; ok {
+		return t.pos
+	}
+	if t, ok := x.(ClassField) ; ok {
+		return t.pos
+	}
+	if t, ok := x.(ClassMethod) ; ok {
+		return t.Function.pos
+	}
+	if t, ok := x.(Enum) ; ok {
+		return t.pos
+	}
+	if t, ok := x.(EnumName) ; ok {
+		return t.pos
+	}
+}

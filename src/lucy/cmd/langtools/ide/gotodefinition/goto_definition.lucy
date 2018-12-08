@@ -3,9 +3,9 @@ import "lucy/cmd/langtools/ide"
 import "java/io"
 import "java/nio/file/FileSystems"
 import "lucy/cmd/langtools/compile/ast"
+import "lucy/os"
 
-
-public fn findDefinition(file string , pos int) -> (result ast.Pos) {
+public fn findDefinition(file string ,bufferFile string , pos int) -> (result ast.Pos) {
     ide.packageLoader.onlyAnalyzeGlobals = true // set true
     lucyPath , packageName := ide.locateLucyFile(file)
     var lucyFiles []ide.LucyFile 
@@ -24,10 +24,17 @@ public fn findDefinition(file string , pos int) -> (result ast.Pos) {
     for v := range lucyFiles {
         if fileSystem.getPath(file).getFileName().toString() == 
             fileSystem.getPath(v.realPathName).getFileName().toString(){
+            if bufferFile != null && bufferFile != "" {
+                t , err := os.readFile(bufferFile)
+                if err != null {
+                    panic(err)
+                }
+                v.realPathName = bufferFile
+                v.bs = javaArray2Lucy(t)
+            }
             v.locateDefinition = pos 
             searchFile = v.realPathName
         }
     }
-    result = new FindDefinition(lucyFiles,packageName , true , searchFile).find()
+    result = new FindDefinition(lucyFiles,packageName , true , searchFile , pos >> 16).find()
 }
-

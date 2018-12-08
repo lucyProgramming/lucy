@@ -5,9 +5,9 @@ import "java/lang/Object"
 import "java/io"
 
 
+
 public class PackageLoader extends lc.FileLoader {
-    public onlyAnalyzeGlobals bool 
-    
+    public onlyAnalyzeGlobals bool
     public fn PackageLoader(lucyPath , classPaths []string){
         this.super(lucyPath ,classPaths )
     }

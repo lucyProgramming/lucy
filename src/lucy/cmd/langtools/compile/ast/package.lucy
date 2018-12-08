@@ -17,8 +17,8 @@ public class Package {
 	disableCheckUnuse  				bool 
 	javaPackage JavaPackage
 	public hasMain bool 
-	public searchFile string 
-
+	public matchFile string 
+	public matchLine int 
 	/*
 		for lucy tool goto definition
 	*/
@@ -33,25 +33,37 @@ public class Package {
 	*/
 	public findUsage []Usage 
 	public findUsageIsGlobal bool 
-
+	
 	public onlyAnalyzeGlobals bool 
 
 	public renameIsGlobal bool 
 
 	public autoCompletionItems []AutoCompletionItem
 	
-	public fn needSearch(file string) ->(need bool){
-		// print(file , this.searchFile)
-		if this.searchFile == null || this.searchFile == "" {
+	public fn matchFileAndLine(file string , name string ,  startLine int , endLine int ) ->(need bool){
+		if this.matchFile == null || this.matchFile == "" {  // no match at all 
 			return true 
 		}
-		need = this.searchFile == file
+		need = this.matchFile == file
+		if need == false {  // file not match
+			// printf("file '%s' not match\n" , file)
+			return false  
+		}
+		if this.matchLine == -1 {
+			return  true // no match line 
+		}
+		if false ==  startLine <= this.matchLine && this.matchLine <= endLine {
+			// printf("'%s' not match\n" , name)
+			return false 
+		}
+		return true 
 	}
-
+	
 	public fn Package(name string,disableCheckUnuse bool){
 		this.super()
 		this.disableCheckUnuse = disableCheckUnuse
 		this.name =  name
+		this.matchLine =  -1
 	}
 	public fn locateDefinitionOrAutoCompletionFetched() ->(fetched bool) {
 		fetched = this.locateDefinition != null || 
@@ -299,6 +311,7 @@ public class Package {
 		for _, v := range this.block.functions {
 			if v.locateDefinition {
 				this.locateDefinition = v.pos 
+				return this.errors 
 			}
 			if v.findUsage {
 				u := new Usage()
@@ -313,6 +326,9 @@ public class Package {
 		for _, v := range this.block.functions {
 			if v.isBuildIn {
 				continue
+			}
+			if this.locateDefinitionOrAutoCompletionFetched() {
+				return this.errors 
 			}
 			v.block.inherit(this.block)
 			v.block.inheritedAttribute.Function = v
@@ -332,11 +348,12 @@ public class Package {
 			if this.shouldStop(null) {
 				return this.errors
 			}
-			if this.locateDefinitionOrAutoCompletionFetched() {
-				return this.errors 
-			}
 		}
 		for _, v := range this.block.Classes {
+			if v.locateDefinition {
+				this.locateDefinition = v.pos 
+				return this.errors
+			}
 			v.name = this.name + "/" + v.name
 			if v.findUsage {
 				u := new Usage()
@@ -345,9 +362,6 @@ public class Package {
 				v.findUsageInstances = [u]
 				this.findUsageIsGlobal = true 
 				this.findUsage = v.findUsageInstances
-			}
-			if v.locateDefinition {
-				this.locateDefinition = v.pos 
 			}
 			this.errors.appendAll(v.block.checkConstants())
 			v.block.inherit(this.block)
@@ -368,20 +382,22 @@ public class Package {
 				this.errors.append(err)
 			}
 			this.errors.appendAll(v.resolveInterfaces())
+			if this.locateDefinitionOrAutoCompletionFetched() {
+				return this.errors 
+			}
 			this.errors.appendAll (v.resolveFieldsAndMethodsType())
 			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors 
 			}
 		}
-
 		for _, v := range this.block.Classes {
 			es = v.checkPhase1()
+			if this.locateDefinitionOrAutoCompletionFetched() {
+				return this.errors 
+			}
 			this.errors.appendAll(es)
 			if this.shouldStop(null) {
 				return this.errors
-			}
-			if this.locateDefinitionOrAutoCompletionFetched() {
-				return this.errors 
 			}
 		}
 		for _, v := range this.initFunctions {
@@ -396,12 +412,11 @@ public class Package {
 		if this.onlyAnalyzeGlobals {
 			return this.errors
 		}
-		
 		for _, v := range this.block.functions {
 			if v.TemplateFunction != null {
 				continue
 			}
-			if this.needSearch(v.pos.filename) == false {
+			if this.matchFileAndLine(v.pos.filename , v.name,   v.startLine , v.endLine ) == false {
 				continue
 			}
 			this.errors.appendAll(v.checkReturnVarExpression())
@@ -410,10 +425,10 @@ public class Package {
 			}
 		}
 		for _, v := range this.block.Classes {
-			if this.needSearch(v.pos.filename) == false {
+			if this.matchFileAndLine(v.pos.filename ,v.name, v.startLine , v.endLine) == false {
 				continue
 			}
-			this.errors.appendAll( v.checkPhase2())
+			this.errors.appendAll(v.checkPhase2())
 			if this.shouldStop(null) {
 				return this.errors
 			}
@@ -425,7 +440,7 @@ public class Package {
 			if v.isBuildIn {
 				continue
 			}
-			if this.needSearch(v.pos.filename) == false {
+			if this.matchFileAndLine(v.pos.filename ,v.name,v.startLine , v.endLine) == false {
 				continue
 			}
 			if v.TemplateFunction != null {
@@ -511,6 +526,5 @@ public class Package {
 			}
 		}
 	}
-
 
 }

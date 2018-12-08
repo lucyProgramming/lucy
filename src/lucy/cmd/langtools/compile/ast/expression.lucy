@@ -37,7 +37,7 @@ public class Expression {
 		}
 		return this.data.(ExpressionIdentifier).name == identifier
 	}
-
+	
 	fn isRelation() -> (is bool) {
 		return this.Type == ExpressionTypeEq ||
 			this.Type == ExpressionTypeNe ||
@@ -46,7 +46,7 @@ public class Expression {
 			this.Type == ExpressionTypeLe ||
 			this.Type == ExpressionTypeLt
 	}
-
+	
 	/*
 		1 > 2
 		'a' > 'b'

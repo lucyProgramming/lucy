@@ -13,6 +13,13 @@ class FunctionParser extends ParserExtends{
 	*/
 	fn parse(needName bool, isAbstract bool , needSource bool ) -> (f ast.Function, err error) {
 		f = new ast.Function()
+		f.startLine = this.parser.token.startLine 
+		defer {
+			if f.endLine == 0 {
+				//default value 
+				f.endLine = this.parser.token.startLine
+			}
+		}
 		offset := this.parser.token.offset
 		this.next(lfIsToken) // skip fn key word
 		this.parser.unExpectNewLineAndSkip()
@@ -69,6 +76,7 @@ class FunctionParser extends ParserExtends{
 					bs[offset : this.parser.lexer.getOffSet()]
 			}
 		}
+		f.endLine =  this.parser.token.startLine 
 		this.next(lfIsToken)
 		return f, err
 	}

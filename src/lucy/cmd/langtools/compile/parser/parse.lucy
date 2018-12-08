@@ -43,7 +43,7 @@ class Parser {
 	TypeParser             TypeParser 
 	EnumParser             EnumParser
 
-
+	
 	/*
 		call before parse source file
 	*/

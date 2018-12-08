@@ -4,4 +4,5 @@ public class AutoCompletionItem {
     public name string 
     public functionDefinition string  // used by function
     public suggest string   // used by function
+    public variableType string 
 }

@@ -16,8 +16,7 @@ class ExpressionCheckIdentifier {
 			e.Type = ExpressionTypeString
 			e.stringValue = e.pos.filename
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = e.pos 
-				
+				block.inheritedAttribute.p.locateDefinition = e.pos
 			}
 			result, _ := e.checkSingleValueContextExpression(block)
 			return result, null
@@ -27,7 +26,6 @@ class ExpressionCheckIdentifier {
 			result, _ := e.checkSingleValueContextExpression(block)
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = e.pos 
-				
 			}
 			return result, null
 		case magicIdentifierTime:
