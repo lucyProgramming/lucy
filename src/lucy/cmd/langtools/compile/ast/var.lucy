@@ -19,6 +19,7 @@ const	JavaStringClass         = "java/lang/String"
 const	SUPER                   = "super"
 const	SpecialMethodInit       = "<init>"
 const	classInitMethod         = "<clinit>"
+
  
 
 fn isMagicIdentifier(name string) ->(is bool)  {
@@ -69,4 +70,7 @@ fn loadJavaStringClass(pos Pos) ->(err error) {
 		panic("loaded java string class is not a class")
 	}
 }
+
+
+
 

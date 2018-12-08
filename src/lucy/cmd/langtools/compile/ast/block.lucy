@@ -51,7 +51,8 @@ public class Block {
                     u.pos = pos
                     t.findUsageInstances.append(u)
                 }
-                t.used = true
+
+                t.used  = true
                 return t, true
             }
         }

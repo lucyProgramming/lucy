@@ -18,7 +18,7 @@ class ExpressionCheckBinary {
 				return null
 			}
 		}
-
+		
 		// &&  ||
 		if e.Type == ExpressionTypeLogicalOr ||
 			e.Type == ExpressionTypeLogicalAnd {

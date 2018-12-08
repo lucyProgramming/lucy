@@ -61,7 +61,7 @@ class ExpressionCheckLeftValue {
 				return null
 			}
 			if selection.autoCompletion {
-				ExpressionCheckSelection.autoCompletion(object , block )
+				ExpressionCheckLeftValue.autoCompletion(object , block )
 				return 
 			}
 			switch object.Type {

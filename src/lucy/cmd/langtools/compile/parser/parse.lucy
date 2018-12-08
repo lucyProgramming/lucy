@@ -26,6 +26,7 @@ public fn Parse(
 }
 
 class Parser {
+	
 	onlyParseImport        bool
 	bs                     []byte
 	tops                   []ast.TopNode

@@ -5,4 +5,133 @@ public class AutoCompletionItem {
     public functionDefinition string  // used by function
     public suggest string   // used by function
     public variableType string 
+    public description string 
+    
+    static arrayDefaultAutoCompletionItem []AutoCompletionItem
+    
+    static javaArrayDefaultAutoCompletionItem  []AutoCompletionItem
+
+
+    static fn getJavaArrayBasicAutoCompletionItem() -> (items []AutoCompletionItem) {
+        if len(AutoCompletionItem.javaArrayDefaultAutoCompletionItem) > 0  {
+            return AutoCompletionItem.javaArrayDefaultAutoCompletionItem
+        }
+        AutoCompletionItem.javaArrayDefaultAutoCompletionItem = []AutoCompletionItem{}
+        items = AutoCompletionItem.javaArrayDefaultAutoCompletionItem
+        
+        //size
+        item := new AutoCompletionItem()
+        item.Type = "method"
+        item.name = "size"
+        item.suggest = "size()"
+        items.append(item)
+
+    }
+
+
+    static fn getArrayBasicAutoCompletionItem() -> (items []AutoCompletionItem) {
+        if len(AutoCompletionItem.arrayDefaultAutoCompletionItem) > 0  {
+            return AutoCompletionItem.arrayDefaultAutoCompletionItem
+        }
+        AutoCompletionItem.arrayDefaultAutoCompletionItem = []AutoCompletionItem{}
+        items = AutoCompletionItem.arrayDefaultAutoCompletionItem
+        //size
+        item := new AutoCompletionItem()
+        item.Type = "method"
+        item.name = "size"
+        item.suggest = "size()"
+        items.append(item)
+        //start
+        item = new AutoCompletionItem()
+        item.Type = "method"
+        item.name = "start"
+        item.suggest = "start()"
+        items.append(item)
+        // end
+        item = new AutoCompletionItem()
+        item.Type = "method"
+        item.name = "end"
+        item.suggest = "end()"
+        items.append(item)
+        // cap 
+        item = new AutoCompletionItem()
+        item.Type = "method"
+        item.name = "cap"
+        item.suggest = "cap()"
+        items.append(item)
+        // 
+        return items 
+    }
+
+    static fn getMapAutoCompletionItem(m Type) ->(items []AutoCompletionItem = []AutoCompletionItem{}) {
+        //size
+        item := new AutoCompletionItem()
+        item.Type = "method"
+        item.name = "size"
+        item.suggest = "size()"
+        items.append(item)
+
+        //remove    
+        item = new AutoCompletionItem()
+        item.Type = "method"
+        item.name = "remove"
+        item.suggest = sprintf("remove( %s, ...)" ,  m.Map.K.typeString())
+        items.append(item)
+
+        //removeAll
+        item = new AutoCompletionItem()
+        item.Type = "method"
+        item.name = "removeAll"
+        item.suggest = "removeAll()"
+        items.append(item)
+        
+        //keyExist
+        item = new AutoCompletionItem()
+        item.Type = "method"
+        item.name = "keyExist"
+        item.suggest = sprintf("keyExist(%s) -> (bool)"  ,  m.Map.K.typeString())
+        items.append(item)
+
+
+
+
+
+
+
+    }
+
+    static fn getArrayAutoCompletionItem(t Type) -> (items []AutoCompletionItem){
+        items = AutoCompletionItem.getArrayBasicAutoCompletionItem()
+        items = copy(new []AutoCompletionItem(len(items)) , items)
+        if t.Type != VariableTypeArray {
+            panic("not a array at all")
+        }
+        item := new AutoCompletionItem()
+        item.Type = "method"
+        item.name = "append"
+        item.suggest = sprintf("append(%s ,...)" , t.array.typeString())
+        items.append(item)
+        
+        item = new AutoCompletionItem()
+        item.Type = "method"
+        item.name = "appendAll"
+        item.suggest = sprintf("appendAll(%s ,...)" , t.typeString())
+        items.append(item)
+
+        item = new AutoCompletionItem()
+        item.Type = "method"
+        item.name = "getUnderlyingArray"
+        t2 := new Type()
+        t2.Type = VariableTypeJavaArray 
+        t2.array = t.array
+        item.suggest = sprintf("getUnderlyingArray() -> (%s) " , t2.typeString())
+        items.append(item)  
+
+
+    }
+
+
+
+
+
 }

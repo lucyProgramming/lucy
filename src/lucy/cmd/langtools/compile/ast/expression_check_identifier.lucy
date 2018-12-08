@@ -34,7 +34,6 @@ class ExpressionCheckIdentifier {
 			result, _ := e.checkSingleValueContextExpression(block)
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = e.pos 
-				
 			}
 			return result, null
 		case magicIdentifierClass:

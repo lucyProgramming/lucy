@@ -1,7 +1,6 @@
  
 class ExpressionCheckTypeAssert {
 
-	
 	static fn check(e Expression , block Block, errs []error) -> (valueTypes []Type) {
 		assertion := e.data.(ExpressionTypeAssert)
 		object, es := assertion.Expression.checkSingleValueContextExpression(block)
