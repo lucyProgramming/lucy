@@ -3,7 +3,6 @@ import "lucy/cmd/langtools/compile/common"
 
 class ExpressionCheckMethodCall {
 	
-
 	static fn check(e Expression , block Block, errs []error) -> (valueTypes []Type) {
 		call := e.data.(ExpressionMethodCall)
 		if call.args == null {
@@ -39,6 +38,7 @@ class ExpressionCheckMethodCall {
 				errs.append(new error(sprintf("%s cannot call '%s'", e.pos.errMsgPrefix(), call.name)))
 				return null
 			}
+			//TODO:: auto completion 
 			if err := loadJavaStringClass(block  , e.pos); err != null {
 				errs.append(err)
 				return null
@@ -66,7 +66,8 @@ class ExpressionCheckMethodCall {
 				errs.append(methodsNotMatchError(e.pos, call.name, ms, args))
 				return null
 			}
-		case VariableTypeObject, VariableTypeClass:
+		case VariableTypeObject, 
+			VariableTypeClass:
 			if call.name == "finalize" {
 				errs.append(new error(sprintf("%s cannot call '%s'", e.pos.errMsgPrefix(), call.name)))
 				return null
@@ -82,6 +83,12 @@ class ExpressionCheckMethodCall {
 					errs.append(new error(sprintf("%s cannot make_node_objects call on interface '%s'",
 						e.pos.errMsgPrefix(), object.Class.name)))
 					return null
+				}
+				if call.locateDefinition {
+					m ,_ := object.Class.getFieldOrMethod(block ,
+						e.pos , call.name , false)
+					block.inheritedAttribute.p.locateDefinition = getPos(m)
+					return 
 				}
 				ms, matched, err := 
 					object.Class.accessInterfaceObjectMethod(block , e.pos, errs, call.name, call, callArgTypes, false)
@@ -107,6 +114,12 @@ class ExpressionCheckMethodCall {
 			if len(call.ParameterTypes) > 0 {
 				errs.append(new error(sprintf("%s method call expect no parameter types",
 					errMsgPrefix(e.pos))))
+			}
+			if call.locateDefinition {
+				m ,_ := object.Class.getFieldOrMethod(block ,
+						e.pos , call.name , false)
+				block.inheritedAttribute.p.locateDefinition = getPos(m)
+				return 
 			}
 			fieldMethodHandler := []ClassField{null}
 			ms, matched, err := object.Class.accessMethod(block , e.pos, errs, call, callArgTypes,
@@ -300,6 +313,10 @@ class ExpressionCheckMethodCall {
 		if exists == false {
 			errs.append(new error(sprintf("%s function '%s' not found", e.pos.errMsgPrefix(), call.name)))
 			return null
+		}
+		if call.locateDefinition {
+			block.inheritedAttribute.p.locateDefinition = getPos(d)
+			return 
 		}
 		if f ,ok := d.(Function) ; ok {
 			if f.isPublic() == false &&

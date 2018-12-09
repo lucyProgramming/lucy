@@ -27,6 +27,7 @@ public fn main(args []string) {
             print(s)
         }
     }
+    os.getEnv(k)
 }
 
 
