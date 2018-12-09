@@ -240,14 +240,14 @@ public class Block {
         }
         if this.isFunctionBlock &&
             len(this.inheritedAttribute.Function.parameterTypes) > 0 {
-            return searchBuildIns(name), null
+            return searchBuildIns(name , this.inheritedAttribute.p.lucyBuildInPackage), null
         }
         if this.isFunctionBlock &&
             name == ThisPointerName {
             return null, null
         }
         if this.outer == null {
-            return searchBuildIns(name), null
+            return searchBuildIns(name , null), null  // 
         }
         t, err := this.outer.searchIdentifier(from, name, isCaptureVar) // search by outer block
         if err != null {
@@ -497,10 +497,17 @@ public class Block {
         if isMagicIdentifier(name) {
             return new error(sprintf("%s '%s' is not a magic identifier", pos.errMsgPrefix(), name))
         }
-        if searchBuildIns(name) != null {
+
+        // label need insert into body first, at this time some pointer maybe null
+        // lable's name must not equal a "build" must be checked //TODO 
+        var lucyBuildInPackage Package 
+        if this.inheritedAttribute != null && this.inheritedAttribute.p != null {
+            lucyBuildInPackage = this.inheritedAttribute.p.lucyBuildInPackage
+        }
+        if searchBuildIns(name , lucyBuildInPackage ) != null {
             err = new error(sprintf("%s '%s' is buildin", pos.errMsgPrefix(), name))
             return err 
-        }
+        }  // 
         return null
     }
 

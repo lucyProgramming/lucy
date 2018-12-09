@@ -11,7 +11,6 @@ class BuildExpressionLogical {
         this.eb = eb
     }
     
-
     fn buildLogical(
         c cg.ClassHighLevel,
         code cg.AttributeCode,

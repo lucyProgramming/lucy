@@ -11,7 +11,7 @@ public class PackageLoader extends lc.FileLoader {
     public fn PackageLoader(lucyPath , classPaths []string){
         this.super(lucyPath ,classPaths )
     }
-    
+
     public fn LoadImport(importName string) -> (x Object , err error) {
         if x = this.getCache(importName) ; x != null {
             return 
@@ -99,7 +99,7 @@ public class PackageLoader extends lc.FileLoader {
 
     public fn  loadLucyPackage(r lc.Resource) -> (p ast.Package) {
         lucyFiles := readLucyFiles(getLucyFiles(r.realPath))
-        p , _ =  parseAstAndTypeCheck(r.name , lucyFiles , this.onlyAnalyzeGlobals , "")
+        p , _ =  parseAstAndTypeCheck(r.name , lucyFiles , this.onlyAnalyzeGlobals , "" , -1 ,this)
     }
 }
 

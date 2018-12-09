@@ -1,11 +1,13 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/ide"
+import "lucy/cmd/langtools/common"
 
 class AutoCompletion {
     lucyFiles []ide.LucyFile
     packageName string 
     searchFile string
     matchLine int 
+
     fn AutoCompletion(lucyFiles []ide.LucyFile , packageName string ,searchFile string  , matchLine int ) {
         this.super()
         this.lucyFiles = lucyFiles
@@ -14,8 +16,9 @@ class AutoCompletion {
         this.matchLine = matchLine
     }
     fn getAutoCompletion() -> (result []ast.AutoCompletionItem) {
-        ide.packageLoader.onlyAnalyzeGlobals = true // set true
-        p , _ := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles , false , this.searchFile , this.matchLine)
+        loader := new ide.PackageLoader(common.getLucyPath() ,common.getClassPath())
+        loader.onlyAnalyzeGlobals = true
+        p , _ := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles , false , this.searchFile , this.matchLine , loader)
         return p.autoCompletionItems 
     }
 }

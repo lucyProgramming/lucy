@@ -570,7 +570,7 @@ public class FileLoader implements ast.LoadImport{
         }
         bs , _ := os.readFile(r.realPath + "/"  + mainClassName)
         c := (new ClassDecoder(javaArray2Lucy(bs))).decode()
-        p = new ast.Package(r.name , true)
+        p = new ast.Package(r.name , true , null)
         this.loadLucyMainClass(p, c)
         fisM.remove(mainClassName)
          fn mkEnums(e ast.Enum) {
@@ -606,7 +606,7 @@ public class FileLoader implements ast.LoadImport{
 
     public fn  loadJavaPackage(r Resource) -> (p ast.Package) {
         fis := new io.File(r.realPath).list()
-        p = new ast.Package(r.name , true )
+        p = new ast.Package(r.name , true , null)
         p.block.Classes = new map {string -> ast.Class}()
         for _, v := range fis {
             if v.endsWith(".class") == false {

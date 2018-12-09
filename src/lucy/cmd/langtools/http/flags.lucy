@@ -1,0 +1,22 @@
+import "lucy/os/flag"
+
+// parse cmd args
+class Flags {
+    port  flag.IntOption
+    parser flag.FlagParser
+
+    fn Flags() {
+        this.super()
+        this.parser = new flag.FlagParser()
+        this.port = this.parser.intOption("-port" , 2018)
+    }
+
+    fn parseArgs(args  []string) -> (port int ){
+        this.parser.parse(args)
+        port = this.port.getValue()
+        if port < 0 {
+             panic("port is negative")
+        }
+
+    }
+}

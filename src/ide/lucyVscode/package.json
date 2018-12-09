@@ -2,7 +2,10 @@
     "name": "lucy",
     "displayName": "lucy",
     "description": "lucy language support",
-    "keywords": ["lucy" , "plugin"],
+    "keywords": [
+        "lucy",
+        "plugin"
+    ],
     "version": "0.0.1",
     "publisher": "yu",
     "engines": {
@@ -52,6 +55,7 @@
         "vscode": "^1.1.21",
         "tslint": "^5.8.0",
         "@types/node": "^8.10.25",
-        "@types/mocha": "^2.2.42"
+        "@types/mocha": "^2.2.42",
+        "sync-request": "^6.0.0"
     }
 }

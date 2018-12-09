@@ -2,12 +2,15 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/ide"
 import "lucy/os"
 import "java/io"
+import "lucy/cmd/langtools/common"
+
 
 class FindUsage {
     lucyFiles []ide.LucyFile
     packageName string
     printErr bool
     lucyPath []string
+    loader ide.PackageLoader
 
     fn FindUsage(lucyFiles []ide.LucyFile , packageName string , printErr bool , lucyPath []string) {
         this.super()
@@ -18,10 +21,12 @@ class FindUsage {
     }
     
     fn find() -> (result []ast.Usage){
-        p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles , false , "")
-        if this.printErr{
+        
+        loader := new ide.PackageLoader(common.getLucyPath() ,common.getClassPath())
+        this.loader = loader
+        p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles , false , "" , -1 , loader)
+        if this.printErr {
             for v := range es{
-                
                 os.stderr.println(v.getMessage())
             }
         }
@@ -29,7 +34,7 @@ class FindUsage {
             set this package to cache 
             when another trying to load this pacakge could use the cache and the "findUsage" has created in memory
         */
-        ide.packageLoader.setCache(this.packageName , p)
+        loader.setCache(this.packageName , p)
         if p.findUsageIsGlobal {
             this.searchLucyPath()        
         }
@@ -64,13 +69,13 @@ class FindUsage {
         if packageName == "lucy/lang" {
             return 
         }
-        if ide.packageLoader.getCache(packageName) != null {
+        if this.loader.getCache(packageName) != null {
             //handled 
             // when handle subdirectory may 
             return 
         }
         lucyFiles := ide.readLucyFiles(ide.getLucyFiles(dir))
-        p , es := ide.parseAstAndTypeCheck(packageName , lucyFiles , false,"")
+        p , es := ide.parseAstAndTypeCheck(packageName , lucyFiles , false ,"" , -1 , this.loader)
         if this.printErr {
             for v := range es {
                 v.printStackTrace()
@@ -78,7 +83,7 @@ class FindUsage {
             }
         }
         // set this package to jvm 
-        ide.packageLoader.setCache(packageName , p )
+        this.loader.setCache(packageName , p )
     }
 }
 

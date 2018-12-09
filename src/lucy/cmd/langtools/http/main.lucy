@@ -1,0 +1,23 @@
+import "com/sun/net/httpserver/HttpExchange"
+import "com/sun/net/httpserver/HttpHandler"
+import "com/sun/net/httpserver/HttpServer"
+import "java/net/InetSocketAddress"
+import "lucy/os"
+import "lucy/cmd/langtools/http/ide"
+
+
+fn main(args []string) {
+    port := new Flags().parseArgs(args)
+    print("port is " , port)
+    server := HttpServer.create(new InetSocketAddress(port), 0)
+    server.createContext("/exit", new TestHandler())
+    ide.registerHandlers(server)
+    server.start()
+}
+
+
+class TestHandler implements HttpHandler {
+    public fn handle(exchange HttpExchange) {
+        os.exit(0)
+    }
+}

@@ -1,0 +1,15 @@
+import "com/sun/net/httpserver/HttpServer"
+
+
+public fn registerHandlers(server HttpServer) {
+    gotoDefinition := new GotoDefinition()
+    server.createContext("/ide/gotoDefinition" , gotoDefinition)
+    findUsage := new FindUsage()
+    server.createContext("/ide/findUsage" , findUsage)
+    autoCompletion := new AutoCompletion()
+    server.createContext("/ide/autoCompletion" , autoCompletion)
+}
+
+
+
+

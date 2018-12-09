@@ -2,46 +2,25 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-const fs = require('fs');
-const child_process = require('child_process');
 
-const bufferFile = "./ffsdfw3er2233242342wewe4233423.buffer";
+const querystring = require('querystring');
+const syncHttpRequest = require('sync-request');
+
 
 
 module.exports = class GoCompletionItemProvider implements vscode.CompletionItemProvider {
     public provideCompletionItems(
         document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken):
         Thenable<vscode.CompletionItem[]> {
-        console.log(process.cwd());
-        fs.writeFileSync(bufferFile , document.getText());
-        let args = [
-            "lucy.cmd.langtools.ide.autocompletion.main",
-            "-file",
-            document.fileName,
-            "-line",
-            position.line,
-            "-column",
-            position.character,
-            "-bufferFile",
-            bufferFile
-        ];
-        {
-            let s =  "java ";
-            for (var i = 0 ; i < args.length ; i++) {
-                s += args[i] ; 
-                if(i !== args.length - 1 ) {
-                    s += " ";
-                }
-            }
-            console.log(s);
-        }
-        let now = new Date() . getTime();
-        let result = child_process.execFileSync("java", args);
-        console.log("call java used:",new Date().getTime() - now , "ms");
-        let lucyItems = JSON.parse(result);
-        if (!lucyItems) {
-            return null;
-        }
+        var u = "http://localhost:2018/ide/autoCompletion?file=" + querystring.escape(document.fileName) + "&line=" + 
+            position.line + "&column=" + position.character; 
+        console.log(u);
+        let buffer = document.getText();
+        var res  = syncHttpRequest("POST" , u , {
+            "body": buffer,
+        });
+        console.log(res.getBody());
+        let lucyItems = JSON.parse(res.getBody());
         if(lucyItems.length === 0 ){
             console.log("auto completion length is 0");
             return null;

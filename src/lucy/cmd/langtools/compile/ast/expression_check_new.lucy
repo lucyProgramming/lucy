@@ -21,7 +21,7 @@ class ExpressionCheckNew {
 					no.Type.pos.errMsgPrefix(), no.Type.typeString())))
 			return null
 		}
-		err = no.Type.Class.loadSelf(e.pos)
+		err = no.Type.Class.loadSelf(block , e.pos)
 		if err != null {
 			errs . append(new error( sprintf("%s %s",
 				no.Type.pos.errMsgPrefix(), err.getMessage())))
@@ -51,7 +51,7 @@ class ExpressionCheckNew {
 		if len(errs) > errsLength {
 			return ret
 		}
-		ms, matched, err := no.Type.Class.accessConstructionMethod(e.pos, errs, no, null, callArgTypes)
+		ms, matched, err := no.Type.Class.accessConstructionMethod(block , e.pos, errs, no, null, callArgTypes)
 		if err != null {
 			errs.append(err)
 			return ret

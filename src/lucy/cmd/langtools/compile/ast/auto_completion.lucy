@@ -11,23 +11,20 @@ public class AutoCompletionItem {
     
     static javaArrayDefaultAutoCompletionItem  []AutoCompletionItem
 
-
     static fn getJavaArrayBasicAutoCompletionItem() -> (items []AutoCompletionItem) {
         if len(AutoCompletionItem.javaArrayDefaultAutoCompletionItem) > 0  {
             return AutoCompletionItem.javaArrayDefaultAutoCompletionItem
         }
         AutoCompletionItem.javaArrayDefaultAutoCompletionItem = []AutoCompletionItem{}
         items = AutoCompletionItem.javaArrayDefaultAutoCompletionItem
-        
         //size
         item := new AutoCompletionItem()
         item.Type = "method"
         item.name = "size"
         item.suggest = "size()"
         items.append(item)
-
     }
-
+    
 
     static fn getArrayBasicAutoCompletionItem() -> (items []AutoCompletionItem) {
         if len(AutoCompletionItem.arrayDefaultAutoCompletionItem) > 0  {
@@ -41,6 +38,7 @@ public class AutoCompletionItem {
         item.name = "size"
         item.suggest = "size()"
         items.append(item)
+
         //start
         item = new AutoCompletionItem()
         item.Type = "method"

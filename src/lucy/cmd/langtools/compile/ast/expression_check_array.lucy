@@ -29,7 +29,7 @@ class ExprssionCheckArray {
 			}
 			if arr.Type != null &&
 				noType == false {
-				convertExpressionToNeed(v, arr.Type.array, eType)
+				convertExpressionToNeed(block , v, arr.Type.array, eType)
 				eType = v.value
 			}
 			if noType && arr.Type == null {
@@ -43,7 +43,7 @@ class ExprssionCheckArray {
 				}
 			}
 			if arr.Type != null {
-				if arr.Type.array.assignAble(errs, eType) == false {
+				if arr.Type.array.assignAble(block , errs, eType) == false {
 					if noType {
 						errs.append(new error(sprintf("%s array literal mix up '%s' and '%s'",
 							errMsgPrefix(eType.pos), arr.Type.array.typeString(), eType.typeString())))

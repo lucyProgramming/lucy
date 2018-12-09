@@ -1,0 +1,23 @@
+
+import "java/io/InputStream"
+
+public fn parseQuery(query string) -> ( parameters map{string -> string}  ){
+    parameters = new map{string -> string} ()
+    items := query.split("\\&")
+    for v := range items {
+        index := v.indexOf("=")
+        parameters[v[:index]]  = v[index+1:]
+    }
+}
+
+public fn readBodyBytes(in InputStream) -> (bs []byte){
+    bs = []byte{}
+    var n int
+    buffer := new byte[](4096) 
+    for n != -1 {
+        n = in.read(buffer)
+        if n > 0 {
+            bs.appendAll(javaArray2Lucy(buffer , 0 , n))
+        }
+    }
+}

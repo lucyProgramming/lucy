@@ -51,7 +51,7 @@ class ExpressionCheckBinary {
 				}
 				return null
 			}
-			if left.isInteger() == false || left.assignAble(errs, right) == false {
+			if left.isInteger() == false || left.assignAble(block , errs, right) == false {
 				errs.append(e.binaryWrongOpErr())
 			}
 			result = left.Clone()
@@ -98,13 +98,13 @@ class ExpressionCheckBinary {
 					errs.append(e.binaryWrongOpErr())
 				}
 			case VariableTypeEnum:
-				if left.assignAble(errs, right) == false {
+				if left.assignAble(block , errs, right) == false {
 					errs.append(e.binaryWrongOpErr())
 				}
 			case left.isNumber():
 				if (left.isInteger() && right.isInteger()) ||
 					(left.isFloat() && right.isFloat()) {
-					if left.assignAble(errs, right) == false {
+					if left.assignAble(block , errs, right) == false {
 						if left.Type < right.Type {
 							bin.left.convertToNumberType(right.Type)
 						} else {
@@ -115,7 +115,7 @@ class ExpressionCheckBinary {
 					errs.append(e.binaryWrongOpErr())
 				}
 			case VariableTypeString:
-			    if left.assignAble(errs, right) == false {
+			    if left.assignAble(block , errs, right) == false {
                     errs.append(e.binaryWrongOpErr())
                 }
             case VariableTypeNull:
@@ -123,7 +123,7 @@ class ExpressionCheckBinary {
             		errs.append(e.binaryWrongOpErr())
             	}
 			case left.isPointer():
-				if left.assignAble(errs, right) == false || e.isEqOrNe() == false {
+				if left.assignAble(block , errs, right) == false || e.isEqOrNe() == false {
 					errs.append(e.binaryWrongOpErr())
 				}
 			default:
@@ -163,7 +163,7 @@ class ExpressionCheckBinary {
 			}
 			if (left.isInteger() && right.isInteger()) ||
 				(left.isFloat() && right.isFloat()) {
-				if left.assignAble(errs, right) == false {
+				if left.assignAble(block , errs, right) == false {
 					if left.Type < right.Type {
 						bin.left.convertToNumberType(right.Type)
 					} else {

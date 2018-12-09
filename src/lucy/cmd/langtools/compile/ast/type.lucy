@@ -331,7 +331,7 @@ public class Type {
 			i := block.inheritedAttribute.p.getImport(this.pos.filename, this.name)
 			if i != null {
 				i.used = true
-				return loaded.load(i.Import)
+				return block.inheritedAttribute.p.load(i.Import)
 			}
 			return null, new error(sprintf("%s type named '%s' not found",
 				errMsgPrefix(this.pos), this.name))
@@ -345,7 +345,7 @@ public class Type {
 				errMsgPrefix(this.pos), packageName))
 		}
 		i.used = true
-		p, err := loaded.load(i.Import)
+		p, err := block.inheritedAttribute.p.load(i.Import)
 		if err != null {
 			return null, new error(sprintf("%s %.getMessage()",
 				errMsgPrefix(this.pos), err.getMessage()))
@@ -687,7 +687,7 @@ public class Type {
 		return new error(sprintf("cannot bind '%s' to '%s'", bind.typeString(), this.typeString()))
 	}
 
-	fn assignAble(errs []error, rightValue Type) ->(able bool) {
+	fn assignAble(block Block , errs []error, rightValue Type) ->(able bool) {
 		leftValue := this
 		if leftValue == rightValue { // equal
 			return true
@@ -706,21 +706,21 @@ public class Type {
 		}
 		if leftValue.Type == VariableTypeArray &&
 			rightValue.Type == VariableTypeArray {
-			return leftValue.array.assignAble(errs, rightValue.array)
+			return leftValue.array.assignAble(block , errs, rightValue.array)
 		}
 		if leftValue.Type == VariableTypeJavaArray &&
 			rightValue.Type == VariableTypeJavaArray {
 			if leftValue.isVariableArgs != rightValue.isVariableArgs {
 				return false
 			}
-			return leftValue.array.assignAble(errs, rightValue.array)
+			return leftValue.array.assignAble(block , errs, rightValue.array)
 		}
 		if leftValue.Type == VariableTypeEnum && rightValue.Type == VariableTypeEnum {
 			return leftValue.Enum.name == rightValue.Enum.name // same enum
 		}
 		if leftValue.Type == VariableTypeMap && rightValue.Type == VariableTypeMap {
-			return leftValue.Map.K.assignAble(errs, rightValue.Map.K) &&
-				leftValue.Map.V.assignAble(errs, rightValue.Map.V)
+			return leftValue.Map.K.assignAble(block , errs, rightValue.Map.K) &&
+				leftValue.Map.V.assignAble(block , errs, rightValue.Map.V)
 		}
 		if leftValue.Type == VariableTypeFunction &&
 			rightValue.Type == VariableTypeFunction {
@@ -730,22 +730,22 @@ public class Type {
 			if leftValue.Class.name == rightValue.Class.name {
 				return true
 			}
-			if err := leftValue.Class.loadSelf(rightValue.pos); err != null {
+			if err := leftValue.Class.loadSelf(block , rightValue.pos); err != null {
 				errs.append(new error(sprintf("%s %s", errMsgPrefix(rightValue.pos), err.getMessage())))
 				return false
 			}
-			if err := rightValue.Class.loadSelf(rightValue.pos); err != null {
+			if err := rightValue.Class.loadSelf(block , rightValue.pos); err != null {
 				errs.append(err)
 				return false
 			}
 			if leftValue.Class.isInterface() {
-				i, err := rightValue.Class.implementedInterface(leftValue.pos, leftValue.Class.name)
+				i, err := rightValue.Class.implementedInterface(block , leftValue.pos, leftValue.Class.name)
 				if err != null {
 					errs.append(err)
 				}
 				return i
 			} else { // class
-				has, err := rightValue.Class.haveSuperClass(rightValue.pos, leftValue.Class.name)
+				has, err := rightValue.Class.haveSuperClass(block , rightValue.pos, leftValue.Class.name)
 				if err != null {
 					errs.append(err)
 				}

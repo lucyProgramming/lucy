@@ -39,7 +39,7 @@ class ExpressionCheckMethodCall {
 				errs.append(new error(sprintf("%s cannot call '%s'", e.pos.errMsgPrefix(), call.name)))
 				return null
 			}
-			if err := loadJavaStringClass(e.pos); err != null {
+			if err := loadJavaStringClass(block  , e.pos); err != null {
 				errs.append(err)
 				return null
 			}
@@ -48,7 +48,7 @@ class ExpressionCheckMethodCall {
 			if len(errs) > errsLength {
 				return null
 			}
-			ms, matched, err := javaStringClass.accessMethod(e.pos, errs, call, args,
+			ms, matched, err := javaStringClass.accessMethod(block , e.pos, errs, call, args,
 				false, null)
 			if err != null {
 				errs.append(err)
@@ -84,7 +84,7 @@ class ExpressionCheckMethodCall {
 					return null
 				}
 				ms, matched, err := 
-					object.Class.accessInterfaceObjectMethod(e.pos, errs, call.name, call, callArgTypes, false)
+					object.Class.accessInterfaceObjectMethod(block , e.pos, errs, call.name, call, callArgTypes, false)
 				if err != null {
 					errs.append(err)
 					return null
@@ -109,7 +109,7 @@ class ExpressionCheckMethodCall {
 					errMsgPrefix(e.pos))))
 			}
 			fieldMethodHandler := []ClassField{null}
-			ms, matched, err := object.Class.accessMethod(e.pos, errs, call, callArgTypes,
+			ms, matched, err := object.Class.accessMethod(block , e.pos, errs, call, callArgTypes,
 				false, fieldMethodHandler)
 			if err != null {
 				errs.append(err)
@@ -174,7 +174,7 @@ class ExpressionCheckMethodCall {
 			return
 		}
 		if object.Class.loadFromOutSide {
-			err := object.Class.loadSuperClass(e.pos)
+			err := object.Class.loadSuperClass(block , e.pos)
 			if err != null {
 				errs.append(err)
 				return
@@ -192,7 +192,7 @@ class ExpressionCheckMethodCall {
 		if len(errs) > errsLength {
 			return
 		}
-		ms, matched, err := object.Class.superClass.accessConstructionMethod(e.pos, errs,
+		ms, matched, err := object.Class.superClass.accessConstructionMethod(block , e.pos, errs,
 			null, call, callArgsTypes)
 		if err != null {
 			errs.append(new error(sprintf("%s %s", e.pos.errMsgPrefix(), err.getMessage())))
@@ -234,7 +234,7 @@ class ExpressionCheckMethodCall {
 		if len(errs) > errsLength {
 			return null
 		}
-		ms, matched, err := object.Class.accessMethod(e.pos, errs, call, callArgTypes, false, fieldMethodHandler)
+		ms, matched, err := object.Class.accessMethod(block , e.pos, errs, call, callArgTypes, false, fieldMethodHandler)
 		if err != null {
 			errs.append(err)
 			return null
@@ -339,7 +339,7 @@ class ExpressionCheckMethodCall {
 					return ret
 				}
 				var err error
-				methodCall.vArgs, err = f.Type.fitArgs(e.pos, call.args, callArgsTypes, f)
+				methodCall.vArgs, err = f.Type.fitArgs(block , e.pos, call.args, callArgsTypes, f)
 				if err != null {
 					errs.append(err)
 				}
@@ -375,7 +375,7 @@ class ExpressionCheckMethodCall {
 			if len(errs) > errsLength {
 				return ret
 			}
-			vArgs, err := v.Type.functionType.fitArgs(e.pos, call.args, callArgsTypes, null)
+			vArgs, err := v.Type.functionType.fitArgs(block , e.pos, call.args, callArgsTypes, null)
 			if err != null {
 				errs.append(err)
 			}
@@ -473,12 +473,12 @@ class ExpressionCheckMethodCall {
 					continue
 				}
 				if call.name == common.ArrayMethodAppend {
-					if array.array.assignAble(errs, t) == false {
+					if array.array.assignAble(block , errs, t) == false {
 						errs.append(new error(sprintf("%s cannot use '%s' as '%s' to call method '%s'",
 							t.pos.errMsgPrefix(), t.typeString(), array.array.typeString(), call.name)))
 					}
 				} else {
-					if array.assignAble(errs, t) == false {
+					if array.assignAble(block , errs, t) == false {
 						errs.append(new error(sprintf("%s cannot use '%s' as '%s' to call method '%s'",
 							t.pos.errMsgPrefix(), t.typeString(), array.typeString(), call.name)))
 					}
@@ -529,7 +529,7 @@ class ExpressionCheckMethodCall {
 			if t == null {
 				return []Type{ret}
 			}
-			if false == m.K.assignAble(errs, t) {
+			if false == m.K.assignAble(block, errs, t) {
 				errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
 					t.pos.errMsgPrefix(), t.typeString(), m.K.typeString())))
 			}
@@ -548,7 +548,7 @@ class ExpressionCheckMethodCall {
 				if t == null {
 					continue
 				}
-				if m.K.assignAble(errs, t) == false {
+				if m.K.assignAble(block , errs, t) == false {
 					errs.append(new error(sprintf("%s cannot use '%s' as '%s' for map-key",
 						t.pos.errMsgPrefix(), t.typeString(), m.K.typeString())))
 				}

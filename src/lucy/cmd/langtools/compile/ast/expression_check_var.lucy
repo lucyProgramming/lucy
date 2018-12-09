@@ -31,7 +31,7 @@ class ExpressionCheckVar {
 				for k, _ := range needs {
 					needs[k] = ev.Type
 				}
-				convertExpressionsToNeeds(ev.InitValues, needs, valueTypes)
+				convertExpressionsToNeeds(block , ev.InitValues, needs, valueTypes)
 			}
 			if len(ev.variables) > len(valueTypes) {
 				pos := ev.InitValues[len(ev.InitValues)-1].pos // last Pos
@@ -49,7 +49,7 @@ class ExpressionCheckVar {
 			for k, v := range ev.variables {
 				if k < len(valueTypes) && valueTypes[k] != null {
 					if v.Type != null {
-						if v.Type.assignAble(errs, valueTypes[k]) == false {
+						if v.Type.assignAble(block, errs, valueTypes[k]) == false {
 							err = new error(sprintf("%s cannot assign  '%s' to '%s'",
 								errMsgPrefix(valueTypes[k].pos),
 								valueTypes[k].typeString(),

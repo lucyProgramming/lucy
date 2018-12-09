@@ -1,7 +1,7 @@
 import "lucy/cmd/langtools/ide"
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/os"
-
+import "lucy/cmd/langtools/common"
 
 
 class FindDefinition {
@@ -20,7 +20,8 @@ class FindDefinition {
     
     fn find() -> (result ast.Pos){
         //parse ast and typecheck
-        p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles , false , this.searchFile)
+        loader := new ide.PackageLoader(common.getLucyPath() ,common.getClassPath())
+        p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles , false , this.searchFile , -1 ,loader )
         if this.printErr {
             for v := range es{
                 os.stderr.println(v.getMessage())

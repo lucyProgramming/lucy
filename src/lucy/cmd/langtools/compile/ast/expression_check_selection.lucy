@@ -22,7 +22,7 @@ class ExpressionCheckSelection {
                     e.pos.errMsgPrefix(), SUPER, object.typeString())))
                 return null
             }
-            access, err := object.Class.getFieldOrMethod(e.pos, selection.name, false)
+            access, err := object.Class.getFieldOrMethod(block , e.pos, selection.name, false)
             if err != null {
                 errs.append(err)
                 return null
@@ -149,7 +149,7 @@ class ExpressionCheckSelection {
                         object.pos.errMsgPrefix(), JavaRootClass)))
                     return object
                 }
-                err := object.Class.loadSuperClass(e.pos)
+                err := object.Class.loadSuperClass(block , e.pos)
                 if err != null {
                     errs.append(err)
                     return object
@@ -162,7 +162,7 @@ class ExpressionCheckSelection {
                 result.Class = result.Class.superClass
                 return result
             }
-            fieldOrMethod, err := object.Class.getFieldOrMethod(e.pos, selection.name, false)
+            fieldOrMethod, err := object.Class.getFieldOrMethod(block , e.pos, selection.name, false)
             if err != null {
                 errs.append(err)
                 return null
@@ -230,15 +230,39 @@ class ExpressionCheckSelection {
             .autoCompletionClass(object.Class , block)
         }
     }
-
+    
 
 
     static fn autoCompletionForPackage(p Package , block Block) {
         items := []AutoCompletionItem{}
-        // only variable is writeable
+        for name , _ := range p.block.constants {
+            item := new AutoCompletionItem()
+            item.Type = "constant"
+            item.name = name
+            items.append(item)
+        }
         for name , _ := range p.block.variables {
             item := new AutoCompletionItem()
             item.Type = "variable"
+            item.name = name
+            items.append(item)
+        }
+        for name , v := range p.block.functions {
+            item := new AutoCompletionItem()
+            item.Type = "function"
+            item.name = name
+            item.suggest = v.mkSuggest()
+            items.append(item)
+        }
+        for name , _ := range p.block.Classes {
+            item := new AutoCompletionItem()
+            item.Type = "class"
+            item.name = name
+            items.append(item)
+        }
+        for name , _ := range p.block.EnumNames {
+            item := new AutoCompletionItem()
+            item.Type = "enumItem"
             item.name = name
             items.append(item)
         }
@@ -251,19 +275,60 @@ class ExpressionCheckSelection {
         // in this case must be lucy class 
         m := new map{string->bool} ()
         for object != null {
-            for v := range object.fields {
-                if m.keyExist(v.name) {
-                    continue  
+            if object.isJava == false {
+                for v := range object.fields {
+                    if m.keyExist(v.name) {
+                        continue  
+                    }
+                    if accessFromSub && v.ableAccessFromSubClass() == false {
+                        continue
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "field"
+                    item.name =  v.name
+                    items.append(item)
                 }
-                if accessFromSub && v.ableAccessFromSubClass() == false {
-                    continue
+                for methods := range object.methods {
+                    method := methods[0]
+                    if m.keyExist(method.Function.name) {
+                        continue
+                    }
+                    if accessFromSub  && method.ableAccessFromSubClass() == false {
+                        continue 
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "method"
+                    item.name =  method.Function.name
+                    item.suggest = method.Function.mkSuggest()
+                    items.append(item)
                 }
-                item := new AutoCompletionItem()
-                item.Type = "field"
-                item.name =  v.name
-                items.append(item)
-            }
-            object.loadSuperClass(new Pos()) 
+            }else {
+                for v := range object.fields {
+                    if m.keyExist(v.name) {
+                        continue  
+                    }
+                    if accessFromSub && v.ableAccessFromSubClass() == false {
+                        continue
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "field"
+                    item.name =  v.name
+                    items.append(item)
+                }
+                for methods := range object.methods {
+                    for method := range methods {
+                        if accessFromSub  && method.ableAccessFromSubClass() == false {
+                            continue 
+                        }
+                        item := new AutoCompletionItem()
+                        item.Type = "method"
+                        item.name =  method.Function.name
+                        item.suggest = method.Function.mkSuggest()
+                        items.append(item)
+                    }
+                }
+            }  
+            object.loadSuperClass(block , new Pos()) 
             if object.superClass == null {
                 break
             }
@@ -279,22 +344,78 @@ class ExpressionCheckSelection {
         // in this case must be lucy class 
         m := new map{string->bool} ()
         for object != null {
-            for v := range object.fields {
-                if m.keyExist(v.name) {
-                    continue  
+            if object.isJava == false {
+                for v := range object.fields {
+                    if m.keyExist(v.name) {
+                        continue  
+                    }
+                    if v.isStatic() {
+                        continue 
+                    }
+                    if accessFromSub && v.ableAccessFromSubClass() == false {
+                        continue
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "field"
+                    item.name =  v.name
+                    items.append(item)
                 }
-                if v.isStatic() {
-                    continue 
+                for methods := range object.methods {
+                    method := methods[0]
+                    if m.keyExist(method.Function.name) {
+                        continue
+                    }
+                    if method.isStatic() {
+                        continue 
+                    }
+                    if method.Function.name == SpecialMethodInit || method.Function.name == classInitMethod  {
+                        continue 
+                    }
+                    if accessFromSub  && method.ableAccessFromSubClass() == false {
+                        continue 
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "method"
+                    item.name =  method.Function.name
+                    item.suggest = method.Function.mkSuggest()
+                    items.append(item)
                 }
-                if accessFromSub && v.ableAccessFromSubClass() == false {
-                    continue
+            }else {
+                for v := range object.fields {
+                    if m.keyExist(v.name) {
+                        continue  
+                    }
+                    if v.isStatic() {
+                        continue 
+                    }
+                    if accessFromSub && v.ableAccessFromSubClass() == false {
+                        continue
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "field"
+                    item.name =  v.name
+                    items.append(item)
                 }
-                item := new AutoCompletionItem()
-                item.Type = "field"
-                item.name =  v.name
-                items.append(item)
-            }
-            object.loadSuperClass(new Pos()) 
+                for methods := range object.methods {
+                    for method := range methods {
+                        if method.isStatic() {
+                            continue 
+                        }
+                        if method.Function.name == SpecialMethodInit || method.Function.name == classInitMethod  {
+                            continue 
+                        }
+                        if accessFromSub  && method.ableAccessFromSubClass() == false {
+                            continue 
+                        }
+                        item := new AutoCompletionItem()
+                        item.Type = "method"
+                        item.name =  method.Function.name
+                        item.suggest = method.Function.mkSuggest()
+                        items.append(item)
+                    }
+                }
+            }  
+            object.loadSuperClass(block , new Pos()) 
             if object.superClass == null {
                 break
             }
@@ -309,22 +430,79 @@ class ExpressionCheckSelection {
         // in this case must be lucy class 
         m := new map{string->bool} ()
         for c != null {
-            for v := range c.fields {
-                if m.keyExist(v.name) {
-                    continue  
+            if c.isJava == false {
+                for v := range c.fields {
+                    if m.keyExist(v.name) {
+                        continue  
+                    }
+                    if v.isStatic() == false {
+                        continue 
+                    }
+                    if accessFromSub && v.ableAccessFromSubClass() == false {
+                        continue
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "field"
+                    item.name =  v.name
+                    items.append(item)
                 }
-                if v.isStatic() == false {
-                    continue 
+                for methods := range c.methods {
+                    method := methods[0]
+                    if m.keyExist(method.Function.name) {
+                        continue
+                    }
+                    if method.Function.name == SpecialMethodInit || method.Function.name == classInitMethod  {
+                        continue 
+                    }
+                    if method.isStatic()  == false {
+                        continue 
+                    }
+                    if accessFromSub  && method.ableAccessFromSubClass() == false {
+                        continue 
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "method"
+                    item.name =  method.Function.name
+                    item.suggest = method.Function.mkSuggest()
+                    items.append(item)
                 }
-                if accessFromSub && v.ableAccessFromSubClass() == false {
-                    continue
+            }else {
+                for v := range c.fields {
+                    if m.keyExist(v.name) {
+                        continue  
+                    }
+                    if v.isStatic() {
+                        continue 
+                    }
+                    if accessFromSub && v.ableAccessFromSubClass() == false {
+                        continue
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "field"
+                    item.name =  v.name
+                    items.append(item)
                 }
-                item := new AutoCompletionItem()
-                item.Type = "field"
-                item.name =  v.name
-                items.append(item)
-            }
-            c.loadSuperClass(new Pos()) 
+                for methods := range c.methods {
+                    for method := range methods {
+                        if method.isStatic() == false {
+                            continue 
+                        }
+                        if   method.Function.name == classInitMethod  || 
+                            method.Function.name == classInitMethod {
+                            continue 
+                        }
+                        if accessFromSub  && method.ableAccessFromSubClass() == false {
+                            continue 
+                        }
+                        item := new AutoCompletionItem()
+                        item.Type = "method"
+                        item.name =  method.Function.name
+                        item.suggest = method.Function.mkSuggest()
+                        items.append(item)
+                    }
+                }
+            }  
+            c.loadSuperClass(block , new Pos()) 
             if c.superClass == null {
                 break
             }

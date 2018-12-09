@@ -20,7 +20,7 @@ public class Command{
 		this.cmd = cmd
 		this.args = args
 		this.envs = envs
-		this.file = file  
+		this.file = file 
 	}
 	public fn destroy() {
 		this.p.destroy()

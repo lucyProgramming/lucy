@@ -223,7 +223,7 @@ public class StatementFor {
 				vType = rangeOn.Map.V
 			}
 			if receiverKType != null {
-				if receiverKType.assignAble(errs, kType) == false {
+				if receiverKType.assignAble(this.initExpressionBlock,errs, kType) == false {
 					err = new error(sprintf("%s cannot use '%s' as '%s' for index",
 						errMsgPrefix(this.RangeAttr.expressionKey.pos),
 						receiverKType.typeString(), kType.typeString()))
@@ -232,7 +232,7 @@ public class StatementFor {
 				}
 			}
 			if receiverVType != null {
-				if receiverVType.assignAble(errs, vType) == false {
+				if receiverVType.assignAble( this.initExpressionBlock, errs, vType) == false {
 					err = new error(sprintf("%s cannot use '%s' as '%s' for value destination",
 						errMsgPrefix(this.RangeAttr.expressionKey.pos),
 						receiverKType.typeString(), kType.typeString()))

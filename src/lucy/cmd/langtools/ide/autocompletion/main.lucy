@@ -5,8 +5,7 @@ import "java/nio/file/FileSystems"
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/os"
 
-
-public fn autoCompletion(file string ,bufferFile string , pos int) -> (result []ast.AutoCompletionItem){
+public fn autoCompletion(file string , bufferFile string , pos int , bs []byte) -> (result []ast.AutoCompletionItem){
     lucyPath , packageName := ide.locateLucyFile(file)
     var lucyFiles = ide.readLucyFiles(ide.getLucyFiles(lucyPath + "/src/" + packageName))    
     fileSystem := FileSystems.getDefault()
@@ -14,12 +13,19 @@ public fn autoCompletion(file string ,bufferFile string , pos int) -> (result []
         if fileSystem.getPath(file).getFileName().toString() == 
             fileSystem.getPath(v.realPathName).getFileName().toString(){
             //read buffer file instead 
-            t , err := os.readFile(bufferFile)
-            if err != null {
-                panic(err)
+            if len(bs) > 0 {
+                v.bs = bs
+            }else {
+                if bufferFile == "" {
+                    panic("not happening")
+                }
+                t , err := os.readFile(bufferFile)
+                if err != null {
+                    panic(err)
+                }
+                v.realPathName = bufferFile
+                v.bs = javaArray2Lucy(t)
             }
-            v.realPathName = bufferFile
-            v.bs = javaArray2Lucy(t)
             v.autoCompletion = pos 
         }
     }
@@ -28,7 +34,7 @@ public fn autoCompletion(file string ,bufferFile string , pos int) -> (result []
 
 fn main(args []string) {
     file , bufferFile , pos := new Flags().parseArgs(args)
-    items := autoCompletion(file,bufferFile , pos)
+    items := autoCompletion(file , bufferFile , pos , null)
     result := copy(new ast.AutoCompletionItem[](len(items)) ,   items)
     bs,err := json.encode(result)
     if err != null {

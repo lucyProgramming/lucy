@@ -68,13 +68,13 @@ public class Class {
     public fn isPublic() -> (is bool)  {
         return this.accessFlags&cg.AccClassPublic != 0
     }
-    
-    fn loadSelf(pos Pos) -> (err error) {
+
+    fn loadSelf(block Block, pos Pos) -> (err error) {
         if this.notImportedYet == false { // current compile class
             return null
         }
         this.notImportedYet = false
-        load, err := loaded.loadClass(this.name)
+        load , err :=  block.inheritedAttribute.p.loadClass(this.name)
         if err != null {
             return new error(sprintf("%s %s", pos.errMsgPrefix(), err.getMessage()))
         }
@@ -350,6 +350,7 @@ public class Class {
     }
 
     fn implementMethod(
+        block Block,
         pos Pos,
         m ClassMethod,
         nameMatched []ClassMethod,
@@ -375,7 +376,7 @@ public class Class {
         if this.name == JavaRootClass {
             return null
         }
-        err := this.loadSuperClass(pos)
+        err := this.loadSuperClass(block , pos)
         if err != null {
             errs.append(err)
             return null
@@ -385,11 +386,11 @@ public class Class {
             return null
         }
 
-        return this.superClass.implementMethod(pos, m, nameMatched, true, errs)
+        return this.superClass.implementMethod(block , pos, m, nameMatched, true, errs)
     }
 
-    fn haveSuperClass(pos Pos, superclassName string) -> (have bool,err  error) {
-        err = this.loadSelf(pos)
+    fn haveSuperClass(block Block, pos Pos, superclassName string) -> (have bool,err  error) {
+        err = this.loadSelf(block , pos)
         if err != null {
             return false, err
         }
@@ -399,7 +400,7 @@ public class Class {
         if this.name == JavaRootClass {
             return false, null
         }
-        err = this.loadSuperClass(pos)
+        err = this.loadSuperClass(block , pos)
         if err != null {
             return false, err
         }
@@ -407,12 +408,12 @@ public class Class {
             return false, null
         }
 
-        return this.superClass.haveSuperClass(pos, superclassName) // check father is implements
+        return this.superClass.haveSuperClass(block , pos, superclassName) // check father is implements
     }
 
-    fn implementedInterface(pos Pos, inter string) -> (implemented bool,err  error) {
+    fn implementedInterface(block Block , pos Pos, inter string) -> (implemented bool,err  error) {
         assert(inter != null )
-        err = this.loadSelf(pos)
+        err = this.loadSelf(block , pos)
         if err != null {
             return false, err
         }
@@ -421,7 +422,7 @@ public class Class {
             if v.name == inter {
                 return true, null
             }
-            im, _ := v.implementedInterface(pos, inter)
+            im, _ := v.implementedInterface(block , pos, inter)
             if im {
                 return im, null
             }
@@ -429,19 +430,19 @@ public class Class {
         if this.name == JavaRootClass {
             return false, null
         }
-        err = this.loadSuperClass(pos)
+        err = this.loadSuperClass(block , pos)
         if err != null {
             return false, err
         }
         if this.superClass == null {
             return false, null
         }
-        return this.superClass.implementedInterface(pos, inter) // check father is implements
+        return this.superClass.implementedInterface(block, pos, inter) // check father is implements
     }
 
-    fn loadSuperClass(pos Pos) -> (err error) {
+    fn loadSuperClass(block Block, pos Pos) -> (err error) {
         if this.superClass != null {
-            return this.superClass.loadSelf(pos)
+            return this.superClass.loadSelf(block , pos)
         }
         if this.resolveFatherCalled ||
             this.loadSuperClassCalled {
@@ -455,7 +456,7 @@ public class Class {
         if this.superClassName == null {
             this.superClassName = new NameWithPos(JavaRootClass ,this.pos )
         }
-        c, err := loaded.loadClass(this.superClassName.name)
+        c, err := this.block.inheritedAttribute.p.loadClass(this.superClassName.name)
         if err != null {
             err = new error(sprintf("%s %s", pos.errMsgPrefix(), err.getMessage()))
             return err
@@ -465,12 +466,13 @@ public class Class {
     }
 
     fn accessConstructionMethod(
+        block Block,
         pos Pos,
         errs []error,
         newCase ExpressionNew,
         callFatherCase ExpressionMethodCall,
         callArgs []Type) -> (ms []ClassMethod = []ClassMethod {} , matched bool, err error) {
-        err = this.loadSelf(pos)
+        err = this.loadSelf(block,pos)
         if err != null {
             return null, false, err
         }
@@ -482,7 +484,7 @@ public class Class {
         }
         for _, v := range this.methods[SpecialMethodInit] {
             var vArgs CallVariableArgs
-            vArgs, err = v.Function.Type.fitArgs(pos, args, callArgs, v.Function)
+            vArgs, err = v.Function.Type.fitArgs(block , pos, args, callArgs, v.Function)
             if err == null {
                 if newCase != null {
                     newCase.vArgs = vArgs
@@ -505,10 +507,11 @@ public class Class {
         ret is *ClassField or *ClassMethod
     */
     fn getFieldOrMethod(
+        block Block ,
         pos Pos,
         name string,
         fromSub bool) -> (f Object,err error) {
-        err = this.loadSelf(pos)
+        err = this.loadSelf(block , pos)
         if err != null {
             return null, err
         }
@@ -546,14 +549,14 @@ public class Class {
         if this.name == JavaRootClass { // root class
             return null, notFoundErr
         }
-        err = this.loadSuperClass(pos)
+        err = this.loadSuperClass(block , pos)
         if err != null {
             return null, err
         }
         if this.superClass == null {
             return null, notFoundErr
         }
-        return this.superClass.getFieldOrMethod(pos, name, true)
+        return this.superClass.getFieldOrMethod(block , pos, name, true)
     }
 
     fn constructionMethodAccessAble(pos Pos, method ClassMethod) -> (err error) {
@@ -575,8 +578,8 @@ public class Class {
         return null
     }
 
-    fn getField(pos Pos, name string, fromSub bool) -> (f ClassField,err  error) {
-            err = this.loadSelf(pos)
+    fn getField(block Block , pos Pos, name string, fromSub bool) -> (f ClassField,err  error) {
+            err = this.loadSelf(block , pos)
             if err != null {
                 return null, err
             }
@@ -600,14 +603,14 @@ public class Class {
             if this.name == JavaRootClass { // root class
                 return null, notFoundErr
             }
-            err = this.loadSuperClass(pos)
+            err = this.loadSuperClass(block , pos)
             if err != null {
                 return null, err
             }
             if this.superClass == null {
                 return null, notFoundErr
             }
-            return this.superClass.getField(pos, name, true)
+            return this.superClass.getField(block , pos, name, true)
     }
 
 
@@ -615,37 +618,39 @@ public class Class {
 
 
     fn accessInterfaceObjectMethod(
+        block Block,
         pos Pos,
         errs []error,
         name string,
         call ExpressionMethodCall,
         callArgTypes []Type,
         fromSub bool) -> (ms []ClassMethod = []ClassMethod{} , matched bool, err error) {
-        ms, matched, err = this.accessInterfaceMethod(pos, errs, name, call, callArgTypes, fromSub)
+        ms, matched, err = this.accessInterfaceMethod(block , pos, errs, name, call, callArgTypes, fromSub)
         if err != null {
             return null, false, err
         }
         if matched {
             return ms, matched, err
         }
-        err = this.loadSuperClass(pos)
+        err = this.loadSuperClass(block , pos)
         if err != null {
             return null, false, err
         }
         if this.superClass == null {
             return null, false, null
         }
-        return this.superClass.accessMethod(pos, errs, call, callArgTypes, fromSub, null)
+        return this.superClass.accessMethod(block , pos, errs, call, callArgTypes, fromSub, null)
     }
 
     fn accessInterfaceMethod(
+        block Block,
         pos Pos,
         errs []error,
         name string,
         call ExpressionMethodCall,
         callArgTypes []Type,
         fromSub bool) -> (ms []ClassMethod = []ClassMethod{} , matched bool, err error) {
-        err = this.loadSelf(pos)
+        err = this.loadSelf(block , pos)
         if err != null {
             return null, false, err
         }
@@ -654,7 +659,7 @@ public class Class {
                 if fromSub && m.ableAccessFromSubClass() == false {
                     continue
                 }
-                call.vArgs, err = m.Function.Type.fitArgs(pos, call.args, callArgTypes, null)
+                call.vArgs, err = m.Function.Type.fitArgs(block, pos, call.args, callArgTypes, null)
                 if err == null {
                     if m.findUsageInstances != null {
                         u := new Usage()
@@ -669,11 +674,11 @@ public class Class {
             }
         }
         for _, v := range this.interfaces {
-            err = v.loadSelf(pos)
+            err = v.loadSelf(block   , pos)
             if err != null {
                 return null, false, err
             }
-            ms2, matched2, err2 := v.accessInterfaceMethod(pos, errs, name, call, callArgTypes, true)
+            ms2, matched2, err2 := v.accessInterfaceMethod(block , pos, errs, name, call, callArgTypes, true)
             if err2 != null {
                 return null, false, err2
             }
@@ -688,18 +693,19 @@ public class Class {
         access method lucy style
     */
     fn accessMethod(
+        block Block,
         pos Pos,
         errs []error,
         call ExpressionMethodCall,
         callArgTypes []Type,
         fromSub bool,
         fieldMethodHandler []ClassField) -> (ms []ClassMethod = []ClassMethod{}, matched bool, err error) {
-        err = this.loadSelf(pos)
+        err = this.loadSelf(block,  pos)
         if err != null {
             return null, false, err
         }
         if this.isJava {
-            return this.accessMethodAsJava(pos, errs, call, callArgTypes, false)
+            return this.accessMethodAsJava(block , pos, errs, call, callArgTypes, false)
         }
         if this.fields != null {
             if f := this.fields[call.name]; f != null &&
@@ -709,7 +715,7 @@ public class Class {
                     //cannot access this field
                 } else {
                     assert(this.fields[call.name].Type.functionType != null)
-                    call.vArgs, err = this.fields[call.name].Type.functionType.fitArgs(pos, call.args,
+                    call.vArgs, err = this.fields[call.name].Type.functionType.fitArgs(block ,  pos, call.args,
                         callArgTypes, null)
                     if err == null {
                         fieldMethodHandler[0] = f
@@ -734,7 +740,7 @@ public class Class {
                         return null, false, new error(sprintf("%s method '%s' not found",
                             pos.errMsgPrefix(), call.name))
                     }
-                    call.vArgs, err = m.Function.Type.fitArgs(pos, call.args,
+                    call.vArgs, err = m.Function.Type.fitArgs(block , pos, call.args,
                         callArgTypes, m.Function)
                     if m.findUsageInstances != null {
                         u := new Usage()
@@ -750,14 +756,14 @@ public class Class {
                 }
             }
         }
-        err = this.loadSuperClass(pos)
+        err = this.loadSuperClass(block , pos)
         if err != null {
             return ms, false, err
         }
         if this.superClass == null {
             return ms, false, null
         }
-        return this.superClass.accessMethod(pos, errs, call,
+        return this.superClass.accessMethod(block , pos, errs, call,
             callArgTypes, true, fieldMethodHandler)
     }
 
@@ -765,6 +771,7 @@ public class Class {
         access method java style
     */
     fn accessMethodAsJava(
+        block Block,
         pos Pos,
         errs []error,
         call ExpressionMethodCall,
@@ -776,7 +783,7 @@ public class Class {
                     //cannot access from sub
                     continue
                 }
-                call.vArgs, err = m.Function.Type.fitArgs(pos, call.args, callArgTypes, m.Function)
+                call.vArgs, err = m.Function.Type.fitArgs(block , pos, call.args, callArgTypes, m.Function)
                 if err == null {
                     return []ClassMethod{m}, true, null
                 } else {
@@ -787,14 +794,14 @@ public class Class {
         if this.name == JavaRootClass {
             return ms, false, null
         }
-        err = this.loadSuperClass(pos)
+        err = this.loadSuperClass(block, pos)
         if err != null {
             return null, false, err
         }
         if this.superClass == null {
             return ms, false, null
         }
-        ms_, matched, err := this.superClass.accessMethodAsJava(pos, errs, call, callArgTypes, true)
+        ms_, matched, err := this.superClass.accessMethodAsJava(block , pos, errs, call, callArgTypes, true)
         if err != null {
             return ms, false, err
         }
@@ -910,9 +917,9 @@ public class Class {
         return errs
     }
 
-    fn suitableSubClassForAbstract(super Class)-> (errs []error = []error{}){
+    fn suitableSubClassForAbstract( super Class)-> (errs []error = []error{}){
         if super.name != JavaRootClass {
-            err := super.loadSuperClass(this.pos)
+            err := super.loadSuperClass(this.block , this.pos)
             if err != null {
                 errs.append(err)
                 return errs
@@ -933,7 +940,7 @@ public class Class {
                     continue
                 }
                 nameMatch :=  []ClassMethod {null}
-                implementation := this.implementMethod(this.pos, m, nameMatch, false, errs)
+                implementation := this.implementMethod(this.block , this.pos, m, nameMatch, false, errs)
                 if implementation != null {
                     if err := m.implementationMethodIsOk(this.pos, implementation); err != null {
                         errs.append(err)
@@ -985,7 +992,7 @@ public class Class {
         if this.name == JavaRootClass {
             return null, null
         }
-        err = this.loadSuperClass(pos)
+        err = this.loadSuperClass(this.block , pos)
         if err != null {
             return null, err
         }
@@ -996,7 +1003,7 @@ public class Class {
     }
 
     fn checkOverrideAbstractMethod()-> (errs []error = []error{}){
-        err := this.loadSuperClass(this.pos)
+        err := this.loadSuperClass(this.block , this.pos)
         if err != null {
             errs.append(err)
             return errs
@@ -1046,7 +1053,7 @@ public class Class {
         is := false
         c := this
         pos := this.pos
-        if err = this.loadSuperClass(pos); err != null {
+        if err = this.loadSuperClass(this.block , pos); err != null {
             return err
         }
         if this.superClass == null {
@@ -1066,7 +1073,7 @@ public class Class {
             }
             m[c.name] = true
             arr.append(c.name)
-            err = c.loadSuperClass(pos)
+            err = c.loadSuperClass(this.block , pos)
             if err != null {
                 return err
             }
@@ -1129,13 +1136,13 @@ public class Class {
             return errs
         }
         for _, i := range this.interfaces {
-            errs.appendAll(this.suitableForInterface(i))
+            errs.appendAll(this.suitableForInterface(this.block , i))
         }
         return errs
     }
 
-    fn suitableForInterface(inter Class)-> (errs []error = []error{}){
-        err := inter.loadSelf(this.pos)
+    fn suitableForInterface(block Block, inter Class)-> (errs []error = []error{}){
+        err := inter.loadSelf(block , this.pos)
         if err != null {
             errs.append(err)
             return errs
@@ -1143,7 +1150,7 @@ public class Class {
         for _, v := range inter.methods {
             m := v[0]
             nameMatch := []ClassMethod {null}
-            implementation := this.implementMethod(this.pos, m, nameMatch, false, errs)
+            implementation := this.implementMethod(block, this.pos, m, nameMatch, false, errs)
             if implementation != null {
                 if err := m.implementationMethodIsOk(this.pos, implementation); err != null {
                     errs.append(err)
@@ -1158,7 +1165,7 @@ public class Class {
             }
         }
         for _, v := range inter.interfaces {
-            es := this.suitableForInterface(v)
+            es := this.suitableForInterface(block , v)
             errs.appendAll(es)
         }
         return errs
@@ -1185,7 +1192,7 @@ public class Class {
                 if assignment == null {
                     continue
                 }
-                if v.Type.assignAble(errs, assignment) == false {
+                if v.Type.assignAble(this.block , errs, assignment) == false {
                     errs.append(new error(sprintf("%s cannot assign '%s' as '%s' for default value",
                         errMsgPrefix(v.pos), assignment.typeString(), v.Type.typeString())))
                     continue

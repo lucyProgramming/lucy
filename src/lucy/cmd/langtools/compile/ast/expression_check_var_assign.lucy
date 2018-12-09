@@ -48,7 +48,7 @@ class ExpressionCheckVarAssign {
 				if t == null || variableType == null {
 					continue
 				}
-				if t.assignAble(errs, variableType) == false {
+				if t.assignAble(block , errs, variableType) == false {
 					errs.append(new error( sprintf("%s cannot use '%s' as '%s'",
 						errMsgPrefix(t.pos), variableType.typeString(), t.typeString())))
 				}
@@ -60,7 +60,7 @@ class ExpressionCheckVarAssign {
 			}
 			if variable := block.variables[identifier.name]; variable != null {
 				if variableType != null {
-					if variable.Type.assignAble(errs, variableType) == false {
+					if variable.Type.assignAble(block , errs, variableType) == false {
 						errs.append(new error( sprintf("%s cannot assign '%s' to '%s'",
 							errMsgPrefix(assignTypes[k].pos),
 							variable.Type.typeString(),

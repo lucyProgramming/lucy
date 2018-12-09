@@ -1,14 +1,14 @@
 //register load 
 
-import "lucy/cmd/langtools/compile/ast"
-import "lucy/cmd/langtools/common"
+// import "lucy/cmd/langtools/compile/ast"
+// import "lucy/cmd/langtools/common"
 
-public var packageLoader = new PackageLoader(common.getLucyPath() , common.getClassPath())
+// public var packageLoader = new PackageLoader(common.getLucyPath() , common.getClassPath())
 
-public fn registerLoader(){
-    ast.ImportsLoader = packageLoader 
-}
+// public fn registerLoader(){
+//     ast.ImportsLoader = packageLoader 
+// }
 
-{
-    registerLoader()
-}
+// {
+//     registerLoader()
+// }

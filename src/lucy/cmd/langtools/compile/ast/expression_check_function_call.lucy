@@ -133,7 +133,7 @@ class ExpressionCheckFunctionCall {
 			return null
 		}
 		var err error
-		call.vArgs, err = ft.fitArgs(e.pos, call.args, callArgsTypes, null)
+		call.vArgs, err = ft.fitArgs(block , e.pos, call.args, callArgsTypes, null)
 		if err != null {
 			errs.append(err)
 		}
@@ -155,7 +155,7 @@ class ExpressionCheckFunctionCall {
 			}
 			ret := tf.Type.mkCallReturnTypes(e.pos)
 			var err error
-			call.vArgs, err = tf.Type.fitArgs(e.pos, call.args, callArgsTypes, tf)
+			call.vArgs, err = tf.Type.fitArgs(block , e.pos, call.args, callArgsTypes, tf)
 			if err != null {
 				errs.append(err)
 			}
@@ -170,7 +170,7 @@ class ExpressionCheckFunctionCall {
 			if f.isBuildIn {
 				if f.loadedFromCorePackage {
 					var err error
-					call.vArgs, err = f.Type.fitArgs(e.pos,call.args, callArgsTypes, f)
+					call.vArgs, err = f.Type.fitArgs(block , e.pos,call.args, callArgsTypes, f)
 					if err != null {
 						errs.append(err)
 					}
@@ -190,7 +190,7 @@ class ExpressionCheckFunctionCall {
 						errMsgPrefix(e.pos))))
 				}
 				var err error
-				call.vArgs, err = f.Type.fitArgs(e.pos, call.args, callArgsTypes, f)
+				call.vArgs, err = f.Type.fitArgs(block , e.pos, call.args, callArgsTypes, f)
 				if err != null {
 					errs.append(err)
 				}

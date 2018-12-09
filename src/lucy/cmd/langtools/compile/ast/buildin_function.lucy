@@ -4,6 +4,8 @@ import "lucy/cmd/langtools/compile/common"
 	registerBuildInFunctions()
 }
 
+
+
 fn registerBuildInFunctions() {
 	{
 		//print
@@ -46,7 +48,7 @@ fn registerBuildInFunctions() {
 			}
 			if len(e.args) == 0 {
 				if block.inheritedAttribute.Defer.exceptionClass == null {
-					c, err := loaded.loadClass(DefaultExceptionClass)
+					c, err := block.inheritedAttribute.p.loadClass(DefaultExceptionClass)
 					if err != null {
 						errs . append(new error( sprintf("%s load exception class failed,err:%s",
 							pos.errMsgPrefix(), err.getMessage())))
@@ -67,12 +69,12 @@ fn registerBuildInFunctions() {
 					errMsgPrefix(args[0].pos), common.BuildInFunctionCatch)))
 			}
 			className := e.args[0].stringValue
-			c, err := loaded.loadClass(className)
+			c, err := block.inheritedAttribute.p.loadClass(className)
 			if err != null {
 				errs . append(new error(sprintf("%s %s", e.args[0].pos.errMsgPrefix(), err.getMessage())))
 				return
 			}
-			have, _ := c.haveSuperClass(e.args[0].pos, JavaThrowableClass)
+			have, _ := c.haveSuperClass(block , e.args[0].pos, JavaThrowableClass)
 			if have == false {
 				errs.append(new error(sprintf("%s '%s' does't have super class '%s'",
 					e.args[0].pos.errMsgPrefix(), className, JavaThrowableClass)))
@@ -105,7 +107,7 @@ fn registerBuildInFunctions() {
 				meta := new BuildInFunctionPanicMeta()
 				e.BuildInFunctionMeta = meta
 				if args[0].Type == VariableTypeObject {
-					meta.argThrowable, _ = args[0].Class.haveSuperClass(args[0].pos, JavaThrowableClass)
+					meta.argThrowable, _ = args[0].Class.haveSuperClass(block , args[0].pos, JavaThrowableClass)
 				}
 			}
 		buildInFunctionsMap[common.BuildInFunctionPanic].isBuildIn = true

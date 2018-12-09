@@ -19,6 +19,7 @@ public class Package {
 	public hasMain bool 
 	public matchFile string 
 	public matchLine int 
+	public loader LoadImport
 	/*
 		for lucy tool goto definition
 	*/
@@ -39,6 +40,8 @@ public class Package {
 	public renameIsGlobal bool 
 
 	public autoCompletionItems []AutoCompletionItem
+
+	public lucyBuildInPackage Package 
 	
 	public fn matchFileAndLine(file string , name string ,  startLine int , endLine int ) ->(need bool){
 		if this.matchFile == null || this.matchFile == "" {  // no match at all 
@@ -59,11 +62,12 @@ public class Package {
 		return true 
 	}
 	
-	public fn Package(name string,disableCheckUnuse bool){
+	public fn Package(name string,disableCheckUnuse bool , loader LoadImport){
 		this.super()
 		this.disableCheckUnuse = disableCheckUnuse
 		this.name =  name
 		this.matchLine =  -1
+		this.loader = loader
 	}
 	public fn locateDefinitionOrAutoCompletionFetched() ->(fetched bool) {
 		fetched = this.locateDefinition != null || 
@@ -100,17 +104,16 @@ public class Package {
 		if this.name == common.CorePackage {
 			return null
 		}
-		if lucyBuildInPackage == null {
-			var pp Object
-			pp, err = loaded.load(common.CorePackage)
-			if err != null {
-				return err
-			}
-			lucyBuildInPackage = pp.(Package)
-			lucyBuildInPackage.markBuildIn()
+		var pp Object
+		pp, err = this.load(common.CorePackage)
+		if err != null {
+			return err
 		}
+		lucyBuildInPackage := pp.(Package)
+		lucyBuildInPackage.markBuildIn()
 		this.block.outer = lucyBuildInPackage.block
 		lucyBuildInPackage.block.inheritedAttribute = new InheritedAttribute()
+		this.lucyBuildInPackage = lucyBuildInPackage
 		return null
 	}
 	
@@ -363,8 +366,9 @@ public class Package {
 				this.findUsageIsGlobal = true 
 				this.findUsage = v.findUsageInstances
 			}
-			this.errors.appendAll(v.block.checkConstants())
 			v.block.inherit(this.block)
+			assert(v.block.inheritedAttribute.p != null)
+			this.errors.appendAll(v.block.checkConstants())
 			v.block.inheritedAttribute.Class = v
 			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors 
@@ -391,6 +395,7 @@ public class Package {
 			}
 		}
 		for _, v := range this.block.Classes {
+			assert(v.block.inheritedAttribute.p != null)
 			es = v.checkPhase1()
 			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors 
@@ -527,4 +532,38 @@ public class Package {
 		}
 	}
 
+	fn load(resource string) -> (x Object, err error) {
+		if resource == "" {
+			panic("null string")
+		}
+		t, err := this.loader.LoadImport(resource)
+		if pp, ok := t.(Package); ok {
+			if pp.name == common.CorePackage {
+				pp.markBuildIn()
+			}
+		}
+		if c, ok := t.(Class); ok && c != null {
+			if c.isJava == false {
+				return null, new error(sprintf("load lucy class not allow"))
+			}
+		}
+		return t, err
+	}
+	
+
+	fn loadClass(className string) -> (c Class,err error) {
+		x, err := this.loader.LoadImport(className)
+		if err != null {
+			return null, err
+		}
+		if t, ok := x.(Class); ok == false || t == null {
+			return null, new error(sprintf("'%s' is not class", className))
+		}
+		cc := x.(Class)
+		return cc, null
+	}
+
 }
+
+
+

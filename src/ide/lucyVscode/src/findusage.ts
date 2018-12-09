@@ -2,50 +2,20 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-const child_process = require('child_process');
-const fs = require('fs');
+
+const querystring = require('querystring');
+const syncHttpRequest = require('sync-request');
 
 module.exports = class GoReferenceProvider implements vscode.ReferenceProvider {
     public provideReferences(
         document: vscode.TextDocument, position: vscode.Position,
         options: { includeDeclaration: boolean }, token: vscode.CancellationToken):
         Thenable<vscode.Location[]> {
-        var args = [
-            "lucy.cmd.langtools.ide.gotodefinition.main",
-            "-file",
-            document.fileName,
-            "-line",
-            position.line,
-            "-column",
-            position.character
-        ];
-        var result = child_process.execFileSync("java", args );
-        var usages = JSON.parse(result);
-        if (!usages) {
-            console.log("definition not found");
-            return null ;
-        }
-        args = [
-            "lucy.cmd.langtools.ide.findusage.main",
-            "-file",
-            usages.filename,
-            "-line",
-            usages.endLine ,
-            "-column",
-            usages.endColumnOffset -1 
-        ];
-        {
-            let s =  "java ";
-            for (var i = 0 ; i < args.length ; i++) {
-                s += args[i] ; 
-                if(i !== args.length - 1 ) {
-                    s += " ";
-                }
-            }
-            console.log(s);
-        }
-        result = child_process.execFileSync("java", args);
-        usages = JSON.parse(result);
+        var u = "http://localhost:2018/ide/findUsage?file=" + querystring.escape(document.fileName) + "&line=" + 
+            position.line + "&column=" + position.character; 
+        console.log(u);
+        var res  = syncHttpRequest("GET" , u);
+        var usages = JSON.parse(res.getBody());
         if (!usages) {
             return null;
         }
@@ -60,5 +30,4 @@ module.exports = class GoReferenceProvider implements vscode.ReferenceProvider {
         } 
         return items; 
     }
-
 };

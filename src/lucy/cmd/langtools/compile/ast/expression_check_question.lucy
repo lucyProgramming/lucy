@@ -31,7 +31,7 @@ class ExpressionCheckQuestion {
 		fType, es := question.False.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if fType != null &&
-			tType.assignAble(errs, fType) == false {
+			tType.assignAble(block , errs, fType) == false {
 			errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
 				fType.pos.errMsgPrefix(), fType.typeString(), tType.typeString())))
 		}

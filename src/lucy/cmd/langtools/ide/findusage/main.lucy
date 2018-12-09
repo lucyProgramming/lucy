@@ -5,19 +5,27 @@ import "lucy/encoding/json"
 import "java/nio/file/FileSystems"
 import "java/lang/Object"
 import "lucy/cmd/langtools/common"
+import "lucy/cmd/langtools/ide/gotodefinition"
+
 
 public fn findUsage(file string , pos int) ->(result Object){
+    definition := gotodefinition.findDefinition(file , "" , pos , null)
+    if definition == null {
+        return null 
+    }
     lucyPath , packageName := ide.locateLucyFile(file)
     var lucyFiles = ide.readLucyFiles(ide.getLucyFiles(lucyPath + "/src/" + packageName))    
     fileSystem := FileSystems.getDefault()
     for v := range lucyFiles {
         if fileSystem.getPath(file).getFileName().toString() == 
             fileSystem.getPath(v.realPathName).getFileName().toString(){
-            v.findUsage = pos 
+            v.findUsage = (definition.endLine << 16) | int(char(definition.endColumnOffset - 1)) 
         }
     }
     result = sortUsages(new FindUsage(lucyFiles , packageName , true , common.getLucyPath()).find())
 }
+
+
 
 fn main(args []string) {
     f := new Flags()

@@ -249,6 +249,7 @@ public class FunctionType {
 	}
 
 	fn fitArgs(
+		block Block , 
 		from Pos,
 		args []Expression,
 		callArgsTypes []Type,
@@ -285,7 +286,7 @@ public class FunctionType {
 						err = new error(sprintf(errMsg))
 						return
 					}
-					if false == v.Type.assignAble(errs, t) {
+					if false == v.Type.assignAble(block , errs, t) {
 						err = new error(sprintf("%s cannot use '%s' as '%s'",
 							errMsgPrefix(t.pos),
 							t.typeString(), v.Type.typeString()))
@@ -294,7 +295,7 @@ public class FunctionType {
 					vArgs.packArray2VArgs = true
 					continue
 				}
-				if false == v.Type.array.assignAble(errs, t) {
+				if false == v.Type.array.assignAble(block , errs, t) {
 					err = new error(sprintf("%s cannot use '%s' as '%s'",
 						errMsgPrefix(t.pos),
 						t.typeString(), v.Type.typeString()))
@@ -321,7 +322,7 @@ public class FunctionType {
 
 		for k, v := range this.parameterList {
 			if k < len(callArgsTypes) && callArgsTypes[k] != null {
-				if v.Type.assignAble(errs, callArgsTypes[k]) {
+				if v.Type.assignAble(block , errs, callArgsTypes[k]) {
 					continue
 				}
 				//TODO :: convert or not ???

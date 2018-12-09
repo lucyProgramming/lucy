@@ -75,7 +75,7 @@ public class StatementSwitch  {
 					containsBool = true 
 					continue
 				}
-				if conditionType.assignAble(errs, t) == false {
+				if conditionType.assignAble(block , errs, t) == false {
 					errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
 						e.pos.errMsgPrefix(), t.typeString(), conditionType.typeString())))
 					continue

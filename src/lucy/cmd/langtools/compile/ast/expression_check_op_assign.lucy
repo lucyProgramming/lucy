@@ -34,7 +34,7 @@ class ExpressionCheckOpAssign {
 				t.Variable.used = true
 			}
 		}
-		convertExpressionToNeed(bin.right, left, right)
+		convertExpressionToNeed(block , bin.right, left, right)
 		/*
 			var  s string
 			s += "11111111"
@@ -51,7 +51,7 @@ class ExpressionCheckOpAssign {
 			e.Type == ExpressionTypeMulAssign ||
 			e.Type == ExpressionTypeDivAssign ||
 			e.Type == ExpressionTypeModAssign {
-			if left.assignAble(errs, right) {
+			if left.assignAble(block , errs, right) {
 				return
 			}
 			if left.isInteger() && right.isInteger() && bin.right.isLiteral() {
@@ -66,7 +66,7 @@ class ExpressionCheckOpAssign {
 		if e.Type == ExpressionTypeAndAssign ||
 			e.Type == ExpressionTypeOrAssign ||
 			e.Type == ExpressionTypeXorAssign {
-			if left.isInteger() && left.assignAble(errs, right) {
+			if left.isInteger() && left.assignAble(block , errs, right) {
 				return
 			}
 		}

@@ -5,8 +5,7 @@ import "java/nio/file/FileSystems"
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/os"
 
-public fn findDefinition(file string ,bufferFile string , pos int) -> (result ast.Pos) {
-    ide.packageLoader.onlyAnalyzeGlobals = true // set true
+public fn findDefinition(file string ,bufferFile string , pos int , bs []byte) -> (result ast.Pos) {
     lucyPath , packageName := ide.locateLucyFile(file)
     var lucyFiles []ide.LucyFile 
     {
@@ -24,7 +23,9 @@ public fn findDefinition(file string ,bufferFile string , pos int) -> (result as
     for v := range lucyFiles {
         if fileSystem.getPath(file).getFileName().toString() == 
             fileSystem.getPath(v.realPathName).getFileName().toString(){
-            if bufferFile != null && bufferFile != "" {
+            if len(bs) > 0 {
+                v.bs = bs 
+            }else if bufferFile != null && bufferFile != "" {
                 t , err := os.readFile(bufferFile)
                 if err != null {
                     panic(err)

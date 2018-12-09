@@ -41,7 +41,7 @@
 			if indexType == null {
 				return  
 			}
-			if on.Map.K.assignAble(errs, indexType) == false {
+			if on.Map.K.assignAble(block, errs, indexType) == false {
 				errs.append(new error(sprintf("%s cannot use '%s' as '%s' for index",
 					index.index.pos.errMsgPrefix(), indexType.typeString(), on.Map.K.typeString())))
 			}

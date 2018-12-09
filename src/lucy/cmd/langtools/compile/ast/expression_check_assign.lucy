@@ -22,7 +22,7 @@ class ExpressionCheckAssign {
 				leftTypes.append(t) // append even if it`s null
 			}
 		}
-		convertExpressionsToNeeds(values, leftTypes, valueTypes)
+		convertExpressionsToNeeds(block , values, leftTypes, valueTypes)
 		bin.left.multiValues = leftTypes
 		if len(lefts) > len(valueTypes) { //expression length compare with value types is more appropriate
 			pos := values[len(values)-1].pos
@@ -48,7 +48,7 @@ class ExpressionCheckAssign {
 			if valueTypes[k] == null {
 				continue
 			}
-			if false == leftTypes[k].assignAble(errs, valueTypes[k]) {
+			if false == leftTypes[k].assignAble(block , errs, valueTypes[k]) {
 				errs.append(new error(sprintf("%s cannot assign '%s' to '%s'",
 					errMsgPrefix(valueTypes[k].pos),
 					valueTypes[k].typeString(), leftTypes[k].typeString())))

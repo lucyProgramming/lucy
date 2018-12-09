@@ -29,17 +29,14 @@ fn isMagicIdentifier(name string) ->(is bool)  {
 		name == magicIdentifierClass
 }
 
-
-public var ImportsLoader       LoadImport
-//public var packageBeenCompile  Package
 var	buildInFunctionsMap = new map { string -> Function }()
-var	lucyBuildInPackage  Package
+
+// var	lucyBuildInPackage  Package
 
 public var	ParseFunctionHandler fn(bs []byte, pos Pos) -> (f Function, es []error)
 var	javaStringClass      Class
 public var	LucyBytesType       Type // []byte
 public var	JavaBytesType        Type // byte[]
-var loaded = new Loaded()
 
 {
 	// []byte
@@ -55,11 +52,11 @@ var loaded = new Loaded()
 	JavaBytesType.array.Type = VariableTypeByte
 }
 
-fn loadJavaStringClass(pos Pos) ->(err error) {
+fn loadJavaStringClass(block Block , pos Pos) ->(err error) {
 	if javaStringClass != null {
 		return null
 	}
-	c, err := ImportsLoader.LoadImport(JavaStringClass)
+	c, err := block.inheritedAttribute.p.loader.LoadImport(JavaStringClass)
 	if err != null {
 		return err
 	}

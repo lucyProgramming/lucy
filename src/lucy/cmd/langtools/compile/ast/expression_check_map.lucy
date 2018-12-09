@@ -45,7 +45,7 @@ class ExpressionCheckMap {
 					}
 				}
 				if mapK != null {
-					if mapK.assignAble(errs, kType) == false {
+					if mapK.assignAble(block , errs, kType) == false {
 						if noType {
 							errs.append(new error(sprintf("%s mix '%s' and '%s' for map value",
 								errMsgPrefix(v.key.pos),
@@ -111,7 +111,7 @@ class ExpressionCheckMap {
 				}
 			}
 			if mapV != null {
-				if mapV.assignAble(errs, vType) == false {
+				if mapV.assignAble(block , errs, vType) == false {
 					if noType {
 						errs.append(new error(sprintf("%s mix '%s' and '%s' for map key",
 							errMsgPrefix(v.value.pos),

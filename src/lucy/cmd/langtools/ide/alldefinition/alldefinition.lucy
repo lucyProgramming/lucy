@@ -1,6 +1,6 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/ide"
-import "lucy/os"
+// import "lucy/os"
 import "java/lang/Object"
 import "java/lang/Boolean"
 import "java/lang/Long"
@@ -21,22 +21,21 @@ class AllDefinition {
     }
     
     fn getAllDefinition() -> (alldefinition Object){
-        ide.packageLoader.onlyAnalyzeGlobals = true 
-        nodes , errs := ide.parseAst(this.lucyFiles)
-        if this.printErr {
-            for v := range errs{
-                os.stderr.println(v.getMessage())
-            }
-        }
-        p := new ast.Package(this.packageName , true)
-        p.onlyAnalyzeGlobals = true // make the process faster
-        errs = p.typeCheck(nodes)
-        if this.printErr {
-            for v := range errs{
-                os.stderr.println(v.getMessage())
-            }
-        }
-        return this.mkResult(p)
+        // nodes , errs := ide.parseAst(this.lucyFiles)
+        // if this.printErr {
+        //     for v := range errs{
+        //         os.stderr.println(v.getMessage())
+        //     }
+        // }
+        // p := new ast.Package(this.packageName , true)
+        // p.onlyAnalyzeGlobals = true // make the process faster
+        // errs = p.typeCheck(nodes)
+        // if this.printErr {
+        //     for v := range errs{
+        //         os.stderr.println(v.getMessage())
+        //     }
+        // }
+        // return this.mkResult(p)
     }
         
     fn mkResult(p ast.Package) ->(result Definition[]) {

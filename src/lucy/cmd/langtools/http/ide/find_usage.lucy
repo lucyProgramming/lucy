@@ -1,0 +1,36 @@
+import "lucy/cmd/langtools/ide/findusage"
+import "com/sun/net/httpserver/HttpHandler"
+import "com/sun/net/httpserver/HttpExchange"
+import "lucy/cmd/langtools/http/g"
+import "java/lang/Integer"
+import "lucy/encoding/json"
+
+class FindUsage implements HttpHandler {
+    public fn handle(exchange HttpExchange) {
+        os := exchange.getResponseBody()
+        defer {
+            exchange.close()
+            e := catch()
+            if e != null {
+                exchange.sendResponseHeaders(500 , 0L)
+                os.write(byte[]("internal error"))
+                e.printStackTrace()
+            }
+        }
+        uri := exchange.getRequestURI()
+        paramters := g.parseQuery(uri.getQuery())
+        file := paramters["file"]
+        if file == null || file == ""{
+            bs := byte[]("file not provide")
+            exchange.sendResponseHeaders(400 , long(len(bs)))
+            os.write(bs)
+            return
+        }
+        line := Integer.parseInt(paramters["line"])
+        column := Integer.parseInt(paramters["column"])
+        usages := findusage.findUsage(file ,(line << 16) | int(char(column)))
+        bs,_ := json.encode(usages , "\t")
+        exchange.sendResponseHeaders(200 , long(len(bs)))
+        os.write(copy(new byte[](len(bs)) ,bs )) 
+    } 
+}
