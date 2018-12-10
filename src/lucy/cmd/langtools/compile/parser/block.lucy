@@ -132,13 +132,8 @@ class BlockParser  extends ParserExtends{
 				}
 			case lex.TokenIf:
 				pos := this.parser.mkPos()
-				statement, err := this.StatementIfParser.parseIf()
-				if err != null {
-					this.consume(untilRc)
-					this.next(lfNotToken)
-					continue
-				}
-				{
+				statement, _ := this.StatementIfParser.parseIf()
+				if null != statement {
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeIf
 				    t.statementIf = statement

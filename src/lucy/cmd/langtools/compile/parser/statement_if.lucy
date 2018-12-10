@@ -44,7 +44,7 @@ class StatementIfParser extends ParserExtends {
 			err = new error(sprintf("%s missing '{' after condition,but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))
 			this.parser.errs.append(err)
-			this.consume(untilLc)
+			return statementIf , err 
 		}
 		this.next(lfIsToken) //skip {
 		if this.parser.token.Type == lex.TokenComment {
