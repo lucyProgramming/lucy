@@ -56,8 +56,13 @@ module.exports = class GoCompletionItemProvider implements vscode.CompletionItem
                 default:
                     kind = vscode.CompletionItemKind.Text ;  
             }
-            let item = new vscode.CompletionItem(v.name , kind);
+            var item = new vscode.CompletionItem(v.name , kind);
             item.sortText = "" + i ; 
+            if (item.sortText.length === 1) {
+                item.sortText = "00" + item.sortText;
+            }else if (item.sortText.length === 2) {
+                item.sortText = "0" + item.sortText;
+            }
             items[i] = item;
         }
         return items;
