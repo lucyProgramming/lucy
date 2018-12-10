@@ -247,6 +247,9 @@ class ExpressionCheckSelection {
             items.append(item)
         }
         for name , v := range p.block.functions {
+            if name == "main" {
+                continue // main function for 
+            }
             item := new AutoCompletionItem()
             item.Type = "function"
             item.name = name

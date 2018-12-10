@@ -19,8 +19,8 @@ module.exports = class GoCompletionItemProvider implements vscode.CompletionItem
         var res  = syncHttpRequest("POST" , u , {
             "body": buffer,
         });
-        console.log(res.getBody());
         let lucyItems = JSON.parse(res.getBody());
+        console.log(lucyItems);
         if(lucyItems.length === 0 ){
             console.log("auto completion length is 0");
             return null;
@@ -57,6 +57,7 @@ module.exports = class GoCompletionItemProvider implements vscode.CompletionItem
                     kind = vscode.CompletionItemKind.Text ;  
             }
             let item = new vscode.CompletionItem(v.name , kind);
+            item.sortText = "" + i ; 
             items[i] = item;
         }
         return items;

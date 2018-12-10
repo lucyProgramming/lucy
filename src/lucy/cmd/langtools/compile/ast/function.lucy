@@ -60,7 +60,7 @@ public class Function {
 		}
 		s += ")"
 	}
-
+	
 	public fn nameLiteralFunction() -> (name string) {
 		if this.name != null && this.name != "" {
 			return this.name

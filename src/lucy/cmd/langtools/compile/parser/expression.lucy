@@ -143,10 +143,19 @@ class ExpressionParser extends  ParserExtends {
 		if this.parser.token.autoCompletion {
 			right := new ast.Expression()
 			right.Type = ast.ExpressionTypeAutoCompletion
+			right.op = "autoCompletion"
 			right.pos = this.parser.mkPos()
-			bin.right = right
+			if isMulti {
+				list := new ast.Expression()
+				list.op = "list"
+				list.pos = this.parser.mkPos()
+				list.Type = ast.ExpressionTypeList
+				list.data = [right]
+				bin.right = list
+			}else {
+				bin.right = right
+			}
 			this.next(lfIsToken)
-			print("in parse")
 			return result , null
 		}
 		this.next(lfIsToken)

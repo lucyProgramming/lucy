@@ -247,6 +247,9 @@ fn searchRightValueForAutoCompletionItems(block Block) -> (items []AutoCompletio
 			if names.keyExist(name) {
 				continue
 			}
+			if v.isGlobalMain() {  // global main function
+				continue 
+			}
 			item  := new AutoCompletionItem()
 			item.Type = "function"
 			item.name = name 
