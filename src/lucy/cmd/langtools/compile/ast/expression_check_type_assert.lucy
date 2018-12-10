@@ -12,9 +12,12 @@ class ExpressionCheckTypeAssert {
 			errs.append(err)
 			return null
 		}
+		if assertion.isType {
+			return [object] 
+		}
 		if object.isPointer() == false {
-			errs.append(new error( sprintf("%s expression is not pointer",
-					errMsgPrefix(object.pos))))
+			errs.append(new error(sprintf("%s expression is not pointer",
+				errMsgPrefix(object.pos))))
 			return null
 		}
 		err := assertion.Type.resolve(block)

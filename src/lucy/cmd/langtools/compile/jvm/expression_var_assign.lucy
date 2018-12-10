@@ -35,7 +35,7 @@ class BuildExpressionVarAssign {
                 state.pushStack(c, obj)
                 state.pushStack(c, obj)
             }
-            stack := this.eb.build(c, code, vs.InitValues[0], context, state)
+            stack := this.eb.build(c, code, vs.initValues[0], context, state)
             if t := currentStack + stack; t > maxStack {
                 maxStack = t
             }
@@ -55,10 +55,10 @@ class BuildExpressionVarAssign {
             }
             return
         }
-        if len(vs.InitValues) == 1 {
-            maxStack = this.eb.build(c, code, vs.InitValues[0], context, state)
+        if len(vs.initValues) == 1 {
+            maxStack = this.eb.build(c, code, vs.initValues[0], context, state)
         } else {
-            maxStack = this.eb.buildExpressions(c, code, vs.InitValues, context, state)
+            maxStack = this.eb.buildExpressions(c, code, vs.initValues, context, state)
         }
         autoVar := new MultiValueAutoVar(c, code, state)
         for k, v := range vs.lefts {
@@ -88,7 +88,7 @@ class BuildExpressionVarAssign {
                 continue
             }
             //this variable not been captured,also not declared here
-            if vs.IfDeclaredBefore[k] {
+            if vs.ifDeclaredBefore[k] {
                 if variable.beenCapturedAsLeftValue > 0 {
                     copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, variable.localValOffset))
                     stack := autoVar.unPack(c, code, k, variable.Type)

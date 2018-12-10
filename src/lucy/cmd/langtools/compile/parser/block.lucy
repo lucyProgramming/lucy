@@ -141,7 +141,7 @@ class BlockParser  extends ParserExtends{
 				{
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeIf
-				    t.StatementIf = statement
+				    t.statementIf = statement
 				    t.pos = pos
 				    block.statements.append(t)
 				}
@@ -460,7 +460,6 @@ class BlockParser  extends ParserExtends{
 				block.statements.append(s)
 			}
 			this.consume(untilSemicolonOrLf)
-			this.next(lfNotToken)
 			return
 		}
 		if e.Type == ast.ExpressionTypeIdentifier &&

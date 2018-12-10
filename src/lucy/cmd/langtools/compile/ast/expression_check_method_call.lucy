@@ -14,7 +14,7 @@ class ExpressionCheckMethodCall {
 			return null
 		}
 		// call father`s construction method
-		if call.name == SUPER && object.Type == VariableTypeObject {
+		if call.name == Super && object.Type == VariableTypeObject {
 			.checkMethodCallExpressionOnSuper(e , block, errs, object)
 			return []Type{mkVoidType(e.pos)}
 		}
@@ -60,7 +60,7 @@ class ExpressionCheckMethodCall {
 					ms[0].isPublic() == false {
 					errs.append(new error(sprintf("%s method '%s' is not public", e.pos.errMsgPrefix(), call.name)))
 				}
-				call.Method = ms[0]
+				call.method = ms[0]
 				return ms[0].Function.Type.mkCallReturnTypes(e.pos)
 			} else {
 				errs.append(methodsNotMatchError(e.pos, call.name, ms, args))
@@ -105,7 +105,7 @@ class ExpressionCheckMethodCall {
 						errs.append(new error(sprintf("%s method '%s' is static",
 							e.pos.errMsgPrefix(), call.name)))
 					}
-					call.Method = ms[0]
+					call.method = ms[0]
 					return ms[0].Function.Type.mkCallReturnTypes(e.pos)
 				}
 				errs.append(methodsNotMatchError(e.pos, call.name, ms, callArgTypes))
@@ -140,7 +140,7 @@ class ExpressionCheckMethodCall {
 				if err != null {
 					errs.append(err)
 				}
-				call.FieldMethodHandler = fieldMethodHandler[0]
+				call.fieldMethodHandler = fieldMethodHandler[0]
 				return fieldMethodHandler[0].Type.functionType.mkCallReturnTypes(e.pos)
 			}
 			if matched {
@@ -153,7 +153,7 @@ class ExpressionCheckMethodCall {
 				if err != null {
 					errs.append(err)
 				}
-				call.Method = m
+				call.method = m
 				return m.Function.Type.mkCallReturnTypes(e.pos)
 			}
 			errs.append(methodsNotMatchError(e.pos, call.name, ms, callArgTypes))
@@ -225,7 +225,7 @@ class ExpressionCheckMethodCall {
 				errs.append(err)
 			}
 			call.name = "<init>"
-			call.Method = m
+			call.method = m
 			call.Class = object.Class.superClass
 			block.statements[0].IsCallFatherConstructionStatement = true
 			block.inheritedAttribute.Function.callFatherConstructionExpression = e
@@ -236,9 +236,9 @@ class ExpressionCheckMethodCall {
 
 	static fn checkMethodCallExpressionOnDynamicSelector(e Expression , block Block, errs []error, object Type) -> (valueTypes []Type) {
 		call := e.data.(ExpressionMethodCall)
-		if call.name == SUPER {
+		if call.name == Super {
 			errs.append(new error(sprintf("%s access '%s' at '%s' not allow",
-				e.pos.errMsgPrefix(), SUPER, object.typeString())))
+				e.pos.errMsgPrefix(), Super, object.typeString())))
 			return null
 		}
 		fieldMethodHandler :=[]ClassField{null}
@@ -262,11 +262,11 @@ class ExpressionCheckMethodCall {
 						//TODO :: 
 					}
 				}
-				call.FieldMethodHandler = fieldMethodHandler[0]
+				call.fieldMethodHandler = fieldMethodHandler[0]
 				return fieldMethodHandler[0].Type.functionType.mkCallReturnTypes(e.pos)
 			} else {
 				method := ms[0]
-				call.Method = method
+				call.method = method
 				if call.locateDefinition {
 					if object.Class.loadFromOutSide == false {
 						block.inheritedAttribute.p.locateDefinition = method.Function.pos 
@@ -348,7 +348,7 @@ class ExpressionCheckMethodCall {
 				return ExpressionCheckFunctionCall.checkFunctionCall(e , block, errs, f, functionCall)
 			} else {
 				methodCall := e.data.(ExpressionMethodCall)
-				methodCall.PackageFunction = f
+				methodCall.packageFunction = f
 				ret := f.Type.mkCallReturnTypes(e.pos)
 				errsLength := len(errs)
 				callArgsTypes := checkExpressions(block, methodCall.args, errs, true)
@@ -396,7 +396,7 @@ class ExpressionCheckMethodCall {
 			if err != null {
 				errs.append(err)
 			}
-			call.PackageGlobalVariableFunction = v
+			call.packageGlobalVariableFunction = v
 			call.vArgs = vArgs
 			return ret
 		}

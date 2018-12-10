@@ -13,7 +13,7 @@ public class StatementSwitch  {
 	public pos                  Pos
 	public EndPos               Pos
 	public condition            Expression //switch
-	public StatementSwitchCases []StatementSwitchCase
+	public cases []StatementSwitchCase
 	public Default              Block
 	public exits                []cg.Exit
 	public inlineComment string 
@@ -48,7 +48,7 @@ public class StatementSwitch  {
 				conditionType.pos.errMsgPrefix())))
 			return errs
 		}
-		if len(this.StatementSwitchCases) == 0 {
+		if len(this.cases) == 0 {
 			errs.append(new error(sprintf("%s switch statement has no cases",
 				this.EndPos.errMsgPrefix())))
 			return errs
@@ -63,7 +63,7 @@ public class StatementSwitch  {
 		var stringValue string
 		var enumName string
 		containsBool := false 
-		for _, v := range this.StatementSwitchCases {
+		for _, v := range this.cases {
 			for _, e := range v.matches {
 				valueValid := false
 				t, es := e.checkSingleValueContextExpression(this.initExpressionBlock)

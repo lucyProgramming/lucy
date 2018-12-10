@@ -77,7 +77,7 @@ class BuildSwitch {
         size := jvmSlotSize(s.condition.value)
         currentStack := size
         state.pushStack(c, s.condition.value)
-        for _, ca := range s.StatementSwitchCases {
+        for _, ca := range s.cases {
             if notMatch != null {
                 writeExits([]cg.Exit{notMatch}, code.codeLength)
                 context.MakeStackMap(code, state, code.codeLength)

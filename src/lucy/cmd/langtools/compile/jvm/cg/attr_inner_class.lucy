@@ -27,31 +27,31 @@ public class InnerClass {
 
 
 public class AttributeInnerClasses {
-	public Classes []InnerClass
+	public classes []InnerClass
 	public fn fromBs(c Class, bs []byte) {
 		length := binary.BigEndian.getChar(bs)
 		bs = bs[2:]
 		if int(length*8) != len(bs) {
 			panic("length not match")
 		}
-		this.Classes = []InnerClass{}
+		this.classes = []InnerClass{}
 		for len(bs) > 0 {
 			inner := new InnerClass()
 			inner.fromBs(c, bs[:8])
-			this.Classes.append( inner)
+			this.classes.append( inner)
 			bs = bs[8:]
 		}
 	}
 
 	fn ToAttributeInfo(c Class) -> (ret AttributeInfo) {
-		if this == null || len(this.Classes) == 0 {
+		if this == null || len(this.classes) == 0 {
 			return null
 		}
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const(AttributeNameInnerClasses)
 		ret.info = new []byte(2)
-		binary.BigEndian.putChar(ret.info, char(len(this.Classes)))
-		for _, v := range this.Classes {
+		binary.BigEndian.putChar(ret.info, char(len(this.classes)))
+		for _, v := range this.classes {
 			bs8 := new []byte(8)
 			binary.BigEndian.putChar(bs8, c.insertClassConst(v.innerClass))
 			binary.BigEndian.putChar(bs8[2:], c.insertClassConst(v.outerClass))

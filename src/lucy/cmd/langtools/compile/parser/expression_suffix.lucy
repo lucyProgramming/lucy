@@ -232,42 +232,42 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix.op = "functionLiteral"
 		case lex.TokenNew:
 			pos := this.parser.mkPos()
-			this.next(lfIsToken)
+			this.next(lfIsToken)  // skip new 
 			this.parser.unExpectNewLineAndSkip()
 			var t ast.Type
 			t, err = this.parser.parseType()
 			if err != null {
-				return null, err
-			}
-			this.parser.unExpectNewLineAndSkip()
-			if this.parser.token.Type != lex.TokenLp {
-				err = new error(sprintf("%s missing '(' after new", this.parser.errMsgPrefix()))
-				this.parser.errs.append( err)
-				return null, err
-			}
-			this.next(lfNotToken) // skip (
-			var es []ast.Expression
-			if this.parser.token.Type != lex.TokenRp { //
-				es, err = this.ep.parseExpressions(lex.TokenRp)
-				if err != null {
-					return null, err
-				}
-			}
-			this.parser.ifTokenIsLfThenSkip(true)
-			if this.parser.token.Type != lex.TokenRp {
-				err = new error(sprintf("%s '(' and ')' not match", this.parser.errMsgPrefix()))
-				this.parser.errs.append( err)
-				return null, err
+				return prefix, err
 			}
 			prefix = new ast.Expression()
 			prefix.Type = ast.ExpressionTypeNew
 			prefix.pos = pos
 			prefix.op = "new"
             n := new ast.ExpressionNew()
-            n.args = es
-            n.Type = t
+			n.Type = t
             prefix.data = n
-            this.next(lfIsToken)
+			if this.parser.token.Type != lex.TokenLp {
+				err = new error(sprintf("%s missing '(' after new", this.parser.errMsgPrefix()))
+				this.parser.errs.append(err)
+				return prefix, err
+			}else {
+				this.next(lfNotToken) // skip (
+				var es []ast.Expression
+				if this.parser.token.Type != lex.TokenRp { //
+					es, err = this.ep.parseExpressions(lex.TokenRp)
+					if err != null {
+						return prefix, err
+					}
+				}
+				this.parser.ifTokenIsLfThenSkip(true)
+				if this.parser.token.Type != lex.TokenRp {
+					err = new error(sprintf("%s '(' and ')' not match", this.parser.errMsgPrefix()))
+					this.parser.errs.append( err)
+					return prefix, err
+				}
+				n.args = es
+				this.next(lfIsToken)  // skip ) 
+			}
 		case lex.TokenLb:
 			prefix, err = this.ep.ExpressionArrayParser.parseArrayExpression()
 			if err != null {
@@ -378,7 +378,7 @@ class ExpressionSuffix extends  ParserExtends {
 					newExpression.pos = this.parser.mkPos()
 					slice := new ast.ExpressionSlice()
 					newExpression.data = slice
-					slice.ExpressionOn = prefix
+					slice.expressionOn = prefix
 					slice.end = end
 					prefix = newExpression
 					this.next(lfIsToken) // skip ]
@@ -409,7 +409,7 @@ class ExpressionSuffix extends  ParserExtends {
 						slice := new ast.ExpressionSlice()
 						newExpression.data = slice
 						slice.start = e
-						slice.ExpressionOn = prefix
+						slice.expressionOn = prefix
 						slice.end = end
 						prefix = newExpression
 						this.next(lfIsToken) // skip ]
@@ -477,6 +477,7 @@ class ExpressionSuffix extends  ParserExtends {
 				autoCompletion := this.parser.token.autoCompletion 
 				this.next(lfIsToken)  // skip . 
 				if autoCompletion {
+					// print("!!!!!!!!!!",prefix.op)
 					newExpression := new ast.Expression()
 					newExpression.pos = pos
 					newExpression.op = "selection"
@@ -519,9 +520,15 @@ class ExpressionSuffix extends  ParserExtends {
 					//
 					this.next(lfNotToken) // skip (
 					var typ ast.Type
-					typ, err = this.parser.parseType()
-					if err != null {
-						return prefix, err
+					var isType bool 
+					if this.parser.token.Type == lex.TokenType {
+						isType = true 
+						this.next(lfIsToken)
+					}else {
+						typ, err = this.parser.parseType()
+						if err != null {
+							return prefix, err
+						}
 					}
 					this.parser.ifTokenIsLfThenSkip(true)
 					if this.parser.token.Type != lex.TokenRp {
@@ -535,6 +542,7 @@ class ExpressionSuffix extends  ParserExtends {
 					newExpression.Type = ast.ExpressionTypeTypeAssert
 					typeAssert := new ast.ExpressionTypeAssert()
 					typeAssert.Type = typ
+					typeAssert.isType = isType
 					typeAssert.Expression = prefix
 					newExpression.data = typeAssert
 					prefix = newExpression

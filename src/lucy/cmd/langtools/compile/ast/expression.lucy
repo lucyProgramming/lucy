@@ -326,7 +326,7 @@ public class Expression {
 		}
 		return false
 	}
-
+	
 	
 	
 	fn check(block Block) -> (returnValueTypes []Type, errs []error = []error{}) {
@@ -337,7 +337,6 @@ public class Expression {
 		switch this.Type {
 		case ExpressionTypeAutoCompletion:
 			block.inheritedAttribute.p.autoCompletionItems = searchRightValueForAutoCompletionItems(block)
-			
 		case ExpressionTypeNull:
 		    this.value = new Type()
 		    this.value.Type = VariableTypeNull

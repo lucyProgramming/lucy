@@ -44,7 +44,7 @@ class BuildExpressionVar {
         }
         index = 0
 
-        for _, v := range vs.InitValues {
+        for _, v := range vs.initValues {
             if v.haveMultiValue() {
                 stack := this.eb.build(c, code, v, context, state)
                 if t := currentStack + stack; t > maxStack {

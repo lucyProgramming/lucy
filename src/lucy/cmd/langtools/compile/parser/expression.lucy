@@ -17,7 +17,6 @@ class ExpressionParser extends  ParserExtends {
 		this.ExpressionSuffix = new ExpressionSuffix(parser , this)
 	}
 	
-
 	fn parseExpressions(endTokens lex.TokenKind...) ->(es []ast.Expression =[]ast.Expression{}  , err error) {
 		for this.parser.token.Type != lex.TokenEof {
 			if this.parser.token.Type == lex.TokenComment ||
@@ -135,6 +134,21 @@ class ExpressionParser extends  ParserExtends {
         pos := this.parser.mkPos()
         opName := this.parser.token.description
 		bin := new ast.ExpressionBinary()
+		result := new ast.Expression()
+        result.Type = expressionType
+        result.op = opName
+        result.data = bin
+        bin.left = left
+        result.pos = pos
+		if this.parser.token.autoCompletion {
+			right := new ast.Expression()
+			right.Type = ast.ExpressionTypeAutoCompletion
+			right.pos = this.parser.mkPos()
+			bin.right = right
+			this.next(lfIsToken)
+			print("in parse")
+			return result , null
+		}
 		this.next(lfIsToken)
 		// skip = :=
 		if this.parser.token.Type == lex.TokenLf {
@@ -146,12 +160,6 @@ class ExpressionParser extends  ParserExtends {
 		}else {
 			//nothing
 		}
-        result := new ast.Expression()
-        result.Type = expressionType
-        result.op = opName
-        result.data = bin
-        bin.left = left
-        result.pos = pos
         if isMulti {
             var es []ast.Expression
             es, err = this.parseExpressions(lex.TokenSemicolon)

@@ -65,9 +65,7 @@ public class Decoder {
 		this.tree  = this.parseJsonSyntaxTree()
 		return this.decodeFromTree(this.tree , this . x )
 	}
-	
-	
-	
+		
 	private fn decodeFromTree(tree JsonSyntaxTreeNode , x Object) -> (x2 Object  ){
 		c := x.getClass()
 		if c.isArray () {

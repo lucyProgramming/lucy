@@ -231,7 +231,6 @@ public class FileLoader implements ast.LoadImport{
                 astClass.methods[m.Function.name].append(m)
             }
         }
-
     }
 
     fn  loadAsLucy(c cg.Class) -> (astClass ast.Class) {
@@ -546,7 +545,7 @@ public class FileLoader implements ast.LoadImport{
             pos.filename = attr.filename
             pos.endLine = int(attr.startLine)
             pos.endColumnOffset = int(attr.startColumn)
-            f, es := ast.ParseFunctionHandler([]byte(attr.code),pos)
+            f, es := ast.parseFunctionHandler([]byte(attr.code),pos)
             if len(es) > 0 { // looks impossible
                 panic(es[0])
             }
@@ -577,12 +576,12 @@ public class FileLoader implements ast.LoadImport{
             if p.block.enums == null {
                 p.block.enums = new map { string -> ast.Enum } ()
             }
-            if p.block.EnumNames == null {
-                p.block.EnumNames = new map { string -> ast.EnumName } ()
+            if p.block.enumNames == null {
+                p.block.enumNames = new map { string -> ast.EnumName } ()
             }
             p.block.enums[common.getBaseName(e.name)] = e
             for _, v := range e.enums {
-                p.block.EnumNames[v.name] = v
+                p.block.enumNames[v.name] = v
             }
         }
         for name, _ := range fisM {
@@ -595,11 +594,11 @@ public class FileLoader implements ast.LoadImport{
             }
             c := this.loadAsLucy(classFile)
             if c != null {
-                if p.block.Classes == null {
-                    p.block.Classes = new map {string -> ast.Class } ()
+                if p.block.classes == null {
+                    p.block.classes = new map {string -> ast.Class } ()
                 }
                 this.caches[c.name] = c
-                p.block.Classes[common.getBaseName(common.getBaseName(c.name))] = c
+                p.block.classes[common.getBaseName(common.getBaseName(c.name))] = c
             }
         }
     }
@@ -607,7 +606,7 @@ public class FileLoader implements ast.LoadImport{
     public fn  loadJavaPackage(r Resource) -> (p ast.Package) {
         fis := new io.File(r.realPath).list()
         p = new ast.Package(r.name , true , null)
-        p.block.Classes = new map {string -> ast.Class}()
+        p.block.classes = new map {string -> ast.Class}()
         for _, v := range fis {
             if v.endsWith(".class") == false {
                 continue
@@ -619,12 +618,12 @@ public class FileLoader implements ast.LoadImport{
             c  := new ClassDecoder(javaArray2Lucy(bs)).decode()
             cc := this.loadAsJava(c)
             if cc != null {
-                if p.block.Classes == null {
-                    p.block.Classes = new map{string->ast.Class}()
+                if p.block.classes == null {
+                    p.block.classes = new map{string->ast.Class}()
                 }
                 caches[cc.name] = cc 
                 this.caches[cc.name] = cc
-                p.block.Classes[common.getBaseName(cc.name)] = cc
+                p.block.classes[common.getBaseName(cc.name)] = cc
             }
         }
     }

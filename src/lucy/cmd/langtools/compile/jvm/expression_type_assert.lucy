@@ -88,6 +88,9 @@ class BuildExpressionAssert {
             code.codeLength++
         } else {
             maxStack = this.eb.build(c, code, assertion.Expression, context, state)
+            if  assertion.isType {
+                return maxStack
+            }
             code.codes[code.codeLength] = cg.OP_dup
             code.codeLength++
             code.codes[code.codeLength] = cg.OP_instanceof

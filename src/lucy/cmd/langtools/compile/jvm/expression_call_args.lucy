@@ -39,7 +39,7 @@ class BuildExpressionCallArgs {
 		if vArgs == null {
 			return
 		}
-		if vArgs.NoArgs {			
+		if vArgs.noArgs {			
 			loadInt32(c, code, 0)
 			newArrayBaseOnType(c, code, vArgs.Type.array)
 			if t := char(1) + currentStack; t > maxStack {

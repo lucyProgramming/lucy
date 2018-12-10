@@ -23,11 +23,11 @@ class BuildExpressionSelection {
         selection := e.data.(ast.ExpressionSelection)
 
         // check cast to super class
-        if selection.name == ast.SUPER {
+        if selection.name == ast.Super {
             maxStack = this.eb.build(c, code, selection.Expression, context, state)
             return
         }
-        if selection.Method != null { // pack to method handle
+        if selection.method != null { // pack to method handle
             code.codes[code.codeLength] = cg.OP_invokestatic
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 "java/lang/invoke/MethodHandles",
@@ -44,11 +44,11 @@ class BuildExpressionSelection {
             code.codeLength += 3
             code.codes[code.codeLength] = cg.OP_ldc_w
             c.insertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(
-                Descriptor.methodDescriptor(selection.Method.Function.Type)
+                Descriptor.methodDescriptor(selection.method.Function.Type)
             ), code.codes[code.codeLength+1:code.codeLength+3])
             code.codeLength += 3
             code.codes[code.codeLength] = cg.OP_invokevirtual
-            if selection.Method.isStatic() {
+            if selection.method.isStatic() {
                 c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                     "java/lang/invoke/MethodHandles$Lookup",
                     "findStatic",
@@ -98,12 +98,12 @@ class BuildExpressionSelection {
                 code.codeLength += 3
                 return
             }
-            if selection.PackageEnumName != null {
-                loadInt32(c, code, selection.PackageEnumName.value)
+            if selection.packageEnumName != null {
+                loadInt32(c, code, selection.packageEnumName.value)
                 maxStack = 1
                 return
             }
-            if selection.PackageFunction != null { // pack to method handle
+            if selection.packageFunction != null { // pack to method handle
                 code.codes[code.codeLength] = cg.OP_invokestatic
                 c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                     "java/lang/invoke/MethodHandles",
@@ -120,7 +120,7 @@ class BuildExpressionSelection {
                 code.codeLength += 3
                 code.codes[code.codeLength] = cg.OP_ldc_w
                 c.insertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(
-                     Descriptor.methodDescriptor(selection.PackageFunction.Type)
+                     Descriptor.methodDescriptor(selection.packageFunction.Type)
                 ), code.codes[code.codeLength+1:code.codeLength+3])
                 code.codeLength += 3
                 code.codes[code.codeLength] = cg.OP_invokevirtual
@@ -136,8 +136,8 @@ class BuildExpressionSelection {
                 return
             }
         case ast.VariableTypeDynamicSelector:
-            if selection.Field != null {
-                if selection.Field.isStatic() == false {
+            if selection.field != null {
+                if selection.field.isStatic() == false {
                     code.codes[code.codeLength] = cg.OP_aload_0
                     code.codeLength++
                     if 1 > maxStack {
@@ -149,14 +149,14 @@ class BuildExpressionSelection {
                     code.codes[code.codeLength] = cg.OP_getstatic
                     code.codeLength++
                 }
-                if selection.Field.jvmDescriptor == null ||
-                    selection.Field.jvmDescriptor == "" {
-                    selection.Field.jvmDescriptor = Descriptor.typeDescriptor(selection.Field.Type)
+                if selection.field.jvmDescriptor == null ||
+                    selection.field.jvmDescriptor == "" {
+                    selection.field.jvmDescriptor = Descriptor.typeDescriptor(selection.field.Type)
                 }
                 c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                     selection.Expression.value.Class.name,
                     selection.name,
-                    selection.Field.jvmDescriptor
+                    selection.field.jvmDescriptor
                 ),
                     code.codes[code.codeLength:code.codeLength+2])
                 code.codeLength += 2
@@ -176,11 +176,11 @@ class BuildExpressionSelection {
                 code.codeLength += 3
                 code.codes[code.codeLength] = cg.OP_ldc_w
                 c.insertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(
-                    Descriptor.methodDescriptor(selection.Method.Function.Type)
+                    Descriptor.methodDescriptor(selection.method.Function.Type)
                 ), code.codes[code.codeLength+1:code.codeLength+3])
                 code.codeLength += 3
                 code.codes[code.codeLength] = cg.OP_invokevirtual
-                if selection.Method.isStatic() {
+                if selection.method.isStatic() {
                     c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                         "java/lang/invoke/MethodHandles$Lookup",
                         "findStatic",
@@ -197,7 +197,7 @@ class BuildExpressionSelection {
                 if 4 > maxStack {
                     maxStack = 4
                 }
-                if selection.Method.isStatic() == false {
+                if selection.method.isStatic() == false {
                     code.codes[code.codeLength] = cg.OP_aload_0
                     code.codeLength++
                     code.codes[code.codeLength] = cg.OP_invokevirtual

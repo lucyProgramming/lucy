@@ -315,7 +315,6 @@ public class Fmt {
         if f.fields[0].isPrivate() {
             access =  "private"
         }
-
     }
 
     fn getFieldDeclarationGroupMeta(fs []ast.ClassFieldDeclaration) ->(maxName string = "" ,
@@ -358,6 +357,9 @@ public class Fmt {
 
     fn formatEnum(indent string , e ast.Enum) -> (format string = "") {
         format = indent 
+        if e.isPublic() {
+            format += "public "
+        }
         format += "enum " + e.shortName + " {\n"
         for k , f := range e.fmts {
             if t,ok := f.(ast.Comment) ; ok {
@@ -369,14 +371,14 @@ public class Fmt {
                 }
                 continue
             }
-            if t,ok := f.(ast.Line) ; ok {
+            if t , ok := f.(ast.Line) ; ok {
                 format += "\n"
                 continue
             }
             v := f.(ast.EnumName)
             format += "    " + v.name
-            if v.NoNeed != null {
-                format += " " + this.formatExpression(indent , v.NoNeed)
+            if v.noNeed != null {
+                format += " " + this.formatExpression(indent , v.noNeed)
             }
             isLast := true  
             for en := range e.fmts[k+1:] {
@@ -384,7 +386,7 @@ public class Fmt {
                 if ok {
                     isLast = false 
                     break
-                } 
+                }
             }
             if isLast == false  {
                 format += ","
@@ -403,7 +405,7 @@ public class Fmt {
         }
     }
 
-
+    // block can have no "{}"
     fn formatBlock(indent string , block ast.Block) -> (format string = ""){
         for s := range block.statements {
             format += this.formatStatement(indent , s)
@@ -419,7 +421,7 @@ public class Fmt {
                     format = indent + this.formatExpression(indent , s.Expression) + " //" + s.inlineComment 
                 }
             case ast.StatementTypeIf:
-                format += this.formatIf(indent , s.StatementIf)
+                format += this.formatIf(indent , s.statementIf)
             case ast.StatementTypeBlock:
                 format += indent + "{\n"
                 format += this.formatBlock(indent + "    ", s.block)
@@ -477,10 +479,17 @@ public class Fmt {
     }
     fn formatDefer(indent string ,d ast.StatementDefer)-> (format string = "") {
         format = indent
-        format += "defer {\n"
-        format += this.formatBlock(indent + "    " ,  d.block)
-        format += indent + "}\n"
+        if d.isOneStatement {
+            format += "defer {\n"
+            format += this.formatStatement(indent + "    " ,  d.block.statements[0])
+            format += indent + "}\n"
+        }else{
+            format += "defer {\n"
+            format += this.formatBlock(indent + "    " ,  d.block)
+            format += indent + "}\n"
+        }
     }
+
     fn formatIf(indent string ,s ast.StatementIf)-> (format string = "") {
         format = indent
         format += "if "
@@ -570,7 +579,7 @@ public class Fmt {
         }
         format += this.formatExpression(indent , s.condition)
         format += " {\n"
-        for c := range s.StatementSwitchCases {
+        for c := range s.cases {
             format += indent + "case "
             for k , e := range c.matches {
                 format += this.formatExpression(indent ,e)
@@ -832,11 +841,11 @@ public class Fmt {
                 if vs.Type != null {
                     format += " " + vs.Type.typeName()
                 }
-                if len(vs.InitValues) > 0 {
+                if len(vs.initValues) > 0 {
                     format += " = "
-                    for k,v := range vs.InitValues {
+                    for k,v := range vs.initValues {
                         format += this.formatExpression(indent , v ) 
-                        if k != len(vs.InitValues) -1 {
+                        if k != len(vs.initValues) -1 {
                             format += " , "
                         }
                     }  
@@ -861,7 +870,7 @@ public class Fmt {
                 format =   "range " + this.formatExpression(indent , e.data.(ast.Expression))
             case ast.ExpressionTypeSlice: 
                 s := e.data.(ast.ExpressionSlice)
-                format += this.formatExpression(indent , s.ExpressionOn ) + "["
+                format += this.formatExpression(indent , s.expressionOn ) + "["
                 if s.start != null {
                     format += this.formatExpression(indent , s.start ) 
                 }

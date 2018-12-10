@@ -2,6 +2,7 @@
 public class Exit {
 	public currentCodeLength int
 	public branchBytes       []byte //[2]byte
+	
 	public fn Exit(op byte, code AttributeCode)  {
 	    this.super()
 		this.currentCodeLength = code.codeLength
@@ -11,4 +12,3 @@ public class Exit {
 	}
 
 }
-

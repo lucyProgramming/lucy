@@ -12,7 +12,7 @@ class ExpressionCheckIdentifier {
 		}
 		//handle magic identifier
 		switch identifier.name {
-		case magicIdentifierFile:
+		case MagicIdentifierFile:
 			e.Type = ExpressionTypeString
 			e.stringValue = e.pos.filename
 			if identifier.locateDefinition {
@@ -20,7 +20,7 @@ class ExpressionCheckIdentifier {
 			}
 			result, _ := e.checkSingleValueContextExpression(block)
 			return result, null
-		case magicIdentifierLine:
+		case MagicIdentifierLine:
 			e.Type = ExpressionTypeInt
 			e.data = Long.valueOf(long(0))
 			result, _ := e.checkSingleValueContextExpression(block)
@@ -28,7 +28,7 @@ class ExpressionCheckIdentifier {
 				block.inheritedAttribute.p.locateDefinition = e.pos 
 			}
 			return result, null
-		case magicIdentifierTime:
+		case MagicIdentifierTime:
 			e.Type = ExpressionTypeLong
 			e.data = Long.valueOf(new Date().getTime())
 			result, _ := e.checkSingleValueContextExpression(block)
@@ -36,7 +36,7 @@ class ExpressionCheckIdentifier {
 				block.inheritedAttribute.p.locateDefinition = e.pos 
 			}
 			return result, null
-		case magicIdentifierClass:
+		case MagicIdentifierClass:
 			if block.inheritedAttribute.Class == null {
 				return null,
 					new error(sprintf("%s '%s' must in class scope", e.pos.errMsgPrefix(), identifier.name))
@@ -165,7 +165,7 @@ class ExpressionCheckIdentifier {
 			result.Type = VariableTypeEnum
 			result.enumName = enumName
 			result.Enum = enumName.Enum
-			identifier.EnumName = enumName
+			identifier.enumName = enumName
 			return result, null
 		}
 		err = new error(sprintf("%s identifier '%s' is not a expression , but '%s'",

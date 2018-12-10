@@ -15,7 +15,7 @@ public class Lexer {
 	endColumnOffset int 
 	lastEndColumnOffset int 
 
-	public fn GetLineAndColumn() -> (line int, column int) {
+	public fn getLineAndColumn() -> (line int, column int) {
 		return this.line, this.endColumnOffset
 	}
 
@@ -577,6 +577,7 @@ public class Lexer {
 			eof, err = this.lexNumber(token, c)
 			return
 		}
+		startColumnOffset := this.endColumnOffset - 1
 		token.offset = this.offset - 1
 		switch c {
 		case '?':
@@ -790,13 +791,6 @@ public class Lexer {
 				token.Type = TokenVArgs
 				token.description = "..."
 			} else {
-				if this.autoCompletion != -1 {
-					line , column := this.getLineAndColumnFromPos(this.autoCompletion)
-					if this.line == line && 
-						(column == this.endColumnOffset -1 || column == this.endColumnOffset) {
-						token.autoCompletion = true 
-					}
-				}
 				token.Type = TokenSelection
 				token.description = "."
 			}
@@ -850,9 +844,14 @@ public class Lexer {
 		}
 		token.endOffset = this.offset 
 		token.endLine = this.line
+		token.endColumnOffset = this.endColumnOffset
+		if this.autoCompletion != -1 {
+			line , column := this.getLineAndColumnFromPos(this.autoCompletion)
+			if token.startLine == line && 
+				(column >= startColumnOffset && column <= token.endColumnOffset) {
+				token.autoCompletion = true
+			}
+		}
 		return
 	}
 }
-
-
-

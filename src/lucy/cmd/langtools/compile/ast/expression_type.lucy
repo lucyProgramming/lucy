@@ -65,7 +65,7 @@ public enum  ExpressionTypeKind {
 	ExpressionTypeRange    ,                                 // for range
 	ExpressionTypeSlice  ,                                   // arr[0:2]
 	ExpressionTypeMap   ,                                    // map literal
-	ExpressionTypeTypeAssert  ,                              // a.(Object)
+	ExpressionTypeTypeAssert ,                              // a.(Object)
 	ExpressionTypeQuestion ,                                 // true ? a : b
 	ExpressionTypeGlobal  ,                                  // global.XXX
 	ExpressionTypeParenthesis ,                              // ( a )
@@ -78,8 +78,8 @@ public enum  ExpressionTypeKind {
 
 public class ExpressionTypeAssert extends ExpressionTypeConversion{
 	public multiValueContext bool
+	public isType bool  // a.(type)  type is a key word
 }
-
 
 
 public class ExpressionQuestion  {
@@ -89,7 +89,7 @@ public class ExpressionQuestion  {
 }
 
 public class ExpressionSlice  {
-	public ExpressionOn Expression
+	public expressionOn Expression
 	public start, end   Expression
 }
 
@@ -101,7 +101,7 @@ public class ExpressionFunctionCall  {
 	public vArgs                    CallVariableArgs
 	public Function                 Function
 	public ParameterTypes           []Type // for template function
-	public TemplateFunctionCallPair TemplateFunctionInstance
+	public templateFunctionCallPair TemplateFunctionInstance
 }
 
 public class ExpressionMethodCall  {
@@ -110,32 +110,30 @@ public class ExpressionMethodCall  {
 	public args               []Expression
 	public vArgs              CallVariableArgs
 	public name               string
-	public Method             ClassMethod
-	public FieldMethodHandler ClassField
+	public method             ClassMethod
+	public fieldMethodHandler ClassField
 	/*
 		unSupport !!!!!!
 	*/
 	public ParameterTypes                []Type
-	public PackageFunction               Function
-	public PackageGlobalVariableFunction Variable
+	public packageFunction               Function
+	public packageGlobalVariableFunction Variable
 	public locateDefinition bool 
 	public getHover  bool 
 	public findUsage  bool 
 	public rename  bool 
-
 }
-
 
 public class ExpressionVar  {
 	public Type       Type
 	public variables  []Variable
-	public InitValues []Expression
+	public initValues []Expression
 }
 
 public class ExpressionVarAssign  {
 	public lefts            []Expression
-	public InitValues       []Expression
-	public IfDeclaredBefore []bool // used for colon assign
+	public initValues       []Expression
+	public ifDeclaredBefore []bool // used for colon assign
 }
 
 public class ExpressionTypeConversion  {
@@ -147,7 +145,7 @@ public class ExpressionIdentifier  {
 	public name     string
 	public Variable Variable
 	public Function Function
-	public EnumName EnumName
+	public enumName EnumName
 	public comment  string
 	public locateDefinition bool 
 	public getHover  bool 
@@ -163,11 +161,11 @@ public class ExpressionIndex  {
 public class ExpressionSelection  {
 	public Expression      Expression
 	public name            string
-	public Field           ClassField  // expression is class or object
-	public Method          ClassMethod // pack to method handle
-	public PackageFunction Function    // expression is package , pack function to method handle
+	public field           ClassField  // expression is class or object
+	public method          ClassMethod // pack to method handle
+	public packageFunction Function    // expression is package , pack function to method handle
 	public packageVariable Variable    // expression is package , get package variable
-	public PackageEnumName EnumName    // expression is package , get enumName
+	public packageEnumName EnumName    // expression is package , get enumName
 	public locateDefinition bool 
 	public getHover  bool 
 	public findUsage  bool 
@@ -185,7 +183,7 @@ public class ExpressionSelection  {
 public class ExpressionNew  {
 	public Type         Type
 	public args         []Expression
-	public Construction ClassMethod
+	public construction ClassMethod
 	public vArgs        CallVariableArgs
 }
 

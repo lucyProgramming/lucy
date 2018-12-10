@@ -25,7 +25,6 @@ public class AutoCompletionItem {
         items.append(item)
     }
     
-
     static fn getArrayBasicAutoCompletionItem() -> (items []AutoCompletionItem) {
         if len(AutoCompletionItem.arrayDefaultAutoCompletionItem) > 0  {
             return AutoCompletionItem.arrayDefaultAutoCompletionItem
@@ -87,15 +86,8 @@ public class AutoCompletionItem {
         item = new AutoCompletionItem()
         item.Type = "method"
         item.name = "keyExist"
-        item.suggest = sprintf("keyExist(%s) -> (bool)"  ,  m.Map.K.typeString())
+        item.suggest = sprintf("keyExist(%s)"  ,  m.Map.K.typeString())
         items.append(item)
-
-
-
-
-
-
-
     }
 
     static fn getArrayAutoCompletionItem(t Type) -> (items []AutoCompletionItem){
@@ -122,14 +114,10 @@ public class AutoCompletionItem {
         t2 := new Type()
         t2.Type = VariableTypeJavaArray 
         t2.array = t.array
-        item.suggest = sprintf("getUnderlyingArray() -> (%s) " , t2.typeString())
+        item.suggest = sprintf("getUnderlyingArray()")
         items.append(item)  
 
 
     }
-
-
-
-
 
 }

@@ -7,7 +7,7 @@ const	lfNotToken = false
 
 
 {
-	ast.ParseFunctionHandler = ParseFunction
+	ast.parseFunctionHandler = ParseFunction
 }
 
 

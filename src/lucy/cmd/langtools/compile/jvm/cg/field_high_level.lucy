@@ -4,7 +4,7 @@ public class FieldHighLevel {
 	public name                         string
 	public descriptor                   string
 	public accessFlags                  char
-	public AttributeConstantValue       AttributeConstantValue
+	public attributeConstantValue       AttributeConstantValue
 	public AttributeLucyFieldDescriptor AttributeLucyFieldDescriptor
 	public AttributeLucyConst           AttributeLucyConst
 }

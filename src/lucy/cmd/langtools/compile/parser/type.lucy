@@ -223,9 +223,14 @@ class TypeParser extends ParserExtends {
 		ret.getHover = this.parser.token.getHover 
 		this.next(lfIsToken) // skip name identifier
 		for this.parser.token.Type == lex.TokenSelection {
+			ret.autoCompletion = this.parser.token.autoCompletion 
 			this.next(lfNotToken) // skip .
+			if ret.autoCompletion {
+				ret.name += "."
+				return ret , null 
+			}
 			if this.parser.token.Type != lex.TokenIdentifier {
-				return null, new error(sprintf("%s not a identifier after dot",
+				return ret, new error(sprintf("%s not a identifier after dot",
 					this.parser.errMsgPrefix()))
 			}
 			ret.name += "." + this.parser.token.stringValue
@@ -236,10 +241,6 @@ class TypeParser extends ParserExtends {
 			ret.pos = this.parser.mkPos() //  override pos
 			this.next(lfIsToken)   // skip identifier
 		}
-		// if ret.locateDefinition {
-		// 	print(ret.name)
-		// }
-
 		return ret, null
 	}
 	

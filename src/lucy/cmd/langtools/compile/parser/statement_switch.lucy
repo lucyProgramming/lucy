@@ -84,10 +84,10 @@ class StatementSwitchParser extends ParserExtends{
 			}
 			t.matches = es
 			t.block = block
-			if statementSwitch.StatementSwitchCases == null {
-                statementSwitch.StatementSwitchCases = [t]
+			if statementSwitch.cases == null {
+                statementSwitch.cases = [t]
 			}else {
-			    statementSwitch.StatementSwitchCases.append(t)
+			    statementSwitch.cases.append(t)
 			}
 		}
 		//default value

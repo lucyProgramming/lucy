@@ -17,12 +17,36 @@ class StatementWhenParser extends ParserExtends {
 		whenStatement.pos = this.parser.mkPos()
 		this.parser.next(lfIsToken)
 		this.parser.unExpectNewLineAndSkip()
-		condition, err := this.parser.parseType()
-		if err != null {
-			this.parser.errs.append( err)
-			this.consume(untilLc)
+		var condition ast.Type
+		var typeExpression ast.Expression
+		if this.parser.token.Type == lex.TokenIdentifier {
+			idenfierToken := this.parser.token
+			this.parser.next(lfIsToken) 
+			thisToken := this.parser.token
+			this.parser.tokenStack = [ idenfierToken , thisToken ]  // store on stack
+			this.parser.next(lfIsToken)  // restore idenfierToken token
+			if thisToken.Type == lex.TokenLc {
+				condition , err = this.parser.parseType()
+				if err != null {
+					this.parser.errs.append(err)
+					this.consume(untilLc)
+				}
+			}else {
+				typeExpression, err = this.parser.ExpressionParser.parseExpression(false)
+				if err != null {
+					this.parser.errs.append(err)
+					this.consume(untilLc)
+				}
+			}
+		}else {
+			typeExpression, err = this.parser.ExpressionParser.parseExpression(false)
+			if err != null {
+				this.parser.errs.append(err)
+				this.consume(untilLc)
+			}
 		}
 		whenStatement.condition = condition
+		whenStatement.typeExpression = typeExpression
 		this.parser.ifTokenIsLfThenSkip(true)
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s expect '{',but '%s'",

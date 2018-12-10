@@ -1,11 +1,10 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/ide"
-// import "lucy/os"
-import "java/lang/Object"
+import "lucy/os"
 import "java/lang/Boolean"
 import "java/lang/Long"
 import "java/lang/Double"
-
+import "lucy/cmd/langtools/common"
 
 class AllDefinition {
     lucyFiles []ide.LucyFile
@@ -19,23 +18,24 @@ class AllDefinition {
         this.packageName = packageName
         this.printErr = printErr
     }
-    
-    fn getAllDefinition() -> (alldefinition Object){
-        // nodes , errs := ide.parseAst(this.lucyFiles)
-        // if this.printErr {
-        //     for v := range errs{
-        //         os.stderr.println(v.getMessage())
-        //     }
-        // }
-        // p := new ast.Package(this.packageName , true)
-        // p.onlyAnalyzeGlobals = true // make the process faster
-        // errs = p.typeCheck(nodes)
-        // if this.printErr {
-        //     for v := range errs{
-        //         os.stderr.println(v.getMessage())
-        //     }
-        // }
-        // return this.mkResult(p)
+    fn getAllDefinition() -> (alldefinition Definition[]){
+        nodes , errs := ide.parseAst(this.lucyFiles)
+        if this.printErr {
+            for v := range errs{
+                os.stderr.println(v.getMessage())
+            }
+        }
+        loader := new ide.PackageLoader(common.getLucyPath() , common.getClassPath())
+        loader.onlyAnalyzeGlobals = true 
+        p := new ast.Package(this.packageName , true , loader)
+        p.onlyAnalyzeGlobals = true // make the process faster
+        errs = p.typeCheck(nodes)
+        if this.printErr {
+            for v := range errs{
+                os.stderr.println(v.getMessage())
+            }
+        }
+        return this.mkResult(p)
     }
         
     fn mkResult(p ast.Package) ->(result Definition[]) {
@@ -68,7 +68,7 @@ class AllDefinition {
             item.name = name
             items.append(item)
         }
-        for name , v := range p.block.Classes {
+        for name , v := range p.block.classes {
             item := new Definition()
             item.Type = "enum"
             item.pos = v.pos 

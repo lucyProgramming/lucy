@@ -35,7 +35,7 @@ public class Map {
 }
 
 public class Type {
-
+	
 	public Type           VariableTypeKind
 	public isBuildIn      bool // build in type alias
 	public isVariableArgs bool // int ...
@@ -55,6 +55,7 @@ public class Type {
 	public findUsage  bool 
 	public rename bool 
 	public getHover bool 
+	public autoCompletion bool 
 	/* 
 		a // this is a inline comment
 	*/
@@ -86,10 +87,12 @@ public class Type {
 		}
 		return true
 		// object or string
-		if this.Type == VariableTypeObject || this.Type == VariableTypeString {
+		if this.Type == VariableTypeObject || 
+			this.Type == VariableTypeString {
 			return true
 		}
-		if this.Type == VariableTypeArray && this.array.isPrimitive() {
+		if this.Type == VariableTypeArray && 
+			this.array.isPrimitive() {
 			return true
 		}
 		if this.Type == VariableTypeJavaArray {
@@ -206,7 +209,7 @@ public class Type {
 		cloned.Function  = this. Function        
 		cloned.Package   = this.Package      
 		cloned.alias     = this.alias      
-
+		cloned.autoCompletion = this.autoCompletion
 		//TODO:: 
 		if cloned.Type == VariableTypeArray ||
 			cloned.Type == VariableTypeJavaArray {
@@ -226,6 +229,11 @@ public class Type {
 		if this.resolved {
 			return null
 		}
+		defer {
+			if this.locateDefinition  && block.inheritedAttribute.p.locateDefinition == null {
+				block.inheritedAttribute.p.locateDefinition = this.pos
+			}
+		}
 		this.resolved = true // single threading
 		switch this.Type {
 		case VariableTypeTemplate:
@@ -241,7 +249,6 @@ public class Type {
 			if this.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = 
 					block.inheritedAttribute.Function.parameterTypes[this.name].pos 
-				
 			}
 			block.inheritedAttribute.Function.parameterTypes[this.name].cp(this)
 			this.pos = pos // keep pos
@@ -350,8 +357,36 @@ public class Type {
 			return null, new error(sprintf("%s %.getMessage()",
 				errMsgPrefix(this.pos), err.getMessage()))
 		}
-		if pp, ok := p.(Package); ok &&
-			pp != null {
+		if this.autoCompletion {
+			items := []AutoCompletionItem{}
+			if pp, ok := p.(Package); ok {
+				for name, v := range pp.block.classes {
+					item := new AutoCompletionItem()
+					item.Type = "class"
+					item.name = name
+					items.append(item)
+				}
+				for name, v := range pp.block.enums {
+					item := new AutoCompletionItem()
+					item.Type = "enum"
+					item.name = name
+					items.append(item)
+				}
+				for name, v := range pp.block.typeAliases {
+					item := new AutoCompletionItem()
+					item.Type = "typealias"
+					item.name = name
+					items.append(item)
+				}
+				block.inheritedAttribute.p.autoCompletionItems = items 
+			}else {
+				return null, new error(sprintf("%s '%s' is not a package",
+					errMsgPrefix(this.pos), packageName))
+			}
+			return null , new error("FLASE ERROR") // it's ok 
+		}
+
+		if pp, ok := p.(Package); ok {
 			var exists bool
 			d, exists = pp.block.nameExists(className , this.pos)
 			if exists == false {

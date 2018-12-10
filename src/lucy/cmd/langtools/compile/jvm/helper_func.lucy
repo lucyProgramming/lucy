@@ -107,6 +107,7 @@ fn nameTemplateFunction(function ast.Function) -> (s string = function.name) {
 }
 
 fn insertTypeAssertClass(c cg.ClassHighLevel, code cg.AttributeCode, t ast.Type) {
+	assert(t != null)
 	if t.Type == ast.VariableTypeString {
 		c.insertClassConst(javaStringClass, code.codes[code.codeLength:code.codeLength+2])
 	}else if t.Type == ast.VariableTypeMap{

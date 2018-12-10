@@ -33,8 +33,8 @@ class ExpressionCheckVarAssign {
 		noNewVariable := true
 		assign := new ExpressionVarAssign()
 		assign.lefts = lefts
-		assign.InitValues = values
-		assign.IfDeclaredBefore = new []bool(len(lefts))
+		assign.initValues = values
+		assign.ifDeclaredBefore = new []bool(len(lefts))
 		if block.variables == null {
 			block.variables = new map{string ->Variable} ()
 		}
@@ -68,7 +68,7 @@ class ExpressionCheckVarAssign {
 					}
 				}
 				identifier.Variable = variable
-				assign.IfDeclaredBefore[k] = true
+				assign.ifDeclaredBefore[k] = true
 				if identifier.locateDefinition {
 					block.inheritedAttribute.p.locateDefinition = variable.pos 
 					

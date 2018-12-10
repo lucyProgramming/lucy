@@ -10,6 +10,8 @@ class BuildBlock {
 	BuildIf BuildIf
 	BuildSwitch BuildSwitch
 	BuildReturn BuildReturn
+	BuildWhen BuildWhen
+
 	
 	fn BuildBlock(eb BuildExpression, bp BuildPackage){
 		this.super()
@@ -19,6 +21,7 @@ class BuildBlock {
 		this.BuildIf = new BuildIf(eb , this)
 		this.BuildSwitch = new BuildSwitch(eb , this)
 		this.BuildReturn = new BuildReturn(eb , this)
+		this.BuildWhen = new BuildWhen(eb , this)
 		
 	}
 	fn buildBlock(
@@ -64,18 +67,18 @@ class BuildBlock {
 				notToHere = s.block.notExecuteToLastStatement
 				continue
 			}
-			if s.Type == ast.StatementTypeIf && s.StatementIf.Else != null {
-				t := s.StatementIf.block.notExecuteToLastStatement
-				for _, v := range s.StatementIf.elseIfList {
+			if s.Type == ast.StatementTypeIf && s.statementIf.Else != null {
+				t := s.statementIf.block.notExecuteToLastStatement
+				for _, v := range s.statementIf.elseIfList {
 					t = t && v.block.notExecuteToLastStatement
 				}
-				t = t && s.StatementIf.Else.notExecuteToLastStatement
+				t = t && s.statementIf.Else.notExecuteToLastStatement
 				notToHere = t
 				continue
 			}
 			if s.Type == ast.StatementTypeSwitch && s.StatementSwitch.Default != null {
 				t := s.StatementSwitch.Default.notExecuteToLastStatement
-				for _, v := range s.StatementSwitch.StatementSwitchCases {
+				for _, v := range s.StatementSwitch.cases {
 					if v.block != null {
 						t = t && v.block.notExecuteToLastStatement
 					} else {
@@ -126,14 +129,20 @@ class BuildBlock {
 		case ast.StatementTypeEnum:
 			//TODO::build 
 		case ast.StatementTypeWhen:
-			//handle at ast
+			//type on a template name already handled at ast stage
+			s.StatementWhen.exits = []cg.Exit{} //could compile multi times
+			maxStack = this.BuildWhen.buildWhenStatement(c, code, s.StatementWhen , context, state)
+			if len(s.StatementWhen.exits) > 0 {
+				writeExits(s.StatementWhen.exits, code.codeLength)
+				context.MakeStackMap(code, state, code.codeLength)
+			}
 		case ast.StatementTypeExpression:
 			maxStack = this.eb.build(c, code, s.Expression, context, state)
 		case ast.StatementTypeIf:
-			s.StatementIf.exits = []cg.Exit{} //could compile multi times
-			maxStack = this.BuildIf.buildIfStatement(c, code, s.StatementIf, context, state)
-			if len(s.StatementIf.exits) > 0 {
-				writeExits(s.StatementIf.exits, code.codeLength)
+			s.statementIf.exits = []cg.Exit{} //could compile multi times
+			maxStack = this.BuildIf.buildIfStatement(c, code, s.statementIf, context, state)
+			if len(s.statementIf.exits) > 0 {
+				writeExits(s.statementIf.exits, code.codeLength)
 				context.MakeStackMap(code, state, code.codeLength)
 			}
 		case ast.StatementTypeBlock:
@@ -142,7 +151,7 @@ class BuildBlock {
 			this.buildBlock(c, code, s.block, context, blockState)
 			state.addTop(blockState)
 			if len(s.block.exits) > 0 {
-				writeExits(s.StatementIf.exits, code.codeLength)
+				writeExits(s.statementIf.exits, code.codeLength)
 				context.MakeStackMap(code, state, code.codeLength)
 			}
 		case ast.StatementTypeFor:
@@ -217,19 +226,19 @@ class BuildBlock {
 			if c.Class.AttributeInnerClasses == null{
 			    c.Class.AttributeInnerClasses = new cg.AttributeInnerClasses()
 			}
-            if c.Class.AttributeInnerClasses.Classes == null {
-                c.Class.AttributeInnerClasses.Classes = []cg.InnerClass{}
+            if c.Class.AttributeInnerClasses.classes == null {
+                c.Class.AttributeInnerClasses.classes = []cg.InnerClass{}
             }
-            c.Class.AttributeInnerClasses.Classes.append(innerClass)
+            c.Class.AttributeInnerClasses.classes.append(innerClass)
 			t := this.bp.buildClass(s.Class)
 			this.bp.putClass(t)
 			if t.Class.AttributeInnerClasses == null {
 			    t.Class.AttributeInnerClasses = new cg.AttributeInnerClasses()
 			}
-			if t.Class.AttributeInnerClasses.Classes == null {
-			    t.Class.AttributeInnerClasses.Classes = []cg.InnerClass{innerClass}
+			if t.Class.AttributeInnerClasses.classes == null {
+			    t.Class.AttributeInnerClasses.classes = []cg.InnerClass{innerClass}
 			}else {
-                 t.Class.AttributeInnerClasses.Classes.append(innerClass)
+                 t.Class.AttributeInnerClasses.classes.append(innerClass)
 			}
 		case ast.StatementTypeNop:
 			// nop

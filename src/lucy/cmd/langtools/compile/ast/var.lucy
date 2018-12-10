@@ -4,10 +4,10 @@ public interface  LoadImport {
 	public fn LoadImport(importName string) -> (Object, error)
 }
 
-const	magicIdentifierFile     = "__FILE__"
-const	magicIdentifierLine     = "__LINE__"
-const	magicIdentifierTime     = "__TIME__"
-const	magicIdentifierClass    = "__CLASS__"
+const	MagicIdentifierFile     = "__FILE__"
+const	MagicIdentifierLine     = "__LINE__"
+const	MagicIdentifierTime     = "__TIME__"
+const	MagicIdentifierClass    = "__CLASS__"
 const	MainFunctionName        = "main"
 const	ThisPointerName         = "this"
 const	UnderScore              = "_"
@@ -16,24 +16,23 @@ const	JavaRootClass           = "java/lang/Object"
 const	DefaultExceptionClass   = "java/lang/Exception"
 const	JavaThrowableClass      = "java/lang/Throwable"
 const	JavaStringClass         = "java/lang/String"
-const	SUPER                   = "super"
+const	Super                   = "super"
 const	SpecialMethodInit       = "<init>"
-const	classInitMethod         = "<clinit>"
+const	ClassInitMethod         = "<clinit>"
 
- 
+
 
 fn isMagicIdentifier(name string) ->(is bool)  {
-	return name == magicIdentifierFile ||
-		name == magicIdentifierLine ||
-		name == magicIdentifierTime ||
-		name == magicIdentifierClass
+	return name == MagicIdentifierFile ||
+		name == MagicIdentifierLine ||
+		name == MagicIdentifierTime ||
+		name == MagicIdentifierClass
 }
 
 var	buildInFunctionsMap = new map { string -> Function }()
 
-// var	lucyBuildInPackage  Package
 
-public var	ParseFunctionHandler fn(bs []byte, pos Pos) -> (f Function, es []error)
+public var	parseFunctionHandler fn(bs []byte, pos Pos) -> (f Function, es []error)
 var	javaStringClass      Class
 public var	LucyBytesType       Type // []byte
 public var	JavaBytesType        Type // byte[]

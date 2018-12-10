@@ -10,14 +10,15 @@ fn main(args []string) {
     port := new Flags().parseArgs(args)
     print("port is " , port)
     server := HttpServer.create(new InetSocketAddress(port), 0)
-    server.createContext("/exit", new TestHandler())
+    server.createContext("/exit", new ExitHandler())
     ide.registerHandlers(server)
     server.start()
 }
 
 
-class TestHandler implements HttpHandler {
+class ExitHandler implements HttpHandler {
     public fn handle(exchange HttpExchange) {
+        print("system is going to shut down")
         os.exit(0)
     }
 }

@@ -36,8 +36,13 @@ public fn parseAst(lucyFiles []LucyFile) ->(nodes []ast.TopNode = []ast.TopNode{
 }
 
 
-public fn parseAstAndTypeCheck(packageName string , 
-	lucyFiles []LucyFile , onlyAnalyzeGlobals bool , matchFile string , matchLine int, loader ast.LoadImport ) -> (p ast.Package,errs []error){
+public fn parseAstAndTypeCheck(
+	packageName string , 
+	lucyFiles []LucyFile , 
+	onlyAnalyzeGlobals bool , 
+	matchFile string ,
+	matchLine int, 
+	loader ast.LoadImport ) -> (p ast.Package,errs []error){
 	nodes ,es := parseAst(lucyFiles)
 	p = new ast.Package(packageName , true , loader)
 	p.onlyAnalyzeGlobals = onlyAnalyzeGlobals

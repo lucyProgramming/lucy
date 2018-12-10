@@ -255,7 +255,7 @@ fn searchRightValueForAutoCompletionItems(block Block) -> (items []AutoCompletio
 			items.append(item)
 			names[name] = true 
 		}
-		for name ,v := range b.Classes {
+		for name ,v := range b.classes {
 			if names.keyExist(name) {
 				continue
 			}

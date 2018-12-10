@@ -66,9 +66,9 @@ class ExpressionCheckLeftValue {
 			}
 			switch object.Type {
 			case VariableTypeDynamicSelector:
-				if selection.name == SUPER {
+				if selection.name == Super {
 					errs.append(new error(sprintf("%s access '%s' at '%s' not allow",
-						e.pos.errMsgPrefix(), SUPER, object.typeString())))
+						e.pos.errMsgPrefix(), Super, object.typeString())))
 					return null
 				}
 				field, err := object.Class.getField(block , e.pos, selection.name, false)
@@ -82,7 +82,7 @@ class ExpressionCheckLeftValue {
 					block.inheritedAttribute.p.locateDefinition = field.pos
 					 
 				}
-				selection.Field = field
+				selection.field = field
 				result = field.Type.Clone()
 				result.pos = e.pos
 				e.value = result
@@ -92,7 +92,7 @@ class ExpressionCheckLeftValue {
 				if err != null {
 					errs.append(err)
 				}
-				selection.Field = field
+				selection.field = field
 				if field != null {
 					if selection.locateDefinition {
 						block.inheritedAttribute.p.locateDefinition = field.pos

@@ -3,21 +3,21 @@ import "lucy/cmd/langtools/ide"
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/encoding/json"
 import "java/nio/file/FileSystems"
-import "java/lang/Object"
 import "lucy/cmd/langtools/common"
 import "lucy/cmd/langtools/ide/gotodefinition"
 
 
-public fn findUsage(file string , pos int) ->(result Object){
+public fn findUsage(file string , pos int) ->(result ast.Usage[]){
     definition := gotodefinition.findDefinition(file , "" , pos , null)
     if definition == null {
+        print("find usage cannot find definition")
         return null 
     }
-    lucyPath , packageName := ide.locateLucyFile(file)
+    lucyPath , packageName := ide.locateLucyFile(definition.filename)
     var lucyFiles = ide.readLucyFiles(ide.getLucyFiles(lucyPath + "/src/" + packageName))    
     fileSystem := FileSystems.getDefault()
     for v := range lucyFiles {
-        if fileSystem.getPath(file).getFileName().toString() == 
+        if fileSystem.getPath(definition.filename).getFileName().toString() == 
             fileSystem.getPath(v.realPathName).getFileName().toString(){
             v.findUsage = (definition.endLine << 16) | int(char(definition.endColumnOffset - 1)) 
         }
@@ -25,20 +25,18 @@ public fn findUsage(file string , pos int) ->(result Object){
     result = sortUsages(new FindUsage(lucyFiles , packageName , true , common.getLucyPath()).find())
 }
 
-
-
 fn main(args []string) {
     f := new Flags()
     file , pos := f.parseArgs(args)
     result := findUsage(file , pos)
-    bs,err := json.encode(result)
+    bs , err := json.encode(result)
     if err != null {
         panic(err)
     }
     print(string(bs))
 }
 
-fn sortUsages (usages []ast.Usage) -> (result Object){
+fn sortUsages (usages []ast.Usage) -> (result ast.Usage[]){
     // if len(usages) == 0 {
     //     return null 
     // }

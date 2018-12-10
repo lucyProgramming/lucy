@@ -20,7 +20,6 @@ public class Token {
 	public autoCompletion bool 
 }
 
-
 public enum  TokenKind {
 	TokenFn    = 1,                  // fn
 	TokenEnum    ,                   // enum
@@ -131,6 +130,7 @@ public enum  TokenKind {
 	TokenWhen  ,                     // when
 	TokenComment       ,             //
 	TokenMultiLineComment  ,         //
+	TokenType   ,  					//type
 	TokenAutoCompletion ,           // special token for aotocompletion 
 	TokenEof                        // end of file
 }
@@ -184,6 +184,7 @@ var keywordsMap = {
 		"final"->        TokenFinal,
 		"global"->      TokenGlobal,
 		"abstract"->     TokenAbstract,
-		"when"->         TokenWhen
+		"when"->         TokenWhen , 
+		"type" ->        TokenType
 }
  

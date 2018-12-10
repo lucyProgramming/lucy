@@ -197,7 +197,7 @@ fn registerBuildInFunctions() {
 			}
 			meta := new BuildInFunctionSprintfMeta()
 			e.BuildInFunctionMeta = meta
-			meta.Format = e.args[0]
+			meta.format = e.args[0]
 			meta.argsLength = len(args) - 1
 			e.args = e.args[1:]
 		}
@@ -272,7 +272,7 @@ fn registerBuildInFunctions() {
 					errs.append(err)
 					return
 				}
-				meta.Format = e.args[0]
+				meta.format = e.args[0]
 				e.args = e.args[1:]
 				meta.argsLength = len(args)
 			}

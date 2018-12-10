@@ -457,6 +457,10 @@
 					"name": "keyword.typealias.lucy"
 				},
 				{
+					"match": "\\btype\\b",
+					"name": "keyword.type.lucy"
+				},
+				{
 					"match": "\\binterface\\b",
 					"name": "keyword.interface.lucy"
 				},

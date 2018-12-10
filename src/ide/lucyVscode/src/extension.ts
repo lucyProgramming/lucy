@@ -3,6 +3,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
+
 const GoDefinitionProvider = require("./goto_definition");
 const GoReferenceProvider = require("./findusage");
 // const GoDocumentSymbolProvider = require("./alldefinition");
@@ -29,7 +30,11 @@ export function activate(context: vscode.ExtensionContext) {
         //         lucySelector, new GoDocumentSymbolProvider()));
         context.subscriptions.push(
             vscode.languages.registerCompletionItemProvider(
-                lucySelector, new GoCompletionItemProvider(), '.'));
+                lucySelector, new GoCompletionItemProvider(), 
+                '.' , '+' , '-' , '*' , '/' , '%', '=' , '&' , '|' ,
+                '>' , '<' ,'!' , '^' , '~'
+                ));
+        
    
 }
 

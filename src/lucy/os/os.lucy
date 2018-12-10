@@ -9,7 +9,6 @@ import "java/lang/System"
 public fn getEnv(k string)->(	v string = System.getenv(k) ){ }
 
 
-
 /*
 	all envs
 */
@@ -30,7 +29,6 @@ public fn getEnvs()->
 */
 public fn getCwd()->(d string = System.getProperty("user.dir")){ }
 
-
 /*
 	change working directory to
 */
@@ -47,7 +45,7 @@ public fn getUser()->(r string = System.getProperty("user.name")){ }
 	exit program
 */
 
-public fn exit(code int){	System.exit(code) }
+public fn exit(code int){	System.exit(code)  }
 
 /*
 	run gc

@@ -8,7 +8,7 @@ class Flags {
     fn Flags() {
         this.super()
         this.parser = new flag.FlagParser()
-        this.port = this.parser.intOption("-port" , 2018)
+        this.port = this.parser.intOption("-port" , 2018)   // 2018 is the birth year of lucy
     }
 
     fn parseArgs(args  []string) -> (port int ){
@@ -17,6 +17,5 @@ class Flags {
         if port < 0 {
              panic("port is negative")
         }
-
     }
 }

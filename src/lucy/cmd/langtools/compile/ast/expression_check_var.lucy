@@ -17,30 +17,30 @@ class ExpressionCheckVar {
 				}
 			}
 		}
-		if ev.Type == null && len(ev.InitValues) == 0 {
+		if ev.Type == null && len(ev.initValues) == 0 {
 			// looks impossible
 			errs.append(new error( sprintf("%s expression var have not type and no initValues",
 					errMsgPrefix(e.pos))))
 			return
 		}
 		var err error
-		if len(ev.InitValues) > 0 {
-			valueTypes := checkExpressions(block, ev.InitValues, errs, false)
+		if len(ev.initValues) > 0 {
+			valueTypes := checkExpressions(block, ev.initValues, errs, false)
 			if ev.Type != null {
 				needs := new []Type(len(ev.variables))
 				for k, _ := range needs {
 					needs[k] = ev.Type
 				}
-				convertExpressionsToNeeds(block , ev.InitValues, needs, valueTypes)
+				convertExpressionsToNeeds(block , ev.initValues, needs, valueTypes)
 			}
 			if len(ev.variables) > len(valueTypes) {
-				pos := ev.InitValues[len(ev.InitValues)-1].pos // last Pos
+				pos := ev.initValues[len(ev.initValues)-1].pos // last Pos
 				errs.append(new error( sprintf("%s too few values , assign %d values to %d destinations",
 					pos.errMsgPrefix(),
 					len(valueTypes),
 					len(ev.variables))))
 			} else if len(ev.variables) < len(valueTypes) {
-				pos := getExtraExpressionPos(ev.InitValues, len(ev.variables))
+				pos := getExtraExpressionPos(ev.initValues, len(ev.variables))
 				errs.append(new error( sprintf("%s too many values , assign %d values to %d destinations",
 					pos.errMsgPrefix(),
 					len(valueTypes),
@@ -81,7 +81,7 @@ class ExpressionCheckVar {
 				}
 			}
 		} else {
-			ev.InitValues = new []Expression(len(ev.variables))
+			ev.initValues = new []Expression(len(ev.variables))
 			for k, v := range ev.variables {
 				var err error
 				if e.isGlobal {
@@ -98,7 +98,7 @@ class ExpressionCheckVar {
 					errs.append(err)
 					continue
 				}
-				ev.InitValues[k] = v.Type.mkDefaultValueExpression()
+				ev.initValues[k] = v.Type.mkDefaultValueExpression()
 			}
 		}
 		if e.isGlobal {

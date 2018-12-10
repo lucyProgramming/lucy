@@ -67,7 +67,7 @@ class EnumParser extends ParserExtends {
 					value = null
 				}
 				enumName.pos = pos
-				enumName.NoNeed = value
+				enumName.noNeed = value
 				enumName.Enum = e
 				enumName.comment = enumComment
 				if e.enums == null {

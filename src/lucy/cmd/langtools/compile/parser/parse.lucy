@@ -43,6 +43,7 @@ class Parser {
 	BlockParser            BlockParser
 	TypeParser             TypeParser 
 	EnumParser             EnumParser
+	tokenStack      	   []lex.Token 
 
 	
 	/*
@@ -360,7 +361,7 @@ class Parser {
 			pos.endOffset = this.token.endOffset
 			return
 		} else {
-			line, _ := this.lexer.GetLineAndColumn()
+			line, _ := this.lexer.getLineAndColumn()
 			pos = new  ast.Pos()
 			pos.filename = this.filename
 			pos.endLine = line
@@ -466,7 +467,7 @@ class Parser {
 		}
 		if this.token.Type == lex.TokenAssign {
 			this.next(lfNotToken) // skip = or :=
-			ret.InitValues, err = this.ExpressionParser.parseExpressions(lex.TokenSemicolon)
+			ret.initValues, err = this.ExpressionParser.parseExpressions(lex.TokenSemicolon)
 			if err != null {
 				return
 			}
@@ -477,6 +478,11 @@ class Parser {
 	fn next(lfIsToken bool) {
 		if this.consumeFoundValidToken {
 			this.consumeFoundValidToken = false
+			return
+		}
+		if len(this.tokenStack) > 0  {
+			this.token = this.tokenStack[0]
+			this.tokenStack = this.tokenStack[1:]
 			return
 		}
 		var err error

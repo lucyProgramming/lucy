@@ -88,7 +88,7 @@ public class Package {
 		for _, v := range this.block.enums {
 			v.isBuildIn = true
 		}
-		for _, v := range this.block.Classes {
+		for _, v := range this.block.classes {
 			v.isBuildIn = true
 		}
 		for _, v := range this.block.functions {
@@ -352,7 +352,7 @@ public class Package {
 				return this.errors
 			}
 		}
-		for _, v := range this.block.Classes {
+		for _, v := range this.block.classes {
 			if v.locateDefinition {
 				this.locateDefinition = v.pos 
 				return this.errors
@@ -377,10 +377,10 @@ public class Package {
 		if this.locateDefinitionOrAutoCompletionFetched() {
 			return this.errors 
 		}
-		for _, v := range this.block.Classes { 
+		for _, v := range this.block.classes { 
 			v.mkDefaultConstruction()
 		} 
-		for _, v := range this.block.Classes {
+		for _, v := range this.block.classes {
 			err := v.resolveFather()
 			if err != null {
 				this.errors.append(err)
@@ -394,7 +394,7 @@ public class Package {
 				return this.errors 
 			}
 		}
-		for _, v := range this.block.Classes {
+		for _, v := range this.block.classes {
 			assert(v.block.inheritedAttribute.p != null)
 			es = v.checkPhase1()
 			if this.locateDefinitionOrAutoCompletionFetched() {
@@ -429,7 +429,7 @@ public class Package {
 				return this.errors 
 			}
 		}
-		for _, v := range this.block.Classes {
+		for _, v := range this.block.classes {
 			if this.matchFileAndLine(v.pos.filename ,v.name, v.startLine , v.endLine) == false {
 				continue
 			}
@@ -531,7 +531,7 @@ public class Package {
 			}
 		}
 	}
-
+	
 	fn load(resource string) -> (x Object, err error) {
 		if resource == "" {
 			panic("null string")

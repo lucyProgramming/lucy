@@ -11,7 +11,7 @@ public class FunctionType {
 	public returnLpContainsLf bool 
 	public returnLpContainsInlineComment  string 
 	
-
+	
 	fn reDefineParameterOrReturnVar(reDefine Variable) -> (err error){
 		if v := this.searchName(reDefine.name) ; v != null {
 			errMsg := sprintf("%s reDefine parameter or return variable '%s',first declared at:\n",
@@ -210,7 +210,7 @@ public class FunctionType {
 		}
 		have += ")"
 	}
-
+	
 	public fn VoidReturn() ->(is bool) {
 		return len(this.returnList) == 0 ||
 			this.returnList[0].Type.Type == VariableTypeVoid
@@ -256,7 +256,7 @@ public class FunctionType {
 		f Function) -> (vArgs CallVariableArgs, err error) {
 		if this.vArgs != null {
 			vArgs = new CallVariableArgs()
-			vArgs.NoArgs = true
+			vArgs.noArgs = true
 			vArgs.Type = this.vArgs.Type
 			vArgs.start = len(this.parameterList)
 		}
@@ -302,7 +302,7 @@ public class FunctionType {
 					return
 				}
 			}
-			vArgs.NoArgs = false
+			vArgs.noArgs = false
 			k := len(this.parameterList)
 			vArgs.length = len(callArgsTypes) - k
 			vArgs.expressions = args[k:]
@@ -372,7 +372,7 @@ public class CallVariableArgs {
 		print(a...)
 	*/
 	public packArray2VArgs bool
-	public NoArgs          bool
+	public noArgs          bool
 	public Type            Type
 	public start int
 }

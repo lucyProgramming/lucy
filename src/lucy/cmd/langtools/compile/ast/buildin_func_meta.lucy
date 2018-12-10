@@ -1,12 +1,10 @@
- 
-
 public class BuildInFunctionPrintfMeta  {
-	public Format     Expression
+	public format     Expression
 	public argsLength int
 }
 
 public class BuildInFunctionSprintfMeta  {
-	public Format     Expression
+	public format     Expression
 	public argsLength int
 }
 

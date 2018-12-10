@@ -131,8 +131,8 @@ public class MakeNodesObjects {
             for k, v := range e.enums {
                 en := new map{string -> Object}()
                 en["name"] = v.name
-                if v.NoNeed != null {
-                    en["value"] = this.makeExpression(v.NoNeed)
+                if v.noNeed != null {
+                    en["value"] = this.makeExpression(v.noNeed)
                 }
                 t[k] = en
             }
@@ -287,9 +287,9 @@ public class MakeNodesObjects {
         if s.condition != null {
             ret["condition"] = this.makeExpression(s.condition)
         }
-        if len(s.StatementSwitchCases) > 0 {
-            var cases = new Object[](len(s.StatementSwitchCases))
-            for k, v := range s.StatementSwitchCases {
+        if len(s.cases) > 0 {
+            var cases = new Object[](len(s.cases))
+            for k, v := range s.cases {
                 onecase := new map{string -> Object}()
                 conditions := new Object[](len(v.matches))
                 for kk, vv := range v.matches {
@@ -354,7 +354,7 @@ public class MakeNodesObjects {
                 sprintf("statementExpression@%d", s.pos.endLine) ->  this.makeExpression(s.Expression),
             }
         case ast.StatementTypeIf:
-            return this.makeStatementIf(s.StatementIf)
+            return this.makeStatementIf(s.statementIf)
         case ast.StatementTypeBlock:
             return  {
                 "block" ->  this.makeBlock(s.block),
@@ -620,9 +620,9 @@ public class MakeNodesObjects {
                 }
                 ret["variables"] = t
             }
-            if len(v.InitValues) > 0 {
-                var t Object[] = new Object[](len(v.InitValues))
-                for kk, vv := range v.InitValues {
+            if len(v.initValues) > 0 {
+                var t Object[] = new Object[](len(v.initValues))
+                for kk, vv := range v.initValues {
                     t[kk] =  this.makeExpression(vv)
                 }
                 ret["initValues"] = t
@@ -663,7 +663,7 @@ public class MakeNodesObjects {
             ret := new map{string -> Object}()
             ret["op"] = e.op
             slice := e.data.(ast.ExpressionSlice)
-            ret["expression"] = this.makeExpression(slice.ExpressionOn)
+            ret["expression"] = this.makeExpression(slice.expressionOn)
             if slice.start != null {
                 ret["start"] = this.makeExpression(slice.start)
             }

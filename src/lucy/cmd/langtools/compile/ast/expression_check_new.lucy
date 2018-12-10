@@ -17,7 +17,7 @@ class ExpressionCheckNew {
 		}
 		// new object
 		if no.Type.Type != VariableTypeObject {
-			errs . append(new error( sprintf("%s cannot have new on type '%s'",
+			errs . append(new error(sprintf("%s cannot have new on type '%s'",
 					no.Type.pos.errMsgPrefix(), no.Type.typeString())))
 			return null
 		}
@@ -61,7 +61,7 @@ class ExpressionCheckNew {
 			if err := no.Type.Class.constructionMethodAccessAble(e.pos, m); err != null {
 				errs.append(err)
 			}
-			no.Construction = m
+			no.construction = m
 			return ret
 		}
 		errs.append(methodsNotMatchError(no.Type.pos, no.Type.typeString(), ms, callArgTypes))

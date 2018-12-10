@@ -28,7 +28,7 @@ public class Statement {
 	public Type                      StatementTypeKind
 	public checked                   bool // if checked
 	public pos                       Pos
-	public StatementIf               StatementIf
+	public statementIf               StatementIf
 	public Expression                Expression
 	public TypeAlias                 TypeAlias
 	public StatementFor              StatementFor
@@ -46,7 +46,7 @@ public class Statement {
 	public Import                    Import
 	public comment 	                 string
 	public inlineComment   string 
-
+	
 	isStaticFieldDefaultValue bool
 	/*
 		this.super()
@@ -82,7 +82,7 @@ public class Statement {
 		case StatementTypeExpression:
 			return this.checkStatementExpression(block)
 		case StatementTypeIf:
-			es := this.StatementIf.check(block)
+			es := this.statementIf.check(block)
 			return es
 		case StatementTypeFor:
 			es := this.StatementFor.check(block)
@@ -212,6 +212,9 @@ public class Statement {
 	
 
 	fn checkStatementExpression(block Block) ->(errs []error = []error{})  {
+		if this.Expression == null {
+			return errs 
+		}
 		this.Expression.isStatementExpression = true
 		if err := this.Expression.canBeUsedAsStatement(); err != null {
 			errs.append(err)

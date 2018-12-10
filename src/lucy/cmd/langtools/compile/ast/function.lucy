@@ -120,7 +120,7 @@ public class Function {
 	}
 	
 	fn clone() -> (ret Function, es []error) {
-		ret, es = ParseFunctionHandler(this.sourceCode, this.pos)
+		ret, es = parseFunctionHandler(this.sourceCode, this.pos)
 		if len(es) > 0 {
 			return ret, es
 		}
@@ -155,7 +155,6 @@ public class Function {
 			}
 			if v.locateDefinition {
 				this.block.inheritedAttribute.p.locateDefinition = v.pos
-				
 			}
 			if v.findUsage {
 				u := new Usage()
@@ -199,11 +198,15 @@ public class Function {
 			if this.TemplateFunction != null {
 				continue
 			}
+			if v.defaultValueExpression == null && this.haveDefaultValue {
+				errs.append(new error( sprintf("%s missing default value for '%s'",
+						errMsgPrefix(v.defaultValueExpression.pos) , v.name)))
+			}
 			if v.defaultValueExpression != null {
 				if this.haveDefaultValue == false {
 					this.defaultValueStartAt = k
+					this.haveDefaultValue = true
 				}
-				this.haveDefaultValue = true
 				t, es := v.defaultValueExpression.checkSingleValueContextExpression(this.block)
 				errs.appendAll(es)
 				if t != null {

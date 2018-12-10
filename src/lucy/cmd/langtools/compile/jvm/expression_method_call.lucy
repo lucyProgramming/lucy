@@ -21,7 +21,7 @@ class BuildExpressionMethodCall {
         call := e.data.(ast.ExpressionMethodCall)
 
         switch call.Expression.value.Type {
-        case call.FieldMethodHandler != null:
+        case call.fieldMethodHandler != null:
             return this.buildMethodCallOnFieldHandler(c, code, e, context, state)
         case ast.VariableTypeArray:
             return this.eb.BuildExpressionArray.buildMethodCallOnArray(c, code, e, context, state)
@@ -34,29 +34,29 @@ class BuildExpressionMethodCall {
         case ast.VariableTypeDynamicSelector:
             return this.buildMethodCallOnDynamicSelector(c, code, e, context, state)
         case ast.VariableTypeClass:
-            if call.Method.Function.jvmDescriptor == null ||
-                call.Method.Function.jvmDescriptor == "" {
-                call.Method.Function.jvmDescriptor = Descriptor.methodDescriptor(call.Method.Function.Type)
+            if call.method.Function.jvmDescriptor == null ||
+                call.method.Function.jvmDescriptor == "" {
+                call.method.Function.jvmDescriptor = Descriptor.methodDescriptor(call.method.Function.Type)
             }
             maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.args, call.vArgs, context, state)
             code.codes[code.codeLength] = cg.OP_invokestatic
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 call.Class.name,
                 call.name,
-                call.Method.Function.jvmDescriptor
+                call.method.Function.jvmDescriptor
             ), code.codes[code.codeLength+1:code.codeLength+3])
             code.codeLength += 3
             if t := jvmSize(e); t > maxStack {
                 maxStack = t
             }
-            if t := popCallResult(code, e,  call.Method.Function.Type); t > maxStack {
+            if t := popCallResult(code, e,  call.method.Function.Type); t > maxStack {
                 maxStack = t
             }
             return
         case ast.VariableTypeObject, ast.VariableTypeString:
-            if call.Method.Function.jvmDescriptor == null ||
-                call.Method.Function.jvmDescriptor == "" {
-                call.Method.Function.jvmDescriptor = Descriptor.methodDescriptor(call.Method.Function.Type)
+            if call.method.Function.jvmDescriptor == null ||
+                call.method.Function.jvmDescriptor == "" {
+                call.method.Function.jvmDescriptor = Descriptor.methodDescriptor(call.method.Function.Type)
             }
             maxStack = this.eb.build(c, code, call.Expression, context, state)
             // object ref
@@ -81,7 +81,7 @@ class BuildExpressionMethodCall {
                 c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                     call.Class.name,
                     call.name,
-                    call.Method.Function.jvmDescriptor
+                    call.method.Function.jvmDescriptor
                 ), code.codes[code.codeLength+1:code.codeLength+3])
                 code.codeLength += 3
                 return
@@ -91,9 +91,9 @@ class BuildExpressionMethodCall {
                 c.insertInterfaceMethodrefConst(new cg.ConstantInfoInterfaceMethodrefHighLevel(
                     call.Class.name,
                     call.name,
-                    call.Method.Function.jvmDescriptor
+                    call.method.Function.jvmDescriptor
                 ), code.codes[code.codeLength+1:code.codeLength+3])
-                code.codes[code.codeLength+3] = interfaceMethodArgsCount(call.Method.Function.Type)
+                code.codes[code.codeLength+3] = interfaceMethodArgsCount(call.method.Function.Type)
                 code.codes[code.codeLength+4] = 0
                 code.codeLength += 5
             } else {
@@ -101,11 +101,11 @@ class BuildExpressionMethodCall {
                 c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                     call.Class.name,
                     call.name,
-                    call.Method.Function.jvmDescriptor
+                    call.method.Function.jvmDescriptor
                 ), code.codes[code.codeLength+1:code.codeLength+3])
                 code.codeLength += 3
             }
-            if t := popCallResult(code, e, call.Method.Function.Type); t > maxStack {
+            if t := popCallResult(code, e, call.method.Function.Type); t > maxStack {
                 maxStack = t
             }
             return
@@ -121,7 +121,7 @@ class BuildExpressionMethodCall {
         context Context,
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionMethodCall)
-        if call.FieldMethodHandler.isStatic() == false {
+        if call.fieldMethodHandler.isStatic() == false {
             stack := this.eb.build(c, code, call.Expression, context, state)
             if stack > maxStack {
                 maxStack = stack
@@ -135,7 +135,7 @@ class BuildExpressionMethodCall {
         c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
             call.Expression.value.Class.name,
             call.name,
-            Descriptor.typeDescriptor(call.FieldMethodHandler.Type)
+            Descriptor.typeDescriptor(call.fieldMethodHandler.Type)
         ), code.codes[code.codeLength:code.codeLength+2])
         code.codeLength += 2
         state.pushStack(c, state.newObjectVariableType(javaMethodHandleClass))
@@ -150,10 +150,10 @@ class BuildExpressionMethodCall {
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             javaMethodHandleClass,
             methodHandleInvokeMethodName,
-            Descriptor.methodDescriptor(call.FieldMethodHandler.Type.functionType)
+            Descriptor.methodDescriptor(call.fieldMethodHandler.Type.functionType)
         ), code.codes[code.codeLength+1:code.codeLength+3])
         code.codeLength += 3
-        if t := popCallResult(code, e, call.FieldMethodHandler.Type.functionType); t > maxStack {
+        if t := popCallResult(code, e, call.fieldMethodHandler.Type.functionType); t > maxStack {
             maxStack = t
         }
         return
@@ -161,8 +161,8 @@ class BuildExpressionMethodCall {
     fn  buildMethodCallOnDynamicSelector(c cg.ClassHighLevel, code cg.AttributeCode,
         e ast.Expression, context Context, state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionMethodCall)
-        if call.FieldMethodHandler != null {
-            if call.FieldMethodHandler.isStatic() == false {
+        if call.fieldMethodHandler != null {
+            if call.fieldMethodHandler.isStatic() == false {
                 code.codes[code.codeLength] = cg.OP_aload_0
                 code.codeLength++
                 if 1 > maxStack {
@@ -177,7 +177,7 @@ class BuildExpressionMethodCall {
             c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                 call.Expression.value.Class.name,
                 call.name,
-                Descriptor.typeDescriptor(call.FieldMethodHandler.Type)
+                Descriptor.typeDescriptor(call.fieldMethodHandler.Type)
             ), code.codes[code.codeLength:code.codeLength+2])
             code.codeLength += 2
             state.pushStack(c, state.newObjectVariableType(javaMethodHandleClass))
@@ -191,15 +191,15 @@ class BuildExpressionMethodCall {
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaMethodHandleClass,
                 methodHandleInvokeMethodName,
-                Descriptor.methodDescriptor(call.FieldMethodHandler.Type.functionType)
+                Descriptor.methodDescriptor(call.fieldMethodHandler.Type.functionType)
             ), code.codes[code.codeLength+1:code.codeLength+3])
             code.codeLength += 3
-            if t := popCallResult(code, e, call.FieldMethodHandler.Type.functionType); t > maxStack {
+            if t := popCallResult(code, e, call.fieldMethodHandler.Type.functionType); t > maxStack {
                 maxStack = t
             }
         } else {
             currentStack := char(0)
-            if call.Method.isStatic() == false {
+            if call.method.isStatic() == false {
                 code.codes[code.codeLength] = cg.OP_aload_0
                 code.codeLength++
                 state.pushStack(c, state.newObjectVariableType(call.Expression.value.Class.name))
@@ -211,7 +211,7 @@ class BuildExpressionMethodCall {
             if t := currentStack + stack; t > maxStack {
                 maxStack = t
             }
-            if call.Method.isStatic() {
+            if call.method.isStatic() {
                 code.codes[code.codeLength] = cg.OP_invokestatic
                 code.codeLength++
             } else {
@@ -221,10 +221,10 @@ class BuildExpressionMethodCall {
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 call.Expression.value.Class.name,
                 call.name,
-                Descriptor.methodDescriptor(call.Method.Function.Type)
+                Descriptor.methodDescriptor(call.method.Function.Type)
             ), code.codes[code.codeLength:code.codeLength+2])
             code.codeLength += 2
-            if t := popCallResult(code, e, call.Method.Function.Type); t > maxStack {
+            if t := popCallResult(code, e, call.method.Function.Type); t > maxStack {
                 maxStack = t
             }
         }
@@ -233,7 +233,7 @@ class BuildExpressionMethodCall {
     fn  buildMethodCallOnPackage(c cg.ClassHighLevel, code cg.AttributeCode,
         e ast.Expression, context Context, state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionMethodCall)
-        if call.PackageFunction != null {
+        if call.packageFunction != null {
             stack := this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.args, call.vArgs, context, state)
             if stack > maxStack {
                 maxStack = stack
@@ -242,22 +242,22 @@ class BuildExpressionMethodCall {
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 call.Expression.value.Package.name + "/main",
                 call.name,
-                Descriptor.methodDescriptor(call.PackageFunction.Type)
+                Descriptor.methodDescriptor(call.packageFunction.Type)
             ), code.codes[code.codeLength+1:code.codeLength+3])
             code.codeLength += 3
-            if t := popCallResult(code, e, call.PackageFunction.Type); t > maxStack {
+            if t := popCallResult(code, e, call.packageFunction.Type); t > maxStack {
                 maxStack = t
             }
         } else {
-            //call.PackageGlobalVariableFunction != null
+            //call.packageGlobalVariableFunction != null
             code.codes[code.codeLength] = cg.OP_getstatic
             c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                 call.Expression.value.Package.name + "/main",
                 call.name,
-                Descriptor.typeDescriptor(call.PackageGlobalVariableFunction.Type)
+                Descriptor.typeDescriptor(call.packageGlobalVariableFunction.Type)
             ), code.codes[code.codeLength+1:code.codeLength+3])
             code.codeLength += 3
-            state.pushStack(c, call.PackageGlobalVariableFunction.Type)
+            state.pushStack(c, call.packageGlobalVariableFunction.Type)
             defer state.popStack(1)
             stack := this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.args, call.vArgs, context, state)
             if t := char(1) + stack; t > maxStack {
@@ -267,10 +267,10 @@ class BuildExpressionMethodCall {
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 "java/lang/invoke/MethodHandle",
                 methodHandleInvokeMethodName,
-                Descriptor.methodDescriptor(call.PackageGlobalVariableFunction.Type.functionType)
+                Descriptor.methodDescriptor(call.packageGlobalVariableFunction.Type.functionType)
             ), code.codes[code.codeLength+1:code.codeLength+3])
             code.codeLength += 3
-            if t := popCallResult(code, e, call.PackageGlobalVariableFunction.Type.functionType); t > maxStack {
+            if t := popCallResult(code, e, call.packageGlobalVariableFunction.Type.functionType); t > maxStack {
                 maxStack = t
             }
         }

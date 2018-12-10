@@ -1,4 +1,6 @@
  
+import "lucy/cmd/langtools/compile/jvm/cg"
+
 
 public class StatementWhenCase {
 	public matches []Type
@@ -6,18 +8,78 @@ public class StatementWhenCase {
 	public inlineComment string 
 }
 
-
 public class StatementWhen {
 	public pos       Pos
 	public condition Type
+	public typeExpression Expression 
+	public prefixExpressions []Expression
 	public cases     []StatementWhenCase
 	public Default   Block
 	public inlineComment string 
 	public elseInlineComment string 
+	public initExpressionBlock Block = new Block()
+	public exits []cg.Exit
+	
+	fn checkWhenType(block Block) -> (errs []error = []error{}){
+		this.initExpressionBlock.inherit(block)
+		condtitionType , es := this.typeExpression.checkSingleValueContextExpression(block)
+		errs.appendAll(es)
+		typeChecked := []Type{}
+		fn typeExist(typeChecked []Type , t Type) ->(exists Type) {
+			for v := range typeChecked {
+				if v.equals(t) {
+					return v 
+				}
+			}
+		}
+		if  this.typeExpression.Type != ExpressionTypeTypeAssert || 
+			this.typeExpression.data.(ExpressionTypeAssert).isType == false {
+			errs.append(new error(sprintf("%s expression is not a XXX.(type)" , 
+				condtitionType.pos.errMsgPrefix())))
+		}
+		if condtitionType != null {
+			if condtitionType.isPointer() == false {
+				errs.append(new error(sprintf("%s is not a pointer at all" , condtitionType.pos.errMsgPrefix())))
+			}
+			for v := range this.cases {
+				for _, match := range v.matches {
+					if err := match.resolve(this.initExpressionBlock) ; err != null {
+						errs.append(err)
+						continue
+					}
+					if t := typeExist(typeChecked , match) ; t != null {
+						errMsg := sprintf("%s type  '%s' alreay declared,first at:\n" , match.pos.errMsgPrefix() , t.typeString())
+						errMsg += sprintf("\t%s" , t.pos.errMsgPrefix())
+						errs.append(new error(errMsg))
+						continue
+					}
+					if match.validForTypeAssertOrConversion() == false {
+						errs.append(new error(sprintf("%s '%s' is not valid for type assert" ,
+							match.typeString() , condtitionType.typeString())))
+						continue
+					}
+				}
+			}
+		}
+		for v := range this.cases {
+			if v.block != null {
+				v.block.inherit(this.initExpressionBlock)
+				errs.appendAll(v.block.check())
+			}
+		}
+		if this.Default != null {
+			this.Default.inherit(this.initExpressionBlock)
+			errs.appendAll(this.Default.check())
+		}
+	}
+
 	/*
 		switchStatement will be override
 	*/
 	fn check(block Block, switchStatement Statement) -> (errs []error = []error{}) {
+		if this.typeExpression != null {
+			return this.checkWhenType(block)
+		}
 		if this.condition == null { // must be a error must parse stage
 			return  
 		}

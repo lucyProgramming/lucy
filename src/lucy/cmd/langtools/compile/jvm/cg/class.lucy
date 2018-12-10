@@ -78,7 +78,7 @@ public class Class {
 		}
 		info :=  new ConstantInfoInterfaceMethodref(
 			this.insertClassConst(n.Class),
-			this.insertNameAndType( new ConstantInfoNameAndTypeHighLevel(     n.Method,  n.descriptor ) )
+			this.insertNameAndType( new ConstantInfoNameAndTypeHighLevel(     n.method,  n.descriptor ) )
 		).ToConstPool()
 		info.selfIndex = this.constPoolLength()
 		this.ConstPool.append(info)
@@ -99,7 +99,7 @@ public class Class {
 		info := new ConstantInfoMethodref(
                     this.insertClassConst(n.Class),
                     this.insertNameAndType( new ConstantInfoNameAndTypeHighLevel (
-                       n.Method,
+                       n.method,
                        n.descriptor) )
 			) .ToConstPool()
 		info.selfIndex = this.constPoolLength()
@@ -139,7 +139,7 @@ public class Class {
 		}
 		info := new ConstantInfoFieldref(
 			this.insertClassConst(f.Class),
-			this.insertNameAndType(new ConstantInfoNameAndTypeHighLevel(   f.Field,  f.descriptor)
+			this.insertNameAndType(new ConstantInfoNameAndTypeHighLevel(   f.field,  f.descriptor)
 			)
 		).ToConstPool()
 		info.selfIndex = this.constPoolLength()
@@ -295,8 +295,8 @@ public class Class {
 			field.accessFlags = f.accessFlags
 			field.nameIndex = this.insertUtf8Const(f.name)
             field.attributes = []AttributeInfo{}
-			if f.AttributeConstantValue != null {
-				field.attributes . append(  f.AttributeConstantValue.ToAttributeInfo(this))
+			if f.attributeConstantValue != null {
+				field.attributes.append(  f.attributeConstantValue.ToAttributeInfo(this))
 			}
 			field.descriptorIndex = this.insertUtf8Const(f.descriptor)
 			if f.AttributeLucyFieldDescriptor != null {
@@ -386,7 +386,7 @@ public class Class {
 		var attr  = new AttributeInnerClasses()
 		thisClassName := string(this.ConstPool[binary.BigEndian.getChar(this.ConstPool[this.thisClass].info)].info)
 		attr.fromBs(this, innerClass.info)
-		for _, v := range attr.Classes {
+		for _, v := range attr.classes {
 			if thisClassName == v.innerClass {
 				return true
 			}

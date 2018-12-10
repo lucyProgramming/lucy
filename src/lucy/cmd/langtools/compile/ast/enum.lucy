@@ -8,11 +8,11 @@ public class EnumName {
 	public pos     Pos
 	public value   int // int is bigger enough
 	public comment string
-	public NoNeed  Expression
+	public noNeed  Expression
 	public locateDefinition 	bool 
 	public findUsage  bool 
 	public rename 	bool 
-	public getHover  bool 
+	public getHover  bool
 	used bool 
     findUsageInstances []Usage 
 }
@@ -101,7 +101,7 @@ public class Enum   {
 		}
 		this.defaultValue = initV
 		for k, v := range this.enums {
-			if v.NoNeed != null {
+			if v.noNeed != null {
 				errs.append(new error(sprintf("%s enum only expect 1 init value",
 					v.pos.errMsgPrefix())))
 			}

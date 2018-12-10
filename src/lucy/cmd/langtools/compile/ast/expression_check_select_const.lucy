@@ -23,6 +23,5 @@ class ExpressionSelectConst {
 		valueType = c.Type.Clone()
 		valueType.pos = e.pos
 	}
-	
 } 
 

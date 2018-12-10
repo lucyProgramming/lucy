@@ -7,7 +7,7 @@ class Flags {
 	line flag.IntOption
 	column flag.IntOption
 	parser flag.FlagParser
-
+	
 	fn Flags(){
 		this.super()
 		this.parser = new flag.FlagParser()

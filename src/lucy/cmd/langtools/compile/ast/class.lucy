@@ -114,7 +114,7 @@ public class Class {
             e.Type = ExpressionTypeMethodCall
             e.pos = this.pos
             call := new ExpressionMethodCall()
-            call.name = SUPER
+            call.name = Super
             {
                 t := new Expression()
                 t.Type = ExpressionTypeIdentifier
@@ -159,7 +159,7 @@ public class Class {
         f.accessFlags |= cg.AccMethodStatic
         f.accessFlags |= cg.AccMethodFinal
         f.accessFlags |= cg.AccMethodBridge
-        f.name = classInitMethod
+        f.name = ClassInitMethod
         f.block.isFunctionBlock = true
         f.block.Fn = method.Function
         if this.methods == null {
@@ -178,7 +178,7 @@ public class Class {
         this.resolveFieldsAndMethodsTypeCalled = true
         var err error
         for _, v := range this.fields {
-            if v.name == SUPER {
+            if v.name == Super {
                 errs.append(new error(sprintf("%s 'super' not allow for field name",
                     errMsgPrefix(v.pos))))
                 continue
@@ -418,7 +418,6 @@ public class Class {
             return false, err
         }
         for _, v := range this.interfaces {
-            assert( v != null , v.name != null )
             if v.name == inter {
                 return true, null
             }
@@ -612,10 +611,7 @@ public class Class {
             }
             return this.superClass.getField(block , pos, name, true)
     }
-
-
-
-
+    
 
     fn accessInterfaceObjectMethod(
         block Block,
@@ -1223,7 +1219,7 @@ public class Class {
                     selection.Expression.value.Type = VariableTypeClass
                     selection.Expression.value.Class = this
                     selection.name = v.name
-                    selection.Field = v
+                    selection.field = v
                     left := new Expression()
                     left.Type =  ExpressionTypeSelection
                     left.data =  selection
@@ -1320,7 +1316,5 @@ public class Class {
         }
         return errs
     }
-
-
 }
 

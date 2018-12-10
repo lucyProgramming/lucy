@@ -18,6 +18,7 @@ class ExpressionBinaryParser extends ParserExtends{
 			return null, err
 		}
 		for this.parser.token.Type == lex.TokenLogicalOr {
+			token := this.parser.token 
 			pos := this.parser.mkPos()
 			name := this.parser.token.description
 			this.next(lfIsToken)
@@ -33,9 +34,15 @@ class ExpressionBinaryParser extends ParserExtends{
 				//nothing
 			}
 			var right ast.Expression
-			right, err = this.parseLogicalAndExpression()
-			if err != null {
-				return left, err
+			if token.autoCompletion {
+				right = new ast.Expression()
+				right.Type = ast.ExpressionTypeAutoCompletion
+				right.pos = this.parser.mkPos()
+			}else { 
+				right, err = this.parseLogicalAndExpression()
+				if err != null {
+					return left, err
+				}
 			}
 			newExpression := new ast.Expression()
 			newExpression.pos = pos
@@ -59,6 +66,7 @@ class ExpressionBinaryParser extends ParserExtends{
 			return null, err
 		}
 		for this.parser.token.Type == lex.TokenLogicalAnd {
+			token := this.parser.token 
 			pos := this.parser.mkPos()
 			name := this.parser.token.description
 			this.next(lfIsToken)
@@ -74,10 +82,17 @@ class ExpressionBinaryParser extends ParserExtends{
 				//nothing
 			}
 			var right ast.Expression
-			right, err = this.parseEqualExpression()
-			if err != null {
-				return left, err
+			if token.autoCompletion {
+				right = new ast.Expression()
+				right.Type = ast.ExpressionTypeAutoCompletion
+				right.pos = this.parser.mkPos()
+			}else {
+				right, err = this.parseEqualExpression()
+				if err != null {
+					return left, err
+				}
 			}
+			
 			newExpression := new ast.Expression()
 			newExpression.pos = pos
 			newExpression.op = name
@@ -102,6 +117,7 @@ class ExpressionBinaryParser extends ParserExtends{
 		for this.parser.token.Type == lex.TokenEqual ||
 			this.parser.token.Type == lex.TokenNe {
 			typ := this.parser.token.Type
+			token := this.parser.token 
 			name := this.parser.token.description
 			pos := this.parser.mkPos()
 			this.next(lfIsToken)
@@ -117,10 +133,17 @@ class ExpressionBinaryParser extends ParserExtends{
 				//nothing
 			}
 			var right ast.Expression
-			right, err = this.parseRelationExpression()
-			if err != null {
-				return left, err
+			if token.autoCompletion {
+				right = new ast.Expression()
+				right.Type = ast.ExpressionTypeAutoCompletion
+				right.pos = this.parser.mkPos()
+			}else {
+				right, err = this.parseRelationExpression()
+				if err != null {
+					return left, err
+				}
 			}
+			
 			newExpression := new ast.Expression()
 			newExpression.pos = pos
 			newExpression.op = name
@@ -151,6 +174,7 @@ class ExpressionBinaryParser extends ParserExtends{
 			this.parser.token.Type == lex.TokenLt ||
 			this.parser.token.Type == lex.TokenLe {
 			typ := this.parser.token.Type
+			token := this.parser.token 
 			name := this.parser.token.description
 			pos := this.parser.mkPos()
 			this.next(lfIsToken)
@@ -166,22 +190,26 @@ class ExpressionBinaryParser extends ParserExtends{
 				//nothing
 			}
 			var right ast.Expression
-			right, err = this.parseOrExpression()
-			if err != null {
-				return left, err
+			if token.autoCompletion {
+				right = new ast.Expression()
+				right.Type = ast.ExpressionTypeAutoCompletion
+				right.pos = this.parser.mkPos()
+			}else {
+				right, err = this.parseOrExpression()
+				if err != null {
+					return left, err
+				}
 			}
+			
 			newExpression := new ast.Expression()
 			newExpression.pos = pos
 			newExpression.op = name
 			if typ == lex.TokenGt {
 				newExpression.Type = ast.ExpressionTypeGt
-
 			} else if typ == lex.TokenGe {
 				newExpression.Type = ast.ExpressionTypeGe
-
 			} else if typ == lex.TokenLt {
 				newExpression.Type = ast.ExpressionTypeLt
-
 			} else {
 				newExpression.Type = ast.ExpressionTypeLe
 			}
@@ -204,6 +232,7 @@ class ExpressionBinaryParser extends ParserExtends{
 		}
 		for this.parser.token.Type == lex.TokenOr {
 			pos := this.parser.mkPos()
+			token := this.parser.token 
 			name := this.parser.token.description
 			this.next(lfIsToken)
 			var containsLf bool 
@@ -218,9 +247,15 @@ class ExpressionBinaryParser extends ParserExtends{
 				//nothing
 			}
 			var right ast.Expression
-			right, err = this.parseXorExpression()
-			if err != null {
-				return left, err
+			if token.autoCompletion {
+				right = new ast.Expression()
+				right.Type = ast.ExpressionTypeAutoCompletion
+				right.pos = this.parser.mkPos()
+			}else{
+				right, err = this.parseXorExpression()
+				if err != null {
+					return left, err
+				}
 			}
 			newExpression := new ast.Expression()
 			newExpression.pos = pos
@@ -244,6 +279,7 @@ class ExpressionBinaryParser extends ParserExtends{
 			return null, err
 		}
 		for this.parser.token.Type == lex.TokenXor {
+			token := this.parser.token 
 			pos := this.parser.mkPos()
 			name := this.parser.token.description
 			this.next(lfIsToken)
@@ -259,9 +295,15 @@ class ExpressionBinaryParser extends ParserExtends{
 				//nothing
 			}
 			var right ast.Expression
-			right, err = this.parseAndExpression()
-			if err != null {
-				return left, err
+			if token.autoCompletion {
+				right = new ast.Expression()
+				right.Type = ast.ExpressionTypeAutoCompletion
+				right.pos = this.parser.mkPos()
+			}else {
+				right, err = this.parseAndExpression()
+				if err != null {
+					return left, err
+				}
 			}
 			newExpression := new ast.Expression()
 			newExpression.pos = pos
@@ -285,6 +327,7 @@ class ExpressionBinaryParser extends ParserExtends{
 			return null, err
 		}
 		for this.parser.token.Type == lex.TokenAnd {
+			token := this.parser.token 
 			pos := this.parser.mkPos()
 			name := this.parser.token.description
 			this.next(lfIsToken)
@@ -300,10 +343,17 @@ class ExpressionBinaryParser extends ParserExtends{
 				//nothing
 			}
 			var right ast.Expression
-			right, err = this.parseShiftExpression()
-			if err != null {
-				return left, err
+			if token.autoCompletion {
+				right = new ast.Expression()
+				right.Type = ast.ExpressionTypeAutoCompletion
+				right.pos = this.parser.mkPos()
+			}else {
+				right, err = this.parseShiftExpression()
+				if err != null {
+					return left, err
+				}
 			}
+			
 			newExpression := new ast.Expression()
 			newExpression.pos = pos
 			newExpression.Type = ast.ExpressionTypeAnd
@@ -327,6 +377,7 @@ class ExpressionBinaryParser extends ParserExtends{
 		}
 		for this.parser.token.Type == lex.TokenLsh ||
 			this.parser.token.Type == lex.TokenRsh {
+			token := this.parser.token 
 			typ := this.parser.token.Type
 			name := this.parser.token.description
 			pos := this.parser.mkPos()
@@ -343,9 +394,15 @@ class ExpressionBinaryParser extends ParserExtends{
 				//nothing
 			}
 			var right ast.Expression
-			right, err = this.parseAddExpression()
-			if err != null {
-				return left, err
+			if token.autoCompletion {
+				right = new ast.Expression()
+				right.Type = ast.ExpressionTypeAutoCompletion
+				right.pos = this.parser.mkPos()
+			}else {
+				right, err = this.parseAddExpression()
+				if err != null {
+					return left, err
+				}
 			}
 			newExpression := new ast.Expression()
 			newExpression.pos = pos
@@ -375,6 +432,7 @@ class ExpressionBinaryParser extends ParserExtends{
 		for this.parser.token.Type == lex.TokenAdd ||
 			this.parser.token.Type == lex.TokenSub {
 			typ := this.parser.token.Type
+			token := this.parser.token 
 			name := this.parser.token.description
 			pos := this.parser.mkPos()
 			this.next(lfIsToken)
@@ -390,9 +448,15 @@ class ExpressionBinaryParser extends ParserExtends{
 				//nothing
 			}
 			var right ast.Expression
-			right, err = this.parseMulExpression()
-			if err != null {
-				return left, err
+			if token.autoCompletion {
+				right = new ast.Expression()
+				right.Type = ast.ExpressionTypeAutoCompletion
+				right.pos = this.parser.mkPos()
+			}else {
+				right, err = this.parseMulExpression()
+				if err != null {
+					return left, err
+				}
 			}
 			newExpression := new ast.Expression()
 			newExpression.pos = pos
@@ -423,6 +487,7 @@ class ExpressionBinaryParser extends ParserExtends{
 			this.parser.token.Type == lex.TokenDiv ||
 			this.parser.token.Type == lex.TokenMod {
 			typ := this.parser.token.Type
+			token := this.parser.token 
 			name := this.parser.token.description
 			pos := this.parser.mkPos()
 			this.next(lfIsToken)
@@ -438,9 +503,15 @@ class ExpressionBinaryParser extends ParserExtends{
 				//nothing
 			}
 			var right ast.Expression
-			right, err = this.ep.ExpressionSuffix.parseSuffixExpression()
-			if err != null {
-				return left, err
+			if token.autoCompletion {
+				right = new ast.Expression()
+				right.Type = ast.ExpressionTypeAutoCompletion
+				right.pos = this.parser.mkPos()
+			}else {
+				right, err = this.ep.ExpressionSuffix.parseSuffixExpression()
+				if err != null {
+					return left, err
+				}
 			}
 			newExpression := new ast.Expression()
 			newExpression.pos = pos

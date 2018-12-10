@@ -43,7 +43,7 @@ public class  BuildPackage {
         this.mkGlobalVariables()
         this.mkGlobalFunctions()
         this.mkInitFunctions()
-        for _, v := range p.block.Classes {
+        for _, v := range p.block.classes {
             this.putClass(this.buildClass(v))
         }
         for _, v := range p.block.enums {
@@ -107,8 +107,8 @@ public class  BuildPackage {
             }
             field.name = v.name
             field.descriptor = "I"
-            field.AttributeConstantValue = new cg.AttributeConstantValue()
-            field.AttributeConstantValue.index = c.Class.insertIntConst(v.value)
+            field.attributeConstantValue = new cg.AttributeConstantValue()
+            field.attributeConstantValue.index = c.Class.insertIntConst(v.value)
             c.fields[v.name] = field
         }
         return c
@@ -123,24 +123,24 @@ public class  BuildPackage {
                 f.accessFlags |= cg.AccFieldPublic
             }
             f.name = v.name
-            f.AttributeConstantValue = new cg.AttributeConstantValue()
+            f.attributeConstantValue = new cg.AttributeConstantValue()
             switch v.Type.Type{
                 case ast.VariableTypeBool:
                     if v.boolValue {
-                        f.AttributeConstantValue.index = this.mainClass.Class.insertIntConst(1)
+                        f.attributeConstantValue.index = this.mainClass.Class.insertIntConst(1)
                     }else {
-                        f.AttributeConstantValue.index = this.mainClass.Class.insertIntConst(0)
+                        f.attributeConstantValue.index = this.mainClass.Class.insertIntConst(0)
                     }
                 case ast.VariableTypeLong:  // handle long before integer
-                    f.AttributeConstantValue.index = this.mainClass.Class.insertLongConst(v.longValue)
+                    f.attributeConstantValue.index = this.mainClass.Class.insertLongConst(v.longValue)
                 case v.Type.isInteger():
-                    f.AttributeConstantValue.index = this.mainClass.Class.insertIntConst(int(v.longValue))
+                    f.attributeConstantValue.index = this.mainClass.Class.insertIntConst(int(v.longValue))
                 case ast.VariableTypeFloat:
-                    f.AttributeConstantValue.index = this.mainClass.Class.insertFloatConst(float(v.doubleValue))
+                    f.attributeConstantValue.index = this.mainClass.Class.insertFloatConst(float(v.doubleValue))
                 case ast.VariableTypeDouble:
-                    f.AttributeConstantValue.index = this.mainClass.Class.insertDoubleConst(v.doubleValue)
+                    f.attributeConstantValue.index = this.mainClass.Class.insertDoubleConst(v.doubleValue)
                 case ast.VariableTypeString:
-                     f.AttributeConstantValue.index = this.mainClass.Class.insertStringConst(v.stringValue)
+                     f.attributeConstantValue.index = this.mainClass.Class.insertStringConst(v.stringValue)
             }
             f.AttributeLucyConst = new cg.AttributeLucyConst()
             f.descriptor = Descriptor.typeDescriptor(v.Type)
@@ -302,24 +302,24 @@ public class  BuildPackage {
             if v.isStatic() &&
                 v.defaultValueExpression != null &&
                 v.defaultValueExpression.isLiteral(){
-                f.AttributeConstantValue = new cg.AttributeConstantValue()
+                f.attributeConstantValue = new cg.AttributeConstantValue()
                 switch v.Type.Type{
                     case ast.VariableTypeBool:
                         if v.defaultValueExpression.boolValue {
-                            f.AttributeConstantValue.index = c.Class.insertIntConst(1)
+                            f.attributeConstantValue.index = c.Class.insertIntConst(1)
                         }else {
-                            f.AttributeConstantValue.index = c.Class.insertIntConst(0)
+                            f.attributeConstantValue.index = c.Class.insertIntConst(0)
                         }
                     case ast.VariableTypeLong:
-                        f.AttributeConstantValue.index = c.Class.insertLongConst(v.defaultValueExpression.longValue)
+                        f.attributeConstantValue.index = c.Class.insertLongConst(v.defaultValueExpression.longValue)
                     case v.Type.isInteger():
-                        f.AttributeConstantValue.index = c.Class.insertIntConst(int(v.defaultValueExpression.longValue))
+                        f.attributeConstantValue.index = c.Class.insertIntConst(int(v.defaultValueExpression.longValue))
                     case ast.VariableTypeFloat:
-                        f.AttributeConstantValue.index = c.Class.insertFloatConst(float(v.defaultValueExpression.doubleValue))
+                        f.attributeConstantValue.index = c.Class.insertFloatConst(float(v.defaultValueExpression.doubleValue))
                     case ast.VariableTypeDouble:
-                        f.AttributeConstantValue.index = c.Class.insertDoubleConst(v.defaultValueExpression.doubleValue)
+                        f.attributeConstantValue.index = c.Class.insertDoubleConst(v.defaultValueExpression.doubleValue)
                     case ast.VariableTypeString:
-                       f.AttributeConstantValue.index = c.Class.insertStringConst(v.defaultValueExpression.stringValue)
+                       f.attributeConstantValue.index = c.Class.insertStringConst(v.defaultValueExpression.stringValue)
                 }
             }
             f.descriptor = Descriptor.typeDescriptor(v.Type)

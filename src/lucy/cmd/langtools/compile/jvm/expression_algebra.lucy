@@ -9,7 +9,7 @@ class BuildExpressionArithmetic {
         this.super()
         this.eb = eb
     }
-
+	
 	fn buildArithmetic(
 		c cg.ClassHighLevel,
 		code cg.AttributeCode,

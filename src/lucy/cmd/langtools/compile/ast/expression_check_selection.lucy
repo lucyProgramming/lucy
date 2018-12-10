@@ -12,14 +12,13 @@ class ExpressionCheckSelection {
         }
         if selection.autoCompletion {
             ExpressionCheckSelection.autoCompletion(object , block )
-            return 
+            return
         }
-
         switch object.Type {
         case VariableTypeDynamicSelector:
-            if selection.name == SUPER {
+            if selection.name == Super {
                 errs.append(new error( sprintf("%s access '%s' at '%s' not allow",
-                    e.pos.errMsgPrefix(), SUPER, object.typeString())))
+                    e.pos.errMsgPrefix(), Super, object.typeString())))
                 return null
             }
             access, err := object.Class.getFieldOrMethod(block , e.pos, selection.name, false)
@@ -28,7 +27,7 @@ class ExpressionCheckSelection {
                 return null
             }
             if field, ok := access.(ClassField); ok {
-                selection.Field = field
+                selection.field = field
                 result := field.Type.Clone()
                 result.pos = e.pos
                 if selection.locateDefinition{
@@ -37,7 +36,7 @@ class ExpressionCheckSelection {
                 return result
             } else {
                 method := access.(ClassMethod)
-                selection.Method = method
+                selection.method = method
                 result := new Type()
                 result.Type = VariableTypeFunction
                 result.functionType = method.Function.Type
@@ -105,7 +104,7 @@ class ExpressionCheckSelection {
                 result.Enum = n.Enum
                 result.enumName = n
                 result.Type = VariableTypeEnum
-                selection.PackageEnumName = n
+                selection.packageEnumName = n
                 return result
             }
             if f,ok := d.(Function) ; ok {
@@ -129,7 +128,7 @@ class ExpressionCheckSelection {
                 result.pos = e.pos
                 result.Type = VariableTypeFunction
                 result.functionType = f.Type
-                selection.PackageFunction = f
+                selection.packageFunction = f
                 return result
             }
             err := new error(sprintf("%s name '%s' cannot be used as right value",
@@ -138,7 +137,7 @@ class ExpressionCheckSelection {
             return null
         case VariableTypeObject, 
             VariableTypeClass:
-            if selection.name == SUPER {
+            if selection.name == Super {
                 if object.Type == VariableTypeClass {
                     errs . append(new error( sprintf("%s cannot access class`s super",
                         object.pos.errMsgPrefix())))
@@ -182,7 +181,7 @@ class ExpressionCheckSelection {
                 }
                 result := field.Type.Clone()
                 result.pos = e.pos
-                selection.Field = field
+                selection.field = field
                 return result
             } else {
                 method := fieldOrMethod.(ClassMethod)
@@ -196,7 +195,7 @@ class ExpressionCheckSelection {
                         
                     }
                 }
-                selection.Method = method
+                selection.method = method
                 result := new Type()
                 result.Type = VariableTypeFunction
                 result.functionType = method.Function.Type
@@ -254,13 +253,13 @@ class ExpressionCheckSelection {
             item.suggest = v.mkSuggest()
             items.append(item)
         }
-        for name , _ := range p.block.Classes {
+        for name , _ := range p.block.classes {
             item := new AutoCompletionItem()
             item.Type = "class"
             item.name = name
             items.append(item)
         }
-        for name , _ := range p.block.EnumNames {
+        for name , _ := range p.block.enumNames {
             item := new AutoCompletionItem()
             item.Type = "enumItem"
             item.name = name
@@ -368,7 +367,7 @@ class ExpressionCheckSelection {
                     if method.isStatic() {
                         continue 
                     }
-                    if method.Function.name == SpecialMethodInit || method.Function.name == classInitMethod  {
+                    if method.Function.name == SpecialMethodInit || method.Function.name == ClassInitMethod  {
                         continue 
                     }
                     if accessFromSub  && method.ableAccessFromSubClass() == false {
@@ -401,7 +400,7 @@ class ExpressionCheckSelection {
                         if method.isStatic() {
                             continue 
                         }
-                        if method.Function.name == SpecialMethodInit || method.Function.name == classInitMethod  {
+                        if method.Function.name == SpecialMethodInit || method.Function.name == ClassInitMethod  {
                             continue 
                         }
                         if accessFromSub  && method.ableAccessFromSubClass() == false {
@@ -451,7 +450,7 @@ class ExpressionCheckSelection {
                     if m.keyExist(method.Function.name) {
                         continue
                     }
-                    if method.Function.name == SpecialMethodInit || method.Function.name == classInitMethod  {
+                    if method.Function.name == SpecialMethodInit || method.Function.name == ClassInitMethod  {
                         continue 
                     }
                     if method.isStatic()  == false {
@@ -487,8 +486,8 @@ class ExpressionCheckSelection {
                         if method.isStatic() == false {
                             continue 
                         }
-                        if   method.Function.name == classInitMethod  || 
-                            method.Function.name == classInitMethod {
+                        if method.Function.name == ClassInitMethod  || 
+                            method.Function.name == ClassInitMethod {
                             continue 
                         }
                         if accessFromSub  && method.ableAccessFromSubClass() == false {
@@ -511,7 +510,5 @@ class ExpressionCheckSelection {
         }
         block.inheritedAttribute.p.autoCompletionItems = items
     } 
-    
-
 }
 
