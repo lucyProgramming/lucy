@@ -20,7 +20,6 @@ public fn Main ( destinationDir string ,
 }
 
 
-
 public class Compiler {
 	Tops              []ast.TopNode   
 	Files             []string  

@@ -16,9 +16,12 @@ module.exports = class GoCompletionItemProvider implements vscode.CompletionItem
             position.line + "&column=" + position.character; 
         console.log(u);
         let buffer = document.getText();
+        let now = new Date().getTime();
         var res  = syncHttpRequest("POST" , u , {
             "body": buffer,
+            "timeout" : 1000 ,
         });
+       console.log("call lucy server used:" , new Date().getTime() - now  );
         let lucyItems = JSON.parse(res.getBody());
         console.log(lucyItems);
         if(lucyItems.length === 0 ){

@@ -104,7 +104,6 @@ public class Type {
 		}
 		return false
 	}
-	
 	fn mkDefaultValueExpression() -> (d Expression) {
 		e := new Expression()
 		e.op = "defaultValueByCompiler"

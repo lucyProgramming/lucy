@@ -140,6 +140,7 @@ public class FileLoader implements ast.LoadImport{
             if p != null {
                 this.caches[p.name] = p
                 caches[p.name] = p 
+                p.javaPackage = new ast.JavaPackage() 
             }
             return p, null
         } else { // lucy package

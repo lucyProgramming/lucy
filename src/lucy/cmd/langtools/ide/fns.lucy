@@ -3,7 +3,6 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/parser"
 import "java/io"
 
-
 public fn readLucyFiles(filenames []string) -> (lucyFiles []LucyFile = []LucyFile{}){
 	for v := range filenames {
 		t := new LucyFile()
@@ -16,7 +15,6 @@ public fn readLucyFiles(filenames []string) -> (lucyFiles []LucyFile = []LucyFil
 		lucyFiles.append(t)
 	}
 }
-
 
 public fn parseImports(lucyFiles []LucyFile) -> (imports []string = []string{} ){
 	nodes := []ast.TopNode{}

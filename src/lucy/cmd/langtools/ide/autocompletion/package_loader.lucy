@@ -1,0 +1,212 @@
+// import "lucy/cmd/langtools/ide"
+// import "lucy/cmd/langtools/compile/ast"
+// import "lucy/cmd/langtools/compile/lc"
+// import "java/io"
+// import "java/lang/System"
+// import "java/lang/Object"
+// import "lucy/cmd/langtools/common"
+
+// class File {
+//     lastTimeModify int // in seconds
+// }
+
+// class PackageCache {
+//     lastUse int // in seconds 
+//     p ast.Package
+//     files map{string -> File}
+
+//     fn fileExist(file string) ->(exist File) {
+//         for f , v := range this.files{
+//             if common.twoPathEqual(f , file) {
+//                 return v 
+//             }
+//         }
+//     }
+// }
+
+
+// class PackageLoader extends ide.PackageLoader {
+//     lucyPackageCaches map{string -> PackageCache}
+
+//     public fn PackageLoader(lucyPath , classPaths []string){
+//         this.super(lucyPath , classPaths )
+//         this.lucyPackageCaches = new map{string -> PackageCache}()
+//     }
+    
+//     public fn LoadImport(importName string) -> (x Object , err error) {
+//         if x = this.getCache(importName) ; x != null {
+//             return 
+//         }
+//         realPaths  := []lc.Resource{}
+//         foundInLucy := false
+//         for _, v := range this.lucyPath {
+//             if  p := v + "/src/" + importName ;  new io.File(p).isDirectory() { // directory is package
+//                 realPaths.append(new lc.Resource(
+//                     lc.resourceKindLucyPackage,
+//                     p,
+//                     importName
+//                 ))
+//                 foundInLucy = true
+//                 continue 
+//             }
+//         }
+//         if foundInLucy == false {
+//             for _, v := range this.classPaths {
+//                 if p := v + "/" + importName  ; new io.File(p).isDirectory() { // directory is package
+//                     realPaths.append(new lc.Resource(
+//                         lc.resourceKindJavaPackage,
+//                         p,
+//                         importName
+//                     ))
+//                 }
+//                 if p := v + "/" + importName + ".class" ; new io.File(p).isFile() { // directory is package
+//                     realPaths.append(new lc.Resource(
+//                        lc.resourceKindJavaClass,
+//                        p,
+//                        importName
+//                     ))
+//                 }
+//             }
+//         }
+//         if len(realPaths) == 0 {
+//             return null, new error(sprintf("resource '%s' not found", importName))
+//         }
+//         realPathMap := new map { string -> []lc.Resource } ()
+//         for _, v := range realPaths {
+//             if realPathMap.keyExist(v.realPath) {
+//                 realPathMap[v.realPath].append( v)
+//             } else {
+//                 realPathMap[v.realPath] = []lc.Resource{v}
+//             }
+//         } 
+//         if len(realPathMap) > 1 {
+//             errMsg := "not 1 resource named '" + importName + "' present:\n"
+//             for _, v := range realPathMap {
+//                 switch v[0].kind {
+//                 case lc.resourceKindJavaClass:
+//                     errMsg += sprintf("\t in '%s' is a java class\n", v[0].realPath)
+//                 case lc.resourceKindJavaPackage:
+//                     errMsg += sprintf("\t in '%s' is a java package\n", v[0].realPath)
+//                 case lc.resourceKindLucyClass:
+//                     errMsg += sprintf("\t in '%s' is a lucy class\n", v[0].realPath)
+//                 case lc.resourceKindLucyPackage:
+//                     errMsg += sprintf("\t in '%s' is a lucy package\n", v[0].realPath)
+//                 }
+//             }
+//             return null, new error(sprintf(errMsg))
+//         }
+//         if realPaths[0].kind == lc.resourceKindJavaClass {
+//             c := this.loadClass(realPaths[0])
+//             if cc ,ok := c.(ast.Class) ; ok  {
+//                 this.caches[cc.name] = cc
+//             }
+//             return c, null
+//         } else if realPaths[0].kind == lc.resourceKindLucyClass {
+//             panic("not happening")
+//         } else if realPaths[0].kind == lc.resourceKindJavaPackage {
+//             p := this.loadJavaPackage(realPaths[0])
+//             if p != null {
+//                 this.caches[p.name] = p
+//             }
+//             return p, null
+//         } else { // lucy package
+//             p := this.loadLucyPackage(realPaths[0])
+//             return p ,null
+//         }
+//     }
+
+//     public fn putCache(name string , cache PackageCache) {
+//         if len(this.lucyPackageCaches) > 50 {
+//             var lastUnUseTime int 
+//             var lastUnUseName string 
+//             for packageName , v := range this.lucyPackageCaches {
+//                 lastUnUseTime = v.lastUse
+//                 lastUnUseName = packageName 
+//                 break
+//             }
+//             for packageName , v := range this.lucyPackageCaches{
+//                 if v.lastUse < lastUnUseTime {
+//                     lastUnUseTime = v.lastUse
+//                     lastUnUseName = packageName 
+//                 }
+//             }
+//             this.lucyPackageCaches.remove(lastUnUseName)
+//         }
+//         this.lucyPackageCaches[name] = cache 
+//     }
+    
+//     public fn hitCache(name string , files []string) -> (cache PackageCache) {
+//         if len(files) == 0 {
+//             panic(0)
+//         }
+//         cache = this.lucyPackageCaches[name]
+//         if cache == null {
+//             return null 
+//         }
+//         // check if file modified 
+//         for _ , v := range files {
+//             f := cache.fileExist(v)
+//             if f == null {
+//                 print("new file missed" , v)
+//             }
+//             if f.lastTimeModify < int(new io.File(v).lastModified() / 1000L) {
+//                 // file modified
+//                 this.lucyPackageCaches.remove(name)
+//                 print("file modify missed" , v)
+//                 return null 
+//             }
+//         }
+//         for file , _ := range cache.files {
+//             stillExist := false 
+//             for f := range files {
+//                 if common.twoPathEqual(f , file) {
+//                     stillExist = true 
+//                 }
+//             }
+//             if  stillExist == false {  // file deleted 
+//                 this.lucyPackageCaches.remove(name)
+//                 print("file deleted missed" , file)
+//                 return null 
+//             } 
+//         }
+//         //  this cache looks very good now 
+//         // but if it's dependecy is modified 
+//         // for v :=  range cache.p.loadLucyPackageName {
+//         //     var realPath string 
+//         //     for _,path := range this.lucyPath {
+//         //         if t := path + "/src/" + v ; new io.File(t).isDirectory() {
+//         //             realPath = t 
+//         //         }
+//         //     }
+//         //     filess := ide.getLucyFiles(realPath)
+//         //     if t := this.hitCache(name , filess) ; t == null {
+//         //         print("package '%s' modified missed" , v)
+//         //         this.lucyPackageCaches.remove(name)
+//         //         return null 
+//         //     }
+//         // }
+//         printf("package '%s' cache hit\n" , name )
+//         return cache 
+//     }
+
+//     //override 
+//     public fn  loadLucyPackage(r lc.Resource) -> (p ast.Package) {
+//         files := ide.getLucyFiles(r.realPath)
+//         if cache := this.hitCache(r.name , files) ; cache != null{
+//             return cache.p 
+//         }
+//         lucyFiles := ide.readLucyFiles(files)
+//         p , _ =  ide.parseAstAndTypeCheck(r.name , lucyFiles , this.onlyAnalyzeGlobals , "" , -1 , this)
+//         cache := new PackageCache()
+//         cache.lastUse = int(System.currentTimeMillis() / 1000L)
+//         cache.files = new map{string -> File}()
+//         for v := range files {
+//             f := new File()
+//             f.lastTimeModify =  int(new io.File(v).lastModified() / 1000L)
+//             cache.files[v] = f 
+//         }
+//         cache.p = p 
+//         this.putCache(r.name , cache)
+//     }
+
+// }

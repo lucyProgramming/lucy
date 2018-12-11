@@ -103,3 +103,17 @@ public fn getPathElements(filepath string ) ->(elements []string) {
 		elements[i] = t.getName(i).toString()
 	}
 }
+
+public fn twoPathEqual(p1 , p2 string) -> (equal bool){
+	t1 := getPathElements(p1)
+	t2 := getPathElements(p2)
+	if len(t1) != len(t2) {
+		return false 
+	} 
+	for k , v := range t1 {
+		if v != t2[k] {
+			return false 
+		}
+	}
+	return true 
+}

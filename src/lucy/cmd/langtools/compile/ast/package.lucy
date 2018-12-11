@@ -14,8 +14,8 @@ public class Package {
 	public triggerPackageInitMethodName string //
 	statementLevelFunctions      []Function
 	statementLevelClass          []Class
-	disableCheckUnuse  				bool 
-	javaPackage JavaPackage
+	disableCheckUnuse  			bool 
+	public javaPackage JavaPackage        
 	public hasMain bool 
 	public matchFile string 
 	public matchLine int 
@@ -24,6 +24,7 @@ public class Package {
 		for lucy tool goto definition
 	*/
 	public locateDefinition Pos 
+	public loadLucyPackageName []string 
 
 	/*
 		for lucy tool hover
@@ -549,6 +550,13 @@ public class Package {
 		if pp, ok := t.(Package); ok {
 			if pp.name == common.CorePackage {
 				pp.markBuildIn()
+			}
+			if pp.javaPackage == null {
+				if this.loadLucyPackageName == null {
+					this.loadLucyPackageName = [resource]
+				}else {
+					this.loadLucyPackageName.append(resource)
+				}
 			}
 		}
 		if c, ok := t.(Class); ok && c != null {
