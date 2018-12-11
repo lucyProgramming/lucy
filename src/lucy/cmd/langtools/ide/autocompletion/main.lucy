@@ -26,10 +26,11 @@ public fn autoCompletion(file string , bufferFile string , pos int , bs []byte) 
                 v.realPathName = bufferFile
                 v.bs = javaArray2Lucy(t)
             }
+            file = v.realPathName
             v.autoCompletion = pos 
         }
     }
-    result = new AutoCompletion(lucyFiles , packageName , bufferFile , pos >> 16).getAutoCompletion()
+    result = new AutoCompletion(lucyFiles , packageName , file , pos >> 16).getAutoCompletion()
 }
 
 fn main(args []string) {

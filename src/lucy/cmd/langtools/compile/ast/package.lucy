@@ -2,7 +2,7 @@
 import "lucy/os"
 import "lucy/cmd/langtools/compile/common"
 import "java/lang/Object"
-
+import "lucy/cmd/langtools/common" as langtoolsCommon
 
 public class Package {
 	public name                         string
@@ -46,20 +46,23 @@ public class Package {
 	
 	public fn matchFileAndLine(file string , name string ,  startLine int , endLine int ) ->(need bool){
 		if this.matchFile == null || this.matchFile == "" {  // no match at all 
+			print(file , name , "need analyze because no match file")
 			return true 
 		}
-		need = this.matchFile == file
+		need =  langtoolsCommon.twoPathEqual(this.matchFile , file) 
 		if need == false {  // file not match
-			// printf("file '%s' not match\n" , file)
+			printf("file '%s' not match\n" , file)
 			return false  
 		}
 		if this.matchLine == -1 {
+			print(file , name , "need analyze")
 			return  true // no match line 
 		}
-		if false ==  startLine <= this.matchLine && this.matchLine <= endLine {
-			// printf("'%s' not match\n" , name)
+		if false == (startLine <= this.matchLine && this.matchLine <= endLine) {
+			printf("'%s' not match\n" , name)
 			return false 
 		}
+		print(file , name , "need analyze")
 		return true 
 	}
 	

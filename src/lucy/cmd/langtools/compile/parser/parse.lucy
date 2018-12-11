@@ -2,7 +2,6 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-
 /*
 public fn ParseJavaBytes(tops []ast.TopNode,
 	filename string,
@@ -22,11 +21,10 @@ public fn Parse(
 	nErrors2Stop int , locateDefinition int ,getHover int , findUsage int ,rename int , autoCompletion int   ) -> (errs []error) {
 	p := new Parser(bs , tops , filename , onlyParseImport , nErrors2Stop )
 	p.lexer = lex.New(bs, 0, 0 , locateDefinition , getHover , findUsage , rename , autoCompletion)
-	return p.parse()
+	errs = p.parse()
 }
 
 class Parser {
-	
 	onlyParseImport        bool
 	bs                     []byte
 	tops                   []ast.TopNode

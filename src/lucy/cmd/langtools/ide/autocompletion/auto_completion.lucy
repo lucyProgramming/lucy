@@ -9,7 +9,7 @@ class AutoCompletion {
     packageName string 
     searchFile string
     matchLine int
-    fn AutoCompletion(lucyFiles []ide.LucyFile , packageName string ,searchFile string  , matchLine int ) {
+    fn AutoCompletion(lucyFiles []ide.LucyFile , packageName string , searchFile string  , matchLine int ) {
         this.super()
         this.lucyFiles = lucyFiles
         this.packageName = packageName
