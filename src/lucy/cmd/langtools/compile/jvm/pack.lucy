@@ -22,6 +22,7 @@ class TypeConverterAndPrimitivePacker {
 				"()Z"
 			), code.codes[code.codeLength+1:code.codeLength+3])
 			code.codeLength += 3
+
 		case ast.VariableTypeByte:
 			cname := "java/lang/Byte"
 			code.codes[code.codeLength] = cg.OP_checkcast

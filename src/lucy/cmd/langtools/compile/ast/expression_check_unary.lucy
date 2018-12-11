@@ -35,6 +35,11 @@ class ExpressionCheckUnary {
 		return result
 	}
 
+	// static fn autoCompletionForUnary(block Block) {
+	// 	block.inheritedAttribute.p.autoCompletionItems =  searchRightValueForAutoCompletionItems(block)
+	// }
+
+
 	static fn checkincrementExpression(e Expression  , block Block, errs []error) ->(valueType Type) {
 		on := e.data.(Expression)
 		increment := on.getLeftValue(block, errs)

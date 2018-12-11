@@ -20,9 +20,9 @@ const	BuildInFunctionPrint        = "print"
 const	BuildInFunctionPrintf       = "printf"
 const	BuildInFunctionSprintf      = "sprintf"
 const	BuildInFunctionLen          = "len"
-const	BuildInFunctionMonitorEnter = "monitorEnter"
-const	BuildInFunctionMonitorExit  = "monitorExit"
+
 const	BuildInFunctionBlockHole    = "blackHole"
 const	BuildInFunctionAssert       = "assert"
- 
+
+
 const CorePackage = "lucy/lang"

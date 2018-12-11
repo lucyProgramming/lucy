@@ -8,7 +8,7 @@
 //	Signature string
 //}
 //
-//func (a *AttributeSignature) ToAttributeInfo(class Class) *AttributeInfo {
+//func (a *AttributeSignature) toAttributeInfo(class Class) *AttributeInfo {
 //	if a.Signature == "" {
 //		return null
 //	}

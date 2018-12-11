@@ -11,15 +11,15 @@ import "lucy/cmd/langtools/compile/ast"
 class AutoCompletion implements HttpHandler {
     public fn handle(exchange HttpExchange) {
         os := exchange.getResponseBody()
-        defer {
-            exchange.close()
-            e := catch()
-            if e != null {
-                exchange.sendResponseHeaders(500 , 0L)
-                os.write(byte[]("internal error"))
-                e.printStackTrace()
-            }
-        }
+        // defer {
+        //     exchange.close()
+        //     e := catch()
+        //     if e != null {
+        //         exchange.sendResponseHeaders(500 , 0L)
+        //         os.write(byte[]("internal error"))
+        //         e.printStackTrace()
+        //     }
+        // }
         uri := exchange.getRequestURI()
         paramters := g.parseQuery(uri.getQuery())
         file := paramters["file"]

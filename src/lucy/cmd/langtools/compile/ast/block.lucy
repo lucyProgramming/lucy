@@ -12,6 +12,8 @@ public class Block {
 	public Fn                        Function
 	public isFunctionBlock           bool // function block
 	public isClassBlock              bool // class block
+    isPackageBlock                   bool 
+    
 	public Class                     Class
 	public isForBlock                bool // for top block
 	public isSwitchBlock             bool // switch statement list block
@@ -30,6 +32,7 @@ public class Block {
 	public typeAliases               map{string->Type}
 	public variables                 map{string->Variable}
 	checkConstantsCalled      bool
+
     
     /* 
     

@@ -104,7 +104,7 @@ public class Type {
 		}
 		return false
 	}
-
+	
 	fn mkDefaultValueExpression() -> (d Expression) {
 		e := new Expression()
 		e.op = "defaultValueByCompiler"
@@ -230,7 +230,8 @@ public class Type {
 			return null
 		}
 		defer {
-			if this.locateDefinition  && block.inheritedAttribute.p.locateDefinition == null {
+			if this.locateDefinition  && 
+				block.inheritedAttribute.p.locateDefinition == null {
 				block.inheritedAttribute.p.locateDefinition = this.pos
 			}
 		}
@@ -293,6 +294,10 @@ public class Type {
 	fn resolveName(block Block) -> (err error ) {
 		var d  Object
 		if this.name.indexOf(".")  < 0  {
+			if this.autoCompletion {
+			  	block.inheritedAttribute.p.autoCompletionItems = searchTypeForAutoCompletionItems(this.pos , block)
+				return null 
+			}
 			var loadFromImport bool
 			d = block.searchType(this.name,this.pos)
 			if d != null {
@@ -408,7 +413,6 @@ public class Type {
 			}
 			if this.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = c.pos
-				
 			}
 			this.Type = VariableTypeObject
 			this.Class = c 

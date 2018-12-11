@@ -8,7 +8,7 @@ public class AttributeLucyTypeAlias {
 		this.comment = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].info)
 	}
 	
-	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
+	fn toAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const(AttributeNameLucyTypeAlias)
 		ret.info = new []byte(4)

@@ -259,7 +259,6 @@ public class Lexer {
 		token = new Token()
 		token.startLine = this.line
 		token.offset = this.offset - 1      // c is read
-		startOffset := token.offset
 		bs := []byte{c}
 		c, eof := this.getChar()
 		endColumnOffset := this.endColumnOffset - 1 
@@ -276,7 +275,6 @@ public class Lexer {
 		token.endOffset = this.offset 
 		token.endLine = this.line
 		token.endColumnOffset = this.endColumnOffset
-	 	
 		if ok := keywordsMap.keyExist(identifier); ok {
 			token.Type = keywordsMap[identifier]
 			token.description = identifier
@@ -291,42 +289,34 @@ public class Lexer {
 			token.Type = TokenIdentifier
 			token.stringValue = identifier
 			token.description = "identifier_" + identifier
-			if this.locateDefinition != -1 {
-				line , column := this.getLineAndColumnFromPos(this.locateDefinition)
-				// if identifier == "ArrayMeta" &&  line == token.startLine {
-				// 	print( column , endColumnOffset , this.endColumnOffset)
-				// }
-                if line == token.startLine && column >= endColumnOffset -1 && column <= this.endColumnOffset  {
-					token.locateDefinition = true 
-					// print("locate:" , identifier )
-					// panic(identifier)
-
-				}
+		}
+		if this.locateDefinition != -1 {
+			line , column := this.getLineAndColumnFromPos(this.locateDefinition)
+			if line == token.startLine && column >= endColumnOffset -1 && column <= this.endColumnOffset  {
+				token.locateDefinition = true 
 			}
-			if this.getHover  != -1 {
-				if this.getHover >= startOffset && this.getHover < this.offset {
-					token.getHover = true 
-				}
+		}
+		if this.findUsage  != -1 {
+			line , column := this.getLineAndColumnFromPos(this.findUsage)
+			if line == token.startLine && column >= endColumnOffset -1 && column <= this.endColumnOffset  {
+				token.findUsage = true 
 			}
-			if this.findUsage  != -1 {
-				line , column := this.getLineAndColumnFromPos(this.findUsage)
-				if line == token.startLine && column >= endColumnOffset -1 && column <= this.endColumnOffset  {
-					token.findUsage = true 
-					// print("locate:" , identifier )
-					// panic(identifier)
-
-				}
+		}
+		if this.autoCompletion != -1 {
+			line , column := this.getLineAndColumnFromPos(this.autoCompletion)
+			if line == token.startLine && column >= endColumnOffset -1 && column <= this.endColumnOffset  {
+				token.autoCompletion = true 
 			}
-			if this.rename  != -1 {
-				if this.rename >= startOffset && this.rename < this.offset {
-					token.rename = true 
-				}
+		}
+		if this.rename != -1 {
+			line , column := this.getLineAndColumnFromPos(this.rename)
+			if line == token.startLine && column >= endColumnOffset -1 && column <= this.endColumnOffset  {
+				token.rename = true 
 			}
 		}
 		return
 	}
 	
-
 	
 	fn tryLexElseIf() -> (is bool) {
 		c, eof := this.getChar()

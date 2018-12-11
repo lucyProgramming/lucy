@@ -60,7 +60,6 @@ public class Statement {
 		}
 		return this.Expression.Type == ExpressionTypeVarAssign ||
 			this.Expression.Type == ExpressionTypeVar
-
 			
 	}
 	
@@ -77,7 +76,7 @@ public class Statement {
 		case StatementTypeEmptyLine:
 			//noting
 		case StatementTypeAutoCompletion:
-			block.inheritedAttribute.p.autoCompletionItems = searchRightValueForAutoCompletionItems(block)
+			block.inheritedAttribute.p.autoCompletionItems = searchRightValueForAutoCompletionItems(this.pos, block)
 			
 		case StatementTypeExpression:
 			return this.checkStatementExpression(block)

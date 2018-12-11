@@ -132,27 +132,22 @@ class BlockParser  extends ParserExtends{
 				}
 			case lex.TokenIf:
 				pos := this.parser.mkPos()
-				statement, _ := this.StatementIfParser.parseIf()
-				if null != statement {
+				statementIf, _ := this.StatementIfParser.parseIf()
+				if null != statementIf {
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeIf
-				    t.statementIf = statement
+				    t.statementIf = statementIf
 				    t.pos = pos
 				    block.statements.append(t)
 				}
 			case lex.TokenFor:
 				pos := this.parser.mkPos()
-				statement, err := this.StatementForParser.parseFor()
-				if err != null {
-					this.consume(untilRc)
-					this.next(lfNotToken)
-					continue
-				}
-				statement.block.isForBlock = true
-				{
+				statementFor, _ := this.StatementForParser.parseFor()
+				statementFor.block.isForBlock = true
+				if null != statementFor {
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeFor
-				    t.StatementFor = statement
+				    t.StatementFor = statementFor
 				    t.pos = pos
                     block.statements.append(t)
 				}
@@ -361,6 +356,7 @@ class BlockParser  extends ParserExtends{
 				statementGoto.locateDefinition = this.parser.token.locateDefinition 
 				statementGoto.findUsage = this.parser.token.findUsage 
 				statementGoto.rename = this.parser.token.rename
+				statementGoto.autoCompletion = this.parser.token.autoCompletion
 				statementGoto.labelName = this.parser.token.stringValue
 				g := new ast.Statement()
 				g.Type = ast.StatementTypeGoTo
@@ -446,16 +442,9 @@ class BlockParser  extends ParserExtends{
 
 	fn parseExpressionStatement(block ast.Block, isDefer bool, deferPos ast.Pos) -> (isLabel bool) {
 		pos := this.parser.mkPos()
-		e, err := this.parser.ExpressionParser.parseExpression(true)
-		if err != null {
-			if e != null {
-				s := new ast.Statement()
-				s.Type = ast.StatementTypeExpression
-				s.Expression = e 
-				block.statements.append(s)
-			}
-			this.consume(untilSemicolonOrLf)
-			return
+		e, _ := this.parser.ExpressionParser.parseExpression(true)
+		if e == null {
+			return  
 		}
 		if e.Type == ast.ExpressionTypeIdentifier &&
 			this.parser.token.Type == lex.TokenColon {
@@ -488,7 +477,7 @@ class BlockParser  extends ParserExtends{
 			label.rename = identifier.rename
 			label.locateDefinition = identifier.locateDefinition 
 			label.block = block
-			err = block.insert(label.name, e.pos, label) // insert first,so this label can be found before it is checked
+			err := block.insert(label.name, e.pos, label) // insert first,so this label can be found before it is checked
 			if err != null {
 				this.parser.errs.append(err)
 			}

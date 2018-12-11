@@ -12,7 +12,7 @@ public class StatementWhen {
 	public pos       Pos
 	public condition Type
 	public typeExpression Expression 
-	public prefixExpressions []Expression
+	public prefixExpressions []Expression  // not support now 
 	public cases     []StatementWhenCase
 	public Default   Block
 	public inlineComment string 
@@ -72,7 +72,7 @@ public class StatementWhen {
 			errs.appendAll(this.Default.check())
 		}
 	}
-
+	
 	/*
 		switchStatement will be override
 	*/

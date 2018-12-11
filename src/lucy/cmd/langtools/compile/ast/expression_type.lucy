@@ -74,8 +74,6 @@ public enum  ExpressionTypeKind {
 	ExpressionTypeAutoCompletion    						//auto completion 
 }
 
-
-
 public class ExpressionTypeAssert extends ExpressionTypeConversion{
 	public multiValueContext bool
 	public isType bool  // a.(type)  type is a key word
@@ -148,6 +146,7 @@ public class ExpressionIdentifier  {
 	public enumName EnumName
 	public comment  string
 	public locateDefinition bool 
+	public autoCompletion bool 
 	public getHover  bool 
 	public findUsage  bool 
 	public rename  bool 

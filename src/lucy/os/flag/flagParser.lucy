@@ -65,8 +65,7 @@ public final class  FlagParser {
 		o.defaultValueString = "" + d
 		this.options[option] = o
 	} 
-	
-	
+		
 	
 	public fn parse(args []string)->(noDefine []string , err error){
 	    defer {

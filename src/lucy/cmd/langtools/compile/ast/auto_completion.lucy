@@ -10,7 +10,7 @@ public class AutoCompletionItem {
     static arrayDefaultAutoCompletionItem []AutoCompletionItem
     
     static javaArrayDefaultAutoCompletionItem  []AutoCompletionItem
-
+    
     static fn getJavaArrayBasicAutoCompletionItem() -> (items []AutoCompletionItem) {
         if len(AutoCompletionItem.javaArrayDefaultAutoCompletionItem) > 0  {
             return AutoCompletionItem.javaArrayDefaultAutoCompletionItem
@@ -59,7 +59,7 @@ public class AutoCompletionItem {
         // 
         return items 
     }
-
+    
     static fn getMapAutoCompletionItem(m Type) ->(items []AutoCompletionItem = []AutoCompletionItem{}) {
         //size
         item := new AutoCompletionItem()
@@ -72,7 +72,7 @@ public class AutoCompletionItem {
         item = new AutoCompletionItem()
         item.Type = "method"
         item.name = "remove"
-        item.suggest = sprintf("remove( %s, ...)" ,  m.Map.K.typeString())
+        item.suggest = sprintf("remove( key, ...)")
         items.append(item)
 
         //removeAll
@@ -86,7 +86,7 @@ public class AutoCompletionItem {
         item = new AutoCompletionItem()
         item.Type = "method"
         item.name = "keyExist"
-        item.suggest = sprintf("keyExist(%s)"  ,  m.Map.K.typeString())
+        item.suggest = sprintf("keyExist(key)")
         items.append(item)
     }
 
@@ -99,25 +99,20 @@ public class AutoCompletionItem {
         item := new AutoCompletionItem()
         item.Type = "method"
         item.name = "append"
-        item.suggest = sprintf("append(%s ,...)" , t.array.typeString())
+        item.suggest = sprintf("append(element , ...)")
         items.append(item)
         
         item = new AutoCompletionItem()
         item.Type = "method"
         item.name = "appendAll"
-        item.suggest = sprintf("appendAll(%s ,...)" , t.typeString())
+        item.suggest = sprintf("appendAll(elements , ...)")
         items.append(item)
 
         item = new AutoCompletionItem()
         item.Type = "method"
         item.name = "getUnderlyingArray"
-        t2 := new Type()
-        t2.Type = VariableTypeJavaArray 
-        t2.array = t.array
         item.suggest = sprintf("getUnderlyingArray()")
-        items.append(item)  
-
-
+        items.append(item) 
     }
-
 }
+

@@ -1,7 +1,6 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
-//TODO :: format 
 
 class StatementWhenParser extends ParserExtends {
 	

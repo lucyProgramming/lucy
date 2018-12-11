@@ -11,6 +11,7 @@ class AllDefinition {
     packageName string
     printErr bool
     lucyPath string
+    
     fn AllDefinition(lucyFiles []ide.LucyFile , packageName string , lucyPath string , printErr bool) {
         this.super()
         this.lucyFiles = lucyFiles

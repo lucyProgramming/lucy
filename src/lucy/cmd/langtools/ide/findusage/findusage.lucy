@@ -11,7 +11,7 @@ class FindUsage {
     printErr bool
     lucyPath []string
     loader ide.PackageLoader
-
+    
     fn FindUsage(lucyFiles []ide.LucyFile , packageName string , printErr bool , lucyPath []string) {
         this.super()
         this.lucyFiles = lucyFiles
@@ -21,7 +21,6 @@ class FindUsage {
     }
     
     fn find() -> (result []ast.Usage){
-        
         loader := new ide.PackageLoader(common.getLucyPath() ,common.getClassPath())
         this.loader = loader
         p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles , false , "" , -1 , loader)

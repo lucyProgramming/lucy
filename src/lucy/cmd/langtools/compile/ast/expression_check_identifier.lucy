@@ -5,6 +5,11 @@ class ExpressionCheckIdentifier {
 	
 	static fn check(e Expression , block Block) -> (valueType Type,err  error) {
 		identifier := e.data.(ExpressionIdentifier)
+		if identifier.autoCompletion {
+			block.inheritedAttribute.p.autoCompletionItems = 
+			  searchRightValueForAutoCompletionItems(e.pos , block)
+			return 
+		}
 		if identifier.name == UnderScore {
 			//_ is not valid
 			return null, new error(sprintf("%s '%s' is not a valid name",

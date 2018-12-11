@@ -13,9 +13,9 @@ typealias buildInFunctionChecker = fn(
 public class Function {
 	public callFatherConstructionExpression Expression
 	public TemplateFunction                 TemplateFunction
-	parameterTypes                   map { string -> Type }     //typed parameters
+	parameterTypes                   		map { string -> Type }     //typed parameters
 	public entrance                         cg.MethodHighLevel // make_node_objects call from
-	buildInFunctionChecker           buildInFunctionChecker
+	buildInFunctionChecker           		buildInFunctionChecker
 	public accessFlags                      char
 	public Type                             FunctionType = new FunctionType()
 	public Closure                          Closure = new Closure()
@@ -33,15 +33,15 @@ public class Function {
 	public loadedFromCorePackage            bool
 	public used                             bool
 	public templateClonedFunction           bool
-	isPackageInitBlockFunction       bool
+	isPackageInitBlockFunction      		bool
 	public comment                          string
 	public isClosureFunction                bool
-	public locateDefinition     bool 
-	public findUsage  bool 
-	public rename bool 
-	findUsageInstances []Usage 
-	public startLine int 
-	public endLine int 
+	public locateDefinition     			bool 
+	public findUsage  						bool 
+	public rename 							bool 
+	findUsageInstances 						[]Usage 
+	public startLine 						int 
+	public endLine 							int 
 
 	
 	public fn isPublic() -> (is bool) {

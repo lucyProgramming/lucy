@@ -43,7 +43,7 @@ public class AttributeInnerClasses {
 		}
 	}
 
-	fn ToAttributeInfo(c Class) -> (ret AttributeInfo) {
+	fn toAttributeInfo(c Class) -> (ret AttributeInfo) {
 		if this == null || len(this.classes) == 0 {
 			return null
 		}

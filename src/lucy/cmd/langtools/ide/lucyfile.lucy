@@ -3,7 +3,6 @@
 public class LucyFile {
 	public realPathName string 
 	public bs []byte
-    
     /*
         when locate is bigger than zero,means to trying to locate something
     */

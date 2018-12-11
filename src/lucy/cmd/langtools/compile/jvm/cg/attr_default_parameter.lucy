@@ -15,8 +15,7 @@ public class AttributeDefaultParameters {
 		}
 	}
 	
-
-	fn ToAttributeInfo(c Class) -> (info AttributeInfo) {
+	fn toAttributeInfo(c Class) -> (info AttributeInfo) {
 		if  len(this.constants) == 0 {
 			return null
 		}

@@ -296,14 +296,14 @@ public class Class {
 			field.nameIndex = this.insertUtf8Const(f.name)
             field.attributes = []AttributeInfo{}
 			if f.attributeConstantValue != null {
-				field.attributes.append(  f.attributeConstantValue.ToAttributeInfo(this))
+				field.attributes.append(  f.attributeConstantValue.toAttributeInfo(this))
 			}
 			field.descriptorIndex = this.insertUtf8Const(f.descriptor)
 			if f.AttributeLucyFieldDescriptor != null {
-				field.attributes . append(  f.AttributeLucyFieldDescriptor.ToAttributeInfo(this))
+				field.attributes . append(  f.AttributeLucyFieldDescriptor.toAttributeInfo(this))
 			}
 			if f.AttributeLucyConst != null {
-				field.attributes . append(  f.AttributeLucyConst.ToAttributeInfo(this))
+				field.attributes . append(  f.AttributeLucyConst.toAttributeInfo(this))
 			}
 			this.fields.append(field)
 		}
@@ -316,25 +316,25 @@ public class Class {
 				info.descriptorIndex = this.insertUtf8Const(m.Descriptor)
 				info.attributes = []AttributeInfo{}
 				if m.code != null {
-					info.attributes . append( m.code.ToAttributeInfo(this))
+					info.attributes . append( m.code.toAttributeInfo(this))
 				}
 				if m.AttributeLucyMethodDescriptor != null {
-					info.attributes . append( m.AttributeLucyMethodDescriptor.ToAttributeInfo(this))
+					info.attributes . append( m.AttributeLucyMethodDescriptor.toAttributeInfo(this))
 				}
 				//if m.AttributeLucyTriggerPackageInitMethod != null {
-					//info.attributes . append(  m.AttributeLucyTriggerPackageInitMethod.ToAttributeInfo(this))
+					//info.attributes . append(  m.AttributeLucyTriggerPackageInitMethod.toAttributeInfo(this))
 				//}
 				if m.AttributeDefaultParameters != null {
-					info.attributes . append(  m.AttributeDefaultParameters.ToAttributeInfo(this))
+					info.attributes . append(  m.AttributeDefaultParameters.toAttributeInfo(this))
 				}
 				if m.AttributeMethodParameters != null {
-					t := m.AttributeMethodParameters.ToAttributeInfo(this)
+					t := m.AttributeMethodParameters.toAttributeInfo(this)
 					if t != null {
 						info.attributes . append(t)
 					}
 				}
 				if m.AttributeLucyReturnListNames != null {
-					t := m.AttributeLucyReturnListNames.ToAttributeInfo(this, AttributeNameLucyReturnListNames)
+					t := m.AttributeLucyReturnListNames.toAttributeInfo(this, AttributeNameLucyReturnListNames)
 					if t != null {
 						info.attributes.append(t)
 					}
@@ -346,23 +346,23 @@ public class Class {
 			this.attributes = []AttributeInfo{}
 		}
 		//source file
-		this.attributes.append(new AttributeSourceFile(high.getSourceFile()).ToAttributeInfo(this))
+		this.attributes.append(new AttributeSourceFile(high.getSourceFile()).toAttributeInfo(this))
 		for _, v := range this.TypeAlias {
-			this.attributes.append(v.ToAttributeInfo(this))
+			this.attributes.append(v.toAttributeInfo(this))
 		}
 		if this.AttributeLucyEnum != null {
-			this.attributes.append( this.AttributeLucyEnum.ToAttributeInfo(this))
+			this.attributes.append( this.AttributeLucyEnum.toAttributeInfo(this))
 		}
 		if this.AttributeLucyClassConst != null {
-			this.attributes.append( this.AttributeLucyClassConst.ToAttributeInfo(this))
+			this.attributes.append( this.AttributeLucyClassConst.toAttributeInfo(this))
 		}
 		if this.AttributeInnerClasses != null {
-			if a := this.AttributeInnerClasses.ToAttributeInfo(this); a != null {
+			if a := this.AttributeInnerClasses.toAttributeInfo(this); a != null {
 				this.attributes.append(a)
 			}
 		}
 		for _, v := range high.templateFunctions {
-			this.attributes.append(v.ToAttributeInfo(this))
+			this.attributes.append(v.toAttributeInfo(this))
 		}
 
 		this.ifConstPoolOverMaxSize()

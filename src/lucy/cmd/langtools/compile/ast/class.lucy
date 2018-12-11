@@ -50,7 +50,6 @@ public class Class {
             this.fmts.append(f)
         }
     }
-
     
     fn haveStaticsCodes() -> (is bool)  {
         return len(this.staticBlocks) > 0

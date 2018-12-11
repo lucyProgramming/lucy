@@ -6,11 +6,3 @@ public class Definition {
    public  pos  ast.Pos  
    public inners Definition[]
 }
-
-
-
-
-
-
-
-

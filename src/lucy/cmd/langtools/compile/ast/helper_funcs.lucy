@@ -186,7 +186,6 @@ fn convertExpressionToNeed(block Block , e Expression, need Type, eval Type) {
 	convertExpressionsToNeeds(block , [e], [need], [eval] )
 }
 
-
 fn convertExpressionsToNeeds(block Block , es []Expression, needs []Type, eval []Type) {
 	errs := []error{} // no return
 	if len(es) == 0 {
@@ -205,7 +204,6 @@ fn convertExpressionsToNeeds(block Block , es []Expression, needs []Type, eval [
 		if eval[k] == null {
 			continue
 		}
-
 		if needs[k].assignAble(block , errs, eval[k]) {
 			continue // no need
 		}
@@ -230,7 +228,7 @@ fn correctLastUsageType(t string , usage []Usage) ->(u Usage) {
 	u.Type = t 
 } 
 
-fn searchRightValueForAutoCompletionItems(block Block) -> (items []AutoCompletionItem = []AutoCompletionItem {} ) {
+fn searchRightValueForAutoCompletionItems(pos Pos, block Block) -> (items []AutoCompletionItem = []AutoCompletionItem {} ) {
 	names := new map{string -> bool}()
 	block.walk(fn (b Block){
 		for name ,v := range b.variables {
@@ -239,6 +237,16 @@ fn searchRightValueForAutoCompletionItems(block Block) -> (items []AutoCompletio
 			}
 			item  := new AutoCompletionItem()
 			item.Type = "variable"
+			item.name = name 
+			items.append(item)
+			names[name] = true 
+		}
+		for name ,v := range b.constants {
+			if names.keyExist(name) {
+				continue 
+			}
+			item  := new AutoCompletionItem()
+			item.Type = "constant"
 			item.name = name 
 			items.append(item)
 			names[name] = true 
@@ -258,6 +266,126 @@ fn searchRightValueForAutoCompletionItems(block Block) -> (items []AutoCompletio
 			items.append(item)
 			names[name] = true 
 		}
+		for name ,v := range b.enumNames {
+			if names.keyExist(name) {
+				continue
+			}
+			item  := new AutoCompletionItem()
+			item.Type = "enumItem"
+			item.name = name 
+			items.append(item)
+			names[name] = true 
+		}
+		for name ,v := range b.classes {
+			if names.keyExist(name) {
+				continue
+			}
+			item  := new AutoCompletionItem()
+			item.Type = "class"
+			item.name = name 
+			items.append(item)
+			names[name] = true 
+		}
+		if b.isPackageBlock {
+			s := block.inheritedAttribute.p.getSourceFile(pos.filename) 
+			if s != null {
+				for name,_ := range s.imports {
+					item  := new AutoCompletionItem()
+					item.Type = "import"
+					item.name = name 
+					items.append(item)
+					names[name] = true 
+				}
+			}
+		}
+	}) 
+	items.appendAll(autoCompletionKeyWordsItems)
+	items.appendAll(autoCompletionBuildFunctionItems)
+}
+
+fn searchLableForAutoCompletionItems(block Block) -> (items []AutoCompletionItem = []AutoCompletionItem {}) {
+	names := new map{string -> bool}()
+	isFunctionBlock := false 
+	block.walk(fn (b Block){
+		if isFunctionBlock == false {
+			for name ,v := range b.labels {
+				if names.keyExist(name) {
+					continue 
+				}
+				item  := new AutoCompletionItem()
+				item.Type = "label"
+				item.name = name 
+				items.append(item)
+				names[name] = true 
+			}
+		}
+		isFunctionBlock = b.isFunctionBlock || isFunctionBlock
+		//I cannot stop the process 
+	})
+}
+
+
+fn searchTypeForAutoCompletionItems( pos Pos, block Block) -> (items []AutoCompletionItem = []AutoCompletionItem {}) {
+	names := new map{string -> bool}()
+	block.walk(fn (b Block){
+		for name ,v := range b.enums {
+			if names.keyExist(name) {
+				continue 
+			}
+			item  := new AutoCompletionItem()
+			item.Type = "enum"
+			item.name = name 
+			items.append(item)
+			names[name] = true 
+		}
+		for name ,v := range b.classes {
+			if names.keyExist(name) {
+				continue
+			}
+			item  := new AutoCompletionItem()
+			item.Type = "class"
+			item.name = name 
+			items.append(item)
+			names[name] = true 
+		}
+		for name ,v := range b.typeAliases {
+			if names.keyExist(name) {
+				continue
+			}
+			item  := new AutoCompletionItem()
+			item.Type = "typealias"
+			item.name = name 
+			items.append(item)
+			names[name] = true 
+		}
+		if b.isPackageBlock {
+			s := block.inheritedAttribute.p.getSourceFile(pos.filename) 
+			if s != null {
+				for name,_ := range s.imports {
+					item  := new AutoCompletionItem()
+					item.Type = "import"
+					item.name = name 
+					items.append(item)
+					names[name] = true 
+				}
+			}
+		}
+	}) 
+}
+
+fn searchLeftValueForAutoCompletionItems(block Block) -> (items []AutoCompletionItem = []AutoCompletionItem {}) {
+	names := new map{string -> bool}()
+	block.walk(fn (b Block){
+		for name ,v := range b.variables {
+			if names.keyExist(name) {
+				continue 
+			}
+			item  := new AutoCompletionItem()
+			item.Type = "variable"
+			item.name = name 
+			items.append(item)
+			names[name] = true 
+		}
 		for name ,v := range b.classes {
 			if names.keyExist(name) {
 				continue
@@ -270,6 +398,7 @@ fn searchRightValueForAutoCompletionItems(block Block) -> (items []AutoCompletio
 		}
 	}) 
 }
+
 
 fn getPos(x Object)  -> (pos Pos){
 	if t, ok := x.(Constant) ; ok {

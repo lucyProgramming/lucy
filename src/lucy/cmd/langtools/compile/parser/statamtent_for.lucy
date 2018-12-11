@@ -15,7 +15,7 @@ class StatementForParser extends ParserExtends{
 	}
 	
 
-	protected fn parseFor() -> (statementFor ast.StatementFor, err error) {
+	fn parseFor() -> (statementFor ast.StatementFor, err error) {
 		statementFor = new ast.StatementFor()
 		statementFor.pos = this.parser.mkPos()
 		statementFor.block = new ast.Block()
@@ -62,7 +62,7 @@ class StatementForParser extends ParserExtends{
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s expect '{',but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))
-			this.parser.errs.append( err)
+			this.parser.errs.append(err)
 			return
 		}
 		this.next(lfIsToken) // skip {

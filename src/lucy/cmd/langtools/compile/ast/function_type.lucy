@@ -360,7 +360,6 @@ public class FunctionType {
 		want += ")"
 		return want
 	}
-
 }
 
 

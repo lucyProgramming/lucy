@@ -14,7 +14,7 @@ public class StatementDefer {
 			v.Reset()
 		}
 	}
-
+	
 	fn registerExceptionClass(c Class) -> (err error) {
 		if this.exceptionClass != null {
 			return new error(sprintf("exception class already registed as '%s'",

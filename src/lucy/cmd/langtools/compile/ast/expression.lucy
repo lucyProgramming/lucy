@@ -22,6 +22,7 @@ public class Expression {
 	public doubleValue double
 	public stringValue string 
 	public literalRaw string 
+	// public autoCompletion bool 
 
 	/* 
 		a // this is a inline comment
@@ -336,7 +337,7 @@ public class Expression {
 		}
 		switch this.Type {
 		case ExpressionTypeAutoCompletion:
-			block.inheritedAttribute.p.autoCompletionItems = searchRightValueForAutoCompletionItems(block)
+			block.inheritedAttribute.p.autoCompletionItems = searchRightValueForAutoCompletionItems(this.pos, block)
 		case ExpressionTypeNull:
 		    this.value = new Type()
 		    this.value.Type = VariableTypeNull

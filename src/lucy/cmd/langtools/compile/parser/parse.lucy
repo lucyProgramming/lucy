@@ -516,8 +516,6 @@ class Parser {
 		return
 	}
 
-
-
 	/*
 		pos.errMsgPrefix() only receive one argument
 	*/
@@ -527,7 +525,7 @@ class Parser {
 		}
 		return this.mkPos().errMsgPrefix()
 	}
-
+	
 	fn consume(until map{lex.TokenKind -> bool } ) {
 		if len(until) == 0 {
 			panic("no token to consume")

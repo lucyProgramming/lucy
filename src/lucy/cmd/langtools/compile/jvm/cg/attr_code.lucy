@@ -19,7 +19,7 @@ public class AttributeCode  {
 		}
 	}
 
-	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
+	fn toAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const("Code")
 		ret.info = new []byte( 8)
@@ -32,12 +32,12 @@ public class AttributeCode  {
 		    this.attributes =  []AttributeInfo{}
 		}
 		if this.lineNumbers != null {
-			if info := this.lineNumbers.ToAttributeInfo(c); info != null {
+			if info := this.lineNumbers.toAttributeInfo(c); info != null {
 				this.attributes.append(info)
 			}
 		}
 		if this.attributeStackMap != null {
-			if info := this.attributeStackMap.ToAttributeInfo(c); info != null {
+			if info := this.attributeStackMap.toAttributeInfo(c); info != null {
 				this.attributes.append(info)
 			}
 		}

@@ -16,7 +16,7 @@ public class AttributeLucyClassConst {
 		}
 	}
 	
-	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)   {
+	fn toAttributeInfo(c Class) -> (ret AttributeInfo)   {
 		if this == null || len(this.constants) == 0 {
 			return null
 		}

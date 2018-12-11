@@ -193,7 +193,7 @@ class TypeParser extends ParserExtends {
 		}
 		return ret, err
 	}
-
+	
 	/*
 		valid begin token of a type
 	*/
@@ -220,6 +220,7 @@ class TypeParser extends ParserExtends {
 		ret.locateDefinition = this.parser.token.locateDefinition
 		ret.findUsage  = this.parser.token.findUsage
 		ret.rename = this.parser.token.rename 
+		ret.autoCompletion = this.parser.token.autoCompletion
 		ret.getHover = this.parser.token.getHover 
 		this.next(lfIsToken) // skip name identifier
 		for this.parser.token.Type == lex.TokenSelection {
@@ -238,6 +239,7 @@ class TypeParser extends ParserExtends {
 			ret.findUsage = ret.findUsage || this.parser.token.findUsage
 			ret.rename = ret.rename || this.parser.token.rename
 			ret.getHover = ret.getHover || this.parser.token.getHover
+			ret.autoCompletion = ret.getHover || this.parser.token.autoCompletion
 			ret.pos = this.parser.mkPos() //  override pos
 			this.next(lfIsToken)   // skip identifier
 		}

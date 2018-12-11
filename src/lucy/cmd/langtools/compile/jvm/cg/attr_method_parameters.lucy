@@ -30,7 +30,7 @@ public class AttributeMethodParameters  {
 			this.parameters.append(m)
 		}
 	}
-	fn ToAttributeInfo(c Class, attrName string...) -> (ret AttributeInfo)  {
+	fn toAttributeInfo(c Class, attrName string...) -> (ret AttributeInfo)  {
 		if this == null || len(this.parameters) == 0 {
 			return null
 		}

@@ -28,6 +28,7 @@ class ExpressionSuffix extends  ParserExtends {
 			identifier.getHover  = this.parser.token.getHover 
 			identifier.findUsage  = this.parser.token.findUsage 
 			identifier.rename  = this.parser.token.rename
+			identifier.autoCompletion  = this.parser.token.autoCompletion
 			prefix.pos = this.parser.mkPos()
 			this.next(lfIsToken)
 		case lex.TokenTrue:
@@ -179,6 +180,18 @@ class ExpressionSuffix extends  ParserExtends {
 		case lex.TokenNot:
 			op := this.parser.token.description
 			pos := this.parser.mkPos()
+			if this.parser.token.autoCompletion {
+				this.next(lfIsToken)
+				newE := new ast.Expression()
+				newE.op = op
+				newE.Type = ast.ExpressionTypeNot
+				newE.pos = pos 
+				prefix = newE
+				data := new ast.Expression()
+				data.Type = ast.ExpressionTypeAutoCompletion
+				newE.data = data 
+				return prefix , null 
+			}
 			this.next(lfIsToken)
 			newE := new ast.Expression()
 			newE.op = op
@@ -193,6 +206,18 @@ class ExpressionSuffix extends  ParserExtends {
 		case lex.TokenBitNot:
 			op := this.parser.token.description
 			pos := this.parser.mkPos()
+			if this.parser.token.autoCompletion {
+				this.next(lfIsToken)
+				newE := new ast.Expression()
+				newE.op = op
+				newE.Type = ast.ExpressionTypeBitwiseNot
+				newE.pos = pos 
+				prefix = newE
+				data := new ast.Expression()
+				data.Type = ast.ExpressionTypeAutoCompletion
+				newE.data = data 
+				return prefix , null 
+			}
 			this.next(lfIsToken)
 			prefix, err = this.parseSuffixExpression()
 			if err != null {
@@ -207,6 +232,18 @@ class ExpressionSuffix extends  ParserExtends {
 		case lex.TokenSub:
 			op := this.parser.token.description
 			pos := this.parser.mkPos()
+			if this.parser.token.autoCompletion {
+				this.next(lfIsToken)
+				newE := new ast.Expression()
+				newE.op = op
+				newE.Type = ast.ExpressionTypeNegative
+				newE.pos = pos 
+				prefix = newE
+				data := new ast.Expression()
+				data.Type = ast.ExpressionTypeAutoCompletion
+				newE.data = data 
+				return prefix , null 
+			}
 			this.next(lfIsToken)
 			prefix, err = this.parseSuffixExpression()
 			if err != null {
@@ -487,7 +524,7 @@ class ExpressionSuffix extends  ParserExtends {
 					selection.Expression = prefix
 					newExpression.data = selection
 					prefix = newExpression
-					continue
+					return prefix , null 
 				}
 				if this.parser.token.Type == lex.TokenLf {
 					containsLf = true 
@@ -508,7 +545,7 @@ class ExpressionSuffix extends  ParserExtends {
 					selection.findUsage  = this.parser.token.findUsage
 					selection.getHover  = this.parser.token.getHover
 					selection.rename  = this.parser.token.rename
-					selection.autoCompletion = autoCompletion 
+					selection.autoCompletion = autoCompletion || this.parser.token.autoCompletion
 					selection.Expression = prefix
 					selection.name = this.parser.token.stringValue
 					selection.containsLf = containsLf

@@ -53,6 +53,18 @@ module.exports = class GoCompletionItemProvider implements vscode.CompletionItem
                 case "enumItem":
                     kind = vscode.CompletionItemKind.EnumMember;
                     break;
+                case "enum":
+                    kind = vscode.CompletionItemKind.Enum;
+                    break;
+                case "typealias":
+                    kind = vscode.CompletionItemKind.Reference;
+                    break;
+                case "keyword":
+                    kind = vscode.CompletionItemKind.Keyword;
+                    break;
+                case "import":
+                    kind = vscode.CompletionItemKind.Module;
+                    break;
                 default:
                     kind = vscode.CompletionItemKind.Text ;  
             }

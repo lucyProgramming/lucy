@@ -21,7 +21,7 @@ public class AttributeTemplateFunction {
 		this.accessFlags = binary.BigEndian.getChar(bs[10:])
 	}
 	
-	fn ToAttributeInfo(c Class) -> (ret AttributeInfo) {
+	fn toAttributeInfo(c Class) -> (ret AttributeInfo) {
 		info := new AttributeInfo()
 		info.nameIndex = c.insertUtf8Const(AttributeNameLucyTemplateFunction)
 		info.attributeLength = 14

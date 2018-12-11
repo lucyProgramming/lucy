@@ -284,7 +284,9 @@ public class StatementFor {
 			_, es := this.increment.check(this.initExpressionBlock)
 			errs.appendAll(es)
 		}
-		errs.appendAll( this.block.check())
+		if this.block != null {
+			errs.appendAll( this.block.check())
+		}
 		return errs
 	}	
 }

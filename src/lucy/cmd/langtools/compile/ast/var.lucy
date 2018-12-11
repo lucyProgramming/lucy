@@ -4,6 +4,7 @@ public interface  LoadImport {
 	public fn LoadImport(importName string) -> (Object, error)
 }
 
+
 const	MagicIdentifierFile     = "__FILE__"
 const	MagicIdentifierLine     = "__LINE__"
 const	MagicIdentifierTime     = "__TIME__"
@@ -37,6 +38,8 @@ var	javaStringClass      Class
 public var	LucyBytesType       Type // []byte
 public var	JavaBytesType        Type // byte[]
 
+var autoCompletionKeyWordsItems = new []AutoCompletionItem(0)
+var autoCompletionBuildFunctionItems = new []AutoCompletionItem(0)
 {
 	// []byte
 	LucyBytesType = new Type()
@@ -50,6 +53,308 @@ public var	JavaBytesType        Type // byte[]
 	JavaBytesType.array = new Type()
 	JavaBytesType.array.Type = VariableTypeByte
 }
+
+
+{
+	item := new AutoCompletionItem()
+	item.Type = "function"
+	item.name = "panic"
+	item.suggest = "panic(reason)"
+	autoCompletionBuildFunctionItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "function"
+	item.name = "catch"
+	item.suggest = "catch()"
+	autoCompletionBuildFunctionItems.append(item)
+	
+	item = new AutoCompletionItem()
+	item.Type = "function"
+	item.name = "print"
+	item.suggest = "print(args , ...)"
+	autoCompletionBuildFunctionItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "function"
+	item.name = "printf"
+	item.suggest = "printf(format , args , ...)"
+	autoCompletionBuildFunctionItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "function"
+	item.name = "sprintf"
+	item.suggest = "sprintf(format , args , ...)"
+	autoCompletionBuildFunctionItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "function"
+	item.name = "len"
+	item.suggest = "len(who)"
+	autoCompletionBuildFunctionItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "function"
+	item.name = "blackHole"
+	item.suggest = "blackHole(args , ...)"
+	autoCompletionBuildFunctionItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "function"
+	item.name = "assert"
+	item.suggest = "assert(args , ...)"
+	autoCompletionBuildFunctionItems.append(item)
+
+}
+
+
+{
+
+	item := new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "fn"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "enum"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "const"
+	autoCompletionKeyWordsItems.append(item)
+	
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "if"
+	autoCompletionKeyWordsItems.append(item)
+	
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "else"
+	autoCompletionKeyWordsItems.append(item)
+	
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "for"
+	autoCompletionKeyWordsItems.append(item)
+	
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "break"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "continue"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "return"
+	autoCompletionKeyWordsItems.append(item)
+	
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "null"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "bool"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "true"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "false"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "pass"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "var"
+	autoCompletionKeyWordsItems.append(item)
+	
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "new"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "switch"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "case"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "default"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "import"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "as"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "class"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "static"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "public"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "protected"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "private"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "interface"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "byte"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "short"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "char"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "int"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "float"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "double"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "long"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "string"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "defer"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "typealias"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "extends"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "implements"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "goto"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "range"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "map"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "volatile"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "synchronized"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "final"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "global"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "abstract"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "when"
+	autoCompletionKeyWordsItems.append(item)
+
+	item = new AutoCompletionItem()
+	item.Type = "keyword"
+	item.name = "type"
+	autoCompletionKeyWordsItems.append(item)
+}
+
 
 fn loadJavaStringClass(block Block , pos Pos) ->(err error) {
 	if javaStringClass != null {

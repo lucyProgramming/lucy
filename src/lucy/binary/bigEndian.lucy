@@ -19,8 +19,7 @@ public class BigEndian {
 		bs[1] = byte(v >> 16)
 		bs[2] = byte(v >> 8)
 		bs[3] = byte(v)
-	} 
-
+	}
 	
 	public static fn getInt(bs []byte) ->(v int){
 		_ = bs[3]
@@ -49,10 +48,10 @@ public class BigEndian {
             ((long(bs[1]) << 48) & 0xff000000000000L) |
             ((long(bs[2]) << 40) & 0xff0000000000L) |
             ((long(bs[3]) << 32) & 0xff00000000L) |
-            ((long(bs[4]) << 56) & 0xff000000L)  |
-            ((long(bs[5]) << 48) & 0xff0000L) |
-            ((long(bs[6]) << 40) & 0xff00L) |
-            ((long(bs[7]) << 32) & 0xffL)
+            ((long(bs[4]) << 24) & 0xff000000L)  |
+            ((long(bs[5]) << 16) & 0xff0000L) |
+            ((long(bs[6]) << 8) & 0xff00L) | 
+            ((long(bs[7]) << 0) & 0xffL)
 	}
 }
 

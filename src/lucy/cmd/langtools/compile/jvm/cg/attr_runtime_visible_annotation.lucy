@@ -3,7 +3,7 @@
 //	Annotations []*Annotation
 //}
 //
-//func (this *AttributeRuntimeVisibleAnnotation) ToAttributeInfo(class Class) *AttributeInfo {
+//func (this *AttributeRuntimeVisibleAnnotation) toAttributeInfo(class Class) *AttributeInfo {
 //	if this == null || len(this.Annotations) == 0 {
 //		return null
 //	}

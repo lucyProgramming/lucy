@@ -26,7 +26,7 @@ class ExpressionCheckTypeAssert {
 			return null
 		}
 		if assertion.Type.validForTypeAssertOrConversion() == false {
-			errs . append(new error( sprintf("%s cannot use '%s' for type assertion",
+			errs.append(new error( sprintf("%s cannot use '%s' for type assertion",
 					errMsgPrefix(assertion.Type.pos), assertion.Type.typeString())))
 			return null
 		}

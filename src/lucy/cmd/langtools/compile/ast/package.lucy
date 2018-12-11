@@ -62,7 +62,7 @@ public class Package {
 		return true 
 	}
 	
-	public fn Package(name string,disableCheckUnuse bool , loader LoadImport){
+	public fn Package(name string , disableCheckUnuse bool , loader LoadImport){
 		this.super()
 		this.disableCheckUnuse = disableCheckUnuse
 		this.name =  name
@@ -127,6 +127,14 @@ public class Package {
 			return null
 		}
 	}
+
+	fn getSourceFile(fileName string) -> (file SourceFile) {
+		if this.files == null {
+			return null
+		}
+		return this.files[fileName]
+	}
+	
 
 	fn mkInitFunctions(bs []Block) {
 		this.initFunctions = new []Function(len(bs))
@@ -255,6 +263,7 @@ public class Package {
 
 	public fn typeCheck(nodes []TopNode) -> (es []error = []error{}) {
 		this.block.inheritedAttribute.p = this
+		this.block.isPackageBlock = true 
 		if t := this.insert(nodes) ; len(t) > 0 {
 			es.appendAll(t)
 		}

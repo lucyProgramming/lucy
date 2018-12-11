@@ -1,7 +1,7 @@
 
 
 public class AttributeLucyConst {
-	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
+	fn toAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const(AttributeNameLucyConst)
 		return ret

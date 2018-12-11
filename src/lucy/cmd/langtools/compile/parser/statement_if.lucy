@@ -11,7 +11,7 @@ class StatementIfParser extends ParserExtends {
 		this.bp = bp
 	}
 	
-	protected fn parseIf() -> (statementIf ast.StatementIf, err error) {
+	fn parseIf() -> (statementIf ast.StatementIf, err error) {
 		statementIf = new ast.StatementIf()
 		statementIf.pos = this.parser.mkPos()
 		this.next(lfIsToken) // skip if
@@ -20,7 +20,6 @@ class StatementIfParser extends ParserExtends {
 		condition, err = this.parser.ExpressionParser.parseExpression(true)
 		if err != null {
 			this.consume(untilLc)
-			this.next(lfNotToken)
 		}
 		statementIf.condition = condition
 		this.parser.ifTokenIsLfThenSkip(true)
@@ -36,7 +35,6 @@ class StatementIfParser extends ParserExtends {
 			statementIf.condition, err = this.parser.ExpressionParser.parseExpression(true)
 			if err != null {
 				this.consume(untilLc)
-				this.next(lfNotToken)
 			}
 		}
 		this.parser.ifTokenIsLfThenSkip(true)

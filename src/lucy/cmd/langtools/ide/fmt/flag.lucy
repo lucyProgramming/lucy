@@ -11,7 +11,7 @@ class Flags {
         this.std = this.parser.boolOption("-std")
 
     }
-
+    
     fn parseArgs(args []string) ->(files []string , std bool ) {
         var err error 
         files ,err = this.parser.parse(args)

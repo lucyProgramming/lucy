@@ -8,7 +8,7 @@ public class AttributeLineNumber  {
 	    this.super()
 		this.lineNumbers = []AttributeLinePc{}
 	}
-	fn ToAttributeInfo(c Class) -> (ret AttributeInfo)  {
+	fn toAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		if this == null || len(this.lineNumbers) == 0 {
 			return null
 		}
@@ -20,7 +20,7 @@ public class AttributeLineNumber  {
 			bs4 := new []byte( 4)
 			binary.BigEndian.putChar(bs4[0:2], v.startPc)
 			binary.BigEndian.putChar(bs4[2:4], v.lineNumber)
-			ret.info . appendAll( bs4)
+			ret.info.appendAll( bs4)
 		}
 		ret.attributeLength = (len(ret.info))
 		return ret
