@@ -98,7 +98,7 @@ public class ExpressionFunctionCall  {
 	public args                     []Expression
 	public vArgs                    CallVariableArgs
 	public Function                 Function
-	public ParameterTypes           []Type // for template function
+	public parameterTypes           []Type // for template function
 	public templateFunctionCallPair TemplateFunctionInstance
 }
 
@@ -113,7 +113,7 @@ public class ExpressionMethodCall  {
 	/*
 		unSupport !!!!!!
 	*/
-	public ParameterTypes                []Type
+	public parameterTypes                []Type
 	public packageFunction               Function
 	public packageGlobalVariableFunction Variable
 	public locateDefinition bool 

@@ -7,7 +7,7 @@ class PackageLoader extends  ide.PackageLoader {
     rename ReName
     loadPacakges map{string->ast.Package}
 
-    public fn PackageLoader(lucyPath , classPaths []string , rename ReName ){
+    public fn PackageLoader(lucyPath , classPaths []string , rename ReName){
         this.super(lucyPath ,classPaths )
         this.rename = rename 
     }

@@ -35,7 +35,6 @@ public class Map {
 }
 
 public class Type {
-	
 	public Type           VariableTypeKind
 	public isBuildIn      bool // build in type alias
 	public isVariableArgs bool // int ...
@@ -830,10 +829,4 @@ public class Type {
 		return false
 	}
 }
-
-
-
-
-
-
 

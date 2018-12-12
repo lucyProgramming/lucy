@@ -11,6 +11,7 @@ public class LucyFile {
     public findUsage int 
     public rename int 
     public autoCompletion int 
+    public lastModify int // in second  // no use
 
     fn LucyFile(){
         this.super()

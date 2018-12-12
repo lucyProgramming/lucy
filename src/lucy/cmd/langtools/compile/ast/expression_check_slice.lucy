@@ -52,7 +52,7 @@ class ExpressionCheckSlice {
 					if on.end.isLiteral() {
 						endIndexValue := on.end.getLongValue()
 						if endIndexValue < 0 {
-							errs . append(new error( sprintf("%s endIndex '%d' is negative",
+							errs.append(new error( sprintf("%s endIndex '%d' is negative",
 									endType.pos.errMsgPrefix(), endIndexValue)))
 						}
 						if startType != null &&
@@ -71,6 +71,3 @@ class ExpressionCheckSlice {
 		valueType.pos = e.pos
 	}
 }
- 
-
-

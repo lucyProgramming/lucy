@@ -19,7 +19,9 @@ public class Package {
 	public hasMain bool 
 	public matchFile string 
 	public matchLine int 
+	public printFileMatchInfo bool 
 	public loader LoadImport
+	
 	/*
 		for lucy tool goto definition
 	*/
@@ -46,23 +48,33 @@ public class Package {
 	
 	public fn matchFileAndLine(file string , name string ,  startLine int , endLine int ) ->(need bool){
 		if this.matchFile == null || this.matchFile == "" {  // no match at all 
-			print(file , name , "need analyze because no match file")
+			if this.printFileMatchInfo {
+				print(file , name , "need analyze because no match file")
+			}
 			return true 
 		}
 		need =  langtoolsCommon.twoPathEqual(this.matchFile , file) 
 		if need == false {  // file not match
-			printf("file '%s' not match\n" , file)
+			if this.printFileMatchInfo {
+				printf("file '%s' '%s' not match\n" , file)
+			}
 			return false  
 		}
 		if this.matchLine == -1 {
 			print(file , name , "need analyze")
 			return  true // no match line 
 		}
+		// t
 		if false == (startLine <= this.matchLine && this.matchLine <= endLine) {
-			printf("'%s' not match\n" , name)
+			if this.printFileMatchInfo {
+				printf("'%s' not match\n" , name)
+				print(this.matchLine , startLine , endLine)
+			}
 			return false 
 		}
-		print(file , name , "need analyze")
+		if this.printFileMatchInfo {
+			print(file , name , "need analyze")
+		}
 		return true 
 	}
 	
@@ -268,13 +280,14 @@ public class Package {
 	public fn typeCheck(nodes []TopNode) -> (es []error = []error{}) {
 		this.block.inheritedAttribute.p = this
 		this.block.isPackageBlock = true 
-		if t := this.insert(nodes) ; len(t) > 0 {
-			es.appendAll(t)
-		}
+		this.errors = []error{}
 		if this.nErrors2Stop <= 2 {
 			this.nErrors2Stop = 10
 		}
-		this.errors = []error{}
+		es = this.errors
+		if t := this.insert(nodes) ; len(t) > 0 {
+			this.errors.appendAll(t)
+		}
 		if this.block == null {
 		    panic("block is null")
 		}
@@ -570,7 +583,7 @@ public class Package {
 		return t, err
 	}
 	
-
+	
 	fn loadClass(className string) -> (c Class,err error) {
 		x, err := this.loader.LoadImport(className)
 		if err != null {
@@ -582,7 +595,6 @@ public class Package {
 		cc := x.(Class)
 		return cc, null
 	}
-
 }
 
 

@@ -130,6 +130,7 @@ public class Statement {
 			}
 			if this.StatementLabel.locateDefinition{
 				block.inheritedAttribute.p.locateDefinition = this.StatementLabel.pos 
+				return 
 			}
 		case StatementTypeClass:
 		    if block.inheritedAttribute.p.statementLevelClass == null {

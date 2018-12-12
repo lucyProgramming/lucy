@@ -690,9 +690,9 @@ class ExpressionSuffix extends  ParserExtends {
 			}
 			this.next(lfIsToken)
 			if result.Type == ast.ExpressionTypeFunctionCall {
-				result.data.(ast.ExpressionFunctionCall).ParameterTypes = ts
+				result.data.(ast.ExpressionFunctionCall).parameterTypes = ts
 			} else {
-				result.data.(ast.ExpressionMethodCall).ParameterTypes = ts
+				result.data.(ast.ExpressionMethodCall).parameterTypes = ts
 			}
 		}
 		*/

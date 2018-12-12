@@ -60,7 +60,7 @@ public class RunLucyPackage {
         if this.flags.build.getValue() {
             return
         }
-        //TODO :: 
+        //TODO:: 
         // if false == meta.hasMain {
         //     print("no main function")
         //     os.exit(4)

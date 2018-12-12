@@ -6,10 +6,59 @@ public class AutoCompletionItem {
     public suggest string   // used by function
     public variableType string 
     public description string 
+    private static arrayDefaultAutoCompletionItem []AutoCompletionItem
+    private static javaArrayDefaultAutoCompletionItem  []AutoCompletionItem
+    private static typeDefaultAutoCompletionItem []AutoCompletionItem
+
     
-    static arrayDefaultAutoCompletionItem []AutoCompletionItem
+    static fn getTypeAutoCompletionItem() -> (items []AutoCompletionItem) {
+        if len(AutoCompletionItem.typeDefaultAutoCompletionItem) > 0  {
+            return AutoCompletionItem.typeDefaultAutoCompletionItem
+        }
+        AutoCompletionItem.typeDefaultAutoCompletionItem = []AutoCompletionItem{}
+        items = AutoCompletionItem.typeDefaultAutoCompletionItem
+        
+        item := new AutoCompletionItem()
+        item.Type = "keyword"
+        item.name = "bool"
+        items.append(item)
+
+        item = new AutoCompletionItem()
+        item.Type = "keyword"
+        item.name = "byte"
+        items.append(item)
+
+        item = new AutoCompletionItem()
+        item.Type = "keyword"
+        item.name = "short"
+        items.append(item)
+        
+        item = new AutoCompletionItem()
+        item.Type = "keyword"
+        item.name = "char"
+        items.append(item)
+
+        item = new AutoCompletionItem()
+        item.Type = "keyword"
+        item.name = "int"
+        items.append(item)
+
+        item = new AutoCompletionItem()
+        item.Type = "keyword"
+        item.name = "long"
+        items.append(item)
+
+        item = new AutoCompletionItem()
+        item.Type = "keyword"
+        item.name = "float"
+        items.append(item)
+
+        item = new AutoCompletionItem()
+        item.Type = "keyword"
+        item.name = "double"
+        items.append(item)
+    }
     
-    static javaArrayDefaultAutoCompletionItem  []AutoCompletionItem
     
     static fn getJavaArrayBasicAutoCompletionItem() -> (items []AutoCompletionItem) {
         if len(AutoCompletionItem.javaArrayDefaultAutoCompletionItem) > 0  {

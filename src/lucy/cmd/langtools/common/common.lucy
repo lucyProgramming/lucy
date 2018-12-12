@@ -45,7 +45,7 @@ public fn getClassPath()->(paths []string){
 	envs := os.getEnvs()
 	classPaths := envs["CLASSPATH"]
 	osName := System.getProperty("os.name").toLowerCase()
-	ps := new map{string -> bool} ()
+	ps := new map{string -> bool} () 
 	if osName.startsWith("windows") {
 	    for v := range classPaths.split(";"){
         	ps[v] = true

@@ -19,6 +19,8 @@ public class StatementSwitch  {
 	public inlineComment string 
 	public defaultInlineComment string 
 	
+
+
 	fn check(block Block) ->(errs []error = []error{})  {
 		this.initExpressionBlock.inherit(block)
 		for _, v := range this.prefixExpressions {
@@ -30,8 +32,7 @@ public class StatementSwitch  {
 			}
 		}
 		if this.condition == null {
-			//TODO:: still check body
-			
+			errs.appendAll(this.checkBlocks())
 			return errs
 		}
 		conditionType, es := this.condition.checkSingleValueContextExpression(this.initExpressionBlock)
@@ -160,18 +161,8 @@ public class StatementSwitch  {
 					}
 				}
 			}
-			if v.block != null {
-				v.block.inherit(this.initExpressionBlock)
-				v.block.inheritedAttribute.forBreak = this
-				errs.appendAll(v.block.check())
-			}
 		}
-		if this.Default != null {
-			this.Default.inherit(this.initExpressionBlock)
-			this.Default.inheritedAttribute.forBreak = this
-			errs.appendAll(this.Default.check())
-		}
-		
+
 		if conditionType.Type == VariableTypeEnum &&
 			len(enumNamesMap) < len(conditionType.Enum.enums) &&
 			this.Default == null &&
@@ -198,8 +189,27 @@ public class StatementSwitch  {
 				errs.append(new error(errMsg))
 			}
 		}
+		errs.appendAll(this.checkBlocks())
 		return errs
-	}	
+	}
+
+
+	fn checkBlocks () -> (errs []error = []error{}) {
+		for v := range this.cases {
+			if v.block == null {
+				continue
+			}
+			v.block.inherit(this.initExpressionBlock)
+			v.block.inheritedAttribute.forBreak = this
+			errs.appendAll(v.block.check())
+		}
+		if this.Default != null {
+			this.Default.inherit(this.initExpressionBlock)
+			this.Default.inheritedAttribute.forBreak = this
+			errs.appendAll(this.Default.check())
+		}
+	}
+	
 }
 
 

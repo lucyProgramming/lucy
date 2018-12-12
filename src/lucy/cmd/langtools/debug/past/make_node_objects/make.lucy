@@ -522,9 +522,9 @@ public class MakeNodesObjects {
                 }
                 ret["args"] = t
             }
-            if len(call.ParameterTypes) > 0 {
-                var t Object[] = new Object[](len(call.ParameterTypes))
-                for k, v := range call.ParameterTypes {
+            if len(call.parameterTypes) > 0 {
+                var t Object[] = new Object[](len(call.parameterTypes))
+                for k, v := range call.parameterTypes {
                     t[k] =  v.typeString()
                 }
                 ret["parameterTypes"] = t
@@ -542,9 +542,9 @@ public class MakeNodesObjects {
                 }
                 ret["args"] = t
             }
-            if len(call.ParameterTypes) > 0 {
-                var t Object[] = new Object[](len(call.ParameterTypes))
-                for k, v := range call.ParameterTypes {
+            if len(call.parameterTypes) > 0 {
+                var t Object[] = new Object[](len(call.parameterTypes))
+                for k, v := range call.parameterTypes {
                     t[k] = v.typeString()
                 }
                 ret["parameterTypes"] = t

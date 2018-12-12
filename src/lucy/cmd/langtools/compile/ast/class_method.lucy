@@ -34,7 +34,7 @@ public class ClassMethod {
 		}
 		return `default ""`
 	}
-
+	
 	public fn isAccessFlagDefault() ->(is bool ) {
 		return this.Function.accessFlags&
 			(cg.AccMethodPublic|

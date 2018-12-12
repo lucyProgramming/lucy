@@ -154,6 +154,7 @@ class ClassParser extends  ParserExtends{
 				classDefinition.appendFmt(new ast.Line())
 				this.next(lfNotToken)  //TODO::delete more lines 
 			case lex.TokenRc:
+				classDefinition.endLine = this.parser.token.startLine 
 				this.next(lfNotToken)
 				return
 			case lex.TokenSemicolon:

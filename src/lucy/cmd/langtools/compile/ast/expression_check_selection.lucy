@@ -370,14 +370,18 @@ class ExpressionCheckSelection {
                     if method.isStatic() {
                         continue 
                     }
-                    if method.Function.name == SpecialMethodInit || method.Function.name == ClassInitMethod  {
+                    if  method.Function.name == ClassInitMethod  || method.Function.name == SpecialMethodInit {
                         continue 
                     }
                     if accessFromSub  && method.ableAccessFromSubClass() == false {
                         continue 
                     }
                     item := new AutoCompletionItem()
-                    item.Type = "method"
+                    if method.Function.name == SpecialMethodInit {
+                        item.Type = "constructor"
+                    }else {
+                        item.Type = "method"
+                    }
                     item.name =  method.Function.name
                     item.suggest = method.Function.mkSuggest()
                     items.append(item)
@@ -403,20 +407,24 @@ class ExpressionCheckSelection {
                         if method.isStatic() {
                             continue 
                         }
-                        if method.Function.name == SpecialMethodInit || method.Function.name == ClassInitMethod  {
+                        if method.Function.name == ClassInitMethod  || method.Function.name == SpecialMethodInit {
                             continue 
                         }
                         if accessFromSub  && method.ableAccessFromSubClass() == false {
                             continue 
                         }
                         item := new AutoCompletionItem()
-                        item.Type = "method"
+                        if method.Function.name == SpecialMethodInit {
+                            item.Type = "constructor"
+                        }else {
+                            item.Type = "method"
+                        }
                         item.name =  method.Function.name
                         item.suggest = method.Function.mkSuggest()
                         items.append(item)
                     }
                 }
-            }  
+            }
             object.loadSuperClass(block , new Pos()) 
             if object.superClass == null {
                 break
@@ -453,7 +461,7 @@ class ExpressionCheckSelection {
                     if m.keyExist(method.Function.name) {
                         continue
                     }
-                    if method.Function.name == SpecialMethodInit || method.Function.name == ClassInitMethod  {
+                    if method.Function.name == ClassInitMethod  || method.Function.name == SpecialMethodInit {
                         continue 
                     }
                     if method.isStatic()  == false {
@@ -463,7 +471,11 @@ class ExpressionCheckSelection {
                         continue 
                     }
                     item := new AutoCompletionItem()
-                    item.Type = "method"
+                    if method.Function.name == SpecialMethodInit {
+                        item.Type = "constructor"
+                    }else {
+                        item.Type = "method"
+                    }
                     item.name =  method.Function.name
                     item.suggest = method.Function.mkSuggest()
                     items.append(item)
@@ -489,15 +501,18 @@ class ExpressionCheckSelection {
                         if method.isStatic() == false {
                             continue 
                         }
-                        if method.Function.name == ClassInitMethod  || 
-                            method.Function.name == ClassInitMethod {
+                        if method.Function.name == ClassInitMethod || method.Function.name == SpecialMethodInit {
                             continue 
                         }
                         if accessFromSub  && method.ableAccessFromSubClass() == false {
                             continue 
                         }
                         item := new AutoCompletionItem()
-                        item.Type = "method"
+                        if method.Function.name == SpecialMethodInit {
+                            item.Type = "constructor"
+                        }else {
+                            item.Type = "method"
+                        }
                         item.name =  method.Function.name
                         item.suggest = method.Function.mkSuggest()
                         items.append(item)

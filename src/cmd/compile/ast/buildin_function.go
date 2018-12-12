@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+
 	"gitee.com/yuyang-fine/lucy/src/cmd/compile/common"
 )
 

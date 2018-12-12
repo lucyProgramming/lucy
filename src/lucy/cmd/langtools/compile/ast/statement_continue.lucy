@@ -28,6 +28,5 @@ public class StatementContinue {
 		}
 		this.mkDefers(block.outer)
 	}
-
 }
 

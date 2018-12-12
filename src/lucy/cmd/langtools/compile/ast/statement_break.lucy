@@ -34,7 +34,7 @@ public class StatementBreak {
 		this.mkDefers(block)
 		return null
 	}
-
+	
 	fn mkDefers(block Block) {
 		if this.statementFor != null {
 			if block.isForBlock {

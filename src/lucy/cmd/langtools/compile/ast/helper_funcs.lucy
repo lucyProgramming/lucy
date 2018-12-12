@@ -371,6 +371,7 @@ fn searchTypeForAutoCompletionItems( pos Pos, block Block) -> (items []AutoCompl
 			}
 		}
 	}) 
+	items.appendAll(AutoCompletionItem.getTypeAutoCompletionItem())
 }
 
 fn searchLeftValueForAutoCompletionItems(block Block) -> (items []AutoCompletionItem = []AutoCompletionItem {}) {

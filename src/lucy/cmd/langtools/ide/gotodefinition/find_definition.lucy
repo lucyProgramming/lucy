@@ -9,19 +9,23 @@ class FindDefinition {
     packageName string
     printErr bool 
     searchFile string 
+    matchLine int 
+
     fn FindDefinition(lucyFiles []ide.LucyFile , 
-        packageName string , printErr bool ,searchFile string  , matchLine  int ){
+        packageName string , printErr bool ,searchFile string  , matchLine int ){
         this.super()
         this.lucyFiles = lucyFiles
         this.packageName = packageName
         this.printErr = printErr 
         this.searchFile = searchFile
+        this.matchLine = matchLine 
     }
     
     fn find() -> (result ast.Pos){
         //parse ast and typecheck
         loader := new ide.PackageLoader(common.getLucyPath() ,common.getClassPath())
-        p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles , false , this.searchFile , -1 ,loader )
+        loader.onlyAnalyzeGlobals = true 
+        p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles , false , this.searchFile , this.matchLine ,loader )
         if this.printErr {
             for v := range es{
                 os.stderr.println(v.getMessage())
@@ -33,7 +37,6 @@ class FindDefinition {
             }
             return p.locateDefinition
         }
-        
     }
     
     fn loadDefinitionFromOutside(out ast.LoadDefinitionFromOutside) -> (result ast.Pos) {

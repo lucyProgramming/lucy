@@ -185,7 +185,7 @@ class ExpressionCheckFunctionCall {
 					return null //
 				}
 			} else {
-				if len(call.ParameterTypes) > 0 {
+				if len(call.parameterTypes) > 0 {
 					errs.append(new error( sprintf("%s function is not a template function",
 						errMsgPrefix(e.pos))))
 				}
@@ -224,7 +224,7 @@ class ExpressionCheckFunctionCall {
 			t.bindWithParameterTypes(f.Type, parameterTypes)
 			parameterTypeArray.append(t)
 		}
-		tps := call.ParameterTypes
+		tps := call.parameterTypes
 		for k, v := range f.Type.returnList {
 			if v == null || v.Type == null || len(v.Type.getParameterType(f.Type)) == 0 {
 				continue

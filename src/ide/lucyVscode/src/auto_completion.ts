@@ -66,10 +66,16 @@ module.exports = class GoCompletionItemProvider implements vscode.CompletionItem
                     kind = vscode.CompletionItemKind.Keyword;
                     break;
                 case "import":
-                    kind = vscode.CompletionItemKind.Module;
+                    kind = vscode.CompletionItemKind.Reference;
+                    break;
+                case "label":
+                    kind = vscode.CompletionItemKind.Reference;
+                    break;
+                case "constructor":
+                    kind = vscode.CompletionItemKind.Constructor;
                     break;
                 default:
-                    kind = vscode.CompletionItemKind.Text ;  
+                    kind = vscode.CompletionItemKind.Reference ;  
             }
             var item = new vscode.CompletionItem(v.name , kind);
             item.sortText = "" + i ; 

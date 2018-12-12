@@ -66,13 +66,15 @@ class FindUsage {
             return 
         }
         if packageName == "lucy/lang" {
+            // this is a core package 
             return 
         }
         if this.loader.getCache(packageName) != null {
             //handled 
-            // when handle subdirectory may 
+            // when handle sub directory may load the package
             return 
         }
+        
         lucyFiles := ide.readLucyFiles(ide.getLucyFiles(dir))
         p , es := ide.parseAstAndTypeCheck(packageName , lucyFiles , false ,"" , -1 , this.loader)
         if this.printErr {

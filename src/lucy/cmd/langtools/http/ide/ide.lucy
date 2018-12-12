@@ -8,6 +8,7 @@ public fn registerHandlers(server HttpServer) {
     server.createContext("/ide/findUsage" , findUsage)
     autoCompletion := new AutoCompletion()
     server.createContext("/ide/autoCompletion" , autoCompletion)
+    
 }
 
 

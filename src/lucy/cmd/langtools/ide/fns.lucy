@@ -12,10 +12,12 @@ public fn readLucyFiles(filenames []string) -> (lucyFiles []LucyFile = []LucyFil
 		if err != null {
 			panic(err)
 		}
+		t.lastModify = int(new io.File(v).lastModified() / 1000L) 
 		t.bs = javaArray2Lucy(bs)
 		lucyFiles.append(t)
 	}
 }
+
 
 public fn parseImports(lucyFiles []LucyFile) -> (imports []string = []string{} ){
 	nodes := []ast.TopNode{}
@@ -49,6 +51,7 @@ public fn parseAstAndTypeCheck(
 	p = new ast.Package(packageName , true , loader)
 	p.onlyAnalyzeGlobals = onlyAnalyzeGlobals
 	p.matchFile = matchFile 
+	p.printFileMatchInfo = true 
 	if matchLine != -1 {
 		p.matchLine = matchLine
 	}
@@ -71,3 +74,5 @@ public fn getLucyFiles(dir string) -> (lucyFiles []string = []string{}) {
 		}
 	}
 }
+
+

@@ -33,7 +33,7 @@ public class Constant  {
 	public fn isPublic() -> (is bool) {
 		return this.accessFlags|cg.AccFieldPublic != 0
 	}
-
+	
 	fn mkDefaultValue() {
 		switch this.Type.Type {
 		case VariableTypeBool:

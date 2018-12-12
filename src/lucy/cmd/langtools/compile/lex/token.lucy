@@ -18,6 +18,11 @@ public class Token {
 	public literalRaw string 
 	public rename bool 
 	public autoCompletion bool 
+	
+	public fn toString() -> (s string){
+		s = sprintf("%s Type:%d startLine:%d endLine:%d columnOffset:%d\n" , 
+			this.description,this.Type , this.startLine , this.endLine , this.endColumnOffset)
+	}
 }
 
 public enum  TokenKind {

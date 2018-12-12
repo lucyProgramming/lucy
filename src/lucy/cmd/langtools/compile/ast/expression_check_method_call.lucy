@@ -111,7 +111,7 @@ class ExpressionCheckMethodCall {
 				errs.append(methodsNotMatchError(e.pos, call.name, ms, callArgTypes))
 				return null
 			}
-			if len(call.ParameterTypes) > 0 {
+			if len(call.parameterTypes) > 0 {
 				errs.append(new error(sprintf("%s method call expect no parameter types",
 					errMsgPrefix(e.pos))))
 			}
@@ -342,7 +342,7 @@ class ExpressionCheckMethodCall {
 				functionCall := new ExpressionFunctionCall()
 				functionCall.args = methodCall.args
 				functionCall.Function = f
-				functionCall.ParameterTypes = methodCall.ParameterTypes
+				functionCall.parameterTypes = methodCall.parameterTypes
 				e.Type = ExpressionTypeFunctionCall
 				e.data = functionCall
 				return ExpressionCheckFunctionCall.checkFunctionCall(e , block, errs, f, functionCall)
@@ -382,9 +382,9 @@ class ExpressionCheckMethodCall {
 				return null
 			}
 			call := e.data.(ExpressionMethodCall)
-			if len(call.ParameterTypes) > 0 {
+			if len(call.parameterTypes) > 0 {
 				errs.append(new error(sprintf("%s variable '%s' cannot be a template fucntion",
-					errMsgPrefix(call.ParameterTypes[0].pos), call.name)))
+					errMsgPrefix(call.parameterTypes[0].pos), call.name)))
 			}
 			ret := v.Type.functionType.mkCallReturnTypes(e.pos)
 			errsLength := len(errs)

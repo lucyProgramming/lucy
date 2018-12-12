@@ -1043,7 +1043,7 @@ public class Class {
     }
 
     fn checkIfClassHierarchyErr()-> (err error){
-        m := new map { string -> bool}( )
+        m := new map{ string -> bool }()
         arr := []string{}
         is := false
         c := this

@@ -14,7 +14,7 @@ public class Lexer {
 	autoCompletion int 
 	endColumnOffset int 
 	lastEndColumnOffset int 
-
+	
 	public fn getLineAndColumn() -> (line int, column int) {
 		return this.line, this.endColumnOffset
 	}
@@ -501,6 +501,7 @@ public class Lexer {
 			return string(bs[:len(bs)-1]),  null	
 		}
 		goto redo
+
 	}
 
 	/*
@@ -548,10 +549,6 @@ public class Lexer {
 		for c == ' ' ||
 			c == '\t' ||
 			c == '\r' { // skip empty
-			if this.offset - 1 == this.autoCompletion {
-				token.Type = TokenAutoCompletion
-				return  
-			}
 			c, eof = this.getChar()
 		}
 		token.startLine = this.line

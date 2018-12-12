@@ -35,10 +35,6 @@ class ExpressionCheckUnary {
 		return result
 	}
 
-	// static fn autoCompletionForUnary(block Block) {
-	// 	block.inheritedAttribute.p.autoCompletionItems =  searchRightValueForAutoCompletionItems(block)
-	// }
-
 
 	static fn checkincrementExpression(e Expression  , block Block, errs []error) ->(valueType Type) {
 		on := e.data.(Expression)
@@ -52,8 +48,7 @@ class ExpressionCheckUnary {
 				special case
 				fn1(a++)
 			*/
-			t := on.data.(ExpressionIdentifier)
-			if t.Variable != null {
+			if t := on.data.(ExpressionIdentifier) ; t.Variable != null {
 				t.Variable.used = true
 			}
 		}

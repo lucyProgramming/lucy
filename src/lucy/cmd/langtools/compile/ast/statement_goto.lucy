@@ -13,6 +13,10 @@ public class StatementGoTo {
 	public autoCompletion bool 
 	
 	fn checkStatementGoTo(block Block) -> (err error) {
+		if this.autoCompletion {
+			block.inheritedAttribute.p.autoCompletionItems =  searchLableForAutoCompletionItems(block)
+			return 
+		}
 		label := block.searchLabel(this.labelName , this.pos)
 		if label == null {
 			return new error(sprintf("%s label named '%s' not found",
@@ -20,10 +24,6 @@ public class StatementGoTo {
 		}
 		if this.locateDefinition {
 			block.inheritedAttribute.p.locateDefinition = label.pos
-			return 
-		}
-		if this.autoCompletion {
-			block.inheritedAttribute.p.autoCompletionItems =  searchLableForAutoCompletionItems(block)
 			return 
 		}
 		this.statementLabel = label

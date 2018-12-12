@@ -137,7 +137,6 @@ class TypeParser extends ParserExtends {
 			ret.Type =  ast.VariableTypeFunction
 			ret.pos =  pos
 			ret.functionType =  ft
-
 		case lex.TokenGlobal:
 			this.next(lfIsToken)
 			this.parser.unExpectNewLineAndSkip()

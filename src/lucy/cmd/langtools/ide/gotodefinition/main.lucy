@@ -4,7 +4,7 @@ import "lucy/encoding/json"
 public fn main(args []string) {
     f := new Flags()
     file , bufferFile, pos := f.parseArgs(args)
-    bs , err := json.encode(findDefinition(file ,bufferFile ,  pos , null ) , "\t")
+    bs , err := json.encode(findDefinition(file , bufferFile ,  pos , null ) , "\t")
     if err != null {
         panic(err)
     }

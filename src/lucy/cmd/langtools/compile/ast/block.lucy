@@ -330,7 +330,7 @@ public class Block {
                 v.isGlobal {
                 continue
             }
-            es.append(new error(sprintf("%s const '%s' has declared,but not used",
+            es.append(new error(sprintf("%s constant '%s' has declared,but not used",
                 v.pos.errMsgPrefix(), v.name)))
         }
         for _, v := range this.enums {
@@ -361,7 +361,7 @@ public class Block {
             if v.used {
                 continue
             }
-            es.append(new error(sprintf("%s enum '%s' has declared,but not used",
+            es.append(new error(sprintf("%s label '%s' has declared,but not used",
                 v.pos.errMsgPrefix(), v.name)))
         }
         for _, v := range this.variables {

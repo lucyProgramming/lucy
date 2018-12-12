@@ -1,7 +1,7 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
 
 
-typealias buildInFunctionChecker = fn(
+typealias BuildInFunctionChecker = fn(
 	f Function,
 	e ExpressionFunctionCall,
 	block Block,
@@ -15,7 +15,7 @@ public class Function {
 	public TemplateFunction                 TemplateFunction
 	parameterTypes                   		map { string -> Type }     //typed parameters
 	public entrance                         cg.MethodHighLevel // make_node_objects call from
-	buildInFunctionChecker           		buildInFunctionChecker
+	buildInFunctionChecker           		BuildInFunctionChecker
 	public accessFlags                      char
 	public Type                             FunctionType = new FunctionType()
 	public Closure                          Closure = new Closure()
@@ -51,8 +51,10 @@ public class Function {
 	fn mkSuggest() ->(s string ) {
 		s = sprintf("%s(" , this.name)
 		for k , v := range this.Type.parameterList {
-			if v.name != null {
+			if v.name != null && v.name != "" {
 				s += v.name 
+			}else {
+				s += v.Type.typeString()
 			}
 			if k != len(this.Type.parameterList) - 1 {
 				s += " , "
@@ -127,6 +129,7 @@ public class Function {
 		ret.templateClonedFunction = true
 		return ret, es
 	}
+
 	fn makeLastReturnStatement() {
 		s := new StatementReturn()
 		t := new Statement()
@@ -155,6 +158,7 @@ public class Function {
 			}
 			if v.locateDefinition {
 				this.block.inheritedAttribute.p.locateDefinition = v.pos
+				return 
 			}
 			if v.findUsage {
 				u := new Usage()
@@ -235,6 +239,7 @@ public class Function {
 				}
 				if v.locateDefinition {
 					this.block.inheritedAttribute.p.locateDefinition = v.pos
+					return
 				}
 				if v.findUsage {
 					u := new Usage()

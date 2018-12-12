@@ -26,8 +26,8 @@ public class AttributeCode  {
 		binary.BigEndian.putChar(ret.info[0:2], this.maxStack)
 		binary.BigEndian.putChar(ret.info[2:4], this.maxLocals)
 		binary.BigEndian.putInt(ret.info[4:8], (this.codeLength))
-		ret.info . appendAll( this.codes)
-		ret.info . appendAll(this.mkExceptions())
+		ret.info.appendAll( this.codes)
+		ret.info.appendAll(this.mkExceptions())
 		if this.attributes == null {
 		    this.attributes =  []AttributeInfo{}
 		}
