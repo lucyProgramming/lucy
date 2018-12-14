@@ -47,12 +47,10 @@ public class StatementSwitch  {
 		if conditionType.Type == VariableTypeBool {
 			errs.append(new error(sprintf("%s bool expression not allow for switch",
 				conditionType.pos.errMsgPrefix())))
-			return errs
 		}
 		if len(this.cases) == 0 {
 			errs.append(new error(sprintf("%s switch statement has no cases",
 				this.EndPos.errMsgPrefix())))
-			return errs
 		}
 		longMap :=  new map { long -> Pos } ()
 		doubleMap := new map { double -> Pos }()

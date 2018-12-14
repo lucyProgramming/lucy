@@ -3,34 +3,29 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+
 const path = require('path');
+const querystring = require('querystring');
+const syncHttpRequest = require('sync-request');
 
-const child_process = require('child_process');
-
+//FIXME vscode don't goto the right place
 module.exports = class GoDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
     public provideDocumentSymbols(
         document: vscode.TextDocument, token: vscode.CancellationToken):
         Thenable<vscode.SymbolInformation[]> {
-        let dir = path.dirname( document.fileName);
-        let args = [
-            "lucy.cmd.langtools.ide.alldefinition.main",
-            "-dir",
-            dir
-        ];
-        let result = child_process.execFileSync("java", args);
-        console.log(result);
-        let definitions = JSON.parse(result);
+        let dir = path.dirname(document.fileName);
+        var u = "http://localhost:2018/ide/allDefinition?dir=" + querystring.escape(dir);
+        console.log(u);
+        var res  = syncHttpRequest("GET" , u);
+        var definitions = JSON.parse(res.getBody());
         if (!definitions) {
-            return ;
+            return null;
         }
         //TODO:: 
         console.log(definitions);
-        var i = 0 ;
         var infos = new Array();
-        for(var pro in definitions) {
-            let v = definitions[pro];
-            let location = new vscode.Location(vscode.Uri.file(v.pos.filename) , new vscode.Position(v.pos.endLine , v.pos.endColumnOffset));
-            console.log(v.name , location);
+        for(var i = 0 ;  i <  definitions.length ; i++ ) {
+            var v = definitions[i];
             var kind : vscode.SymbolKind ;
             switch(v.Type) {
                 case "variable":
@@ -49,9 +44,14 @@ module.exports = class GoDocumentSymbolProvider implements vscode.DocumentSymbol
                     kind = vscode.SymbolKind.Enum;
                     break;
             }
-            let info = new vscode.SymbolInformation(v.name , kind  , "" , location);
+            console.log( "!!!!!!!!!!!!!!!!!",v.name , v.pos.filename , v.pos.startLine);
+            var uri2 = vscode.Uri.file(v.pos.filename);
+            var position2 = new vscode.Position(v.pos.endLine,v.pos.endColumnOffset);
+            var location2 = new vscode.Location(uri2 , position2);
+            console.log(location2);
+            var info = new vscode.SymbolInformation(v.name , kind  , "" , location2);
             infos[i] = info;
-            i++;
+            console.log(i , info );
         }
         return infos;
     }

@@ -239,7 +239,7 @@ public class Package {
 				continue
 			}
 			if t ,ok:= v.node.(Import) ; ok {
-				if t.accessName != null && t.accessName == UnderScore{
+				if t.accessName != null && t.accessName == UnderScore {
 					errs.append(new error(sprintf("%s '%s' is not a valid name" , t.pos.errMsgPrefix()  , UnderScore)))
 				}else {
 					err := this.insertImport(t)
@@ -251,10 +251,14 @@ public class Package {
 			if t ,ok:= v.node.(Expression) ; ok {
 				if t.Type == ExpressionTypeVar || t.Type == ExpressionTypeVarAssign {
 					expressions.append(t)
-				} else {
-					errs.append(new error(sprintf("%s cannot have '%s' in top",
-						t.pos.errMsgPrefix(), t.op)))
-				}	
+					continue
+				} 
+				if t.isAutoCompletionIdenfier() {
+					this.autoCompletionItems = AutoCompletionItem.getTopDefaultAutoCompletionItem()
+					continue
+				}
+				errs.append(new error(sprintf("%s cannot have '%s' in top",
+					t.pos.errMsgPrefix(), t.op)))
 			}
 		}
 		
@@ -280,6 +284,7 @@ public class Package {
 	public fn typeCheck(nodes []TopNode) -> (es []error = []error{}) {
 		this.block.inheritedAttribute.p = this
 		this.block.isPackageBlock = true 
+		this.block.Package = this 
 		this.errors = []error{}
 		if this.nErrors2Stop <= 2 {
 			this.nErrors2Stop = 10

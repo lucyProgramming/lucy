@@ -20,8 +20,7 @@ public enum StatementTypeKind {
 	StatementTypeTypeAlias ,
 	StatementTypeComment ,
 	StatementTypeCommentMultiLine , 
-	StatementTypeEmptyLine  , 
-	StatementTypeAutoCompletion 
+	StatementTypeEmptyLine 
 }
 
 public class Statement {
@@ -75,8 +74,6 @@ public class Statement {
 			//nothing
 		case StatementTypeEmptyLine:
 			//noting
-		case StatementTypeAutoCompletion:
-			block.inheritedAttribute.p.autoCompletionItems = searchRightValueForAutoCompletionItems(this.pos, block)
 			
 		case StatementTypeExpression:
 			return this.checkStatementExpression(block)

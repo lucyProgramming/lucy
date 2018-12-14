@@ -296,7 +296,9 @@ public class MakeNodesObjects {
                     conditions[kk] =  this.makeExpression(vv)
                 }
                 onecase["conditions"] = conditions
-                onecase["block"] = this.makeBlock(v.block)
+                if v.block != null {
+                    onecase["block"] = this.makeBlock(v.block)
+                }
                 cases[k] = onecase
             }
             ret["cases"] = cases

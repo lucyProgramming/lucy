@@ -260,7 +260,7 @@ class ClassParser extends  ParserExtends{
 				if classDefinition.methods == null {
 					classDefinition.methods = new map { string -> []ast.ClassMethod }( )
 				}
-				if f.name == "" {
+				if f.name == null || f.name == "" {
 					f.name = compileAutoName()
 				}
 				m := new ast.ClassMethod()

@@ -122,8 +122,6 @@ class BuildBlock {
 			//handle at ast
 		case ast.StatementTypeEmptyLine:
 			//handle at ast
-		case ast.StatementTypeAutoCompletion:
-			//handle at ast
 		case ast.StatementTypeImport:
 			//handle at ast
 		case ast.StatementTypeEnum:

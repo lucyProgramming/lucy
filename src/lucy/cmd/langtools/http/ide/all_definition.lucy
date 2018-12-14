@@ -1,0 +1,35 @@
+import "lucy/cmd/langtools/ide/alldefinition"
+import "com/sun/net/httpserver/HttpHandler"
+import "com/sun/net/httpserver/HttpExchange"
+import "lucy/cmd/langtools/http/g"
+import "lucy/encoding/json"
+
+
+class AllDefinition implements HttpHandler {
+    public fn handle(exchange HttpExchange) {
+        os := exchange.getResponseBody()
+        defer {
+            e := catch()
+            if e != null {
+                exchange.sendResponseHeaders(500 , 0L)
+                os.write(byte[]("internal error"))
+                e.printStackTrace()
+            }
+            exchange.close()
+        }
+        uri := exchange.getRequestURI()
+        paramters := g.parseQuery(uri.getQuery())
+        dir := paramters["dir"]
+        if dir == null || dir == "" {
+            bs := byte[]("dir not provide")
+            exchange.sendResponseHeaders(400 , long(len(bs)))
+            os.write(bs)
+            return
+        }
+        definitions :=  alldefinition.getAllDefinition(dir)
+        bs ,_ := json.encode(definitions , "\t")
+        exchange.sendResponseHeaders(200 , long(len(bs)))
+        os.write(copy(new byte[](len(bs)) ,bs))
+        
+    } 
+}

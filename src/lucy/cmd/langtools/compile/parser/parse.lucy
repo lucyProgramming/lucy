@@ -2,23 +2,13 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-/*
-public fn ParseJavaBytes(tops []ast.TopNode,
-	filename string,
-	bs byte[],
-	onlyParseImport bool,
-	nErrors2Stop int) -> (errs []error){
-	return Parse(tops , filename , javaArray2Lucy(bs)，onlyParseImport，nErrors2Stop )
-}
-*/
-
-
 public fn Parse(
 	tops []ast.TopNode,
 	filename string,
 	bs []byte,
 	onlyParseImport bool,
 	nErrors2Stop int , locateDefinition int ,getHover int , findUsage int ,rename int , autoCompletion int   ) -> (errs []error) {
+	
 	p := new Parser(bs , tops , filename , onlyParseImport , nErrors2Stop )
 	p.lexer = lex.New(bs, 0, 0 , locateDefinition , getHover , findUsage , rename , autoCompletion)
 	errs = p.parse()
@@ -41,7 +31,7 @@ class Parser {
 	BlockParser            BlockParser
 	TypeParser             TypeParser 
 	EnumParser             EnumParser
-	tokenStack      	   []lex.Token 
+	tokenStack      	   []lex.Token  // token stack for look back 
 
 	
 	/*

@@ -78,7 +78,7 @@ class StatementWhenParser extends ParserExtends {
 			if this.parser.token.Type != lex.TokenColon {
 				err = new error(sprintf("%s expect ':',but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.description))
-				this.parser.errs.append( err)
+				this.parser.errs.append(err)
 				t := new ast.StatementWhenCase()
 				t.matches = ts 
 				if whenStatement.cases == null{

@@ -13,7 +13,7 @@ public class Block {
 	public isFunctionBlock           bool // function block
 	public isClassBlock              bool // class block
     isPackageBlock                   bool 
-    
+    Package                          Package // when isPackageBlock is true this field shoule not be null
 	public Class                     Class
 	public isForBlock                bool // for top block
 	public isSwitchBlock             bool // switch statement list block

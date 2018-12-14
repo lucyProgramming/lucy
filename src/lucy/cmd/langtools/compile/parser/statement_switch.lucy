@@ -16,8 +16,8 @@ class StatementSwitchParser extends ParserExtends{
 		this.parser.unExpectNewLineAndSkip()
 		statementSwitch.EndPos = this.parser.mkPos()
 		statementSwitch.condition, err = this.parser.ExpressionParser.parseExpression(false)
-		if err != null {
-			this.consume(untilLc)
+		if statementSwitch.condition == null  {
+			return null ,err 
 		}
 		this.parser.ifTokenIsLfThenSkip(true)
 		for this.parser.token.Type == lex.TokenSemicolon {
@@ -35,8 +35,8 @@ class StatementSwitchParser extends ParserExtends{
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s expect '{',but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))
-			this.parser.errs.append( err)
-			this.consume(untilLc)
+			this.parser.errs.append(err)
+			return statementSwitch , err 
 		}
 		this.next(lfIsToken) // skip {  , must be case
 		this.parser.expectNewLine()
@@ -54,9 +54,8 @@ class StatementSwitchParser extends ParserExtends{
 		for this.parser.token.Type == lex.TokenCase {
 			this.next(lfIsToken) // skip case
 			this.parser.unExpectNewLineAndSkip()
-			var es []ast.Expression
-			es, err = this.parser.ExpressionParser.parseExpressions(lex.TokenColon)
-			if err != null {
+			es, _ := this.parser.ExpressionParser.parseExpressions(lex.TokenColon)
+			if es == null {
 				return statementSwitch, err
 			}
 			if this.parser.token.Type != lex.TokenColon {
@@ -71,6 +70,7 @@ class StatementSwitchParser extends ParserExtends{
 					statementSwitch.cases.append(t)
 				}
 				print("in parse")
+				this.parser.ifTokenIsLfThenSkip(true) 
 				continue
 			}
 			this.next(lfIsToken) // skip :
@@ -124,6 +124,7 @@ class StatementSwitchParser extends ParserExtends{
 				statementSwitch.Default = block
 			}
 		}
+
 		if this.parser.token.Type != lex.TokenRc {
 			err = new error(sprintf("%s expect '}',but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))

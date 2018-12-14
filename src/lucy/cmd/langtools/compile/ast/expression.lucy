@@ -811,7 +811,7 @@ public class Expression {
 		}
 	}
 	
-	public fn isAutoCompletionIdenfier() -> (is bool){
+	fn isAutoCompletionIdenfier() -> (is bool){
 		if this.Type != ExpressionTypeIdentifier {
 			return false 
 		}

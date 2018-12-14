@@ -356,6 +356,7 @@ var autoCompletionBuildFunctionItems = new []AutoCompletionItem(0)
 }
 
 
+
 fn loadJavaStringClass(block Block , pos Pos) ->(err error) {
 	if javaStringClass != null {
 		return null

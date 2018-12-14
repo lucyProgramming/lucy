@@ -286,15 +286,14 @@ fn searchRightValueForAutoCompletionItems(pos Pos, block Block) -> (items []Auto
 			items.append(item)
 			names[name] = true 
 		}
-		if b.isPackageBlock {
+		if b.isPackageBlock  && b.Package.name != "lucy/lang"{
 			s := block.inheritedAttribute.p.getSourceFile(pos.filename) 
 			if s != null {
-				for name,_ := range s.imports {
+				for name , _ := range s.imports {
 					item  := new AutoCompletionItem()
 					item.Type = "import"
 					item.name = name 
 					items.append(item)
-					names[name] = true 
 				}
 			}
 		}
@@ -358,7 +357,8 @@ fn searchTypeForAutoCompletionItems( pos Pos, block Block) -> (items []AutoCompl
 			items.append(item)
 			names[name] = true 
 		}
-		if b.isPackageBlock {
+		//FIXME 
+		if b.isPackageBlock && b.Package.name != "lucy/lang" {
 			s := block.inheritedAttribute.p.getSourceFile(pos.filename) 
 			if s != null {
 				for name,_ := range s.imports {
@@ -366,7 +366,6 @@ fn searchTypeForAutoCompletionItems( pos Pos, block Block) -> (items []AutoCompl
 					item.Type = "import"
 					item.name = name 
 					items.append(item)
-					names[name] = true 
 				}
 			}
 		}

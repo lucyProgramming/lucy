@@ -14,7 +14,7 @@ public class Closure {
 		}
 		return this.variables.keyExist(v)
 	}
-
+	
 	public fn closureFunctionExist(v Function)  ->(exists bool)  {
 		if this.functions == null {
 			return false

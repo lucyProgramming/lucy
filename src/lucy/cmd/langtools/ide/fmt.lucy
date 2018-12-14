@@ -469,8 +469,6 @@ public class Fmt {
             case ast.StatementTypeCommentMultiLine:
                 format += indent + "/*\n" + s.comment 
                 format += indent + "*/\n"   
-            case ast.StatementTypeAutoCompletion:
-                // not possible 
         }
     }
     fn formatTypealias(indent string ,a ast.TypeAlias)-> (format string = "") {
