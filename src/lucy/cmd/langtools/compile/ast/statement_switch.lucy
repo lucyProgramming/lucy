@@ -11,7 +11,7 @@ public class StatementSwitch  {
 	public prefixExpressions    []Expression
 	initExpressionBlock  Block = new Block() 
 	public pos                  Pos
-	public EndPos               Pos
+	public endPos               Pos
 	public condition            Expression //switch
 	public cases []StatementSwitchCase
 	public Default              Block
@@ -19,7 +19,6 @@ public class StatementSwitch  {
 	public inlineComment string 
 	public defaultInlineComment string 
 	
-
 
 	fn check(block Block) ->(errs []error = []error{})  {
 		this.initExpressionBlock.inherit(block)
@@ -50,7 +49,7 @@ public class StatementSwitch  {
 		}
 		if len(this.cases) == 0 {
 			errs.append(new error(sprintf("%s switch statement has no cases",
-				this.EndPos.errMsgPrefix())))
+				this.endPos.errMsgPrefix())))
 		}
 		longMap :=  new map { long -> Pos } ()
 		doubleMap := new map { double -> Pos }()
@@ -167,7 +166,7 @@ public class StatementSwitch  {
 			containsBool == false {
 			//some enum are missing, not allow
 			errMsg := sprintf("%s switch for enum '%s' is not complete\n",
-				this.EndPos.errMsgPrefix(), conditionType.Enum.name)
+				this.endPos.errMsgPrefix(), conditionType.Enum.name)
 			errMsg += "\tyou can use 'default:' or give missing enums,which are:\n"
 			var i = 0 
 			for _, v := range conditionType.Enum.enums {

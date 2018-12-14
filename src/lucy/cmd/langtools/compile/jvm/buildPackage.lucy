@@ -178,7 +178,6 @@ public class  BuildPackage {
                             cg.AccMethodVarargs
                     }
                 }
-                
             }
             v.globalVarClassName = this.mainClass.name
             f.name = v.name

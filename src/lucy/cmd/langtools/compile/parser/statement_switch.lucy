@@ -14,7 +14,7 @@ class StatementSwitchParser extends ParserExtends{
 		statementSwitch.pos = this.parser.mkPos()
 		this.next(lfIsToken) // skip switch key word
 		this.parser.unExpectNewLineAndSkip()
-		statementSwitch.EndPos = this.parser.mkPos()
+		statementSwitch.endPos = this.parser.mkPos()
 		statementSwitch.condition, err = this.parser.ExpressionParser.parseExpression(false)
 		if statementSwitch.condition == null  {
 			return null ,err 
@@ -124,14 +124,15 @@ class StatementSwitchParser extends ParserExtends{
 				statementSwitch.Default = block
 			}
 		}
-
+		this.parser.ifTokenIsLfThenSkip(true)
 		if this.parser.token.Type != lex.TokenRc {
 			err = new error(sprintf("%s expect '}',but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))
-			this.parser.errs.append( err)
+			this.parser.errs.append(err)
+			statementSwitch.endPos = this.parser.mkPos()
 			return statementSwitch, err
 		}
-		statementSwitch.EndPos = this.parser.mkPos()
+		statementSwitch.endPos = this.parser.mkPos()
 		this.next(lfIsToken) //  skip }
 		return statementSwitch, null
 	}

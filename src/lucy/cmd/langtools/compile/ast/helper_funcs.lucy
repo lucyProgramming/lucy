@@ -286,7 +286,7 @@ fn searchRightValueForAutoCompletionItems(pos Pos, block Block) -> (items []Auto
 			items.append(item)
 			names[name] = true 
 		}
-		if b.isPackageBlock  && b.Package.name != "lucy/lang"{
+		if b.isPackageBlock && (b.Package.name != "lucy/lang" || b.Package == block.inheritedAttribute.p) {
 			s := block.inheritedAttribute.p.getSourceFile(pos.filename) 
 			if s != null {
 				for name , _ := range s.imports {
@@ -357,8 +357,7 @@ fn searchTypeForAutoCompletionItems( pos Pos, block Block) -> (items []AutoCompl
 			items.append(item)
 			names[name] = true 
 		}
-		//FIXME 
-		if b.isPackageBlock && b.Package.name != "lucy/lang" {
+		if b.isPackageBlock && (b.Package.name != "lucy/lang" || b.Package == block.inheritedAttribute.p) {
 			s := block.inheritedAttribute.p.getSourceFile(pos.filename) 
 			if s != null {
 				for name,_ := range s.imports {

@@ -357,7 +357,7 @@ class Parser {
 		}
 	}
     /*
-	fn mkEndPos() -> (pos ast.Pos) {
+	fn mkendPos() -> (pos ast.Pos) {
 		if this.lastToken == null {
 			return &ast.Pos{
 				filename: this.filename,

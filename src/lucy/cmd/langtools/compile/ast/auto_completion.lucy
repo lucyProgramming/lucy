@@ -20,16 +20,12 @@ public class AutoCompletionItem {
         }
         AutoCompletionItem.topDefaultAutoCompletionItem = []AutoCompletionItem{}
         items = AutoCompletionItem.topDefaultAutoCompletionItem
+        
         item := new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "static"
-        items.append(item)
-
-        item = new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "public"
         items.append(item)
-
+        
 
         item = new AutoCompletionItem()
         item.Type = "keyword"
