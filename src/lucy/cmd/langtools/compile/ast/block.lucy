@@ -500,7 +500,7 @@ public class Block {
         if isMagicIdentifier(name) {
             return new error(sprintf("%s '%s' is not a magic identifier", pos.errMsgPrefix(), name))
         }
-        //TODO :: check it or not
+        //TODO:: check it or not
         // // label need insert into body first, at this time some pointer maybe null
         // // lable's name must not equal a "build" must be checked //TODO 
         // var lucyBuildInPackage Package 
@@ -513,7 +513,7 @@ public class Block {
         // }  // 
         return null
     }
-
+    
     public fn insert(name string, pos Pos, d Object) -> (err error) {
         if err = this.nameIsValid(name, pos); err != null {
             return err

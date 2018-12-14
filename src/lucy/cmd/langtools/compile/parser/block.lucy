@@ -2,7 +2,6 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-
 class BlockParser  extends ParserExtends{
 	
 	StatementForParser StatementForParser
