@@ -108,10 +108,8 @@ class BlockParser  extends ParserExtends{
 			case lex.TokenVar:
 				pos := this.parser.mkPos()
 				this.next(lfIsToken) // skip var key word
-				vs, err := this.parser.parseVar()
-				if err != null {
-					this.consume(untilSemicolonOrLf)
-					this.next(lfNotToken)
+				vs, _ := this.parser.parseVar()
+				if vs == null   {
 					continue
 				}
 				statement := new ast.Statement()
@@ -159,13 +157,8 @@ class BlockParser  extends ParserExtends{
 				}
 			case lex.TokenSwitch:
 				pos := this.parser.mkPos()
-				statement, err := this.StatementSwitchParser.parseSwitch()
-				if err != null {
-					this.consume(untilRc)
-					this.next(lfNotToken)
-					continue
-				}
-				{
+				statement, _ := this.StatementSwitchParser.parseSwitch()
+				if statement != null{
 				    t := new ast.Statement()
 				    t.Type =  ast.StatementTypeSwitch
 				    t.StatementSwitch =  statement
@@ -174,13 +167,8 @@ class BlockParser  extends ParserExtends{
 				}
 			case lex.TokenWhen:
 				pos := this.parser.mkPos()
-				statement, err := this.StatementWhenParser.parseWhen()
-				if err != null {
-					this.consume(untilRc)
-					this.next(lfNotToken)
-					continue
-				}
-				{
+				statement, _ := this.StatementWhenParser.parseWhen()
+				if statement != null {
 				    t := new ast.Statement()
 				    t.Type = ast.StatementTypeWhen
 				    t.StatementWhen = statement

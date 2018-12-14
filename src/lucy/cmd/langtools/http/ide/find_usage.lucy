@@ -9,13 +9,13 @@ class FindUsage implements HttpHandler {
     public fn handle(exchange HttpExchange) {
         os := exchange.getResponseBody()
         defer {
-            exchange.close()
             e := catch()
             if e != null {
                 exchange.sendResponseHeaders(500 , 0L)
                 os.write(byte[]("internal error"))
                 e.printStackTrace()
             }
+            exchange.close()
         }
         uri := exchange.getRequestURI()
         paramters := g.parseQuery(uri.getQuery())

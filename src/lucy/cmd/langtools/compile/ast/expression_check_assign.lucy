@@ -1,5 +1,5 @@
 class ExpressionCheckAssign {
-		
+	
 	static fn check(e Expression , block Block, errs []error) ->(valueType Type)  {
 		bin := e.data.(ExpressionBinary)
 		lefts := new []Expression(1)
@@ -37,9 +37,33 @@ class ExpressionCheckAssign {
 				len(valueTypes),
 				len(lefts))))
 		}
-		
 		for k, v := range leftTypes {
 			if v == null { // get left value error or "_"
+				left := lefts[k]
+				if left == null {
+					continue
+				}
+				if left.Type != ExpressionTypeIdentifier {
+					continue
+				}
+				identifier := left.data.(ExpressionIdentifier)
+				if identifier.name == UnderScore {
+					continue
+				}
+				if k >= len(valueTypes) {
+					continue
+				}
+				if valueTypes[k] == null {
+					continue
+				}
+				vd := new Variable()
+				vd.name = identifier.name 
+				vd.pos = valueTypes[k].pos
+				vd.Type = valueTypes[k]
+				vd.used = true 
+				identifier.Variable = vd 
+				//error should not be handle this time
+				block.insert(identifier.name , vd.pos , vd)
 				continue
 			}
 			if k >= len(valueTypes) {

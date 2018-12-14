@@ -25,8 +25,8 @@ class ExpressionParser extends  ParserExtends {
 				continue
 			}
 			var e ast.Expression
-			e, err = this.parseExpression(false)
-			if err != null {
+			e, _ = this.parseExpression(false)
+			if e == null {
 				return es, err
 			}
 			es.append(e)
@@ -42,7 +42,7 @@ class ExpressionParser extends  ParserExtends {
 				}
 				break
 			}
-			// == ,
+			//==
 			commnaPos := this.parser.mkPos()
 			this.next(lfIsToken)
 			// skip = :=
@@ -172,17 +172,14 @@ class ExpressionParser extends  ParserExtends {
         if isMulti {
             var es []ast.Expression
             es, err = this.parseExpressions(lex.TokenSemicolon)
-            if err != null {
+            if es == null {
                 return left, err
             }
             bin.right = new ast.Expression()
             bin.right.Type = ast.ExpressionTypeList
             bin.right.data = es
         } else {
-            bin.right, err = this.parseExpression(false)
-            if err != null {
-                return left, err
-            }
+            bin.right, _ = this.parseExpression(false)
         }
         return result, err
     }
@@ -202,7 +199,7 @@ class ExpressionParser extends  ParserExtends {
 		}
 		this.next(lfNotToken) // skip (
 		on, err := this.parseExpression(false)
-		if err != null {
+		if on == null {
 			return on, err
 		}
 		this.parser.ifTokenIsLfThenSkip(true)
@@ -272,8 +269,8 @@ class ExpressionParser extends  ParserExtends {
 			this.parser.token.Type != lex.TokenRc {
 			// key
 			var k ast.Expression
-			k, err = this.parseExpression(false)
-			if err != null {
+			k, _ = this.parseExpression(false)
+			if  k == null {
 				return
 			}
 			this.parser.unExpectNewLineAndSkip()
@@ -287,9 +284,9 @@ class ExpressionParser extends  ParserExtends {
 			this.next(lfNotToken) // skip ->
 			// value
 			var v ast.Expression
-			v, err = this.parseExpression(false)
-			if err != null {
-				return
+			v, _ = this.parseExpression(false)
+			if v == null {
+				return 
 			}
 			t := new ast.ExpressionKV()
 			t.key = k

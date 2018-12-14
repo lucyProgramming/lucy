@@ -18,8 +18,8 @@ class StatementIfParser extends ParserExtends {
 		var condition ast.Expression
 		this.parser.unExpectNewLineAndSkip()
 		condition, err = this.parser.ExpressionParser.parseExpression(true)
-		if err != null {
-			this.consume(untilLc)
+		if condition == null {
+			return null , err 
 		}
 		statementIf.condition = condition
 		this.parser.ifTokenIsLfThenSkip(true)

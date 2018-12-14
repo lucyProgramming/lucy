@@ -12,6 +12,7 @@ public class ClassField {
 	public locateDefinition bool 
 	public findUsage  bool 
 	public rename  bool
+	public autoCompletion bool 
 	public findUsageInstances  []Usage 
 	
 	/* 

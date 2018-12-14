@@ -79,7 +79,14 @@ class StatementWhenParser extends ParserExtends {
 				err = new error(sprintf("%s expect ':',but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.description))
 				this.parser.errs.append( err)
-				return whenStatement, err
+				t := new ast.StatementWhenCase()
+				t.matches = ts 
+				if whenStatement.cases == null{
+					whenStatement.cases = [t]
+				}else {
+					whenStatement.cases.append(t)
+				}
+				continue
 			}
 			t := new ast.StatementWhenCase()
 			this.next(lfIsToken) // skip :

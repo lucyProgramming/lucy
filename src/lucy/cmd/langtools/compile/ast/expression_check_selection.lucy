@@ -213,12 +213,14 @@ class ExpressionCheckSelection {
     
     static fn autoCompletion(object Type , block Block) {
         switch object.Type {
+        case VariableTypeString:
+            ExpressionCheckSelection.autoCompletionForString(block , object.pos)
         case VariableTypeMap:
             block.inheritedAttribute.p.autoCompletionItems = AutoCompletionItem.getMapAutoCompletionItem(object)
         case VariableTypeJavaArray:
             block.inheritedAttribute.p.autoCompletionItems = AutoCompletionItem.getJavaArrayBasicAutoCompletionItem()
         case VariableTypeArray:
-             block.inheritedAttribute.p.autoCompletionItems = AutoCompletionItem.getArrayAutoCompletionItem(object)
+            block.inheritedAttribute.p.autoCompletionItems = AutoCompletionItem.getArrayAutoCompletionItem(object)
         case VariableTypeDynamicSelector:
             .autoCompletionForDynamicSelector(object.Class , block)
         case VariableTypePackage:
@@ -229,9 +231,15 @@ class ExpressionCheckSelection {
             .autoCompletionClass(object.Class , block)
         }
     }
+
+    static fn autoCompletionForString( block Block , pos Pos ) {
+        if err := loadJavaStringClass(block , pos) ; err != null {
+            return 
+        }
+        ExpressionCheckSelection.autoCompletionForObject(javaStringClass , block)
+    }
+
     
-
-
     static fn autoCompletionForPackage(p Package , block Block) {
         items := []AutoCompletionItem{}
         for name , _ := range p.block.constants {

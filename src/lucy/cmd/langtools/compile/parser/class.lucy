@@ -342,7 +342,6 @@ class ClassParser extends  ParserExtends{
 		}
 		return null
 	}
-
 	fn parseField(
 		classDefinition ast.Class,
 		errs []error,
@@ -350,6 +349,22 @@ class ClassParser extends  ParserExtends{
 		isVolatile bool,
 		accessControlToken lex.Token,
 		comment CommentParser) -> (err error) {
+		if this.parser.token.autoCompletion {
+			// this is a auto completion mission
+			f := new ast.ClassField()
+			f.name = this.parser.token.stringValue
+			f.autoCompletion = true 
+			f.pos = this.parser.mkPos()
+			if classDefinition.fields == null {
+				classDefinition.fields = new  map { string -> ast.ClassField } ()
+			}
+			if f.name == null || f.name == "" {
+				f.name = compileAutoName()
+			}
+			this.next(lfIsToken)
+			classDefinition.fields[f.name] = f 
+			return 	
+		}
 		names, err := this.parser.parseNameList()
 		if err != null {
 			return err
@@ -372,7 +387,6 @@ class ClassParser extends  ParserExtends{
 		fd.initValues = initValues
 		fd.fields = new []ast.ClassField(len(names)) 
 		classDefinition.appendFmt(fd)
-		
 		fieldComment := comment.comment
 		if this.parser.token.Type == lex.TokenComment {
 			fd.inlineComment = this.parser.token.stringValue

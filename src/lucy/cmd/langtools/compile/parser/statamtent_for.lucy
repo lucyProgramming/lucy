@@ -23,9 +23,9 @@ class StatementForParser extends ParserExtends{
 		this.parser.unExpectNewLineAndSkip()
 		if this.parser.token.Type != lex.TokenLc &&
 			this.parser.token.Type != lex.TokenSemicolon { // not '{' and not ';'
-			statementFor.condition, err = this.parser.ExpressionParser.parseExpression(true)
-			if err != null {
-				this.consume(untilLc)
+			statementFor.condition, _ = this.parser.ExpressionParser.parseExpression(true)
+			if statementFor.condition == null {
+				// this.consume(untilLc)
 				goto parseBlock
 			}
 		}
@@ -35,24 +35,24 @@ class StatementForParser extends ParserExtends{
 			statementFor.condition = null // mk null
 			//condition
 			if this.parser.token.Type != lex.TokenSemicolon {
-				statementFor.condition, err = this.parser.ExpressionParser.parseExpression(false)
-				if err != null {
-					this.consume(untilLc)
+				statementFor.condition, _ = this.parser.ExpressionParser.parseExpression(false)
+				if statementFor.condition == null  {
+					// this.consume(untilLc)
 					goto parseBlock
 				}
 				if this.parser.token.Type != lex.TokenSemicolon {
 					this.parser.errs.append( new error(sprintf("%s missing semicolon after expression",
 						this.parser.errMsgPrefix())))
-					this.consume(untilLc)
+					// this.consume(untilLc)
 					goto parseBlock
 				}
 			}
 			this.next(lfIsToken)
 			this.parser.unExpectNewLineAndSkip()
 			if this.parser.token.Type != lex.TokenLc {
-				statementFor.increment, err = this.parser.ExpressionParser.parseExpression(true)
-				if err != null {
-					this.consume(untilLc)
+				statementFor.increment, _ = this.parser.ExpressionParser.parseExpression(true)
+				if statementFor.increment == null {
+					// this.consume(untilLc)
 					goto parseBlock
 				}
 			}

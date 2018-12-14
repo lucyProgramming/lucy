@@ -2,7 +2,6 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 import "java/lang/Object"
 import "lucy/cmd/langtools/compile/common"
 
-
 /*
 	public abstract final class {}
 	unlike function class not accept capture
@@ -184,7 +183,11 @@ public class Class {
             }
             if v.locateDefinition {
                 this.block.inheritedAttribute.p.locateDefinition = v.pos 
-                
+                return 
+            }
+            if v.autoCompletion {
+                this.block.inheritedAttribute.p.autoCompletionItems = AutoCompletionItem.getFieldDefaultAutoCompletionItem()
+                return 
             }
             if v.findUsage {
                 u := new Usage()

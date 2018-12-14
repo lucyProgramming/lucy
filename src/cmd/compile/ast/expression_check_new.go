@@ -11,6 +11,7 @@ func (e *Expression) checkNewExpression(block *Block, errs *[]error) *Type {
 		*errs = append(*errs, err)
 		return nil
 	}
+
 	if no.Type.Type == VariableTypeMap {
 		return e.checkNewMapExpression(block, no, errs)
 	}

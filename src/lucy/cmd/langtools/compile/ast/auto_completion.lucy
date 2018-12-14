@@ -10,6 +10,56 @@ public class AutoCompletionItem {
     private static javaArrayDefaultAutoCompletionItem  []AutoCompletionItem
     private static typeDefaultAutoCompletionItem []AutoCompletionItem
 
+    private static fieldDefaultAutoCompletionItem []AutoCompletionItem
+
+    static fn getFieldDefaultAutoCompletionItem() -> (items []AutoCompletionItem) {
+        if len(AutoCompletionItem.fieldDefaultAutoCompletionItem) > 0  {
+            return AutoCompletionItem.fieldDefaultAutoCompletionItem
+        }
+        AutoCompletionItem.fieldDefaultAutoCompletionItem = []AutoCompletionItem{}
+        items = AutoCompletionItem.fieldDefaultAutoCompletionItem
+        item := new AutoCompletionItem()
+        item.Type = "keyword"
+        item.name = "static"
+        items.append(item)
+
+        item = new AutoCompletionItem()
+        item.Type = "keyword"
+        item.name = "public"
+        items.append(item)
+
+        item = new AutoCompletionItem()
+        item.Type = "keyword"
+        item.name = "protected"
+        items.append(item)
+
+        item = new AutoCompletionItem()
+        item.Type = "keyword"
+        item.name = "private"
+        items.append(item)
+
+
+        item = new AutoCompletionItem()
+        item.Type = "keyword"
+        item.name = "volatile"
+        items.append(item)
+
+        item = new AutoCompletionItem()
+        item.Type = "keyword"
+        item.name = "synchronized"
+        items.append(item)
+
+        item = new AutoCompletionItem()
+        item.Type = "keyword"
+        item.name = "final"
+        items.append(item)
+
+        item = new AutoCompletionItem()
+        item.Type = "keyword"
+        item.name = "abstract"
+        items.append(item) 
+    }
+
     
     static fn getTypeAutoCompletionItem() -> (items []AutoCompletionItem) {
         if len(AutoCompletionItem.typeDefaultAutoCompletionItem) > 0  {

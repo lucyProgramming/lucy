@@ -37,8 +37,7 @@ class ExpressionCheckMethodCall {
 			if call.name == "finalize" {
 				errs.append(new error(sprintf("%s cannot call '%s'", e.pos.errMsgPrefix(), call.name)))
 				return null
-			}
-			//TODO:: auto completion 
+			} 
 			if err := loadJavaStringClass(block  , e.pos); err != null {
 				errs.append(err)
 				return null

@@ -45,7 +45,7 @@ class ExpressionArrayParser extends ParserExtends {
 			*/
 			this.next(lfNotToken) // skip (
 			e, err = this.ep.parseExpression(false)
-			if err != null {
+			if e == null {
 				return e, err  // incase e is not null
 			}
 			if this.parser.token.Type != lex.TokenRp {
@@ -125,7 +125,7 @@ class ExpressionArrayParser extends ParserExtends {
 				if e != null {
 					es.append(e)
 				}
-				if err != null {
+				if e == null {
 					return es, err
 				}
 			}

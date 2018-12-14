@@ -9,7 +9,7 @@ class ExpressionSuffix extends  ParserExtends {
 		this.parser = parser
 		this.ep = ep 
 	}
-
+	
 	fn parseSuffixExpression() -> (prefix ast.Expression, err error) {
 		switch this.parser.token.Type {
 		case lex.TokenAutoCompletion:
@@ -143,7 +143,6 @@ class ExpressionSuffix extends  ParserExtends {
 				this.parser.errs.append( err)
 				return prefix, err
 			}
-			assert(prefix != null)
 			newExpression := new ast.Expression()
 			newExpression.Type = ast.ExpressionTypeParenthesis
 			newExpression.pos = pos
@@ -273,7 +272,7 @@ class ExpressionSuffix extends  ParserExtends {
 			this.parser.unExpectNewLineAndSkip()
 			var t ast.Type
 			t, err = this.parser.parseType()
-			if err != null {
+			if t == null {
 				return prefix, err
 			}
 			prefix = new ast.Expression()
@@ -286,25 +285,25 @@ class ExpressionSuffix extends  ParserExtends {
 			if this.parser.token.Type != lex.TokenLp {
 				err = new error(sprintf("%s missing '(' after new", this.parser.errMsgPrefix()))
 				this.parser.errs.append(err)
-				return prefix, err
-			}else {
-				this.next(lfNotToken) // skip (
-				var es []ast.Expression
-				if this.parser.token.Type != lex.TokenRp { //
-					es, err = this.ep.parseExpressions(lex.TokenRp)
-					if err != null {
-						return prefix, err
-					}
-				}
-				this.parser.ifTokenIsLfThenSkip(true)
-				if this.parser.token.Type != lex.TokenRp {
-					err = new error(sprintf("%s '(' and ')' not match", this.parser.errMsgPrefix()))
-					this.parser.errs.append( err)
+				return prefix, null
+			} 
+			this.next(lfNotToken) // skip (
+			var es []ast.Expression
+			if this.parser.token.Type != lex.TokenRp { //
+				es, err = this.ep.parseExpressions(lex.TokenRp)
+				if err != null {
 					return prefix, err
 				}
-				n.args = es
-				this.next(lfIsToken)  // skip ) 
 			}
+			this.parser.ifTokenIsLfThenSkip(true)
+			if this.parser.token.Type != lex.TokenRp {
+				err = new error(sprintf("%s '(' and ')' not match", this.parser.errMsgPrefix()))
+				this.parser.errs.append( err)
+				return prefix, err
+			}
+			n.args = es
+			this.next(lfIsToken)  // skip ) 
+			
 		case lex.TokenLb:
 			prefix, err = this.ep.ExpressionArrayParser.parseArrayExpression()
 			if err != null {
@@ -398,16 +397,14 @@ class ExpressionSuffix extends  ParserExtends {
 					this.next(lfNotToken) // skip :
 					var end ast.Expression
 					if this.parser.token.Type != lex.TokenRb {
-						end, err = this.ep.parseExpression(false)
-						if err != null {
-							return prefix, err
-						}
+						end, _ = this.ep.parseExpression(false)
 					}
 					this.parser.ifTokenIsLfThenSkip(true)
 					if this.parser.token.Type != lex.TokenRb {
 						err = new error(sprintf("%s '[' and ']' not match", this.parser.errMsgPrefix()))
 						this.parser.errs.append( err)
-						return prefix, err
+					}else {
+						this.next(lfIsToken) // skip ]
 					}
 					newExpression := new ast.Expression()
 					newExpression.Type = ast.ExpressionTypeSlice
@@ -418,7 +415,6 @@ class ExpressionSuffix extends  ParserExtends {
 					slice.expressionOn = prefix
 					slice.end = end
 					prefix = newExpression
-					this.next(lfIsToken) // skip ]
 				} else {
 				    var e ast.Expression
 					e, err = this.ep.parseExpression(false)
@@ -429,15 +425,13 @@ class ExpressionSuffix extends  ParserExtends {
 						this.next(lfNotToken)
 						var end ast.Expression
 						if this.parser.token.Type != lex.TokenRb {
-							end, err = this.ep.parseExpression(false)
-							if err != null {
-								return prefix, err
-							}
+							end, _ = this.ep.parseExpression(false)
 						}
 						if this.parser.token.Type != lex.TokenRb {
 							err = new error(sprintf("%s '[' and ']' not match", this.parser.errMsgPrefix()))
 							this.parser.errs.append( err)
-							return prefix, err
+						}else {
+							this.next(lfIsToken) // skip ]
 						}
 						newExpression := new ast.Expression()
 						newExpression.Type = ast.ExpressionTypeSlice
@@ -449,7 +443,6 @@ class ExpressionSuffix extends  ParserExtends {
 						slice.expressionOn = prefix
 						slice.end = end
 						prefix = newExpression
-						this.next(lfIsToken) // skip ]
 					} else {
 						if this.parser.token.Type != lex.TokenRb {
 							err = new error(sprintf("%s '[' and ']' not match", this.parser.errMsgPrefix()))

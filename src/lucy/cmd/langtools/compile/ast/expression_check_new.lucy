@@ -1,10 +1,14 @@
 class ExpressionCheckNew {
+	
 	static  fn check(e Expression , block Block, errs []error) ->(valueType Type)  {
 		no := e.data.(ExpressionNew)
 		err := no.Type.resolve(block)
 		if err != null {
 			errs.append(err)
 			return null
+		}
+		if block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+			return  
 		}
 		if no.Type.Type == VariableTypeMap {
 			return .checkNewMapExpression(e ,block, no, errs)

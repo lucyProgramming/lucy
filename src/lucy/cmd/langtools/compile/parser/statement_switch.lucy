@@ -62,8 +62,16 @@ class StatementSwitchParser extends ParserExtends{
 			if this.parser.token.Type != lex.TokenColon {
 				err = new error(sprintf("%s expect ':',but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.description))
-				this.parser.errs.append( err)
-				return statementSwitch, err
+				this.parser.errs.append(err)
+				t := new ast.StatementSwitchCase()
+				t.matches = es 
+				if statementSwitch.cases == null {
+					statementSwitch.cases = [t]
+				}else {
+					statementSwitch.cases.append(t)
+				}
+				print("in parse")
+				continue
 			}
 			this.next(lfIsToken) // skip :
 			this.parser.expectNewLine()

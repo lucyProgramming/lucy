@@ -40,7 +40,7 @@ class ExpressionBinaryParser extends ParserExtends{
 				right.pos = this.parser.mkPos()
 			}else { 
 				right, err = this.parseLogicalAndExpression()
-				if err != null {
+				if right == null { // err must not null
 					return left, err
 				}
 			}
@@ -88,7 +88,7 @@ class ExpressionBinaryParser extends ParserExtends{
 				right.pos = this.parser.mkPos()
 			}else {
 				right, err = this.parseEqualExpression()
-				if err != null {
+				if right == null { // err must not null
 					return left, err
 				}
 			}
@@ -139,7 +139,7 @@ class ExpressionBinaryParser extends ParserExtends{
 				right.pos = this.parser.mkPos()
 			}else {
 				right, err = this.parseRelationExpression()
-				if err != null {
+				if right == null { // err must not null
 					return left, err
 				}
 			}
@@ -196,7 +196,7 @@ class ExpressionBinaryParser extends ParserExtends{
 				right.pos = this.parser.mkPos()
 			}else {
 				right, err = this.parseOrExpression()
-				if err != null {
+				if right == null { // err must not null
 					return left, err
 				}
 			}
@@ -253,7 +253,7 @@ class ExpressionBinaryParser extends ParserExtends{
 				right.pos = this.parser.mkPos()
 			}else{
 				right, err = this.parseXorExpression()
-				if err != null {
+				if right == null { // err must not null
 					return left, err
 				}
 			}
@@ -301,7 +301,7 @@ class ExpressionBinaryParser extends ParserExtends{
 				right.pos = this.parser.mkPos()
 			}else {
 				right, err = this.parseAndExpression()
-				if err != null {
+				if right == null { // err must not null
 					return left, err
 				}
 			}
@@ -349,7 +349,7 @@ class ExpressionBinaryParser extends ParserExtends{
 				right.pos = this.parser.mkPos()
 			}else {
 				right, err = this.parseShiftExpression()
-				if err != null {
+				if right == null { // err must not null
 					return left, err
 				}
 			}
@@ -400,7 +400,7 @@ class ExpressionBinaryParser extends ParserExtends{
 				right.pos = this.parser.mkPos()
 			}else {
 				right, err = this.parseAddExpression()
-				if err != null {
+				if right == null { // err must not null
 					return left, err
 				}
 			}
@@ -454,7 +454,7 @@ class ExpressionBinaryParser extends ParserExtends{
 				right.pos = this.parser.mkPos()
 			}else {
 				right, err = this.parseMulExpression()
-				if err != null {
+				if right == null { // err must not null
 					return left, err
 				}
 			}
@@ -509,7 +509,7 @@ class ExpressionBinaryParser extends ParserExtends{
 				right.pos = this.parser.mkPos()
 			}else {
 				right, err = this.ep.ExpressionSuffix.parseSuffixExpression()
-				if err != null {
+				if right == null { // err must not null
 					return left, err
 				}
 			}

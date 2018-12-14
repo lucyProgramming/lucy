@@ -1,6 +1,4 @@
-
 import "lucy/cmd/langtools/compile/jvm/cg"
-
 
 public class Constant  {
 	public isGlobal               bool
