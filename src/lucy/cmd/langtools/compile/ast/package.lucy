@@ -56,7 +56,7 @@ public class Package {
 		need =  langtoolsCommon.twoPathEqual(this.matchFile , file) 
 		if need == false {  // file not match
 			if this.printFileMatchInfo {
-				printf("file '%s' '%s' not match\n" , file)
+				printf("file '%s' '%s' not match\n" , this.matchFile , file )
 			}
 			return false  
 		}
