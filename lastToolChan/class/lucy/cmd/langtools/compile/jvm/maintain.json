@@ -1,12 +1,12 @@
 {
-	"compileTime":1543647401,
+	"compileTime":1544837735,
 	"compiledFrom":[
 		{
-			"lastModify":1543312303,
+			"lastModify":1544089291,
 			"name":"array_meta.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544782953,
 			"name":"block.lucy"
 		},
 		{
@@ -26,7 +26,7 @@
 			"name":"buildin_funcs.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544089291,
 			"name":"buildin_len.lucy"
 		},
 		{
@@ -34,19 +34,19 @@
 			"name":"buildin_print.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544435019,
 			"name":"buildin_printf.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544435019,
 			"name":"buildin_sprintf.lucy"
 		},
 		{
-			"lastModify":1543312303,
+			"lastModify":1544782953,
 			"name":"buildPackage.lucy"
 		},
 		{
-			"lastModify":1542108579,
+			"lastModify":1544089291,
 			"name":"closure.lucy"
 		},
 		{
@@ -54,15 +54,15 @@
 			"name":"context.lucy"
 		},
 		{
-			"lastModify":1542276696,
+			"lastModify":1543920568,
 			"name":"descriptor.lucy"
 		},
 		{
-			"lastModify":1543488785,
+			"lastModify":1544089291,
 			"name":"expression.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544435019,
 			"name":"expression_algebra.lucy"
 		},
 		{
@@ -74,23 +74,23 @@
 			"name":"expression_assign.lucy"
 		},
 		{
-			"lastModify":1542965008,
+			"lastModify":1544435019,
 			"name":"expression_call_args.lucy"
 		},
 		{
-			"lastModify":1542108579,
+			"lastModify":1544182205,
 			"name":"expression_conversion.lucy"
 		},
 		{
-			"lastModify":1542364114,
+			"lastModify":1544836412,
 			"name":"expression_function.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544836287,
 			"name":"expression_function_call.lucy"
 		},
 		{
-			"lastModify":1542108579,
+			"lastModify":1544836269,
 			"name":"expression_identifier.lucy"
 		},
 		{
@@ -102,11 +102,11 @@
 			"name":"expression_index.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544836285,
 			"name":"expression_left_value.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544340528,
 			"name":"expression_logical.lucy"
 		},
 		{
@@ -114,11 +114,11 @@
 			"name":"expression_map_literal.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544435019,
 			"name":"expression_method_call.lucy"
 		},
 		{
-			"lastModify":1542276696,
+			"lastModify":1544435019,
 			"name":"expression_new.lucy"
 		},
 		{
@@ -134,11 +134,11 @@
 			"name":"expression_relation.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544435019,
 			"name":"expression_selection.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544435019,
 			"name":"expression_slice.lucy"
 		},
 		{
@@ -146,11 +146,11 @@
 			"name":"expression_strcat.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544435019,
 			"name":"expression_template_function.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544435019,
 			"name":"expression_type_assert.lucy"
 		},
 		{
@@ -162,23 +162,23 @@
 			"name":"expression_unary.lucy"
 		},
 		{
-			"lastModify":1542108579,
+			"lastModify":1544435019,
 			"name":"expression_var.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544435019,
 			"name":"expression_var_assign.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544007647,
 			"name":"function.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544520739,
 			"name":"function_default_value.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544435019,
 			"name":"helper_func.lucy"
 		},
 		{
@@ -194,27 +194,27 @@
 			"name":"multi_return_packer.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544520739,
 			"name":"pack.lucy"
 		},
 		{
-			"lastModify":1542364114,
+			"lastModify":1544089291,
 			"name":"simple_var.lucy"
 		},
 		{
-			"lastModify":1542108579,
+			"lastModify":1544089291,
 			"name":"stackmap.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544089291,
 			"name":"statement_for.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544089291,
 			"name":"statement_for_range_array.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544089291,
 			"name":"statement_for_range_java_array.lucy"
 		},
 		{
@@ -222,15 +222,19 @@
 			"name":"statement_for_range_map.lucy"
 		},
 		{
-			"lastModify":1542276696,
+			"lastModify":1544089291,
 			"name":"statement_if.lucy"
 		},
 		{
-			"lastModify":1542276696,
+			"lastModify":1544435019,
 			"name":"statement_switch.lucy"
 		},
 		{
-			"lastModify":1542364114,
+			"lastModify":1544435019,
+			"name":"statement_when.lucy"
+		},
+		{
+			"lastModify":1544089291,
 			"name":"statment_return.lucy"
 		},
 		{
@@ -238,28 +242,29 @@
 			"name":"type_alias.lucy"
 		},
 		{
-			"lastModify":1542276696,
+			"lastModify":1544340251,
 			"name":"var.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/cmd/langtools/compile/ast",
-			"linkTime":1543647399
+			"linkTime":1544837734
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/jvm/cg",
-			"linkTime":1543630787
+			"linkTime":1544835382
 		},
 		{
 			"name":"lucy/binary",
-			"linkTime":1543630787
+			"linkTime":1544835381
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/common",
-			"linkTime":1543630787
+			"linkTime":1544837732
 		}
 	],
+	"hasMain":false,
 	"classes":[
 		"ArrayMeta.class",
 		"AutoVariableForRangeArray.class",
@@ -312,7 +317,9 @@
 		"BuildSwitch.class",
 		"BuildTemplateFunctionCall.class",
 		"buildTypeConversion$autoVar.class",
+		"BuildWhen.class",
 		"Closure.class",
+		"closureFunction$buildSwitchStatement$literal24.class",
 		"closureFunction$buildSwitchStatement$literal25.class",
 		"ClosureKind.class",
 		"ClosureObjectMeta.class",

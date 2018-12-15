@@ -1,0 +1,14 @@
+{
+	"compileTime":1544835386,
+	"compiledFrom":[
+		{
+			"lastModify":1544520739,
+			"name":"fns.lucy"
+		}
+	],
+	"imports":[],
+	"hasMain":false,
+	"classes":[
+		"main.class"
+	]
+}

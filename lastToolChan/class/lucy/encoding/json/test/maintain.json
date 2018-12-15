@@ -1,0 +1,20 @@
+{
+	"compileTime":1544836451,
+	"compiledFrom":[
+		{
+			"lastModify":1543312303,
+			"name":"test.lucy"
+		}
+	],
+	"imports":[
+		{
+			"name":"lucy/encoding/json",
+			"linkTime":1544835385
+		}
+	],
+	"classes":[
+		"FileMeta.class",
+		"main.class",
+		"PackageMeta.class"
+	]
+}

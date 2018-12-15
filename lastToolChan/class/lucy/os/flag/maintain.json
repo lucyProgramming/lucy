@@ -1,12 +1,12 @@
 {
-	"compileTime":1543630787,
+	"compileTime":1544837732,
 	"compiledFrom":[
 		{
-			"lastModify":1543225175,
+			"lastModify":1544837558,
 			"name":"boolOption.lucy"
 		},
 		{
-			"lastModify":1540977283,
+			"lastModify":1544520739,
 			"name":"flagParser.lucy"
 		},
 		{
@@ -18,15 +18,16 @@
 			"name":"intOption.lucy"
 		},
 		{
-			"lastModify":1540300109,
+			"lastModify":1544837050,
 			"name":"option.lucy"
 		},
 		{
-			"lastModify":1543225175,
+			"lastModify":1543920568,
 			"name":"stringOption.lucy"
 		}
 	],
 	"imports":[],
+	"hasMain":false,
 	"classes":[
 		"BoolOption.class",
 		"FlagParser.class",

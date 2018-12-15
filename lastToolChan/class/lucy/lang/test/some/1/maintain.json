@@ -1,0 +1,22 @@
+{
+	"compileTime":1544836451,
+	"compiledFrom":[
+		{
+			"lastModify":1540300109,
+			"name":"test.lucy"
+		},
+		{
+			"lastModify":1539947102,
+			"name":"testArray.lucy"
+		}
+	],
+	"imports":[
+		{
+			"name":"lucy/os",
+			"linkTime":1544835381
+		}
+	],
+	"classes":[
+		"main.class"
+	]
+}

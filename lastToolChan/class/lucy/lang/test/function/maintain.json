@@ -1,0 +1,22 @@
+{
+	"compileTime":1543728885,
+	"compiledFrom":[
+		{
+			"lastModify":1541150040,
+			"name":"function_d.lucy"
+		},
+		{
+			"lastModify":1539947102,
+			"name":"return.lucy"
+		},
+		{
+			"lastModify":1532869803,
+			"name":"test.lucy"
+		}
+	],
+	"imports":[],
+	"classes":[
+		"literal$3$test.class",
+		"main.class"
+	]
+}

@@ -1,0 +1,24 @@
+{
+	"compileTime":1543728885,
+	"compiledFrom":[
+		{
+			"lastModify":1542192151,
+			"name":"capture.lucy"
+		},
+		{
+			"lastModify":1532844535,
+			"name":"test.lucy"
+		},
+		{
+			"lastModify":1532845236,
+			"name":"xxx.lucy"
+		}
+	],
+	"imports":[],
+	"classes":[
+		"Capture.class",
+		"closureFunction$init$literal10.class",
+		"main.class",
+		"xxx.class"
+	]
+}

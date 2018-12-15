@@ -1,0 +1,6 @@
+
+fileCache := new FileCacher(1000 , true)
+
+
+
+

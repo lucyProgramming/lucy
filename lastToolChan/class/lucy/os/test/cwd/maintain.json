@@ -1,0 +1,18 @@
+{
+	"compileTime":1544836451,
+	"compiledFrom":[
+		{
+			"lastModify":1537968397,
+			"name":"test.lucy"
+		}
+	],
+	"imports":[
+		{
+			"name":"lucy/os",
+			"linkTime":1544835381
+		}
+	],
+	"classes":[
+		"main.class"
+	]
+}

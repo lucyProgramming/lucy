@@ -1,54 +1,64 @@
 {
-	"compileTime":1543647402,
+	"compileTime":1544855197,
 	"compiledFrom":[
 		{
-			"lastModify":1543642075,
+			"lastModify":1544855170,
+			"name":"file_cache.lucy"
+		},
+		{
+			"lastModify":1544782953,
 			"name":"fmt.lucy"
 		},
 		{
-			"lastModify":1543642082,
+			"lastModify":1544854514,
 			"name":"fns.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544607510,
 			"name":"locate.lucy"
 		},
 		{
-			"lastModify":1543647070,
+			"lastModify":1544854868,
 			"name":"lucyfile.lucy"
 		},
 		{
-			"lastModify":1543643630,
+			"lastModify":1544607510,
 			"name":"package_loader.lucy"
 		},
 		{
-			"lastModify":1543642089,
-			"name":"register_loader.lucy"
+			"lastModify":1544607510,
+			"name":"package_loader_with_cache.lucy"
+		},
+		{
+			"lastModify":1544855180,
+			"name":"var.lucy"
 		}
 	],
 	"imports":[
 		{
-			"name":"lucy/cmd/langtools/compile/ast",
-			"linkTime":1543647399
+			"name":"lucy/os",
+			"linkTime":1544835381
 		},
 		{
-			"name":"lucy/os",
-			"linkTime":1543647398
+			"name":"lucy/cmd/langtools/compile/ast",
+			"linkTime":1544837734
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/parser",
-			"linkTime":1543647400
+			"linkTime":1544837736
 		},
 		{
 			"name":"lucy/cmd/langtools/common",
-			"linkTime":1543647400
+			"linkTime":1544835382
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/lc",
-			"linkTime":1543647401
+			"linkTime":1544837737
 		}
 	],
+	"hasMain":false,
 	"classes":[
+		"FileCacher.class",
 		"Fmt.class",
 		"LucyFile.class",
 		"main.class",

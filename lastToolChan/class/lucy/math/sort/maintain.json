@@ -1,0 +1,13 @@
+{
+	"compileTime":1543728885,
+	"compiledFrom":[
+		{
+			"lastModify":1539947102,
+			"name":"quickSort.lucy"
+		}
+	],
+	"imports":[],
+	"classes":[
+		"main.class"
+	]
+}

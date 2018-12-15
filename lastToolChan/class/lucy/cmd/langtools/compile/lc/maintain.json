@@ -1,12 +1,12 @@
 {
-	"compileTime":1543647401,
+	"compileTime":1544837737,
 	"compiledFrom":[
 		{
-			"lastModify":1543225175,
+			"lastModify":1544182205,
 			"name":"class.lucy"
 		},
 		{
-			"lastModify":1543627472,
+			"lastModify":1544529051,
 			"name":"file_loader.lucy"
 		},
 		{
@@ -14,52 +14,53 @@
 			"name":"helper_funcs.lucy"
 		},
 		{
-			"lastModify":1543627341,
+			"lastModify":1544528924,
 			"name":"lc.lucy"
 		},
 		{
-			"lastModify":1543225175,
+			"lastModify":1544607510,
 			"name":"resouce_kind.lucy"
 		},
 		{
-			"lastModify":1543627289,
+			"lastModify":1544607510,
 			"name":"var.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/cmd/langtools/compile/jvm/cg",
-			"linkTime":1543630787
+			"linkTime":1544835382
 		},
 		{
 			"name":"lucy/binary",
-			"linkTime":1543630787
+			"linkTime":1544835381
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/jvm",
-			"linkTime":1543647401
+			"linkTime":1544837735
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/ast",
-			"linkTime":1543647399
+			"linkTime":1544837734
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/common",
-			"linkTime":1543630787
+			"linkTime":1544837732
 		},
 		{
 			"name":"lucy/os",
-			"linkTime":1543647398
+			"linkTime":1544835381
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/parser",
-			"linkTime":1543647400
+			"linkTime":1544837736
 		},
 		{
 			"name":"lucy/encoding/json",
-			"linkTime":1543630787
+			"linkTime":1544835385
 		}
 	],
+	"hasMain":false,
 	"classes":[
 		"ClassDecoder.class",
 		"closureFunction$mkEnums.class",

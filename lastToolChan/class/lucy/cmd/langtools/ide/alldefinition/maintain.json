@@ -1,47 +1,57 @@
 {
-	"compileTime":1543641257,
+	"compileTime":1544855197,
 	"compiledFrom":[
 		{
-			"lastModify":1543586080,
+			"lastModify":1544531837,
 			"name":"alldefinition.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544520739,
+			"name":"definition.lucy"
+		},
+		{
+			"lastModify":1544238941,
 			"name":"flag.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544782953,
 			"name":"main.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544238932,
 			"name":"usage.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/cmd/langtools/compile/ast",
-			"linkTime":1543631968
+			"linkTime":1544837734
 		},
 		{
 			"name":"lucy/cmd/langtools/ide",
-			"linkTime":1543641257
+			"linkTime":1544855197
 		},
 		{
 			"name":"lucy/os",
-			"linkTime":1543630787
+			"linkTime":1544835381
+		},
+		{
+			"name":"lucy/cmd/langtools/common",
+			"linkTime":1544835382
 		},
 		{
 			"name":"lucy/os/flag",
-			"linkTime":1543630787
+			"linkTime":1544837732
 		},
 		{
 			"name":"lucy/encoding/json",
-			"linkTime":1543630787
+			"linkTime":1544835385
 		}
 	],
+	"hasMain":false,
 	"classes":[
 		"AllDefinition.class",
+		"Definition.class",
 		"Flags.class",
 		"main.class"
 	]

@@ -1,5 +1,5 @@
 {
-	"compileTime":1543642062,
+	"compileTime":1544837759,
 	"compiledFrom":[
 		{
 			"lastModify":1542621174,
@@ -18,54 +18,65 @@
 			"name":"package_compiled.lucy"
 		},
 		{
-			"lastModify":1543630693,
+			"lastModify":1544607510,
 			"name":"run.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/os/flag",
-			"linkTime":1543630787
+			"linkTime":1544837732
 		},
 		{
 			"name":"lucy/cmd/langtools/common",
-			"linkTime":1543630787
+			"linkTime":1544835382
 		},
 		{
 			"name":"lucy/os",
-			"linkTime":1543630787
+			"linkTime":1544835381
 		},
 		{
 			"name":"lucy/encoding/json",
-			"linkTime":1543630787
+			"linkTime":1544835385
 		},
 		{
 			"name":"lucy/io",
-			"linkTime":1543630786
+			"linkTime":1544835381
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/ast",
-			"linkTime":1543642060
+			"linkTime":1544837734
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/lc",
-			"linkTime":1543642062
+			"linkTime":1544837737
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/parser",
-			"linkTime":1543642060
+			"linkTime":1544837736
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/common",
-			"linkTime":1543630787
+			"linkTime":1544837732
 		}
 	],
+	"hasMain":false,
 	"classes":[
 		"closureFunction$javaPackageFilter$literal231.class",
+		"closureFunction$javaPackageFilter$literal235.class",
+		"closureFunction$javaPackageFilter$literal236.class",
 		"closureFunction$javaPackageFilter$literal243.class",
+		"closureFunction$javaPackageFilter$literal247.class",
+		"closureFunction$javaPackageFilter$literal248.class",
 		"closureFunction$RunCommand$literal77.class",
 		"closureFunction$RunCommand$literal80.class",
+		"closureFunction$RunCommand$literal81.class",
+		"closureFunction$RunCommand$literal82.class",
 		"closureFunction$RunCommand$literal83.class",
+		"closureFunction$RunCommand$literal84.class",
+		"closureFunction$RunCommand$literal85.class",
+		"closureFunction$RunCommand$literal87.class",
+		"closureFunction$RunCommand$literal88.class",
 		"Flags.class",
 		"ImportStack.class",
 		"LucyFile.class",

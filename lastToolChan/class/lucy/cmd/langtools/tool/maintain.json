@@ -1,5 +1,5 @@
 {
-	"compileTime":1543632460,
+	"compileTime":1544836451,
 	"compiledFrom":[
 		{
 			"lastModify":1543632458,
@@ -13,11 +13,11 @@
 	"imports":[
 		{
 			"name":"lucy/os",
-			"linkTime":1543630787
+			"linkTime":1544835381
 		},
 		{
 			"name":"lucy/cmd/langtools/tool/install_lucy_array",
-			"linkTime":1543632448
+			"linkTime":1544836451
 		}
 	],
 	"classes":[

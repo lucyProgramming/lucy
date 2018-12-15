@@ -1,0 +1,25 @@
+{
+	"compileTime":1543728885,
+	"compiledFrom":[
+		{
+			"lastModify":1532740377,
+			"name":"float.lucy"
+		},
+		{
+			"lastModify":1543401097,
+			"name":"increment.lucy"
+		},
+		{
+			"lastModify":1532741023,
+			"name":"integer.lucy"
+		},
+		{
+			"lastModify":1543401097,
+			"name":"test.lucy"
+		}
+	],
+	"imports":[],
+	"classes":[
+		"main.class"
+	]
+}

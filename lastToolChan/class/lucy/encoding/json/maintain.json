@@ -1,16 +1,16 @@
 {
-	"compileTime":1543630787,
+	"compileTime":1544835385,
 	"compiledFrom":[
 		{
-			"lastModify":1543312303,
+			"lastModify":1544615495,
 			"name":"decoder.lucy"
 		},
 		{
-			"lastModify":1543630500,
+			"lastModify":1544608551,
 			"name":"encoder.lucy"
 		},
 		{
-			"lastModify":1540890869,
+			"lastModify":1544182205,
 			"name":"json.lucy"
 		},
 		{
@@ -19,6 +19,7 @@
 		}
 	],
 	"imports":[],
+	"hasMain":false,
 	"classes":[
 		"Decoder.class",
 		"Encoder.class",

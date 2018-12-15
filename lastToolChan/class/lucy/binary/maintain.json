@@ -1,12 +1,13 @@
 {
-	"compileTime":1543630787,
+	"compileTime":1544835381,
 	"compiledFrom":[
 		{
-			"lastModify":1542880362,
+			"lastModify":1544520738,
 			"name":"bigEndian.lucy"
 		}
 	],
 	"imports":[],
+	"hasMain":false,
 	"classes":[
 		"BigEndian.class",
 		"main.class"

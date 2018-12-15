@@ -1,4 +1,3 @@
-import "lucy/os"
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/parser"
 import "java/io"
@@ -6,14 +5,7 @@ import "java/lang/System"
 
 public fn readLucyFiles(filenames []string) -> (lucyFiles []LucyFile = []LucyFile{}){
 	for v := range filenames {
-		t := new LucyFile()
-		t.realPathName  = v 
-		bs,err := os.readFile(v)
-		if err != null {
-			panic(err)
-		}
-		t.lastModify = int(new io.File(v).lastModified() / 1000L) 
-		t.bs = javaArray2Lucy(bs)
+		t := fileCache.get(v)
 		lucyFiles.append(t)
 	}
 }

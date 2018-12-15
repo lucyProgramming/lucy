@@ -1,44 +1,48 @@
 {
-	"compileTime":1543647399,
+	"compileTime":1544837734,
 	"compiledFrom":[
 		{
-			"lastModify":1543493205,
+			"lastModify":1544782953,
+			"name":"auto_completion.lucy"
+		},
+		{
+			"lastModify":1544836251,
 			"name":"block.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544607509,
 			"name":"buildin_function.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544523706,
 			"name":"buildin_func_meta.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544835023,
 			"name":"class.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544782953,
+			"name":"class_field.lucy"
+		},
+		{
+			"lastModify":1543714385,
 			"name":"class_field_declaration.lucy"
 		},
 		{
-			"lastModify":1543586080,
-			"name":"class_filed.lucy"
-		},
-		{
-			"lastModify":1543312303,
+			"lastModify":1544607509,
 			"name":"class_method.lucy"
 		},
 		{
-			"lastModify":1543225175,
+			"lastModify":1544782953,
 			"name":"closure.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544782953,
 			"name":"comment.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544782953,
 			"name":"const.lucy"
 		},
 		{
@@ -46,79 +50,79 @@
 			"name":"definition.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544435019,
 			"name":"enum.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544789791,
 			"name":"expression.lucy"
 		},
 		{
-			"lastModify":1543225175,
+			"lastModify":1544341641,
 			"name":"expression_check_array.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544782953,
 			"name":"expression_check_assign.lucy"
 		},
 		{
-			"lastModify":1543629096,
+			"lastModify":1544520738,
 			"name":"expression_check_binary.lucy"
 		},
 		{
-			"lastModify":1543312303,
+			"lastModify":1544247221,
 			"name":"expression_check_const.lucy"
 		},
 		{
-			"lastModify":1543312303,
+			"lastModify":1544835781,
 			"name":"expression_check_function_call.lucy"
 		},
 		{
-			"lastModify":1543312303,
+			"lastModify":1544520738,
 			"name":"expression_check_identifier.lucy"
 		},
 		{
-			"lastModify":1543628817,
+			"lastModify":1544341598,
 			"name":"expression_check_index.lucy"
 		},
 		{
-			"lastModify":1543644107,
+			"lastModify":1544435019,
 			"name":"expression_check_left_value.lucy"
 		},
 		{
-			"lastModify":1543230679,
+			"lastModify":1544439443,
 			"name":"expression_check_map.lucy"
 		},
 		{
-			"lastModify":1543629103,
+			"lastModify":1544835339,
 			"name":"expression_check_method_call.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544835618,
 			"name":"expression_check_new.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544836215,
 			"name":"expression_check_op_assign.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544782953,
 			"name":"expression_check_question.lucy"
 		},
 		{
-			"lastModify":1543628700,
+			"lastModify":1544782953,
 			"name":"expression_check_selection.lucy"
 		},
 		{
-			"lastModify":1541898368,
+			"lastModify":1544782953,
 			"name":"expression_check_select_const.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544607509,
 			"name":"expression_check_slice.lucy"
 		},
 		{
-			"lastModify":1542192151,
+			"lastModify":1544520738,
 			"name":"expression_check_type_assert.lucy"
 		},
 		{
@@ -126,153 +130,163 @@
 			"name":"expression_check_type_conversion.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544607509,
 			"name":"expression_check_unary.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544435019,
 			"name":"expression_check_var.lucy"
 		},
 		{
-			"lastModify":1543312303,
+			"lastModify":1544435019,
 			"name":"expression_check_var_assign.lucy"
 		},
 		{
-			"lastModify":1542621174,
+			"lastModify":1543828816,
 			"name":"expression_const_fold.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544782953,
 			"name":"expression_type.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544836239,
 			"name":"function.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544520738,
 			"name":"function_type.lucy"
 		},
 		{
-			"lastModify":1543312303,
+			"lastModify":1544782953,
 			"name":"helper_funcs.lucy"
 		},
 		{
-			"lastModify":1542965008,
+			"lastModify":1544182205,
 			"name":"hover.lucy"
 		},
 		{
-			"lastModify":1543642843,
+			"lastModify":1544836072,
 			"name":"import.lucy"
 		},
 		{
-			"lastModify":1542621174,
+			"lastModify":1543729206,
 			"name":"inherited_attribute.lucy"
 		},
 		{
-			"lastModify":1543225175,
+			"lastModify":1544529514,
 			"name":"java_package.lucy"
-		},
-		{
-			"lastModify":1542965008,
-			"name":"loaded.lucy"
 		},
 		{
 			"lastModify":1543642969,
 			"name":"node.lucy"
 		},
 		{
-			"lastModify":1543647222,
+			"lastModify":1544836255,
 			"name":"package.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544607509,
 			"name":"pos.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544836779,
 			"name":"statement.lucy"
 		},
 		{
-			"lastModify":1542276696,
+			"lastModify":1544607509,
 			"name":"statement_break.lucy"
 		},
 		{
-			"lastModify":1541898368,
+			"lastModify":1544836100,
 			"name":"statement_continue.lucy"
 		},
 		{
-			"lastModify":1542276696,
+			"lastModify":1544836557,
 			"name":"statement_defer.lucy"
 		},
 		{
-			"lastModify":1543642935,
+			"lastModify":1544520738,
 			"name":"statement_for.lucy"
 		},
 		{
-			"lastModify":1543312303,
+			"lastModify":1544836013,
 			"name":"statement_goto.lucy"
 		},
 		{
-			"lastModify":1542621174,
+			"lastModify":1544520738,
 			"name":"statement_if.lucy"
 		},
 		{
-			"lastModify":1543312303,
+			"lastModify":1544836783,
+			"name":"statement_kind.lucy"
+		},
+		{
+			"lastModify":1544836114,
 			"name":"statement_label.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544836846,
 			"name":"statement_return.lucy"
 		},
 		{
-			"lastModify":1542276696,
+			"lastModify":1544782953,
 			"name":"statement_switch.lucy"
 		},
 		{
-			"lastModify":1541898367,
+			"lastModify":1544520738,
 			"name":"statement_when.lucy"
 		},
 		{
-			"lastModify":1543228376,
+			"lastModify":1544835492,
 			"name":"template_function.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544836608,
 			"name":"type.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1543728803,
 			"name":"type_alias.lucy"
+		},
+		{
+			"lastModify":1544836610,
+			"name":"type_kind.lucy"
 		},
 		{
 			"lastModify":1543312303,
 			"name":"usage.lucy"
 		},
 		{
-			"lastModify":1543631941,
+			"lastModify":1544782953,
 			"name":"var.lucy"
 		},
 		{
-			"lastModify":1543401097,
+			"lastModify":1544002867,
 			"name":"variable.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/cmd/langtools/compile/jvm/cg",
-			"linkTime":1543630787
+			"linkTime":1544835382
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/common",
-			"linkTime":1543630787
+			"linkTime":1544837732
 		},
 		{
 			"name":"lucy/os",
-			"linkTime":1543647398
+			"linkTime":1544835381
+		},
+		{
+			"name":"lucy/cmd/langtools/common",
+			"linkTime":1544835382
 		}
 	],
+	"hasMain":false,
 	"classes":[
+		"AutoCompletionItem.class",
 		"Block.class",
 		"BuildInFunctionPanicMeta.class",
 		"BuildInFunctionPrintfMeta.class",
@@ -285,6 +299,20 @@
 		"Closure.class",
 		"closureFunction$equal.class",
 		"closureFunction$errMsg.class",
+		"closureFunction$searchLableForAutoCompletionItems$literal307.class",
+		"closureFunction$searchLableForAutoCompletionItems$literal308.class",
+		"closureFunction$searchLeftValueForAutoCompletionItems$literal376.class",
+		"closureFunction$searchLeftValueForAutoCompletionItems$literal377.class",
+		"closureFunction$searchLeftValueForAutoCompletionItems$literal378.class",
+		"closureFunction$searchRightValueAutoCompletionItems$literal236.class",
+		"closureFunction$searchRightValueForAutoCompletionItems$literal232.class",
+		"closureFunction$searchRightValueForAutoCompletionItems$literal234.class",
+		"closureFunction$searchRightValueForAutoCompletionItems$literal235.class",
+		"closureFunction$searchRightValueForAutoCompletionItems$literal237.class",
+		"closureFunction$searchRightValueForAutoCompletionItems$literal238.class",
+		"closureFunction$searchRightValueForAutoCompletionItems$literal240.class",
+		"closureFunction$searchTypeForAutoCompletionItems$literal328.class",
+		"closureFunction$searchTypeForAutoCompletionItems$literal329.class",
 		"ClosureMeta.class",
 		"Comment.class",
 		"Constant.class",

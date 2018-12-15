@@ -1,0 +1,18 @@
+{
+	"compileTime":1544313856,
+	"compiledFrom":[
+		{
+			"lastModify":1544182205,
+			"name":"doc.lucy"
+		},
+		{
+			"lastModify":1544277534,
+			"name":"main.lucy"
+		}
+	],
+	"imports":[],
+	"hasMain":false,
+	"classes":[
+		"main.class"
+	]
+}

@@ -1,12 +1,12 @@
 {
-	"compileTime":1543647400,
+	"compileTime":1544837736,
 	"compiledFrom":[
 		{
-			"lastModify":1543627135,
+			"lastModify":1544782953,
 			"name":"block.lucy"
 		},
 		{
-			"lastModify":1543624839,
+			"lastModify":1544782953,
 			"name":"class.lucy"
 		},
 		{
@@ -14,80 +14,81 @@
 			"name":"comment.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544435019,
 			"name":"enum.lucy"
 		},
 		{
-			"lastModify":1543625031,
+			"lastModify":1544782953,
 			"name":"expression.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544782953,
 			"name":"expression_array.lucy"
 		},
 		{
-			"lastModify":1542364114,
+			"lastModify":1544782953,
 			"name":"expression_binary.lucy"
 		},
 		{
-			"lastModify":1543627233,
+			"lastModify":1544782953,
 			"name":"expression_question.lucy"
 		},
 		{
-			"lastModify":1543624917,
+			"lastModify":1544836315,
 			"name":"expression_suffix.lucy"
 		},
 		{
-			"lastModify":1543625484,
+			"lastModify":1544782953,
 			"name":"function.lucy"
 		},
 		{
-			"lastModify":1543624332,
+			"lastModify":1544791659,
 			"name":"parse.lucy"
 		},
 		{
-			"lastModify":1542364114,
+			"lastModify":1544520739,
 			"name":"parser_extends.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544782953,
 			"name":"statamtent_for.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544782953,
 			"name":"statement_if.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544782953,
 			"name":"statement_switch.lucy"
 		},
 		{
-			"lastModify":1543586080,
+			"lastModify":1544782953,
 			"name":"statement_when.lucy"
 		},
 		{
-			"lastModify":1543624860,
+			"lastModify":1544607510,
 			"name":"type.lucy"
 		},
 		{
-			"lastModify":1543624718,
+			"lastModify":1544435019,
 			"name":"var.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/cmd/langtools/compile/ast",
-			"linkTime":1543647399
+			"linkTime":1544837734
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/lex",
-			"linkTime":1543630790
+			"linkTime":1544835383
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/jvm/cg",
-			"linkTime":1543630787
+			"linkTime":1544835382
 		}
 	],
+	"hasMain":false,
 	"classes":[
 		"BlockParser.class",
 		"ClassParser.class",

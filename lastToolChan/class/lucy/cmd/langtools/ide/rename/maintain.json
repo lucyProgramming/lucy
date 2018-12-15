@@ -1,20 +1,20 @@
 {
-	"compileTime":1543706692,
+	"compileTime":1544855206,
 	"compiledFrom":[
 		{
-			"lastModify":1543643017,
+			"lastModify":1544435019,
 			"name":"flag.lucy"
 		},
 		{
-			"lastModify":1543647082,
+			"lastModify":1544435019,
 			"name":"main.lucy"
 		},
 		{
-			"lastModify":1543647327,
+			"lastModify":1544607510,
 			"name":"package_loader.lucy"
 		},
 		{
-			"lastModify":1543672583,
+			"lastModify":1544607510,
 			"name":"rename.lucy"
 		},
 		{
@@ -25,37 +25,38 @@
 	"imports":[
 		{
 			"name":"lucy/os/flag",
-			"linkTime":1543630787
+			"linkTime":1544837732
 		},
 		{
 			"name":"lucy/cmd/langtools/ide",
-			"linkTime":1543647402
+			"linkTime":1544855197
 		},
 		{
 			"name":"lucy/cmd/langtools/ide/gotodefinition",
-			"linkTime":1543647402
+			"linkTime":1544855198
 		},
 		{
 			"name":"lucy/cmd/langtools/common",
-			"linkTime":1543647400
+			"linkTime":1544835382
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/lc",
-			"linkTime":1543647401
+			"linkTime":1544837737
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/ast",
-			"linkTime":1543647399
+			"linkTime":1544837734
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/parser",
-			"linkTime":1543647400
+			"linkTime":1544837736
 		},
 		{
 			"name":"lucy/os",
-			"linkTime":1543647398
+			"linkTime":1544835381
 		}
 	],
+	"hasMain":false,
 	"classes":[
 		"Flags.class",
 		"main.class",

@@ -1,0 +1,17 @@
+{
+	"compileTime":1543728885,
+	"compiledFrom":[
+		{
+			"lastModify":1532944657,
+			"name":"defer.lucy"
+		},
+		{
+			"lastModify":1532944645,
+			"name":"test.lucy"
+		}
+	],
+	"imports":[],
+	"classes":[
+		"main.class"
+	]
+}

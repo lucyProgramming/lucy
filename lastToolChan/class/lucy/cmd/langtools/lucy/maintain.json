@@ -1,21 +1,22 @@
 {
-	"compileTime":1543630791,
+	"compileTime":1544837760,
 	"compiledFrom":[
 		{
-			"lastModify":1543312303,
+			"lastModify":1543632512,
 			"name":"main.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/os",
-			"linkTime":1543630787
+			"linkTime":1544835381
 		},
 		{
 			"name":"lucy/cmd/langtools/lucy/run",
-			"linkTime":1543630791
+			"linkTime":1544837759
 		}
 	],
+	"hasMain":false,
 	"classes":[
 		"main.class"
 	]
