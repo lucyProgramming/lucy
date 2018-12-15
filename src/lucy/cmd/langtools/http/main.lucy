@@ -11,7 +11,7 @@ fn main(args []string) {
     print("port is " , port)
     server := HttpServer.create(new InetSocketAddress(port), 0)
     server.createContext("/exit", new ExitHandler())
-    ide.registerHandlers(server)
+    ide.registerHandlers("/ide",server)
     server.start()
 }
 

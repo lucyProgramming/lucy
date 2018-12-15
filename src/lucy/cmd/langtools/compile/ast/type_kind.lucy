@@ -1,0 +1,35 @@
+
+
+public enum  VariableTypeKind {
+	VariableTypeBool =1 ,
+	VariableTypeByte,
+	VariableTypeShort,
+	VariableTypeChar,
+	VariableTypeInt,
+	VariableTypeLong,
+	VariableTypeFloat,
+	VariableTypeDouble,
+	//enum 
+	VariableTypeEnum,
+	//ref types 
+	VariableTypeString,
+	VariableTypeObject,
+	VariableTypeMap,
+	VariableTypeArray,
+	VariableTypeJavaArray,
+	VariableTypeFunction,
+	VariableTypeClass,
+	VariableTypeName,
+	VariableTypeTemplate,
+	VariableTypeVoid,
+	
+	VariableTypePackage,
+	VariableTypeNull,
+	VariableTypeGlobal,
+	VariableTypeDynamicSelector 
+}
+
+public class Map {
+	public K Type
+	public V Type
+}

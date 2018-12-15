@@ -530,7 +530,7 @@ class ExpressionSuffix extends  ParserExtends {
 				}
 				if this.parser.token.Type == lex.TokenIdentifier {
 					newExpression := new ast.Expression()
-					newExpression.pos = pos
+					newExpression.pos = this.parser.mkPos()
 					newExpression.op = "selection"
 					newExpression.Type = ast.ExpressionTypeSelection
 					selection := new ast.ExpressionSelection()

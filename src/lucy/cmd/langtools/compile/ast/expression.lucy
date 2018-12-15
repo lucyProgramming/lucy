@@ -21,9 +21,7 @@ public class Expression {
 	public longValue long
 	public doubleValue double
 	public stringValue string 
-	public literalRaw string 
-	// public autoCompletion bool 
-
+	public literalRaw string  
 	/* 
 		a // this is a inline comment
 	*/

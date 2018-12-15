@@ -27,8 +27,8 @@ public class Import {
 
 //different from different source file
 class SourceFile {
-	imports            map { string -> Import }  // accessName -> *Import
-	importsByResources map { string -> Import }  // resourceName -> *Import
+	imports            map { string -> Import }  // accessName -> Import
+	importsByResources map { string -> Import }  // resourceName -> Import
 	filename          string 
 	/*
 		rename will modify this file 

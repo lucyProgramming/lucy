@@ -1318,5 +1318,35 @@ public class Class {
         }
         return errs
     }
+
+    fn getMethodOrFieldHandleByName(block Block ,  name string , isStatic bool) ->(x Object) {
+        err := this.loadSelf(block , new Pos())
+        if err != null {
+            return null 
+        }
+        if this.fields != null && 
+            this.fields[name] != null && 
+            this.fields[name].Type.Type == VariableTypeFunction {
+            f := this.fields[name]
+            if f.isStatic() == isStatic {
+                return this.fields[name]
+            }
+        }
+        if this.methods != null && 
+            this.methods[name] != null && 
+            len(this.methods[name]) > 0 {
+            method := this.methods[name][0]
+            if method.isStatic() == isStatic{
+                return method
+            }
+        }
+        this.loadSuperClass(block , new Pos())
+        if this.superClass == null {
+            return null 
+        }
+        return this.superClass.getMethodOrFieldHandleByName(block , name , isStatic)
+    }
+
+
 }
 

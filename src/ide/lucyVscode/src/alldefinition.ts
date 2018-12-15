@@ -22,7 +22,6 @@ module.exports = class GoDocumentSymbolProvider implements vscode.DocumentSymbol
             return null;
         }
         //TODO:: 
-        console.log(definitions);
         var infos = new Array();
         for(var i = 0 ;  i <  definitions.length ; i++ ) {
             var v = definitions[i];
@@ -44,14 +43,11 @@ module.exports = class GoDocumentSymbolProvider implements vscode.DocumentSymbol
                     kind = vscode.SymbolKind.Enum;
                     break;
             }
-            console.log( "!!!!!!!!!!!!!!!!!",v.name , v.pos.filename , v.pos.startLine);
             var uri2 = vscode.Uri.file(v.pos.filename);
             var position2 = new vscode.Position(v.pos.endLine,v.pos.endColumnOffset);
             var location2 = new vscode.Location(uri2 , position2);
-            console.log(location2);
             var info = new vscode.SymbolInformation(v.name , kind  , "" , location2);
             infos[i] = info;
-            console.log(i , info );
         }
         return infos;
     }

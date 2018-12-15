@@ -95,7 +95,7 @@ class  BuildExpressionFunction {
 		copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, function.closureVariableOffSet))
 		//set filed
 		closureClass.fields = new map { string -> cg.FieldHighLevel} ()
-		for v, _ := range function.Closure.variables {
+		for v, _ := range function.closure.variables {
 			field := new cg.FieldHighLevel()
 			field.accessFlags |= cg.AccFieldSynthetic
 			field.name = v.name
@@ -104,7 +104,7 @@ class  BuildExpressionFunction {
 			if v.beenCapturedAsLeftValue > 0 {
 				meta := closure.getMeta(v.Type.Type)
 				field.descriptor = "L" + meta.className + ";"
-				if context.function.Closure.closureVariableExist(v) {
+				if context.function.closure.closureVariableExist(v) {
 					// I Know c object at offset 0
 					copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, char(0)))
 					if 3 > maxStack {
@@ -125,7 +125,7 @@ class  BuildExpressionFunction {
 				}
 			} else {
 				field.descriptor = Descriptor.typeDescriptor(v.Type)
-				if context.function.Closure.closureVariableExist(v) {
+				if context.function.closure.closureVariableExist(v) {
 					// I Know c object at offset 0
 					copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, char(0)))
 					if 3 > maxStack {
@@ -154,7 +154,7 @@ class  BuildExpressionFunction {
 			code.codeLength += 3
 
 		}
-		for v, _ := range function.Closure.functions {
+		for v, _ := range function.closure.functions {
 			if v.isClosureFunction == false {
 				continue
 			}
@@ -165,7 +165,7 @@ class  BuildExpressionFunction {
 			filed.descriptor = "L" + v.entrance.Class.name + ";"
 			closureClass.fields[v.name] = filed
 			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, function.closureVariableOffSet))
-			if context.function.Closure.closureFunctionExist(v) {
+			if context.function.closure.closureFunctionExist(v) {
 				// I Know this at 0 offset
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, char(0)))
 				if 3 > maxStack {
@@ -236,7 +236,7 @@ class  BuildExpressionFunction {
 			maxStack = 4
 		}
 		if function.isClosureFunction {
-			if context.function.Closure.closureFunctionExist(function) {
+			if context.function.closure.closureFunctionExist(function) {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, char(0)))
 				code.codes[code.codeLength] = cg.OP_getfield
 				c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(

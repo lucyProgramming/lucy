@@ -68,7 +68,7 @@ class BuildExpressionFunctionCall {
 		} else {
 			//closure function call
 			//load object
-			if context.function.Closure.closureFunctionExist(call.Function) {
+			if context.function.closure.closureFunctionExist(call.Function) {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, char(0)))
 				code.codes[code.codeLength] = cg.OP_getfield
 				c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(

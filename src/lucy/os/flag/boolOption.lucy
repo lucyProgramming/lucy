@@ -1,7 +1,7 @@
 
 
 
-public final class BoolOption  extends Option{
+public final class BoolOption  extends Option {
 	private boolDefaultValue bool 
 	private boolValue bool 
 
@@ -9,7 +9,6 @@ public final class BoolOption  extends Option{
 		this.super() 
 		.boolDefaultValue = d 
 	}
-	
 	
 	protected fn reset() {
 		this.boolValue = this.boolDefaultValue 

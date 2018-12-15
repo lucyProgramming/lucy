@@ -1,0 +1,22 @@
+public enum StatementTypeKind {
+	StatementTypeExpression = 1 ,
+	StatementTypeIf,
+	StatementTypeBlock,
+	StatementTypeFor,
+	StatementTypeContinue,
+	StatementTypeReturn,
+	StatementTypeBreak,
+	StatementTypeSwitch,
+	StatementTypeWhen,
+	StatementTypeLabel,
+	StatementTypeGoTo,
+	StatementTypeDefer,
+	StatementTypeClass,
+	StatementTypeEnum,
+	StatementTypeNop,
+	StatementTypeImport,
+	StatementTypeTypeAlias ,
+	StatementTypeComment ,
+	StatementTypeCommentMultiLine , 
+	StatementTypeEmptyLine 
+}

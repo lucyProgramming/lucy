@@ -21,19 +21,15 @@ class ExpressionCheckFunctionCall {
 					call.Expression.pos.errMsgPrefix(), identifier.name)))
 				return null
 			}
+			if identifier.locateDefinition {
+				block.inheritedAttribute.p.locateDefinition = getPos(d)
+				return 
+			}
 			if f ,ok := d.(Function) ; ok {
                 call.Function = f
-				if identifier.locateDefinition {
-					block.inheritedAttribute.p.locateDefinition = f.pos 
-					
-				}
                 return .checkFunctionCall(e , block, errs, f, call)
 			}
 			if t ,ok:= d.(Type) ; ok {
-				if identifier.locateDefinition {
-					block.inheritedAttribute.p.locateDefinition = t.pos
-					
-				}
 				typeConversion := new ExpressionTypeConversion()
 				typeConversion.Type = d.(Type)
 				if len(call.args) != 1 {
@@ -51,10 +47,6 @@ class ExpressionCheckFunctionCall {
 				return []Type{ret}
 			}
 			if c ,ok:= d.(Class) ; ok {
-				if identifier.locateDefinition {
-					block.inheritedAttribute.p.locateDefinition = c.pos
-					
-				}
 				typeConversion := new ExpressionTypeConversion()
 				typeConversion.Type = new Type()
 				typeConversion.Type.Type = VariableTypeObject
@@ -75,10 +67,6 @@ class ExpressionCheckFunctionCall {
 				return []Type{ret}
 			}
 			if v ,ok := d.(Variable) ; ok {
-				if identifier.locateDefinition {
-					block.inheritedAttribute.p.locateDefinition = v.pos
-					
-				}
 				if isCaptureVar[0] {
 					v.beenCapturedAsRightValue++
 				}

@@ -26,8 +26,8 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.languages.registerReferenceProvider(
             lucySelector, new GoReferenceProvider()));
         context.subscriptions.push(
-            vscode.languages.registerDocumentSymbolProvider(
-                lucySelector, new GoDocumentSymbolProvider()));
+            // vscode.languages.registerDocumentSymbolProvider(
+            //     lucySelector, new GoDocumentSymbolProvider()));
         context.subscriptions.push(
             vscode.languages.registerCompletionItemProvider(
                 lucySelector, new GoCompletionItemProvider(), '.' , '\"'));

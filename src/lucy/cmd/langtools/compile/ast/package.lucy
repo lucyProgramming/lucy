@@ -41,7 +41,7 @@ public class Package {
 	public onlyAnalyzeGlobals bool 
 
 	public renameIsGlobal bool 
-
+	
 	public autoCompletionItems []AutoCompletionItem
 
 	public lucyBuildInPackage Package 
@@ -491,7 +491,7 @@ public class Package {
 			}
 		}
 		for _, v := range this.statementLevelFunctions {
-			v.isClosureFunction = v.Closure.captureCount(v) > 0
+			v.isClosureFunction = v.closure.captureCount(v) > 0
 		}
 		for _, v := range this.statementLevelClass {
 			for f, meta := range v.closure.functions {

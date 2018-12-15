@@ -1,4 +1,3 @@
-
 import "lucy/cmd/langtools/compile/common"
 
 class ExpressionCheckMethodCall {
@@ -67,6 +66,13 @@ class ExpressionCheckMethodCall {
 			}
 		case VariableTypeObject, 
 			VariableTypeClass:
+			defer {
+				if call.locateDefinition && block.inheritedAttribute.p.locateDefinition == null {
+					isStatic := object.Type == VariableTypeClass
+					x := object.Class.getMethodOrFieldHandleByName(block , call.name , isStatic)
+					block.inheritedAttribute.p.locateDefinition = getPos(x)
+				}
+			}
 			if call.name == "finalize" {
 				errs.append(new error(sprintf("%s cannot call '%s'", e.pos.errMsgPrefix(), call.name)))
 				return null

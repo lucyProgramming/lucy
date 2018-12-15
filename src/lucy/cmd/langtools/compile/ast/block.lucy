@@ -54,7 +54,6 @@ public class Block {
                     u.pos = pos
                     t.findUsageInstances.append(u)
                 }
-
                 t.used  = true
                 return t, true
             }
@@ -261,7 +260,7 @@ public class Block {
                 if v.isGlobal == false { // not a global variable
                     if this.isFunctionBlock &&
                         this.inheritedAttribute.Function.isGlobal == false {
-                        this.inheritedAttribute.Function.Closure.insertVar(from, v)
+                        this.inheritedAttribute.Function.closure.insertVar(from, v)
                             isCaptureVar[0] = true
                     }
                     //cannot search variable from class body
@@ -277,7 +276,7 @@ public class Block {
                         this.Class.closure.insertFunction(from, f)
                     }
                     if this.isFunctionBlock {
-                        this.Fn.Closure.insertFunction(from, f)
+                        this.Fn.closure.insertFunction(from, f)
                     }
                 }
 

@@ -1,15 +1,15 @@
 import "com/sun/net/httpserver/HttpServer"
 
 
-public fn registerHandlers(server HttpServer) {
+public fn registerHandlers(prefix string , server HttpServer) {
     gotoDefinition := new GotoDefinition()
-    server.createContext("/ide/gotoDefinition" , gotoDefinition)
+    server.createContext(prefix + "/gotoDefinition" , gotoDefinition)
     findUsage := new FindUsage()
-    server.createContext("/ide/findUsage" , findUsage)
+    server.createContext(prefix + "/findUsage" , findUsage)
     autoCompletion := new AutoCompletion()
-    server.createContext("/ide/autoCompletion" , autoCompletion)
+    server.createContext(prefix + "/autoCompletion" , autoCompletion)
     allDefinition := new AllDefinition()
-    server.createContext("/ide/allDefinition" , allDefinition)
+    server.createContext(prefix + "/allDefinition" , allDefinition)
 }
 
 

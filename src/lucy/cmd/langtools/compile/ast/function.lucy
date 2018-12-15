@@ -18,7 +18,7 @@ public class Function {
 	buildInFunctionChecker           		BuildInFunctionChecker
 	public accessFlags                      char
 	public Type                             FunctionType = new FunctionType()
-	public Closure                          Closure = new Closure()
+	public closure                          Closure = new Closure()
 	public name                             string // if name is null string,means no name function
 	public block                            Block = new Block()
 	public pos                              Pos
