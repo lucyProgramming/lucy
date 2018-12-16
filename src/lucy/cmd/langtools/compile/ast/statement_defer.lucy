@@ -12,7 +12,7 @@ public class StatementDefer {
 	
 	public fn resetLabels() {
 		for _, v := range this.labels {
-			v.Reset()
+			v.reset()
 		}
 	}
 	

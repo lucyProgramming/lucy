@@ -23,7 +23,7 @@ public class StatementLabel {
 		should reset the label
 	*/
 	
-	fn Reset() {
+	fn reset() {
 		this.codeOffsetGenerated = false
 		this.codeOffset = -1
 		this.exits = []cg.Exit{}
