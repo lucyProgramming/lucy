@@ -180,6 +180,7 @@ public class AutoCompletionItem {
         item.Type = "method"
         item.name = "size"
         item.suggest = "size()"
+        item.description = "size() -> (int)"
         items.append(item)
     }
     
@@ -194,6 +195,7 @@ public class AutoCompletionItem {
         item.Type = "method"
         item.name = "size"
         item.suggest = "size()"
+        item.description = "size() -> (int)"
         items.append(item)
 
         //start
@@ -201,18 +203,21 @@ public class AutoCompletionItem {
         item.Type = "method"
         item.name = "start"
         item.suggest = "start()"
+        item.description = "start() -> (int)"
         items.append(item)
         // end
         item = new AutoCompletionItem()
         item.Type = "method"
         item.name = "end"
         item.suggest = "end()"
+        item.description = "end() -> (int)"
         items.append(item)
         // cap 
         item = new AutoCompletionItem()
         item.Type = "method"
         item.name = "cap"
         item.suggest = "cap()"
+        item.description = "cap() -> (int)"
         items.append(item)
         // 
         return items 
@@ -224,6 +229,7 @@ public class AutoCompletionItem {
         item.Type = "method"
         item.name = "size"
         item.suggest = "size()"
+        item.description = "size() -> (int)"
         items.append(item)
 
         //remove    

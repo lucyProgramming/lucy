@@ -78,6 +78,7 @@ module.exports = class GoCompletionItemProvider implements vscode.CompletionItem
                     kind = vscode.CompletionItemKind.Reference ;  
             }
             var item = new vscode.CompletionItem(v.name , kind);
+            item.detail = v.description;
             item.sortText = "" + i ; 
             if (item.sortText.length === 1) {
                 item.sortText = "00" + item.sortText;

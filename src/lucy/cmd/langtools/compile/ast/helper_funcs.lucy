@@ -263,6 +263,7 @@ fn searchRightValueForAutoCompletionItems(pos Pos, block Block) -> (items []Auto
 			item.name = name 
 			item.functionDefinition = v.readableMsg()
 			item.suggest = v.mkSuggest()
+			item.description = v.readableMsg()
 			items.append(item)
 			names[name] = true 
 		}

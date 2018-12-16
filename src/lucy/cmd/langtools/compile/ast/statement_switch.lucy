@@ -51,9 +51,9 @@ public class StatementSwitch  {
 			errs.append(new error(sprintf("%s switch statement has no cases",
 				this.endPos.errMsgPrefix())))
 		}
-		longMap :=  new map { long -> Pos } ()
-		doubleMap := new map { double -> Pos }()
-		stringMap := new map{ string -> Pos }()
+		longMap :=  new map {long -> Pos } () 
+		doubleMap := new map {double -> Pos }()
+		stringMap := new map{string -> Pos }()
 		enumNamesMap := new map {string -> Pos }()
 		enumPackageName := ""
 		var longValue long
@@ -126,23 +126,27 @@ public class StatementSwitch  {
 						return new error(errMsg)
 					}
 					switch conditionType.Type {
-					case VariableTypeByte , VariableTypeShort ,VariableTypeChar ,  VariableTypeInt , VariableTypeLong:
+					case VariableTypeByte,
+						VariableTypeShort,
+						VariableTypeChar,
+						VariableTypeInt,
+						VariableTypeLong:
 						if first := longMap[longValue]; first != null {
-							errs.append(errMsg(first, longValue + ""))
+							errs.append(errMsg(first, e.literalRaw ))
 							continue // no check body
 						} else {
 							longMap[longValue] = e.pos
 						}
 					case VariableTypeDouble:
 						if first := doubleMap[doubleValue]; first != null {
-							errs.append( errMsg(first, doubleValue + ""))
+							errs.append(errMsg(first, e.literalRaw))
 							continue // no check body
 						} else {
 							doubleMap[doubleValue] = e.pos
 						}
 					case VariableTypeString:
 						if first := stringMap[stringValue]; first != null {
-							errs . append( errMsg(first, stringValue ))
+							errs . append( errMsg(first, e.literalRaw ))
 							continue // no check body
 						} else {
 							stringMap[stringValue] = e.pos
@@ -154,12 +158,11 @@ public class StatementSwitch  {
 						} else {
 							enumNamesMap[enumName] = e.pos
 						}
-					default:
 					}
 				}
 			}
 		}
-
+		
 		if conditionType.Type == VariableTypeEnum &&
 			len(enumNamesMap) < len(conditionType.Enum.enums) &&
 			this.Default == null &&

@@ -466,10 +466,6 @@ public class FileLoader implements ast.LoadImport{
         }
 
         for _, m := range c.methods {
-            if t := m.GetAttributeByName(cg.AttributeNameLucyTriggerPackageInit); t != null && len(t) > 0 {
-                pack.triggerPackageInitMethodName = string(c.ConstPool[m.nameIndex].info)
-                continue
-            }
             name := string(c.ConstPool[m.nameIndex].info)
             if name == ast.MainFunctionName {
                 // this is main function

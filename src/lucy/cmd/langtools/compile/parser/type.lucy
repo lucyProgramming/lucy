@@ -38,21 +38,25 @@ class TypeParser extends ParserExtends {
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeBool
 			ret.pos = pos
+			ret.locateDefinition = this.parser.token.locateDefinition 
 			this.next(lfIsToken)
 		case lex.TokenByte:
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeByte
 			ret.pos = pos
+			ret.locateDefinition = this.parser.token.locateDefinition 
 			this.next(lfIsToken)
 		case lex.TokenShort:
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeShort
 			ret.pos = pos
+			ret.locateDefinition = this.parser.token.locateDefinition 
 			this.next(lfIsToken)
 		case lex.TokenChar:
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeChar
 			ret.pos = pos
+			ret.locateDefinition = this.parser.token.locateDefinition 
 			this.next(lfIsToken)
 		case lex.TokenInt:
 			ret = new ast.Type()
@@ -63,21 +67,25 @@ class TypeParser extends ParserExtends {
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeFloat
 			ret.pos = pos
+			ret.locateDefinition = this.parser.token.locateDefinition 
 			this.next(lfIsToken)
 		case lex.TokenDouble:
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeDouble
 			ret.pos = pos
+			ret.locateDefinition = this.parser.token.locateDefinition 
 			this.next(lfIsToken)
 		case lex.TokenLong:
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeLong
 			ret.pos = pos
+			ret.locateDefinition = this.parser.token.locateDefinition 
 			this.next(lfIsToken)
 		case lex.TokenString:
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeString
 			ret.pos = pos
+			ret.locateDefinition = this.parser.token.locateDefinition 
 			this.next(lfIsToken)
 		case lex.TokenIdentifier:
 			ret, err = this.parseIdentifierType()

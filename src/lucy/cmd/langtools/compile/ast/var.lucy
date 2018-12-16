@@ -73,7 +73,7 @@ var autoCompletionBuildFunctionItems = new []AutoCompletionItem(0)
 	item.name = "print"
 	item.suggest = "print(args , ...)"
 	autoCompletionBuildFunctionItems.append(item)
-
+	
 	item = new AutoCompletionItem()
 	item.Type = "function"
 	item.name = "printf"

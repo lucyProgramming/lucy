@@ -550,6 +550,17 @@ public class Expression {
 					errs.append(err)
 				}
 			}
+			if f.locateDefinition {
+				block.inheritedAttribute.p.locateDefinition = f.pos 
+				return
+			}
+			if f.findUsage {
+				u := new Usage()
+				u.Type = "declaration"
+				u.pos = f.pos 
+				f.findUsageInstances = [u]
+				block.inheritedAttribute.p.findUsage = f.findUsageInstances
+			}
 			es := f.check(block)
 			errs.appendAll(es)
 			returnValueTypes = new []Type( 1)

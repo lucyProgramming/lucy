@@ -10,7 +10,6 @@ public const	AttributeNameInnerClasses            = "InnerClasses"
 
 public const	AttributeNameLucyFieldDescriptor    = "LucyFieldDescriptor"
 public const	AttributeNameLucyMethodDescriptor   = "LucyMethodDescriptor"
-public const	AttributeNameLucyTriggerPackageInit = "LucyTriggerPackageInitMethod"
 public const	AttributeNameLucyDefaultParameters  = "LucyDefaultParameters"
 public const	AttributeNameLucyTypeAlias          = "LucyTypeAlias"
 public const	AttributeNameLucyEnum               = "LucyEnum"

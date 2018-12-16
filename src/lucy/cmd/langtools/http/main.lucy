@@ -15,7 +15,6 @@ fn main(args []string) {
     server.start()
 }
 
-
 class ExitHandler implements HttpHandler {
     public fn handle(exchange HttpExchange) {
         print("system is going to shut down")

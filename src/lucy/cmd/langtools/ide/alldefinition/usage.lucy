@@ -3,7 +3,7 @@ import "lucy/os"
 
 const usage = `
     find all definition of a directory. 
-       -dir   dir to be located
+        -dir   dir to be located
 `
 
 fn printUsageAndExit(code int){

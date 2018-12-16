@@ -193,12 +193,6 @@ public class Type {
 		if this.resolved {
 			return null
 		}
-		defer {
-			if this.locateDefinition  && 
-				block.inheritedAttribute.p.locateDefinition == null {
-				block.inheritedAttribute.p.locateDefinition = this.pos
-			}
-		}
 		this.resolved = true // single threading
 		switch this.Type {
 		case VariableTypeTemplate:
@@ -250,7 +244,11 @@ public class Type {
 					return err
 				}
 			}
-		default:
+		case this.isPrimitive():
+			if this.locateDefinition {
+				block.inheritedAttribute.p.locateDefinition = this.pos
+			}
+
 		}
 		return null
 	}

@@ -1,4 +1,3 @@
-
 import "lucy/cmd/langtools/ide"
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/encoding/json"
@@ -7,7 +6,7 @@ import "lucy/cmd/langtools/common"
 import "lucy/cmd/langtools/ide/gotodefinition"
 
 
-public fn findUsage(file string , pos int) ->(result ast.Usage[]){
+public fn findUsage(file string , pos int , scope string) -> (result ast.Usage[]){
     definition := gotodefinition.findDefinition(file , "" , pos , null)
     if definition == null {
         print("find usage cannot find definition")
@@ -22,13 +21,13 @@ public fn findUsage(file string , pos int) ->(result ast.Usage[]){
             v.findUsage = (definition.endLine << 16) | int(char(definition.endColumnOffset - 1)) 
         }
     }
-    result = sortUsages(new FindUsage(lucyFiles , packageName , true , common.getLucyPath()).find())
+    result = sortUsages(new FindUsage(lucyFiles , packageName , true , common.getLucyPath() , scope).find())
 }
 
 fn main(args []string) {
     f := new Flags()
     file , pos := f.parseArgs(args)
-    result := findUsage(file , pos)
+    result := findUsage(file , pos, "")
     bs , err := json.encode(result)
     if err != null {
         panic(err)

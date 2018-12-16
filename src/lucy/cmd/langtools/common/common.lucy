@@ -80,12 +80,7 @@ public fn findPackageInWhichDirectory(lucyPath []string , packageName string)->(
 	which = ps[0]
 }
 
-
-
-
-
-
- public fn getPaths()->(lucyRoot string ,lucyPath []string ,err error ) {
+public fn getPaths()->(lucyRoot string ,lucyPath []string ,err error ) {
 	defer {
 		err = catch()
 	}
@@ -95,9 +90,9 @@ public fn findPackageInWhichDirectory(lucyPath []string , packageName string)->(
 
 
 
-public fn getPathElements(filepath string ) ->(elements []string) {
+public fn getPathElements(path string ) ->(elements []string) {
 	fileSystem := FileSystems.getDefault()
-	t := fileSystem.getPath(filepath)
+	t := fileSystem.getPath(path)
 	elements = new []string(t.getNameCount())
 	for i := 0 ;  i < t.getNameCount();i++{
 		elements[i] = t.getName(i).toString()

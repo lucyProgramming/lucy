@@ -10,7 +10,7 @@ class FileCacher {
     caches map{string -> LucyFile}
     maxSize int // max cache cache number
     printFileCacheInfo bool 
-
+    
     fn FileCacher(maxSize int ,printFileCacheInfo bool ) {
         this.super()
         this.maxSize = maxSize 
@@ -39,6 +39,11 @@ class FileCacher {
     }
     
     fn get(filename string) -> (f LucyFile) {
+        if this.maxSize < 0  {  
+            // -1 means no cache
+            f = this.readLucyFile(filename)
+            return f 
+        }
         if this.caches.keyExist(filename) == false {
             f = this.readLucyFile(filename)
             this.set(filename , f)

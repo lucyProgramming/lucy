@@ -29,12 +29,6 @@ public class  BuildPackage {
         mainClass.accessFlags |= cg.AccClassSynthetic
         mainClass.superClass = ast.JavaRootClass
         mainClass.name = p.name + "/main"
-        if p.block.functions != null {
-            for _, v := range p.block.functions {
-                mainClass.insertSourceFile(v.pos.filename)
-                break
-            }
-        }
         mainClass.fields = new map {string -> cg.FieldHighLevel }()
         this.mkClassDefaultConstruction(this.mainClass)
         this.classes = new map { string -> cg.ClassHighLevel } ()
@@ -49,7 +43,7 @@ public class  BuildPackage {
         for _, v := range p.block.enums {
             this.putClass(this.mkEnum(v))
         }
-        this.DumpClass()
+        this.dumpClass()
     }
 
     fn newClassName(prefix string) -> (autoName string) {
@@ -122,6 +116,7 @@ public class  BuildPackage {
             if v.accessFlags&cg.AccFieldPublic != 0 {
                 f.accessFlags |= cg.AccFieldPublic
             }
+            this.mainClass.insertSourceFile(v.pos.filename)
             f.name = v.name
             f.attributeConstantValue = new cg.AttributeConstantValue()
             switch v.Type.Type{
@@ -158,9 +153,10 @@ public class  BuildPackage {
             }
             this.mainClass.Class.TypeAlias[i] = t
             i++
+            this.mainClass.insertSourceFile(v.pos.filename)
         }
     }
-
+    
     fn mkGlobalVariables() {
         for k, v := range this.Package.block.variables {
             f := new cg.FieldHighLevel()
@@ -182,6 +178,7 @@ public class  BuildPackage {
             v.globalVarClassName = this.mainClass.name
             f.name = v.name
             this.mainClass.fields[k] = f
+            this.mainClass.insertSourceFile(v.pos.filename)
         }
     }
 
@@ -202,6 +199,7 @@ public class  BuildPackage {
             method.code = new cg.AttributeCode()
             this.BuildFunction.buildFunction(this.mainClass, null, method, v)
             this.mainClass.appendMethod(method)
+            this.mainClass.insertSourceFile(v.pos.filename)
         }
         method := new cg.MethodHighLevel()
         method.accessFlags |= cg.AccMethodStatic
@@ -225,25 +223,6 @@ public class  BuildPackage {
         method.code.codes = codes
         method.code.codeLength = codeLength
         this.mainClass.appendMethod(method)
-
-        /*
-            trigger init
-
-        trigger := new cg.MethodHighLevel()
-        trigger.name = this.mainClass.newMethodName("triggerPackageInit")
-        trigger.accessFlags |= cg.AccMethodPublic
-        trigger.accessFlags |= cg.AccMethodBridge
-        trigger.accessFlags |= cg.AccMethodStatic
-        trigger.accessFlags |= cg.AccMethodSynthetic
-        trigger.Descriptor = "()V"
-        trigger.code = new cg.AttributeCode()
-        trigger.code.codes = new []byte(1)
-        trigger.code.codes[0] = cg.OP_return
-        trigger.code.codeLength = 1
-        trigger.AttributeLucyTriggerPackageInitMethod = new cg.AttributeLucyTriggerPackageInitMethod()
-        this.mainClass.appendMethod(trigger)
-        this.mainClass.triggerPackageInitMethod = trigger
-         */
     }
 
 
@@ -370,12 +349,12 @@ public class  BuildPackage {
                 }else {
                     this.mainClass.templateFunctions.append( t)
                 }
-
                 continue
             }
             if f.isBuildIn { //
                 continue
             }
+            this.mainClass.insertSourceFile(f.pos.filename)
             c := this.mainClass
             method := new cg.MethodHighLevel()
             method.Class = c
@@ -410,7 +389,7 @@ public class  BuildPackage {
         }
     }
 
-    fn DumpClass() {
+    fn dumpClass() {
         //dump main c
         f := new io.FileOutputStream(this.dir + "/main.class", false)
         defer f.close()

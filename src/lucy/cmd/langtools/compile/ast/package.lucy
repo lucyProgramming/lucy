@@ -11,12 +11,10 @@ public class Package {
 	public initFunctions                []Function
 	public nErrors2Stop                 int // number of errors should stop compile
 	errors                       []error
-	public triggerPackageInitMethodName string //
 	statementLevelFunctions      []Function
 	statementLevelClass          []Class
 	disableCheckUnuse  			bool 
-	public javaPackage JavaPackage        
-	public hasMain bool 
+	public javaPackage JavaPackage  
 	public matchFile string 
 	public matchLine int 
 	public printFileMatchInfo bool 
@@ -88,6 +86,11 @@ public class Package {
 	public fn locateDefinitionOrAutoCompletionFetched() ->(fetched bool) {
 		fetched = this.locateDefinition != null || 
 			len(this.autoCompletionItems) > 0 
+	}
+
+	public fn hasMain() -> (has bool)   {
+		return this.block.functions != null && 
+			this.block.functions.keyExist(MainFunctionName)
 	}
 	
 	fn isSame(compare Package) -> (is bool) {
@@ -368,7 +371,6 @@ public class Package {
 			v.block.inheritedAttribute.Function = v
 			v.checkParametersAndReturns(this.errors, false, false)
 			if v.isGlobalMain() {
-				this.hasMain = true
 				defineMainOK := false
 				if len(v.Type.parameterList) == 1 {
 					defineMainOK = v.Type.parameterList[0].Type.Type == VariableTypeArray &&

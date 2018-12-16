@@ -262,6 +262,7 @@ class ExpressionCheckSelection {
             item.Type = "function"
             item.name = name
             item.suggest = v.mkSuggest()
+            item.description = v.readableMsg()
             items.append(item)
         }
         for name , _ := range p.block.classes {
@@ -308,6 +309,7 @@ class ExpressionCheckSelection {
                     }
                     item := new AutoCompletionItem()
                     item.Type = "method"
+                    item.description = method.Function.readableMsg() 
                     item.name =  method.Function.name
                     item.suggest = method.Function.mkSuggest()
                     items.append(item)
@@ -332,6 +334,7 @@ class ExpressionCheckSelection {
                         }
                         item := new AutoCompletionItem()
                         item.Type = "method"
+                        item.description = method.Function.readableMsg() 
                         item.name =  method.Function.name
                         item.suggest = method.Function.mkSuggest()
                         items.append(item)
@@ -392,6 +395,7 @@ class ExpressionCheckSelection {
                     }
                     item.name =  method.Function.name
                     item.suggest = method.Function.mkSuggest()
+                    item.description = method.Function.readableMsg() 
                     items.append(item)
                 }
             }else {
@@ -429,6 +433,7 @@ class ExpressionCheckSelection {
                         }
                         item.name =  method.Function.name
                         item.suggest = method.Function.mkSuggest()
+                        item.description = method.Function.readableMsg() 
                         items.append(item)
                     }
                 }
@@ -486,6 +491,7 @@ class ExpressionCheckSelection {
                     }
                     item.name =  method.Function.name
                     item.suggest = method.Function.mkSuggest()
+                    item.description = method.Function.readableMsg() 
                     items.append(item)
                 }
             }else {
@@ -523,6 +529,7 @@ class ExpressionCheckSelection {
                         }
                         item.name =  method.Function.name
                         item.suggest = method.Function.mkSuggest()
+                        item.description = method.Function.readableMsg() 
                         items.append(item)
                     }
                 }

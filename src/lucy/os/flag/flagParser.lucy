@@ -1,6 +1,6 @@
 
 /*
-	a simple but yet powerful cmd parse for lucy programing
+	a simple but yet powerful command line arguments parser for lucy programing language 
 */
 public final class  FlagParser {
 	options map{ string -> Option };
@@ -34,6 +34,7 @@ public final class  FlagParser {
 		o.name = option 
 		o.defaultValueString = "" + d
 		this.options[option] = o
+		o.reset()
 	} 
 	
 	public fn intOption(option string , d int = 0 ,usage string = "") ->(o IntOption){
@@ -44,6 +45,7 @@ public final class  FlagParser {
 		o.name = option 
 		o.defaultValueString = "" + d
 		this.options[option] = o
+		o.reset()
 	} 
 	
 	public fn stringOption(option string , d string = "" ,usage string = "") ->(o StringOption){
@@ -54,6 +56,7 @@ public final class  FlagParser {
 		o.name = option 
 		o.defaultValueString = "" + d
 		this.options[option] = o
+		o.reset()
 	}
 
 	public fn floatOption(option string , d float = 0f,usage string = "") ->(o FloatOption){
@@ -64,6 +67,7 @@ public final class  FlagParser {
 		o.name = option 
 		o.defaultValueString = "" + d
 		this.options[option] = o
+		o.reset()
 	} 
 		
 	

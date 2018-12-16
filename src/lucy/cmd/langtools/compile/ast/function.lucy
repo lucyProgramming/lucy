@@ -151,6 +151,7 @@ public class Function {
 		var err error
 		if this.locateDefinition {
 			this.block.inheritedAttribute.p.locateDefinition = this.pos 
+			return 
 		}
 		for k, v := range this.Type.parameterList {
 			if v.name == null {

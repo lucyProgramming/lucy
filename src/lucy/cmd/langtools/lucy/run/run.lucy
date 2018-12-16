@@ -22,7 +22,7 @@ public class RunLucyPackage {
 	flags               Flags = new Flags()
 	packagesCompiled    map{string -> PackageCompiled}
 	lucyProgramArgs     []string // lucy application args
-
+    
     public fn RunCommand(command string, args []string) -> (err error){
         this.command = command
         err = this.parseCmd(args) // skip run
@@ -30,7 +30,7 @@ public class RunLucyPackage {
             this.help()
             return
         }
-        if this.flags.help.getValue() {
+        if this.flags.h.getValue() {
             this.help()
             return
         }
@@ -52,7 +52,7 @@ public class RunLucyPackage {
                 return err 
             }
         }
-        _, _, err = this.buildPackage(this.mainPackageLucyPath, this.Package, new ImportStack())
+        _, meta, err := this.buildPackage(this.mainPackageLucyPath, this.Package, new ImportStack())
         if err != null {
             print(err)
             return 
@@ -60,11 +60,16 @@ public class RunLucyPackage {
         if this.flags.build.getValue() {
             return
         }
-        //TODO:: 
-        // if false == meta.hasMain {
-        //     print("no main function")
-        //     os.exit(4)
-        // }
+        if false == meta.hasMain {
+            print(`no main function, please declare main function as:
+
+    fn main(args []string){
+
+    }
+            `)
+            
+            os.exit(4)
+        }
         cmdArray := []string{"java" , this.Package + "/" + "main"}
         cmdArray.appendAll(this.lucyProgramArgs)
         var envs = new string[](len(os.getEnvs()))
@@ -86,13 +91,13 @@ public class RunLucyPackage {
             lucyIo.ioCopy(os.stdout , p.getInputStream())
         })
         Run.runFn(fn() {
-            lucyIo.ioCopy(p.getOutputStream(),os.stdin )
+            lucyIo.ioCopy(p.getOutputStream() , os.stdin )
         })
         os.exit(p.waitFor())  // wait for exit
     }
 
     fn help() {
-        print("run a lucy package")
+        this.flags.help()
     }
 
     fn parseCmd(args []string) ->(err error) {
@@ -361,7 +366,16 @@ public class RunLucyPackage {
             files[k] = v.realpathName
         }
         f := new compileCommon.Flags()
-        f.parseArgs(["-package-name" , packageName])
+        if cf := this.flags.compilerFlags.getValue() ; cf == null && cf == "" {
+            f.parseArgs(["-package-name" , packageName])
+        }else {
+            a := ["-package-name" , packageName]
+            for  v := range cf.split(" ") {
+                a.append(v)
+            }
+            f.parseArgs(a)
+        }
+
         hasMain := lc.Main(destinationDir , f , files , this.lucyPath , this.classPaths , true)
         // make_node_objects maitain.json
         meta = new common.PackageMeta()
@@ -397,10 +411,25 @@ public class RunLucyPackage {
             copy(new byte[](len(bs)) ,bs ))
         t := new PackageCompiled()
         t.meta = meta
-        meta.hasMain = hasMain  
+        meta.hasMain = hasMain 
+        print(packageName , hasMain) 
         t.packageName = packageName
         this.packagesCompiled[packageName] = t
         needBuild = true
+        
+        {
+            //verything is done delete old class files
+            classFileMap := new map{string->bool}()
+            for v := range meta.classes {
+                classFileMap[v] = true 
+            }
+            list := new io.File(destinationDir).list()
+            for v := range list {
+                if classFileMap.keyExist(v) == false {
+                    new io.File(destinationDir).delete()
+                }
+            }
+        }
         return
     }
 

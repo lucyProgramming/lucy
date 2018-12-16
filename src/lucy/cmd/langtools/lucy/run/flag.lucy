@@ -6,8 +6,8 @@ class Flags {
 	build         flag.BoolOption
 	verbose       flag.BoolOption
 	compilerFlags flag.StringOption 
-	help          flag.BoolOption
-    parser         flag.FlagParser
+	h          flag.BoolOption
+    parser        flag.FlagParser
 
 	fn Flags(){
 	    this.super()
@@ -16,7 +16,19 @@ class Flags {
         this.compilerFlags = this.parser.stringOption("-cf", "", "compiler flags")
         this.build = this.parser.boolOption("-build", false, "build package and no run")
         this.verbose = this.parser.boolOption("-v", false, "verbose")
-        this.help = this.parser.boolOption("-h", false, "print help message")
+        this.h = this.parser.boolOption("-h", false, "print help message")
+	}
+
+
+	fn help()  {
+		usage := `run a lucy package
+    -forceReBuild           force rebuild all package 
+	-cf                     compile flags
+	-build                  build the package and no run 
+	-v                      print the package been compile
+	-h                      print this help message
+		`
+		print(usage)
 	}
 
 }

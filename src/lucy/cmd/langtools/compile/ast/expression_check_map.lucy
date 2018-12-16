@@ -68,28 +68,31 @@ class ExpressionCheckMap {
 					return new error(errMsg)
 				}
 				switch m.Type.Map.K.Type {
-				case VariableTypeByte ,VariableTypeChar , VariableTypeShort , VariableTypeInt , VariableTypeLong:
+				case VariableTypeByte,
+					VariableTypeChar, 
+					VariableTypeShort,
+					VariableTypeInt,
+					VariableTypeLong:
 					value := v.key.longValue
 					if first := longMap[value]; first != null {
-						errs.append(errMsg(v.key.pos, first, ""+value))
+						errs.append(errMsg(v.key.pos, first , v.key.literalRaw))
 					} else {
 						longMap[value] = v.key.pos
 					}
 				case VariableTypeFloat ,VariableTypeDouble :
 					value := v.key.doubleValue
 					if first := doubleMap[value]; first != null {
-						errs.append(errMsg(v.key.pos, first, value + ""))
+						errs.append(errMsg(v.key.pos, first, v.key.literalRaw))
 					} else {
 						doubleMap[value] = v.key.pos
 					}
 				case VariableTypeString:
 					value := v.key.stringValue
 					if first := stringMap[value]; first != null {
-						errs.append(errMsg(v.key.pos, first, value))
+						errs.append(errMsg(v.key.pos, first, v.key.literalRaw))
 					} else {
 						stringMap[value] = v.key.pos
 					}
-				default:
 				}
 			}
 			// map v
