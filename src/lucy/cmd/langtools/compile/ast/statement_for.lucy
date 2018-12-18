@@ -1,6 +1,5 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-
 public class ForRangeAttr {
 	public identifierKey   ExpressionIdentifier
 	public identifierValue ExpressionIdentifier
@@ -11,7 +10,7 @@ public class ForRangeAttr {
 
 
 public class StatementFor {
-	public RangeAttr           ForRangeAttr
+	public rangeAttr           ForRangeAttr
 	public exits               []cg.Exit
 	public continueCodeOffset  int
 	public pos                 Pos
@@ -87,8 +86,8 @@ public class StatementFor {
 			lefts = lefts[0:2]
 		}
 		modelKv := len(lefts) == 2
-		this.RangeAttr = new ForRangeAttr()
-		this.RangeAttr.rangeOn = rangeExpression
+		this.rangeAttr = new ForRangeAttr()
+		this.rangeAttr.rangeOn = rangeExpression
 		var err error
 		if this.condition.Type == ExpressionTypeVarAssign {
 			for _, v := range lefts {
@@ -142,7 +141,7 @@ public class StatementFor {
 					errs.append(err)
 				}
 				identifierV.Variable = vd
-				this.RangeAttr.identifierValue = identifierV
+				this.rangeAttr.identifierValue = identifierV
 			}
 			if modelKv &&
 				identifierK.name != UnderScore {
@@ -182,31 +181,31 @@ public class StatementFor {
 					errs.append(err)
 				}
 				identifierK.Variable = vd
-				this.RangeAttr.identifierKey = identifierK
+				this.rangeAttr.identifierKey = identifierK
 			}
 		} else { // k,v = range arr
 			if modelKv {
 				if false == lefts[0].isIdentifier(UnderScore) {
-					this.RangeAttr.expressionKey = lefts[0]
+					this.rangeAttr.expressionKey = lefts[0]
 				}
 				if false == lefts[1].isIdentifier(UnderScore) {
-					this.RangeAttr.expressionValue = lefts[1]
+					this.rangeAttr.expressionValue = lefts[1]
 				}
 			} else {
 				if false == lefts[0].isIdentifier(UnderScore) {
-					this.RangeAttr.expressionValue = lefts[0]
+					this.rangeAttr.expressionValue = lefts[0]
 				}
 			}
 			var receiverKType Type
-			if this.RangeAttr.expressionKey != null {
-				receiverKType = this.RangeAttr.expressionKey.getLeftValue(this.initExpressionBlock, errs)
+			if this.rangeAttr.expressionKey != null {
+				receiverKType = this.rangeAttr.expressionKey.getLeftValue(this.initExpressionBlock, errs)
 				if receiverKType == null {
 					goto checkBlock 
 				}
 			}
 			var receiverVType Type
-			if this.RangeAttr.expressionValue != null {
-				receiverVType = this.RangeAttr.expressionValue.getLeftValue(this.initExpressionBlock, errs)
+			if this.rangeAttr.expressionValue != null {
+				receiverVType = this.rangeAttr.expressionValue.getLeftValue(this.initExpressionBlock, errs)
 				if receiverVType == null {
 					goto checkBlock 
 				}
@@ -225,7 +224,7 @@ public class StatementFor {
 			if receiverKType != null {
 				if receiverKType.assignAble(this.initExpressionBlock,errs, kType) == false {
 					err = new error(sprintf("%s cannot use '%s' as '%s' for index",
-						errMsgPrefix(this.RangeAttr.expressionKey.pos),
+						errMsgPrefix(this.rangeAttr.expressionKey.pos),
 						receiverKType.typeString(), kType.typeString()))
 					errs.append(err)
 					goto checkBlock 
@@ -234,7 +233,7 @@ public class StatementFor {
 			if receiverVType != null {
 				if receiverVType.assignAble( this.initExpressionBlock, errs, vType) == false {
 					err = new error(sprintf("%s cannot use '%s' as '%s' for value destination",
-						errMsgPrefix(this.RangeAttr.expressionKey.pos),
+						errMsgPrefix(this.rangeAttr.expressionKey.pos),
 						receiverKType.typeString(), kType.typeString()))
 					errs.append(err)
 					goto checkBlock 

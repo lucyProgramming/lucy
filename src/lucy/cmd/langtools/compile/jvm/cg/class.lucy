@@ -14,11 +14,11 @@ public const	AccClassEnum       char = 0x4000 // 标识枚举类型
 
 
 public class Class {
-	writer                  io.FileOutputStream
+	writer                  io.OutputStream
 	magic                   int //0xCAFEBABE
 	public minorVersion            char
 	public majorVersion            char
-	public ConstPool               []ConstPool
+	public constPools               []ConstPool
 	public accessFlags              char
 	public thisClass               char
 	public superClass              char
@@ -53,15 +53,15 @@ public class Class {
 		if this.methodTypeConstants == null {
 			this.methodTypeConstants = new  map{string -> ConstPool}()
 		}
-		if len(this.ConstPool) == 0 {
-			this.ConstPool = []ConstPool{null}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
 		}
 		if con := this.methodTypeConstants[n.toString()]; con != null {
 			return con.selfIndex
 		}
 		info := new ConstantInfoMethodType ( this.insertUtf8Const(n.descriptor) ).ToConstPool()
 		info.selfIndex = this.constPoolLength()
-		this.ConstPool.append(info)
+		this.constPools.append(info)
 		this.methodTypeConstants[n.toString()] = info
 		return info.selfIndex
 	}
@@ -70,18 +70,18 @@ public class Class {
 		if this.interfaceMethodrefConstants == null {
 			this.interfaceMethodrefConstants = new map {string -> ConstPool} ()
 		}
-		if len(this.ConstPool) == 0 {
-			this.ConstPool = []ConstPool{null}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
 		}
 		if con := this.interfaceMethodrefConstants[n.toString()]; con != null {
 			return con.selfIndex
 		}
 		info :=  new ConstantInfoInterfaceMethodref(
-			this.insertClassConst(n.Class),
+			this.insertClassConst(n.className),
 			this.insertNameAndType( new ConstantInfoNameAndTypeHighLevel(     n.method,  n.descriptor ) )
 		).ToConstPool()
 		info.selfIndex = this.constPoolLength()
-		this.ConstPool.append(info)
+		this.constPools.append(info)
 		this.interfaceMethodrefConstants[n.toString()] = info
 		return info.selfIndex
 	}
@@ -90,20 +90,20 @@ public class Class {
 		if this.methodrefConstants == null {
 			this.methodrefConstants = new map{string -> ConstPool} ()
 		}
-		if len(this.ConstPool) == 0 {
-			this.ConstPool = []ConstPool{null}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
 		}
 		if con := this.methodrefConstants[n.toString()]; con != null {
 			return con.selfIndex
 		}
 		info := new ConstantInfoMethodref(
-                    this.insertClassConst(n.Class),
+                    this.insertClassConst(n.className),
                     this.insertNameAndType( new ConstantInfoNameAndTypeHighLevel (
                        n.method,
                        n.descriptor) )
 			) .ToConstPool()
 		info.selfIndex = this.constPoolLength()
-		this.ConstPool.append(info)
+		this.constPools.append(info)
 		this.methodrefConstants[n.toString()] = info
 		return info.selfIndex
 	}
@@ -112,8 +112,8 @@ public class Class {
 		if this.nameAndTypeConstants == null {
 			this.nameAndTypeConstants = new map{string -> ConstPool} ()
 		}
-		if len(this.ConstPool) == 0 {
-			this.ConstPool = []ConstPool{null}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
 		}
 		if con := this.nameAndTypeConstants[n.toString()]; con != null {
 			return con.selfIndex
@@ -123,7 +123,7 @@ public class Class {
 			    this.insertUtf8Const(n.descriptor)
 		    ).ToConstPool()
 		info.selfIndex = this.constPoolLength()
-		this.ConstPool.append(info)
+		this.constPools.append(info)
 		this.nameAndTypeConstants[n.toString()] = info
 		return info.selfIndex
 	}
@@ -131,19 +131,19 @@ public class Class {
 		if this.fieldRefConstants == null {
 			this.fieldRefConstants = new map{string -> ConstPool}()
 		}
-		if len(this.ConstPool) == 0 {
-			this.ConstPool = []ConstPool{null}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
 		}
 		if con := this.fieldRefConstants[f.toString()]; con != null {
 			return con.selfIndex
 		}
 		info := new ConstantInfoFieldref(
-			this.insertClassConst(f.Class),
+			this.insertClassConst(f.className),
 			this.insertNameAndType(new ConstantInfoNameAndTypeHighLevel(   f.field,  f.descriptor)
 			)
 		).ToConstPool()
 		info.selfIndex = this.constPoolLength()
-		this.ConstPool.append(info)
+		this.constPools.append(info)
 		this.fieldRefConstants[f.toString()] = info
 		return info.selfIndex
 	}
@@ -154,15 +154,15 @@ public class Class {
 		if this.utf8Constants == null {
 			this.utf8Constants = new map {string -> ConstPool}( )
 		}
-		if len(this.ConstPool) == 0 {
-			this.ConstPool = []ConstPool{null}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
 		}
 		if con := this.utf8Constants[s]; con != null  {
 			return con.selfIndex
 		}
 		info := (new ConstantInfoUtf8(s)).ToConstPool()
 		info.selfIndex = this.constPoolLength()
-		this.ConstPool.append(info)
+		this.constPools.append(info)
 		this.utf8Constants[s] = info
 		return info.selfIndex
 	}
@@ -171,15 +171,15 @@ public class Class {
 		if this.intConstants == null {
 			this.intConstants = new map{ int -> ConstPool }()
 		}
-		if len(this.ConstPool) == 0 {
-			this.ConstPool = []ConstPool{null}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
 		}
 		if con := this.intConstants[i];   con != null {
 			return con.selfIndex
 		}
 		info := new ConstantInfoInteger(i).ToConstPool()
 		info.selfIndex = this.constPoolLength()
-		this.ConstPool.append(info)
+		this.constPools.append(info)
 		this.intConstants[i] = info
 		return info.selfIndex
 	}
@@ -187,15 +187,15 @@ public class Class {
 		if this.longConstants == null {
 			this.longConstants = new map{ long -> ConstPool } ()
 		}
-		if len(this.ConstPool) == 0 {
-			this.ConstPool = []ConstPool{null}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
 		}
 		if con := this.longConstants[i]; con != null {
 			return con.selfIndex
 		}
 		info := new ConstantInfoLong(i).ToConstPool()
 		info.selfIndex = this.constPoolLength()
-		this.ConstPool.append(info , null )
+		this.constPools.append(info , null )
 		this.longConstants[i] = info
 		return info.selfIndex
 	}
@@ -204,15 +204,15 @@ public class Class {
 		if this.floatConstants == null {
 			this.floatConstants = new map {float -> ConstPool} ()
 		}
-		if len(this.ConstPool) == 0 {
-			this.ConstPool = []ConstPool{null}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
 		}
 		if con := this.floatConstants[f]; con != null {
 			return con.selfIndex
 		}
 		info := new ConstantInfoFloat(f).ToConstPool()
 		info.selfIndex = this.constPoolLength()
-		this.ConstPool.append(info)
+		this.constPools.append(info)
 		this.floatConstants[f] = info
 		return info.selfIndex
 	}
@@ -221,15 +221,15 @@ public class Class {
 		if this.doubleConstants == null {
 			this.doubleConstants = new map{double -> ConstPool}()
 		}
-		if len(this.ConstPool) == 0 {
-			this.ConstPool = []ConstPool{null}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
 		}
 		if con := this.doubleConstants[f]; con != null {
 			return con.selfIndex
 		}
 		info := (new ConstantInfoDouble(f)).ToConstPool()
 		info.selfIndex = this.constPoolLength()
-		this.ConstPool.append(info , null )
+		this.constPools.append(info , null )
 		this.doubleConstants[f] = info
 		return info.selfIndex
 	}
@@ -238,15 +238,15 @@ public class Class {
 		if this.classConstants == null {
 			this.classConstants = new map {string -> ConstPool} ()
 		}
-		if len(this.ConstPool) == 0 {
-			this.ConstPool = []ConstPool{null}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
 		}
 		if con := this.classConstants[name]; con != null {
 			return con.selfIndex
 		}
 		info := new ConstantInfoClass(this.insertUtf8Const(name)).ToConstPool()
 		info.selfIndex = this.constPoolLength()
-		this.ConstPool.append(info  )
+		this.constPools.append(info  )
 		this.classConstants[name] = info
 		return info.selfIndex
 	}
@@ -258,15 +258,15 @@ public class Class {
 		if this.stringConstants == null {
 			this.stringConstants = new map{string -> ConstPool }()
 		}
-		if len(this.ConstPool) == 0 {
-			this.ConstPool = []ConstPool{null}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
 		}
 		if con := this.stringConstants[s]; con != null {
 			return con.selfIndex
 		}
 		info := new ConstantInfoString(this.insertUtf8Const(s)).ToConstPool()
 		info.selfIndex = this.constPoolLength()
-		this.ConstPool . append( info)
+		this.constPools.append( info)
 		this.stringConstants[s] = info
 		return info.selfIndex
 	}
@@ -276,8 +276,8 @@ public class Class {
 	fn fromHighLevel(high ClassHighLevel) {
 		this.majorVersion = char(52)
 		this.minorVersion = char(0)
-		if len(this.ConstPool) == 0 {
-			this.ConstPool = []ConstPool{null} // jvm const pool index begin at 1
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null} // jvm const pool index begin at 1
 		}
 		this.accessFlags = high.accessFlags
 		this.thisClass = this.insertClassConst(high.name)
@@ -286,8 +286,8 @@ public class Class {
 		for _, i := range high.interfaces {
 			inter := (new ConstantInfoClass(this.insertUtf8Const(i))).ToConstPool()
 			index := this.constPoolLength()
-			this.interfaces . append(index)
-			this.ConstPool . append(inter)
+			this.interfaces.append(index)
+			this.constPools.append(inter)
 		}
 		this.fields = []FieldInfo{}
 		for _, f := range high.fields {
@@ -370,10 +370,10 @@ public class Class {
 	}
 	
 	fn constPoolLength() -> (length char){
-		return char(len(this.ConstPool))
+		return char(len(this.constPools))
 	}
 	fn ifConstPoolOverMaxSize() {
-		if len(this.ConstPool) > ConstantPoolMaxSize {
+		if len(this.constPools) > ConstantPoolMaxSize {
 			panic(sprintf("const pool max size is:%d", ConstantPoolMaxSize))
 		}
 	}
@@ -384,7 +384,7 @@ public class Class {
 		}
 		innerClass := this.AttributeGroupedByName[AttributeNameInnerClasses][0]
 		var attr  = new AttributeInnerClasses()
-		thisClassName := string(this.ConstPool[binary.BigEndian.getChar(this.ConstPool[this.thisClass].info)].info)
+		thisClassName := string(this.constPools[binary.BigEndian.getChar(this.constPools[this.thisClass].info)].info)
 		attr.fromBs(this, innerClass.info)
 		for _, v := range attr.classes {
 			if thisClassName == v.innerClass {
@@ -397,8 +397,8 @@ public class Class {
 
 	public fn outPut(writer io.FileOutputStream)  {
 		this.writer = writer
-		//magic number
 		{
+			//magic number
 		    bs := new byte[](4)
 		    bs[0] = 0xca
 		    bs[1] = 0xfe
@@ -417,7 +417,7 @@ public class Class {
 		//const pool
 		binary.BigEndian.putChar(bs2, this.constPoolLength())
 		writer.write(bs2.getUnderlyingArray())
-		for _, v := range this.ConstPool {
+		for _, v := range this.constPools {
 			if v == null {
 				continue
 			}
@@ -496,8 +496,8 @@ public class Class {
 			}
 		}
 	}	
-	public fn GetAttributeByName( name string) -> (attrs []AttributeInfo) {
-		return GetAttributeByName(this.AttributeGroupedByName , name)
+	public fn getAttributeByName( name string) -> (attrs []AttributeInfo) {
+		return getAttributeByName(this.AttributeGroupedByName , name)
 	}
 }
 

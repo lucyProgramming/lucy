@@ -49,7 +49,7 @@ class BuildinFunctionCall {
             ), code.codes[code.codeLength+1:code.codeLength+3])
             code.codeLength += 3
             if e.isStatementExpression {
-                if call.Function.Type.VoidReturn() == false {
+                if call.Function.Type.voidReturn() == false {
                     if len(call.Function.Type.returnList) > 1 {
                         code.codes[code.codeLength] = cg.OP_pop
                         code.codeLength++

@@ -1,0 +1,199 @@
+import "lucy/binary"
+  
+
+public class ClassDecoder {
+	bs        []byte 
+	classFile Class 
+	
+	public fn ClassDecoder(bs []byte){
+		this.super()
+		this.bs = bs 
+		this.classFile = new Class()
+	}
+	
+	public fn decode() -> (c Class) {
+		if binary.BigEndian.getInt(this.bs) != ClassMagicNumber {
+			panic("magic number is not right")
+		}
+		this.bs = this.bs[4:]
+		//version
+		this.classFile.minorVersion = binary.BigEndian.getChar(this.bs)
+		this.classFile.majorVersion = binary.BigEndian.getChar(this.bs[2:])
+		this.bs = this.bs[4:] 
+		this.classFile.constPools = []ConstPool{null} // pool start 1
+		//const pool
+		this.parseConstPool()
+		//access flag
+		this.classFile.accessFlags = binary.BigEndian.getChar(this.bs) //11
+		this.bs = this.bs[2:]
+		// this class
+		this.classFile.thisClass = binary.BigEndian.getChar(this.bs)
+		this.classFile.superClass = binary.BigEndian.getChar(this.bs[2:])
+		this.bs = this.bs[4:]
+		this.parseInterfaces()
+		this.parseFields()
+		this.parserMethods()
+		this.classFile.AttributeGroupedByName = this.parseAttributes()
+		return this.classFile
+	}
+
+	fn parseConstPool()   {
+		length := binary.BigEndian.getChar(this.bs) - 1
+		this.bs = this.bs[2:]
+		for i := 0; i < int(length); i++ {
+			switch this.bs[0] {
+			case ConstantPoolTagUtf8:
+				p := new ConstPool()
+				length := binary.BigEndian.getChar(this.bs[1:])
+				p.tag = this.bs[0]
+				this.bs = this.bs[3:]
+				p.info = this.bs[:length]
+				this.bs = this.bs[length:]
+				this.classFile.constPools.append( p)
+			case ConstantPoolTagInteger:
+				p := new ConstPool()
+				p.tag = this.bs[0]
+				p.info = this.bs[1:5]
+				this.bs = this.bs[5:]
+				this.classFile.constPools.append( p)
+			case ConstantPoolTagFloat:
+				p := new ConstPool()
+				p.tag = this.bs[0]
+				p.info = this.bs[1:5]
+				this.bs = this.bs[5:]
+				this.classFile.constPools.append( p)
+			case ConstantPoolTagFieldref:
+				p := new ConstPool()
+				p.tag = this.bs[0]
+				p.info = this.bs[1:5]
+				this.bs = this.bs[5:]
+				this.classFile.constPools.append( p)
+			case ConstantPoolTagMethodref:
+				p := new ConstPool()
+				p.tag = this.bs[0]
+				p.info = this.bs[1:5]
+				this.bs = this.bs[5:]
+				this.classFile.constPools.append( p)
+			case ConstantPoolTagInterfaceMethodref:
+				p := new ConstPool()
+				p.tag = this.bs[0]
+				p.info = this.bs[1:5]
+				this.bs = this.bs[5:]
+				this.classFile.constPools.append( p)
+			case ConstantPoolTagNameAndType:
+				p := new ConstPool()
+				p.tag = this.bs[0]
+				p.info = this.bs[1:5]
+				this.bs = this.bs[5:]
+				this.classFile.constPools.append( p)
+			case ConstantPoolTagInvokeDynamic:
+				p := new ConstPool()
+				p.tag = this.bs[0]
+				p.info = this.bs[1:5]
+				this.bs = this.bs[5:]
+				this.classFile.constPools.append( p)
+			case ConstantPoolTagLong:
+				p := new ConstPool()
+				p.tag = this.bs[0]
+				p.info = this.bs[1:9]
+				this.bs = this.bs[9:]
+				this.classFile.constPools.append( p, null)
+				i++ // increment twice
+			case ConstantPoolTagDouble:
+				p := new ConstPool()
+				p.tag = this.bs[0]
+				p.info = this.bs[1:9]
+				this.bs = this.bs[9:]
+				this.classFile.constPools.append( p, null)
+				i++ // increment twice
+			case ConstantPoolTagClass:
+				p := new ConstPool()
+				p.tag = this.bs[0]
+				p.info = this.bs[1:3]
+				this.bs = this.bs[3:]
+				this.classFile.constPools.append( p)
+			case ConstantPoolTagString:
+				p := new ConstPool()
+				p.tag = this.bs[0]
+				p.info = this.bs[1:3]
+				this.bs = this.bs[3:]
+				this.classFile.constPools.append( p)
+			case ConstantPoolTagMethodType:
+				p := new ConstPool()
+				p.tag = this.bs[0]
+				p.info = this.bs[1:3]
+				this.bs = this.bs[3:]
+				this.classFile.constPools.append( p)
+			case ConstantPoolTagMethodHandle:
+				p := new ConstPool()
+				p.tag = this.bs[0]
+				p.info = this.bs[1:4]
+				this.bs = this.bs[4:]
+				this.classFile.constPools.append( p)
+			}
+		}
+	}
+
+	fn parseInterfaces() {
+		length := binary.BigEndian.getChar(this.bs)
+		this.bs = this.bs[2:]
+		this.classFile.interfaces = new []char(length)
+		for i := char(0); i < length; i++ {
+			this.classFile.interfaces[i] = binary.BigEndian.getChar(this.bs)
+			this.bs = this.bs[2:]
+		}
+	}
+
+	fn parseFields() {
+		length := binary.BigEndian.getChar(this.bs)
+		this.bs = this.bs[2:]
+		this.classFile.fields = new []FieldInfo(length)
+		for i := char(0); i < length; i++ {
+			f := new FieldInfo()
+			f.accessFlags = binary.BigEndian.getChar(this.bs)
+			f.nameIndex = binary.BigEndian.getChar(this.bs[2:])
+			f.descriptorIndex = binary.BigEndian.getChar(this.bs[4:])
+			this.bs = this.bs[6:]
+			f.AttributeGroupedByName = this.parseAttributes()
+			this.classFile.fields[i] = f 
+		}
+	}
+
+	fn parserMethods()  {
+		length := binary.BigEndian.getChar(this.bs)
+		this.bs = this.bs[2:]
+		this.classFile.methods = new []MethodInfo(length)
+		for i := char(0); i < length; i++ {
+			m := new MethodInfo()
+			m.accessFlags = binary.BigEndian.getChar(this.bs)
+			m.nameIndex = binary.BigEndian.getChar(this.bs[2:])
+			m.descriptorIndex = binary.BigEndian.getChar(this.bs[4:])
+			this.bs = this.bs[6:]
+			m.AttributeGroupedByName = this.parseAttributes()
+			this.classFile.methods[i] = m 
+		}
+	}
+	 
+	fn parseAttributes() -> (attrs  AttributeGroupedByName) {
+		attrs = new AttributeGroupedByName()
+		length := binary.BigEndian.getChar(this.bs)
+		this.bs = this.bs[2:]
+		for i := char(0); i < length; i++ {
+			a := new AttributeInfo()
+			a.nameIndex = binary.BigEndian.getChar(this.bs)
+			if this.classFile.constPools[a.nameIndex].tag != ConstantPoolTagUtf8 {
+				panic(sprintf("name index %d is not a utf8 const", a.nameIndex))
+			}
+			length := binary.BigEndian.getInt(this.bs[2:])
+			this.bs = this.bs[6:]
+			a.info = this.bs[:length]
+			this.bs = this.bs[length:]
+			name := string(this.classFile.constPools[a.nameIndex].info)
+			if attrs.keyExist(name) {
+				attrs[name].append(a)
+			} else {
+				attrs[name] = []AttributeInfo{a}
+			}
+		}
+	}
+}

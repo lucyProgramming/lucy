@@ -95,7 +95,7 @@ class BuildExpressionNew {
         maxStack = this.eb.build(c, code, n.args[0], context, state) // must be a integer
         currentStack := char(1)
         for i := byte(0); i < dimensions-1; i++ {
-            loadInt32(c, code, 0)
+            loadInt(c, code, 0)
             currentStack++
             if currentStack > maxStack {
                 maxStack = currentStack

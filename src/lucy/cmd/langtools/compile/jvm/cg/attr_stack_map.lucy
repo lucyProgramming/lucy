@@ -8,6 +8,7 @@ interface StackMap  {
 
 public class AttributeStackMap {
 	public StackMaps []StackMap
+	
 	public fn append(s StackMap){
 		if this.StackMaps == null {
 			this.StackMaps = [s]

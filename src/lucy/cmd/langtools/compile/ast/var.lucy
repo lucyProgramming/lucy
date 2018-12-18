@@ -9,7 +9,7 @@ const	MagicIdentifierFile     = "__FILE__"
 const	MagicIdentifierLine     = "__LINE__"
 const	MagicIdentifierTime     = "__TIME__"
 const	MagicIdentifierClass    = "__CLASS__"
-const	MainFunctionName        = "main"
+public const	MainFunctionName        = "main"
 const	ThisPointerName         = "this"
 const	UnderScore              = "_"
 const	LucyRootClass           = "lucy/lang/Lucy"
@@ -20,7 +20,6 @@ const	JavaStringClass         = "java/lang/String"
 const	Super                   = "super"
 const	SpecialMethodInit       = "<init>"
 const	ClassInitMethod         = "<clinit>"
-
 
 
 fn isMagicIdentifier(name string) ->(is bool)  {
@@ -34,6 +33,7 @@ var	buildInFunctionsMap = new map { string -> Function }()
 
 
 public var	parseFunctionHandler fn(bs []byte, pos Pos) -> (f Function, es []error)
+
 var	javaStringClass      Class
 public var	LucyBytesType       Type // []byte
 public var	JavaBytesType        Type // byte[]

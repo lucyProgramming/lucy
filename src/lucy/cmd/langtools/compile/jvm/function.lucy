@@ -55,7 +55,7 @@ class BuildFunction {
         f ast.Function, context Context, state StackMapState) -> (maxStack char) {
         this.mkParametersOffset(c, code, f, state)
         maxStack = this.mkCapturedParameters(c, code, f, state)
-        if f.Type.VoidReturn() == false {
+        if f.Type.voidReturn() == false {
             for _, v := range f.Type.returnList {
                 currentStack := char(0)
                 if v.beenCapturedAsLeftValue > 0 { //create closure object
@@ -156,13 +156,13 @@ class BuildFunction {
             }
             method.code.maxLocals = 1
         }
-        if LucyMethodSignature.Need(f.Type) {
+        if LucyMethodSignature.need(f.Type) {
             d := new cg.AttributeLucyMethodDescriptor()
-            d.descriptor = LucyMethodSignature.Encode(f.Type)
+            d.descriptor = LucyMethodSignature.encode(f.Type)
             method.AttributeLucyMethodDescriptor = d
         }
         if f.haveDefaultValue {
-            method.AttributeDefaultParameters = DefaultValueParse.Encode(c, f)
+            method.AttributeDefaultParameters = DefaultValueParse.encode(c, f)
         }
         if method.isConstruction == false {
             if t := this.buildFunctionParameterAndReturnList(c, method.code, f, context, state); t > method.code.maxStack {
@@ -183,7 +183,7 @@ class BuildFunction {
                 
             }
         }
-        if f.Type.VoidReturn() == false {
+        if f.Type.voidReturn() == false {
             method.AttributeLucyReturnListNames = new cg.AttributeMethodParameters()
             for _, v := range f.Type.returnList {
                 p := new cg.MethodParameter()

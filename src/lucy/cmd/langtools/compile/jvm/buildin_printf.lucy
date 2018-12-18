@@ -43,7 +43,7 @@ class BuildinFunctionPrintf {
             maxStack = t
         }
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
-        loadInt32(c, code, int(meta.argsLength))
+        loadInt(c, code, int(meta.argsLength))
         code.codes[code.codeLength] = cg.OP_anewarray
         c.insertClassConst("java/lang/Object", code.codes[code.codeLength+1:code.codeLength+3])
         code.codeLength += 3
@@ -60,7 +60,7 @@ class BuildinFunctionPrintf {
             currentStack = 3
             code.codes[code.codeLength] = cg.OP_dup
             code.codeLength++
-            loadInt32(c, code, index)
+            loadInt(c, code, index)
             currentStack += 2
             state.pushStack(c, objectArray)
             state.pushStack(c, typeInt)

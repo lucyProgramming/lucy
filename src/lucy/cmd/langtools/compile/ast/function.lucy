@@ -12,7 +12,7 @@ typealias BuildInFunctionChecker = fn(
 
 public class Function {
 	public callFatherConstructionExpression Expression
-	public TemplateFunction                 TemplateFunction
+	public templateFunction                 TemplateFunction
 	parameterTypes                   		map { string -> Type }     //typed parameters
 	public entrance                         cg.MethodHighLevel // make_node_objects call from
 	buildInFunctionChecker           		BuildInFunctionChecker
@@ -54,7 +54,7 @@ public class Function {
 			if v.name != null && v.name != "" {
 				s += v.name 
 			}else {
-				s += v.Type.typeString()
+				s += "var" + k
 			}
 			if k != len(this.Type.parameterList) - 1 {
 				s += " , "
@@ -74,10 +74,10 @@ public class Function {
 		return t
 	}
 
-	public fn readableMsg() -> (r string)  {
+	public fn readableMsg(format bool...) -> (r string)  {
 		if this.name == null ||
 			this.name == "" {
-			return "fn " + this.Type.typeString()
+			return "fn " + this.Type.typeString(format)
 		} else {
 			return "fn " + this.name + " " + this.Type.typeString()
 		}
@@ -115,7 +115,7 @@ public class Function {
 		this.block.inherit(b)
 		this.block.inheritedAttribute.Function = this
 		this.checkParametersAndReturns(errs, true, false)
-		if this.TemplateFunction == null {
+		if this.templateFunction == null {
 			this.checkBlock(errs)
 		}
 		return errs
@@ -135,7 +135,7 @@ public class Function {
 		t := new Statement()
 		t.Type = StatementTypeReturn
 		t.StatementReturn = s
-		t.pos =  this.block.endPos
+		t.pos = this.block.endPos
 		this.block.statements.append( t)
 	}
 	
@@ -170,8 +170,8 @@ public class Function {
 			}
 			v.isFunctionParameter = true
 			if len(v.Type.getParameterType(this.Type)) > 0 {
-				if this.TemplateFunction == null {
-					this.TemplateFunction = new TemplateFunction()
+				if this.templateFunction == null {
+					this.templateFunction = new TemplateFunction()
 				}
 			} else {
 				err = v.Type.resolve(this.block)
@@ -200,7 +200,7 @@ public class Function {
 				}
 				continue
 			}
-			if this.TemplateFunction != null {
+			if this.templateFunction != null {
 				continue
 			}
 			if v.defaultValueExpression == null && this.haveDefaultValue {
@@ -232,7 +232,7 @@ public class Function {
 				}
 			}
 		}
-		if this.Type.VoidReturn() == false {
+		if this.Type.voidReturn() == false {
 			//handler return
 			for _, v := range this.Type.returnList {
 				if v.name == null {
@@ -251,8 +251,8 @@ public class Function {
 				}
 				v.isReturn = true
 				if len(v.Type.getParameterType(this.Type)) > 0 {
-					if this.TemplateFunction == null {
-						this.TemplateFunction = new TemplateFunction()
+					if this.templateFunction == null {
+						this.templateFunction = new TemplateFunction()
 					}
 				} else {
 					err = v.Type.resolve(this.block)
@@ -267,7 +267,7 @@ public class Function {
 						}
 					}
 				}
-				if this.TemplateFunction != null {
+				if this.templateFunction != null {
 					continue
 				}
 				if checkReturnVarExpression == false {
@@ -293,7 +293,7 @@ public class Function {
 	}
 	
 	fn checkReturnVarExpression() -> (errs []error= []error{}) {
-		if this.Type.VoidReturn() {
+		if this.Type.voidReturn() {
 			return null
 		}
 		for _, v := range this.Type.returnList {

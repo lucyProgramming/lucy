@@ -50,7 +50,7 @@ class BuildExpressionAssert {
             code.codes[code.codeLength+9] = cg.OP_iconst_0
             code.codes[code.codeLength+10] = cg.OP_aconst_null
             code.codeLength += 11
-            loadInt32(c, code, 2)
+            loadInt(c, code, 2)
             code.codes[code.codeLength] = cg.OP_anewarray
             c.insertClassConst(javaRootClass, code.codes[code.codeLength+1:code.codeLength+3])
             code.codeLength += 3

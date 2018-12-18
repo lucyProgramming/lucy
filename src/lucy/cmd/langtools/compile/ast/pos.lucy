@@ -1,4 +1,4 @@
- 
+ import "java/lang/Object"
 
 
 public class Pos {
@@ -12,10 +12,12 @@ public class Pos {
 	*/
 	public offset int
 	public endOffset int 
+	public locateDefinitionIs Object
 	public loadDefinitionFromOutside LoadDefinitionFromOutside 
 	
 	public fn errMsgPrefix() -> (prefix string) {
-		return sprintf("%s:%d:%d", this.filename, this.endLine + 1, this.endColumnOffset + 1)
+		// 0 based to 1 bases
+		return sprintf("%s:%d:%d", this.filename, this.endLine + 1, this.endColumnOffset + 1) 
 	}
 }
 

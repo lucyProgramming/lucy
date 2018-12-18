@@ -5,18 +5,17 @@ import "com/sun/net/httpserver/HttpHandler"
 import "com/sun/net/httpserver/HttpExchange"
 import "lucy/cmd/langtools/http/g"
 
-
 class Fmt implements HttpHandler {
     public fn handle(exchange HttpExchange) {
         os := exchange.getResponseBody()
         defer {
-            exchange.close()
             e := catch()
             if e != null {
                 exchange.sendResponseHeaders(500 , 0L)
                 os.write(byte[]("internal error"))
                 e.printStackTrace()
             }
+            exchange.close()
         }
         bs := g.readBodyBytes(exchange.getRequestBody())
         if len(bs) == 0 {

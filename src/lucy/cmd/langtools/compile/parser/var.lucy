@@ -43,7 +43,7 @@ fn ParseFunction(bs []byte, pos ast.Pos) -> (f ast.Function,es []error) {
 	return f, parser.errs
 }
 
-var    autoNameIndex = 1
+var   autoNameIndex = 1
 
 fn compileAutoName() -> (name string) {
 	name = sprintf("autoName$%d", autoNameIndex)

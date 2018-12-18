@@ -5,8 +5,7 @@ import "lucy/cmd/langtools/compile/lex"
 class CommentParser extends ParserExtends{
 	comment string
 	fn CommentParser(parser Parser){
-		this.super()
-		this.parser = parser 
+		this.super(parser)
 	}
 	fn reset() {
 		this.comment = ""

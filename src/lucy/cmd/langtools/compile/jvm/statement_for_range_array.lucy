@@ -11,7 +11,7 @@ class BuildForRangeArray {
     
     eb BuildExpression
     bb  BuildBlock
-
+    
     fn BuildForRangeArray(eb BuildExpression , bb  BuildBlock){
         this.super()
         this.eb = eb
@@ -25,7 +25,7 @@ class BuildForRangeArray {
         context Context,
         state StackMapState) -> (maxStack char) {
         //build array expression
-        attr := s.RangeAttr
+        attr := s.rangeAttr
         maxStack = this.eb.build(c, code, attr.rangeOn, context, state) // array on stack
         code.codes[code.codeLength] = cg.OP_dup
         code.codeLength++

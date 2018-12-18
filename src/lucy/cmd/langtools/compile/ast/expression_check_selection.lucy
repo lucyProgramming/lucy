@@ -113,13 +113,13 @@ class ExpressionCheckSelection {
                         e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
                 }
-                if f.TemplateFunction != null {
+                if f.templateFunction != null {
                     err := new error(sprintf("%s function '%s' is a template function",
                         e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
                     return null
                 }
-                if selection.name == "main" {
+                if selection.name == MainFunctionName {
                     err := new error(sprintf("%s function '%s' is a a special entrance",
                         e.pos.errMsgPrefix(), selection.name))
                     errs.append(err)
@@ -255,7 +255,7 @@ class ExpressionCheckSelection {
             items.append(item)
         }
         for name , v := range p.block.functions {
-            if name == "main" {
+            if name == MainFunctionName {
                 continue // main function for 
             }
             item := new AutoCompletionItem()

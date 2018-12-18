@@ -26,7 +26,7 @@ class BuildForRangeJavaArray {
         context Context,
         state StackMapState) -> (maxStack char) {
         //build array expression
-        maxStack = this.eb.build(c, code, s.RangeAttr.rangeOn, context, state) // array on stack
+        maxStack = this.eb.build(c, code, s.rangeAttr.rangeOn, context, state) // array on stack
         code.codes[code.codeLength] = cg.OP_dup
         code.codeLength++
         noNullExit := new cg.Exit(cg.OP_ifnonnull, code)
@@ -34,12 +34,12 @@ class BuildForRangeJavaArray {
         code.codeLength++
         s.exits.append( new cg.Exit(cg.OP_goto, code))
         writeExits([]cg.Exit{noNullExit}, code.codeLength)
-        state.pushStack(c, s.RangeAttr.rangeOn.value)
+        state.pushStack(c, s.rangeAttr.rangeOn.value)
         context.MakeStackMap(code, state, code.codeLength)
         state.popStack(1)
         forState := new StackMapState(state)
         defer state.addTop(forState) // add top
-        attr := s.RangeAttr
+        attr := s.rangeAttr
         var autoVar = new AutoVariableForRangeJavaArray()
         {
             autoVar.Elements = code.maxLocals

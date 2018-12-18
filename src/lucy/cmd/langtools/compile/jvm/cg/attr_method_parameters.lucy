@@ -17,7 +17,7 @@ public class AttributeMethodParameters  {
 		this.parameters = []MethodParameter{}
 		for len(bs) > 0 {
 			p := new MethodParameter()
-			p.name = string(c.ConstPool[binary.BigEndian.getChar(bs)].info)
+			p.name = string(c.constPools[binary.BigEndian.getChar(bs)].info)
 			p.accessFlags = binary.BigEndian.getChar(bs[2:])
 			this.parameters . append(p)
 			bs = bs[4:]

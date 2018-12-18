@@ -64,7 +64,7 @@ class  BuildExpressionIdentifier {
 		identifier := e.data.(ast.ExpressionIdentifier)
 		switch identifier{
 		case e.value.Type == ast.VariableTypeEnum && identifier.enumName != null:
-			loadInt32(c, code, identifier.enumName.value)
+			loadInt(c, code, identifier.enumName.value)
 			maxStack = 1
 			return
 		case identifier.Function != null:

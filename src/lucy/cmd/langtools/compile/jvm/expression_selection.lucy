@@ -99,7 +99,7 @@ class BuildExpressionSelection {
                 return
             }
             if selection.packageEnumName != null {
-                loadInt32(c, code, selection.packageEnumName.value)
+                loadInt(c, code, selection.packageEnumName.value)
                 maxStack = 1
                 return
             }

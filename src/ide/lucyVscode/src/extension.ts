@@ -25,15 +25,14 @@ export function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(
         vscode.languages.registerReferenceProvider(
             lucySelector, new GoReferenceProvider()));
-        context.subscriptions.push(
+        // context.subscriptions.push(
             // vscode.languages.registerDocumentSymbolProvider(
             //     lucySelector, new GoDocumentSymbolProvider()));
         context.subscriptions.push(
             vscode.languages.registerCompletionItemProvider(
-                lucySelector, new GoCompletionItemProvider(), '.' , '\"'));
-        
-   
+                lucySelector, new GoCompletionItemProvider(), '.' , '\"')); 
 }
+
 
 
 // this method is called when your extension is deactivated

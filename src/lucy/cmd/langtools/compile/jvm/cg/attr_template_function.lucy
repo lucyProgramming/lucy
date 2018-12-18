@@ -13,11 +13,11 @@ public class AttributeTemplateFunction {
 	public accessFlags  char
 	public comment     string
 	public fn fromBytes(c Class, bs []byte) {
-		this.name = string(c.ConstPool[binary.BigEndian.getChar(bs)].info)
-		this.filename = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].info)
+		this.name = string(c.constPools[binary.BigEndian.getChar(bs)].info)
+		this.filename = string(c.constPools[binary.BigEndian.getChar(bs[2:])].info)
 		this.startLine = binary.BigEndian.getChar(bs[4:])
 		this.startColumn = binary.BigEndian.getChar(bs[6:])
-		this.code = string(c.ConstPool[binary.BigEndian.getChar(bs[8:])].info)
+		this.code = string(c.constPools[binary.BigEndian.getChar(bs[8:])].info)
 		this.accessFlags = binary.BigEndian.getChar(bs[10:])
 	}
 	

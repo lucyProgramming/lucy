@@ -5,9 +5,9 @@ import "lucy/binary"
 
 
 fn main(args []string) {
-	
 	bs := [-54b,-2b,-70b,-66b]
-	if t := binary.BigEndian.getInt(bs)  ;t != -889275714{
+
+	if t := binary.BigEndian.getInt(bs)  ;t != -889275714 {
 		panic("java magic number not parse right, value is " + t)
 	}
 }

@@ -4,7 +4,7 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 class BuildExpressionIndex {
     
-
+    
     eb BuildExpression
     
     fn BuildExpressionIndex(eb BuildExpression){
@@ -13,7 +13,7 @@ class BuildExpressionIndex {
     }
 
 
-    fn  buildIndex(
+    fn buildIndex(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
         e ast.Expression,
@@ -72,7 +72,7 @@ class BuildExpressionIndex {
         return
     }
 
-    fn  buildStringIndex(
+    fn buildStringIndex(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
         e ast.Expression,
@@ -100,7 +100,8 @@ class BuildExpressionIndex {
         code.codeLength++
         return
     }
-    fn  buildMapIndex(
+
+    fn buildMapIndex(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
         e ast.Expression,

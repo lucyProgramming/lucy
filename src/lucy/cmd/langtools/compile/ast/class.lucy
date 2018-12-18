@@ -1295,7 +1295,7 @@ public class Class {
                                 errMsgPrefix(method.Function.pos))))
                         }
                     }
-                    if isConstruction && method.Function.Type.VoidReturn() == false {
+                    if isConstruction && method.Function.Type.voidReturn() == false {
                         errs.append( new error(sprintf("%s construction method expect no return values",
                             errMsgPrefix(method.Function.Type.parameterList[0].pos))))
                     }

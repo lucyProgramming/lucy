@@ -2,11 +2,10 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-class ClassParser extends  ParserExtends{
+class ClassParser extends  ParserExtends {
 
 	fn ClassParser(parser Parser){
-	    this.super()
-	    this.parser = parser
+	    this.super(parser)
 	}
 	
 	fn parseClassName() -> (name ast.NameWithPos,err error) {

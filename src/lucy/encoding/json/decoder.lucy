@@ -1,4 +1,6 @@
 
+//TODO:: support for map 
+
 import "java/lang/Object" 
 import "java/lang/Class"
 import "java/lang/Boolean"
@@ -48,7 +50,6 @@ class JsonSyntaxTreeNode  {
 }
 
 
-
 public class Decoder {
 	x Object 
 	bs []byte
@@ -65,7 +66,7 @@ public class Decoder {
 		this.tree  = this.parseJsonSyntaxTree()
 		return this.decodeFromTree(this.tree , this . x )
 	}
-		
+	
 	private fn decodeFromTree(tree JsonSyntaxTreeNode , x Object) -> (x2 Object  ){
 		c := x.getClass()
 		if c.isArray () {
@@ -481,3 +482,4 @@ public class Decoder {
 		return string(this.bs[this.offset:end])
 	}
 }
+

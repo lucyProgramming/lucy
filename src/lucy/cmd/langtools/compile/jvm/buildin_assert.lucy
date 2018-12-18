@@ -22,7 +22,7 @@ class BuildinFunctionAssert {
         code.maxLocals++
         
         state.appendLocals(c, typeInt)
-        loadInt32(c, code, length)
+        loadInt(c, code, length)
         copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, lengthOffset))
         stepOffset := code.maxLocals
         code.maxLocals++
@@ -50,7 +50,7 @@ class BuildinFunctionAssert {
         code.codes[code.codeLength] = cg.OP_ldc_w
         c.insertStringConst("assert failed,expression->'%d'", code.codes[code.codeLength+1:code.codeLength+3])
         code.codeLength += 3
-        loadInt32(c, code, 1)
+        loadInt(c, code, 1)
         code.codes[code.codeLength] = cg.OP_anewarray
         c.insertClassConst(javaRootClass, code.codes[code.codeLength+1:code.codeLength+3])
         code.codeLength += 3

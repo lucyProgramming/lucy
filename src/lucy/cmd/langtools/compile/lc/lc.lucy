@@ -6,16 +6,22 @@ import "lucy/cmd/langtools/compile/common"
 import "lucy/os"
 import "lucy/encoding/json"
 
-public fn Main ( destinationDir string , 
-	flags common.Flags , files []string ,lucyPath , classPaths []string , ifErrExit bool) -> (hasMain bool ){
-    var	compiler  = new Compiler()
-    
+public fn Main (
+	destinationDir string , 
+	flags common.Flags , 
+	files []string ,
+	lucyPath , 
+	classPaths []string , 
+	ifErrExit bool, 
+	printError bool) -> (hasMain bool , es []error){
+	var	compiler  = new Compiler()
 	if len(files) == 0 {
-		print("no file specfied")
-		os.exit(1)
+		return false , [new error("no file specfied")]
 	}
 	compiler.flags = flags
-	compiler.destinationDir =	destinationDir 
+	compiler.destinationDir = destinationDir 
+	compiler.ifErrExit = ifErrExit 
+	compiler.printError = printError
 	return compiler.compile(files,lucyPath,classPaths)
 }
 
@@ -30,7 +36,8 @@ public class Compiler {
 	buildPackage        jvm.BuildPackage = new jvm.BuildPackage()
     flags common.Flags
 	destinationDir string
-
+	ifErrExit bool 
+	printError bool 
 
 	fn Compiler(){
 	    this.super()
@@ -45,16 +52,22 @@ public class Compiler {
 			this.exit()
 		}
 	}
+
 	fn exit() {
 		code := 0
 		if len(this.Errs) > 0 {
 			code = 2
 		}
-		for _, v := range this.Errs {
+		if this.printError {
+			for _, v := range this.Errs {
 		    //v.printStackTrace()
-			os.stderr.println(v.getMessage())
+				os.stderr.println(v.getMessage())
+			}
 		}
-		os.exit(code)
+		
+		if this.ifErrExit {
+			os.exit(code)
+		}
 	}
 
 	fn dumpImports() {
@@ -69,7 +82,7 @@ public class Compiler {
 		print(string(bs))
 	}
 
-	fn compile(files []string,lucyPath , classPaths []string) -> (hasMain bool ) {
+	fn compile(files []string,lucyPath , classPaths []string) -> (hasMain bool , es []error) {
 	    this.lucyPath = lucyPath
 	    this.classPaths = classPaths
         this.Files = files
@@ -141,7 +154,7 @@ public class Compiler {
 			this.exit()
 		}
 		this.buildPackage.make(p,this.destinationDir)
-		return p.hasMain() 
+		return p.hasMain() , null 
 	}
 }
 

@@ -26,10 +26,10 @@ class BuildFor {
         s ast.StatementFor,
         context Context,
         state StackMapState) -> (maxStack char) {
-        if s.RangeAttr != null {
-            if s.RangeAttr.rangeOn.value.Type == ast.VariableTypeArray {
+        if s.rangeAttr != null {
+            if s.rangeAttr.rangeOn.value.Type == ast.VariableTypeArray {
                 return this.BuildForRangeArray.build(c, code, s, context, state)
-            } else if s.RangeAttr.rangeOn.value.Type == ast.VariableTypeJavaArray {
+            } else if s.rangeAttr.rangeOn.value.Type == ast.VariableTypeJavaArray {
                 return this.BuildForRangeJavaArray.build(c, code, s, context, state)
             } else { // for map
                 return this.BuildForRangeMap.build(c, code, s, context, state)

@@ -4,8 +4,7 @@ import "lucy/cmd/langtools/compile/lex"
 class FunctionParser extends ParserExtends{
 
     fn FunctionParser(parser Parser){
-        this.super()
-        this.parser = parser
+        this.super(parser)
     }
 	
 	/*

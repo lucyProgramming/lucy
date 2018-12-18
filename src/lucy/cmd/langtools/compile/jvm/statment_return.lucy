@@ -19,7 +19,7 @@ class BuildReturn {
         statementReturn ast.StatementReturn,
         context Context,
         state StackMapState) -> (maxStack char) {
-        if context.function.Type.VoidReturn() { // no return value
+        if context.function.Type.voidReturn() { // no return value
             if statementReturn.defers != null && len(statementReturn.defers) > 0 {
                 stack := this.buildDefersForReturn(c, code, context, state, statementReturn)
                 if stack > maxStack {
@@ -115,7 +115,7 @@ class BuildReturn {
 
     fn  buildReturnFromReturnVars(c cg.ClassHighLevel,
         code cg.AttributeCode, context Context) -> (maxStack char) {
-        if context.function.Type.VoidReturn() { // when has no return,should not call this function
+        if context.function.Type.voidReturn() { // when has no return,should not call this function
             return
         }
         if len(context.function.Type.returnList) == 1 {
@@ -143,7 +143,7 @@ class BuildReturn {
         }
         //multi returns
         //new a array list
-        loadInt32(c, code, int(len(context.function.Type.returnList)))
+        loadInt(c, code, int(len(context.function.Type.returnList)))
         code.codes[code.codeLength] = cg.OP_anewarray
         c.insertClassConst(javaRootClass, code.codes[code.codeLength+1:code.codeLength+3])
         code.codeLength += 3
@@ -161,7 +161,7 @@ class BuildReturn {
             if v.Type.isPointer() == false {
                 TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.Type)
             }
-            loadInt32(c, code, index)
+            loadInt(c, code, index)
             if 4 > maxStack {
                 maxStack = 4
             }

@@ -1,5 +1,5 @@
 
- 
+//array  
 const	ArrayMethodSize               = "size"
 const	ArrayMethodCap                = "cap"
 const	ArrayMethodStart              = "start"
@@ -7,13 +7,14 @@ const	ArrayMethodEnd                = "end"
 const	ArrayMethodGetUnderlyingArray = "getUnderlyingArray"
 const	ArrayMethodAppend             = "append"
 const	ArrayMethodAppendAll          = "appendAll"
-	// map
+
+// map
 const	MapMethodRemove    = "remove"
 const	MapMethodRemoveAll = "removeAll"
 const	MapMethodKeyExist  = "keyExist"
 const	MapMethodSize      = "size"
 
-	// buildIn function
+// buildIn function
 const	BuildInFunctionPanic        = "panic"
 const	BuildInFunctionCatch        = "catch"
 const	BuildInFunctionPrint        = "print"

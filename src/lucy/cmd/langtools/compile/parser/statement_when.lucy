@@ -6,8 +6,7 @@ class StatementWhenParser extends ParserExtends {
 	
 	bp BlockParser
 	fn StatementWhenParser(parser Parser ,bp BlockParser){
-		this.super()
-		this.parser = parser
+		this.super(parser)
 		this.bp = bp
 	}
 	

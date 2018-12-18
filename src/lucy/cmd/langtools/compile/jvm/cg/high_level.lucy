@@ -15,47 +15,47 @@ public class ConstantInfoNameAndTypeHighLevel {
 
 
 public class ConstantInfoMethodrefHighLevel {
-	public Class      string
+	public className      string
 	public method     string
 	public descriptor string
-	public fn ConstantInfoMethodrefHighLevel(Class , method ,descriptor string  ){
+	public fn ConstantInfoMethodrefHighLevel(className , method ,descriptor string  ){
 		this.super()
-		this.Class = Class
+		this.className = className
 		this.method = method
 		this.descriptor = descriptor
 	}
 	public fn toString() ->(s string) {
-		return this.Class + ";" + this.method + ";" + this.descriptor
+		return this.className + ";" + this.method + ";" + this.descriptor
 	}
 }
 
 public class ConstantInfoInterfaceMethodrefHighLevel {
-	public Class      string
+	public className      string
 	public method     string
 	public descriptor string
-	public fn ConstantInfoInterfaceMethodrefHighLevel(Class , method ,descriptor string){
+	public fn ConstantInfoInterfaceMethodrefHighLevel(className , method ,descriptor string){
 		this.super()
-		this.Class = Class
+		this.className = className
 		this.method = method
 		this.descriptor = descriptor
 	}
 	public fn toString() ->(s string) {
-		return this.Class + ";" + this.method + ";" + this.descriptor
+		return this.className + ";" + this.method + ";" + this.descriptor
 	}
 }
 
 public class ConstantInfoFieldrefHighLevel {
-	public Class      string
+	public className      string
 	public field      string
 	public descriptor string
-	public fn ConstantInfoFieldrefHighLevel(Class , field , descriptor string){
+	public fn ConstantInfoFieldrefHighLevel(className , field , descriptor string){
 		this.super()
-		this.Class = Class
+		this.className = className
 		this.field = field
 		this.descriptor = descriptor
 	}
 	public fn toString() ->(s string) {
-		return this.Class + ";" + this.field + ";" + this.descriptor
+		return this.className + ";" + this.field + ";" + this.descriptor
 	}
 }
 

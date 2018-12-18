@@ -13,7 +13,7 @@ public class Descriptor  {
 			s += .typeDescriptor(functionType.vArgs.Type)
 		}
 		s += ")"
-		if functionType.VoidReturn() {
+		if functionType.voidReturn() {
 			s += "V"
 		} else if len(functionType.returnList) == 1 {
 			s += .typeDescriptor(functionType.returnList[0].Type)

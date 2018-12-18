@@ -174,7 +174,7 @@ public class Type {
 		cloned.Package   = this.Package      
 		cloned.alias     = this.alias      
 		cloned.autoCompletion = this.autoCompletion
-		//TODO:: 
+		
 		if cloned.Type == VariableTypeArray ||
 			cloned.Type == VariableTypeJavaArray {
 			cloned.array = this.array.Clone()

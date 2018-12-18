@@ -48,18 +48,4 @@ public class Variable {
 		v.findUsage = this.findUsage
 		v.rename = this.rename
 	}
-
-
 }
-
-// class kkkk {
-// 	bb int 
-// }
-// class a{
-//   bb int
-
-//  fn aaa(f kkkk){
-  
-//   bb := f.bb;
-// }
-// }

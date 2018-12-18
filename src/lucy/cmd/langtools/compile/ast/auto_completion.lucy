@@ -6,6 +6,7 @@ public class AutoCompletionItem {
     public suggest string   // used by function
     public variableType string 
     public description string 
+    
     private static arrayDefaultAutoCompletionItem []AutoCompletionItem
     private static javaArrayDefaultAutoCompletionItem  []AutoCompletionItem
     private static typeDefaultAutoCompletionItem []AutoCompletionItem

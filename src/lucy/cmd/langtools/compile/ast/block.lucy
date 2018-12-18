@@ -146,7 +146,7 @@ public class Block {
                 if lable := outer.labels[name]; lable != null {
                     if lable.findUsage {
                         u := new Usage() 
-                        u.Type = "declaration"
+                        u.Type = "value read"
                         u.pos = pos
                         if lable.findUsageInstances == null {
                             lable.findUsageInstances = [u]

@@ -111,7 +111,7 @@ public class Fmt {
             format += f.Type.vArgs.Type.typeName() 
         }
         format += ")"
-        if f.Type.VoidReturn() == false {
+        if f.Type.voidReturn() == false {
             format += " -> ("
             indent2 = indent
             if f.Type.returnLpContainsLf {

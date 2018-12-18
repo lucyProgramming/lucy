@@ -9,8 +9,7 @@ class ExpressionParser extends  ParserExtends {
 	ExpressionSuffix ExpressionSuffix
 	
 	fn ExpressionParser(parser Parser){
-		this.super()
-		this.parser = parser
+		this.super(parser)
 		this.ExpressionArrayParser = new ExpressionArrayParser(parser , this)
 		this.ExpressionBinaryParser = new ExpressionBinaryParser(parser , this)
 		this.ExpressionQuestionParser = new ExpressionQuestionParser(parser , this)

@@ -147,7 +147,7 @@ public class  BuildPackage {
         var i = 0 
         for name, v := range this.Package.block.typeAliases {
             t := new cg.AttributeLucyTypeAlias()
-            t.alias = LucyTypeAlias.Encode(name, v)
+            t.alias = LucyTypeAlias.encode(name, v)
             if v.alias != null {
                 t.comment = v.alias.comment
             }
@@ -166,8 +166,8 @@ public class  BuildPackage {
                 f.accessFlags |= cg.AccFieldPublic
             }
             f.accessFlags |= cg.AccFieldVolatile
-            if LucyFieldSignature.Need(v.Type) {
-                f.AttributeLucyFieldDescriptor = new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.Encode(v.Type) , char(0) )
+            if LucyFieldSignature.need(v.Type) {
+                f.AttributeLucyFieldDescriptor = new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.encode(v.Type) , char(0) )
                 if v.Type.Type == ast.VariableTypeFunction {
                     if v.Type.functionType.vArgs != null {
                         f.AttributeLucyFieldDescriptor.methodAccessFlag |=
@@ -301,8 +301,8 @@ public class  BuildPackage {
                 }
             }
             f.descriptor = Descriptor.typeDescriptor(v.Type)
-            if LucyFieldSignature.Need(v.Type) {
-                t := new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.Encode(v.Type) , char(0 ))
+            if LucyFieldSignature.need(v.Type) {
+                t := new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.encode(v.Type) , char(0 ))
                 f.AttributeLucyFieldDescriptor = t
             }
             c.fields[v.name] = f
@@ -318,9 +318,9 @@ public class  BuildPackage {
             if vv.isCompilerAuto {
                 method.accessFlags |= cg.AccMethodSynthetic
             }
-            if LucyMethodSignature.Need(vv.Function.Type) {
+            if LucyMethodSignature.need(vv.Function.Type) {
                 method.AttributeLucyMethodDescriptor = new cg.AttributeLucyMethodDescriptor()
-                method.AttributeLucyMethodDescriptor.descriptor = LucyMethodSignature.Encode(vv.Function.Type)
+                method.AttributeLucyMethodDescriptor.descriptor = LucyMethodSignature.encode(vv.Function.Type)
             }
             method.Class = c
             method.Descriptor = Descriptor.methodDescriptor(vv.Function.Type)
@@ -337,7 +337,7 @@ public class  BuildPackage {
     fn mkGlobalFunctions() {
         ms := new map { string -> cg.MethodHighLevel }()
         for k, f := range this.Package.block.functions { // first round
-            if f.TemplateFunction != null {
+            if f.templateFunction != null {
                 t := new cg.AttributeTemplateFunction()
                 t.name = f.name
                 t.filename = f.pos.filename
@@ -369,9 +369,9 @@ public class  BuildPackage {
             if f.accessFlags&cg.AccMethodPublic != 0 || f.name == ast.MainFunctionName {
                 method.accessFlags |= cg.AccMethodPublic
             }
-            if LucyMethodSignature.Need(f.Type) {
+            if LucyMethodSignature.need(f.Type) {
                 method.AttributeLucyMethodDescriptor = new cg.AttributeLucyMethodDescriptor()
-                method.AttributeLucyMethodDescriptor.descriptor = LucyMethodSignature.Encode(f.Type)
+                method.AttributeLucyMethodDescriptor.descriptor = LucyMethodSignature.encode(f.Type)
             }
             if f.Type.vArgs != null {
                 method.accessFlags |= cg.AccMethodVarargs
@@ -382,7 +382,7 @@ public class  BuildPackage {
             this.mainClass.appendMethod(method)
         }
         for k, f := range this.Package.block.functions {
-            if f.isBuildIn || f.TemplateFunction != null { //
+            if f.isBuildIn || f.templateFunction != null { //
                 continue
             }
             this.BuildFunction.buildFunction(ms[k].Class, null, ms[k], f)

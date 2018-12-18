@@ -43,7 +43,7 @@ class ExpressionCheckSlice {
 			errs.appendAll(es)
 			if endType != null {
 				if endType.isInteger() == false {
-					errs . append(new error( sprintf("%s cannot use '%s' for endIndex",
+					errs.append(new error( sprintf("%s cannot use '%s' for endIndex",
 						endType.pos.errMsgPrefix(), endType.typeString())))
 				} else {
 					if endType.Type == VariableTypeLong {

@@ -1,6 +1,9 @@
 import "lucy/os"
 import "lucy/cmd/langtools/lucy/run"
-
+import "lucy/cmd/langtools/install"
+import "lucy/cmd/langtools/test"
+import "lucy/cmd/langtools/clean"
+import "lucy/cmd/langtools/tool"
 
 fn printUsage() {
 	msg := `lucy is a new programing language build on jvm
@@ -9,7 +12,7 @@ fn printUsage() {
 	install                install directory and it's sub directories 
 	run                    run a lucy package
 	clean                  clean compiled files
-	pack                   make_node_objects jar
+    http                   the http service for lucy
 	test                   test a package`
 	print(msg)
 }
@@ -30,21 +33,13 @@ fn main(args []string) {
 	case "run":
 		(new run.RunLucyPackage()).RunCommand(args[0], args[1:])
 	case "install":
-		runArgs := []string{"lucy/cmd/langtools/install"}
-		runArgs.appendAll( args[1:])
-		(new run.RunLucyPackage()).RunCommand("run", runArgs)
+		install.install(args[1:])
 	case "clean":
-		runArgs := []string{"lucy/cmd/langtools/clean"}
-		runArgs.appendAll( args[1:])
-		(new run.RunLucyPackage()).RunCommand("run", runArgs)
+		clean.clean(args[1:])
 	case "test":
-		runArgs := []string{"lucy/cmd/langtools/test"}
-		runArgs.appendAll( args[1:])
-		(new run.RunLucyPackage()).RunCommand("run", runArgs)
-	case "pack":
-		runArgs := []string{"lucy/cmd/langtools/pack"}
-		runArgs.appendAll( args[1:])
-		(new run.RunLucyPackage()).RunCommand("run", runArgs)
+		test.test(args[1:])
+	case "tool":
+		tool.tool(args[1:])
 	default:
 		printUsage()
 		os.exit(1)

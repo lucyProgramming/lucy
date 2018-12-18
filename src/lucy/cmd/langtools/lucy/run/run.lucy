@@ -70,7 +70,7 @@ public class RunLucyPackage {
             
             os.exit(4)
         }
-        cmdArray := []string{"java" , this.Package + "/" + "main"}
+        cmdArray := []string{"java" , this.Package + "/" + ast.MainFunctionName }
         cmdArray.appendAll(this.lucyProgramArgs)
         var envs = new string[](len(os.getEnvs()))
         {
@@ -375,8 +375,7 @@ public class RunLucyPackage {
             }
             f.parseArgs(a)
         }
-
-        hasMain := lc.Main(destinationDir , f , files , this.lucyPath , this.classPaths , true)
+        hasMain , _ := lc.Main(destinationDir , f , files , this.lucyPath , this.classPaths , true , true)
         // make_node_objects maitain.json
         meta = new common.PackageMeta()
         meta.compiledFrom = new common.FileMeta[](len(lucyFiles))
@@ -412,7 +411,6 @@ public class RunLucyPackage {
         t := new PackageCompiled()
         t.meta = meta
         meta.hasMain = hasMain 
-        print(packageName , hasMain) 
         t.packageName = packageName
         this.packagesCompiled[packageName] = t
         needBuild = true

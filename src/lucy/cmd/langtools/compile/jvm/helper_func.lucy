@@ -3,7 +3,6 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/common"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-
 fn writeExits(es []cg.Exit, to int) {
 	for _, e := range es {
 		offset := short(to - int(e.currentCodeLength))
@@ -27,7 +26,7 @@ fn copyOPs(code cg.AttributeCode, op []byte) {
 	code.codeLength += len(op)
 }
 
-fn loadInt32(c cg.ClassHighLevel, code cg.AttributeCode, value int) {
+fn loadInt(c cg.ClassHighLevel, code cg.AttributeCode, value int) {
 	switch value {
 	case int(-1):
 		code.codes[code.codeLength] = cg.OP_iconst_m1
@@ -216,7 +215,7 @@ fn storeArrayElementOp(typ ast.VariableTypeKind) -> (op byte) {
 */
 fn popCallResult(code cg.AttributeCode, e ast.Expression, ft ast.FunctionType) ->(stackSize char) {
 	stackSize = functionReturnJvmSize(ft)
-	if ft.VoidReturn() == false && e.isStatementExpression {
+	if ft.voidReturn() == false && e.isStatementExpression {
 		if len(ft.returnList) == 1 {
 			if jvmSlotSize(ft.returnList[0].Type) == 1 {
 				code.codes[code.codeLength] = cg.OP_pop
@@ -234,7 +233,7 @@ fn popCallResult(code cg.AttributeCode, e ast.Expression, ft ast.FunctionType) -
 }
 
 fn functionReturnJvmSize(ft ast.FunctionType) -> (size char) {
-	if ft.VoidReturn() {
+	if ft.voidReturn() {
 		return 0
 	}
 	if len(ft.returnList) > 1 {
@@ -275,7 +274,7 @@ fn setEnumArray(c cg.ClassHighLevel, code cg.AttributeCode,
 	code.codes[code.codeLength] = cg.OP_dup
 	code.codeLength++
 	copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, a.k))
-	loadInt32(c, code, e.defaultValue)
+	loadInt(c, code, e.defaultValue)
 	code.codes[code.codeLength] = cg.OP_iastore
 	code.codeLength++
 	maxStack = 3

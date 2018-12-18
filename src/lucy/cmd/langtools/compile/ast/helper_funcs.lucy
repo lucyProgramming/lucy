@@ -220,6 +220,7 @@ fn convertExpressionsToNeeds(block Block , es []Expression, needs []Type, eval [
 
 // check out package name is valid or not
 fn packageNameIsValid(name string) -> (valid bool) {
+	//TODO:: check is package name is valid
 	return true
 }
 

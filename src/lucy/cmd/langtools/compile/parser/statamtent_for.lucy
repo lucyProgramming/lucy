@@ -9,8 +9,7 @@ class StatementForParser extends ParserExtends{
 	bp BlockParser
 
 	fn StatementForParser(parser Parser ,bp BlockParser){
-		this.super()
-		this.parser = parser
+		this.super(parser)
 		this.bp = bp
 	}
 	

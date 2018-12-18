@@ -2,16 +2,15 @@
 import "lucy/os"
 import "lucy/cmd/langtools/tool/install_lucy_array"
 
+typealias toolFn = fn(args []string)
 
-typealias tool = fn(args []string)
 
-
-fn getTools() -> (tools map{string->tool}) {
-	tools = new map{string -> tool} ()
+fn getTools() -> (tools map{string->toolFn}) {
+	tools = new map{string -> toolFn} ()
 	tools["install_lucy_array"] = install_lucy_array.install
 }
 
-fn main(args []string) {
+public fn tool(args []string) {
 	tools := getTools()
 	if len(args) == 0 {
 		print("tool not provide")
@@ -24,6 +23,10 @@ fn main(args []string) {
  		os.exit(1)
 	}
 	tools[args[0]](args[1:])
+}
+
+fn main(args []string) {
+	tool(args)
 }
 
 

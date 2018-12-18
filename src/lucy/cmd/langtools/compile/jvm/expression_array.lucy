@@ -36,7 +36,7 @@ class BuildExpressionArray {
 			verify.Verify = unInit
 			state.stacks.append( verify, verify)
 		}
-		loadInt32(c, code, int(len(arr.expressions)))
+		loadInt(c, code, int(len(arr.expressions)))
 		newArrayBaseOnType(c, code, e.value.array)
 		arrayObject := new ast.Type()
 		arrayObject.Type = ast.VariableTypeJavaArray
@@ -48,7 +48,7 @@ class BuildExpressionArray {
 		for _, v := range arr.expressions {
 			code.codes[code.codeLength] = cg.OP_dup
 			code.codeLength++
-			loadInt32(c, code, index) // load index
+			loadInt(c, code, index) // load index
 			state.pushStack(c, arrayObject)
 			state.pushStack(c, typeInt)
 			stack := this.eb.build(c, code, v, context, state)

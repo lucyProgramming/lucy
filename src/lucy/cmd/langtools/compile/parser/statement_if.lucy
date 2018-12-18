@@ -6,8 +6,7 @@ class StatementIfParser extends ParserExtends {
 	bp BlockParser
 
 	fn StatementIfParser(parser Parser ,bp BlockParser){
-		this.super()
-		this.parser = parser
+		this.super(parser)
 		this.bp = bp
 	}
 	
@@ -19,7 +18,7 @@ class StatementIfParser extends ParserExtends {
 		this.parser.unExpectNewLineAndSkip()
 		condition, err = this.parser.ExpressionParser.parseExpression(true)
 		if condition == null {
-			return null , err 
+			return null , err
 		}
 		statementIf.condition = condition
 		this.parser.ifTokenIsLfThenSkip(true)

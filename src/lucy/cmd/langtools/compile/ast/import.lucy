@@ -7,6 +7,7 @@ public class Import {
 	public pos    Pos
 	public used   bool
 	public alias string 
+	public locateDefinition bool
 	/*
 		import "github.com/lucy" should access by lucy.doSomething()
 		import "github.com/std" as std2 should access by std2.doSomething()
@@ -40,7 +41,10 @@ class SourceFile {
 		this.filename = filename
 	}
 
-	fn insertImport(i Import) ->(err error)  {
+	fn insertImport(block Block,i Import) ->(err error)  {
+		if i.locateDefinition {
+			block.inheritedAttribute.p.locateDefinition = i.pos
+		}
 		if this.imports == null {
 			this.imports = new  map { string -> Import }()
 		}

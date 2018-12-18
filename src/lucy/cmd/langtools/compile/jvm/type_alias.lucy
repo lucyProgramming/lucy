@@ -3,16 +3,16 @@ import "lucy/cmd/langtools/compile/common"
 
 public class LucyTypeAlias {
 
-    static fn Encode(name string, variableType ast.Type) -> (e string) {
+    static fn encode(name string, variableType ast.Type) -> (e string) {
         name += ";"
-        name += LucyFieldSignature.Encode(variableType)
+        name += LucyFieldSignature.encode(variableType)
         return name
     }
 
-    public static fn Decode(bs []byte) -> (name string, variableType ast.Type, err error) {
+    public static fn decode(bs []byte) -> (name string, variableType ast.Type, err error) {
         index := common.Bytes.indexByte(bs,';')
         name = string(bs[0:index])
-        _, variableType, err = LucyFieldSignature.Decode(bs[index+1:])
+        _, variableType, err = LucyFieldSignature.decode(bs[index+1:])
         return
     }
 

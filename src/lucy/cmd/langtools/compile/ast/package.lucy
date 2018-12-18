@@ -4,17 +4,19 @@ import "lucy/cmd/langtools/compile/common"
 import "java/lang/Object"
 import "lucy/cmd/langtools/common" as langtoolsCommon
 
+
 public class Package {
 	public name                         string
 	public block                        Block = new Block() // package always have a default block
-	files                        map {string -> SourceFile}
+	files                               map {string -> SourceFile}
 	public initFunctions                []Function
 	public nErrors2Stop                 int // number of errors should stop compile
 	errors                       []error
 	statementLevelFunctions      []Function
 	statementLevelClass          []Class
-	disableCheckUnuse  			bool 
-	public javaPackage JavaPackage  
+	disableCheckUnuse  			 bool 
+
+	public javaPackage    JavaPackage   
 	public matchFile string 
 	public matchLine int 
 	public printFileMatchInfo bool 
@@ -29,7 +31,7 @@ public class Package {
 	/*
 		for lucy tool hover
 	*/
-	hover Hover
+	getHover Hover
 	/*
 		for usage 
 	*/
@@ -451,7 +453,7 @@ public class Package {
 			return this.errors
 		}
 		for _, v := range this.block.functions {
-			if v.TemplateFunction != null {
+			if v.templateFunction != null {
 				continue
 			}
 			if this.matchFileAndLine(v.pos.filename , v.name,   v.startLine , v.endLine ) == false {
@@ -481,7 +483,7 @@ public class Package {
 			if this.matchFileAndLine(v.pos.filename ,v.name,v.startLine , v.endLine) == false {
 				continue
 			}
-			if v.TemplateFunction != null {
+			if v.templateFunction != null {
 				continue
 			}
 			v.checkBlock(this.errors)
@@ -548,7 +550,7 @@ public class Package {
 			x = new SourceFile(i.pos.filename)
 			this.files[i.pos.filename] = x
 		}
-		return x.insertImport(i)
+		return x.insertImport(this.block , i)
 	}
 
 	public fn setFileDirty(filename string ) {

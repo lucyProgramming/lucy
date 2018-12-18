@@ -4,8 +4,7 @@ import "lucy/cmd/langtools/compile/lex"
 class StatementSwitchParser extends ParserExtends{
 	bp BlockParser
 	fn StatementSwitchParser(parser Parser ,bp BlockParser){
-		this.super()
-		this.parser = parser
+		this.super(parser)
 		this.bp = bp
 	}
 	

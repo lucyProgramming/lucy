@@ -3,8 +3,7 @@ import "lucy/cmd/langtools/compile/lex"
 
 class EnumParser extends ParserExtends {
 	fn EnumParser(parser Parser){
-		this.super()
-		this.parser = parser
+		this.super(parser)
 	}
 	fn parse() -> (e ast.Enum, err error) {
 		e = new ast.Enum()

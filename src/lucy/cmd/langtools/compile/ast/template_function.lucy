@@ -11,7 +11,7 @@ public class TemplateFunctionInstance  {
 
 public class TemplateFunction  {
 	instances []TemplateFunctionInstance
-
+	
 	fn instanceExists(parameterTypes []Type) -> (instance TemplateFunctionInstance) {
 		fn equal(instance TemplateFunctionInstance) ->(isEqual bool) {
 			if len(instance.parameterTypes) != len(parameterTypes) {

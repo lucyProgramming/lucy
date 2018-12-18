@@ -27,7 +27,7 @@ class BuildForRangeMap {
         s ast.StatementFor,
         context Context,
         state StackMapState) -> (maxStack char) {
-        attr := s.RangeAttr
+        attr := s.rangeAttr
         maxStack = this.eb.build(
             c,
             code,

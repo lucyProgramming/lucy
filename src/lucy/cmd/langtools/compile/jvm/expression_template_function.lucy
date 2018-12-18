@@ -51,7 +51,7 @@ class BuildTemplateFunctionCall {
             code.codes[code.codeLength+1:code.codeLength+3])
         code.codeLength += 3
         if e.isStatementExpression {
-            if call.templateFunctionCallPair.Function.Type.VoidReturn() == false {
+            if call.templateFunctionCallPair.Function.Type.voidReturn() == false {
                 if len(call.templateFunctionCallPair.Function.Type.returnList) > 1 {
                     code.codes[code.codeLength] = cg.OP_pop
                     code.codeLength++

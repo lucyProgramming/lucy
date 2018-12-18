@@ -4,8 +4,8 @@ public class AttributeLucyTypeAlias {
 	public alias   string
 	public comment string
 	public fn fromBs(c Class, bs []byte) {
-		this.alias = string(c.ConstPool[binary.BigEndian.getChar(bs)].info)
-		this.comment = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].info)
+		this.alias = string(c.constPools[binary.BigEndian.getChar(bs)].info)
+		this.comment = string(c.constPools[binary.BigEndian.getChar(bs[2:])].info)
 	}
 	
 	fn toAttributeInfo(c Class) -> (ret AttributeInfo)  {

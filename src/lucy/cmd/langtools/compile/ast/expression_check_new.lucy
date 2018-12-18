@@ -1,6 +1,6 @@
 class ExpressionCheckNew {
 	
-	static  fn check(e Expression , block Block, errs []error) ->(valueType Type)  {
+	static fn check(e Expression , block Block, errs []error) ->(valueType Type)  {
 		no := e.data.(ExpressionNew)
 		err := no.Type.resolve(block)
 		if err != null {
@@ -93,7 +93,7 @@ class ExpressionCheckNew {
 		ret := newArray.Type.Clone() // clone the type
 		ret.pos = e.pos
 		if len(newArray.args) != 1 { //
-			errs . append(new error( sprintf("%s new array expect at least 1 argument",
+			errs.append(new error( sprintf("%s new array expect at least 1 argument",
 					errMsgPrefix(e.pos))))
 			return ret
 		}
@@ -105,7 +105,7 @@ class ExpressionCheckNew {
 			return ret
 		}
 		if amount.isInteger() == false {
-			errs . append(new error( sprintf("%s argument must be 'int',but '%s'",
+			errs.append(new error( sprintf("%s argument must be 'int',but '%s'",
 					errMsgPrefix(amount.pos), amount.typeString())))
 		} else {
 			if amount.Type == VariableTypeLong {
@@ -118,7 +118,6 @@ class ExpressionCheckNew {
 				}
 			}
 		}
-
 		//no further checks
 		return ret
 	}

@@ -9,7 +9,7 @@ public class AttributeLucyFieldDescriptor {
 		if len(bs) != 4 {
 			panic("length is not 4")
 		}
-		this.descriptor = string(c.ConstPool[binary.BigEndian.getChar(bs[0:2])].info)
+		this.descriptor = string(c.constPools[binary.BigEndian.getChar(bs[0:2])].info)
 		this.methodAccessFlag = binary.BigEndian.getChar(bs[2:4])
 	}
 

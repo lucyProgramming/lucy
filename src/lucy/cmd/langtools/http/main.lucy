@@ -6,13 +6,17 @@ import "lucy/os"
 import "lucy/cmd/langtools/http/ide"
 
 
-fn main(args []string) {
+public fn http(args []string) {
     port := new Flags().parseArgs(args)
     print("port is " , port)
-    server := HttpServer.create(new InetSocketAddress(port), 0)
+    server := HttpServer.create(new InetSocketAddress("127.0.0.1",port), 0)
     server.createContext("/exit", new ExitHandler())
     ide.registerHandlers("/ide",server)
     server.start()
+}
+
+fn main(args []string) {
+    http(args)
 }
 
 class ExitHandler implements HttpHandler {

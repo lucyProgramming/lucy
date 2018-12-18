@@ -16,6 +16,48 @@ class ExpressionCheckFunctionCall {
 				errs.append(err)
 				return null
 			}
+			when d.(type) {
+			case Function:
+				t := d.(Function)
+				if t.isBuildIn == false {
+					i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
+					if should {
+						d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
+					}
+				}
+			case Variable:
+				t := d.(Variable)
+				if t.isBuildIn == false {
+					i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
+					if should {
+						d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
+					}
+				}
+			case Constant:
+				t := d.(Constant)
+				if t.isBuildIn == false {
+					i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
+					if should {
+						d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
+					}
+				}
+			case Class:
+				t := d.(Class)
+				if t.isBuildIn == false {
+					i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
+					if should {
+						d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
+					}
+				}
+			case EnumName:
+				t := d.(EnumName)
+				// if t.isBuildIn == false {
+				i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
+				if should {
+					d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
+				}
+				// }
+			}
 			if d == null {
 				errs.append(new error(sprintf("%s '%s' not found",
 					call.Expression.pos.errMsgPrefix(), identifier.name)))
@@ -129,7 +171,7 @@ class ExpressionCheckFunctionCall {
 	}
 
 	static fn checkFunctionCall(e Expression , block Block, errs []error, f Function, call ExpressionFunctionCall)  ->(valueTypes []Type) {
-		if f.TemplateFunction != null {
+		if f.templateFunction != null {
 			errsLength := len(errs)
 			callArgsTypes := checkExpressions(block, call.args, errs, true)
 			if len(errs) > errsLength {
@@ -240,7 +282,7 @@ class ExpressionCheckFunctionCall {
 			parameterTypeArray.append(t)
 			tps = tps[1:]
 		}
-		call.templateFunctionCallPair = f.TemplateFunction.insert(parameterTypeArray)
+		call.templateFunctionCallPair = f.templateFunction.insert(parameterTypeArray)
 		if call.templateFunctionCallPair.Function == null { // not called before,make_node_objects the binds
 			cloneFunction, es := f.clone()
 			if len(es) > 0 {
@@ -248,7 +290,7 @@ class ExpressionCheckFunctionCall {
 				return null
 			}
 			cloneFunction.used = true
-			cloneFunction.TemplateFunction = null
+			cloneFunction.templateFunction = null
 			call.templateFunctionCallPair.Function = cloneFunction
 			cloneFunction.parameterTypes = parameterTypes
 			for k, v := range parameterTypes {

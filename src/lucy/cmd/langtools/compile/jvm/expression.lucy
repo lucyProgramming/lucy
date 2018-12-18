@@ -96,7 +96,7 @@ class BuildExpression {
         case ast.ExpressionTypeInt,
             ast.ExpressionTypeShort, 
             ast.ExpressionTypeChar:
-            loadInt32(c, code, int(e.longValue))
+            loadInt(c, code, int(e.longValue))
             maxStack = 1
         case ast.ExpressionTypeLong:
             if e.longValue == 0 {
@@ -230,7 +230,7 @@ class BuildExpression {
                 length++
             }
         }
-        loadInt32(c, code, int(length))
+        loadInt(c, code, int(length))
         code.codes[code.codeLength] = cg.OP_anewarray
         c.insertClassConst(javaRootClass, code.codes[code.codeLength+1:code.codeLength+3])
         code.codeLength += 3
@@ -258,7 +258,7 @@ class BuildExpression {
                     if t := stack + currentStack; t > maxStack {
                         maxStack = t
                     }
-                    loadInt32(c, code, index)
+                    loadInt(c, code, index)
                     if 4 > maxStack { // current stack is  arrayRef arrayRef value index
                         maxStack = 4
                     }
@@ -280,7 +280,7 @@ class BuildExpression {
             if v.value.isPointer() == false {
                 TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.value)
             }
-            loadInt32(c, code, index)
+            loadInt(c, code, index)
             if 4 > maxStack { // current stack is  arrayRef arrayRef value index
                 maxStack = 4
             }

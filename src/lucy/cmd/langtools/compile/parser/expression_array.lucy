@@ -5,8 +5,7 @@ class ExpressionArrayParser extends ParserExtends {
 	ep ExpressionParser
 	
 	fn ExpressionArrayParser(parser Parser , ep ExpressionParser) {
-		this.super()
-		this.parser = parser
+		this.super(parser)
 		this.ep = ep 
 	}
 	fn parseArrayExpression() -> (e ast.Expression, err error) {

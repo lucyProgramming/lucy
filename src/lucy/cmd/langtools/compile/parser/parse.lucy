@@ -503,7 +503,7 @@ class Parser {
 		}
 		return
 	}
-
+	
 	/*
 		pos.errMsgPrefix() only receive one argument
 	*/
@@ -583,6 +583,7 @@ class Parser {
 			this.next(lfNotToken)
 		}
 	}
+
 	fn unExpectNewLine() -> (err error) {
 		if this.token.Type == lex.TokenLf {
 			err = new error(sprintf("%s unexpected new line",
@@ -775,6 +776,7 @@ class Parser {
 				} else {
 					i.accessName = this.token.stringValue
 					i.alias = this.token.stringValue
+					i.locateDefinition = this.token.locateDefinition 
 					this.next(lfIsToken) // skip identifier
 				}
 				this.validStatementEnding()
@@ -822,8 +824,6 @@ class Parser {
 				this.errs.append( err)
 				return names, err
 			}
-
-			
 		}
 		return
 	}

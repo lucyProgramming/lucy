@@ -91,7 +91,7 @@ public class MakeNodesObjects {
                 ret["parameterlist"] = t
             }
         }
-        if f.Type.VoidReturn() == false {
+        if f.Type.voidReturn() == false {
             if len(f.Type.parameterList) == 1 {
                 for _, v := range f.Type.returnList {
                     p := new map{string->Object}()

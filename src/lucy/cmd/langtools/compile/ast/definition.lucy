@@ -13,7 +13,7 @@ public class LoadDefinitionFromOutside {
 	public packageName string 
 	public name string 
 	public javaPackage   JavaPackage
-	public javaClass Class 
+	public javaClass Class
 	public description string 
 }
 

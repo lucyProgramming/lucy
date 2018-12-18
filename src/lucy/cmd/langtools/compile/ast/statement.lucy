@@ -101,8 +101,12 @@ public class Statement {
 				u := new Usage()
 				u.Type = "declaration"
 				u.pos = this.StatementLabel.pos 
-				this.StatementLabel.findUsageInstances = [u]
-				block.inheritedAttribute.p.findUsage = this.StatementLabel.findUsageInstances
+				if this.StatementLabel.findUsageInstances == null {
+					this.StatementLabel.findUsageInstances = [u]
+					block.inheritedAttribute.p.findUsage = this.StatementLabel.findUsageInstances
+				}else {
+					this.StatementLabel.findUsageInstances.append(u)
+				}
 			}
 			if this.StatementLabel.locateDefinition{
 				block.inheritedAttribute.p.locateDefinition = this.StatementLabel.pos 

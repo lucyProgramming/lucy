@@ -5,9 +5,7 @@ import "lucy/cmd/langtools/compile/lex"
 class TypeParser extends ParserExtends {
 	
 	fn TypeParser(parser Parser){
-		this.super()
-		this.parser = parser
-		
+		this.super(parser)
 	}
 
 	fn parseType() -> (ret ast.Type,err error) {
@@ -85,7 +83,7 @@ class TypeParser extends ParserExtends {
 			ret = new ast.Type()
 			ret.Type = ast.VariableTypeString
 			ret.pos = pos
-			ret.locateDefinition = this.parser.token.locateDefinition 
+			ret.locateDefinition = this.parser.token.locateDefinition
 			this.next(lfIsToken)
 		case lex.TokenIdentifier:
 			ret, err = this.parseIdentifierType()

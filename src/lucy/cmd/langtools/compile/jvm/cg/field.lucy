@@ -18,7 +18,7 @@ public class FieldInfo {
 	public attributes             []AttributeInfo
 	public AttributeGroupedByName AttributeGroupedByName
 
-	public fn GetAttributeByName(name string) -> (attrs []AttributeInfo){
-		return GetAttributeByName(this.AttributeGroupedByName , name)
+	public fn getAttributeByName(name string) -> (attrs []AttributeInfo){
+		return getAttributeByName(this.AttributeGroupedByName , name)
 	}
 }

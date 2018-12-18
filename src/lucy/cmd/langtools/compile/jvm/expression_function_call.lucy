@@ -46,7 +46,7 @@ class BuildExpressionFunctionCall {
 		if call.Function == null {
 			return this.buildFunctionPointerCall(c, code, e, context, state)
 		}
-		if call.Function.TemplateFunction != null {
+		if call.Function.templateFunction != null {
 			return this.eb.BuildTemplateFunctionCall.buildTemplateFunctionCall(c, code, e, context, state)
 		}
 		if call.Function.isBuildIn {

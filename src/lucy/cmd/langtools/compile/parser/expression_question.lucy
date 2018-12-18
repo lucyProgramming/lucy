@@ -5,8 +5,7 @@ class ExpressionQuestionParser extends ParserExtends {
 	
 	ep ExpressionParser
 	fn ExpressionQuestionParser(parser Parser , ep ExpressionParser){
-		this.super()
-		this.parser = parser
+		this.super(parser)
 		this.ep = ep 
 	}
 

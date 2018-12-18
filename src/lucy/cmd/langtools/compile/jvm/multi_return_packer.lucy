@@ -42,7 +42,7 @@ class MultiValueAutoVar {
         //a.buildLoadArrayListAutoVar(code, context) // local array list on stack
         copyOPs(code,
             loadLocalVariableOps(ast.VariableTypeObject, this.localVarOffset))
-        loadInt32(c, code, int(valueIndex))
+        loadInt(c, code, int(valueIndex))
         code.codes[code.codeLength] = cg.OP_aaload
         code.codeLength++
         return

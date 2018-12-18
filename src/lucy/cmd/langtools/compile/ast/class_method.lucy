@@ -14,7 +14,7 @@ public class ClassMethod {
         }
         if this.isProtected() {
             return implementation.isPrivate() ||
-                implementation.isAccessFlagDefault()
+            	implementation.isAccessFlagDefault()
         }
         if this.isAccessFlagDefault() {
             return implementation.isPrivate()

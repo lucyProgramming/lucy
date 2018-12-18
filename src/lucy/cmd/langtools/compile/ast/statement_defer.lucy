@@ -23,7 +23,7 @@ public class StatementDefer {
 		}
 		this.exceptionClass = c
 		return null
-	}	
+	}
 }
 
 

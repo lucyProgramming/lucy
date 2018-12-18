@@ -7,10 +7,10 @@ public class AttributeLucyClassConst {
 	    this.constants = []LucyClassConst{}
 		for len(bs) > 0 {
 			constant := new LucyClassConst()
-			constant.name = string(c.ConstPool[binary.BigEndian.getChar(bs)].info)
-			constant.descriptor = string(c.ConstPool[binary.BigEndian.getChar(bs[2:])].info)
+			constant.name = string(c.constPools[binary.BigEndian.getChar(bs)].info)
+			constant.descriptor = string(c.constPools[binary.BigEndian.getChar(bs[2:])].info)
 			constant.valueIndex = binary.BigEndian.getChar(bs[4:])
-			constant.comment = string(c.ConstPool[binary.BigEndian.getChar(bs[6:])].info)
+			constant.comment = string(c.constPools[binary.BigEndian.getChar(bs[6:])].info)
 			bs = bs[8:]
 			this.constants.append(constant)
 		}

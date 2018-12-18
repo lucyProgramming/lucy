@@ -70,11 +70,11 @@ class BuildExpressionTypeConversion {
             conversion.Expression.value.Type == ast.VariableTypeInt {
             code.codes[code.codeLength] = cg.OP_dup
             code.codeLength++
-            loadInt32(c, code, conversion.Type.Enum.defaultValue)
+            loadInt(c, code, conversion.Type.Enum.defaultValue)
             wrongExit := new cg.Exit(cg.OP_if_icmplt, code)
             code.codes[code.codeLength] = cg.OP_dup
             code.codeLength++
-            loadInt32(c, code, conversion.Type.Enum.enums[len(conversion.Type.Enum.enums)-1].value)
+            loadInt(c, code, conversion.Type.Enum.enums[len(conversion.Type.Enum.enums)-1].value)
             wrongExit2 := new cg.Exit(cg.OP_if_icmpgt, code)
             okExit := new cg.Exit(cg.OP_goto, code)
             state.pushStack(c, conversion.Expression.value)

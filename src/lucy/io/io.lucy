@@ -2,8 +2,7 @@ import "java/io"
 
 
 
-
-public fn ioCopy(dest io.OutputStream , in io.InputStream) {
+public fn ioCopy(out io.OutputStream , in io.InputStream) {
 	size := 4 << 10  
 	bs := new byte[] (size)  
 	var n int  
@@ -12,6 +11,6 @@ public fn ioCopy(dest io.OutputStream , in io.InputStream) {
 		if n == -1 {
 			break 
 		}
-		dest.write(bs , 0 , n) 
+		out.write(bs , 0 , n) 
 	}
 }

@@ -1,13 +1,13 @@
  
 public class FunctionType {
 	public templateNames    []NameWithPos
-	public templateNamesMap map { string -> Pos }
+	public templateNamesMap map {string -> Pos}
 	public parameterList    []Variable
 	public returnList       []Variable
 	public vArgs            Variable
 	public lpContainsLf   bool 
 	public lpContainsInlineComment   string 
-
+	
 	public returnLpContainsLf bool 
 	public returnLpContainsInlineComment  string 
 	
@@ -84,7 +84,7 @@ public class FunctionType {
 			s += this.vArgs.Type.typeName()
 		}
 		s += ")"
-		if this.VoidReturn() == false {
+		if this.voidReturn() == false {
 			s += "->( "
 			for k, v := range this.returnList {
 				if v.name != null && v.name != "" {
@@ -99,7 +99,7 @@ public class FunctionType {
 		}
 		return s
 	}
-	fn typeString() -> (s string) {
+	fn typeString(format bool...) -> (s string) {
 		s = "("
 		for k, v := range this.parameterList {
 			if v.name != null && v.name != "" {
@@ -123,7 +123,7 @@ public class FunctionType {
 			s += this.vArgs.Type.typeString()
 		}
 		s += ")"
-		if this.VoidReturn() == false {
+		if this.voidReturn() == false {
 			s += "->( "
 			for k, v := range this.returnList {
 				if v.name != null && v.name != "" {
@@ -153,7 +153,7 @@ public class FunctionType {
 				return this.vArgs
 			}
 		}
-		if this.VoidReturn() == false {
+		if this.voidReturn() == false {
 			for _, v := range this.returnList {
 				if name == v.name {
 					return v
@@ -181,11 +181,11 @@ public class FunctionType {
 				return false
 			}
 		}
-		if this.VoidReturn() != compare.VoidReturn() {
+		if this.voidReturn() != compare.voidReturn() {
 			return false
 		}
 
-		if this.VoidReturn() == false {
+		if this.voidReturn() == false {
 			for k, v := range this.returnList {
 				if false == v.Type.equal(compare.returnList[k].Type) {
 					return false
@@ -211,7 +211,7 @@ public class FunctionType {
 		have += ")"
 	}
 	
-	public fn VoidReturn() ->(is bool) {
+	public fn voidReturn() ->(is bool) {
 		return len(this.returnList) == 0 ||
 			this.returnList[0].Type.Type == VariableTypeVoid
 	}

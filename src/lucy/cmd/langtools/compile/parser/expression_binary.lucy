@@ -5,8 +5,7 @@ import "lucy/cmd/langtools/compile/lex"
 class ExpressionBinaryParser extends ParserExtends{
 	ep ExpressionParser
 	fn ExpressionBinaryParser(parser Parser , ep ExpressionParser){
-		this.super()
-		this.parser = parser
+		this.super(parser)
 		this.ep = ep 
 	}
 	

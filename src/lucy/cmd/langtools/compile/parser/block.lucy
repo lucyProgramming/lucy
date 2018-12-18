@@ -10,8 +10,7 @@ class BlockParser  extends ParserExtends{
 	StatementSwitchParser StatementSwitchParser
 
 	fn BlockParser(parser Parser){
-		this.super()
-		this.parser = parser
+		this.super(parser)
 		this.StatementForParser = new StatementForParser(parser,this)
         this.StatementIfParser = new StatementIfParser(parser,this)
         this.StatementWhenParser = new StatementWhenParser(parser,this)

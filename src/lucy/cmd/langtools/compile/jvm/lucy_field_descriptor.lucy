@@ -6,18 +6,18 @@ import "lucy/cmd/langtools/compile/common"
 public class LucyFieldSignature {
 
 
-    static fn Need(variableType ast.Type)->(need bool)  {
+    static fn need(variableType ast.Type)->(need bool)  {
         return variableType.Type == ast.VariableTypeMap ||
             variableType.Type == ast.VariableTypeArray ||
             variableType.Type == ast.VariableTypeEnum ||
             variableType.Type == ast.VariableTypeFunction
     }
 
-    static fn Encode(variableType ast.Type) -> (d string) {
+    static fn encode(variableType ast.Type) -> (d string) {
         if variableType.Type == ast.VariableTypeMap {
             d = "M" // start token of map
-            d += .Encode(variableType.Map.K)
-            d += .Encode(variableType.Map.V)
+            d += .encode(variableType.Map.K)
+            d += .encode(variableType.Map.V)
             return d
         }
         if variableType.Type == ast.VariableTypeEnum {
@@ -27,26 +27,26 @@ public class LucyFieldSignature {
         }
         if variableType.Type == ast.VariableTypeArray {
             d = "]"
-            d += .Encode(variableType.array)
+            d += .encode(variableType.array)
             return d
         }
         if variableType.Type == ast.VariableTypeFunction {
-            d = LucyMethodSignature.Encode(variableType.functionType)
+            d = LucyMethodSignature.encode(variableType.functionType)
             return d
         }
         return Descriptor.typeDescriptor(variableType)
     }
 
-    public static fn Decode(bs []byte) -> (bsSliced []byte,t ast.Type,err  error) {
+    public static fn decode(bs []byte) -> (bsSliced []byte,t ast.Type,err  error) {
         if bs[0] == 'M' {
             bs = bs[1:]
             var kt ast.Type
-            bs, kt, err = .Decode(bs)
+            bs, kt, err = .decode(bs)
             if err != null {
                 return bs, null, err
             }
             var vt ast.Type
-            bs, vt, err = .Decode(bs)
+            bs, vt, err = .decode(bs)
             if err != null {
                 return bs, null, err
             }
@@ -71,7 +71,7 @@ public class LucyFieldSignature {
             a := new ast.Type()
             a.Type = ast.VariableTypeFunction
             a.functionType = new ast.FunctionType()
-            bs, err = LucyMethodSignature.Decode(a.functionType, bs)
+            bs, err = LucyMethodSignature.decode(a.functionType, bs)
             if err != null {
                 return bs, null, err
             }
@@ -81,7 +81,7 @@ public class LucyFieldSignature {
             bs = bs[1:]
             a := new ast.Type()
             a.Type = ast.VariableTypeArray
-            bs, a.array, err = .Decode(bs)
+            bs, a.array, err = .decode(bs)
             return bs, a, err
         }
         return Descriptor.ParseType(bs)
