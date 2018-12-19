@@ -182,7 +182,6 @@ fn newArrayBaseOnType(c cg.ClassHighLevel, code cg.AttributeCode, typ ast.Type) 
 		c.insertClassConst(Descriptor.typeDescriptor(typ.array),
 			code.codes[code.codeLength+1:code.codeLength+3])
 		code.codeLength += 3
-	default:
 	}
 }
 fn storeArrayElementOp(typ ast.VariableTypeKind) -> (op byte) {

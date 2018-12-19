@@ -21,5 +21,4 @@ public final class BoolOption  extends Option {
 	// if flag is nerver parse then panic
 	public fn getValue() -> (b bool = this.boolValue) {}
 	
-	
 }

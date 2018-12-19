@@ -33,7 +33,8 @@ public class Descriptor  {
 			return "S"
 		case ast.VariableTypeChar:
 			return "C"
-		case ast.VariableTypeInt, ast.VariableTypeEnum:
+		case ast.VariableTypeInt, 
+			ast.VariableTypeEnum:
 			return "I"
 		case ast.VariableTypeLong:
 			return "J"
@@ -56,8 +57,6 @@ public class Descriptor  {
 			return "L" + javaMethodHandleClass + ";"
 		case ast.VariableTypeJavaArray:
 			return "[" + .typeDescriptor(typ.array)
-		default:
-			
 		}
 		panic("unHandle type signature")
 	}

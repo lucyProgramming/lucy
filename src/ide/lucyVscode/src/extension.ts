@@ -2,11 +2,11 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-
+// const cp = require('child_process');
 
 const GoDefinitionProvider = require("./goto_definition");
 const GoReferenceProvider = require("./findusage");
-const GoDocumentSymbolProvider = require("./alldefinition");
+// const GoDocumentSymbolProvider = require("./alldefinition");
 const GoCompletionItemProvider = require("./auto_completion");
 
 
@@ -35,7 +35,15 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 
+
+
 // this method is called when your extension is deactivated
 export function deactivate() {
+
 }
+
+
+
+
+
 

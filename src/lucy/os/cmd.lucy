@@ -6,6 +6,7 @@ import "java/lang/Process"
 import "java/lang/Runtime"
 import "java/io/File"
 
+
 public class Command{
 	cmd string  
 	args string []  

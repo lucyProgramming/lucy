@@ -6,11 +6,14 @@ final class Test {
 	lucyPath []string
 	packageName string 
 	lucyRoot string
-	public fn Test(lucyRoot string , lucyPath []string , packageName string){
+	forceReBuild bool 
+	
+	public fn Test(lucyRoot string , lucyPath []string , packageName string , forceReBuild bool){
 	    this.super()
 		this.lucyRoot = lucyRoot
 		this.lucyPath = lucyPath
 		this.packageName = packageName
+		this.forceReBuild = forceReBuild
 	}
 	
 	//real test method
@@ -46,6 +49,10 @@ final class Test {
 		}
 		//TODO:: support args
 		print(packageName)
-		new run.RunLucyPackage().RunCommand("test" , [packageName])
+		if this.forceReBuild {
+			new run.RunLucyPackage().RunCommand("test" , ["-forceReBuild",packageName ])
+		}else {
+			new run.RunLucyPackage().RunCommand("test" , [packageName])
+		}
 	}
 }

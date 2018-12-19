@@ -101,7 +101,13 @@ public class FunctionType {
 	}
 	fn typeString(format bool...) -> (s string) {
 		s = "("
+		if len(format) > 0 {
+			s += "\n"
+		}
 		for k, v := range this.parameterList {
+			if len(format) > 0 {
+				s += "\t"
+			}
 			if v.name != null && v.name != "" {
 				s += v.name + " "
 			}
@@ -112,10 +118,16 @@ public class FunctionType {
 			if k != len(this.parameterList)-1 {
 				s += ","
 			}
+			if len(format) > 0 {
+				s += "\n"
+			}
 		}
 		if this.vArgs != null {
 			if len(this.parameterList) > 0 {
 				s += ","
+			}
+			if len(format) > 0 {
+				s += "\n"
 			}
 			if this.vArgs.name != null && this.vArgs.name != "" {
 				s += this.vArgs.name + " "
@@ -124,14 +136,23 @@ public class FunctionType {
 		}
 		s += ")"
 		if this.voidReturn() == false {
-			s += "->( "
+			s += "->("
+			if len(format) > 0 {
+				s += "\n"
+			}
 			for k, v := range this.returnList {
+				if len(format) > 0 {
+					s += "\t"
+				}
 				if v.name != null && v.name != "" {
 					s += v.name + " "
 				}
 				s += v.Type.typeString()
 				if k != len(this.returnList)-1 {
 					s += ","
+				}
+				if len(format) > 0 {
+					s += "\n"
 				}
 			}
 			s += ")"

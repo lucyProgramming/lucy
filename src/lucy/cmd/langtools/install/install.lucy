@@ -48,7 +48,6 @@ class Install {
 			printf("install failed,err:%s\n" ,err.toString())
         }
 	}
-
 }
 
 

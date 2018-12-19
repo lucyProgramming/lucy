@@ -5,7 +5,7 @@ import "lucy/cmd/langtools/http/g"
 import "java/lang/Integer"
 import "lucy/encoding/json"
 
-class GotoDefinition implements HttpHandler{
+class GotoDefinition implements HttpHandler {
     public fn handle(exchange HttpExchange) {
         os := exchange.getResponseBody()
         defer {

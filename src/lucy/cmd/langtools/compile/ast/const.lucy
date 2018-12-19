@@ -44,10 +44,15 @@ public class Constant  {
 			this.doubleValue = 0d
 		case VariableTypeString:
 			this.stringValue = ""
-		default:
-			//
 		}
 	}
+	fn reduceFindUsageInstances(block Block) {
+        if this.findUsage == false {
+            return 
+        }
+        this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
+        block.inheritedAttribute.p.findUsage = this.findUsageInstances 
+    }
 }
 
 

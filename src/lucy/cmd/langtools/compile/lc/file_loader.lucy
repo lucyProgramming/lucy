@@ -640,6 +640,4 @@ public class FileLoader implements ast.LoadImport{
         }
         return this.loadAsJava(cc)
     }
-
 }
-

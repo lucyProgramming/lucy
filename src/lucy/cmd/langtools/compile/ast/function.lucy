@@ -313,6 +313,15 @@ public class Function {
 			}
 		}
 		return errs
-	}	
+	}
+	
+	fn reduceFindUsageInstances(block Block) {
+        if this.findUsage == false {
+            return 
+        }
+        this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
+        block.inheritedAttribute.p.findUsage = this.findUsageInstances 
+    }
+    
 }
 

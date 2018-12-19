@@ -455,9 +455,9 @@ public class Class {
             return err
         }
         if this.superClassName == null {
-            this.superClassName = new NameWithPos(JavaRootClass ,this.pos )
+            this.superClassName = new NameWithPos(JavaRootClass , this.pos )
         }
-        c, err := this.block.inheritedAttribute.p.loadClass(this.superClassName.name)
+        c, err := block.inheritedAttribute.p.loadClass(this.superClassName.name)
         if err != null {
             err = new error(sprintf("%s %s", pos.errMsgPrefix(), err.getMessage()))
             return err
@@ -1348,5 +1348,15 @@ public class Class {
     }
 
 
+    fn reduceFindUsageInstances(block Block) {
+        if this.findUsage == false {
+            return 
+        }
+        this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
+        block.inheritedAttribute.p.findUsage = this.findUsageInstances 
+    }
+    
 }
+
+
 

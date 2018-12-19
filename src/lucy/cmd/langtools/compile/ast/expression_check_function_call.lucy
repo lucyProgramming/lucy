@@ -22,14 +22,17 @@ class ExpressionCheckFunctionCall {
 				if t.isBuildIn == false {
 					i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
 					if should {
+						t.reduceFindUsageInstances(block)
 						d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
 					}
+					
 				}
 			case Variable:
 				t := d.(Variable)
 				if t.isBuildIn == false {
 					i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
 					if should {
+						t.reduceFindUsageInstances(block)
 						d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
 					}
 				}
@@ -38,6 +41,7 @@ class ExpressionCheckFunctionCall {
 				if t.isBuildIn == false {
 					i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
 					if should {
+						t.reduceFindUsageInstances(block)
 						d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
 					}
 				}
@@ -46,6 +50,7 @@ class ExpressionCheckFunctionCall {
 				if t.isBuildIn == false {
 					i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
 					if should {
+						t.reduceFindUsageInstances(block)
 						d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
 					}
 				}
@@ -54,6 +59,7 @@ class ExpressionCheckFunctionCall {
 				// if t.isBuildIn == false {
 				i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
 				if should {
+					t.reduceFindUsageInstances(block)
 					d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
 				}
 				// }

@@ -105,7 +105,6 @@ public class StatementSwitch  {
 							doubleValue = e.doubleValue
 						case ExpressionTypeString:
 							stringValue = e.stringValue
-						default:
 						}
 						valueValid = true
 					} else {

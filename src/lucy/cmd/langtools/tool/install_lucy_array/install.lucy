@@ -30,12 +30,6 @@ class InstallLucyArray {
 }
 
 
-
 public fn install(args []string) {
 	new InstallLucyArray().install()
 }
-
-
-
-
-

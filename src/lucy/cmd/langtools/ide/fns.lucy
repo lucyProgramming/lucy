@@ -57,15 +57,3 @@ public fn getLucyFiles(dir string) -> (lucyFiles []string = []string{}) {
 	}
 }
 
-
-
-
-// public fn parseImports(lucyFiles []LucyFile) -> (imports []string = []string{} ){
-// 	nodes := []ast.TopNode{}
-// 	for _,v := range lucyFiles {
-// 		parser.Parse(nodes , v.realPathName , v.bs , true , 10 , -1 ,-1 ,-1 , -1 ,-1)
-// 	}
-// 	for v := range nodes {
-// 		imports.append(v.node.(ast.Import).Import)
-// 	}
-// }

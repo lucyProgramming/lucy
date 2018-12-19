@@ -3,7 +3,6 @@ import "lucy/os"
 
 
 
-
 public fn main(args []string) {
     files , std := new Flags().parseArgs(args)
     if len(files) == 0 {

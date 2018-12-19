@@ -48,4 +48,12 @@ public class Variable {
 		v.findUsage = this.findUsage
 		v.rename = this.rename
 	}
+	fn reduceFindUsageInstances(block Block) {
+        if this.findUsage == false {
+            return 
+        }
+        this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
+        block.inheritedAttribute.p.findUsage = this.findUsageInstances 
+    }
+    
 }

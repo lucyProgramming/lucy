@@ -1,5 +1,5 @@
 
-fileCache := new FileCacher(1000 , true)
+fileCache := new FileCacher(-1 , true)  // no cache
 
 
 

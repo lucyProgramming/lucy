@@ -1,0 +1,30 @@
+import "lucy/os/flag"
+
+class Flags {
+    forceReBuild flag.BoolOption
+    parser flag.FlagParser 
+    fn Flags() {
+        this.super()
+        this.parser = new flag.FlagParser ()
+        this.forceReBuild = this.parser.boolOption("-forceReBuild" )
+    }
+
+    fn parseArgs(args []string) ->(packageName string, forceReBuild bool) {
+        noDefine , err := this.parser.parse(args)
+        if err != null {
+            panic(err)
+        }
+        if len(noDefine) == 0 {
+            panic("package name not provide")
+        }
+        if len(noDefine) > 1 {
+            panic("args provided not used:" + noDefine )
+        } 
+        packageName = noDefine[0]
+        forceReBuild = this.forceReBuild.getValue() 
+    }
+}
+
+
+
+

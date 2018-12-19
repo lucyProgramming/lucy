@@ -10,5 +10,4 @@ public class Exit {
 		this.branchBytes = code.codes[code.codeLength+1 : code.codeLength+3]
 		code.codeLength += 3
 	}
-	
 }

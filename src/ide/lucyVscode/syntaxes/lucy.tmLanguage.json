@@ -493,7 +493,11 @@
 					"match": "\\bpublic|protected|private\\b",
 					"name": "keyword.access.control.lucy"
 				},
-				
+				{
+					"comment": "static",
+					"match": "\\bstatic\\b",
+					"name": "keyword.static.lucy"
+				},
 				{
 					"comment": "modifier",
 					"match": "\\b(volatile|synchronized|final|abstract)\\b",

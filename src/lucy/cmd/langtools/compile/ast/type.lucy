@@ -266,14 +266,23 @@ public class Type {
 				if t, ok := d.(Class); ok &&
 					t.isBuildIn == false {
 					_, loadFromImport = shouldAccessFromImports(block , this.name, this.pos, t.pos)
+					if loadFromImport {
+						t.reduceFindUsageInstances(block)
+					}
 				}
 				if t, ok := d.(Type); ok &&
-						t.isBuildIn == false {
-						_, loadFromImport = shouldAccessFromImports(block , this.name, this.pos, t.pos)
+					t.isBuildIn == false {
+					_, loadFromImport = shouldAccessFromImports(block , this.name, this.pos, t.pos)
+					if loadFromImport  && t.alias != null {
+						t.alias.reduceFindUsageInstances(block)
+					}
 				}
 				if t, ok := d.(Enum); ok &&
 						t.isBuildIn == false {
 						_, loadFromImport = shouldAccessFromImports(block , this.name, this.pos, t.pos)
+						if loadFromImport {
+							t.reduceFindUsageInstances(block)
+						}
 				}
 			} else {
 				loadFromImport = true

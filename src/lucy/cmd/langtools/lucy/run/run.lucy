@@ -22,6 +22,7 @@ public class RunLucyPackage {
 	flags               Flags = new Flags()
 	packagesCompiled    map{string -> PackageCompiled}
 	lucyProgramArgs     []string // lucy application args
+    public runOverExit         bool 
     
     public fn RunCommand(command string, args []string) -> (err error){
         this.command = command
@@ -93,7 +94,10 @@ public class RunLucyPackage {
         Run.runFn(fn() {
             lucyIo.ioCopy(p.getOutputStream() , os.stdin )
         })
-        os.exit(p.waitFor())  // wait for exit
+        code := p.waitFor() // wait for exit
+        if this.runOverExit {
+            os.exit(code)  
+        }
     }
 
     fn help() {
@@ -430,5 +434,4 @@ public class RunLucyPackage {
         }
         return
     }
-
 }

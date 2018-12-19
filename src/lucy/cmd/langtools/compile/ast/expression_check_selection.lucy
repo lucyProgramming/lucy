@@ -222,13 +222,13 @@ class ExpressionCheckSelection {
         case VariableTypeArray:
             block.inheritedAttribute.p.autoCompletionItems = AutoCompletionItem.getArrayAutoCompletionItem(object)
         case VariableTypeDynamicSelector:
-            .autoCompletionForDynamicSelector(object.Class , block)
+            ExpressionCheckSelection.autoCompletionForDynamicSelector(object.Class , block)
         case VariableTypePackage:
-            .autoCompletionForPackage(object.Package , block )
+            ExpressionCheckSelection.autoCompletionForPackage(object.Package , block )
         case VariableTypeObject:
-            .autoCompletionForObject(object.Class , block)
+            ExpressionCheckSelection.autoCompletionForObject(object.Class , block)
         case VariableTypeClass:
-            .autoCompletionClass(object.Class , block)
+            ExpressionCheckSelection.autoCompletionClass(object.Class , block)
         }
     }
 
@@ -262,7 +262,7 @@ class ExpressionCheckSelection {
             item.Type = "function"
             item.name = name
             item.suggest = v.mkSuggest()
-            item.description = v.readableMsg()
+            item.description = v.readableMsg(true)
             items.append(item)
         }
         for name , _ := range p.block.classes {
@@ -309,7 +309,7 @@ class ExpressionCheckSelection {
                     }
                     item := new AutoCompletionItem()
                     item.Type = "method"
-                    item.description = method.Function.readableMsg() 
+                    item.description = method.Function.readableMsg(true) 
                     item.name =  method.Function.name
                     item.suggest = method.Function.mkSuggest()
                     items.append(item)
@@ -334,7 +334,7 @@ class ExpressionCheckSelection {
                         }
                         item := new AutoCompletionItem()
                         item.Type = "method"
-                        item.description = method.Function.readableMsg() 
+                        item.description = method.Function.readableMsg(true) 
                         item.name =  method.Function.name
                         item.suggest = method.Function.mkSuggest()
                         items.append(item)
@@ -352,6 +352,9 @@ class ExpressionCheckSelection {
     } 
     
     static fn autoCompletionForObject(object Class , block Block) {
+        if err := object.loadSelf(block , new Pos()) ;err != null {
+            return 
+        }
         items := []AutoCompletionItem{}
         accessFromSub := false 
         // in this case must be lucy class 
@@ -395,7 +398,7 @@ class ExpressionCheckSelection {
                     }
                     item.name =  method.Function.name
                     item.suggest = method.Function.mkSuggest()
-                    item.description = method.Function.readableMsg() 
+                    item.description = method.Function.readableMsg(true) 
                     items.append(item)
                 }
             }else {
@@ -433,7 +436,7 @@ class ExpressionCheckSelection {
                         }
                         item.name =  method.Function.name
                         item.suggest = method.Function.mkSuggest()
-                        item.description = method.Function.readableMsg() 
+                        item.description = method.Function.readableMsg(true) 
                         items.append(item)
                     }
                 }
@@ -447,7 +450,11 @@ class ExpressionCheckSelection {
         }
         block.inheritedAttribute.p.autoCompletionItems = items
     } 
+
     static fn autoCompletionClass(c Class , block Block) {
+        if err := c.loadSelf(block , new Pos()) ; err != null{
+            return
+        }
         items := []AutoCompletionItem{}
         accessFromSub := false 
         // in this case must be lucy class 
@@ -491,7 +498,7 @@ class ExpressionCheckSelection {
                     }
                     item.name =  method.Function.name
                     item.suggest = method.Function.mkSuggest()
-                    item.description = method.Function.readableMsg() 
+                    item.description = method.Function.readableMsg(true) 
                     items.append(item)
                 }
             }else {
@@ -529,7 +536,7 @@ class ExpressionCheckSelection {
                         }
                         item.name =  method.Function.name
                         item.suggest = method.Function.mkSuggest()
-                        item.description = method.Function.readableMsg() 
+                        item.description = method.Function.readableMsg(true) 
                         items.append(item)
                     }
                 }

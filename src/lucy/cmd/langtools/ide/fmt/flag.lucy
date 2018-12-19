@@ -9,7 +9,6 @@ class Flags {
         this.super()
         this.parser = new flag.FlagParser()
         this.std = this.parser.boolOption("-std")
-
     }
     
     fn parseArgs(args []string) ->(files []string , std bool ) {

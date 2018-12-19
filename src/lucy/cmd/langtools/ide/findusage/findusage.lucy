@@ -92,7 +92,7 @@ class FindUsage {
         // set this package to jvm 
         this.loader.setCache(packageName , p )
     }
-
+    
     fn matchScope(dir string) ->(match bool){
         if len(this.scope) == 0 {
             return true
@@ -110,7 +110,4 @@ class FindUsage {
         }
         return match
     }
-
 }
-
-

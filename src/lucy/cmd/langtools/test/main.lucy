@@ -9,12 +9,11 @@ fn printUsageAndExit(code int){
 
 
 public fn test(args []string) {
-	if args.size() == 0 {
-		printUsageAndExit(1)
-	}
+	packageName , forceReBuild := new Flags().parseArgs(args)
 	lucyRoot := common.getLucyRoot()
 	lcyPaths  := common.getLucyPath()
-	new Test(lucyRoot , lcyPaths ,args[0]) .test()
+	new Test(lucyRoot , lcyPaths ,packageName , forceReBuild ).test()
+	os.exit(0)
 }
 
 

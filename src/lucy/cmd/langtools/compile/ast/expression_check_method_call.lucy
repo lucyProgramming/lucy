@@ -526,6 +526,7 @@ class ExpressionCheckMethodCall {
 		}
 		return null
 	}
+	
 	static fn checkMethodCallExpressionOnMap(
 	    e Expression ,
 		block Block,

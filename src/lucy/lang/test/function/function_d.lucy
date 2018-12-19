@@ -3,36 +3,44 @@
 	fn () {
 
 	}()
+
 	fn (args bool ) {
 
 	}(false)
+
 	fn (args int) {
 
 	}(1)
+
 	fn (args string) {
 
 	}(null)
+
 	class test {} 
 
 	fn (args test) {
 
 	}(new test() )
+
 	fn (args test) ->(r bool) {
 
 	}(new test())
+	
 	fn (args test) ->(r int) {
 
 	}(null)
-    fn (args test) ->(r string) {
+    
+	fn (args test) ->(r string) {
 
 	}(new test())
+	
 	fn (args test) ->(r test) {
 
     }(null)
-    fn (args  map{ int -> test }) ->(r Lucy) {
+    
+	fn (args  map{ int -> test }) ->(r Lucy) {
 
     }(null)
-
 
 }
 

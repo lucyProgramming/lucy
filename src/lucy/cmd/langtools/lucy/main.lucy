@@ -32,7 +32,9 @@ fn main(args []string) {
 	    t.appendAll(args[1:])
 		(new run.RunLucyPackage()).RunCommand("run", t )
 	case "run":
-		(new run.RunLucyPackage()).RunCommand(args[0], args[1:])
+		r := (new run.RunLucyPackage())
+		r.runOverExit = true 
+		r.RunCommand(args[0], args[1:])
 	case "install":
 		install.install(args[1:])
 	case "clean":

@@ -160,7 +160,6 @@ public class Expression {
 		case VariableTypeString:
 			this.Type = ExpressionTypeString
 			this.stringValue = c.stringValue
-		default:
 		}
 	}
 
@@ -735,15 +734,15 @@ public class Expression {
 			panic("not number")
 		}
 		switch this.Type {
-		case ExpressionTypeByte ,
+		case ExpressionTypeByte,
 			ExpressionTypeChar,
-			ExpressionTypeShort ,
-			ExpressionTypeInt , 
-			ExpressionTypeLong :
+			ExpressionTypeShort,
+			ExpressionTypeInt, 
+			ExpressionTypeLong:
+
 			return this.longValue
 		case ExpressionTypeFloat,ExpressionTypeDouble:
 			return long(this.doubleValue)
-        default:
 		}
 		panic("no match")
 	}
@@ -753,11 +752,15 @@ public class Expression {
 			panic("not number")
 		}
 		switch this.Type {
-		case ExpressionTypeByte , ExpressionTypeChar,ExpressionTypeShort ,ExpressionTypeInt , ExpressionTypeLong :
+		case ExpressionTypeByte,
+			ExpressionTypeChar,
+			ExpressionTypeShort,
+			ExpressionTypeInt,
+			ExpressionTypeLong :
 			return double(this.longValue)
-		case ExpressionTypeFloat , ExpressionTypeDouble:
+		case ExpressionTypeFloat,
+			ExpressionTypeDouble:
 			return double(this.doubleValue)
-        default:
 		}
 		panic("no match")
 	}
@@ -814,7 +817,6 @@ public class Expression {
 		case VariableTypeDouble:
 			this.doubleValue = this.getDoubleValue()
 			this.Type = ExpressionTypeDouble
-		default:
 		}
 	}
 	
