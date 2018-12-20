@@ -356,24 +356,7 @@ class Parser {
 			return
 		}
 	}
-    /*
-	fn mkendPos() -> (pos ast.Pos) {
-		if this.lastToken == null {
-			return &ast.Pos{
-				filename: this.filename,
-				line:     this.token.endLine,
-				column:   this.token.endColumn,
-				offset:   this.lexer.getOffSet(),
-			}
-		} else {
-			return &ast.Pos{
-				filename: this.filename,
-				line:     this.lastToken.endLine,
-				column:   this.lastToken.endColumn,
-			}
-		}
-	}
-    */
+	
 	// str := "hello world"   a,b = 123 or a b ;
 	fn parseConst() -> (constants []ast.Constant, err error) {
 		names, err := this.parseNameList()
