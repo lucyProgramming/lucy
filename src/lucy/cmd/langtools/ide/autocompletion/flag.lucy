@@ -2,12 +2,12 @@ import "lucy/os/flag"
 
 
 class Flags {
-	
 	file flag.StringOption
 	line flag.IntOption
 	column flag.IntOption
 	parser flag.FlagParser
 	bufferFile flag.StringOption
+	
 	fn Flags(){
 		this.super()
 		this.parser = new flag.FlagParser()
@@ -16,6 +16,7 @@ class Flags {
 		this.column = this.parser.intOption("-column" , -1)
 		this.bufferFile =  this.parser.stringOption("-bufferFile")
 	}
+
 	fn parseArgs(args []string) ->(file string ,  bufferFile string , pos int) {
 		nodefine,err := this.parser.parse(args)
 		if err != null {
@@ -43,7 +44,7 @@ class Flags {
 		}
 		file = this.file.getValue()
 		bufferFile = this.bufferFile.getValue()
-		pos = (this.line.getValue() << 16 ) | (this.column.getValue())
+		pos = (this.line.getValue() << 16 ) | int(char(this.column.getValue()))
 		if pos == -1 {
 			panic("pos == -1")
 		}

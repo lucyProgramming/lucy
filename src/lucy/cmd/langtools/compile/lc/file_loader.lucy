@@ -8,12 +8,10 @@ import "java/io"
 import "lucy/os"
 
 
-
-
 /*
 	load from file implementation
 */
-public class FileLoader implements ast.LoadImport{
+public class FileLoader implements ast.loadImport{
     public lucyPath , classPaths []string
     public caches map{ string -> Object }
     public fn FileLoader(lucyPath , classPaths []string){
@@ -41,7 +39,7 @@ public class FileLoader implements ast.LoadImport{
         return cache 
     }
     
-    public fn  LoadImport(importName string) -> (x Object,err error) {
+    public fn  loadImport(importName string) -> (x Object,err error) {
         /*defer {
             e := catch()
             if err == null && e != null{

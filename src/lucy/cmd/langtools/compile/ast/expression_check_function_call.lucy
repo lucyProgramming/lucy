@@ -16,54 +16,64 @@ class ExpressionCheckFunctionCall {
 				errs.append(err)
 				return null
 			}
-			when d.(type) {
-			case Function:
-				t := d.(Function)
-				if t.isBuildIn == false {
+			if d == null {
+				i := block.inheritedAttribute.p.getImport(e.pos.filename , identifier.name)
+				if i != null {
+					d ,err = block.inheritedAttribute.p.load(i.Import) 
+					if err != null {
+						errs.append(err)
+					}
+				}
+			}else {
+				when d.(type) {
+				case Function:
+					t := d.(Function)
+					if t.isBuildIn == false {
+						i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
+						if should {
+							t.reduceFindUsageInstances(block)
+							d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
+						}
+					}
+				case Variable:
+					t := d.(Variable)
+					if t.isBuildIn == false {
+						i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
+						if should {
+							t.reduceFindUsageInstances(block)
+							d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
+						}
+					}
+				case Constant:
+					t := d.(Constant)
+					if t.isBuildIn == false {
+						i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
+						if should {
+							t.reduceFindUsageInstances(block)
+							d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
+						}
+					}
+				case Class:
+					t := d.(Class)
+					if t.isBuildIn == false {
+						i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
+						if should {
+							t.reduceFindUsageInstances(block)
+							d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
+						}
+					}
+				case EnumName:
+					t := d.(EnumName)
+					// if t.isBuildIn == false {
 					i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
 					if should {
 						t.reduceFindUsageInstances(block)
 						d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
 					}
-					
+					// }
 				}
-			case Variable:
-				t := d.(Variable)
-				if t.isBuildIn == false {
-					i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
-					if should {
-						t.reduceFindUsageInstances(block)
-						d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
-					}
-				}
-			case Constant:
-				t := d.(Constant)
-				if t.isBuildIn == false {
-					i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
-					if should {
-						t.reduceFindUsageInstances(block)
-						d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
-					}
-				}
-			case Class:
-				t := d.(Class)
-				if t.isBuildIn == false {
-					i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
-					if should {
-						t.reduceFindUsageInstances(block)
-						d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
-					}
-				}
-			case EnumName:
-				t := d.(EnumName)
-				// if t.isBuildIn == false {
-				i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
-				if should {
-					t.reduceFindUsageInstances(block)
-					d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
-				}
-				// }
 			}
+
 			if d == null {
 				errs.append(new error(sprintf("%s '%s' not found",
 					call.Expression.pos.errMsgPrefix(), identifier.name)))
@@ -71,6 +81,7 @@ class ExpressionCheckFunctionCall {
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = getPos(d)
+				// //block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = d 
 				return 
 			}
 			if f ,ok := d.(Function) ; ok {

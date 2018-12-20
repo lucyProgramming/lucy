@@ -21,7 +21,7 @@ class ExpressionCheckSelection {
                     e.pos.errMsgPrefix(), Super, object.typeString())))
                 return null
             }
-            access, err := object.Class.getFieldOrMethod(block , e.pos, selection.name, false)
+            access, err := object.Class.getFieldOrMethod(block , e.pos, selection.name, false , object.Class.name)
             if err != null {
                 errs.append(err)
                 return null
@@ -31,7 +31,8 @@ class ExpressionCheckSelection {
                 result := field.Type.Clone()
                 result.pos = e.pos
                 if selection.locateDefinition{
-                    block.inheritedAttribute.p.locateDefinition = field.pos
+                    block.inheritedAttribute.p.setLocationDefinition(field)
+                    return 
                 }
                 return result
             } else {
@@ -42,15 +43,15 @@ class ExpressionCheckSelection {
                 result.functionType = method.Function.Type
                 result.pos = e.pos
                 if selection.locateDefinition {
-                    block.inheritedAttribute.p.locateDefinition = method.Function.pos
-                       
+                    block.inheritedAttribute.p.setLocationDefinition(method)
+                    return 
                 }
                 return result
             }
         case VariableTypePackage:
             d, ok := object.Package.block.nameExists(selection.name , e.pos)
             if selection.locateDefinition {
-                block.inheritedAttribute.p.locateDefinition = getPos(d)
+                block.inheritedAttribute.p.setLocationDefinition(d)
                 return 
             }
             if ok == false {
@@ -139,12 +140,12 @@ class ExpressionCheckSelection {
             VariableTypeClass:
             if selection.name == Super {
                 if object.Type == VariableTypeClass {
-                    errs . append(new error( sprintf("%s cannot access class`s super",
+                    errs.append(new error( sprintf("%s cannot access class`s super",
                         object.pos.errMsgPrefix())))
                     return object
                 }
                 if object.Class.name == JavaRootClass {
-                    errs . append(new error( sprintf("%s '%s' is root class",
+                    errs.append(new error( sprintf("%s '%s' is root class",
                         object.pos.errMsgPrefix(), JavaRootClass)))
                     return object
                 }
@@ -161,7 +162,7 @@ class ExpressionCheckSelection {
                 result.Class = result.Class.superClass
                 return result
             }
-            fieldOrMethod, err := object.Class.getFieldOrMethod(block , e.pos, selection.name, false)
+            fieldOrMethod, err := object.Class.getFieldOrMethod(block , e.pos, selection.name, false , object.Class.name)
             if err != null {
                 errs.append(err)
                 return null
@@ -173,8 +174,8 @@ class ExpressionCheckSelection {
                 }
                 if selection.locateDefinition {
                     if object.Class.loadFromOutSide  == false {      
-                        block.inheritedAttribute.p.locateDefinition = field.pos
-                        
+                        block.inheritedAttribute.p.setLocationDefinition(field)
+                        return 
                     }else {
                         //TODO :: locateDefinition
                     }
@@ -191,8 +192,8 @@ class ExpressionCheckSelection {
                 }
                 if selection.locateDefinition {
                     if object.Class.loadFromOutSide  == false {      
-                        block.inheritedAttribute.p.locateDefinition = field.pos
-                        
+                        block.inheritedAttribute.p.setLocationDefinition(field)
+                        return 
                     }
                 }
                 selection.method = method
@@ -296,6 +297,7 @@ class ExpressionCheckSelection {
                     }
                     item := new AutoCompletionItem()
                     item.Type = "field"
+                    item.description = v.mkDescription() 
                     item.name =  v.name
                     items.append(item)
                 }
@@ -309,7 +311,8 @@ class ExpressionCheckSelection {
                     }
                     item := new AutoCompletionItem()
                     item.Type = "method"
-                    item.description = method.Function.readableMsg(true) 
+                    
+                    item.description = method.mkDescription() 
                     item.name =  method.Function.name
                     item.suggest = method.Function.mkSuggest()
                     items.append(item)
@@ -324,6 +327,7 @@ class ExpressionCheckSelection {
                     }
                     item := new AutoCompletionItem()
                     item.Type = "field"
+                    item.description = v.mkDescription() 
                     item.name =  v.name
                     items.append(item)
                 }
@@ -334,7 +338,7 @@ class ExpressionCheckSelection {
                         }
                         item := new AutoCompletionItem()
                         item.Type = "method"
-                        item.description = method.Function.readableMsg(true) 
+                        item.description = method.mkDescription() 
                         item.name =  method.Function.name
                         item.suggest = method.Function.mkSuggest()
                         items.append(item)
@@ -373,6 +377,7 @@ class ExpressionCheckSelection {
                     }
                     item := new AutoCompletionItem()
                     item.Type = "field"
+                    item.description = v.mkDescription() 
                     item.name =  v.name
                     items.append(item)
                 }
@@ -398,7 +403,7 @@ class ExpressionCheckSelection {
                     }
                     item.name =  method.Function.name
                     item.suggest = method.Function.mkSuggest()
-                    item.description = method.Function.readableMsg(true) 
+                    item.description = method.mkDescription() 
                     items.append(item)
                 }
             }else {
@@ -414,6 +419,7 @@ class ExpressionCheckSelection {
                     }
                     item := new AutoCompletionItem()
                     item.Type = "field"
+                    item.description = v.mkDescription() 
                     item.name =  v.name
                     items.append(item)
                 }
@@ -436,7 +442,7 @@ class ExpressionCheckSelection {
                         }
                         item.name =  method.Function.name
                         item.suggest = method.Function.mkSuggest()
-                        item.description = method.Function.readableMsg(true) 
+                        item.description = method.mkDescription() 
                         items.append(item)
                     }
                 }
@@ -473,6 +479,7 @@ class ExpressionCheckSelection {
                     }
                     item := new AutoCompletionItem()
                     item.Type = "field"
+                    item.description = v.mkDescription() 
                     item.name =  v.name
                     items.append(item)
                 }
@@ -487,7 +494,8 @@ class ExpressionCheckSelection {
                     if method.isStatic()  == false {
                         continue 
                     }
-                    if accessFromSub  && method.ableAccessFromSubClass() == false {
+                    if accessFromSub  && 
+                        method.ableAccessFromSubClass() == false {
                         continue 
                     }
                     item := new AutoCompletionItem()
@@ -498,7 +506,7 @@ class ExpressionCheckSelection {
                     }
                     item.name =  method.Function.name
                     item.suggest = method.Function.mkSuggest()
-                    item.description = method.Function.readableMsg(true) 
+                    item.description = method.mkDescription() 
                     items.append(item)
                 }
             }else {
@@ -514,6 +522,7 @@ class ExpressionCheckSelection {
                     }
                     item := new AutoCompletionItem()
                     item.Type = "field"
+                    item.description = v.mkDescription() 
                     item.name =  v.name
                     items.append(item)
                 }
@@ -536,7 +545,7 @@ class ExpressionCheckSelection {
                         }
                         item.name =  method.Function.name
                         item.suggest = method.Function.mkSuggest()
-                        item.description = method.Function.readableMsg(true) 
+                        item.description = method.mkDescription() 
                         items.append(item)
                     }
                 }

@@ -142,8 +142,8 @@ public class Compiler {
 			this.dumpImports()
 			return
 		}
-		if this.flags.packageName.getValue() ==null ||
-		    this.flags.packageName.getValue() == "" {
+		if t := this.flags.packageName.getValue() ; t == null ||
+		    t == "" {
 			print("package name not specfied")
 			os.exit(1)
 		}

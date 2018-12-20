@@ -86,7 +86,6 @@ public class StatementWhen {
 		if len(this.condition.getParameterType(block.inheritedAttribute.Function.Type)) == 0 {
 			errs.append(new error(sprintf("%s '%s' constains no parameter type",
 				this.condition.pos.errMsgPrefix(), this.condition.typeString())))
-			return errs
 		}
 		if err := this.condition.resolve(block); err != null {
 			errs.append(err)
@@ -141,7 +140,7 @@ public class StatementWhen {
 				switchStatement.block.inherit(block)
 				switchStatement.block.isWhenBlock = true
 				switchStatement.block.inheritedAttribute.forBreak = switchStatement.block
-				errs.appendAll (switchStatement.block.check())
+				errs.appendAll(switchStatement.block.check())
 			}
 			return
 		}
@@ -158,7 +157,7 @@ public class StatementWhen {
 			errs.appendAll(switchStatement.block.check())
 			return 
 		}
-	}	
+	}
 }
 
 

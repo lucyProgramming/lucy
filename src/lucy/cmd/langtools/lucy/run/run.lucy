@@ -13,7 +13,7 @@ import "java/lang/Runtime"
 
 public class RunLucyPackage {
 	lucyRoot            string
-	lucyPath           []string
+	lucyPath            []string
 	mainPackageLucyPath string
 	Package             string
 	command             string
@@ -22,7 +22,7 @@ public class RunLucyPackage {
 	flags               Flags = new Flags()
 	packagesCompiled    map{string -> PackageCompiled}
 	lucyProgramArgs     []string // lucy application args
-    public runOverExit         bool 
+    public runOverExit  bool 
     
     public fn RunCommand(command string, args []string) -> (err error){
         this.command = command
@@ -99,7 +99,7 @@ public class RunLucyPackage {
             os.exit(code)  
         }
     }
-
+    
     fn help() {
         this.flags.help()
     }
@@ -406,6 +406,7 @@ public class RunLucyPackage {
             }
             meta.classes = copy(new string[](len(classFiles)),classFiles )
         }
+        meta.hasMain = hasMain 
         bs, err := json.encode(meta , "\t")
         if err != null {
             return
@@ -414,7 +415,6 @@ public class RunLucyPackage {
             copy(new byte[](len(bs)) ,bs ))
         t := new PackageCompiled()
         t.meta = meta
-        meta.hasMain = hasMain 
         t.packageName = packageName
         this.packagesCompiled[packageName] = t
         needBuild = true

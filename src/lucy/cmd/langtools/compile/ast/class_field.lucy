@@ -34,11 +34,53 @@ public class ClassField {
 	public fn isPrivate() -> (is bool) {
 		return (this.accessFlags & cg.AccFieldPrivate) != 0
 	}
+	public fn isVolatile() -> (is bool) {
+		return (this.accessFlags & cg.AccFieldVolatile) != 0
+	}
 	public fn isFinal() -> (is bool) {
 		return (this.accessFlags & cg.AccFieldFinal) != 0
 	}
 	public fn ableAccessFromSubClass() ->(accessable bool) {
 		return this.isPublic() ||
 			this.isProtected()
+	}
+	
+	public fn mkDescription() ->(d string = "") {
+		if this.isPublic() {
+			d = "public"
+		}else if this.isProtected() {
+			d = "protected"
+		}else if this.isPrivate() {
+			d = "private"
+		}
+		if this.isStatic() {
+			if d == "" {
+				d = "static"
+			}else {
+				d += " static" 
+			}
+		}
+		if this.isFinal() {
+			if d == "" {
+				d = "final"
+			}else {
+				d += " final" 
+			}
+		}
+		if this.isVolatile() {
+			if d == "" {
+				d = "volatile"
+			}else {
+				d += " volatile" 
+			}
+		}
+		if d != "" {
+			d += " "
+		}
+		d += this.name
+		d += " "
+		if this.Type != null {
+			d += this.Type.typeString("")
+		}
 	}
 }

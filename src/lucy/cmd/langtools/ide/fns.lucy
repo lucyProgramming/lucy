@@ -11,7 +11,6 @@ public fn readLucyFiles(filenames []string) -> (lucyFiles []LucyFile = []LucyFil
 }
 
 
-
 public fn parseAst(lucyFiles []LucyFile) ->(nodes []ast.TopNode = []ast.TopNode{} , errs []error = []error{}){
 	for _,v := range lucyFiles {
 		errs.appendAll(parser.Parse(nodes , v.realPathName , v.bs , false , 10 , 
@@ -19,13 +18,14 @@ public fn parseAst(lucyFiles []LucyFile) ->(nodes []ast.TopNode = []ast.TopNode{
 	}
 }
 
+
 public fn parseAstAndTypeCheck(
 	packageName string , 
 	lucyFiles []LucyFile , 
 	onlyAnalyzeGlobals bool , 
 	matchFile string ,
 	matchLine int, 
-	loader ast.LoadImport ) -> (p ast.Package,errs []error){
+	loader ast.loadImport ) -> (p ast.Package,errs []error){
 	now := System.currentTimeMillis()
 	nodes ,es := parseAst(lucyFiles)
 	print("prase ast used:", System.currentTimeMillis() - now ,packageName)
@@ -56,4 +56,3 @@ public fn getLucyFiles(dir string) -> (lucyFiles []string = []string{}) {
 		}
 	}
 }
-

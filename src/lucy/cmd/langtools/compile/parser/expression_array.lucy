@@ -34,7 +34,7 @@ class ExpressionArrayParser extends ParserExtends {
 		this.next(lfIsToken) // skip ]
 		this.parser.unExpectNewLineAndSkip()
 		array, err := this.parser.parseType()
-		if err != null {
+		if array == null {
 			return null, err
 		}
 		pos := this.parser.mkPos()

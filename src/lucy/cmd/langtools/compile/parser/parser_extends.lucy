@@ -13,7 +13,7 @@ class ParserExtends {
 	protected fn next(lfIsToken bool) {
 		this.parser.next(lfIsToken)
 	}
-
+	
 	protected fn consume(c map{ lex.TokenKind -> bool } ) {
 		this.parser.consume(c)
 	}

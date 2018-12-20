@@ -13,7 +13,7 @@ public class PackageLoader extends lc.FileLoader {
         this.super(lucyPath ,classPaths )
     }
     
-    public fn LoadImport(importName string) -> (x Object , err error) {
+    public fn loadImport(importName string) -> (x Object , err error) {
         if x = this.getCache(importName) ; x != null {
             return 
         }

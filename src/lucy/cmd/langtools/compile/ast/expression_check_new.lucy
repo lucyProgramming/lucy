@@ -21,23 +21,22 @@ class ExpressionCheckNew {
 		}
 		// new object
 		if no.Type.Type != VariableTypeObject {
-			errs . append(new error(sprintf("%s cannot have new on type '%s'",
-					no.Type.pos.errMsgPrefix(), no.Type.typeString())))
+			errs.append(new error(sprintf("%s cannot have new on type '%s'",
+				no.Type.pos.errMsgPrefix(), no.Type.typeString())))
 			return null
 		}
 		err = no.Type.Class.loadSelf(block , e.pos)
 		if err != null {
-			errs . append(new error( sprintf("%s %s",
-				no.Type.pos.errMsgPrefix(), err.getMessage())))
+			errs.append(err)
 			return null
 		}
 		if no.Type.Class.isInterface() {
-			errs . append(new error( sprintf("%s '%s' is interface",
+			errs.append(new error( sprintf("%s '%s' is interface",
 				errMsgPrefix(no.Type.pos), no.Type.Class.name)))
 			return null
 		}
 		if no.Type.Class.isAbstract() {
-			errs . append(new error( sprintf("%s '%s' is abstract",
+			errs.append(new error( sprintf("%s '%s' is abstract",
 				errMsgPrefix(no.Type.pos), no.Type.Class.name)))
 			return null
 		}
@@ -113,7 +112,7 @@ class ExpressionCheckNew {
 			}
 			if newArray.args[0].isLiteral() {
 				if a := newArray.args[0].getLongValue(); a < 0 {
-					errs . append(new error( sprintf("%s '%d' is negative ",
+					errs.append(new error( sprintf("%s '%d' is negative ",
 							errMsgPrefix(amount.pos), a)))
 				}
 			}

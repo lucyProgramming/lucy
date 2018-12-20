@@ -23,7 +23,7 @@ public class StatementGoTo {
 				this.pos.errMsgPrefix(), this.labelName))
 		}
 		if this.locateDefinition {
-			block.inheritedAttribute.p.locateDefinition = label.pos
+			block.inheritedAttribute.p.setLocationDefinition(label)
 			return 
 		}
 		this.statementLabel = label

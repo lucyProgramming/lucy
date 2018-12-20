@@ -38,10 +38,9 @@ public class StatementIf {
 			this.block.inherit(this.initExpressionBlock)
 			errs.appendAll(this.block.check())
 		}
-		for _, v := range this.elseIfList {
-			v.block.inherit(this.initExpressionBlock)
+		for _ , v := range this.elseIfList {
 			if v.condition != null {
-				conditionType, es := v.condition.checkSingleValueContextExpression(v.block)
+				conditionType, es := v.condition.checkSingleValueContextExpression(this.initExpressionBlock)
 				errs.appendAll(es)
 				if err := v.condition.canBeUsedAsCondition(); err != null {
 					errs.append(err)
@@ -51,7 +50,10 @@ public class StatementIf {
 					errs.append(new error(sprintf("%s condition is not a bool expression",
 							conditionType.pos.errMsgPrefix())))
 				}
-				errs.appendAll(v.block.check())
+				if v.block != null {
+					v.block.inherit(this.initExpressionBlock)
+					errs.appendAll(v.block.check())
+				}
 			}
 		}
 		if this.Else != null {
@@ -61,8 +63,6 @@ public class StatementIf {
 		return errs
 	}
 }
-
-
 
 public class StatementElseIf {
 	public condition Expression

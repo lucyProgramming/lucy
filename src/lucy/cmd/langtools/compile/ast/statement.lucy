@@ -110,6 +110,7 @@ public class Statement {
 			}
 			if this.StatementLabel.locateDefinition{
 				block.inheritedAttribute.p.locateDefinition = this.StatementLabel.pos 
+				//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = this.StatementLabel
 				return 
 			}
 		case StatementTypeClass:
@@ -124,6 +125,8 @@ public class Statement {
 			}
 			if this.Class.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = this.Class.pos 
+				//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = this.Class
+				return 
 			}
 			if this.Class.findUsage {
 				u := new Usage()
@@ -168,7 +171,9 @@ public class Statement {
 			}
 		case StatementTypeTypeAlias:
 			if this.TypeAlias.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = this.pos 
+				block.inheritedAttribute.p.locateDefinition = this.TypeAlias.pos 
+				//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = this.TypeAlias
+				return 
 			}
 			if this.TypeAlias.findUsage {
 				u := new Usage()

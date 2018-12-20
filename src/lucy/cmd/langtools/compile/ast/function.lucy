@@ -129,14 +129,23 @@ public class Function {
 		ret.templateClonedFunction = true
 		return ret, es
 	}
-
+	
 	fn makeLastReturnStatement() {
 		s := new StatementReturn()
 		t := new Statement()
 		t.Type = StatementTypeReturn
 		t.StatementReturn = s
 		t.pos = this.block.endPos
-		this.block.statements.append( t)
+		if this.block == null {
+			this.block = new Block()
+			this.block.pos = this.pos
+		}
+		if this.block.statements == null {
+			this.block.statements = [t]
+		}else {
+			this.block.statements.append(t)
+		}
+		
 	}
 	
 	public fn isGlobalMain() -> (is bool) {
@@ -150,7 +159,7 @@ public class Function {
 		isAbstract bool) {
 		var err error
 		if this.locateDefinition {
-			this.block.inheritedAttribute.p.locateDefinition = this.pos 
+			this.block.inheritedAttribute.p.setLocationDefinition(this) 
 			return 
 		}
 		for k, v := range this.Type.parameterList {
@@ -158,7 +167,7 @@ public class Function {
 				v.name = ""
 			}
 			if v.locateDefinition {
-				this.block.inheritedAttribute.p.locateDefinition = v.pos
+				this.block.inheritedAttribute.p.setLocationDefinition(v)
 				return 
 			}
 			if v.findUsage {
@@ -178,6 +187,10 @@ public class Function {
 				if err != null {
 					errs.append(err)
 				}
+				// print(v.Type.typeString() , v.Type.locateDefinition )
+				// if this.block.inheritedAttribute.p.locateDefinition != null {
+				// 	print(this.block.inheritedAttribute.p.locateDefinition.errMsgPrefix())
+				// }
 				if isAbstract == false {
 					err = this.block.insert(v.name, v.pos, v)
 					if err != null {
@@ -239,7 +252,7 @@ public class Function {
 					v.name = ""
 				}
 				if v.locateDefinition {
-					this.block.inheritedAttribute.p.locateDefinition = v.pos
+					this.block.inheritedAttribute.p.setLocationDefinition(v)
 					return
 				}
 				if v.findUsage {

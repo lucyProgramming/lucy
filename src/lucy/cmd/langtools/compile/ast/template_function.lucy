@@ -32,20 +32,20 @@ public class TemplateFunction  {
 		}
 		return null
 	}
+	
 	fn insert(parameterTypes []Type) -> (template TemplateFunctionInstance) {
 		if t := this.instanceExists(parameterTypes); t != null {
 			return t
 		}
-		ret := new TemplateFunctionInstance ()
-		ret.parameterTypes = parameterTypes 
+		template = new TemplateFunctionInstance()
+		template.parameterTypes = parameterTypes 
 		if this.instances == null {
-			this.instances = [ret]
+			this.instances = [template]
 		}else {
-			this.instances.append(ret)
+			this.instances.append(template)
 		}
-		return ret
+		return template
 	}
-
 }
 
 

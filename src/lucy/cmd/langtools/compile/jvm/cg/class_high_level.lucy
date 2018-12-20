@@ -5,7 +5,7 @@ public class ClassHighLevel {
 	/*
 		one class file can be compile form multi source file
 	*/
-	public sourceFiles              map { string -> bool }
+	sourceFiles              map { string -> bool }
 	public name                     string
 	public accessFlags              char
 	public superClass               string
@@ -70,13 +70,14 @@ public class ClassHighLevel {
 	public fn insertStringConst(s string, location []byte) {
 		binary.BigEndian.putChar(location, this.Class.insertStringConst(s))
 	}
-
+	
 	public fn appendMethod(ms MethodHighLevel...) {
 		if this.methods == null {
 			this.methods = new map {string -> []MethodHighLevel}()
 		}
 		for _, v := range ms {
-			if v.name == "" {
+			if v.name == null ||
+				v.name == "" {
 				panic("null name")
 			}
 			if  this.methods.keyExist(v.name) {

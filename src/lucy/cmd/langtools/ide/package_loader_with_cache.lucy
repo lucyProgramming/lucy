@@ -20,7 +20,7 @@
 //         this.lucyPackageCaches = new map{string -> PackageCache}()
 //     }
     
-//     public fn LoadImport(importName string) -> (x Object , err error) {
+//     public fn loadImport(importName string) -> (x Object , err error) {
 //         if x = this.getCache(importName) ; x != null {  // java packages 
 //             return 
 //         }

@@ -18,7 +18,7 @@ public class Lexer {
 	public fn getLineAndColumn() -> (line int, column int) {
 		return this.line, this.endColumnOffset
 	}
-
+	
 	public fn getOffSet() -> (offset int) {
 		return this.offset
 	}
@@ -249,7 +249,7 @@ public class Lexer {
         }
         return
 	}
-	
+	//store line and column in a int 
 	fn getLineAndColumnFromPos(pos int) ->(line int , column int) {
 		line = pos >> 16
 		column = int(short(pos))
@@ -752,7 +752,7 @@ public class Lexer {
 				bs := []byte{}
 				for c != '\n' && eof == false {
 					c, eof = this.getChar()
-					bs . append( c)
+					bs.append( c)
 				}
 				token.Type = TokenComment
 				token.stringValue = string(bs)

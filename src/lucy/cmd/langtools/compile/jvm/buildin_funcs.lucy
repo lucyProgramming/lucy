@@ -15,7 +15,7 @@ class BuildinFunctionCall {
     BuildinFunctionPrintf BuildinFunctionPrintf
     BuildinFunctionSprintf BuildinFunctionSprintf
     BuildinFunctionBlackHole BuildinFunctionBlackHole
-
+    
     fn BuildinFunctionCall(eb BuildExpression){
         this.super()
         this.eb = eb
@@ -73,16 +73,16 @@ class BuildinFunctionCall {
             return this.BuildinFunctionCatchPanic.mkBuildInPanic(c, code, e, context, state)
         case common.BuildInFunctionCatch:
             return this.BuildinFunctionCatchPanic.mkBuildInCatch(c, code, e, context)
-        /*
-        case common.BuildInFunctionMonitorEnter, common.BuildInFunctionMonitorExit:
-            maxStack = this.build(c, code, call.args[0], context, state)
-            if call.Function.name == common.BuildInFunctionMonitorEnter {
-                code.codes[code.codeLength] = cg.OP_monitorenter
-            } else { // monitor enter on exit
-                code.codes[code.codeLength] = cg.OP_monitorexit
-            }
-            code.codeLength++
-          */
+        
+        // case common.BuildInFunctionMonitorEnter, common.BuildInFunctionMonitorExit:
+        //     maxStack = this.build(c, code, call.args[0], context, state)
+        //     if call.Function.name == common.BuildInFunctionMonitorEnter {
+        //         code.codes[code.codeLength] = cg.OP_monitorenter
+        //     } else { // monitor enter on exit
+        //         code.codes[code.codeLength] = cg.OP_monitorexit
+        //     }
+        //     code.codeLength++
+        
         case common.BuildInFunctionPrintf:
             return this.BuildinFunctionPrintf.buildPrintf(c, code, e, context, state)
         case common.BuildInFunctionSprintf:

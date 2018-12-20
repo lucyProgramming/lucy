@@ -555,7 +555,7 @@ class ExpressionSuffix extends  ParserExtends {
 						this.next(lfIsToken)
 					}else {
 						typ, err = this.parser.parseType()
-						if err != null {
+						if typ == null {
 							return prefix, err
 						}
 					}
@@ -647,6 +647,7 @@ class ExpressionSuffix extends  ParserExtends {
 			call.findUsage  = selection.findUsage
 			call.getHover  = selection.getHover
 			call.Expression = selection.Expression
+			call.autoCompletion = selection.autoCompletion 
 			call.args = args	
 			result.pos = on.pos
 			result.data = call	

@@ -1,7 +1,7 @@
 import "java/lang/Object"
 
-public interface  LoadImport {
-	public fn LoadImport(importName string) -> (Object, error)
+public interface  loadImport {
+	public fn loadImport(importName string) -> (Object, error)
 }
 
 
@@ -29,7 +29,7 @@ fn isMagicIdentifier(name string) ->(is bool)  {
 		name == MagicIdentifierClass
 }
 
-var	buildInFunctionsMap = new map { string -> Function }()
+var	buildInFunctionsMap = new map {string -> Function}()
 
 
 public var	parseFunctionHandler fn(bs []byte, pos Pos) -> (f Function, es []error)
@@ -361,7 +361,7 @@ fn loadJavaStringClass(block Block , pos Pos) ->(err error) {
 	if javaStringClass != null {
 		return null
 	}
-	c, err := block.inheritedAttribute.p.loader.LoadImport(JavaStringClass)
+	c, err := block.inheritedAttribute.p.loader.loadImport(JavaStringClass)
 	if err != null {
 		return err
 	}

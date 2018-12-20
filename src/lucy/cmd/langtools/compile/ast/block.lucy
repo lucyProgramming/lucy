@@ -9,8 +9,8 @@ public class Block {
 	*/
 	public notExecuteToLastStatement bool
 	public defers                    []StatementDefer
-	public Fn                        Function
 	public isFunctionBlock           bool // function block
+    public Fn                        Function
 	public isClassBlock              bool // class block
     isPackageBlock                   bool 
     Package                          Package // when isPackageBlock is true this field shoule not be null
@@ -33,7 +33,6 @@ public class Block {
 	public variables                 map{string->Variable}
 	checkConstantsCalled      bool
 
-    
     /* 
     
     */
@@ -44,7 +43,7 @@ public class Block {
             b = b.outer
         }
     }
-
+    
     public fn nameExists(name string , pos Pos) -> (x Object,exist bool) {
         if this.functions != null {
             if t := this.functions[name]; t != null {
@@ -487,8 +486,9 @@ public class Block {
     }
 
     fn nameIsValid(name string, pos Pos) -> (err error) {
-        if name == "" {
-            return new error(sprintf(`%s "" is not a valid name`, pos.errMsgPrefix()))
+        if name == null ||
+            name == "" {
+            return new error(sprintf(`%s null name`, pos.errMsgPrefix()))
         }
         if name == ThisPointerName {
             return new error(sprintf("%s '%s' already been taken", pos.errMsgPrefix(), ThisPointerName))

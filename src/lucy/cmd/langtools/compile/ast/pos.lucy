@@ -12,7 +12,6 @@ public class Pos {
 	*/
 	public offset int
 	public endOffset int 
-	public locateDefinitionIs Object
 	public loadDefinitionFromOutside LoadDefinitionFromOutside 
 	
 	public fn errMsgPrefix() -> (prefix string) {
@@ -29,6 +28,7 @@ public class NameWithPos {
 	public findUsage bool 
 	public getHover bool 
 	public rename bool 
+	public autoCompletion bool 
 	/* 
 		a // this is a inline comment
 	*/

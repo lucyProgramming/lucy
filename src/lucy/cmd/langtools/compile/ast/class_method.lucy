@@ -59,13 +59,60 @@ public class ClassMethod {
 	public fn isFinal() ->(is bool ) {
 		return (this.Function.accessFlags & cg.AccMethodFinal) != 0
 	}
+
 	public fn isAbstract() ->(is bool ) {
 		return (this.Function.accessFlags & cg.AccMethodAbstract) != 0
+	}
+
+	public fn isSynthetic() ->(is bool ) {
+		return (this.Function.accessFlags & cg.AccMethodSynthetic) != 0
 	}
 
 	public fn ableAccessFromSubClass() ->(is bool ) {
 		return this.isPublic() ||
 			this.isProtected()
+	}
+	
+	public fn mkDescription() ->(d string = "") {
+		if this.isPublic() {
+			d = "public"
+		}else if this.isProtected() {
+			d = "protected"
+		}else if this.isPrivate() {
+			d = "private"
+		}
+		if this.isStatic() {
+			if d == "" {
+				d = "static"
+			}else {
+				d += " static" 
+			}
+		}
+		if this.isSynthetic() {
+			if d == "" {
+				d = "synchronized"
+			}else {
+				d += " synchronized" 
+			}
+		}
+		if this.isFinal() {
+			if d == "" {
+				d = "final"
+			}else {
+				d += " final" 
+			}
+		}
+		if this.isAbstract() {
+			if d == "" {
+				d = "abstract"
+			}else {
+				d += " abstract" 
+			}
+		}
+		if d != "" {
+			d += " "
+		}
+		d += this.Function.readableMsg(true) 
 	}
 
 	fn checkModifierOk() ->(errs []error = []error{}) {
@@ -97,17 +144,16 @@ public class ClassMethod {
 			return false
 		}
 		call := s.Expression.data.(ExpressionMethodCall)
-		if call.Expression.isIdentifier(ThisPointerName) == false || call.name != Super {
+		if call.Expression.isIdentifier(ThisPointerName) == false || 
+			call.name != Super {
 			return false
 		}
 		return true
 	}
 
-
-
 	fn implementationMethodIsOk(
 		pos Pos,
-		implementation ClassMethod) ->(err error) {
+		implementation ClassMethod) -> (err error) {
 		if implementation.Function.pos != null {
 			pos = implementation.Function.pos
 		}

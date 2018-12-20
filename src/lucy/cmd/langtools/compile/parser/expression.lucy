@@ -185,7 +185,7 @@ class ExpressionParser extends  ParserExtends {
 
 	fn parseTypeConversionExpression() -> (e ast.Expression,err error) {
 		to, err := this.parser.parseType()
-		if err != null {
+		if to == null {
 			return null, err
 		}
 		pos := this.parser.mkPos()
@@ -247,7 +247,7 @@ class ExpressionParser extends  ParserExtends {
 		var typ ast.Type
 		if this.parser.token.Type == lex.TokenMap {
 			typ, err = this.parser.parseType()
-			if err != null {
+			if typ == null {
 				return null, err
 			}
 			this.parser.ifTokenIsLfThenSkip(true)

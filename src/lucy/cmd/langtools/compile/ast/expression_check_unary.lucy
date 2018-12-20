@@ -26,7 +26,7 @@ class ExpressionCheckUnary {
 		}
 		if e.Type == ExpressionTypeBitwiseNot {
 			if unary.isInteger() == false {
-				errs . append(new error( sprintf("%s cannot apply '~' on '%s'",
+				errs.append(new error( sprintf("%s cannot apply '~' on '%s'",
 					unary.pos.errMsgPrefix(), unary.typeString())))
 			}
 		}
@@ -53,7 +53,7 @@ class ExpressionCheckUnary {
 			}
 		}
 		if false == increment.isNumber() {
-			errs . append(new error( sprintf("%s cannot apply '%s' on '%s'",
+			errs.append(new error( sprintf("%s cannot apply '%s' on '%s'",
 					on.pos.errMsgPrefix(), on.op, increment.typeString())))
 		}
 		result := increment.Clone()

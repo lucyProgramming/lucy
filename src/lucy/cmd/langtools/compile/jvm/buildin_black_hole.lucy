@@ -8,7 +8,7 @@ class BuildinFunctionBlackHole {
         this.super()
         this.eb = eb
     }
-
+	
 	fn mkBuildInBlackHole(
 		c cg.ClassHighLevel,
 		code cg.AttributeCode,

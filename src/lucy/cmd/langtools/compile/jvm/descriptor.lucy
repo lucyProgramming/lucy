@@ -3,7 +3,6 @@ import "lucy/cmd/langtools/compile/common"
 
 public class Descriptor  {
 
-	
 	static fn methodDescriptor(functionType ast.FunctionType) -> (s string) {
 		s = "("
 		for _, v := range functionType.parameterList {
@@ -153,7 +152,7 @@ public class Descriptor  {
 		}
 		bs = bs[1:] // skip )
 		vd := new ast.Variable()
-		vd.name = "returnValue"
+		vd.name = ""
 		_, vd.Type, err = .ParseType(bs)
 		if err != null {
 			return t, err
@@ -161,7 +160,5 @@ public class Descriptor  {
 		t.returnList = [vd]
 		return t, null
 	}
-
-
 }
 

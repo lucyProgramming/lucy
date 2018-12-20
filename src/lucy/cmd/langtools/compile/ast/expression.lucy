@@ -629,7 +629,7 @@ public class Expression {
 		}
 		return ret, es
 	}
-
+	
 	fn methodAccessAble(block Block, method ClassMethod) -> (err error ) {
 		if this.value.Type == VariableTypeObject {
 			if method.isStatic() {

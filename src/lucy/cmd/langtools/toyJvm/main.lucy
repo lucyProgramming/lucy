@@ -6,4 +6,5 @@ public fn toyJvm(args []string){
 
 fn main(args []string) {
     toyJvm(args)
+    
 }

@@ -161,7 +161,8 @@ public class FunctionType {
 	}
 
 	fn searchName(name string) -> (variable Variable) {
-		if name == "" {
+		if name == null ||
+			name == "" {
 			return null
 		}
 		for _, v := range this.parameterList {
@@ -216,7 +217,7 @@ public class FunctionType {
 		return true
 	}
 
-	fn callHave(ts []Type) -> (have string = "(") {
+	private fn callHave(ts []Type) -> (have string = "(") {
 		for k, v := range ts {
 			if v == null {
 				continue
@@ -358,8 +359,14 @@ public class FunctionType {
 		return
 	}
 
+	private fn parameterCount() -> (count int){
+		count = len(this.parameterList)
+		if this.vArgs != null {
+			count ++ 
+		}
+	}
 	
-	fn wantArgs() -> (want string = "(") {
+	private fn wantArgs() -> (want string = "(") {
 		for k, v := range this.parameterList {
 			if v.name != null && v.name != "" {
 				want += v.name + " "

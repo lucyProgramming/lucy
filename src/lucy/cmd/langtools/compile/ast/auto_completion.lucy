@@ -69,7 +69,7 @@ public class AutoCompletionItem {
         item.name = "const"
         items.append(item)
     }
-
+    
 
 
     static fn getFieldDefaultAutoCompletionItem() -> (items []AutoCompletionItem) {

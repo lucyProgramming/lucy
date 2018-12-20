@@ -218,15 +218,16 @@ class ConstantInfoMethodHandle  {
 }
 
 
-
 class ConstantInfoUtf8  {
 	length char
 	bs     []byte
+
 	fn ConstantInfoUtf8(s string){
 	    this.super()
         this.bs = []byte(s)
         this.length = char(this.bs.size())
 	}
+	
 	fn ToConstPool() -> (p ConstPool) {
 		p = new ConstPool()
 		p.tag = ConstantPoolTagUtf8

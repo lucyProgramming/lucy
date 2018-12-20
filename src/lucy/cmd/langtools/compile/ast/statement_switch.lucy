@@ -85,7 +85,7 @@ public class StatementSwitch  {
 						continue
 					} else {
 						if e.value.Type == VariableTypePackage &&
-							enumPackageName == "" {
+							(enumPackageName == null || enumPackageName == "") {
 							enumPackageName = e.value.Package.name
 						}
 						enumName = t.enumName.name
@@ -145,14 +145,14 @@ public class StatementSwitch  {
 						}
 					case VariableTypeString:
 						if first := stringMap[stringValue]; first != null {
-							errs . append( errMsg(first, e.literalRaw ))
+							errs.append( errMsg(first, e.literalRaw ))
 							continue // no check body
 						} else {
 							stringMap[stringValue] = e.pos
 						}
 					case VariableTypeEnum:
 						if first := enumNamesMap[enumName]; first != null {
-							errs . append(errMsg(first, enumName))
+							errs.append(errMsg(first, enumName))
 							continue // no check body
 						} else {
 							enumNamesMap[enumName] = e.pos
@@ -178,7 +178,8 @@ public class StatementSwitch  {
 					i++
 					continue
 				}
-				if enumPackageName == "" {
+				if enumPackageName == null ||
+					enumPackageName == "" {
 					errMsg += sprintf("\t\tcase %s:\n", v.name)
 				} else {
 					errMsg += sprintf("\t\tcase %s.%s:\n", enumPackageName, v.name)
@@ -191,9 +192,9 @@ public class StatementSwitch  {
 		errs.appendAll(this.checkBlocks())
 		return errs
 	}
-
-
-	fn checkBlocks () -> (errs []error = []error{}) {
+	
+	
+	fn checkBlocks() -> (errs []error = []error{}) {
 		for v := range this.cases {
 			if v.block == null {
 				continue

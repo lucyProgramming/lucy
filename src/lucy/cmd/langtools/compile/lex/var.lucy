@@ -1,5 +1,14 @@
 
-public fn New(bs []byte, startLine, endColumnOffset int,locateDefinition , getHover , findUsage ,rename int , autoCompletion int ) -> (lex Lexer) {
+public fn New(
+	bs []byte, 
+	startLine, 
+	endColumnOffset int,
+	locateDefinition , 
+	getHover , 
+	findUsage ,
+	rename,
+	autoCompletion int ) -> (lex Lexer) {
+		
 	lex = new Lexer()
 	lex.bs = bs
 	lex.end = len(bs)

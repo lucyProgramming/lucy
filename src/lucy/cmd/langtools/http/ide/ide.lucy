@@ -10,6 +10,10 @@ public fn registerHandlers(prefix string , server HttpServer) {
     server.createContext(prefix + "/autoCompletion" , autoCompletion)
     allDefinition := new AllDefinition()
     server.createContext(prefix + "/allDefinition" , allDefinition)
+    fmt := new Fmt()
+    server.createContext(prefix + "/fmt" , fmt)
+    
+
 }
 
 

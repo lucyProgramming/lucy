@@ -70,7 +70,10 @@ public class StatementFor {
 			rangeOn.Type != VariableTypeMap {
 			errs.append( new error(sprintf("%s cannot range on '%s'",
 				errMsgPrefix(rangeExpression.pos), rangeOn.typeString())))
-			errs.appendAll( this.block.check())
+			if this.block != null {
+				this.block.inherit(this.initExpressionBlock)
+				errs.appendAll(this.block.check())
+			}
 			return errs
 		}
 		var lefts []Expression
@@ -116,6 +119,8 @@ public class StatementFor {
 				vd.pos = posV
 				if vd.locateDefinition{
 					this.initExpressionBlock.inheritedAttribute.p.locateDefinition = vd.pos 
+					//this.initExpression//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = vd 
+					return 
 				}
 				if vd.findUsage {
 					u := new Usage()
@@ -161,8 +166,8 @@ public class StatementFor {
 				vd.locateDefinition = identifierK.locateDefinition
 				vd.findUsage = identifierK.findUsage 
 				if vd.locateDefinition {
-					this.initExpressionBlock.inheritedAttribute.p.locateDefinition = vd.pos 
-					
+					this.initExpressionBlock.inheritedAttribute.p.setLocationDefinition(vd)  
+					return 
 				}
 				if vd.findUsage {
 					u := new Usage()
@@ -241,14 +246,17 @@ public class StatementFor {
 			}
 		}
 	checkBlock:
-		errs.appendAll( this.block.check())
+		if this.block != null {
+			this.block.inherit(this.initExpressionBlock)
+			errs.appendAll(this.block.check())
+		}
 		return errs
 	}
+
 	fn check(block Block) ->(errs []error = []error{})  {
 		this.initExpressionBlock.inherit(block)
 		this.initExpressionBlock.inheritedAttribute.forStatement = this
 		this.initExpressionBlock.inheritedAttribute.forBreak = this
-		this.block.inherit(this.initExpressionBlock)
 		if this.Init == null &&
 			this.increment == null &&
 			this.condition != null &&
@@ -284,6 +292,7 @@ public class StatementFor {
 			errs.appendAll(es)
 		}
 		if this.block != null {
+			this.block.inherit(this.initExpressionBlock)
 			errs.appendAll( this.block.check())
 		}
 		return errs

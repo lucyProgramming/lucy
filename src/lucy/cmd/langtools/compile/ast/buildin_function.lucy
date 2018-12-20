@@ -25,7 +25,7 @@ fn registerBuildInFunctions() {
 		buildInFunctionsMap[common.BuildInFunctionCatch] = c
 		c.Type.returnList = new []Variable(1)
 		c.Type.returnList[0] = new Variable()
-		c.Type.returnList[0].name = "returnValue"
+		c.Type.returnList[0].name = "e"
 		c.Type.returnList[0].Type = new Type()
 		c.Type.returnList[0].Type.Type = VariableTypeObject
 		c.Type.returnList[0].Type.Class = new Class()
@@ -33,7 +33,7 @@ fn registerBuildInFunctions() {
 		c.Type.returnList[0].Type.Class.notImportedYet = true
 		c.buildInFunctionChecker = fn(f Function, e ExpressionFunctionCall, block Block, errs []error, args []Type, pos Pos) {
 			if len(e.parameterTypes) > 0 {
-				errs . append(new error( sprintf("%s buildin function expect no typed parameter",
+				errs.append(new error( sprintf("%s buildin function expect no typed parameter",
 					e.parameterTypes[0].pos.errMsgPrefix())) )
 			}
 			if block.inheritedAttribute.Defer == null {
@@ -50,14 +50,14 @@ fn registerBuildInFunctions() {
 				if block.inheritedAttribute.Defer.exceptionClass == null {
 					c, err := block.inheritedAttribute.p.loadClass(DefaultExceptionClass)
 					if err != null {
-						errs . append(new error( sprintf("%s load exception class failed,err:%s",
+						errs.append(new error( sprintf("%s load exception class failed,err:%s",
 							pos.errMsgPrefix(), err.getMessage())))
 						return
 					}
 					f.Type.returnList[0].Type.Class = c
 					err = block.inheritedAttribute.Defer.registerExceptionClass(c)
 					if err != null {
-						errs . append(new error( sprintf("%s %s", pos.errMsgPrefix(), err.getMessage())))
+						errs.append(new error( sprintf("%s %s", pos.errMsgPrefix(), err.getMessage())))
 					}
 				} else {
 					f.Type.returnList[0].Type.Class = block.inheritedAttribute.Defer.exceptionClass
@@ -65,13 +65,13 @@ fn registerBuildInFunctions() {
 				return
 			}
 			if e.args[0].Type != ExpressionTypeString {
-				errs . append(new error( sprintf("%s build function '%s' expect string argument",
+				errs.append(new error( sprintf("%s build function '%s' expect string argument",
 					errMsgPrefix(args[0].pos), common.BuildInFunctionCatch)))
 			}
 			className := e.args[0].stringValue
 			c, err := block.inheritedAttribute.p.loadClass(className)
 			if err != null {
-				errs . append(new error(sprintf("%s %s", e.args[0].pos.errMsgPrefix(), err.getMessage())))
+				errs.append(new error(sprintf("%s %s", e.args[0].pos.errMsgPrefix(), err.getMessage())))
 				return
 			}
 			have, _ := c.haveSuperClass(block , e.args[0].pos, JavaThrowableClass)
@@ -155,7 +155,7 @@ fn registerBuildInFunctions() {
 			}
 		buildInFunctionsMap[common.BuildInFunctionLen].isBuildIn = true
 		Len := buildInFunctionsMap[common.BuildInFunctionLen]
-		Len.Type.returnList = new []Variable (1)
+		Len.Type.returnList = new []Variable(1)
 		Len.Type.returnList[0] = new Variable()
 		Len.Type.returnList[0].Type = new Type()
 		Len.Type.returnList[0].Type.Type = VariableTypeInt
@@ -166,7 +166,7 @@ fn registerBuildInFunctions() {
 		buildInFunctionsMap[common.BuildInFunctionSprintf] = s
 		s.Type.returnList = new []Variable(1)
 		s.Type.returnList[0] = new Variable()
-		s.Type.returnList[0].name = "returnValue"
+		s.Type.returnList[0].name = "format"
 		s.Type.returnList[0].Type = new Type()
 		s.Type.returnList[0].Type.Type = VariableTypeString
 		s.buildInFunctionChecker = fn(f Function, e ExpressionFunctionCall, block Block, errs []error,

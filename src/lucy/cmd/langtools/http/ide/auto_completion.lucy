@@ -39,7 +39,7 @@ class AutoCompletion implements HttpHandler {
             return
         }
         usages := autocompletion.autoCompletion(file , "" , (line << 16) | int(char(column)) ,bs)
-        result := copy(new ast.AutoCompletionItem[](len(usages)) ,   usages)
+        result := copy(new ast.AutoCompletionItem[](len(usages)) , usages)
         bs,_ = json.encode(result , "\t")
         exchange.sendResponseHeaders(200 , long(len(bs)))
         os.write(copy(new byte[](len(bs)) ,bs )) 

@@ -6,10 +6,10 @@ public class ClassFieldDeclaration {
     public fields []ClassField
     /* 
 		a // this is a inline comment
-	*/
-	public inlineComment string   //   in
+	  */
+	  public inlineComment string   //   in
 	
-	//public containsLf bool    // constains "\n"
+	  //public containsLf bool    // constains "\n"
 }
 
 

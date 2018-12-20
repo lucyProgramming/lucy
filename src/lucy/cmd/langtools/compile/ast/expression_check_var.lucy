@@ -114,7 +114,8 @@ class ExpressionCheckVar {
 		for _, v := range ev.variables {
 			if v.locateDefinition{
 				block.inheritedAttribute.p.locateDefinition = v.pos 
-				
+				//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = v 
+				return 
 			}
 			if v.findUsage {
 				u := new Usage()

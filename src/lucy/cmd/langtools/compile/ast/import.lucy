@@ -44,9 +44,11 @@ class SourceFile {
 	fn insertImport(block Block,i Import) ->(err error)  {
 		if i.locateDefinition {
 			block.inheritedAttribute.p.locateDefinition = i.pos
+			//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = i 
+			return 
 		}
 		if this.imports == null {
-			this.imports = new  map { string -> Import }()
+			this.imports = new map { string -> Import }()
 		}
 		if this.importsByResources == null {
 			this.importsByResources =new map { string -> Import }()

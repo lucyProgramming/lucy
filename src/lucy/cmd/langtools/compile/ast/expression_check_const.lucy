@@ -5,13 +5,6 @@ class ExpressionCheckConst {
 	static fn check(e Expression , block Block) -> (errs []error = []error{}) {
 		cs := e.data.([]Constant)
 		for _, c := range cs {
-            if c.findUsage {
-				u := new Usage()
-                u.Type = "declaration"
-                u.pos = c.pos 
-                c.findUsageInstances = [u]
-                block.inheritedAttribute.p.findUsage = c.findUsageInstances
-            }
 			err := checkConst(block, c)
 			if err != null {
 				if err != null {

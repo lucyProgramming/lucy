@@ -25,6 +25,7 @@ public class Token {
 	}
 }
 
+
 public enum  TokenKind {
 	TokenFn    = 1,                  // fn
 	TokenEnum    ,                   // enum

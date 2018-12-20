@@ -8,7 +8,7 @@ class Flags {
 	compilerFlags flag.StringOption 
 	h          flag.BoolOption
     parser        flag.FlagParser
-
+	
 	fn Flags(){
 	    this.super()
         this.parser = new flag.FlagParser()
@@ -19,11 +19,11 @@ class Flags {
         this.h = this.parser.boolOption("-h", false, "print help message")
 	}
 
-
+	
 	fn help()  {
 		usage := `run a lucy package
     -forceReBuild           force rebuild all package 
-	-cf                     compile flags
+	-cf                     compiler flags
 	-build                  build the package and no run 
 	-v                      print the package been compile
 	-h                      print this help message

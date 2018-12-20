@@ -128,7 +128,7 @@ class Context {
 		this.currentLineNumber = pos.endLine
 		if this.currentSourceFile != oldFileName ||
 			this.currentLineNumber != oldLine  {
-			code.MKLineNumber(pos.endLine + 1)
+			code.mKLineNumber(pos.endLine + 1)
 		}
 	}
 

@@ -6,6 +6,8 @@ public class PackageMeta {
 	public compileTime  long // in seconds
 	public classes      string[]
 	public hasMain bool 
+	public lucyVersion string 
+	
 }
 
 

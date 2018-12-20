@@ -32,6 +32,8 @@ class ExpressionCheckLeftValue {
                 }
 				if identifier.locateDefinition {
 					block.inheritedAttribute.p.locateDefinition = v.pos
+					// v.pos.locateDefinitionIs = v 
+					return 
 				}
 				if v.findUsageInstances != null {
 					correctLastUsageType("value write" , v.findUsageInstances)
@@ -71,7 +73,7 @@ class ExpressionCheckLeftValue {
 						e.pos.errMsgPrefix(), Super, object.typeString())))
 					return null
 				}
-				field, err := object.Class.getField(block , e.pos, selection.name, false)
+				field, err := object.Class.getField(block , e.pos, selection.name, false , object.Class.name)
 				if err != null {
 					errs.append(err)
 				}
@@ -80,15 +82,17 @@ class ExpressionCheckLeftValue {
 				}
 				if selection.locateDefinition {
 					block.inheritedAttribute.p.locateDefinition = field.pos
-					 
+					// field.pos.locateDefinitionIs = field 
+					return 
 				}
 				selection.field = field
 				result = field.Type.Clone()
 				result.pos = e.pos
 				e.value = result
 				return result
-			case VariableTypeObject, VariableTypeClass:
-				field, err := object.Class.getField(block , e.pos, selection.name, false)
+			case VariableTypeObject,
+				VariableTypeClass:
+				field, err := object.Class.getField(block , e.pos, selection.name, false , object.Class.name)
 				if err != null {
 					errs.append(err)
 				}
@@ -96,7 +100,8 @@ class ExpressionCheckLeftValue {
 				if field != null {
 					if selection.locateDefinition {
 						block.inheritedAttribute.p.locateDefinition = field.pos
-						 
+						// field.pos.locateDefinitionIs = field
+						return 
 					}
 					err := selection.Expression.fieldAccessAble(block, field)
 					if err != null {
@@ -123,7 +128,8 @@ class ExpressionCheckLeftValue {
                     }
 					if selection.locateDefinition {
 						block.inheritedAttribute.p.locateDefinition = v.pos 
-						
+						// v.pos.locateDefinitionIs = v
+						return 
 					}
                     selection.packageVariable = v
                     result = v.Type.Clone()
@@ -189,6 +195,7 @@ class ExpressionCheckLeftValue {
 				item := new AutoCompletionItem()
 				item.Type = "field"
 				item.name =  v.name
+				item.description = v.mkDescription() 
 				items.append(item)
 			}
             object.loadSuperClass(block , new Pos()) 
@@ -211,14 +218,12 @@ class ExpressionCheckLeftValue {
 				if m.keyExist(v.name) {
 					continue  
 				}
-				if v.isStatic() {
-					continue 
-				}
 				if accessFromSub && v.ableAccessFromSubClass() == false {
 					continue
 				}
 				item := new AutoCompletionItem()
 				item.Type = "field"
+				item.description = v.mkDescription() 
 				item.name =  v.name
 				items.append(item)
 			} 
@@ -241,14 +246,12 @@ class ExpressionCheckLeftValue {
 				if m.keyExist(v.name) {
 					continue  
 				}
-				if v.isStatic() == false {
-					continue 
-				}
 				if accessFromSub && v.ableAccessFromSubClass() == false {
 					continue
 				}
 				item := new AutoCompletionItem()
 				item.Type = "field"
+				item.description = v.mkDescription() 
 				item.name =  v.name
 				items.append(item)
 			}
@@ -260,6 +263,5 @@ class ExpressionCheckLeftValue {
             accessFromSub = true    
         }
         block.inheritedAttribute.p.autoCompletionItems = items
-    } 
-
+    }
 } 

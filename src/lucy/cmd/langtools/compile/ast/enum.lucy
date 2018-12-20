@@ -23,7 +23,6 @@ public class EnumName {
         this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
         block.inheritedAttribute.p.findUsage = this.findUsageInstances 
     }
-	
 }
 
 
@@ -64,7 +63,7 @@ public class Enum   {
 	
 	fn check(block Block) -> (errs []error = []error{}) {
 		if this.locateDefinition {
-			block.inheritedAttribute.p.locateDefinition = this.pos
+			block.inheritedAttribute.p.setLocationDefinition(this)
 			return 
 		}
 		if this.findUsage {
@@ -78,7 +77,7 @@ public class Enum   {
 		}
 		for _ , vv := range this.enums {
 			if vv.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = vv.pos 
+				block.inheritedAttribute.p.setLocationDefinition(vv)
 				return	
 			}
 			if vv.findUsage {
@@ -128,5 +127,5 @@ public class Enum   {
         }
         this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
         block.inheritedAttribute.p.findUsage = this.findUsageInstances 
-    }   
+    } 
 }

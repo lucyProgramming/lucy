@@ -68,7 +68,8 @@ public class  BuildPackage {
     }
 
     fn putClass(c cg.ClassHighLevel) {
-        if c.name  == "" {
+        if c.name == null ||
+            c.name  == "" {
             panic("missing name")
         }
         name := c.name

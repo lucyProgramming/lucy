@@ -84,7 +84,7 @@ public class LucyMethodSignature {
 			bs = bs[1:] // skip V
 			ft.returnList = new []ast.Variable(1)
 			ft.returnList[0] = new ast.Variable()
-			ft.returnList[0].name = "returnValue"
+			ft.returnList[0].name = ""
 			ft.returnList[0].Type = new ast.Type()
 			ft.returnList[0].Type.Type = ast.VariableTypeVoid
 		} else {

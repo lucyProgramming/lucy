@@ -3,7 +3,8 @@
 	a simple but yet powerful command line arguments parser for lucy programing language 
 */
 public final class  FlagParser {
-	options map{ string -> Option };
+
+	options map{string -> Option}
 	
 	public fn FlagParser() {
 	    this.super()
@@ -109,13 +110,13 @@ public final class  FlagParser {
 				case OptionTypeBool:
 					msg += prefix + sprintf("\t %s default:%s\n" , k ,v.defaultValueString)
 					msg += prefix + "\t\tusage:" + v.usage + "\n"
-				case OptionTypeInt :
+				case OptionTypeInt:
 					msg += prefix + sprintf("\t %s default:%s\n" , k ,v.defaultValueString)
 					msg += prefix + "\t\tusage:" + v.usage + "\n"
-				case OptionTypeString :
+				case OptionTypeString:
 					msg += prefix + sprintf("\t %s default:'%s'\n" , k ,v.defaultValueString)
 					msg += prefix + "\t\tusage:" + v.usage + "\n"
-				case OptionTypeFloat :
+				case OptionTypeFloat:
 					msg += prefix + sprintf("\t %s default:%s\n" , k ,v.defaultValueString)
 					msg += prefix + "\t\tusage:" + v.usage + "\n"
 			}

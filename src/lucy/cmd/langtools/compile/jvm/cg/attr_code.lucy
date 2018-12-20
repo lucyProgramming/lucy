@@ -49,7 +49,7 @@ public class AttributeCode  {
 	/*
 		mk line number attribute
 	*/
-	public fn MKLineNumber(lineNumber int) {
+	public fn mKLineNumber(lineNumber int) {
 	    if this.lineNumbers == null {
 	        this.lineNumbers = new AttributeLineNumber()
 	    }
@@ -95,9 +95,6 @@ public class AttributeCode  {
 		return bs
 	}
 }
-
-
-
 
 
 public class ExceptionTable  {

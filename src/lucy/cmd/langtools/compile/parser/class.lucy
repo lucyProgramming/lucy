@@ -369,7 +369,7 @@ class ClassParser extends  ParserExtends {
 			return err
 		}
 		t, err := this.parser.parseType()
-		if err != null {
+		if t == null {
 			return err
 		}
 		var initValues []ast.Expression

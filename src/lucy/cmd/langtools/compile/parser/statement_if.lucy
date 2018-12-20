@@ -118,13 +118,16 @@ class StatementIfParser extends ParserExtends {
 			if err != null {
 				this.consume(untilLc)
 			}
+			t := new ast.StatementElseIf()
+			t.condition = condition
+			elseIfList.append(t)
+
 			if this.parser.token.Type != lex.TokenLc {
 				err = new error(sprintf("%s not '{' after a expression,but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.description))
 				this.parser.errs.append(err)
-				this.consume(untilLc)
+				return elseIfList, err 
 			}
-			t := new ast.StatementElseIf()
 			this.next(lfIsToken) // skip {
 			if this.parser.token.Type == lex.TokenComment {
 				t.inlineComment = this.parser.token.stringValue 
@@ -134,9 +137,7 @@ class StatementIfParser extends ParserExtends {
 			}
 			block := new ast.Block()
 			this.bp.parseStatementList(block, false)
-			t.condition = condition
 			t.block = block
-			elseIfList.append(t)
 			if this.parser.token.Type != lex.TokenRc {
 				err = new error(sprintf("%s expect '}', but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.description))

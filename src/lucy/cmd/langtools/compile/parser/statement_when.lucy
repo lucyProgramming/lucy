@@ -25,21 +25,18 @@ class StatementWhenParser extends ParserExtends {
 			this.parser.next(lfIsToken)  // restore idenfierToken token
 			if thisToken.Type == lex.TokenLc {
 				condition , err = this.parser.parseType()
-				if err != null {
-					this.parser.errs.append(err)
+				if condition == null {
 					this.consume(untilLc)
 				}
 			}else {
 				typeExpression, err = this.parser.ExpressionParser.parseExpression(false)
 				if err != null {
-					this.parser.errs.append(err)
 					this.consume(untilLc)
 				}
 			}
 		}else {
 			typeExpression, err = this.parser.ExpressionParser.parseExpression(false)
 			if err != null {
-				this.parser.errs.append(err)
 				this.consume(untilLc)
 			}
 		}

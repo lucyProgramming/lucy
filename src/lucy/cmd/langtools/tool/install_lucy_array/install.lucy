@@ -15,7 +15,7 @@ class InstallLucyArray {
 		new io.File(dest).mkdirs()
 		for _, v := range installs {
 			javaFile := v.className + ".java"
-			t := array_template.replace("ArrayTTT".(CharSequence), v.className.(CharSequence))
+			t := array_template.replace(CharSequence("ArrayTTT"), v.className.(CharSequence))
 			t = t.replace("TTT".(CharSequence),v.typename .(CharSequence))
 			t = t.replace("IMPORTS".(CharSequence), v.imports.(CharSequence))
 			dest := dest + javaFile

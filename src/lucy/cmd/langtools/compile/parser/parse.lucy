@@ -396,7 +396,7 @@ class Parser {
 		var variableType ast.Type
 		if this.TypeParser.isValidTypeBegin() {
 			variableType, err = this.parseType()
-			if err != null {
+			if variableType == null {
 				return
 			}
 		}
@@ -449,9 +449,6 @@ class Parser {
 		}
 		if this.token.Type != lex.TokenAssign {
 			ret.Type, err = this.parseType()
-			if err != null {
-				return
-			}
 		}
 		if this.token.Type == lex.TokenAssign {
 			this.next(lfNotToken) // skip = or :=
@@ -625,7 +622,7 @@ class Parser {
 		}
 		this.next(lfNotToken) // skip =
 		ret.Type, err = this.parseType()
-		if err != null {
+		if ret.Type == null {
 			return null, err
 		}
 		ret.comment = comment.comment
@@ -648,26 +645,45 @@ class Parser {
 			*/
 			var t ast.Type
 			t, err = this.parseType()
-			if err != null {
+			if t == null {
 				return null, err
 			}
 			v := new ast.Variable()
 			v.Type = t
 			v.name = ""
 			v.pos = this.mkPos()
-			return []ast.Variable{v}, null
+			return [v], null
 		}
+		token := this.token
 		names, err := this.parseNameList()
 		if err != null {
 			return null, err
 		}
+		if len(names) == 1 && 
+			this.token.Type == lex.TokenSelection {
+			// XXX.
+			//this is a type 
+			this.tokenStack = [token , this.token]
+			this.next(lfIsToken) // restore the stack 
+			var t ast.Type
+			t, err = this.parseType()
+			if t == null {
+				return null, err
+			}
+			v := new ast.Variable()
+			v.Type = t
+			v.name = ""
+			v.pos = this.mkPos()
+			return [v], null
+		}
+
 		if this.TypeParser.isValidTypeBegin() {
 			/*
 				a , b int
 			*/
 			var t ast.Type
 			t, err = this.parseType()
-			if err != null {
+			if t == null {
 				return null, err
 			}
 			vs = new []ast.Variable(len(names))
@@ -682,7 +698,6 @@ class Parser {
 				vd.containsLf = v.containsLf 
 				vd.inlineComment = v.inlineComment 
 				vd.Type = t.Clone()
-				vd.Type.pos = v.pos // override pos
 			}
 			return vs, null
 		} else {
@@ -690,7 +705,6 @@ class Parser {
 				syntax a,b
 				not valid type after name list, "a" and "b" must indicate types
 			*/
-			
 			vs = new []ast.Variable(len(names))
 			for k, v := range names {
 				vd := new ast.Variable()
@@ -703,6 +717,10 @@ class Parser {
 				vd.Type.Type = ast.VariableTypeName
 				vd.Type.pos = v.pos
 				vd.Type.name = v.name
+				vd.Type.autoCompletion = v.autoCompletion 
+				vd.Type.locateDefinition = v.locateDefinition
+				vd.Type.getHover = v.getHover
+				vd.Type.findUsage = v.findUsage
 				vd.Type.pos = v.pos // override pos
 			}
 			return vs, null
@@ -720,7 +738,7 @@ class Parser {
 			}
 			var t ast.Type
 			t, err = this.parseType()
-			if err != null {
+			if t == null {
 				return vs, err
 			}
 			for _, v := range ns {
@@ -800,6 +818,7 @@ class Parser {
 			t.findUsage = this.token.findUsage
 			t.getHover = this.token.getHover
 			t.rename = this.token.rename
+			t.autoCompletion = this.token.autoCompletion 
 			names.append(t)
 			this.next(lfIsToken)
 			if this.token.Type != lex.TokenComma {

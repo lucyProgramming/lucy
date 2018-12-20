@@ -22,12 +22,12 @@
 						indexValue := index.index.getLongValue()
 						if indexValue < 0 {
 							errs.append(new error(sprintf("%s index '%d' is negative",
-									index.index.pos.errMsgPrefix(), indexValue)))
+								index.index.pos.errMsgPrefix(), indexValue)))
 						}
 					}
 				} else {
 					errs.append(new error(sprintf("%s only integer can be used as index,but '%s'",
-							index.index.pos.errMsgPrefix(), indexType.typeString())))
+						index.index.pos.errMsgPrefix(), indexType.typeString())))
 				}
 			}
 			valueType = on.array.Clone()

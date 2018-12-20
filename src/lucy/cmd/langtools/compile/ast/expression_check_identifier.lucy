@@ -22,6 +22,7 @@ class ExpressionCheckIdentifier {
 			e.stringValue = e.pos.filename
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = e.pos
+				return 
 			}
 			result, _ := e.checkSingleValueContextExpression(block)
 			return result, null
@@ -90,6 +91,8 @@ class ExpressionCheckIdentifier {
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = f.pos 
+				// f.pos.locateDefinitionIs = f 
+				return 
 			}
 			result := new Type()
 			result.Type = VariableTypeFunction
@@ -111,6 +114,8 @@ class ExpressionCheckIdentifier {
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = t.pos 
+				// t.pos.locateDefinitionIs = t 
+				return 
 			}
 			if t.findUsageInstances != null {
 				correctLastUsageType("value read" , t.findUsageInstances)
@@ -131,6 +136,8 @@ class ExpressionCheckIdentifier {
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = t.pos
+				// t.pos.locateDefinitionIs = t 
+				return 
 			}
 			t.used = true
 			e.fromConst(t)
@@ -147,7 +154,8 @@ class ExpressionCheckIdentifier {
 				}
 			}
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = c.pos 
+				block.inheritedAttribute.p.locateDefinition = c.pos
+				// c.pos.locateDefinitionIs = c  
 				return 
 			}
 			if c.findUsageInstances != null {
@@ -169,6 +177,7 @@ class ExpressionCheckIdentifier {
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.locateDefinition = enumName.pos 
+				// enumName.pos.locateDefinitionIs = enumName 
 				return 
 			}
 			result := new Type()
@@ -190,7 +199,8 @@ class ExpressionCheckIdentifier {
 		}
 		if identifier.locateDefinition {
 			block.inheritedAttribute.p.locateDefinition = it.pos 
-			 
+			// it.pos.locateDefinitionIs = it 
+			return 
 		}
 		valueType = new Type()
 		valueType.pos = e.pos
