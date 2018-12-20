@@ -6,10 +6,10 @@ public fn getHover (file string , pos int , bs []byte) ->(s string = "") {
     if p == null {
         return  
     }
-    if p.locateDefinitionIs == null {
-        return 
-    }
-    s = new MakeHover(p.locateDefinitionIs).make() 
+    // if p.locateDefinitionIs == null {
+    //     return 
+    // }
+    // s = new MakeHover(p.locateDefinitionIs).make() 
 }
 
 
