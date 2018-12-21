@@ -2,17 +2,17 @@
 /*
 	provide hover message for ide
 */
-class Hover {
-	public Type string 
-	public name string 
-	public comment string 
-	public hoverLoadFromOutside HoverLoadFromOutside
-}
+// class Hover {
+// 	public Type string 
+// 	public name string 
+// 	public comment string 
+// 	public hoverLoadFromOutside HoverLoadFromOutside
+// }
 
-class HoverLoadFromOutside {
-	public packageName string
-	public name string
-}
+// class HoverLoadFromOutside {
+// 	public packageName string
+// 	public name string
+// }
 
 
 

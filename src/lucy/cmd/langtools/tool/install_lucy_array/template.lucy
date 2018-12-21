@@ -8,7 +8,9 @@ public class ArrayTTT   {
 	public int start;
 	public int end; // not include
 	public int cap;
+	boolean readOnly ; 
 	static String outOfRangeMsg = "index out range";
+	static String readOnlyArrayException = "array is readOnly";
 	public TTT[] elements;
 	public int size(){
 		return this.end - this.start;
@@ -31,9 +33,17 @@ public class ArrayTTT   {
 	public ArrayTTT(){
 		
 	}
+
+	public synchronized setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly
+	}
+
 	public synchronized void set(int index , TTT value) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
+		}
+		if if(this.readOnly) {
+			throw new Exception(readOnlyArrayException);
 		}
 		index += this.start ; 
 		if (index >= this.end ){
@@ -41,6 +51,7 @@ public class ArrayTTT   {
 		}
 		this.elements[index] = value ; 
 	}
+
 	public synchronized TTT get(int index) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
@@ -50,8 +61,7 @@ public class ArrayTTT   {
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
 		return this.elements[index]  ; 
-	}	
-	
+	}
 
 	public  synchronized ArrayTTT slice(int start,int end){
 		int length = end - start ;
@@ -65,7 +75,11 @@ public class ArrayTTT   {
 		result.cap = this.cap;
 		return result;
 	}
+
 	public synchronized void append(TTT e){
+		if if(this.readOnly) {
+			throw new Exception(readOnlyArrayException);
+		}
 		if(this.end < this.cap){
 		}else{
 			this.expand(this.cap * 2);
@@ -73,6 +87,9 @@ public class ArrayTTT   {
 		this.elements[this.end++] = e;
 	}
 	public synchronized  void append(ArrayTTT es){
+		if if(this.readOnly) {
+			throw new Exception(readOnlyArrayException);
+		}
 		if (es == null) { //no need 
 			return  ;
 		}

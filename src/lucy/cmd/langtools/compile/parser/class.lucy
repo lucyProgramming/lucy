@@ -202,24 +202,20 @@ class ClassParser extends  ParserExtends {
 				this.parser.unExpectNewLineAndSkip()
 				err = this.validAfterAbstract()
 				if err != null {
-					this.parser.errs.append( err)
-					accessControlToken = null // set to null
-				} else {
-					isAbstract = true
-				}
+					this.parser.errs.append(err)
+				}  
+				isAbstract = true
 			case lex.TokenVolatile:
 				isVolatile = true
 				this.next(lfIsToken)
 				if err = this.validAfterVolatile(this.parser.token); err != null {
 					this.parser.errs.append( err)
-					isVolatile = false
 				}
 			case lex.TokenFinal:
 				isFinal = true
 				this.next(lfIsToken)
 				if err = this.validAfterFinal(); err != null {
 					this.parser.errs.append(err)
-					isFinal = false
 				}
 			case lex.TokenIdentifier:
 				err = this.parseField(classDefinition, this.parser.errs, isStatic, isVolatile, accessControlToken, comment)
@@ -245,9 +241,9 @@ class ClassParser extends  ParserExtends {
 				}
 			case lex.TokenFn:
 				if isAbstract &&
-					(classDefinition.isAbstract() == false && classDefinition.isInterface() == false) {
+					(classDefinition.isAbstract() == false) {
 					this.parser.errs.append(
-						new error(sprintf("%s cannot  abstact method is non-abstract class",
+						new error(sprintf("%s cannot have abstact method is non-abstract class",
 							this.parser.errMsgPrefix())))
 				}
 				var f ast.Function
@@ -349,13 +345,13 @@ class ClassParser extends  ParserExtends {
 		accessControlToken lex.Token,
 		comment CommentParser) -> (err error) {
 		if this.parser.token.autoCompletion {
-			// this is a auto completion mission
+			// this is a auto completion call 
 			f := new ast.ClassField()
 			f.name = this.parser.token.stringValue
 			f.autoCompletion = true 
 			f.pos = this.parser.mkPos()
 			if classDefinition.fields == null {
-				classDefinition.fields = new  map { string -> ast.ClassField } ()
+				classDefinition.fields = new  map{string->ast.ClassField}()
 			}
 			if f.name == null || f.name == "" {
 				f.name = compileAutoName()
@@ -370,7 +366,7 @@ class ClassParser extends  ParserExtends {
 		if err != null {
 			return err
 		}
-		if this.parser.token.Type == lex.TokenLp  && len(names) ==1 {
+		if this.parser.token.Type == lex.TokenLp  && len(names) == 1 {
 			this.parser.errs.append(new error(sprintf("%s missing 'fn'" , this.parser.errMsgPrefix(idenfierPos))))
 			t := new lex.Token()
 			t.Type = lex.TokenFn

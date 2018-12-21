@@ -6,7 +6,7 @@ class Flags {
 	file flag.StringOption
 	pos flag.IntOption  
 	parser flag.FlagParser
-
+	
 	fn Flags(){
 		this.super()
 		this.parser = new flag.FlagParser()

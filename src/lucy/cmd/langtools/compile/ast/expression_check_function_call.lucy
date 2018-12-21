@@ -80,8 +80,7 @@ class ExpressionCheckFunctionCall {
 				return null
 			}
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = getPos(d)
-				// //block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = d 
+				block.inheritedAttribute.p.setLocationDefinition(d)
 				return 
 			}
 			if f ,ok := d.(Function) ; ok {

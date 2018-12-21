@@ -78,9 +78,8 @@ class ExpressionCheckMethodCall {
 			defer {
 				if call.locateDefinition && block.inheritedAttribute.p.getLocationDefinition() == null {
 					isStatic := object.Type == VariableTypeClass
-					x := object.Class.getMethodOrFieldHandleByName(block , call.name , isStatic)
+					x := object.Class.getMethodOrFieldHandleByName(block , call.name,isStatic)
 					block.inheritedAttribute.p.setLocationDefinition(x)
-					// //block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = x 
 				}
 			}
 			if call.name == "finalize" {
@@ -113,7 +112,7 @@ class ExpressionCheckMethodCall {
 				}
 				if matched {
 					if call.locateDefinition {
-						block.inheritedAttribute.p.locateDefinition = ms[0].Function.pos
+						block.inheritedAttribute.p.setLocationDefinition(ms[0].Function)
 						return 
 					}
 					if ms[0].isStatic() {
@@ -133,7 +132,7 @@ class ExpressionCheckMethodCall {
 			if call.locateDefinition {
 				m ,_ := object.Class.getFieldOrMethod(block ,
 						e.pos , call.name , false , object.Class.name)
-				block.inheritedAttribute.p.locateDefinition = getPos(m)
+				block.inheritedAttribute.p.setLocationDefinition(m)
 				//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = m 
 				return 
 			}
@@ -150,7 +149,7 @@ class ExpressionCheckMethodCall {
 			}
 			if fieldMethodHandler[0] != null {
 				if call.locateDefinition {
-					block.inheritedAttribute.p.locateDefinition = fieldMethodHandler[0].pos
+					block.inheritedAttribute.p.setLocationDefinition(fieldMethodHandler[0])
 					//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = fieldMethodHandler[0]
 					return 
 				}
@@ -164,8 +163,7 @@ class ExpressionCheckMethodCall {
 			if matched {
 				m := ms[0]
 				if call.locateDefinition {
-					block.inheritedAttribute.p.locateDefinition = ms[0].Function.pos 
-					//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = ms[0]
+					block.inheritedAttribute.p.setLocationDefinition(m)
 					return 
 					//TODO if java 
 				}
@@ -236,7 +234,6 @@ class ExpressionCheckMethodCall {
 			if call.locateDefinition {
 				if object.Class.loadFromOutSide == false {
 					block.inheritedAttribute.p.setLocationDefinition(m)
-					//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = m 
 					return 
 				}else {
 					//TODO :: 
@@ -291,7 +288,6 @@ class ExpressionCheckMethodCall {
 				if call.locateDefinition {
 					if object.Class.loadFromOutSide == false {
 						block.inheritedAttribute.p.setLocationDefinition(method)
-						//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = method
 						return 
 					}else {
 						//TODO :: 
@@ -337,7 +333,7 @@ class ExpressionCheckMethodCall {
 			return null
 		}
 		if call.locateDefinition {
-			block.inheritedAttribute.p.locateDefinition = getPos(d)
+			block.inheritedAttribute.p.setLocationDefinition(d)
 			return 
 		}
 		if f ,ok := d.(Function) ; ok {
@@ -352,7 +348,7 @@ class ExpressionCheckMethodCall {
 			}
 			if call.locateDefinition {
 				if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
-					block.inheritedAttribute.p.locateDefinition = f.pos
+					block.inheritedAttribute.p.setLocationDefinition(f)
 					//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = f 
 					return 
 				}else {
@@ -389,7 +385,7 @@ class ExpressionCheckMethodCall {
 		if v , ok:= d.(Variable) ; ok {
 			if call.locateDefinition {
 				if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
-					block.inheritedAttribute.p.locateDefinition = v.pos 
+					block.inheritedAttribute.p.setLocationDefinition(v)
 					//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = v 
 					return 
 				}else {
@@ -427,7 +423,7 @@ class ExpressionCheckMethodCall {
 		if c,ok := d.(Class) ; ok {
 			if call.locateDefinition {
 				if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
-					block.inheritedAttribute.p.locateDefinition = c.pos 
+					block.inheritedAttribute.p.setLocationDefinition(c)
 					//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = c 
 				}else {
 					//TODO :: 
@@ -456,7 +452,7 @@ class ExpressionCheckMethodCall {
 		if t ,ok:= d.(Type) ; ok {
 			if call.locateDefinition {
 				if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
-					block.inheritedAttribute.p.locateDefinition = t.pos
+					block.inheritedAttribute.p.setLocationDefinition(t)
 					//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = t 
 				}else {
 					//TODO :: 
@@ -540,6 +536,25 @@ class ExpressionCheckMethodCall {
 					call.args[0].pos.errMsgPrefix(), call.name)))
 			}
 			return []Type{result}
+		case common.ArrayMethodSetReadOnly:
+			if len(call.args) == 0 {
+				errs.append(new error(sprintf("%s too few arguments to call %s,expect one argument",
+					e.pos.errMsgPrefix(), call.name)))
+			}else {
+				checkExpressions(block , call.args , errs , true)
+				if call.args[0].value != null && call.args[0].value.Type != VariableTypeBool {
+					errs.append(new error(sprintf("%s expect bool argument",
+						e.pos.errMsgPrefix())))
+				}
+				if len(call.args) > 1 {
+					errs.append(new error(sprintf("%s too few arguments to call %s,expect one argument",
+						e.pos.errMsgPrefix(), call.name)))
+				}
+			}
+			result := new Type()
+			result.Type = VariableTypeVoid
+			result.pos = e.pos
+			return [result]
 		default:
 			errs.append(new error(sprintf("%s unkown call '%s' on array", e.pos.errMsgPrefix(), call.name)))
 		}
@@ -614,6 +629,8 @@ class ExpressionCheckMethodCall {
 					call.args[0].pos.errMsgPrefix(), call.name)))
 			}
 			return []Type{ret}
+		
+
 		default:
 			errs.append(new error(sprintf("%s unkown call '%s' on map",
 				e.pos.errMsgPrefix(), call.name)))

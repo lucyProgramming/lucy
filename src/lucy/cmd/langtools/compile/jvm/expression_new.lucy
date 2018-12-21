@@ -4,15 +4,13 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 class BuildExpressionNew {
 
-
     eb BuildExpression
     
     fn BuildExpressionNew(eb BuildExpression){
         this.super()
         this.eb = eb
     }
-
-
+    
     fn  buildNew(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
@@ -55,7 +53,7 @@ class BuildExpressionNew {
         code.codeLength += 3
         return
     }
-
+    
     fn  buildNewMap(
         c cg.ClassHighLevel,
         code cg.AttributeCode,

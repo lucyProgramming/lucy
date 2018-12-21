@@ -117,8 +117,8 @@ public class FileLoader implements ast.loadImport{
             return null, new error(sprintf(errMsg))
         }
         if realPaths[0].kind == resourceKindLucyClass {
-            if common.getBaseName(realPaths[0].realPath) == mainClassName {
-                return null, new error(sprintf("%s is special class for global variable and other things", mainClassName))
+            if common.getBaseName(realPaths[0].realPath) == MainClassName {
+                return null, new error(sprintf("%s is special class for global variable and other things", MainClassName))
             }
         }
         if realPaths[0].kind == resourceKindJavaClass {
@@ -400,8 +400,8 @@ public class FileLoader implements ast.loadImport{
     }
 
     fn  loadLucyMainClass(pack ast.Package, c cg.Class)  {
-        mainClassName := new cg.ClassHighLevel()
-        mainClassName.name = pack.name + "/main"
+        maincClass := new cg.ClassHighLevel()
+        maincClass.name = pack.name + "/main"
         pack.block.variables = new map{string->ast.Variable}()
         pack.block.constants = new map{string->ast.Constant}()
         pack.block.functions = new map{string->ast.Function}()
@@ -508,7 +508,7 @@ public class FileLoader implements ast.loadImport{
 
             function.entrance = new cg.MethodHighLevel()
             function.entrance.name = function.name
-            function.entrance.Class = mainClassName
+            function.entrance.Class = maincClass
             function.entrance.Descriptor = function.jvmDescriptor
             function.isGlobal = true
             pack.block.functions[name] = function
@@ -559,14 +559,14 @@ public class FileLoader implements ast.loadImport{
                 fisM[v] = true
             }
         }
-        if false == fisM.keyExist(mainClassName) {
+        if false == fisM.keyExist(MainClassName) {
             panic(sprintf("main class not found"))
         }
-        bs , _ := os.readFile(r.realPath + "/"  + mainClassName)
+        bs , _ := os.readFile(r.realPath + "/"  + MainClassName)
         c := (new cg.ClassDecoder(javaArray2Lucy(bs))).decode()
         p = new ast.Package(r.name , true , null)
         this.loadLucyMainClass(p, c)
-        fisM.remove(mainClassName)
+        fisM.remove(MainClassName)
          fn mkEnums(e ast.Enum) {
             if p.block.enums == null {
                 p.block.enums = new map { string -> ast.Enum } ()

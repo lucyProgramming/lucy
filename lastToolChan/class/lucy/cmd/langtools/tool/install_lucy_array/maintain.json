@@ -1,25 +1,26 @@
 {
-	"compileTime":1544836451,
+	"compileTime":1545354360,
 	"compiledFrom":[
 		{
-			"lastModify":1543632188,
+			"lastModify":1545352986,
 			"name":"install.lucy"
 		},
 		{
-			"lastModify":1543632137,
+			"lastModify":1543804887,
 			"name":"template.lucy"
 		},
 		{
-			"lastModify":1543632352,
+			"lastModify":1545286649,
 			"name":"var.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/os",
-			"linkTime":1544835381
+			"linkTime":1545354354
 		}
 	],
+	"hasMain":false,
 	"classes":[
 		"InstallLucyArray.class",
 		"InstallType.class",

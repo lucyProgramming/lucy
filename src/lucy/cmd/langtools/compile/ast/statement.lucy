@@ -25,6 +25,9 @@ public class Statement {
 	public comment 	                 string
 	public inlineComment   string 
 	
+	/* 
+		statement contructed from static field default value
+	*/
 	isStaticFieldDefaultValue bool
 	/*
 		this.super()
@@ -38,11 +41,8 @@ public class Statement {
 		}
 		return this.Expression.Type == ExpressionTypeVarAssign ||
 			this.Expression.Type == ExpressionTypeVar
-			
 	}
 	
-	
-
 
 	fn check(block Block) -> (errs []error) {
 		this.checked = true
@@ -53,7 +53,6 @@ public class Statement {
 			//nothing
 		case StatementTypeEmptyLine:
 			//noting
-			
 		case StatementTypeExpression:
 			return this.checkStatementExpression(block)
 		case StatementTypeIf:
@@ -109,8 +108,7 @@ public class Statement {
 				}
 			}
 			if this.StatementLabel.locateDefinition{
-				block.inheritedAttribute.p.locateDefinition = this.StatementLabel.pos 
-				//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = this.StatementLabel
+				block.inheritedAttribute.p.setLocationDefinition(this.StatementLabel)
 				return 
 			}
 		case StatementTypeClass:
@@ -124,8 +122,7 @@ public class Statement {
 				errs.append(err)
 			}
 			if this.Class.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = this.Class.pos 
-				//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = this.Class
+				block.inheritedAttribute.p.setLocationDefinition(this.Class)
 				return 
 			}
 			if this.Class.findUsage {
@@ -171,8 +168,7 @@ public class Statement {
 			}
 		case StatementTypeTypeAlias:
 			if this.TypeAlias.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = this.TypeAlias.pos 
-				//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = this.TypeAlias
+				block.inheritedAttribute.p.setLocationDefinition(this.TypeAlias)
 				return 
 			}
 			if this.TypeAlias.findUsage {
@@ -210,25 +206,25 @@ public class Statement {
 	}
 
 
-	/*
+	
 	fn simplifyIf() {
-		if len(this.StatementIf.elseIfList) > 0 {
+		if len(this.statementIf.elseIfList) > 0 {
 			return
 		}
-		if len(this.StatementIf.prefixExpressions) > 0 {
+		if len(this.statementIf.prefixExpressions) > 0 {
 			return
 		}
-		if this.StatementIf.condition.Type != ExpressionTypeBool {
+		if this.statementIf.condition.Type != ExpressionTypeBool {
 			return
 		}
-		c := this.StatementIf.condition.boolValue
+		c := this.statementIf.condition.boolValue
 		if c {
 			this.Type = StatementTypeBlock
-			this.block = this.StatementIf.block
+			this.block = this.statementIf.block
 		} else {
-			if this.StatementIf.Else != null {
+			if this.statementIf.Else != null {
 				this.Type = StatementTypeBlock
-				this.block = this.StatementIf.Else
+				this.block = this.statementIf.Else
 			} else {
 				this.Type = StatementTypeNop
 			}
@@ -245,5 +241,4 @@ public class Statement {
 			this.StatementFor = null
 		}
 	}
-	*/
 }

@@ -5,6 +5,7 @@ class InstallType {
 	className    string
 	typename     string
 	imports      string
+
 	public fn InstallType(className , typename string , imports string = "" ){
 		this.super()
 		this.className = className

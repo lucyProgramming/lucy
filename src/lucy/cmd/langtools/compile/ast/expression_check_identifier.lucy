@@ -21,7 +21,7 @@ class ExpressionCheckIdentifier {
 			e.Type = ExpressionTypeString
 			e.stringValue = e.pos.filename
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = e.pos
+				block.inheritedAttribute.p.setLocationDefinition(e)
 				return 
 			}
 			result, _ := e.checkSingleValueContextExpression(block)
@@ -31,7 +31,8 @@ class ExpressionCheckIdentifier {
 			e.data = Long.valueOf(long(0))
 			result, _ := e.checkSingleValueContextExpression(block)
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = e.pos 
+				block.inheritedAttribute.p.setLocationDefinition(e)
+				return 
 			}
 			return result, null
 		case MagicIdentifierTime:
@@ -39,13 +40,18 @@ class ExpressionCheckIdentifier {
 			e.data = Long.valueOf(new Date().getTime())
 			result, _ := e.checkSingleValueContextExpression(block)
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = e.pos 
+				block.inheritedAttribute.p.setLocationDefinition(e)
+				return 
 			}
 			return result, null
 		case MagicIdentifierClass:
 			if block.inheritedAttribute.Class == null {
 				return null,
 					new error(sprintf("%s '%s' must in class scope", e.pos.errMsgPrefix(), identifier.name))
+			}
+			if identifier.locateDefinition {
+				block.inheritedAttribute.p.setLocationDefinition(e)
+				return 
 			}
 			result := new Type()
 			result.Type = VariableTypeClass
@@ -90,7 +96,7 @@ class ExpressionCheckIdentifier {
 				}
 			}
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = f.pos 
+				block.inheritedAttribute.p.setLocationDefinition(f)
 				// f.pos.locateDefinitionIs = f 
 				return 
 			}
@@ -113,8 +119,7 @@ class ExpressionCheckIdentifier {
 				t.beenCapturedAsRightValue++
 			}
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = t.pos 
-				// t.pos.locateDefinitionIs = t 
+				block.inheritedAttribute.p.setLocationDefinition(t)
 				return 
 			}
 			if t.findUsageInstances != null {
@@ -135,8 +140,7 @@ class ExpressionCheckIdentifier {
 				}
 			}
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = t.pos
-				// t.pos.locateDefinitionIs = t 
+				block.inheritedAttribute.p.setLocationDefinition(t)
 				return 
 			}
 			t.used = true
@@ -154,8 +158,7 @@ class ExpressionCheckIdentifier {
 				}
 			}
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = c.pos
-				// c.pos.locateDefinitionIs = c  
+				block.inheritedAttribute.p.setLocationDefinition(c)
 				return 
 			}
 			if c.findUsageInstances != null {
@@ -176,8 +179,7 @@ class ExpressionCheckIdentifier {
 				}
 			}
 			if identifier.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = enumName.pos 
-				// enumName.pos.locateDefinitionIs = enumName 
+				block.inheritedAttribute.p.setLocationDefinition(enumName)
 				return 
 			}
 			result := new Type()
@@ -198,7 +200,7 @@ class ExpressionCheckIdentifier {
 			return null, new error(sprintf("%s %s", e.pos.errMsgPrefix(), err.getMessage()))
 		}
 		if identifier.locateDefinition {
-			block.inheritedAttribute.p.locateDefinition = it.pos 
+			block.inheritedAttribute.p.setLocationDefinition(it)
 			// it.pos.locateDefinitionIs = it 
 			return 
 		}

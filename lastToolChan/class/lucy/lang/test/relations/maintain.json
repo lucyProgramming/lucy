@@ -1,28 +1,29 @@
 {
-	"compileTime":1543728885,
+	"compileTime":1545354361,
 	"compiledFrom":[
 		{
-			"lastModify":1533303715,
+			"lastModify":1533515726,
 			"name":"float.lucy"
 		},
 		{
-			"lastModify":1533303700,
+			"lastModify":1533515726,
 			"name":"integer.lucy"
 		},
 		{
-			"lastModify":1533038021,
+			"lastModify":1533005161,
 			"name":"object.lucy"
 		},
 		{
-			"lastModify":1533038021,
+			"lastModify":1533003880,
 			"name":"string.lucy"
 		},
 		{
-			"lastModify":1532423472,
+			"lastModify":1532396050,
 			"name":"test.lucy"
 		}
 	],
 	"imports":[],
+	"hasMain":false,
 	"classes":[
 		"main.class",
 		"testObject$test.class"

@@ -28,7 +28,7 @@ class GotoDefinition implements HttpHandler {
         }
         line := Integer.parseInt(paramters["line"])
         column := Integer.parseInt(paramters["column"])
-        pos := gotodefinition.findDefinition(file , "" , (line << 16) | int(char(column)) , g.readBodyBytes(exchange.getRequestBody()))
+        pos := gotodefinition.findDefinition(file , (line << 16) | int(char(column)) , g.readBodyBytes(exchange.getRequestBody()) , null)
         bs,_ := json.encode(pos , "\t")
         exchange.sendResponseHeaders(200 , long(len(bs)))
         os.write(copy(new byte[](len(bs)) ,bs )) 

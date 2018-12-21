@@ -147,6 +147,7 @@ public class Class {
 		this.fieldRefConstants[f.toString()] = info
 		return info.selfIndex
 	}
+	
 	public fn insertUtf8Const(s string) -> (index char) {
 		if s == null {
 			s = ""

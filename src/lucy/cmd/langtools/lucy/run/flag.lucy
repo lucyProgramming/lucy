@@ -18,7 +18,7 @@ class Flags {
         this.verbose = this.parser.boolOption("-v", false, "verbose")
         this.h = this.parser.boolOption("-h", false, "print help message")
 	}
-
+	
 	
 	fn help()  {
 		usage := `run a lucy package

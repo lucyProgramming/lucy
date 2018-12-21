@@ -43,11 +43,13 @@ class FindUsage {
         }
         return p.findUsage 
     }
+    
     fn searchLucyPath() {
         for _,v := range this.lucyPath {
             this.searchDir("" , v + "/src/")
         }
     }
+
     fn searchDir(packageName string , dir string ) {
         list := (new io.File(dir)).list()
         containsLucyFile := false 

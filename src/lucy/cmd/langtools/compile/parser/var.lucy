@@ -10,7 +10,6 @@ const	lfNotToken = false
 	ast.parseFunctionHandler = ParseFunction
 }
 
-
 var	untilLp = {
 		lex.TokenLp-> true
 	}

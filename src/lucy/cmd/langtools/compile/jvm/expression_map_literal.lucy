@@ -12,7 +12,6 @@ class BuildExpressionMap{
         this.super()
         this.eb = eb
     }
-
     
     fn  buildMapLiteral(
         c cg.ClassHighLevel,

@@ -101,7 +101,8 @@ public class StatementSwitch  {
 							ExpressionTypeInt , 
 							ExpressionTypeLong:
 							longValue = e.longValue
-						case ExpressionTypeFloat , ExpressionTypeDouble:
+						case ExpressionTypeFloat,
+							ExpressionTypeDouble:
 							doubleValue = e.doubleValue
 						case ExpressionTypeString:
 							stringValue = e.stringValue

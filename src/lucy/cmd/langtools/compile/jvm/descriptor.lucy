@@ -56,9 +56,14 @@ public class Descriptor  {
 			return "L" + javaMethodHandleClass + ";"
 		case ast.VariableTypeJavaArray:
 			return "[" + .typeDescriptor(typ.array)
-		default:
+		case ast.VariableTypeName:
+		case ast.VariableTypeDynamicSelector:
+		case ast.VariableTypeGlobal:
+		case ast.VariableTypeClass:
+		case ast.VariableTypePackage:
+		case ast.VariableTypeNull:
+		case ast.VariableTypeTemplate:
 		}
-		panic("unHandle type signature")
 	}
 
 	public static fn ParseType(bs []byte) -> (bsSlieced []byte, t ast.Type,err error) {

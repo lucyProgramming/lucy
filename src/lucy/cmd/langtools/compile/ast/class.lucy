@@ -23,8 +23,8 @@ public class Class {
 	public isJava                            bool //class imported from CLASSPATH
 	public block                             Block = new Block()
 	public accessFlags                       char
-	public fields                            map { string -> ClassField }
-	public methods                           map { string -> []ClassMethod }
+	public fields                            map{string->ClassField}
+	public methods                           map{string->[]ClassMethod}
 	public superClassName                    NameWithPos
 	public superClass                        Class
 	public interfaceNames                    []NameWithPos
@@ -49,7 +49,12 @@ public class Class {
             this.fmts.append(f)
         }
     }
+
+    public fn mkDescription() ->(d string = "") {
+        
+    }
     
+
     fn haveStaticsCodes() -> (is bool)  {
         return len(this.staticBlocks) > 0
     }
@@ -84,15 +89,17 @@ public class Class {
         this.isJava = load.isJava 
         this.isGlobal = load.isGlobal
         this.isBuildIn = load.isBuildIn
+        this.loadFromOutSide = load.loadFromOutSide
         return null
     }
+
 
     fn mkDefaultConstruction() {
         if this.isInterface() {
             return
         }
         if this.methods == null {
-            this.methods = new map { string -> []ClassMethod } ( )
+            this.methods = new map{string->[]ClassMethod}()
         }
         if len(this.methods[SpecialMethodInit]) > 0 {
             return
@@ -141,11 +148,11 @@ public class Class {
         }
         method := new ClassMethod()
         method.Function = new Function()
-        method.Function.Type.parameterList = new []Variable( 0)
-        method.Function.Type.returnList =  new []Variable( 0)
+        method.Function.Type.parameterList = new []Variable(0)
+        method.Function.Type.returnList =  new []Variable(0)
         f := method.Function
         f.pos = this.pos
-        f.block.statements =new []Statement ( len(this.staticBlocks))
+        f.block.statements =new []Statement (len(this.staticBlocks))
         for k, _ := range f.block.statements {
             s := new Statement()
             s.Type = StatementTypeBlock
@@ -179,15 +186,15 @@ public class Class {
             if v.name == Super {
                 errs.append(new error(sprintf("%s 'super' not allow for field name",
                     errMsgPrefix(v.pos))))
-                continue
             }
             if v.locateDefinition {
                 this.block.inheritedAttribute.p.setLocationDefinition(v)
                 return 
             }
             if v.autoCompletion {
-                this.block.inheritedAttribute.p.autoCompletionItems = AutoCompletionItem.getFieldDefaultAutoCompletionItem()
-                return 
+                this.block.inheritedAttribute.p.autoCompletionItems = 
+                    AutoCompletionItem.getFieldDefaultAutoCompletionItem()
+                return
             }
             if v.findUsage {
                 u := new Usage()
@@ -307,7 +314,6 @@ public class Class {
                 if this.superClass.name != JavaRootClass {
                     err = new error(sprintf("%s interface`s super-class must be '%s'",
                         errMsgPrefix(this.superClassName.pos), JavaRootClass))
-
                     return err
                 }
             }
@@ -351,7 +357,7 @@ public class Class {
         return errs
     }
 
-    fn implementMethod(
+    fn implementMethod (
         block Block,
         pos Pos,
         m ClassMethod,
@@ -366,7 +372,7 @@ public class Class {
                 if fromSub && v.ableAccessFromSubClass() == false {
                     return null
                 }
-                if nameMatched == null {
+                if nameMatched[0] == null {
                     nameMatched[0] = v
                 }
                 if v.Function.Type.equal(m.Function.Type) {
@@ -376,6 +382,7 @@ public class Class {
         }
         //no same name method at current class
         if this.name == JavaRootClass {
+            // root class already 
             return null
         }
         err := this.loadSuperClass(block , pos)
@@ -383,11 +390,9 @@ public class Class {
             errs.append(err)
             return null
         }
-
         if this.superClass == null {
             return null
         }
-
         return this.superClass.implementMethod(block , pos, m, nameMatched, true, errs)
     }
 
@@ -409,12 +414,10 @@ public class Class {
         if this.superClass == null {
             return false, null
         }
-
         return this.superClass.haveSuperClass(block , pos, superclassName) // check father is implements
     }
 
     fn implementedInterface(block Block , pos Pos, inter string) -> (implemented bool,err  error) {
-        assert(inter != null )
         err = this.loadSelf(block , pos)
         if err != null {
             return false, err
@@ -443,7 +446,7 @@ public class Class {
 
     fn loadSuperClass(block Block, pos Pos) -> (err error) {
         if this.superClass != null {
-            return this.superClass.loadSelf(block , pos)
+            return this.superClass.loadSelf(block , pos) // load self
         }
         if this.resolveFatherCalled ||
             this.loadSuperClassCalled {
@@ -505,13 +508,13 @@ public class Class {
     }
 
     /*
-        ret is *ClassField or *ClassMethod
+        ret is ClassField or ClassMethod
     */
     fn getFieldOrMethod(
         block Block ,
         pos Pos,
         name string,
-        fromSub bool ,fromClassName string) -> (f Object,err error) {
+        fromSub bool , fromClassName string) -> (f Object,err error) {
         err = this.loadSelf(block , pos)
         if err != null {
             return null, err
@@ -623,7 +626,11 @@ public class Class {
         name string,
         call ExpressionMethodCall,
         callArgTypes []Type,
-        fromSub bool , fromClassName string) -> (ms []ClassMethod = []ClassMethod{} , matched bool, err error) {
+        fromSub bool , fromClassName string) -> 
+        (
+            ms []ClassMethod = []ClassMethod{} , matched bool, err error
+        ) {
+        
         ms, matched, err = this.accessInterfaceMethod(block , pos, errs, name, call, callArgTypes, fromSub)
         if err != null {
             return null, false, err
@@ -917,7 +924,7 @@ public class Class {
         return errs
     }
 
-    fn suitableSubClassForAbstract( super Class)-> (errs []error = []error{}){
+    fn suitableSubClassForAbstract(super Class)-> (errs []error = []error{}){
         if super.name != JavaRootClass {
             err := super.loadSuperClass(this.block , this.pos)
             if err != null {
@@ -1059,7 +1066,6 @@ public class Class {
         if this.superClass == null {
             return null
         }
-
         if this.superClass.isFinal() {
             return new error(sprintf("%s class name '%s' have super class  named '%s' that is final",
                 this.pos.errMsgPrefix(), this.name, this.superClass.name))
@@ -1183,10 +1189,10 @@ public class Class {
         for _, v := range this.fields {
             if v.locateDefinition {
                 this.block.inheritedAttribute.p.setLocationDefinition(v)
+                return 
             }
             if v.defaultValueExpression != null {
-                assignment, es := v.defaultValueExpression.
-                    checkSingleValueContextExpression(this.methods[SpecialMethodInit][0].Function.block)
+                assignment, es := v.defaultValueExpression.checkSingleValueContextExpression(this.block)
                 errs.appendAll(es)
                 if assignment == null {
                     continue
@@ -1207,43 +1213,36 @@ public class Class {
                 }
                 if v.isStatic() == false {
                     // nothing to do
+                    // not a static field , field value will be evalute after call father constraction method 
                     continue
                 }
-                bin := new ExpressionBinary()
-                bin.right = new Expression()
-                bin.right.Type = ExpressionTypeList
-                bin.right.op =  "list"
-                bin.right.data =  []Expression{v.defaultValueExpression}
-                {
-                    selection := new ExpressionSelection()
-                    selection.Expression = new Expression()
-                    selection.Expression.op = "selection"
-                    selection.Expression.value = new Type()
-                    selection.Expression.value.Type = VariableTypeClass
-                    selection.Expression.value.Class = this
-                    selection.name = v.name
-                    selection.field = v
-                    left := new Expression()
-                    left.Type =  ExpressionTypeSelection
-                    left.data =  selection
-                    left.op =   "selection"
-                    left.value = v.Type
-                    bin.left = new Expression()
-                    bin.left.Type = ExpressionTypeList
-                    bin.left.data = []Expression{left}
-                }
+                bin := new ExpressionAssign()
+                bin.values = [v.defaultValueExpression]
+                selection := new ExpressionSelection()
+                selection.Expression = new Expression()
+                selection.Expression.op = "selection"
+                selection.Expression.value = new Type()
+                selection.Expression.value.Type = VariableTypeClass
+                selection.Expression.value.Class = this
+                selection.name = v.name
+                selection.field = v
+                left := new Expression()
+                left.Type =  ExpressionTypeSelection
+                left.data =  selection
+                left.op =   "selection"
+                left.value = v.Type
+                bin.lefts = [left]
                 e := new Expression()
                 e.Type =  ExpressionTypeAssign
                 e.data =  bin
                 e.isStatementExpression =  true
                 e.op =  "assign"
-                {
-                    t := new Statement()
-                    t.Type = StatementTypeExpression
-                    t.Expression = e
-                    t.isStaticFieldDefaultValue = true
-                    staticFieldAssignStatements.append(t)
-                }
+                statemment := new Statement()
+                statemment.Type = StatementTypeExpression
+                statemment.Expression = e
+                statemment.isStaticFieldDefaultValue = true
+                staticFieldAssignStatements.append(statemment)
+                 
             }
         }
         if len(staticFieldAssignStatements) > 0 {
@@ -1266,9 +1265,6 @@ public class Class {
     fn checkMethods()-> (errs []error = []error{}){
         if this.isInterface() {
             return errs
-        }
-        if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
-            return errs  
         }
         for name, methods := range this.methods {
             if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
@@ -1348,7 +1344,6 @@ public class Class {
         return this.superClass.getMethodOrFieldHandleByName(block , name , isStatic)
     }
 
-
     fn reduceFindUsageInstances(block Block) {
         if this.findUsage == false {
             return 
@@ -1356,8 +1351,4 @@ public class Class {
         this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
         block.inheritedAttribute.p.findUsage = this.findUsageInstances 
     }
-    
 }
-
-
-

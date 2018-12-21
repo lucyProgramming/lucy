@@ -76,7 +76,7 @@ public enum  ExpressionTypeKind {
 
 public class ExpressionTypeAssert extends ExpressionTypeConversion{
 	public multiValueContext bool
-	public isType bool  // a.(type)  type is a key word
+	public isType bool  // a.(type)  type is a key word , value is good enough 
 }
 
 

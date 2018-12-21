@@ -10,15 +10,22 @@ class FindDefinition {
     printErr bool 
     searchFile string 
     matchLine int 
+    storePackage []ast.Package
 
-    fn FindDefinition(lucyFiles []ide.LucyFile , 
-        packageName string , printErr bool ,searchFile string  , matchLine int ){
+    fn FindDefinition(
+        lucyFiles []ide.LucyFile , 
+        packageName string , 
+        printErr bool , 
+        searchFile string,
+        matchLine int,
+        storePackage []ast.Package){
         this.super()
         this.lucyFiles = lucyFiles
         this.packageName = packageName
         this.printErr = printErr 
         this.searchFile = searchFile
         this.matchLine = matchLine 
+        this.storePackage = this.storePackage
     }
     
     fn find() -> (result ast.Pos){
@@ -48,6 +55,9 @@ class FindDefinition {
                 os.stderr.println(v.getMessage())
             }
         }
+        if null != this.storePackage {
+            this.storePackage[0] = p 
+        }
         if p.locateDefinition != null {
             if p.locateDefinition.loadDefinitionFromOutside != null {
                 return this.loadDefinitionFromOutside(p.locateDefinition.loadDefinitionFromOutside)
@@ -59,12 +69,4 @@ class FindDefinition {
     fn loadDefinitionFromOutside(out ast.LoadDefinitionFromOutside) -> (result ast.Pos) {
         // primary load definition from class file
     }
-    
 }
-
-
-
-
-
-
-

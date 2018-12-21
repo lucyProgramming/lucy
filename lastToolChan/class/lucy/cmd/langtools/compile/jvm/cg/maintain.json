@@ -1,135 +1,139 @@
 {
-	"compileTime":1544835382,
+	"compileTime":1545354354,
 	"compiledFrom":[
 		{
-			"lastModify":1542192151,
+			"lastModify":1545118016,
 			"name":"attr.lucy"
 		},
 		{
-			"lastModify":1544607510,
+			"lastModify":1545267023,
 			"name":"attr_code.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1545286363,
 			"name":"attr_const_value.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1544493838,
 			"name":"attr_default_parameter.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1545108221,
 			"name":"attr_inner_class.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1544493216,
 			"name":"attr_line_number.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1545203000,
 			"name":"attr_lucy_class_const.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1545118009,
 			"name":"attr_lucy_const.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1544494079,
 			"name":"attr_lucy_enum.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1545108194,
 			"name":"attr_lucy_field_descriptor.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1544492407,
 			"name":"attr_lucy_method_descriptor.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1544492407,
 			"name":"attr_lucy_trigger_package_init_method.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1545108365,
 			"name":"attr_lucy_type_alias.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1545108197,
 			"name":"attr_method_parameters.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1544492407,
 			"name":"attr_runtime_visible_annotation.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1544492407,
 			"name":"attr_sginature.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1544492407,
 			"name":"attr_source_file.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1545274187,
 			"name":"attr_stack_map.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1545108359,
 			"name":"attr_template_function.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1545271360,
 			"name":"class.lucy"
 		},
 		{
-			"lastModify":1544089291,
+			"lastModify":1545118707,
+			"name":"class_decoder.lucy"
+		},
+		{
+			"lastModify":1545274068,
 			"name":"class_high_level.lucy"
 		},
 		{
-			"lastModify":1541761872,
+			"lastModify":1545110160,
 			"name":"const.lucy"
 		},
 		{
-			"lastModify":1544002867,
+			"lastModify":1545274298,
 			"name":"constPool.lucy"
 		},
 		{
-			"lastModify":1544435019,
+			"lastModify":1545185177,
 			"name":"exit.lucy"
 		},
 		{
-			"lastModify":1544523745,
+			"lastModify":1545109142,
 			"name":"field.lucy"
 		},
 		{
-			"lastModify":1544435019,
+			"lastModify":1544425405,
 			"name":"field_high_level.lucy"
 		},
 		{
-			"lastModify":1541496612,
+			"lastModify":1541472183,
 			"name":"helper_func.lucy"
 		},
 		{
-			"lastModify":1544520739,
+			"lastModify":1545110042,
 			"name":"high_level.lucy"
 		},
 		{
-			"lastModify":1544182205,
+			"lastModify":1545109154,
 			"name":"method.lucy"
 		},
 		{
-			"lastModify":1544182205,
+			"lastModify":1544157363,
 			"name":"method_high_level.lucy"
 		},
 		{
-			"lastModify":1541761872,
+			"lastModify":1544147337,
 			"name":"op.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/binary",
-			"linkTime":1544835381
+			"linkTime":1545354353
 		}
 	],
 	"hasMain":false,
@@ -152,6 +156,7 @@
 		"AttributeStackMap.class",
 		"AttributeTemplateFunction.class",
 		"Class.class",
+		"ClassDecoder.class",
 		"ClassHighLevel.class",
 		"ConstantInfoClass.class",
 		"ConstantInfoDouble.class",

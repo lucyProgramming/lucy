@@ -1,21 +1,22 @@
 {
-	"compileTime":1544836451,
+	"compileTime":1545354361,
 	"compiledFrom":[
 		{
-			"lastModify":1540300109,
+			"lastModify":1540256799,
 			"name":"test.lucy"
 		},
 		{
-			"lastModify":1539947102,
+			"lastModify":1540259014,
 			"name":"testArray.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/os",
-			"linkTime":1544835381
+			"linkTime":1545354354
 		}
 	],
+	"hasMain":false,
 	"classes":[
 		"main.class"
 	]

@@ -60,11 +60,9 @@ public class Compiler {
 		}
 		if this.printError {
 			for _, v := range this.Errs {
-		    //v.printStackTrace()
 				os.stderr.println(v.getMessage())
 			}
 		}
-		
 		if this.ifErrExit {
 			os.exit(code)
 		}
@@ -147,9 +145,9 @@ public class Compiler {
 			print("package name not specfied")
 			os.exit(1)
 		}
-		var	loader  = new FileLoader(lucyPath , classPaths)
+		var	loader = new FileLoader(lucyPath , classPaths)
 		p := new ast.Package(this.flags.packageName.getValue() , this.flags.disableCheckUnUse.getValue() , loader)
-		this.Errs.appendAll(this.Errs, p.typeCheck(this.Tops))
+		this.Errs.appendAll(p.typeCheck(this.Tops))
 		if len(this.Errs) > 0 {
 			this.exit()
 		}

@@ -45,8 +45,5 @@ class BuildExpressionStrcat {
         ), code.codes[code.codeLength+1:code.codeLength+3])
         code.codeLength += 3
         return
-
     }
-
-
 }

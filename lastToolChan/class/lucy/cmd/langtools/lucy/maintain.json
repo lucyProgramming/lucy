@@ -1,19 +1,39 @@
 {
-	"compileTime":1544837760,
+	"compileTime":1545354361,
 	"compiledFrom":[
 		{
-			"lastModify":1543632512,
+			"lastModify":1545199335,
 			"name":"main.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/os",
-			"linkTime":1544835381
+			"linkTime":1545354354
 		},
 		{
 			"name":"lucy/cmd/langtools/lucy/run",
-			"linkTime":1544837759
+			"linkTime":1545354360
+		},
+		{
+			"name":"lucy/cmd/langtools/install",
+			"linkTime":1545354360
+		},
+		{
+			"name":"lucy/cmd/langtools/test",
+			"linkTime":1545354360
+		},
+		{
+			"name":"lucy/cmd/langtools/clean",
+			"linkTime":1545354354
+		},
+		{
+			"name":"lucy/cmd/langtools/tool",
+			"linkTime":1545354360
+		},
+		{
+			"name":"lucy/cmd/langtools/http",
+			"linkTime":1545354358
 		}
 	],
 	"hasMain":false,

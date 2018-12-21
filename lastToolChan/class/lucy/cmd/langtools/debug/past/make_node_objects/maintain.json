@@ -1,15 +1,15 @@
 {
-	"compileTime":1544837737,
+	"compileTime":1545354357,
 	"compiledFrom":[
 		{
-			"lastModify":1544782953,
+			"lastModify":1545287246,
 			"name":"make.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/cmd/langtools/compile/ast",
-			"linkTime":1544837734
+			"linkTime":1545354355
 		}
 	],
 	"hasMain":false,

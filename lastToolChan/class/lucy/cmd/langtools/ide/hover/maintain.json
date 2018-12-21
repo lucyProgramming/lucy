@@ -1,37 +1,45 @@
 {
-	"compileTime":1544837756,
+	"compileTime":1545354357,
 	"compiledFrom":[
 		{
-			"lastModify":1543312303,
+			"lastModify":1545288401,
 			"name":"find_hover.lucy"
 		},
 		{
-			"lastModify":1544230163,
+			"lastModify":1543305418,
 			"name":"flag.lucy"
 		},
 		{
-			"lastModify":1543312303,
+			"lastModify":1545352986,
 			"name":"main.lucy"
 		},
 		{
-			"lastModify":1543312303,
+			"lastModify":1545288215,
 			"name":"usage.lucy"
 		}
 	],
 	"imports":[
 		{
+			"name":"lucy/cmd/langtools/compile/ast",
+			"linkTime":1545354355
+		},
+		{
 			"name":"lucy/os/flag",
-			"linkTime":1544837732
+			"linkTime":1545354354
+		},
+		{
+			"name":"lucy/cmd/langtools/ide/gotodefinition",
+			"linkTime":1545354357
 		},
 		{
 			"name":"lucy/os",
-			"linkTime":1544835381
+			"linkTime":1545354354
 		}
 	],
 	"hasMain":false,
 	"classes":[
-		"FindHover.class",
 		"Flags.class",
-		"main.class"
+		"main.class",
+		"MakeHover.class"
 	]
 }

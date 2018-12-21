@@ -1,5 +1,5 @@
 import "lucy/binary"
- 
+
 
 public class AttributeCode  {
 	public	maxStack          char
@@ -18,11 +18,11 @@ public class AttributeCode  {
 			this.exceptions.append(e)
 		}
 	}
-
+	
 	fn toAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const("Code")
-		ret.info = new []byte( 8)
+		ret.info = new []byte(8)
 		binary.BigEndian.putChar(ret.info[0:2], this.maxStack)
 		binary.BigEndian.putChar(ret.info[2:4], this.maxLocals)
 		binary.BigEndian.putInt(ret.info[4:8], (this.codeLength))
@@ -95,7 +95,6 @@ public class AttributeCode  {
 		return bs
 	}
 }
-
 
 public class ExceptionTable  {
 	public startPc   char

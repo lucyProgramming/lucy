@@ -16,7 +16,7 @@ public class AttributeStackMap {
 			this.StackMaps.append(s)
 		}
 	}
-
+	
 	fn toAttributeInfo(c Class) -> (ret AttributeInfo) {
 		if this == null || len(this.StackMaps) == 0 {
 			return null

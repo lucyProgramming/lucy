@@ -7,7 +7,8 @@ class Install {
 	verbose bool 
 	packageName string 
 	lucyRoot string 
-	fn Install(lucyRoot string , dir string   ,  packageName string , verbose bool) {
+	
+	fn Install(lucyRoot string , dir string , packageName string , verbose bool) {
 	    this.super()
 		this.dir = dir
 		this.packageName = packageName 
@@ -25,7 +26,7 @@ class Install {
 	}
 	
 	fn installDir(dir string , packageName string ) {
-		f := new io.File(dir) 
+		f := new io.File(dir)
 		fs := f.listFiles()
 		hasLucyFile := false
 		for f := range fs {
@@ -49,34 +50,3 @@ class Install {
         }
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

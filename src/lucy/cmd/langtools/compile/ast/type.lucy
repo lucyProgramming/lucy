@@ -206,8 +206,7 @@ public class Type {
 			}
 			pos := this.pos // keep pos
 			if this.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = 
-					block.inheritedAttribute.Function.parameterTypes[this.name].pos 
+				block.inheritedAttribute.p.setLocationDefinition(block.inheritedAttribute.Function.parameterTypes[this.name])
 
 			}
 			block.inheritedAttribute.Function.parameterTypes[this.name].cp(this)
@@ -383,8 +382,7 @@ public class Type {
                            errMsgPrefix(this.pos), c.name))
 			}
 			if this.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = c.pos
-				//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = c 
+				block.inheritedAttribute.p.setLocationDefinition(c)
 			}
 			this.Type = VariableTypeObject
 			this.Class = c 
@@ -397,11 +395,9 @@ public class Type {
 			t.cp(this)
 			if this.locateDefinition {
 				if t.alias == null {
-					block.inheritedAttribute.p.locateDefinition = t.pos
-					//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = t 
+					block.inheritedAttribute.p.setLocationDefinition(t)
 				}else {
-					block.inheritedAttribute.p.locateDefinition = t.alias.pos
-					//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = t.alias 
+					block.inheritedAttribute.p.setLocationDefinition(t.alias)
 				}
 			}
 			this.pos = pos
@@ -416,8 +412,7 @@ public class Type {
 						errMsgPrefix(this.pos), dd.name)))
 			}
 			if this.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = dd.pos 
-				//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = dd 
+				block.inheritedAttribute.p.setLocationDefinition(dd)
 				return 
 			}
 			this.Type = VariableTypeEnum

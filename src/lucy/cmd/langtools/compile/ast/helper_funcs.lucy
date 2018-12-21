@@ -134,8 +134,7 @@ fn searchBuildIns(name string , lucyBuildInPackage Package ) -> (t Object)  {
 
 fn checkConst(block Block, c Constant) -> (err error)  {
 	if c.locateDefinition {
-		block.inheritedAttribute.p.locateDefinition = c.pos
-		//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = c 
+		block.inheritedAttribute.p.setLocationDefinition(c)
 		return 
 	}
 	if c.findUsage {
@@ -146,7 +145,6 @@ fn checkConst(block Block, c Constant) -> (err error)  {
 		block.inheritedAttribute.p.findUsageIsGlobal = c.isGlobal 
 		block.inheritedAttribute.p.findUsage = c.findUsageInstances
 	}
-	
 	if c.Type != null {
 		c.mkDefaultValue()
 	}
@@ -180,16 +178,36 @@ fn checkConst(block Block, c Constant) -> (err error)  {
 		c.Type = t
 	}
 	switch c.Type.Type {
-		case VariableTypeBool:
-			c.boolValue = c.defaultValueExpression.boolValue
-		case c.Type.isInteger():
-			c.longValue = c.defaultValueExpression.longValue
-		case c.Type.isFloat():
-			c.doubleValue = c.defaultValueExpression.doubleValue
-		case VariableTypeString:
-			c.stringValue = c.defaultValueExpression.stringValue
+	case VariableTypeBool:
+		c.boolValue = c.defaultValueExpression.boolValue
+	case VariableTypeByte:
+		c.longValue = c.defaultValueExpression.longValue
+		if (c.longValue >> 8) != 0 {
+			err = new error(sprintf("%s exceeds max byte" , c.defaultValueExpression.pos.errMsgPrefix()))
+		}
+	case VariableTypeShort:
+		c.longValue = c.defaultValueExpression.longValue
+		if (c.longValue >> 16) != 0 {
+			err = new error(sprintf("%s exceeds max byte" , c.defaultValueExpression.pos.errMsgPrefix()))
+		}
+	case VariableTypeChar:
+		c.longValue = c.defaultValueExpression.longValue
+		if (c.longValue >> 16) != 0 {
+			err = new error(sprintf("%s exceeds max byte" , c.defaultValueExpression.pos.errMsgPrefix()))
+		}
+	case VariableTypeInt:
+		c.longValue = c.defaultValueExpression.longValue
+		if (c.longValue >> 32) != 0 {
+			err = new error(sprintf("%s exceeds max byte" , c.defaultValueExpression.pos.errMsgPrefix()))
+		}
+	case VariableTypeLong:
+		c.longValue = c.defaultValueExpression.longValue
+	case c.Type.isFloat():
+		c.doubleValue = c.defaultValueExpression.doubleValue
+	case VariableTypeString:
+		c.stringValue = c.defaultValueExpression.stringValue
 	}
-	return null
+	return 
 }
 
 fn convertExpressionToNeed(block Block , e Expression, need Type, eval Type) {
@@ -436,5 +454,16 @@ fn getPos(x Object)  -> (pos Pos){
 	if t, ok := x.(EnumName) ; ok {
 		return t.pos
 	}
-	return new Pos() // avoid null pointer 
+	if t, ok := x.(TypeAlias) ; ok {
+		return t.pos
+	}
+	if t, ok := x.(Import) ; ok {
+		return t.pos
+	}
+	if t, ok := x.(Type) ; ok {
+		return t.pos
+	}
+	// return new Pos() // avoid null pointer 
+	// panic("test")
+	
 }

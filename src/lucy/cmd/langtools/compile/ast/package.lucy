@@ -30,10 +30,6 @@ public class Package {
 	public loadLucyPackageName []string 
 
 	/*
-		for lucy tool hover
-	*/
-	getHover Hover
-	/*
 		for usage 
 	*/
 	public findUsage []Usage 
@@ -49,12 +45,9 @@ public class Package {
 	
 	public fn setLocationDefinition(x Object) {
 		this.locateDefinition = getPos(x)
-		//TODO:: avoid recursive pointer
-		// if this.locateDefinition != null {
-		// 	this.locateDefinition.locateDefinitionIs = x 
-		// }
+		this.locateDefinitionBaseOn = x
 	}
-	
+		
 	public fn getLocationDefinition() -> (ret Pos = this.locateDefinition){}
 	
 
@@ -97,6 +90,7 @@ public class Package {
 		this.matchLine =  -1
 		this.loader = loader
 	}
+	
 	public fn locateDefinitionOrAutoCompletionFetched() ->(fetched bool) {
 		fetched = this.locateDefinition != null || 
 			len(this.autoCompletionItems) > 0 
@@ -156,9 +150,8 @@ public class Package {
 		}
 		if t := this.files[file]; t != null && t.imports != null {
 			return t.imports[accessName]
-		} else {
-			return null
-		}
+		} 
+		return null
 	}
 
 	fn getSourceFile(fileName string) -> (file SourceFile) {
@@ -168,7 +161,6 @@ public class Package {
 		return this.files[fileName]
 	}
 	
-
 	fn mkInitFunctions(bs []Block) {
 		this.initFunctions = new []Function(len(bs))
 		for k, b := range bs {
@@ -178,15 +170,16 @@ public class Package {
 			f.pos = b.pos
 			f.block = b
 			this.initFunctions[k] = f
-			f.isPackageInitBlockFunction = true
 			f.used = true
 		}
 	}
+
 	fn shouldStop(errs []error) -> (should bool) {
-		return len(this.errors)+len(errs) >= this.nErrors2Stop
+		return len(this.errors)+len(errs) >= 
+			this.nErrors2Stop
 	}
 
-	fn insert(nodes []TopNode) -> ( errs []error = []error{}){
+	fn insert(nodes []TopNode) -> (errs []error = []error{}){
 		if len(nodes) == 0 {
 			errs = []error{new error("nothing to compile")}
 			return
@@ -198,6 +191,7 @@ public class Package {
 			this.block.inheritedAttribute = new InheritedAttribute()
 		}
 		if err := this.loadCorePackage(); err != null {
+			// fetal error 
 			printf("load lucy buildin package failed,err:%s\n", err.getMessage())
 			os.exit(1)
 		}
@@ -205,9 +199,11 @@ public class Package {
 		expressions := []Expression{}
 		for _, v := range nodes {
 			if _,ok := v.node.(Comment) ; ok {
+				// no handle
 				continue
 			}
 			if _,ok := v.node.(Line) ; ok {
+				// no handle
 				continue
 			}
 			if t,ok := v.node.(Block) ; ok {
@@ -238,7 +234,6 @@ public class Package {
 				}
 				continue
 			}
-			
 			if t,ok := v.node.(TypeAlias) ; ok {
 				err := this.block.insert(t.name, t.pos, t.Type)
 				t.Type.alias = t
@@ -282,7 +277,7 @@ public class Package {
 		if len(expressions) > 0 {
 			s := new []Statement(len(expressions))
 			for k, v := range expressions {
-			    s[k] = new  Statement()
+			    s[k] = new Statement()
 				s[k].Type = StatementTypeExpression
 				s[k].Expression = v
 				s[k].pos = v.pos
@@ -303,16 +298,14 @@ public class Package {
 		this.block.isPackageBlock = true 
 		this.block.Package = this 
 		this.errors = []error{}
-		if this.nErrors2Stop <= 2 {
+		if this.nErrors2Stop <= 5 {
 			this.nErrors2Stop = 10
 		}
 		es = this.errors
 		if t := this.insert(nodes) ; len(t) > 0 {
 			this.errors.appendAll(t)
 		}
-		
 		this.errors.appendAll(this.block.checkConstants())
-	
 		if this.locateDefinitionOrAutoCompletionFetched() {
 			return this.errors 
 		}
@@ -326,7 +319,7 @@ public class Package {
 		if this.locateDefinitionOrAutoCompletionFetched() {
 			return this.errors 
 		}
-
+		
 		for _, v := range this.block.typeAliases {
 			if v.alias.locateDefinition {
 				this.locateDefinition = v.alias.pos
@@ -344,7 +337,7 @@ public class Package {
 
 		for _, v := range this.block.functions {
 			if v.locateDefinition {
-				this.locateDefinition = v.pos 
+				this.setLocationDefinition(v)
 				return this.errors 
 			}
 			if v.findUsage {
@@ -359,7 +352,7 @@ public class Package {
 
 		for _, v := range this.block.classes {
 			if v.locateDefinition {
-				this.locateDefinition = v.pos 
+				this.setLocationDefinition(v)
 				return this.errors
 			}
 			v.name = this.name + "/" + v.name
@@ -387,9 +380,6 @@ public class Package {
 			if v.isBuildIn {
 				continue
 			}
-			if this.locateDefinitionOrAutoCompletionFetched() {
-				return this.errors 
-			}
 			v.block.inherit(this.block)
 			v.block.inheritedAttribute.Function = v
 			v.checkParametersAndReturns(this.errors, false, false)
@@ -407,6 +397,9 @@ public class Package {
 			if this.shouldStop(null) {
 				return this.errors
 			}
+			if this.locateDefinitionOrAutoCompletionFetched() {
+				return this.errors 
+			}
 		}
 
 		for _, v := range this.block.classes { 
@@ -421,9 +414,6 @@ public class Package {
 			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors 
 			}
-		}
-		if this.locateDefinitionOrAutoCompletionFetched() {
-			return this.errors 
 		}
 		
 		for _, v := range this.block.classes {
@@ -452,7 +442,7 @@ public class Package {
 			}
 		}
 		for _, v := range this.initFunctions {
-			this.errors.appendAll( v.check(this.block))
+			this.errors.appendAll(v.check(this.block))
 			if this.shouldStop(null) {
 				return this.errors
 			}
@@ -465,6 +455,7 @@ public class Package {
 		}
 		for _, v := range this.block.functions {
 			if v.templateFunction != null {
+				// analyze at call 
 				continue
 			}
 			if this.matchFileAndLine(v.pos.filename , v.name,   v.startLine , v.endLine ) == false {
@@ -517,9 +508,6 @@ public class Package {
 					meta.pos.errMsgPrefix(), f.name)))
 			}
 		}
-		if this.shouldStop(null) {
-			return this.errors
-		}
 		this.errors.appendAll(this.checkUnUsedPackage())
 		return this.errors
 	}
@@ -565,10 +553,11 @@ public class Package {
 	}
 
 	public fn setFileDirty(filename string ) {
-		//set right file is "isDirty"
+		//set modified file is "isDirty"
+		//rename will use this
 		this.files[filename].isDirty = true
 	}
-
+	
 	public fn getDirtyFiles() ->(files map{string->bool}) {
 		files = new map{string->bool}()
 		for f := range this.files {
@@ -584,9 +573,6 @@ public class Package {
 		}
 		t, err := this.loader.loadImport(resource)
 		if pp, ok := t.(Package); ok {
-			if pp.name == common.CorePackage {
-				pp.markBuildIn()
-			}
 			if pp.javaPackage == null {
 				if this.loadLucyPackageName == null {
 					this.loadLucyPackageName = [resource]

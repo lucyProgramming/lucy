@@ -32,7 +32,6 @@ public class TemplateFunction  {
 		}
 		return null
 	}
-	
 	fn insert(parameterTypes []Type) -> (template TemplateFunctionInstance) {
 		if t := this.instanceExists(parameterTypes); t != null {
 			return t

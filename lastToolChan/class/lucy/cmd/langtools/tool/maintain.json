@@ -1,25 +1,26 @@
 {
-	"compileTime":1544836451,
+	"compileTime":1545354360,
 	"compiledFrom":[
 		{
-			"lastModify":1543632458,
+			"lastModify":1545102113,
 			"name":"main.lucy"
 		},
 		{
-			"lastModify":1543632331,
+			"lastModify":1543798612,
 			"name":"usage.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/os",
-			"linkTime":1544835381
+			"linkTime":1545354354
 		},
 		{
 			"name":"lucy/cmd/langtools/tool/install_lucy_array",
-			"linkTime":1544836451
+			"linkTime":1545354360
 		}
 	],
+	"hasMain":false,
 	"classes":[
 		"main.class"
 	]

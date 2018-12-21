@@ -9,7 +9,6 @@ class ExpressionBinaryParser extends ParserExtends{
 		this.ep = ep 
 	}
 	
-
 	// ||
 	fn parseLogicalOrExpression() -> (e ast.Expression,err error) {
 		left, err := this.parseLogicalAndExpression()

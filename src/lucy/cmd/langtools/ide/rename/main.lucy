@@ -5,7 +5,7 @@ import "java/nio/file/FileSystems"
 import "lucy/cmd/langtools/common"
 
 public fn rename( file string, to string, pos int) {
-    definition := gotodefinition.findDefinition(file , "", pos , null )
+    definition := gotodefinition.findDefinition(file ,pos , null,null)
     if definition == null {
         return 
     }

@@ -1,12 +1,13 @@
 {
-	"compileTime":1543728885,
+	"compileTime":1545354361,
 	"compiledFrom":[
 		{
-			"lastModify":1533119432,
+			"lastModify":1527469119,
 			"name":"test.lucy"
 		}
 	],
 	"imports":[],
+	"hasMain":false,
 	"classes":[
 		"main.class"
 	]

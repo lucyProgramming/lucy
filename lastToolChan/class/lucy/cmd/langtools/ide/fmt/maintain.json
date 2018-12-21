@@ -1,31 +1,31 @@
 {
-	"compileTime":1544855204,
+	"compileTime":1545354359,
 	"compiledFrom":[
 		{
-			"lastModify":1544836996,
+			"lastModify":1545201246,
 			"name":"flag.lucy"
 		},
 		{
-			"lastModify":1544435019,
+			"lastModify":1545201203,
 			"name":"main.lucy"
 		},
 		{
-			"lastModify":1543828816,
+			"lastModify":1544421811,
 			"name":"usage.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/os/flag",
-			"linkTime":1544837732
+			"linkTime":1545354354
 		},
 		{
 			"name":"lucy/cmd/langtools/ide",
-			"linkTime":1544855197
+			"linkTime":1545354357
 		},
 		{
 			"name":"lucy/os",
-			"linkTime":1544835381
+			"linkTime":1545354354
 		}
 	],
 	"hasMain":false,

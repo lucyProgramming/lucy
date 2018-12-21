@@ -17,8 +17,7 @@ class StackMapState {
         copy(this.locals, last.locals)
         this.stacks = new []cg.StackMapVerificationTypeInfo(0)
     }
-
-
+	
 	fn appendLocals(c cg.ClassHighLevel, v ast.Type) { 
 		this.locals.append(this.newStackMapVerificationTypeInfo(c, v))
 	}
@@ -107,8 +106,20 @@ class StackMapState {
 		case ast.VariableTypeJavaArray:
 			d := Descriptor.typeDescriptor(t)
 			ret.Verify = new cg.StackMapObjectVariableInfo(	c.Class.insertClassConst(d))
-		default:
-			panic(1)
+		case ast.VariableTypeVoid:
+			// handle at ast
+		case ast.VariableTypeName:
+			// handle at ast
+		case ast.VariableTypeDynamicSelector:
+			// handle at ast
+		case ast.VariableTypeGlobal:
+			// handle at ast
+		case ast.VariableTypeClass:
+			//
+		case ast.VariableTypePackage:
+			// handle at ast
+		case ast.VariableTypeTemplate:
+			// handle at ast
 		}
 		return ret
 	}

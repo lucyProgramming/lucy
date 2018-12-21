@@ -172,6 +172,13 @@ class BuildExpressionArray {
                     state.popStack(1)
                 }
             }
+        case common.ArrayMethodSetReadOnly:
+            meta := ArrayMetas[call.Expression.value.array.Type]
+            stack := this.eb.build(c , code , call.args[0] , context , state)
+            if t := char(1) + stack ; t > maxStack {
+                maxStack = t 
+            }
+            c.insertMethodCall(code , cg.OP_invokevirtual , meta.className , common.ArrayMethodSetReadOnly , "(Z)V")
         case common.ArrayMethodGetUnderlyingArray:
             meta := ArrayMetas[call.Expression.value.array.Type]
             code.codes[code.codeLength] = cg.OP_getfield
@@ -190,20 +197,7 @@ class BuildExpressionArray {
                 code.codeLength++
             }
         }
-
         return
     }
-
-
-
-
-
-
-
-
-
-
-
-
 }
 

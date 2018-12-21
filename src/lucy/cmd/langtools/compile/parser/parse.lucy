@@ -206,9 +206,8 @@ class Parser {
 				this.tops.append( new ast.TopNode(b))
 				this.ifTokenIsLfThenSkip(false)
 			case lex.TokenClass, lex.TokenInterface:
-				c, err := this.ClassParser.parse(isAbstract)
-				if err != null {
-					resetProperty()
+				c, _ := this.ClassParser.parse(isAbstract)
+				if c == null {
 					continue
 				}
 				c.comment = comment.comment
@@ -472,7 +471,6 @@ class Parser {
 			if tok == null {
 				continue
 			}
-			//print(tok.description)123
 			this.token = tok
 			if lfIsToken {
 				break

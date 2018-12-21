@@ -1,27 +1,27 @@
 {
-	"compileTime":1544837732,
+	"compileTime":1545354354,
 	"compiledFrom":[
 		{
-			"lastModify":1544354197,
+			"lastModify":1545274353,
 			"name":"clean.lucy"
 		},
 		{
-			"lastModify":1544089291,
+			"lastModify":1545103056,
 			"name":"main.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/cmd/langtools/common",
-			"linkTime":1544835382
+			"linkTime":1545354354
 		},
 		{
 			"name":"lucy/os",
-			"linkTime":1544835381
+			"linkTime":1545354354
 		},
 		{
 			"name":"lucy/os/flag",
-			"linkTime":1544837732
+			"linkTime":1545354354
 		}
 	],
 	"hasMain":false,

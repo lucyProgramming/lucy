@@ -404,11 +404,5 @@ class ExpressionConstFold {
 			return
 		}
 	}
-	
-
-
 }
-
-
-
 

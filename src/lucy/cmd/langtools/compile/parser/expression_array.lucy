@@ -76,10 +76,9 @@ class ExpressionArrayParser extends ParserExtends {
 			arr.Type.pos = array.pos
 		}
 		/*
-			[]int { 1, 2}
+			[]int {1, 2}
 		*/
-
-		arr.expressions, err = this.parseArrayValues()
+		arr.expressions, _ = this.parseArrayValues()
 		e = new ast.Expression()
 		e.Type = ast.ExpressionTypeArray
 		e.data = arr
@@ -93,7 +92,7 @@ class ExpressionArrayParser extends ParserExtends {
 		if this.parser.token.Type != lex.TokenLc {
 			err = new error(sprintf("%s expect '{',but '%s'",
 				this.parser.errMsgPrefix(), this.parser.token.description))
-			this.parser.errs.append( err)
+			this.parser.errs.append(err)
 			return null, err
 		}
 		this.next(lfNotToken) // skip {

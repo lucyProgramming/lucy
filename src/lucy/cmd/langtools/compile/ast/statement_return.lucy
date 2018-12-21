@@ -5,8 +5,10 @@ public class StatementReturn   {
 	public pos         Pos
 	public inlineComment string 
 	
-	
 	fn mkDefers(b Block) {
+		if b == null {
+			return 
+		}
 		if b.isFunctionBlock == false { // not top block
 			this.mkDefers(b.outer) // recursive
 		}

@@ -302,10 +302,9 @@ class ExpressionSuffix extends  ParserExtends {
 			}
 			n.args = es
 			this.next(lfIsToken)  // skip ) 
-			
 		case lex.TokenLb:
 			prefix, err = this.ep.ExpressionArrayParser.parseArrayExpression()
-			if err != null {
+			if prefix == null {
 				return prefix, err
 			}
 		// bool(xxx)

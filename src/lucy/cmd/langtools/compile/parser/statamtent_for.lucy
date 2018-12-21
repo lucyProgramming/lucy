@@ -2,9 +2,6 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
 
-
-
-
 class StatementForParser extends ParserExtends{
 	bp BlockParser
 
@@ -13,7 +10,6 @@ class StatementForParser extends ParserExtends{
 		this.bp = bp
 	}
 	
-
 	fn parseFor() -> (statementFor ast.StatementFor, err error) {
 		statementFor = new ast.StatementFor()
 		statementFor.pos = this.parser.mkPos()

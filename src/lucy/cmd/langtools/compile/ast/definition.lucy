@@ -1,15 +1,14 @@
 
 
 
-
-public class LoadDefinitionFromOutside {
-	/*
-		when javaPackage is not null 
-			packageName indicate "java package name" and name indicate "class name"
-		when javaClass is not null 	
-			packageName indicate "java class name" and name indicate "field name or method name" which is ambiguous 
-		this is used load definition from classpath ("java compiled classes") , may be contains decompile class file 
-	*/
+/*
+	when javaPackage is not null 
+		packageName indicate "java package name" and name indicate "class name"
+	when javaClass is not null 	
+		packageName indicate "java class name" and name indicate "field name or method name" which is ambiguous 
+	this is used load definition from classpath ("java compiled classes") , may be contains decompile class file 
+*/
+public class LoadDefinitionFromOutside {	
 	public packageName string 
 	public name string 
 	public javaPackage   JavaPackage

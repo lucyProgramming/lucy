@@ -1,19 +1,20 @@
 import "lucy/cmd/langtools/ide/gotodefinition"
+import "lucy/cmd/langtools/compile/ast"
 
 
 public fn getHover (file string , pos int , bs []byte) ->(s string = "") {
-    p := gotodefinition.findDefinition(file , "" , pos , bs)
+    storePackage := []ast.Package{null}
+    p := gotodefinition.findDefinition(file , pos , bs , storePackage)
     if p == null {
         return  
     }
-    // if p.locateDefinitionIs == null {
-    //     return 
-    // }
-    // s = new MakeHover(p.locateDefinitionIs).make() 
+    if storePackage[0] == null || 
+        storePackage[0].locateDefinitionBaseOn == null {
+        return 
+    }
+    return new MakeHover(storePackage[0].locateDefinitionBaseOn).make()
 }
 
-
-
-public fn main(args []string) {
+fn main(args []string) {
 	 
 }

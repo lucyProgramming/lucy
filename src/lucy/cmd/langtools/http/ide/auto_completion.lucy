@@ -16,6 +16,7 @@ class AutoCompletion implements HttpHandler {
             if e != null {
                 exchange.sendResponseHeaders(500 , 0L)
                 os.write(byte[]("internal error"))
+                print("call auto completion failed")
                 e.printStackTrace()
             }
             exchange.close()

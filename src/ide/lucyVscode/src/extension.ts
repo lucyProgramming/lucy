@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 
 const GoDefinitionProvider = require("./goto_definition");
 const GoReferenceProvider = require("./findusage");
-// const GoDocumentSymbolProvider = require("./alldefinition");
+const GoDocumentSymbolProvider = require("./alldefinition");
 const GoCompletionItemProvider = require("./auto_completion");
 
 
@@ -25,9 +25,9 @@ export function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(
         vscode.languages.registerReferenceProvider(
             lucySelector, new GoReferenceProvider()));
-        // context.subscriptions.push(
-            // vscode.languages.registerDocumentSymbolProvider(
-            //     lucySelector, new GoDocumentSymbolProvider()));
+        context.subscriptions.push(
+            vscode.languages.registerDocumentSymbolProvider(
+                lucySelector, new GoDocumentSymbolProvider()));
         context.subscriptions.push(
             vscode.languages.registerCompletionItemProvider(
                 lucySelector, new GoCompletionItemProvider(), '.' , '\"')); 

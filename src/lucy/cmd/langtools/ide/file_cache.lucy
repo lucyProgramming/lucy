@@ -40,7 +40,7 @@ class FileCacher {
     
     fn get(filename string) -> (f LucyFile) {
         if this.maxSize < 0  {  
-            // -1 means no cache
+            //
             f = this.readLucyFile(filename)
             return f 
         }
@@ -58,7 +58,6 @@ class FileCacher {
             }
             return 
         }
-        
         newF := new LucyFile()
         newF.bs = f.bs 
         newF.realPathName = f.realPathName

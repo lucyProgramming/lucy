@@ -81,12 +81,12 @@ class ExpressionCheckVarAssign {
 				}
 				vd.name = identifier.name
 				vd.pos = v.pos
+				if identifier.locateDefinition {
+					block.inheritedAttribute.p.setLocationDefinition(vd)
+					return 
+				}
 				if variableType == null {
 					continue
-				}
-				if identifier.locateDefinition {
-					block.inheritedAttribute.p.setLocationDefinition(v)
-					return 
 				}
 				vd.findUsage = identifier.findUsage  
 				if vd.findUsage {

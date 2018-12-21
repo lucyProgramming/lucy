@@ -1,20 +1,21 @@
 {
-	"compileTime":1543728885,
+	"compileTime":1545354361,
 	"compiledFrom":[
 		{
-			"lastModify":1542192151,
+			"lastModify":1542177499,
 			"name":"switch_template.lucy"
 		},
 		{
-			"lastModify":1532683136,
+			"lastModify":1532666067,
 			"name":"test.lucy"
 		},
 		{
-			"lastModify":1532943744,
+			"lastModify":1532937847,
 			"name":"testSwitch.lucy"
 		}
 	],
 	"imports":[],
+	"hasMain":false,
 	"classes":[
 		"main.class",
 		"testSwitchObject$test.class"

@@ -71,7 +71,7 @@ public class AutoCompletionItem {
     }
     
 
-
+    
     static fn getFieldDefaultAutoCompletionItem() -> (items []AutoCompletionItem) {
         if len(AutoCompletionItem.fieldDefaultAutoCompletionItem) > 0  {
             return AutoCompletionItem.fieldDefaultAutoCompletionItem

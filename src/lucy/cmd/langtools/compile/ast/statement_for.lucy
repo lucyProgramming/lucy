@@ -118,8 +118,7 @@ public class StatementFor {
 				vd.findUsage = identifierV.findUsage 
 				vd.pos = posV
 				if vd.locateDefinition{
-					this.initExpressionBlock.inheritedAttribute.p.locateDefinition = vd.pos 
-					//this.initExpression//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = vd 
+					this.initExpressionBlock.inheritedAttribute.p.setLocationDefinition(vd)
 					return 
 				}
 				if vd.findUsage {

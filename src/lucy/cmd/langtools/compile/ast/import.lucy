@@ -43,7 +43,7 @@ class SourceFile {
 
 	fn insertImport(block Block,i Import) ->(err error)  {
 		if i.locateDefinition {
-			block.inheritedAttribute.p.locateDefinition = i.pos
+			block.inheritedAttribute.p.setLocationDefinition(i)
 			//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = i 
 			return 
 		}

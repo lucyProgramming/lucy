@@ -14,19 +14,19 @@ class ExpressionCheckUnary {
 		}
 		if e.Type == ExpressionTypeNot {
 			if unary.Type != VariableTypeBool {
-				errs.append(new error( sprintf("%s not a bool expression , but '%s'",
+				errs.append(new error(sprintf("%s not a bool expression , but '%s'",
 					unary.pos.errMsgPrefix(), unary.typeString())))
 			}
 		}
 		if e.Type == ExpressionTypeNegative {
 			if unary.isNumber() == false {
-				errs.append(new error( sprintf("%s cannot apply '-' on '%s'",
+				errs.append(new error(sprintf("%s cannot apply '-' on '%s'",
 					unary.pos.errMsgPrefix(), unary.typeString())))
 			}
 		}
 		if e.Type == ExpressionTypeBitwiseNot {
 			if unary.isInteger() == false {
-				errs.append(new error( sprintf("%s cannot apply '~' on '%s'",
+				errs.append(new error(sprintf("%s cannot apply '~' on '%s'",
 					unary.pos.errMsgPrefix(), unary.typeString())))
 			}
 		}

@@ -548,7 +548,7 @@ public class Expression {
 				}
 			}
 			if f.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = f.pos 
+				block.inheritedAttribute.p.setLocationDefinition(f)
 				return
 			}
 			if f.findUsage {

@@ -3,6 +3,7 @@ import "lucy/cmd/langtools/compile/parser"
 import "java/io"
 import "java/lang/System"
 
+
 public fn readLucyFiles(filenames []string) -> (lucyFiles []LucyFile = []LucyFile{}){
 	for v := range filenames {
 		t := fileCache.get(v)
@@ -18,16 +19,15 @@ public fn parseAst(lucyFiles []LucyFile) ->(nodes []ast.TopNode = []ast.TopNode{
 	}
 }
 
-
 public fn parseAstAndTypeCheck(
 	packageName string , 
 	lucyFiles []LucyFile , 
 	onlyAnalyzeGlobals bool , 
 	matchFile string ,
 	matchLine int, 
-	loader ast.loadImport ) -> (p ast.Package,errs []error){
+	loader ast.loadImport) -> (p ast.Package,errs []error){
 	now := System.currentTimeMillis()
-	nodes ,es := parseAst(lucyFiles)
+	nodes , es := parseAst(lucyFiles)
 	print("prase ast used:", System.currentTimeMillis() - now ,packageName)
 	now = System.currentTimeMillis()
 	p = new ast.Package(packageName , true , loader)

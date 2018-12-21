@@ -291,7 +291,9 @@ public class FunctionType {
 		if len(callArgsTypes) > len(this.parameterList) {
 			if this.vArgs == null {
 				errMsg := sprintf("%s too many paramaters to call\n", errMsgPrefix(from))
-				errMsg += haveAndWant
+				if haveAndWant != null {
+					errMsg += haveAndWant
+				}
 				err = new error(sprintf(errMsg))
 				return
 			}
@@ -362,7 +364,7 @@ public class FunctionType {
 	private fn parameterCount() -> (count int){
 		count = len(this.parameterList)
 		if this.vArgs != null {
-			count ++ 
+			count++ 
 		}
 	}
 	
@@ -389,7 +391,6 @@ public class FunctionType {
 		return want
 	}
 }
-
 
 public class CallVariableArgs {
 	public expressions []Expression

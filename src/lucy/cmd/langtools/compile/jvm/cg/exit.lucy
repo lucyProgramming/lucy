@@ -1,7 +1,7 @@
 
 public class Exit {
-	public currentCodeLength int
-	public branchBytes       []byte //[2]byte
+	private currentCodeLength int
+	private branchBytes       []byte //[2]byte
 	
 	public fn Exit(op byte, code AttributeCode)  {
 	    this.super()
@@ -9,5 +9,10 @@ public class Exit {
 		code.codes[code.codeLength] = op
 		this.branchBytes = code.codes[code.codeLength+1 : code.codeLength+3]
 		code.codeLength += 3
+	}
+	public fn write(to int){
+		offset := short(to - int(this.currentCodeLength))
+		this.branchBytes[0] = byte(offset >> 8)
+		this.branchBytes[1] = byte(offset)
 	}
 }

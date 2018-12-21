@@ -243,7 +243,7 @@ class ExpressionParser extends  ParserExtends {
 	}
 
 
-	fn parseMapExpression() -> (e ast.Expression,err error) {
+	fn parseMapExpression() -> (e ast.Expression , err error) {
 		var typ ast.Type
 		if this.parser.token.Type == lex.TokenMap {
 			typ, err = this.parser.parseType()

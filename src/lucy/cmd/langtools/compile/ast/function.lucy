@@ -33,7 +33,6 @@ public class Function {
 	public loadedFromCorePackage            bool
 	public used                             bool
 	public templateClonedFunction           bool
-	isPackageInitBlockFunction      		bool
 	public comment                          string
 	public isClosureFunction                bool
 	public locateDefinition     			bool 
@@ -50,17 +49,27 @@ public class Function {
 	
 	fn mkSuggest() ->(s string ) {
 		s = sprintf("%s(" , this.name)
-		for k , v := range this.Type.parameterList {
-			if v.name != null && v.name != "" {
-				s += v.name 
-			}else {
-				s += "var" + k
-			}
-			if k != len(this.Type.parameterList) - 1 {
-				s += " , "
+		l := len(this.Type.parameterList)
+		if this.haveDefaultValue {
+			l = this.defaultValueStartAt
+		}
+		if this.Type.parameterList != null {
+			for k , v := range this.Type.parameterList[:l] {
+				if v.name != null && v.name != "" {
+					s += v.name 
+				}else {
+					s += "var" + k
+				}
+				if k != len(this.Type.parameterList) - 1 {
+					s += " , "
+				}
 			}
 		}
 		s += ")"
+	}
+
+	public fn mkDescription() ->(d string = "") {
+		
 	}
 	
 	public fn nameLiteralFunction() -> (name string) {
@@ -187,10 +196,6 @@ public class Function {
 				if err != null {
 					errs.append(err)
 				}
-				// print(v.Type.typeString() , v.Type.locateDefinition )
-				// if this.block.inheritedAttribute.p.locateDefinition != null {
-				// 	print(this.block.inheritedAttribute.p.locateDefinition.errMsgPrefix())
-				// }
 				if isAbstract == false {
 					err = this.block.insert(v.name, v.pos, v)
 					if err != null {

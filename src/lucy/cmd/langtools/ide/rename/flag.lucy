@@ -15,6 +15,7 @@ class Flags {
 		this.line = this.parser.intOption("-line" , -1)
 		this.column = this.parser.intOption("-column" , -1)
 	}
+	
 	fn parseArgs(args []string) ->(file string , pos int) {
 		nodefine,err := this.parser.parse(args)
 		if err != null {

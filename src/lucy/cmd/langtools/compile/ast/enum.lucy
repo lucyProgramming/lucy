@@ -25,7 +25,6 @@ public class EnumName {
     }
 }
 
-
 public class Enum   {
 	public isGlobal        bool
 	public isBuildIn       bool
@@ -60,7 +59,10 @@ public class Enum   {
 		return this.accessFlags&cg.AccClassPublic != 0
 	}
 
-	
+	public fn mkDescription() ->(s string) {
+
+	}
+
 	fn check(block Block) -> (errs []error = []error{}) {
 		if this.locateDefinition {
 			block.inheritedAttribute.p.setLocationDefinition(this)
@@ -120,7 +122,8 @@ public class Enum   {
 			}
 		}
 		return errs
-	}	
+	}
+	
 	fn reduceFindUsageInstances(block Block) {
         if this.findUsage == false {
             return 

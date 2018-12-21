@@ -46,7 +46,7 @@ public fn writeFile(filepath string , bs byte[] , start int = 0 , length int = -
 		return
 	}
 	f.createNewFile()  // create new file 
-	stream := new io.FileOutputStream(f, false  ) // override 
+	stream := new io.FileOutputStream(f, false  )// override 
 	defer stream.close()
 	stream.write(bs , start ,length ) 
 }

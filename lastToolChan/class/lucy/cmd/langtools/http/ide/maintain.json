@@ -1,75 +1,79 @@
 {
-	"compileTime":1544855198,
+	"compileTime":1545354358,
 	"compiledFrom":[
 		{
-			"lastModify":1544782953,
+			"lastModify":1544768147,
 			"name":"all_definition.lucy"
 		},
 		{
-			"lastModify":1544782953,
+			"lastModify":1545287621,
 			"name":"auto_completion.lucy"
 		},
 		{
-			"lastModify":1544782953,
+			"lastModify":1545025599,
 			"name":"find_usage.lucy"
 		},
 		{
-			"lastModify":1544782953,
+			"lastModify":1545287681,
 			"name":"fmt.lucy"
 		},
 		{
-			"lastModify":1544340402,
+			"lastModify":1545292363,
 			"name":"goto_definition.lucy"
 		},
 		{
-			"lastModify":1544344161,
+			"lastModify":1545287989,
 			"name":"hover.lucy"
 		},
 		{
-			"lastModify":1544837876,
+			"lastModify":1545287746,
 			"name":"ide.lucy"
 		},
 		{
-			"lastModify":1544337005,
+			"lastModify":1544405217,
 			"name":"rename.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/cmd/langtools/ide/alldefinition",
-			"linkTime":1544855197
+			"linkTime":1545354357
 		},
 		{
 			"name":"lucy/cmd/langtools/http/g",
-			"linkTime":1544835386
+			"linkTime":1545354357
 		},
 		{
 			"name":"lucy/encoding/json",
-			"linkTime":1544835385
+			"linkTime":1545354357
 		},
 		{
 			"name":"lucy/cmd/langtools/ide/autocompletion",
-			"linkTime":1544855197
+			"linkTime":1545354357
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/ast",
-			"linkTime":1544837734
+			"linkTime":1545354355
 		},
 		{
 			"name":"lucy/cmd/langtools/ide/findusage",
-			"linkTime":1544855198
+			"linkTime":1545354357
 		},
 		{
 			"name":"lucy/cmd/langtools/ide",
-			"linkTime":1544855197
+			"linkTime":1545354357
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/parser",
-			"linkTime":1544837736
+			"linkTime":1545354356
 		},
 		{
 			"name":"lucy/cmd/langtools/ide/gotodefinition",
-			"linkTime":1544855198
+			"linkTime":1545354357
+		},
+		{
+			"name":"lucy/cmd/langtools/ide/hover",
+			"linkTime":1545354357
 		}
 	],
 	"hasMain":false,
@@ -79,6 +83,7 @@
 		"FindUsage.class",
 		"Fmt.class",
 		"GotoDefinition.class",
+		"Hover.class",
 		"main.class"
 	]
 }

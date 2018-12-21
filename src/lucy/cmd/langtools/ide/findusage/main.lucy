@@ -7,7 +7,7 @@ import "lucy/cmd/langtools/ide/gotodefinition"
 
 
 public fn findUsage(file string , pos int , scope string) -> (result ast.Usage[]){
-    definition := gotodefinition.findDefinition(file , "" , pos , null)
+    definition := gotodefinition.findDefinition(file , pos , null , null)
     if definition == null {
         print("find usage cannot find definition")
         return null 

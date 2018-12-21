@@ -1,6 +1,5 @@
 import "java/lang/Object"
 
 
-const mainClassName = "main.class"
-
+const MainClassName = "main.class"
 var caches = new  map{string -> Object} ()   // class loaded from CLASSPATH
