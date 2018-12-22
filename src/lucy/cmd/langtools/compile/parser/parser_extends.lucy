@@ -2,6 +2,7 @@
 import "lucy/cmd/langtools/compile/lex"
 
 
+
 class ParserExtends {
 	protected parser Parser
 	

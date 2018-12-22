@@ -20,7 +20,7 @@ class AllDefinition {
         this.packageName = packageName
         this.printErr = printErr
     }
-    fn getAllDefinition() -> (alldefinition Definition[]){
+    fn getAllDefinition() -> (alldefinition ide.Definition[]){
         nodes , errs := ide.parseAst(this.lucyFiles)
         if this.printErr {
             for v := range errs{
@@ -39,39 +39,39 @@ class AllDefinition {
         }
         return this.mkResult(p)
     }
-        
-    fn mkResult(p ast.Package) ->(result Definition[]) {
-        items := []Definition{}
+       
+    fn mkResult(p ast.Package) ->(result ide.Definition[]) {
+        items := []ide.Definition{}
         for name , v := range p.block.variables {
-            item := new Definition()
+            item := new ide.Definition()
             item.Type = "variable"
             item.pos = v.pos 
             item.name = name
             items.append(item)
         }
         for name , v := range p.block.constants {
-            item := new Definition()
+            item := new ide.Definition()
             item.Type = "constant"
             item.pos = v.pos 
             item.name = name
             items.append(item)
         }
         for name , v := range p.block.functions {
-            item := new Definition()
+            item := new ide.Definition()
             item.Type = "function"
             item.pos = v.pos 
             item.name = name
             items.append(item)
         }
         for name , v := range p.block.enums {
-            item := new Definition()
+            item := new ide.Definition()
             item.Type = "enum"
             item.pos = v.pos 
             item.name = name
             items.append(item)
         }
         for name , v := range p.block.classes {
-            item := new Definition()
+            item := new ide.Definition()
             item.Type = "enum"
             item.pos = v.pos 
             item.name = name
@@ -80,10 +80,10 @@ class AllDefinition {
             for v := range v.methods {
                 innerLength += len(v)
             }
-            item.inners = new Definition[](innerLength)
+            item.inners = new ide.Definition[](innerLength)
             var i = 0 
             for _, v := range v.fields {
-                itemField := new Definition()
+                itemField := new ide.Definition()
                 itemField.Type = "field"
                 itemField.name = v.name
                 itemField.pos = v.pos 
@@ -92,7 +92,7 @@ class AllDefinition {
             }
             for _, v := range v.methods {
                 for method := range v {
-                    itemMethod := new Definition()
+                    itemMethod := new ide.Definition()
                     itemMethod.Type = "method"
                     itemMethod.name = method.Function.name 
                     itemMethod.pos = method.Function.pos 
@@ -101,7 +101,7 @@ class AllDefinition {
                 }   
             }
         }
-        return copy(new Definition[](len(items)) , items)
+        return copy(new ide.Definition[](len(items)) , items)
     }
 
     

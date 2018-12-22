@@ -20,6 +20,7 @@ module.exports = class GoDefinitionProvider implements vscode.DefinitionProvider
             let buffer = document.getText();
             var res  = syncHttpRequest("POST" , u ,  {
                 "body": buffer,
+                "timeout" : 2000
             });
             let definition = JSON.parse(res.getBody());
             if (!definition) {
@@ -27,8 +28,12 @@ module.exports = class GoDefinitionProvider implements vscode.DefinitionProvider
                 return ;
             }
             let uri2 =  vscode.Uri.file(path.normalize(definition.filename)) ; 
-            let position2 = new vscode.Position(definition.endLine, definition.endColumnOffset);
-            resolve(new vscode.Location(uri2, position2));
+            // var r = new vscode.Range(
+            //         new vscode.Position(definition.satrtLine, definition.startColumnOffset),
+            //         new vscode.Position(definition.endLine, definition.endColumnOffset)
+            // );
+            var r = new vscode.Position( definition.endLine, definition.endColumnOffset);
+            resolve(new vscode.Location(uri2, r));
         });
     }
 };

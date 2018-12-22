@@ -32,19 +32,43 @@ public class Encoder {
 			return []byte(this.x.toString())
 		} 
 		if this.c.getTypeName() == "java.lang.String" {
-			s := []byte{'"'} 
-			for k,v := range []byte(this.x.toString()) {
+			bs = []byte{'"'} 
+			for k , v := range []byte(this.x.toString()) {
 				if v == '"' {
 					bs.appendAll(['\\' , '"'])
 					continue
 				}
-				s.append(v)
+				if v == 10 {
+					bs.appendAll(['\\' , 'n'])
+					continue
+				}
+				if v == '/' {   
+					bs.appendAll(['\\' , '/'])
+					continue
+				}
+				if v == '\t' {
+					bs.appendAll(['\\' , 't'])
+					continue
+				}
+				if v == '\b' {
+					bs.appendAll(['\\' , 'b'])
+					continue
+				}
+				if v == '\f' {
+					bs.appendAll(['\\' , 'f'])
+					continue
+				}
+				if v == '\r' {
+					bs.appendAll(['\\' , 'r'])
+					continue
+				}
+				bs.append(v)
 				if v == '\\'{
-					s.append('\\')
+					bs.append('\\')
 				}
 			}
-			s.append('"')
-			return s
+			bs.append('"')
+			return bs
 		}
 		if isMap(this.c) {
 			return this.encodeMap()

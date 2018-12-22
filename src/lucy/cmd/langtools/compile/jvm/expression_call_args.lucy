@@ -5,7 +5,6 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 class BuildExpressionCallArgs {
 
-
 	eb BuildExpression
     
     fn BuildExpressionCallArgs(eb BuildExpression){

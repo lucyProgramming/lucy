@@ -1,0 +1,113 @@
+import "lucy/cmd/langtools/ide"
+import "lucy/cmd/langtools/compile/parser"
+import "lucy/os"
+import "lucy/cmd/langtools/compile/ast"
+
+public fn outLine(filename string) ->(definitions []ide.Definition = []ide.Definition{}) {
+    bs,_ := os.readFile(filename)
+    tops := []ast.TopNode{}
+    parser.Parse(tops , filename , javaArray2Lucy(bs) , false , 10 , -1 , -1 , -1 , -1 , -1)
+
+    for v := range tops{
+        when v.node.(type){
+            case ast.Line:
+                continue
+            case ast.Comment:
+                continue
+            case ast.Constant:
+                definition := new ide.Definition()
+                definitions.append(definition)
+                definition.Type = "constant"
+                t := v.node.(ast.Constant)
+                definition.name = t.name
+                definition.pos = t.pos
+
+            case ast.Expression:
+                t := v.node.(ast.Expression)
+                if t.Type != ast.ExpressionTypeVar && t.Type != ast.ExpressionTypeVarAssign {
+                    continue
+                }
+                if t.Type == ast.ExpressionTypeVar {
+                    vs := t.data.(ast.ExpressionVar)
+                    for vv := range vs.variables {
+                        definition := new ide.Definition()
+                        definitions.append(definition)
+                        definition.Type = "variable"
+                        definition.name = vv.name
+                        definition.pos = vv.pos
+                    }
+                }else {
+                    bin := t.data.(ast.ExpressionBinary)
+                    list := []ast.Expression{bin.left}
+                    if bin.left.Type == ast.ExpressionTypeList {
+                        list = bin.left.data.([]ast.Expression)
+                    }
+                    for vv := range list {
+                        if vv.Type != ast.ExpressionTypeIdentifier {
+                            continue
+                        }
+                        definition := new ide.Definition()
+                        definitions.append(definition)
+                        definition.Type = "variable"
+                        definition.name = vv.data.(ast.ExpressionIdentifier).name
+                        definition.pos = vv.pos
+                    }
+                }
+            case ast.Class:
+                t := v.node.(ast.Class)
+                definition := new ide.Definition()
+                definitions.append(definition)
+                definition.Type = "class"
+                definition.pos = t.pos
+                definition.name = t.name
+                inners := []ide.Definition{}
+                for vv := range t.fields {
+                    definition := new ide.Definition()
+                    inners.append(definition)
+                    definition.Type = "field"
+                    definition.pos = vv.pos 
+                    definition.name = vv.name
+                }
+                for vv := range t.methods {
+                    for vvv := range vv {
+                        definition := new ide.Definition()
+                        inners.append(definition)
+                        definition.Type = "method"
+                        definition.pos = vvv.Function.pos
+                        definition.name = vvv.Function.name
+                    }
+                }
+                definition.inners = copy(new ide.Definition[](len(inners)) , inners)
+            case ast.Function:
+                t := v.node.(ast.Function)
+                definition := new ide.Definition()
+                definitions.append(definition)
+                definition.Type = "function"
+                definition.pos = t.pos
+                definition.name = t.name
+
+            case ast.Enum:
+                t := v.node.(ast.Enum)
+                definition := new ide.Definition()
+                definitions.append(definition)
+                definition.Type = "enum"
+                definition.pos = t.pos
+                definition.name = t.name 
+                definition.inners = new ide.Definition[](len(t.enums))
+                for k,v := range t.enums{
+                    d := new ide.Definition()
+                    d.Type = "enumItem"
+                    d.name = v.name
+                    d.pos = v.pos 
+                    definition.inners[k] = d 
+                }
+        }
+    }
+
+
+}
+
+
+fn main(args []string) {
+    
+}

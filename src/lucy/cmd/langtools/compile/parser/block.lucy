@@ -2,7 +2,7 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-class BlockParser  extends ParserExtends{
+class BlockParser  extends ParserExtends {
 	
 	StatementForParser StatementForParser
 	StatementIfParser StatementIfParser
@@ -171,7 +171,7 @@ class BlockParser  extends ParserExtends{
 			case lex.TokenConst:
 				pos := this.parser.mkPos()
 				this.next(lfIsToken)
-				cs, err := this.parser.parseConst()
+				cs, err := this.parser.parseConst(comment)
 				if err != null {
 					this.consume(untilSemicolonOrLf)
 					this.next(lfNotToken)

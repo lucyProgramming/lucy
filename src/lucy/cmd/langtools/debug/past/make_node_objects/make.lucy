@@ -66,6 +66,9 @@ public class MakeNodesObjects {
     }
     fn makeFunction(f ast.Function) -> (x Object) {
         ret := new map{string -> Object}()
+        if f.comment != null {
+            ret["comment"] = f.comment
+        }
         {
             if len(f.Type.parameterList) == 1 {
                 for _, v := range f.Type.parameterList {
@@ -126,6 +129,9 @@ public class MakeNodesObjects {
 
     fn makeEnum(e ast.Enum) ->(x Object)  {
         ret := new map{string -> Object}()
+        if e.comment != null {
+            ret["comment"] = e.comment
+        }
         {
             var t  = new Object[](len(e.enums))
             for k, v := range e.enums {
@@ -146,6 +152,9 @@ public class MakeNodesObjects {
     fn makeClass(c ast.Class) ->(x Object) {
         ret := new map{string -> Object}()
         ret["name"] = c.name
+        if c.comment != null {
+            ret["comment"] = c.comment
+        }
         ret["accessFlags"] = sprintf("0x%x" , int(c.accessFlags))
         if c.superClassName != null {
             ret["superClass"] = c.superClassName.name

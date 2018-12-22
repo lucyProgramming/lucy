@@ -1,8 +1,13 @@
 import "lucy/cmd/langtools/ide/gotodefinition"
 import "lucy/cmd/langtools/compile/ast"
-
+import "lucy/os"
 
 public fn getHover (file string , pos int , bs []byte) ->(s string = "") {
+    if len(bs) == 0 {
+        // read the file 
+        t,_ := os.readFile(file)
+        bs = javaArray2Lucy(t)
+    }
     storePackage := []ast.Package{null}
     p := gotodefinition.findDefinition(file , pos , bs , storePackage)
     if p == null {
@@ -12,6 +17,7 @@ public fn getHover (file string , pos int , bs []byte) ->(s string = "") {
         storePackage[0].locateDefinitionBaseOn == null {
         return 
     }
+    print(storePackage[0].locateDefinitionBaseOn)
     return new MakeHover(storePackage[0].locateDefinitionBaseOn).make()
 }
 

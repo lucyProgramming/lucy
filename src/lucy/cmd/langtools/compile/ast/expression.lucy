@@ -437,7 +437,10 @@ public class Expression {
 				returnValueTypes = []Type{tt}
 			}
 			this.value = tt
-		case ExpressionTypeincrement , ExpressionTypeDecrement ,ExpressionTypePrefixincrement ,ExpressionTypePrefixDecrement  :
+		case ExpressionTypeincrement,
+			ExpressionTypeDecrement,
+			ExpressionTypePrefixincrement,
+			ExpressionTypePrefixDecrement:
 			tt := ExpressionCheckUnary.checkincrementExpression(this , block, errs)
 			if tt != null {
 				returnValueTypes = []Type{tt}

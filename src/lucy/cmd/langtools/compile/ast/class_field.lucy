@@ -46,6 +46,10 @@ public class ClassField {
 	}
 	
 	public fn mkDescription() ->(d string = "") {
+		// if this.comment != null {
+		// 	d += this.comment
+		// }
+		d += "field"
 		if this.isPublic() {
 			d = "public"
 		}else if this.isProtected() {

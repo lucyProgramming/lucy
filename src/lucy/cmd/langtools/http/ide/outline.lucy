@@ -1,12 +1,12 @@
-
-import "lucy/cmd/langtools/ide/hover"
+import "lucy/cmd/langtools/ide/outline"
+import "lucy/cmd/langtools/ide"
 import "com/sun/net/httpserver/HttpHandler"
 import "com/sun/net/httpserver/HttpExchange"
 import "lucy/cmd/langtools/http/g"
-import "java/lang/Integer"
+import "lucy/encoding/json"
 
 
-class GetHover implements HttpHandler {
+class OutLine implements HttpHandler {
     public fn handle(exchange HttpExchange) {
         os := exchange.getResponseBody()
         defer {
@@ -18,23 +18,19 @@ class GetHover implements HttpHandler {
             }
             exchange.close()
         }
-        bs := g.readBodyBytes(exchange.getRequestBody())
         uri := exchange.getRequestURI()
         paramters := g.parseQuery(uri.getQuery())
-        file := paramters["file"]
-        if file == null || file == ""{
-            bs := byte[]("file not provide")
+        filename := paramters["filename"]
+        if filename == null || filename == "" {
+            bs := byte[]("dir not provide")
             exchange.sendResponseHeaders(400 , long(len(bs)))
             os.write(bs)
-            return 
+            return
         }
-        line := Integer.parseInt(paramters["line"])
-        column := Integer.parseInt(paramters["column"])
-        s := hover.getHover(file , (line << 16) | int(char(column)) , bs)
-        bs = []byte(s)
-        exchange.setAttribute("Content-Type" , "Content-Type: text/html; charset=utf-8")
+        definitions := outline.outLine(filename)
+        t := copy(new ide.Definition[](len(definitions)) ,definitions )
+        bs ,_ := json.encode(t , "\t")
         exchange.sendResponseHeaders(200 , long(len(bs)))
-        print(string(bs))
-        os.write(copy(new byte[](len(bs)) ,bs )) 
+        os.write(copy(new byte[](len(bs)) ,bs))
     } 
 }

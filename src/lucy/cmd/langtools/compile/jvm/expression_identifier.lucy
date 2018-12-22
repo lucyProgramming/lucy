@@ -17,8 +17,6 @@ class  BuildExpressionIdentifier {
 		e ast.Expression,
 		context Context) -> (maxStack char) {
 		identifier := e.data.(ast.ExpressionIdentifier)
-		//print(identifier.name, identifier.Variable.beenCapturedAsLeftValue,
-		//	context.function.Closure.closureVariableExist(identifier.Variable))
 		maxStack = jvmSlotSize(identifier.Variable.Type)
 		if context.function.closure.closureVariableExist(identifier.Variable) {
 			if identifier.Variable.beenCapturedAsLeftValue > 0 {

@@ -58,16 +58,22 @@ class Parser {
 		if this.token.Type == lex.TokenEof {
 			return null
 		}
+		comment := new CommentParser(this)
 		for this.token.Type == lex.TokenComment || 
 			this.token.Type == lex.TokenMultiLineComment || 
 			this.token.Type == lex.TokenImport  || 
 			this.token.Type == lex.TokenLf {
 			if this.token.Type == lex.TokenImport {
-				for _, t := range this.parseImports() {
+				for k, t := range this.parseImports() {
+					if k == 0 {
+						t.comment = comment.comment
+						comment.reset()
+					}
 					this.tops.append(new ast.TopNode(t))
 				}
 				continue
 			}
+
 			if this.onlyParseImport == false {
 				if this.token.Type == lex.TokenComment || 
 					this.token.Type == lex.TokenMultiLineComment{
@@ -75,11 +81,15 @@ class Parser {
 					c.isMulti = this.token.Type == lex.TokenMultiLineComment
 					c.comment = this.token.stringValue
 					this.tops.append(new ast.TopNode(c))
+					comment.read()
 				}else {  // must be lf 
 					this.tops.append(new ast.TopNode(new ast.Line()))
+					this.next(lfIsToken)
 				}
+			}else {
+				this.next(lfIsToken)
 			}
-			this.next(lfIsToken)
+			
 		}
 		if this.onlyParseImport { // only parse imports
 			return this.errs
@@ -88,7 +98,6 @@ class Parser {
 		isFinal := false
 		isAbstract := false
 		var finalPos ast.Pos
-		comment := new CommentParser(this)
 		fn resetProperty () {
 			accessControlToken = null
 			isFinal = false
@@ -105,15 +114,38 @@ class Parser {
 				break
 			}
 			switch this.token.Type {
-			case lex.TokenComment, lex.TokenMultiLineComment:
+			case lex.TokenComment,
+				lex.TokenMultiLineComment:
 				c := new ast.Comment()
 				c.comment = this.token.stringValue 
 				c.isMulti = this.token.Type == lex.TokenMultiLineComment
 				this.tops.append(new ast.TopNode(c))
 				comment.read()
-			case lex.TokenSemicolon: // empty statement, no big deal
+			case lex.TokenSemicolon: 
+				// empty statement, no big deal
 				this.next(lfNotToken)
 				continue
+			case lex.TokenIdentifier:
+				idenfierToken := this.token
+				this.next(lfIsToken)
+				if this.token.Type == lex.TokenLp {
+					// look like a function 
+					f := new lex.Token()
+					f.Type = lex.TokenFn
+					this.tokenStack = [f , idenfierToken , this.token]
+					this.errs.append(new error(sprintf("%s missing 'fn'" , this.errMsgPrefix(this.mkPos(idenfierToken)))))
+					this.next(lfIsToken)  // restore 
+					continue
+				}else {
+					this.tokenStack = [idenfierToken , this.token]
+					this.next(lfIsToken)  // restore 
+					e, _ := this.ExpressionParser.parseExpression(true)
+					if e != null {
+						e.isPublic = isPublic()
+						e.isGlobal = true
+						this.tops.append( new ast.TopNode(e))
+					}
+				}
 			case lex.TokenLf:
 				this.tops.append(new ast.TopNode(new ast.Line()))
 				this.next(lfNotToken)  //TODO::delete more lines 
@@ -146,10 +178,9 @@ class Parser {
 			case lex.TokenVar:
 				pos := this.mkPos()
 				this.next(lfIsToken) // skip var key word
-				vs, err := this.parseVar()
-				if err != null {
-					this.consume(untilSemicolonOrLf)
-					this.next(lfNotToken)
+				vs, _ := this.parseVar()
+				if vs == null {
+					resetProperty()
 					continue
 				}
 				isPublic := isPublic()
@@ -164,8 +195,8 @@ class Parser {
 				resetProperty()
 				this.ifTokenIsLfThenSkip(false)
 			case lex.TokenEnum:
-				e, err := this.EnumParser.parse()
-				if err != null {
+				e, _ := this.EnumParser.parse()
+				if e == null {
 					resetProperty()
 					continue
 				}
@@ -180,9 +211,9 @@ class Parser {
 				resetProperty()
 				this.ifTokenIsLfThenSkip(false)
 			case lex.TokenFn:
-				f, err := this.FunctionParser.parse(true, false,true)
-				if err != null {
-					this.next(lfNotToken)
+				f, _ := this.FunctionParser.parse(true, false,true)
+				if f == null {
+					resetProperty()
 					continue
 				}
 				f.comment = comment.comment
@@ -205,13 +236,15 @@ class Parser {
 				this.next(lfIsToken) // skip }
 				this.tops.append( new ast.TopNode(b))
 				this.ifTokenIsLfThenSkip(false)
-			case lex.TokenClass, lex.TokenInterface:
+			case lex.TokenClass,
+				lex.TokenInterface:
 				c, _ := this.ClassParser.parse(isAbstract)
 				if c == null {
+					resetProperty()
 					continue
 				}
 				c.comment = comment.comment
-				this.tops.append( new ast.TopNode( c) )
+				this.tops.append(new ast.TopNode( c) )
 				isPublic := isPublic()
 				if isPublic {
 					c.accessFlags |= cg.AccClassPublic
@@ -227,10 +260,8 @@ class Parser {
 				this.ifTokenIsLfThenSkip(false)
 			case lex.TokenConst:
 				this.next(lfIsToken) // skip const key word
-				cs, err := this.parseConst()
-				if err != null {
-					this.consume(untilSemicolonOrLf)
-					this.next(lfNotToken)
+				cs, _ := this.parseConst(comment)
+				if cs == null {
 					resetProperty()
 					continue
 				}
@@ -245,10 +276,8 @@ class Parser {
 				this.ifTokenIsLfThenSkip(false)
 				continue
 			case lex.TokenTypeAlias:
-				a, err := this.parseTypeAlias(comment)
-				if err != null {
-					this.consume(untilSemicolonOrLf)
-					this.next(lfNotToken)
+				a, _ := this.parseTypeAlias(comment)
+				if a == null {
 					resetProperty()
 					continue
 				}
@@ -268,8 +297,8 @@ class Parser {
 					if e != null {
 						e.isPublic = isPublic()
 						e.isGlobal = true
+						this.tops.append( new ast.TopNode(e))
 					}
-					this.tops.append( new ast.TopNode( e))
 				} else {
 					this.errs.append( new error(sprintf("%s token '%s' is not except",
 						this.errMsgPrefix(), this.token.description)))
@@ -337,14 +366,19 @@ class Parser {
 		return err
 	}
 
-	fn mkPos() -> (pos ast.Pos) {
-		if this.token != null {
+	fn mkPos(t lex.Token...) -> (pos ast.Pos) {
+		token := this.token
+		if len(t) > 0 {
+			token = t[0]
+		}
+		if token != null {
 		    pos = new ast.Pos()
 		    pos.filename = this.filename
 		    pos.startLine = this.token.startLine
 			pos.endLine = this.token.endLine
-		    pos.offset = this.token.offset
+			pos.startColumnOffset = this.token.startColumnOffset
 			pos.endColumnOffset = this.token.endColumnOffset 
+		    pos.offset = this.token.offset
 			pos.endOffset = this.token.endOffset
 			return
 		} else {
@@ -357,11 +391,12 @@ class Parser {
 	}
 	
 	// str := "hello world"   a,b = 123 or a b ;
-	fn parseConst() -> (constants []ast.Constant, err error) {
+	fn parseConst(comment CommentParser) -> (constants []ast.Constant, err error) {
 		names, err := this.parseNameList()
 		if err != null {
 			return
 		}
+		
 		constants = new []ast.Constant(len(names))
 		for k, v := range names {
 			vd := new ast.Constant()
@@ -382,6 +417,7 @@ class Parser {
 				return
 			}
 		}
+
 		if variableType != null {
 			for _, c := range constants {
 				c.Type = variableType.Clone()
@@ -400,9 +436,17 @@ class Parser {
 		if len(es) != len(constants) {
 			err = new error(sprintf("%s cannot assign %d value to %d constant",
 				this.errMsgPrefix(), len(es), len(constants)))
-			this.errs.append( err)
+			this.errs.append(err)
 		}
-		for k, _ := range constants {
+		constComment := comment.comment
+		if this.token.Type == lex.TokenComment {
+			constComment = "//" + this.token.stringValue
+			this.next(lfIsToken)
+		}
+		for k, v := range constants {
+			if v != null {
+				v.comment = constComment
+			}
 			if k < len(es) {
 				constants[k].defaultValueExpression = es[k]
 			}

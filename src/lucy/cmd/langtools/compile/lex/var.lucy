@@ -13,7 +13,7 @@ public fn New(
 	lex.bs = bs
 	lex.end = len(bs)
 	lex.line = startLine
-	lex.endColumnOffset = endColumnOffset
+	lex.columnOffset = endColumnOffset
 	lex.lastLine = startLine
 	lex.locateDefinition = locateDefinition
 	lex.getHover = getHover

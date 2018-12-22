@@ -6,6 +6,7 @@ public class Token {
 	public endOffset  int 
 	public startLine   int
 	public endLine     int
+	public startColumnOffset int 
 	public endColumnOffset int 
 	public description string
 	public stringValue string 

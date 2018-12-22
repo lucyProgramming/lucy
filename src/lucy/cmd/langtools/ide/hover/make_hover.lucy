@@ -1,12 +1,13 @@
 import "lucy/cmd/langtools/compile/ast"
 import "java/lang/Object"
 
+
 class MakeHover {
     from Object
     
     fn MakeHover(from Object) {
         this.super()
-        this.from = from 
+        this.from = from
     }
 
     fn make() -> (s string){
@@ -21,6 +22,12 @@ class MakeHover {
             s = this.from.(ast.Function).mkDescription()
         case ast.ClassMethod:
             s = this.from.(ast.ClassMethod).mkDescription()
+        case ast.EnumName:
+            s = this.from.(ast.EnumName).mkDescription()
+        case ast.Variable:
+            s = this.from.(ast.Variable).mkDescription()
+        case ast.Constant:
+            s = this.from.(ast.Constant).mkDescription()
         default:
             s = sprintf("'%s' un handled" , this.from.getClass().toString())
         }

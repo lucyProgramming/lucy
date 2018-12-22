@@ -22,12 +22,13 @@ module.exports = class GoReferenceProvider implements vscode.ReferenceProvider {
                 reject("not found usages");
                 return;
             }
-            console.log(usages);
             var items = new Array();
             for(var i = 0 ; i < usages.length ; i ++ ) {
                 let v = usages[i];
                 var uri2 = vscode.Uri.file(v.pos.filename);
-                var position2 = new vscode.Position(v.pos.endLine,v.pos.endColumnOffset);
+                var position2 = new vscode.Range(
+                    new vscode.Position(v.pos.startLine,v.pos.startColumnOffset) ,
+                    new vscode.Position(v.pos.endLine,v.pos.endColumnOffset) );
                 var location =  new vscode.Location(uri2, position2);
                 items[i] = location; 
             } 

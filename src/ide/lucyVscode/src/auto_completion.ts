@@ -2,10 +2,9 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-
 const querystring = require('querystring');
 const syncHttpRequest = require('sync-request');
-
+const fs = require('fs');
 
 module.exports = class GoCompletionItemProvider implements vscode.CompletionItemProvider {
     public provideCompletionItems(
@@ -20,11 +19,11 @@ module.exports = class GoCompletionItemProvider implements vscode.CompletionItem
             let now = new Date().getTime();
             var res  = syncHttpRequest("POST" , u , {
                 "body": buffer,
-                "timeout" : 1000 ,
+                "timeout" : 2000,
             });
-            console.log("call lucy server used:" , new Date().getTime() - now  );
-            let lucyItems = JSON.parse(res.getBody());
-            console.log(lucyItems);
+            console.log("call lucy server used:" , new Date().getTime()-now);
+            fs.writeFileSync("d://debug.txt" , res.getBody());
+            let lucyItems = JSON.parse(res.getBody("utf8"));
             if(lucyItems.length === 0 ){
                 reject("no suggest");
                 return;

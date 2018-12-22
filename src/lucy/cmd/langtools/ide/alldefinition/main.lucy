@@ -3,7 +3,7 @@ import "lucy/cmd/langtools/ide"
 import "lucy/os"
 import "lucy/encoding/json"
 
-public fn getAllDefinition (dir string) -> (result Definition[]){
+public fn getAllDefinition (dir string) -> (result ide.Definition[]){
     lucyFileNames := ide.getLucyFiles(dir)
     if len(lucyFileNames) == 0 {
         print("the directory contains no lucy file")

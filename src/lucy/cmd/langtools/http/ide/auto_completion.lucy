@@ -7,7 +7,6 @@ import "lucy/encoding/json"
 import "lucy/cmd/langtools/compile/ast"
 
 
-
 class AutoCompletion implements HttpHandler {
     public fn handle(exchange HttpExchange) {
         os := exchange.getResponseBody()

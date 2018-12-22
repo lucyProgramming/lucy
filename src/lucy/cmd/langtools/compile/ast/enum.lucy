@@ -16,6 +16,13 @@ public class EnumName {
 	used bool 
     findUsageInstances []Usage 
 
+	public fn mkDescription() -> (s string = ""){
+		// if this.comment != null {
+		// 	s += this.comment
+		// }
+		s += sprintf("%s enumItem@%d\n" , this.name  , this.value) 
+	}
+
 	fn reduceFindUsageInstances(block Block) {
         if this.findUsage == false {
             return 
@@ -59,14 +66,19 @@ public class Enum   {
 		return this.accessFlags&cg.AccClassPublic != 0
 	}
 
-	public fn mkDescription() ->(s string) {
-
+	public fn mkDescription() ->(s string = "") {
+		// if this.comment != null {
+		// 	s += this.comment
+		// }
+		if this.isPublic() {
+			s += "public "
+		}
+		s += this.name + "\n"
 	}
 
 	fn check(block Block) -> (errs []error = []error{}) {
 		if this.locateDefinition {
 			block.inheritedAttribute.p.setLocationDefinition(this)
-			return 
 		}
 		if this.findUsage {
 			u := new Usage()
@@ -75,12 +87,10 @@ public class Enum   {
 			this.findUsageInstances = [u]
 			block.inheritedAttribute.p.findUsage = this.findUsageInstances
 			block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal
-		 	return 
 		}
 		for _ , vv := range this.enums {
 			if vv.locateDefinition {
 				block.inheritedAttribute.p.setLocationDefinition(vv)
-				return	
 			}
 			if vv.findUsage {
 				u := new Usage()
@@ -89,11 +99,7 @@ public class Enum   {
 				vv.findUsageInstances = [u]
 				block.inheritedAttribute.p.findUsage = vv.findUsageInstances
 				block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal
-				return
 			}
-		}
-		if block.inheritedAttribute.p.onlyAnalyzeGlobals {
-			return 
 		}
 		var initV int = 0
 		if this.Init != null {

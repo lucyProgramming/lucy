@@ -53,6 +53,22 @@ public class Constant  {
         this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
         block.inheritedAttribute.p.findUsage = this.findUsageInstances 
     }
+
+	public fn mkDescription() -> (s string = ""){
+		// if this.comment != null {
+		// 	s += this.comment
+		// }
+		if this.Type != null {
+			s += sprintf("const %s %s" , this.name , this.Type.typeString())
+		}else {
+			s += sprintf("const %s" , this.name , this.Type.typeString())
+		}
+		if this.defaultValueExpression != null {
+			if this.defaultValueExpression.literalRaw != null {
+				s += " = " + this.defaultValueExpression.literalRaw 
+			}else {
+				s += " = " + this.defaultValueExpression.op 
+			}
+		}
+	}
 }
-
-

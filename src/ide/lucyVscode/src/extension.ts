@@ -6,8 +6,10 @@ import * as vscode from 'vscode';
 
 const GoDefinitionProvider = require("./goto_definition");
 const GoReferenceProvider = require("./findusage");
-const GoDocumentSymbolProvider = require("./alldefinition");
+const GoWorkSpaceSymbolProvider = require("./dir_definitions");
 const GoCompletionItemProvider = require("./auto_completion");
+const GoDocumentSymbolProvider = require("./outline");
+const GoHoverProvider = require("./hovers");
 
 
 // this method is called when your extension is activated
@@ -26,11 +28,17 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.languages.registerReferenceProvider(
             lucySelector, new GoReferenceProvider()));
         context.subscriptions.push(
-            vscode.languages.registerDocumentSymbolProvider(
-                lucySelector, new GoDocumentSymbolProvider()));
+            vscode.languages.registerWorkspaceSymbolProvider(
+                new GoWorkSpaceSymbolProvider()));
         context.subscriptions.push(
             vscode.languages.registerCompletionItemProvider(
                 lucySelector, new GoCompletionItemProvider(), '.' , '\"')); 
+        context.subscriptions.push(
+            vscode.languages.registerDocumentSymbolProvider(
+                lucySelector, new GoDocumentSymbolProvider()));
+        context.subscriptions.push(
+            vscode.languages.registerHoverProvider(
+                lucySelector, new GoHoverProvider()));
 }
 
 

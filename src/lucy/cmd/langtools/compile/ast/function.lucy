@@ -69,7 +69,10 @@ public class Function {
 	}
 
 	public fn mkDescription() ->(d string = "") {
-		
+		// if this.comment != null {
+		// 	d += this.comment
+		// }
+		d += this.readableMsg(true)
 	}
 	
 	public fn nameLiteralFunction() -> (name string) {
@@ -88,7 +91,7 @@ public class Function {
 			this.name == "" {
 			return "fn " + this.Type.typeString(format)
 		} else {
-			return "fn " + this.name + " " + this.Type.typeString()
+			return "fn " + this.name + " " + this.Type.typeString(format)
 		}
 	}
 

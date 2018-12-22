@@ -25,7 +25,7 @@ class FindDefinition {
         this.printErr = printErr 
         this.searchFile = searchFile
         this.matchLine = matchLine 
-        this.storePackage = this.storePackage
+        this.storePackage = storePackage
     }
     
     fn find() -> (result ast.Pos){
@@ -34,7 +34,6 @@ class FindDefinition {
         loader.onlyAnalyzeGlobals = true 
         var p ast.Package
         var es []error 
-        
         {
             defer {
                 err := catch()  // may be panic 
@@ -50,6 +49,9 @@ class FindDefinition {
                 this.matchLine , 
                 loader)
         }
+        if p == null {
+            return 
+        }
         if this.printErr {
             for v := range es{
                 os.stderr.println(v.getMessage())
@@ -58,6 +60,7 @@ class FindDefinition {
         if null != this.storePackage {
             this.storePackage[0] = p 
         }
+        
         if p.locateDefinition != null {
             if p.locateDefinition.loadDefinitionFromOutside != null {
                 return this.loadDefinitionFromOutside(p.locateDefinition.loadDefinitionFromOutside)

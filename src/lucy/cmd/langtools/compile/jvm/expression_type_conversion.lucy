@@ -108,7 +108,7 @@ class BuildExpressionTypeConversion {
             return
         }
 
-        // []byte("hello world")
+        //[]byte("hello world")
         if conversion.Type.equal(ast.LucyBytesType) &&
             conversion.Expression.value.Type == ast.VariableTypeString {
             //stack top must be a string
@@ -148,7 +148,7 @@ class BuildExpressionTypeConversion {
             }
             return
         }
-        //  string(['h','e'])
+        //string(['h','e'])
         if conversion.Type.Type == ast.VariableTypeString &&
             conversion.Expression.value.equal(ast.LucyBytesType) {
             class autoVar {

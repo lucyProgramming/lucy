@@ -7,7 +7,7 @@ public class ClassMethod {
 	public findUsage  bool 
 	public rename  bool
 	public findUsageInstances  []Usage 
-	
+	public comment string 
 	public fn narrowDownAccessRange(implementation ClassMethod) ->(is bool ) {
 		if this.isPublic() {
             return !implementation.isPublic()
@@ -74,6 +74,9 @@ public class ClassMethod {
 	}
 	
 	public fn mkDescription() ->(d string = "") {
+		// if this.comment != null {
+		// 	d += this.comment
+		// }
 		if this.isPublic() {
 			d = "public"
 		}else if this.isProtected() {

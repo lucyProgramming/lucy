@@ -58,7 +58,7 @@ class ClassParser extends  ParserExtends {
 			}
 		}
 	}
-
+	
 	fn parse(isAbstract bool) -> (classDefinition ast.Class, err error) {
 		isInterface := this.parser.token.Type == lex.TokenInterface
 		classDefinition = new ast.Class()
@@ -312,15 +312,9 @@ class ClassParser extends  ParserExtends {
 	}
 	
 	fn parseConst(classDefinition ast.Class, comment CommentParser) -> (err error) {
-		cs, err := this.parser.parseConst()
+		cs, err := this.parser.parseConst(comment)
 		if err != null {
 			return err
-		}
-		constComment := comment.comment
-		if this.parser.token.Type == lex.TokenComment {
-			this.next(lfIsToken)
-		} else {
-			this.parser.validStatementEnding()
 		}
 		if classDefinition.block.constants == null {
 			classDefinition.block.constants = new map { string -> ast.Constant }( )
@@ -333,7 +327,6 @@ class ClassParser extends  ParserExtends {
 				continue
 			}
 			classDefinition.block.constants[v.name] = v
-			v.comment = constComment
 		}
 		return null
 	}
