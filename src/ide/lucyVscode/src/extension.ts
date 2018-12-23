@@ -11,6 +11,9 @@ const GoCompletionItemProvider = require("./auto_completion");
 const GoDocumentSymbolProvider = require("./outline");
 const GoHoverProvider = require("./hovers");
 
+let diagnosticCollection: vscode.DiagnosticCollection;
+
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -38,6 +41,9 @@ export function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(
             vscode.languages.registerHoverProvider(
                 lucySelector, new GoHoverProvider()));
+        
+        diagnosticCollection = vscode.languages.createDiagnosticCollection('go');
+        context.subscriptions.push(diagnosticCollection);
 }
 
 

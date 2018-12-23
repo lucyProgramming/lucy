@@ -1,0 +1,33 @@
+import "lucy/cmd/langtools/ide/diagnose"
+import "com/sun/net/httpserver/HttpHandler"
+import "com/sun/net/httpserver/HttpExchange"
+import "lucy/cmd/langtools/http/g"
+import "lucy/encoding/json"
+
+class Diagnose implements HttpHandler {
+    public fn handle(exchange HttpExchange) {
+        os := exchange.getResponseBody()
+        defer {
+            e := catch()
+            if e != null {
+                exchange.sendResponseHeaders(500 , 0L)
+                os.write(byte[]("internal error"))
+                e.printStackTrace()
+            }
+            exchange.close()
+        }
+        uri := exchange.getRequestURI()
+        paramters := g.parseQuery(uri.getQuery())
+        file := paramters["file"]
+        if file == null || file == "" {
+            bs := byte[]("file not provide")
+            exchange.sendResponseHeaders(400 , long(len(bs)))
+            os.write(bs)
+            return
+        }
+        diags := diagnose.diagnose(file)
+        bs ,_ := json.encode(copy(new error[](len(diags)) , diags) , "\t")
+        exchange.sendResponseHeaders(200 , long(len(bs)))
+        os.write(copy(new byte[](len(bs)) ,bs))
+    } 
+}

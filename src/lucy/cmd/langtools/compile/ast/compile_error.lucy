@@ -1,0 +1,9 @@
+import "java/lang/Exception"
+
+public class CompileError extends Exception {
+    pos Pos 
+    public fn CompileError(pos Pos , msg string) {
+        this.super(msg)
+        this.pos = pos 
+    }
+}

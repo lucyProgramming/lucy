@@ -1,0 +1,20 @@
+
+import "lucy/cmd/langtools/ide"
+import "lucy/cmd/langtools/common"
+
+public fn diagnose(filename string) ->(es []error) {
+    lucypath , packageName := ide.locateLucyFile(filename)
+    lucyFiles := ide.readLucyFiles(ide.getLucyFiles(lucypath + "/src/" + packageName))
+    loader := new ide.PackageLoader(common.getLucyPath() , common.getClassPath())
+    _ , es = ide.parseAstAndTypeCheck(packageName , lucyFiles , false , "" , -1 , loader)
+    if es == null {
+        es = loader.errors
+    }else {
+        es.appendAll(loader.errors)
+    }
+}
+
+
+fn main(args []string) {
+    
+}

@@ -8,7 +8,8 @@ import "java/io"
 
 public class PackageLoader extends lc.FileLoader {
     public onlyAnalyzeGlobals bool
-    
+    public errors []error 
+
     public fn PackageLoader(lucyPath , classPaths []string){
         this.super(lucyPath ,classPaths )
     }
@@ -100,7 +101,13 @@ public class PackageLoader extends lc.FileLoader {
     
     public fn  loadLucyPackage(r lc.Resource) -> (p ast.Package) {
         lucyFiles := readLucyFiles(getLucyFiles(r.realPath))
-        p , _ =  parseAstAndTypeCheck(r.name , lucyFiles , this.onlyAnalyzeGlobals , "" , -1 ,this)
+        var es []error 
+        p , es =  parseAstAndTypeCheck(r.name , lucyFiles , this.onlyAnalyzeGlobals , "" , -1 ,this)
+        if this.errors == null {
+            this.errors = es 
+        }else {
+            this.errors.appendAll(es)
+        }
     }
 }
 
