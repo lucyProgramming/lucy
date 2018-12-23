@@ -1,0 +1,164 @@
+
+syntax ::= [imports] [ 
+    ["public"] class_definition | 
+    ["public"] function_definition |
+    ["public"] enum_definition | 
+    ["public"] expression |
+    ["public"] const_definition | 
+    typealias |
+    "{" [statement_list] "}" 
+]
+
+imports ::= (import | imports import)
+import ::= "import" expression_string_literal ["as" identifier ]
+
+enum_definition ::= "enum" identifier "{" name_list "}"
+
+typealias ::= "typealias" identifier "=" type
+
+
+class_definition ::= ["abstract"] ["final"]  ("class" | "interface") classname [ "extends"  superclassname ] ["implements" superclassnames ]
+    "{" { field_definition | method_definition | const_definition }  "}"
+
+access_control = ("public"|"proteced"|"private")
+
+field_definition ::= [access_control] ["final"] ["static"] ["volatile"] name_list type ["=" expression_list]
+
+method_definition ::= ([access_control] ["final"] ["static"] ["synchronized"] function_definition | 
+    [access_control] ["final"] ["static"] ["synchronized"] fn identifier "(" [parameter_list] ")"
+) 
+
+classname ::= identifier
+superclassname ::= (classname | identifier "." identifier)
+superclassnames ::= (superclassname | superclassnames "," superclassname)
+
+
+function_definition ::= "fn" [identifier] ["<" name_list ">"] "(" [parameter_list] ")" [ "->" return_list] "{"  [statement_list]  "}"
+
+parameter_list ::= (typedname | parameter_list ","  typedname)
+return_list ::= parameter_list
+
+typedname ::= name_list type ["=" expression_list]
+
+type ::= ("bool" | "int" | "short" | "char" | "long" | "double" | "float"  | 
+    "[]"type | type"[]" | map"{"type "->" type"}"  | identifier | identifier "." identifier | 
+    "global" "." identifier
+)
+
+statement ::= (
+    expression_statement | 
+    if_statement | 
+    for_statement | 
+    switch_statement | 
+    when_statement | 
+    enum | 
+    class_definition  | 
+    typealias | 
+    "continue" | 
+    "goto" identifier | 
+    "break" | 
+    "pass" | 
+    lable_statement |
+    return_statemment | 
+    defer_statement |
+    block_statement
+) 
+
+statement_list ::= (statement | statement_list statement)
+
+block_statement ::= "{" [statement_list] "}"
+
+expression_list ::= (expression | expression_list "," expression)
+
+expression_statement ::= expression
+expression_or_nothing ::= (expression|)
+lable_statement ::= identifier ":"
+return_statemment ::= "return" [expression_list]
+defer_statement ::= "defer" statement
+
+if_statement ::= "if" expression_list "{" [statement_list] "}" [elseif_list] ["default{" [statement_list] "}"] 
+elseif_list ::= (elseif | elseif_list elseif)
+elseif ::= "else if" expression "{"  [statement_list] "}"  
+for_statement ::= "for" (expression_or_nothing |  expression_or_nothing ";" expression_or_nothing ";" expression_or_nothing) "{" [statement_list] "}"
+switch_statement ::= "switch" expression_list "{"  switch_cases ["default:" "{" [statement_list] "}"] "}"
+switch_cases ::= (switch_case | switch_cases switch_case)
+switch_case ::= "case" expression_list ":" [statement_list]
+when_statement ::= "when" (identifier | expression ".(type)") "{" when_cases  ["default:" "{" [statement_list] "}"] "}"
+when_cases ::= (when_case | when_cases when_case)
+when_case ::= "case" type_list ":" [statement_list]
+type_list ::= (type | type_list "," type)
+name_list ::= (identifier | name_list "," identifier) 
+
+const_definition = "const" name_list [type] "=" expression_list
+
+expression ::= (
+    "null" |
+    "true" |
+    "false" |
+    expression_string_literal | 
+    expression_short_literal | 
+    expression_char_literal | 
+    expression_int_literal |
+    expression_byte_literal | 
+    expression_long_literal | 
+    expression_float_literal |
+    expression_double_literal | 
+    expression_assign |
+    expression_binary |
+    expression_unary |
+    var_expression | 
+    identifier | 
+    expression_suffix |
+    expression_question | 
+    expression_call |
+    "global" "." identifier |
+    expression_new | 
+    function_definition |
+    "range" expression | 
+    "(" expression ")" |
+    expression_type_convertion |
+    expression_type_assertion |
+    expression_index |
+    expression_slice | 
+    expression_array | 
+    expression_map
+)
+
+expression_map ::= ("map{" type -> type "}{" [kvPairs] "}" | "{" kvPairs "}")
+kvPairs ::= (kvPair | kvPairs "," kvPair)
+kvPair ::= expression "->" expression 
+
+expression_array ::= ("[" expression_list  "]" | "[]" type "{" [expression_list] "}")
+
+expression_index ::= expression "[" expression "]"
+
+expression_slice ::= expression "[" expression_or_nothing ":" expression_or_nothing "]"
+
+expression_type_convertion ::= type "(" expression ")"
+
+expression_type_assertion ::= expression ".("  type ")"
+
+expression_assign ::= 
+    expression_list 
+        ("=" | ":=" ,"*=" , "/=" , "%=" , "&=" , "|=" , "<<=" ,"^=" , ">>=" ) 
+    expression_list
+
+var_expression ::= "var" name_list (type ["=" expression_list] | "=" expression_list | type "=" expression_list)  
+
+expression_binary ::= 
+    expression 
+        ("+" | "-" | "*" |"/" | "%" | "&" | "^" | "|" | "&&" |  "||" | ">" | "<" | "==" | "!=" , ">=" , "<=") 
+    expression 
+
+expression_unary ::= ("++" , "--" , "-" , "~" , "!") expression 
+
+expression_question ::= expression "?" expression ":" expression
+
+expression_suffix ::= (expression | expression_suffix ("." |"++"| "--") expression )
+
+arguments ::= expression_list
+
+expression_call ::= expression "("  [expression_list] ")"
+
+expression_new ::= "new" type "(" [arguments] ")"
+
