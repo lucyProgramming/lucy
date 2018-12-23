@@ -58,7 +58,7 @@
         "@types/mocha": "^2.2.42",
         "sync-request": "^6.0.0"
     },
-    "dependencies":{
+    "dependencies": {
         "sync-request": "^6.0.0"
     }
 }

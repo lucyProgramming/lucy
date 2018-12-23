@@ -11,7 +11,8 @@ const GoCompletionItemProvider = require("./auto_completion");
 const GoDocumentSymbolProvider = require("./outline");
 const GoHoverProvider = require("./hovers");
 
-let diagnosticCollection: vscode.DiagnosticCollection;
+// let diagnosticCollection: vscode.DiagnosticCollection;
+
 
 
 // this method is called when your extension is activated
@@ -41,30 +42,30 @@ export function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(
             vscode.languages.registerHoverProvider(
                 lucySelector, new GoHoverProvider()));
-        
-        diagnosticCollection = vscode.languages.createDiagnosticCollection('go');
-        context.subscriptions.push(diagnosticCollection);
+        // const collection = vscode.languages.createDiagnosticCollection('lucy');``
+        // context.subscriptions.push(collection);
+        // context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(e => updateDiagnostics(e, collection)));
 }
 
 
-// function onChange() {
-//     let uri = document.uri;
-//     check(uri.fsPath, goConfig).then(errors => {
-//       diagnosticCollection.clear();
-//       let diagnosticMap: Map<string, vscode.Diagnostic[]> = new Map();
-//       errors.forEach(error => {
-//         let canonicalFile = vscode.Uri.file(error.file).toString();
-//         let range = new vscode.Range(error.line-1, error.startColumn, error.line-1, error.endColumn);
-//         let diagnostics = diagnosticMap.get(canonicalFile);
-//         if (!diagnostics) { diagnostics = []; }
-//         diagnostics.push(new vscode.Diagnostic(range, error.msg, error.severity));
-//         diagnosticMap.set(canonicalFile, diagnostics);
-//       });
-//       diagnosticMap.forEach((diags, file) => {
-//         diagnosticCollection.set(vscode.Uri.parse(file), diags);
-//       });
-//     })
-// }
+function updateDiagnostics(document: vscode.TextEditor | undefined , collection: vscode.DiagnosticCollection): void {
+	// if (document && path.basename(document.uri.fsPath) === 'sample-demo.rs') {
+	// 	collection.set(document.uri, [{
+	// 		code: '',
+	// 		message: 'cannot assign twice to immutable variable `x`',
+	// 		range: new vscode.Range(new vscode.Position(3, 4), new vscode.Position(3, 10)),
+	// 		severity: vscode.DiagnosticSeverity.Error,
+	// 		source: '',
+	// 		relatedInformation: [
+	// 			new vscode.DiagnosticRelatedInformation(new vscode.Location(document.uri, new vscode.Range(new vscode.Position(1, 8), new vscode.Position(1, 9))), 'first assignment to `x`')
+	// 		]
+	// 	}]);
+	// } else {
+	// 	collection.clear();
+    // }
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!");
+}
+
 
 
 

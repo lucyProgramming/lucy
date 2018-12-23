@@ -26,7 +26,7 @@ class Diagnose implements HttpHandler {
             return
         }
         diags := diagnose.diagnose(file)
-        bs ,_ := json.encode(copy(new error[](len(diags)) , diags) , "\t")
+        bs , _ := json.encode(copy(new error[](len(diags)) , diags) , "\t")
         exchange.sendResponseHeaders(200 , long(len(bs)))
         os.write(copy(new byte[](len(bs)) ,bs))
     } 
