@@ -1,5 +1,4 @@
 
-
 public class Pos {
 	public filename string
 	public startLine   int
@@ -10,7 +9,7 @@ public class Pos {
 		offset at bs , for special use。
 		for template function only currently
 	*/
-	public offset int
+	public startOffset int
 	public endOffset int 
 	public loadDefinitionFromOutside LoadDefinitionFromOutside 
 	
@@ -20,6 +19,10 @@ public class Pos {
 	}
 }
 
+
+fn errMsgPrefix(pos Pos) -> (prefix string) {
+	return pos.errMsgPrefix()
+}
 
 public class NameWithPos {
 	public name string
@@ -43,6 +46,3 @@ public class NameWithPos {
 	}
 }
 
-fn errMsgPrefix(pos Pos) -> (prefix string) {
-	return pos.errMsgPrefix()
-}

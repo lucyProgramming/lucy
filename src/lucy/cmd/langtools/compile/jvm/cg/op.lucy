@@ -201,4 +201,4 @@ public const	OP_ifnull    byte = 0xc6 //为 null 时跳转。
 public const	OP_ifnonnull byte = 0xc7 //不为 null 时跳转。
 public const	OP_goto_w    byte = 0xc8 //无条件跳转（宽索引）。
 public const	OP_jsr_w     byte = 0xc9 // 跳转至指定 32 位地址偏移量位置，并将 jsr_w 下一条指令地址压入栈顶。
-public const	breakpoint byte = 0xca //调试时的断点标志。
+public const	OP_breakpoint byte = 0xca //调试时的断点标志。

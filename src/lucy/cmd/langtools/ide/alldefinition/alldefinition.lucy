@@ -39,7 +39,7 @@ class AllDefinition {
         }
         return this.mkResult(p)
     }
-       
+    
     fn mkResult(p ast.Package) ->(result ide.Definition[]) {
         items := []ide.Definition{}
         for name , v := range p.block.variables {
@@ -72,34 +72,17 @@ class AllDefinition {
         }
         for name , v := range p.block.classes {
             item := new ide.Definition()
-            item.Type = "enum"
+            item.Type = "class"
             item.pos = v.pos 
             item.name = name
             items.append(item)
-            innerLength := len(v.fields)
-            for v := range v.methods {
-                innerLength += len(v)
-            }
-            item.inners = new ide.Definition[](innerLength)
-            var i = 0 
-            for _, v := range v.fields {
-                itemField := new ide.Definition()
-                itemField.Type = "field"
-                itemField.name = v.name
-                itemField.pos = v.pos 
-                item.inners[i] = itemField
-                i++
-            }
-            for _, v := range v.methods {
-                for method := range v {
-                    itemMethod := new ide.Definition()
-                    itemMethod.Type = "method"
-                    itemMethod.name = method.Function.name 
-                    itemMethod.pos = method.Function.pos 
-                    item.inners[i] = itemMethod
-                    i++
-                }   
-            }
+        }
+        for name , v := range p.block.typeAliases {
+            item := new ide.Definition()
+            item.Type = "typealias"
+            item.pos = v.alias.pos
+            item.name = v.alias.name
+            items.append(item)
         }
         return copy(new ide.Definition[](len(items)) , items)
     }

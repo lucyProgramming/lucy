@@ -74,9 +74,9 @@ public class ClassMethod {
 	}
 	
 	public fn mkDescription() ->(d string = "") {
-		// if this.comment != null {
-		// 	d += this.comment
-		// }
+		if this.comment != null {
+			d += this.comment
+		}
 		if this.isPublic() {
 			d = "public"
 		}else if this.isProtected() {

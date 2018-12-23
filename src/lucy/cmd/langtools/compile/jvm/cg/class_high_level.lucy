@@ -5,13 +5,13 @@ public class ClassHighLevel {
 	/*
 		one class file can be compile form multi source file
 	*/
-	sourceFiles              map { string -> bool }
+	sourceFiles                     map {string -> bool}
 	public name                     string
 	public accessFlags              char
 	public superClass               string
 	public interfaces               []string
-	public fields                   map { string -> FieldHighLevel }
-	public methods                  map { string -> []MethodHighLevel }
+	public fields                   map {string -> FieldHighLevel}
+	public methods                  map {string -> []MethodHighLevel}
 	public triggerPackageInitMethod MethodHighLevel
 	public templateFunctions        []AttributeTemplateFunction
 
@@ -174,7 +174,6 @@ public class ClassHighLevel {
 		s += "}"
 		return s
 	}
-
 	public fn toLow() ->(c Class) {
     	this.Class.fromHighLevel(this)
     	return this.Class

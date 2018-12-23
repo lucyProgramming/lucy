@@ -233,7 +233,7 @@ class ConstantInfoUtf8  {
 		p.tag = ConstantPoolTagUtf8
 		p.info = new []byte(2)
 		binary.BigEndian.putChar(p.info, char(this.length))
-		p.info . appendAll(this.bs)
+		p.info.appendAll(this.bs)
 		return p
 	}
 }

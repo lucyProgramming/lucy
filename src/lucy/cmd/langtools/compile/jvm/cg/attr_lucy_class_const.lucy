@@ -1,6 +1,7 @@
  import "lucy/binary"
 
 public class AttributeLucyClassConst {
+	
 	public constants []LucyClassConst
 	
 	public fn fromBs(c Class, bs []byte) {
@@ -10,8 +11,7 @@ public class AttributeLucyClassConst {
 			constant.name = string(c.constPools[binary.BigEndian.getChar(bs)].info)
 			constant.descriptor = string(c.constPools[binary.BigEndian.getChar(bs[2:])].info)
 			constant.valueIndex = binary.BigEndian.getChar(bs[4:])
-			constant.comment = string(c.constPools[binary.BigEndian.getChar(bs[6:])].info)
-			bs = bs[8:]
+			bs = bs[6:]
 			this.constants.append(constant)
 		}
 	}
@@ -22,24 +22,23 @@ public class AttributeLucyClassConst {
 		}
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const(AttributeNameLucyClassConst)
-		ret.info = new []byte(len(this.constants)*8)
+		ret.info = new []byte(len(this.constants)*6)
 		for k, v := range this.constants {
-			b := ret.info[k*8:]
+			b := ret.info[k*6:]
 			binary.BigEndian.putChar(b, c.insertUtf8Const(v.name))
 			binary.BigEndian.putChar(b[2:], c.insertUtf8Const(v.descriptor))
 			binary.BigEndian.putChar(b[4:], v.valueIndex)
-			binary.BigEndian.putChar(b[6:], c.insertUtf8Const(v.comment))
 		}
 		ret.attributeLength = (len(ret.info))
 		return ret
 	}	
 }
 
+
 public class LucyClassConst {
 	public name       string
 	public descriptor string
 	public valueIndex char
-	public comment    string
 }
 
 

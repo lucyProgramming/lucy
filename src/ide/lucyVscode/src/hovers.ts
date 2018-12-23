@@ -22,7 +22,11 @@ module.exports = class GoHoverProvider implements vscode.HoverProvider {
                 "body": buffer,
                 "timeout" : 2000
             });
-            var value = res.getBody('utf8')
+            var value = res.getBody('utf8');
+            if(!value) {
+                reject("not found");
+                return ;
+            }
             resolve(new vscode.Hover({language:"lucy" ,value : value }));
         });
     }

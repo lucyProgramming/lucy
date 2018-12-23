@@ -101,6 +101,13 @@ public fn outLine(filename string) ->(definitions []ide.Definition = []ide.Defin
                     d.pos = v.pos 
                     definition.inners[k] = d 
                 }
+            case ast.TypeAlias:
+                t := v.node.(ast.TypeAlias)
+                definition := new ide.Definition()
+                definitions.append(definition)
+                definition.name = t.name
+                definition.pos = t.pos
+                definition.Type = "typealias"
         }
     }
 

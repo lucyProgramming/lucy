@@ -50,6 +50,9 @@ module.exports = class GoWorkSpaceSymbolProvider implements vscode.WorkspaceSymb
                     case "enum":
                         kind = vscode.SymbolKind.Enum;
                         break;
+                    case "typealias":
+                        kind = vscode.SymbolKind.Operator;
+                        break;
                     default:
                         console.log(v.name, v.Type, "have not match use default");
                         kind = vscode.SymbolKind.Property;

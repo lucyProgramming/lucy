@@ -438,7 +438,7 @@ public class Lexer {
 					}
 					c, eof = this.getChar()
 				}
-				bs.append( b)
+				bs.append(b)
 				c, eof = this.getChar()
 			case 'u':
 				var r char

@@ -244,7 +244,6 @@ public class  BuildPackage {
             for _, v := range astClass.block.constants {
                 cos := new cg.LucyClassConst()
                 cos.name = v.name
-                cos.comment = v.comment
                 cos.descriptor = Descriptor.typeDescriptor(v.Type)
                 switch v.Type.Type{
                     case ast.VariableTypeBool:

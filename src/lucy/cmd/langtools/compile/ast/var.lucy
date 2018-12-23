@@ -106,7 +106,6 @@ var autoCompletionBuildFunctionItems = new []AutoCompletionItem(0)
 
 }
 
-
 {
 
 	item := new AutoCompletionItem()

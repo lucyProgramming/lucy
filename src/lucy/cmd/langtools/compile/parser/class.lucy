@@ -136,6 +136,7 @@ class ClassParser extends  ParserExtends {
 			isSynchronized = false
 			isFinal = false
 			isAbstract = false
+			comment.reset()
 			accessControlToken = null
 		}
 		for this.parser.token.Type != lex.TokenEof {
@@ -188,7 +189,9 @@ class ClassParser extends  ParserExtends {
 					isStatic = false
 				}
 			//access private
-			case lex.TokenPublic, lex.TokenProtected, lex.TokenPrivate:
+			case lex.TokenPublic,
+				lex.TokenProtected,
+				lex.TokenPrivate:
 				accessControlToken = this.parser.token
 				this.next(lfIsToken)
 				this.parser.unExpectNewLineAndSkip()
@@ -218,11 +221,7 @@ class ClassParser extends  ParserExtends {
 					this.parser.errs.append(err)
 				}
 			case lex.TokenIdentifier:
-				err = this.parseField(classDefinition, this.parser.errs, isStatic, isVolatile, accessControlToken, comment)
-				if err != null {
-					this.consume(untilSemicolonOrLf)
-					this.next(lfNotToken)
-				}
+				this.parseField(classDefinition, this.parser.errs, isStatic, isVolatile, accessControlToken, comment)
 				resetProperty()
 			case lex.TokenConst: // const is for local use
 				this.next(lfIsToken)
@@ -374,10 +373,7 @@ class ClassParser extends  ParserExtends {
 		var initValues []ast.Expression
 		if this.parser.token.Type == lex.TokenAssign {
 			this.parser.next(lfNotToken) // skip = or :=
-			initValues, err = this.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
-			if err != null {
-				this.consume(untilSemicolonOrLf)
-			}
+			initValues, _ = this.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon)
 		}
 		fd := new ast.ClassFieldDeclaration()
 		fd.nameList = names 
@@ -388,18 +384,19 @@ class ClassParser extends  ParserExtends {
 		fieldComment := comment.comment
 		if this.parser.token.Type == lex.TokenComment {
 			fd.inlineComment = this.parser.token.stringValue
+			fieldComment = "//" + this.parser.token.stringValue 
 			this.next(lfIsToken)
 		} else {
 			this.parser.validStatementEnding()
 			this.parser.ifTokenIsLfThenSkip(false)
 		}
 		if classDefinition.fields == null {
-			classDefinition.fields = new map { string -> ast.ClassField } ()
+			classDefinition.fields = new map {string->ast.ClassField} ()
 		}
 		for k, v := range names {
 			if classDefinition.fields.keyExist(v.name) {
 				this.parser.errs.append( new error(sprintf("%s field %s is alreay declared",
-						this.parser.errMsgPrefix(), v.name)))
+					this.parser.errMsgPrefix(), v.name)))
 				continue
 			}
 			f := new ast.ClassField()

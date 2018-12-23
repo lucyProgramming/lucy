@@ -112,15 +112,19 @@ class BuildExpressionTypeConversion {
         if conversion.Type.equal(ast.LucyBytesType) &&
             conversion.Expression.value.Type == ast.VariableTypeString {
             //stack top must be a string
+            code.codes[code.codeLength] = cg.OP_ldc_w
+            c.insertStringConst("utf-8" , code.codes[code.codeLength+1 : code.codeLength+3])
+            code.codeLength += 3
+            
             code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                 "getBytes",
-                "()[B"
+                "(Ljava/lang/String;)[B"
             ), code.codes[code.codeLength+1:code.codeLength+3])
             code.codeLength += 3
-            if 3 > maxStack { //arraybyteref arraybyteref byte[]
-                maxStack = 3
+            if 4 > maxStack {  
+                maxStack = 4
             }
             meta := ArrayMetas[ast.VariableTypeByte]
             code.codes[code.codeLength] = cg.OP_invokespecial
@@ -135,16 +139,19 @@ class BuildExpressionTypeConversion {
         // byte[]("hello world")
         if conversion.Type.equal(ast.JavaBytesType) &&
             conversion.Expression.value.Type == ast.VariableTypeString {
+            code.codes[code.codeLength++] = cg.OP_ldc_w
+            c.insertStringConst("utf-8" , code.codes[code.codeLength : code.codeLength+2])
+            code.codeLength += 2
             //stack top must be a string
             code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                 "getBytes",
-               "()[B"
+               "(Ljava/lang/String;)[B"
             ), code.codes[code.codeLength+1:code.codeLength+3])
             code.codeLength += 3
-            if 3 > maxStack { //arraybyteref arraybyteref byte[]
-                maxStack = 3
+            if 4 > maxStack {  
+                maxStack = 4
             }
             return
         }
@@ -210,12 +217,20 @@ class BuildExpressionTypeConversion {
         // string(byte[])
         if conversion.Type.Type == ast.VariableTypeString &&
             conversion.Expression.value.equal(ast.JavaBytesType) {
+            
+            code.codes[code.codeLength++] = cg.OP_ldc_w
+            c.insertStringConst("utf-8" , code.codes[code.codeLength : code.codeLength+2])
+            code.codeLength += 2
+            if 4 > maxStack {
+                maxStack = 4
+            }
             code.codes[code.codeLength] = cg.OP_invokespecial
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaStringClass,
                 specialMethodInit,
-                "([B)V"
+                "([BLjava/lang/String;)V"
             ), code.codes[code.codeLength+1:code.codeLength+3])
+
             code.codeLength += 3
             return
         }

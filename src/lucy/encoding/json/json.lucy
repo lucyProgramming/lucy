@@ -6,6 +6,10 @@ import "java/lang/Class"
 public fn encode(x Object , indent string = "") -> (bs []byte , err error){
 	defer {
 	    err = catch()
+		if err != null {
+			print("encode json error")
+			err.printStackTrace()
+		}
 	}
 	bs = new Encoder( x, "" , indent).encode()
 }
@@ -14,11 +18,13 @@ public fn encode(x Object , indent string = "") -> (bs []byte , err error){
 public fn decode( bs []byte , x Object ) -> (x2 Object , err error ){
 	defer {
         err = catch()
+		if err != null {
+			print("decode json error")
+			err.printStackTrace()
+		}
     }
 	x2 = new Decoder(x , bs).decode()
 }
-
-
 
 
 fn isMap(c Class ) ->(is bool = false ) {  
@@ -30,6 +36,3 @@ fn isMap(c Class ) ->(is bool = false ) {
 		c = c.getSuperclass()
 	}
 }
-
-
-

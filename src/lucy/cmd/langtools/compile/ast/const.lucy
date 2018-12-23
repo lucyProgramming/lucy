@@ -46,6 +46,7 @@ public class Constant  {
 			this.stringValue = ""
 		}
 	}
+	
 	fn reduceFindUsageInstances(block Block) {
         if this.findUsage == false {
             return 
@@ -55,9 +56,9 @@ public class Constant  {
     }
 
 	public fn mkDescription() -> (s string = ""){
-		// if this.comment != null {
-		// 	s += this.comment
-		// }
+		if this.comment != null {
+			s += this.comment
+		}
 		if this.Type != null {
 			s += sprintf("const %s %s" , this.name , this.Type.typeString())
 		}else {

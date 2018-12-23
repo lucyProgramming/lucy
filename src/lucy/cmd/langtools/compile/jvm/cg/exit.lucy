@@ -10,6 +10,7 @@ public class Exit {
 		this.branchBytes = code.codes[code.codeLength+1 : code.codeLength+3]
 		code.codeLength += 3
 	}
+	
 	public fn write(to int){
 		offset := short(to - int(this.currentCodeLength))
 		this.branchBytes[0] = byte(offset >> 8)

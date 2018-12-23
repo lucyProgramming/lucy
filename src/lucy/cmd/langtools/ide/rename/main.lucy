@@ -15,11 +15,12 @@ public fn rename( file string, to string, pos int) {
     for v := range lucyFiles {
         if fileSystem.getPath(definition.filename).getFileName().toString() == 
             fileSystem.getPath(v.realPathName).getFileName().toString(){
-            v.rename = definition.offset 
+            v.rename = (definition.endLine << 16) | int(char(definition.endColumnOffset -1 )) 
         }
     }
     new ReName(lucyFiles , packageName , true ,common.getClassPath(), common.getLucyPath() , to ).rename()
 }
+
 
 fn main(args []string) {
     // f := new Flags()

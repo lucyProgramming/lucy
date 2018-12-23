@@ -17,9 +17,9 @@ public class EnumName {
     findUsageInstances []Usage 
 
 	public fn mkDescription() -> (s string = ""){
-		// if this.comment != null {
-		// 	s += this.comment
-		// }
+		if this.comment != null {
+			s += this.comment
+		}
 		s += sprintf("%s enumItem@%d\n" , this.name  , this.value) 
 	}
 
@@ -67,9 +67,9 @@ public class Enum   {
 	}
 
 	public fn mkDescription() ->(s string = "") {
-		// if this.comment != null {
-		// 	s += this.comment
-		// }
+		if this.comment != null {
+			s += this.comment
+		}
 		if this.isPublic() {
 			s += "public "
 		}

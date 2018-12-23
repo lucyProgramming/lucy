@@ -30,7 +30,7 @@ public class StatementLabel {
 	}
 	
 	// check this label is read to goto
-	fn Ready(from Pos) ->(err error) {
+	fn Ready(block Block ,  from Pos) ->(err error) {
 		ss := []Statement{}
 		for _, v := range this.block.statements {
 			if v.StatementLabel == this { // this is me

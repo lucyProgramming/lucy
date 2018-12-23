@@ -378,7 +378,7 @@ class Parser {
 			pos.endLine = this.token.endLine
 			pos.startColumnOffset = this.token.startColumnOffset
 			pos.endColumnOffset = this.token.endColumnOffset 
-		    pos.offset = this.token.offset
+		    pos.startOffset = this.token.offset
 			pos.endOffset = this.token.endOffset
 			return
 		} else {
