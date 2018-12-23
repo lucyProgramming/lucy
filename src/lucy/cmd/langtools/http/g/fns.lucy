@@ -2,6 +2,9 @@ import "java/io/InputStream"
 
 public fn parseQuery(query string) -> ( parameters map{string -> string}  ){
     parameters = new map{string -> string} ()
+    if query == null {
+        return parameters
+    }
     items := query.split("\\&")
     for v := range items {
         index := v.indexOf("=")
