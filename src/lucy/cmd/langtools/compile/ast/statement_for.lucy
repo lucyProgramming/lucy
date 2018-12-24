@@ -136,7 +136,8 @@ public class StatementFor {
 				}
 				vd.name = identifierV.name
 				if this.initExpressionBlock.inheritedAttribute.Function != null {
-					if err := this.initExpressionBlock.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(vd) ; err != null{
+					if err := this.initExpressionBlock.inheritedAttribute.Function.Type.
+						reDefineParameterOrReturnVar(vd) ; err != null{
 						errs.append(err)
 					}
 				}

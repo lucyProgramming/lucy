@@ -12,7 +12,8 @@ public class Expression {
 	public isCompilerAuto        bool // compile auto expression
 	public value                 Type
 	public multiValues           []Type
-	public pos                   Pos
+	public pos                   Pos  
+	public endPos 			     Pos  
 	public data                  Object
 	public isStatementExpression bool
 	public op                    string
@@ -50,6 +51,7 @@ public class Expression {
 		1 > 2
 		'a' > 'b'
 		1s > 2s
+		not include long 
 	*/
 	public fn is2IntCompare() -> (is bool) {
 		if this.isRelation() == false {
@@ -223,8 +225,13 @@ public class Expression {
 			this.Type == ExpressionTypeParenthesis	{
 			return null
 		}
-		return new error(sprintf("%s cannot use '%s' as condition",
-			this.pos.errMsgPrefix(), this.op))
+		errMsg := sprintf("cannot use '%s' as condition" , this.op)
+		err =  new CompileError(sprintf("%s %s",
+			this.pos.errMsgPrefix(), errMsg))
+		t := err.(CompileError)
+		t.startPos = this.pos
+		t.endPos = this.pos
+		t.err = errMsg
 	}
 
 	fn canBeUsedAsStatement() -> (err error) {
@@ -251,8 +258,13 @@ public class Expression {
 			this.Type == ExpressionTypeConst {
 			return null
 		}
-		return new error(sprintf("%s expression '%s' evaluate but not used",
-			this.pos.errMsgPrefix(), this.op))
+		errMsg := sprintf("expression '%s' evaluate but not used" , this.op )
+		err =  new CompileError(sprintf("%s ",
+			this.pos.errMsgPrefix(), errMsg))
+		t := err.(CompileError)
+		t.startPos = this.pos
+		t.endPos = this.pos
+		t.err = errMsg
 	}
 
 	fn isNumber() -> (is bool) {
@@ -404,22 +416,28 @@ public class Expression {
 				returnValueTypes = []Type{tt}
 			}
 			//binaries
-		case ExpressionTypeLogicalOr , ExpressionTypeLogicalAnd ,
-			ExpressionTypeOr ,ExpressionTypeAnd ,ExpressionTypeXor ,
-			ExpressionTypeLsh ,ExpressionTypeRsh,
-			ExpressionTypeEq ,ExpressionTypeNe , ExpressionTypeGe ,
-			ExpressionTypeGt, ExpressionTypeLe,ExpressionTypeLt , 
-			ExpressionTypeAdd,ExpressionTypeSub , ExpressionTypeMul,
-			ExpressionTypeDiv , ExpressionTypeMod :
+		case ExpressionTypeLogicalOr,
+			ExpressionTypeLogicalAnd ,
+			ExpressionTypeOr,
+			ExpressionTypeAnd ,
+			ExpressionTypeXor ,
+			ExpressionTypeLsh ,
+			ExpressionTypeRsh,
+			ExpressionTypeEq ,
+			ExpressionTypeNe ,
+			 ExpressionTypeGe ,
+			ExpressionTypeGt, 
+			ExpressionTypeLe,
+			ExpressionTypeLt , 
+			ExpressionTypeAdd , 
+			ExpressionTypeSub , 
+			ExpressionTypeMul,
+			ExpressionTypeDiv , 
+			ExpressionTypeMod :
 			tt := ExpressionCheckBinary.check(this , block, errs)
 			if tt != null {
 				returnValueTypes = []Type{tt}
 			}
-			//if len(errs) == length { // no error
-			//	if ee := this.binaryExpressionDependOnSub(); ee != null {
-			//		*e = *ee
-			//	}
-			//}
 			this.value = tt
 		case ExpressionTypeMap:
 			tt := ExpressionCheckMap.check(this , block, errs)
@@ -514,9 +532,16 @@ public class Expression {
 				returnValueTypes = []Type{tt}
 				this.value = tt
 			}
-		case ExpressionTypePlusAssign , ExpressionTypeMinusAssign,ExpressionTypeMulAssign ,
-			ExpressionTypeDivAssign , ExpressionTypeModAssign ,ExpressionTypeAndAssign,ExpressionTypeOrAssign,
-			 ExpressionTypeLshAssign,ExpressionTypeRshAssign ,ExpressionTypeXorAssign :
+		case ExpressionTypePlusAssign ,
+			ExpressionTypeMinusAssign,
+			ExpressionTypeMulAssign ,
+			ExpressionTypeDivAssign , 
+			ExpressionTypeModAssign ,
+			ExpressionTypeAndAssign,
+			ExpressionTypeOrAssign,
+			ExpressionTypeLshAssign,
+			ExpressionTypeRshAssign ,
+			ExpressionTypeXorAssign :
 			tt := ExpressionCheckOpAssign.check(this , block, errs)
 			if tt != null {
 				returnValueTypes = []Type{tt}
@@ -619,7 +644,7 @@ public class Expression {
 		}
 		return ts[0], err
 	}
-
+	
 	fn checkSingleValueContextExpression(block Block) -> (valueType Type, errs []error) {
 		ts, es := this.check(block)
 		ret, err := this.mustBeOneValueContext(ts)
@@ -682,7 +707,7 @@ public class Expression {
 		}
 		return null
 	}
-
+	
 	fn fieldAccessAble(block Block, field ClassField) -> (err error ) {
 		if this.value.Type == VariableTypeObject {
 			if field.isStatic() {
@@ -742,7 +767,6 @@ public class Expression {
 			ExpressionTypeShort,
 			ExpressionTypeInt, 
 			ExpressionTypeLong:
-
 			return this.longValue
 		case ExpressionTypeFloat,ExpressionTypeDouble:
 			return long(this.doubleValue)
@@ -781,12 +805,18 @@ public class Expression {
 		} else {
 			typ2 = bin.right.op
 		}
-		return new error(sprintf("%s cannot apply '%s' on '%s' and '%s'",
-			this.pos.errMsgPrefix(),
-			this.op,
+		errMsg := sprintf("cannot apply '%s' on '%s' and '%s'" ,this.op,
 			typ1,
-			typ2))
+			typ2 )
+		err = new CompileError(sprintf("%s %s",
+			this.pos.errMsgPrefix(),errMsg
+			))
+		t := err.(CompileError)
+		t.startPos =   bin.left.pos 
+		t.endPos = bin.right.pos
+		t.err = errMsg
 	}
+	
 	fn getLeftValue(block Block, errs []error)  -> (result Type){
 		return ExpressionCheckLeftValue.getLeftValue(this,block ,errs )
 	}
@@ -825,11 +855,8 @@ public class Expression {
 	
 	fn isAutoCompletionIdenfier() -> (is bool){
 		if this.Type != ExpressionTypeIdentifier {
-			return false 
+			return  
 		}
 		return this.data.(ExpressionIdentifier).autoCompletion 
 	}
-
-
-}
- 
+} 

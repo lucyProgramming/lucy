@@ -15,7 +15,7 @@ public class EnumName {
 	public getHover  bool
 	used bool 
     findUsageInstances []Usage 
-
+	
 	public fn mkDescription() -> (s string = ""){
 		if this.comment != null {
 			s += this.comment

@@ -31,7 +31,7 @@ public class Import {
 class SourceFile {
 	imports            map { string -> Import }  // accessName -> Import
 	importsByResources map { string -> Import }  // resourceName -> Import
-	filename          string 
+	filename          string  
 	/*
 		rename will modify this file 
 	*/
@@ -45,11 +45,10 @@ class SourceFile {
 	fn insertImport(block Block,i Import) ->(err error)  {
 		if i.locateDefinition {
 			block.inheritedAttribute.p.setLocationDefinition(i)
-			//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = i 
-			return 
+			return
 		}
 		if this.imports == null {
-			this.imports = new map { string -> Import }()
+			this.imports = new map {string->Import}()
 		}
 		if this.importsByResources == null {
 			this.importsByResources =new map { string -> Import }()

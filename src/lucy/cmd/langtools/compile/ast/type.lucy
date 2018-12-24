@@ -207,7 +207,7 @@ public class Type {
 			pos := this.pos // keep pos
 			if this.locateDefinition {
 				block.inheritedAttribute.p.setLocationDefinition(block.inheritedAttribute.Function.parameterTypes[this.name])
-
+				
 			}
 			block.inheritedAttribute.Function.parameterTypes[this.name].cp(this)
 			this.pos = pos // keep pos
@@ -425,7 +425,7 @@ public class Type {
 	
 	public fn isNumber() -> (is bool) {
 		return this.isInteger() ||
-			this.isFloat()
+			this.isFloat() 
 	}
 
 	public fn isPointer() -> (is bool)  {

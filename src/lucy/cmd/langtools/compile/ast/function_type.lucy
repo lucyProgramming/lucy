@@ -11,7 +11,6 @@ public class FunctionType {
 	public returnLpContainsLf bool 
 	public returnLpContainsInlineComment  string 
 	
-	
 	fn reDefineParameterOrReturnVar(reDefine Variable) -> (err error){
 		if v := this.searchName(reDefine.name) ; v != null {
 			errMsg := sprintf("%s reDefine parameter or return variable '%s',first declared at:\n",

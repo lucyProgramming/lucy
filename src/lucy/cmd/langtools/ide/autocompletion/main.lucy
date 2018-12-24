@@ -5,6 +5,7 @@ import "java/nio/file/FileSystems"
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/os"
 
+
 public fn autoCompletion(file string , bufferFile string , pos int , bs []byte) -> (result []ast.AutoCompletionItem){
     lucyPath , packageName := ide.locateLucyFile(file)
     var lucyFiles = ide.readLucyFiles(ide.getLucyFiles(lucyPath + "/src/" + packageName))    

@@ -1215,7 +1215,7 @@ public class Class {
                 }
                 if v.Type.assignAble(this.block , errs, assignment) == false {
                     errs.append(new error(sprintf("%s cannot assign '%s' as '%s' for default value",
-                        errMsgPrefix(v.pos), assignment.typeString(), v.Type.typeString())))
+                        v.defaultValueExpression.pos.errMsgPrefix(), assignment.typeString(), v.Type.typeString())))
                     continue
                 }
                 if assignment.Type == VariableTypeNull {
@@ -1304,8 +1304,9 @@ public class Class {
                     isConstruction := name == SpecialMethodInit
                     if isConstruction {
                         if method.isFirstStatementCallFatherConstruction() == false {
-                            errs.append( new error(sprintf("%s construction method should call father construction method first",
-                                errMsgPrefix(method.Function.pos))))
+                            errs.append(
+                                new error(sprintf("%s construction method should call father construction method first, 'this.super()'",
+                                    errMsgPrefix(method.Function.pos))))
                         }
                     }
                     if isConstruction && method.Function.Type.voidReturn() == false {
@@ -1332,7 +1333,7 @@ public class Class {
         return errs
     }
 
-    fn getMethodOrFieldHandleByName(block Block ,  name string , isStatic bool) ->(x Object) {
+    fn getMethodOrFieldHandleByName(block Block ,  name string) ->(x Object) {
         err := this.loadSelf(block , new Pos())
         if err != null {
             return null 
@@ -1341,23 +1342,19 @@ public class Class {
             this.fields[name] != null && 
             this.fields[name].Type.Type == VariableTypeFunction {
             f := this.fields[name]
-            if f.isStatic() == isStatic {
-                return this.fields[name]
-            }
+            return f 
         }
         if this.methods != null && 
             this.methods[name] != null && 
             len(this.methods[name]) > 0 {
             method := this.methods[name][0]
-            if method.isStatic() == isStatic{
-                return method
-            }
+            return method
         }
         this.loadSuperClass(block , new Pos())
         if this.superClass == null {
             return null 
         }
-        return this.superClass.getMethodOrFieldHandleByName(block , name , isStatic)
+        return this.superClass.getMethodOrFieldHandleByName(block , name)
     }
 
     fn reduceFindUsageInstances(block Block) {

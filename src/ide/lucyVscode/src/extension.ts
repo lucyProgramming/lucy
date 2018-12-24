@@ -11,8 +11,11 @@ const GoCompletionItemProvider = require("./auto_completion");
 const GoDocumentSymbolProvider = require("./outline");
 const GoHoverProvider = require("./hovers");
 
-// let diagnosticCollection: vscode.DiagnosticCollection;
+const querystring = require('querystring');
+const syncHttpRequest = require('sync-request');
 
+
+// let diagnosticCollection: vscode.DiagnosticCollection;
 
 
 // this method is called when your extension is activated
@@ -42,28 +45,44 @@ export function activate(context: vscode.ExtensionContext) {
         context.subscriptions.push(
             vscode.languages.registerHoverProvider(
                 lucySelector, new GoHoverProvider()));
-        // const collection = vscode.languages.createDiagnosticCollection('lucy');``
-        // context.subscriptions.push(collection);
-        // context.subscriptions.push(vscode.window.onDidChangeActiveTextEditor(e => updateDiagnostics(e, collection)));
+        const collection = vscode.languages.createDiagnosticCollection('lucy');
+        context.subscriptions.push(collection);
+        context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(e => updateDiagnostics(e, collection)));
 }
 
 
-function updateDiagnostics(document: vscode.TextEditor | undefined , collection: vscode.DiagnosticCollection): void {
-	// if (document && path.basename(document.uri.fsPath) === 'sample-demo.rs') {
-	// 	collection.set(document.uri, [{
-	// 		code: '',
-	// 		message: 'cannot assign twice to immutable variable `x`',
-	// 		range: new vscode.Range(new vscode.Position(3, 4), new vscode.Position(3, 10)),
-	// 		severity: vscode.DiagnosticSeverity.Error,
-	// 		source: '',
-	// 		relatedInformation: [
-	// 			new vscode.DiagnosticRelatedInformation(new vscode.Location(document.uri, new vscode.Range(new vscode.Position(1, 8), new vscode.Position(1, 9))), 'first assignment to `x`')
-	// 		]
-	// 	}]);
-	// } else {
-	// 	collection.clear();
-    // }
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!");
+function updateDiagnostics(document: vscode.TextDocument  , collection: vscode.DiagnosticCollection): void {
+    if (document.isUntitled) {
+        return  ;  
+    }
+    if (document.languageId !== "lucy") {
+        return ;
+    } 
+    collection.clear();
+    var u = "http://localhost:2018/ide/diagnose?file=" + querystring.escape(document.fileName);
+    console.log("##################",u);
+    var res = syncHttpRequest("GET" , u);
+    var errs = JSON.parse(res.getBody());
+    if(!errs) {
+        return ; 
+    }
+    console.log(errs);
+    for(let filename in errs) {
+        console.log(filename , errs[filename]);
+        var d = new Array();
+        for(var i = 0 ; i < errs[filename].length ; i++) {
+            var v = errs[filename][i];
+            var t = new vscode.Diagnostic(
+                new vscode.Range(
+                    new vscode.Position(v.pos.startLine , v.pos.startColumnOffset),
+                    new vscode.Position(v.pos.startLine , v.pos.startColumnOffset)
+                ),
+                v.err
+            );
+            d.push(t);
+        }
+        collection.set(  vscode.Uri.file(filename ), d);
+    }
 }
 
 

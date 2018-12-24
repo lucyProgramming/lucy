@@ -485,7 +485,7 @@ class Parser {
 		}
 		return
 	}
-
+	
 	fn next(lfIsToken bool) {
 		if this.consumeFoundValidToken {
 			this.consumeFoundValidToken = false

@@ -4,6 +4,7 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 
 class MultiValueAutoVar {
 	localVarOffset char
+    
 	fn MultiValueAutoVar(c cg.ClassHighLevel, code cg.AttributeCode, state StackMapState){
         this.super()
         this.localVarOffset = code.maxLocals
@@ -14,8 +15,11 @@ class MultiValueAutoVar {
 	}
 
 
-    fn unPack(c cg.ClassHighLevel, code cg.AttributeCode,
-        valueIndex int, typ ast.Type)  -> (maxStack char) {
+    fn unPack(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        valueIndex int, 
+        typ ast.Type)  -> (maxStack char) {
         maxStack = this.unPack2Object(c, code, valueIndex)
         if typ.isPointer() == false {
             TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, typ)

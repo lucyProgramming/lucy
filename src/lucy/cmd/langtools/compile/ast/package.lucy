@@ -47,10 +47,10 @@ public class Package {
 		this.locateDefinition = getPos(x)
 		this.locateDefinitionBaseOn = x
 	}
-		
+	
 	public fn getLocationDefinition() -> (ret Pos = this.locateDefinition){}
 	
-
+	
 	public fn matchFileAndLine(file string , name string ,  startLine int , endLine int ) ->(need bool){
 		if this.matchFile == null || this.matchFile == "" {  // no match at all 
 			if this.printFileMatchInfo {
@@ -173,12 +173,12 @@ public class Package {
 			f.used = true
 		}
 	}
-
+	
 	fn shouldStop(errs []error) -> (should bool) {
 		return len(this.errors)+len(errs) >= 
 			this.nErrors2Stop
 	}
-
+	
 	fn insert(nodes []TopNode) -> (errs []error = []error{}){
 		if len(nodes) == 0 {
 			errs = []error{new error("nothing to compile")}
@@ -261,7 +261,8 @@ public class Package {
 				}
 			}
 			if t ,ok:= v.node.(Expression) ; ok {
-				if t.Type == ExpressionTypeVar || t.Type == ExpressionTypeVarAssign {
+				if t.Type == ExpressionTypeVar || 
+					t.Type == ExpressionTypeVarAssign {
 					expressions.append(t)
 					continue
 				} 
@@ -269,7 +270,7 @@ public class Package {
 					this.autoCompletionItems = AutoCompletionItem.getTopDefaultAutoCompletionItem()
 					continue
 				}
-				errs.append(new error(sprintf("%s cannot have '%s' in top",
+				errs.append(new error(sprintf("%s cannot have expression '%s' in top",
 					t.pos.errMsgPrefix(), t.op)))
 			}
 		}
@@ -554,7 +555,8 @@ public class Package {
 
 	public fn setFileDirty(filename string ) {
 		//set modified file is "isDirty"
-		//rename will use this
+		//rename will use this 
+		//
 		this.files[filename].isDirty = true
 	}
 	

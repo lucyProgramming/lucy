@@ -23,13 +23,5 @@ class CommentParser extends ParserExtends{
 			this.comment = "/*" + this.parser.token.stringValue + "*/\n"
 			this.parser.next(lfIsToken)
 		}
-		// if this.parser.token.Type != lex.TokenLf {
-		// 	return
-		// }
-		// this.parser.next(lfIsToken)
-		// if this.parser.token.Type == lex.TokenLf {
-		// 	this.reset()
-		// 	return
-		// }
 	}
 }

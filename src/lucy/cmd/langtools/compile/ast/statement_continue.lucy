@@ -20,7 +20,7 @@ public class StatementContinue {
 		this.mkDefers(block)
 		return null
 	}
-
+	
 	fn mkDefers(block Block) {
 		if block.isForBlock {
 			this.defers.appendAll(block.defers)

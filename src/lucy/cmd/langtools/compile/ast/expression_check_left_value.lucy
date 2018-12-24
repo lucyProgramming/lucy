@@ -81,7 +81,6 @@ class ExpressionCheckLeftValue {
 				}
 				if selection.locateDefinition {
 					block.inheritedAttribute.p.setLocationDefinition(field)
-					// field.pos.locateDefinitionIs = field 
 					return 
 				}
 				selection.field = field

@@ -1,0 +1,67 @@
+import "lucy/cmd/langtools/compile/ast"
+import "java/lang/Integer"
+
+public class Error {
+    public pos ast.Pos
+    public err string
+    
+    public static fn convertErrors(ess []error) -> (result map{string -> Error[]}) {
+        //TODO:: un elegance
+        //TODO:: pos dose not contains range info 
+        //fix the issue next version
+        es := new map{string -> []Error}()
+        for e := range ess {
+            if t , ok := e.(ast.CompileError) ; ok {
+                e := new Error()
+                e.pos = new ast.Pos()
+                e.pos.filename = t.startPos.filename
+                e.pos.startLine = t.startPos.startLine
+                e.pos.startColumnOffset  = t.startPos.startColumnOffset
+                e.pos.endLine = t.endPos.endLine
+                e.pos.endColumnOffset = t.endPos.endColumnOffset
+                e.err = t.err
+                if es.keyExist(e.pos.filename) {
+                    es[e.pos.filename].append(e)
+                }else {
+                    es[e.pos.filename] = [e]
+                }
+                continue
+            }
+            v := e.getMessage()
+            filename := v[:v.indexOf(".lucy") + 5]
+            rest := v[v.indexOf(".lucy") + 6:] // skip :
+            line := Integer.parseInt(rest[:rest.indexOf(":")])
+            line--
+            rest = rest[rest.indexOf(":") + 1 :]
+            var index int
+            var column int
+            for k,v := range rest {
+                index = k
+                if v >= '0' && v <= '9' {
+                    column = column * 10 + (v - '0')
+                }else {
+                    break
+                }
+            } 
+            column--
+            rest =rest[index:]
+            t := new Error()
+            t.pos = new ast.Pos()
+            t.pos.filename = filename
+            t.pos.startLine = line
+            t.pos.endLine = line
+            t.pos.startColumnOffset = column
+            t.pos.endColumnOffset = column
+            t.err = rest
+            if es.keyExist(filename) {
+                es[filename].append(t)
+            }else {
+                es[filename] = [t]
+            }
+        }
+        result = new map{string -> Error[]}()
+        for k,v := range es {
+            result[k] = copy(new Error[](len(v)) , v)
+        }
+    }
+}

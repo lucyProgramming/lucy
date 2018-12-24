@@ -59,7 +59,8 @@ class BlockParser  extends ParserExtends {
 				continue
 			}
 			switch this.parser.token.Type {
-			case lex.TokenComment, lex.TokenMultiLineComment:
+			case lex.TokenComment, 
+				lex.TokenMultiLineComment:
 				s := new ast.Statement()
 				if this.parser.token.Type == lex.TokenComment {
 					s.Type = ast.StatementTypeComment 

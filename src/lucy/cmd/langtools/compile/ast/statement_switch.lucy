@@ -13,7 +13,7 @@ public class StatementSwitch  {
 	public pos                  Pos
 	public endPos               Pos
 	public condition            Expression //switch
-	public cases []StatementSwitchCase
+	public cases                []StatementSwitchCase
 	public Default              Block
 	public exits                []cg.Exit
 	public inlineComment string 

@@ -85,9 +85,9 @@ class ExpressionConstFold {
 			    return
 			}
 			if bin.left.Type != ExpressionTypeBool ||
-					bin.right.Type != ExpressionTypeBool {
-					err = e.binaryWrongOpErr()
-					return
+				bin.right.Type != ExpressionTypeBool {
+				err = e.binaryWrongOpErr()
+				return
 			}
 			is = true
 			if e.Type == ExpressionTypeLogicalAnd {
@@ -118,7 +118,11 @@ class ExpressionConstFold {
 				return
 			} 
 			switch bin.left.Type {
-			case ExpressionTypeByte ,ExpressionTypeShort ,ExpressionTypeChar ,ExpressionTypeInt ,  ExpressionTypeLong  :
+			case ExpressionTypeByte,
+				ExpressionTypeShort , 
+				ExpressionTypeChar , 
+				ExpressionTypeInt ,  
+				ExpressionTypeLong:
 				left := bin.left.longValue
 				right := bin.right.longValue
 				switch e.Type {
@@ -132,12 +136,12 @@ class ExpressionConstFold {
 					if right == 0 {
 						err = divisionByZeroErr(bin.right.pos)
 					}
-					e.longValue = left
+					e.longValue = left / right
 				case ExpressionTypeMod:
 					if right == 0 {
 						err = divisionByZeroErr(bin.right.pos)
 					}
-					e.longValue = left
+					e.longValue = left % right
 				default:
 					return false, null
 				}
@@ -164,12 +168,12 @@ class ExpressionConstFold {
 					if right == 0d {
 						err = divisionByZeroErr(bin.right.pos)
 					}
-					e.doubleValue = left
+					e.doubleValue = left / right
 				case ExpressionTypeMod:
 					if right == 0d {
 						err = divisionByZeroErr(bin.right.pos)
 					}
-					e.doubleValue = left
+					e.doubleValue = left % right
 				default:
 					return false, null
 				}

@@ -16,7 +16,7 @@ fn checkExpressions(block Block, es []Expression, errs []error, singleValueConte
 			ret.append(null)
 		} else {
 			if len(ts) > 1 && singleValueContext {
-				errs.append(new error( sprintf("%s multi value in single value context",
+				errs.append(new error(sprintf("%s multi value in single value context",
 					errMsgPrefix(v.pos))))
 			}
 			for _, t := range ts {
@@ -429,6 +429,7 @@ fn searchLeftValueForAutoCompletionItems(block Block) -> (items []AutoCompletion
 }
 
 
+
 fn getPos(x Object)  -> (pos Pos){
 	if t, ok := x.(Constant) ; ok {
 		return t.pos
@@ -463,7 +464,7 @@ fn getPos(x Object)  -> (pos Pos){
 	if t, ok := x.(Type) ; ok {
 		return t.pos
 	}
-	// return new Pos() // avoid null pointer 
-	// panic("test")
-	
+	if t, ok := x.(StatementLabel) ; ok {
+		return t.pos
+	}
 }

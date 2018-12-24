@@ -12,8 +12,8 @@ class ExpressionCheckMap {
 		noType := m.Type == null
 		if noType && len(m.keyValuePairs) == 0 {
 			errs.append(new error(sprintf("%s map literal has no type and no initiational values,"+
-					"cannot inference it`s type",
-					e.pos.errMsgPrefix())))
+				"cannot inference it`s type",
+				e.pos.errMsgPrefix())))
 			return null
 		}
 		if m.Type == null {
@@ -24,9 +24,9 @@ class ExpressionCheckMap {
 		if m.Type.Map == null {
 			m.Type.Map = new Map()
 		}
-		longMap := new map { long -> Pos }  ()
-		doubleMap := new map { double -> Pos } ()
-		stringMap := new map { string-> Pos }()
+		longMap := new map {long -> Pos}  ()
+		doubleMap := new map {double -> Pos} ()
+		stringMap := new map {string-> Pos}()
 		for _, v := range m.keyValuePairs {
 			// map k
 			kType, es := v.key.checkSingleValueContextExpression(block)
@@ -61,7 +61,7 @@ class ExpressionCheckMap {
 			if m.Type.Map.K != null &&
 				v.key.isLiteral() &&
 				m.Type.Map.K.Type == v.key.value.Type {
-				fn errMsg (pos Pos, first Pos, which string) -> (err error) {
+				fn errMsg(pos Pos, first Pos, which string) -> (err error) {
 					errMsg := sprintf("%s  '%s' duplicate key,first declared at:\n",
 						pos.errMsgPrefix(), which)
 					errMsg += sprintf("\t%s", first.errMsgPrefix())
@@ -79,7 +79,8 @@ class ExpressionCheckMap {
 					} else {
 						longMap[value] = v.key.pos
 					}
-				case VariableTypeFloat ,VariableTypeDouble :
+				case VariableTypeFloat , 
+					VariableTypeDouble :
 					value := v.key.doubleValue
 					if first := doubleMap[value]; first != null {
 						errs.append(errMsg(v.key.pos, first, v.key.literalRaw))

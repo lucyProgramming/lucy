@@ -56,10 +56,10 @@ class ExpressionCheckMethodCall {
 				return null
 			}
 			ms, matched, err := javaStringClass.accessMethod(block , e.pos, errs, call, args,
-				false,javaStringClass.name , null)
+				false , javaStringClass.name , null)
 			if err != null {
 				errs.append(err)
-				return null
+				return .returnValuesForFailCall(javaStringClass , block , call.name , e.pos)
 			}
 			if matched {
 				call.Class = javaStringClass
@@ -71,16 +71,16 @@ class ExpressionCheckMethodCall {
 				return ms[0].Function.Type.mkCallReturnTypes(e.pos)
 			} else {
 				errs.append(methodsNotMatchError(e.pos, call.name, ms, args))
-				return null
+				return .returnValuesForFailCall(javaStringClass , block ,  call.name , e.pos)
 			}
 		case VariableTypeObject, 
 			VariableTypeClass:
 			defer {
 				if call.locateDefinition && block.inheritedAttribute.p.getLocationDefinition() == null {
-					isStatic := object.Type == VariableTypeClass
-					x := object.Class.getMethodOrFieldHandleByName(block , call.name,isStatic)
+					x := object.Class.getMethodOrFieldHandleByName(block , call.name)
 					block.inheritedAttribute.p.setLocationDefinition(x)
 				}
+				
 			}
 			if call.name == "finalize" {
 				errs.append(new error(sprintf("%s cannot call '%s'", e.pos.errMsgPrefix(), call.name)))
@@ -90,13 +90,14 @@ class ExpressionCheckMethodCall {
 			errsLength := len(errs)
 			callArgTypes := checkExpressions(block, call.args, errs, true)
 			if len(errs) > errsLength {
-				return null
+				return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
 			}
 			if object.Class.isInterface() {
 				if object.Type == VariableTypeClass {
-					errs.append(new error(sprintf("%s cannot make_node_objects call on interface '%s'",
+					errs.append(new error(sprintf("%s cannot method call on interface '%s'",
 						e.pos.errMsgPrefix(), object.Class.name)))
-					return null
+					
+					return .returnValuesForFailCall(object.Class , block ,call.name , e.pos)
 				}
 				if call.locateDefinition {
 					m ,_ := object.Class.getFieldOrMethod(block ,
@@ -108,7 +109,7 @@ class ExpressionCheckMethodCall {
 					object.Class.accessInterfaceObjectMethod(block , e.pos, errs, call.name, call, callArgTypes, false , object.Class.name)
 				if err != null {
 					errs.append(err)
-					return null
+					return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
 				}
 				if matched {
 					if call.locateDefinition {
@@ -123,7 +124,7 @@ class ExpressionCheckMethodCall {
 					return ms[0].Function.Type.mkCallReturnTypes(e.pos)
 				}
 				errs.append(methodsNotMatchError(e.pos, call.name, ms, callArgTypes))
-				return null
+				return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
 			}
 			if len(call.parameterTypes) > 0 {
 				errs.append(new error(sprintf("%s method call expect no parameter types",
@@ -132,8 +133,7 @@ class ExpressionCheckMethodCall {
 			if call.locateDefinition {
 				m ,_ := object.Class.getFieldOrMethod(block ,
 						e.pos , call.name , false , object.Class.name)
-				block.inheritedAttribute.p.setLocationDefinition(m)
-				//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = m 
+				block.inheritedAttribute.p.setLocationDefinition(m) 
 				return 
 			}
 			
@@ -150,7 +150,6 @@ class ExpressionCheckMethodCall {
 			if fieldMethodHandler[0] != null {
 				if call.locateDefinition {
 					block.inheritedAttribute.p.setLocationDefinition(fieldMethodHandler[0])
-					//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = fieldMethodHandler[0]
 					return 
 				}
 				err := call.Expression.fieldAccessAble(block, fieldMethodHandler[0])
@@ -182,6 +181,26 @@ class ExpressionCheckMethodCall {
 			return null
 		}
 	}
+
+
+	static fn returnValuesForFailCall(c Class , block Block ,  name string , pos Pos ) ->(valueType []Type) {
+		x := c.getMethodOrFieldHandleByName(block , name )
+		if x == null {
+			return 
+		}
+		when x.(type) {
+			case ClassField:
+				t := x.(ClassField)
+				if t.Type.functionType != null {
+					return t.Type.functionType.mkCallReturnTypes(pos)
+				}
+			case ClassMethod:
+				t := x.(ClassMethod)
+				if t.Function != null && t.Function.Type != null {
+					return t.Function.Type.mkCallReturnTypes(pos)
+				}
+		}
+	} 
 	
 	/*
 		this.super()
@@ -263,12 +282,12 @@ class ExpressionCheckMethodCall {
 		errsLength := len(errs)
 		callArgTypes := checkExpressions(block, call.args, errs, true)
 		if len(errs) > errsLength {
-			return null
+			return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
 		}
 		ms, matched, err := object.Class.accessMethod(block , e.pos, errs, call, callArgTypes, false, object.Class.name, fieldMethodHandler)
 		if err != null {
 			errs.append(err)
-			return null
+			return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
 		}
 		if matched {
 			if fieldMethodHandler[0] != null {
@@ -348,8 +367,7 @@ class ExpressionCheckMethodCall {
 			}
 			if call.locateDefinition {
 				if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
-					block.inheritedAttribute.p.setLocationDefinition(f)
-					//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = f 
+					block.inheritedAttribute.p.setLocationDefinition(f) 
 					return 
 				}else {
 					//TODO :: 
@@ -386,7 +404,6 @@ class ExpressionCheckMethodCall {
 			if call.locateDefinition {
 				if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
 					block.inheritedAttribute.p.setLocationDefinition(v)
-					//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = v 
 					return 
 				}else {
 					//TODO :: 
@@ -424,7 +441,6 @@ class ExpressionCheckMethodCall {
 			if call.locateDefinition {
 				if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
 					block.inheritedAttribute.p.setLocationDefinition(c)
-					//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = c 
 				}else {
 					//TODO :: 
 				}
@@ -453,7 +469,6 @@ class ExpressionCheckMethodCall {
 			if call.locateDefinition {
 				if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
 					block.inheritedAttribute.p.setLocationDefinition(t)
-					//block.inheritedAttribute.p.locateDefinition.locateDefinitionIs = t 
 				}else {
 					//TODO :: 
 				}
@@ -495,14 +510,14 @@ class ExpressionCheckMethodCall {
 			result.pos = e.pos
 			if len(call.args) > 0 {
 				errs.append(new error(sprintf("%s too mamy argument to call,method '%s' expect no arguments",
-						call.args[0].pos.errMsgPrefix(), call.name)))
+					call.args[0].pos.errMsgPrefix(), call.name)))
 			}
 			return []Type{result}
 		case common.ArrayMethodAppend,
 			common.ArrayMethodAppendAll:
 			if len(call.args) == 0 {
 				errs.append(new error(sprintf("%s too few arguments to call %s,expect at least one argument",
-						e.pos.errMsgPrefix(), call.name)))
+					e.pos.errMsgPrefix(), call.name)))
 			}
 			ts := checkExpressions(block, call.args, errs, true)
 			for _, t := range ts {
@@ -524,7 +539,7 @@ class ExpressionCheckMethodCall {
 			result := new Type()
 			result.Type = VariableTypeVoid
 			result.pos = e.pos
-			return []Type{result}
+			return [result]
 		case common.ArrayMethodGetUnderlyingArray:
 			result := new Type()
 			result.Type = VariableTypeJavaArray

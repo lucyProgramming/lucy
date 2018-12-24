@@ -20,7 +20,6 @@ class StatementForParser extends ParserExtends{
 			this.parser.token.Type != lex.TokenSemicolon { // not '{' and not ';'
 			statementFor.condition, _ = this.parser.ExpressionParser.parseExpression(true)
 			if statementFor.condition == null {
-				// this.consume(untilLc)
 				goto parseBlock
 			}
 		}
@@ -32,13 +31,11 @@ class StatementForParser extends ParserExtends{
 			if this.parser.token.Type != lex.TokenSemicolon {
 				statementFor.condition, _ = this.parser.ExpressionParser.parseExpression(false)
 				if statementFor.condition == null  {
-					// this.consume(untilLc)
 					goto parseBlock
 				}
 				if this.parser.token.Type != lex.TokenSemicolon {
 					this.parser.errs.append( new error(sprintf("%s missing semicolon after expression",
 						this.parser.errMsgPrefix())))
-					// this.consume(untilLc)
 					goto parseBlock
 				}
 			}

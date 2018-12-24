@@ -8,6 +8,7 @@ public class ClassMethod {
 	public rename  bool
 	public findUsageInstances  []Usage 
 	public comment string 
+	
 	public fn narrowDownAccessRange(implementation ClassMethod) ->(is bool ) {
 		if this.isPublic() {
             return !implementation.isPublic()

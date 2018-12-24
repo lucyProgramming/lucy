@@ -5,6 +5,7 @@ import "java/net/InetSocketAddress"
 import "lucy/os"
 import "lucy/cmd/langtools/http/ide"
 import "lucy/cmd/langtools/http/doc"
+import "lucy/encoding/json"
 
 public fn http(args []string) {
     port := new Flags().parseArgs(args)
@@ -13,7 +14,9 @@ public fn http(args []string) {
     server.createContext("/exit", new ExitHandler())
     ide.registerHandlers("/ide",server)
     doc.registerHandlers("/doc" , server)
+    json.enablePrintErr = true 
     server.start()
+    
 }
 
 fn main(args []string) {

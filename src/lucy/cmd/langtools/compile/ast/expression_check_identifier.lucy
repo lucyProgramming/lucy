@@ -97,7 +97,6 @@ class ExpressionCheckIdentifier {
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.setLocationDefinition(f)
-				// f.pos.locateDefinitionIs = f 
 				return 
 			}
 			result := new Type()
@@ -201,7 +200,6 @@ class ExpressionCheckIdentifier {
 		}
 		if identifier.locateDefinition {
 			block.inheritedAttribute.p.setLocationDefinition(it)
-			// it.pos.locateDefinitionIs = it 
 			return 
 		}
 		valueType = new Type()

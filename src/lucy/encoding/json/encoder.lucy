@@ -10,9 +10,8 @@ public class Encoder {
 	x Object
 	c Class
 	indent string  
-	indents string 
+	indents string  
 	
-
 	public fn Encoder(x Object, indents string  = "", indent string  = "" ) {
 		this.super()
 		this.x = x
@@ -22,7 +21,6 @@ public class Encoder {
 			this.c = x.getClass()
 		}
 	}
-	
 	
 	public fn encode()->( bs []byte ){
 		if this.x == null {
@@ -90,9 +88,8 @@ public class Encoder {
 		for k , v := range ks {
 			Encoder.validForMapKey(v)
 			bs.appendAll([]byte(this.indents + this.indent ))
-            bs.append('"')
-            bs.appendAll([]byte(v.toString()))
-            bs.append('"' , ':')
+            bs.appendAll(new Encoder(v.toString()).encode() )
+            bs.append(':')
 			vv := x.get(v)
 			var bs2 []byte
 			if vv == null {

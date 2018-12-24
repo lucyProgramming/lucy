@@ -15,6 +15,7 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix = new ast.Expression()
 			prefix.Type = ast.ExpressionTypeAutoCompletion 
 			prefix.pos = this.parser.mkPos()
+			prefix.endPos = prefix.pos 
 			this.next(lfIsToken)
 		case lex.TokenIdentifier:
 			prefix = new ast.Expression()
@@ -29,6 +30,7 @@ class ExpressionSuffix extends  ParserExtends {
 			identifier.rename  = this.parser.token.rename
 			identifier.autoCompletion  = this.parser.token.autoCompletion
 			prefix.pos = this.parser.mkPos()
+			prefix.endPos = prefix.pos 
 			this.next(lfIsToken)
 		case lex.TokenTrue:
 			prefix = new ast.Expression()
@@ -37,6 +39,7 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix.boolValue = true
 			prefix.literalRaw = "true"
 			prefix.pos = this.parser.mkPos()
+			prefix.endPos = prefix.pos 
 			this.next(lfIsToken)
 		case lex.TokenFalse:
 			prefix = new ast.Expression()
@@ -45,18 +48,21 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix.Type = ast.ExpressionTypeBool
 			prefix.boolValue = false
 			prefix.pos = this.parser.mkPos()
+			prefix.endPos = prefix.pos 
 			this.next(lfIsToken)
 		case lex.TokenSelection:
 			prefix = new ast.Expression()
 			prefix.op = "."
 			prefix.Type = ast.ExpressionTypeDot
 			prefix.pos = this.parser.mkPos()
+			prefix.endPos = prefix.pos 
 			//special case , no next
 		case lex.TokenGlobal:
 			prefix = new ast.Expression()
 			prefix.op = "global"
 			prefix.Type = ast.ExpressionTypeGlobal
 			prefix.pos = this.parser.mkPos()
+			prefix.endPos = prefix.pos 
 			this.next(lfIsToken)
 		case lex.TokenLiteralByte:
 			prefix = new ast.Expression()
@@ -65,6 +71,7 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix.pos = this.parser.mkPos()
 			prefix.literalRaw = this.parser.token.literalRaw
 			prefix.op = "byteLiteral"
+			prefix.endPos = prefix.pos 
 			this.next(lfIsToken)
 		case lex.TokenLiteralShort:
 		    prefix = new ast.Expression()
@@ -73,6 +80,7 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix.pos = this.parser.mkPos()
 			prefix.literalRaw = this.parser.token.literalRaw
 			prefix.op = "shortLiteral"
+			prefix.endPos = prefix.pos 
 			this.next(lfIsToken)
 		case lex.TokenLiteralChar:
 			prefix = new ast.Expression()
@@ -81,6 +89,7 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix.pos = this.parser.mkPos()
 			prefix.literalRaw = this.parser.token.literalRaw
 			prefix.op = "charLiteral"
+			prefix.endPos = prefix.pos 
 			this.next(lfIsToken)
 		case lex.TokenLiteralInt:
 			prefix = new ast.Expression()
@@ -89,6 +98,7 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix.pos = this.parser.mkPos()
 			prefix.literalRaw = this.parser.token.literalRaw
 			prefix.op = "intLiteral"
+			prefix.endPos = prefix.pos 
 			this.next(lfIsToken)
 		case lex.TokenLiteralLong:
 			prefix = new ast.Expression()
@@ -97,6 +107,7 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix.pos = this.parser.mkPos()
 			prefix.op = "longLiteral"
 			prefix.literalRaw = this.parser.token.literalRaw
+			prefix.endPos = prefix.pos 
 			this.next(lfIsToken)
 		case lex.TokenLiteralFloat:
 			prefix = new ast.Expression()
@@ -105,6 +116,7 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix.pos = this.parser.mkPos()
 			prefix.op = "floatLiteral"
 			prefix.literalRaw = this.parser.token.literalRaw
+			prefix.endPos = prefix.pos 
 			this.next(lfIsToken)
 		case lex.TokenLiteralDouble:
 			prefix = new ast.Expression()
@@ -113,12 +125,14 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix.pos = this.parser.mkPos()
 			prefix.literalRaw = this.parser.token.literalRaw
 			prefix.op = "doubleLiteral"
+			prefix.endPos = prefix.pos 
 			this.next(lfIsToken)
 		case lex.TokenLiteralString:
 			prefix = new ast.Expression()
 			prefix.Type = ast.ExpressionTypeString
 			prefix.stringValue = this.parser.token.stringValue
 			prefix.pos = this.parser.mkPos()
+			prefix.endPos = prefix.pos 
 			prefix.op = "stringLiteral"
 			prefix.literalRaw = this.parser.token.literalRaw
 			this.next(lfIsToken)
@@ -126,6 +140,7 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix = new ast.Expression()
 			prefix.Type = ast.ExpressionTypeNull
 			prefix.pos = this.parser.mkPos()
+			prefix.endPos = prefix.pos 
 			prefix.op = "null"
 			this.next(lfIsToken)
 		case lex.TokenLp:
@@ -146,6 +161,7 @@ class ExpressionSuffix extends  ParserExtends {
 			newExpression.Type = ast.ExpressionTypeParenthesis
 			newExpression.pos = pos
 			newExpression.data = prefix
+			newExpression.endPos = pos 
 			newExpression.op = "(" + prefix.op + ")"
 			prefix = newExpression
 			this.next(lfIsToken)
@@ -158,6 +174,7 @@ class ExpressionSuffix extends  ParserExtends {
 			}
 			newE := new ast.Expression()
 			newE.pos = pos
+			newE.endPos = pos 
 			newE.op = "++()"
 			newE.Type = ast.ExpressionTypePrefixincrement
 			newE.data = prefix
@@ -171,6 +188,7 @@ class ExpressionSuffix extends  ParserExtends {
 			}
 			newE := new ast.Expression()
 			newE.op = "--()"
+			newE.endPos = pos 
 			newE.Type = ast.ExpressionTypePrefixDecrement
 			newE.data = prefix
 			newE.pos = pos
@@ -182,6 +200,7 @@ class ExpressionSuffix extends  ParserExtends {
 				this.next(lfIsToken)
 				newE := new ast.Expression()
 				newE.op = op
+				newE.endPos = pos 
 				newE.Type = ast.ExpressionTypeNot
 				newE.pos = pos 
 				prefix = newE
@@ -210,6 +229,7 @@ class ExpressionSuffix extends  ParserExtends {
 				newE.op = op
 				newE.Type = ast.ExpressionTypeBitwiseNot
 				newE.pos = pos 
+				newE.endPos = pos 
 				prefix = newE
 				data := new ast.Expression()
 				data.Type = ast.ExpressionTypeAutoCompletion
@@ -236,6 +256,7 @@ class ExpressionSuffix extends  ParserExtends {
 				newE.op = op
 				newE.Type = ast.ExpressionTypeNegative
 				newE.pos = pos 
+				newE.endPos = pos 
 				prefix = newE
 				data := new ast.Expression()
 				data.Type = ast.ExpressionTypeAutoCompletion
@@ -264,6 +285,7 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix.Type = ast.ExpressionTypeFunctionLiteral
 			prefix.data = f
 			prefix.pos = pos
+			prefix.endPos = pos 
 			prefix.op = "functionLiteral"
 		case lex.TokenNew:
 			pos := this.parser.mkPos()
@@ -277,6 +299,7 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix = new ast.Expression()
 			prefix.Type = ast.ExpressionTypeNew
 			prefix.pos = pos
+			prefix.endPos = pos 
 			prefix.op = "new"
             n := new ast.ExpressionNew()
 			n.Type = t
@@ -335,6 +358,7 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix.Type = ast.ExpressionTypeRange
 			prefix.pos = pos
 			prefix.data = e
+			prefix.endPos = pos 
 			return prefix, null
 		case lex.TokenMap:
 			prefix, err = this.ep.parseMapExpression()

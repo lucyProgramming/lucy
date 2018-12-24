@@ -21,7 +21,7 @@ class ExpressionCheckSelection {
                     e.pos.errMsgPrefix(), Super, object.typeString())))
                 return null
             }
-            access, err := object.Class.getFieldOrMethod(block , e.pos, selection.name, false , object.Class.name)
+            access, err := object.Class.getFieldOrMethod(block , e.pos, selection.name, false , object.Class.name )
             if err != null {
                 errs.append(err)
                 return null

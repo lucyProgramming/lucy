@@ -60,6 +60,10 @@ class EnumParser extends ParserExtends {
 					value, _ = this.parser.ExpressionParser.parseExpression(false)
 				}
 				enumComment := comment.comment
+				if this.parser.token.Type == lex.TokenComment {
+					enumComment = "//" + this.parser.token.stringValue
+					this.next(lfIsToken)
+				}
 				if e.Init == null && value != null {
 					e.Init = value
 					e.firstValueIndex = len(e.enums)
@@ -94,7 +98,4 @@ class EnumParser extends ParserExtends {
 		this.next(lfNotToken)
 		return e, err
 	}
-
-
 }
-

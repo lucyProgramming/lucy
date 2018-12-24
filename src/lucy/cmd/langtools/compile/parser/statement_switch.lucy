@@ -25,10 +25,7 @@ class StatementSwitchParser extends ParserExtends{
 				statementSwitch.condition = null
 			}
 			this.parser.next(lfNotToken)
-			statementSwitch.condition, err = this.parser.ExpressionParser.parseExpression(false)
-			if err != null {
-				this.consume(untilLc)
-			}
+			statementSwitch.condition, _ = this.parser.ExpressionParser.parseExpression(false)
 			this.parser.ifTokenIsLfThenSkip(true)
 		}
 		if this.parser.token.Type != lex.TokenLc {

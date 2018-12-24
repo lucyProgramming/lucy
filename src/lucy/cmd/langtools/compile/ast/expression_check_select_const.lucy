@@ -5,7 +5,7 @@ class ExpressionSelectConst {
 		object, es := selection.Expression.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if object == null {
-			return null
+			return null 
 		}
 		if object.Type != VariableTypeClass {
 			errs.append(new error(sprintf("%s not a class , but '%s'",

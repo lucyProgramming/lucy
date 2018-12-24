@@ -4,6 +4,8 @@ import "com/sun/net/httpserver/HttpExchange"
 import "lucy/cmd/langtools/http/g"
 import "lucy/encoding/json"
 
+
+
 class Diagnose implements HttpHandler {
     public fn handle(exchange HttpExchange) {
         os := exchange.getResponseBody()
@@ -25,9 +27,9 @@ class Diagnose implements HttpHandler {
             os.write(bs)
             return
         }
-        diags := diagnose.diagnose(file)
-        bs , _ := json.encode(copy(new error[](len(diags)) , diags) , "\t")
+        diags := diagnose.diagnose(file , g.readBodyBytes(exchange.getRequestBody()))
+        bs , _ := json.encode(diags,"\t")
         exchange.sendResponseHeaders(200 , long(len(bs)))
         os.write(copy(new byte[](len(bs)) ,bs))
-    } 
+    }
 }

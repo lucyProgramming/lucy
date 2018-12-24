@@ -24,6 +24,7 @@ fn errMsgPrefix(pos Pos) -> (prefix string) {
 	return pos.errMsgPrefix()
 }
 
+
 public class NameWithPos {
 	public name string
 	public pos  Pos
