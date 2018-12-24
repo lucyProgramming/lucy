@@ -146,21 +146,21 @@ public class RunLucyPackage {
         }
         need = true
         sourceFileDir := lucyPath +"/src/" + packageName
-        fis := new io.File(sourceFileDir).list()
+        fis := new io.File(sourceFileDir).listFiles()
         fisM := new map{string -> LucyFile}()
         lucyFiles = []LucyFile {}
         for _, v := range fis {
-            if v.endsWith( ".lucy") {
+            if v.getName().endsWith( ".lucy") {
                 t := new LucyFile()
                 t.realpathName = sourceFileDir + "/" +  v
-                t.name = v
+                t.name = v.getAbsolutePath()
                 tt ,e := os.readFile(t.realpathName)
                 if e != null {
                     panic(e)
                 }
                 t.bs = javaArray2Lucy(tt)
                 lucyFiles.append(t)
-                fisM[v] = t
+                fisM[v.getName()] = t
             }
         }
         if len(lucyFiles) == 0 {
