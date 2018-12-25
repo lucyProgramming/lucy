@@ -12,7 +12,7 @@ const GoDocumentSymbolProvider = require("./outline");
 const GoHoverProvider = require("./hovers");
 
 const querystring = require('querystring');
-const syncHttpRequest = require('sync-request');
+const request = require('request');
 
 
 // let diagnosticCollection: vscode.DiagnosticCollection;

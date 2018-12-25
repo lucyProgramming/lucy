@@ -6,7 +6,7 @@
 import * as vscode from 'vscode';
 
 const querystring = require('querystring');
-const syncHttpRequest = require('sync-request');
+const request = require('request');
 
 //FIXME vscode don't goto the right place
 module.exports = class GoHoverProvider implements vscode.HoverProvider {
@@ -17,17 +17,22 @@ module.exports = class GoHoverProvider implements vscode.HoverProvider {
             var u = "http://localhost:2018/ide/getHover?file=" + querystring.escape(document.fileName) + "&line=" + 
             position.line + "&column=" + position.character ; 
             console.log(u);
-            let buffer = document.getText();
-            var res  = syncHttpRequest("POST" , u ,  {
-                "body": buffer,
-                "timeout" : 2000
+            request({
+                method : "POST",
+                url : u ,
+                body : document.getText()
+            } , function(error : any, response : any, body:any){
+                if(error) {
+                    console.log(error);
+                    return ; 
+                }
+                var value = body;
+                if(!value) {
+                    reject("not found");
+                    return ;
+                }
+                resolve(new vscode.Hover({language:"lucy" ,value : value }));
             });
-            var value = res.getBody('utf8');
-            if(!value) {
-                reject("not found");
-                return ;
-            }
-            resolve(new vscode.Hover({language:"lucy" ,value : value }));
         });
     }
 };
