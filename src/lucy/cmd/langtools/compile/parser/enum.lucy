@@ -82,6 +82,13 @@ class EnumParser extends ParserExtends {
 				comment.reset()
 			case lex.TokenComma:
 				this.next(lfNotToken)
+				if this.parser.token.Type != lex.TokenIdentifier && 
+					this.parser.token.Type != lex.TokenComment &&
+					this.parser.token.Type != lex.TokenLf && 
+					this.parser.token.Type != lex.TokenMultiLineComment {
+					this.parser.errs.append( new error(sprintf("%s not a valid token after comma",
+						this.parser.errMsgPrefix(), this.parser.token.description)))
+				}
 			default:
 				this.parser.errs.append( new error(sprintf("%s token '%s' is not except",
 					this.parser.errMsgPrefix(), this.parser.token.description)))

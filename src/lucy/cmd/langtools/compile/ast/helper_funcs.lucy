@@ -257,6 +257,7 @@ fn correctLastUsageType(t string , usage []Usage) ->(u Usage) {
 	u.Type = t 
 } 
 
+
 fn searchRightValueForAutoCompletionItems(pos Pos, block Block) -> (items []AutoCompletionItem = []AutoCompletionItem {} ) {
 	names := new map{string -> bool}()
 	block.walk(fn (b Block){

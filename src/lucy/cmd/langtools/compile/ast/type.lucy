@@ -483,7 +483,7 @@ public class Type {
 		case VariableTypeObject: // must resolved form a name
 			return prefix + this.name
 		case VariableTypeMap:
-			ret =prefix + "map{"
+			ret = prefix + "map{"
 			ret += this.Map.K.typeName()
 			ret += " -> "
 			ret += this.Map.V.typeName()
@@ -701,6 +701,16 @@ public class Type {
 		if leftValue == rightValue { // equal
 			return true
 		}
+		{
+			// try string first
+			isString1 := leftValue.Type == VariableTypeString || 
+				leftValue.isStringObject()
+			isString2 := rightValue.Type == VariableTypeString || 
+				rightValue.isStringObject()
+			if  isString1 && isString2 {
+				return true
+			}
+		}
 		if leftValue.isPrimitive() &&
 			rightValue.isPrimitive() {
 			return leftValue.Type == rightValue.Type
@@ -735,6 +745,21 @@ public class Type {
 			rightValue.Type == VariableTypeFunction {
 			return leftValue.functionType.equal(rightValue.functionType)
 		}
+		
+		if leftValue.Type == VariableTypeString {
+			leftValue = new Type()
+			leftValue.Type = VariableTypeObject
+			leftValue.Class = new Class()
+			leftValue.Class.name = JavaStringClassName
+			leftValue.Class.notImportedYet = true 
+		}
+		if rightValue.Type == VariableTypeString{
+			rightValue = new Type()
+			rightValue.Type = VariableTypeObject
+			rightValue.Class = new Class()
+			rightValue.Class.name = JavaStringClassName
+			rightValue.Class.notImportedYet = true 
+		}
 		if leftValue.Type == VariableTypeObject && rightValue.Type == VariableTypeObject { // object
 			if leftValue.Class.name == rightValue.Class.name {
 				return true
@@ -763,10 +788,17 @@ public class Type {
 		}
 		return false
 	}
-
+	
 	public fn equal(compareTo Type) -> (is bool) {
 		leftValue := this
 		if leftValue.Type != compareTo.Type {
+			isString1 := leftValue.Type == VariableTypeString || 
+				leftValue.isStringObject()
+			isString2 := compareTo.Type == VariableTypeString || 
+				compareTo.isStringObject()
+			if  isString1 && isString2 {
+				return true
+			}
 			return false //early check
 		}
 		if leftValue.isPrimitive() {
@@ -799,6 +831,12 @@ public class Type {
 			return leftValue.functionType.equal(compareTo.functionType)
 		}
 		return false
+	}
+	fn isStringObject() ->(is bool) {
+		if this.Type != VariableTypeObject {
+			return false 
+		}
+		return this.Class != null && this.Class.name == JavaStringClassName
 	}
 }
 

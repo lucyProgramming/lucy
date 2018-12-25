@@ -25,11 +25,6 @@ public class StatementBreak {
 		if t, ok := block.inheritedAttribute.forBreak.(Block); ok{
 			this.switchTemplateBlock = t
 		}
-		if this.statementFor == null &&
-			this.statementSwitch == null &&
-			this.switchTemplateBlock == null {
-			panic("not happening")
-		}
 		this.defers = []StatementDefer{}
 		this.mkDefers(block)
 		return null

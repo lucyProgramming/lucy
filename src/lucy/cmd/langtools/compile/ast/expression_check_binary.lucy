@@ -2,10 +2,16 @@ class ExpressionCheckBinary {
 	
 	static fn check(e Expression , block Block, errs []error) -> (result Type) {
 		bin := e.data.(ExpressionBinary)
-		left, es := bin.left.checkSingleValueContextExpression(block)
-		errs.appendAll(es)
-		right, es := bin.right.checkSingleValueContextExpression(block)
-		errs.appendAll(es)
+		var left,right Type 
+		var es []error 
+		if bin.left != null {
+			left, es = bin.left.checkSingleValueContextExpression(block)
+			errs.appendAll(es)
+		}
+		if bin.right != null {
+			right, es = bin.right.checkSingleValueContextExpression(block)
+			errs.appendAll(es)
+		}
 		if left != null {
 			if err := left.rightValueValid(); err != null {
 				errs.append(err)
@@ -17,6 +23,9 @@ class ExpressionCheckBinary {
 				errs.append(err)
 				return null
 			}
+		}
+		if left == null && right == null {
+			return 
 		}
 		// &&  ||
 		if e.Type == ExpressionTypeLogicalOr ||

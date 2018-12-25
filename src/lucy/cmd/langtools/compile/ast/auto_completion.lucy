@@ -11,6 +11,7 @@ public class AutoCompletionItem {
     private static javaArrayDefaultAutoCompletionItem  []AutoCompletionItem
     private static typeDefaultAutoCompletionItem []AutoCompletionItem
     
+    
     private static fieldDefaultAutoCompletionItem []AutoCompletionItem
 
     private static topDefaultAutoCompletionItem []AutoCompletionItem
@@ -152,7 +153,7 @@ public class AutoCompletionItem {
         item.Type = "keyword"
         item.name = "int"
         items.append(item)
-
+        
         item = new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "long"

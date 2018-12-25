@@ -4,7 +4,6 @@ import "lucy/cmd/langtools/compile/common"
 import "java/lang/Object"
 import "lucy/cmd/langtools/common" as langtoolsCommon
 
-
 public class Package {
 	public name                         string
 	public block                        Block = new Block() // package always have a default block
@@ -352,6 +351,17 @@ public class Package {
 		}
 
 		for _, v := range this.block.classes {
+			if v.suggestExtendsOrImplements {
+				items := new []AutoCompletionItem(2)
+				items[0] = new AutoCompletionItem()
+				items[0].Type = "keyword"
+				items[0].name = "extends"
+				items[1] = new AutoCompletionItem()
+				items[1].Type = "keyword"
+				items[1].name = "implements"
+				this.autoCompletionItems = items
+				return 
+			}
 			if v.locateDefinition {
 				this.setLocationDefinition(v)
 				return this.errors
@@ -520,8 +530,12 @@ public class Package {
 		for _, v := range this.files {
 			for _, i := range v.imports {
 				if i.used == false {
-					errs.append(new error(sprintf("%s '%s' imported not used",
-						errMsgPrefix(i.pos), i.Import)))
+					errMsg := sprintf("%s' imported not used" , i.Import)
+					t := new CompileError(sprintf("%s %s" ,errMsgPrefix(i.pos) , errMsg)) 
+					t.startPos = i.pos
+					t.endPos = i.pos 
+					t.err = errMsg
+					errs.append(t)
 				}
 			}
 		}

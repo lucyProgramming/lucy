@@ -15,6 +15,9 @@ class ExpressionCheckVarAssign {
 		for _, v := range values {
 			v.lefts = lefts
 		}
+		if len(values) == 0 {
+			return 
+		}
 		assignTypes := checkExpressions(block, values, errs, false)
 		if len(lefts) > len(assignTypes) {
 			pos := values[len(values)-1].pos

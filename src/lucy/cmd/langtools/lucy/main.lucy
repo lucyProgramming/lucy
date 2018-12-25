@@ -50,4 +50,3 @@ fn main(args []string) {
 		os.exit(1)
 	}
 }
-

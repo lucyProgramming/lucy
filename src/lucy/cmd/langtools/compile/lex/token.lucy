@@ -37,7 +37,7 @@ public enum  TokenKind {
 	TokenFor    ,                    // for
 	TokenBreak  ,                    // break
 	TokenContinue ,                  // continue
-	TokenReturn   ,                  // return,
+	TokenReturn   ,                    // return,
 	TokenNull     ,                  // null
 	TokenBool  ,                     // bool
 	TokenTrue   ,                    // true
@@ -60,7 +60,7 @@ public enum  TokenKind {
 	TokenRsh  ,                      // >>
 	TokenXor  ,                      // ^
 	TokenBitNot ,                    // ~
-	TokenAssign ,  ,                  // =
+	TokenAssign ,                   // =
 	TokenEqual   ,                   // ==
 	TokenNe   ,                      // !=
 	TokenGt   ,                      // >

@@ -20,6 +20,6 @@ class AutoCompletion {
         var loader = new ide.PackageLoader(common.getLucyPath() , common.getClassPath())
         loader.onlyAnalyzeGlobals = true
         p , _ := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles , false , this.searchFile , this.matchLine , loader)
-        return p.autoCompletionItems 
+        return p.autoCompletionItems
     }
 }

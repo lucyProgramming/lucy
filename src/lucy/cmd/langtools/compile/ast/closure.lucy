@@ -5,9 +5,10 @@ class ClosureMeta {
 }
 
 public class Closure {
+	
 	public variables map{ Variable -> ClosureMeta }
 	public functions map{ Function -> ClosureMeta }
-	
+
 	public fn closureVariableExist(v Variable) ->(exists bool) {
 		if this.variables == null {
 			return false

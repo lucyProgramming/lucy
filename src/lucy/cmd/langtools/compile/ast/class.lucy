@@ -39,6 +39,7 @@ public class Class {
      
     public startLine int 
 	public endLine int 
+    public suggestExtendsOrImplements bool 
     
     public fmts []Object   // use for format 
     
@@ -307,7 +308,11 @@ public class Class {
             variableType.Type = VariableTypeName // naming
             variableType.name = this.superClassName.name
             variableType.pos = this.superClassName.pos
+
+            variableType.rename = this.superClassName.rename
             variableType.locateDefinition = this.superClassName.locateDefinition
+            variableType.autoCompletion  = this.superClassName.autoCompletion
+            variableType.findUsage = this.superClassName.findUsage
             err = variableType.resolve(this.block)
             if err != null {
                 return err
@@ -349,6 +354,9 @@ public class Class {
             t.pos = i.pos
             t.name = i.name
             t.locateDefinition = i.locateDefinition
+            t.rename = t.rename
+            t.autoCompletion = i.autoCompletion
+            t.findUsage = i.findUsage 
             err := t.resolve(this.block)
             if err != null {
                 errs.append(err)

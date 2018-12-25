@@ -135,7 +135,7 @@ public class RunLucyPackage {
         }
         return pathHavePackage
     }
-
+    
     /*
         check package if need rebuild
     */
@@ -148,12 +148,12 @@ public class RunLucyPackage {
         sourceFileDir := lucyPath +"/src/" + packageName
         fis := new io.File(sourceFileDir).listFiles()
         fisM := new map{string -> LucyFile}()
-        lucyFiles = []LucyFile {}
+        lucyFiles = []LucyFile{}
         for _, v := range fis {
             if v.getName().endsWith( ".lucy") {
                 t := new LucyFile()
-                t.realpathName = sourceFileDir + "/" +  v
-                t.name = v.getAbsolutePath()
+                t.realpathName = v.getAbsolutePath()
+                t.name = v.getName()
                 tt ,e := os.readFile(t.realpathName)
                 if e != null {
                     panic(e)

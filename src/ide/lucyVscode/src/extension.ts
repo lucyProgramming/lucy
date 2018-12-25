@@ -45,88 +45,53 @@ export function activate(context: vscode.ExtensionContext) {
             lucySelector, new GoHoverProvider()));
     const collection = vscode.languages.createDiagnosticCollection('lucy');
     context.subscriptions.push(collection);
-    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(e => updateDiagnostics(e, collection)));
-    context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(e => updateDiagnostics(e, collection)));
-    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(e => updateDiagnostics2(e, collection)));
+    context.subscriptions.push(vscode.workspace.onDidSaveTextDocument(e => updateDiagnostics(e, collection , true)));
+    context.subscriptions.push(vscode.workspace.onDidOpenTextDocument(e => updateDiagnostics(e, collection , true)));
+    context.subscriptions.push(vscode.workspace.onDidChangeTextDocument(e => updateDiagnostics(e.document, collection , false)));
 }
 
-var lastUpdateDiagnoseTime : Date;
 
-
-function updateDiagnostics2(event: vscode.TextDocumentChangeEvent  , collection: vscode.DiagnosticCollection): void {
-    if (event.document.isUntitled) {
-        return ;  
-    }
-    if (event.document.languageId !== "lucy") {
-        return ;
-    } 
-    if (new Date().getTime() - lastUpdateDiagnoseTime.getTime() < 5000 )  {
-        return ;
-    } 
-    collection.clear();
-    var u = "http://localhost:2018/ide/diagnose?file=" + querystring.escape(event.document.fileName);
-    console.log("##################",u);
-    var res = syncHttpRequest("POST" , u , {
-        "body": event.document.getText(),
-        "timeout" : 2000,
-    });
-    lastUpdateDiagnoseTime = new Date();
-    var errs = JSON.parse(res.getBody());
-    if(!errs) {
-        return ; 
-    }
-    console.log(errs);
-    for(let filename in errs) {
-        console.log(filename , errs[filename]);
-        var d = new Array();
-        for(var i = 0 ; i < errs[filename].length ; i++) {
-            var v = errs[filename][i];
-            var t = new vscode.Diagnostic(
-                new vscode.Range(
-                    new vscode.Position(v.pos.startLine , v.pos.startColumnOffset),
-                    new vscode.Position(v.pos.startLine , v.pos.startColumnOffset)
-                ),
-                v.err
-            );
-            d.push(t);
-        }
-        collection.set(  vscode.Uri.file(filename ), d);
-    }
-}
-
-function updateDiagnostics(document: vscode.TextDocument  , collection: vscode.DiagnosticCollection): void {
+function updateDiagnostics(document: vscode.TextDocument ,collection: vscode.DiagnosticCollection , isSaveOrOpen : boolean): void {
     if (document.isUntitled) {
-        return  ;  
+        return;  
     }
     if (document.languageId !== "lucy") {
-        return ;
-    } 
-    lastUpdateDiagnoseTime = new Date()
+        return;
+    }
     collection.clear();
     var u = "http://localhost:2018/ide/diagnose?file=" + querystring.escape(document.fileName);
-    console.log("##################",u);
-    var res = syncHttpRequest("GET" , u);
-    var errs = JSON.parse(res.getBody());
-    if(!errs) {
-        return ; 
-    }
-    console.log(errs);
-    for(let filename in errs) {
-        console.log(filename , errs[filename]);
-        var d = new Array();
-        for(var i = 0 ; i < errs[filename].length ; i++) {
-            var v = errs[filename][i];
-            var t = new vscode.Diagnostic(
-                new vscode.Range(
-                    new vscode.Position(v.pos.startLine , v.pos.startColumnOffset),
-                    new vscode.Position(v.pos.startLine , v.pos.startColumnOffset)
-                ),
-                v.err
-            );
-            d.push(t);
+    console.log("!!!!!!!!!!!!!" , u);
+    request({
+        url: u ,
+        method : "POST",
+        body : document.getText(),
+    } , function(error : any, response : any, body:any){
+        if(error) {
+            console.log(error);
+            return ; 
         }
-        collection.set(  vscode.Uri.file(filename ), d);
-    }
+        var errs = JSON.parse(body);
+        if(!errs) {
+            return ; 
+        }
+        console.log(errs);
+        for(let filename in errs) {
+            console.log(filename , errs[filename]);
+            var d = new Array();
+            for(var i = 0 ; i < errs[filename].length ; i++) {
+                var v = errs[filename][i];
+                var t = new vscode.Diagnostic(
+                    new vscode.Range(
+                        new vscode.Position(v.pos.startLine , v.pos.startColumnOffset),
+                        new vscode.Position(v.pos.startLine , v.pos.startColumnOffset)
+                    ),
+                    v.err
+                );
+                d.push(t);
+            }
+            collection.set(  vscode.Uri.file(filename ), d);
+        }
+    });
 }
 
 

@@ -155,7 +155,7 @@ class ExpressionSuffix extends  ParserExtends {
 				err = new error(sprintf("%s '(' and ')' not matched, but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.description))
 				this.parser.errs.append( err)
-				return prefix, err
+				return prefix, null
 			}
 			newExpression := new ast.Expression()
 			newExpression.Type = ast.ExpressionTypeParenthesis
@@ -317,13 +317,13 @@ class ExpressionSuffix extends  ParserExtends {
 					return prefix, err
 				}
 			}
+			n.args = es
 			this.parser.ifTokenIsLfThenSkip(true)
 			if this.parser.token.Type != lex.TokenRp {
 				err = new error(sprintf("%s '(' and ')' not match", this.parser.errMsgPrefix()))
 				this.parser.errs.append( err)
-				return prefix, err
+				return prefix, null
 			}
-			n.args = es
 			this.next(lfIsToken)  // skip ) 
 		case lex.TokenLb:
 			prefix, err = this.ep.ExpressionArrayParser.parseArrayExpression()

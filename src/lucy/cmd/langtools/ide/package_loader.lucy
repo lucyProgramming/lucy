@@ -28,7 +28,7 @@ public class PackageLoader extends lc.FileLoader {
                     importName
                 ))
                 foundInLucy = true
-                continue 
+                continue
             }
         }
         if foundInLucy == false {

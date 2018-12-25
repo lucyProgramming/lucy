@@ -20,6 +20,7 @@ class ClassParser extends  ParserExtends {
 		name.locateDefinition = this.parser.token.locateDefinition
 		name.findUsage = this.parser.token.findUsage
 		name.rename  = this.parser.token.rename
+		name.autoCompletion = this.parser.token.autoCompletion 
 		pos := this.parser.mkPos()
 		this.next(lfNotToken)
 		if this.parser.token.Type == lex.TokenSelection {
@@ -34,6 +35,7 @@ class ClassParser extends  ParserExtends {
 				name.locateDefinition = name.locateDefinition || this.parser.token.locateDefinition
 				name.findUsage = name.findUsage || this.parser.token.findUsage
 				name.rename  = name.rename || this.parser.token.rename
+				name.autoCompletion = name.autoCompletion || this.parser.token.autoCompletion 
 				pos = this.parser.mkPos()
 				this.next(lfNotToken) // skip name identifier
 			}
@@ -98,7 +100,12 @@ class ClassParser extends  ParserExtends {
 		}
 		if null == classDefinition.pos {
 			classDefinition.pos = this.parser.mkPos()
-		} 
+		}
+		if this.parser.token.Type == lex.TokenIdentifier  && 
+			this.parser.token.autoCompletion	{
+			classDefinition.suggestExtendsOrImplements = true 
+			this.next(lfIsToken)
+		}
 		if this.parser.token.Type == lex.TokenExtends { // parse father expression
 			this.next(lfNotToken) // skip extends
 			classDefinition.superClassName, err = this.parseClassName()
@@ -106,6 +113,11 @@ class ClassParser extends  ParserExtends {
 				this.parser.errs.append( err)
 				this.consume(untilLc)
 			}
+		}
+		if this.parser.token.Type == lex.TokenIdentifier  && 
+			this.parser.token.autoCompletion	{
+			classDefinition.suggestExtendsOrImplements = true 
+			this.next(lfIsToken)
 		}
 		if this.parser.token.Type == lex.TokenImplements {
 			this.next(lfNotToken) // skip key word

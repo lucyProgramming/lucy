@@ -12,7 +12,15 @@ public class TypeAlias {
     findUsageInstances []Usage 
 	used bool 
 	public inlineComment string 
-	
+
+	public fn mkDescription() ->(s string = "") {
+		if this.comment != null {
+			s += this.comment
+		}
+		tt := this.Type.Clone()
+		tt.alias = null 
+		s += sprintf("typealias %s@%s" , this.name , tt.typeString())
+	}
 	fn reduceFindUsageInstances(block Block) {
         if this.findUsage == false {
             return 

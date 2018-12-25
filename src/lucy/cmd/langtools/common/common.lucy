@@ -62,7 +62,8 @@ public fn getClassPath()->(paths []string){
 	}
 }
 
-public fn findPackageInWhichDirectory(lucyPath []string , packageName string)->(which string ){
+
+public fn findPackageInWhichDirectory(lucyPath []string , packageName string) -> (which string ){
 	ps := []string{}
 	for _,v := range lucyPath {
 		if true == new io.File(v + "/src/" + packageName).isDirectory() {

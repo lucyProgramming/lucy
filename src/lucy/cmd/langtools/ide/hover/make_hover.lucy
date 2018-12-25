@@ -28,6 +28,8 @@ class MakeHover {
             s = this.from.(ast.Variable).mkDescription()
         case ast.Constant:
             s = this.from.(ast.Constant).mkDescription()
+        case ast.TypeAlias:
+            s = this.from.(ast.TypeAlias).mkDescription()
         default:
             s = sprintf("'%s' un handled" , this.from.getClass().toString())
         }

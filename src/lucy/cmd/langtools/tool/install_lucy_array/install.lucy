@@ -1,7 +1,6 @@
 
 import "lucy/os"
 import "java/io"
-import "java/lang/CharSequence"
 
 class InstallLucyArray {
 	
@@ -15,9 +14,9 @@ class InstallLucyArray {
 		new io.File(dest).mkdirs()
 		for _, v := range installs {
 			javaFile := v.className + ".java"
-			t := array_template.replace("ArrayTTT".(CharSequence), v.className.(CharSequence))
-			t = t.replace("TTT".(CharSequence),v.typename .(CharSequence))
-			t = t.replace("IMPORTS".(CharSequence), v.imports.(CharSequence))
+			t := array_template.replace("ArrayTTT", v.className)
+			t = t.replace("TTT",v.typename)
+			t = t.replace("IMPORTS", v.imports)
 			dest := dest + javaFile
 			err := os.writeFile(dest , byte[](t))
 			if err != null {

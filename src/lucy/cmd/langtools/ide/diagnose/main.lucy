@@ -10,12 +10,13 @@ public fn diagnose(filename string , bs []byte) ->(result map{string -> Error[]}
         fileSystem := FileSystems.getDefault()
         file := fileSystem.getPath(filename).getFileName().toString()
         for v := range lucyFiles {
-           if file ==  fileSystem.getPath(v.realPathName).getFileSystem().toString(){
+           if file ==  fileSystem.getPath(v.realPathName).getFileName().toString(){
                v.bs = bs 
            }
         }
     }
     loader := new ide.PackageLoader(common.getLucyPath() , common.getClassPath())
+    loader.onlyAnalyzeGlobals = true 
     _ , es := ide.parseAstAndTypeCheck(packageName , lucyFiles , false , "" , -1 , loader)
     if es == null {
         es = loader.errors

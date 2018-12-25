@@ -31,7 +31,8 @@ public class Expression {
 	public containsLf bool    // constains "\n"
 	
 
-	public fn isIdentifier(identifier string) -> (is bool) {
+	public fn isIdentifier(identifier string) -> (is bool) { 
+		
 		if this.Type != ExpressionTypeIdentifier {
 			return  
 		}
