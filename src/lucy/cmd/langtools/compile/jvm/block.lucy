@@ -39,7 +39,7 @@ class BuildBlock {
 			if notToHere {
 				continue
 			}
-			if s.IsCallFatherConstructionStatement {
+			if s.isCallFatherConstructionStatement {
 				// special case
 				// no need to build
 				// this statement is build before

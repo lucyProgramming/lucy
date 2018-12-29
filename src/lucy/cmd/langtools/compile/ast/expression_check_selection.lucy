@@ -28,7 +28,7 @@ class ExpressionCheckSelection {
             }
             if field, ok := access.(ClassField); ok {
                 selection.field = field
-                result := field.Type.Clone()
+                result := field.Type.cloneType()
                 result.pos = e.pos
                 if selection.locateDefinition{
                     block.inheritedAttribute.p.setLocationDefinition(field)
@@ -61,7 +61,7 @@ class ExpressionCheckSelection {
                 return null
             }
             if v ,ok := d.(Variable) ;ok {
-            	result := v.Type.Clone()
+            	result := v.Type.cloneType()
                 result.pos = e.pos
                 if v.isPublic() == false && object.Package.isSame(block.inheritedAttribute.p) == false {
                     err := new error(sprintf("%s variable '%s' is not public",
@@ -73,7 +73,7 @@ class ExpressionCheckSelection {
             }
             if  c,ok := d.(Constant) ; ok {
 				e.fromConst(c) //
-                result := c.Type.Clone()
+                result := c.Type.cloneType()
                 result.pos = e.pos
                 if c.isPublic() == false && object.Package.isSame(block.inheritedAttribute.p) == false {
                     err := new error(sprintf("%s const '%s' is not public",
@@ -157,7 +157,7 @@ class ExpressionCheckSelection {
                 if object.Class.superClass == null {
                     return object
                 }
-                result := object.Clone()
+                result := object.cloneType()
                 result.pos = e.pos
                 result.Class = result.Class.superClass
                 return result
@@ -180,7 +180,7 @@ class ExpressionCheckSelection {
                         //TODO :: locateDefinition
                     }
                 }
-                result := field.Type.Clone()
+                result := field.Type.cloneType()
                 result.pos = e.pos
                 selection.field = field
                 return result

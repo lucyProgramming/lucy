@@ -1,12 +1,12 @@
 {
-	"compileTime":1545354354,
+	"compileTime":1546064965,
 	"compiledFrom":[
 		{
-			"lastModify":1545118016,
+			"lastModify":1545369956,
 			"name":"attr.lucy"
 		},
 		{
-			"lastModify":1545267023,
+			"lastModify":1545359930,
 			"name":"attr_code.lucy"
 		},
 		{
@@ -22,11 +22,11 @@
 			"name":"attr_inner_class.lucy"
 		},
 		{
-			"lastModify":1544493216,
+			"lastModify":1545715127,
 			"name":"attr_line_number.lucy"
 		},
 		{
-			"lastModify":1545203000,
+			"lastModify":1545613421,
 			"name":"attr_lucy_class_const.lucy"
 		},
 		{
@@ -66,19 +66,19 @@
 			"name":"attr_sginature.lucy"
 		},
 		{
-			"lastModify":1544492407,
+			"lastModify":1545370085,
 			"name":"attr_source_file.lucy"
 		},
 		{
-			"lastModify":1545274187,
+			"lastModify":1545369895,
 			"name":"attr_stack_map.lucy"
 		},
 		{
-			"lastModify":1545108359,
+			"lastModify":1545370094,
 			"name":"attr_template_function.lucy"
 		},
 		{
-			"lastModify":1545271360,
+			"lastModify":1545373887,
 			"name":"class.lucy"
 		},
 		{
@@ -86,7 +86,7 @@
 			"name":"class_decoder.lucy"
 		},
 		{
-			"lastModify":1545274068,
+			"lastModify":1545613421,
 			"name":"class_high_level.lucy"
 		},
 		{
@@ -94,11 +94,11 @@
 			"name":"const.lucy"
 		},
 		{
-			"lastModify":1545274298,
+			"lastModify":1545613421,
 			"name":"constPool.lucy"
 		},
 		{
-			"lastModify":1545185177,
+			"lastModify":1546059174,
 			"name":"exit.lucy"
 		},
 		{
@@ -126,14 +126,14 @@
 			"name":"method_high_level.lucy"
 		},
 		{
-			"lastModify":1544147337,
+			"lastModify":1545613421,
 			"name":"op.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/binary",
-			"linkTime":1545354353
+			"linkTime":1546064964
 		}
 	],
 	"hasMain":false,
@@ -205,5 +205,6 @@
 		"StackMapUninitializedThisVariableInfo.class",
 		"StackMapUninitializedVariableInfo.class",
 		"StackMapVerificationTypeInfo.class"
-	]
+	],
+	"lucyVersion":null
 }

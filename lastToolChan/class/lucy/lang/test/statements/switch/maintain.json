@@ -1,5 +1,5 @@
 {
-	"compileTime":1545354361,
+	"compileTime":1546065001,
 	"compiledFrom":[
 		{
 			"lastModify":1542177499,
@@ -15,9 +15,10 @@
 		}
 	],
 	"imports":[],
-	"hasMain":false,
+	"hasMain":true,
 	"classes":[
 		"main.class",
 		"testSwitchObject$test.class"
-	]
+	],
+	"lucyVersion":null
 }

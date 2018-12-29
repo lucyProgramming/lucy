@@ -101,7 +101,7 @@ class ExpressionCheckVarAssign {
 					block.inheritedAttribute.p.findUsageIsGlobal = e.isGlobal 
 				}
 				vd.comment = identifier.comment
-				vd.Type = variableType.Clone()
+				vd.Type = variableType.cloneType()
 				vd.Type.pos = e.pos
 				if err := variableType.isTyped(); err != null {
 					errs.append(err)

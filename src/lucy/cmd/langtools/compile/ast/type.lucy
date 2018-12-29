@@ -17,6 +17,7 @@ public class Type {
 	public Package        Package
 	public alias          TypeAlias
 	public locateDefinition  bool 
+	public locatePackageDefinition bool 
 	public findUsage  bool 
 	public rename bool 
 	public getHover bool 
@@ -74,7 +75,7 @@ public class Type {
 		e.op = "defaultValueByCompiler"
 		e.isCompilerAuto = true
 		e.pos = this.pos
-		e.value = this.Clone()
+		e.value = this.cloneType()
 		switch this.Type {
 		case VariableTypeBool:
 			e.Type = ExpressionTypeBool
@@ -152,15 +153,18 @@ public class Type {
 		return null
 	}
 
-	/*
-		deep clone
-	*/
-	public fn Clone() ->(cloned Type) {
-		cloned = new Type()
+
+	public fn cloneType() ->(cloned Type) {
+		cloned = this.clone().(Type)
+	}
+
+	public fn clone() ->(x Object) {
+		cloned := new Type()
+		x = cloned
 		cloned.Type = this.Type
 		cloned.isBuildIn  = this.isBuildIn
 		cloned.isVariableArgs  = this.isVariableArgs
-		cloned.resolved      = this.resolved
+		cloned.resolved   = this.resolved
 		cloned.pos     = this.pos    
 		cloned.name = this.name                
 		cloned.Class  = this.Class        
@@ -177,17 +181,18 @@ public class Type {
 		
 		if cloned.Type == VariableTypeArray ||
 			cloned.Type == VariableTypeJavaArray {
-			cloned.array = this.array.Clone()
+			cloned.array = this.array.cloneType()
 		}
 		if cloned.Type == VariableTypeMap {
 			cloned.Map = new Map()
-			cloned.Map.K = this.Map.K.Clone()
-			cloned.Map.V = this.Map.V.Clone()
+			cloned.Map.K = this.Map.K.cloneType()
+			cloned.Map.V = this.Map.V.cloneType()
 		}
 		if this.Type == VariableTypeFunction {
-			cloned.functionType = this.functionType.Clone()
+			cloned.functionType = this.functionType.cloneFunctioType()
 		}
 	}
+
 
 	fn resolve(block Block) -> (err error) {
 		if this.resolved {
@@ -207,7 +212,6 @@ public class Type {
 			pos := this.pos // keep pos
 			if this.locateDefinition {
 				block.inheritedAttribute.p.setLocationDefinition(block.inheritedAttribute.Function.parameterTypes[this.name])
-				
 			}
 			block.inheritedAttribute.Function.parameterTypes[this.name].cp(this)
 			this.pos = pos // keep pos
@@ -246,7 +250,7 @@ public class Type {
 			}
 		case this.isPrimitive():
 			if this.locateDefinition {
-				block.inheritedAttribute.p.locateDefinition = this.pos
+				block.inheritedAttribute.p.setLocationDefinition(this)
 			}
 		}
 		return null
@@ -327,6 +331,9 @@ public class Type {
 				errMsgPrefix(this.pos), packageName))
 		}
 		i.used = true
+		if this.locatePackageDefinition {
+			block.inheritedAttribute.p.setLocationDefinition(i)
+		}
 		p, err := block.inheritedAttribute.p.load(i.Import)
 		if err != null {
 			return null, new error(sprintf("%s %.getMessage()",
@@ -374,12 +381,12 @@ public class Type {
 				errMsgPrefix(this.pos), packageName))
 		}
 	}
-
+	
 	fn makeTypeFrom(block Block , d Object) -> (err error)  {
 		if c ,ok := d.(Class) ; ok{
 			if c.loadFromOutSide && c.isPublic() == false {
                 err = new error(sprintf("%s class '%s' is not public",
-                           errMsgPrefix(this.pos), c.name))
+                    errMsgPrefix(this.pos), c.name))
 			}
 			if this.locateDefinition {
 				block.inheritedAttribute.p.setLocationDefinition(c)
@@ -642,7 +649,7 @@ public class Type {
 				panic(sprintf("typed parameter '%s' not found", this.name))
 			}
 			//TODO ::
-			//*typ = *t.Clone() // real bind
+			//*typ = *t.cloneType() // real bind
 			parameterTypes[this.name].cp(this)
 			return 
 		}

@@ -1,8 +1,6 @@
 
 import "java/lang/Object"
 
-
-
 fn divisionByZeroErr(pos Pos) -> (err error) {
 	return new error(sprintf("%s division by zero", pos.errMsgPrefix()))
 }
@@ -10,6 +8,9 @@ fn divisionByZeroErr(pos Pos) -> (err error) {
 fn checkExpressions(block Block, es []Expression, errs []error, singleValueContext bool) ->(valueTypes []Type) {
 	ret := []Type{}
 	for _, v := range es {
+		if v == null {
+			continue
+		}
 		ts, ess := v.check(block)
 		errs.appendAll(ess)
 		if ts == null {
@@ -125,8 +126,6 @@ fn searchBuildIns(name string , lucyBuildInPackage Package ) -> (t Object)  {
 	}
 	if lucyBuildInPackage != null { // avoid lucy/lang package
 		t, _ = lucyBuildInPackage.block.nameExists(name , null )
-		
-
 		return t
 	}
 	return null

@@ -3,6 +3,7 @@ import "lucy/cmd/langtools/ide"
 import "lucy/cmd/langtools/ide/gotodefinition"
 import "java/nio/file/FileSystems"
 import "lucy/cmd/langtools/common"
+import "lucy/os"
 
 public fn rename( file string, to string, pos int) {
     definition := gotodefinition.findDefinition(file ,pos , null,null)
@@ -21,9 +22,7 @@ public fn rename( file string, to string, pos int) {
     new ReName(lucyFiles , packageName , true ,common.getClassPath(), common.getLucyPath() , to ).rename()
 }
 
-
 fn main(args []string) {
-    // f := new Flags()
-    // file , to , pos := f.parseArgs(args)
-    // rename(file, to , pos)
+    print("un support now")
+    os.exit(1)
 }

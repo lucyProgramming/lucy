@@ -1,8 +1,8 @@
 {
-	"compileTime":1545354356,
+	"compileTime":1546064967,
 	"compiledFrom":[
 		{
-			"lastModify":1544081853,
+			"lastModify":1545628457,
 			"name":"array_meta.lucy"
 		},
 		{
@@ -14,7 +14,7 @@
 			"name":"buildin_assert.lucy"
 		},
 		{
-			"lastModify":1545267712,
+			"lastModify":1545370202,
 			"name":"buildin_black_hole.lucy"
 		},
 		{
@@ -42,7 +42,7 @@
 			"name":"buildin_sprintf.lucy"
 		},
 		{
-			"lastModify":1545268789,
+			"lastModify":1545613421,
 			"name":"buildPackage.lucy"
 		},
 		{
@@ -54,19 +54,19 @@
 			"name":"context.lucy"
 		},
 		{
-			"lastModify":1545274174,
+			"lastModify":1545374098,
 			"name":"descriptor.lucy"
 		},
 		{
-			"lastModify":1545118217,
+			"lastModify":1545360874,
 			"name":"expression.lucy"
 		},
 		{
-			"lastModify":1544426748,
+			"lastModify":1545360907,
 			"name":"expression_algebra.lucy"
 		},
 		{
-			"lastModify":1545118217,
+			"lastModify":1545361352,
 			"name":"expression_array.lucy"
 		},
 		{
@@ -74,7 +74,7 @@
 			"name":"expression_assign.lucy"
 		},
 		{
-			"lastModify":1545118217,
+			"lastModify":1545613421,
 			"name":"expression_call_args.lucy"
 		},
 		{
@@ -90,7 +90,7 @@
 			"name":"expression_function_call.lucy"
 		},
 		{
-			"lastModify":1545118217,
+			"lastModify":1545613421,
 			"name":"expression_identifier.lucy"
 		},
 		{
@@ -106,11 +106,11 @@
 			"name":"expression_left_value.lucy"
 		},
 		{
-			"lastModify":1544403838,
+			"lastModify":1545373913,
 			"name":"expression_logical.lucy"
 		},
 		{
-			"lastModify":1542178972,
+			"lastModify":1545374150,
 			"name":"expression_map_literal.lucy"
 		},
 		{
@@ -118,7 +118,7 @@
 			"name":"expression_method_call.lucy"
 		},
 		{
-			"lastModify":1545118217,
+			"lastModify":1545374211,
 			"name":"expression_new.lucy"
 		},
 		{
@@ -134,7 +134,7 @@
 			"name":"expression_relation.lucy"
 		},
 		{
-			"lastModify":1545118217,
+			"lastModify":1545360851,
 			"name":"expression_selection.lucy"
 		},
 		{
@@ -142,7 +142,7 @@
 			"name":"expression_slice.lucy"
 		},
 		{
-			"lastModify":1542178902,
+			"lastModify":1545359747,
 			"name":"expression_strcat.lucy"
 		},
 		{
@@ -154,7 +154,7 @@
 			"name":"expression_type_assert.lucy"
 		},
 		{
-			"lastModify":1545118217,
+			"lastModify":1545613421,
 			"name":"expression_type_conversion.lucy"
 		},
 		{
@@ -178,7 +178,7 @@
 			"name":"function_default_value.lucy"
 		},
 		{
-			"lastModify":1545266829,
+			"lastModify":1545724151,
 			"name":"helper_func.lucy"
 		},
 		{
@@ -190,7 +190,7 @@
 			"name":"lucy_method_descriptor.lucy"
 		},
 		{
-			"lastModify":1545118217,
+			"lastModify":1545635530,
 			"name":"multi_return_packer.lucy"
 		},
 		{
@@ -202,7 +202,7 @@
 			"name":"simple_var.lucy"
 		},
 		{
-			"lastModify":1544072375,
+			"lastModify":1545374044,
 			"name":"stackmap.lucy"
 		},
 		{
@@ -222,7 +222,7 @@
 			"name":"statement_for_range_map.lucy"
 		},
 		{
-			"lastModify":1544148709,
+			"lastModify":1545373922,
 			"name":"statement_if.lucy"
 		},
 		{
@@ -249,19 +249,19 @@
 	"imports":[
 		{
 			"name":"lucy/cmd/langtools/compile/ast",
-			"linkTime":1545354355
+			"linkTime":1546064966
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/jvm/cg",
-			"linkTime":1545354354
+			"linkTime":1546064965
 		},
 		{
 			"name":"lucy/binary",
-			"linkTime":1545354353
+			"linkTime":1546064964
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/common",
-			"linkTime":1545354354
+			"linkTime":1546064965
 		}
 	],
 	"hasMain":false,
@@ -334,5 +334,6 @@
 		"setEnumArray$autoVar.class",
 		"StackMapState.class",
 		"TypeConverterAndPrimitivePacker.class"
-	]
+	],
+	"lucyVersion":null
 }

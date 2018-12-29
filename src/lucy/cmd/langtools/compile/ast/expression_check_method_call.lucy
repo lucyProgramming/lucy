@@ -264,7 +264,7 @@ class ExpressionCheckMethodCall {
 			call.name = "<init>"
 			call.method = m
 			call.Class = object.Class.superClass
-			block.statements[0].IsCallFatherConstructionStatement = true
+			block.statements[0].isCallFatherConstructionStatement = true
 			block.inheritedAttribute.Function.callFatherConstructionExpression = e
 			return
 		}
@@ -461,7 +461,7 @@ class ExpressionCheckMethodCall {
 			e.data = conversion
 			if len(call.args) != 1 {
 				errs.append(new error(sprintf("%s cast type expect 1 argument", e.pos.errMsgPrefix())))
-				return []Type{conversion.Type.Clone()}
+				return []Type{conversion.Type.cloneType()}
 			}
 			return []Type{ExpressionCheckTypeConversion.check(e , block, errs)}
 		}
@@ -476,7 +476,7 @@ class ExpressionCheckMethodCall {
 			if len(call.args) != 1 {
 				errs.append(new error(sprintf("%s cast type expect 1 argument",
 					e.pos.errMsgPrefix())))
-				result := p.block.typeAliases[call.name].Clone()
+				result := p.block.typeAliases[call.name].cloneType()
 				result.pos = e.pos
 				return []Type{result}
 			}
@@ -544,7 +544,7 @@ class ExpressionCheckMethodCall {
 			result := new Type()
 			result.Type = VariableTypeJavaArray
 			result.pos = e.pos
-			result.array = array.array.Clone()
+			result.array = array.array.cloneType()
 			result.array.pos = e.pos
 			if len(call.args) > 0 {
 				errs.append(new error(sprintf("%s too mamy argument to call,method '%s' expect no arguments",

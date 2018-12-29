@@ -2,7 +2,6 @@ import "lucy/os/flag"
 
 
 class Flags {
-
 	dir flag.StringOption
 	pos flag.IntOption  
 	parser flag.FlagParser

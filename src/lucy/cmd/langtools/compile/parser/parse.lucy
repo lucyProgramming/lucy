@@ -366,6 +366,30 @@ class Parser {
 		return err
 	}
 
+	fn mkPosStartAt(start ast.Pos , t lex.Token...) -> (pos ast.Pos) {
+		token := this.token
+		if len(t) > 0 {
+			token = t[0]
+		}
+		if token != null {
+		    pos = new ast.Pos()
+		    pos.filename = this.filename
+		    pos.startLine = start.startLine
+			pos.endLine = start.endLine
+			pos.startColumnOffset = start.startColumnOffset
+			pos.endColumnOffset = token.endColumnOffset 
+		    pos.startOffset = token.offset
+			pos.endOffset = token.endOffset
+			return
+		} else {
+			line, _ := this.lexer.getLineAndColumn()
+			pos = new  ast.Pos()
+			pos.filename = this.filename
+			pos.endLine = line
+			return
+		}
+	}
+
 	fn mkPos(t lex.Token...) -> (pos ast.Pos) {
 		token := this.token
 		if len(t) > 0 {
@@ -374,12 +398,12 @@ class Parser {
 		if token != null {
 		    pos = new ast.Pos()
 		    pos.filename = this.filename
-		    pos.startLine = this.token.startLine
-			pos.endLine = this.token.endLine
-			pos.startColumnOffset = this.token.startColumnOffset
-			pos.endColumnOffset = this.token.endColumnOffset 
-		    pos.startOffset = this.token.offset
-			pos.endOffset = this.token.endOffset
+		    pos.startLine = token.startLine
+			pos.endLine = token.endLine
+			pos.startColumnOffset = token.startColumnOffset
+			pos.endColumnOffset = token.endColumnOffset 
+		    pos.startOffset = token.offset
+			pos.endOffset = token.endOffset
 			return
 		} else {
 			line, _ := this.lexer.getLineAndColumn()
@@ -420,7 +444,7 @@ class Parser {
 
 		if variableType != null {
 			for _, c := range constants {
-				c.Type = variableType.Clone()
+				c.Type = variableType.cloneType()
 			}
 		}
 		if this.token.Type != lex.TokenAssign {
@@ -722,7 +746,7 @@ class Parser {
 				vd.pos = v.pos
 				vd.containsLf = v.containsLf 
 				vd.inlineComment = v.inlineComment 
-				vd.Type = t.Clone()
+				vd.Type = t.cloneType()
 			}
 			return vs, null
 		} else {
@@ -772,7 +796,7 @@ class Parser {
 				vd.pos = v.pos
 				vd.containsLf = v.containsLf 
 				vd.inlineComment = v.inlineComment 
-				vd.Type = t.Clone()
+				vd.Type = t.cloneType()
 				vs.append(vd)
 			}
 			if this.token.Type != lex.TokenComma { // not a comma
@@ -803,6 +827,7 @@ class Parser {
 			i := new ast.Import()
 			i.pos = this.mkPos()
 			i.Import = this.token.stringValue
+			i.findUsage = this.token.findUsage 
 			imports.append(i)
 			this.next(lfIsToken) // skip name
 			if this.token.Type == lex.TokenAs {

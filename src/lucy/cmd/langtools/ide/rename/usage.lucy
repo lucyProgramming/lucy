@@ -1,9 +1,10 @@
 import "lucy/os"
 
 const usage = `
-    find definition of a element.
+    rename a symbolic.
        -file   file to be located
-       -pos    pos to be located , must be positive
+       -line   which line (zero based)
+       -column which column (zero based)
        -to     rename to what
 `
 

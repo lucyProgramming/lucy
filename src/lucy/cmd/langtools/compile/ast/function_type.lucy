@@ -42,7 +42,7 @@ public class FunctionType {
 		have = this.templateNamesMap != null &&
 			this.templateNamesMap.keyExist(name)
 	}
-	fn Clone() -> (ret FunctionType) {
+	fn cloneFunctioType() -> (ret FunctionType) {
 		ret = new FunctionType()
 		ret.parameterList = new []Variable(len(this.parameterList))
 		for k, _ := range ret.parameterList {
@@ -245,7 +245,7 @@ public class FunctionType {
 		}
 		ret := new []Type(len(this.returnList))
 		for k, v := range this.returnList {
-			ret[k] = v.Type.Clone()
+			ret[k] = v.Type.cloneType()
 			ret[k].pos = pos
 		}
 		return ret

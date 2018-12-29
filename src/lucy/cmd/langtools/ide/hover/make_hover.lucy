@@ -30,6 +30,16 @@ class MakeHover {
             s = this.from.(ast.Constant).mkDescription()
         case ast.TypeAlias:
             s = this.from.(ast.TypeAlias).mkDescription()
+        case ast.Type:
+            t := this.from.(ast.Type)
+            if t.isPrimitive() {
+                s = "buildin " + t.typeString()
+            }else {
+                s = t.typeString()
+            }
+        case ast.Import:
+            t := this.from.(ast.Import)
+            s = t.mkDescription()
         default:
             s = sprintf("'%s' un handled" , this.from.getClass().toString())
         }

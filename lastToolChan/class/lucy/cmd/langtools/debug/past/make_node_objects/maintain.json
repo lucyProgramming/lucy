@@ -1,20 +1,21 @@
 {
-	"compileTime":1545354357,
+	"compileTime":1546064968,
 	"compiledFrom":[
 		{
-			"lastModify":1545287246,
+			"lastModify":1545613421,
 			"name":"make.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/cmd/langtools/compile/ast",
-			"linkTime":1545354355
+			"linkTime":1546064966
 		}
 	],
 	"hasMain":false,
 	"classes":[
 		"main.class",
 		"MakeNodesObjects.class"
-	]
+	],
+	"lucyVersion":null
 }

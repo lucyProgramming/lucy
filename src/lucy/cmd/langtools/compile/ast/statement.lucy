@@ -33,7 +33,7 @@ public class Statement {
 		this.super()
 		special case
 	*/
-	public IsCallFatherConstructionStatement bool
+	public isCallFatherConstructionStatement bool
 
 	fn isVariableDefinition() ->(is bool)  {
 		if this.Type != StatementTypeExpression {
@@ -76,7 +76,7 @@ public class Statement {
 			}
 		case StatementTypeDefer:
 			if block.defers == null {
-				block.defers = []StatementDefer{this.Defer}
+				block.defers = [this.Defer]
 			}else {
 				block.defers.append(this.Defer)
 			}

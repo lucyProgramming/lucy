@@ -12,12 +12,15 @@ class ExpressionCheckOpAssign {
 			bin.left = list[0]
 		}
 		left := bin.left.getLeftValue(block, errs)
+		if bin.right == null {
+			return 
+		}
 		right, es := bin.right.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if left == null || right == null {
 			return
 		}
-		valueType = left.Clone()
+		valueType = left.cloneType()
 		valueType.pos = e.pos
 		if err := right.rightValueValid(); err != null {
 			errs.append(err)

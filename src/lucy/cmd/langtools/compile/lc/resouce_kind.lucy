@@ -1,7 +1,5 @@
 
 
-
-
 public enum  resourceKind {
 	resourceKindJavaClass = 1,
 	resourceKindJavaPackage,

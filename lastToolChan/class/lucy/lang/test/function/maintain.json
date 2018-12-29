@@ -1,5 +1,5 @@
 {
-	"compileTime":1545354361,
+	"compileTime":1546065001,
 	"compiledFrom":[
 		{
 			"lastModify":1545200330,
@@ -15,9 +15,10 @@
 		}
 	],
 	"imports":[],
-	"hasMain":false,
+	"hasMain":true,
 	"classes":[
 		"literal$2$test.class",
 		"main.class"
-	]
+	],
+	"lucyVersion":null
 }

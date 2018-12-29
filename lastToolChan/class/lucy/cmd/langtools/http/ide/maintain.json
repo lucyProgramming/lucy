@@ -1,13 +1,17 @@
 {
-	"compileTime":1545354358,
+	"compileTime":1546064969,
 	"compiledFrom":[
 		{
-			"lastModify":1544768147,
+			"lastModify":1545721447,
 			"name":"all_definition.lucy"
 		},
 		{
-			"lastModify":1545287621,
+			"lastModify":1546060944,
 			"name":"auto_completion.lucy"
+		},
+		{
+			"lastModify":1545637496,
+			"name":"diagnose.lucy"
 		},
 		{
 			"lastModify":1545025599,
@@ -18,16 +22,20 @@
 			"name":"fmt.lucy"
 		},
 		{
-			"lastModify":1545292363,
+			"lastModify":1545373344,
 			"name":"goto_definition.lucy"
 		},
 		{
-			"lastModify":1545287989,
+			"lastModify":1545715873,
 			"name":"hover.lucy"
 		},
 		{
-			"lastModify":1545287746,
+			"lastModify":1545613421,
 			"name":"ide.lucy"
+		},
+		{
+			"lastModify":1545613421,
+			"name":"outline.lucy"
 		},
 		{
 			"lastModify":1544405217,
@@ -37,53 +45,64 @@
 	"imports":[
 		{
 			"name":"lucy/cmd/langtools/ide/alldefinition",
-			"linkTime":1545354357
+			"linkTime":1546064968
 		},
 		{
 			"name":"lucy/cmd/langtools/http/g",
-			"linkTime":1545354357
+			"linkTime":1546064968
 		},
 		{
 			"name":"lucy/encoding/json",
-			"linkTime":1545354357
+			"linkTime":1546064968
 		},
 		{
 			"name":"lucy/cmd/langtools/ide/autocompletion",
-			"linkTime":1545354357
+			"linkTime":1546064968
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/ast",
-			"linkTime":1545354355
+			"linkTime":1546064966
+		},
+		{
+			"name":"lucy/cmd/langtools/ide/diagnose",
+			"linkTime":1546064968
 		},
 		{
 			"name":"lucy/cmd/langtools/ide/findusage",
-			"linkTime":1545354357
+			"linkTime":1546064969
 		},
 		{
 			"name":"lucy/cmd/langtools/ide",
-			"linkTime":1545354357
+			"linkTime":1546064968
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/parser",
-			"linkTime":1545354356
+			"linkTime":1546064967
 		},
 		{
 			"name":"lucy/cmd/langtools/ide/gotodefinition",
-			"linkTime":1545354357
+			"linkTime":1546064968
 		},
 		{
 			"name":"lucy/cmd/langtools/ide/hover",
-			"linkTime":1545354357
+			"linkTime":1546064969
+		},
+		{
+			"name":"lucy/cmd/langtools/ide/outline",
+			"linkTime":1546064969
 		}
 	],
 	"hasMain":false,
 	"classes":[
 		"AllDefinition.class",
 		"AutoCompletion.class",
+		"Diagnose.class",
 		"FindUsage.class",
 		"Fmt.class",
+		"GetHover.class",
 		"GotoDefinition.class",
-		"Hover.class",
-		"main.class"
-	]
+		"main.class",
+		"OutLine.class"
+	],
+	"lucyVersion":null
 }

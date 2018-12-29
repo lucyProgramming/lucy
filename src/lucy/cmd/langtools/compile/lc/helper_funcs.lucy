@@ -10,6 +10,7 @@ fn parseMethodParameter(c cg.Class, bs []byte, f ast.Function) {
 		f.Type.parameterList[k].name = v.name
 	}
 }
+
 fn parseReturnListNames(c cg.Class, bs []byte, f ast.Function) {
 	a := new cg.AttributeMethodParameters()
 	a.fromBs(c, bs)

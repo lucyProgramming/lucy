@@ -1,8 +1,8 @@
 {
-	"compileTime":1545354354,
+	"compileTime":1546064964,
 	"compiledFrom":[
 		{
-			"lastModify":1545287579,
+			"lastModify":1546048076,
 			"name":"boolOption.lucy"
 		},
 		{
@@ -10,15 +10,15 @@
 			"name":"flagParser.lucy"
 		},
 		{
-			"lastModify":1543212562,
+			"lastModify":1546063977,
 			"name":"floatOption.lucy"
 		},
 		{
-			"lastModify":1545119129,
+			"lastModify":1546063972,
 			"name":"intOption.lucy"
 		},
 		{
-			"lastModify":1545284305,
+			"lastModify":1546046483,
 			"name":"option.lucy"
 		},
 		{
@@ -37,5 +37,6 @@
 		"Option.class",
 		"OptionType.class",
 		"StringOption.class"
-	]
+	],
+	"lucyVersion":null
 }

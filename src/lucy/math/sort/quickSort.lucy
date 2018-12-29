@@ -45,12 +45,3 @@ public fn quickSort <array> (s array, l int, r int,asc bool) {
         quickSort(s, i + 1, r,asc)
     } 
 }
-
-
-
-
-
-
-
-
-

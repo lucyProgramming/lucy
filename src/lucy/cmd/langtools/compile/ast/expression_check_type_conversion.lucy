@@ -16,7 +16,7 @@ class ExpressionCheckTypeConversion {
 			errs.append(err)
 			return null
 		}
-		valueType = conversion.Type.Clone()
+		valueType = conversion.Type.cloneType()
 		valueType.pos = e.pos
 		if on.isNumber() && conversion.Type.isNumber() {
 			if conversion.Expression.isLiteral() {

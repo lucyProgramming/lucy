@@ -1,53 +1,54 @@
 {
-	"compileTime":1545354357,
+	"compileTime":1546064968,
 	"compiledFrom":[
 		{
-			"lastModify":1544591253,
+			"lastModify":1545708635,
 			"name":"auto_completion.lucy"
 		},
 		{
-			"lastModify":1545287382,
+			"lastModify":1546062135,
 			"name":"flag.lucy"
 		},
 		{
-			"lastModify":1544600964,
+			"lastModify":1546060918,
 			"name":"main.lucy"
 		},
 		{
-			"lastModify":1544403838,
+			"lastModify":1546062218,
 			"name":"usage.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/cmd/langtools/compile/ast",
-			"linkTime":1545354355
+			"linkTime":1546064966
 		},
 		{
 			"name":"lucy/cmd/langtools/ide",
-			"linkTime":1545354357
+			"linkTime":1546064968
 		},
 		{
 			"name":"lucy/cmd/langtools/common",
-			"linkTime":1545354354
+			"linkTime":1546064964
 		},
 		{
 			"name":"lucy/os/flag",
-			"linkTime":1545354354
+			"linkTime":1546064964
 		},
 		{
 			"name":"lucy/encoding/json",
-			"linkTime":1545354357
+			"linkTime":1546064968
 		},
 		{
 			"name":"lucy/os",
-			"linkTime":1545354354
+			"linkTime":1546064964
 		}
 	],
-	"hasMain":false,
+	"hasMain":true,
 	"classes":[
 		"AutoCompletion.class",
 		"Flags.class",
 		"main.class"
-	]
+	],
+	"lucyVersion":null
 }

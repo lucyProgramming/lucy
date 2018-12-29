@@ -67,7 +67,7 @@ class ExpressionCheckSlice {
 				}
 			}
 		}
-		valueType = sliceOn.Clone()
+		valueType = sliceOn.cloneType()
 		valueType.pos = e.pos
 	}
 }

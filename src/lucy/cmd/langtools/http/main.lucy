@@ -8,15 +8,14 @@ import "lucy/cmd/langtools/http/doc"
 import "lucy/encoding/json"
 
 public fn http(args []string) {
-    port := new Flags().parseArgs(args)
-    print("port is " , port)
-    server := HttpServer.create(new InetSocketAddress("127.0.0.1" , port), 0)
+    host , port := new Flags().parseArgs(args)
+    printf("listen on %s:%s\n" ,host, port)
+    server := HttpServer.create(new InetSocketAddress(host , port), 0)
     server.createContext("/exit", new ExitHandler())
     ide.registerHandlers("/ide",server)
     doc.registerHandlers("/doc" , server)
     json.enablePrintErr = true 
     server.start()
-    
 }
 
 fn main(args []string) {

@@ -1,5 +1,5 @@
 {
-	"compileTime":1545354361,
+	"compileTime":1546065001,
 	"compiledFrom":[
 		{
 			"lastModify":1540256799,
@@ -12,12 +12,13 @@
 	],
 	"imports":[
 		{
-			"name":"lucy/os",
-			"linkTime":1545354354
+			"name":"lucy\/os",
+			"linkTime":1546064964
 		}
 	],
-	"hasMain":false,
+	"hasMain":true,
 	"classes":[
 		"main.class"
-	]
+	],
+	"lucyVersion":null
 }

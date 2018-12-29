@@ -1,27 +1,27 @@
 {
-	"compileTime":1545354354,
+	"compileTime":1546064965,
 	"compiledFrom":[
 		{
 			"lastModify":1545107132,
 			"name":"bytes.lucy"
 		},
 		{
-			"lastModify":1545107154,
+			"lastModify":1546061738,
 			"name":"const.lucy"
 		},
 		{
-			"lastModify":1543910395,
+			"lastModify":1545372115,
 			"name":"flag.lucy"
 		},
 		{
-			"lastModify":1545201803,
+			"lastModify":1546061727,
 			"name":"fns.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/os/flag",
-			"linkTime":1545354354
+			"linkTime":1546064964
 		}
 	],
 	"hasMain":false,
@@ -29,5 +29,6 @@
 		"Bytes.class",
 		"Flags.class",
 		"main.class"
-	]
+	],
+	"lucyVersion":null
 }

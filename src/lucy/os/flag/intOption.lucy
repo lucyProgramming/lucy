@@ -28,14 +28,13 @@ public final class IntOption  extends Option{
 				value = value * 10 + int(b - '0')
 			}else {
 				panic(sprintf("'%s' format int wrong" , s ))
-
 			}
 		}
 		if isNegative {
 			value = -value 
 		}
 		this.intValue = value 
-	} 
+	}
 	
 	public fn getValue() -> (v int = this.intValue ){   }
 

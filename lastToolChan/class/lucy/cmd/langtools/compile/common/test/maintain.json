@@ -1,5 +1,5 @@
 {
-	"compileTime":1545354355,
+	"compileTime":1546064966,
 	"compiledFrom":[
 		{
 			"lastModify":1545201470,
@@ -9,11 +9,12 @@
 	"imports":[
 		{
 			"name":"lucy/cmd/langtools/compile/common",
-			"linkTime":1545354354
+			"linkTime":1546064965
 		}
 	],
-	"hasMain":false,
+	"hasMain":true,
 	"classes":[
 		"main.class"
-	]
+	],
+	"lucyVersion":null
 }

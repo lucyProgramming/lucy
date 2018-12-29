@@ -20,7 +20,7 @@ class ExpressionSelectConst {
 		}
 		c := object.Class.block.constants[selection.name]
 		e.fromConst(c)
-		valueType = c.Type.Clone()
+		valueType = c.Type.cloneType()
 		valueType.pos = e.pos
 	}
 }

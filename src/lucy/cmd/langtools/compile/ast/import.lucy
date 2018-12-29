@@ -1,5 +1,5 @@
- import "lucy/cmd/langtools/compile/common"
- 
+import "lucy/cmd/langtools/compile/common"
+
 
 public class Import {
 	public accessName  string
@@ -9,6 +9,18 @@ public class Import {
 	public alias string 
 	public locateDefinition bool
 	public comment string 
+	public findUsage bool 
+	public findUsageInstances []Usage 
+
+	public fn mkDescription() -> (s string = "") {
+		if this.comment != null {
+			s += this.comment
+		}
+		s += sprintf("import \"%s\"" , this.Import)
+		if this.alias != null {
+			s += " as " + this.alias
+		}
+	}
 	/*
 		import "github.com/lucy" should access by lucy.doSomething()
 		import "github.com/std" as std2 should access by std2.doSomething()

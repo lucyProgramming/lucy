@@ -1,8 +1,8 @@
 {
-	"compileTime":1545354354,
+	"compileTime":1546064964,
 	"compiledFrom":[
 		{
-			"lastModify":1545202390,
+			"lastModify":1545716057,
 			"name":"common.lucy"
 		},
 		{
@@ -17,7 +17,7 @@
 	"imports":[
 		{
 			"name":"lucy/os",
-			"linkTime":1545354354
+			"linkTime":1546064964
 		}
 	],
 	"hasMain":false,
@@ -26,5 +26,6 @@
 		"Import.class",
 		"main.class",
 		"PackageMeta.class"
-	]
+	],
+	"lucyVersion":null
 }

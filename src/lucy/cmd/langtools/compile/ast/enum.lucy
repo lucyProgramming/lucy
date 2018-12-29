@@ -22,7 +22,7 @@ public class EnumName {
 		}
 		s += sprintf("%s enumItem@%d\n" , this.name  , this.value) 
 	}
-
+	
 	fn reduceFindUsageInstances(block Block) {
         if this.findUsage == false {
             return 

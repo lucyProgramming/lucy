@@ -1,6 +1,7 @@
 import "lucy/os"
 
-const usage = `		
+const usage = `
+    format lucy files
 `
 
 fn printUsageAndExit(code int ){    

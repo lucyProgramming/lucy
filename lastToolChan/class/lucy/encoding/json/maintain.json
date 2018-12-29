@@ -1,16 +1,16 @@
 {
-	"compileTime":1545354357,
+	"compileTime":1546064968,
 	"compiledFrom":[
 		{
 			"lastModify":1545198330,
 			"name":"decoder.lucy"
 		},
 		{
-			"lastModify":1544505585,
+			"lastModify":1545625792,
 			"name":"encoder.lucy"
 		},
 		{
-			"lastModify":1545199708,
+			"lastModify":1546059403,
 			"name":"json.lucy"
 		},
 		{
@@ -27,5 +27,6 @@
 		"JsonSyntaxTreeType.class",
 		"main.class",
 		"Number.class"
-	]
+	],
+	"lucyVersion":null
 }

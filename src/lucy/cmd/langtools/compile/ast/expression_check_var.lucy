@@ -13,7 +13,7 @@ class ExpressionCheckVar {
 				ev.variables[0].Type = ev.Type
 			} else {
 				for _, v := range ev.variables {
-					v.Type = ev.Type.Clone()
+					v.Type = ev.Type.cloneType()
 				}
 			}
 		}
@@ -58,7 +58,7 @@ class ExpressionCheckVar {
 							continue
 						}
 					} else {
-						v.Type = valueTypes[k].Clone()
+						v.Type = valueTypes[k].cloneType()
 						v.Type.pos = v.pos
 					}
 				}

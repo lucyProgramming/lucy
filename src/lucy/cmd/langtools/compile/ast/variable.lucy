@@ -42,7 +42,7 @@ public class Variable {
 		v.isFunctionParameter = this.isFunctionParameter
 		v.isReturn = this.isReturn
 		v.name = this.name
-		v.Type = this.Type.Clone()
+		v.Type = this.Type.cloneType()
 		v.comment = this.comment
 		v.locateDefinition = this.locateDefinition
 		v.findUsage = this.findUsage
@@ -62,5 +62,4 @@ public class Variable {
 		}
 		s += sprintf("variable %s %s" , this.name , this.Type.typeString())
 	}
-
 }

@@ -17,7 +17,7 @@ public class TypeAlias {
 		if this.comment != null {
 			s += this.comment
 		}
-		tt := this.Type.Clone()
+		tt := this.Type.cloneType()
 		tt.alias = null 
 		s += sprintf("typealias %s@%s" , this.name , tt.typeString())
 	}

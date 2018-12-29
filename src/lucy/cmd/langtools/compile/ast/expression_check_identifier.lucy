@@ -125,7 +125,7 @@ class ExpressionCheckIdentifier {
 				correctLastUsageType("value read" , t.findUsageInstances)
 			}
 			t.used = true
-			result := t.Type.Clone()
+			result := t.Type.cloneType()
 			result.pos = e.pos
 			identifier.Variable = t
 			return result, null
@@ -144,7 +144,7 @@ class ExpressionCheckIdentifier {
 			}
 			t.used = true
 			e.fromConst(t)
-			result := t.Type.Clone()
+			result := t.Type.cloneType()
 			result.pos = e.pos
 			return result, null
 		}

@@ -1,8 +1,8 @@
 {
-	"compileTime":1545354361,
+	"compileTime":1546065001,
 	"compiledFrom":[
 		{
-			"lastModify":1545198418,
+			"lastModify":1546063290,
 			"name":"quickSort.lucy"
 		}
 	],
@@ -10,5 +10,6 @@
 	"hasMain":false,
 	"classes":[
 		"main.class"
-	]
+	],
+	"lucyVersion":null
 }

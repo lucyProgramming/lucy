@@ -42,7 +42,7 @@ class ExpressionCheckLeftValue {
                 v.beenCapturedAsLeftValue += v.beenCapturedAsRightValue
                 v.beenCapturedAsRightValue = 0
                 identifier.Variable = v
-                result = identifier.Variable.Type.Clone()
+                result = identifier.Variable.Type.cloneType()
                 result.pos = e.pos
                 e.value = result
                 return result
@@ -84,7 +84,7 @@ class ExpressionCheckLeftValue {
 					return 
 				}
 				selection.field = field
-				result = field.Type.Clone()
+				result = field.Type.cloneType()
 				result.pos = e.pos
 				e.value = result
 				return result
@@ -104,7 +104,7 @@ class ExpressionCheckLeftValue {
 					if err != null {
 						errs.append(err)
 					}
-					result = field.Type.Clone()
+					result = field.Type.cloneType()
 					result.pos = e.pos
 					e.value = result
 					return result
@@ -128,7 +128,7 @@ class ExpressionCheckLeftValue {
 						return 
 					}
                     selection.packageVariable = v
-                    result = v.Type.Clone()
+                    result = v.Type.cloneType()
                     result.pos = e.pos
                     e.value = result
                     return result

@@ -4,8 +4,9 @@ import "lucy/os"
 const usage = `
     find definition of a element. 
        -file   file to be located
-       -line   zero-base line offset
-       -column zero-base line column
+       -buffer-file the file been editing (optional)
+       -line   which line (zero based)
+       -column which column (zero based)
 `
 
 fn printUsageAndExit(code int ){

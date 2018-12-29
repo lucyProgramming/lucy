@@ -30,7 +30,7 @@ class ExpressionCheckUnary {
 					unary.pos.errMsgPrefix(), unary.typeString())))
 			}
 		}
-		result := unary.Clone()
+		result := unary.cloneType()
 		result.pos = e.pos
 		return result
 	}
@@ -56,7 +56,7 @@ class ExpressionCheckUnary {
 			errs.append(new error( sprintf("%s cannot apply '%s' on '%s'",
 					on.pos.errMsgPrefix(), on.op, increment.typeString())))
 		}
-		result := increment.Clone()
+		result := increment.cloneType()
 		result.pos = e.pos
 		return result
 	}	

@@ -1,5 +1,5 @@
 {
-	"compileTime":1545354353,
+	"compileTime":1546064964,
 	"compiledFrom":[
 		{
 			"lastModify":1545269232,
@@ -10,5 +10,6 @@
 	"hasMain":false,
 	"classes":[
 		"main.class"
-	]
+	],
+	"lucyVersion":null
 }

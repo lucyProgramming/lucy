@@ -33,14 +33,14 @@ class ExpressionCheckTypeAssert {
 		if len(e.lefts) > 1 {
 			assertion.multiValueContext = true
 			valueTypes = new []Type(2)
-			valueTypes[0] = assertion.Type.Clone()
+			valueTypes[0] = assertion.Type.cloneType()
 			valueTypes[0].pos = e.pos
 			valueTypes[1] = new Type()
 			valueTypes[1].pos = e.pos
 			valueTypes[1].Type = VariableTypeBool // if  assert is ok
 		} else {
 			valueTypes = new []Type(1)
-			valueTypes[0] = assertion.Type.Clone()
+			valueTypes[0] = assertion.Type.cloneType()
 			valueTypes[0].pos = e.pos
 		}
 	}

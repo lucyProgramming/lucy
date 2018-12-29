@@ -417,7 +417,7 @@ class ClassParser extends  ParserExtends {
 			f.rename = v.rename
 			f.name = v.name
 			f.pos = v.pos
-			f.Type = t.Clone()
+			f.Type = t.cloneType()
 			f.accessFlags = 0
 			f.containsLf = v.containsLf 
 			f.inlineComment = v.inlineComment 

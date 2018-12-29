@@ -46,7 +46,7 @@ class ExpressionCheckNew {
 			correctLastUsageType("instaniation" , no.Type.Class.findUsageInstances)
 			// set to ok 
 		}
-		ret := no.Type.Clone()
+		ret := no.Type.cloneType()
 		ret.Type = VariableTypeObject
 		ret.pos = e.pos
 		errsLength := len(errs)
@@ -76,12 +76,13 @@ class ExpressionCheckNew {
 		if len(newMap.args) > 0 {
 			errs.append(new error( sprintf("%s new 'map' expect no arguments",
 				errMsgPrefix(newMap.args[0].pos))))
+			checkExpressions(block , newMap.args , errs , true)
 		}
-		ret := newMap.Type.Clone()
+		ret := newMap.Type.cloneType()
 		ret.pos = e.pos
 		return ret
 	}
-
+	
 	static fn checkNewJavaArrayExpression(e Expression , block Block, newArray ExpressionNew,
 		errs []error) ->(valueType Type) {
 		return .checkNewArrayExpression(e , block, newArray, errs)
@@ -89,7 +90,7 @@ class ExpressionCheckNew {
 
 	static fn checkNewArrayExpression(e Expression , block Block, newArray ExpressionNew,
 		errs []error) ->(valueType Type) {
-		ret := newArray.Type.Clone() // clone the type
+		ret := newArray.Type.cloneType() // clone the type
 		ret.pos = e.pos
 		if len(newArray.args) != 1 { //
 			errs.append(new error( sprintf("%s new array expect at least 1 argument",

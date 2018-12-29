@@ -2,6 +2,9 @@
 import "lucy/cmd/langtools/ide"
 import "lucy/cmd/langtools/common"
 import "java/nio/file/FileSystems"
+import "lucy/os"
+import "lucy/encoding/json"
+
 
 public fn diagnose(filename string , bs []byte) ->(result map{string -> Error[]}) {
     lucypath , packageName := ide.locateLucyFile(filename)
@@ -10,7 +13,7 @@ public fn diagnose(filename string , bs []byte) ->(result map{string -> Error[]}
         fileSystem := FileSystems.getDefault()
         file := fileSystem.getPath(filename).getFileName().toString()
         for v := range lucyFiles {
-           if file ==  fileSystem.getPath(v.realPathName).getFileName().toString(){
+           if file == fileSystem.getPath(v.realPathName).getFileName().toString(){
                v.bs = bs 
            }
         }
@@ -27,5 +30,16 @@ public fn diagnose(filename string , bs []byte) ->(result map{string -> Error[]}
 }
 
 fn main(args []string) {
-    
+    file  , bufferFile := new Flags().parseArgs(args)
+    var bs []byte 
+    if bufferFile != null && bufferFile != "" {
+        t,err := os.readFile(bufferFile)
+        if err != null {
+            panic(err)
+        }
+        bs = javaArray2Lucy(t)
+    }
+    result := diagnose(file , bs)
+    bs = new json.Encoder(result , "" , "\t").encode()
+    print(string(bs))
 }

@@ -6,7 +6,7 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/os"
 
 
-public fn autoCompletion(file string , bufferFile string , pos int , bs []byte) -> (result []ast.AutoCompletionItem){
+public fn autoCompletion(file string , pos int , bs []byte) -> (result []ast.AutoCompletionItem){
     lucyPath , packageName := ide.locateLucyFile(file)
     var lucyFiles = ide.readLucyFiles(ide.getLucyFiles(lucyPath + "/src/" + packageName))    
     fileSystem := FileSystems.getDefault()
@@ -16,16 +16,6 @@ public fn autoCompletion(file string , bufferFile string , pos int , bs []byte) 
             //read buffer file instead 
             if len(bs) > 0 {
                 v.bs = bs
-            }else {
-                if bufferFile == "" {
-                    panic("not happening")
-                }
-                t , err := os.readFile(bufferFile)
-                if err != null {
-                    panic(err)
-                }
-                v.realPathName = bufferFile
-                v.bs = javaArray2Lucy(t)
             }
             file = v.realPathName
             v.autoCompletion = pos 
@@ -36,7 +26,15 @@ public fn autoCompletion(file string , bufferFile string , pos int , bs []byte) 
 
 fn main(args []string) {
     file , bufferFile , pos := new Flags().parseArgs(args)
-    items := autoCompletion(file , bufferFile , pos , null)
+    var bs []byte 
+    if bufferFile != null && bufferFile != "" {
+        t , err := os.readFile(bufferFile)
+        if null != err {
+            panic(err)
+        }
+        bs = javaArray2Lucy(t)
+    }
+    items := autoCompletion(file ,  pos , bs)
     result := copy(new ast.AutoCompletionItem[](len(items)) ,   items)
     bs,err := json.encode(result)
     if err != null {

@@ -6,8 +6,8 @@ import "java/lang/Long"
 import "java/lang/Double"
 import "lucy/cmd/langtools/common"
 
-
 class AllDefinition {
+    
     lucyFiles []ide.LucyFile
     packageName string
     printErr bool

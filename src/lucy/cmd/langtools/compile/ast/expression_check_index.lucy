@@ -30,11 +30,11 @@
 						index.index.pos.errMsgPrefix(), indexType.typeString())))
 				}
 			}
-			valueType = on.array.Clone()
+			valueType = on.array.cloneType()
 			valueType.pos = e.pos
 			return  
 		case VariableTypeMap:
-			valueType = on.Map.V.Clone()
+			valueType = on.Map.V.cloneType()
 			valueType.pos = e.pos
 			indexType, es := index.index.checkSingleValueContextExpression(block)
 			errs.appendAll(es)

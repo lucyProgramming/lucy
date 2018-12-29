@@ -24,10 +24,10 @@ public class Package {
 	/*
 		for lucy tool goto definition
 	*/
-	public locateDefinition Pos
+	private locateDefinition Pos
 	public locateDefinitionBaseOn Object
 	public loadLucyPackageName []string 
-
+	
 	/*
 		for usage 
 	*/
@@ -322,7 +322,7 @@ public class Package {
 		
 		for _, v := range this.block.typeAliases {
 			if v.alias.locateDefinition {
-				this.locateDefinition = v.alias.pos
+				this.setLocationDefinition(v.alias)
 				return this.errors 
 			}
 			if v.alias.findUsage {
@@ -556,6 +556,14 @@ public class Package {
 	}
 
 	public fn insertImport(i Import) -> (err error) {
+		if i.findUsage {
+			u := new Usage()
+			u.Type = "import"
+			u.pos = i.pos
+			i.findUsageInstances = [u]
+			this.findUsage = i.findUsageInstances
+			this.findUsageIsGlobal = false  // false is also default
+		}
 		if this.files == null {
 			this.files = new map {string->SourceFile} ()
 		}

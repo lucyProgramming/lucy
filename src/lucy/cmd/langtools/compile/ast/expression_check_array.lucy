@@ -36,7 +36,7 @@ class ExprssionCheckArray {
 				if err := eType.isTyped(); err == null {
 					arr.Type = new Type()
 					arr.Type.Type = VariableTypeArray
-					arr.Type.array = eType.Clone()
+					arr.Type.array = eType.cloneType()
 					arr.Type.pos = e.pos
 				} else {
 					errs.append(err)
@@ -57,7 +57,7 @@ class ExprssionCheckArray {
 		if arr.Type == null {
 			return null
 		}
-		valueType = arr.Type.Clone()
+		valueType = arr.Type.cloneType()
 		valueType.pos = e.pos
 	}
 } 

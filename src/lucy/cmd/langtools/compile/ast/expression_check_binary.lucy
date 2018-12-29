@@ -48,12 +48,12 @@ class ExpressionCheckBinary {
 			ExpressionTypeXor == e.Type {
 			if left == null || right == null {
 				if left != null && left.isNumber() {
-					result = left.Clone()
+					result = left.cloneType()
 					result.pos = e.pos
 					return result
 				}
 				if right != null && right.isNumber() {
-					result = right.Clone()
+					result = right.cloneType()
 					result.pos = e.pos
 					return result
 				}
@@ -62,7 +62,7 @@ class ExpressionCheckBinary {
 			if left.isInteger() == false || left.assignAble(block , errs, right) == false {
 				errs.append(e.binaryWrongOpErr())
 			}
-			result = left.Clone()
+			result = left.cloneType()
 			result.pos = e.pos
 			return result
 		}
@@ -70,7 +70,7 @@ class ExpressionCheckBinary {
 			e.Type == ExpressionTypeRsh {
 			if left == null || right == null {
 				if left != null && left.isNumber() {
-					result = left.Clone()
+					result = left.cloneType()
 					result.pos = e.pos
 					return result
 				}
@@ -83,7 +83,7 @@ class ExpressionCheckBinary {
 			if right.Type == VariableTypeLong {
 				bin.right.convertToNumberType(VariableTypeInt)
 			}
-			result = left.Clone()
+			result = left.cloneType()
 			result.pos = e.pos
 			return result
 		}
@@ -147,12 +147,12 @@ class ExpressionCheckBinary {
 			e.Type == ExpressionTypeMod {
 			if left == null || right == null {
 				if left != null {
-					result = left.Clone()
+					result = left.cloneType()
 					result.pos = e.pos
 					return result
 				}
 				if right != null {
-					result = right.Clone()
+					result = right.cloneType()
 					result.pos = e.pos
 					return result
 				}
@@ -181,7 +181,7 @@ class ExpressionCheckBinary {
 			} else {
 				errs.append(e.binaryWrongOpErr())
 			}
-			result = left.Clone()
+			result = left.cloneType()
 			result.pos = e.pos
 			return result
 		}

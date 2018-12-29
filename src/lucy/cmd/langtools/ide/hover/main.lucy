@@ -22,5 +22,14 @@ public fn getHover (file string , pos int , bs []byte) ->(s string = "") {
 }
 
 fn main(args []string) {
-	 
+	file , bufferFile , pos := new Flags().parseArgs(args)
+    var bs []byte 
+    if bufferFile != null && bufferFile != "" {
+        t , err := os.readFile(bufferFile)
+        if null != err {
+            panic(err)
+        }
+        bs = javaArray2Lucy(t)
+    }
+    print(getHover(file , pos , bs))
 }

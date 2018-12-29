@@ -229,7 +229,7 @@ class TypeParser extends ParserExtends {
 		ret.getHover = this.parser.token.getHover 
 		this.next(lfIsToken) // skip name identifier
 		for this.parser.token.Type == lex.TokenSelection {
-			ret.autoCompletion = this.parser.token.autoCompletion 
+			ret.locatePackageDefinition = ret.locateDefinition
 			this.next(lfNotToken) // skip .
 			if ret.autoCompletion {
 				ret.name += "."
@@ -240,17 +240,17 @@ class TypeParser extends ParserExtends {
 					this.parser.errMsgPrefix()))
 			}
 			ret.name += "." + this.parser.token.stringValue
-			ret.locateDefinition = ret.locateDefinition || this.parser.token.locateDefinition
+			ret.locateDefinition = this.parser.token.locateDefinition
 			ret.findUsage = ret.findUsage || this.parser.token.findUsage
 			ret.rename = ret.rename || this.parser.token.rename
 			ret.getHover = ret.getHover || this.parser.token.getHover
-			ret.autoCompletion = ret.getHover || this.parser.token.autoCompletion
-			ret.pos = this.parser.mkPos() //  override pos
+			ret.autoCompletion = ret.autoCompletion || this.parser.token.autoCompletion
+			ret.pos = this.parser.mkPosStartAt(ret.pos) //  override pos
 			this.next(lfIsToken)   // skip identifier
 		}
 		return ret, null
 	}
-	
+
 	fn parseTypes(endTokens lex.TokenKind...) ->(ts []ast.Type,err error) {
 		ts = []ast.Type{}
 		for this.parser.token.Type != lex.TokenEof {

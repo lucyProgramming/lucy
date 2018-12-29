@@ -30,7 +30,7 @@ class ExpressionCheckQuestion {
 			}
 		}
 		if tType != null {
-			valueType = tType.Clone()
+			valueType = tType.cloneType()
 			valueType.pos = e.pos
 		}
 		if question.False  != null {
@@ -43,7 +43,7 @@ class ExpressionCheckQuestion {
 					fType.pos.errMsgPrefix(), fType.typeString(), tType.typeString())))
 			}
 			if valueType == null && fType != null {
-				valueType = fType.Clone()
+				valueType = fType.cloneType()
 				valueType.pos = e.pos
 			}
 		}

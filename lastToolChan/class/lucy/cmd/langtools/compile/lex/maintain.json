@@ -1,16 +1,16 @@
 {
-	"compileTime":1545354356,
+	"compileTime":1546064967,
 	"compiledFrom":[
 		{
-			"lastModify":1545286288,
+			"lastModify":1545631514,
 			"name":"lex.lucy"
 		},
 		{
-			"lastModify":1545285188,
+			"lastModify":1545712731,
 			"name":"token.lucy"
 		},
 		{
-			"lastModify":1545285164,
+			"lastModify":1545631336,
 			"name":"var.lucy"
 		}
 	],
@@ -21,5 +21,6 @@
 		"main.class",
 		"Token.class",
 		"TokenKind.class"
-	]
+	],
+	"lucyVersion":null
 }

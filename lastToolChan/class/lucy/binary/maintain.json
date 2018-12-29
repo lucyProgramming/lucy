@@ -1,5 +1,5 @@
 {
-	"compileTime":1545354353,
+	"compileTime":1546064964,
 	"compiledFrom":[
 		{
 			"lastModify":1544492282,
@@ -11,5 +11,6 @@
 	"classes":[
 		"BigEndian.class",
 		"main.class"
-	]
+	],
+	"lucyVersion":null
 }

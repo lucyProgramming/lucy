@@ -6,9 +6,6 @@ public class Error {
     public err string
     
     public static fn convertErrors(ess []error) -> (result map{string -> Error[]}) {
-        //TODO:: un elegance
-        //TODO:: pos dose not contains range info 
-        //fix the issue next version
         es := new map{string -> []Error}()
         for e := range ess {
             if t , ok := e.(ast.CompileError) ; ok {
@@ -27,6 +24,9 @@ public class Error {
                 }
                 continue
             }
+            //TODO:: un elegance
+            //TODO:: pos dose not contains range info 
+            //fix the issue next version
             v := e.getMessage()
             filename := v[:v.indexOf(".lucy") + 5]
             rest := v[v.indexOf(".lucy") + 6:] // skip :

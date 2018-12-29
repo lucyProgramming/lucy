@@ -105,7 +105,7 @@ class ExpressionCheckAssign {
 			}
 		}
 		// here is safe
-		valueType = leftTypes[0].Clone()
+		valueType = leftTypes[0].cloneType()
 		valueType.pos = e.pos
 	}	
 } 

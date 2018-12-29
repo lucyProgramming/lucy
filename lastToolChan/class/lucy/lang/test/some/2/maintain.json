@@ -1,5 +1,5 @@
 {
-	"compileTime":1545354361,
+	"compileTime":1546065001,
 	"compiledFrom":[
 		{
 			"lastModify":1542176041,
@@ -15,11 +15,12 @@
 		}
 	],
 	"imports":[],
-	"hasMain":false,
+	"hasMain":true,
 	"classes":[
 		"Capture.class",
 		"closureFunction$init$literal9.class",
 		"main.class",
 		"xxx.class"
-	]
+	],
+	"lucyVersion":null
 }

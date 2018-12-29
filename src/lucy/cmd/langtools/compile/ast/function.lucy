@@ -49,18 +49,18 @@ public class Function {
 	
 	fn mkSuggest() ->(s string ) {
 		s = sprintf("%s(" , this.name)
-		l := len(this.Type.parameterList)
+		length := len(this.Type.parameterList)
 		if this.haveDefaultValue {
-			l = this.defaultValueStartAt
+			length = this.defaultValueStartAt
 		}
 		if this.Type.parameterList != null {
-			for k , v := range this.Type.parameterList[:l] {
+			for k , v := range this.Type.parameterList[:length] {
 				if v.name != null && v.name != "" {
 					s += v.name 
 				}else {
 					s += "var" + k
 				}
-				if k != len(this.Type.parameterList) - 1 {
+				if k != length - 1 {
 					s += " , "
 				}
 			}
@@ -94,7 +94,7 @@ public class Function {
 			return "fn " + this.name + " " + this.Type.typeString(format)
 		}
 	}
-
+	
 	fn makeName() {
 		if this.name == null || this.name == "" {
 			if this.block.inheritedAttribute.classAndFunctionNames == null ||

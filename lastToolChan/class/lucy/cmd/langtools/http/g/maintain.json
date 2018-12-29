@@ -1,8 +1,8 @@
 {
-	"compileTime":1545354357,
+	"compileTime":1546064968,
 	"compiledFrom":[
 		{
-			"lastModify":1545188879,
+			"lastModify":1546062456,
 			"name":"fns.lucy"
 		}
 	],
@@ -10,5 +10,6 @@
 	"hasMain":false,
 	"classes":[
 		"main.class"
-	]
+	],
+	"lucyVersion":null
 }

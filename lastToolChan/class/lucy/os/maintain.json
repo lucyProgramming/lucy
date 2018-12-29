@@ -1,16 +1,16 @@
 {
-	"compileTime":1545354354,
+	"compileTime":1546064964,
 	"compiledFrom":[
 		{
-			"lastModify":1545203309,
+			"lastModify":1546063639,
 			"name":"cmd.lucy"
 		},
 		{
-			"lastModify":1542077195,
+			"lastModify":1545713756,
 			"name":"file.lucy"
 		},
 		{
-			"lastModify":1545292386,
+			"lastModify":1546057616,
 			"name":"os.lucy"
 		},
 		{
@@ -21,7 +21,7 @@
 	"imports":[
 		{
 			"name":"lucy/io",
-			"linkTime":1545354353
+			"linkTime":1546064964
 		}
 	],
 	"hasMain":false,
@@ -31,5 +31,6 @@
 		"closureFunction$start$literal78.class",
 		"Command.class",
 		"main.class"
-	]
+	],
+	"lucyVersion":null
 }

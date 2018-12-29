@@ -476,6 +476,12 @@ public class Lexer {
 		if c == '\n' {
 			err = new error("string literal start new line")
 		}
+		if this.findUsage > 0 {
+			line,column := this.getLineAndColumnFromPos(this.findUsage)
+			if line == token.endLine && column >= token.startLine && column <= token.endLine {
+				token.findUsage = true 
+			}
+		}
 		token.stringValue = string(bs)
 		token.literalRaw = string(this.bs[token.offset : this.offset ] )
 		token.description = string(bs)

@@ -9,11 +9,11 @@ import "java/io/File"
 
 public class Command{
 	cmd string  
-	args string []  
-	envs string [] 
-	file File 
+	args string[]  
+	envs string[] 
+	file File
 	public stdin  InputStream
-	public stdout , stderr  OutputStream 
+	public stdout , stderr  OutputStream
 	p Process
 	
 	public fn Command(cmd string , args  , envs string []   ,file File  ){

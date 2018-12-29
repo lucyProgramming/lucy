@@ -68,7 +68,7 @@ class ReName {
         if p.renameIsGlobal {
             this.searchLucyPath()        
         }
-        length :=1 + len(packageLoader.loadPacakges)
+        length := 1 + len(packageLoader.loadPacakges)
         ps := new []ast.Package(length)
         ps[0] = p 
         var i = 1 

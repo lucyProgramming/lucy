@@ -64,13 +64,11 @@ class ExpressionCheckFunctionCall {
 					}
 				case EnumName:
 					t := d.(EnumName)
-					// if t.isBuildIn == false {
 					i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
 					if should {
 						t.reduceFindUsageInstances(block)
 						d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
 					}
-					// }
 				}
 			}
 
@@ -266,7 +264,7 @@ class ExpressionCheckFunctionCall {
 					errMsgPrefix(argTypes[k].pos), err.getMessage())))
 				return
 			}
-			t := v.Type.Clone()
+			t := v.Type.cloneType()
 			t.bindWithParameterTypes(f.Type, parameterTypes)
 			parameterTypeArray.append(t)
 		}
@@ -279,7 +277,7 @@ class ExpressionCheckFunctionCall {
 				//trying already have
 				if err := v.Type.canBeBindWithParameterTypes(parameterTypes); err == null {
 					//very good no error
-					t := v.Type.Clone()
+					t := v.Type.cloneType()
 					t.bindWithParameterTypes(f.Type, parameterTypes)
 					parameterTypeArray.append( t)
 					continue
@@ -293,7 +291,7 @@ class ExpressionCheckFunctionCall {
 					errMsgPrefix(tps[0].pos), err.getMessage())))
 				return null
 			}
-			t := v.Type.Clone()
+			t := v.Type.cloneType()
 			t.bindWithParameterTypes(f.Type, parameterTypes)
 			parameterTypeArray.append(t)
 			tps = tps[1:]
@@ -343,4 +341,3 @@ class ExpressionCheckFunctionCall {
 		return ret
 	}	
 }
-

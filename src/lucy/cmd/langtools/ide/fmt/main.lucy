@@ -4,6 +4,9 @@ import "lucy/os"
 
 
 public fn main(args []string) {
+    print("un support now")
+    os.exit(1)
+    
     files , std := new Flags().parseArgs(args)
     if len(files) == 0 {
         print("no file provide")
@@ -28,10 +31,3 @@ public fn main(args []string) {
         }
     }
 }
-
-
-
-
-
-
-

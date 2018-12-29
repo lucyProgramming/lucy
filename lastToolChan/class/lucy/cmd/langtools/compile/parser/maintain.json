@@ -1,32 +1,32 @@
 {
-	"compileTime":1545354356,
+	"compileTime":1546064967,
 	"compiledFrom":[
 		{
-			"lastModify":1545111447,
+			"lastModify":1545723160,
 			"name":"block.lucy"
 		},
 		{
-			"lastModify":1545354281,
+			"lastModify":1545711410,
 			"name":"class.lucy"
 		},
 		{
-			"lastModify":1545118606,
+			"lastModify":1545633480,
 			"name":"comment.lucy"
 		},
 		{
-			"lastModify":1545280140,
+			"lastModify":1545713416,
 			"name":"enum.lucy"
 		},
 		{
-			"lastModify":1545278748,
+			"lastModify":1545631990,
 			"name":"expression.lucy"
 		},
 		{
-			"lastModify":1545278760,
+			"lastModify":1545369464,
 			"name":"expression_array.lucy"
 		},
 		{
-			"lastModify":1545109576,
+			"lastModify":1545632698,
 			"name":"expression_binary.lucy"
 		},
 		{
@@ -34,7 +34,7 @@
 			"name":"expression_question.lucy"
 		},
 		{
-			"lastModify":1545278778,
+			"lastModify":1545713814,
 			"name":"expression_suffix.lucy"
 		},
 		{
@@ -42,15 +42,15 @@
 			"name":"function.lucy"
 		},
 		{
-			"lastModify":1545352986,
+			"lastModify":1545632535,
 			"name":"parse.lucy"
 		},
 		{
-			"lastModify":1545280052,
+			"lastModify":1545613421,
 			"name":"parser_extends.lucy"
 		},
 		{
-			"lastModify":1545269609,
+			"lastModify":1545636893,
 			"name":"statamtent_for.lucy"
 		},
 		{
@@ -58,34 +58,34 @@
 			"name":"statement_if.lucy"
 		},
 		{
-			"lastModify":1545109514,
+			"lastModify":1545636939,
 			"name":"statement_switch.lucy"
 		},
 		{
-			"lastModify":1545278864,
+			"lastModify":1545370621,
 			"name":"statement_when.lucy"
 		},
 		{
-			"lastModify":1545112840,
+			"lastModify":1545713878,
 			"name":"type.lucy"
 		},
 		{
-			"lastModify":1545109315,
+			"lastModify":1545637020,
 			"name":"var.lucy"
 		}
 	],
 	"imports":[
 		{
 			"name":"lucy/cmd/langtools/compile/ast",
-			"linkTime":1545354355
+			"linkTime":1546064966
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/lex",
-			"linkTime":1545354356
+			"linkTime":1546064967
 		},
 		{
 			"name":"lucy/cmd/langtools/compile/jvm/cg",
-			"linkTime":1545354354
+			"linkTime":1546064965
 		}
 	],
 	"hasMain":false,
@@ -112,5 +112,6 @@
 		"StatementSwitchParser.class",
 		"StatementWhenParser.class",
 		"TypeParser.class"
-	]
+	],
+	"lucyVersion":null
 }

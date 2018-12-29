@@ -2,9 +2,10 @@ import "lucy/os"
 
 
 const usage = `
-    find definition of a element. 
+    get HOVER imformation of a element. 
        -file   file to be located
-       -pos    pos to be located , must be positive
+       -line   which line (zero based)
+       -column which column (zero based)
 `
 
 fn printUsageAndExit(code int){

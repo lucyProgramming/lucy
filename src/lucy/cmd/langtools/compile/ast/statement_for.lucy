@@ -130,9 +130,9 @@ public class StatementFor {
 				}
 				if rangeOn.Type == VariableTypeArray ||
 					rangeOn.Type == VariableTypeJavaArray {
-					vd.Type = rangeOn.array.Clone()
+					vd.Type = rangeOn.array.cloneType()
 				} else {
-					vd.Type = rangeOn.Map.V.Clone()
+					vd.Type = rangeOn.Map.V.cloneType()
 				}
 				vd.name = identifierV.name
 				if this.initExpressionBlock.inheritedAttribute.Function != null {
@@ -157,7 +157,7 @@ public class StatementFor {
 					vt = new Type()
 					vt.Type = VariableTypeInt
 				} else {
-					vt = rangeOn.Map.K.Clone()
+					vt = rangeOn.Map.K.cloneType()
 					vt.pos = rangeOn.pos
 				}
 				vd.name = identifierK.name

@@ -7,7 +7,7 @@ public fn getBaseName(filepath string) -> (name string) {
 	return filepath[index+1:]
 }
 
-
+//
 public fn getDirName(filepath string) -> (name string) {
 	index := filepath.lastIndexOf("/")
 	if index  < 0 {
