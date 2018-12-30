@@ -23,7 +23,7 @@ class BuildinFunctionSprintf {
         }
         // format,must be string
         call := e.data.(ast.ExpressionFunctionCall)
-        meta := call.BuildInFunctionMeta.(ast.BuildInFunctionSprintfMeta)
+        meta := call.buildInFunctionMeta.(ast.BuildInFunctionSprintfMeta)
         maxStack = this.eb.build(c, code, meta.format, context, state)
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
         loadInt(c, code, int(meta.argsLength))

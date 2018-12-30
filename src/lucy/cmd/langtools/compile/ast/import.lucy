@@ -12,6 +12,17 @@ public class Import {
 	public findUsage bool 
 	public findUsageInstances []Usage 
 
+	fn mkValueReadUsage(pos Pos) {
+		this.used = true
+		if this.findUsage == false {
+			return 
+		}
+		u := new Usage()
+		u.Type = "value read"
+		u.pos = pos 
+		this.findUsageInstances.append(u)
+	}
+
 	public fn mkDescription() -> (s string = "") {
 		if this.comment != null {
 			s += this.comment
@@ -38,47 +49,3 @@ public class Import {
 		return null
 	}
 }
-
-//different from different source file
-class SourceFile {
-	imports            map { string -> Import }  // accessName -> Import
-	importsByResources map { string -> Import }  // resourceName -> Import
-	filename          string  
-	/*
-		rename will modify this file 
-	*/
-	isDirty bool 
-	
-	fn SourceFile(filename string) {
-		this.super()
-		this.filename = filename
-	}
-
-	fn insertImport(block Block,i Import) ->(err error)  {
-		if i.locateDefinition {
-			block.inheritedAttribute.p.setLocationDefinition(i)
-			return
-		}
-		if this.imports == null {
-			this.imports = new map {string->Import}()
-		}
-		if this.importsByResources == null {
-			this.importsByResources =new map { string -> Import }()
-		}
-		if err = i.mkAccessName(); err != null {
-			return err
-		}
-		if this.imports.keyExist(i.accessName){
-			return new error(sprintf("%s '%s' reimported",
-				i.pos.errMsgPrefix(), i.Import))
-		}
-		if this.importsByResources.keyExist(i.Import) {
-			return new error(sprintf("%s '%s' reimported",
-				i.pos.errMsgPrefix(), i.accessName))
-		}
-		this.importsByResources[i.Import] = i
-		this.imports[i.accessName] = i
-		return null
-	}
-}
-

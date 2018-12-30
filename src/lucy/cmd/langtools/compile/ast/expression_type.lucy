@@ -1,6 +1,5 @@
 import "java/lang/Object"
 
-
 public enum  ExpressionTypeKind { 
 	ExpressionTypeNull  = 1,                                     // null
 	ExpressionTypeBool,                                      // true or false
@@ -71,14 +70,13 @@ public enum  ExpressionTypeKind {
 	ExpressionTypeParenthesis ,                              // ( a )
 	ExpressionTypeVArgs ,                                    // a ...
 	ExpressionTypeDot ,                                      // .
-	ExpressionTypeAutoCompletion    						//auto completion 
+	ExpressionTypeAutoCompletion    						 //auto completion 
 }
 
 public class ExpressionTypeAssert extends ExpressionTypeConversion{
 	public multiValueContext bool
 	public isType bool  // a.(type)  type is a key word , value is good enough 
 }
-
 
 public class ExpressionQuestion  {
 	public selection Expression
@@ -93,7 +91,7 @@ public class ExpressionSlice  {
 
 
 public class ExpressionFunctionCall  {
-	public BuildInFunctionMeta      Object // for build in function only
+	public buildInFunctionMeta      Object // for build in function only
 	public Expression               Expression
 	public args                     []Expression
 	public vArgs                    CallVariableArgs

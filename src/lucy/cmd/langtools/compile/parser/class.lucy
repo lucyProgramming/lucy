@@ -365,12 +365,13 @@ class ClassParser extends  ParserExtends {
 			return 	
 		}
 		idenfierToken := this.parser.token
-		idenfierPos := this.parser.mkPos() 
+		idenfierPos := this.parser.mkPos(this.parser.lastToken) 
 		names, err := this.parser.parseNameList()
 		if err != null {
 			return err
 		}
-		if this.parser.token.Type == lex.TokenLp  && len(names) == 1 {
+		if this.parser.token.Type == lex.TokenLp  &&  
+			len(names) == 1 {
 			this.parser.errs.append(new error(sprintf("%s missing 'fn'" , this.parser.errMsgPrefix(idenfierPos))))
 			t := new lex.Token()
 			t.Type = lex.TokenFn

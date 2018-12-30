@@ -478,8 +478,14 @@ public class Lexer {
 		}
 		if this.findUsage > 0 {
 			line,column := this.getLineAndColumnFromPos(this.findUsage)
-			if line == token.endLine && column >= token.startLine && column <= token.endLine {
+			if line == token.endLine && column >= token.startColumnOffset && column <= token.endColumnOffset {
 				token.findUsage = true 
+			}
+		}
+		if this.locateDefinition > 0 {
+			line , column := this.getLineAndColumnFromPos(this.locateDefinition)
+			if line == token.endLine && column >= token.startColumnOffset && column <= token.endColumnOffset {
+				token.locateDefinition = true 
 			}
 		}
 		token.stringValue = string(bs)

@@ -1,5 +1,5 @@
 class ExpressionCheckAssign {
-	
+
 	static fn check(e Expression , block Block, errs []error) ->(valueType Type)  {
 		bin := e.data.(ExpressionBinary)
 		lefts := new []Expression(1)
@@ -7,6 +7,9 @@ class ExpressionCheckAssign {
 			lefts = bin.left.data.([]Expression)
 		} else {
 			lefts[0] = bin.left
+		}
+		if bin.right.data == null {
+			return 
 		}
 		values := bin.right.data.([]Expression)
 		for _, v := range values {

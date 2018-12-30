@@ -121,7 +121,6 @@ class StatementIfParser extends ParserExtends {
 			t := new ast.StatementElseIf()
 			t.condition = condition
 			elseIfList.append(t)
-
 			if this.parser.token.Type != lex.TokenLc {
 				err = new error(sprintf("%s not '{' after a expression,but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.description))

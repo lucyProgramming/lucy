@@ -67,7 +67,6 @@ class ExpressionCheckIdentifier {
 		if d == null {
 			i := block.inheritedAttribute.p.getImport(e.pos.filename, identifier.name)
 			if i != null {
-				i.used = true
 				return .checkIdentifierThroughImports(block , identifier , e , i)
 			}
 		}
@@ -197,6 +196,10 @@ class ExpressionCheckIdentifier {
 		p, err := block.inheritedAttribute.p.load(it.Import)
 		if err != null {
 			return null, new error(sprintf("%s %s", e.pos.errMsgPrefix(), err.getMessage()))
+		}
+
+		{
+			it.mkValueReadUsage(e.pos)
 		}
 		if identifier.locateDefinition {
 			block.inheritedAttribute.p.setLocationDefinition(it)

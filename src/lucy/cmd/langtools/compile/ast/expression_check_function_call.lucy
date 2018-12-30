@@ -100,7 +100,7 @@ class ExpressionCheckFunctionCall {
 				if ret == null {
 					return null
 				}
-				return []Type{ret}
+				return [ret]
 			}
 			if c ,ok:= d.(Class) ; ok {
 				typeConversion := new ExpressionTypeConversion()
@@ -120,7 +120,7 @@ class ExpressionCheckFunctionCall {
 				if ret == null {
 					return null
 				}
-				return []Type{ret}
+				return [ret]
 			}
 			if v ,ok := d.(Variable) ; ok {
 				if isCaptureVar[0] {

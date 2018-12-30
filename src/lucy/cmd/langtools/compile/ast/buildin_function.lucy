@@ -105,7 +105,7 @@ fn registerBuildInFunctions() {
 					return
 				}
 				meta := new BuildInFunctionPanicMeta()
-				e.BuildInFunctionMeta = meta
+				e.buildInFunctionMeta = meta
 				if args[0].Type == VariableTypeObject {
 					meta.argThrowable, _ = args[0].Class.haveSuperClass(block , args[0].pos, JavaThrowableClass)
 				}
@@ -196,7 +196,7 @@ fn registerBuildInFunctions() {
 				return
 			}
 			meta := new BuildInFunctionSprintfMeta()
-			e.BuildInFunctionMeta = meta
+			e.buildInFunctionMeta = meta
 			meta.format = e.args[0]
 			meta.argsLength = len(args) - 1
 			e.args = e.args[1:]
@@ -242,7 +242,7 @@ fn registerBuildInFunctions() {
 						errMsgPrefix(e.parameterTypes[0].pos))))
 				}
 				meta := new BuildInFunctionPrintfMeta()
-				e.BuildInFunctionMeta = meta
+				e.buildInFunctionMeta = meta
 				if len(args) == 0 {
 					err := new error(sprintf("%s '%s' expect one argument at least",
 						pos.errMsgPrefix(), common.BuildInFunctionPrintf) )

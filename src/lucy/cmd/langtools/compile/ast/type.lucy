@@ -316,7 +316,7 @@ public class Type {
 		if this.name.indexOf(".") < 0  {
 			i := block.inheritedAttribute.p.getImport(this.pos.filename, this.name)
 			if i != null {
-				i.used = true
+				i.mkValueReadUsage(this.pos)
 				return block.inheritedAttribute.p.load(i.Import)
 			}
 			return null, new error(sprintf("%s type named '%s' not found",
@@ -330,7 +330,7 @@ public class Type {
 			return null, new error(sprintf("%s package '%s' not imported",
 				errMsgPrefix(this.pos), packageName))
 		}
-		i.used = true
+		i.mkValueReadUsage(this.pos)
 		if this.locatePackageDefinition {
 			block.inheritedAttribute.p.setLocationDefinition(i)
 		}

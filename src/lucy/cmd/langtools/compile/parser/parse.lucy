@@ -2,7 +2,7 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-public fn Parse(
+public fn parse(
 	tops []ast.TopNode,
 	filename string,
 	bs []byte,
@@ -366,7 +366,7 @@ class Parser {
 		return err
 	}
 
-	fn mkPosStartAt(start ast.Pos , t lex.Token...) -> (pos ast.Pos) {
+	fn mkPosFromStart(start ast.Pos , t lex.Token...) -> (pos ast.Pos) {
 		token := this.token
 		if len(t) > 0 {
 			token = t[0]
@@ -406,10 +406,13 @@ class Parser {
 			pos.endOffset = token.endOffset
 			return
 		} else {
-			line, _ := this.lexer.getLineAndColumn()
+			line, column := this.lexer.getLineAndColumn()
 			pos = new  ast.Pos()
 			pos.filename = this.filename
+			pos.startLine = line
+			pos.startColumnOffset = column
 			pos.endLine = line
+			pos.endColumnOffset = column
 			return
 		}
 	}
@@ -828,6 +831,7 @@ class Parser {
 			i.pos = this.mkPos()
 			i.Import = this.token.stringValue
 			i.findUsage = this.token.findUsage 
+			i.locateDefinition = this.token.locateDefinition
 			imports.append(i)
 			this.next(lfIsToken) // skip name
 			if this.token.Type == lex.TokenAs {
@@ -844,7 +848,8 @@ class Parser {
 				} else {
 					i.accessName = this.token.stringValue
 					i.alias = this.token.stringValue
-					i.locateDefinition = this.token.locateDefinition 
+					i.locateDefinition = i.locateDefinition || this.token.locateDefinition 
+					i.findUsage = i.findUsage || this.token.findUsage 
 					this.next(lfIsToken) // skip identifier
 				}
 				this.validStatementEnding()

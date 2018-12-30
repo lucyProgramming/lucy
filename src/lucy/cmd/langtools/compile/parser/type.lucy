@@ -245,7 +245,7 @@ class TypeParser extends ParserExtends {
 			ret.rename = ret.rename || this.parser.token.rename
 			ret.getHover = ret.getHover || this.parser.token.getHover
 			ret.autoCompletion = ret.autoCompletion || this.parser.token.autoCompletion
-			ret.pos = this.parser.mkPosStartAt(ret.pos) //  override pos
+			ret.pos = this.parser.mkPosFromStart(ret.pos) //  override pos
 			this.next(lfIsToken)   // skip identifier
 		}
 		return ret, null

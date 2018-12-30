@@ -66,7 +66,6 @@ fn shouldAccessFromImports(block Block,name string, from Pos, alreadyHave Pos) -
 	if from.filename != alreadyHave.filename {
 		i = block.inheritedAttribute.p.getImport(from.filename, name)
 		if i != null {
-			i.used = true
 			return i, true
 		} else {
 			return null, false
@@ -83,9 +82,6 @@ fn shouldAccessFromImports(block Block,name string, from Pos, alreadyHave Pos) -
 		alreadyHave
 	*/
 	should = from.endLine < alreadyHave.endLine
-	if should {
-		i.used = true
-	}
 	return i, should
 }
 
@@ -213,12 +209,12 @@ fn convertExpressionToNeed(block Block , e Expression, need Type, eval Type) {
 	convertExpressionsToNeeds(block , [e], [need], [eval] )
 }
 
-fn convertExpressionsToNeeds(block Block , es []Expression, needs []Type, eval []Type) {
+fn convertExpressionsToNeeds(block Block , expressions []Expression, needs []Type, eval []Type) {
 	errs := []error{} // no return
-	if len(es) == 0 {
+	if len(expressions) == 0 {
 		return
 	}
-	for k, e := range es {
+	for k, e := range expressions {
 		if e.isLiteral() == false {
 			continue
 		}

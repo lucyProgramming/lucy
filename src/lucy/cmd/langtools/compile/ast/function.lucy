@@ -67,13 +67,22 @@ public class Function {
 		}
 		s += ")"
 	}
-
+	
 	public fn mkDescription() ->(d string = "") {
+		if this.isBuildIn {
+			return this.mkBuildInFunctionDescription()
+		}
 		if this.comment != null {
 			d += this.comment
 		}
 		d += this.readableMsg(true)
 	}
+
+	public fn mkBuildInFunctionDescription() ->(d string = "") {
+		//TODO:: more information 
+		d = "buildin " + this.name 
+	}
+
 	
 	public fn nameLiteralFunction() -> (name string) {
 		if this.name != null && this.name != "" {

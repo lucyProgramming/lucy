@@ -45,7 +45,5 @@ class Flags {
 		if pos == -1 {
 			panic("pos == -1")
 		}
-
 	}
 }
-

@@ -7,7 +7,7 @@ import "lucy/encoding/json"
 public fn outLine(filename string) ->(definitions []ide.Definition = []ide.Definition{}) {
     bs,_ := os.readFile(filename)
     tops := []ast.TopNode{}
-    parser.Parse(tops , filename , javaArray2Lucy(bs) , false , 10 , -1 , -1 , -1 , -1 , -1)
+    parser.parse(tops , filename , javaArray2Lucy(bs) , false , 10 , -1 , -1 , -1 , -1 , -1)
     
     for v := range tops{
         when v.node.(type){

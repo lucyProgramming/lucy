@@ -110,7 +110,6 @@ public class Class {
         return null
     }
 
-
     fn mkDefaultConstruction() {
         if this.isInterface() {
             return

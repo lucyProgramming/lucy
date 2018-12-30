@@ -9,10 +9,7 @@ public fn getHover (file string , pos int , bs []byte) ->(s string = "") {
         bs = javaArray2Lucy(t)
     }
     storePackage := []ast.Package{null}
-    p := gotodefinition.findDefinition(file , pos , bs , storePackage)
-    if p == null {
-        return  
-    }
+    gotodefinition.findDefinition(file , pos , bs , storePackage)
     if storePackage[0] == null || 
         storePackage[0].locateDefinitionBaseOn == null {
         return 
@@ -20,6 +17,7 @@ public fn getHover (file string , pos int , bs []byte) ->(s string = "") {
     print(storePackage[0].locateDefinitionBaseOn)
     return new MakeHover(storePackage[0].locateDefinitionBaseOn).make()
 }
+
 
 fn main(args []string) {
 	file , bufferFile , pos := new Flags().parseArgs(args)

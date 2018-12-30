@@ -27,10 +27,6 @@ class Flags {
 			print("file not provided")
 			printUsageAndExit(1)
 		}
-		if this.bufferFile.getValue() == "" {
-			print("buffer file not provided")
-			printUsageAndExit(1)
-		}
 		file = this.file.getValue()
 		bufferFile = this.bufferFile.getValue()
 	}

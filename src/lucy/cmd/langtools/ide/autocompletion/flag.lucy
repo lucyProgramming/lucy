@@ -30,10 +30,6 @@ class Flags {
 			print("file not provided")
 			printUsageAndExit(1)
 		}
-		if this.bufferFile.getValue() == "" {
-			print("buffer file not provided")
-			printUsageAndExit(1)
-		}
 		if this.line.getValue() < 0 {
 			print("line not provided or negative...")
 			printUsageAndExit(1)

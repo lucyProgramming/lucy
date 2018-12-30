@@ -594,18 +594,18 @@ class ExpressionCheckMethodCall {
 				}
 				errs.append(new error(sprintf("%s call '%s' expect one argument",
 					pos.errMsgPrefix(), call.name)))
-				return []Type{ret}
+				return [ret]
 			}
 			t, es := call.args[0].checkSingleValueContextExpression(block)
 			errs.appendAll(es)
 			if t == null {
-				return []Type{ret}
+				return [ret]
 			}
 			if false == m.K.assignAble(block, errs, t) {
 				errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
 					t.pos.errMsgPrefix(), t.typeString(), m.K.typeString())))
 			}
-			return []Type{ret}
+			return [ret]
 		case common.MapMethodRemove:
 			ret := new Type()
 			ret.pos = e.pos
@@ -613,7 +613,7 @@ class ExpressionCheckMethodCall {
 			if len(call.args) == 0 {
 				errs.append(new error(sprintf("%s remove expect at last 1 argement",
 					e.pos.errMsgPrefix())))
-				return []Type{ret}
+				return [ret]
 			}
 			ts := checkExpressions(block, call.args, errs, true)
 			for _, t := range ts {
@@ -625,7 +625,7 @@ class ExpressionCheckMethodCall {
 						t.pos.errMsgPrefix(), t.typeString(), m.K.typeString())))
 				}
 			}
-			return []Type{ret}
+			return [ret]
 		case common.MapMethodRemoveAll:
 			ret := new Type()
 			ret.pos = e.pos
@@ -634,7 +634,7 @@ class ExpressionCheckMethodCall {
 				errs.append(new error(sprintf("%s '%s' expect no arguments",
 					e.pos.errMsgPrefix(), common.MapMethodRemoveAll)))
 			}
-			return []Type{ret}
+			return [ret]
 		case common.MapMethodSize:
 			ret := new Type()
 			ret.pos = e.pos
@@ -643,7 +643,7 @@ class ExpressionCheckMethodCall {
 				errs.append(new error(sprintf("%s too many argument to call '%s''",
 					call.args[0].pos.errMsgPrefix(), call.name)))
 			}
-			return []Type{ret}
+			return [ret]
 		
 
 		default:

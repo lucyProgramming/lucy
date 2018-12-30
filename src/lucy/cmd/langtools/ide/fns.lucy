@@ -13,7 +13,7 @@ public fn readLucyFiles(filenames []string) -> (lucyFiles []LucyFile = []LucyFil
 
 public fn parseAst(lucyFiles []LucyFile) ->(nodes []ast.TopNode = []ast.TopNode{} , errs []error = []error{}){
 	for _,v := range lucyFiles {
-		errs.appendAll(parser.Parse(nodes , v.realPathName , v.bs , false , 10 , 
+		errs.appendAll(parser.parse(nodes , v.realPathName , v.bs , false , 10 , 
 			v.locateDefinition , v.getHover , v.findUsage , v.rename ,v.autoCompletion))
 	}
 }

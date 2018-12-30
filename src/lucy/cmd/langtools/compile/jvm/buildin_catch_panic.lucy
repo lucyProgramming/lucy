@@ -19,7 +19,7 @@ class BuildinFunctionCatchPanic {
         context Context,
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionFunctionCall)
-        meta := call.BuildInFunctionMeta.(ast.BuildInFunctionPanicMeta)
+        meta := call.buildInFunctionMeta.(ast.BuildInFunctionPanicMeta)
         if meta.argThrowable {
             if call.args[0].Type == ast.ExpressionTypeNew { // not new expression
                 maxStack = this.eb.build(c, code, call.args[0], context, state)

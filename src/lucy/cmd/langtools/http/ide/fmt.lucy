@@ -25,7 +25,7 @@ class Fmt implements HttpHandler {
             return
         }
         var tops = new []ast.TopNode(0)
-        es := parser.Parse(tops , "" , bs , false , 10 , -1 , -1 , -1 , -1 , -1)
+        es := parser.parse(tops , "" , bs , false , 10 , -1 , -1 , -1 , -1 , -1)
         if len(es) > 0 {
             errmsg := ""
             for v := range es {

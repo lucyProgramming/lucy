@@ -37,7 +37,7 @@ class ReName {
         for _,v := range this.lucyFiles {
             length := len(tops)
             errs.appendAll(
-                parser.Parse(tops , v.realPathName , v.bs , false , 10 , -1 , -1 , -1 , v.rename , -1) 
+                parser.parse(tops , v.realPathName , v.bs , false , 10 , -1 , -1 , -1 , v.rename , -1) 
             )
             this.lucyAstNodes[v.realPathName] = tops[length : len(tops)]
         }

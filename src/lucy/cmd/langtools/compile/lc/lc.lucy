@@ -8,7 +8,7 @@ import "lucy/encoding/json"
 
 public fn Main (
 	destinationDir string , 
-	flags common.Flags , 
+	flags common.Flags, 
 	files []string ,
 	lucyPath , 
 	classPaths []string , 
@@ -131,7 +131,7 @@ public class Compiler {
 				// utf8 bom
 				bs = bs[3:]
 			}
-			this.Errs.appendAll(parser.Parse(this.Tops, v, bs ,
+			this.Errs.appendAll(parser.parse(this.Tops, v, bs ,
 				this.flags.onlyImport.getValue(), this.NErrs2StopCompile, -1 , -1 , -1 , -1 , -1))
 			this.shouldExit()
 		}

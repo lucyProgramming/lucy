@@ -28,7 +28,7 @@ class BuildinFunctionPrintf {
             state.popStack(len(state.stacks) - length)
         }
         call := e.data.(ast.ExpressionFunctionCall)
-        meta := call.BuildInFunctionMeta.(ast.BuildInFunctionPrintfMeta)
+        meta := call.buildInFunctionMeta.(ast.BuildInFunctionPrintfMeta)
         code.codes[code.codeLength] = cg.OP_getstatic
         c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
                  "java/lang/System",
