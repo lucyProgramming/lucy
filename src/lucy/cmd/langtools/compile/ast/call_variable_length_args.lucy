@@ -1,0 +1,15 @@
+
+public class CallVariableLengthArgs {
+	public expressions []Expression
+	public length      int
+	/*
+		a := new int[](10)
+		print(a...)
+	*/
+	public packArray2VArgs bool
+	public noArgs          bool
+	public Type            Type
+	public start int
+}
+
+

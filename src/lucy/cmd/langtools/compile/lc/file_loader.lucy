@@ -622,7 +622,7 @@ public class FileLoader implements ast.loadImport{
             }
         }
     }
-
+    
     public fn  loadClass(r Resource) -> (c  Object) {
         bs, err := os.readFile(r.realPath)
         if err != null {

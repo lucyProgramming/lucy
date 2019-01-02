@@ -43,6 +43,8 @@ class StatementIfParser extends ParserExtends {
 			this.parser.errs.append(err)
 			return statementIf , err 
 		}
+		statementIf.block = new ast.Block()
+		statementIf.block.pos = this.parser.mkPos()
 		this.next(lfIsToken) //skip {
 		if this.parser.token.Type == lex.TokenComment {
 			statementIf.inlineComment = this.parser.token.stringValue 
@@ -50,7 +52,6 @@ class StatementIfParser extends ParserExtends {
 		}else if this.parser.token.Type == lex.TokenLf {
 			this.next(lfNotToken)
 		}
-		statementIf.block = new ast.Block()
 		this.bp.parseStatementList(statementIf.block, false)
 		if this.parser.token.Type != lex.TokenRc {
 			this.parser.errs.append( new error(sprintf("%s expect '}', but '%s'",
@@ -88,6 +89,8 @@ class StatementIfParser extends ParserExtends {
 				this.parser.errs.append( err)
 				this.consume(untilLc)
 			}
+			statementIf.Else = new ast.Block()
+			statementIf.Else.pos = this.parser.mkPos()
 			this.next(lfIsToken) // skip {
 			if this.parser.token.Type == lex.TokenComment {
 				statementIf.elseInlineComment = this.parser.token.stringValue 
@@ -95,7 +98,6 @@ class StatementIfParser extends ParserExtends {
 			}else if this.parser.token.Type == lex.TokenLf {
 				this.next(lfNotToken)
 			}
-			statementIf.Else = new ast.Block()
 			this.bp.parseStatementList(statementIf.Else, false)
 			if this.parser.token.Type != lex.TokenRc {
 				err = new error(sprintf("%s expect '}', but '%s'",
@@ -127,6 +129,8 @@ class StatementIfParser extends ParserExtends {
 				this.parser.errs.append(err)
 				return elseIfList, err 
 			}
+			block := new ast.Block()
+			block.pos =this.parser.mkPos()
 			this.next(lfIsToken) // skip {
 			if this.parser.token.Type == lex.TokenComment {
 				t.inlineComment = this.parser.token.stringValue 
@@ -134,7 +138,6 @@ class StatementIfParser extends ParserExtends {
 			}else if this.parser.token.Type == lex.TokenLf {
 				this.next(lfNotToken)
 			}
-			block := new ast.Block()
 			this.bp.parseStatementList(block, false)
 			t.block = block
 			if this.parser.token.Type != lex.TokenRc {

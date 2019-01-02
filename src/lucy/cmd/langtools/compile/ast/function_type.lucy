@@ -26,12 +26,11 @@ public class FunctionType {
 		for _, v := range this.templateNames {
 			if p := m[v.name]; p != null {
 				errMsg := sprintf("%s duplicated name '%s' , first declaraed at:\n",
-						v.pos.errMsgPrefix(), v.name)
+					v.pos.errMsgPrefix(), v.name)
 				errMsg += sprintf("\t%s\n", p.errMsgPrefix())
 				errs.append( new error(errMsg))
 				continue
 			}
-			assert(v.pos != null)
 			m[v.name] = v.pos
 		}
 		this.templateNamesMap = m
@@ -42,22 +41,29 @@ public class FunctionType {
 		have = this.templateNamesMap != null &&
 			this.templateNamesMap.keyExist(name)
 	}
-	fn cloneFunctioType() -> (ret FunctionType) {
+
+	fn cloneFunctionType() -> (ret FunctionType) {
 		ret = new FunctionType()
 		ret.parameterList = new []Variable(len(this.parameterList))
-		for k, _ := range ret.parameterList {
+		for k, v := range this.parameterList {
 			p := new Variable()
-			this.parameterList[k].cp(p)
+			v.cp(p)
 			ret.parameterList[k] = p
 		}
-		ret.returnList = new []Variable(len(this.returnList))
-		for k, _ := range ret.returnList {
+		if this.vArgs != null {
 			p := new Variable()
-			this.returnList[k].cp(p)
+			this.vArgs.cp(p)
+			ret.vArgs = p 
+		}
+		ret.returnList = new []Variable(len(this.returnList))
+		for k, v := range this.returnList {
+			p := new Variable()
+			v.cp(p)
 			ret.returnList[k] = p
 		}
 		return
 	}
+
 
 	fn typeName () ->(s string) {
 		s = "("
@@ -164,51 +170,55 @@ public class FunctionType {
 			return null
 		}
 		for _, v := range this.parameterList {
-			if name == v.name {
+			if v.name == null {
+				continue
+			}
+			if name == v.name {	
 				return v
 			}
 		}
 		if this.vArgs != null {
-			if this.vArgs.name == name {
+			if this.vArgs.name != null && 
+				this.vArgs.name == name {
 				return this.vArgs
 			}
 		}
 		if this.voidReturn() == false {
 			for _, v := range this.returnList {
+				if v.name == null {
+					continue
+				}
 				if name == v.name {
 					return v
 				}
 			}
 		}
-		return null
 	}
 
 	fn equal(compare FunctionType) -> (equal bool) {
 		if len(this.parameterList) != len(compare.parameterList) {
-			return false
+			return 
 		}
 		for k, v := range this.parameterList {
 			if false == v.Type.equal(compare.parameterList[k].Type) {
-				return false
+				return 
 			}
 		}
 		if (this.vArgs == null) != (compare.vArgs == null) {
-			return false
+			return 
 		}
-
 		if this.vArgs != null {
 			if this.vArgs.Type.equal(compare.vArgs.Type) == false {
-				return false
+				return 
 			}
 		}
 		if this.voidReturn() != compare.voidReturn() {
-			return false
+			return 
 		}
-
 		if this.voidReturn() == false {
 			for k, v := range this.returnList {
 				if false == v.Type.equal(compare.returnList[k].Type) {
-					return false
+					return 
 				}
 			}
 		}
@@ -237,7 +247,7 @@ public class FunctionType {
 	}
 
 	fn mkCallReturnTypes(pos Pos) ->(valueTypes []Type) {
-		if this.returnList == null || len(this.returnList) == 0 {
+		if len(this.returnList) == 0 {
 			t := new Type()
 			t.Type = VariableTypeVoid // means no return ;
 			t.pos = pos
@@ -269,13 +279,13 @@ public class FunctionType {
 	}
 
 	fn fitArgs(
-		block Block , 
+		block Block, 
 		from Pos,
 		args []Expression,
 		callArgsTypes []Type,
-		f Function) -> (vArgs CallVariableArgs, err error) {
+		f Function) -> (vArgs CallVariableLengthArgs, err error) {
 		if this.vArgs != null {
-			vArgs = new CallVariableArgs()
+			vArgs = new CallVariableLengthArgs()
 			vArgs.noArgs = true
 			vArgs.Type = this.vArgs.Type
 			vArgs.start = len(this.parameterList)
@@ -388,17 +398,4 @@ public class FunctionType {
 		want += ")"
 		return want
 	}
-}
-
-public class CallVariableArgs {
-	public expressions []Expression
-	public length      int
-	/*
-		a := new int[](10)
-		print(a...)
-	*/
-	public packArray2VArgs bool
-	public noArgs          bool
-	public Type            Type
-	public start int
 }

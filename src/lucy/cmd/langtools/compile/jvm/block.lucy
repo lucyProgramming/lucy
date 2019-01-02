@@ -195,7 +195,6 @@ class BuildBlock {
 				}else {
 					s.StatementGoTo.statementLabel.exits.append(exit)
 				}
-				
 			}
 		case ast.StatementTypeLabel:
 			s.StatementLabel.codeOffsetGenerated = true

@@ -127,7 +127,7 @@ fn searchBuildIns(name string , lucyBuildInPackage Package ) -> (t Object)  {
 	return null
 }
 
-fn checkConst(block Block, c Constant) -> (err error)  {
+fn checkConst(block Block, c Constant , errs []error) -> (err error)  {
 	if c.locateDefinition {
 		block.inheritedAttribute.p.setLocationDefinition(c)
 		return 
@@ -147,7 +147,7 @@ fn checkConst(block Block, c Constant) -> (err error)  {
 		err = new error(sprintf("%s const have no expression", errMsgPrefix(c.pos)))
 		return err
 	}
-	is, err := c.defaultValueExpression.constantFold()
+	is, err := c.defaultValueExpression.constantFold(errs)
 	if err != null {
 		return err
 	}
@@ -178,22 +178,26 @@ fn checkConst(block Block, c Constant) -> (err error)  {
 	case VariableTypeByte:
 		c.longValue = c.defaultValueExpression.longValue
 		if (c.longValue >> 8) != 0 {
-			err = new error(sprintf("%s exceeds max byte" , c.defaultValueExpression.pos.errMsgPrefix()))
+			err = new error(sprintf("%s constant %d exceeds max byte" ,
+				c.defaultValueExpression.pos.errMsgPrefix() , c.longValue))
 		}
 	case VariableTypeShort:
 		c.longValue = c.defaultValueExpression.longValue
 		if (c.longValue >> 16) != 0 {
-			err = new error(sprintf("%s exceeds max byte" , c.defaultValueExpression.pos.errMsgPrefix()))
+			err = new error(sprintf("%s constant %d exceeds max short" , 
+				c.defaultValueExpression.pos.errMsgPrefix(), c.longValue))
 		}
 	case VariableTypeChar:
 		c.longValue = c.defaultValueExpression.longValue
 		if (c.longValue >> 16) != 0 {
-			err = new error(sprintf("%s exceeds max byte" , c.defaultValueExpression.pos.errMsgPrefix()))
+			err = new error(sprintf("%s constant %d exceeds max char" , 
+				c.defaultValueExpression.pos.errMsgPrefix(), c.longValue))
 		}
 	case VariableTypeInt:
 		c.longValue = c.defaultValueExpression.longValue
 		if (c.longValue >> 32) != 0 {
-			err = new error(sprintf("%s exceeds max byte" , c.defaultValueExpression.pos.errMsgPrefix()))
+			err = new error(sprintf("%s constant %d exceeds max int" , 
+				c.defaultValueExpression.pos.errMsgPrefix(), c.longValue))
 		}
 	case VariableTypeLong:
 		c.longValue = c.defaultValueExpression.longValue

@@ -40,6 +40,17 @@ class ExpressionCheckUnary {
 		on := e.data.(Expression)
 		increment := on.getLeftValue(block, errs)
 		if increment == null {
+			if on.Type == ExpressionTypeIdentifier {
+				identifier := on.data.(ExpressionIdentifier)
+				vd := new Variable()
+				vd.name = identifier.name
+				vd.pos = on.pos
+				vd.Type = new Type()
+				vd.Type.pos = on.pos
+				vd.Type.Type = VariableTypeInt
+				// create the var
+				block.insert(identifier.name , on.pos , vd)
+			}
 			return null
 		}
 		if on.Type == ExpressionTypeIdentifier &&

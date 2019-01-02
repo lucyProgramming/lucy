@@ -98,12 +98,14 @@ class StatementSwitchParser extends ParserExtends{
 		if this.parser.token.Type == lex.TokenDefault {
 			this.next(lfIsToken) // skip default key word
 			this.parser.unExpectNewLineAndSkip()
+			block := new ast.Block()
 			if this.parser.token.Type != lex.TokenColon {
 				err = new error(sprintf("%s missing colon after 'default'",
 					this.parser.errMsgPrefix()))
 				this.parser.errs.append( err)
 			} else {
 				this.next(lfIsToken) // skip :
+				block.pos = this.parser.mkPos()
 				this.parser.expectNewLine()
 				if this.parser.token.Type == lex.TokenComment {
 					statementSwitch.defaultInlineComment = this.parser.token.stringValue 
@@ -112,7 +114,6 @@ class StatementSwitchParser extends ParserExtends{
 					this.next(lfNotToken)
 				}
 			}
-			block := new ast.Block()
 			block.isSwitchBlock = true
 			statementSwitch.Default = block
 			if this.parser.token.Type != lex.TokenRc {

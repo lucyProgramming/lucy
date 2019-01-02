@@ -15,7 +15,7 @@ public class AttributeLucyTypeAlias {
 		ret.attributeLength = (len(ret.info))
 		binary.BigEndian.putChar(ret.info, c.insertUtf8Const(this.alias))
 		binary.BigEndian.putChar(ret.info[2:], c.insertUtf8Const(this.comment))
-		return ret
+		return 
 	}
 }
 

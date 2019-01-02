@@ -395,7 +395,7 @@ public class Block {
         errs.appendAll( this.checkUnUsed())
         return errs
     }
-
+    
     fn checkConstants() -> (errs []error= new []error(0)) {
         if this.checkConstantsCalled {
             return null
@@ -407,7 +407,7 @@ public class Block {
                 this.constants.remove(c.name)
                 continue
             }
-            err := checkConst(this, c)
+            err := checkConst(this, c , errs)
             if err != null {
                 errs.append(err)
             }

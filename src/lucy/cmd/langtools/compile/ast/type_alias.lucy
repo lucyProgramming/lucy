@@ -12,7 +12,7 @@ public class TypeAlias {
     findUsageInstances []Usage 
 	used bool 
 	public inlineComment string 
-
+	
 	public fn mkDescription() ->(s string = "") {
 		if this.comment != null {
 			s += this.comment

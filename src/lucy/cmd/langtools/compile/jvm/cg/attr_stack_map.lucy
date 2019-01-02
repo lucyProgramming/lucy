@@ -49,8 +49,8 @@ public class StackMapSameFrame implements StackMap{
 
 
 public class StackMapSameLocals1StackItemFrame implements StackMap {
-	public frameType byte
-	stack     StackMapVerificationTypeInfo
+	frameType byte
+	stack  StackMapVerificationTypeInfo
 	
 	public fn StackMapSameLocals1StackItemFrame(frameType byte ,stack     StackMapVerificationTypeInfo ){
         this.super()

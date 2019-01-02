@@ -307,7 +307,8 @@ public class Class {
             variableType.Type = VariableTypeName // naming
             variableType.name = this.superClassName.name
             variableType.pos = this.superClassName.pos
-
+            variableType.locatePackageDefinition =  this.superClassName.locatePackageDefinition
+            variableType.packagePos = this.superClassName.packagePos
             variableType.rename = this.superClassName.rename
             variableType.locateDefinition = this.superClassName.locateDefinition
             variableType.autoCompletion  = this.superClassName.autoCompletion
@@ -355,7 +356,9 @@ public class Class {
             t.locateDefinition = i.locateDefinition
             t.rename = t.rename
             t.autoCompletion = i.autoCompletion
-            t.findUsage = i.findUsage 
+            t.findUsage = i.findUsage
+            t.locatePackageDefinition = i.locatePackageDefinition
+            t.packagePos = i.packagePos 
             err := t.resolve(this.block)
             if err != null {
                 errs.append(err)
@@ -466,7 +469,7 @@ public class Class {
         }
         return this.superClass.implementedInterface(block, pos, inter) // check father is implements
     }
-
+    
     fn loadSuperClass(block Block, pos Pos) -> (err error) {
         if this.superClass != null {
             return this.superClass.loadSelf(block , pos) // load self
@@ -510,7 +513,7 @@ public class Class {
             args = callFatherCase.args
         }
         for _, v := range this.methods[SpecialMethodInit] {
-            var vArgs CallVariableArgs
+            var vArgs CallVariableLengthArgs
             vArgs, err = v.Function.Type.fitArgs(block , pos, args, callArgs, v.Function)
             if err == null {
                 if newCase != null {
@@ -518,12 +521,18 @@ public class Class {
                 } else {
                     callFatherCase.vArgs = vArgs
                 }
-                return []ClassMethod{v}, true, null
+                if v.findUsage {
+                    u := new Usage()
+                    u.Type = "value read"
+                    u.pos = pos
+                    v.findUsageInstances.append(u)
+                }
+                return [v], true, null
             } else {
                 if this.isJava {
                     ms.append(v)
                 } else {
-                    return null, false, err
+                    return [v], false, err
                 }
             }
         }
@@ -841,8 +850,6 @@ public class Class {
         ms.appendAll(ms_)
         return ms, false, null // methods have the same name
     }
-
-
 
     fn check(father Block) -> (errs []error = []error{}){
         this.block.inherit(father)

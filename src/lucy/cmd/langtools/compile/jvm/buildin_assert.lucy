@@ -9,7 +9,7 @@ class BuildinFunctionAssert {
         this.super()
         this.eb = eb
     }
-
+    
     fn build(
         c cg.ClassHighLevel,
         code cg.AttributeCode,

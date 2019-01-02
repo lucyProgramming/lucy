@@ -18,6 +18,7 @@ public class Type {
 	public alias          TypeAlias
 	public locateDefinition  bool 
 	public locatePackageDefinition bool 
+	public packagePos Pos 
 	public findUsage  bool 
 	public rename bool 
 	public getHover bool 
@@ -29,7 +30,7 @@ public class Type {
 	
 	public containsLf bool    // constains "\n"
 	
-	
+
 	// copy to t 
 	fn cp(t Type) {
 	    t.Type = this.Type
@@ -154,11 +155,11 @@ public class Type {
 	}
 
 
-	public fn cloneType() ->(cloned Type) {
+	public fn cloneType() -> (cloned Type) {
 		cloned = this.clone().(Type)
 	}
 
-	public fn clone() ->(x Object) {
+	public fn clone() -> (x Object) {
 		cloned := new Type()
 		x = cloned
 		cloned.Type = this.Type
@@ -166,10 +167,12 @@ public class Type {
 		cloned.isVariableArgs  = this.isVariableArgs
 		cloned.resolved   = this.resolved
 		cloned.pos     = this.pos    
+		cloned.packagePos = this.packagePos    
 		cloned.name = this.name                
 		cloned.Class  = this.Class        
 		cloned.Enum  = this.Enum
 		cloned.locateDefinition = this.locateDefinition
+		cloned.locatePackageDefinition = this.locatePackageDefinition
 		cloned.findUsage = this.findUsage 
 		cloned.rename = this.rename 
 		cloned.getHover = this.getHover 
@@ -189,7 +192,7 @@ public class Type {
 			cloned.Map.V = this.Map.V.cloneType()
 		}
 		if this.Type == VariableTypeFunction {
-			cloned.functionType = this.functionType.cloneFunctioType()
+			cloned.functionType = this.functionType.cloneFunctionType()
 		}
 	}
 
@@ -316,8 +319,11 @@ public class Type {
 		if this.name.indexOf(".") < 0  {
 			i := block.inheritedAttribute.p.getImport(this.pos.filename, this.name)
 			if i != null {
-				i.mkValueReadUsage(this.pos)
+				i.mkUsed(this.pos)
 				return block.inheritedAttribute.p.load(i.Import)
+			}
+			if this.locatePackageDefinition {
+				block.inheritedAttribute.p.setLocationDefinition(i)
 			}
 			return null, new error(sprintf("%s type named '%s' not found",
 				errMsgPrefix(this.pos), this.name))
@@ -330,7 +336,13 @@ public class Type {
 			return null, new error(sprintf("%s package '%s' not imported",
 				errMsgPrefix(this.pos), packageName))
 		}
-		i.mkValueReadUsage(this.pos)
+		{
+			pos := this.pos
+			if this.packagePos != null {
+				pos = this.packagePos 
+			}
+			i.mkUsed(pos)
+		}
 		if this.locatePackageDefinition {
 			block.inheritedAttribute.p.setLocationDefinition(i)
 		}
@@ -370,7 +382,7 @@ public class Type {
 
 		if pp, ok := p.(Package); ok {
 			var exists bool
-			d, exists = pp.block.nameExists(className , this.pos)
+			d, exists = pp.block.nameExists(className , this.pos )
 			if exists == false {
 				err = new error(sprintf("%s '%s' not found",
 					errMsgPrefix(this.pos), className))
@@ -531,9 +543,9 @@ public class Type {
 	}
 	
 	public fn typeString(prefix string = "") ->(ret string) {
-		if this.alias != null {
-			return prefix + this.alias.name
-		}
+		// if this.alias != null {
+		// 	return prefix + this.alias.name
+		// }
 		switch this.Type {
 		case VariableTypeBool:
 			return prefix +  "bool"
@@ -616,7 +628,7 @@ public class Type {
 		}
 		return null
 	}
-
+	
 	fn canBeBindWithParameterTypes(parameterTypes map{ string->Type }) -> (err error) {
 		if this.Type == VariableTypeTemplate {
 			 ok := parameterTypes.keyExist(this.name)
@@ -710,11 +722,7 @@ public class Type {
 		}
 		{
 			// try string first
-			isString1 := leftValue.Type == VariableTypeString || 
-				leftValue.isStringObject()
-			isString2 := rightValue.Type == VariableTypeString || 
-				rightValue.isStringObject()
-			if  isString1 && isString2 {
+			if leftValue.isString() && rightValue.isString() {
 				return true
 			}
 		}
@@ -799,11 +807,7 @@ public class Type {
 	public fn equal(compareTo Type) -> (is bool) {
 		leftValue := this
 		if leftValue.Type != compareTo.Type {
-			isString1 := leftValue.Type == VariableTypeString || 
-				leftValue.isStringObject()
-			isString2 := compareTo.Type == VariableTypeString || 
-				compareTo.isStringObject()
-			if  isString1 && isString2 {
+			if  leftValue.isString() && compareTo.isString() {
 				return true
 			}
 			return false //early check
@@ -820,8 +824,6 @@ public class Type {
 				leftValue.isVariableArgs != compareTo.isVariableArgs {
 				return false
 			}
-			assert(leftValue != null)
-			assert(compareTo.array != null)
 			return leftValue.array.equal(compareTo.array)
 		}
 		if leftValue.Type == VariableTypeMap {
@@ -839,7 +841,10 @@ public class Type {
 		}
 		return false
 	}
-	fn isStringObject() ->(is bool) {
+	fn isString() ->(is bool) {
+		if this.Type == VariableTypeString {
+			return true 
+		}
 		if this.Type != VariableTypeObject {
 			return false 
 		}

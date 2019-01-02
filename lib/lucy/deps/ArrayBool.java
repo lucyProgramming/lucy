@@ -2,7 +2,7 @@
 package lucy.deps;
 import java.lang.reflect.* ; 
 
-public class ArrayBool   {
+public class ArrayBool {
 	public int start;
 	public int end; // not include
 	public int cap;

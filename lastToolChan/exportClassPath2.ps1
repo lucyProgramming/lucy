@@ -1,1 +1,0 @@
-$env:CLASSPATH="d:/classpath;d:/gopath/src/gitee.com/yuyang-fine/lucy/lastToolChan/class;d:/gopath/src/gitee.com/yuyang-fine/lucy/lastToolChan"

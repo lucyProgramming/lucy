@@ -5,7 +5,6 @@ import "lucy/cmd/langtools/compile/lex"
 const	lfIsToken  = true
 const	lfNotToken = false
 
-
 {
 	ast.parseFunctionHandler = ParseFunction
 }

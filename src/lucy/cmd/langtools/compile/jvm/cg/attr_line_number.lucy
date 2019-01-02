@@ -2,7 +2,7 @@ import "lucy/binary"
 
 public class AttributeLineNumber  {
 	lineNumbers []AttributeLinePc
-
+	
 	
 	fn AttributeLineNumber (){
 	    this.super()

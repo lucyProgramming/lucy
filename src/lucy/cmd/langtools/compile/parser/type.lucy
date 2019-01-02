@@ -1,13 +1,12 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
-
 class TypeParser extends ParserExtends {
-	
+
 	fn TypeParser(parser Parser){
 		this.super(parser)
 	}
-
+	
 	fn parseType() -> (ret ast.Type,err error) {
 		pos := this.parser.mkPos()
 		switch this.parser.token.Type {
@@ -230,6 +229,8 @@ class TypeParser extends ParserExtends {
 		this.next(lfIsToken) // skip name identifier
 		for this.parser.token.Type == lex.TokenSelection {
 			ret.locatePackageDefinition = ret.locateDefinition
+			ret.locateDefinition = false 
+			ret.packagePos = ret.pos 
 			this.next(lfNotToken) // skip .
 			if ret.autoCompletion {
 				ret.name += "."
@@ -245,7 +246,7 @@ class TypeParser extends ParserExtends {
 			ret.rename = ret.rename || this.parser.token.rename
 			ret.getHover = ret.getHover || this.parser.token.getHover
 			ret.autoCompletion = ret.autoCompletion || this.parser.token.autoCompletion
-			ret.pos = this.parser.mkPosFromStart(ret.pos) //  override pos
+			ret.pos = this.parser.mkPos() //  override pos
 			this.next(lfIsToken)   // skip identifier
 		}
 		return ret, null

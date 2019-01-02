@@ -1,6 +1,5 @@
+
 class ExpressionCheckOpAssign {
-	
-	
 	static fn check(e Expression , block Block, errs []error) -> (valueType Type) {
 		bin := e.data.(ExpressionBinary)
 		if bin.left.Type == ExpressionTypeList {
@@ -18,6 +17,17 @@ class ExpressionCheckOpAssign {
 		right, es := bin.right.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if left == null || right == null {
+			if left == null && 
+				bin.left.Type == ExpressionTypeIdentifier && 
+				right != null {
+				identifier := bin.left.data.(ExpressionIdentifier)
+				vd := new Variable()
+				vd.name = identifier.name
+				vd.pos = bin.left.pos
+				vd.Type = right
+				// create the var
+				block.insert(identifier.name , bin.left.pos , vd)
+			}
 			return
 		}
 		valueType = left.cloneType()

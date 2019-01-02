@@ -199,7 +199,7 @@ class ExpressionCheckIdentifier {
 		}
 
 		{
-			it.mkValueReadUsage(e.pos)
+			it.mkUsed(e.pos)
 		}
 		if identifier.locateDefinition {
 			block.inheritedAttribute.p.setLocationDefinition(it)

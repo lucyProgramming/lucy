@@ -18,15 +18,15 @@ class ExpressionCheckQuestion {
 			tType, es = question.True.checkSingleValueContextExpression(block)
 			errs.appendAll(es)
 			if tType == null {
-				return null
+				return 
 			}
 			if err := tType.rightValueValid(); err != null {
 				errs.append(err)
-				return null
+				return 
 			}
 			if err := tType.isTyped(); err != null {
 				errs.append(err)
-				return null
+				return 
 			}
 		}
 		if tType != null {

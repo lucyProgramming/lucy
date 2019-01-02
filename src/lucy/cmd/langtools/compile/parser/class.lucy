@@ -31,8 +31,10 @@ class ClassParser extends  ParserExtends {
 					this.parser.token.description))
 				this.parser.errs.append(err)
 			} else {
+				name.locatePackageDefinition = name.locateDefinition
+				name.packagePos = name.pos
 				className += "." + this.parser.token.stringValue
-				name.locateDefinition = name.locateDefinition || this.parser.token.locateDefinition
+				name.locateDefinition = this.parser.token.locateDefinition
 				name.findUsage = name.findUsage || this.parser.token.findUsage
 				name.rename  = name.rename || this.parser.token.rename
 				name.autoCompletion = name.autoCompletion || this.parser.token.autoCompletion 
@@ -179,6 +181,7 @@ class ClassParser extends  ParserExtends {
 				if this.parser.token.Type == lex.TokenLc {
 					this.next(lfIsToken) // skip {
 					block := new ast.Block()
+					block.pos = this.parser.mkPos()
 					this.parser.BlockParser.parseStatementList(block, false)
 					if this.parser.token.Type != lex.TokenRc {
 						this.parser.errs.append(

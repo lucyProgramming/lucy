@@ -42,8 +42,21 @@ public class Package {
 	
 	public lucyBuildInPackage Package 
 	
+
+	public fn Package(name string , disableCheckUnuse bool , loader loadImport){
+		this.super()
+		this.disableCheckUnuse = disableCheckUnuse
+		this.name =  name
+		this.matchLine =  -1
+		this.loader = loader
+	}
+
+
 	public fn setLocationDefinition(x Object) {
 		this.locateDefinition = getPos(x)
+		if this.locateDefinition == null {
+			printf("cannot get pos from '%s'\n" , x.toString())
+		}
 		this.locateDefinitionBaseOn = x
 	}
 	
@@ -82,13 +95,7 @@ public class Package {
 		return true 
 	}
 	
-	public fn Package(name string , disableCheckUnuse bool , loader loadImport){
-		this.super()
-		this.disableCheckUnuse = disableCheckUnuse
-		this.name =  name
-		this.matchLine =  -1
-		this.loader = loader
-	}
+	
 	
 	public fn locateDefinitionOrAutoCompletionFetched() ->(fetched bool) {
 		fetched = this.locateDefinition != null || 
@@ -625,6 +632,3 @@ public class Package {
 		return cc, null
 	}
 }
-
-
-

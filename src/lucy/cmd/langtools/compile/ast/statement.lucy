@@ -1,4 +1,3 @@
-
 public class Statement {
 	public Type                      StatementTypeKind
 	public checked                   bool // if checked

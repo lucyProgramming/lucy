@@ -21,7 +21,7 @@ class StatementWhenParser extends ParserExtends {
 			idenfierToken := this.parser.token
 			this.parser.next(lfIsToken) 
 			thisToken := this.parser.token
-			this.parser.tokenStack = [ idenfierToken , thisToken ]  // store on stack
+			this.parser.tokenStack = [idenfierToken , thisToken ]  // restore on stack
 			this.parser.next(lfIsToken)  // restore idenfierToken token
 			if thisToken.Type == lex.TokenLc {
 				condition , err = this.parser.parseType()

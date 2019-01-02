@@ -8,6 +8,7 @@ public class StatementWhenCase {
 	public inlineComment string 
 }
 
+
 public class StatementWhen {
 	public pos       Pos
 	public condition Type

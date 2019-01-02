@@ -1,15 +1,10 @@
- 
-
 class ExpressionCheckConst {
-	
 	static fn check(e Expression , block Block) -> (errs []error = []error{}) {
 		cs := e.data.([]Constant)
 		for _, c := range cs {
-			err := checkConst(block, c)
+			err := checkConst(block, c ,errs)
 			if err != null {
-				if err != null {
-					errs.append(err)
-				}
+				errs.append(err) 
 				continue
 			}
 			err = block.insert(c.name, c.pos, c)

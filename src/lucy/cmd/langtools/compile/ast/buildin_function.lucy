@@ -4,8 +4,6 @@ import "lucy/cmd/langtools/compile/common"
 	registerBuildInFunctions()
 }
 
-
-
 fn registerBuildInFunctions() {
 	{
 		//print

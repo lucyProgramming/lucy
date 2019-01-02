@@ -103,7 +103,7 @@ public class Enum   {
 		}
 		var initV int = 0
 		if this.Init != null {
-			if is, err := this.Init.constantFold(); err != null {
+			if is, err := this.Init.constantFold(errs); err != null {
 				errs.append(err)
 			} else {
 				if is == false {

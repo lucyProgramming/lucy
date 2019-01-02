@@ -77,7 +77,7 @@ public class Function {
 		}
 		d += this.readableMsg(true)
 	}
-
+	
 	public fn mkBuildInFunctionDescription() ->(d string = "") {
 		//TODO:: more information 
 		d = "buildin " + this.name 
@@ -100,7 +100,7 @@ public class Function {
 			this.name == "" {
 			return "fn " + this.Type.typeString(format)
 		} else {
-			return "fn " + this.name + " " + this.Type.typeString(format)
+			return "fn " + this.name + this.Type.typeString(format)
 		}
 	}
 	

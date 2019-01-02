@@ -57,6 +57,7 @@ class StatementForParser extends ParserExtends{
 			this.parser.errs.append(err)
 			return
 		}
+		statementFor.block.pos = this.parser.mkPos()
 		this.next(lfIsToken) // skip {
 		if this.parser.token.Type == lex.TokenComment {
 			statementFor.inlineComment = this.parser.token.stringValue 

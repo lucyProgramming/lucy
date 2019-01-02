@@ -29,6 +29,8 @@ public class NameWithPos {
 	public name string
 	public pos  Pos
 	public locateDefinition  bool 
+	public locatePackageDefinition bool 
+	public packagePos Pos 
 	public findUsage bool 
 	public getHover bool 
 	public rename bool 

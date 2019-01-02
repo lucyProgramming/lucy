@@ -1,7 +1,5 @@
 import "java/io"
 
-
-
 public fn ioCopy(out io.OutputStream , in io.InputStream) {
 	bs := new byte[] (4 << 10)  
 	var n int  

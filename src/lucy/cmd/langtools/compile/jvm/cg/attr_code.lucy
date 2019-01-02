@@ -62,7 +62,6 @@ public class AttributeCode  {
 	fn mkAttributes(c Class) -> (bs []byte)  {
 		bs = new []byte (2)
 		binary.BigEndian.putChar(bs, char(len(this.attributes)))
-
 		if len(this.attributes) > 0 {
 			b := new []byte(0)
 			for _, v := range this.attributes {
@@ -76,7 +75,6 @@ public class AttributeCode  {
 			}
 			bs.appendAll(b)
 		}
-		return bs
 	}
 	
 	fn mkExceptions() -> (bs []byte)  {
@@ -92,7 +90,6 @@ public class AttributeCode  {
 			}
 			bs.appendAll(b)
 		}
-		return bs
 	}
 }
 

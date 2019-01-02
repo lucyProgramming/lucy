@@ -5,8 +5,10 @@ class ExpressionCheckSlice {
 		sliceOn, es := on.expressionOn.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if sliceOn == null {
-			return null
+			return 
 		}
+		valueType = sliceOn.cloneType()
+		valueType.pos = e.pos
 		if sliceOn.Type != VariableTypeArray &&
 			sliceOn.Type != VariableTypeString {
 			errs.append(new error( sprintf("%s cannot have slice on '%s'",
@@ -23,7 +25,7 @@ class ExpressionCheckSlice {
 		errs.appendAll(es)
 		if startType != null {
 			if startType.isInteger() == false {
-				errs.append(new error( sprintf("%s cannot use '%s' for startIndex",
+				errs.append(new error(sprintf("%s cannot use '%s' for startIndex",
 					startType.pos.errMsgPrefix(), startType.typeString())))
 			} else {
 				if startType.Type == VariableTypeLong {
@@ -33,7 +35,7 @@ class ExpressionCheckSlice {
 					startIndexValue := on.start.getLongValue()
 					if startIndexValue < 0 {
 						errs.append(new error( sprintf("%s startIndex '%d' is negative",
-								startType.pos.errMsgPrefix(), startIndexValue)))
+							startType.pos.errMsgPrefix(), startIndexValue)))
 					}
 				}
 			}
@@ -53,21 +55,20 @@ class ExpressionCheckSlice {
 						endIndexValue := on.end.getLongValue()
 						if endIndexValue < 0 {
 							errs.append(new error( sprintf("%s endIndex '%d' is negative",
-									endType.pos.errMsgPrefix(), endIndexValue)))
+								endType.pos.errMsgPrefix(), endIndexValue)))
 						}
 						if startType != null &&
 							startType.isInteger() &&
 							on.start.isLiteral() {
 							if on.start.getLongValue() > endIndexValue {
 								errs.append(new error( sprintf("%s startIndex '%d' is greater than endIndex '%d'",
-										endType.pos.errMsgPrefix(), on.start.getLongValue(), endIndexValue)))
+									endType.pos.errMsgPrefix(), on.start.getLongValue(), endIndexValue)))
 							}
 						}
 					}
 				}
 			}
 		}
-		valueType = sliceOn.cloneType()
-		valueType.pos = e.pos
 	}
+	
 }

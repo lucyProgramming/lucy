@@ -1,8 +1,8 @@
 
 
 public class ConstantInfoNameAndTypeHighLevel {
-	public name       string
-	public descriptor string
+	name       string
+	descriptor string
 	public fn ConstantInfoNameAndTypeHighLevel(name ,descriptor string  ){
 		this.super()
 		this.name = name
@@ -15,9 +15,9 @@ public class ConstantInfoNameAndTypeHighLevel {
 
 
 public class ConstantInfoMethodrefHighLevel {
-	public className      string
-	public method     string
-	public descriptor string
+	className      string
+	method     string
+	descriptor string
 	public fn ConstantInfoMethodrefHighLevel(className , method ,descriptor string  ){
 		this.super()
 		this.className = className
@@ -30,9 +30,9 @@ public class ConstantInfoMethodrefHighLevel {
 }
 
 public class ConstantInfoInterfaceMethodrefHighLevel {
-	public className      string
-	public method     string
-	public descriptor string
+	className      string
+	method     string
+	descriptor string
 	public fn ConstantInfoInterfaceMethodrefHighLevel(className , method ,descriptor string){
 		this.super()
 		this.className = className
@@ -45,9 +45,9 @@ public class ConstantInfoInterfaceMethodrefHighLevel {
 }
 
 public class ConstantInfoFieldrefHighLevel {
-	public className      string
-	public field      string
-	public descriptor string
+	className      string
+	field      string
+	descriptor string
 	public fn ConstantInfoFieldrefHighLevel(className , field , descriptor string){
 		this.super()
 		this.className = className
@@ -60,7 +60,7 @@ public class ConstantInfoFieldrefHighLevel {
 }
 
 public class ConstantInfoMethodTypeHighLevel {
-	public descriptor string
+	descriptor string
 	public fn ConstantInfoMethodTypeHighLevel(descriptor string) {
 	    this.super()
 		this.descriptor = descriptor

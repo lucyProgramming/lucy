@@ -16,12 +16,12 @@ class BuildExpressionCallArgs {
 		c cg.ClassHighLevel,
 		code cg.AttributeCode,
 		args []ast.Expression,
-		vArgs ast.CallVariableArgs,
+		vArgs ast.CallVariableLengthArgs,
 		context Context,
 		state StackMapState) -> (maxStack char) {
 		currentStack := char(0)
 		stackLength := len(state.stacks)
-		defer  {
+		defer {
 			state.popStack(len(state.stacks) - stackLength) // let`s pop
 		}
 		if vArgs != null {

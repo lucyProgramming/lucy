@@ -288,7 +288,7 @@ class ExpressionSuffix extends  ParserExtends {
 			prefix.endPos = pos 
 			prefix.op = "functionLiteral"
 		case lex.TokenNew:
-			pos := this.parser.mkPos()
+			// pos := this.parser.mkPos()
 			this.next(lfIsToken)  // skip new 
 			this.parser.unExpectNewLineAndSkip()
 			var t ast.Type
@@ -298,8 +298,8 @@ class ExpressionSuffix extends  ParserExtends {
 			}
 			prefix = new ast.Expression()
 			prefix.Type = ast.ExpressionTypeNew
-			prefix.pos = pos
-			prefix.endPos = pos 
+			prefix.pos = t.pos
+			prefix.endPos = t.pos 
 			prefix.op = "new"
             n := new ast.ExpressionNew()
 			n.Type = t

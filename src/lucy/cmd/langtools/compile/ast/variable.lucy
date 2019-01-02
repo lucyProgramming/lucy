@@ -36,6 +36,7 @@ public class Variable {
 		return this.accessFlags&
 			cg.AccFieldPublic != 0
 	}
+	// copy to v
 	fn cp(v Variable){
 		v.isBuildIn = this.isBuildIn
 		v.isGlobal = this.isGlobal

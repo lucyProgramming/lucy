@@ -129,7 +129,6 @@ public class Expression {
 		}
 	}
 	
-
 	/*
 		const spread
 	*/
@@ -339,7 +338,7 @@ public class Expression {
 	
 	
 	fn check(block Block) -> (returnValueTypes []Type, errs []error = []error{}) {
-		_, err := this.constantFold()
+		_, err := this.constantFold(errs)
 		if err != null {
 			return null, []error{err}
 		}
@@ -420,21 +419,21 @@ public class Expression {
 		case ExpressionTypeLogicalOr,
 			ExpressionTypeLogicalAnd ,
 			ExpressionTypeOr,
-			ExpressionTypeAnd ,
-			ExpressionTypeXor ,
-			ExpressionTypeLsh ,
+			ExpressionTypeAnd,
+			ExpressionTypeXor,
+			ExpressionTypeLsh,
 			ExpressionTypeRsh,
-			ExpressionTypeEq ,
-			ExpressionTypeNe ,
-			 ExpressionTypeGe ,
+			ExpressionTypeEq,
+			ExpressionTypeNe,
+			ExpressionTypeGe,
 			ExpressionTypeGt, 
 			ExpressionTypeLe,
-			ExpressionTypeLt , 
-			ExpressionTypeAdd , 
-			ExpressionTypeSub , 
+			ExpressionTypeLt, 
+			ExpressionTypeAdd, 
+			ExpressionTypeSub, 
 			ExpressionTypeMul,
-			ExpressionTypeDiv , 
-			ExpressionTypeMod :
+			ExpressionTypeDiv, 
+			ExpressionTypeMod:
 			tt := ExpressionCheckBinary.check(this , block, errs)
 			if tt != null {
 				returnValueTypes = []Type{tt}
@@ -821,8 +820,8 @@ public class Expression {
 	fn getLeftValue(block Block, errs []error)  -> (result Type){
 		return ExpressionCheckLeftValue.getLeftValue(this,block ,errs )
 	}
-	fn constantFold() -> (is bool, err error){
-		return ExpressionConstFold.constantFold(this)
+	fn constantFold(errs []error) -> (is bool, err error){
+		return ExpressionConstFold.constantFold(this , errs)
 	}
 
 	fn convertLiteralToNumberType(to VariableTypeKind) {
@@ -860,4 +859,62 @@ public class Expression {
 		}
 		return this.data.(ExpressionIdentifier).autoCompletion 
 	}
-} 
+
+	fn byteExceedsError(errs []error) {
+		if (this.longValue >> 8) != 0  {
+			errMsg := sprintf("constant %d exceeds max byte", this.longValue)
+			t := new CompileError(sprintf("%s %s" , this.pos.errMsgPrefix() , errMsg))
+			t.startPos = this.pos
+			t.endPos = this.pos
+			t.err = errMsg
+			errs.append(t)
+		}
+	}
+
+	fn shortExceedsError(errs []error) {
+		if (this.longValue >> 16) != 0  {
+			errMsg := sprintf("constant %d exceeds max short", this.longValue)
+			t := new CompileError(sprintf("%s %s" , this.pos.errMsgPrefix() , errMsg))
+			t.startPos = this.pos
+			t.endPos = this.pos
+			t.err = errMsg
+			errs.append(t)
+		}
+	}
+
+	fn charExceedsError(errs []error) {
+		if (this.longValue >> 16) != 0  {
+			errMsg := sprintf("constant %d exceeds max char", this.longValue)
+			t := new CompileError(sprintf("%s %s" , this.pos.errMsgPrefix() , errMsg))
+			t.startPos = this.pos
+			t.endPos = this.pos
+			t.err = errMsg
+			errs.append(t)
+		}
+	}
+	fn intExceedsError(errs []error) {
+		if (this.longValue >> 32) != 0  {
+			errMsg := sprintf("constant %d exceeds max char", this.longValue)
+			t := new CompileError(sprintf("%s %s" , this.pos.errMsgPrefix() , errMsg))
+			t.startPos = this.pos
+			t.endPos = this.pos
+			t.err = errMsg
+			errs.append(t)
+		}
+	}
+
+	fn checkIfConstantExceeds(errs []error) {
+		switch this.Type {
+			case ExpressionTypeByte:
+				this.byteExceedsError(errs)
+			case ExpressionTypeChar:
+				this.charExceedsError(errs)
+			case ExpressionTypeShort:
+				this.shortExceedsError(errs)
+			case ExpressionTypeInt:
+				this.intExceedsError(errs)
+			case ExpressionTypeLong:
+				//TODO:: long check
+		}
+	}
+}

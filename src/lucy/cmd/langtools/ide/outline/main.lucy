@@ -8,7 +8,7 @@ public fn outLine(filename string) ->(definitions []ide.Definition = []ide.Defin
     bs,_ := os.readFile(filename)
     tops := []ast.TopNode{}
     parser.parse(tops , filename , javaArray2Lucy(bs) , false , 10 , -1 , -1 , -1 , -1 , -1)
-    
+    blockNum := 1
     for v := range tops{
         when v.node.(type){
             case ast.Line:
@@ -22,7 +22,6 @@ public fn outLine(filename string) ->(definitions []ide.Definition = []ide.Defin
                 t := v.node.(ast.Constant)
                 definition.name = t.name
                 definition.pos = t.pos
-
             case ast.Expression:
                 t := v.node.(ast.Expression)
                 if t.Type != ast.ExpressionTypeVar && t.Type != ast.ExpressionTypeVarAssign {
@@ -109,9 +108,16 @@ public fn outLine(filename string) ->(definitions []ide.Definition = []ide.Defin
                 definition.name = t.name
                 definition.pos = t.pos
                 definition.Type = "typealias"
+            case ast.Block:
+                t := v.node.(ast.Block)
+                definition := new ide.Definition()
+                definitions.append(definition)
+                definition.name = "packageInitBlock" + blockNum
+                definition.pos = t.pos
+                definition.Type = "block"
+                blockNum++
         }
     }
-
 }
 
 

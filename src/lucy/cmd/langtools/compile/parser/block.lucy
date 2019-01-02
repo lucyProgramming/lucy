@@ -30,7 +30,9 @@ class BlockParser  extends ParserExtends {
 	    if block.statements == null {
 	        block.statements = []ast.Statement{}
 	    }
-		block.pos = this.parser.mkPos()
+		if block.pos == null {
+			block.pos = this.parser.mkPos()
+		}
 		defer {
 			block.endPos = this.parser.mkPos()
 		}
@@ -240,6 +242,7 @@ class BlockParser  extends ParserExtends {
 			case lex.TokenLc:
 				pos := this.parser.mkPos()
 				newBlock := new ast.Block()
+				newBlock.pos = this.parser.mkPos()
 				this.next(lfIsToken) // skip {
 				this.parseStatementList(newBlock, false)
 				this.parser.ifTokenIsLfThenSkip(true)

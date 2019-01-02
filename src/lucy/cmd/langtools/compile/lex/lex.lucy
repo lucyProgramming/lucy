@@ -6,7 +6,7 @@ public class Lexer {
 	bs                   []byte
 	lastLine  int
 	line         int
-	offset , end         int
+	offset , end       int
 	locateDefinition         int
 	getHover int 
 	findUsage int 
@@ -119,7 +119,7 @@ public class Lexer {
 		isHex := false
 		isOctal := false
 		startOffset := this.offset - 1
-		startColumnOffset := this.columnOffset - 1 
+		startColumnOffset := this.columnOffset  
 		if c == '0' { // enter when first char is '0'
 			c, eof = this.getChar()
 			if c == 'x' || c == 'X' {
@@ -213,7 +213,7 @@ public class Lexer {
                 token.doubleValue = floatValue
             }
         } else {
-            longValue ,e := this.parseLong(integerPart)
+            longValue , e := this.parseLong(integerPart)
             if e != null {
                 err = e
             }
@@ -229,20 +229,20 @@ public class Lexer {
             } else if isByte {
                 token.Type = TokenLiteralByte
                 token.longValue = longValue
-                if longValue >> 56  != 0 {
-                	err = new error("exceeds max byte")
+                if longValue >> 8 != 0 {
+                	err = new error(sprintf("constant %d exceeds max byte" , longValue))
                 }
             } else if isShort {
                 token.Type = TokenLiteralShort
                 token.longValue = longValue
-                if longValue >> 48  != 0 {
-                	err = new error("exceeds max short")
+                if longValue >> 16  != 0 {
+                	err = new error(sprintf("constant %d exceeds max short", longValue))
                 }
             } else {
                 token.Type = TokenLiteralInt
                 token.longValue = longValue
                 if longValue >> 32  != 0 {
-                	err = new error("exceeds max int")
+                	err = new error(sprintf("constant %d exceeds max int", longValue))
                 }
             }
         }
@@ -258,10 +258,9 @@ public class Lexer {
 		token = new Token()
 		token.startLine = this.line
 		token.offset = this.offset - 1      // c is read
-		token.startColumnOffset = this.columnOffset -1 // c is read 
+		token.startColumnOffset = this.columnOffset - 1 // c is read 
 		bs := []byte{c}
 		c, eof := this.getChar()
-		endColumnOffset := this.columnOffset - 1 
 		for eof == false {
 			if this.isLetter(c) || c == '_' || this.isDigit(c) || c == '$' {
 				bs.append(c)
@@ -293,31 +292,30 @@ public class Lexer {
 		}
 		if this.locateDefinition != -1 {
 			line , column := this.getLineAndColumnFromPos(this.locateDefinition)
-			if line == token.startLine && column >= endColumnOffset -1 && column <= this.columnOffset  {
+			if line == token.startLine && column >= token.startColumnOffset   && column <= this.columnOffset  {
 				token.locateDefinition = true 
 			}
 		}
 		if this.findUsage  != -1 {
 			line , column := this.getLineAndColumnFromPos(this.findUsage)
-			if line == token.startLine && column >= endColumnOffset -1 && column <= this.columnOffset  {
+			if line == token.startLine && column >= token.startColumnOffset   && column <= this.columnOffset  {
 				token.findUsage = true 
 			}
 		}
 		if this.autoCompletion != -1 {
 			line , column := this.getLineAndColumnFromPos(this.autoCompletion)
-			if line == token.startLine && column >= endColumnOffset -1 && column <= this.columnOffset  {
+			if line == token.startLine && column >= token.startColumnOffset  && column <= this.columnOffset  {
 				token.autoCompletion = true 
 			}
 		}
 		if this.rename != -1 {
 			line , column := this.getLineAndColumnFromPos(this.rename)
-			if line == token.startLine && column >= endColumnOffset -1 && column <= this.columnOffset  {
+			if line == token.startLine && column >= token.startColumnOffset && column <= this.columnOffset  {
 				token.rename = true 
 			}
 		}
 		return
 	}
-	
 	
 	fn tryLexElseIf() -> (is bool) {
 		c, eof := this.getChar()
@@ -352,7 +350,7 @@ public class Lexer {
 		token.startLine = this.line
 		token.Type = TokenLiteralString
 		token.offset = this.offset - 1 
-		token.startColumnOffset = this.columnOffset - 1
+		token.startColumnOffset = this.columnOffset 
 		bs := []byte{}
 		var c byte
 		c, eof := this.getChar()
@@ -578,8 +576,7 @@ public class Lexer {
 			eof, err = this.lexNumber(token, c)
 			return
 		}
-		startColumnOffset := this.columnOffset - 1
-		token.startColumnOffset = this.columnOffset - 1
+		token.startColumnOffset = this.columnOffset - 1 
 		token.offset = this.offset - 1
 		switch c {
 		case '?':
@@ -816,7 +813,7 @@ public class Lexer {
 			if err == null {
 				if t := []byte(token.stringValue); len(t) != 1 {
 					err = new error("expect one char")
-				} else { // correct token
+				} else { //correct token
 					if isChar {
 						token.Type = TokenLiteralChar
 						token.longValue =  long(t[0])
@@ -847,11 +844,11 @@ public class Lexer {
 		token.endOffset = this.offset 
 		token.endLine = this.line
 		token.endColumnOffset = this.columnOffset
-		
+
 		if this.autoCompletion != -1 {
 			line , column := this.getLineAndColumnFromPos(this.autoCompletion)
 			if token.startLine == line && 
-				(column >= startColumnOffset && column <= token.endColumnOffset) {
+				(column >= token.startColumnOffset && column <= token.endColumnOffset) {
 				token.autoCompletion = true
 			}
 		}

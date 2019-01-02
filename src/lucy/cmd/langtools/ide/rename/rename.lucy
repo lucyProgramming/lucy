@@ -4,7 +4,6 @@ import "lucy/os"
 import "lucy/cmd/langtools/compile/parser"
 import "java/io"
 
-
 typealias filename = string 
 
 class ReName {
@@ -14,7 +13,7 @@ class ReName {
     lucyPath []string
     classPath []string 
     to string 
-    lucyAstNodes map{ filename->[]ast.TopNode } 
+    lucyAstNodes map{filename->[]ast.TopNode} 
     otherPackageErrors []error 
     packageLoader PackageLoader 
     
@@ -28,7 +27,6 @@ class ReName {
         this.to = to 
     }
 
-    
     fn rename() {
         // current package must be used
         this.lucyAstNodes = new map{filename->[]ast.TopNode}()
@@ -93,13 +91,12 @@ class ReName {
     }
 
 
-
     public  fn searchLucyPath() {
         for _,v := range this.lucyPath {
             this.searchDir("" , v + "/src/")
         }
     }
-
+    
     fn searchDir(packageName string , dir string ) {
         list := (new io.File(dir)).list()
         containsLucyFile := false 

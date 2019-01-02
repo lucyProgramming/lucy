@@ -8,7 +8,7 @@ public class InheritedAttribute {
 	forBreak              Object
 	Function              Function
 	Class                 Class
-	public Defer         StatementDefer
+	Defer         StatementDefer
 	classMethod           ClassMethod
 	public classAndFunctionNames string
 	p Package 
@@ -18,6 +18,3 @@ public class InheritedAttribute {
 		this.classAndFunctionNames = ""
 	}
 }
-
-
-

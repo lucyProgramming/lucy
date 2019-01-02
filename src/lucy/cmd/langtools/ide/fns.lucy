@@ -24,7 +24,7 @@ public fn parseAstAndTypeCheck(
 	onlyAnalyzeGlobals bool , 
 	matchFile string ,
 	matchLine int, 
-	loader ast.loadImport) -> (p ast.Package,errs []error){
+	loader ast.loadImport) -> (p ast.Package , errs []error){
 	now := System.currentTimeMillis()
 	nodes , es := parseAst(lucyFiles)
 	print("prase ast used:", System.currentTimeMillis() - now ,packageName)

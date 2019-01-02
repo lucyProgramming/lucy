@@ -1,23 +1,23 @@
  
 class ExpressionCheckTypeConversion {
-	static fn check(e Expression , block Block, errs []error)  ->(valueType Type){
+	static fn check(e Expression , block Block , errs []error)  ->(valueType Type){
 		conversion := e.data.(ExpressionTypeConversion)
 		on, es := conversion.Expression.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
+		valueType = conversion.Type.cloneType()
+		valueType.pos = e.pos
 		if on == null {
-			return null
+			return 
 		}
 		if err := on.rightValueValid(); err != null {
 			errs.append(err)
-			return null
+			return 
 		}
 		err := conversion.Type.resolve(block)
 		if err != null {
 			errs.append(err)
-			return null
+			return 
 		}
-		valueType = conversion.Type.cloneType()
-		valueType.pos = e.pos
 		if on.isNumber() && conversion.Type.isNumber() {
 			if conversion.Expression.isLiteral() {
 				conversion.Expression.convertToNumberType(conversion.Type.Type)
@@ -26,44 +26,44 @@ class ExpressionCheckTypeConversion {
 				e.doubleValue = conversion.Expression.doubleValue
 				e.value = conversion.Expression.value
 			}
-			return valueType
+			return 
 		}
 		// string([]byte)
 		if conversion.Type.Type == VariableTypeString &&
 			on.equal(LucyBytesType) {
-			return valueType
+			return 
 		}
 		// string(byte[])
 		if conversion.Type.Type == VariableTypeString &&
 			on.equal(JavaBytesType) {
-			return valueType
+			return 
 		}
 		// int(enum)
 		if conversion.Type.Type == VariableTypeInt &&
 			on.Type == VariableTypeEnum {
-			return valueType
+			return 
 		}
 		// enum(int)
 		if conversion.Type.Type == VariableTypeEnum &&
 			on.Type == VariableTypeInt {
-			return valueType
+			return 
 		}
 		// []byte("hello world")
 		if conversion.Type.equal(LucyBytesType) &&
 			on.Type == VariableTypeString {
-			return valueType
+			return 
 		}
 		// byte[]("hello world")
 		if conversion.Type.equal(JavaBytesType) &&
 			on.Type == VariableTypeString {
-			return valueType
+			return 
 		}
 		if conversion.Type.validForTypeAssertOrConversion() && on.isPointer() {
-			return valueType
+			return 
 		}
 		errs.append(new error( sprintf("%s cannot convert '%s' to '%s'",
 			on.pos.errMsgPrefix(), on.typeString(), conversion.Type.typeString())))
-		return valueType
+		return 
 	}
 }
 

@@ -9,7 +9,7 @@ class ExpressionCheckLeftValue {
 			if identifier.name == UnderScore {
 				errs.append(new error(sprintf("%s cannot use '%s' as left value",
 					e.pos.errMsgPrefix(), identifier.name)))
-				return null
+				return 
 			}
 			if identifier.name == ThisPointerName {
 				errs.append(new error(sprintf("%s '%s' cannot be used as left value",
@@ -19,12 +19,12 @@ class ExpressionCheckLeftValue {
 			d, err := block.searchIdentifier(e.pos, identifier.name, isCaptureVar)
 			if err != null {
 				errs.append(err)
-				return null
+				return 
 			}
 			if d == null {
 				errs.append(new error(sprintf("%s '%s' not found",
 					e.pos.errMsgPrefix(), identifier.name)))
-				return null
+				return 
 			}
 			if v ,ok := d.(Variable) ; ok {
                 if isCaptureVar[0] {
@@ -45,7 +45,7 @@ class ExpressionCheckLeftValue {
                 result = identifier.Variable.Type.cloneType()
                 result.pos = e.pos
                 e.value = result
-                return result
+                return
 			}
             errs.append(new error(sprintf("%s identifier '%s' is '%s' , cannot be used as left value",
                 e.pos.errMsgPrefix(), identifier.name, block.identifierIsWhat(d))))
@@ -53,13 +53,13 @@ class ExpressionCheckLeftValue {
 		case ExpressionTypeIndex:
 			result = ExpressionCheckIndex.check(e , block, errs)
 			e.value = result
-			return result
+			return
 		case ExpressionTypeSelection:
 			selection := e.data.(ExpressionSelection)
 			object, es := selection.Expression.checkSingleValueContextExpression(block)
 			errs.appendAll(es)
 			if object == null {
-				return null
+				return 
 			}
 			if selection.autoCompletion {
 				ExpressionCheckLeftValue.autoCompletion(object , block )
@@ -70,14 +70,14 @@ class ExpressionCheckLeftValue {
 				if selection.name == Super {
 					errs.append(new error(sprintf("%s access '%s' at '%s' not allow",
 						e.pos.errMsgPrefix(), Super, object.typeString())))
-					return null
+					return 
 				}
 				field, err := object.Class.getField(block , e.pos, selection.name, false , object.Class.name)
 				if err != null {
 					errs.append(err)
 				}
 				if field == null {
-					return null
+					return 
 				}
 				if selection.locateDefinition {
 					block.inheritedAttribute.p.setLocationDefinition(field)
@@ -107,7 +107,7 @@ class ExpressionCheckLeftValue {
 					result = field.Type.cloneType()
 					result.pos = e.pos
 					e.value = result
-					return result
+					return 
 				}
 				return null
 			case VariableTypePackage:
@@ -135,20 +135,19 @@ class ExpressionCheckLeftValue {
 				}
                 errs.append(new error(sprintf("%s '%s' is not variable",
                     e.pos.errMsgPrefix(), selection.name)))
-                return null
+                return 
 
 			default:
 				errs.append(new error(sprintf("%s cannot access '%s' on '%s'",
 					e.pos.errMsgPrefix(), selection.name, object.typeString())))
-				return null
+				return 
 			}
 		default:
 			errs.append(new error(sprintf("%s '%s' cannot be used as left value",
 				e.pos.errMsgPrefix(),
 				e.op)))
-			return null
+			return 
 		}
-		return null
 	}
 
 	static fn autoCompletion(object Type , block Block) {

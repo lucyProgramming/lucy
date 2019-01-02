@@ -73,7 +73,6 @@ class Parser {
 				}
 				continue
 			}
-
 			if this.onlyParseImport == false {
 				if this.token.Type == lex.TokenComment || 
 					this.token.Type == lex.TokenMultiLineComment{
@@ -226,6 +225,7 @@ class Parser {
 				this.ifTokenIsLfThenSkip(false)
 			case lex.TokenLc:
 				b := new ast.Block()
+				b.pos = this.mkPos()
 				this.next(lfIsToken) // skip {
 				this.BlockParser.parseStatementList(b, true)
 				if this.token.Type != lex.TokenRc {
@@ -423,7 +423,6 @@ class Parser {
 		if err != null {
 			return
 		}
-		
 		constants = new []ast.Constant(len(names))
 		for k, v := range names {
 			vd := new ast.Constant()
@@ -526,11 +525,6 @@ class Parser {
 		var err error
 		var tok lex.Token
 		this.lastToken = this.token
-		defer {
-			if this.lastToken == null {
-				this.lastToken = this.token
-			}
-		}
 		for {
 			tok, err = this.lexer.next()
 			if tok != null {

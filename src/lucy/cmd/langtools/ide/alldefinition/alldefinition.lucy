@@ -1,9 +1,6 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/ide"
 import "lucy/os"
-import "java/lang/Boolean"
-import "java/lang/Long"
-import "java/lang/Double"
 import "lucy/cmd/langtools/common"
 
 
@@ -86,13 +83,6 @@ class AllDefinition {
         }
         return copy(new ide.Definition[](len(items)) , items)
     }
-
-    
-    fn packBool(v bool) -> (o Boolean = Boolean.valueOf(v)) { }
-    fn packLong(v long) -> (o Long = Long.valueOf(v)) { }
-    fn packDouble(v double) -> (o Double = Double.valueOf(v)) { }
-
-
 }
 
 

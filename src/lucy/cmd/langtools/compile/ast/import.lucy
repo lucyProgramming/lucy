@@ -1,6 +1,5 @@
 import "lucy/cmd/langtools/compile/common"
 
-
 public class Import {
 	public accessName  string
 	public Import string // full name
@@ -9,10 +8,10 @@ public class Import {
 	public alias string 
 	public locateDefinition bool
 	public comment string 
-	public findUsage bool 
+	public findUsage bool
 	public findUsageInstances []Usage 
 
-	fn mkValueReadUsage(pos Pos) {
+	fn mkUsed(pos Pos) {
 		this.used = true
 		if this.findUsage == false {
 			return 

@@ -24,9 +24,6 @@ class ExpressionCheckBinary {
 				return null
 			}
 		}
-		if left == null && right == null {
-			return 
-		}
 		// &&  ||
 		if e.Type == ExpressionTypeLogicalOr ||
 			e.Type == ExpressionTypeLogicalAnd {
@@ -34,13 +31,13 @@ class ExpressionCheckBinary {
 			result.Type = VariableTypeBool
 			result.pos = e.pos
 			if left == null || right == null {
-				return result
+				return 
 			}
 			if left.Type != VariableTypeBool ||
 				right.Type != VariableTypeBool {
 				errs.append(e.binaryWrongOpErr())
 			}
-			return result
+			return
 		}
 		// & |
 		if e.Type == ExpressionTypeOr ||
@@ -50,12 +47,12 @@ class ExpressionCheckBinary {
 				if left != null && left.isNumber() {
 					result = left.cloneType()
 					result.pos = e.pos
-					return result
+					return 
 				}
 				if right != null && right.isNumber() {
 					result = right.cloneType()
 					result.pos = e.pos
-					return result
+					return 
 				}
 				return null
 			}
@@ -64,7 +61,7 @@ class ExpressionCheckBinary {
 			}
 			result = left.cloneType()
 			result.pos = e.pos
-			return result
+			return 
 		}
 		if e.Type == ExpressionTypeLsh ||
 			e.Type == ExpressionTypeRsh {
@@ -72,7 +69,7 @@ class ExpressionCheckBinary {
 				if left != null && left.isNumber() {
 					result = left.cloneType()
 					result.pos = e.pos
-					return result
+					return 
 				}
 				return null
 			}
@@ -97,7 +94,7 @@ class ExpressionCheckBinary {
 			result.Type = VariableTypeBool
 			result.pos = e.pos
 			if left == null || right == null {
-				return result
+				return
 			}
 			//number
 			switch left.Type {
@@ -149,12 +146,12 @@ class ExpressionCheckBinary {
 				if left != null {
 					result = left.cloneType()
 					result.pos = e.pos
-					return result
+					return 
 				}
 				if right != null {
 					result = right.cloneType()
 					result.pos = e.pos
-					return result
+					return 
 				}
 				return null
 			}
@@ -185,6 +182,6 @@ class ExpressionCheckBinary {
 			result.pos = e.pos
 			return result
 		}
-		return null
+		return
 	}	
 } 

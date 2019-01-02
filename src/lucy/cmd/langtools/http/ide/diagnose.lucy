@@ -5,7 +5,6 @@ import "lucy/cmd/langtools/http/g"
 import "lucy/encoding/json"
 
 
-
 class Diagnose implements HttpHandler {
     public fn handle(exchange HttpExchange) {
         os := exchange.getResponseBody()

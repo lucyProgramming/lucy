@@ -94,7 +94,7 @@ public class ExpressionFunctionCall  {
 	public buildInFunctionMeta      Object // for build in function only
 	public Expression               Expression
 	public args                     []Expression
-	public vArgs                    CallVariableArgs
+	public vArgs                    CallVariableLengthArgs
 	public Function                 Function
 	public parameterTypes           []Type // for template function
 	public templateFunctionCallPair TemplateFunctionInstance
@@ -104,7 +104,7 @@ public class ExpressionMethodCall  {
 	public Class              Class // for object or class
 	public Expression         Expression
 	public args               []Expression
-	public vArgs              CallVariableArgs
+	public vArgs              CallVariableLengthArgs
 	public name               string
 	public method             ClassMethod
 	public fieldMethodHandler ClassField
@@ -182,7 +182,7 @@ public class ExpressionNew  {
 	public Type         Type
 	public args         []Expression
 	public construction ClassMethod
-	public vArgs        CallVariableArgs
+	public vArgs        CallVariableLengthArgs
 }
 
 public class ExpressionMap  {
