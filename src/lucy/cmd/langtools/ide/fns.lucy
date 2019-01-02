@@ -32,7 +32,7 @@ public fn parseAstAndTypeCheck(
 	p = new ast.Package(packageName , false , loader)
 	p.onlyAnalyzeGlobals = onlyAnalyzeGlobals
 	p.matchFile = matchFile 
-	p.printFileMatchInfo = true 
+	// p.printFileMatchInfo = true 
 	if matchLine != -1 {
 		p.matchLine = matchLine
 	}

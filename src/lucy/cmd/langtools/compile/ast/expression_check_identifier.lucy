@@ -1,4 +1,3 @@
-import "java/lang/Long"
 import "java/util/Date"
 
 class ExpressionCheckIdentifier {
@@ -28,7 +27,7 @@ class ExpressionCheckIdentifier {
 			return result, null
 		case MagicIdentifierLine:
 			e.Type = ExpressionTypeInt
-			e.data = Long.valueOf(long(0))
+			e.longValue = long(e.pos.startLine)
 			result, _ := e.checkSingleValueContextExpression(block)
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.setLocationDefinition(e)
@@ -37,7 +36,7 @@ class ExpressionCheckIdentifier {
 			return result, null
 		case MagicIdentifierTime:
 			e.Type = ExpressionTypeLong
-			e.data = Long.valueOf(new Date().getTime())
+			e.longValue = new Date().getTime()
 			result, _ := e.checkSingleValueContextExpression(block)
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.setLocationDefinition(e)

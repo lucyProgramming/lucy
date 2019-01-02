@@ -1,5 +1,3 @@
-import "lucy/cmd/langtools/compile/jvm/cg"
-
 class ExpressionCheckLeftValue {
 	
 	static fn getLeftValue(e Expression, block Block, errs []error) -> (result Type) {
@@ -118,7 +116,7 @@ class ExpressionCheckLeftValue {
 					return null
 				}
 				if v ,ok := variable.(Variable) ; ok {
-				    if v.accessFlags&cg.AccFieldPublic == 0 &&
+				    if v.isPublic() == false &&
                         object.Package.isSame(block.inheritedAttribute.p) == false {
                         errs.append(new error(sprintf("%s '%s.%s' is private",
                             e.pos.errMsgPrefix(), object.Package.name, selection.name)))
