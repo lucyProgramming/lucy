@@ -86,13 +86,10 @@ class ExpressionCheckIdentifier {
 				return null, new error(sprintf("%s fucntion '%s' a template function",
 					e.pos.errMsgPrefix(), f.name))
 			}
-			// try from import
-			if f.isBuildIn == false {
-				i, should := shouldAccessFromImports(block , identifier.name, e.pos, f.pos)
-				if should {
-					f.reduceFindUsageInstances(block)
-					return .checkIdentifierThroughImports(block,identifier , e , i)
-				}
+			it, should := shouldAccessFromImports(block , identifier.name, e.pos, f.pos)
+			if should {
+				f.reduceFindUsageInstances(block)
+				return .checkIdentifierThroughImports(block,identifier , e , it)
 			}
 			if identifier.locateDefinition {
 				block.inheritedAttribute.p.setLocationDefinition(f)
@@ -197,10 +194,7 @@ class ExpressionCheckIdentifier {
 		if err != null {
 			return null, new error(sprintf("%s %s", e.pos.errMsgPrefix(), err.getMessage()))
 		}
-
-		{
-			it.mkUsed(e.pos)
-		}
+		it.mkUsed(e.pos)
 		if identifier.locateDefinition {
 			block.inheritedAttribute.p.setLocationDefinition(it)
 			return 

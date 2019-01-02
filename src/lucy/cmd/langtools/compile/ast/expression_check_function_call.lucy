@@ -71,7 +71,6 @@ class ExpressionCheckFunctionCall {
 					}
 				}
 			}
-
 			if d == null {
 				errs.append(new error(sprintf("%s '%s' not found",
 					call.Expression.pos.errMsgPrefix(), identifier.name)))
@@ -82,6 +81,15 @@ class ExpressionCheckFunctionCall {
 				return 
 			}
 			if f ,ok := d.(Function) ; ok {
+				if f.isGlobalMain() {
+					errMsg := sprintf("is global main")
+					t := new CompileError(sprintf("%s %s" , e.pos.errMsgPrefix() ,errMsg ))
+					t.startPos = e.pos
+					t.endPos = e.pos
+					t.err = errMsg
+					errs.append(t)
+					
+				}
                 call.Function = f
                 return .checkFunctionCall(e , block, errs, f, call)
 			}
