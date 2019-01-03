@@ -11,11 +11,11 @@ public class Error {
             if t , ok := e.(ast.CompileError) ; ok {
                 e := new Error()
                 e.pos = new ast.Pos()
-                e.pos.filename = t.startPos.filename
-                e.pos.startLine = t.startPos.startLine
-                e.pos.startColumnOffset  = t.startPos.startColumnOffset
-                e.pos.endLine = t.endPos.endLine
-                e.pos.endColumnOffset = t.endPos.endColumnOffset
+                e.pos.filename = t.pos.filename
+                e.pos.startLine = t.pos.startLine
+                e.pos.startColumnOffset  = t.pos.startColumnOffset
+                e.pos.endLine = t.pos.endLine
+                e.pos.endColumnOffset = t.pos.endColumnOffset
                 e.err = t.err
                 if es.keyExist(e.pos.filename) {
                     es[e.pos.filename].append(e)

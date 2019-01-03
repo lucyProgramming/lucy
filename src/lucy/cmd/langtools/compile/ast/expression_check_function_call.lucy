@@ -84,8 +84,7 @@ class ExpressionCheckFunctionCall {
 				if f.isGlobalMain() {
 					errMsg := sprintf("is global main")
 					t := new CompileError(sprintf("%s %s" , e.pos.errMsgPrefix() ,errMsg ))
-					t.startPos = e.pos
-					t.endPos = e.pos
+					t.pos = e.pos
 					t.err = errMsg
 					errs.append(t)
 					

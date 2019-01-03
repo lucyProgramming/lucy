@@ -18,7 +18,6 @@ public fn clean(args []string) {
 		printf("parse command line failed,err:%s\n" , err.toString())
 		os.exit(2)
 	}
-	aaaa
 	if len(packageName) == 0 {
 		printUsageAndExit(1)
 	}

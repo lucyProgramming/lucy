@@ -539,8 +539,7 @@ public class Package {
 				if i.used == false {
 					errMsg := sprintf("%s' imported not used" , i.Import)
 					t := new CompileError(sprintf("%s %s" ,errMsgPrefix(i.pos) , errMsg)) 
-					t.startPos = i.pos
-					t.endPos = i.pos 
+					t.pos = i.pos
 					t.err = errMsg
 					errs.append(t)
 				}
