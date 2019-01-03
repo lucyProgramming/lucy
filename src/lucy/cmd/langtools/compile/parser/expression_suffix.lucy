@@ -650,8 +650,7 @@ class ExpressionSuffix extends  ParserExtends {
 				err = new error(sprintf("%s except ')' ,but '%s'",
 					this.parser.errMsgPrefix(pos),
 					this.parser.token.description))
-				this.parser.errs.append( err)
-				return null, err
+				this.parser.errs.append(err)
 			}
 	    }
 		pos := this.parser.mkPos()

@@ -350,7 +350,7 @@ public class Lexer {
 		token.startLine = this.line
 		token.Type = TokenLiteralString
 		token.offset = this.offset - 1 
-		token.startColumnOffset = this.columnOffset 
+		token.startColumnOffset = this.columnOffset - 1
 		bs := []byte{}
 		var c byte
 		c, eof := this.getChar()
@@ -475,7 +475,7 @@ public class Lexer {
 			err = new error("string literal start new line")
 		}
 		if this.findUsage > 0 {
-			line,column := this.getLineAndColumnFromPos(this.findUsage)
+			line , column := this.getLineAndColumnFromPos(this.findUsage)
 			if line == token.endLine && column >= token.startColumnOffset && column <= token.endColumnOffset {
 				token.findUsage = true 
 			}

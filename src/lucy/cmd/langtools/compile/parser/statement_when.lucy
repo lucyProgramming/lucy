@@ -142,7 +142,4 @@ class StatementWhenParser extends ParserExtends {
 		}
 		this.next(lfNotToken) //  skip }
 	}
-
-
 }
- 

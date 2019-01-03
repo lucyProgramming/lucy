@@ -6,7 +6,7 @@ public class Pos {
 	public startColumnOffset int 
 	public endColumnOffset int 
 	/*
-		offset at bs , for special use。
+		offset at bs , for special use.
 		for template function only currently
 	*/
 	public startOffset int
