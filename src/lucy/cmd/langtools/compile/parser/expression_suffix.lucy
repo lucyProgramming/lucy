@@ -6,7 +6,7 @@ class ExpressionSuffix extends  ParserExtends {
 	
 	fn ExpressionSuffix(parser Parser , ep ExpressionParser){
 		this.super(parser)
-		this.ep = ep 
+		this.ep = ep
 	}
 	
 	fn parseSuffixExpression() -> (prefix ast.Expression, err error) {

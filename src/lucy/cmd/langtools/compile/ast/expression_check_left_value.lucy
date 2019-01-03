@@ -70,7 +70,7 @@ class ExpressionCheckLeftValue {
 						e.pos.errMsgPrefix(), Super, object.typeString())))
 					return 
 				}
-				field, err := object.Class.getField(block , e.pos, selection.name, false , object.Class.name)
+				field, err := object.Class.getField(block , e.pos, selection.name, new map{string->bool}(), false , object.Class.name)
 				if err != null {
 					errs.append(err)
 				}
@@ -88,7 +88,7 @@ class ExpressionCheckLeftValue {
 				return result
 			case VariableTypeObject,
 				VariableTypeClass:
-				field, err := object.Class.getField(block , e.pos, selection.name, false , object.Class.name)
+				field, err := object.Class.getField(block , e.pos, selection.name,new map{string->bool}(), false , object.Class.name)
 				if err != null {
 					errs.append(err)
 				}

@@ -1,0 +1,41 @@
+public class CallStatus {
+    public times int 
+    public usedTime long // in millisecond 
+    public usedTimeString string
+    public avgTime long
+    public avgTimeString string
+    
+    fn add(usedTime long) {
+        this.times++
+        this.usedTime += usedTime
+        this.usedTimeString = CallStatus.formatUsedTime(this.usedTime)
+        this.avgTime = this.usedTime / this.times
+        this.avgTimeString = CallStatus.formatUsedTime(this.avgTime)
+    }
+    
+    static fn formatUsedTime(usedTime long) ->(s string){
+        switch usedTime {
+            case usedTime / (3600 * 1000) > 0:
+                t := usedTime / (3600 * 1000)
+                s = sprintf("%dh" , t)
+                return s + CallStatus.formatUsedTime(usedTime % (3600 * 1000))
+            case usedTime / (60 * 1000) > 0:
+                t := usedTime / (60 * 1000)
+                s = sprintf("%dm" , t)
+                return s + CallStatus.formatUsedTime(usedTime % (60 * 1000))
+            case usedTime / (1000) > 0:
+                t := usedTime / (1000)
+                s = sprintf("%ds" , t)
+                return s + CallStatus.formatUsedTime(usedTime % (1000))
+            default:
+                return sprintf("%dms" , usedTime)
+        }
+    }
+    
+    static fn collect(m map{string->CallStatus} , name string , usedTime long) {
+        if m.keyExist(name) == false {
+            m[name] = new CallStatus()
+        }
+        m[name].add(usedTime)    
+    }
+}

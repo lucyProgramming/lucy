@@ -143,9 +143,9 @@ class BuildSwitch {
         }
         code.codeLength++
         state.popStack(1)
-        if s.Default != null {
+        if s.defaultBlock != null {
             ss := new StackMapState(state)
-            this.bb.buildBlock(c, code, s.Default, context, ss)
+            this.bb.buildBlock(c, code, s.defaultBlock, context, ss)
             state.addTop(ss)
         }
         return

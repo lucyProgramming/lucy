@@ -29,16 +29,14 @@ public class Expression {
 	public inlineComment string   //   in
 	
 	public containsLf bool    // constains "\n"
-	
 
 	public fn isIdentifier(identifier string) -> (is bool) { 
-		
 		if this.Type != ExpressionTypeIdentifier {
 			return  
 		}
 		return this.data.(ExpressionIdentifier).name == identifier
 	}
-	
+
 	fn isRelation() -> (is bool) {
 		return this.Type == ExpressionTypeEq ||
 			this.Type == ExpressionTypeNe ||

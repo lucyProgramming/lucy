@@ -12,7 +12,7 @@ class FindUsage {
     lucyPath []string
     loader ide.PackageLoader
     scope []string 
-
+    
     fn FindUsage(lucyFiles []ide.LucyFile , packageName string , printErr bool , lucyPath []string, scope string) {
         this.super()
         this.lucyFiles = lucyFiles
@@ -21,7 +21,7 @@ class FindUsage {
         this.lucyPath = lucyPath
         if scope != null && scope != "" {
             this.scope = common.getPathElements(scope)
-        } 
+        }
     }
     
     fn find() -> (result []ast.Usage){

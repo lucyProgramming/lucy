@@ -4,9 +4,3 @@ import "java/lang/System"
 public var stdin  = System.in
 public var stdout = System.out
 public var stderr  = System.err
-
-
-
-
-
-

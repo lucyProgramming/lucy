@@ -21,7 +21,7 @@ class ExpressionCheckSelection {
                     e.pos.errMsgPrefix(), Super, object.typeString())))
                 return null
             }
-            access, err := object.Class.getFieldOrMethod(block , e.pos, selection.name, false , object.Class.name )
+            access, err := object.Class.getFieldOrMethod(block , e.pos, selection.name, new map{string->bool}() , false , object.Class.name )
             if err != null {
                 errs.append(err)
                 return null
@@ -162,7 +162,7 @@ class ExpressionCheckSelection {
                 result.Class = result.Class.superClass
                 return result
             }
-            fieldOrMethod, err := object.Class.getFieldOrMethod(block , e.pos, selection.name, false , object.Class.name)
+            fieldOrMethod, err := object.Class.getFieldOrMethod(block ,  e.pos, selection.name, new map{string->bool}() ,false , object.Class.name)
             if err != null {
                 errs.append(err)
                 return null
@@ -350,20 +350,25 @@ class ExpressionCheckSelection {
                 break
             }
             object = object.superClass 
-            accessFromSub = true    
+            accessFromSub = true  
         }
         block.inheritedAttribute.p.autoCompletionItems = items
-    } 
+    }
     
     static fn autoCompletionForObject(object Class , block Block) {
         if err := object.loadSelf(block , new Pos()) ;err != null {
             return 
         }
         items := []AutoCompletionItem{}
-        accessFromSub := false 
+        accessFromSub := false
+        classHandled := new map{string -> bool}() 
         // in this case must be lucy class 
         m := new map{string->bool} ()
         for object != null {
+            if classHandled.keyExist(object.name) {
+                break 
+            }
+            classHandled[object.name] = true
             if object.isJava == false {
                 for v := range object.fields {
                     if m.keyExist(v.name) {
@@ -462,10 +467,15 @@ class ExpressionCheckSelection {
             return
         }
         items := []AutoCompletionItem{}
-        accessFromSub := false 
+        accessFromSub := false
+        classHandled := new map{string -> bool}() 
         // in this case must be lucy class 
         m := new map{string->bool} ()
         for c != null {
+            if classHandled.keyExist(c.name) {
+                break 
+            }
+            classHandled[c.name] = true 
             if c.isJava == false {
                 for v := range c.fields {
                     if m.keyExist(v.name) {

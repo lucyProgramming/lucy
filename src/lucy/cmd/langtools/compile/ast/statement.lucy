@@ -128,6 +128,17 @@ public class Statement {
 				this.Class.findUsageInstances = [u]
 				block.inheritedAttribute.p.findUsage = this.Class.findUsageInstances
 			}
+			if this.Class.suggestExtendsOrImplements {
+				block.inheritedAttribute.p.autoCompletionItems = new []AutoCompletionItem(2)
+				item := new AutoCompletionItem()
+				item.Type = "keyword"
+				item.name = "extends"
+				block.inheritedAttribute.p.autoCompletionItems[0] = item
+				item = new AutoCompletionItem()
+				item.Type = "keyword"
+				item.name = "implements"
+				block.inheritedAttribute.p.autoCompletionItems[1] = item
+			}
 			errs.appendAll(this.Class.check(block))
 			return errs
 		case StatementTypeEnum:
@@ -226,7 +237,7 @@ public class Statement {
 			}
 		}
 	}
-
+	
 	fn simplifyFor() {
 		if this.StatementFor.Init == null &&
 			this.StatementFor.increment == null &&

@@ -1,6 +1,5 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-
 public class StatementSwitchCase  {
 	public matches []Expression
 	public block   Block
@@ -14,12 +13,11 @@ public class StatementSwitch  {
 	public endPos               Pos
 	public condition            Expression //switch
 	public cases                []StatementSwitchCase
-	public Default              Block
+	public defaultBlock         Block
 	public exits                []cg.Exit
 	public inlineComment string 
 	public defaultInlineComment string 
 	
-
 	fn check(block Block) ->(errs []error = []error{})  {
 		this.initExpressionBlock.inherit(block)
 		for _, v := range this.prefixExpressions {
@@ -165,7 +163,7 @@ public class StatementSwitch  {
 		
 		if conditionType.Type == VariableTypeEnum &&
 			len(enumNamesMap) < len(conditionType.Enum.enums) &&
-			this.Default == null &&
+			this.defaultBlock == null &&
 			containsBool == false {
 			//some enum are missing, not allow
 			errMsg := sprintf("%s switch for enum '%s' is not complete\n",
@@ -204,10 +202,10 @@ public class StatementSwitch  {
 			v.block.inheritedAttribute.forBreak = this
 			errs.appendAll(v.block.check())
 		}
-		if this.Default != null {
-			this.Default.inherit(this.initExpressionBlock)
-			this.Default.inheritedAttribute.forBreak = this
-			errs.appendAll(this.Default.check())
+		if this.defaultBlock != null {
+			this.defaultBlock.inherit(this.initExpressionBlock)
+			this.defaultBlock.inheritedAttribute.forBreak = this
+			errs.appendAll(this.defaultBlock.check())
 		}
 	}
 	

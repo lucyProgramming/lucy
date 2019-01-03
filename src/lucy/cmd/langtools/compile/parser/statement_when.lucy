@@ -131,7 +131,7 @@ class StatementWhenParser extends ParserExtends {
 				block := new ast.Block()
 				block.isSwitchBlock = true
 				this.bp.parseStatementList(block, false)
-				whenStatement.Default = block
+				whenStatement.defaultBlock = block
 			}
 		}
 		if this.parser.token.Type != lex.TokenRc {

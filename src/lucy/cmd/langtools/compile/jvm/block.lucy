@@ -76,8 +76,8 @@ class BuildBlock {
 				notToHere = t
 				continue
 			}
-			if s.Type == ast.StatementTypeSwitch && s.StatementSwitch.Default != null {
-				t := s.StatementSwitch.Default.notExecuteToLastStatement
+			if s.Type == ast.StatementTypeSwitch && s.StatementSwitch.defaultBlock != null {
+				t := s.StatementSwitch.defaultBlock.notExecuteToLastStatement
 				for _, v := range s.StatementSwitch.cases {
 					if v.block != null {
 						t = t && v.block.notExecuteToLastStatement
@@ -87,7 +87,7 @@ class BuildBlock {
 						break
 					}
 				}
-				t = t && s.StatementSwitch.Default.notExecuteToLastStatement
+				t = t && s.StatementSwitch.defaultBlock.notExecuteToLastStatement
 				notToHere = t
 				continue
 			}

@@ -19,11 +19,9 @@ public class Pos {
 	}
 }
 
-
 fn errMsgPrefix(pos Pos) -> (prefix string) {
 	return pos.errMsgPrefix()
 }
-
 
 public class NameWithPos {
 	public name string
@@ -48,4 +46,3 @@ public class NameWithPos {
 		this.pos = Pos
 	}
 }
-

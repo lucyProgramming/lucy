@@ -55,7 +55,7 @@ class ExpressionCheckMethodCall {
 			if len(errs) > errsLength {
 				return null
 			}
-			ms, matched, err := javaStringClass.accessMethod(block , e.pos, errs, call, args,
+			ms, matched, err := javaStringClass.accessMethod(block , e.pos, errs,new map{string -> bool} (), call, args,
 				false , javaStringClass.name , null)
 			if err != null {
 				errs.append(err)
@@ -101,12 +101,12 @@ class ExpressionCheckMethodCall {
 				}
 				if call.locateDefinition {
 					m ,_ := object.Class.getFieldOrMethod(block ,
-						e.pos , call.name , false , object.Class.name)
+						e.pos , call.name ,  new map{string->bool}(),false , object.Class.name)
 					block.inheritedAttribute.p.setLocationDefinition(m)
 					return 
 				}
 				ms, matched, err := 
-					object.Class.accessInterfaceObjectMethod(block , e.pos, errs, call.name, call, callArgTypes, false , object.Class.name)
+					object.Class.accessInterfaceObjectMethod(block , e.pos, errs, new map{string -> bool}(), call.name, call, callArgTypes, false , object.Class.name)
 				if err != null {
 					errs.append(err)
 					return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
@@ -132,13 +132,13 @@ class ExpressionCheckMethodCall {
 			}
 			if call.locateDefinition {
 				m ,_ := object.Class.getFieldOrMethod(block ,
-						e.pos , call.name , false , object.Class.name)
+						e.pos , call.name , new map{string->bool}(), false , object.Class.name)
 				block.inheritedAttribute.p.setLocationDefinition(m) 
 				return 
 			}
 			
 			fieldMethodHandler := []ClassField{null}
-			ms, matched, err := object.Class.accessMethod(block , e.pos, errs, call, callArgTypes,
+			ms, matched, err := object.Class.accessMethod(block , e.pos, errs,new map{string -> bool} (), call, callArgTypes,
 				false, object.Class.name , fieldMethodHandler)
 			if err != null {
 				errs.append(err)
@@ -284,7 +284,7 @@ class ExpressionCheckMethodCall {
 		if len(errs) > errsLength {
 			return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
 		}
-		ms, matched, err := object.Class.accessMethod(block , e.pos, errs, call, callArgTypes, false, object.Class.name, fieldMethodHandler)
+		ms, matched, err := object.Class.accessMethod(block , e.pos, errs,new map{string -> bool} (),call, callArgTypes, false, object.Class.name, fieldMethodHandler)
 		if err != null {
 			errs.append(err)
 			return .returnValuesForFailCall(object.Class , block , call.name , e.pos)

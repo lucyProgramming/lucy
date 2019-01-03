@@ -158,7 +158,8 @@ class ClassParser extends  ParserExtends {
 				break
 			}
 			switch this.parser.token.Type {
-			case lex.TokenComment, lex.TokenMultiLineComment:
+			case lex.TokenComment,
+				lex.TokenMultiLineComment:
 				c := new ast.Comment()
 				c.comment = this.parser.token.stringValue 
 				c.isMulti = this.parser.token.Type == lex.TokenMultiLineComment
@@ -236,7 +237,7 @@ class ClassParser extends  ParserExtends {
 					this.parser.errs.append(err)
 				}
 			case lex.TokenIdentifier:
-				this.parseField(classDefinition, this.parser.errs, isStatic, isVolatile, accessControlToken, comment)
+				this.parseField(classDefinition, this.parser.errs, isStatic, isVolatile,  isFinal,accessControlToken, comment)
 				resetProperty()
 			case lex.TokenConst: // const is for local use
 				this.next(lfIsToken)
@@ -322,6 +323,10 @@ class ClassParser extends  ParserExtends {
 				this.next(lfNotToken)
 			}
 		}
+		if this.parser.token.Type != lex.TokenRc {
+			this.parser.errs.append(new error(sprintf("%s expect '}' , but '%s'" , 
+				this.parser.errMsgPrefix() , this.parser.token.description)))
+		}
 		return
 	}
 	
@@ -349,6 +354,7 @@ class ClassParser extends  ParserExtends {
 		errs []error,
 		isStatic bool,
 		isVolatile bool,
+		isFinal bool , 
 		accessControlToken lex.Token,
 		comment CommentParser) -> (err error) {
 		if this.parser.token.autoCompletion {
@@ -446,6 +452,9 @@ class ClassParser extends  ParserExtends {
 			if isVolatile {
 				f.accessFlags |= cg.AccFieldVolatile
 			}
+			if isFinal {
+				f.accessFlags |= cg.AccFieldFinal
+			}
 			classDefinition.fields[v.name] = f
 		}
 		return null
@@ -485,7 +494,8 @@ class ClassParser extends  ParserExtends {
 	}
 	fn validAfterFinal() ->(err error) {
 		if this.parser.token.Type == lex.TokenFn ||
-			this.parser.token.Type == lex.TokenSynchronized {
+			this.parser.token.Type == lex.TokenSynchronized  ||
+			this.parser.token.Type == lex.TokenIdentifier {
 			return null
 		}
 		return new error(sprintf("%s not a valid token after 'final'",

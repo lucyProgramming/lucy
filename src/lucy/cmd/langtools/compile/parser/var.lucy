@@ -32,6 +32,7 @@ var	untilSemicolonOrLf = {
 		lex.TokenLf->        true
 	}
  
+ 
 
 fn ParseFunction(bs []byte, pos ast.Pos) -> (f ast.Function,es []error) {
 	parser := new Parser(bs , null ,pos.filename , false , 10 )

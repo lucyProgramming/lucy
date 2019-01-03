@@ -8,9 +8,9 @@ class FunctionParser extends ParserExtends{
     }
 	
 	/*
-		when canBeAbstract is true , means can have no body
+		when isAbstract is true , means can have no body
 	*/
-	fn parse(needName bool, isAbstract bool , needSource bool ) -> (f ast.Function, err error) {
+	fn parse(needName bool, isAbstract bool , needSource bool) -> (f ast.Function, err error) {
 		f = new ast.Function()
 		f.startLine = this.parser.token.startLine 
 		defer {
@@ -74,10 +74,10 @@ class FunctionParser extends ParserExtends{
 				this.parser.
 					bs[offset : this.parser.lexer.getOffSet()]
 			}
+			this.next(lfIsToken)
 		}
-		f.endLine =  this.parser.token.startLine 
-		this.next(lfIsToken)
-		return f, err
+		f.endLine = this.parser.token.startLine 
+		return f, null
 	}
 	
 	//(a,b int)->(total int)

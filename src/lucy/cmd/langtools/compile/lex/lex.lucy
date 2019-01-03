@@ -554,6 +554,12 @@ public class Lexer {
 		var c byte
 		c, eof := this.getChar()
 		if eof {
+			token.startLine = this.line
+			token.startColumnOffset = this.columnOffset - 1 
+			token.offset = this.offset - 1
+			token.endLine = this.line
+			token.endColumnOffset = this.columnOffset
+			token.offset = this.offset
 			token.Type = TokenEof
 			token.description = "EOF"
 			return
@@ -563,8 +569,14 @@ public class Lexer {
 			c == '\r' { // skip empty
 			c, eof = this.getChar()
 		}
-		token.startLine = this.line
+		
 		if eof {
+			token.startLine = this.line
+			token.startColumnOffset = this.columnOffset - 1 
+			token.offset = this.offset - 1
+			token.endLine = this.line
+			token.endColumnOffset = this.columnOffset
+			token.offset = this.offset
 			token.Type = TokenEof
 			token.description = "EOF"
 			return
@@ -578,6 +590,7 @@ public class Lexer {
 		}
 		token.startColumnOffset = this.columnOffset - 1 
 		token.offset = this.offset - 1
+		token.startLine = this.line
 		switch c {
 		case '?':
 			token.Type = TokenQuestion

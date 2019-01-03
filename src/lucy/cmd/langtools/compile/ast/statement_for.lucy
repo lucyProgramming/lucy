@@ -8,7 +8,6 @@ public class ForRangeAttr {
 	public rangeOn         Expression
 }
 
-
 public class StatementFor {
 	public rangeAttr           ForRangeAttr
 	public exits               []cg.Exit

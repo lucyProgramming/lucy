@@ -25,25 +25,3 @@ fn main(args []string) {
 	    print(o.name , o.defaultValueString , o.usage)
 	})
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

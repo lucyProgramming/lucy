@@ -87,8 +87,9 @@ class TypeParser extends ParserExtends {
 		case lex.TokenIdentifier:
 			ret, err = this.parseIdentifierType()
 			if err != null {
-				this.parser.errs.append( err)
+				this.parser.errs.append(err)
 			}
+			err = null 
 		case lex.TokenMap:
 			this.next(lfNotToken) // skip map key word
 			if this.parser.token.Type != lex.TokenLc {
@@ -105,6 +106,22 @@ class TypeParser extends ParserExtends {
 			}
 			this.parser.ifTokenIsLfThenSkip(true)
 			if this.parser.token.Type != lex.TokenArrow {
+				if k.autoCompletion {
+					if this.parser.token.Type == lex.TokenRc {
+						// consume '}' token 
+						this.next(lfIsToken) 
+					}
+					m := new ast.Map()
+					m.K = k
+					m.V = new ast.Type()
+					m.V.pos = pos 
+					m.V.Type = ast.VariableTypeBool
+					ret = new ast.Type()
+					ret.Type = ast.VariableTypeMap
+					ret.Map = m
+					ret.pos = pos
+					return ret , null 
+				}
 				err = new error(sprintf("%s expect '->',but '%s'",
 					this.parser.errMsgPrefix(), this.parser.token.description))
 				this.parser.errs.append( err)
@@ -112,7 +129,7 @@ class TypeParser extends ParserExtends {
 			}
 			this.next(lfNotToken) // skip ->
 			v, err = this.parseType()
-			if err != null {
+			if v == null {
 				return null, err
 			}
 			this.parser.ifTokenIsLfThenSkip(true)
@@ -228,19 +245,21 @@ class TypeParser extends ParserExtends {
 		ret.getHover = this.parser.token.getHover 
 		this.next(lfIsToken) // skip name identifier
 		for this.parser.token.Type == lex.TokenSelection {
+
 			ret.locatePackageDefinition = ret.locateDefinition
 			ret.locateDefinition = false 
 			ret.packagePos = ret.pos 
+			ret.name += "."
+			ret.autoCompletion = ret.autoCompletion || this.parser.token.autoCompletion 
 			this.next(lfNotToken) // skip .
 			if ret.autoCompletion {
-				ret.name += "."
 				return ret , null 
 			}
 			if this.parser.token.Type != lex.TokenIdentifier {
 				return ret, new error(sprintf("%s not a identifier after dot",
 					this.parser.errMsgPrefix()))
 			}
-			ret.name += "." + this.parser.token.stringValue
+			ret.name += this.parser.token.stringValue
 			ret.locateDefinition = this.parser.token.locateDefinition
 			ret.findUsage = ret.findUsage || this.parser.token.findUsage
 			ret.rename = ret.rename || this.parser.token.rename

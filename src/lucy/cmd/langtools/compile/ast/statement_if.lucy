@@ -48,7 +48,7 @@ public class StatementIf {
 				if conditionType != null &&
 					conditionType.Type != VariableTypeBool {
 					errs.append(new error(sprintf("%s condition is not a bool expression",
-							conditionType.pos.errMsgPrefix())))
+						conditionType.pos.errMsgPrefix())))
 				}
 				if v.block != null {
 					v.block.inherit(this.initExpressionBlock)

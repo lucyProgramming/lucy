@@ -13,19 +13,3 @@ public class AttributeConstantValue {
 		return info
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

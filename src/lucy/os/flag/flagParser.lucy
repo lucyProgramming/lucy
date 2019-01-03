@@ -11,7 +11,6 @@ public final class  FlagParser {
 		this.options = new map{ string -> Option }()
 	}
 	
-	
 	public fn walkOptions(walkFn fn (o Option)) {
 		for v := range this.options {
 			walkFn(v)

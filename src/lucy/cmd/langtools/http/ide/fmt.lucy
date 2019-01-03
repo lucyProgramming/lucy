@@ -4,11 +4,14 @@ import "lucy/cmd/langtools/compile/ast"
 import "com/sun/net/httpserver/HttpHandler"
 import "com/sun/net/httpserver/HttpExchange"
 import "lucy/cmd/langtools/http/g"
+import "java/lang/System"
 
 class Fmt implements HttpHandler {
     public fn handle(exchange HttpExchange) {
         os := exchange.getResponseBody()
+        now := System.currentTimeMillis()
         defer {
+            CallStatus.collect(callStatus , "fmt" , System.currentTimeMillis() - now)
             e := catch()
             if e != null {
                 exchange.sendResponseHeaders(500 , 0L)

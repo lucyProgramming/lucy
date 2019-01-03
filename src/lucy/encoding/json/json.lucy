@@ -14,7 +14,7 @@ public fn encode(x Object , indent string = "") -> (bs []byte , err error){
 			err.printStackTrace()
 		}
 	}
-	bs = new Encoder( x, "" , indent).encode()
+	bs = new Encoder(x , "" , indent).encode()
 }
 
 public fn decode( bs []byte , x Object ) -> (x2 Object , err error ){

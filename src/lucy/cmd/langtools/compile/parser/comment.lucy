@@ -2,7 +2,7 @@
 import "lucy/cmd/langtools/compile/lex"
 
 
-class CommentParser extends ParserExtends{
+class CommentParser extends ParserExtends {
 	comment string
 	fn CommentParser(parser Parser){
 		this.super(parser)

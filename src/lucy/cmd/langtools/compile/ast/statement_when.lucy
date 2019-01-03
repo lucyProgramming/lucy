@@ -15,7 +15,7 @@ public class StatementWhen {
 	public typeExpression Expression 
 	public prefixExpressions []Expression  // not support now 
 	public cases     []StatementWhenCase
-	public Default   Block
+	public defaultBlock   Block
 	public inlineComment string 
 	public elseInlineComment string 
 	public initExpressionBlock Block = new Block()
@@ -68,9 +68,9 @@ public class StatementWhen {
 				errs.appendAll(v.block.check())
 			}
 		}
-		if this.Default != null {
-			this.Default.inherit(this.initExpressionBlock)
-			errs.appendAll(this.Default.check())
+		if this.defaultBlock != null {
+			this.defaultBlock.inherit(this.initExpressionBlock)
+			errs.appendAll(this.defaultBlock.check())
 		}
 	}
 	
@@ -132,12 +132,12 @@ public class StatementWhen {
 			return errs
 		}
 		if match == null {
-			if this.Default == null {
+			if this.defaultBlock == null {
 				errs.append(new error(sprintf("%s condition resolve as '%s' has no match and no 'default block'",
 						errMsgPrefix(this.condition.pos), this.condition.typeString())))
 			} else {
 				switchStatement.Type = StatementTypeBlock
-				switchStatement.block = this.Default
+				switchStatement.block = this.defaultBlock
 				switchStatement.block.inherit(block)
 				switchStatement.block.isWhenBlock = true
 				switchStatement.block.inheritedAttribute.forBreak = switchStatement.block
@@ -160,3 +160,5 @@ public class StatementWhen {
 		}
 	}
 }
+
+

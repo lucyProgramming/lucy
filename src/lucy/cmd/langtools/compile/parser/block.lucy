@@ -34,7 +34,9 @@ class BlockParser  extends ParserExtends {
 			block.pos = this.parser.mkPos()
 		}
 		defer {
-			block.endPos = this.parser.mkPos()
+			if block.endPos == null  {
+				block.endPos = this.parser.mkPos()
+			}
 		}
 		isDefer := false
 		var deferPos ast.Pos
@@ -42,7 +44,8 @@ class BlockParser  extends ParserExtends {
 		isFinal := false
 		var finalPos ast.Pos
 		comment := new CommentParser(this.parser)
-		fn resetPrefix () {
+
+		fn resetPrefix() {
 			isFinal = false
 			isDefer = false
 			deferPos = null
@@ -358,27 +361,27 @@ class BlockParser  extends ParserExtends {
 				}
 			case lex.TokenTypeAlias:
 				pos := this.parser.mkPos()
-				alias, err := this.parser.parseTypeAlias(comment)
-				if err != null {
-					this.consume(untilSemicolonOrLf)
-					this.next(lfNotToken)
-					continue
+				alias, _ := this.parser.parseTypeAlias(comment)
+				if alias != null {
+					statement := new ast.Statement()
+					statement.pos = pos
+					statement.Type = ast.StatementTypeTypeAlias
+					statement.TypeAlias = alias
+					block.statements.append(statement)
+					this.parser.validStatementEnding()
+					if this.parser.token.Type == lex.TokenComment {
+						statement.inlineComment = this.parser.token.stringValue 
+						this.next(lfIsToken)
+					}else {
+						this.parser.ifTokenIsLfThenSkip(false)
+					}
 				}
-				statement := new ast.Statement()
-				statement.pos = pos
-				statement.Type = ast.StatementTypeTypeAlias
-				statement.TypeAlias = alias
-				block.statements.append(statement)
-				this.parser.validStatementEnding()
-				if this.parser.token.Type == lex.TokenComment {
-					statement.inlineComment = this.parser.token.stringValue 
-					this.next(lfIsToken)
-				}else {
-					this.parser.ifTokenIsLfThenSkip(false)
-				}
-			case lex.TokenClass, lex.TokenInterface:
+				resetPrefix()
+			case lex.TokenClass,
+				lex.TokenInterface:
 				pos := this.parser.mkPos()
 				c, _ := this.parser.ClassParser.parse(isAbstract)
+				resetPrefix()
 				if c != null {
 					statement := new ast.Statement()
 					statement.pos = pos

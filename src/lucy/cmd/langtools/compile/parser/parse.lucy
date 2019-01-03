@@ -7,7 +7,12 @@ public fn parse(
 	filename string,
 	bs []byte,
 	onlyParseImport bool,
-	nErrors2Stop int , locateDefinition int ,getHover int , findUsage int ,rename int , autoCompletion int   ) -> (errs []error) {
+	nErrors2Stop int , 
+	locateDefinition int ,
+	getHover int ,
+	findUsage int ,
+	rename int, 
+	autoCompletion int) -> (errs []error) {
 	
 	p := new Parser(bs , tops , filename , onlyParseImport , nErrors2Stop )
 	p.lexer = lex.New(bs, 0, 0 , locateDefinition , getHover , findUsage , rename , autoCompletion)
@@ -211,18 +216,16 @@ class Parser {
 				this.ifTokenIsLfThenSkip(false)
 			case lex.TokenFn:
 				f, _ := this.FunctionParser.parse(true, false,true)
-				if f == null {
-					resetProperty()
-					continue
+				if f != null {
+					f.comment = comment.comment
+					isPublic := isPublic()
+					if isPublic {
+						f.accessFlags |= cg.AccMethodPublic
+					}
+					this.tops.append(new ast.TopNode(f))
+					this.ifTokenIsLfThenSkip(false)
 				}
-				f.comment = comment.comment
-				isPublic := isPublic()
-				if isPublic {
-					f.accessFlags |= cg.AccMethodPublic
-				}
-				this.tops.append( new ast.TopNode(f))
 				resetProperty()
-				this.ifTokenIsLfThenSkip(false)
 			case lex.TokenLc:
 				b := new ast.Block()
 				b.pos = this.mkPos()
@@ -389,7 +392,7 @@ class Parser {
 			return
 		}
 	}
-
+	
 	fn mkPos(t lex.Token...) -> (pos ast.Pos) {
 		token := this.token
 		if len(t) > 0 {
@@ -546,7 +549,6 @@ class Parser {
 		}
 		return
 	}
-	
 	/*
 		pos.errMsgPrefix() only receive one argument
 	*/
@@ -862,7 +864,7 @@ class Parser {
 		}
 		names = []ast.NameWithPos{}
 		for this.token.Type == lex.TokenIdentifier {
-			t := new ast.NameWithPos(this.token.stringValue,this.mkPos())
+			t := new ast.NameWithPos(this.token.stringValue , this.mkPos())
 			t.locateDefinition = this.token.locateDefinition
 			t.findUsage = this.token.findUsage
 			t.getHover = this.token.getHover

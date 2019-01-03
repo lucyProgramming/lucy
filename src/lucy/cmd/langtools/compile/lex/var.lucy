@@ -8,7 +8,7 @@ public fn New(
 	findUsage ,
 	rename,
 	autoCompletion int ) -> (lex Lexer) {
-		
+	
 	lex = new Lexer()
 	lex.bs = bs
 	lex.end = len(bs)

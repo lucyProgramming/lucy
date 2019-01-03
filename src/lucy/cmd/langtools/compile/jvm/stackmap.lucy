@@ -53,17 +53,17 @@ class StackMapState {
 		return ret
 	}
 
-	fn popStack(pop int) {
-		if pop == 0 {
+	fn popStack(num int) {
+		if num == 0 {
 			return
 		}
-		if pop < 0 {
-			panic("negative pop")
+		if num < 0 {
+			panic("negative num")
 		}
 		if len(this.stacks) == 0 {
 			panic("already 0")
 		}
-		this.stacks = this.stacks[:len(this.stacks)-pop]
+		this.stacks = this.stacks[:len(this.stacks)-num]
 	}
 	fn pushStack(c cg.ClassHighLevel, v ast.Type) {
 		if this == null {
@@ -72,16 +72,15 @@ class StackMapState {
 		this.stacks.append(this.newStackMapVerificationTypeInfo(c, v))
 	}
 
-
 	fn newStackMapVerificationTypeInfo(c cg.ClassHighLevel,
 		t ast.Type) -> (ret cg.StackMapVerificationTypeInfo) {
 		ret = new cg.StackMapVerificationTypeInfo()
 		switch t.Type {
-		case ast.VariableTypeBool , 
-			ast.VariableTypeByte ,
-			 ast.VariableTypeShort,
-		    ast.VariableTypeEnum ,
-			ast.VariableTypeChar , 
+		case ast.VariableTypeBool, 
+			ast.VariableTypeByte,
+			ast.VariableTypeShort,
+		    ast.VariableTypeEnum,
+			ast.VariableTypeChar, 
 			ast.VariableTypeInt:
 			ret.Verify = new cg.StackMapIntegerVariableInfo()
 		case ast.VariableTypeLong:
@@ -123,7 +122,6 @@ class StackMapState {
 		}
 		return ret
 	}
-
 
 }
 

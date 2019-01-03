@@ -8,22 +8,21 @@ public class TemplateFunctionInstance  {
 	public Function       Function
 }
 
-
 public class TemplateFunction  {
 	instances []TemplateFunctionInstance
 	
 	fn instanceExists(parameterTypes []Type) -> (instance TemplateFunctionInstance) {
 		fn equal(instance TemplateFunctionInstance) ->(isEqual bool) {
 			if len(instance.parameterTypes) != len(parameterTypes) {
-				return false
+				return 
 			}
 			for k, tType := range parameterTypes {
 				if tType.equal(instance.parameterTypes[k]) == false {
 					//not equal
-					return false
+					return 
 				}
 			}
-			return true
+			isEqual = true
 		}
 		for _, v := range this.instances {
 			if equal(v) {
@@ -33,8 +32,8 @@ public class TemplateFunction  {
 		return null
 	}
 	fn insert(parameterTypes []Type) -> (template TemplateFunctionInstance) {
-		if t := this.instanceExists(parameterTypes); t != null {
-			return t
+		if template = this.instanceExists(parameterTypes); template != null {
+			return
 		}
 		template = new TemplateFunctionInstance()
 		template.parameterTypes = parameterTypes 

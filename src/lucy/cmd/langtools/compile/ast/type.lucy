@@ -314,7 +314,7 @@ public class Type {
 		}
 		return null
 	}
-
+	
 	fn getNameFromImport(block Block) -> (d Object, err error) {
 		if this.name.indexOf(".") < 0  {
 			i := block.inheritedAttribute.p.getImport(this.pos.filename, this.name)
@@ -788,13 +788,13 @@ public class Type {
 				return false
 			}
 			if leftValue.Class.isInterface() {
-				i, err := rightValue.Class.implementedInterface(block , leftValue.pos, leftValue.Class.name)
+				i, err := rightValue.Class.implementedInterface(block , new map{string -> bool}() , leftValue.pos, leftValue.Class.name)
 				if err != null {
 					errs.append(err)
 				}
 				return i
 			} else { // class
-				has, err := rightValue.Class.haveSuperClass(block , rightValue.pos, leftValue.Class.name)
+				has, err := rightValue.Class.haveSuperClass(block , new map{string -> bool}(), rightValue.pos, leftValue.Class.name)
 				if err != null {
 					errs.append(err)
 				}
@@ -851,4 +851,3 @@ public class Type {
 		return this.Class != null && this.Class.name == JavaStringClassName
 	}
 }
-

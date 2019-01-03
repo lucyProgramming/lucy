@@ -1,4 +1,3 @@
-
 import "java/lang/Object" as javaRootClass
 
 /*
@@ -12,13 +11,12 @@ public fn copy < destArray, srcArray > (dest destArray , src srcArray , start in
 		return
 	}
 	if end == -1 {
-		end = src.size();
+		end = src.size()
 	}
 	for i := start ; i < end ; i++ {
-		dest[i] = src[i] ; 
+		dest[i] = src[i] 
 	}
 }
-
 
 public fn javaArray2Lucy  <array > (java array[] ,start int = 0 , end int = -1) -> (lucy []array) {
 	import "lucy/deps"
@@ -90,15 +88,3 @@ public fn javaArray2Lucy  <array > (java array[] ,start int = 0 , end int = -1) 
 			lucy = retType(a)
 	}
 }
- 
-
-
-
-
-
-
-
-
-
-
-

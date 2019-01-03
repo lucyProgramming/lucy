@@ -36,6 +36,7 @@ public class Class {
     public locateDefinition 	bool 
 	public findUsage  bool  
     findUsageInstances []Usage
+    hierarchyOk bool  
      
     public startLine int 
 	public endLine int 
@@ -385,11 +386,16 @@ public class Class {
 
     fn implementMethod (
         block Block,
+        classChecked map{string -> bool}, 
         pos Pos,
         m ClassMethod,
         nameMatched []ClassMethod,
         fromSub bool,
         errs []error) ->(method ClassMethod) {
+        if classChecked.keyExist(this.name) {
+            return 
+        }
+        classChecked[this.name] = true
         if this.methods != null {
             for _, v := range this.methods[m.Function.name] {
                 if v.isAbstract() {
@@ -419,40 +425,52 @@ public class Class {
         if this.superClass == null {
             return null
         }
-        return this.superClass.implementMethod(block , pos, m, nameMatched, true, errs)
+        return this.superClass.implementMethod(block , classChecked, pos, m, nameMatched, true, errs)
     }
 
-    fn haveSuperClass(block Block, pos Pos, superclassName string) -> (have bool,err  error) {
+    fn haveSuperClass(
+        block Block, 
+        classChecked map{string -> bool}, 
+        pos Pos, 
+        superclassName string) -> (have bool,err  error) {
         err = this.loadSelf(block , pos)
         if err != null {
-            return false, err
+            return 
         }
+        if classChecked.keyExist(this.name) {
+            return 
+        }
+        classChecked[this.name] = true 
         if this.name == superclassName {
             return true, null
         }
         if this.name == JavaRootClass {
-            return false, null
+            return 
         }
         err = this.loadSuperClass(block , pos)
         if err != null {
-            return false, err
+            return
         }
         if this.superClass == null {
-            return false, null
+            return 
         }
-        return this.superClass.haveSuperClass(block , pos, superclassName) // check father is implements
+        return this.superClass.haveSuperClass(block , classChecked, pos, superclassName) // check father is implements
     }
-
-    fn implementedInterface(block Block , pos Pos, inter string) -> (implemented bool,err  error) {
+    
+    fn implementedInterface(block Block , classChecked map{string->bool}, pos Pos, inter string) -> (implemented bool,err  error) {
         err = this.loadSelf(block , pos)
         if err != null {
             return false, err
         }
+        if classChecked.keyExist(this.name) {
+            return 
+        }
+        classChecked[this.name] = true 
         for _, v := range this.interfaces {
             if v.name == inter {
                 return true, null
             }
-            im, _ := v.implementedInterface(block , pos, inter)
+            im, _ := v.implementedInterface(block , classChecked , pos, inter)
             if im {
                 return im, null
             }
@@ -467,9 +485,9 @@ public class Class {
         if this.superClass == null {
             return false, null
         }
-        return this.superClass.implementedInterface(block, pos, inter) // check father is implements
+        return this.superClass.implementedInterface(block,classChecked, pos, inter) // check father is implements
     }
-    
+
     fn loadSuperClass(block Block, pos Pos) -> (err error) {
         if this.superClass != null {
             return this.superClass.loadSelf(block , pos) // load self
@@ -546,13 +564,20 @@ public class Class {
         block Block ,
         pos Pos,
         name string,
+        classChecked map{string -> bool},
         fromSub bool , fromClassName string) -> (f Object,err error) {
         err = this.loadSelf(block , pos)
         if err != null {
             return null, err
         }
+        
         notFoundErr := new error(sprintf("%s field or method named '%s' not found on class '%s'", 
             pos.errMsgPrefix(), name , fromClassName))
+        if classChecked[this.name] {
+            return null , notFoundErr
+        }
+        classChecked[this.name] = true
+
         if this.fields != null && null != this.fields[name] {
             if fromSub && this.fields[name].ableAccessFromSubClass() == false {
                 // private field
@@ -569,6 +594,7 @@ public class Class {
                 return f, null
             }
         }
+
         if this.methods != null && null != this.methods[name] {
             m := this.methods[name][0]
             if fromSub && m.ableAccessFromSubClass() == false {
@@ -593,7 +619,7 @@ public class Class {
         if this.superClass == null {
             return null, notFoundErr
         }
-        return this.superClass.getFieldOrMethod(block , pos, name, true,fromClassName)
+        return this.superClass.getFieldOrMethod(block , pos, name, classChecked, true,fromClassName)
     }
 
     fn constructionMethodAccessAble(pos Pos, method ClassMethod) -> (err error) {
@@ -615,13 +641,23 @@ public class Class {
         return null
     }
 
-    fn getField(block Block,pos Pos, name string, fromSub bool , fromClassName string) -> (f ClassField,err  error) {
+    fn getField(
+        block Block,
+        pos Pos,
+        name string, 
+        classChecked map{string -> bool},
+        fromSub bool , 
+        fromClassName string) -> (f ClassField,err  error) {
             err = this.loadSelf(block , pos)
             if err != null {
                 return null, err
             }
             notFoundErr := new error(sprintf("%s field named '%s' not found on class '%s'",
                 pos.errMsgPrefix(), name , fromClassName))
+            if classChecked.keyExist(this.name){
+                return null , notFoundErr
+            }
+            classChecked[this.name] = true 
             if this.fields != null && null != this.fields[name] {
                 if fromSub && this.fields[name].ableAccessFromSubClass() == false {
                     // private field
@@ -647,14 +683,14 @@ public class Class {
             if this.superClass == null {
                 return null, notFoundErr
             }
-            return this.superClass.getField(block , pos, name, true , fromClassName)
+            return this.superClass.getField(block , pos, name, classChecked , true , fromClassName)
     }
-    
 
     fn accessInterfaceObjectMethod(
         block Block,
         pos Pos,
         errs []error,
+        classChecked map{string->bool} ,
         name string,
         call ExpressionMethodCall,
         callArgTypes []Type,
@@ -662,8 +698,7 @@ public class Class {
         (
             ms []ClassMethod = []ClassMethod{} , matched bool, err error
         ) {
-        
-        ms, matched, err = this.accessInterfaceMethod(block , pos, errs, name, call, callArgTypes, fromSub)
+        ms, matched, err = this.accessInterfaceMethod(block , pos, errs , classChecked, name, call, callArgTypes, fromSub)
         if err != null {
             return null, false, err
         }
@@ -677,13 +712,14 @@ public class Class {
         if this.superClass == null {
             return null, false, null
         }
-        return this.superClass.accessMethod(block , pos, errs, call, callArgTypes, fromSub, fromClassName , null)
+        return this.superClass.accessMethod(block , pos, errs, classChecked, call, callArgTypes, fromSub, fromClassName , null)
     }
 
     fn accessInterfaceMethod(
         block Block,
         pos Pos,
         errs []error,
+        classChecked map{string->bool},
         name string,
         call ExpressionMethodCall,
         callArgTypes []Type,
@@ -692,6 +728,10 @@ public class Class {
         if err != null {
             return null, false, err
         }
+        if classChecked.keyExist(this.name){
+            return null , false , null
+        }
+        classChecked[this.name] = true 
         if null != this.methods {
             for _, m := range this.methods[name] {
                 if fromSub && m.ableAccessFromSubClass() == false {
@@ -716,7 +756,7 @@ public class Class {
             if err != null {
                 return null, false, err
             }
-            ms2, matched2, err2 := v.accessInterfaceMethod(block , pos, errs, name, call, callArgTypes, true)
+            ms2, matched2, err2 := v.accessInterfaceMethod(block , pos, errs, classChecked , name, call, callArgTypes, true)
             if err2 != null {
                 return null, false, err2
             }
@@ -734,6 +774,7 @@ public class Class {
         block Block,
         pos Pos,
         errs []error,
+        classChecked map{string->bool},
         call ExpressionMethodCall,
         callArgTypes []Type,
         fromSub bool,
@@ -744,8 +785,12 @@ public class Class {
             return null, false, err
         }
         if this.isJava {
-            return this.accessMethodAsJava(block , pos, errs, call, callArgTypes, false)
+            return this.accessMethodAsJava(block , pos, errs, classChecked , call, callArgTypes, false)
         }
+        if classChecked.keyExist(this.name){
+            return null , false , null
+        }
+        classChecked[this.name] = true 
         if this.fields != null {
             if f := this.fields[call.name]; f != null &&
                 f.Type.Type == VariableTypeFunction &&
@@ -802,7 +847,7 @@ public class Class {
         if this.superClass == null {
             return ms, false, null
         }
-        return this.superClass.accessMethod(block , pos, errs, call,
+        return this.superClass.accessMethod(block , pos, errs , classChecked , call,
             callArgTypes, true, fromClassName , fieldMethodHandler)
     }
 
@@ -813,9 +858,14 @@ public class Class {
         block Block,
         pos Pos,
         errs []error,
+        classChecked map{string->bool},
         call ExpressionMethodCall,
         callArgTypes []Type,
         fromSub bool) -> (ms []ClassMethod = []ClassMethod{} , matched bool, err error) {
+        if classChecked.keyExist(this.name){
+            return null , false , null
+        }
+        classChecked[this.name] = true 
         if this.methods != null {
             for _, m := range this.methods[call.name] {
                 if fromSub == true && m.ableAccessFromSubClass() == false {
@@ -840,7 +890,7 @@ public class Class {
         if this.superClass == null {
             return ms, false, null
         }
-        ms_, matched, err := this.superClass.accessMethodAsJava(block , pos, errs, call, callArgTypes, true)
+        ms_, matched, err := this.superClass.accessMethodAsJava(block , pos, errs, classChecked, call, callArgTypes, true)
         if err != null {
             return ms, false, err
         }
@@ -850,7 +900,7 @@ public class Class {
         ms.appendAll(ms_)
         return ms, false, null // methods have the same name
     }
-
+    
     fn check(father Block) -> (errs []error = []error{}){
         this.block.inherit(father)
         this.block.inheritedAttribute.Class = this
@@ -858,7 +908,7 @@ public class Class {
         errs.appendAll( this.checkPhase2())
         return errs
     }
-
+    
     fn checkPhase1()-> (errs []error = []error{}){
         if this.block.inheritedAttribute.classAndFunctionNames != null {
             if this.block.inheritedAttribute.classAndFunctionNames == "" {
@@ -875,10 +925,11 @@ public class Class {
         if err != null {
             errs.append(err)
         } else {
-            err = this.checkIfClassHierarchyErr()
+            err = this.checkIfClassHierarchyErr(this.block)
             if err != null {
                 errs.append(err)
             }
+            this.hierarchyOk = err == null 
         }
         errs.appendAll(this.checkModifierOk())
         errs.appendAll(this.resolveFieldsAndMethodsType())
@@ -921,7 +972,7 @@ public class Class {
         if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
             return errs  
         }
-        errs.appendAll(this.checkIfOverrideFinalMethod())
+        errs.appendAll(this.checkIfOverrideFinal())
         if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
             return errs  
         }
@@ -930,22 +981,24 @@ public class Class {
             return errs  
         }
         if this.isInterface() {
-            errs.appendAll( this.checkOverrideInterfaceMethod())
+            errs.appendAll(this.checkOverrideInterfaceMethod())
         }
         if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
             return errs  
         }
         if this.isAbstract() {
-            errs.appendAll( this.checkOverrideAbstractMethod())
+            errs.appendAll(this.checkOverrideAbstractMethod())
         }
         if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
             return errs  
         }
-        errs.appendAll(this.suitableForInterfaces())
+        if this.hierarchyOk {
+            errs.appendAll(this.suitableForInterfaces())
+        }
         if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
             return errs  
         }
-        if this.superClass != null {
+        if this.superClass != null && this.hierarchyOk {
             errs.appendAll(this.suitableSubClassForAbstract(this.superClass))
         }
         if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
@@ -977,7 +1030,7 @@ public class Class {
                     continue
                 }
                 nameMatch :=  []ClassMethod {null}
-                implementation := this.implementMethod(this.block , this.pos, m, nameMatch, false, errs)
+                implementation := this.implementMethod(this.block ,  new map{string->bool}() , this.pos, m, nameMatch, false, errs)
                 if implementation != null {
                     if err := m.implementationMethodIsOk(this.pos, implementation); err != null {
                         errs.append(err)
@@ -994,7 +1047,7 @@ public class Class {
                         errs.append(new error(errMsg))
                     } else {
                         errs.append(new error(sprintf("%s missing implementation method '%s' define on abstract class '%s'",
-                                pos.errMsgPrefix(), m.Function.readableMsg(), super.name)))
+                            pos.errMsgPrefix(), m.Function.readableMsg(), super.name)))
                     }
                 }
             }
@@ -1016,7 +1069,7 @@ public class Class {
         }
         return null
     }
-
+    
     fn abstractMethodExists(pos Pos, name string) -> (c Class,err error) {
         if this.isAbstract() {
             if this.methods != null && len(this.methods[name]) > 0 {
@@ -1084,13 +1137,13 @@ public class Class {
         return errs
     }
 
-    fn checkIfClassHierarchyErr()-> (err error){
+    fn checkIfClassHierarchyErr(block Block)-> (err error){
         m := new map{ string -> bool }()
         arr := []string{}
         is := false
         c := this
         pos := this.pos
-        if err = this.loadSuperClass(this.block , pos); err != null {
+        if err = this.loadSuperClass(block , pos); err != null {
             return err
         }
         if this.superClass == null {
@@ -1101,15 +1154,14 @@ public class Class {
                 this.pos.errMsgPrefix(), this.name, this.superClass.name))
         }
         for c.name != JavaRootClass {
-            ok := m.keyExist(c.name)
-            if ok {
+            if m.keyExist(c.name) {
                 arr.append(c.name)
                 is = true
                 break
             }
             m[c.name] = true
             arr.append(c.name)
-            err = c.loadSuperClass(this.block , pos)
+            err = c.loadSuperClass(block , pos)
             if err != null {
                 return err
             }
@@ -1118,22 +1170,56 @@ public class Class {
             }
             c = c.superClass
         }
-        if is == false {
-            return null
-        }
-        errMsg := sprintf("%s class named '%s' detects a circularity in class hierarchy",
+        if is {
+            errMsg := sprintf("%s class named '%s' detects a circularity in class hierarchy",
             this.pos.errMsgPrefix(), this.name)
-        tab := "\t"
-        index := len(arr) - 1
-        for index >= 0 {
-            errMsg += tab + arr[index] + "\n"
-            tab += " "
-            index--
+            tab := "\t"
+            index := len(arr) - 1
+            for index >= 0 {
+                errMsg += tab + arr[index] + "\n"
+                tab += " "
+                index--
+            }
+            return new error(errMsg)
         }
-        return new error(errMsg)
+        {
+            inters := this.interfaces 
+            m = new map{ string -> bool }()
+            arr = []string{}
+            is = false
+            for len(inters) > 0 {
+                inters2 := []Class{}
+                for k , v := range inters {
+                    if m.keyExist(v.name){
+                        arr.append(c.name)
+                        is = true
+                        break
+                    }
+                    m[v.name] = true
+                    arr.append(v.name)
+                    if err = v.loadSelf(block , new Pos()) ;err != null {
+                        return 
+                    }
+                    inters2.appendAll(v.interfaces)
+                }   
+                inters = inters2
+            }
+        }
+        if is {
+            errMsg := sprintf("%s class named '%s' detects a circularity in class hierarchy",
+            this.pos.errMsgPrefix(), this.name)
+            tab := "\t"
+            index := len(arr) - 1
+            for index >= 0 {
+                errMsg += tab + arr[index] + "\n"
+                tab += " "
+                index--
+            }
+            return new error(errMsg)
+        }
     }
 
-    fn checkIfOverrideFinalMethod()-> (errs []error = []error{}){
+    fn checkIfOverrideFinal()-> (errs []error = []error{}){
         if this.superClass != null {
             for name, v := range this.methods {
                 if name == SpecialMethodInit {
@@ -1158,9 +1244,23 @@ public class Class {
                     f2.Type = VariableTypeFunction
                     f2.functionType = v.Function.Type
                     if f1.equal(f2) {
-                        errs.append(new error(sprintf("%s override final method",
-                            errMsgPrefix(m.Function.pos))))
+                        errs.append(new error(sprintf("%s override final method '%s'",
+                            errMsgPrefix(m.Function.pos) , name)))
                     }
+                }
+            }
+            for name , f := range this.fields {
+                if len(this.superClass.fields) == 0 {
+                    // this class not found at super
+                    continue
+                }
+                if this.superClass.fields.keyExist(name) == false {
+                    continue
+                }
+                ff := this.superClass.fields[name]
+                if ff.isFinal() {
+                    errs.append(new error(sprintf("%s override final field '%s'",
+                        errMsgPrefix(f.pos) , name)))
                 }
             }
         }
@@ -1169,24 +1269,23 @@ public class Class {
 
     fn suitableForInterfaces()-> (errs []error = []error{}){
         if this.isInterface() {
-            return errs
+            // I am interface , no need to check
+            return 
         }
         for _, i := range this.interfaces {
-            errs.appendAll(this.suitableForInterface(this.block , i))
+            errs.appendAll(this.suitableForInterface(this.block , i , new map{string -> bool}()))
         }
-        return errs
     }
 
-    fn suitableForInterface(block Block, inter Class)-> (errs []error = []error{}){
-        err := inter.loadSelf(block , this.pos)
-        if err != null {
-            errs.append(err)
+    fn suitableForInterface(block Block, inter Class , classChecked map{string -> bool})-> (errs []error = []error{}){
+        if classChecked.keyExist(inter.name) {
             return errs
         }
+        classChecked[inter.name] = true
         for _, v := range inter.methods {
             m := v[0]
             nameMatch := []ClassMethod {null}
-            implementation := this.implementMethod(block, this.pos, m, nameMatch, false, errs)
+            implementation := this.implementMethod(block , new map{string->bool}(), this.pos, m, nameMatch, false, errs)
             if implementation != null {
                 if err := m.implementationMethodIsOk(this.pos, implementation); err != null {
                     errs.append(err)
@@ -1201,7 +1300,7 @@ public class Class {
             }
         }
         for _, v := range inter.interfaces {
-            es := this.suitableForInterface(block , v)
+            es := this.suitableForInterface(block , v , classChecked)
             errs.appendAll(es)
         }
         return errs

@@ -29,17 +29,4 @@ public class AttributeDefaultParameters {
 		}
 		return info
 	}
-
 }
-
-
-
-
-
-
-
-
-
-
-
-

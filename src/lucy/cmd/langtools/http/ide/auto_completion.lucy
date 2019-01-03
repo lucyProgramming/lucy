@@ -5,12 +5,15 @@ import "lucy/cmd/langtools/http/g"
 import "java/lang/Integer"
 import "lucy/encoding/json"
 import "lucy/cmd/langtools/compile/ast"
+import "java/lang/System"
 
 
 class AutoCompletion implements HttpHandler {
     public fn handle(exchange HttpExchange) {
         os := exchange.getResponseBody()
+        now := System.currentTimeMillis()
         defer {
+            CallStatus.collect(callStatus , "autocompletion" , System.currentTimeMillis() - now)
             e := catch()
             if e != null {
                 exchange.sendResponseHeaders(500 , 0L)

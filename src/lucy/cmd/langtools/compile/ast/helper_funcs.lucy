@@ -6,7 +6,7 @@ fn divisionByZeroErr(pos Pos) -> (err error) {
 }
 
 fn checkExpressions(block Block, es []Expression, errs []error, singleValueContext bool) ->(valueTypes []Type) {
-	ret := []Type{}
+	valueTypes = []Type{}
 	for _, v := range es {
 		if v == null {
 			continue
@@ -14,7 +14,7 @@ fn checkExpressions(block Block, es []Expression, errs []error, singleValueConte
 		ts, ess := v.check(block)
 		errs.appendAll(ess)
 		if ts == null {
-			ret.append(null)
+			valueTypes.append(null)
 		} else {
 			if len(ts) > 1 && singleValueContext {
 				errs.append(new error(sprintf("%s multi value in single value context",
@@ -28,10 +28,9 @@ fn checkExpressions(block Block, es []Expression, errs []error, singleValueConte
 					errs.append(err)
 				}
 			}
-			ret.appendAll(ts)
+			valueTypes.appendAll(ts)
 		}
 	}
-	return ret
 }
 
 fn getExtraExpressionPos(args []Expression, n int) -> (pos Pos) {
@@ -328,8 +327,8 @@ fn searchRightValueForAutoCompletionItems(pos Pos, block Block) -> (items []Auto
 			}
 		}
 	}) 
-	items.appendAll(autoCompletionKeyWordsItems)
-	items.appendAll(autoCompletionBuildFunctionItems)
+	items.appendAll(AutoCompletionItem.getKeywordAutoCompletionItems())
+	items.appendAll(AutoCompletionItem.getBuildFunctionAutoCompletionItems())
 }
 
 fn searchLableForAutoCompletionItems(block Block) -> (items []AutoCompletionItem = []AutoCompletionItem {}) {

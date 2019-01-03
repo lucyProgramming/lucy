@@ -17,7 +17,7 @@ public class FieldInfo {
 	public descriptorIndex        char
 	public attributes             []AttributeInfo
 	public AttributeGroupedByName AttributeGroupedByName
-
+	
 	public fn getAttributeByName(name string) -> (attrs []AttributeInfo){
 		return getAttributeByName(this.AttributeGroupedByName , name)
 	}

@@ -596,9 +596,9 @@ public class Fmt {
             format += ":\n"
             format += this.formatBlock(indent + "    " , c.block)
         }
-        if s.Default != null {
+        if s.defaultBlock != null {
             format += indent + "default:\n" 
-            format += this.formatBlock(indent + "   " , s.Default)
+            format += this.formatBlock(indent + "   " , s.defaultBlock)
         }
         format += indent + "}\n"
     }
@@ -626,9 +626,9 @@ public class Fmt {
             d += this.formatBlock(indent + "    " , c.block)
             format += d 
         }
-        if w.Default != null {
+        if w.defaultBlock != null {
             format += "default:"
-            format += this.formatBlock(indent + "    " , w.Default)
+            format += this.formatBlock(indent + "    " , w.defaultBlock)
         }
         format += indent + "}\n"
     }

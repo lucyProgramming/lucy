@@ -115,10 +115,10 @@ class StatementSwitchParser extends ParserExtends{
 				}
 			}
 			block.isSwitchBlock = true
-			statementSwitch.Default = block
+			statementSwitch.defaultBlock = block
 			if this.parser.token.Type != lex.TokenRc {
 				this.bp.parseStatementList(block, false)
-				statementSwitch.Default = block
+				statementSwitch.defaultBlock = block
 			}
 		}
 		this.parser.ifTokenIsLfThenSkip(true)

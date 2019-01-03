@@ -46,11 +46,11 @@ public class Package {
 	public fn Package(name string , disableCheckUnuse bool , loader loadImport){
 		this.super()
 		this.disableCheckUnuse = disableCheckUnuse
-		this.name =  name
-		this.matchLine =  -1
+		this.name = name
+		this.matchLine = -1
 		this.loader = loader
 	}
-
+	
 
 	public fn setLocationDefinition(x Object) {
 		this.locateDefinition = getPos(x)

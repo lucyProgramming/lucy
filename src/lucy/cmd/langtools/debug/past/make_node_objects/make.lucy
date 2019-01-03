@@ -312,8 +312,8 @@ public class MakeNodesObjects {
             }
             ret["cases"] = cases
         }
-        if s.Default != null {
-            ret["block"] = this.makeBlock(s.Default)
+        if s.defaultBlock != null {
+            ret["block"] = this.makeBlock(s.defaultBlock)
         }
         return  {
             sprintf("switch@%d", s.pos.endLine) -> ret,
@@ -338,8 +338,8 @@ public class MakeNodesObjects {
             }
             ret["cases"] = cases
         }
-        if w.Default != null {
-            ret["block"] = this.makeBlock(w.Default)
+        if w.defaultBlock != null {
+            ret["block"] = this.makeBlock(w.defaultBlock)
         }
         return  {
             sprintf("when%d", w.pos.endLine)-> ret,

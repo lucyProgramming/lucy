@@ -22,7 +22,7 @@ public class FunctionType {
 	
 	public fn checkTemplateNameDuplication() -> (errs []error) {
 		errs = []error{}
-		m := new map {string -> Pos}()
+		m := new map{string -> Pos}()
 		for _, v := range this.templateNames {
 			if p := m[v.name]; p != null {
 				errMsg := sprintf("%s duplicated name '%s' , first declaraed at:\n",

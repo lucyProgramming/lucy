@@ -1,9 +1,6 @@
 import "lucy/binary"
 
 
-
-
-
 fn main(args []string) {
 	bs := [-54b,-2b,-70b,-66b]
 
@@ -11,9 +8,3 @@ fn main(args []string) {
 		panic("java magic number not parse right, value is " + t)
 	}
 }
-
-
-
-
-
-
