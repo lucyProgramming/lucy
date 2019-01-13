@@ -199,7 +199,9 @@ fn registerBuildInFunctions() {
 			meta.argsLength = len(args) - 1
 			e.args = e.args[1:]
 			if meta.format.Type == ExpressionTypeString {
-				errs.appendAll(checkFormat(meta.format.stringValue , args[1:]))
+				if err := checkFormat(meta.format.stringValue , meta.format.pos , args[1:]) ; err != null {
+					errs.append(err)
+				}
 			}
 		}
 	}
@@ -238,49 +240,50 @@ fn registerBuildInFunctions() {
 		// printf
 		buildInFunctionsMap[common.BuildInFunctionPrintf] = new Function()
 		buildInFunctionsMap[common.BuildInFunctionPrintf].buildInFunctionChecker = fn(f Function, e ExpressionFunctionCall, block Block, 	errs []error, args []Type, pos Pos) {
-				if len(e.parameterTypes) > 0 {
-					errs.append(new error(sprintf("%s buildin function expect no typed parameter",
-						errMsgPrefix(e.parameterTypes[0].pos))))
-				}
-				meta := new BuildInFunctionPrintfMeta()
-				e.buildInFunctionMeta = meta
-				if len(args) == 0 {
-					err := new error(sprintf("%s '%s' expect one argument at least",
-						pos.errMsgPrefix(), common.BuildInFunctionPrintf) )
+			if len(e.parameterTypes) > 0 {
+				errs.append(new error(sprintf("%s buildin function expect no typed parameter",
+					errMsgPrefix(e.parameterTypes[0].pos))))
+			}
+			meta := new BuildInFunctionPrintfMeta()
+			e.buildInFunctionMeta = meta
+			if len(args) == 0 {
+				err := new error(sprintf("%s '%s' expect one argument at least",
+					pos.errMsgPrefix(), common.BuildInFunctionPrintf) )
+				errs.append(err)
+				return
+			}
+			if args[0] == null {
+				return
+			}
+			if len(args) == 0 {
+				err := new error(sprintf("%s missing format argument",
+					errMsgPrefix(pos)))
+				errs.append(err)
+				return
+			}
+			if args[0] == null {
+				return
+			}
+			if args[0].Type != VariableTypeString {
+				err := new error(sprintf("%s format must be string",
+					errMsgPrefix(pos)))
+				errs.append(err)
+				return
+			}
+			_, err := e.args[0].mustBeOneValueContext(e.args[0].multiValues)
+			if err != null {
+				errs.append(err)
+				return
+			}
+			meta.format = e.args[0]
+			e.args = e.args[1:]
+			meta.argsLength = len(args)
+			if meta.format.Type == ExpressionTypeString {
+				if err := checkFormat(meta.format.stringValue , meta.format.pos, args[1:]) ; err != null {
 					errs.append(err)
-					return
-				}
-				if args[0] == null {
-					return
-				}
-				if len(args) == 0 {
-					err := new error(sprintf("%s missing format argument",
-						errMsgPrefix(pos)))
-					errs.append(err)
-					return
-				}
-				if args[0] == null {
-					return
-				}
-				if args[0].Type != VariableTypeString {
-					err := new error(sprintf("%s format must be string",
-						errMsgPrefix(pos)))
-					errs.append(err)
-					return
-				}
-				_, err := e.args[0].mustBeOneValueContext(e.args[0].multiValues)
-				if err != null {
-					errs.append(err)
-					return
-				}
-				meta.format = e.args[0]
-				e.args = e.args[1:]
-				meta.argsLength = len(args)
-				if meta.format.Type == ExpressionTypeString {
-					errs.appendAll(checkFormat(meta.format.stringValue , args[1:]))
 				}
 			}
-		
+		}
 	}
 
 	 

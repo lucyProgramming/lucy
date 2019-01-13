@@ -231,7 +231,7 @@ class BlockParser  extends ParserExtends {
 					continue
 				}
 				var es []ast.Expression
-				es, err = this.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon , lex.TokenLf)
+				es , err = this.parser.ExpressionParser.parseExpressions(lex.TokenSemicolon , lex.TokenLf)
 				st.expressions = es
 				if err == null {
 					this.parser.validStatementEnding()

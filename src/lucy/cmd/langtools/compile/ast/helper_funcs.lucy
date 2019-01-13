@@ -1,5 +1,14 @@
-
 import "java/lang/Object"
+import "java/lang/Boolean"
+import "java/lang/Byte"
+import "java/lang/Short"
+import "java/lang/Character"
+import "java/lang/Integer"
+import "java/lang/Long"
+import "java/lang/Float"
+import "java/lang/Double"
+import "java/lang/String"
+
 
 fn divisionByZeroErr(pos Pos) -> (err error) {
 	return new error(sprintf("%s division by zero", pos.errMsgPrefix()))
@@ -482,21 +491,44 @@ fn getPos(x Object)  -> (pos Pos){
 	}
 }
 
-fn checkFormat(formatLiteral string , args []Type) -> (errs []error = []error{}) {
-	// enum FormatType {
-	// 	FormatTypeInt = 1,
-
-	// }
-	// formaters := []FormatType{}
-	// bs := []byte(formatLiteral)
-	// for i:= 0 ; i < bs.size() ; i++ {
-	// 	if bs[i] != '%' {
-	// 		continue
-	// 	}
-	// 	if i == bs.size() -1 {
-	// 		continue
-	// 	}
-	// }
-
-
+fn checkFormat(formatLiteral string , pos Pos, args []Type) -> (err error) {
+	for v := range args {
+		if v == null {
+			return 
+		}
+	}
+	defer {
+		e := catch()
+		if e != null {
+			err =  new error(sprintf("%s %s" ,pos.errMsgPrefix() , e.getMessage()))
+		}
+	}
+	falseArgs := new Object[](len(args))
+	for k,v := range args {
+		switch v.Type {
+		case VariableTypeBool:
+			falseArgs[k] = Boolean.valueOf(true)
+		case VariableTypeByte:
+			falseArgs[k] = Byte.valueOf(0b)
+		case VariableTypeShort:
+			falseArgs[k] = Short.valueOf(0s)
+		case VariableTypeChar:
+			falseArgs[k] = Character.valueOf(char(0))
+		case VariableTypeInt:
+			falseArgs[k] = Integer.valueOf(0)
+		case VariableTypeLong:
+			falseArgs[k] = Long.valueOf(0l)
+		case VariableTypeFloat:
+			falseArgs[k] = Float.valueOf(0f)
+		case VariableTypeDouble:
+			falseArgs[k] = Double.valueOf(0d)
+		case VariableTypeEnum:
+			falseArgs[k] = Integer.valueOf(0)
+		case VariableTypeString:
+			falseArgs[k] = ""
+		default:
+			falseArgs[k] = null
+		}
+	}
+	String.format(formatLiteral , falseArgs...)
 }
