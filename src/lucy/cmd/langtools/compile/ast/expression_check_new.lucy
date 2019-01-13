@@ -114,7 +114,7 @@ class ExpressionCheckNew {
 			errs.append(new error( sprintf("%s argument must be 'int',but '%s'",
 					errMsgPrefix(amount.pos), amount.typeString())))
 		} else {
-			if amount.Type == VariableTypeLong {
+			if amount.Type == VariableTypeLong && block.inheritedAttribute.isCompileTask {
 				newArray.args[0].convertToNumberType(VariableTypeLong)
 			}
 			if newArray.args[0].isLiteral() {

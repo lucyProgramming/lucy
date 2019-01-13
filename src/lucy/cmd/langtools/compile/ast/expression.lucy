@@ -22,13 +22,18 @@ public class Expression {
 	public longValue long
 	public doubleValue double
 	public stringValue string 
-	public literalRaw string  
+	public literalRaw string 
+	
 	/* 
 		a // this is a inline comment
 	*/
 	public inlineComment string   //   in
 	
 	public containsLf bool    // constains "\n"
+
+	public fn Expression() {
+		this.super()
+	}
 
 	public fn isIdentifier(identifier string) -> (is bool) { 
 		if this.Type != ExpressionTypeIdentifier {
@@ -44,6 +49,12 @@ public class Expression {
 			this.Type == ExpressionTypeGt ||
 			this.Type == ExpressionTypeLe ||
 			this.Type == ExpressionTypeLt
+	}
+	
+	public fn unPackList() -> (list []Expression = [this]){
+		if this.Type == ExpressionTypeList {
+			list = this.data.([]Expression)
+		}
 	}
 	
 	/*
@@ -96,7 +107,7 @@ public class Expression {
 		bin := this.data.(ExpressionBinary)
 		return bin.left.value.isPointer()
 	}
-
+	
 	fn convertTo(to Type) {
 		c := new ExpressionTypeConversion()
 		c.Expression = new Expression()
@@ -118,7 +129,6 @@ public class Expression {
 			this.value = new Type()
 			this.value.Type = typ
 			this.value.pos =  this.pos
-
 		} else {
 		    t := new Type()
 		    t.Type = typ

@@ -1,4 +1,4 @@
- 
+
 class ExpressionCheckTypeConversion {
 	static fn check(e Expression , block Block , errs []error)  ->(valueType Type){
 		conversion := e.data.(ExpressionTypeConversion)
@@ -19,7 +19,8 @@ class ExpressionCheckTypeConversion {
 			return 
 		}
 		if on.isNumber() && conversion.Type.isNumber() {
-			if conversion.Expression.isLiteral() {
+			if conversion.Expression.isLiteral()  && 
+				block.inheritedAttribute.isCompileTask {
 				conversion.Expression.convertToNumberType(conversion.Type.Type)
 				e.Type = conversion.Expression.Type
 				e.longValue = conversion.Expression.longValue

@@ -35,8 +35,12 @@ public class StatementReturn   {
 		} else if len(returnValueTypes) > len(rs) {
 			errs.append(new error(sprintf("%s too many arguments to return", pos.errMsgPrefix())))
 		}
-		convertExpressionsToNeeds(b , this.expressions,
-			b.inheritedAttribute.Function.Type.mkCallReturnTypes(this.expressions[0].pos), returnValueTypes)
+		convertExpressionsToNeeds(
+			b , 
+			this.expressions,
+			b.inheritedAttribute.Function.Type.mkCallReturnTypes(this.expressions[0].pos), 
+			returnValueTypes
+		)
 		for k, v := range rs {
 			if k < len(returnValueTypes) && returnValueTypes[k] != null {
 				if false == v.Type.assignAble(b , errs, returnValueTypes[k]) {

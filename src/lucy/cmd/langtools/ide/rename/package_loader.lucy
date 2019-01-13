@@ -30,7 +30,7 @@ class PackageLoader extends  ide.PackageLoader {
                 this.rename.otherPackageErrors.appendAll(errs)
             }
         }
-        p = new ast.Package(r.name , false , this)
+        p = new ast.Package(r.name , false , this , false)
         errs.appendAll(p.typeCheck(tops))
         if this.loadPacakges == null {
             this.loadPacakges = new map{string->ast.Package}()

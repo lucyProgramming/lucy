@@ -1,8 +1,6 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-
 class ExpressionCheckVarAssign {
-	
 	static fn check(e Expression , block Block, errs []error) {
 		bin := e.data.(ExpressionBinary)
 		var lefts []Expression
@@ -130,8 +128,9 @@ class ExpressionCheckVarAssign {
 		if noNewVariable {
 			errs.append(new error( sprintf("%s no new variables to create", e.pos.errMsgPrefix())))
 		}
-		e.data = assign
-	}	
-
+		if block.inheritedAttribute.isCompileTask {
+			e.data = assign
+		}
+	}
 } 
 

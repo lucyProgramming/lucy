@@ -21,9 +21,9 @@ class  BuildExpressionAssign {
 		defer  {
 			state.popStack(len(state.stacks) - stackLength)
 		}
-		assign := e.data.(ast.ExpressionAssign)
-		left := assign.lefts[0]
-		right := assign.values[0]
+		bin := e.data.(ast.ExpressionBinary)
+		left := bin.left.unPackList()[0]
+		right := bin.right.unPackList()[0]
 		var remainStack char
 		var op []byte
 		var leftValueKind LeftValueKind
@@ -54,7 +54,7 @@ class  BuildExpressionAssign {
 		}
 		return
 	}
-
+	
 	// a,b,c = 122,fdfd2232,"hello";
 	fn  buildAssign(
 		c cg.ClassHighLevel,
@@ -62,17 +62,18 @@ class  BuildExpressionAssign {
 		e ast.Expression,
 		context Context,
 		state StackMapState) -> (maxStack char) {
-		assign := e.data.(ast.ExpressionAssign)
-		if e.isStatementExpression == false || len(assign.lefts) == 1 {
+		bin := e.data.(ast.ExpressionBinary)
+
+		if e.isStatementExpression == false || len(bin.left.unPackList()) == 1 {
 			return this.buildExpressionAssign(c, code, e, context, state)
 		}
-		if len(assign.values) == 1 {
-			maxStack = this.eb.build(c, code, assign.values[0], context, state)
+		if values := bin.right.unPackList() ; len(values) == 1 {
+			maxStack = this.eb.build(c, code, values[0], context, state)
 		} else {
-			maxStack = this.eb.buildExpressions(c, code, assign.values, context, state)
+			maxStack = this.eb.buildExpressions(c, code, values, context, state)
 		}
 		autoVar := new MultiValueAutoVar(c, code, state)
-		for k, v := range assign.lefts {
+		for k, v := range bin.left.unPackList() {
 			if v.isIdentifier(ast.UnderScore) {
 				continue
 			}
@@ -91,9 +92,6 @@ class  BuildExpressionAssign {
 		}
 		return
 	}
-
-	
-	
 
 }
 

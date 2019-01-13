@@ -401,10 +401,10 @@ public class Class {
 		{
 			//magic number
 		    bs := new byte[](4)
-		    bs[0] = 0xca
-		    bs[1] = 0xfe
-		    bs[2] = 0xba
-		    bs[3] = 0xbe
+		    bs[0] = byte(0xca)
+		    bs[1] = byte(0xfe)
+		    bs[2] = byte(0xba)
+		    bs[3] = byte(0xbe)
 		    writer.write(bs)
 		}
 

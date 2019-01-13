@@ -28,7 +28,7 @@ class BuildinFunctionLen {
         code.codes[code.codeLength] = cg.OP_dup
         code.codeLength++
         if 2 > maxStack {
-            maxStack = 2
+            maxStack = char(2)
         }
         code.codes[code.codeLength] = cg.OP_ifnonnull
         binary.BigEndian.putChar(code.codes[code.codeLength+1:code.codeLength+3], char(8))

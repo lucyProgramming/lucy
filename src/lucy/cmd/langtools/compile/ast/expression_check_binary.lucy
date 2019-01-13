@@ -77,7 +77,7 @@ class ExpressionCheckBinary {
 				right.isInteger() == false {
 				errs.append(e.binaryWrongOpErr())
 			}
-			if right.Type == VariableTypeLong {
+			if right.Type == VariableTypeLong && block.inheritedAttribute.isCompileTask {
 				bin.right.convertToNumberType(VariableTypeInt)
 			}
 			result = left.cloneType()
@@ -111,9 +111,13 @@ class ExpressionCheckBinary {
 					(left.isFloat() && right.isFloat()) {
 					if left.assignAble(block , errs, right) == false {
 						if left.Type < right.Type {
-							bin.left.convertToNumberType(right.Type)
+							if block.inheritedAttribute.isCompileTask {
+								bin.left.convertToNumberType(right.Type)
+							}	
 						} else {
-							bin.right.convertToNumberType(left.Type)
+							if block.inheritedAttribute.isCompileTask {
+								bin.right.convertToNumberType(left.Type)
+							}
 						}
 					}
 				} else {
@@ -169,10 +173,12 @@ class ExpressionCheckBinary {
 			if (left.isInteger() && right.isInteger()) ||
 				(left.isFloat() && right.isFloat()) {
 				if left.assignAble(block , errs, right) == false {
-					if left.Type < right.Type {
-						bin.left.convertToNumberType(right.Type)
-					} else {
-						bin.right.convertToNumberType(left.Type)
+					if block.inheritedAttribute.isCompileTask{
+						if left.Type < right.Type {
+							bin.left.convertToNumberType(right.Type)
+						} else {
+							bin.right.convertToNumberType(left.Type)
+						}
 					}
 				}
 			} else {

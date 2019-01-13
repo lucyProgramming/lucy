@@ -53,14 +53,12 @@ class BuildForRangeJavaArray {
             autoVar.end = code.maxLocals
             code.maxLocals++
             forState.appendLocals(c, typeInt)
-
         }
-
         //get length
         code.codes[code.codeLength] = cg.OP_dup //dup top
         code.codeLength++
         if 2 > maxStack {
-            maxStack = 2
+            maxStack = char(2)
         }
         code.codes[code.codeLength] = cg.OP_arraylength
         code.codeLength++
@@ -103,7 +101,7 @@ class BuildForRangeJavaArray {
             panic("over 255")
         }
         code.codes[code.codeLength+1] = byte(autoVar.K)
-        code.codes[code.codeLength+2] = 1
+        code.codes[code.codeLength+2] = 1b
         code.codeLength += 3
 
         // load  k

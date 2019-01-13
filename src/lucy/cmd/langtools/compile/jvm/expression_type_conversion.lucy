@@ -27,7 +27,7 @@ class BuildExpressionTypeConversion {
         currentStack := char(0)
         // []byte("aaaaaaaaaaaa")
         if conversion.Type.equal(ast.LucyBytesType) {
-            currentStack = 2
+            currentStack = char(2)
             meta := ArrayMetas[ast.VariableTypeByte]
             code.codes[code.codeLength] = cg.OP_new
             c.insertClassConst(meta.className, code.codes[code.codeLength+1:code.codeLength+3])
@@ -42,7 +42,7 @@ class BuildExpressionTypeConversion {
         if (conversion.Type.Type == ast.VariableTypeString &&
             conversion.Expression.value.equal(ast.LucyBytesType)) ||
             (conversion.Type.Type == ast.VariableTypeString && conversion.Expression.value.equal(ast.JavaBytesType)) {
-            currentStack = 2
+            currentStack = char(2)
             code.codes[code.codeLength] = cg.OP_new
             c.insertClassConst(javaStringClass, code.codes[code.codeLength+1:code.codeLength+3])
             code.codes[code.codeLength+3] = cg.OP_dup
@@ -92,7 +92,7 @@ class BuildExpressionTypeConversion {
                 code.codes[code.codeLength+1:code.codeLength+3])
             code.codeLength += 3
             if 3 > maxStack {
-                maxStack = 3
+                maxStack = char(3)
             }
             code.codes[code.codeLength] = cg.OP_invokespecial
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
@@ -124,7 +124,7 @@ class BuildExpressionTypeConversion {
             ), code.codes[code.codeLength+1:code.codeLength+3])
             code.codeLength += 3
             if 4 > maxStack {  
-                maxStack = 4
+                maxStack = char(4)
             }
             meta := ArrayMetas[ast.VariableTypeByte]
             code.codes[code.codeLength] = cg.OP_invokespecial
@@ -151,7 +151,7 @@ class BuildExpressionTypeConversion {
             ), code.codes[code.codeLength+1:code.codeLength+3])
             code.codeLength += 3
             if 4 > maxStack {  
-                maxStack = 4
+                maxStack = char(4)
             }
             return
         }

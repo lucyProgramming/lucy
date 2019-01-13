@@ -2,7 +2,6 @@
 
 
 class ExpressionCheckSelection {
-    
     static fn check(e Expression , block Block, errs []error) -> (valueType Type) {
         selection := e.data.(ExpressionSelection)
         object, es := selection.Expression.checkSingleValueContextExpression(block)
@@ -11,7 +10,7 @@ class ExpressionCheckSelection {
             return null
         }
         if selection.autoCompletion {
-            ExpressionCheckSelection.autoCompletion(object , block )
+            ExpressionCheckSelection.autoCompletion(object , block , selection.Expression.isIdentifier(ThisPointerName))
             return
         }
         switch object.Type {
@@ -212,7 +211,7 @@ class ExpressionCheckSelection {
         return null
     }
     
-    static fn autoCompletion(object Type , block Block) {
+    static fn autoCompletion(object Type , block Block ,isThis bool) {
         switch object.Type {
         case VariableTypeString:
             ExpressionCheckSelection.autoCompletionForString(block , object.pos)
@@ -227,7 +226,7 @@ class ExpressionCheckSelection {
         case VariableTypePackage:
             ExpressionCheckSelection.autoCompletionForPackage(object.Package , block )
         case VariableTypeObject:
-            ExpressionCheckSelection.autoCompletionForObject(object.Class , block)
+            ExpressionCheckSelection.autoCompletionForObject(object.Class , block , isThis)
         case VariableTypeClass:
             ExpressionCheckSelection.autoCompletionClass(object.Class , block)
         }
@@ -237,7 +236,7 @@ class ExpressionCheckSelection {
         if err := loadJavaStringClass(block , pos) ; err != null {
             return 
         }
-        ExpressionCheckSelection.autoCompletionForObject(javaStringClass , block)
+        ExpressionCheckSelection.autoCompletionForObject(javaStringClass , block , false)
     }
 
     
@@ -355,7 +354,10 @@ class ExpressionCheckSelection {
         block.inheritedAttribute.p.autoCompletionItems = items
     }
     
-    static fn autoCompletionForObject(object Class , block Block) {
+    static fn autoCompletionForObject(
+        object Class,
+        block Block , 
+        isThis bool) {
         if err := object.loadSelf(block , new Pos()) ;err != null {
             return 
         }
@@ -570,4 +572,3 @@ class ExpressionCheckSelection {
         block.inheritedAttribute.p.autoCompletionItems = items
     } 
 }
-

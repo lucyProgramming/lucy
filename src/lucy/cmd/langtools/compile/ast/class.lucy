@@ -2,6 +2,7 @@ import "lucy/cmd/langtools/compile/jvm/cg"
 import "java/lang/Object"
 import "lucy/cmd/langtools/compile/common"
 
+
 /*
 	public abstract final class {}
 	unlike function class not accept capture
@@ -1221,7 +1222,7 @@ public class Class {
             return new error(errMsg)
         }
     }
-
+    
     fn checkIfOverrideFinal()-> (errs []error = []error{}){
         if this.superClass != null {
             for name, v := range this.methods {
@@ -1348,33 +1349,34 @@ public class Class {
                     // not a static field , field value will be evalute after call father constraction method 
                     continue
                 }
-                bin := new ExpressionAssign()
-                bin.values = [v.defaultValueExpression]
-                selection := new ExpressionSelection()
-                selection.Expression = new Expression()
-                selection.Expression.op = "selection"
-                selection.Expression.value = new Type()
-                selection.Expression.value.Type = VariableTypeClass
-                selection.Expression.value.Class = this
-                selection.name = v.name
-                selection.field = v
-                left := new Expression()
-                left.Type =  ExpressionTypeSelection
-                left.data =  selection
-                left.op =   "selection"
-                left.value = v.Type
-                bin.lefts = [left]
-                e := new Expression()
-                e.Type =  ExpressionTypeAssign
-                e.data =  bin
-                e.isStatementExpression =  true
-                e.op =  "assign"
-                statemment := new Statement()
-                statemment.Type = StatementTypeExpression
-                statemment.Expression = e
-                statemment.isStaticFieldDefaultValue = true
-                staticFieldAssignStatements.append(statemment)
-                 
+                if this.block.inheritedAttribute.isCompileTask {
+                    bin := new ExpressionBinary()
+                    bin.right = v.defaultValueExpression
+                    selection := new ExpressionSelection()
+                    selection.Expression = new Expression()
+                    selection.Expression.op = "selection"
+                    selection.Expression.value = new Type()
+                    selection.Expression.value.Type = VariableTypeClass
+                    selection.Expression.value.Class = this
+                    selection.name = v.name
+                    selection.field = v
+                    left := new Expression()
+                    left.Type =  ExpressionTypeSelection
+                    left.data =  selection
+                    left.op = "selection"
+                    left.value = v.Type
+                    bin.left = left
+                    e := new Expression()
+                    e.Type =  ExpressionTypeAssign
+                    e.data =  bin
+                    e.isStatementExpression =  true
+                    e.op =  "assign"
+                    statemment := new Statement()
+                    statemment.Type = StatementTypeExpression
+                    statemment.Expression = e
+                    statemment.isStaticFieldDefaultValue = true
+                    staticFieldAssignStatements.append(statemment)
+                }
             }
         }
         if len(staticFieldAssignStatements) > 0 {
@@ -1394,6 +1396,7 @@ public class Class {
         return errs
     }
 
+    
     fn checkMethods()-> (errs []error = []error{}){
         if this.isInterface() {
             return errs

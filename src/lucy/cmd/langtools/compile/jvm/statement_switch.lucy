@@ -25,10 +25,10 @@ class BuildSwitch {
         compare := fn(t ast.Type) {
             switch t.Type {
             case ast.VariableTypeByte,
-                ast.VariableTypeShort ,
+                ast.VariableTypeShort,
                 ast.VariableTypeEnum,
-                ast.VariableTypeChar , 
-                ast.VariableTypeInt :
+                ast.VariableTypeChar, 
+                ast.VariableTypeInt:
                 code.codes[code.codeLength] = cg.OP_isub
                 code.codeLength++
             case ast.VariableTypeLong:

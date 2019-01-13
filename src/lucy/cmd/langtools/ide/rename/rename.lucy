@@ -41,7 +41,7 @@ class ReName {
         }
         packageLoader := new PackageLoader(this.classPath , this.lucyPath , this)
         this.packageLoader = packageLoader
-        p := new ast.Package(this.packageName , false , packageLoader)
+        p := new ast.Package(this.packageName , false , packageLoader , false)
         errs.appendAll(p.typeCheck(tops))
         if this.printErr {
             for v := range errs {

@@ -8,6 +8,7 @@ public const	AttributeNameSignature               = "Signature"
 public const	AttributeNameMethodParameters        = "MethodParameters"
 public const	AttributeNameInnerClasses            = "InnerClasses"
 
+
 public const	AttributeNameLucyFieldDescriptor    = "LucyFieldDescriptor"
 public const	AttributeNameLucyMethodDescriptor   = "LucyMethodDescriptor"
 public const	AttributeNameLucyDefaultParameters  = "LucyDefaultParameters"

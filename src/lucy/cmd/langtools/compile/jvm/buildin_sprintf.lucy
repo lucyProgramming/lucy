@@ -40,7 +40,7 @@ class BuildinFunctionSprintf {
         state.pushStack(c, objectArray)
         index := int(0)
         for _, v := range call.args {
-            currentStack = 2
+            currentStack = char(2)
             code.codes[code.codeLength] = cg.OP_dup
             code.codeLength++
             loadInt(c, code, index)

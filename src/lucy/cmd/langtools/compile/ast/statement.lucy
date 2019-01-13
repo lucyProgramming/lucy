@@ -32,6 +32,10 @@ public class Statement {
 	*/
 	public isCallFatherConstructionStatement bool
 
+	public fn Statement(){
+		this.super()
+	}
+
 	fn isVariableDefinition() ->(is bool)  {
 		if this.Type != StatementTypeExpression {
 			return false

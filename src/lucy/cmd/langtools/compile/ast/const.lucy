@@ -62,7 +62,7 @@ public class Constant  {
 		if this.Type != null {
 			s += sprintf("const %s %s" , this.name , this.Type.typeString())
 		}else {
-			s += sprintf("const %s" , this.name , this.Type.typeString())
+			s += sprintf("const %s" , this.name)
 		}
 		if this.defaultValueExpression != null {
 			if this.defaultValueExpression.literalRaw != null {

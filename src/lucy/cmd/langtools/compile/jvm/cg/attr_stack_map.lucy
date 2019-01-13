@@ -197,35 +197,35 @@ public class StackMapVerificationTypeInfo  {
 	public Verify Object
 	public fn toBytes() -> (bs []byte)  {
 		if _,ok := this.Verify.(StackMapTopVariableInfo) ; ok {
-			return []byte{0}
+			return []byte{0b}
 		}
 		if _,ok := this.Verify.(StackMapIntegerVariableInfo) ; ok {
-			return []byte{1}
+			return []byte{1b}
 		}
 		if _,ok := this.Verify.(StackMapFloatVariableInfo) ; ok {
-			return []byte{2}
+			return []byte{2b}
 		}
 		if _,ok := this.Verify.(StackMapDoubleVariableInfo) ; ok {
-			return []byte{3}
+			return []byte{3b}
 		}
 		if _,ok := this.Verify.(StackMapLongVariableInfo) ; ok {
-			return []byte{4}
+			return []byte{4b}
 		}
 		if _,ok := this.Verify.(StackMapNullVariableInfo) ; ok {
-			return []byte{5}
+			return []byte{5b}
 		}
 		if _,ok := this.Verify.(StackMapUninitializedThisVariableInfo) ; ok {
-			return []byte{6}
+			return []byte{6b}
 		}
 		if v,ok := this.Verify.(StackMapObjectVariableInfo) ; ok {
 			bs = new []byte(3)
-			bs[0] = 7
+			bs[0] = 7b
 			binary.BigEndian.putChar(bs[1:], v.index)
 			return bs
 		}
 		if v,ok := this.Verify.(StackMapUninitializedVariableInfo) ; ok {
 			bs = new []byte (3)
-			bs[0] = 8
+			bs[0] = 8b
 			binary.BigEndian.putChar(bs[1:], v.codeOffset)
 			return bs
 		}

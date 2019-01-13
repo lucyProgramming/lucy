@@ -19,7 +19,8 @@ public class Fmt {
                 }
                 continue
             }
-            if t , ok := n.node.(ast.Block) ; ok {
+            if t , ok := n.node.(ast.Block) ; ok && 
+                t.isCompilerAuto == false {
                 format += "{\n"
                 format += this.formatBlock("" , t) + "\n\n"
                 format += "}\n"
@@ -68,7 +69,7 @@ public class Fmt {
         if c.Type != null {
             format += " " + c.Type.typeName()
         }
-        format += " =" +  this.formatExpression(indent + this.indentIncrement ,  c.defaultValueExpression) 
+        format += " =" + this.formatExpression(indent + this.indentIncrement ,  c.defaultValueExpression) 
     }
 
     fn formatFunction(indent string , f ast.Function , isAbstract bool) -> (format string = "") {
@@ -286,6 +287,7 @@ public class Fmt {
             // must be a method 
             method := f.(ast.ClassMethod)
             if method.isCompilerAuto {
+                //compiler auto 
                 continue
             }
             m := indent + this.indentIncrement
@@ -429,7 +431,9 @@ public class Fmt {
     }
     
     fn formatStatement(indent string , s ast.Statement) -> (format string = ""){
-        
+        if s.isCompilerAuto {
+            return 
+        }
         switch s.Type {
             case ast.StatementTypeExpression:
                 if s.inlineComment == null {
@@ -506,7 +510,7 @@ public class Fmt {
         }
     }
 
-    fn formatIf(indent string ,s ast.StatementIf)-> (format string = "") {
+    fn formatIf(indent string , s ast.StatementIf)-> (format string = "") {
         format = indent
         format += "if "
         for v := range s.prefixExpressions {

@@ -15,7 +15,8 @@
 			errs.appendAll(es)
 			if indexType != null {
 				if indexType.isInteger() {
-					if indexType.Type == VariableTypeLong {
+					if indexType.Type == VariableTypeLong && 
+						block.inheritedAttribute.isCompileTask {
 						index.index.convertToNumberType(VariableTypeInt) //  convert to int
 					}
 					if index.index.isLiteral() {
@@ -51,7 +52,7 @@
 			errs.appendAll(es)
 			if indexType != null {
 				if indexType.isInteger() {
-					if indexType.Type == VariableTypeLong {
+					if indexType.Type == VariableTypeLong  && block.inheritedAttribute.isCompileTask {
 						index.index.convertToNumberType(VariableTypeInt) //  convert to int
 					}
 				} else {

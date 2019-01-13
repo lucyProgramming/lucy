@@ -161,7 +161,9 @@ fn checkConst(block Block, c Constant , errs []error) -> (err error)  {
 		if c.Type.assignAble(block , es, t) == false {
 			if (c.Type.isInteger() && t.isInteger()) ||
 				(c.Type.isFloat() && t.isFloat()) {
-				c.defaultValueExpression.convertLiteralToNumberType(c.Type.Type)
+				if block.inheritedAttribute.isCompileTask {
+					c.defaultValueExpression.convertLiteralToNumberType(c.Type.Type)
+				}
 			} else {
 				err = new error(sprintf("%s cannot use '%s' as '%s' for initialization value",
 					c.pos.errMsgPrefix(), c.Type.typeString(), t.typeString()))
@@ -209,7 +211,7 @@ fn checkConst(block Block, c Constant , errs []error) -> (err error)  {
 }
 
 fn convertExpressionToNeed(block Block , e Expression, need Type, eval Type) {
-	convertExpressionsToNeeds(block , [e], [need], [eval] )
+	convertExpressionsToNeeds(block , [e], [need], [eval])
 }
 
 fn convertExpressionsToNeeds(block Block , expressions []Expression, needs []Type, eval []Type) {
@@ -249,6 +251,7 @@ fn packageNameIsValid(name string) -> (valid bool) {
 	//TODO:: check is package name is valid
 	return true
 }
+
 
 fn correctLastUsageType(t string , usage []Usage) ->(u Usage) {
 	u = usage[len(usage) -1]

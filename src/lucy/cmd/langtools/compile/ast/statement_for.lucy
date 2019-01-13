@@ -44,6 +44,10 @@ public class StatementFor {
 		rangeOn, es := rangeExpression.checkSingleValueContextExpression(this.initExpressionBlock)
 		errs.appendAll(es)
 		if rangeOn == null {
+			if this.block != null {
+				this.block.inherit(this.initExpressionBlock)
+				errs.appendAll(this.block.check())
+			}
 			return errs
 		}
 		if rangeOn.Type == VariableTypeString {

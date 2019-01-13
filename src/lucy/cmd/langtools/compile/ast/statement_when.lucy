@@ -131,34 +131,34 @@ public class StatementWhen {
 		if len(errs) > 0 {
 			return errs
 		}
-		if match == null {
-			if this.defaultBlock == null {
-				errs.append(new error(sprintf("%s condition resolve as '%s' has no match and no 'default block'",
+		if block.inheritedAttribute.isCompileTask {
+			if match == null {
+				if this.defaultBlock == null {
+					errs.append(new error(sprintf("%s condition resolve as '%s' has no match and no 'default block'",
 						errMsgPrefix(this.condition.pos), this.condition.typeString())))
+				} else {
+					switchStatement.Type = StatementTypeBlock
+					switchStatement.block = this.defaultBlock
+					switchStatement.block.inherit(block)
+					switchStatement.block.isWhenBlock = true
+					switchStatement.block.inheritedAttribute.forBreak = switchStatement.block
+					errs.appendAll(switchStatement.block.check())
+				}
+				return
+			}
+			// let`s reWrite
+			if matchBlock == null {
+				switchStatement.Type = StatementTypeNop
+				return errs
 			} else {
 				switchStatement.Type = StatementTypeBlock
-				switchStatement.block = this.defaultBlock
+				switchStatement.block = matchBlock
 				switchStatement.block.inherit(block)
 				switchStatement.block.isWhenBlock = true
 				switchStatement.block.inheritedAttribute.forBreak = switchStatement.block
 				errs.appendAll(switchStatement.block.check())
+				return 
 			}
-			return
-		}
-		// let`s reWrite
-		if matchBlock == null {
-			switchStatement.Type = StatementTypeNop
-			return errs
-		} else {
-			switchStatement.Type = StatementTypeBlock
-			switchStatement.block = matchBlock
-			switchStatement.block.inherit(block)
-			switchStatement.block.isWhenBlock = true
-			switchStatement.block.inheritedAttribute.forBreak = switchStatement.block
-			errs.appendAll(switchStatement.block.check())
-			return 
 		}
 	}
 }
-
-

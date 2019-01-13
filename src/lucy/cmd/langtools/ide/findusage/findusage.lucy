@@ -38,6 +38,7 @@ class FindUsage {
             when another trying to load this pacakge could use the cache and the "findUsage" has created in memory
         */
         loader.setCache(this.packageName , p)
+        
         if p.findUsageIsGlobal {
             if this.scope != null && this.scope != "" {
                 lucyPath , pacakgenName := ide.locateDir(this.scope)

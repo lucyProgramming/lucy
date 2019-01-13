@@ -26,7 +26,7 @@ class AllDefinition {
         }
         loader := new ide.PackageLoader(common.getLucyPath() , common.getClassPath())
         loader.onlyAnalyzeGlobals = true 
-        p := new ast.Package(this.packageName , true , loader)
+        p := new ast.Package(this.packageName , true , loader ,false)
         p.onlyAnalyzeGlobals = true // make the process faster
         errs = p.typeCheck(nodes)
         if this.printErr {

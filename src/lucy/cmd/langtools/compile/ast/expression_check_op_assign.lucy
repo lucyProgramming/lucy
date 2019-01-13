@@ -67,11 +67,17 @@ class ExpressionCheckOpAssign {
 			if left.assignAble(block , errs, right) {
 				return
 			}
-			if left.isInteger() && right.isInteger() && bin.right.isLiteral() {
+			if left.isInteger() && 
+				right.isInteger() && 
+				bin.right.isLiteral() && 
+				block.inheritedAttribute.isCompileTask {
 				bin.right.convertToNumberType(left.Type)
 				return
 			}
-			if left.isFloat() && right.isFloat() && bin.right.isLiteral() {
+			if left.isFloat() && 
+				right.isFloat() && 
+				bin.right.isLiteral() && 
+				block.inheritedAttribute.isCompileTask  {
 				bin.right.convertToNumberType(left.Type)
 				return
 			}
@@ -86,7 +92,8 @@ class ExpressionCheckOpAssign {
 		if e.Type == ExpressionTypeLshAssign ||
 			e.Type == ExpressionTypeRshAssign {
 			if left.isInteger() && right.isInteger() {
-				if right.Type == VariableTypeLong {
+				if right.Type == VariableTypeLong && 
+					block.inheritedAttribute.isCompileTask {
 					bin.right.convertToNumberType(VariableTypeInt)
 				}
 				return

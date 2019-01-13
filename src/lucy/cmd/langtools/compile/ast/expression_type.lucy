@@ -98,11 +98,6 @@ public class ExpressionFunctionCall  {
 	public Function                 Function
 	public parameterTypes           []Type // for template function
 	public templateFunctionCallPair TemplateFunctionInstance
-
-	// public fn ExpressionFunctionCall(){
-	// 	this.super()
-	// 	this.args = []Expression{}
-	// }
 }
 
 public class ExpressionMethodCall  {
@@ -124,11 +119,6 @@ public class ExpressionMethodCall  {
 	public findUsage  bool 
 	public rename  bool 
 	public autoCompletion bool 
-
-	// public fn ExpressionMethodCall(){
-	// 	this.super()
-	// 	this.args = []Expression{}
-	// }
 }
 
 public class ExpressionVar  {
@@ -186,16 +176,11 @@ public class ExpressionSelection  {
 	public autoCompletion bool 
 }
 
-
-public class ExpressionNew  {
+public class ExpressionNew {
 	public Type         Type
 	public args         []Expression
 	public construction ClassMethod
 	public vArgs        CallVariableLengthArgs
-	public fn ExpressionNew() {
-		this.super()
-		this.args = []Expression{}
-	}
 }
 
 public class ExpressionMap  {
@@ -221,15 +206,8 @@ public class ExpressionBinary  {
 	public containsLf bool    // constains "\n"
 }
 
-// for package jvm
-public class ExpressionAssign  {
-	public lefts  []Expression
-	public values []Expression
-}
-
 public class ExpressionArray  {
 	public Type        Type
 	public expressions []Expression
-	public declarationHaveType bool 
+	public declarationHaveType bool  // type could genarated at ast stage 
 }
-

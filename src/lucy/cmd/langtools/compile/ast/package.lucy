@@ -41,14 +41,21 @@ public class Package {
 	public autoCompletionItems []AutoCompletionItem
 	
 	public lucyBuildInPackage Package 
-	
 
-	public fn Package(name string , disableCheckUnuse bool , loader loadImport){
+	public isCompileTask bool
+	
+	public fn Package(
+		name string ,
+		disableCheckUnuse bool ,
+		loader loadImport,
+		isCompileTask bool){
+		
 		this.super()
 		this.disableCheckUnuse = disableCheckUnuse
 		this.name = name
 		this.matchLine = -1
 		this.loader = loader
+		this.isCompileTask = isCompileTask
 	}
 	
 
@@ -290,6 +297,7 @@ public class Package {
 				s[k].pos = v.pos
 			}
 			b := new Block()
+			b.isCompilerAuto = true
 			b.pos = expressions[0].pos
 			b.statements = s
 			t := []Block{b}
@@ -299,11 +307,12 @@ public class Package {
 		this.mkInitFunctions(bs)
 		return
 	}
-
+	
 	public fn typeCheck(nodes []TopNode) -> (es []error = []error{}) {
 		this.block.inheritedAttribute.p = this
 		this.block.isPackageBlock = true 
 		this.block.Package = this 
+		this.block.inheritedAttribute.isCompileTask = this.isCompileTask
 		this.errors = []error{}
 		if this.nErrors2Stop <= 5 {
 			this.nErrors2Stop = 10

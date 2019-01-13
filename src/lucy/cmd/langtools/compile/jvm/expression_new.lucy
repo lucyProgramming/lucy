@@ -38,7 +38,7 @@ class BuildExpressionNew {
         t.Verify = new cg.StackMapUninitializedVariableInfo(char(code.codeLength))
         state.stacks.append( t, t)
         code.codeLength += 4
-        maxStack = 2
+        maxStack = char(2)
         maxStack += this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, n.args, n.vArgs, context, state)
         code.codes[code.codeLength] = cg.OP_invokespecial
         d := n.construction.Function.jvmDescriptor
@@ -59,7 +59,7 @@ class BuildExpressionNew {
         code cg.AttributeCode,
         e ast.Expression,
         context Context) -> (maxStack char) {
-        maxStack = 2
+        maxStack = char(2)
         code.codes[code.codeLength] = cg.OP_new
         c.insertClassConst(mapClass, code.codes[code.codeLength+1:code.codeLength+3])
         code.codes[code.codeLength+3] = cg.OP_dup
@@ -73,6 +73,8 @@ class BuildExpressionNew {
         code.codeLength += 3
         return
     }
+
+
 
     fn  buildNewJavaArray(
         c cg.ClassHighLevel,
@@ -125,7 +127,7 @@ class BuildExpressionNew {
         c.insertClassConst(meta.className, code.codes[code.codeLength+1:code.codeLength+3])
         code.codes[code.codeLength+3] = cg.OP_dup
         code.codeLength += 4
-        maxStack = 2
+        maxStack = char(2)
         t := new cg.StackMapVerificationTypeInfo()
         unInit := new cg.StackMapUninitializedVariableInfo( char(code.codeLength - 4))
         t.Verify = unInit

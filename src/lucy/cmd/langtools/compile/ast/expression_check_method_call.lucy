@@ -2,8 +2,8 @@ import "lucy/cmd/langtools/compile/common"
 
 class ExpressionCheckMethodCall {
 	
-	static fn autoCompletion(block Block , object Type) {
-		ExpressionCheckSelection.autoCompletion(object , block)
+	static fn autoCompletion(block Block , object Type , isThis bool) {
+		ExpressionCheckSelection.autoCompletion(object , block , isThis)
 	}
 	
 	static fn check(e Expression , block Block, errs []error) -> (valueTypes []Type) {
@@ -17,7 +17,7 @@ class ExpressionCheckMethodCall {
 			return null
 		}
 		if call.autoCompletion {
-			ExpressionCheckMethodCall.autoCompletion(block , object)
+			ExpressionCheckMethodCall.autoCompletion(block , object , call.Expression.isIdentifier(ThisPointerName))
 			return 
 		}
 		

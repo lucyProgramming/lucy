@@ -94,7 +94,7 @@ class BuildExpressionMethodCall {
                     call.method.Function.jvmDescriptor
                 ), code.codes[code.codeLength+1:code.codeLength+3])
                 code.codes[code.codeLength+3] = interfaceMethodArgsCount(call.method.Function.Type)
-                code.codes[code.codeLength+4] = 0
+                code.codes[code.codeLength+4] = 0b
                 code.codeLength += 5
             } else {
                 code.codes[code.codeLength] = cg.OP_invokevirtual

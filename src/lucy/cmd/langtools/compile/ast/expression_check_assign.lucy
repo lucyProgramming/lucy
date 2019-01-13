@@ -25,7 +25,9 @@ class ExpressionCheckAssign {
 				leftTypes.append(t) // append even if it`s null
 			}
 		}
-		convertExpressionsToNeeds(block , values, leftTypes, valueTypes)
+		if block.inheritedAttribute.isCompileTask{
+			convertExpressionsToNeeds(block , values, leftTypes, valueTypes)
+		}
 		bin.left.multiValues = leftTypes
 		if len(lefts) > len(valueTypes) { //expression length compare with value types is more appropriate
 			pos := values[len(values)-1].pos
@@ -80,12 +82,6 @@ class ExpressionCheckAssign {
 					errMsgPrefix(valueTypes[k].pos),
 					valueTypes[k].typeString(), leftTypes[k].typeString())))
 			}
-		}
-		{
-		    t := new ExpressionAssign()
-		    e.data = t
-		    t.lefts = lefts
-            t.values = values
 		}
 		voidReturn := mkVoidType(e.pos)
 		if len(lefts) > 1 {
