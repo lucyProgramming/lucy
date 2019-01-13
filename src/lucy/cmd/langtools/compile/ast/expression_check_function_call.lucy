@@ -305,7 +305,7 @@ class ExpressionCheckFunctionCall {
 		}
 		call.templateFunctionCallPair = f.templateFunction.insert(parameterTypeArray)
 		if call.templateFunctionCallPair.Function == null { // not called before,make_node_objects the binds
-			cloneFunction, es := f.clone()
+			cloneFunction, es := f.cloneFunction()
 			if len(es) > 0 {
 				errs.appendAll(es)
 				return null

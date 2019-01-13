@@ -56,10 +56,8 @@ public final class FloatOption  extends Option{
 			value = -value 
 		}
 		.floatValue = value 
-		
 	} 
-	public fn getValue() -> (v float = this.floatValue ){  }
-	
 
+	public fn getValue() -> (v float = this.floatValue ){  }
 	
 }

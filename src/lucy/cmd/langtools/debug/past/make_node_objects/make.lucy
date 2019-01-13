@@ -589,7 +589,9 @@ public class MakeNodesObjects {
             ret["op"] = e.op
             ret["on"] = this.makeExpression(e.data.(ast.Expression))
             return ret
-        case ast.ExpressionTypeNegative , ast.ExpressionTypeNot,ast.ExpressionTypeBitwiseNot:
+        case ast.ExpressionTypeNegative,
+            ast.ExpressionTypeNot,
+            ast.ExpressionTypeBitwiseNot:
             ret := new map{string -> Object}()
             ret["op"] = e.op
             ret["on"] = this.makeExpression(e.data.(ast.Expression))

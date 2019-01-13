@@ -1,6 +1,5 @@
 import "lucy/cmd/langtools/compile/jvm/cg"
 
-
 typealias BuildInFunctionChecker = fn(
 	f Function,
 	e ExpressionFunctionCall,
@@ -142,20 +141,19 @@ public class Function {
 		return errs
 	}
 	
-	fn clone() -> (ret Function, es []error) {
+	fn cloneFunction() -> (ret Function, es []error) {
 		ret, es = parseFunctionHandler(this.sourceCode, this.pos)
-		if len(es) > 0 {
-			return ret, es
+		if ret != null {
+			ret.templateClonedFunction = true
 		}
-		ret.templateClonedFunction = true
-		return ret, es
 	}
-	
+		
 	fn makeLastReturnStatement() {
 		s := new StatementReturn()
 		t := new Statement()
 		t.Type = StatementTypeReturn
 		t.StatementReturn = s
+		t.isCompilerAuto = true 
 		t.pos = this.block.endPos
 		if this.block == null {
 			this.block = new Block()

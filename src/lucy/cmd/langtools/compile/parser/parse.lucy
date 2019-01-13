@@ -15,7 +15,7 @@ public fn parse(
 	autoCompletion int) -> (errs []error) {
 	
 	p := new Parser(bs , tops , filename , onlyParseImport , nErrors2Stop )
-	p.lexer = lex.New(bs, 0, 0 , locateDefinition , getHover , findUsage , rename , autoCompletion)
+	p.lexer = new lex.Lexer(bs, 0, 0 , locateDefinition , getHover , findUsage , rename , autoCompletion)
 	errs = p.parse()
 }
 

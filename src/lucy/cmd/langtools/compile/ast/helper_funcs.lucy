@@ -263,7 +263,7 @@ fn searchRightValueForAutoCompletionItems(pos Pos, block Block) -> (items []Auto
 			if names.keyExist(name) {
 				continue 
 			}
-			item  := new AutoCompletionItem()
+			item := new AutoCompletionItem()
 			item.Type = "variable"
 			item.name = name 
 			items.append(item)
@@ -348,10 +348,10 @@ fn searchLableForAutoCompletionItems(block Block) -> (items []AutoCompletionItem
 			}
 		}
 		isFunctionBlock = b.isFunctionBlock || isFunctionBlock
-		//I cannot stop the process 
+		// I cannot stop the process
+		// so just skip all block
 	})
 }
-
 
 fn searchTypeForAutoCompletionItems( pos Pos, block Block) -> (items []AutoCompletionItem = []AutoCompletionItem {}) {
 	names := new map{string -> bool}()
@@ -401,7 +401,7 @@ fn searchTypeForAutoCompletionItems( pos Pos, block Block) -> (items []AutoCompl
 	items.appendAll(AutoCompletionItem.getTypeAutoCompletionItem())
 }
 
-fn searchLeftValueForAutoCompletionItems(block Block) -> (items []AutoCompletionItem = []AutoCompletionItem {}) {
+fn searchLeftValueForAutoCompletionItems(block Block , pos Pos) -> (items []AutoCompletionItem = []AutoCompletionItem {}) {
 	names := new map{string -> bool}()
 	block.walk(fn (b Block){
 		for name ,v := range b.variables {
@@ -414,6 +414,7 @@ fn searchLeftValueForAutoCompletionItems(block Block) -> (items []AutoCompletion
 			items.append(item)
 			names[name] = true 
 		}
+		// CLASS.FIELD = ""
 		for name ,v := range b.classes {
 			if names.keyExist(name) {
 				continue
@@ -424,9 +425,19 @@ fn searchLeftValueForAutoCompletionItems(block Block) -> (items []AutoCompletion
 			items.append(item)
 			names[name] = true 
 		}
+		if b.isPackageBlock && (b.Package.name != "lucy/lang" || b.Package == block.inheritedAttribute.p) {
+			s := block.inheritedAttribute.p.getSourceFile(pos.filename) 
+			if s != null {
+				for name,_ := range s.imports {
+					item  := new AutoCompletionItem()
+					item.Type = "import"
+					item.name = name 
+					items.append(item)
+				}
+			}
+		}
 	}) 
 }
-
 
 
 fn getPos(x Object)  -> (pos Pos){
@@ -466,4 +477,23 @@ fn getPos(x Object)  -> (pos Pos){
 	if t, ok := x.(StatementLabel) ; ok {
 		return t.pos
 	}
+}
+
+fn checkFormat(formatLiteral string , args []Type) -> (errs []error = []error{}) {
+	// enum FormatType {
+	// 	FormatTypeInt = 1,
+
+	// }
+	// formaters := []FormatType{}
+	// bs := []byte(formatLiteral)
+	// for i:= 0 ; i < bs.size() ; i++ {
+	// 	if bs[i] != '%' {
+	// 		continue
+	// 	}
+	// 	if i == bs.size() -1 {
+	// 		continue
+	// 	}
+	// }
+
+
 }

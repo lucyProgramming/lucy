@@ -1,6 +1,3 @@
- 
-
-
 public class StatementGoTo {
 	public defers         []StatementDefer
 	public labelName      string
@@ -10,7 +7,7 @@ public class StatementGoTo {
 	public findUsage bool  // useless 
 	public rename bool // useless 
 	public inlineComment string 
-	public autoCompletion bool 
+	public autoCompletion bool
 	
 	fn checkStatementGoTo(block Block) -> (err error) {
 		if this.autoCompletion {

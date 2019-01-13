@@ -268,7 +268,7 @@ public class FunctionType {
 		}
 		return ret
 	}
-
+	
 	fn callArgsHasNoNil(ts []Type) ->(is bool)  {
 		for _, t := range ts {
 			if t == null {
@@ -341,6 +341,10 @@ public class FunctionType {
 		}
 		if len(callArgsTypes) < len(this.parameterList) {
 			if f != null && f.haveDefaultValue && len(callArgsTypes) >= f.defaultValueStartAt {
+				// java programming language have not default value feature
+				// so must be lucy function or method 
+				// lucy programming language does not support overload 
+				// so modify the arguments is safe
 				for i := len(callArgsTypes); i < len(f.Type.parameterList); i++ {
 					args.append(f.Type.parameterList[i].defaultValueExpression)
 				}
@@ -365,8 +369,6 @@ public class FunctionType {
 				return
 			}
 		}
-
-		return
 	}
 
 	private fn parameterCount() -> (count int){

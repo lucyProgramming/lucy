@@ -4,6 +4,10 @@ class ExpressionCheckLeftValue {
 		switch e.Type {
 		case ExpressionTypeIdentifier:
 			identifier := e.data.(ExpressionIdentifier)
+			if identifier.autoCompletion {
+				block.inheritedAttribute.p.autoCompletionItems = searchLeftValueForAutoCompletionItems(block , e.pos)
+				return 
+			}
 			if identifier.name == UnderScore {
 				errs.append(new error(sprintf("%s cannot use '%s' as left value",
 					e.pos.errMsgPrefix(), identifier.name)))
@@ -257,4 +261,4 @@ class ExpressionCheckLeftValue {
         }
         block.inheritedAttribute.p.autoCompletionItems = items
     }
-} 
+}

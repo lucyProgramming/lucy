@@ -198,6 +198,9 @@ fn registerBuildInFunctions() {
 			meta.format = e.args[0]
 			meta.argsLength = len(args) - 1
 			e.args = e.args[1:]
+			if meta.format.Type == ExpressionTypeString {
+				errs.appendAll(checkFormat(meta.format.stringValue , args[1:]))
+			}
 		}
 	}
 	
@@ -273,6 +276,9 @@ fn registerBuildInFunctions() {
 				meta.format = e.args[0]
 				e.args = e.args[1:]
 				meta.argsLength = len(args)
+				if meta.format.Type == ExpressionTypeString {
+					errs.appendAll(checkFormat(meta.format.stringValue , args[1:]))
+				}
 			}
 		
 	}

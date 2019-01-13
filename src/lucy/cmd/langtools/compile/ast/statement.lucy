@@ -20,6 +20,7 @@ public class Statement {
 	public Import                    Import
 	public comment 	                 string
 	public inlineComment   string 
+	public isCompilerAuto bool 
 	
 	/* 
 		statement contructed from static field default value

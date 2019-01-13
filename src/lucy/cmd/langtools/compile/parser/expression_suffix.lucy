@@ -624,13 +624,12 @@ class ExpressionSuffix extends  ParserExtends {
 				prefix = newExpression
 			}
 		}
-
 		return prefix, null
 	}
 
 	fn parseCallExpression(on ast.Expression) -> (e ast.Expression,err error) {
 		this.next(lfNotToken) // skip (
-		var args []ast.Expression
+		var args = []ast.Expression{}
 		if this.parser.token.Type != lex.TokenRp { //a(123)
 			args, err = this.ep.parseExpressions(lex.TokenRp)
 			if err != null {

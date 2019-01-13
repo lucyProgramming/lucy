@@ -11,17 +11,16 @@ class FindUsage {
     printErr bool
     lucyPath []string
     loader ide.PackageLoader
-    scope []string 
+    scope string 
     
     fn FindUsage(lucyFiles []ide.LucyFile , packageName string , printErr bool , lucyPath []string, scope string) {
         this.super()
         this.lucyFiles = lucyFiles
         this.packageName = packageName
         this.printErr = printErr
-        this.lucyPath = lucyPath
-        if scope != null && scope != "" {
-            this.scope = common.getPathElements(scope)
-        }
+        this.lucyPath = lucyPath 
+        this.scope =  scope
+        
     }
     
     fn find() -> (result []ast.Usage){
@@ -33,15 +32,20 @@ class FindUsage {
                 os.stderr.println(v.getMessage())
             }
         }
+        result = p.findUsage
         /* 
             set this package to cache 
             when another trying to load this pacakge could use the cache and the "findUsage" has created in memory
         */
         loader.setCache(this.packageName , p)
         if p.findUsageIsGlobal {
-            this.searchLucyPath()        
+            if this.scope != null && this.scope != "" {
+                lucyPath , pacakgenName := ide.locateDir(this.scope)
+                this.searchDir(pacakgenName , lucyPath + "/src/" + pacakgenName)
+            }else {
+                this.searchLucyPath()
+            }    
         }
-        return p.findUsage 
     }
     
     fn searchLucyPath() {
@@ -80,8 +84,10 @@ class FindUsage {
             // when handle sub directory may load the package
             return 
         }
-        if false == this.matchScope(dir) {
-            return 
+        defer {
+            if e := catch() ; e != null {
+                e.printStackTrace()
+            }
         }
         lucyFiles := ide.readLucyFiles(ide.getLucyFiles(dir))
         p , es := ide.parseAstAndTypeCheck(packageName , lucyFiles , false ,"" , -1 , this.loader)
@@ -93,23 +99,5 @@ class FindUsage {
         }
         // set this package to jvm 
         this.loader.setCache(packageName , p )
-    }
-    
-    fn matchScope(dir string) ->(match bool){
-        if len(this.scope) == 0 {
-            return true
-        }
-        dirEles := common.getPathElements(dir)
-        if len(dirEles) > len(this.scope) {
-            // cannot match
-            return false 
-        }
-        match = true 
-        for k,v := range this.scope {
-            if v != dirEles[k] {
-                return false 
-            }
-        }
-        return match
     }
 }

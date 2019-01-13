@@ -32,23 +32,6 @@ public fn clean(args []string) {
 	) .clean()
 }
 
-
 fn main(args []string){
 	clean(args)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -74,6 +74,7 @@ class ExpressionArrayParser extends ParserExtends {
 			arr.Type.Type = ast.VariableTypeArray
 			arr.Type.array = array
 			arr.Type.pos = array.pos
+			arr.declarationHaveType = true 
 		}
 		/*
 			[]int {1, 2}

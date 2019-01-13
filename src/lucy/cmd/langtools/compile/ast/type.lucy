@@ -348,7 +348,7 @@ public class Type {
 		}
 		p, err := block.inheritedAttribute.p.load(i.Import)
 		if err != null {
-			return null, new error(sprintf("%s %.getMessage()",
+			return null, new error(sprintf("%s %s",
 				errMsgPrefix(this.pos), err.getMessage()))
 		}
 		if this.autoCompletion {

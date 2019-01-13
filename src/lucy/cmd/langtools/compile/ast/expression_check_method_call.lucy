@@ -386,18 +386,18 @@ class ExpressionCheckMethodCall {
 			} else {
 				methodCall := e.data.(ExpressionMethodCall)
 				methodCall.packageFunction = f
-				ret := f.Type.mkCallReturnTypes(e.pos)
+				valueTypes = f.Type.mkCallReturnTypes(e.pos)
 				errsLength := len(errs)
 				callArgsTypes := checkExpressions(block, methodCall.args, errs, true)
 				if len(errs) > errsLength {
-					return ret
+					return
 				}
 				var err error
 				methodCall.vArgs, err = f.Type.fitArgs(block , e.pos, call.args, callArgsTypes, f)
 				if err != null {
 					errs.append(err)
 				}
-				return ret
+				return
 			}
 		}
 		if v , ok:= d.(Variable) ; ok {

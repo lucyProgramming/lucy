@@ -2,6 +2,13 @@
 import "lucy/cmd/langtools/compile/ast"
 
 public class Fmt {
+    indentIncrement string
+
+    public fn Fmt(indentIncrement string = "    ") {
+        this.super()
+        this.indentIncrement = indentIncrement
+    }
+
     public fn fmt(nodes []ast.TopNode) -> (format string = ""){
         for k, n := range nodes {
             if t,ok := n.node.(ast.Comment) ; ok {
@@ -10,48 +17,58 @@ public class Fmt {
                 }else {
                     format += "//" + t.comment // contains \n
                 }
+                continue
             }
-            if t,ok := n.node.(ast.Block) ; ok {
+            if t , ok := n.node.(ast.Block) ; ok {
                 format += "{\n"
                 format += this.formatBlock("" , t) + "\n\n"
                 format += "}\n"
+                continue
             }
-            if t,ok := n.node.(ast.Function) ; ok {
+            if t , ok := n.node.(ast.Function) ; ok {
                 format += this.formatFunction("" , t ,false ) + "\n\n"
+                continue
             }
-            if t,ok := n.node.(ast.Enum) ; ok {
+            if t , ok := n.node.(ast.Enum) ; ok {
                 format += this.formatEnum("" , t) + "\n\n"
+                continue
             }
-            if t,ok := n.node.(ast.Class) ; ok {
+            if t , ok := n.node.(ast.Class) ; ok {
                 format += this.formatClass("" , t) + "\n\n"
+                continue
             }
             if t,ok := n.node.(ast.Constant) ; ok {
-                format += this.formatConstant("" , t)  + "\n\n"
+                format += this.formatConstant("" , t)  + "\n"
+                continue
             }
             if t,ok := n.node.(ast.Import) ; ok {
                 format += this.formatImport("" , t) + "\n"
+                continue
             }
             if t,ok := n.node.(ast.Expression) ; ok {
-               format += this.formatExpression("" , t) + "\n\n"
+               format += this.formatExpression("" , t) + "\n"
+               continue
             }
             if t,ok := n.node.(ast.TypeAlias) ; ok {
-               format += this.formatTypealais("" , t) + "\n\n"
+               format += this.formatTypealais("" , t) + "\n"
+               continue
             }
+            panic(n.getClass().toString() + " not handle")
         }
     }
     
-    fn formatTypealais(indent string , a ast.TypeAlias ) -> (format string = "") {
+    fn formatTypealais(indent string , a ast.TypeAlias) -> (format string = "") {
         format = indent
         format += sprintf ("typealias %s = %s" , a.name ,a.Type.typeName())
     }
     
-    fn formatConstant(indent string , c ast.Constant ) -> (format string = "") {
+    fn formatConstant(indent string , c ast.Constant) -> (format string = "") {
         format = indent
         format += "const " + c.name
         if c.Type != null {
             format += " " + c.Type.typeName()
         }
-        format += " =" +  c.defaultValueExpression.literalRaw
+        format += " =" +  this.formatExpression(indent + this.indentIncrement ,  c.defaultValueExpression) 
     }
 
     fn formatFunction(indent string , f ast.Function , isAbstract bool) -> (format string = "") {
@@ -72,12 +89,12 @@ public class Fmt {
         format += "("
         indent2 := indent
         if f.Type.lpContainsLf {
-            indent2 += "    "
+            indent2 += this.indentIncrement
             format += "\n"
             format += indent2
         }
         if f.Type.lpContainsInlineComment != null {
-            indent2 += "    "
+            indent2 += this.indentIncrement
             format += " // " + f.Type.lpContainsInlineComment
             format += indent2
         }
@@ -95,12 +112,12 @@ public class Fmt {
             }
             if v.containsLf {
                 format += "\n"
-                indent2 += "    "
+                indent2 += this.indentIncrement
                 format += indent2
             }
             if v.inlineComment != null {
                 format += " // " +  v.inlineComment
-                indent2 += "    "
+                indent2 += this.indentIncrement
                 format += indent2
             }
         }
@@ -115,12 +132,12 @@ public class Fmt {
             format += " -> ("
             indent2 = indent
             if f.Type.returnLpContainsLf {
-                indent2 += "    "
+                indent2 += this.indentIncrement
                 format += "\n"
                 format += indent2
             }
             if f.Type.returnLpContainsInlineComment != null {
-                indent2 += "    "
+                indent2 += this.indentIncrement
                 format += "// " + f.Type.returnLpContainsInlineComment
                 format += indent2
             }
@@ -138,26 +155,25 @@ public class Fmt {
                 }
                 if v.containsLf {
                     format += "\n"
-                    indent2 += "    "
+                    indent2 += this.indentIncrement
                     format += indent2
                 }
                 if v.inlineComment != null {
                     format += "// " +  v.inlineComment
-                    indent2 += "    "
+                    indent2 += this.indentIncrement
                     format += indent2
                 }
             }
             format += ")" 
         }
         if isAbstract {
-            return format 
+            return  
         }
         format += " {\n"
-        format += this.formatBlock(indent+"    ", f.block)
+        format += this.formatBlock(indent+this.indentIncrement, f.block)
         format += indent + "}\n"
     }
     
-
     fn formatClass(indent string , c ast.Class) -> (format string = "") {
         format = indent 
         if c.isPublic() {
@@ -203,7 +219,7 @@ public class Fmt {
                 maxName,maxAccessRange , maxTypeName ,hasFinal , hasStatic := 
                     this.getFieldDeclarationGroupMeta(fields)
                 for k,f := range fields {
-                    d := indent + "    "
+                    d := indent + this.indentIncrement
                     if maxAccessRange != "" {
                         accessControl := this.getFieldAccessControlString(f)
                         d += accessControl
@@ -272,7 +288,7 @@ public class Fmt {
             if method.isCompilerAuto {
                 continue
             }
-            m := indent + "    "
+            m := indent + this.indentIncrement
             if method.isPublic() {
                 m += "public "
             }
@@ -294,7 +310,7 @@ public class Fmt {
             if method.Function.name == "<init>" {
                 method.Function.name = c.shortName
             }
-            m += this.formatFunction( indent + "    ", method.Function , method.isAbstract())
+            m += this.formatFunction( indent + this.indentIncrement, method.Function , method.isAbstract())
             format += m + "\n"
         }
         format += indent + "}\n"
@@ -305,6 +321,7 @@ public class Fmt {
             s += " "
         }
     }
+
     fn getFieldAccessControlString(f ast.ClassFieldDeclaration) ->(access string = "") {
         if f.fields[0].isPublic() {
             access = "public"
@@ -376,7 +393,7 @@ public class Fmt {
                 continue
             }
             v := f.(ast.EnumName)
-            format += "    " + v.name
+            format += this.indentIncrement + v.name
             if v.noNeed != null {
                 format += " " + this.formatExpression(indent , v.noNeed)
             }
@@ -396,7 +413,6 @@ public class Fmt {
         format += indent + "}\n"
     }
     
-    
     fn formatImport(indent string , i ast.Import) -> (format string = "") {
         format = indent
         format += "import \"" + i.Import + "\""
@@ -413,6 +429,7 @@ public class Fmt {
     }
     
     fn formatStatement(indent string , s ast.Statement) -> (format string = ""){
+        
         switch s.Type {
             case ast.StatementTypeExpression:
                 if s.inlineComment == null {
@@ -424,7 +441,7 @@ public class Fmt {
                 format += this.formatIf(indent , s.statementIf)
             case ast.StatementTypeBlock:
                 format += indent + "{\n"
-                format += this.formatBlock(indent + "    ", s.block)
+                format += this.formatBlock(indent + this.indentIncrement, s.block)
                 format += indent + "}\n"
             case ast.StatementTypeFor:
                 format += this.formatFor(indent , s.StatementFor)
@@ -458,6 +475,7 @@ public class Fmt {
                 format += this.formatEnum(indent , s.Enum)
             case ast.StatementTypeNop:
                //nothing
+               //
             case ast.StatementTypeImport:
                 format += this.formatImport(indent , s.Import)
             case ast.StatementTypeTypeAlias:
@@ -479,11 +497,11 @@ public class Fmt {
         format = indent
         if d.isOneStatement {
             format += "defer {\n"
-            format += this.formatStatement(indent + "    " ,  d.block.statements[0])
+            format += this.formatStatement(indent + this.indentIncrement ,  d.block.statements[0])
             format += indent + "}\n"
         }else{
             format += "defer {\n"
-            format += this.formatBlock(indent + "    " ,  d.block)
+            format += this.formatBlock(indent + this.indentIncrement ,  d.block)
             format += indent + "}\n"
         }
     }
@@ -497,7 +515,7 @@ public class Fmt {
         }
         format += this.formatExpression(indent , s.condition)
         format += " {\n"
-        format += this.formatBlock(indent + "    " , s.block )
+        format += this.formatBlock(indent + this.indentIncrement , s.block )
         if len(s.elseIfList) == 0 && s.Else == null {
             format += indent + "}\n"
         }else {
@@ -505,7 +523,7 @@ public class Fmt {
         }
         for k,v := range s.elseIfList{
             format += " else if " + this.formatExpression(indent , v.condition) + " {\n"
-            format += this.formatBlock(indent + "    " , v.block )
+            format += this.formatBlock(indent + this.indentIncrement , v.block )
             if k == len(s.elseIfList) -1 && s.Else == null {
                 format += indent + "}\n"
             }else {
@@ -514,7 +532,7 @@ public class Fmt {
         }
         if s.Else != null {
             format += " else {\n"
-            format += this.formatBlock(indent + "    " , s.Else)
+            format += this.formatBlock(indent + this.indentIncrement , s.Else)
             format += indent + "}\n"
         }
     }
@@ -539,7 +557,7 @@ public class Fmt {
                 format += "{ // " + s.inlineComment 
             }
         }else if s.Init != null  && s.condition != null &&  s.increment ==null {
-            format += this.formatExpression(indent + "    " , s.condition) + " "
+            format += this.formatExpression(indent + this.indentIncrement , s.condition) + " "
             if s.inlineComment == null {
                 format += "{\n"
             }else {
@@ -547,13 +565,13 @@ public class Fmt {
             }   
         }else {
             if s.Init != null {
-                format += this.formatExpression(indent + "    " , s.Init) + " "
+                format += this.formatExpression(indent + this.indentIncrement , s.Init) + " "
             }
             if s.condition != null {
-                format += this.formatExpression(indent + "    " , s.condition) + " "
+                format += this.formatExpression(indent + this.indentIncrement , s.condition) + " "
             }
             if s.increment != null {
-                format += this.formatExpression(indent + "    " , s.condition) + " "
+                format += this.formatExpression(indent + this.indentIncrement , s.condition) + " "
             }
             if s.inlineComment == null {
                 format += "{\n"
@@ -561,7 +579,7 @@ public class Fmt {
                 format += "{ // " + s.inlineComment 
             }   
         }
-        format += this.formatBlock(indent + "    " , s.block)
+        format += this.formatBlock(indent + this.indentIncrement , s.block)
         format += indent + "}\n"
     }
     
@@ -586,15 +604,15 @@ public class Fmt {
                 }
                 if e.containsLf {
                     format += "\n"
-                    format += indent + "    "
+                    format += indent + this.indentIncrement
                 }
                 if e.inlineComment != null {
                     format += " //" + e.inlineComment
-                    format += indent + "    "
+                    format += indent + this.indentIncrement
                 }
             }
             format += ":\n"
-            format += this.formatBlock(indent + "    " , c.block)
+            format += this.formatBlock(indent + this.indentIncrement , c.block)
         }
         if s.defaultBlock != null {
             format += indent + "default:\n" 
@@ -602,7 +620,7 @@ public class Fmt {
         }
         format += indent + "}\n"
     }
-
+    
     fn formatWhen(indent string ,w ast.StatementWhen)-> (format string = "") {
         format = indent
         format += "when " + w.condition.typeName() + " {\n"
@@ -615,20 +633,20 @@ public class Fmt {
                 }
                 if v.containsLf {
                     d += "\n"
-                    d += indent + "    "
+                    d += indent + this.indentIncrement
                 }
                 if v.inlineComment != null {
                     d += " //" + v.inlineComment
-                    d += indent + "    "
+                    d += indent + this.indentIncrement
                 }
             }
             d += ":\n"
-            d += this.formatBlock(indent + "    " , c.block)
+            d += this.formatBlock(indent + this.indentIncrement , c.block)
             format += d 
         }
         if w.defaultBlock != null {
             format += "default:"
-            format += this.formatBlock(indent + "    " , w.defaultBlock)
+            format += this.formatBlock(indent + this.indentIncrement , w.defaultBlock)
         }
         format += indent + "}\n"
     }
@@ -663,11 +681,20 @@ public class Fmt {
                 ast.ExpressionTypeLong, 
                 ast.ExpressionTypeFloat , 
                 ast.ExpressionTypeDouble,
-                 ast.ExpressionTypeString:
+                ast.ExpressionTypeString:
                 return e.literalRaw 
             case ast.ExpressionTypeArray:
                 array := e.data.(ast.ExpressionArray)
-                if array.Type == null {
+                if array.declarationHaveType {
+                    format =  array.Type.typeName() + "{"
+                    for k,v := range array.expressions{
+                        format += this.formatExpression(indent + this.indentIncrement , v)
+                        if k != len(array.expressions) -1 {
+                            format += " , "
+                        }
+                    }
+                    format += "}"
+                }else {
                     format = "["
                     for k,v := range array.expressions{
                         format += this.formatExpression(indent , v)
@@ -676,15 +703,6 @@ public class Fmt {
                         }
                     }
                     format += "]"
-                }else {
-                    format =  array.Type.typeName() + "{"
-                    for k,v := range array.expressions{
-                        format += this.formatExpression(indent + "    " , v)
-                        if k != len(array.expressions) -1 {
-                            format += " , "
-                        }
-                    }
-                    format += "}"
                 }
             case ast.ExpressionTypeLogicalOr,
                 ast.ExpressionTypeLogicalAnd,  
@@ -701,10 +719,10 @@ public class Fmt {
                 bin := e.data.(ast.ExpressionBinary)
                 if bin.containsLf {
                     format = this.formatExpression(indent , bin.left) + " " +  e.op + "\n"
-                    format += indent + "    " + this.formatExpression(indent + "    ", bin.right)
+                    format += indent + this.indentIncrement + this.formatExpression(indent + this.indentIncrement, bin.right)
                 }else if bin.inlineComment != null {
                     format = this.formatExpression(indent , bin.left) + " " +   e.op + " //" + bin.inlineComment
-                    format += indent + "    "+ this.formatExpression(indent + "    ", bin.right)
+                    format += indent + this.indentIncrement+ this.formatExpression(indent + this.indentIncrement, bin.right)
                 }else {
                     format = this.formatExpression(indent , bin.left) + " "+ 
                         e.op + " " + this.formatExpression(indent , bin.right)
@@ -730,10 +748,10 @@ public class Fmt {
                 bin := e.data.(ast.ExpressionBinary)
                 if bin.containsLf {
                     format = this.formatExpression(indent , bin.left) + " " +  e.op + "\n"
-                    format += indent + "    " + this.formatExpression(indent + "    ", bin.right)
+                    format += indent + this.indentIncrement + this.formatExpression(indent + this.indentIncrement, bin.right)
                 }else if bin.inlineComment != null {
                     format = this.formatExpression(indent , bin.left) + " " +  e.op + " //" + bin.inlineComment
-                    format += indent + "    " + this.formatExpression(indent + "    ", bin.right)
+                    format += indent + this.indentIncrement + this.formatExpression(indent + this.indentIncrement, bin.right)
                 }else {
                     format = this.formatExpression(indent , bin.left) + " "+ 
                         e.op + " " + this.formatExpression(indent , bin.right)
@@ -751,10 +769,10 @@ public class Fmt {
                     format = this.formatExpression(indent , selection.Expression) + "."
                     if selection.containsLf {
                         format += "\n"
-                        format += indent + "    " + selection.name
+                        format += indent + this.indentIncrement + selection.name
                     }else if selection.inlineComment != null {
                         format += " //" + selection.inlineComment
-                        format += indent + "    " + selection.name
+                        format += indent + this.indentIncrement + selection.name
                     }else {
                         format += selection.name   
                     }
@@ -764,10 +782,10 @@ public class Fmt {
                 format = this.formatExpression(indent , selection.Expression) + "."
                 if selection.containsLf {
                     format += "\n"
-                    format += indent + "    " + selection.name
+                    format += indent + this.indentIncrement + selection.name
                 }else if selection.inlineComment != null {
                     format += " //" + selection.inlineComment
-                    format += indent + "    " + selection.name
+                    format += indent + this.indentIncrement + selection.name
                 }else {
                     format += selection.name   
                 } 
@@ -919,10 +937,8 @@ public class Fmt {
             case ast.ExpressionTypeVArgs:   
                 return   this.formatExpression(indent , e.data.(ast.Expression)) + "..."                            
             case ast.ExpressionTypeDot:   
-                return "."
-            default:
-                panic("not possible")                           
+                return "."     
+            case ast.ExpressionTypeAutoCompletion:                  
         }
     }
 }
-

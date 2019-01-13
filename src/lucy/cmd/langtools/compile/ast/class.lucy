@@ -530,6 +530,9 @@ public class Class {
         } else {
             args = callFatherCase.args
         }
+        if this.methods == null {
+            return 
+        }
         for _, v := range this.methods[SpecialMethodInit] {
             var vArgs CallVariableLengthArgs
             vArgs, err = v.Function.Type.fitArgs(block , pos, args, callArgs, v.Function)

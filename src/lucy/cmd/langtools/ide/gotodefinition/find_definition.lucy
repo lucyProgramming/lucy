@@ -19,6 +19,7 @@ class FindDefinition {
         searchFile string,
         matchLine int,
         storePackage []ast.Package){
+            
         this.super()
         this.lucyFiles = lucyFiles
         this.packageName = packageName

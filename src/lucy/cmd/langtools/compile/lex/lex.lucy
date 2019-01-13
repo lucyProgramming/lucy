@@ -14,6 +14,28 @@ public class Lexer {
 	autoCompletion int 
 	columnOffset int 
 	lastColumnOffset int 
+	
+	public fn Lexer(bs []byte, 
+		startLine, 
+		endColumnOffset int,
+		locateDefinition , 
+		getHover , 
+		findUsage ,
+		rename,
+		autoCompletion int) {
+		this.super()
+		this.bs = bs
+		this.end = len(bs)
+		this.line = startLine
+		this.columnOffset = endColumnOffset
+		this.lastLine = startLine
+		this.locateDefinition = locateDefinition
+		this.getHover = getHover
+		this.findUsage = findUsage
+		this.rename = rename 
+		this.autoCompletion = autoCompletion 
+
+	}
 	public fn getLineAndColumn() -> (line int, column int) {
 		return this.line, this.columnOffset
 	}

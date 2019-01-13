@@ -1,23 +1,23 @@
 
-public fn New(
-	bs []byte, 
-	startLine, 
-	endColumnOffset int,
-	locateDefinition , 
-	getHover , 
-	findUsage ,
-	rename,
-	autoCompletion int ) -> (lex Lexer) {
+// public fn NewLexer(
+// 	bs []byte, 
+// 	startLine, 
+// 	endColumnOffset int,
+// 	locateDefinition , 
+// 	getHover , 
+// 	findUsage ,
+// 	rename,
+// 	autoCompletion int ) -> (lex Lexer) {
 	
-	lex = new Lexer()
-	lex.bs = bs
-	lex.end = len(bs)
-	lex.line = startLine
-	lex.columnOffset = endColumnOffset
-	lex.lastLine = startLine
-	lex.locateDefinition = locateDefinition
-	lex.getHover = getHover
-	lex.findUsage = findUsage
-	lex.rename = rename 
-	lex.autoCompletion = autoCompletion 
-}
+// 	lex = new Lexer()
+// 	lex.bs = bs
+// 	lex.end = len(bs)
+// 	lex.line = startLine
+// 	lex.columnOffset = endColumnOffset
+// 	lex.lastLine = startLine
+// 	lex.locateDefinition = locateDefinition
+// 	lex.getHover = getHover
+// 	lex.findUsage = findUsage
+// 	lex.rename = rename 
+// 	lex.autoCompletion = autoCompletion 
+// }

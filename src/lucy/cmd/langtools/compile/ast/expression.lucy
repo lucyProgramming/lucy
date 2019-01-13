@@ -271,9 +271,9 @@ public class Expression {
 	fn isInteger() -> (is bool) {
 		return this.Type == ExpressionTypeByte ||
 			this.Type == ExpressionTypeShort ||
+			this.Type == ExpressionTypeChar ||
 			this.Type == ExpressionTypeInt ||
-			this.Type == ExpressionTypeLong ||
-			this.Type == ExpressionTypeChar
+			this.Type == ExpressionTypeLong 
 	}
 	fn isFloat() -> (is bool) {
 		return this.Type == ExpressionTypeFloat ||
@@ -906,6 +906,7 @@ public class Expression {
 				this.intExceedsError(errs)
 			case ExpressionTypeLong:
 				//TODO:: long check
+				
 		}
 	}
 }

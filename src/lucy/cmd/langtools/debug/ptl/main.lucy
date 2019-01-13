@@ -62,7 +62,7 @@ fn main(args []string) {
 		// utf8 bom
 		bs = bs[3:]
 	} 
-	lexer := lex.New(bs , 0,0,-1,-1,-1 , -1 , -1 )
+	lexer := new lex.Lexer(bs , 0,0,-1,-1,-1 , -1 , -1 )
 	tok,err := lexer.next()
 	if err != null {
 		print(err.getMessage())

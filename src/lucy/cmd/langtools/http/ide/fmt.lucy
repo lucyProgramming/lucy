@@ -40,7 +40,7 @@ class Fmt implements HttpHandler {
             return
         }
         {
-            formator := new ideLib.Fmt()
+            formator := new ideLib.Fmt("    ")
             s := formator.fmt(tops)
             bs := byte[](s)
             exchange.sendResponseHeaders(200 , long(len(bs)))

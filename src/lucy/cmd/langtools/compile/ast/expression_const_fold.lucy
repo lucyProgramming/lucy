@@ -13,7 +13,8 @@ class ExpressionConstFold {
 				return
 			}
 			if ee.isInteger() == false {
-				err = new error(sprintf("%s cannot apply '^' on a non-integer expression",
+				is = false 
+				err = new error(sprintf("%s cannot apply '~' on a non-integer expression",
 					errMsgPrefix(e.pos)))
 				return
 			}
@@ -30,6 +31,7 @@ class ExpressionConstFold {
 				return
 			}
 			if ee.Type != ExpressionTypeBool {
+				is = false 
 				err = new error(sprintf("%s cannot apply '!' on a non-bool expression",
 					errMsgPrefix(e.pos)))
 				return
@@ -53,21 +55,9 @@ class ExpressionConstFold {
 			    return
 			}
 			e.Type = ee.Type
-			is = true
-			switch ee.Type {
-			case ExpressionTypeByte:
-			     e.longValue = -ee.longValue
-            case ExpressionTypeShort:
-                 e.longValue = -ee.longValue
-            case ExpressionTypeChar:
-                 e.longValue = -ee.longValue
-            case ExpressionTypeInt:
-                 e.longValue = -ee.longValue
-            case ExpressionTypeLong:
-                e.longValue = -ee.longValue
-			case ExpressionTypeFloat:
-                e.doubleValue = -ee.doubleValue
-			case ExpressionTypeDouble:
+			if ee.isInteger() {
+				e.longValue = -ee.longValue
+			}else {  // must be float
 				e.doubleValue = -ee.doubleValue
 			}
 			e.literalRaw = "-" + ee.literalRaw
@@ -76,11 +66,11 @@ class ExpressionConstFold {
 		// && and ||
 		if e.Type == ExpressionTypeLogicalAnd || e.Type == ExpressionTypeLogicalOr {
 			bin := e.data.(ExpressionBinary)
-			is,err = .constantFold(bin.left , errs)
+			is , err = .constantFold(bin.left , errs)
 			if is == false || err != null {
 			    return
 			}
-			is,err = .constantFold(bin.right , errs)
+			is , err = .constantFold(bin.right , errs)
 			if is == false || err != null {
 			    return
 			}
@@ -118,11 +108,7 @@ class ExpressionConstFold {
 				return
 			} 
 			switch bin.left.Type {
-			case ExpressionTypeByte,
-				ExpressionTypeShort, 
-				ExpressionTypeChar, 
-				ExpressionTypeInt,  
-				ExpressionTypeLong:
+			case bin.left.isInteger():
 				left := bin.left.longValue
 				right := bin.right.longValue
 				switch e.Type {
@@ -156,7 +142,7 @@ class ExpressionConstFold {
 				e.checkIfConstantExceeds(errs)
 				return
 			case ExpressionTypeFloat,
-				ExpressionTypeDouble :
+				ExpressionTypeDouble:
 				left := bin.left.doubleValue
 				right := bin.right.doubleValue
 				switch e.Type {
@@ -219,7 +205,6 @@ class ExpressionConstFold {
 			if bin.left.isInteger() == false || bin.right.isInteger() == false {
 				return
 			}
-
             if e.Type == ExpressionTypeLsh {
                 e.longValue = bin.left.longValue << byte(bin.right.getLongValue())
             } else {

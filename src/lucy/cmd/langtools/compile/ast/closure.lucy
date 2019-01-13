@@ -1,5 +1,3 @@
-
-
 class ClosureMeta {
 	pos Pos
 }
@@ -51,4 +49,3 @@ public class Closure {
 		this.functions[f].pos = pos
 	}
 }
-

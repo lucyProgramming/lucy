@@ -194,4 +194,3 @@ var keywordsMap = {
 		"when"->         TokenWhen , 
 		"type" ->        TokenType
 }
- 

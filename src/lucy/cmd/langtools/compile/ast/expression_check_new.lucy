@@ -2,10 +2,13 @@ class ExpressionCheckNew {
 	
 	static fn check(e Expression , block Block, errs []error) ->(valueType Type)  {
 		no := e.data.(ExpressionNew)
+		if no.args == null {
+			no.args = []Expression{}
+		}
 		err := no.Type.resolve(block)
 		if err != null {
 			errs.append(err)
-			return null
+			return 
 		}
 		if block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
 			return  
@@ -23,22 +26,22 @@ class ExpressionCheckNew {
 		if no.Type.Type != VariableTypeObject {
 			errs.append(new error(sprintf("%s cannot have new on type '%s'",
 				no.Type.pos.errMsgPrefix(), no.Type.typeString())))
-			return null
+			return 
 		}
 		err = no.Type.Class.loadSelf(block , e.pos)
 		if err != null {
 			errs.append(err)
-			return null
+			return 
 		}
 		if no.Type.Class.isInterface() {
 			errs.append(new error( sprintf("%s '%s' is interface",
 				errMsgPrefix(no.Type.pos), no.Type.Class.name)))
-			return null
+			return 
 		}
 		if no.Type.Class.isAbstract() {
 			errs.append(new error( sprintf("%s '%s' is abstract",
 				errMsgPrefix(no.Type.pos), no.Type.Class.name)))
-			return null
+			return 
 		}
 		if no.Type.Class.findUsage {
 			// type must resolved 
@@ -46,18 +49,21 @@ class ExpressionCheckNew {
 			correctLastUsageType("instaniation" , no.Type.Class.findUsageInstances)
 			// set to ok 
 		}
-		ret := no.Type.cloneType()
-		ret.Type = VariableTypeObject
-		ret.pos = e.pos
+		valueType = no.Type.cloneType()
+		valueType.Type = VariableTypeObject
+		valueType.pos = e.pos
 		errsLength := len(errs)
 		callArgTypes := checkExpressions(block, no.args, errs, true)
 		if len(errs) > errsLength {
-			return ret
+			return 
+		}
+		if no.args == null {
+			no.args = []Expression{}
 		}
 		ms, matched, err := no.Type.Class.accessConstructionMethod(block , e.pos, errs, no, null, callArgTypes)
 		if err != null {
 			errs.append(err)
-			return ret
+			return 
 		}
 		if matched {
 			m := ms[0]
@@ -65,10 +71,10 @@ class ExpressionCheckNew {
 				errs.append(err)
 			}
 			no.construction = m
-			return ret
+			return 
 		}
 		errs.append(methodsNotMatchError(no.Type.pos, no.Type.typeString(), ms, callArgTypes))
-		return ret
+		return
 	}
 
 	static fn checkNewMapExpression(e Expression , block Block, newMap ExpressionNew,
