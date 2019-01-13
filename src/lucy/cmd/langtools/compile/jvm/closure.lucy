@@ -1,7 +1,6 @@
  import "lucy/cmd/langtools/compile/ast"
  import "lucy/cmd/langtools/compile/jvm/cg"
 
-
 enum  ClosureKind{
 	ClosureClassInt = 1 ,
 	ClosureClassLong ,
@@ -11,14 +10,8 @@ enum  ClosureKind{
 	ClosureClassObject
 }
 
-
-
-
 class Closure  {
 	closureObjectMetas map { ClosureKind -> ClosureObjectMeta }
-
-	
-
 
 	fn getMeta(t ast.VariableTypeKind) -> (meta ClosureObjectMeta) {
 		switch t {
@@ -174,8 +167,6 @@ class ClosureObjectMeta {
 		this.fieldDescription = fieldDescription
 	}
 }
-
-
 
 
 {

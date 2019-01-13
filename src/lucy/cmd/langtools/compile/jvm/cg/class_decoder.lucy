@@ -182,7 +182,7 @@ public class ClassDecoder {
 			a := new AttributeInfo()
 			a.nameIndex = binary.BigEndian.getChar(this.bs)
 			if this.classFile.constPools[a.nameIndex].tag != ConstantPoolTagUtf8 {
-				panic(sprintf("name index %d is not a utf8 const", a.nameIndex))
+				panic(sprintf("name index %d is not a utf8 const", int(a.nameIndex)))
 			}
 			length := binary.BigEndian.getInt(this.bs[2:])
 			this.bs = this.bs[6:]
