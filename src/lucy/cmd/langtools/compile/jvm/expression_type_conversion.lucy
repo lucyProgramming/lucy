@@ -107,7 +107,7 @@ class BuildExpressionTypeConversion {
             writeExits([]cg.Exit{okExit}, code.codeLength)
             return
         }
-
+        
         //[]byte("hello world")
         if conversion.Type.equal(ast.LucyBytesType) &&
             conversion.Expression.value.Type == ast.VariableTypeString {

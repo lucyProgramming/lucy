@@ -25,25 +25,25 @@ fn copyOPs(code cg.AttributeCode, op []byte) {
 
 fn loadInt(c cg.ClassHighLevel, code cg.AttributeCode, value int) {
 	switch value {
-	case int(-1):
+	case -1:
 		code.codes[code.codeLength] = cg.OP_iconst_m1
 		code.codeLength++
-	case int(0):
+	case 0:
 		code.codes[code.codeLength] = cg.OP_iconst_0
 		code.codeLength++
-	case int(1):
+	case 1:
 		code.codes[code.codeLength] = cg.OP_iconst_1
 		code.codeLength++
-	case int(2):
+	case 2:
 		code.codes[code.codeLength] = cg.OP_iconst_2
 		code.codeLength++
-	case int(3):
+	case 3:
 		code.codes[code.codeLength] = cg.OP_iconst_3
 		code.codeLength++
-	case int(4):
+	case 4:
 		code.codes[code.codeLength] = cg.OP_iconst_4
 		code.codeLength++
-	case int(5):
+	case 5:
 		code.codes[code.codeLength] = cg.OP_iconst_5
 		code.codeLength++
 	default:

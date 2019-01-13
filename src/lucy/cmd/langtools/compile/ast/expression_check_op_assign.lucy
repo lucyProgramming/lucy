@@ -69,15 +69,13 @@ class ExpressionCheckOpAssign {
 			}
 			if left.isInteger() && 
 				right.isInteger() && 
-				bin.right.isLiteral() && 
-				block.inheritedAttribute.isCompileTask {
+				bin.right.isLiteral()  {
 				bin.right.convertToNumberType(left.Type)
 				return
 			}
 			if left.isFloat() && 
 				right.isFloat() && 
-				bin.right.isLiteral() && 
-				block.inheritedAttribute.isCompileTask  {
+				bin.right.isLiteral()  {
 				bin.right.convertToNumberType(left.Type)
 				return
 			}
@@ -92,8 +90,7 @@ class ExpressionCheckOpAssign {
 		if e.Type == ExpressionTypeLshAssign ||
 			e.Type == ExpressionTypeRshAssign {
 			if left.isInteger() && right.isInteger() {
-				if right.Type == VariableTypeLong && 
-					block.inheritedAttribute.isCompileTask {
+				if right.Type == VariableTypeLong {
 					bin.right.convertToNumberType(VariableTypeInt)
 				}
 				return

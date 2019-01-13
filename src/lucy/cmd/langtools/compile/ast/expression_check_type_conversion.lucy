@@ -19,8 +19,7 @@ class ExpressionCheckTypeConversion {
 			return 
 		}
 		if on.isNumber() && conversion.Type.isNumber() {
-			if conversion.Expression.isLiteral()  && 
-				block.inheritedAttribute.isCompileTask {
+			if conversion.Expression.isLiteral()  {
 				conversion.Expression.convertToNumberType(conversion.Type.Type)
 				e.Type = conversion.Expression.Type
 				e.longValue = conversion.Expression.longValue
