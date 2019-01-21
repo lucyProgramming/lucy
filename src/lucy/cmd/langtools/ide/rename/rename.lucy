@@ -1,134 +1,55 @@
 import "lucy/cmd/langtools/compile/ast"
-import "lucy/cmd/langtools/ide"
-import "lucy/os"
-import "lucy/cmd/langtools/compile/parser"
-import "java/io"
+import "java/lang/Object"
 
 typealias filename = string 
 
 class ReName {
-    lucyFiles []ide.LucyFile
-    packageName string
-    printErr bool
-    lucyPath []string
-    classPath []string 
+    usages ast.Usage[] 
+    on Object
     to string 
-    lucyAstNodes map{filename->[]ast.TopNode} 
-    otherPackageErrors []error 
-    packageLoader PackageLoader 
-    
-    public fn ReName(lucyFiles []ide.LucyFile , packageName string , printErr bool , classPath, lucyPath []string , to string  ) {
+
+    public fn ReName(usages ast.Usage[] , on Object , to string) {
         this.super()
-        this.lucyFiles = lucyFiles
-        this.packageName = packageName
-        this.printErr = printErr
-        this.classPath = classPath
-        this.lucyPath = lucyPath
+        this.usages = usages
+        this.on = on 
         this.to = to 
     }
 
     fn rename() {
-        // current package must be used
-        this.lucyAstNodes = new map{filename->[]ast.TopNode}()
-        var tops = new []ast.TopNode(0) 
-        var errs = new []error(0)
-        for _,v := range this.lucyFiles {
-            length := len(tops)
-            errs.appendAll(
-                parser.parse(tops , v.realPathName , v.bs , false , 10 , -1 , -1 , -1 , v.rename , -1) 
-            )
-            this.lucyAstNodes[v.realPathName] = tops[length : len(tops)]
+        if t,ok := this.on.(ast.ClassMethod) ; ok == true && t.Function.name == ast.SpecialMethodInit {
+            // init method cannot be renamed
+            return 
         }
-        packageLoader := new PackageLoader(this.classPath , this.lucyPath , this)
-        this.packageLoader = packageLoader
-        p := new ast.Package(this.packageName , false , packageLoader , false)
-        errs.appendAll(p.typeCheck(tops))
-        if this.printErr {
-            for v := range errs {
-                os.stderr.println(v.getMessage())
-            }
-        }
-        if len(errs) > (0) {
-            // rename is not safe 
-            // print errors and exit
-            if this.printErr == false {
-                for v := range errs {
-                    os.stderr.println(v.getMessage())
-                }
-            }
-            os.exit(1)
-        } 
-        /*
-            set this package to cache 
-            when another trying to load this pacakge could use the cache and the "findUsage" has created in memory
-        */
-        packageLoader.setCache(this.packageName , p)
-        if p.renameIsGlobal {
-            this.searchLucyPath()        
-        }
-        length := 1 + len(packageLoader.loadPacakges)
-        ps := new []ast.Package(length)
-        ps[0] = p 
-        var i = 1 
-        for _,p := range packageLoader.loadPacakges{
-            ps[i] = p 
-            i++
-        }
-        this.writeBack(ps)
-    }
-    
-    fn writeBack(ps []ast.Package) {
-        fmt := new ide.Fmt() 
-        for p := range ps {
-            files := p.getDirtyFiles()
-            for f,_ := range files {
-                formated := fmt.fmt(this.lucyAstNodes[f])
-                if err :=  os.writeFile(f , byte[](formated)) ; err != null {
-                    panic(err)
-                }
-            }
-        }
-    }
-
-
-    public  fn searchLucyPath() {
-        for _,v := range this.lucyPath {
-            this.searchDir("" , v + "/src/")
-        }
-    }
-    
-    fn searchDir(packageName string , dir string ) {
-        list := (new io.File(dir)).list()
-        containsLucyFile := false 
-        for v := range list {
-            subDir := dir + "/" + v 
-            if packageName == "" {
-                this.searchDir(v , subDir)
-                continue
+        grouyByFileName := new map{string -> []ast.Usage} ()
+        for _,v := range this.usages {
+            if grouyByFileName.keyExist(v.pos.filename)  {
+                grouyByFileName[v.pos.filename].append(v)
             }else {
-                this.searchDir(packageName + "/" + v , subDir)
-                continue
-            }
-            if v.endsWith(".lucy") {
-                containsLucyFile = true
+                grouyByFileName[v.pos.filename] = [v]
             }
         }
-        if containsLucyFile == false {
-            // no lucy files
+        if t , ok := this.on.(ast.Import) ; ok == true {
+            // init method cannot be renamed
+            this.renameImport(grouyByFileName , t)
             return 
         }
-        if this.packageLoader.getCache(packageName) != null {
-            //handled 
-            //when handle subdirectory this package processed 
-            return 
-        }
-        lucyFiles := ide.readLucyFiles(ide.getLucyFiles(dir))
-        p , es := ide.parseAstAndTypeCheck(packageName , lucyFiles ,false , "" , -1 , this.packageLoader)
-        if this.printErr {
-            for v := range es{
-                os.stderr.println(v.getMessage())
+        
+
+    }  
+
+    fn getUsageGroupByLine(usages []ast.Usage) -> (ret map{int -> []ast.Usage} = new map{int -> []ast.Usage}()) {
+        for v := range usages {
+            if ret.keyExist(v.pos.startLine) {
+                ret[v.pos.startLine].append(v)
+            }else {
+                ret[v.pos.startLine] = [v]
             }
         }
-        this.packageLoader.setCache(packageName , p )  // already handled
     }
+    
+
+    fn renameImport(grouyByFileName map{string -> []ast.Usage}, i ast.Import ) {
+        
+    }
+    
 }

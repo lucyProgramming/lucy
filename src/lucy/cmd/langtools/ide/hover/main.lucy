@@ -14,7 +14,6 @@ public fn getHover (file string , pos int , bs []byte) ->(s string = "") {
         storePackage[0].locateDefinitionBaseOn == null {
         return 
     }
-    print(storePackage[0].locateDefinitionBaseOn)
     return new MakeHover(storePackage[0].locateDefinitionBaseOn).make()
 }
 

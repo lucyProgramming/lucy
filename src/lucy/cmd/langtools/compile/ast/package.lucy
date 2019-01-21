@@ -557,18 +557,7 @@ public class Package {
 		return errs
 	}
 	
-	fn insertSouceFiles(filenames []string) {
-		if this.files == null {
-			this.files = new map {string->SourceFile} ()
-		}
-		for v := range filenames {
-			x := this.files[v]
-			if x == null {
-				x = new SourceFile(v)
-				this.files[v] = x
-			}
-		}
-	}
+	
 
 	public fn insertImport(i Import) -> (err error) {
 		if i.findUsage {
@@ -590,12 +579,24 @@ public class Package {
 		return x.insertImport(this.block , i)
 	}
 
-	public fn setFileDirty(filename string ) {
-		//set modified file is "isDirty"
-		//rename will use this 
-		//
-		this.files[filename].isDirty = true
-	}
+	// fn insertSouceFiles(filenames []string) {
+	// 	if this.files == null {
+	// 		this.files = new map {string->SourceFile} ()
+	// 	}
+	// 	for v := range filenames {
+	// 		x := this.files[v]
+	// 		if x == null {
+	// 			x = new SourceFile(v)
+	// 			this.files[v] = x
+	// 		}
+	// 	}
+	// }
+	// public fn setFileDirty(filename string ) {
+	// 	//set modified file is "isDirty"
+	// 	//rename will use this 
+	// 	//
+	// 	this.files[filename].isDirty = true
+	// }
 	
 	public fn getDirtyFiles() ->(files map{string->bool}) {
 		files = new map{string->bool}()

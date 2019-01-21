@@ -1,25 +1,19 @@
 
-import "lucy/cmd/langtools/ide"
-import "lucy/cmd/langtools/ide/gotodefinition"
-import "java/nio/file/FileSystems"
-import "lucy/cmd/langtools/common"
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/ide/findusage"
 import "lucy/os"
 
 public fn rename( file string, to string, pos int) {
-    definition := gotodefinition.findDefinition(file ,pos , null,null)
-    if definition == null {
+    storePackage := []ast.Package{null}
+    usages := findusage.findUsage(file , pos , null , storePackage)
+    if len(usage)  == 0 {
         return 
     }
-    lucyPath , packageName := ide.locateLucyFile(definition.filename)
-    var lucyFiles = ide.readLucyFiles(ide.getLucyFiles(lucyPath + "/src/" + packageName))    
-    fileSystem := FileSystems.getDefault()
-    for v := range lucyFiles {
-        if fileSystem.getPath(definition.filename).getFileName().toString() == 
-            fileSystem.getPath(v.realPathName).getFileName().toString(){
-            v.rename = (definition.endLine << 16) | int(char(definition.endColumnOffset -1 )) 
-        }
+    if storePackage[0] == null  || 
+        storePackage[0].locateDefinitionBaseOn == null{
+        return 
     }
-    new ReName(lucyFiles , packageName , true ,common.getClassPath(), common.getLucyPath() , to ).rename()
+    new ReName(usages , storePackage[0].locateDefinitionBaseOn , to).rename()
 }
 
 fn main(args []string) {

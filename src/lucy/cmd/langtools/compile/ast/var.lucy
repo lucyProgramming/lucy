@@ -18,7 +18,7 @@ const	DefaultExceptionClass   = "java/lang/Exception"
 const	JavaThrowableClass      = "java/lang/Throwable"
 const	JavaStringClassName     = "java/lang/String"
 const	Super                   = "super"
-const	SpecialMethodInit       = "<init>"
+public const	SpecialMethodInit       = "<init>"
 const	ClassInitMethod         = "<clinit>"
 
 
