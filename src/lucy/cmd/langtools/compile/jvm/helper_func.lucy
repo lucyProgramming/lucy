@@ -1,6 +1,6 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/common"
-import "lucy/cmd/langtools/compile/jvm/cg"
+import "lucy/jvm/cg"
 
 fn writeExits(es []cg.Exit, to int) {
 	for _, e := range es {

@@ -1,4 +1,4 @@
-import "lucy/cmd/langtools/compile/jvm/cg" 
+import "lucy/jvm/cg" 
 import "java/lang/Object"
 import "lucy/cmd/langtools/compile/common"
 

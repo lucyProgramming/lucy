@@ -26,7 +26,7 @@ public class AttributeStackMap {
 		bs := new []byte(2)
 		binary.BigEndian.putChar(bs, char(len(this.StackMaps)))
 		for _, v := range this.StackMaps {
-			bs . appendAll(v.toBytes())
+			bs.appendAll(v.toBytes())
 		}
 		info.info = bs
 		info.attributeLength = (len(info.info))

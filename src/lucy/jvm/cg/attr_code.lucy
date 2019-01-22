@@ -1,0 +1,101 @@
+import "lucy/binary"
+
+
+public class AttributeCode  {
+	public	maxStack          char
+	public	maxLocals         char
+	public	codeLength        int
+	public	codes             []byte
+	public	lineNumbers       AttributeLineNumber
+	public	exceptions        []ExceptionTable
+			attributes        []AttributeInfo
+	public	attributeStackMap AttributeStackMap
+	
+	public fn appendException(e ExceptionTable){
+		if this.exceptions == null {
+			this.exceptions = [e]
+		}else {
+			this.exceptions.append(e)
+		}
+	}
+	
+	fn toAttributeInfo(c Class) -> (ret AttributeInfo)  {
+		ret = new AttributeInfo()
+		ret.nameIndex = c.insertUtf8Const("Code")
+		ret.info = new []byte(8)
+		binary.BigEndian.putChar(ret.info[0:2], this.maxStack)
+		binary.BigEndian.putChar(ret.info[2:4], this.maxLocals)
+		binary.BigEndian.putInt(ret.info[4:8], (this.codeLength))
+		ret.info.appendAll( this.codes)
+		ret.info.appendAll(this.mkExceptions())
+		if this.attributes == null {
+		    this.attributes =  []AttributeInfo{}
+		}
+		if this.lineNumbers != null {
+			if info := this.lineNumbers.toAttributeInfo(c); info != null {
+				this.attributes.append(info)
+			}
+		}
+		if this.attributeStackMap != null {
+			if info := this.attributeStackMap.toAttributeInfo(c); info != null {
+				this.attributes.append(info)
+			}
+		}
+		ret.info.appendAll(this.mkAttributes(c))
+		ret.attributeLength = (len(ret.info))
+		return ret
+	}
+
+	/*
+		mk line number attribute
+	*/
+	public fn mKLineNumber(lineNumber int) {
+	    if this.lineNumbers == null {
+	        this.lineNumbers = new AttributeLineNumber()
+	    }
+		line := new AttributeLinePc()
+		line.startPc = char(this.codeLength)
+		line.lineNumber = char(lineNumber)
+		this.lineNumbers.lineNumbers.append(line)
+	}
+
+	fn mkAttributes(c Class) -> (bs []byte)  {
+		bs = new []byte (2)
+		binary.BigEndian.putChar(bs, char(len(this.attributes)))
+		if len(this.attributes) > 0 {
+			b := new []byte(0)
+			for _, v := range this.attributes {
+				bb := new []byte(2)
+				binary.BigEndian.putChar(bb, v.nameIndex)
+				bs4 := new []byte(4)
+				binary.BigEndian.putInt(bs4, (v.attributeLength))
+				bb.appendAll(bs4)
+				bb.appendAll(v.info)
+				b.appendAll(bb)
+			}
+			bs.appendAll(b)
+		}
+	}
+	
+	fn mkExceptions() -> (bs []byte)  {
+		bs = new []byte (2)
+		binary.BigEndian.putChar(bs, char(len(this.exceptions)))
+		if len(this.exceptions) > 0 {
+			b := new []byte (8*len(this.exceptions))
+			for k, v := range this.exceptions {
+				binary.BigEndian.putChar(b[k*8:], v.startPc)
+				binary.BigEndian.putChar(b[k*8+2:], v.endPc)
+				binary.BigEndian.putChar(b[k*8+4:], v.handlerPc)
+				binary.BigEndian.putChar(b[k*8+6:], v.catchType)
+			}
+			bs.appendAll(b)
+		}
+	}
+}
+
+public class ExceptionTable  {
+	public startPc   char
+	public endPc     char
+	public handlerPc char
+	public catchType char
+}

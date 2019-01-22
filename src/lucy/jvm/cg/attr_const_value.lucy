@@ -1,0 +1,15 @@
+ import "lucy/binary"
+ 
+
+public class AttributeConstantValue {
+	public index char
+	
+	fn toAttributeInfo(c Class) -> (info AttributeInfo) {
+		info = new AttributeInfo()
+		info.nameIndex = c.insertUtf8Const(AttributeNameConstValue)
+		info.attributeLength = 2
+		info.info = new []byte(2)
+		binary.BigEndian.putChar(info.info, this.index)
+		return info
+	}
+}

@@ -1,6 +1,6 @@
 
 import "lucy/cmd/langtools/compile/ast"
-import "lucy/cmd/langtools/compile/jvm/cg"
+import "lucy/jvm/cg"
 
 class BuildExpressionRelation {
     

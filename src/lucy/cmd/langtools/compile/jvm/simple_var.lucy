@@ -1,6 +1,6 @@
 
 import "lucy/cmd/langtools/compile/ast"
-import "lucy/cmd/langtools/compile/jvm/cg"
+import "lucy/jvm/cg"
 
 /*
 	store local var according on type and offset
