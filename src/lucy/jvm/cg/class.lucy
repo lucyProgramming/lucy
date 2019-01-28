@@ -500,5 +500,19 @@ public class Class {
 	public fn getAttributeByName( name string) -> (attrs []AttributeInfo) {
 		return getAttributeByName(this.AttributeGroupedByName , name)
 	}
+	
+	public fn getName()-> (name string){
+		t := this.constPools[this.thisClass]
+		nameIndex := binary.BigEndian.getChar(t.info)
+		return string(this.constPools[nameIndex].info)
+	}
+	public fn getInterfacesName()-> (names []string){
+		names = new []string(len(this.interfaces))
+		for k,v := range this.interfaces {
+			t := this.constPools[v]
+			nameIndex := binary.BigEndian.getChar(t.info)
+			names[k] = string(this.constPools[nameIndex].info)
+		}
+	}
 }
 
