@@ -481,7 +481,7 @@ public class Class {
 			this.writeAttributeInfo(v.attributes)
 		}
 	}
-
+	
 	fn writeAttributeInfo(attrs []AttributeInfo)   {
 		bs2 := new []byte(2)
 		binary.BigEndian.putChar(bs2, char(len(attrs)))

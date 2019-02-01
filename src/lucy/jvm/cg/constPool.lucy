@@ -238,8 +238,6 @@ class ConstantInfoUtf8  {
 	}
 }
 
-
-
 class ConstantInfoMethodType  {
 	descriptorIndex char
 	fn ConstantInfoMethodType(index char){ 
@@ -257,18 +255,15 @@ class ConstantInfoMethodType  {
 
 
 
-/*
-type ConstantInfoInvokeDynamic  {
+class  ConstantInfoInvokeDynamic  {
 	bootstrapMethodAttrIndex char
 	nameAndTypeIndex         char
-}
 
-func (this *ConstantInfoInvokeDynamic) ToConstPool() *ConstPool {
-	info := &ConstPool{}
-	info.tag = ConstantPoolTagInvokeDynamic
-	info.info = new []byte(4)
-	binary.BigEndian.putChar(info.info, this.bootstrapMethodAttrIndex)
-	binary.BigEndian.putChar(info.info[2:], this.nameAndTypeIndex)
-	return info
+	fn ToConstPool() ->(info ConstPool)  {
+		info = new ConstPool()
+		info.tag = ConstantPoolTagInvokeDynamic
+		info.info = new []byte(4)
+		binary.BigEndian.putChar(info.info, this.bootstrapMethodAttrIndex)
+		binary.BigEndian.putChar(info.info[2:], this.nameAndTypeIndex)
+	}
 }
-*/

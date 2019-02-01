@@ -1,0 +1,24 @@
+import "java/lang/Object";
+
+public class ClosureDouble{
+	public value double
+}
+
+public class ClosureFloat{
+	public value float
+}
+
+public class ClosureInt {
+	public value int
+}
+
+public class ClosureLong{
+	public value long
+}
+
+public class ClosureObject {
+	public value Object
+}
+public class ClosureString {
+	public value string
+}

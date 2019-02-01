@@ -15,11 +15,3 @@ public fn getAttributeByName(a AttributeGroupedByName , name string) -> (attrs [
 	}
 	return a[name]
 }
-
-
-
-
-
-
-
-
