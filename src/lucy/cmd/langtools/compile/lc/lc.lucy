@@ -146,7 +146,7 @@ public class Compiler {
 			os.exit(1)
 		}
 		var	loader = new FileLoader(lucyPath , classPaths)
-		p := new ast.Package(this.flags.packageName.getValue() , this.flags.disableCheckUnUse.getValue() , loader , true)
+		p := new ast.Package(this.flags.packageName.getValue() , this.flags.disableCheckUnUse.getValue() , loader )
 		this.Errs.appendAll(p.typeCheck(this.Tops))
 		if len(this.Errs) > 0 {
 			this.exit()

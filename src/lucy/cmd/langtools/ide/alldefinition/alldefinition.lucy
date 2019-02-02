@@ -3,77 +3,83 @@ import "lucy/cmd/langtools/ide"
 import "lucy/os"
 import "lucy/cmd/langtools/common"
 
-
 class AllDefinition {
-    lucyFiles []ide.LucyFile
-    packageName string
-    printErr bool
-    lucyPath string
-    
+    lucyFiles   []ide.LucyFile
+    packageName string        
+    printErr    bool          
+    lucyPath    string        
+
     fn AllDefinition(lucyFiles []ide.LucyFile , packageName string , lucyPath string , printErr bool) {
         this.super()
         this.lucyFiles = lucyFiles
-        this.lucyPath = lucyPath 
+        this.lucyPath = lucyPath
         this.packageName = packageName
         this.printErr = printErr
     }
-    fn getAllDefinition() -> (alldefinition ide.Definition[]){
+    fn getAllDefinition() -> (alldefinition ide.Definition[]) {
         nodes , errs := ide.parseAst(this.lucyFiles)
         if this.printErr {
-            for v := range errs{
+            for v := range errs {
                 os.stderr.println(v.getMessage())
             }
+
         }
         loader := new ide.PackageLoader(common.getLucyPath() , common.getClassPath())
-        loader.onlyAnalyzeGlobals = true 
-        p := new ast.Package(this.packageName , true , loader ,false)
+        loader.onlyAnalyzeGlobals = true
+        p := new ast.Package(this.packageName , true , loader)
         p.onlyAnalyzeGlobals = true // make the process faster
         errs = p.typeCheck(nodes)
         if this.printErr {
-            for v := range errs{
+            for v := range errs {
                 os.stderr.println(v.getMessage())
             }
+
         }
         return this.mkResult(p)
     }
-    
-    fn mkResult(p ast.Package) ->(result ide.Definition[]) {
+
+    fn mkResult(p ast.Package) -> (result ide.Definition[]) {
         items := []ide.Definition{}
         for name , v := range p.block.variables {
             item := new ide.Definition()
             item.Type = "variable"
-            item.pos = v.pos 
+            item.pos = v.pos
             item.name = name
             items.append(item)
         }
+
         for name , v := range p.block.constants {
             item := new ide.Definition()
             item.Type = "constant"
-            item.pos = v.pos 
+            item.pos = v.pos
             item.name = name
             items.append(item)
         }
+
         for name , v := range p.block.functions {
             item := new ide.Definition()
             item.Type = "function"
-            item.pos = v.pos 
+            item.pos = v.pos
             item.name = name
             items.append(item)
         }
+
         for name , v := range p.block.enums {
             item := new ide.Definition()
             item.Type = "enum"
-            item.pos = v.pos 
+            item.pos = v.pos
             item.name = name
             items.append(item)
         }
+
         for name , v := range p.block.classes {
             item := new ide.Definition()
             item.Type = "class"
-            item.pos = v.pos 
+            item.pos = v.pos
             item.name = name
             items.append(item)
         }
+
         for name , v := range p.block.typeAliases {
             item := new ide.Definition()
             item.Type = "typealias"
@@ -81,15 +87,9 @@ class AllDefinition {
             item.name = v.alias.name
             items.append(item)
         }
+
         return copy(new ide.Definition[](len(items)) , items)
     }
 }
-
-
-
-
-
-
-
 
 

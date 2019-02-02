@@ -307,7 +307,6 @@ public class Block {
         this.inheritedAttribute.classMethod = father.inheritedAttribute.classMethod
         this.inheritedAttribute.classAndFunctionNames = father.inheritedAttribute.classAndFunctionNames
         this.inheritedAttribute.p = father.inheritedAttribute.p
-        this.inheritedAttribute.isCompileTask = father.inheritedAttribute.isCompileTask
 
         if this.isFunctionBlock || this.isClassBlock {
             this.inheritedAttribute.forBreak = null

@@ -1,136 +1,141 @@
 import "lucy/jvm/cg"
 
 class ExpressionCheckVarAssign {
-	static fn check(e Expression , block Block, errs []error) {
-		bin := e.data.(ExpressionBinary)
-		var lefts []Expression
-		if bin.left.Type == ExpressionTypeList {
-			lefts = bin.left.data.([]Expression)
-		} else {
-			lefts = []Expression{bin.left}
-		}
-		values := bin.right.data.([]Expression)
-		for _, v := range values {
-			v.lefts = lefts
-		}
-		if len(values) == 0 {
-			return 
-		}
-		assignTypes := checkExpressions(block, values, errs, false)
-		if len(lefts) > len(assignTypes) {
-			pos := values[len(values)-1].pos
-			errs.append(new error( sprintf("%s too few values , assign %d values to %d destinations",
-				pos.errMsgPrefix(),
-				len(assignTypes),
-				len(lefts))))
-		} else if len(lefts) < len(assignTypes) {
-			pos := getExtraExpressionPos(values, len(lefts))
-			errs.append(new error( sprintf("%s too many values , assign %d values to %d destinations",
-				pos.errMsgPrefix(),
-				len(assignTypes),
-				len(lefts))))
-		}
-		var err error
-		noNewVariable := true
-		assign := new ExpressionVarAssign()
-		assign.lefts = lefts
-		assign.initValues = values
-		assign.ifDeclaredBefore = new []bool(len(lefts))
-		if block.variables == null {
-			block.variables = new map{string ->Variable} ()
-		}
-		for k, v := range lefts {
-			var variableType Type = null
-			if k < len(assignTypes) {
-				variableType = assignTypes[k]
-			}
-			if v.Type != ExpressionTypeIdentifier {
-				t := v.getLeftValue(block, errs)
-				if t == null || variableType == null {
-					continue
-				}
-				if t.assignAble(block , errs, variableType) == false {
-					errs.append(new error( sprintf("%s cannot use '%s' as '%s'",
-						t.pos.errMsgPrefix(), variableType.typeString(), t.typeString())))
-				}
-				continue
-			}
-			identifier := v.data.(ExpressionIdentifier)
-			if identifier.name == UnderScore {
-				continue
-			}
-			if variable := block.variables[identifier.name]; variable != null {
-				if variableType != null {
-					if variable.Type.assignAble(block , errs, variableType) == false {
-						errs.append(new error( sprintf("%s cannot assign '%s' to '%s'",
-							assignTypes[k].pos.errMsgPrefix(),
-							variable.Type.typeString(),
-							variableType.typeString())))
-					}
-				}
-				identifier.Variable = variable
-				assign.ifDeclaredBefore[k] = true
-				if identifier.locateDefinition {
-					block.inheritedAttribute.p.setLocationDefinition(variable)
-					return 
-				}
-			} else { // should be no error
-				noNewVariable = false
-				vd := new Variable()
-				if k < len(assignTypes) {
-					vd.Type = assignTypes[k]
-				}
-				vd.name = identifier.name
-				vd.pos = v.pos
-				if identifier.locateDefinition {
-					block.inheritedAttribute.p.setLocationDefinition(vd)
-					return 
-				}
-				if variableType == null {
-					continue
-				}
-				vd.findUsage = identifier.findUsage  
-				if vd.findUsage {
-					u := new Usage()
-					u.Type = "declaration"
-					u.pos = vd.pos 
-					vd.findUsageInstances = [u]
-					block.inheritedAttribute.p.findUsage = vd.findUsageInstances
-					block.inheritedAttribute.p.findUsageIsGlobal = e.isGlobal 
-				}
-				vd.comment = identifier.comment
-				vd.Type = variableType.cloneType()
-				vd.Type.pos = e.pos
-				if err := variableType.isTyped(); err != null {
-					errs.append(err)
-				}
-				if e.isGlobal {
-					err = block.inheritedAttribute.p.block.insert(vd.name, v.pos, vd)
-					vd.isGlobal = true
-				} else {
-					if block.inheritedAttribute.Function != null {
-						if err := block.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(vd) ; err != null{
-							errs.append(err)
-						}
-					}
-					err = block.insert(vd.name, v.pos, vd)
-				}
-				identifier.Variable = vd
-				if err != null {
-					errs.append(err)
-					continue
-				}
-				if e.isPublic { // only use when is is global
-					vd.accessFlags |= cg.AccFieldPublic
-				}
-			}
-		}
-		if noNewVariable {
-			errs.append(new error( sprintf("%s no new variables to create", e.pos.errMsgPrefix())))
-		}
-		if block.inheritedAttribute.isCompileTask {
-			e.data = assign
-		}
-	}
-} 
+    static fn check(e Expression , block Block , errs []error) {
+        bin := e.data.(ExpressionBinary)
+        var lefts []Expression
+        if bin.left.Type == ExpressionTypeList {
+            lefts = bin.left.data.([]Expression)
+        } else {
+            lefts = []Expression{bin.left}
+        }
+
+        values := bin.right.data.([]Expression)
+        for _ , v := range values {
+            v.lefts = lefts
+        }
+
+        if len(values) == 0 {
+            return
+        }
+        assignTypes := checkExpressions(block , values , errs , false)
+        if len(lefts) > len(assignTypes) {
+            pos := values[len(values) - 1].pos
+            errs.append(new error(sprintf("%s too few values , assign %d values to %d destinations",
+                pos.errMsgPrefix(),
+                len(assignTypes),
+                len(lefts))))
+        } else if len(lefts) < len(assignTypes) {
+            pos := getExtraExpressionPos(values , len(lefts))
+            errs.append(new error(sprintf("%s too many values , assign %d values to %d destinations",
+                pos.errMsgPrefix(),
+                len(assignTypes),
+                len(lefts))))
+        }
+        var err error
+        noNewVariable := true
+        assign := new ExpressionVarAssign()
+        assign.lefts = lefts
+        assign.initValues = values
+        assign.ifDeclaredBefore = new []bool(len(lefts))
+        if block.variables == null {
+            block.variables = new map{string -> Variable}()
+        }
+        for k , v := range lefts {
+            var variableType Type = null
+            if k < len(assignTypes) {
+                variableType = assignTypes[k]
+            }
+            if v.Type != ExpressionTypeIdentifier {
+                t := v.getLeftValue(block , errs)
+                if t == null || variableType == null {
+                    continue
+                }
+                if t.assignAble(block , errs , variableType) == false {
+                    errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
+                        t.pos.errMsgPrefix() , variableType.typeString() , t.typeString())))
+                }
+                continue
+            }
+            identifier := v.data.(ExpressionIdentifier)
+            if identifier.name == UnderScore {
+                continue
+            }
+            if variable := block.variables[identifier.name] ; variable != null {
+                if variableType != null {
+                    if variable.Type.assignAble(block , errs , variableType) == false {
+                        errs.append(new error(sprintf("%s cannot assign '%s' to '%s'",
+                            assignTypes[k].pos.errMsgPrefix(),
+                            variable.Type.typeString(),
+                            variableType.typeString())))
+                    }
+                }
+                identifier.Variable = variable
+                assign.ifDeclaredBefore[k] = true
+                if identifier.locateDefinition {
+                    block.inheritedAttribute.p.setLocationDefinition(variable)
+                    return
+                }
+            } else {
+                noNewVariable = false
+                vd := new Variable()
+                if k < len(assignTypes) {
+                    vd.Type = assignTypes[k]
+                }
+                vd.name = identifier.name
+                vd.pos = v.pos
+                if identifier.locateDefinition {
+                    block.inheritedAttribute.p.setLocationDefinition(vd)
+                    return
+                }
+                if variableType == null {
+                    continue
+                }
+                vd.findUsage = identifier.findUsage
+                if vd.findUsage {
+                    u := new Usage()
+                    u.Type = "declaration"
+                    u.pos = vd.pos
+                    vd.findUsageInstances = [u]
+                    block.inheritedAttribute.p.findUsage = vd.findUsageInstances
+                    block.inheritedAttribute.p.findUsageIsGlobal = e.isGlobal
+                }
+                vd.comment = identifier.comment
+                vd.Type = variableType.cloneType()
+                vd.Type.pos = e.pos
+                if err := variableType.isTyped() ; err != null {
+                    errs.append(err)
+                }
+                if e.isGlobal {
+                    err = block.inheritedAttribute.p.block.insert(vd.name , v.pos , vd)
+                    vd.isGlobal = true
+                } else {
+                    if block.inheritedAttribute.Function != null {
+                        if err := block.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(vd) ; err != null {
+                            errs.append(err)
+                        }
+                    }
+                    err = block.insert(vd.name , v.pos , vd)
+                }
+
+                identifier.Variable = vd
+                if err != null {
+                    errs.append(err)
+                    continue
+                }
+                if e.isPublic {
+                    vd.accessFlags |= cg.AccFieldPublic
+                }
+            }
+
+        }
+
+        if noNewVariable {
+            errs.append(new error(sprintf("%s no new variables to create" , e.pos.errMsgPrefix())))
+        }
+        e.data = assign
+
+    }
+}
+
 

@@ -2,19 +2,13 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 import "lucy/binary"
 
-
 class BuildinFunctionLen {
-
-
-
     eb BuildExpression
-    
-    fn BuildinFunctionLen(eb BuildExpression){
+
+    fn BuildinFunctionLen(eb BuildExpression) {
         this.super()
         this.eb = eb
     }
-    
-    
 
     fn buildLen(
         c cg.ClassHighLevel,
@@ -24,20 +18,20 @@ class BuildinFunctionLen {
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionFunctionCall)
         a0 := call.args[0]
-        maxStack = this.eb.build(c, code, a0, context, state)
+        maxStack = this.eb.build(c , code , a0 , context , state)
         code.codes[code.codeLength] = cg.OP_dup
         code.codeLength++
         if 2 > maxStack {
             maxStack = char(2)
         }
         code.codes[code.codeLength] = cg.OP_ifnonnull
-        binary.BigEndian.putChar(code.codes[code.codeLength+1:code.codeLength+3], char(8))
-        code.codes[code.codeLength+3] = cg.OP_pop
-        code.codes[code.codeLength+4] = cg.OP_iconst_0
+        binary.BigEndian.putChar(code.codes[code.codeLength + 1 : code.codeLength + 3] , char(8))
+        code.codes[code.codeLength + 3] = cg.OP_pop
+        code.codes[code.codeLength + 4] = cg.OP_iconst_0
         code.codeLength += 5
-        noNullExit := (new cg.Exit(cg.OP_goto, code))
-        state.pushStack(c, a0.value)
-        context.MakeStackMap(code, state, code.codeLength)
+        noNullExit := (new cg.Exit(cg.OP_goto , code))
+        state.pushStack(c , a0.value)
+        context.MakeStackMap(code , state , code.codeLength)
         state.popStack(1)
         if a0.value.Type == ast.VariableTypeJavaArray {
             code.codes[code.codeLength] = cg.OP_arraylength
@@ -45,31 +39,26 @@ class BuildinFunctionLen {
         } else if a0.value.Type == ast.VariableTypeArray {
             meta := ArrayMetas[a0.value.array.Type]
             code.codes[code.codeLength] = cg.OP_invokevirtual
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-                    meta.className,
-                   "size",
-                "()I"), code.codes[code.codeLength+1:code.codeLength+3])
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
+                "size",
+                "()I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
         } else if a0.value.Type == ast.VariableTypeMap {
             code.codes[code.codeLength] = cg.OP_invokevirtual
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-                 mapClass,
-                 "size",
-                 "()I"
-            ), code.codes[code.codeLength+1:code.codeLength+3])
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(mapClass,
+                "size",
+                "()I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
         } else if a0.value.Type == ast.VariableTypeString {
             code.codes[code.codeLength] = cg.OP_invokevirtual
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-                 javaStringClass,
-                 "length",
-                 "()I"
-            ), code.codes[code.codeLength+1:code.codeLength+3])
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaStringClass,
+                "length",
+                "()I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
         }
-        writeExits([]cg.Exit{noNullExit}, code.codeLength)
-        state.pushStack(c, typeInt)
-        context.MakeStackMap(code, state, code.codeLength)
+        writeExits([]cg.Exit{noNullExit} , code.codeLength)
+        state.pushStack(c , typeInt)
+        context.MakeStackMap(code , state , code.codeLength)
         state.popStack(1)
         if e.isStatementExpression {
             code.codes[code.codeLength] = cg.OP_pop
@@ -78,4 +67,5 @@ class BuildinFunctionLen {
         return
     }
 }
+
 

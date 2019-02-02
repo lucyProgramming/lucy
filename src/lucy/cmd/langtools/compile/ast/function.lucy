@@ -146,24 +146,22 @@ public class Function {
     }
 
     fn makeLastReturnStatement() {
-        if this.block.inheritedAttribute.isCompileTask {
-            s := new StatementReturn()
-            t := new Statement()
-            t.Type = StatementTypeReturn
-            t.StatementReturn = s
-            t.isCompilerAuto = true
-            t.pos = this.block.endPos
-            if this.block == null {
-                this.block = new Block()
-                this.block.pos = this.pos
-            }
-            if this.block.statements == null {
-                this.block.statements = [t]
-            } else {
-                this.block.statements.append(t)
-            }
-
+        s := new StatementReturn()
+        t := new Statement()
+        t.Type = StatementTypeReturn
+        t.StatementReturn = s
+        t.isCompilerAuto = true
+        t.pos = this.block.endPos
+        if this.block == null {
+            this.block = new Block()
+            this.block.pos = this.pos
         }
+        if this.block.statements == null {
+            this.block.statements = [t]
+        } else {
+            this.block.statements.append(t)
+        }
+
     }
 
     public fn isGlobalMain() -> (is bool) {
@@ -305,8 +303,7 @@ public class Function {
                     // eval expression later
                     continue
                 }
-                if v.defaultValueExpression == null &&
-                    this.block.inheritedAttribute.isCompileTask {
+                if v.defaultValueExpression == null {
                     v.defaultValueExpression = v.Type.mkDefaultValueExpression()
                     continue
                 }
@@ -333,8 +330,7 @@ public class Function {
             return null
         }
         for _ , v := range this.Type.returnList {
-            if v.defaultValueExpression == null &&
-                this.block.inheritedAttribute.isCompileTask {
+            if v.defaultValueExpression == null {
                 v.defaultValueExpression = v.Type.mkDefaultValueExpression()
                 continue
             }

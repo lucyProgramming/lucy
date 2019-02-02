@@ -12,7 +12,7 @@ public class InheritedAttribute {
 	classMethod           ClassMethod
 	public classAndFunctionNames string
 	p Package 
-	isCompileTask bool 
+	// isCompileTask bool 
 	fn InheritedAttribute(){
 	    this.super()
 		this.classAndFunctionNames = ""

@@ -10,10 +10,10 @@ class BuildExpressionAssign {
     }
 
     fn buildExpressionAssign(
-        c cg.ClassHighLevel , 
-        code cg.AttributeCode , 
-        e ast.Expression , 
-        context Context , 
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        e ast.Expression,
+        context Context,
         state StackMapState) -> (maxStack char) {
         stackLength := len(state.stacks)
         defer {
@@ -59,10 +59,10 @@ class BuildExpressionAssign {
 
      // a,b,c = 122,fdfd2232,"hello";
     fn buildAssign(
-        c cg.ClassHighLevel , 
-        code cg.AttributeCode , 
-        e ast.Expression , 
-        context Context , 
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        e ast.Expression,
+        context Context,
         state StackMapState) -> (maxStack char) {
         bin := e.data.(ast.ExpressionBinary)
 
@@ -98,4 +98,5 @@ class BuildExpressionAssign {
     }
 
 }
+
 

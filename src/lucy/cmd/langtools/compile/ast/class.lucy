@@ -210,7 +210,7 @@ public class Class {
         var err error
         for _ , v := range this.fields {
             if v.name == Super {
-                errs.append(new error(sprintf("%s 'super' not allow for field name" , 
+                errs.append(new error(sprintf("%s 'super' not allow for field name",
                     errMsgPrefix(v.pos))))
             }
             if v.locateDefinition {
@@ -253,14 +253,14 @@ public class Class {
                 if m.isAbstract() {
                     for _ , v := range m.Function.Type.parameterList {
                         if v.defaultValueExpression != null {
-                            errs.append(new error(sprintf("%s abstract method parameter '%s' cannot have default value '%s'" , 
+                            errs.append(new error(sprintf("%s abstract method parameter '%s' cannot have default value '%s'",
                                 errMsgPrefix(v.pos) , v.name , v.defaultValueExpression.op)))
                         }
                     }
 
                     for _ , v := range m.Function.Type.returnList {
                         if v.defaultValueExpression != null {
-                            errs.append(new error(sprintf("%s abstract method return variable '%s' cannot have default value '%s'" , 
+                            errs.append(new error(sprintf("%s abstract method return variable '%s' cannot have default value '%s'",
                                 errMsgPrefix(v.pos) , v.name , v.defaultValueExpression.op)))
                         }
                     }
@@ -271,7 +271,7 @@ public class Class {
                 m.Function.block.inheritedAttribute.classMethod = m
                 m.Function.checkParametersAndReturns(errs , false , m.isAbstract())
                 if len(m.Function.Type.templateNames) > 0 {
-                    errs.append(new error(sprintf("%s cannot use template for method" , 
+                    errs.append(new error(sprintf("%s cannot use template for method",
                         errMsgPrefix(m.Function.pos))))
                 }
                 if m.isStatic() == false {
@@ -339,7 +339,7 @@ public class Class {
                 return err
             }
             if variableType.Type != VariableTypeObject {
-                err = new error(sprintf("%s '%s' is not a class" , 
+                err = new error(sprintf("%s '%s' is not a class",
                     this.pos.errMsgPrefix() , this.superClassName.name))
                 return err
             }
@@ -355,7 +355,7 @@ public class Class {
             }
             if this.isInterface() {
                 if this.superClass.name != JavaRootClass {
-                    err = new error(sprintf("%s interface`s super-class must be '%s'" , 
+                    err = new error(sprintf("%s interface`s super-class must be '%s'",
                         errMsgPrefix(this.superClassName.pos) , JavaRootClass))
                     return err
                 }
@@ -388,7 +388,7 @@ public class Class {
                 continue
             }
             if t.Type != VariableTypeObject {
-                errs.append(new error(sprintf("%s '%s' is not a object , but '%s'" , 
+                errs.append(new error(sprintf("%s '%s' is not a object , but '%s'",
                     errMsgPrefix(i.pos) , i.name , t.typeString())))
                 continue
             }
@@ -397,7 +397,7 @@ public class Class {
                 u.Type = "implement"
             }
             if t.Class.isInterface() == false {
-                errs.append(new error(sprintf("%s '%s' is not a interface" , 
+                errs.append(new error(sprintf("%s '%s' is not a interface",
                     errMsgPrefix(i.pos) , i.name)))
                 continue
             }
@@ -408,12 +408,12 @@ public class Class {
     }
 
     fn implementMethod(
-        block Block , 
-        classChecked map{string -> bool} , 
-        pos Pos , 
-        m ClassMethod , 
-        nameMatched []ClassMethod , 
-        fromSub bool , 
+        block Block,
+        classChecked map{string -> bool},
+        pos Pos,
+        m ClassMethod,
+        nameMatched []ClassMethod,
+        fromSub bool,
         errs []error) -> (method ClassMethod) {
         if classChecked.keyExist(this.name) {
             return
@@ -453,9 +453,9 @@ public class Class {
     }
 
     fn haveSuperClass(
-        block Block , 
-        classChecked map{string -> bool} , 
-        pos Pos , 
+        block Block,
+        classChecked map{string -> bool},
+        pos Pos,
         superclassName string) -> (have bool , err error) {
         err = this.loadSelf(block , pos)
         if err != null {
@@ -539,11 +539,11 @@ public class Class {
     }
 
     fn accessConstructionMethod(
-        block Block , 
-        pos Pos , 
-        errs []error , 
-        newCase ExpressionNew , 
-        callFatherCase ExpressionMethodCall , 
+        block Block,
+        pos Pos,
+        errs []error,
+        newCase ExpressionNew,
+        callFatherCase ExpressionMethodCall,
         callArgs []Type) -> (ms []ClassMethod = []ClassMethod{} , matched bool , err error) {
         err = this.loadSelf(block , pos)
         if err != null {
@@ -594,16 +594,16 @@ public class Class {
         ret is ClassField or ClassMethod
     */
     fn getFieldOrMethod(
-        block Block , 
-        pos Pos , 
-        name string , 
-        classChecked map{string -> bool} , 
+        block Block,
+        pos Pos,
+        name string,
+        classChecked map{string -> bool},
         fromSub bool , fromClassName string) -> (f Object , err error) {
         err = this.loadSelf(block , pos)
         if err != null {
             return null , err
         }
-        notFoundErr := new error(sprintf("%s field or method named '%s' not found on class '%s'" , 
+        notFoundErr := new error(sprintf("%s field or method named '%s' not found on class '%s'",
             pos.errMsgPrefix() , name , fromClassName))
         if classChecked[this.name] {
             return null , notFoundErr
@@ -657,16 +657,16 @@ public class Class {
     fn constructionMethodAccessAble(pos Pos , method ClassMethod) -> (err error) {
         if this.loadFromOutSide {
             if this.isPublic() == false {
-                return new error(sprintf("%s class '%s' is not public" , 
+                return new error(sprintf("%s class '%s' is not public",
                     pos.errMsgPrefix() , this.name))
             }
             if method.isPublic() == false {
-                return new error(sprintf("%s method '%s' is not public" , 
+                return new error(sprintf("%s method '%s' is not public",
                     pos.errMsgPrefix() , method.Function.name))
             }
         } else {
             if method.isPrivate() {
-                return new error(sprintf("%s method '%s' is private" , 
+                return new error(sprintf("%s method '%s' is private",
                     pos.errMsgPrefix() , method.Function.name))
             }
         }
@@ -675,17 +675,17 @@ public class Class {
     }
 
     fn getField(
-        block Block , 
-        pos Pos , 
-        name string , 
-        classChecked map{string -> bool} , 
-        fromSub bool , 
+        block Block,
+        pos Pos,
+        name string,
+        classChecked map{string -> bool},
+        fromSub bool,
         fromClassName string) -> (f ClassField , err error) {
         err = this.loadSelf(block , pos)
         if err != null {
             return null , err
         }
-        notFoundErr := new error(sprintf("%s field named '%s' not found on class '%s'" , 
+        notFoundErr := new error(sprintf("%s field named '%s' not found on class '%s'",
             pos.errMsgPrefix() , name , fromClassName))
         if classChecked.keyExist(this.name) {
             return null , notFoundErr
@@ -721,13 +721,13 @@ public class Class {
     }
 
     fn accessInterfaceObjectMethod(
-        block Block , 
-        pos Pos , 
-        errs []error , 
-        classChecked map{string -> bool} , 
-        name string , 
-        call ExpressionMethodCall , 
-        callArgTypes []Type , 
+        block Block,
+        pos Pos,
+        errs []error,
+        classChecked map{string -> bool},
+        name string,
+        call ExpressionMethodCall,
+        callArgTypes []Type,
         fromSub bool , fromClassName string) -> (
         ms []ClassMethod = []ClassMethod{} , matched bool , err error) {
         ms , matched , err = this.accessInterfaceMethod(block , pos , errs , classChecked , name , call , callArgTypes , fromSub)
@@ -748,13 +748,13 @@ public class Class {
     }
 
     fn accessInterfaceMethod(
-        block Block , 
-        pos Pos , 
-        errs []error , 
-        classChecked map{string -> bool} , 
-        name string , 
-        call ExpressionMethodCall , 
-        callArgTypes []Type , 
+        block Block,
+        pos Pos,
+        errs []error,
+        classChecked map{string -> bool},
+        name string,
+        call ExpressionMethodCall,
+        callArgTypes []Type,
         fromSub bool) -> (ms []ClassMethod = []ClassMethod{} , matched bool , err error) {
         err = this.loadSelf(block , pos)
         if err != null {
@@ -806,14 +806,14 @@ public class Class {
         access method lucy style
     */
     fn accessMethod(
-        block Block , 
-        pos Pos , 
-        errs []error , 
-        classChecked map{string -> bool} , 
-        call ExpressionMethodCall , 
-        callArgTypes []Type , 
-        fromSub bool , 
-        fromClassName string , 
+        block Block,
+        pos Pos,
+        errs []error,
+        classChecked map{string -> bool},
+        call ExpressionMethodCall,
+        callArgTypes []Type,
+        fromSub bool,
+        fromClassName string,
         fieldMethodHandler []ClassField) -> (ms []ClassMethod = []ClassMethod{} , matched bool , err error) {
         err = this.loadSelf(block , pos)
         if err != null {
@@ -834,7 +834,7 @@ public class Class {
                     //cannot access this field
                 } else {
                     assert(this.fields[call.name].Type.functionType != null)
-                    call.vArgs , err = this.fields[call.name].Type.functionType.fitArgs(block , pos , call.args , 
+                    call.vArgs , err = this.fields[call.name].Type.functionType.fitArgs(block , pos , call.args,
                         callArgTypes , null)
                     if err == null {
                         fieldMethodHandler[0] = f
@@ -858,10 +858,10 @@ public class Class {
             if len(this.methods[call.name]) > 0 {
                 for _ , m := range this.methods[call.name] {
                     if fromSub && m.ableAccessFromSubClass() == false {
-                        return null , false , new error(sprintf("%s method '%s' not found on class '%s'" , 
+                        return null , false , new error(sprintf("%s method '%s' not found on class '%s'",
                             pos.errMsgPrefix() , call.name , fromClassName))
                     }
-                    call.vArgs , err = m.Function.Type.fitArgs(block , pos , call.args , 
+                    call.vArgs , err = m.Function.Type.fitArgs(block , pos , call.args,
                         callArgTypes , m.Function)
                     if m.findUsageInstances != null {
                         u := new Usage()
@@ -886,7 +886,7 @@ public class Class {
         if this.superClass == null {
             return ms , false , null
         }
-        return this.superClass.accessMethod(block , pos , errs , classChecked , call , 
+        return this.superClass.accessMethod(block , pos , errs , classChecked , call,
             callArgTypes , true , fromClassName , fieldMethodHandler)
     }
 
@@ -894,12 +894,12 @@ public class Class {
         access method java style
     */
     fn accessMethodAsJava(
-        block Block , 
-        pos Pos , 
-        errs []error , 
-        classChecked map{string -> bool} , 
-        call ExpressionMethodCall , 
-        callArgTypes []Type , 
+        block Block,
+        pos Pos,
+        errs []error,
+        classChecked map{string -> bool},
+        call ExpressionMethodCall,
+        callArgTypes []Type,
         fromSub bool) -> (ms []ClassMethod = []ClassMethod{} , matched bool , err error) {
         if classChecked.keyExist(this.name) {
             return null , false , null
@@ -990,12 +990,12 @@ public class Class {
             if this.fields != null && this.fields[name] != null {
                 f := this.fields[name]
                 if f.pos.endLine < ms[0].Function.pos.endLine {
-                    errMsg := sprintf("%s method named '%s' already declared as field,at:\n" , 
+                    errMsg := sprintf("%s method named '%s' already declared as field,at:\n",
                         errMsgPrefix(ms[0].Function.pos) , name)
                     errMsg += sprintf("\t%s" , errMsgPrefix(f.pos))
                     errs.append(new error(errMsg))
                 } else {
-                    errMsg := sprintf("%s field named '%s' already declared as method,at:\n" , 
+                    errMsg := sprintf("%s field named '%s' already declared as method,at:\n",
                         errMsgPrefix(f.pos) , name)
                     errMsg += sprintf("\t%s" , errMsgPrefix(ms[0].Function.pos))
                     errs.append(new error(errMsg))
@@ -1004,8 +1004,8 @@ public class Class {
                 continue
             }
             if len(ms) > 1 {
-                errMsg := sprintf("%s class method named '%s' has declared %d times,which are:\n" , 
-                    errMsgPrefix(ms[0].Function.pos) , 
+                errMsg := sprintf("%s class method named '%s' has declared %d times,which are:\n",
+                    errMsgPrefix(ms[0].Function.pos),
                     ms[0].Function.name , len(ms))
                 for _ , v := range ms {
                     errMsg += sprintf("\t%s\n" , errMsgPrefix(v.Function.pos))
@@ -1093,7 +1093,7 @@ public class Class {
                         errMsg += sprintf("\t want %s\n" , m.Function.readableMsg())
                         errs.append(new error(errMsg))
                     } else {
-                        errs.append(new error(sprintf("%s missing implementation method '%s' define on abstract class '%s'" , 
+                        errs.append(new error(sprintf("%s missing implementation method '%s' define on abstract class '%s'",
                             pos.errMsgPrefix() , m.Function.readableMsg() , super.name)))
                     }
 
@@ -1164,7 +1164,7 @@ public class Class {
                 continue
             }
             if exist != null {
-                errs.append(new error(sprintf("%s method '%s' override '%s'" , 
+                errs.append(new error(sprintf("%s method '%s' override '%s'",
                     errMsgPrefix(v[0].Function.pos) , name , exist.name)))
             }
         }
@@ -1183,7 +1183,7 @@ public class Class {
             }
 
             if exist != null {
-                errs.append(new error(sprintf("%s method '%s' override '%s'" , 
+                errs.append(new error(sprintf("%s method '%s' override '%s'",
                     errMsgPrefix(v[0].Function.pos) , name , exist.name)))
             }
         }
@@ -1204,7 +1204,7 @@ public class Class {
             return null
         }
         if this.superClass.isFinal() {
-            return new error(sprintf("%s class name '%s' have super class  named '%s' that is final" , 
+            return new error(sprintf("%s class name '%s' have super class  named '%s' that is final",
                 this.pos.errMsgPrefix() , this.name , this.superClass.name))
         }
         for c.name != JavaRootClass {
@@ -1226,7 +1226,7 @@ public class Class {
         }
 
         if is {
-            errMsg := sprintf("%s class named '%s' detects a circularity in class hierarchy" , 
+            errMsg := sprintf("%s class named '%s' detects a circularity in class hierarchy",
                 this.pos.errMsgPrefix() , this.name)
             tab := "\t"
             index := len(arr) - 1
@@ -1266,7 +1266,7 @@ public class Class {
         }
 
         if is {
-            errMsg := sprintf("%s class named '%s' detects a circularity in class hierarchy" , 
+            errMsg := sprintf("%s class named '%s' detects a circularity in class hierarchy",
                 this.pos.errMsgPrefix() , this.name)
             tab := "\t"
             index := len(arr) - 1
@@ -1305,7 +1305,7 @@ public class Class {
                     f2.Type = VariableTypeFunction
                     f2.functionType = v.Function.Type
                     if f1.equal(f2) {
-                        errs.append(new error(sprintf("%s override final method '%s'" , 
+                        errs.append(new error(sprintf("%s override final method '%s'",
                             errMsgPrefix(m.Function.pos) , name)))
                     }
                 }
@@ -1322,7 +1322,7 @@ public class Class {
                 }
                 ff := this.superClass.fields[name]
                 if ff.isFinal() {
-                    errs.append(new error(sprintf("%s override final field '%s'" , 
+                    errs.append(new error(sprintf("%s override final field '%s'",
                         errMsgPrefix(f.pos) , name)))
                 }
             }
@@ -1360,7 +1360,7 @@ public class Class {
                 if nameMatch != null && nameMatch[0].Function.pos != null {
                     pos = nameMatch[0].Function.pos
                 }
-                errs.append(new error(sprintf("%s missing implementation method '%s' define on interface '%s'" , 
+                errs.append(new error(sprintf("%s missing implementation method '%s' define on interface '%s'",
                     pos.errMsgPrefix() , m.Function.readableMsg() , inter.name)))
             }
 
@@ -1377,7 +1377,7 @@ public class Class {
     fn checkFields() -> (errs []error = []error{}) {
         if this.isInterface() {
             for _ , v := range this.fields {
-                errs.append(new error(sprintf("%s interface '%s' expect no field named '%s'" , 
+                errs.append(new error(sprintf("%s interface '%s' expect no field named '%s'",
                     errMsgPrefix(v.pos) , this.name , v.name)))
             }
 
@@ -1396,12 +1396,12 @@ public class Class {
                     continue
                 }
                 if v.Type.assignAble(this.block , errs , assignment) == false {
-                    errs.append(new error(sprintf("%s cannot assign '%s' as '%s' for default value" , 
+                    errs.append(new error(sprintf("%s cannot assign '%s' as '%s' for default value",
                         v.defaultValueExpression.pos.errMsgPrefix() , assignment.typeString() , v.Type.typeString())))
                     continue
                 }
                 if assignment.Type == VariableTypeNull {
-                    errs.append(new error(sprintf("%s pointer types default value is '%s' already" , 
+                    errs.append(new error(sprintf("%s pointer types default value is '%s' already",
                         v.pos.errMsgPrefix() , assignment.typeString())))
                     continue
                 }
@@ -1413,34 +1413,33 @@ public class Class {
                     // nothing to do
                     continue
                 }
-                if this.block.inheritedAttribute.isCompileTask {
-                    bin := new ExpressionBinary()
-                    bin.right = v.defaultValueExpression
-                    selection := new ExpressionSelection()
-                    selection.Expression = new Expression()
-                    selection.Expression.op = "selection"
-                    selection.Expression.value = new Type()
-                    selection.Expression.value.Type = VariableTypeClass
-                    selection.Expression.value.Class = this
-                    selection.name = v.name
-                    selection.field = v
-                    left := new Expression()
-                    left.Type = ExpressionTypeSelection
-                    left.data = selection
-                    left.op = "selection"
-                    left.value = v.Type
-                    bin.left = left
-                    e := new Expression()
-                    e.Type = ExpressionTypeAssign
-                    e.data = bin
-                    e.isStatementExpression = true
-                    e.op = "assign"
-                    statemment := new Statement()
-                    statemment.Type = StatementTypeExpression
-                    statemment.Expression = e
-                    statemment.isStaticFieldDefaultValue = true
-                    staticFieldAssignStatements.append(statemment)
-                }
+                bin := new ExpressionBinary()
+                bin.right = v.defaultValueExpression
+                selection := new ExpressionSelection()
+                selection.Expression = new Expression()
+                selection.Expression.op = "selection"
+                selection.Expression.value = new Type()
+                selection.Expression.value.Type = VariableTypeClass
+                selection.Expression.value.Class = this
+                selection.name = v.name
+                selection.field = v
+                left := new Expression()
+                left.Type = ExpressionTypeSelection
+                left.data = selection
+                left.op = "selection"
+                left.value = v.Type
+                bin.left = left
+                e := new Expression()
+                e.Type = ExpressionTypeAssign
+                e.data = bin
+                e.isStatementExpression = true
+                e.op = "assign"
+                statemment := new Statement()
+                statemment.Type = StatementTypeExpression
+                statemment.Expression = e
+                statemment.isStaticFieldDefaultValue = true
+                staticFieldAssignStatements.append(statemment)
+
             }
         }
 
@@ -1472,7 +1471,7 @@ public class Class {
                 return errs
             }
             for _ , method := range methods {
-                if this.block.inheritedAttribute.p.matchFileAndLine(method.Function.pos.filename , 
+                if this.block.inheritedAttribute.p.matchFileAndLine(method.Function.pos.filename,
                     method.Function.name , method.Function.startLine , method.Function.endLine) == false {
                     continue
                 }
@@ -1481,7 +1480,7 @@ public class Class {
                     //nothing
                 } else {
                     if this.isInterface() {
-                        errs.append(new error(sprintf("%s interface method cannot have implementation" , 
+                        errs.append(new error(sprintf("%s interface method cannot have implementation",
                             errMsgPrefix(method.Function.pos))))
                         continue
                     }
@@ -1489,12 +1488,12 @@ public class Class {
                     isConstruction := name == SpecialMethodInit
                     if isConstruction {
                         if method.isFirstStatementCallFatherConstruction() == false {
-                            errs.append(new error(sprintf("%s construction method should call father construction method first, 'this.super()'" , 
+                            errs.append(new error(sprintf("%s construction method should call father construction method first, 'this.super()'",
                                 errMsgPrefix(method.Function.pos))))
                         }
                     }
                     if isConstruction && method.Function.Type.voidReturn() == false {
-                        errs.append(new error(sprintf("%s construction method expect no return values" , 
+                        errs.append(new error(sprintf("%s construction method expect no return values",
                             errMsgPrefix(method.Function.Type.parameterList[0].pos))))
                     }
                     method.Function.block.inheritedAttribute.isConstructionMethod = isConstruction
@@ -1507,14 +1506,14 @@ public class Class {
 
         return errs
     }
-    
+
     fn checkModifierOk() -> (errs []error = []error{}) {
         if this.isInterface() && this.isFinal() {
-            errs.append(new error(sprintf("%s interface '%s' cannot be final" , 
+            errs.append(new error(sprintf("%s interface '%s' cannot be final",
                 errMsgPrefix(this.finalPos) , this.name)))
         }
         if this.isAbstract() && this.isFinal() {
-            errs.append(new error(sprintf("%s abstract class '%s' cannot be final" , 
+            errs.append(new error(sprintf("%s abstract class '%s' cannot be final",
                 errMsgPrefix(this.finalPos) , this.name)))
         }
         return errs
@@ -1548,8 +1547,9 @@ public class Class {
         if this.findUsage == false {
             return
         }
-        this.findUsageInstances = this.findUsageInstances[ : len(this.findUsageInstances) - 1]
+        this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
         block.inheritedAttribute.p.findUsage = this.findUsageInstances
     }
 }
+
 

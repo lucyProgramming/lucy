@@ -14,6 +14,7 @@ class ExpressionCheckVar {
                 for _ , v := range ev.variables {
                     v.Type = ev.Type.cloneType()
                 }
+
             }
 
         }
@@ -32,9 +33,8 @@ class ExpressionCheckVar {
                     needs[k] = ev.Type
                 }
 
-                if block.inheritedAttribute.isCompileTask {
-                    convertExpressionsToNeeds(block , ev.initValues , needs , valueTypes)
-                }
+                convertExpressionsToNeeds(block , ev.initValues , needs , valueTypes)
+
             }
             if len(ev.variables) > len(valueTypes) {
                 pos := ev.initValues[len(ev.initValues) - 1].pos // last Pos
@@ -105,9 +105,8 @@ class ExpressionCheckVar {
                     errs.append(err)
                     continue
                 }
-                if block.inheritedAttribute.isCompileTask {
-                    ev.initValues[k] = v.Type.mkDefaultValueExpression()
-                }
+                ev.initValues[k] = v.Type.mkDefaultValueExpression()
+
             }
 
         }

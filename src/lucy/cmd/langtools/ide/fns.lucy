@@ -29,7 +29,7 @@ public fn parseAstAndTypeCheck(
 	nodes , es := parseAst(lucyFiles)
 	// print("prase ast used:", System.currentTimeMillis() - now ,packageName)
 	// now = System.currentTimeMillis()
-	p = new ast.Package(packageName , false , loader , false)
+	p = new ast.Package(packageName , false , loader )
 	p.onlyAnalyzeGlobals = onlyAnalyzeGlobals
 	p.matchFile = matchFile 
 	// p.printFileMatchInfo = true 

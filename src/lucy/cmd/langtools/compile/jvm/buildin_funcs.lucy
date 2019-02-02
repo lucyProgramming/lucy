@@ -1,22 +1,18 @@
-
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 import "lucy/cmd/langtools/compile/common"
 
-
-
 class BuildinFunctionCall {
-    
-    eb BuildExpression
-    BuildinFunctionAssert BuildinFunctionAssert
+    eb                        BuildExpression          
+    BuildinFunctionAssert     BuildinFunctionAssert    
     BuildinFunctionCatchPanic BuildinFunctionCatchPanic
-    BuildinFunctionLen BuildinFunctionLen
-    BuildinFunctionPrint BuildinFunctionPrint
-    BuildinFunctionPrintf BuildinFunctionPrintf
-    BuildinFunctionSprintf BuildinFunctionSprintf
-    BuildinFunctionBlackHole BuildinFunctionBlackHole
-    
-    fn BuildinFunctionCall(eb BuildExpression){
+    BuildinFunctionLen        BuildinFunctionLen       
+    BuildinFunctionPrint      BuildinFunctionPrint     
+    BuildinFunctionPrintf     BuildinFunctionPrintf    
+    BuildinFunctionSprintf    BuildinFunctionSprintf   
+    BuildinFunctionBlackHole  BuildinFunctionBlackHole 
+
+    fn BuildinFunctionCall(eb BuildExpression) {
         this.super()
         this.eb = eb
         this.BuildinFunctionAssert = new BuildinFunctionAssert(eb)
@@ -30,7 +26,6 @@ class BuildinFunctionCall {
 
     }
 
-
     fn mkBuildInFunctionCall(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
@@ -39,14 +34,11 @@ class BuildinFunctionCall {
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionFunctionCall)
         if call.Function.loadedFromCorePackage {
-            maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.args, call.vArgs, context, state)
+            maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
             code.codes[code.codeLength] = cg.OP_invokestatic
-            c.insertMethodRefConst(
-                new cg.ConstantInfoMethodrefHighLevel(
-                    call.Function.entrance.Class.name,
-                    call.Function.name,
-                    call.Function.entrance.Descriptor
-            ), code.codes[code.codeLength+1:code.codeLength+3])
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.Function.entrance.Class.name,
+                call.Function.name,
+                call.Function.entrance.Descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
             if e.isStatementExpression {
                 if call.Function.Type.voidReturn() == false {
@@ -61,43 +53,40 @@ class BuildinFunctionCall {
                             code.codes[code.codeLength] = cg.OP_pop2
                             code.codeLength++
                         }
+
                     }
+
                 }
             }
             return
         }
         switch call.Function.name {
-        case common.BuildInFunctionPrint:
-            return this.BuildinFunctionPrint.mkBuildInPrint(c, code, e, context, state)
-        case common.BuildInFunctionPanic:
-            return this.BuildinFunctionCatchPanic.mkBuildInPanic(c, code, e, context, state)
-        case common.BuildInFunctionCatch:
-            return this.BuildinFunctionCatchPanic.mkBuildInCatch(c, code, e, context)
-        
-        // case common.BuildInFunctionMonitorEnter, common.BuildInFunctionMonitorExit:
-        //     maxStack = this.build(c, code, call.args[0], context, state)
-        //     if call.Function.name == common.BuildInFunctionMonitorEnter {
-        //         code.codes[code.codeLength] = cg.OP_monitorenter
-        //     } else { // monitor enter on exit
-        //         code.codes[code.codeLength] = cg.OP_monitorexit
-        //     }
-        //     code.codeLength++
-        
-        case common.BuildInFunctionPrintf:
-            return this.BuildinFunctionPrintf.buildPrintf(c, code, e, context, state)
-        case common.BuildInFunctionSprintf:
-            return this.BuildinFunctionSprintf.buildSprintf(c, code, e, context, state)
-        case common.BuildInFunctionLen:
-            return this.BuildinFunctionLen.buildLen(c, code, e, context, state)
-        case common.BuildInFunctionBlockHole:
-            return this.BuildinFunctionBlackHole.mkBuildInBlackHole(c, code, e, context, state)
-        case common.BuildInFunctionAssert:
-            return this.BuildinFunctionAssert.build(c, code, e, context, state)
-        default:
-            panic("unknown  buildIn function:" + call.Function.name)
+            case common.BuildInFunctionPrint:
+                return this.BuildinFunctionPrint.mkBuildInPrint(c , code , e , context , state)
+            case common.BuildInFunctionPanic:
+                return this.BuildinFunctionCatchPanic.mkBuildInPanic(c , code , e , context , state)
+            case common.BuildInFunctionCatch:
+                return this.BuildinFunctionCatchPanic.mkBuildInCatch(c , code , e , context)
+
+                // case common.BuildInFunctionMonitorEnter, common.BuildInFunctionMonitorExit:
+
+            case common.BuildInFunctionPrintf:
+                return this.BuildinFunctionPrintf.buildPrintf(c , code , e , context , state)
+            case common.BuildInFunctionSprintf:
+                return this.BuildinFunctionSprintf.buildSprintf(c , code , e , context , state)
+            case common.BuildInFunctionLen:
+                return this.BuildinFunctionLen.buildLen(c , code , e , context , state)
+            case common.BuildInFunctionBlockHole:
+                return this.BuildinFunctionBlackHole.mkBuildInBlackHole(c , code , e , context , state)
+            case common.BuildInFunctionAssert:
+                return this.BuildinFunctionAssert.build(c , code , e , context , state)
+            default:
+                panic("unknown  buildIn function:" + call.Function.name)
         }
+
         return
     }
 
 }
+
 

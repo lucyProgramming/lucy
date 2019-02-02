@@ -1,131 +1,132 @@
 class ExpressionCheckNew {
-	
-	static fn check(e Expression , block Block, errs []error) ->(valueType Type)  {
-		no := e.data.(ExpressionNew)
-		if no.args == null {
-			no.args = []Expression{}
-		}
-		err := no.Type.resolve(block)
-		if err != null {
-			errs.append(err)
-			return 
-		}
-		if block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
-			return  
-		}
-		if no.Type.Type == VariableTypeMap {
-			return .checkNewMapExpression(e ,block, no, errs)
-		}
-		if no.Type.Type == VariableTypeArray {
-			return .checkNewArrayExpression(e ,block, no, errs)
-		}
-		if no.Type.Type == VariableTypeJavaArray {
-			return .checkNewJavaArrayExpression(e , block, no, errs)
-		}
-		// new object
-		if no.Type.Type != VariableTypeObject {
-			errs.append(new error(sprintf("%s cannot have new on type '%s'",
-				no.Type.pos.errMsgPrefix(), no.Type.typeString())))
-			return 
-		}
-		err = no.Type.Class.loadSelf(block , e.pos)
-		if err != null {
-			errs.append(err)
-			return 
-		}
-		if no.Type.Class.isInterface() {
-			errs.append(new error( sprintf("%s '%s' is interface",
-				errMsgPrefix(no.Type.pos), no.Type.Class.name)))
-			return 
-		}
-		if no.Type.Class.isAbstract() {
-			errs.append(new error( sprintf("%s '%s' is abstract",
-				errMsgPrefix(no.Type.pos), no.Type.Class.name)))
-			return 
-		}
-		if no.Type.Class.findUsage {
-			// type must resolved 
-			// so must len(no.Type.Class.findUsageInstances) >= 1 
-			correctLastUsageType("instaniation" , no.Type.Class.findUsageInstances)
-			// set to ok 
-		}
-		valueType = no.Type.cloneType()
-		valueType.Type = VariableTypeObject
-		valueType.pos = e.pos
-		errsLength := len(errs)
-		callArgTypes := checkExpressions(block, no.args, errs, true)
-		if len(errs) > errsLength {
-			return 
-		}
-		if no.args == null {
-			no.args = []Expression{}
-		}
-		ms, matched, err := no.Type.Class.accessConstructionMethod(block , e.pos, errs, no, null, callArgTypes)
-		if err != null {
-			errs.append(err)
-			return 
-		}
-		if matched {
-			m := ms[0]
-			if err := no.Type.Class.constructionMethodAccessAble(e.pos, m); err != null {
-				errs.append(err)
-			}
-			no.construction = m
-			return 
-		}
-		errs.append(methodsNotMatchError(no.Type.pos, no.Type.typeString(), ms, callArgTypes))
-		return
-	}
+    static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
+        no := e.data.(ExpressionNew)
+        if no.args == null {
+            no.args = []Expression{}
+        }
+        err := no.Type.resolve(block)
+        if err != null {
+            errs.append(err)
+            return
+        }
+        if block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+            return
+        }
+        if no.Type.Type == VariableTypeMap {
+            return .checkNewMapExpression(e , block , no , errs)
+        }
+        if no.Type.Type == VariableTypeArray {
+            return .checkNewArrayExpression(e , block , no , errs)
+        }
+        if no.Type.Type == VariableTypeJavaArray {
+            return .checkNewJavaArrayExpression(e , block , no , errs)
+        }
+        // new object
+        if no.Type.Type != VariableTypeObject {
+            errs.append(new error(sprintf("%s cannot have new on type '%s'",
+                no.Type.pos.errMsgPrefix() , no.Type.typeString())))
+            return
+        }
+        err = no.Type.Class.loadSelf(block , e.pos)
+        if err != null {
+            errs.append(err)
+            return
+        }
+        if no.Type.Class.isInterface() {
+            errs.append(new error(sprintf("%s '%s' is interface",
+                errMsgPrefix(no.Type.pos) , no.Type.Class.name)))
+            return
+        }
+        if no.Type.Class.isAbstract() {
+            errs.append(new error(sprintf("%s '%s' is abstract",
+                errMsgPrefix(no.Type.pos) , no.Type.Class.name)))
+            return
+        }
+        if no.Type.Class.findUsage {
+            // type must resolved 
+            correctLastUsageType("instaniation" , no.Type.Class.findUsageInstances)
+            // set to ok 
+        }
+        valueType = no.Type.cloneType()
+        valueType.Type = VariableTypeObject
+        valueType.pos = e.pos
+        errsLength := len(errs)
+        callArgTypes := checkExpressions(block , no.args , errs , true)
+        if len(errs) > errsLength {
+            return
+        }
+        if no.args == null {
+            no.args = []Expression{}
+        }
+        ms , matched , err := no.Type.Class.accessConstructionMethod(block , e.pos , errs , no , null , callArgTypes)
+        if err != null {
+            errs.append(err)
+            return
+        }
+        if matched {
+            m := ms[0]
+            if err := no.Type.Class.constructionMethodAccessAble(e.pos , m) ; err != null {
+                errs.append(err)
+            }
+            no.construction = m
+            return
+        }
+        errs.append(methodsNotMatchError(no.Type.pos , no.Type.typeString() , ms , callArgTypes))
+        return
+    }
 
-	static fn checkNewMapExpression(e Expression , block Block, newMap ExpressionNew,
-		errs []error) ->(valueType Type)  {
-		if len(newMap.args) > 0 {
-			errs.append(new error( sprintf("%s new 'map' expect no arguments",
-				errMsgPrefix(newMap.args[0].pos))))
-			checkExpressions(block , newMap.args , errs , true)
-		}
-		ret := newMap.Type.cloneType()
-		ret.pos = e.pos
-		return ret
-	}
-	
-	static fn checkNewJavaArrayExpression(e Expression , block Block, newArray ExpressionNew,
-		errs []error) ->(valueType Type) {
-		return .checkNewArrayExpression(e , block, newArray, errs)
-	}
+    static fn checkNewMapExpression(e Expression , block Block , newMap ExpressionNew,
+        errs []error) -> (valueType Type) {
+        if len(newMap.args) > 0 {
+            errs.append(new error(sprintf("%s new 'map' expect no arguments",
+                errMsgPrefix(newMap.args[0].pos))))
+            checkExpressions(block , newMap.args , errs , true)
+        }
+        ret := newMap.Type.cloneType()
+        ret.pos = e.pos
+        return ret
+    }
 
-	static fn checkNewArrayExpression(e Expression , block Block, newArray ExpressionNew,
-		errs []error) ->(valueType Type) {
-		ret := newArray.Type.cloneType() // clone the type
-		ret.pos = e.pos
-		if len(newArray.args) != 1 { //
-			errs.append(new error( sprintf("%s new array expect at least 1 argument",
-					errMsgPrefix(e.pos))))
-			return ret
-		}
-		amount, es := newArray.args[0].checkSingleValueContextExpression(block)
-		if es != null {
-			errs.appendAll(es)
-		}
-		if amount == null {
-			return ret
-		}
-		if amount.isInteger() == false {
-			errs.append(new error( sprintf("%s argument must be 'int',but '%s'",
-					errMsgPrefix(amount.pos), amount.typeString())))
-		} else {
-			if amount.Type == VariableTypeLong && block.inheritedAttribute.isCompileTask {
-				newArray.args[0].convertToNumberType(VariableTypeLong)
-			}
-			if newArray.args[0].isLiteral() {
-				if a := newArray.args[0].getLongValue(); a < 0 {
-					errs.append(new error( sprintf("%s '%d' is negative ",
-							errMsgPrefix(amount.pos), a)))
-				}
-			}
-		}
-		//no further checks
-		return ret
-	}
-	
-} 
+    static fn checkNewJavaArrayExpression(e Expression , block Block , newArray ExpressionNew,
+        errs []error) -> (valueType Type) {
+        return .checkNewArrayExpression(e , block , newArray , errs)
+    }
+
+    static fn checkNewArrayExpression(e Expression , block Block , newArray ExpressionNew,
+        errs []error) -> (valueType Type) {
+        ret := newArray.Type.cloneType() // clone the type
+        ret.pos = e.pos
+        if len(newArray.args) != 1 {
+            errs.append(new error(sprintf("%s new array expect at least 1 argument",
+                errMsgPrefix(e.pos))))
+            return ret
+        }
+        amount , es := newArray.args[0].checkSingleValueContextExpression(block)
+        if es != null {
+            errs.appendAll(es)
+        }
+        if amount == null {
+            return ret
+        }
+        if amount.isInteger() == false {
+            errs.append(new error(sprintf("%s argument must be 'int',but '%s'",
+                errMsgPrefix(amount.pos) , amount.typeString())))
+        } else {
+            if amount.Type == VariableTypeLong {
+                newArray.args[0].convertToNumberType(VariableTypeLong)
+            }
+            if newArray.args[0].isLiteral() {
+                if a := newArray.args[0].getLongValue() ; a < 0 {
+                    errs.append(new error(sprintf("%s '%d' is negative ",
+                        errMsgPrefix(amount.pos) , a)))
+                }
+            }
+        }
+
+        //no further checks
+        return ret
+    }
+
+}
+
+

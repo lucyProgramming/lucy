@@ -15,7 +15,7 @@ class ExpressionCheckSlice {
 				sliceOn.pos.errMsgPrefix(), sliceOn.typeString())))
 		}
 		//start
-		if on.start == null && block.inheritedAttribute.isCompileTask {
+		if on.start == null   {
 			on.start = new Expression()
 			on.start.pos = e.pos
 			on.start.op = "intLiteral"
@@ -31,8 +31,7 @@ class ExpressionCheckSlice {
 				errs.append(new error(sprintf("%s cannot use '%s' for startIndex",
 					startType.pos.errMsgPrefix(), startType.typeString())))
 			} else {
-				if startType.Type == VariableTypeLong && 
-					block.inheritedAttribute.isCompileTask {
+				if startType.Type == VariableTypeLong   {
 					on.start.convertToNumberType(VariableTypeInt)
 				}
 				if on.start.isLiteral() {
@@ -52,8 +51,7 @@ class ExpressionCheckSlice {
 					errs.append(new error( sprintf("%s cannot use '%s' for endIndex",
 						endType.pos.errMsgPrefix(), endType.typeString())))
 				} else {
-					if endType.Type == VariableTypeLong && 
-						block.inheritedAttribute.isCompileTask {
+					if endType.Type == VariableTypeLong   {
 						on.end.convertToNumberType(VariableTypeInt)
 					}
 					if on.end.isLiteral() {

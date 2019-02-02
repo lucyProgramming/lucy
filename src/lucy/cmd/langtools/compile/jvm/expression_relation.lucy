@@ -1,18 +1,15 @@
-
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildExpressionRelation {
-    
-
     eb BuildExpression
-    
-    fn BuildExpressionRelation(eb BuildExpression){
+
+    fn BuildExpressionRelation(eb BuildExpression) {
         this.super()
         this.eb = eb
     }
 
-    fn  buildRelations(
+    fn buildRelations(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
         e ast.Expression,
@@ -20,15 +17,17 @@ class BuildExpressionRelation {
         state StackMapState) -> (maxStack char) {
         bin := e.data.(ast.ExpressionBinary)
         stackLength := len(state.stacks)
-        defer  {
+        defer {
+
             state.popStack(len(state.stacks) - stackLength)
         }
+
         if bin.left.value.isNumber() ||
-            bin.left.value.Type == ast.VariableTypeEnum { // in this case ,right must be a number type
-            maxStack = this.eb.build(c, code, bin.left, context, state)
-            state.pushStack(c, bin.left.value)
-            stack := this.eb.build(c, code, bin.right, context, state)
-            if t := jvmSlotSize(bin.left.value) + stack; t > maxStack {
+            bin.left.value.Type == ast.VariableTypeEnum {
+            maxStack = this.eb.build(c , code , bin.left , context , state)
+            state.pushStack(c , bin.left.value)
+            stack := this.eb.build(c , code , bin.right , context , state)
+            if t := jvmSlotSize(bin.left.value) + stack ; t > maxStack {
                 maxStack = t
             }
             var exit cg.Exit
@@ -38,195 +37,208 @@ class BuildExpressionRelation {
                 bin.left.value.Type == ast.VariableTypeInt ||
                 bin.left.value.Type == ast.VariableTypeEnum {
                 switch e.Type {
-                case ast.ExpressionTypeGt:
-                    exit = new cg.Exit(cg.OP_if_icmpgt, code)
-                case ast.ExpressionTypeLe:
-                    exit = new cg.Exit(cg.OP_if_icmple, code)
-                case ast.ExpressionTypeLt:
-                    exit = new cg.Exit(cg.OP_if_icmplt, code)
-                case ast.ExpressionTypeGe:
-                    exit = new cg.Exit(cg.OP_if_icmpge, code)
-                case ast.ExpressionTypeEq:
-                    exit = new cg.Exit(cg.OP_if_icmpeq, code)
-                case ast.ExpressionTypeNe:
-                    exit = new cg.Exit(cg.OP_if_icmpne, code)
+                    case ast.ExpressionTypeGt:
+                        exit = new cg.Exit(cg.OP_if_icmpgt , code)
+                    case ast.ExpressionTypeLe:
+                        exit = new cg.Exit(cg.OP_if_icmple , code)
+                    case ast.ExpressionTypeLt:
+                        exit = new cg.Exit(cg.OP_if_icmplt , code)
+                    case ast.ExpressionTypeGe:
+                        exit = new cg.Exit(cg.OP_if_icmpge , code)
+                    case ast.ExpressionTypeEq:
+                        exit = new cg.Exit(cg.OP_if_icmpeq , code)
+                    case ast.ExpressionTypeNe:
+                        exit = new cg.Exit(cg.OP_if_icmpne , code)
                 }
+
             } else {
                 switch bin.left.value.Type {
-                case ast.VariableTypeLong:
-                    code.codes[code.codeLength] = cg.OP_lcmp
-                case ast.VariableTypeFloat:
-                    code.codes[code.codeLength] = cg.OP_fcmpl
-                case ast.VariableTypeDouble:
-                    code.codes[code.codeLength] = cg.OP_dcmpl
+                    case ast.VariableTypeLong:
+                        code.codes[code.codeLength] = cg.OP_lcmp
+                    case ast.VariableTypeFloat:
+                        code.codes[code.codeLength] = cg.OP_fcmpl
+                    case ast.VariableTypeDouble:
+                        code.codes[code.codeLength] = cg.OP_dcmpl
                 }
+
                 code.codeLength++
                 switch e.Type {
-                case ast.ExpressionTypeGt:
-                    exit = new cg.Exit(cg.OP_ifgt, code)
-                case ast.ExpressionTypeLe:
-                    exit = new cg.Exit(cg.OP_ifle, code)
-                case ast.ExpressionTypeLt:
-                    exit = new cg.Exit(cg.OP_iflt, code)
-                case ast.ExpressionTypeGe:
-                    exit = new cg.Exit(cg.OP_ifge, code)
-                case ast.ExpressionTypeEq:
-                    exit = new cg.Exit(cg.OP_ifeq, code)
-                case ast.ExpressionTypeNe:
-                    exit = new cg.Exit(cg.OP_ifne, code)
+                    case ast.ExpressionTypeGt:
+                        exit = new cg.Exit(cg.OP_ifgt , code)
+                    case ast.ExpressionTypeLe:
+                        exit = new cg.Exit(cg.OP_ifle , code)
+                    case ast.ExpressionTypeLt:
+                        exit = new cg.Exit(cg.OP_iflt , code)
+                    case ast.ExpressionTypeGe:
+                        exit = new cg.Exit(cg.OP_ifge , code)
+                    case ast.ExpressionTypeEq:
+                        exit = new cg.Exit(cg.OP_ifeq , code)
+                    case ast.ExpressionTypeNe:
+                        exit = new cg.Exit(cg.OP_ifne , code)
                 }
+
             }
+
             state.popStack(1)
             code.codes[code.codeLength] = cg.OP_iconst_0
             code.codeLength++
-            falseExit := new cg.Exit(cg.OP_goto, code)
-            writeExits([]cg.Exit{exit}, code.codeLength)
-            context.MakeStackMap(code, state, code.codeLength)
+            falseExit := new cg.Exit(cg.OP_goto , code)
+            writeExits([]cg.Exit{exit} , code.codeLength)
+            context.MakeStackMap(code , state , code.codeLength)
             code.codes[code.codeLength] = cg.OP_iconst_1
             code.codeLength++
-            writeExits([]cg.Exit{falseExit}, code.codeLength)
-            state.pushStack(c,typeBool)
-            context.MakeStackMap(code, state, code.codeLength)
-            defer state.popStack(1)
+            writeExits([]cg.Exit{falseExit} , code.codeLength)
+            state.pushStack(c , typeBool)
+            context.MakeStackMap(code , state , code.codeLength)
+            defer {
+                state.popStack(1)
+            }
             return
         }
         if bin.left.value.Type == ast.VariableTypeBool ||
-            bin.right.value.Type == ast.VariableTypeBool { // bool type
-            maxStack = this.eb.build(c, code, bin.left, context, state)
-            state.pushStack(c, bin.left.value)
-            stack := this.eb.build(c, code, bin.right, context, state)
-            if t := jvmSlotSize(bin.left.value) + stack; t > maxStack {
+            bin.right.value.Type == ast.VariableTypeBool {
+            maxStack = this.eb.build(c , code , bin.left , context , state)
+            state.pushStack(c , bin.left.value)
+            stack := this.eb.build(c , code , bin.right , context , state)
+            if t := jvmSlotSize(bin.left.value) + stack ; t > maxStack {
                 maxStack = t
             }
             state.popStack(1) // 1 bool value
             var exit cg.Exit
             if e.Type == ast.ExpressionTypeEq {
-                exit = new cg.Exit(cg.OP_if_icmpeq, code)
+                exit = new cg.Exit(cg.OP_if_icmpeq , code)
             } else {
-                exit = new cg.Exit(cg.OP_if_icmpne, code)
+                exit = new cg.Exit(cg.OP_if_icmpne , code)
             }
+
             code.codes[code.codeLength] = cg.OP_iconst_0
             code.codeLength++
-            falseExit := new cg.Exit(cg.OP_goto, code)
-            writeExits([]cg.Exit{exit}, code.codeLength)
-            context.MakeStackMap(code, state, code.codeLength)
+            falseExit := new cg.Exit(cg.OP_goto , code)
+            writeExits([]cg.Exit{exit} , code.codeLength)
+            context.MakeStackMap(code , state , code.codeLength)
             code.codes[code.codeLength] = cg.OP_iconst_1
             code.codeLength++
-            writeExits([]cg.Exit{falseExit}, code.codeLength)
-            state.pushStack(c, typeBool)
-            context.MakeStackMap(code, state, code.codeLength)
-            defer state.popStack(1)
+            writeExits([]cg.Exit{falseExit} , code.codeLength)
+            state.pushStack(c , typeBool)
+            context.MakeStackMap(code , state , code.codeLength)
+            defer {
+                state.popStack(1)
+            }
             return
         }
         if bin.left.value.Type == ast.VariableTypeNull ||
-            bin.right.value.Type == ast.VariableTypeNull { // must not null-null
+            bin.right.value.Type == ast.VariableTypeNull {
             var notNullExpression ast.Expression
             if bin.left.value.Type != ast.VariableTypeNull {
                 notNullExpression = bin.left
             } else {
                 notNullExpression = bin.right
             }
-            maxStack = this.eb.build(c, code, notNullExpression, context, state)
+
+            maxStack = this.eb.build(c , code , notNullExpression , context , state)
             var exit cg.Exit
             if e.Type == ast.ExpressionTypeEq {
-                exit = new cg.Exit(cg.OP_ifnull, code)
-            } else { // ne
-                exit = new cg.Exit(cg.OP_ifnonnull, code)
+                exit = new cg.Exit(cg.OP_ifnull , code)
+            } else {
+                exit = new cg.Exit(cg.OP_ifnonnull , code)
             }
+
             code.codes[code.codeLength] = cg.OP_iconst_0
             code.codeLength++
-            falseExit := new cg.Exit(cg.OP_goto, code)
-            writeExits([]cg.Exit{exit}, code.codeLength)
-            context.MakeStackMap(code, state, code.codeLength)
+            falseExit := new cg.Exit(cg.OP_goto , code)
+            writeExits([]cg.Exit{exit} , code.codeLength)
+            context.MakeStackMap(code , state , code.codeLength)
             code.codes[code.codeLength] = cg.OP_iconst_1
             code.codeLength++
-            writeExits([]cg.Exit{falseExit}, code.codeLength)
-            state.pushStack(c,typeBool)
-            context.MakeStackMap(code, state, code.codeLength)
-            defer state.popStack(1)
+            writeExits([]cg.Exit{falseExit} , code.codeLength)
+            state.pushStack(c , typeBool)
+            context.MakeStackMap(code , state , code.codeLength)
+            defer {
+                state.popStack(1)
+            }
             return
         }
-
         //string compare
         if bin.left.value.Type == ast.VariableTypeString {
-            maxStack = this.eb.build(c, code, bin.left, context, state)
-            state.pushStack(c, bin.left.value)
-            stack := this.eb.build(c, code, bin.right, context, state)
+            maxStack = this.eb.build(c , code , bin.left , context , state)
+            state.pushStack(c , bin.left.value)
+            stack := this.eb.build(c , code , bin.right , context , state)
             code.codes[code.codeLength] = cg.OP_invokevirtual
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-                javaStringClass,
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaStringClass,
                 "compareTo",
-                "(Ljava/lang/String;)I"
-            ), code.codes[code.codeLength+1:code.codeLength+3])
+                "(Ljava/lang/String;)I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
-            if t := char(1) + stack; t > maxStack {
+            if t := char(1) + stack ; t > maxStack {
                 maxStack = t
             }
             state.popStack(1) // pop left string
             var exit cg.Exit
             switch e.Type {
-            case ast.ExpressionTypeGt:
-                exit = new cg.Exit(cg.OP_ifgt, code)
-            case ast.ExpressionTypeLe:
-                exit = new cg.Exit(cg.OP_ifle, code)
-            case ast.ExpressionTypeLt:
-                exit = new cg.Exit(cg.OP_iflt, code)
-            case ast.ExpressionTypeGe:
-                exit = new cg.Exit(cg.OP_ifge, code)
-            case ast.ExpressionTypeEq:
-                exit = new cg.Exit(cg.OP_ifeq, code)
-            case ast.ExpressionTypeNe:
-                exit = new cg.Exit(cg.OP_ifne, code)
+                case ast.ExpressionTypeGt:
+                    exit = new cg.Exit(cg.OP_ifgt , code)
+                case ast.ExpressionTypeLe:
+                    exit = new cg.Exit(cg.OP_ifle , code)
+                case ast.ExpressionTypeLt:
+                    exit = new cg.Exit(cg.OP_iflt , code)
+                case ast.ExpressionTypeGe:
+                    exit = new cg.Exit(cg.OP_ifge , code)
+                case ast.ExpressionTypeEq:
+                    exit = new cg.Exit(cg.OP_ifeq , code)
+                case ast.ExpressionTypeNe:
+                    exit = new cg.Exit(cg.OP_ifne , code)
             }
+
             code.codes[code.codeLength] = cg.OP_iconst_0
             code.codeLength++
-            falseExit := new cg.Exit(cg.OP_goto, code)
-            writeExits([]cg.Exit{exit}, code.codeLength)
-            context.MakeStackMap(code, state, code.codeLength)
+            falseExit := new cg.Exit(cg.OP_goto , code)
+            writeExits([]cg.Exit{exit} , code.codeLength)
+            context.MakeStackMap(code , state , code.codeLength)
             code.codes[code.codeLength] = cg.OP_iconst_1
             code.codeLength++
-            writeExits([]cg.Exit{falseExit}, code.codeLength)
-            state.pushStack(c, typeBool)
-            context.MakeStackMap(code, state, code.codeLength)
-            defer state.popStack(1)
+            writeExits([]cg.Exit{falseExit} , code.codeLength)
+            state.pushStack(c , typeBool)
+            context.MakeStackMap(code , state , code.codeLength)
+            defer {
+                state.popStack(1)
+            }
             return
         }
-
-        if bin.left.value.isPointer() && bin.right.value.isPointer() { //
-            stack := this.eb.build(c, code, bin.left, context, state)
+        if bin.left.value.isPointer() && bin.right.value.isPointer() {
+            stack := this.eb.build(c , code , bin.left , context , state)
             if stack > maxStack {
                 maxStack = stack
             }
-            state.pushStack(c, bin.left.value)
-            stack = this.eb.build(c, code, bin.right, context, state)
-            if t := stack + 1; t > maxStack {
+            state.pushStack(c , bin.left.value)
+            stack = this.eb.build(c , code , bin.right , context , state)
+            if t := stack + 1 ; t > maxStack {
                 maxStack = t
             }
             state.popStack(1)
             var exit cg.Exit
             if e.Type == ast.ExpressionTypeEq {
-                exit = new cg.Exit(cg.OP_if_acmpeq, code)
-            } else { // ne
-                exit = new cg.Exit(cg.OP_if_acmpne, code)
+                exit = new cg.Exit(cg.OP_if_acmpeq , code)
+            } else {
+                exit = new cg.Exit(cg.OP_if_acmpne , code)
             }
+
             code.codes[code.codeLength] = cg.OP_iconst_0
             code.codeLength++
-            falseExit := new cg.Exit(cg.OP_goto, code)
-            writeExits([]cg.Exit{exit}, code.codeLength)
-            context.MakeStackMap(code, state, code.codeLength)
+            falseExit := new cg.Exit(cg.OP_goto , code)
+            writeExits([]cg.Exit{exit} , code.codeLength)
+            context.MakeStackMap(code , state , code.codeLength)
             code.codes[code.codeLength] = cg.OP_iconst_1
             code.codeLength++
-            writeExits([]cg.Exit{falseExit}, code.codeLength)
-            state.pushStack(c,typeBool)
-            context.MakeStackMap(code, state, code.codeLength)
-            defer state.popStack(1)
+            writeExits([]cg.Exit{falseExit} , code.codeLength)
+            state.pushStack(c , typeBool)
+            context.MakeStackMap(code , state , code.codeLength)
+            defer {
+                state.popStack(1)
+            }
             return
         }
         return
     }
 
-
-
-
 }
+
 
