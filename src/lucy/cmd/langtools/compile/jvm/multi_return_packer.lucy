@@ -1,34 +1,33 @@
-
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class MultiValueAutoVar {
-	localVarOffset char
-    
-	fn MultiValueAutoVar(c cg.ClassHighLevel, code cg.AttributeCode, state StackMapState){
+    localVarOffset char
+
+    fn MultiValueAutoVar(c cg.ClassHighLevel , code cg.AttributeCode , state StackMapState) {
         this.super()
         this.localVarOffset = code.maxLocals
         code.maxLocals++
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
+        copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject,
             this.localVarOffset))
-        state.appendLocals(c, state.newObjectVariableType(javaRootObjectArray))
-	}
-
+        state.appendLocals(c , state.newObjectVariableType(javaRootObjectArray))
+    }
 
     fn unPack(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
-        valueIndex int, 
-        typ ast.Type)  -> (maxStack char) {
-        maxStack = this.unPack2Object(c, code, valueIndex)
+        valueIndex int,
+        typ ast.Type) -> (maxStack char) {
+        maxStack = this.unPack2Object(c , code , valueIndex)
         if typ.isPointer() == false {
-            TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, typ)
-            if t := jvmSlotSize(typ); t > maxStack {
+            TypeConverterAndPrimitivePacker.unPackPrimitives(c , code , typ)
+            if t := jvmSlotSize(typ) ; t > maxStack {
                 maxStack = t
             }
         } else {
-            TypeConverterAndPrimitivePacker.castPointer(c, code, typ)
+            TypeConverterAndPrimitivePacker.castPointer(c , code , typ)
         }
+
         return
     }
 
@@ -43,17 +42,14 @@ class MultiValueAutoVar {
             panic("over 127")
         }
         maxStack = 2
-        //a.buildLoadArrayListAutoVar(code, context) // local array list on stack
         copyOPs(code,
-            loadLocalVariableOps(ast.VariableTypeObject, this.localVarOffset))
-        loadInt(c, code, int(valueIndex))
+            loadLocalVariableOps(ast.VariableTypeObject , this.localVarOffset))
+        loadInt(c , code , int(valueIndex))
         code.codes[code.codeLength] = cg.OP_aaload
         code.codeLength++
         return
     }
 
-
 }
-
 
 

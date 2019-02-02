@@ -1,282 +1,276 @@
-
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 import "lucy/binary"
 
-
 class BuildExpressionConversion {
-	
-	eb BuildExpression
-    
-    fn BuildExpressionConversion(eb BuildExpression){
+    eb BuildExpression
+
+    fn BuildExpressionConversion(eb BuildExpression) {
         this.super()
         this.eb = eb
     }
-    
-	fn  stackTop2Byte(code cg.AttributeCode, on ast.VariableTypeKind) {
-		switch on {
-		case ast.VariableTypeByte:
-			// already is
-		case ast.VariableTypeShort ,
-			ast.VariableTypeChar , 
-			ast.VariableTypeInt :
-			code.codes[code.codeLength] = cg.OP_i2b
-			code.codeLength++
-		case ast.VariableTypeLong:
-			code.codes[code.codeLength] = cg.OP_l2i
-			code.codes[code.codeLength+1] = cg.OP_i2b
-			code.codeLength += 2
-		case ast.VariableTypeFloat:
-			code.codes[code.codeLength] = cg.OP_f2i
-			code.codes[code.codeLength+1] = cg.OP_i2b
-			code.codeLength += 2
-		case ast.VariableTypeDouble:
-			code.codes[code.codeLength] = cg.OP_d2i
-			code.codes[code.codeLength+1] = cg.OP_i2b
-			code.codeLength += 2
-		}
-	}
 
-	fn  stackTop2Short(code cg.AttributeCode, on ast.VariableTypeKind) {
-		switch on {
-		case ast.VariableTypeByte:
-			// already is
-		case ast.VariableTypeShort:
-			// already is
-		case ast.VariableTypeChar:
-			code.codes[code.codeLength] = cg.OP_i2s
-			code.codeLength++
-		case ast.VariableTypeInt:
-			code.codes[code.codeLength] = cg.OP_i2s
-			code.codeLength++
-		case ast.VariableTypeLong:
-			code.codes[code.codeLength] = cg.OP_l2i
-			code.codes[code.codeLength+1] = cg.OP_i2s
-			code.codeLength += 2
-		case ast.VariableTypeFloat:
-			code.codes[code.codeLength] = cg.OP_f2i
-			code.codes[code.codeLength+1] = cg.OP_i2s
-			code.codeLength += 2
-		case ast.VariableTypeDouble:
-			code.codes[code.codeLength] = cg.OP_d2i
-			code.codes[code.codeLength+1] = cg.OP_i2s
-			code.codeLength += 2
+    fn stackTop2Byte(code cg.AttributeCode , on ast.VariableTypeKind) {
+        switch on {
+            case ast.VariableTypeByte:
+                // already is
+            case ast.VariableTypeShort,
+                ast.VariableTypeChar,
+                ast.VariableTypeInt:
+                code.codes[code.codeLength] = cg.OP_i2b
+                code.codeLength++
+            case ast.VariableTypeLong:
+                code.codes[code.codeLength] = cg.OP_l2i
+                code.codes[code.codeLength + 1] = cg.OP_i2b
+                code.codeLength += 2
+            case ast.VariableTypeFloat:
+                code.codes[code.codeLength] = cg.OP_f2i
+                code.codes[code.codeLength + 1] = cg.OP_i2b
+                code.codeLength += 2
+            case ast.VariableTypeDouble:
+                code.codes[code.codeLength] = cg.OP_d2i
+                code.codes[code.codeLength + 1] = cg.OP_i2b
+                code.codeLength += 2
+        }
 
-		}
-	}
+    }
 
-	fn  stackTop2Char(code cg.AttributeCode, on ast.VariableTypeKind) {
-		switch on {
-		case ast.VariableTypeByte:
-			// already is
-		case ast.VariableTypeShort:
-			// already is
-		case ast.VariableTypeChar:
-			// already is
-		case ast.VariableTypeInt:
-			code.codes[code.codeLength] = cg.OP_i2c
-			code.codeLength++
-		case ast.VariableTypeLong:
-			code.codes[code.codeLength] = cg.OP_l2i
-			code.codeLength++
-			code.codes[code.codeLength] = cg.OP_i2c
-			code.codeLength++
-		case ast.VariableTypeFloat:
-			code.codes[code.codeLength] = cg.OP_f2i
-			code.codeLength++
-			code.codes[code.codeLength] = cg.OP_i2c
-			code.codeLength++
-		case ast.VariableTypeDouble:
-			code.codes[code.codeLength] = cg.OP_d2i
-			code.codeLength++
-			code.codes[code.codeLength] = cg.OP_i2c
-			code.codeLength++
+    fn stackTop2Short(code cg.AttributeCode , on ast.VariableTypeKind) {
+        switch on {
+            case ast.VariableTypeByte:
+                // already is
+            case ast.VariableTypeShort:
+                // already is
+            case ast.VariableTypeChar:
+                code.codes[code.codeLength] = cg.OP_i2s
+                code.codeLength++
+            case ast.VariableTypeInt:
+                code.codes[code.codeLength] = cg.OP_i2s
+                code.codeLength++
+            case ast.VariableTypeLong:
+                code.codes[code.codeLength] = cg.OP_l2i
+                code.codes[code.codeLength + 1] = cg.OP_i2s
+                code.codeLength += 2
+            case ast.VariableTypeFloat:
+                code.codes[code.codeLength] = cg.OP_f2i
+                code.codes[code.codeLength + 1] = cg.OP_i2s
+                code.codeLength += 2
+            case ast.VariableTypeDouble:
+                code.codes[code.codeLength] = cg.OP_d2i
+                code.codes[code.codeLength + 1] = cg.OP_i2s
+                code.codeLength += 2
 
-		}
-	}
-	fn  stackTop2Int(code cg.AttributeCode, on ast.VariableTypeKind) {
-		switch on {
-		case ast.VariableTypeByte:
-			// already is
-		case ast.VariableTypeShort:
-			// already is
-		case ast.VariableTypeChar:
-			// already is
-		case ast.VariableTypeInt:
-			// already is
-		case ast.VariableTypeLong:
-			code.codes[code.codeLength] = cg.OP_l2i
-			code.codeLength++
-		case ast.VariableTypeFloat:
-			code.codes[code.codeLength] = cg.OP_f2i
-			code.codeLength++
-		case ast.VariableTypeDouble:
-			code.codes[code.codeLength] = cg.OP_d2i
-			code.codeLength++
+        }
 
-		}
-	}
+    }
 
-	fn  stackTop2Float(code cg.AttributeCode, on ast.VariableTypeKind) {
-		switch on {
-		case ast.VariableTypeByte ,ast.VariableTypeShort ,ast.VariableTypeChar ,ast.VariableTypeInt   :
-			code.codes[code.codeLength] = cg.OP_i2f
-			code.codeLength++
-		case ast.VariableTypeLong:
-			code.codes[code.codeLength] = cg.OP_l2f
-			code.codeLength++
-		case ast.VariableTypeFloat:
-			// already is
-		case ast.VariableTypeDouble:
-			code.codes[code.codeLength] = cg.OP_d2f
-			code.codeLength++
+    fn stackTop2Char(code cg.AttributeCode , on ast.VariableTypeKind) {
+        switch on {
+            case ast.VariableTypeByte:
+                // already is
+            case ast.VariableTypeShort:
+                // already is
+            case ast.VariableTypeChar:
+                // already is
+            case ast.VariableTypeInt:
+                code.codes[code.codeLength] = cg.OP_i2c
+                code.codeLength++
+            case ast.VariableTypeLong:
+                code.codes[code.codeLength] = cg.OP_l2i
+                code.codeLength++
+                code.codes[code.codeLength] = cg.OP_i2c
+                code.codeLength++
+            case ast.VariableTypeFloat:
+                code.codes[code.codeLength] = cg.OP_f2i
+                code.codeLength++
+                code.codes[code.codeLength] = cg.OP_i2c
+                code.codeLength++
+            case ast.VariableTypeDouble:
+                code.codes[code.codeLength] = cg.OP_d2i
+                code.codeLength++
+                code.codes[code.codeLength] = cg.OP_i2c
+                code.codeLength++
 
-		}
-	}
+        }
 
-	fn  stackTop2Long(code cg.AttributeCode, on ast.VariableTypeKind) {
-		switch on {
-		case ast.VariableTypeByte , ast.VariableTypeShort ,ast.VariableTypeChar ,ast.VariableTypeInt  :
-			code.codes[code.codeLength] = cg.OP_i2l
-			code.codeLength++
-		case ast.VariableTypeLong:
-			// already is
-		case ast.VariableTypeFloat:
-			code.codes[code.codeLength] = cg.OP_f2l
-			code.codeLength++
-		case ast.VariableTypeDouble:
-			code.codes[code.codeLength] = cg.OP_d2l
-			code.codeLength++
+    }
+    fn stackTop2Int(code cg.AttributeCode , on ast.VariableTypeKind) {
+        switch on {
+            case ast.VariableTypeByte:
+                // already is
+            case ast.VariableTypeShort:
+                // already is
+            case ast.VariableTypeChar:
+                // already is
+            case ast.VariableTypeInt:
+                // already is
+            case ast.VariableTypeLong:
+                code.codes[code.codeLength] = cg.OP_l2i
+                code.codeLength++
+            case ast.VariableTypeFloat:
+                code.codes[code.codeLength] = cg.OP_f2i
+                code.codeLength++
+            case ast.VariableTypeDouble:
+                code.codes[code.codeLength] = cg.OP_d2i
+                code.codeLength++
 
-		}
-	}
+        }
 
-	fn  stackTop2Double(code cg.AttributeCode, on ast.VariableTypeKind) {
-		switch on {
-		case ast.VariableTypeByte , ast.VariableTypeShort ,ast.VariableTypeChar , ast.VariableTypeInt :
-			code.codes[code.codeLength] = cg.OP_i2d
-			code.codeLength++
-		case ast.VariableTypeLong:
-			code.codes[code.codeLength] = cg.OP_l2d
-			code.codeLength++
-		case ast.VariableTypeFloat:
-			code.codes[code.codeLength] = cg.OP_f2d
-			code.codeLength++
-		case ast.VariableTypeDouble:
-			// already is
-		}
-	}
+    }
 
-	/*
+    fn stackTop2Float(code cg.AttributeCode , on ast.VariableTypeKind) {
+        switch on {
+            case ast.VariableTypeByte , ast.VariableTypeShort , ast.VariableTypeChar , ast.VariableTypeInt:
+                code.codes[code.codeLength] = cg.OP_i2f
+                code.codeLength++
+            case ast.VariableTypeLong:
+                code.codes[code.codeLength] = cg.OP_l2f
+                code.codeLength++
+            case ast.VariableTypeFloat:
+                // already is
+            case ast.VariableTypeDouble:
+                code.codes[code.codeLength] = cg.OP_d2f
+                code.codeLength++
+
+        }
+
+    }
+
+    fn stackTop2Long(code cg.AttributeCode , on ast.VariableTypeKind) {
+        switch on {
+            case ast.VariableTypeByte , ast.VariableTypeShort , ast.VariableTypeChar , ast.VariableTypeInt:
+                code.codes[code.codeLength] = cg.OP_i2l
+                code.codeLength++
+            case ast.VariableTypeLong:
+                // already is
+            case ast.VariableTypeFloat:
+                code.codes[code.codeLength] = cg.OP_f2l
+                code.codeLength++
+            case ast.VariableTypeDouble:
+                code.codes[code.codeLength] = cg.OP_d2l
+                code.codeLength++
+
+        }
+
+    }
+
+    fn stackTop2Double(code cg.AttributeCode , on ast.VariableTypeKind) {
+        switch on {
+            case ast.VariableTypeByte , ast.VariableTypeShort , ast.VariableTypeChar , ast.VariableTypeInt:
+                code.codes[code.codeLength] = cg.OP_i2d
+                code.codeLength++
+            case ast.VariableTypeLong:
+                code.codes[code.codeLength] = cg.OP_l2d
+                code.codeLength++
+            case ast.VariableTypeFloat:
+                code.codes[code.codeLength] = cg.OP_f2d
+                code.codeLength++
+            case ast.VariableTypeDouble:
+                // already is
+        }
+
+    }
+
+    /*
 		convert stack top to target
 	*/
-	fn  numberTypeConverter(code cg.AttributeCode,
-		on ast.VariableTypeKind, target ast.VariableTypeKind) {
-		if on == target {
-			return
-		}
-		switch target {
-		case ast.VariableTypeByte:
-			this.stackTop2Byte(code, on)
-		case ast.VariableTypeShort:
-			this.stackTop2Short(code, on)
-		case ast.VariableTypeChar:
-			this.stackTop2Char(code, on)
-		case ast.VariableTypeInt:
-			this.stackTop2Int(code, on)
-		case ast.VariableTypeLong:
-			this.stackTop2Long(code, on)
-		case ast.VariableTypeFloat:
-			this.stackTop2Float(code, on)
-		case ast.VariableTypeDouble:
-			this.stackTop2Double(code, on)
-		}
-	}
+    fn numberTypeConverter(code cg.AttributeCode,
+        on ast.VariableTypeKind , target ast.VariableTypeKind) {
+        if on == target {
+            return
+        }
+        switch target {
+            case ast.VariableTypeByte:
+                this.stackTop2Byte(code , on)
+            case ast.VariableTypeShort:
+                this.stackTop2Short(code , on)
+            case ast.VariableTypeChar:
+                this.stackTop2Char(code , on)
+            case ast.VariableTypeInt:
+                this.stackTop2Int(code , on)
+            case ast.VariableTypeLong:
+                this.stackTop2Long(code , on)
+            case ast.VariableTypeFloat:
+                this.stackTop2Float(code , on)
+            case ast.VariableTypeDouble:
+                this.stackTop2Double(code , on)
+        }
 
-	fn  stackTop2String(c cg.ClassHighLevel, code cg.AttributeCode,
-		typ ast.Type, context Context, state StackMapState) -> (maxStack char) {
-		if typ.Type == ast.VariableTypeString {
-			return
-		}
-		maxStack = jvmSlotSize(typ) * 2
-		switch typ.Type {
-		case ast.VariableTypeBool:
-			code.codes[code.codeLength] = cg.OP_invokestatic
-			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-				javaStringClass,
-				"valueOf",
-				"(Z)Ljava/lang/String;"
-			), code.codes[code.codeLength+1:code.codeLength+3])
-			code.codeLength += 3
-		case ast.VariableTypeChar:
-			code.codes[code.codeLength] = cg.OP_invokestatic
-			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-				javaStringClass,
-				"valueOf",
-				"(C)Ljava/lang/String;"
-			), code.codes[code.codeLength+1:code.codeLength+3])
-			code.codeLength += 3
-		case ast.VariableTypeByte ,ast.VariableTypeShort ,  ast.VariableTypeEnum ,ast.VariableTypeInt :
-			code.codes[code.codeLength] = cg.OP_invokestatic
-			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-				javaStringClass,
-				"valueOf",
-				"(I)Ljava/lang/String;"
-			), code.codes[code.codeLength+1:code.codeLength+3])
-			code.codeLength += 3
-		case ast.VariableTypeLong:
-			code.codes[code.codeLength] = cg.OP_invokestatic
-			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-				javaStringClass,
-				"valueOf",
-				"(J)Ljava/lang/String;"
-			), code.codes[code.codeLength+1:code.codeLength+3])
-			code.codeLength += 3
-		case ast.VariableTypeFloat:
-			code.codes[code.codeLength] = cg.OP_invokestatic
-			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-				javaStringClass,
-				"valueOf",
-				"(F)Ljava/lang/String;"
-			), code.codes[code.codeLength+1:code.codeLength+3])
-			code.codeLength += 3
-		case ast.VariableTypeDouble:
-			code.codes[code.codeLength] = cg.OP_invokestatic
-			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-				javaStringClass,
-				"valueOf",
-				"(D)Ljava/lang/String;"
-			), code.codes[code.codeLength+1:code.codeLength+3])
-			code.codeLength += 3
-		default:
-			code.codes[code.codeLength] = cg.OP_dup
-			code.codeLength++
-			{
-				state.pushStack(c, typ)
-				context.MakeStackMap(code, state, code.codeLength+10)
-				state.popStack(1)
-				state.pushStack(c, typeString)
-				context.MakeStackMap(code, state, code.codeLength+13)
-				state.popStack(1)
-			}
-			code.codes[code.codeLength] = cg.OP_ifnonnull
-			binary.BigEndian.putChar(code.codes[code.codeLength+1:code.codeLength+3], char(10))
-			code.codes[code.codeLength+3] = cg.OP_pop
-			code.codes[code.codeLength+4] = cg.OP_ldc_w
-			c.insertStringConst("null", code.codes[code.codeLength+5:code.codeLength+7])
-			code.codes[code.codeLength+7] = cg.OP_goto
-			binary.BigEndian.putChar(code.codes[code.codeLength+8:code.codeLength+10],char( 6))
-			code.codes[code.codeLength+10] = cg.OP_invokevirtual
-			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-				"java/lang/Object",
-				"toString",
-				"()Ljava/lang/String;"
-			), code.codes[code.codeLength+11:code.codeLength+13])
-			code.codeLength += 13
-		}
-		return
-	}
-	
+    }
+
+    fn stackTop2String(c cg.ClassHighLevel , code cg.AttributeCode,
+        typ ast.Type , context Context , state StackMapState) -> (maxStack char) {
+        if typ.Type == ast.VariableTypeString {
+            return
+        }
+        maxStack = jvmSlotSize(typ) * 2
+        switch typ.Type {
+            case ast.VariableTypeBool:
+                code.codes[code.codeLength] = cg.OP_invokestatic
+                c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaStringClass,
+                    "valueOf",
+                    "(Z)Ljava/lang/String;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                code.codeLength += 3
+            case ast.VariableTypeChar:
+                code.codes[code.codeLength] = cg.OP_invokestatic
+                c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaStringClass,
+                    "valueOf",
+                    "(C)Ljava/lang/String;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                code.codeLength += 3
+            case ast.VariableTypeByte , ast.VariableTypeShort , ast.VariableTypeEnum , ast.VariableTypeInt:
+                code.codes[code.codeLength] = cg.OP_invokestatic
+                c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaStringClass,
+                    "valueOf",
+                    "(I)Ljava/lang/String;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                code.codeLength += 3
+            case ast.VariableTypeLong:
+                code.codes[code.codeLength] = cg.OP_invokestatic
+                c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaStringClass,
+                    "valueOf",
+                    "(J)Ljava/lang/String;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                code.codeLength += 3
+            case ast.VariableTypeFloat:
+                code.codes[code.codeLength] = cg.OP_invokestatic
+                c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaStringClass,
+                    "valueOf",
+                    "(F)Ljava/lang/String;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                code.codeLength += 3
+            case ast.VariableTypeDouble:
+                code.codes[code.codeLength] = cg.OP_invokestatic
+                c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaStringClass,
+                    "valueOf",
+                    "(D)Ljava/lang/String;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                code.codeLength += 3
+            default:
+                code.codes[code.codeLength] = cg.OP_dup
+                code.codeLength++
+                {
+
+                    state.pushStack(c , typ)
+                    context.MakeStackMap(code , state , code.codeLength + 10)
+                    state.popStack(1)
+                    state.pushStack(c , typeString)
+                    context.MakeStackMap(code , state , code.codeLength + 13)
+                    state.popStack(1)
+                }
+
+                code.codes[code.codeLength] = cg.OP_ifnonnull
+                binary.BigEndian.putChar(code.codes[code.codeLength + 1 : code.codeLength + 3] , char(10))
+                code.codes[code.codeLength + 3] = cg.OP_pop
+                code.codes[code.codeLength + 4] = cg.OP_ldc_w
+                c.insertStringConst("null" , code.codes[code.codeLength + 5 : code.codeLength + 7])
+                code.codes[code.codeLength + 7] = cg.OP_goto
+                binary.BigEndian.putChar(code.codes[code.codeLength + 8 : code.codeLength + 10] , char(6))
+                code.codes[code.codeLength + 10] = cg.OP_invokevirtual
+                c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/Object",
+                    "toString",
+                    "()Ljava/lang/String;") , code.codes[code.codeLength + 11 : code.codeLength + 13])
+                code.codeLength += 13
+        }
+
+        return
+    }
+
 }
 
 

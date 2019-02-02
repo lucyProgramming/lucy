@@ -1,18 +1,18 @@
 
 
  
-const	AccMethodPublic       char = 0x0001 //public，方法可以从包外访问
-const	AccMethodPrivate      char = 0x0002 //private，方法只能本类中访问
-const	AccMethodProtected    char = 0x0004 //protected，方法在自身和子类可以访问
-const	AccMethodStatic       char = 0x0008 //static，静态方法
-const	AccMethodFinal        char = 0x0010 //final，方法不能被重写（覆盖）
-const	AccMethodSynchronized char = 0x0020 //synchronized，方法由管程同步
-const	AccMethodBridge       char = 0x0040 //bridge，方法由编译器产生
-const	AccMethodVarargs      char = 0x0080 //表示方法带有变长参数
-const	AccMethodNative       char = 0x0100 //native，方法引用非java语言的本地方法
-const	AccMethodAbstract     char = 0x0400 //abstract，方法没有具体实现
-const	AccMethodStrict       char = 0x0800 //strictfp，方法使用FP-strict浮点格式
-const	AccMethodSynthetic    char = 0x1000 //方法在源文件中不出现，由编译器产生
+public const	AccMethodPublic       char = 0x0001 //public，方法可以从包外访问
+public const	AccMethodPrivate      char = 0x0002 //private，方法只能本类中访问
+public const	AccMethodProtected    char = 0x0004 //protected，方法在自身和子类可以访问
+public const	AccMethodStatic       char = 0x0008 //static，静态方法
+public const	AccMethodFinal        char = 0x0010 //final，方法不能被重写（覆盖）
+public const	AccMethodSynchronized char = 0x0020 //synchronized，方法由管程同步
+public const	AccMethodBridge       char = 0x0040 //bridge，方法由编译器产生
+public const	AccMethodVarargs      char = 0x0080 //表示方法带有变长参数
+public const	AccMethodNative       char = 0x0100 //native，方法引用非java语言的本地方法
+public const	AccMethodAbstract     char = 0x0400 //abstract，方法没有具体实现
+public const	AccMethodStrict       char = 0x0800 //strictfp，方法使用FP-strict浮点格式
+public const	AccMethodSynthetic    char = 0x1000 //方法在源文件中不出现，由编译器产生
 
 
 public class MethodInfo {

@@ -1,256 +1,260 @@
 public class Statement {
-	public Type                      StatementTypeKind
-	public checked                   bool // if checked
-	public pos                       Pos
-	public statementIf               StatementIf
-	public Expression                Expression
-	public TypeAlias                 TypeAlias
-	public StatementFor              StatementFor
-	public StatementReturn           StatementReturn
-	public StatementSwitch           StatementSwitch
-	public StatementWhen             StatementWhen
-	public StatementBreak            StatementBreak
-	public block                     Block
-	public StatementContinue         StatementContinue
-	public StatementLabel            StatementLabel
-	public StatementGoTo             StatementGoTo
-	public Defer                     StatementDefer
-	public Class                     Class
-	public Enum                      Enum
-	public Import                    Import
-	public comment 	                 string
-	public inlineComment   string 
-	public isCompilerAuto bool 
-	
-	/* 
+    public Type              StatementTypeKind
+    public checked           bool              // if checked
+    public pos               Pos              
+    public statementIf       StatementIf      
+    public Expression        Expression       
+    public TypeAlias         TypeAlias        
+    public StatementFor      StatementFor     
+    public StatementReturn   StatementReturn  
+    public StatementSwitch   StatementSwitch  
+    public StatementWhen     StatementWhen    
+    public StatementBreak    StatementBreak   
+    public block             Block            
+    public StatementContinue StatementContinue
+    public StatementLabel    StatementLabel   
+    public StatementGoTo     StatementGoTo    
+    public Defer             StatementDefer   
+    public Class             Class            
+    public Enum              Enum             
+    public Import            Import           
+    public comment           string           
+    public inlineComment     string           
+    public isCompilerAuto    bool             
+
+    /*
 		statement contructed from static field default value
 	*/
-	isStaticFieldDefaultValue bool
-	/*
+    isStaticFieldDefaultValue bool
+    /*
 		this.super()
 		special case
 	*/
-	public isCallFatherConstructionStatement bool
+    public isCallFatherConstructionStatement bool
 
-	public fn Statement(){
-		this.super()
-	}
+    public fn Statement() {
+        this.super()
+    }
 
-	fn isVariableDefinition() ->(is bool)  {
-		if this.Type != StatementTypeExpression {
-			return false
-		}
-		return this.Expression.Type == ExpressionTypeVarAssign ||
-			this.Expression.Type == ExpressionTypeVar
-	}
-	
+    fn isVariableDefinition() -> (is bool) {
+        if this.Type != StatementTypeExpression {
+            return false
+        }
+        return this.Expression.Type == ExpressionTypeVarAssign ||
+            this.Expression.Type == ExpressionTypeVar
+    }
 
-	fn check(block Block) -> (errs []error) {
-		this.checked = true
-		errs = []error{}
-		switch this.Type {
-		case StatementTypeComment,
-			StatementTypeCommentMultiLine:
-			//nothing
-		case StatementTypeEmptyLine:
-			//noting
-		case StatementTypeExpression:
-			return this.checkStatementExpression(block)
-		case StatementTypeIf:
-			es := this.statementIf.check(block)
-			return es
-		case StatementTypeFor:
-			es := this.StatementFor.check(block)
-			return es
-		case StatementTypeSwitch:
-			return this.StatementSwitch.check(block)
-		case StatementTypeBreak:
-			return this.StatementBreak.check(block)
-		case StatementTypeContinue:
-			return this.StatementContinue.check(block)
-		case StatementTypeReturn:
-			return this.StatementReturn.check(block)
-		case StatementTypeGoTo:
-			err := this.StatementGoTo.checkStatementGoTo(block)
-			if err != null {
-				return []error{err}
-			}
-		case StatementTypeDefer:
-			if block.defers == null {
-				block.defers = [this.Defer]
-			}else {
-				block.defers.append(this.Defer)
-			}
-			block.inheritedAttribute.Function.hasDefer = true
-			this.Defer.block.inherit(block)
-			this.Defer.block.inheritedAttribute.Defer = this.Defer
-			es := this.Defer.block.check()
-			return es
-		case StatementTypeBlock:
-			this.block.inherit(block)
-			return this.block.check()
-		case StatementTypeLabel:
-			if block.inheritedAttribute.Defer != null {
-			    if block.inheritedAttribute.Defer.labels != null {
-			        block.inheritedAttribute.Defer.labels.append(this.StatementLabel)
-			    }else {
-			        block.inheritedAttribute.Defer.labels = [this.StatementLabel]
-			    }
-			}
-			if this.StatementLabel.findUsage {
-				u := new Usage()
-				u.Type = "declaration"
-				u.pos = this.StatementLabel.pos 
-				if this.StatementLabel.findUsageInstances == null {
-					this.StatementLabel.findUsageInstances = [u]
-					block.inheritedAttribute.p.findUsage = this.StatementLabel.findUsageInstances
-				}else {
-					this.StatementLabel.findUsageInstances.append(u)
-				}
-			}
-			if this.StatementLabel.locateDefinition{
-				block.inheritedAttribute.p.setLocationDefinition(this.StatementLabel)
-				return 
-			}
-		case StatementTypeClass:
-		    if block.inheritedAttribute.p.statementLevelClass == null {
-                block.inheritedAttribute.p.statementLevelClass = []Class{this.Class}
-		    }else {
-                block.inheritedAttribute.p.statementLevelClass.append(this.Class)
-		    }
-			err := block.insert(this.Class.name, this.Class.pos, this.Class)
-			if err != null {
-				errs.append(err)
-			}
-			if this.Class.locateDefinition {
-				block.inheritedAttribute.p.setLocationDefinition(this.Class)
-				return 
-			}
-			if this.Class.findUsage {
-				u := new Usage()
-                u.Type = "declaration"
-                u.pos = this.Class.pos 
-				this.Class.findUsageInstances = [u]
-				block.inheritedAttribute.p.findUsage = this.Class.findUsageInstances
-			}
-			if this.Class.suggestExtendsOrImplements {
-				block.inheritedAttribute.p.autoCompletionItems = new []AutoCompletionItem(2)
-				item := new AutoCompletionItem()
-				item.Type = "keyword"
-				item.name = "extends"
-				block.inheritedAttribute.p.autoCompletionItems[0] = item
-				item = new AutoCompletionItem()
-				item.Type = "keyword"
-				item.name = "implements"
-				block.inheritedAttribute.p.autoCompletionItems[1] = item
-			}
-			errs.appendAll(this.Class.check(block))
-			return errs
-		case StatementTypeEnum:
-			es := this.Enum.check(block)
-			err := block.insert(this.Enum.name, this.Enum.pos, this.Enum)
-			if err != null {
-				es.append(err)
-			}
-			return es
-		case StatementTypeNop:
-			//nop , should be never execute to here
-			//
-		case StatementTypeWhen:
-			return this.StatementWhen.check(block, this)
-		case StatementTypeImport:
-			if block.inheritedAttribute.Function.templateClonedFunction == false {
-				errs.append(new error(sprintf("%s cannot have 'import' at this scope , non-template function",
-					errMsgPrefix(this.Import.pos))))
-				return errs
-			}
-			err := this.Import.mkAccessName()
-			if err != null {
-				errs.append(err)
-				return errs
-			}
-			if this.Import.accessName != null &&
-			    this.Import.accessName == UnderScore {
-				errs.append(new error(sprintf("%s import at block scope , must be used",
-					errMsgPrefix(this.Import.pos))))
-				return null
-			}
-			if err := block.inheritedAttribute.p.insertImport(this.Import); err != null {
-				errs.append(err)
-			}
-		case StatementTypeTypeAlias:
-			if this.TypeAlias.locateDefinition {
-				block.inheritedAttribute.p.setLocationDefinition(this.TypeAlias)
-				return 
-			}
-			if this.TypeAlias.findUsage {
-				u := new Usage()
-				u.Type = "declaration"
-				u.pos = this.TypeAlias.pos 
-				this.TypeAlias.findUsageInstances = [u]
-				block.inheritedAttribute.p.findUsage = this.TypeAlias.findUsageInstances
-			}
-			err := this.TypeAlias.Type.resolve(block)
-			if err != null {
-				return []error{err}
-			}
-			err = block.insert(this.TypeAlias.name, this.TypeAlias.pos, this.TypeAlias.Type)
-			if err != null {
-				return []error{err}
-			}
-			return null
-		}
-		return null
-	}
-	
+    fn check(block Block) -> (errs []error) {
+        this.checked = true
+        errs = []error{}
+        switch this.Type {
+            case StatementTypeComment,
+                StatementTypeCommentMultiLine:
+                //nothing
+            case StatementTypeEmptyLine:
+                //noting
+            case StatementTypeExpression:
+                return this.checkStatementExpression(block)
+            case StatementTypeIf:
+                es := this.statementIf.check(block)
+                return es
+            case StatementTypeFor:
+                es := this.StatementFor.check(block)
+                return es
+            case StatementTypeSwitch:
+                return this.StatementSwitch.check(block)
+            case StatementTypeBreak:
+                return this.StatementBreak.check(block)
+            case StatementTypeContinue:
+                return this.StatementContinue.check(block)
+            case StatementTypeReturn:
+                return this.StatementReturn.check(block)
+            case StatementTypeGoTo:
+                err := this.StatementGoTo.checkStatementGoTo(block)
+                if err != null {
+                    return []error{err}
+                }
+            case StatementTypeDefer:
+                if block.defers == null {
+                    block.defers = [this.Defer]
+                } else {
+                    block.defers.append(this.Defer)
+                }
 
-	fn checkStatementExpression(block Block) ->(errs []error = []error{})  {
-		if this.Expression == null {
-			return errs 
-		}
-		this.Expression.isStatementExpression = true
-		if err := this.Expression.canBeUsedAsStatement(); err != null {
-			errs.append(err)
-		}
-		_, es := this.Expression.check(block)
-		errs.appendAll(es)
-		return errs
-	}
+                block.inheritedAttribute.Function.hasDefer = true
+                this.Defer.block.inherit(block)
+                this.Defer.block.inheritedAttribute.Defer = this.Defer
+                es := this.Defer.block.check()
+                return es
+            case StatementTypeBlock:
+                this.block.inherit(block)
+                return this.block.check()
+            case StatementTypeLabel:
+                if block.inheritedAttribute.Defer != null {
+                    if block.inheritedAttribute.Defer.labels != null {
+                        block.inheritedAttribute.Defer.labels.append(this.StatementLabel)
+                    } else {
+                        block.inheritedAttribute.Defer.labels = [this.StatementLabel]
+                    }
 
+                }
+                if this.StatementLabel.findUsage {
+                    u := new Usage()
+                    u.Type = "declaration"
+                    u.pos = this.StatementLabel.pos
+                    if this.StatementLabel.findUsageInstances == null {
+                        this.StatementLabel.findUsageInstances = [u]
+                        block.inheritedAttribute.p.findUsage = this.StatementLabel.findUsageInstances
+                    } else {
+                        this.StatementLabel.findUsageInstances.append(u)
+                    }
 
-	
-	fn simplifyIf() {
-		if len(this.statementIf.elseIfList) > 0 {
-			return
-		}
-		if len(this.statementIf.prefixExpressions) > 0 {
-			return
-		}
-		if this.statementIf.condition.Type != ExpressionTypeBool {
-			return
-		}
-		c := this.statementIf.condition.boolValue
-		if c {
-			this.Type = StatementTypeBlock
-			this.block = this.statementIf.block
-		} else {
-			if this.statementIf.Else != null {
-				this.Type = StatementTypeBlock
-				this.block = this.statementIf.Else
-			} else {
-				this.Type = StatementTypeNop
-			}
-		}
-	}
-	
-	fn simplifyFor() {
-		if this.StatementFor.Init == null &&
-			this.StatementFor.increment == null &&
-			this.StatementFor.condition != null &&
-			this.StatementFor.condition.Type == ExpressionTypeBool &&
-			this.StatementFor.condition.boolValue == false  {
-			this.Type = StatementTypeNop
-			this.StatementFor = null
-		}
-	}
+                }
+                if this.StatementLabel.locateDefinition {
+                    block.inheritedAttribute.p.setLocationDefinition(this.StatementLabel)
+                    return
+                }
+            case StatementTypeClass:
+                if block.inheritedAttribute.p.statementLevelClass == null {
+                    block.inheritedAttribute.p.statementLevelClass = []Class{this.Class}
+                } else {
+                    block.inheritedAttribute.p.statementLevelClass.append(this.Class)
+                }
+
+                err := block.insert(this.Class.name , this.Class.pos , this.Class)
+                if err != null {
+                    errs.append(err)
+                }
+                if this.Class.locateDefinition {
+                    block.inheritedAttribute.p.setLocationDefinition(this.Class)
+                    return
+                }
+                if this.Class.findUsage {
+                    u := new Usage()
+                    u.Type = "declaration"
+                    u.pos = this.Class.pos
+                    this.Class.findUsageInstances = [u]
+                    block.inheritedAttribute.p.findUsage = this.Class.findUsageInstances
+                }
+                if this.Class.suggestExtendsOrImplements {
+                    block.inheritedAttribute.p.autoCompletionItems = new []AutoCompletionItem(2)
+                    item := new AutoCompletionItem()
+                    item.Type = "keyword"
+                    item.name = "extends"
+                    block.inheritedAttribute.p.autoCompletionItems[0] = item
+                    item = new AutoCompletionItem()
+                    item.Type = "keyword"
+                    item.name = "implements"
+                    block.inheritedAttribute.p.autoCompletionItems[1] = item
+                }
+                errs.appendAll(this.Class.check(block))
+                return errs
+            case StatementTypeEnum:
+                es := this.Enum.check(block)
+                err := block.insert(this.Enum.name , this.Enum.pos , this.Enum)
+                if err != null {
+                    es.append(err)
+                }
+                return es
+            case StatementTypeNop:
+                //nop , should be never execute to here
+            case StatementTypeWhen:
+                return this.StatementWhen.check(block , this)
+            case StatementTypeImport:
+                if block.inheritedAttribute.Function.templateClonedFunction == false {
+                    errs.append(new error(sprintf("%s cannot have 'import' at this scope , non-template function",
+                        errMsgPrefix(this.Import.pos))))
+                    return errs
+                }
+                err := this.Import.mkAccessName()
+                if err != null {
+                    errs.append(err)
+                    return errs
+                }
+                if this.Import.accessName != null &&
+                    this.Import.accessName == UnderScore {
+                    errs.append(new error(sprintf("%s import at block scope , must be used",
+                        errMsgPrefix(this.Import.pos))))
+                    return null
+                }
+                if err := block.inheritedAttribute.p.insertImport(this.Import) ; err != null {
+                    errs.append(err)
+                }
+            case StatementTypeTypeAlias:
+                if this.TypeAlias.locateDefinition {
+                    block.inheritedAttribute.p.setLocationDefinition(this.TypeAlias)
+                    return
+                }
+                if this.TypeAlias.findUsage {
+                    u := new Usage()
+                    u.Type = "declaration"
+                    u.pos = this.TypeAlias.pos
+                    this.TypeAlias.findUsageInstances = [u]
+                    block.inheritedAttribute.p.findUsage = this.TypeAlias.findUsageInstances
+                }
+                err := this.TypeAlias.Type.resolve(block)
+                if err != null {
+                    return []error{err}
+                }
+                err = block.insert(this.TypeAlias.name , this.TypeAlias.pos , this.TypeAlias.Type)
+                if err != null {
+                    return []error{err}
+                }
+                return null
+        }
+
+        return null
+    }
+
+    fn checkStatementExpression(block Block) -> (errs []error = []error{}) {
+        if this.Expression == null {
+            return errs
+        }
+        this.Expression.isStatementExpression = true
+        if err := this.Expression.canBeUsedAsStatement() ; err != null {
+            errs.append(err)
+        }
+        _ , es := this.Expression.check(block)
+        errs.appendAll(es)
+        return errs
+    }
+
+    fn simplifyIf() {
+        if len(this.statementIf.elseIfList) > 0 {
+            return
+        }
+        if len(this.statementIf.prefixExpressions) > 0 {
+            return
+        }
+        if this.statementIf.condition.Type != ExpressionTypeBool {
+            return
+        }
+        c := this.statementIf.condition.boolValue
+        if c {
+            this.Type = StatementTypeBlock
+            this.block = this.statementIf.block
+        } else {
+            if this.statementIf.Else != null {
+                this.Type = StatementTypeBlock
+                this.block = this.statementIf.Else
+            } else {
+                this.Type = StatementTypeNop
+            }
+
+        }
+
+    }
+
+    fn simplifyFor() {
+        if this.StatementFor.Init == null &&
+            this.StatementFor.increment == null &&
+            this.StatementFor.condition != null &&
+            this.StatementFor.condition.Type == ExpressionTypeBool &&
+            this.StatementFor.condition.boolValue == false {
+            this.Type = StatementTypeNop
+            this.StatementFor = null
+        }
+    }
 }
+
+

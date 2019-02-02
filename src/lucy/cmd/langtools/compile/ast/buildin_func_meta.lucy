@@ -1,13 +1,17 @@
-public class BuildInFunctionPrintfMeta  {
-	public format     Expression
-	public argsLength int
+public class BuildInFunctionPrintfMeta {
+    public format     Expression
+    public argsLength int       
 }
 
-public class BuildInFunctionSprintfMeta  {
-	public format     Expression
-	public argsLength int
+
+public class BuildInFunctionSprintfMeta {
+    public format     Expression
+    public argsLength int       
 }
 
-public class BuildInFunctionPanicMeta  {
-	public argThrowable bool
+
+public class BuildInFunctionPanicMeta {
+    public argThrowable bool
 }
+
+

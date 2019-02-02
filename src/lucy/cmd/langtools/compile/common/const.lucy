@@ -1,30 +1,30 @@
 
 //array  
-const	ArrayMethodSize               = "size"
-const	ArrayMethodCap                = "cap"
-const	ArrayMethodStart              = "start"
-const	ArrayMethodEnd                = "end"
-const	ArrayMethodGetUnderlyingArray = "getUnderlyingArray"
-const	ArrayMethodAppend             = "append"
-const	ArrayMethodAppendAll          = "appendAll"
-const	ArrayMethodSetReadOnly        = "setReadOnly"
+public const	ArrayMethodSize               = "size"
+public const	ArrayMethodCap                = "cap"
+public const	ArrayMethodStart              = "start"
+public const	ArrayMethodEnd                = "end"
+public const	ArrayMethodGetUnderlyingArray = "getUnderlyingArray"
+public const	ArrayMethodAppend             = "append"
+public const	ArrayMethodAppendAll          = "appendAll"
+public const	ArrayMethodSetReadOnly        = "setReadOnly"
 
 // map
-const	MapMethodRemove    = "remove"
-const	MapMethodRemoveAll = "removeAll"
-const	MapMethodKeyExist  = "keyExist"
-const	MapMethodSize      = "size"
+public const	MapMethodRemove    = "remove"
+public const	MapMethodRemoveAll = "removeAll"
+public const	MapMethodKeyExist  = "keyExist"
+public const	MapMethodSize      = "size"
 
 // buildIn function
-const	BuildInFunctionPanic        = "panic"
-const	BuildInFunctionCatch        = "catch"
-const	BuildInFunctionPrint        = "print"
-const	BuildInFunctionPrintf       = "printf"
-const	BuildInFunctionSprintf      = "sprintf"
-const	BuildInFunctionLen          = "len"
+public const	BuildInFunctionPanic        = "panic"
+public const	BuildInFunctionCatch        = "catch"
+public const	BuildInFunctionPrint        = "print"
+public const	BuildInFunctionPrintf       = "printf"
+public const	BuildInFunctionSprintf      = "sprintf"
+public const	BuildInFunctionLen          = "len"
 
-const	BuildInFunctionBlockHole    = "blackHole"
-const	BuildInFunctionAssert       = "assert"
+public const	BuildInFunctionBlockHole    = "blackHole"
+ public const	BuildInFunctionAssert       = "assert"
 
 
-const CorePackage = "lucy/lang"
+public const CorePackage = "lucy/lang"

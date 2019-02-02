@@ -27,9 +27,9 @@ public class Constant {
     public inlineComment string //   in
 
     public containsLf bool // constains "\n"
-
+    
     public fn isPublic() -> (is bool) {
-        return this.accessFlags | cg.AccFieldPublic != 0
+        return this.accessFlags & cg.AccFieldPublic != 0
     }
 
     fn mkDefaultValue() {

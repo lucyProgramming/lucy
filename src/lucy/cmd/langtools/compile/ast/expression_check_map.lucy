@@ -1,145 +1,155 @@
 class ExpressionCheckMap {
-	
-	static fn check(e Expression , block Block, errs []error) ->(valueType Type) {
-		m := e.data.(ExpressionMap)
-		if m.Type != null {
-			if err := m.Type.resolve(block); err != null {
-				errs.append(err)
-			}
-		}
-		var mapK Type
-		var mapV Type
-		noType := m.Type == null
-		if noType && len(m.keyValuePairs) == 0 {
-			errs.append(new error(sprintf("%s map literal has no type and no initiational values,"+
-				"cannot inference it`s type",
-				e.pos.errMsgPrefix())))
-			return null
-		}
-		if m.Type == null {
-			m.Type = new Type()
-			m.Type.pos = e.pos
-			m.Type.Type = VariableTypeMap
-		}
-		if m.Type.Map == null {
-			m.Type.Map = new Map()
-		}
-		longMap := new map {long -> Pos}  ()
-		doubleMap := new map {double -> Pos} ()
-		stringMap := new map {string-> Pos}()
-		for _, v := range m.keyValuePairs {
-			// map k
-			kType, es := v.key.checkSingleValueContextExpression(block)
-			errs.appendAll(es)
-			if kType != null {
-				if err := kType.rightValueValid(); err != null {
-					errs.append(err)
-					continue
-				}
-				if noType && m.Type.Map.K == null {
-					if err := kType.isTyped(); err != null {
-						errs.append(err)
-					} else {
-						m.Type.Map.K = kType
-						mapK = m.Type.Map.K
-					}
-				}
-				if mapK != null {
-					if mapK.assignAble(block , errs, kType) == false {
-						if noType {
-							errs.append(new error(sprintf("%s mix '%s' and '%s' for map value",
-								v.key.pos.errMsgPrefix(),
-								kType.typeString(), mapK.typeString())))
-						} else {
-							errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-								v.key.pos.errMsgPrefix(),
-								kType.typeString(), mapK.typeString())))
-						}
-					}
-				}
-			}
-			if m.Type.Map.K != null &&
-				v.key.isLiteral() &&
-				m.Type.Map.K.Type == v.key.value.Type {
-				fn errMsg(pos Pos, first Pos, which string) -> (err error) {
-					errMsg := sprintf("%s  '%s' duplicate key,first declared at:\n",
-						pos.errMsgPrefix(), which)
-					errMsg += sprintf("\t%s", first.errMsgPrefix())
-					return new error(errMsg)
-				}
-				switch m.Type.Map.K.Type {
-				case VariableTypeByte,
-					VariableTypeChar, 
-					VariableTypeShort,
-					VariableTypeInt,
-					VariableTypeLong:
-					value := v.key.longValue
-					if first := longMap[value]; first != null {
-						errs.append(errMsg(v.key.pos, first , v.key.literalRaw))
-					} else {
-						longMap[value] = v.key.pos
-					}
-				case VariableTypeFloat , 
-					VariableTypeDouble :
-					value := v.key.doubleValue
-					if first := doubleMap[value]; first != null {
-						errs.append(errMsg(v.key.pos, first, v.key.literalRaw))
-					} else {
-						doubleMap[value] = v.key.pos
-					}
-				case VariableTypeString:
-					value := v.key.stringValue
-					if first := stringMap[value]; first != null {
-						errs.append(errMsg(v.key.pos, first, v.key.literalRaw))
-					} else {
-						stringMap[value] = v.key.pos
-					}
-				}
-			}
-			// map v
-			vType, es := v.value.checkSingleValueContextExpression(block)
-			errs.appendAll(es)
-			if vType == null {
-				continue
-			}
-			if err := vType.rightValueValid(); err != null {
-				errs.append(err)
-				continue
-			}
-			if noType && m.Type.Map.V == null {
-				if err := vType.isTyped(); err != null {
-					errs.append(err)
-				} else {
-					m.Type.Map.V = vType
-					mapV = m.Type.Map.V
-				}
-			}
-			if mapV != null {
-				if mapV.assignAble(block , errs, vType) == false {
-					if noType {
-						errs.append(new error(sprintf("%s mix '%s' and '%s' for map key",
-							errMsgPrefix(v.value.pos),
-							vType.typeString(), mapV.typeString())))
-					} else {
-						errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-							errMsgPrefix(v.value.pos),
-							vType.typeString(), mapV.typeString())))
-					}
-				}
-			}
-		}
-		if m.Type.Map.K == null {
-			m.Type.Map.K = new Type ()
-			m.Type.Map.K.Type = VariableTypeVoid
-			m.Type.Map.K.pos = e.pos
-		}
-		if m.Type.Map.V == null {
-			m.Type.Map.V = new Type()
-			m.Type.Map.V.Type = VariableTypeVoid
-			m.Type.Map.V.pos = e.pos
-		}
-		return m.Type
-	}
+    static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
+        m := e.data.(ExpressionMap)
+        if m.Type != null {
+            if err := m.Type.resolve(block) ; err != null {
+                errs.append(err)
+            }
+        }
+        var mapK Type
+        var mapV Type
+        noType := m.Type == null
+        if noType && len(m.keyValuePairs) == 0 {
+            errs.append(new error(sprintf("%s map literal has no type and no initiational values," +
+                "cannot inference it`s type",
+                e.pos.errMsgPrefix())))
+            return null
+        }
+        if m.Type == null {
+            m.Type = new Type()
+            m.Type.pos = e.pos
+            m.Type.Type = VariableTypeMap
+        }
+        if m.Type.Map == null {
+            m.Type.Map = new Map()
+        }
+        longMap := new map{long -> Pos}()
+        doubleMap := new map{double -> Pos}()
+        stringMap := new map{string -> Pos}()
+        for _ , v := range m.keyValuePairs {
+            // map k
+            kType , es := v.key.checkSingleValueContextExpression(block)
+            errs.appendAll(es)
+            if kType != null {
+                if err := kType.rightValueValid() ; err != null {
+                    errs.append(err)
+                    continue
+                }
+                if noType && m.Type.Map.K == null {
+                    if err := kType.isTyped() ; err != null {
+                        errs.append(err)
+                    } else {
+                        m.Type.Map.K = kType
+                        mapK = m.Type.Map.K
+                    }
 
-} 
+                }
+                if mapK != null {
+                    if mapK.assignAble(block , errs , kType) == false {
+                        if noType {
+                            errs.append(new error(sprintf("%s mix '%s' and '%s' for map value",
+                                v.key.pos.errMsgPrefix(),
+                                kType.typeString() , mapK.typeString())))
+                        } else {
+                            errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
+                                v.key.pos.errMsgPrefix(),
+                                kType.typeString() , mapK.typeString())))
+                        }
+
+                    }
+                }
+            }
+            if m.Type.Map.K != null &&
+                v.key.isLiteral() &&
+                m.Type.Map.K.Type == v.key.value.Type {
+                fn errMsg(pos Pos , first Pos , which string) -> (err error) {
+                    errMsg := sprintf("%s  '%s' duplicate key,first declared at:\n",
+                        pos.errMsgPrefix() , which)
+                    errMsg += sprintf("\t%s" , first.errMsgPrefix())
+                    return new error(errMsg)
+                }
+
+                switch m.Type.Map.K.Type {
+                    case VariableTypeByte,
+                        VariableTypeChar,
+                        VariableTypeShort,
+                        VariableTypeInt,
+                        VariableTypeLong:
+                        value := v.key.longValue
+                        if first := longMap[value] ; first != null {
+                            errs.append(errMsg(v.key.pos , first , v.key.literalRaw))
+                        } else {
+                            longMap[value] = v.key.pos
+                        }
+
+                    case VariableTypeFloat,
+                        VariableTypeDouble:
+                        value := v.key.doubleValue
+                        if first := doubleMap[value] ; first != null {
+                            errs.append(errMsg(v.key.pos , first , v.key.literalRaw))
+                        } else {
+                            doubleMap[value] = v.key.pos
+                        }
+
+                    case VariableTypeString:
+                        value := v.key.stringValue
+                        if first := stringMap[value] ; first != null {
+                            errs.append(errMsg(v.key.pos , first , v.key.literalRaw))
+                        } else {
+                            stringMap[value] = v.key.pos
+                        }
+
+                }
+
+            }
+            // map v
+            vType , es := v.value.checkSingleValueContextExpression(block)
+            errs.appendAll(es)
+            if vType == null {
+                continue
+            }
+            if err := vType.rightValueValid() ; err != null {
+                errs.append(err)
+                continue
+            }
+            if noType && m.Type.Map.V == null {
+                if err := vType.isTyped() ; err != null {
+                    errs.append(err)
+                } else {
+                    m.Type.Map.V = vType
+                    mapV = m.Type.Map.V
+                }
+
+            }
+            if mapV != null {
+                if mapV.assignAble(block , errs , vType) == false {
+                    if noType {
+                        errs.append(new error(sprintf("%s mix '%s' and '%s' for map key",
+                            errMsgPrefix(v.value.pos),
+                            vType.typeString() , mapV.typeString())))
+                    } else {
+                        errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
+                            errMsgPrefix(v.value.pos),
+                            vType.typeString() , mapV.typeString())))
+                    }
+
+                }
+            }
+        }
+
+        if m.Type.Map.K == null {
+            m.Type.Map.K = new Type()
+            m.Type.Map.K.Type = VariableTypeVoid
+            m.Type.Map.K.pos = e.pos
+        }
+        if m.Type.Map.V == null {
+            m.Type.Map.V = new Type()
+            m.Type.Map.V.Type = VariableTypeVoid
+            m.Type.Map.V.pos = e.pos
+        }
+        return m.Type
+    }
+
+}
+
 

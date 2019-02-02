@@ -1,350 +1,358 @@
- 
-
 class ExpressionCheckFunctionCall {
-	
-	static fn checkFunctionCallExpression(e Expression, block Block, errs []error) ->(valueTypes []Type) {
-		call := e.data.(ExpressionFunctionCall)
-		if call.args == null {
+    static fn checkFunctionCallExpression(e Expression , block Block , errs []error) -> (valueTypes []Type) {
+        call := e.data.(ExpressionFunctionCall)
+        if call.args == null {
             call.args = []Expression{}
         }
-		if call.Expression.Type == ExpressionTypeIdentifier {
-			identifier := call.Expression.data.(ExpressionIdentifier)
-			isCaptureVar := [false]
-			//TODO:: try from import , must be cast types.
-			d, err := block.searchIdentifier(call.Expression.pos, identifier.name, isCaptureVar)
-			if err != null {
-				errs.append(err)
-				return null
-			}
-			if d == null {
-				i := block.inheritedAttribute.p.getImport(e.pos.filename , identifier.name)
-				if i != null {
-					d ,err = block.inheritedAttribute.p.load(i.Import) 
-					if err != null {
-						errs.append(err)
-					}
-				}
-			}else {
-				when d.(type) {
-				case Function:
-					t := d.(Function)
-					if t.isBuildIn == false {
-						i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
-						if should {
-							t.reduceFindUsageInstances(block)
-							d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
-						}
-					}
-				case Variable:
-					t := d.(Variable)
-					if t.isBuildIn == false {
-						i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
-						if should {
-							t.reduceFindUsageInstances(block)
-							d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
-						}
-					}
-				case Constant:
-					t := d.(Constant)
-					if t.isBuildIn == false {
-						i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
-						if should {
-							t.reduceFindUsageInstances(block)
-							d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
-						}
-					}
-				case Class:
-					t := d.(Class)
-					if t.isBuildIn == false {
-						i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
-						if should {
-							t.reduceFindUsageInstances(block)
-							d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
-						}
-					}
-				case EnumName:
-					t := d.(EnumName)
-					i, should := shouldAccessFromImports(block , identifier.name, e.pos, t.pos)
-					if should {
-						t.reduceFindUsageInstances(block)
-						d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block,identifier , e , i)
-					}
-				}
-			}
-			if d == null {
-				errs.append(new error(sprintf("%s '%s' not found",
-					call.Expression.pos.errMsgPrefix(), identifier.name)))
-				return null
-			}
-			if identifier.locateDefinition {
-				block.inheritedAttribute.p.setLocationDefinition(d)
-				return 
-			}
-			if f ,ok := d.(Function) ; ok {
-				if f.isGlobalMain() {
-					errMsg := sprintf("is global main")
-					t := new CompileError(sprintf("%s %s" , e.pos.errMsgPrefix() ,errMsg ))
-					t.pos = e.pos
-					t.err = errMsg
-					errs.append(t)
-					
-				}
+        if call.Expression.Type == ExpressionTypeIdentifier {
+            identifier := call.Expression.data.(ExpressionIdentifier)
+            isCaptureVar := [false]
+            //TODO:: try from import , must be cast types.
+            d , err := block.searchIdentifier(call.Expression.pos , identifier.name , isCaptureVar)
+            if err != null {
+                errs.append(err)
+                return null
+            }
+            if d == null {
+                i := block.inheritedAttribute.p.getImport(e.pos.filename , identifier.name)
+                if i != null {
+                    d , err = block.inheritedAttribute.p.load(i.Import)
+                    if err != null {
+                        errs.append(err)
+                    }
+                }
+            } else {
+                when d.(type) {
+                    case Function:
+                        t := d.(Function)
+                        if t.isBuildIn == false {
+                            i , should := shouldAccessFromImports(block , identifier.name , e.pos , t.pos)
+                            if should {
+                                t.reduceFindUsageInstances(block)
+                                d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block , identifier , e , i)
+                            }
+                        }
+                    case Variable:
+                        t := d.(Variable)
+                        if t.isBuildIn == false {
+                            i , should := shouldAccessFromImports(block , identifier.name , e.pos , t.pos)
+                            if should {
+                                t.reduceFindUsageInstances(block)
+                                d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block , identifier , e , i)
+                            }
+                        }
+                    case Constant:
+                        t := d.(Constant)
+                        if t.isBuildIn == false {
+                            i , should := shouldAccessFromImports(block , identifier.name , e.pos , t.pos)
+                            if should {
+                                t.reduceFindUsageInstances(block)
+                                d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block , identifier , e , i)
+                            }
+                        }
+                    case Class:
+                        t := d.(Class)
+                        if t.isBuildIn == false {
+                            i , should := shouldAccessFromImports(block , identifier.name , e.pos , t.pos)
+                            if should {
+                                t.reduceFindUsageInstances(block)
+                                d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block , identifier , e , i)
+                            }
+                        }
+                    case EnumName:
+                        t := d.(EnumName)
+                        i , should := shouldAccessFromImports(block , identifier.name , e.pos , t.pos)
+                        if should {
+                            t.reduceFindUsageInstances(block)
+                            d , err = ExpressionCheckIdentifier.checkIdentifierThroughImports(block , identifier , e , i)
+                        }
+                }
+            }
+
+            if d == null {
+                errs.append(new error(sprintf("%s '%s' not found",
+                    call.Expression.pos.errMsgPrefix() , identifier.name)))
+                return null
+            }
+            if identifier.locateDefinition {
+                block.inheritedAttribute.p.setLocationDefinition(d)
+                return
+            }
+            if f , ok := d.(Function) ; ok {
+                if f.isGlobalMain() {
+                    errMsg := sprintf("is global main")
+                    t := new CompileError(sprintf("%s %s" , e.pos.errMsgPrefix() , errMsg))
+                    t.pos = e.pos
+                    t.err = errMsg
+                    errs.append(t)
+
+                }
                 call.Function = f
-                return .checkFunctionCall(e , block, errs, f, call)
-			}
-			if t ,ok:= d.(Type) ; ok {
-				typeConversion := new ExpressionTypeConversion()
-				typeConversion.Type = d.(Type)
-				if len(call.args) != 1 {
-					errs.append(new error(sprintf("%s cast type expect 1 argument",
-						e.pos.errMsgPrefix())))
-					return null
-				}
-				e.Type = ExpressionTypeCheckCast
-				typeConversion.Expression = call.args[0]
-				e.data = typeConversion
-				ret := ExpressionCheckTypeConversion.check(e , block, errs)
-				if ret == null {
-					return null
-				}
-				return [ret]
-			}
-			if c ,ok:= d.(Class) ; ok {
-				typeConversion := new ExpressionTypeConversion()
-				typeConversion.Type = new Type()
-				typeConversion.Type.Type = VariableTypeObject
-				typeConversion.Type.Class = d.(Class)
-				typeConversion.Type.pos = e.pos
-				if len(call.args) != 1 {
-					errs.append(new error( sprintf("%s cast type expect 1 argument",
-						e.pos.errMsgPrefix())))
-					return null
-				}
-				e.Type = ExpressionTypeCheckCast
-				typeConversion.Expression = call.args[0]
-				e.data = typeConversion
-				ret := ExpressionCheckTypeConversion.check(e , block, errs)
-				if ret == null {
-					return null
-				}
-				return [ret]
-			}
-			if v ,ok := d.(Variable) ; ok {
-				if isCaptureVar[0] {
-					v.beenCapturedAsRightValue++
-				}
-				v.used = true
-				if v.Type.Type != VariableTypeFunction {
-					errs.append(new error( sprintf("%s '%s' is not a function , but '%s' ",
-						call.Expression.pos.errMsgPrefix(), v.name, v.Type.typeString())))
-					return null
-				}
-				call.Expression.value = new Type()
-				call.Expression.value.Type = VariableTypeFunction
-				call.Expression.value.pos = e.pos
-				call.Expression.value.functionType = v.Type.functionType
-				identifier.Variable = v
-				return .checkFunctionPointerCall(e , block, errs, v.Type.functionType, call)
-			}
-			errs.append(new error( sprintf("%s cannot make_node_objects call on '%s'",
-				call.Expression.pos.errMsgPrefix(), block.identifierIsWhat(d))))
-			return null
-			 
-		}
-		functionPointer, es := call.Expression.checkSingleValueContextExpression(block)
-		errs.appendAll(es)
-		if functionPointer == null {
-			return null
-		}
-		if functionPointer.Type != VariableTypeFunction {
-			errs.append(new error( sprintf("%s '%s' is not a function , but '%s'",
-				e.pos.errMsgPrefix(),
-				call.Expression.op, functionPointer.typeString())))
-			return null
-		}
-		if call.Expression.Type == ExpressionTypeFunctionLiteral {
-			/*
+                return .checkFunctionCall(e , block , errs , f , call)
+            }
+            if t , ok := d.(Type) ; ok {
+                typeConversion := new ExpressionTypeConversion()
+                typeConversion.Type = d.(Type)
+                if len(call.args) != 1 {
+                    errs.append(new error(sprintf("%s cast type expect 1 argument",
+                        e.pos.errMsgPrefix())))
+                    return null
+                }
+                e.Type = ExpressionTypeCheckCast
+                typeConversion.Expression = call.args[0]
+                e.data = typeConversion
+                ret := ExpressionCheckTypeConversion.check(e , block , errs)
+                if ret == null {
+                    return null
+                }
+                return [ret]
+            }
+            if c , ok := d.(Class) ; ok {
+                typeConversion := new ExpressionTypeConversion()
+                typeConversion.Type = new Type()
+                typeConversion.Type.Type = VariableTypeObject
+                typeConversion.Type.Class = d.(Class)
+                typeConversion.Type.pos = e.pos
+                if len(call.args) != 1 {
+                    errs.append(new error(sprintf("%s cast type expect 1 argument",
+                        e.pos.errMsgPrefix())))
+                    return null
+                }
+                e.Type = ExpressionTypeCheckCast
+                typeConversion.Expression = call.args[0]
+                e.data = typeConversion
+                ret := ExpressionCheckTypeConversion.check(e , block , errs)
+                if ret == null {
+                    return null
+                }
+                return [ret]
+            }
+            if v , ok := d.(Variable) ; ok {
+                if isCaptureVar[0] {
+                    v.beenCapturedAsRightValue++
+                }
+                v.used = true
+                if v.Type.Type != VariableTypeFunction {
+                    errs.append(new error(sprintf("%s '%s' is not a function , but '%s' ",
+                        call.Expression.pos.errMsgPrefix() , v.name , v.Type.typeString())))
+                    return null
+                }
+                call.Expression.value = new Type()
+                call.Expression.value.Type = VariableTypeFunction
+                call.Expression.value.pos = e.pos
+                call.Expression.value.functionType = v.Type.functionType
+                identifier.Variable = v
+                return .checkFunctionPointerCall(e , block , errs , v.Type.functionType , call)
+            }
+            errs.append(new error(sprintf("%s cannot make_node_objects call on '%s'",
+                call.Expression.pos.errMsgPrefix() , block.identifierIsWhat(d))))
+            return null
+
+        }
+        functionPointer , es := call.Expression.checkSingleValueContextExpression(block)
+        errs.appendAll(es)
+        if functionPointer == null {
+            return null
+        }
+        if functionPointer.Type != VariableTypeFunction {
+            errs.append(new error(sprintf("%s '%s' is not a function , but '%s'",
+                e.pos.errMsgPrefix(),
+                call.Expression.op , functionPointer.typeString())))
+            return null
+        }
+        if call.Expression.Type == ExpressionTypeFunctionLiteral {
+            /*
 				fn() {
 
 				}()
 				no name function is statement too
 			*/
-			call.Function = call.Expression.data.(Function)
-			call.Expression.isStatementExpression = true
-		}
-		return .checkFunctionPointerCall(e , block, errs, functionPointer.functionType, call)
-	}
+            call.Function = call.Expression.data.(Function)
+            call.Expression.isStatementExpression = true
+        }
+        return .checkFunctionPointerCall(e , block , errs , functionPointer.functionType , call)
+    }
 
-	static fn checkFunctionPointerCall(e Expression , block Block, errs []error,
-		ft FunctionType, call ExpressionFunctionCall) ->(valueTypes []Type) {
-		length := len(errs)
-		callArgsTypes := checkExpressions(block, call.args, errs, true)
-		ret := ft.mkCallReturnTypes(e.pos)
-		if len(errs) > length {
-			return null
-		}
-		var err error
-		call.vArgs, err = ft.fitArgs(block , e.pos, call.args, callArgsTypes, null)
-		if err != null {
-			errs.append(err)
-		}
-		return ret
-	}
+    static fn checkFunctionPointerCall(e Expression , block Block , errs []error,
+        ft FunctionType , call ExpressionFunctionCall) -> (valueTypes []Type) {
+        length := len(errs)
+        callArgsTypes := checkExpressions(block , call.args , errs , true)
+        ret := ft.mkCallReturnTypes(e.pos)
+        if len(errs) > length {
+            return null
+        }
+        var err error
+        call.vArgs , err = ft.fitArgs(block , e.pos , call.args , callArgsTypes , null)
+        if err != null {
+            errs.append(err)
+        }
+        return ret
+    }
 
-	static fn checkFunctionCall(e Expression , block Block, errs []error, f Function, call ExpressionFunctionCall)  ->(valueTypes []Type) {
-		if f.templateFunction != null {
-			errsLength := len(errs)
-			callArgsTypes := checkExpressions(block, call.args, errs, true)
-			if len(errs) > errsLength {
-				return null
-			}
-			errsLength = len(errs)
-			//rewrite
-			tf := .checkTemplateFunctionCall(e , block, errs, callArgsTypes, f)
-			if len(errs) != errsLength { // if no
-				return null
-			}
-			ret := tf.Type.mkCallReturnTypes(e.pos)
-			var err error
-			call.vArgs, err = tf.Type.fitArgs(block , e.pos, call.args, callArgsTypes, tf)
-			if err != null {
-				errs.append(err)
-			}
-			return ret
-		} else { // not template function
-			ret := f.Type.mkCallReturnTypes(e.pos)
-			errsLength := len(errs)
-			callArgsTypes := checkExpressions(block, call.args, errs, true)
-			if len(errs) > errsLength {
-				return ret
-			}
-			if f.isBuildIn {
-				if f.loadedFromCorePackage {
-					var err error
-					call.vArgs, err = f.Type.fitArgs(block , e.pos,call.args, callArgsTypes, f)
-					if err != null {
-						errs.append(err)
-					}
-					return ret
-				} else {
-					length := len(errs)
-					f.buildInFunctionChecker(f, e.data.(ExpressionFunctionCall), block, errs, callArgsTypes, e.pos)
-					if len(errs) == length {
-						//special case ,avoid null pointer
-						return ret
-					}
-					return null //
-				}
-			} else {
-				if len(call.parameterTypes) > 0 {
-					errs.append(new error( sprintf("%s function is not a template function",
-						errMsgPrefix(e.pos))))
-				}
-				var err error
-				call.vArgs, err = f.Type.fitArgs(block , e.pos, call.args, callArgsTypes, f)
-				if err != null {
-					errs.append(err)
-				}
-				return ret
-			}
-		}
-	}
-	
-	static fn checkTemplateFunctionCall(e Expression ,block Block, errs []error,
-		argTypes []Type, f Function) -> (ret Function) {
-		call := e.data.(ExpressionFunctionCall)
-		parameterTypes := new map { string -> Type } ()
-		parameterTypeArray := []Type{}
-		for k, v := range f.Type.parameterList {
-			if v == null ||
-				v.Type == null || 
-				len(v.Type.getParameterType(f.Type)) == 0 {
-				continue
-			}
-			if k >= len(argTypes) || argTypes[k] == null {
-				errs.append(new error(sprintf("%s missing typed parameter,index at %d",
-					e.pos.errMsgPrefix(), k)))
-				return
-			}
-			if err := v.Type.canBeBindWithType(f.Type, parameterTypes, argTypes[k]); err != null {
-				errs.append(new error(sprintf("%s %s",
-					errMsgPrefix(argTypes[k].pos), err.getMessage())))
-				return
-			}
-			t := v.Type.cloneType()
-			t.bindWithParameterTypes(f.Type, parameterTypes)
-			parameterTypeArray.append(t)
-		}
-		tps := call.parameterTypes
-		for k, v := range f.Type.returnList {
-			if v == null || v.Type == null || len(v.Type.getParameterType(f.Type)) == 0 {
-				continue
-			}
-			if len(tps) == 0 || tps[0] == null {
-				//trying already have
-				if err := v.Type.canBeBindWithParameterTypes(parameterTypes); err == null {
-					//very good no error
-					t := v.Type.cloneType()
-					t.bindWithParameterTypes(f.Type, parameterTypes)
-					parameterTypeArray.append( t)
-					continue
-				}
-				errs.append(new error( sprintf("%s missing typed return value,index at %d",
-					e.pos.errMsgPrefix(), k)))
-				return
-			}
-			if err := v.Type.canBeBindWithType(f.Type, parameterTypes, tps[0]); err != null {
-				errs.append(new error( sprintf("%s %s",
-					errMsgPrefix(tps[0].pos), err.getMessage())))
-				return null
-			}
-			t := v.Type.cloneType()
-			t.bindWithParameterTypes(f.Type, parameterTypes)
-			parameterTypeArray.append(t)
-			tps = tps[1:]
-		}
-		call.templateFunctionCallPair = f.templateFunction.insert(parameterTypeArray)
-		if call.templateFunctionCallPair.Function == null { // not called before,make_node_objects the binds
-			cloneFunction, es := f.cloneFunction()
-			if len(es) > 0 {
-				errs.appendAll(es)
-				return null
-			}
-			cloneFunction.used = true
-			cloneFunction.templateFunction = null
-			call.templateFunctionCallPair.Function = cloneFunction
-			cloneFunction.parameterTypes = parameterTypes
-			for k, v := range parameterTypes {
-				v.pos = f.Type.templateNamesMap[k] // keep Pos
-			}
-			for _, v := range cloneFunction.Type.parameterList {
-				if len(v.Type.getParameterType(f.Type)) > 0 {
-					v.Type = parameterTypeArray[0]
-					parameterTypeArray = parameterTypeArray[1:]
-				}
-			}
-			for _, v := range cloneFunction.Type.returnList {
-				if len(v.Type.getParameterType(f.Type)) > 0 {
-					v.Type = parameterTypeArray[0]
-					parameterTypeArray = parameterTypeArray[1:]
-				}
-			}
-			//check this function
-			cloneFunction.block.inherit(block.inheritedAttribute.p.block)
-			if cloneFunction.block.functions == null {
-				cloneFunction.block.functions = new map { string -> Function } ()
-			}
-			cloneFunction.block.functions[cloneFunction.name] = cloneFunction
-			cloneFunction.block.inheritedAttribute.Function = cloneFunction
-			cloneFunction.checkParametersAndReturns(errs, true, false)
-			cloneFunction.checkBlock(errs)
-		}
-		ret = call.templateFunctionCallPair.Function
-		// when all ok ,ret is not a template function any more
-		if len(tps) > 0 {
-			errs.append(new error( sprintf("%s to many parameter type to call template function",
-				errMsgPrefix(e.pos))))
-		}
-		return ret
-	}	
+    static fn checkFunctionCall(e Expression , block Block , errs []error , f Function , call ExpressionFunctionCall) -> (valueTypes []Type) {
+        if f.templateFunction != null {
+            errsLength := len(errs)
+            callArgsTypes := checkExpressions(block , call.args , errs , true)
+            if len(errs) > errsLength {
+                return null
+            }
+            errsLength = len(errs)
+            //rewrite
+            tf := .checkTemplateFunctionCall(e , block , errs , callArgsTypes , f)
+            if len(errs) != errsLength {
+                return null
+            }
+            ret := tf.Type.mkCallReturnTypes(e.pos)
+            var err error
+            call.vArgs , err = tf.Type.fitArgs(block , e.pos , call.args , callArgsTypes , tf)
+            if err != null {
+                errs.append(err)
+            }
+            return ret
+        } else {
+            ret := f.Type.mkCallReturnTypes(e.pos)
+            errsLength := len(errs)
+            callArgsTypes := checkExpressions(block , call.args , errs , true)
+            if len(errs) > errsLength {
+                return ret
+            }
+            if f.isBuildIn {
+                if f.loadedFromCorePackage {
+                    var err error
+                    call.vArgs , err = f.Type.fitArgs(block , e.pos , call.args , callArgsTypes , f)
+                    if err != null {
+                        errs.append(err)
+                    }
+                    return ret
+                } else {
+                    length := len(errs)
+                    f.buildInFunctionChecker(f , e.data.(ExpressionFunctionCall) , block , errs , callArgsTypes , e.pos)
+                    if len(errs) == length {
+                        //special case ,avoid null pointer
+                        return ret
+                    }
+                    return null //
+                }
+
+            } else {
+                if len(call.parameterTypes) > 0 {
+                    errs.append(new error(sprintf("%s function is not a template function",
+                        errMsgPrefix(e.pos))))
+                }
+                var err error
+                call.vArgs , err = f.Type.fitArgs(block , e.pos , call.args , callArgsTypes , f)
+                if err != null {
+                    errs.append(err)
+                }
+                return ret
+            }
+
+        }
+
+    }
+
+    static fn checkTemplateFunctionCall(e Expression , block Block , errs []error,
+        argTypes []Type , f Function) -> (ret Function) {
+        call := e.data.(ExpressionFunctionCall)
+        parameterTypes := new map{string -> Type}()
+        parameterTypeArray := []Type{}
+        for k , v := range f.Type.parameterList {
+            if v == null ||
+                v.Type == null ||
+                len(v.Type.getParameterType(f.Type)) == 0 {
+                continue
+            }
+            if k >= len(argTypes) || argTypes[k] == null {
+                errs.append(new error(sprintf("%s missing typed parameter,index at %d",
+                    e.pos.errMsgPrefix() , k)))
+                return
+            }
+            if err := v.Type.canBeBindWithType(f.Type , parameterTypes , argTypes[k]) ; err != null {
+                errs.append(new error(sprintf("%s %s",
+                    errMsgPrefix(argTypes[k].pos) , err.getMessage())))
+                return
+            }
+            t := v.Type.cloneType()
+            t.bindWithParameterTypes(f.Type , parameterTypes)
+            parameterTypeArray.append(t)
+        }
+
+        tps := call.parameterTypes
+        for k , v := range f.Type.returnList {
+            if v == null || v.Type == null || len(v.Type.getParameterType(f.Type)) == 0 {
+                continue
+            }
+            if len(tps) == 0 || tps[0] == null {
+                //trying already have
+                if err := v.Type.canBeBindWithParameterTypes(parameterTypes) ; err == null {
+                    //very good no error
+                    t := v.Type.cloneType()
+                    t.bindWithParameterTypes(f.Type , parameterTypes)
+                    parameterTypeArray.append(t)
+                    continue
+                }
+                errs.append(new error(sprintf("%s missing typed return value,index at %d",
+                    e.pos.errMsgPrefix() , k)))
+                return
+            }
+            if err := v.Type.canBeBindWithType(f.Type , parameterTypes , tps[0]) ; err != null {
+                errs.append(new error(sprintf("%s %s",
+                    errMsgPrefix(tps[0].pos) , err.getMessage())))
+                return null
+            }
+            t := v.Type.cloneType()
+            t.bindWithParameterTypes(f.Type , parameterTypes)
+            parameterTypeArray.append(t)
+            tps = tps[1:]
+        }
+
+        call.templateFunctionCallPair = f.templateFunction.insert(parameterTypeArray)
+        if call.templateFunctionCallPair.Function == null {
+            cloneFunction , es := f.cloneFunction()
+            if len(es) > 0 {
+                errs.appendAll(es)
+                return null
+            }
+            cloneFunction.used = true
+            cloneFunction.templateFunction = null
+            call.templateFunctionCallPair.Function = cloneFunction
+            cloneFunction.parameterTypes = parameterTypes
+            for k , v := range parameterTypes {
+                v.pos = f.Type.templateNamesMap[k] // keep Pos
+            }
+
+            for _ , v := range cloneFunction.Type.parameterList {
+                if len(v.Type.getParameterType(f.Type)) > 0 {
+                    v.Type = parameterTypeArray[0]
+                    parameterTypeArray = parameterTypeArray[1:]
+                }
+            }
+
+            for _ , v := range cloneFunction.Type.returnList {
+                if len(v.Type.getParameterType(f.Type)) > 0 {
+                    v.Type = parameterTypeArray[0]
+                    parameterTypeArray = parameterTypeArray[1:]
+                }
+            }
+
+            //check this function
+            cloneFunction.block.inherit(block.inheritedAttribute.p.block)
+            if cloneFunction.block.functions == null {
+                cloneFunction.block.functions = new map{string -> Function}()
+            }
+            cloneFunction.block.functions[cloneFunction.name] = cloneFunction
+            cloneFunction.block.inheritedAttribute.Function = cloneFunction
+            cloneFunction.checkParametersAndReturns(errs , true , false)
+            cloneFunction.checkBlock(errs)
+        }
+        ret = call.templateFunctionCallPair.Function
+        // when all ok ,ret is not a template function any more
+        if len(tps) > 0 {
+            errs.append(new error(sprintf("%s to many parameter type to call template function",
+                errMsgPrefix(e.pos))))
+        }
+        return ret
+    }
 }
+
+

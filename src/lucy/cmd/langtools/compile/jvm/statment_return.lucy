@@ -1,27 +1,25 @@
-
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 import "lucy/binary"
 
-
 class BuildReturn {
     eb BuildExpression
-    bb BuildBlock
-    fn BuildReturn(eb BuildExpression,bb BuildBlock ) {
+    bb BuildBlock     
+    fn BuildReturn(eb BuildExpression , bb BuildBlock) {
         this.super()
         this.eb = eb
         this.bb = bb
     }
 
-    fn  buildReturnStatement(
+    fn buildReturnStatement(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
         statementReturn ast.StatementReturn,
         context Context,
         state StackMapState) -> (maxStack char) {
-        if context.function.Type.voidReturn() { // no return value
+        if context.function.Type.voidReturn() {
             if statementReturn.defers != null && len(statementReturn.defers) > 0 {
-                stack := this.buildDefersForReturn(c, code, context, state, statementReturn)
+                stack := this.buildDefersForReturn(c , code , context , state , statementReturn)
                 if stack > maxStack {
                     maxStack = stack
                 }
@@ -32,64 +30,66 @@ class BuildReturn {
         }
         if len(context.function.Type.returnList) == 1 {
             if len(statementReturn.expressions) > 0 {
-                maxStack = this.eb.build(c, code, statementReturn.expressions[0], context, state)
+                maxStack = this.eb.build(c , code , statementReturn.expressions[0] , context , state)
             }
             // execute defer first
             if len(statementReturn.defers) > 0 {
                 //return value  is on stack,  store to local var
                 if len(statementReturn.expressions) > 0 {
-                    this.eb.storeLocalVar(c, code, context.function.Type.returnList[0])
+                    this.eb.storeLocalVar(c , code , context.function.Type.returnList[0])
                 }
-                stack := this.buildDefersForReturn(c, code, context, state, statementReturn)
+                stack := this.buildDefersForReturn(c , code , context , state , statementReturn)
                 if stack > maxStack {
                     maxStack = stack
                 }
                 //restore the stack
-                if len(statementReturn.expressions) > 0 { //restore stack
-                    this.eb.loadLocalVar(c, code, context.function.Type.returnList[0])
+                if len(statementReturn.expressions) > 0 {
+                    this.eb.loadLocalVar(c , code , context.function.Type.returnList[0])
                 }
             }
             // in this case,load local var is not under exception handle,should be ok
             if len(statementReturn.expressions) == 0 {
-                this.eb.loadLocalVar(c, code, context.function.Type.returnList[0])
+                this.eb.loadLocalVar(c , code , context.function.Type.returnList[0])
             }
             switch context.function.Type.returnList[0].Type.Type {
-            case ast.VariableTypeBool ,
-                ast.VariableTypeByte,
-                ast.VariableTypeShort,
-                ast.VariableTypeEnum,
-                ast.VariableTypeChar,
-                ast.VariableTypeInt:
-                code.codes[code.codeLength] = cg.OP_ireturn
-            case ast.VariableTypeLong:
-                code.codes[code.codeLength] = cg.OP_lreturn
-            case ast.VariableTypeFloat:
-                code.codes[code.codeLength] = cg.OP_freturn
-            case ast.VariableTypeDouble:
-                code.codes[code.codeLength] = cg.OP_dreturn
-            default:
-                code.codes[code.codeLength] = cg.OP_areturn
+                case ast.VariableTypeBool,
+                    ast.VariableTypeByte,
+                    ast.VariableTypeShort,
+                    ast.VariableTypeEnum,
+                    ast.VariableTypeChar,
+                    ast.VariableTypeInt:
+                    code.codes[code.codeLength] = cg.OP_ireturn
+                case ast.VariableTypeLong:
+                    code.codes[code.codeLength] = cg.OP_lreturn
+                case ast.VariableTypeFloat:
+                    code.codes[code.codeLength] = cg.OP_freturn
+                case ast.VariableTypeDouble:
+                    code.codes[code.codeLength] = cg.OP_dreturn
+                default:
+                    code.codes[code.codeLength] = cg.OP_areturn
             }
+
             code.codeLength++
             return
         }
         //multi returns
         if len(statementReturn.expressions) > 0 {
             if len(statementReturn.expressions) == 1 {
-                maxStack = this.eb.build(c, code,
-                    statementReturn.expressions[0], context, state)
+                maxStack = this.eb.build(c , code,
+                    statementReturn.expressions[0] , context , state)
             } else {
-                maxStack = this.eb.buildExpressions(c, code,
-                    statementReturn.expressions, context, state)
+                maxStack = this.eb.buildExpressions(c , code,
+                    statementReturn.expressions , context , state)
             }
+
         }
         if len(statementReturn.defers) > 0 {
             //store a simple var,should be no exception
             if len(statementReturn.expressions) > 0 {
-                copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
+                copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject,
                     context.multiValueVarOffset))
             }
-            stack := this.buildDefersForReturn(c, code, context, state, statementReturn)
+            stack := this.buildDefersForReturn(c , code , context , state , statementReturn)
             if stack > maxStack {
                 maxStack = stack
             }
@@ -97,7 +97,7 @@ class BuildReturn {
             if len(statementReturn.expressions) > 0 {
                 copyOPs(code,
                     loadLocalVariableOps(ast.VariableTypeObject,
-                        context.multiValueVarOffset))
+                    context.multiValueVarOffset))
             }
         }
         // return value is on stack
@@ -106,77 +106,78 @@ class BuildReturn {
             code.codeLength++
             return
         }
-        stack := this.buildReturnFromReturnVars(c, code, context)
+        stack := this.buildReturnFromReturnVars(c , code , context)
         if stack > maxStack {
             maxStack = stack
         }
         return
     }
 
-    fn  buildReturnFromReturnVars(c cg.ClassHighLevel,
-        code cg.AttributeCode, context Context) -> (maxStack char) {
-        if context.function.Type.voidReturn() { // when has no return,should not call this function
+    fn buildReturnFromReturnVars(c cg.ClassHighLevel,
+        code cg.AttributeCode , context Context) -> (maxStack char) {
+        if context.function.Type.voidReturn() {
             return
         }
         if len(context.function.Type.returnList) == 1 {
-            this.eb.loadLocalVar(c, code, context.function.Type.returnList[0])
+            this.eb.loadLocalVar(c , code , context.function.Type.returnList[0])
             maxStack = jvmSlotSize(context.function.Type.returnList[0].Type)
             switch context.function.Type.returnList[0].Type.Type {
-            case ast.VariableTypeBool,
-                ast.VariableTypeByte ,
-                ast.VariableTypeShort,
-                ast.VariableTypeChar, 
-                ast.VariableTypeEnum , 
-                ast.VariableTypeInt:
-                code.codes[code.codeLength] = cg.OP_ireturn
-            case ast.VariableTypeLong:
-                code.codes[code.codeLength] = cg.OP_lreturn
-            case ast.VariableTypeFloat:
-                code.codes[code.codeLength] = cg.OP_freturn
-            case ast.VariableTypeDouble:
-                code.codes[code.codeLength] = cg.OP_dreturn
-            default:
-                code.codes[code.codeLength] = cg.OP_areturn
+                case ast.VariableTypeBool,
+                    ast.VariableTypeByte,
+                    ast.VariableTypeShort,
+                    ast.VariableTypeChar,
+                    ast.VariableTypeEnum,
+                    ast.VariableTypeInt:
+                    code.codes[code.codeLength] = cg.OP_ireturn
+                case ast.VariableTypeLong:
+                    code.codes[code.codeLength] = cg.OP_lreturn
+                case ast.VariableTypeFloat:
+                    code.codes[code.codeLength] = cg.OP_freturn
+                case ast.VariableTypeDouble:
+                    code.codes[code.codeLength] = cg.OP_dreturn
+                default:
+                    code.codes[code.codeLength] = cg.OP_areturn
             }
+
             code.codeLength++
             return
         }
         //multi returns
-        //new a array list
-        loadInt(c, code, int(len(context.function.Type.returnList)))
+        loadInt(c , code , int(len(context.function.Type.returnList)))
         code.codes[code.codeLength] = cg.OP_anewarray
-        c.insertClassConst(javaRootClass, code.codes[code.codeLength+1:code.codeLength+3])
+        c.insertClassConst(javaRootClass , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         maxStack = 1 // max stack is
         index := int(0)
-        for _, v := range context.function.Type.returnList {
+        for _ , v := range context.function.Type.returnList {
             currentStack := char(1)
             code.codes[code.codeLength] = cg.OP_dup
             code.codeLength++
             currentStack++
-            this.eb.loadLocalVar(c, code, v)
-            if t := currentStack + jvmSlotSize(v.Type); t > maxStack {
+            this.eb.loadLocalVar(c , code , v)
+            if t := currentStack + jvmSlotSize(v.Type) ; t > maxStack {
                 maxStack = t
             }
             if v.Type.isPointer() == false {
-                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.Type)
+                TypeConverterAndPrimitivePacker.packPrimitives(c , code , v.Type)
             }
-            loadInt(c, code, index)
+            loadInt(c , code , index)
             if 4 > maxStack {
                 maxStack = 4
             }
             code.codes[code.codeLength] = cg.OP_swap
-            code.codes[code.codeLength+1] = cg.OP_aastore
+            code.codes[code.codeLength + 1] = cg.OP_aastore
             code.codeLength += 2
             index++
         }
+
         code.codes[code.codeLength] = cg.OP_areturn
         code.codeLength++
         return
     }
 
-    fn  buildDefersForReturn(c cg.ClassHighLevel, code cg.AttributeCode,
-        context Context, from StackMapState,
+    fn buildDefersForReturn(c cg.ClassHighLevel , code cg.AttributeCode,
+        context Context , from StackMapState,
         statementReturn ast.StatementReturn) -> (maxStack char) {
         if len(statementReturn.defers) == 0 {
             return
@@ -187,12 +188,12 @@ class BuildReturn {
             maxStack = 1
         }
         index := len(statementReturn.defers) - 1
-        for index >= 0 { // build defer,cannot have return statement is defer
+        for index >= 0 { //  build defer,cannot have return statement is defer
             state := statementReturn.defers[index].stackMapState.(StackMapState)
             state = new StackMapState(state) // clone
             state.addTop(from)
-            state.pushStack(c, state.newObjectVariableType(throwableClass))
-            context.MakeStackMap(code, state, code.codeLength)
+            state.pushStack(c , state.newObjectVariableType(throwableClass))
+            context.MakeStackMap(code , state , code.codeLength)
             e := new cg.ExceptionTable()
             e.startPc = char(statementReturn.defers[index].startPc)
             e.endPc = char(code.codeLength)
@@ -202,34 +203,35 @@ class BuildReturn {
             } else {
                 e.catchType = c.Class.insertClassConst(statementReturn.defers[index].exceptionClass.name) // custom c
             }
+
             code.appendException(e)
             //expect exception on stack
-            copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
+            copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject,
                 context.exceptionVarOffset)) // this code will make_node_objects stack is empty
             state.popStack(1)
             // build block
             context.Defer = statementReturn.defers[index]
-            this.bb.buildBlock(c, code, statementReturn.defers[index].block, context, state)
+            this.bb.buildBlock(c , code , statementReturn.defers[index].block , context , state)
             from.addTop(state)
             context.Defer = null
             statementReturn.defers[index].resetLabels()
             //if need throw
-            copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset))
+            copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , context.exceptionVarOffset))
             code.codes[code.codeLength] = cg.OP_dup
             code.codeLength++
             if 2 > maxStack {
                 maxStack = 2
             }
-            state.pushStack(c, state.newObjectVariableType(throwableClass))
-            context.MakeStackMap(code, state, code.codeLength+6)
-            context.MakeStackMap(code, state, code.codeLength+7)
+            state.pushStack(c , state.newObjectVariableType(throwableClass))
+            context.MakeStackMap(code , state , code.codeLength + 6)
+            context.MakeStackMap(code , state , code.codeLength + 7)
             state.popStack(1)
             code.codes[code.codeLength] = cg.OP_ifnonnull
-            binary.BigEndian.putChar(code.codes[code.codeLength+1:code.codeLength+3], char(6))
-            code.codes[code.codeLength+3] = cg.OP_goto
-            binary.BigEndian.putChar(code.codes[code.codeLength+4:code.codeLength+6], char(4)) // goto pop
-            code.codes[code.codeLength+6] = cg.OP_athrow
-            code.codes[code.codeLength+7] = cg.OP_pop // pop exception on stack
+            binary.BigEndian.putChar(code.codes[code.codeLength + 1 : code.codeLength + 3] , char(6))
+            code.codes[code.codeLength + 3] = cg.OP_goto
+            binary.BigEndian.putChar(code.codes[code.codeLength + 4 : code.codeLength + 6] , char(4)) // goto pop
+            code.codes[code.codeLength + 6] = cg.OP_athrow
+            code.codes[code.codeLength + 7] = cg.OP_pop // pop exception on stack
             code.codeLength += 8
             if index != 0 {
                 code.codes[code.codeLength] = cg.OP_aconst_null
@@ -238,18 +240,20 @@ class BuildReturn {
                 //exception that have been handled
                 if len(statementReturn.expressions) > 0 && len(context.function.Type.returnList) > 1 {
                     //load when function have multi returns if read to end
-                    copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.multiValueVarOffset))
-                    exit := new cg.Exit(cg.OP_ifnonnull, code)
-                    this.buildReturnFromReturnVars(c, code, context)
-                    context.MakeStackMap(code, state, code.codeLength)
-                    writeExits([]cg.Exit{exit}, code.codeLength)
+                    copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , context.multiValueVarOffset))
+                    exit := new cg.Exit(cg.OP_ifnonnull , code)
+                    this.buildReturnFromReturnVars(c , code , context)
+                    context.MakeStackMap(code , state , code.codeLength)
+                    writeExits([]cg.Exit{exit} , code.codeLength)
                 }
             }
+
             index--
         }
+
         return
     }
 
-
 }
+
 

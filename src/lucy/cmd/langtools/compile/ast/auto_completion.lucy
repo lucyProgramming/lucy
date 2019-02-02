@@ -1,30 +1,29 @@
-
 public class AutoCompletionItem {
-    public Type string 
-    public name string 
-    public functionDefinition string  // used by function
-    public suggest string   // used by function
-    public variableType string 
-    public description string 
-    
-    private static arrayDefaultAutoCompletionItem []AutoCompletionItem
-    private static javaArrayDefaultAutoCompletionItem  []AutoCompletionItem
-    private static typeDefaultAutoCompletionItem []AutoCompletionItem
-    
+    public Type               string
+    public name               string
+    public functionDefinition string // used by function
+    public suggest            string // used by function
+    public variableType       string
+    public description        string
+
+    private static arrayDefaultAutoCompletionItem     []AutoCompletionItem
+    private static javaArrayDefaultAutoCompletionItem []AutoCompletionItem
+    private static typeDefaultAutoCompletionItem      []AutoCompletionItem
+
     private static fieldDefaultAutoCompletionItem []AutoCompletionItem
-    
+
     private static topDefaultAutoCompletionItem []AutoCompletionItem
-    
+
     private static buildFunctionAutoCompletionItems []AutoCompletionItem
-    private static keywordAutoCompletionItems []AutoCompletionItem
-    
+    private static keywordAutoCompletionItems       []AutoCompletionItem
+
     static fn getKeywordAutoCompletionItems() -> (items []AutoCompletionItem) {
-        if len(AutoCompletionItem.keywordAutoCompletionItems) > 0  {
+        if len(AutoCompletionItem.keywordAutoCompletionItems) > 0 {
             return AutoCompletionItem.keywordAutoCompletionItems
         }
         AutoCompletionItem.keywordAutoCompletionItems = []AutoCompletionItem{}
         items = AutoCompletionItem.keywordAutoCompletionItems
-        
+
         item := new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "fn"
@@ -39,22 +38,22 @@ public class AutoCompletionItem {
         item.Type = "keyword"
         item.name = "const"
         items.append(item)
-        
+
         item = new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "if"
         items.append(item)
-        
+
         item = new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "else"
         items.append(item)
-        
+
         item = new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "for"
         items.append(item)
-        
+
         item = new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "break"
@@ -69,7 +68,7 @@ public class AutoCompletionItem {
         item.Type = "keyword"
         item.name = "return"
         items.append(item)
-        
+
         item = new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "null"
@@ -99,7 +98,7 @@ public class AutoCompletionItem {
         item.Type = "keyword"
         item.name = "var"
         items.append(item)
-        
+
         item = new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "new"
@@ -269,7 +268,6 @@ public class AutoCompletionItem {
         item.Type = "keyword"
         item.name = "type"
         items.append(item)
-        
 
         item = new AutoCompletionItem()
         item.Type = "keyword"
@@ -292,10 +290,8 @@ public class AutoCompletionItem {
         items.append(item)
     }
 
-    
-
     static fn getBuildFunctionAutoCompletionItems() -> (items []AutoCompletionItem) {
-        if len(AutoCompletionItem.buildFunctionAutoCompletionItems) > 0  {
+        if len(AutoCompletionItem.buildFunctionAutoCompletionItems) > 0 {
             return AutoCompletionItem.buildFunctionAutoCompletionItems
         }
         AutoCompletionItem.buildFunctionAutoCompletionItems = []AutoCompletionItem{}
@@ -312,13 +308,13 @@ public class AutoCompletionItem {
         item.name = "catch"
         item.suggest = "catch()"
         items.append(item)
-        
+
         item = new AutoCompletionItem()
         item.Type = "function"
         item.name = "print"
         item.suggest = "print(args , ...)"
         items.append(item)
-        
+
         item = new AutoCompletionItem()
         item.Type = "function"
         item.name = "printf"
@@ -351,15 +347,13 @@ public class AutoCompletionItem {
 
     }
 
-
     static fn getTopDefaultAutoCompletionItem() -> (items []AutoCompletionItem) {
-        if len(AutoCompletionItem.topDefaultAutoCompletionItem) > 0  {
+        if len(AutoCompletionItem.topDefaultAutoCompletionItem) > 0 {
             return AutoCompletionItem.topDefaultAutoCompletionItem
         }
-
         AutoCompletionItem.topDefaultAutoCompletionItem = []AutoCompletionItem{}
         items = AutoCompletionItem.topDefaultAutoCompletionItem
-        
+
         item := new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "public"
@@ -373,7 +367,7 @@ public class AutoCompletionItem {
         item = new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "abstract"
-        items.append(item) 
+        items.append(item)
 
         item = new AutoCompletionItem()
         item.Type = "keyword"
@@ -390,7 +384,6 @@ public class AutoCompletionItem {
         item.name = "interface"
         items.append(item)
 
-
         item = new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "var"
@@ -406,10 +399,9 @@ public class AutoCompletionItem {
         item.name = "const"
         items.append(item)
     }
-    
-    
+
     static fn getFieldDefaultAutoCompletionItem() -> (items []AutoCompletionItem) {
-        if len(AutoCompletionItem.fieldDefaultAutoCompletionItem) > 0  {
+        if len(AutoCompletionItem.fieldDefaultAutoCompletionItem) > 0 {
             return AutoCompletionItem.fieldDefaultAutoCompletionItem
         }
         AutoCompletionItem.fieldDefaultAutoCompletionItem = []AutoCompletionItem{}
@@ -434,7 +426,6 @@ public class AutoCompletionItem {
         item.name = "private"
         items.append(item)
 
-
         item = new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "volatile"
@@ -453,17 +444,16 @@ public class AutoCompletionItem {
         item = new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "abstract"
-        items.append(item) 
+        items.append(item)
     }
 
-    
     static fn getTypeAutoCompletionItem() -> (items []AutoCompletionItem) {
-        if len(AutoCompletionItem.typeDefaultAutoCompletionItem) > 0  {
+        if len(AutoCompletionItem.typeDefaultAutoCompletionItem) > 0 {
             return AutoCompletionItem.typeDefaultAutoCompletionItem
         }
         AutoCompletionItem.typeDefaultAutoCompletionItem = []AutoCompletionItem{}
         items = AutoCompletionItem.typeDefaultAutoCompletionItem
-        
+
         item := new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "bool"
@@ -478,7 +468,7 @@ public class AutoCompletionItem {
         item.Type = "keyword"
         item.name = "short"
         items.append(item)
-        
+
         item = new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "char"
@@ -488,7 +478,7 @@ public class AutoCompletionItem {
         item.Type = "keyword"
         item.name = "int"
         items.append(item)
-        
+
         item = new AutoCompletionItem()
         item.Type = "keyword"
         item.name = "long"
@@ -509,12 +499,10 @@ public class AutoCompletionItem {
         item.name = "string"
         items.append(item)
 
-        
     }
-    
-    
+
     static fn getJavaArrayBasicAutoCompletionItem() -> (items []AutoCompletionItem) {
-        if len(AutoCompletionItem.javaArrayDefaultAutoCompletionItem) > 0  {
+        if len(AutoCompletionItem.javaArrayDefaultAutoCompletionItem) > 0 {
             return AutoCompletionItem.javaArrayDefaultAutoCompletionItem
         }
         AutoCompletionItem.javaArrayDefaultAutoCompletionItem = []AutoCompletionItem{}
@@ -527,9 +515,9 @@ public class AutoCompletionItem {
         item.description = "size() -> (int)"
         items.append(item)
     }
-    
+
     static fn getArrayBasicAutoCompletionItem() -> (items []AutoCompletionItem) {
-        if len(AutoCompletionItem.arrayDefaultAutoCompletionItem) > 0  {
+        if len(AutoCompletionItem.arrayDefaultAutoCompletionItem) > 0 {
             return AutoCompletionItem.arrayDefaultAutoCompletionItem
         }
         AutoCompletionItem.arrayDefaultAutoCompletionItem = []AutoCompletionItem{}
@@ -564,10 +552,10 @@ public class AutoCompletionItem {
         item.description = "cap() -> (int)"
         items.append(item)
         // 
-        return items 
+        return items
     }
-    
-    static fn getMapAutoCompletionItem(m Type) ->(items []AutoCompletionItem = []AutoCompletionItem{}) {
+
+    static fn getMapAutoCompletionItem(m Type) -> (items []AutoCompletionItem = []AutoCompletionItem{}) {
         //size
         item := new AutoCompletionItem()
         item.Type = "method"
@@ -589,7 +577,7 @@ public class AutoCompletionItem {
         item.name = "removeAll"
         item.suggest = "removeAll()"
         items.append(item)
-        
+
         //keyExist
         item = new AutoCompletionItem()
         item.Type = "method"
@@ -598,7 +586,7 @@ public class AutoCompletionItem {
         items.append(item)
     }
 
-    static fn getArrayAutoCompletionItem(t Type) -> (items []AutoCompletionItem){
+    static fn getArrayAutoCompletionItem(t Type) -> (items []AutoCompletionItem) {
         items = AutoCompletionItem.getArrayBasicAutoCompletionItem()
         items = copy(new []AutoCompletionItem(len(items)) , items)
         if t.Type != VariableTypeArray {
@@ -609,7 +597,7 @@ public class AutoCompletionItem {
         item.name = "append"
         item.suggest = sprintf("append(element , ...)")
         items.append(item)
-        
+
         item = new AutoCompletionItem()
         item.Type = "method"
         item.name = "appendAll"
@@ -620,7 +608,8 @@ public class AutoCompletionItem {
         item.Type = "method"
         item.name = "getUnderlyingArray"
         item.suggest = sprintf("getUnderlyingArray()")
-        items.append(item) 
+        items.append(item)
     }
 }
+
 

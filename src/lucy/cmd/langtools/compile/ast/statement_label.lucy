@@ -1,48 +1,48 @@
 import "lucy/jvm/cg"
 
-
 public class StatementLabel {
-	public used                bool
-	public codeOffsetGenerated bool
-	public codeOffset          int
-	public block               Block
-	public name                string
-	public exits               []cg.Exit
-	public statement           Statement
-	public pos                 Pos
-	public findUsage bool 
-	public findUsageInstances []Usage  
-	public inlineComment string 
-	public rename bool 
-	public locateDefinition bool 
-	/*
+    public used                bool     
+    public codeOffsetGenerated bool     
+    public codeOffset          int      
+    public block               Block    
+    public name                string   
+    public exits               []cg.Exit
+    public statement           Statement
+    public pos                 Pos      
+    public findUsage           bool     
+    public findUsageInstances  []Usage  
+    public inlineComment       string   
+    public rename              bool     
+    public locateDefinition    bool     
+    /*
 		defer {
 			xxx:
 		}
 		defer block could be compile multi times,
 		should reset the label
 	*/
-	fn reset() {
-		this.codeOffsetGenerated = false
-		this.codeOffset = -1
-		this.exits = []cg.Exit{}
-	}
-	
-	// check this label is read to goto
-	fn ready(block Block ,  from Pos) ->(err error) {
-		ss := []Statement{}
-		for _, v := range this.block.statements {
-			if v.StatementLabel == this { // this is me
-				break
-			}
-			if v.isVariableDefinition() && v.checked == false {
-				ss.append(v)
-			}
-		}
-		if len(ss) == 0 {
-			return null
-		}
-		/*
+    fn reset() {
+        this.codeOffsetGenerated = false
+        this.codeOffset = -1
+        this.exits = []cg.Exit{}
+    }
+
+     // check this label is read to goto
+    fn ready(block Block , from Pos) -> (err error) {
+        ss := []Statement{}
+        for _ , v := range this.block.statements {
+            if v.StatementLabel == this {
+                break
+            }
+            if v.isVariableDefinition() && v.checked == false {
+                ss.append(v)
+            }
+        }
+
+        if len(ss) == 0 {
+            return null
+        }
+        /*
 			if false {
 				if true {
 					// jump over variable definition not allow
@@ -52,12 +52,13 @@ public class StatementLabel {
 			a := false ;
 			some:
 		*/
-		errMsg := sprintf("%s cannot jump over variable definition:\n", from.errMsgPrefix())
-		for _, v := range ss {
-			errMsg += sprintf("\t%s constains variable definition\n", v.pos.errMsgPrefix())
-		}
-		return new error(errMsg)
-	}
+        errMsg := sprintf("%s cannot jump over variable definition:\n" , from.errMsgPrefix())
+        for _ , v := range ss {
+            errMsg += sprintf("\t%s constains variable definition\n" , v.pos.errMsgPrefix())
+        }
+
+        return new error(errMsg)
+    }
 }
 
 

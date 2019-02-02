@@ -1,84 +1,87 @@
-
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
-
 class BuildExpressionCallArgs {
+    eb BuildExpression
 
-	eb BuildExpression
-    
-    fn BuildExpressionCallArgs(eb BuildExpression){
+    fn BuildExpressionCallArgs(eb BuildExpression) {
         this.super()
         this.eb = eb
     }
-    
-	fn buildCallArgs(
-		c cg.ClassHighLevel,
-		code cg.AttributeCode,
-		args []ast.Expression,
-		vArgs ast.CallVariableLengthArgs,
-		context Context,
-		state StackMapState) -> (maxStack char) {
-		currentStack := char(0)
-		stackLength := len(state.stacks)
-		defer {
-			state.popStack(len(state.stacks) - stackLength) // let`s pop
-		}
-		if vArgs != null {
-		    args = args[:vArgs.start]
-		}
-		for _, e := range args {
-			stack := this.eb.build(c, code, e, context, state)
-			if t := stack + currentStack; t > maxStack {
-				maxStack = t
-			}
-			currentStack += jvmSlotSize(e.value)
-			state.pushStack(c, e.value)
-		}
-		if vArgs == null {
-			return
-		}
-		if vArgs.noArgs {			
-			loadInt(c, code, 0)
-			newArrayBaseOnType(c, code, vArgs.Type.array)
-			if t := char(1) + currentStack; t > maxStack {
-				maxStack = t
-			}
-		} else {
-			if vArgs.packArray2VArgs {
-				stack := this.eb.build(c, code, vArgs.expressions[0], context, state)
-				if t := currentStack + stack; t > maxStack {
-					maxStack = t
-				}
-			} else {
-				loadInt(c, code, int(vArgs.length))
-				newArrayBaseOnType(c, code, vArgs.Type.array)
-				state.pushStack(c, vArgs.Type)
-				currentStack++
-				op := storeArrayElementOp(vArgs.Type.array.Type)
-				index := int(0)
-				for _, e := range vArgs.expressions {
-					code.codes[code.codeLength] = cg.OP_dup
-					code.codeLength++
-					state.pushStack(c, vArgs.Type)
-					loadInt(c, code, index)
-					state.pushStack(c,typeInt)
-					currentStack += 2
-					stack := this.eb.build(c, code, e, context, state)
-					if t := currentStack + stack; t > maxStack {
-						maxStack = t
-					}
-					code.codes[code.codeLength] = op
-					code.codeLength++
-					state.popStack(2)
-					currentStack -= 2
-					index++
-				}
-			}
-		}
-		return
-	}	
+
+    fn buildCallArgs(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        args []ast.Expression,
+        vArgs ast.CallVariableLengthArgs,
+        context Context,
+        state StackMapState) -> (maxStack char) {
+        currentStack := char(0)
+        stackLength := len(state.stacks)
+        defer {
+
+            state.popStack(len(state.stacks) - stackLength) // let`s pop
+        }
+
+        if vArgs != null {
+            args = args[:vArgs.start]
+        }
+        for _ , e := range args {
+            stack := this.eb.build(c , code , e , context , state)
+            if t := stack + currentStack ; t > maxStack {
+                maxStack = t
+            }
+            currentStack += jvmSlotSize(e.value)
+            state.pushStack(c , e.value)
+        }
+
+        if vArgs == null {
+            return
+        }
+        if vArgs.noArgs {
+            loadInt(c , code , 0)
+            newArrayBaseOnType(c , code , vArgs.Type.array)
+            if t := char(1) + currentStack ; t > maxStack {
+                maxStack = t
+            }
+        } else {
+            if vArgs.packArray2VArgs {
+                stack := this.eb.build(c , code , vArgs.expressions[0] , context , state)
+                if t := currentStack + stack ; t > maxStack {
+                    maxStack = t
+                }
+            } else {
+                loadInt(c , code , int(vArgs.length))
+                newArrayBaseOnType(c , code , vArgs.Type.array)
+                state.pushStack(c , vArgs.Type)
+                currentStack++
+                op := storeArrayElementOp(vArgs.Type.array.Type)
+                index := int(0)
+                for _ , e := range vArgs.expressions {
+                    code.codes[code.codeLength] = cg.OP_dup
+                    code.codeLength++
+                    state.pushStack(c , vArgs.Type)
+                    loadInt(c , code , index)
+                    state.pushStack(c , typeInt)
+                    currentStack += 2
+                    stack := this.eb.build(c , code , e , context , state)
+                    if t := currentStack + stack ; t > maxStack {
+                        maxStack = t
+                    }
+                    code.codes[code.codeLength] = op
+                    code.codeLength++
+                    state.popStack(2)
+                    currentStack -= 2
+                    index++
+                }
+
+            }
+
+        }
+
+        return
+    }
 
 }
 
- 
+

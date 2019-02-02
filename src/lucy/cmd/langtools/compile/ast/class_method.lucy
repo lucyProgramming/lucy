@@ -1,174 +1,179 @@
 import "lucy/jvm/cg"
 
 public class ClassMethod {
-	public isCompilerAuto bool
-	public Function       Function 
-	public locateDefinition bool 
-	public findUsage  bool 
-	public rename  bool
-	public findUsageInstances  []Usage 
-	public comment string 
-	
-	public fn narrowDownAccessRange(implementation ClassMethod) ->(is bool ) {
-		if this.isPublic() {
+    public isCompilerAuto     bool    
+    public Function           Function
+    public locateDefinition   bool    
+    public findUsage          bool    
+    public rename             bool    
+    public findUsageInstances []Usage 
+    public comment            string  
+
+    public fn narrowDownAccessRange(implementation ClassMethod) -> (is bool) {
+        if this.isPublic() {
             return !implementation.isPublic()
         }
         if this.isProtected() {
             return implementation.isPrivate() ||
-            	implementation.isAccessFlagDefault()
+                implementation.isAccessFlagDefault()
         }
         if this.isAccessFlagDefault() {
             return implementation.isPrivate()
         }
         return false
-	}
-	
-	public fn accessString() ->(s string) {
-		if this.isPublic() {
-			return "public"
-		}
-		if this.isProtected() {
-			return "protected"
-		}
-		if this.isPrivate() {
-			return "private"
-		}
-		return `default ""`
-	}
-	
-	public fn isAccessFlagDefault() ->(is bool ) {
-		return this.Function.accessFlags&
-			(cg.AccMethodPublic|
-				cg.AccMethodPrivate|
-				cg.AccMethodProtected) == 0
-	}
+    }
 
-	public fn isPublic() ->(is bool ) {
-		return (this.Function.accessFlags & cg.AccMethodPublic) != 0
-	}
-	public fn isProtected() ->(is bool ) {
-		return (this.Function.accessFlags & cg.AccMethodProtected) != 0
-	}
+    public fn accessString() -> (s string) {
+        if this.isPublic() {
+            return "public"
+        }
+        if this.isProtected() {
+            return "protected"
+        }
+        if this.isPrivate() {
+            return "private"
+        }
+        return `default ""`
+    }
 
-	public fn isStatic() ->(is bool ) {
-		return (this.Function.accessFlags & cg.AccMethodStatic) != 0
-	}
+    public fn isAccessFlagDefault() -> (is bool) {
+        return this.Function.accessFlags &
+            (cg.AccMethodPublic |
+                cg.AccMethodPrivate |
+                cg.AccMethodProtected) == 0
+    }
 
-	public fn isPrivate() ->(is bool ) {
-		return (this.Function.accessFlags & cg.AccMethodPrivate) != 0
-	}
-	public fn isFinal() ->(is bool ) {
-		return (this.Function.accessFlags & cg.AccMethodFinal) != 0
-	}
+    public fn isPublic() -> (is bool) {
+        return (this.Function.accessFlags & cg.AccMethodPublic) != 0
+    }
+    public fn isProtected() -> (is bool) {
+        return (this.Function.accessFlags & cg.AccMethodProtected) != 0
+    }
 
-	public fn isAbstract() ->(is bool ) {
-		return (this.Function.accessFlags & cg.AccMethodAbstract) != 0
-	}
+    public fn isStatic() -> (is bool) {
+        return (this.Function.accessFlags & cg.AccMethodStatic) != 0
+    }
 
-	public fn isSynthetic() ->(is bool ) {
-		return (this.Function.accessFlags & cg.AccMethodSynthetic) != 0
-	}
+    public fn isPrivate() -> (is bool) {
+        return (this.Function.accessFlags & cg.AccMethodPrivate) != 0
+    }
+    public fn isFinal() -> (is bool) {
+        return (this.Function.accessFlags & cg.AccMethodFinal) != 0
+    }
 
-	public fn ableAccessFromSubClass() ->(is bool ) {
-		return this.isPublic() ||
-			this.isProtected()
-	}
-	
-	public fn mkDescription() ->(d string = "") {
-		if this.comment != null {
-			d += this.comment
-		}
-		if this.isPublic() {
-			d = "public"
-		}else if this.isProtected() {
-			d = "protected"
-		}else if this.isPrivate() {
-			d = "private"
-		}
-		if this.isStatic() {
-			if d == "" {
-				d = "static"
-			}else {
-				d += " static" 
-			}
-		}
-		if this.isSynthetic() {
-			if d == "" {
-				d = "synchronized"
-			}else {
-				d += " synchronized" 
-			}
-		}
-		if this.isFinal() {
-			if d == "" {
-				d = "final"
-			}else {
-				d += " final" 
-			}
-		}
-		if this.isAbstract() {
-			if d == "" {
-				d = "abstract"
-			}else {
-				d += " abstract" 
-			}
-		}
-		if d != "" {
-			d += " "
-		}
-		d += this.Function.readableMsg(true) 
-	}
+    public fn isAbstract() -> (is bool) {
+        return (this.Function.accessFlags & cg.AccMethodAbstract) != 0
+    }
 
-	fn checkModifierOk() ->(errs []error = []error{}) {
-		if this.isAbstract() && this.isFinal() {
-			errs.append(new error(sprintf("%s abstract method cannot be final",
-				errMsgPrefix(this.Function.pos))))
-		}
-		if this.isAbstract() && this.isPrivate() {
-			errs.append( new error(sprintf("%s abstract method cannot be private",
-				errMsgPrefix(this.Function.pos))))
-		}
-		if this.isAbstract() && this.Function.name == SpecialMethodInit {
-			errs.append( new error(sprintf("%s construction method cannot be abstract",
-				errMsgPrefix(this.Function.pos))))
-		}
-		return errs
-	}
+    public fn isSynthetic() -> (is bool) {
+        return (this.Function.accessFlags & cg.AccMethodSynthetic) != 0
+    }
 
-	fn isFirstStatementCallFatherConstruction() ->(is bool ) {
-		if len(this.Function.block.statements) == 0 {
-			return false
-		}
-		s := this.Function.block.statements[0]
-		if s.Type != StatementTypeExpression {
-			return false
-		}
-		e := s.Expression
-		if e.Type != ExpressionTypeMethodCall {
-			return false
-		}
-		call := s.Expression.data.(ExpressionMethodCall)
-		if call.Expression.isIdentifier(ThisPointerName) == false || 
-			call.name != Super {
-			return false
-		}
-		return true
-	}
+    public fn ableAccessFromSubClass() -> (is bool) {
+        return this.isPublic() ||
+            this.isProtected()
+    }
 
-	fn implementationMethodIsOk(
-		pos Pos,
-		implementation ClassMethod) -> (err error) {
-		if implementation.Function.pos != null {
-			pos = implementation.Function.pos
-		}
-		if implementation.isStatic() {
-			return new error(sprintf("%s method '%s' is static", pos.errMsgPrefix(), this.Function.name))
-		}
-		if this.narrowDownAccessRange(implementation) {
-			return new error(sprintf("%s implementation of method '%s' should not narrow down access range, '%s' -> '%s'",
-				pos.errMsgPrefix(), this.Function.name, this.accessString(), implementation.accessString()))
-		}
-		return null
-	}	
+    public fn mkDescription() -> (d string = "") {
+        if this.comment != null {
+            d += this.comment
+        }
+        if this.isPublic() {
+            d = "public"
+        } else if this.isProtected() {
+            d = "protected"
+        } else if this.isPrivate() {
+            d = "private"
+        }
+        if this.isStatic() {
+            if d == "" {
+                d = "static"
+            } else {
+                d += " static"
+            }
+
+        }
+        if this.isSynthetic() {
+            if d == "" {
+                d = "synchronized"
+            } else {
+                d += " synchronized"
+            }
+
+        }
+        if this.isFinal() {
+            if d == "" {
+                d = "final"
+            } else {
+                d += " final"
+            }
+
+        }
+        if this.isAbstract() {
+            if d == "" {
+                d = "abstract"
+            } else {
+                d += " abstract"
+            }
+
+        }
+        if d != "" {
+            d += " "
+        }
+        d += this.Function.readableMsg(true)
+    }
+
+    fn checkModifierOk() -> (errs []error = []error{}) {
+        if this.isAbstract() && this.isFinal() {
+            errs.append(new error(sprintf("%s abstract method cannot be final",
+                errMsgPrefix(this.Function.pos))))
+        }
+        if this.isAbstract() && this.isPrivate() {
+            errs.append(new error(sprintf("%s abstract method cannot be private",
+                errMsgPrefix(this.Function.pos))))
+        }
+        if this.isAbstract() && this.Function.name == SpecialMethodInit {
+            errs.append(new error(sprintf("%s construction method cannot be abstract",
+                errMsgPrefix(this.Function.pos))))
+        }
+        return errs
+    }
+
+    fn isFirstStatementCallFatherConstruction() -> (is bool) {
+        if len(this.Function.block.statements) == 0 {
+            return false
+        }
+        s := this.Function.block.statements[0]
+        if s.Type != StatementTypeExpression {
+            return false
+        }
+        e := s.Expression
+        if e.Type != ExpressionTypeMethodCall {
+            return false
+        }
+        call := s.Expression.data.(ExpressionMethodCall)
+        if call.Expression.isIdentifier(ThisPointerName) == false ||
+            call.name != Super {
+            return false
+        }
+        return true
+    }
+
+    fn implementationMethodIsOk(
+        pos Pos,
+        implementation ClassMethod) -> (err error) {
+        if implementation.Function.pos != null {
+            pos = implementation.Function.pos
+        }
+        if implementation.isStatic() {
+            return new error(sprintf("%s method '%s' is static" , pos.errMsgPrefix() , this.Function.name))
+        }
+        if this.narrowDownAccessRange(implementation) {
+            return new error(sprintf("%s implementation of method '%s' should not narrow down access range, '%s' -> '%s'",
+                pos.errMsgPrefix() , this.Function.name , this.accessString() , implementation.accessString()))
+        }
+        return null
+    }
 }
+
 

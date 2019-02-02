@@ -1,52 +1,55 @@
-
 public class Pos {
-	public filename string
-	public startLine   int
-	public endLine     int
-	public startColumnOffset int 
-	public endColumnOffset int 
-	/*
+    public filename          string
+    public startLine         int   
+    public endLine           int   
+    public startColumnOffset int   
+    public endColumnOffset   int   
+    /*
 		offset at bs , for special use.
 		for template function only currently
 	*/
-	public startOffset int
-	public endOffset int 
-	public loadDefinitionFromOutside LoadDefinitionFromOutside 
-	
-	public fn errMsgPrefix() -> (prefix string) {
-		// 0 based to 1 bases
-		return sprintf("%s:%d:%d", this.filename, this.endLine + 1, this.endColumnOffset + 1) 
-	}
+    public startOffset               int                      
+    public endOffset                 int                      
+    public loadDefinitionFromOutside LoadDefinitionFromOutside
+
+    public fn errMsgPrefix() -> (prefix string) {
+        // 0 based to 1 bases
+        return sprintf("%s:%d:%d" , this.filename , this.endLine + 1 , this.endColumnOffset + 1)
+    }
 }
+
 
 fn errMsgPrefix(pos Pos) -> (prefix string) {
-	return pos.errMsgPrefix()
+    return pos.errMsgPrefix()
 }
+
 
 public class NameWithPos {
-	public name string
-	public pos  Pos
-	public locateDefinition  bool 
-	public locatePackageDefinition bool 
-	public packagePos Pos 
-	public findUsage bool 
-	public getHover bool 
-	public rename bool 
-	public autoCompletion bool 
-	/* 
+    public name                    string
+    public pos                     Pos   
+    public locateDefinition        bool  
+    public locatePackageDefinition bool  
+    public packagePos              Pos   
+    public findUsage               bool  
+    public getHover                bool  
+    public rename                  bool  
+    public autoCompletion          bool  
+    /*
 		a // this is a inline comment
 	*/
-	public inlineComment string   //   in
-	
-	public containsLf bool   // constains "\n"
+    public inlineComment string //   in
 
-	public fn NameWithPos(name string ,Pos  Pos ){
-	    this.super()
-		this.name = name
-		this.pos = Pos
-	}
+    public containsLf bool // constains "\n"
 
-	public fn containsLfOrInlineComment() ->(constains bool) {
-		return this.containsLf || this.inlineComment != null
-	}
+    public fn NameWithPos(name string , Pos Pos) {
+        this.super()
+        this.name = name
+        this.pos = Pos
+    }
+
+    public fn containsLfOrInlineComment() -> (constains bool) {
+        return this.containsLf || this.inlineComment != null
+    }
 }
+
+

@@ -1,72 +1,74 @@
 import "java/lang/Object"
 
-public interface  loadImport {
-	public fn loadImport(importName string) -> (Object, error)
+public interface loadImport {
+    public abstract fn loadImport(importName string) -> (Object , error)}
+
+
+public const MagicIdentifierFile ="__FILE__"
+public const MagicIdentifierLine ="__LINE__"
+public const MagicIdentifierTime ="__TIME__"
+public const MagicIdentifierClass ="__CLASS__"
+public const MainFunctionName ="main"
+public const ThisPointerName ="this"
+public const UnderScore ="_"
+public const LucyRootClass ="lucy/lang/Lucy"
+public const JavaRootClass ="java/lang/Object"
+public const DefaultExceptionClass ="java/lang/Exception"
+public const JavaThrowableClass ="java/lang/Throwable"
+public const JavaStringClassName ="java/lang/String"
+public const Super ="super"
+public const SpecialMethodInit ="<init>"
+const ClassInitMethod ="<clinit>"
+
+fn isMagicIdentifier(name string) -> (is bool) {
+    return name == MagicIdentifierFile ||
+        name == MagicIdentifierLine ||
+        name == MagicIdentifierTime ||
+        name == MagicIdentifierClass
 }
 
 
-const	MagicIdentifierFile     = "__FILE__"
-const	MagicIdentifierLine     = "__LINE__"
-const	MagicIdentifierTime     = "__TIME__"
-const	MagicIdentifierClass    = "__CLASS__"
-public const	MainFunctionName  = "main"
-const	ThisPointerName         = "this"
-const	UnderScore              = "_"
-const	LucyRootClass           = "lucy/lang/Lucy"
-const	JavaRootClass           = "java/lang/Object"
-const	DefaultExceptionClass   = "java/lang/Exception"
-const	JavaThrowableClass      = "java/lang/Throwable"
-const	JavaStringClassName     = "java/lang/String"
-const	Super                   = "super"
-public const	SpecialMethodInit       = "<init>"
-const	ClassInitMethod         = "<clinit>"
+var buildInFunctionsMap = new map{string -> Function}()
 
+public var parseFunctionHandler fn (bs []byte , pos Pos)->( f Function,es []error)
 
-fn isMagicIdentifier(name string) ->(is bool)  {
-	return name == MagicIdentifierFile ||
-		name == MagicIdentifierLine ||
-		name == MagicIdentifierTime ||
-		name == MagicIdentifierClass
-}
-
-var	buildInFunctionsMap = new map {string -> Function}()
-
-public var	parseFunctionHandler fn(bs []byte, pos Pos) -> (f Function, es []error)
-
-var	javaStringClass      Class
-public var	LucyBytesType       Type // []byte
-public var	JavaBytesType        Type // byte[]
-
+var javaStringClass Class
+public var LucyBytesType Type
+// []byte
+public var JavaBytesType Type
+// byte[]
 
 {
-	// []byte
-	LucyBytesType = new Type()
-	LucyBytesType.Type = VariableTypeArray
-	LucyBytesType.array = new Type()
-	LucyBytesType.array.Type = VariableTypeByte
 
-	//byte[]
-	JavaBytesType = new Type()
-	JavaBytesType.Type = VariableTypeJavaArray
-	JavaBytesType.array = new Type()
-	JavaBytesType.array.Type = VariableTypeByte
+    // []byte
+    LucyBytesType = new Type()
+    LucyBytesType.Type = VariableTypeArray
+    LucyBytesType.array = new Type()
+    LucyBytesType.array.Type = VariableTypeByte
+
+    //byte[]
+    JavaBytesType = new Type()
+    JavaBytesType.Type = VariableTypeJavaArray
+    JavaBytesType.array = new Type()
+    JavaBytesType.array.Type = VariableTypeByte
+
+
 }
 
-
-
-fn loadJavaStringClass(block Block , pos Pos) ->(err error) {
-	if javaStringClass != null {
-		return null
-	}
-	c, err := block.inheritedAttribute.p.loader.loadImport(JavaStringClassName)
-	if err != null {
-		return err
-	}
-	if cc, ok := c.(Class); ok && cc != null {
-		javaStringClass = cc
-		return null
-	} else {
-		panic("loaded java string class is not a class")
-	}
+fn loadJavaStringClass(block Block , pos Pos) -> (err error) {
+    if javaStringClass != null {
+        return null
+    }
+    c , err := block.inheritedAttribute.p.loader.loadImport(JavaStringClassName)
+    if err != null {
+        return err
+    }
+    if cc , ok := c.(Class) ; ok && cc != null {
+        javaStringClass = cc
+        return null
+    } else {
+        panic("loaded java string class is not a class")
+    }
 }
+
 

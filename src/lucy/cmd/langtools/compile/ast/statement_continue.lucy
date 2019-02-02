@@ -1,32 +1,31 @@
- 
-
 public class StatementContinue {
-	public statementFor StatementFor
-	public defers       []StatementDefer
-	public pos          Pos
-	public inlineComment string 
-	
-	fn check(block Block) -> (errs []error) {
-		if block.inheritedAttribute.forStatement == null {
-			return []error{new error(sprintf("%s 'continue' can`t in this scope",
-				this.pos.errMsgPrefix())) }
-		}
-		if block.inheritedAttribute.Defer != null {
-			return []error{new error(sprintf("%s cannot has 'continue' in 'defer'",
-				this.pos.errMsgPrefix()))}
-		}
-		this.statementFor = block.inheritedAttribute.forStatement
-		this.defers = []StatementDefer{}
-		this.mkDefers(block)
-		return null
-	}
-	
-	fn mkDefers(block Block) {
-		if block.isForBlock {
-			this.defers.appendAll(block.defers)
-			return
-		}
-		this.mkDefers(block.outer)
-	}
+    public statementFor  StatementFor    
+    public defers        []StatementDefer
+    public pos           Pos             
+    public inlineComment string          
+
+    fn check(block Block) -> (errs []error) {
+        if block.inheritedAttribute.forStatement == null {
+            return []error{new error(sprintf("%s 'continue' can`t in this scope",
+                    this.pos.errMsgPrefix()))}
+        }
+        if block.inheritedAttribute.Defer != null {
+            return []error{new error(sprintf("%s cannot has 'continue' in 'defer'",
+                    this.pos.errMsgPrefix()))}
+        }
+        this.statementFor = block.inheritedAttribute.forStatement
+        this.defers = []StatementDefer{}
+        this.mkDefers(block)
+        return null
+    }
+
+    fn mkDefers(block Block) {
+        if block.isForBlock {
+            this.defers.appendAll(block.defers)
+            return
+        }
+        this.mkDefers(block.outer)
+    }
 }
+
 

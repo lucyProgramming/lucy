@@ -1,48 +1,48 @@
- 
 class ExpressionCheckTypeAssert {
+    static fn check(e Expression , block Block , errs []error) -> (valueTypes []Type) {
+        assertion := e.data.(ExpressionTypeAssert)
+        object , es := assertion.Expression.checkSingleValueContextExpression(block)
+        errs.appendAll(es)
+        if object == null {
+            return null
+        }
+        if err := object.rightValueValid() ; err != null {
+            errs.append(err)
+            return null
+        }
+        if assertion.isType {
+            return [object]
+        }
+        if object.isPointer() == false {
+            errs.append(new error(sprintf("%s expression is not pointer",
+                errMsgPrefix(object.pos))))
+            return null
+        }
+        err := assertion.Type.resolve(block)
+        if err != null {
+            errs.append(err)
+            return null
+        }
+        if assertion.Type.validForTypeAssertOrConversion() == false {
+            errs.append(new error(sprintf("%s cannot use '%s' for type assertion",
+                errMsgPrefix(assertion.Type.pos) , assertion.Type.typeString())))
+            return null
+        }
+        if len(e.lefts) > 1 {
+            assertion.multiValueContext = true
+            valueTypes = new []Type(2)
+            valueTypes[0] = assertion.Type.cloneType()
+            valueTypes[0].pos = e.pos
+            valueTypes[1] = new Type()
+            valueTypes[1].pos = e.pos
+            valueTypes[1].Type = VariableTypeBool // if  assert is ok
+        } else {
+            valueTypes = new []Type(1)
+            valueTypes[0] = assertion.Type.cloneType()
+            valueTypes[0].pos = e.pos
+        }
 
-	static fn check(e Expression , block Block, errs []error) -> (valueTypes []Type) {
-		assertion := e.data.(ExpressionTypeAssert)
-		object, es := assertion.Expression.checkSingleValueContextExpression(block)
-		errs.appendAll(es)
-		if object == null {
-			return null
-		}
-		if err := object.rightValueValid(); err != null {
-			errs.append(err)
-			return null
-		}
-		if assertion.isType {
-			return [object] 
-		}
-		if object.isPointer() == false {
-			errs.append(new error(sprintf("%s expression is not pointer",
-				errMsgPrefix(object.pos))))
-			return null
-		}
-		err := assertion.Type.resolve(block)
-		if err != null {
-			errs.append(err)
-			return null
-		}
-		if assertion.Type.validForTypeAssertOrConversion() == false {
-			errs.append(new error( sprintf("%s cannot use '%s' for type assertion",
-				errMsgPrefix(assertion.Type.pos), assertion.Type.typeString())))
-			return null
-		}
-		if len(e.lefts) > 1 {
-			assertion.multiValueContext = true
-			valueTypes = new []Type(2)
-			valueTypes[0] = assertion.Type.cloneType()
-			valueTypes[0].pos = e.pos
-			valueTypes[1] = new Type()
-			valueTypes[1].pos = e.pos
-			valueTypes[1].Type = VariableTypeBool // if  assert is ok
-		} else {
-			valueTypes = new []Type(1)
-			valueTypes[0] = assertion.Type.cloneType()
-			valueTypes[0].pos = e.pos
-		}
-	}
+    }
 }
+
 

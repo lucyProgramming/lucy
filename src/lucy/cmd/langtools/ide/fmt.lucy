@@ -16,7 +16,6 @@ public class Fmt {
                 } else {
                     format += "//" + t.comment // contains \n
                 }
-
                 continue
             }
             if t , ok := n.node.(ast.Block) ; ok &&
@@ -27,7 +26,11 @@ public class Fmt {
                 continue
             }
             if t , ok := n.node.(ast.Function) ; ok {
-                format += this.formatFunction("" , t , false) + "\n"
+                if t.isPublic() {
+                    format += "public " +  this.formatFunction("" , t , false) + "\n"
+                }else {
+                    format += this.formatFunction("" , t , false) + "\n"
+                }
                 continue
             }
             if t , ok := n.node.(ast.Enum) ; ok {
@@ -73,11 +76,14 @@ public class Fmt {
 
     fn formatConstant(indent string , c ast.Constant) -> (format string = "") {
         format = indent
+        if c.isPublic() {
+            format += "public "
+        }
         format += "const " + c.name
         if c.Type != null {
             format += " " + c.Type.typeName()
         }
-        format += " =" + this.formatExpression(indent + this.indentIncrement , c.defaultValueExpression)
+        format += " = " + this.formatExpression(indent + this.indentIncrement , c.defaultValueExpression)
     }
 
     fn formatFunction(indent string , f ast.Function , isAbstract bool) -> (format string = "") {
@@ -199,7 +205,7 @@ public class Fmt {
         if c.isFinal() {
             format += "final "
         }
-        if c.isAbstract() {
+        if c.isAbstract()  && c.isInterface() == false{
             format += "abstract "
         }
         if c.isInterface() {
@@ -597,6 +603,7 @@ public class Fmt {
             }
 
         }
+
         if s.Else != null {
             format += " else {\n"
             format += this.formatBlock(indent + this.indentIncrement , s.Else)
@@ -1054,6 +1061,9 @@ public class Fmt {
                 format = this.formatFunction(indent , e.data.(ast.Function) , false)
             case ast.ExpressionTypeVar:
                 vs := e.data.(ast.ExpressionVar)
+                if e.isPublic {
+                    format += "public "
+                }
                 format += "var "
                 for k , v := range vs.variables {
                     format += v.name
@@ -1230,6 +1240,15 @@ public class Fmt {
             case ast.ExpressionTypeAutoCompletion:
         }
 
+    }
+
+    fn getStringMaxWideLength(s string) -> (length int) {
+        t := s.split("\n")
+        for v := range t {
+            if len(v) > length {
+                length = len(v)
+            }
+        }
     }
 }
 

@@ -1,31 +1,31 @@
- 
-
 public class TypeAlias {
-	public 	name    string
-	public  aliasName string 
-	public 	Type    Type
-	public 	pos     Pos
-	public 	comment string
-	public locateDefinition  bool 
-	public findUsage  bool 
-	public rename bool 
-    findUsageInstances []Usage 
-	used bool 
-	public inlineComment string 
+    public name               string 
+    public aliasName          string 
+    public Type               Type   
+    public pos                Pos    
+    public comment            string 
+    public locateDefinition   bool   
+    public findUsage          bool   
+    public rename             bool   
+           findUsageInstances []Usage
+           used               bool   
+    public inlineComment      string 
 	
-	public fn mkDescription() ->(s string = "") {
-		if this.comment != null {
-			s += this.comment
-		}
-		tt := this.Type.cloneType()
-		tt.alias = null 
-		s += sprintf("typealias %s@%s" , this.name , tt.typeString())
-	}
-	fn reduceFindUsageInstances(block Block) {
+    public fn mkDescription() -> (s string = "") {
+        if this.comment != null {
+            s += this.comment
+        }
+        tt := this.Type.cloneType()
+        tt.alias = null
+        s += sprintf("typealias %s@%s" , this.name , tt.typeString())
+    }
+    fn reduceFindUsageInstances(block Block) {
         if this.findUsage == false {
-            return 
+            return
         }
         this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
-        block.inheritedAttribute.p.findUsage = this.findUsageInstances 
+        block.inheritedAttribute.p.findUsage = this.findUsageInstances
     }
 }
+
+
