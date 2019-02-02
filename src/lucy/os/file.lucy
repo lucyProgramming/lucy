@@ -1,55 +1,57 @@
-import "java/io";
+import "java/io"
 
+public fn readFile(filepath string) -> (bs byte[] , err error) {
+    defer {
 
+        e := catch()
+        if e != null {
+            err = e
+        }
+    }
 
-
-public fn readFile(filepath string) -> ( bs byte[],err error){
-	defer {
-		e := catch()
-		if e != null {
-			err = e 
-		}
-	}
-	f := new io.File(filepath)	 
-	if f.exists() == false {
-		err = new error("file not exits")
-		return 
-	}
-	if f.isDirectory() {
-		err = new error("file not a regular file")
-		return
-	}
-	if f.canRead() == false {
-		err = new error("file not readable")
-		return
-	}
-	bs  = new byte[]( int (f.length()) )
-	stream := new io.FileInputStream(f)
-	defer stream.close()
-	stream.read(bs)
+    f := new io.File(filepath)
+    if f.exists() == false {
+        err = new error("file not exits")
+        return
+    }
+    if f.isDirectory() {
+        err = new error("file not a regular file")
+        return
+    }
+    if f.canRead() == false {
+        err = new error("file not readable")
+        return
+    }
+    bs = new byte[](int(f.length()))
+    stream := new io.FileInputStream(f)
+    defer {
+        stream.close()
+    }
+    stream.read(bs)
 }
 
+public fn writeFile(filepath string , bs byte[] , start int = 0 , length int = -1) -> (err error) {
+    defer {
 
-public fn writeFile(filepath string , bs byte[] , start int = 0 , length int = -1) -> (err error){
-	defer {
-		e := catch()
-		if e != null {
-			err = e 
-		}
-	}
-	if length == -1 {
-		length = bs.size() 
-	}
-	f := new io.File(filepath)	 
-	if f.isDirectory() {
-		err = new error("file is a directory")
-		return
-	}
-	f.createNewFile()  // create new file 
-	stream := new io.FileOutputStream(f, false  )// override 
-	defer stream.close()
-	stream.write(bs , start ,length ) 
+        e := catch()
+        if e != null {
+            err = e
+        }
+    }
+
+    if length == -1 {
+        length = bs.size()
+    }
+    f := new io.File(filepath)
+    if f.isDirectory() {
+        err = new error("file is a directory")
+        return
+    }
+    f.createNewFile() // create new file 
+    stream := new io.FileOutputStream(f , false) // override 
+    defer {
+        stream.close()
+    }
+    stream.write(bs , start , length)
 }
 
-	
- 

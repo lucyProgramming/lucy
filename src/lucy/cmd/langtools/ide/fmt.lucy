@@ -478,7 +478,8 @@ public class Fmt {
         if i.alias != null {
             format += " as " + i.alias
         }
-    }     // block can have no "{}"
+    }
+     // block can have no "{}"
     fn formatBlock(indent string , block ast.Block) -> (format string = "") {
         for s := range block.statements {
             format += this.formatStatement(indent , s)
@@ -550,7 +551,8 @@ public class Fmt {
     fn formatTypealias(indent string , a ast.TypeAlias) -> (format string = "") {
         format = indent
         format += sprintf("typealias %s = %s\n" , a.name , a.Type.typeName())
-    }    fn formatDefer(indent string , d ast.StatementDefer) -> (format string = "") {
+    }
+    fn formatDefer(indent string , d ast.StatementDefer) -> (format string = "") {
         format = indent
         if d.isOneStatement {
             format += "defer {\n"
@@ -1235,6 +1237,7 @@ public class Fmt {
             }
         }
 
-    }}
+    }
+}
 
 

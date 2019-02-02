@@ -1,51 +1,49 @@
-
 import "java/lang/System"
 
 /*
 	get env by k
 */
-public fn getEnv(k string)->(	v string = System.getenv(k) ){}
+public fn getEnv(k string) -> (v string = System.getenv(k)){}
 
 /*
 	all envs
 */
-public fn getEnvs()->
-(
-	envs map{ string -> string } = new map{ string -> string }()
-)
-{
-	es := System.getenv()	
-	ks := es.keySet().toArray()
-	for v := range ks {
-		envs[string(v)] = string(es.get(v))
-	}
+public fn getEnvs() -> (envs map{string -> string} = new map{string -> string}()) {
+    es := System.getenv()
+    ks := es.keySet().toArray()
+    for v := range ks {
+        envs[string(v)] = string(es.get(v))
+    }
+
 }
 
 /*
 	get current working directory
 */
-public fn getCwd()->(d string = System.getProperty("user.dir")){ }
+public fn getCwd() -> (d string = System.getProperty("user.dir")){}
 
 /*
 	change working directory to
 */
-public fn chCwd(to string){
-	System.setProperty("user.dir", to)
+public fn chCwd(to string) {
+    System.setProperty("user.dir" , to)
 }
 
 /*
 	get current user
 */
-public fn getUser()->(r string = System.getProperty("user.name")){ }
+public fn getUser() -> (r string = System.getProperty("user.name")){}
 
 /*
 	exit program
 */
-
-public fn exit(code int){ System.exit(code) }
+public fn exit(code int) {
+    System.exit(code)
+}
 
 /*
 	run gc
 */
-
-public fn gc(){	System.gc() }
+public fn gc() {
+    System.gc()
+}
