@@ -1176,8 +1176,12 @@ public class Fmt {
                         }
 
                     }
-
-                    format += "}"
+                    if m.containsLf() {
+                        format += indent + "}"
+                    }else {
+                        format += "}"
+                    }
+                    
                 } else {
                     format += sprintf("map{%s -> %s}{" , m.Type.Map.K.typeName() , m.Type.Map.V.typeName())
                     if m.containsLf() {
