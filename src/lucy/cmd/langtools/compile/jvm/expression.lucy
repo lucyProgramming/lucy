@@ -1,39 +1,37 @@
- 
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
-
 class BuildExpression {
-	bp BuildPackage
-    BuildExpressionArithmetic BuildExpressionArithmetic
-    BuildExpressionArray BuildExpressionArray
-    BuildExpressionAssign BuildExpressionAssign
-    BuildExpressionCallArgs BuildExpressionCallArgs
-    BuildExpressionConversion BuildExpressionConversion
-    BuildExpressionFunction BuildExpressionFunction
-    BuildExpressionFunctionCall BuildExpressionFunctionCall
-    BuildExpressionIdentifier BuildExpressionIdentifier
-    BuildExpressionincrement BuildExpressionincrement
-    BuildExpressionIndex BuildExpressionIndex
-    BuildExpressionLeftValue BuildExpressionLeftValue
-    BuildExpressionLogical BuildExpressionLogical
-    BuildExpressionMap BuildExpressionMap
-    BuildExpressionMethodCall BuildExpressionMethodCall
-    BuildExpressionNew BuildExpressionNew
-    BuildExpressionOpAssign BuildExpressionOpAssign
-    BuildExpressionQuestion BuildExpressionQuestion
-    BuildExpressionRelation BuildExpressionRelation
-    BuildExpressionSelection BuildExpressionSelection
-    BuildExpressionSlice BuildExpressionSlice
-    BuildExpressionStrcat BuildExpressionStrcat
-    BuildExpressionAssert BuildExpressionAssert
+    bp                            BuildPackage                 
+    BuildExpressionArithmetic     BuildExpressionArithmetic    
+    BuildExpressionArray          BuildExpressionArray         
+    BuildExpressionAssign         BuildExpressionAssign        
+    BuildExpressionCallArgs       BuildExpressionCallArgs      
+    BuildExpressionConversion     BuildExpressionConversion    
+    BuildExpressionFunction       BuildExpressionFunction      
+    BuildExpressionFunctionCall   BuildExpressionFunctionCall  
+    BuildExpressionIdentifier     BuildExpressionIdentifier    
+    BuildExpressionincrement      BuildExpressionincrement     
+    BuildExpressionIndex          BuildExpressionIndex         
+    BuildExpressionLeftValue      BuildExpressionLeftValue     
+    BuildExpressionLogical        BuildExpressionLogical       
+    BuildExpressionMap            BuildExpressionMap           
+    BuildExpressionMethodCall     BuildExpressionMethodCall    
+    BuildExpressionNew            BuildExpressionNew           
+    BuildExpressionOpAssign       BuildExpressionOpAssign      
+    BuildExpressionQuestion       BuildExpressionQuestion      
+    BuildExpressionRelation       BuildExpressionRelation      
+    BuildExpressionSelection      BuildExpressionSelection     
+    BuildExpressionSlice          BuildExpressionSlice         
+    BuildExpressionStrcat         BuildExpressionStrcat        
+    BuildExpressionAssert         BuildExpressionAssert        
     BuildExpressionTypeConversion BuildExpressionTypeConversion
-    BuildExpressionUnary BuildExpressionUnary
-    BuildExpressionVar BuildExpressionVar
-    BuildExpressionVarAssign BuildExpressionVarAssign
-    BuildTemplateFunctionCall BuildTemplateFunctionCall
+    BuildExpressionUnary          BuildExpressionUnary         
+    BuildExpressionVar            BuildExpressionVar           
+    BuildExpressionVarAssign      BuildExpressionVarAssign     
+    BuildTemplateFunctionCall     BuildTemplateFunctionCall    
 
-    fn BuildExpression(bp BuildPackage){
+    fn BuildExpression(bp BuildPackage) {
         this.super()
         this.bp = bp
         this.BuildExpressionArithmetic = new BuildExpressionArithmetic(this)
@@ -41,30 +39,29 @@ class BuildExpression {
         this.BuildExpressionAssign = new BuildExpressionAssign(this)
         this.BuildExpressionCallArgs = new BuildExpressionCallArgs(this)
         this.BuildExpressionConversion = new BuildExpressionConversion(this)
-        this.BuildExpressionFunction = new BuildExpressionFunction(this,bp)
-        this.BuildExpressionFunctionCall = new  BuildExpressionFunctionCall(this)
-        this.BuildExpressionIdentifier = new  BuildExpressionIdentifier(this)
+        this.BuildExpressionFunction = new BuildExpressionFunction(this , bp)
+        this.BuildExpressionFunctionCall = new BuildExpressionFunctionCall(this)
+        this.BuildExpressionIdentifier = new BuildExpressionIdentifier(this)
         this.BuildExpressionincrement = new BuildExpressionincrement(this)
         this.BuildExpressionIndex = new BuildExpressionIndex(this)
-        this.BuildExpressionLeftValue = new  BuildExpressionLeftValue(this)
+        this.BuildExpressionLeftValue = new BuildExpressionLeftValue(this)
         this.BuildExpressionLogical = new BuildExpressionLogical(this)
         this.BuildExpressionMap = new BuildExpressionMap(this)
-        this.BuildExpressionMethodCall = new  BuildExpressionMethodCall(this)
+        this.BuildExpressionMethodCall = new BuildExpressionMethodCall(this)
         this.BuildExpressionNew = new BuildExpressionNew(this)
         this.BuildExpressionOpAssign = new BuildExpressionOpAssign(this)
-        this.BuildExpressionQuestion = new  BuildExpressionQuestion(this)
+        this.BuildExpressionQuestion = new BuildExpressionQuestion(this)
         this.BuildExpressionRelation = new BuildExpressionRelation(this)
         this.BuildExpressionSelection = new BuildExpressionSelection(this)
-        this.BuildExpressionSlice = new  BuildExpressionSlice(this)
-        this.BuildExpressionStrcat = new  BuildExpressionStrcat(this)
-        this.BuildExpressionAssert = new  BuildExpressionAssert(this)
-        this.BuildExpressionTypeConversion = new  BuildExpressionTypeConversion(this)
+        this.BuildExpressionSlice = new BuildExpressionSlice(this)
+        this.BuildExpressionStrcat = new BuildExpressionStrcat(this)
+        this.BuildExpressionAssert = new BuildExpressionAssert(this)
+        this.BuildExpressionTypeConversion = new BuildExpressionTypeConversion(this)
         this.BuildExpressionUnary = new BuildExpressionUnary(this)
-        this.BuildExpressionVar= new  BuildExpressionVar(this)
-        this.BuildExpressionVarAssign = new  BuildExpressionVarAssign(this)
+        this.BuildExpressionVar = new BuildExpressionVar(this)
+        this.BuildExpressionVarAssign = new BuildExpressionVarAssign(this)
         this.BuildTemplateFunctionCall = new BuildTemplateFunctionCall(this , bp)
     }
-
 
     fn build(
         c cg.ClassHighLevel,
@@ -73,321 +70,330 @@ class BuildExpression {
         context Context,
         state StackMapState) -> (maxStack char) {
         if e.isCompilerAuto == false {
-            context.appendLimeNumberAndSourceFile(e.pos, code, c)
+            context.appendLimeNumberAndSourceFile(e.pos , code , c)
         }
         switch e.Type {
-        case ast.ExpressionTypeNull:
-            code.codes[code.codeLength] = cg.OP_aconst_null
-            code.codeLength++
-            maxStack = 1
-        case ast.ExpressionTypeBool:
-            if e.boolValue {
-                code.codes[code.codeLength] = cg.OP_iconst_1
-            } else {
-                code.codes[code.codeLength] = cg.OP_iconst_0
-            }
-            code.codeLength++
-            maxStack = 1
-        case ast.ExpressionTypeByte:
-            code.codes[code.codeLength] = cg.OP_bipush
-            code.codes[code.codeLength+1] = byte(e.longValue)
-            code.codeLength += 2
-            maxStack = 1
-        case ast.ExpressionTypeInt,
-            ast.ExpressionTypeShort, 
-            ast.ExpressionTypeChar:
-            loadInt(c, code, int(e.longValue))
-            maxStack = 1
-        case ast.ExpressionTypeLong:
-            if e.longValue == 0 {
-                code.codes[code.codeLength] = cg.OP_lconst_0
+            case ast.ExpressionTypeNull:
+                code.codes[code.codeLength] = cg.OP_aconst_null
                 code.codeLength++
-            } else if e.longValue == 1 {
-                code.codes[code.codeLength] = cg.OP_lconst_1
-                code.codeLength++
-            } else {
-                code.codes[code.codeLength] = cg.OP_ldc2_w
-                c.insertLongConst(e.longValue, code.codes[code.codeLength+1:code.codeLength+3])
-                code.codeLength += 3
-            }
-            maxStack = 2
-        case ast.ExpressionTypeFloat:
-            if e.doubleValue == 0d {
-                code.codes[code.codeLength] = cg.OP_fconst_0
-                code.codeLength++
-            } else if e.doubleValue == 1d{
-                code.codes[code.codeLength] = cg.OP_fconst_1
-                code.codeLength++
-            } else if e.doubleValue == 2d {
-                code.codes[code.codeLength] = cg.OP_fconst_2
-                code.codeLength++
-            } else {
-                code.codes[code.codeLength] = cg.OP_ldc_w
-                c.insertFloatConst(float(e.doubleValue), code.codes[code.codeLength+1:code.codeLength+3])
-                code.codeLength += 3
-            }
-            maxStack = 1
-        case ast.ExpressionTypeDouble:
-            if e.doubleValue == 0d {
-                code.codes[code.codeLength] = cg.OP_dconst_0
-                code.codeLength++
-            } else if e.doubleValue == 1d {
-                code.codes[code.codeLength] = cg.OP_dconst_1
-                code.codeLength++
-            } else {
-                code.codes[code.codeLength] = cg.OP_ldc2_w
-                c.insertDoubleConst(e.doubleValue, code.codes[code.codeLength+1:code.codeLength+3])
-                code.codeLength += 3
-            }
-            maxStack = 2
-        case ast.ExpressionTypeString:
-            code.codes[code.codeLength] = cg.OP_ldc_w
-            c.insertStringConst(e.stringValue, code.codes[code.codeLength+1:code.codeLength+3])
-            code.codeLength += 3
-            if len([]byte(e.stringValue)) > 65536 {
-                panic("jvm max string length is 65536")
-            }
-            maxStack = 1
-        //binary expression
-        case ast.ExpressionTypeLogicalOr ,ast.ExpressionTypeLogicalAnd :
-            maxStack = this.BuildExpressionLogical.buildLogical(c, code, e, context, state)
-        case ast.ExpressionTypeOr ,ast.ExpressionTypeAnd ,ast.ExpressionTypeXor ,
-            ast.ExpressionTypeLsh , ast.ExpressionTypeRsh,ast.ExpressionTypeAdd, ast.ExpressionTypeSub,
-            ast.ExpressionTypeMul , ast.ExpressionTypeDiv , ast.ExpressionTypeMod:
-            maxStack = this.BuildExpressionArithmetic.buildArithmetic(c, code, e, context, state)
-        case ast.ExpressionTypeAssign :
-            maxStack = this.BuildExpressionAssign.buildAssign(c, code, e, context, state)
-        case ast.ExpressionTypeVarAssign:
-            maxStack = this.BuildExpressionVarAssign.buildVarAssign(c, code, e, context, state)
-        case ast.ExpressionTypePlusAssign,  ast.ExpressionTypeMinusAssign ,ast.ExpressionTypeMulAssign ,
-            ast.ExpressionTypeDivAssign , ast.ExpressionTypeModAssign , ast.ExpressionTypeAndAssign ,
-            ast.ExpressionTypeOrAssign , ast.ExpressionTypeLshAssign ,ast.ExpressionTypeRshAssign ,
-             ast.ExpressionTypeXorAssign:
-            maxStack = this.BuildExpressionOpAssign.buildOpAssign(c, code, e, context, state)
-        case ast.ExpressionTypeEq ,ast.ExpressionTypeNe , ast.ExpressionTypeGe ,
-        ast.ExpressionTypeGt, ast.ExpressionTypeLe , ast.ExpressionTypeLt :
-            maxStack = this.BuildExpressionRelation.buildRelations(c, code, e, context, state)
-        case ast.ExpressionTypeIndex:
-            maxStack = this.BuildExpressionIndex.buildIndex(c, code, e, context, state)
-        case ast.ExpressionTypeSelection:
-            maxStack = this.BuildExpressionSelection.buildSelection(c, code, e, context, state)
-        case ast.ExpressionTypeMethodCall:
-            maxStack = this.BuildExpressionMethodCall.buildMethodCall(c, code, e, context, state)
-        case ast.ExpressionTypeFunctionCall:
-            maxStack = this.BuildExpressionFunctionCall.buildFunctionCall(c, code, e, context, state)
-        //
-        case ast.ExpressionTypeincrement ,ast.ExpressionTypeDecrement ,
-             ast.ExpressionTypePrefixincrement,ast.ExpressionTypePrefixDecrement:
-            maxStack = this.BuildExpressionincrement.buildSelfincrement(c, code, e, context, state)
-        //
-        case ast.ExpressionTypeBitwiseNot ,ast.ExpressionTypeNegative , ast.ExpressionTypeNot :
+                maxStack = 1
+            case ast.ExpressionTypeBool:
+                if e.boolValue {
+                    code.codes[code.codeLength] = cg.OP_iconst_1
+                } else {
+                    code.codes[code.codeLength] = cg.OP_iconst_0
+                }
 
-            maxStack = this.BuildExpressionUnary.buildUnary(c, code, e, context, state)
-        //
-        case ast.ExpressionTypeIdentifier:
-            maxStack = this.BuildExpressionIdentifier.buildIdentifier(c, code, e, context)
-        case ast.ExpressionTypeNew:
-            maxStack = this.BuildExpressionNew.buildNew(c, code, e, context, state)
-        case ast.ExpressionTypeFunctionLiteral:
-            maxStack = this.BuildExpressionFunction.buildFunctionExpression(c, code, e, context, state)
-        case ast.ExpressionTypeCheckCast: // []byte(str)
-            maxStack = this.BuildExpressionTypeConversion.buildTypeConversion(c, code, e, context, state)
-        case ast.ExpressionTypeConst:
-            /*
+                code.codeLength++
+                maxStack = 1
+            case ast.ExpressionTypeByte:
+                code.codes[code.codeLength] = cg.OP_bipush
+                code.codes[code.codeLength + 1] = byte(e.longValue)
+                code.codeLength += 2
+                maxStack = 1
+            case ast.ExpressionTypeInt,
+                ast.ExpressionTypeShort,
+                ast.ExpressionTypeChar:
+                loadInt(c , code , int(e.longValue))
+                maxStack = 1
+            case ast.ExpressionTypeLong:
+                if e.longValue == 0 {
+                    code.codes[code.codeLength] = cg.OP_lconst_0
+                    code.codeLength++
+                } else if e.longValue == 1 {
+                    code.codes[code.codeLength] = cg.OP_lconst_1
+                    code.codeLength++
+                } else {
+                    code.codes[code.codeLength] = cg.OP_ldc2_w
+                    c.insertLongConst(e.longValue , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                    code.codeLength += 3
+                }
+
+                maxStack = 2
+            case ast.ExpressionTypeFloat:
+                if e.doubleValue == 0d {
+                    code.codes[code.codeLength] = cg.OP_fconst_0
+                    code.codeLength++
+                } else if e.doubleValue == 1d {
+                    code.codes[code.codeLength] = cg.OP_fconst_1
+                    code.codeLength++
+                } else if e.doubleValue == 2d {
+                    code.codes[code.codeLength] = cg.OP_fconst_2
+                    code.codeLength++
+                } else {
+                    code.codes[code.codeLength] = cg.OP_ldc_w
+                    c.insertFloatConst(float(e.doubleValue) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                    code.codeLength += 3
+                }
+
+                maxStack = 1
+            case ast.ExpressionTypeDouble:
+                if e.doubleValue == 0d {
+                    code.codes[code.codeLength] = cg.OP_dconst_0
+                    code.codeLength++
+                } else if e.doubleValue == 1d {
+                    code.codes[code.codeLength] = cg.OP_dconst_1
+                    code.codeLength++
+                } else {
+                    code.codes[code.codeLength] = cg.OP_ldc2_w
+                    c.insertDoubleConst(e.doubleValue , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                    code.codeLength += 3
+                }
+
+                maxStack = 2
+            case ast.ExpressionTypeString:
+                code.codes[code.codeLength] = cg.OP_ldc_w
+                c.insertStringConst(e.stringValue , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                code.codeLength += 3
+                if len([]byte(e.stringValue)) > 65536 {
+                    panic("jvm max string length is 65536")
+                }
+                maxStack = 1
+                //binary expression
+            case ast.ExpressionTypeLogicalOr , ast.ExpressionTypeLogicalAnd:
+                maxStack = this.BuildExpressionLogical.buildLogical(c , code , e , context , state)
+            case ast.ExpressionTypeOr , ast.ExpressionTypeAnd , ast.ExpressionTypeXor,
+                ast.ExpressionTypeLsh , ast.ExpressionTypeRsh , ast.ExpressionTypeAdd , ast.ExpressionTypeSub,
+                ast.ExpressionTypeMul , ast.ExpressionTypeDiv , ast.ExpressionTypeMod:
+                maxStack = this.BuildExpressionArithmetic.buildArithmetic(c , code , e , context , state)
+            case ast.ExpressionTypeAssign:
+                maxStack = this.BuildExpressionAssign.buildAssign(c , code , e , context , state)
+            case ast.ExpressionTypeVarAssign:
+                maxStack = this.BuildExpressionVarAssign.buildVarAssign(c , code , e , context , state)
+            case ast.ExpressionTypePlusAssign , ast.ExpressionTypeMinusAssign , ast.ExpressionTypeMulAssign,
+                ast.ExpressionTypeDivAssign , ast.ExpressionTypeModAssign , ast.ExpressionTypeAndAssign,
+                ast.ExpressionTypeOrAssign , ast.ExpressionTypeLshAssign , ast.ExpressionTypeRshAssign,
+                ast.ExpressionTypeXorAssign:
+                maxStack = this.BuildExpressionOpAssign.buildOpAssign(c , code , e , context , state)
+            case ast.ExpressionTypeEq , ast.ExpressionTypeNe , ast.ExpressionTypeGe,
+                ast.ExpressionTypeGt , ast.ExpressionTypeLe , ast.ExpressionTypeLt:
+                maxStack = this.BuildExpressionRelation.buildRelations(c , code , e , context , state)
+            case ast.ExpressionTypeIndex:
+                maxStack = this.BuildExpressionIndex.buildIndex(c , code , e , context , state)
+            case ast.ExpressionTypeSelection:
+                maxStack = this.BuildExpressionSelection.buildSelection(c , code , e , context , state)
+            case ast.ExpressionTypeMethodCall:
+                maxStack = this.BuildExpressionMethodCall.buildMethodCall(c , code , e , context , state)
+            case ast.ExpressionTypeFunctionCall:
+                maxStack = this.BuildExpressionFunctionCall.buildFunctionCall(c , code , e , context , state)
+                //
+            case ast.ExpressionTypeincrement , ast.ExpressionTypeDecrement,
+                ast.ExpressionTypePrefixincrement , ast.ExpressionTypePrefixDecrement:
+                maxStack = this.BuildExpressionincrement.buildSelfincrement(c , code , e , context , state)
+                //
+            case ast.ExpressionTypeBitwiseNot , ast.ExpressionTypeNegative , ast.ExpressionTypeNot:
+                maxStack = this.BuildExpressionUnary.buildUnary(c , code , e , context , state)
+                //
+            case ast.ExpressionTypeIdentifier:
+                maxStack = this.BuildExpressionIdentifier.buildIdentifier(c , code , e , context)
+            case ast.ExpressionTypeNew:
+                maxStack = this.BuildExpressionNew.buildNew(c , code , e , context , state)
+            case ast.ExpressionTypeFunctionLiteral:
+                maxStack = this.BuildExpressionFunction.buildFunctionExpression(c , code , e , context , state)
+            case ast.ExpressionTypeCheckCast:
+                maxStack = this.BuildExpressionTypeConversion.buildTypeConversion(c , code , e , context , state)
+            case ast.ExpressionTypeConst:
+                /*
              analyse at ast stage
             */
-        case ast.ExpressionTypeSlice:
-            maxStack = this.BuildExpressionSlice.buildSlice(c, code, e, context, state)
-        case ast.ExpressionTypeArray:
-            maxStack = this.BuildExpressionArray.buildArray(c, code, e, context, state)
-        case ast.ExpressionTypeMap:
-            maxStack = this.BuildExpressionMap.buildMapLiteral(c, code, e, context, state)
-        case ast.ExpressionTypeVar:
-            maxStack = this.BuildExpressionVar.buildVar(c, code, e, context, state)
-        case ast.ExpressionTypeTypeAssert:
-            maxStack = this.BuildExpressionAssert.buildAssert(c, code, e, context, state)
-        case ast.ExpressionTypeQuestion:
-            maxStack = this.BuildExpressionQuestion.buildQuestion(c, code, e, context, state)
-        case ast.ExpressionTypeVArgs:
-            maxStack = this.build(c, code, e.data.(ast.Expression), context, state)
-        case ast.ExpressionTypeParenthesis:
-            maxStack = this.build(c, code, e.data.(ast.Expression), context, state)
-        default:
-            panic("missing handle:" + e.op)
+            case ast.ExpressionTypeSlice:
+                maxStack = this.BuildExpressionSlice.buildSlice(c , code , e , context , state)
+            case ast.ExpressionTypeArray:
+                maxStack = this.BuildExpressionArray.buildArray(c , code , e , context , state)
+            case ast.ExpressionTypeMap:
+                maxStack = this.BuildExpressionMap.buildMapLiteral(c , code , e , context , state)
+            case ast.ExpressionTypeVar:
+                maxStack = this.BuildExpressionVar.buildVar(c , code , e , context , state)
+            case ast.ExpressionTypeTypeAssert:
+                maxStack = this.BuildExpressionAssert.buildAssert(c , code , e , context , state)
+            case ast.ExpressionTypeQuestion:
+                maxStack = this.BuildExpressionQuestion.buildQuestion(c , code , e , context , state)
+            case ast.ExpressionTypeVArgs:
+                maxStack = this.build(c , code , e.data.(ast.Expression) , context , state)
+            case ast.ExpressionTypeParenthesis:
+                maxStack = this.build(c , code , e.data.(ast.Expression) , context , state)
+            default:
+                panic("missing handle:" + e.op)
         }
+
         return
     }
 
-    
-
-    fn buildExpressions(c cg.ClassHighLevel, code cg.AttributeCode,
-        es []ast.Expression, context Context, state StackMapState) -> (maxStack char) {
+    fn buildExpressions(c cg.ClassHighLevel , code cg.AttributeCode,
+        es []ast.Expression , context Context , state StackMapState) -> (maxStack char) {
         length := 0
-        for _, e := range es {
+        for _ , e := range es {
             if e.haveMultiValue() {
                 length += len(e.multiValues)
             } else {
                 length++
             }
+
         }
-        loadInt(c, code, int(length))
+
+        loadInt(c , code , int(length))
         code.codes[code.codeLength] = cg.OP_anewarray
-        c.insertClassConst(javaRootClass, code.codes[code.codeLength+1:code.codeLength+3])
+        c.insertClassConst(javaRootClass , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         if 1 > maxStack {
             maxStack = 1
         }
         arrayListObject := state.newObjectVariableType(javaRootObjectArray)
-        state.pushStack(c, arrayListObject)
-        defer state.popStack(1)
+        state.pushStack(c , arrayListObject)
+        defer {
+            state.popStack(1)
+        }
         index := int(0)
-        for _, v := range es {
+        for _ , v := range es {
             currentStack := char(1)
             if v.haveMultiValue() {
-                stack := this.build(c, code, v, context, state)
-                if t := currentStack + stack; t > maxStack {
+                stack := this.build(c , code , v , context , state)
+                if t := currentStack + stack ; t > maxStack {
                     maxStack = t
                 }
-                autoVar := new MultiValueAutoVar(c, code, state)
-                for kk, _ := range v.multiValues {
+                autoVar := new MultiValueAutoVar(c , code , state)
+                for kk , _ := range v.multiValues {
                     currentStack = 1
                     code.codes[code.codeLength] = cg.OP_dup
                     code.codeLength++
                     currentStack++
-                    stack = autoVar.unPack2Object(c, code, kk)
-                    if t := stack + currentStack; t > maxStack {
+                    stack = autoVar.unPack2Object(c , code , kk)
+                    if t := stack + currentStack ; t > maxStack {
                         maxStack = t
                     }
-                    loadInt(c, code, index)
-                    if 4 > maxStack { // current stack is  arrayRef arrayRef value index
+                    loadInt(c , code , index)
+                    if 4 > maxStack {
                         maxStack = 4
                     }
                     code.codes[code.codeLength] = cg.OP_swap
-                    code.codes[code.codeLength+1] = cg.OP_aastore
+                    code.codes[code.codeLength + 1] = cg.OP_aastore
                     code.codeLength += 2
                     index++
                 }
+
                 continue
             }
             code.codes[code.codeLength] = cg.OP_dup
             code.codeLength++
-            state.pushStack(c, arrayListObject)
+            state.pushStack(c , arrayListObject)
             currentStack++
-            stack := this.build(c, code, v, context, state)
-            if t := currentStack + stack; t > maxStack {
+            stack := this.build(c , code , v , context , state)
+            if t := currentStack + stack ; t > maxStack {
                 maxStack = t
             }
             if v.value.isPointer() == false {
-                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.value)
+                TypeConverterAndPrimitivePacker.packPrimitives(c , code , v.value)
             }
-            loadInt(c, code, index)
-            if 4 > maxStack { // current stack is  arrayRef arrayRef value index
+            loadInt(c , code , index)
+            if 4 > maxStack {
                 maxStack = 4
             }
             code.codes[code.codeLength] = cg.OP_swap
-            code.codes[code.codeLength+1] = cg.OP_aastore
+            code.codes[code.codeLength + 1] = cg.OP_aastore
             code.codeLength += 2
             state.popStack(1) // @270
             index++
         }
+
         return
     }
 
-    fn storeGlobalVariable(c cg.ClassHighLevel, code cg.AttributeCode,
+    fn storeGlobalVariable(c cg.ClassHighLevel , code cg.AttributeCode,
         v ast.Variable) {
         code.codes[code.codeLength] = cg.OP_putstatic
         if v.jvmDescriptor == null ||
             v.jvmDescriptor == "" {
             v.jvmDescriptor = Descriptor.typeDescriptor(v.Type)
         }
-        c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-                v.globalVarClassName,
-                v.name,
-             v.jvmDescriptor
-        ), code.codes[code.codeLength+1:code.codeLength+3])
+        c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(v.globalVarClassName,
+            v.name,
+            v.jvmDescriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
     }
 
     fn loadLocalVar(c cg.ClassHighLevel,
-        code cg.AttributeCode, v ast.Variable) -> (maxStack char) {
+        code cg.AttributeCode , v ast.Variable) -> (maxStack char) {
         if v.beenCapturedAsLeftValue > 0 {
-            return closure.loadLocalClosureVar(c, code, v)
+            return closure.loadLocalClosureVar(c , code , v)
         }
         maxStack = jvmSlotSize(v.Type)
-        copyOPs(code, loadLocalVariableOps(v.Type.Type, v.localValOffset))
+        copyOPs(code , loadLocalVariableOps(v.Type.Type , v.localValOffset))
         return
     }
 
     fn storeLocalVar(c cg.ClassHighLevel,
-        code cg.AttributeCode, v ast.Variable) -> (maxStack char) {
+        code cg.AttributeCode , v ast.Variable) -> (maxStack char) {
         if v.beenCapturedAsLeftValue > 0 {
-            closure.storeLocalClosureVar(c, code, v)
+            closure.storeLocalClosureVar(c , code , v)
             return
         }
         maxStack = jvmSlotSize(v.Type)
-        copyOPs(code, storeLocalVariableOps(v.Type.Type, v.localValOffset))
+        copyOPs(code , storeLocalVariableOps(v.Type.Type , v.localValOffset))
         return
     }
-    
-    fn  dupStackLeaveValueBelow(
+
+    fn dupStackLeaveValueBelow(
         code cg.AttributeCode,
         leftValueKind LeftValueKind,
         stackTopType ast.Type) -> (increment char) {
         switch leftValueKind {
-        case LeftValueKindLocalVar:
-            if jvmSlotSize(stackTopType) == 1 {
-                increment = 1
-                code.codes[code.codeLength] = cg.OP_dup
-            } else {
-                code.codes[code.codeLength] = cg.OP_dup2
-                increment = 2
-            }
-            code.codeLength++
-        case LeftValueKindPutStatic:
-            if jvmSlotSize(stackTopType) == 1 {
-                increment = 1
-                code.codes[code.codeLength] = cg.OP_dup
-            } else {
-                code.codes[code.codeLength] = cg.OP_dup2
-                increment = 2
-            }
-            code.codeLength++
-        case LeftValueKindPutField:
-            if jvmSlotSize(stackTopType) == 1 {
-                increment = 1
-                code.codes[code.codeLength] = cg.OP_dup_x1
-            } else {
-                increment = 2
-                code.codes[code.codeLength] = cg.OP_dup2_x1
-            }
-            code.codeLength++
-        case LeftValueKindArray, LeftValueKindLucyArray:
-            if jvmSlotSize(stackTopType) == 1 {
-                increment = 1
-                code.codes[code.codeLength] = cg.OP_dup_x2
-                code.codeLength++
-            } else {
-                increment = 2
-                code.codes[code.codeLength] = cg.OP_dup2_x2
-                code.codeLength++
-            }
+            case LeftValueKindLocalVar:
+                if jvmSlotSize(stackTopType) == 1 {
+                    increment = 1
+                    code.codes[code.codeLength] = cg.OP_dup
+                } else {
+                    code.codes[code.codeLength] = cg.OP_dup2
+                    increment = 2
+                }
 
-        case LeftValueKindMap:
-            if jvmSlotSize(stackTopType) == 1 {
-                increment = 1
-                code.codes[code.codeLength] = cg.OP_dup_x2
                 code.codeLength++
-            } else {
-                increment = 2
-                code.codes[code.codeLength] = cg.OP_dup2_x2
+            case LeftValueKindPutStatic:
+                if jvmSlotSize(stackTopType) == 1 {
+                    increment = 1
+                    code.codes[code.codeLength] = cg.OP_dup
+                } else {
+                    code.codes[code.codeLength] = cg.OP_dup2
+                    increment = 2
+                }
+
                 code.codeLength++
-            }
+            case LeftValueKindPutField:
+                if jvmSlotSize(stackTopType) == 1 {
+                    increment = 1
+                    code.codes[code.codeLength] = cg.OP_dup_x1
+                } else {
+                    increment = 2
+                    code.codes[code.codeLength] = cg.OP_dup2_x1
+                }
+
+                code.codeLength++
+            case LeftValueKindArray , LeftValueKindLucyArray:
+                if jvmSlotSize(stackTopType) == 1 {
+                    increment = 1
+                    code.codes[code.codeLength] = cg.OP_dup_x2
+                    code.codeLength++
+                } else {
+                    increment = 2
+                    code.codes[code.codeLength] = cg.OP_dup2_x2
+                    code.codeLength++
+                }
+
+            case LeftValueKindMap:
+                if jvmSlotSize(stackTopType) == 1 {
+                    increment = 1
+                    code.codes[code.codeLength] = cg.OP_dup_x2
+                    code.codeLength++
+                } else {
+                    increment = 2
+                    code.codes[code.codeLength] = cg.OP_dup2_x2
+                    code.codeLength++
+                }
+
         }
 
         return
     }
 
-    
-
 }
+
 
