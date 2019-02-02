@@ -829,7 +829,8 @@ class Parser {
 			i.findUsage = this.token.findUsage 
 			i.locateDefinition = this.token.locateDefinition
 			imports.append(i)
-			this.next(lfIsToken) // skip name
+			this.next(lfIsToken)
+			
 			if this.token.Type == lex.TokenAs {
 				/*
 					import "xxxxxxxxxxx" as yyy
@@ -848,8 +849,6 @@ class Parser {
 					i.findUsage = i.findUsage || this.token.findUsage 
 					this.next(lfIsToken) // skip identifier
 				}
-				this.validStatementEnding()
-				this.next(lfIsToken)
 			}
 		}
 	}

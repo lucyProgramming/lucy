@@ -209,7 +209,7 @@ public class Decoder {
 		this.skipWhiteSpace()
 		b := this.bs[this.offset]
 		switch b {
-			case '\"':
+			case '"':
 				s := this.parseString()
 				n = new JsonSyntaxTreeNode()
 				n.Type = JsonSyntaxTreeTypeString

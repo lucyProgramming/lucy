@@ -41,7 +41,7 @@ class BuildExpressionincrement {
 			code.codeLength += 3
 			if e.isStatementExpression == false { // I still need it`s value
 				if e.Type == ast.ExpressionTypePrefixincrement || e.Type == ast.ExpressionTypePrefixDecrement { // decrement
-					copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, identifier.Variable.localValOffset)) // load to stack top
+copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, identifier.Variable.localValOffset)) // load to stack top
 					maxStack = 1
 				}
 			}

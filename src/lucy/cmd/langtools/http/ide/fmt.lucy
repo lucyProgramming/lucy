@@ -5,6 +5,7 @@ import "com/sun/net/httpserver/HttpHandler"
 import "com/sun/net/httpserver/HttpExchange"
 import "lucy/cmd/langtools/http/g"
 import "java/lang/System"
+import "lucy/os"  as lucyOs
 
 class Fmt implements HttpHandler {
     public fn handle(exchange HttpExchange) {
@@ -20,12 +21,22 @@ class Fmt implements HttpHandler {
             }
             exchange.close()
         }
-        bs := g.readBodyBytes(exchange.getRequestBody())
-        if len(bs) == 0 {
-            bs := byte[]("zero length bs")
+        uri := exchange.getRequestURI()
+        paramters := g.parseQuery(uri.getQuery())
+        file := paramters["file"]
+        if file == null || file == ""{
+            bs := byte[]("file not provide")
             exchange.sendResponseHeaders(400 , long(len(bs)))
             os.write(bs)
             return
+        }
+        bs := g.readBodyBytes(exchange.getRequestBody())
+        if len(bs) == 0 {
+            t,err := lucyOs.readFile(file)
+            if err != null {
+                panic(err)
+            }
+            bs = javaArray2Lucy(t) 
         }
         var tops = new []ast.TopNode(0)
         es := parser.parse(tops , "" , bs , false , 10 , -1 , -1 , -1 , -1 , -1)

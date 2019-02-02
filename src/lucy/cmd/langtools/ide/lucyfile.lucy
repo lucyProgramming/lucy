@@ -7,8 +7,8 @@ public class LucyFile {
         when locate is bigger than zero,means to trying to locate something
     */
     public locateDefinition int 
-    public getHover int 
-    public findUsage int 
+    public getHover,
+        findUsage int 
     public rename int 
     public autoCompletion int 
     
@@ -23,4 +23,5 @@ public class LucyFile {
         this.rename = -1
         this.autoCompletion = -1
     }
+
 }

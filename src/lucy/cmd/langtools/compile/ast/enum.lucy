@@ -15,6 +15,8 @@ public class EnumName {
 	public getHover  bool
 	used bool 
     findUsageInstances []Usage 
+	public containsLf bool 
+	public inlineComment string 
 	
 	public fn mkDescription() -> (s string = ""){
 		if this.comment != null {
@@ -45,7 +47,7 @@ public class Enum   {
 	public loadFromOutSide bool
 	public firstValueIndex int
 	public comment         string
-	public shortName      string 
+	// public shortName      string 
 	public locateDefinition 	bool 
 	public findUsage  bool 
 	public rename 	bool 

@@ -23,10 +23,10 @@ class Flags {
 	fn help()  {
 		usage := `run a lucy package
     -forceReBuild           force rebuild all package 
-	-cf                     compiler flags
-	-build                  build the package and no run 
-	-v                      print the package been compile
-	-h                      print this help message
+    -cf                     compiler flags
+    -build                  build the package and no run 
+    -v                      print the package been compile
+    -h                      print this help message
 		`
 		print(usage)
 	}

@@ -1,128 +1,129 @@
-
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class StackMapState {
-	locals []cg.StackMapVerificationTypeInfo
-	stacks []cg.StackMapVerificationTypeInfo
+    locals []cg.StackMapVerificationTypeInfo
+    stacks []cg.StackMapVerificationTypeInfo
 
     fn StackMapState(last StackMapState) {
-    	this.super()
-    	if last == null {
-    		this.locals = new []cg.StackMapVerificationTypeInfo(0)
-    		this.stacks = new []cg.StackMapVerificationTypeInfo(0)
-    		return 
-    	}
+        this.super()
+        if last == null {
+            this.locals = new []cg.StackMapVerificationTypeInfo(0)
+            this.stacks = new []cg.StackMapVerificationTypeInfo(0)
+            return
+        }
         this.locals = new []cg.StackMapVerificationTypeInfo(len(last.locals))
-        copy(this.locals, last.locals)
+        copy(this.locals , last.locals)
         this.stacks = new []cg.StackMapVerificationTypeInfo(0)
     }
-	
-	fn appendLocals(c cg.ClassHighLevel, v ast.Type) { 
-		this.locals.append(this.newStackMapVerificationTypeInfo(c, v))
-	}
 
-	fn addTop(absent StackMapState) {
-		if this == absent {
-			return
-		}
-		length := len(absent.locals) - len(this.locals)
-		if length == 0 {
-			return
-		}
-		oldLength := len(this.locals)
-		verify := new cg.StackMapVerificationTypeInfo()
-		verify.Verify = new cg.StackMapTopVariableInfo()
-		for i := 0; i < length; i++ {
-			tt := absent.locals[i+oldLength].Verify
-			_, isDouble := tt.(cg.StackMapDoubleVariableInfo)
-			_, isLong := tt.(cg.StackMapLongVariableInfo)
-			if isDouble || isLong {
-				this.locals.append(verify, verify)
-			} else {
-				this.locals.append(verify)
-			}
-		}
-	}
+    fn appendLocals(c cg.ClassHighLevel , v ast.Type) {
+        this.locals.append(this.newStackMapVerificationTypeInfo(c , v))
+    }
 
-	fn newObjectVariableType(name string) -> (ret ast.Type) {
-		ret =new ast.Type()
-		ret.Type = ast.VariableTypeObject
-		ret.Class = new ast.Class()
-		ret.Class.name = name
-		return ret
-	}
+    fn addTop(absent StackMapState) {
+        if this == absent {
+            return
+        }
+        length := len(absent.locals) - len(this.locals)
+        if length == 0 {
+            return
+        }
+        oldLength := len(this.locals)
+        verify := new cg.StackMapVerificationTypeInfo()
+        verify.Verify = new cg.StackMapTopVariableInfo()
+        for i := 0 ; i < length ; i++ {
+            tt := absent.locals[i + oldLength].Verify
+            _ , isDouble := tt.(cg.StackMapDoubleVariableInfo)
+            _ , isLong := tt.(cg.StackMapLongVariableInfo)
+            if isDouble || isLong {
+                this.locals.append(verify , verify)
+            } else {
+                this.locals.append(verify)
+            }
 
-	fn popStack(num int) {
-		if num == 0 {
-			return
-		}
-		if num < 0 {
-			panic("negative num")
-		}
-		if len(this.stacks) == 0 {
-			panic("already 0")
-		}
-		this.stacks = this.stacks[:len(this.stacks)-num]
-	}
-	fn pushStack(c cg.ClassHighLevel, v ast.Type) {
-		if this == null {
-			panic("s is null")
-		}
-		this.stacks.append(this.newStackMapVerificationTypeInfo(c, v))
-	}
+        }
 
-	fn newStackMapVerificationTypeInfo(c cg.ClassHighLevel,
-		t ast.Type) -> (ret cg.StackMapVerificationTypeInfo) {
-		ret = new cg.StackMapVerificationTypeInfo()
-		switch t.Type {
-		case ast.VariableTypeBool, 
-			ast.VariableTypeByte,
-			ast.VariableTypeShort,
-		    ast.VariableTypeEnum,
-			ast.VariableTypeChar, 
-			ast.VariableTypeInt:
-			ret.Verify = new cg.StackMapIntegerVariableInfo()
-		case ast.VariableTypeLong:
-			ret.Verify = new cg.StackMapLongVariableInfo()
-		case ast.VariableTypeFloat:
-			ret.Verify = new cg.StackMapFloatVariableInfo()
-		case ast.VariableTypeDouble:
-			ret.Verify = new cg.StackMapDoubleVariableInfo()
-		case ast.VariableTypeNull:
-			ret.Verify = new cg.StackMapNullVariableInfo()
-		case ast.VariableTypeString:
-			ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(javaStringClass))
-		case ast.VariableTypeObject:
-			ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(t.Class.name))
-		case ast.VariableTypeFunction:
-			ret.Verify = new cg.StackMapObjectVariableInfo( c.Class.insertClassConst(javaMethodHandleClass))
-		case ast.VariableTypeMap:
-			ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(mapClass))
-		case ast.VariableTypeArray:
-			meta := ArrayMetas[t.array.Type]
-			ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(meta.className))
-		case ast.VariableTypeJavaArray:
-			d := Descriptor.typeDescriptor(t)
-			ret.Verify = new cg.StackMapObjectVariableInfo(	c.Class.insertClassConst(d))
-		case ast.VariableTypeVoid:
-			// handle at ast
-		case ast.VariableTypeName:
-			// handle at ast
-		case ast.VariableTypeDynamicSelector:
-			// handle at ast
-		case ast.VariableTypeGlobal:
-			// handle at ast
-		case ast.VariableTypeClass:
-			//
-		case ast.VariableTypePackage:
-			// handle at ast
-		case ast.VariableTypeTemplate:
-			// handle at ast
-		}
-		return ret
-	}
+    }
+
+    fn newObjectVariableType(name string) -> (ret ast.Type) {
+        ret = new ast.Type()
+        ret.Type = ast.VariableTypeObject
+        ret.Class = new ast.Class()
+        ret.Class.name = name
+        return ret
+    }
+
+    fn popStack(num int) {
+        if num == 0 {
+            return
+        }
+        if num < 0 {
+            panic("negative num")
+        }
+        if len(this.stacks) == 0 {
+            panic("already 0")
+        }
+        this.stacks = this.stacks[ : len(this.stacks) - num]
+    }
+    fn pushStack(c cg.ClassHighLevel , v ast.Type) {
+        if this == null {
+            panic("s is null")
+        }
+        this.stacks.append(this.newStackMapVerificationTypeInfo(c , v))
+    }
+
+    fn newStackMapVerificationTypeInfo(c cg.ClassHighLevel , 
+        t ast.Type) -> (ret cg.StackMapVerificationTypeInfo) {
+        ret = new cg.StackMapVerificationTypeInfo()
+        switch t.Type {
+        case ast.VariableTypeBool , 
+            ast.VariableTypeByte , 
+            ast.VariableTypeShort , 
+            ast.VariableTypeEnum , 
+            ast.VariableTypeChar , 
+            ast.VariableTypeInt:
+            ret.Verify = new cg.StackMapIntegerVariableInfo()
+        case ast.VariableTypeLong:
+            ret.Verify = new cg.StackMapLongVariableInfo()
+        case ast.VariableTypeFloat:
+            ret.Verify = new cg.StackMapFloatVariableInfo()
+        case ast.VariableTypeDouble:
+            ret.Verify = new cg.StackMapDoubleVariableInfo()
+        case ast.VariableTypeNull:
+            ret.Verify = new cg.StackMapNullVariableInfo()
+        case ast.VariableTypeString:
+            ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(javaStringClass))
+        case ast.VariableTypeObject:
+            ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(t.Class.name))
+        case ast.VariableTypeFunction:
+            ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(javaMethodHandleClass))
+        case ast.VariableTypeMap:
+            ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(mapClass))
+        case ast.VariableTypeArray:
+            meta := ArrayMetas[t.array.Type]
+            ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(meta.className))
+        case ast.VariableTypeJavaArray:
+            d := Descriptor.typeDescriptor(t)
+            ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(d))
+        case ast.VariableTypeVoid:
+            // handle at ast
+        case ast.VariableTypeName:
+            // handle at ast
+        case ast.VariableTypeDynamicSelector:
+            // handle at ast
+        case ast.VariableTypeGlobal:
+            // handle at ast
+        case ast.VariableTypeClass:
+            //
+        case ast.VariableTypePackage:
+            // handle at ast
+        case ast.VariableTypeTemplate:
+            // handle at ast
+        }
+
+        return ret
+    }
 
 }
-
 

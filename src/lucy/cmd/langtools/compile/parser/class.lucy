@@ -86,7 +86,6 @@ class ClassParser extends  ParserExtends {
 		if t != null {
 			classDefinition.pos = t.pos 
 			classDefinition.name = t.name
-			classDefinition.shortName = t.name
 			classDefinition.findUsage = t.findUsage
 			classDefinition.locateDefinition = t.locateDefinition
 		}
@@ -265,6 +264,9 @@ class ClassParser extends  ParserExtends {
 				f, _ = this.parser.FunctionParser.parse(true, isAbstract || isInterface , false)
 				if f == null {
 					continue
+				}
+				if this.parser.token.Type == lex.TokenLf {
+					this.next(lfIsToken)
 				}
 				f.comment = comment.comment
 				if classDefinition.methods == null {

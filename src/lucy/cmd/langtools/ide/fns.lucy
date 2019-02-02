@@ -1,7 +1,7 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/parser"
 import "java/io"
-import "java/lang/System"
+// import "java/lang/System"
 
 
 public fn readLucyFiles(filenames []string) -> (lucyFiles []LucyFile = []LucyFile{}){
@@ -25,10 +25,10 @@ public fn parseAstAndTypeCheck(
 	matchFile string ,
 	matchLine int, 
 	loader ast.loadImport) -> (p ast.Package , errs []error){
-	now := System.currentTimeMillis()
+	// now := System.currentTimeMillis()
 	nodes , es := parseAst(lucyFiles)
-	print("prase ast used:", System.currentTimeMillis() - now ,packageName)
-	now = System.currentTimeMillis()
+	// print("prase ast used:", System.currentTimeMillis() - now ,packageName)
+	// now = System.currentTimeMillis()
 	p = new ast.Package(packageName , false , loader , false)
 	p.onlyAnalyzeGlobals = onlyAnalyzeGlobals
 	p.matchFile = matchFile 
@@ -37,7 +37,7 @@ public fn parseAstAndTypeCheck(
 		p.matchLine = matchLine
 	}
 	errs = p.typeCheck(nodes)
-	print("type check package:",  onlyAnalyzeGlobals , System.currentTimeMillis() - now ,packageName)
+	// print("type check package:",  onlyAnalyzeGlobals , System.currentTimeMillis() - now ,packageName)
 	if len(es) > 0 {
 		if len(errs) == 0 {
 			errs = es

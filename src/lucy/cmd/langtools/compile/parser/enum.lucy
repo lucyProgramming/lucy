@@ -54,16 +54,45 @@ class EnumParser extends ParserExtends {
 				enumName.rename  = this.parser.token.rename
 				pos := this.parser.mkPos()
 				var value ast.Expression
-				this.next(lfIsToken)
+				this.next(lfIsToken)  // skip name 
 				if this.parser.token.Type == lex.TokenAssign {
 					this.next(lfNotToken)
 					value, _ = this.parser.ExpressionParser.parseExpression(false)
 				}
 				enumComment := comment.comment
+				var containsComma ast.Pos
+				if this.parser.token.Type == lex.TokenComma {
+					this.parser.next(lfIsToken)
+					containsComma = this.parser.mkPos()
+				}
 				if this.parser.token.Type == lex.TokenComment {
 					enumComment = "//" + this.parser.token.stringValue
+					enumName.inlineComment = this.parser.token.stringValue
+					this.next(lfIsToken)
+				}else if this.parser.token.Type == lex.TokenLf {
+					enumName.containsLf = true 
 					this.next(lfIsToken)
 				}
+				if containsComma != null {
+					for this.parser.token.Type == lex.TokenLf ||
+						this.parser.token.Type == lex.TokenMultiLineComment ||
+						this.parser.token.Type == lex.TokenComment{
+						if this.parser.token.Type == lex.TokenLf {
+							this.next(lfIsToken)
+							continue
+						}
+						c := new ast.Comment()
+						c.comment = this.parser.token.stringValue 
+						c.isMulti = this.parser.token.Type == lex.TokenMultiLineComment
+						e.appendFmt(c)
+						comment.read()
+					}
+					if this.parser.token.Type != lex.TokenIdentifier   {
+						this.parser.errs.append( new error(sprintf("%s expect identifier, but '%s'",
+							this.parser.errMsgPrefix(containsComma), this.parser.token.description)))
+					}
+				}
+				
 				if e.Init == null && value != null {
 					e.Init = value
 					e.firstValueIndex = len(e.enums)
@@ -80,15 +109,15 @@ class EnumParser extends ParserExtends {
 				}
 				e.appendFmt(enumName)
 				comment.reset()
-			case lex.TokenComma:
-				this.next(lfNotToken)
-				if this.parser.token.Type != lex.TokenIdentifier && 
-					this.parser.token.Type != lex.TokenComment &&
-					this.parser.token.Type != lex.TokenLf && 
-					this.parser.token.Type != lex.TokenMultiLineComment {
-					this.parser.errs.append( new error(sprintf("%s not a valid token after comma",
-						this.parser.errMsgPrefix(), this.parser.token.description)))
-				}
+			// case lex.TokenComma:
+			// 	this.next(lfNotToken)
+			// 	if this.parser.token.Type != lex.TokenIdentifier && 
+			// 		this.parser.token.Type != lex.TokenComment &&
+			// 		this.parser.token.Type != lex.TokenLf && 
+			// 		this.parser.token.Type != lex.TokenMultiLineComment {
+			// 		this.parser.errs.append( new error(sprintf("%s not a valid token after comma",
+			// 			this.parser.errMsgPrefix(), this.parser.token.description)))
+			// 	}
 			default:
 				this.parser.errs.append( new error(sprintf("%s token '%s' is not except",
 					this.parser.errMsgPrefix(), this.parser.token.description)))

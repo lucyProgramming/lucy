@@ -18,7 +18,7 @@ public class Class {
     
 	public notImportedYet                    bool   // not imported
 	public name                              string // binary name
-    public shortName                         string // short name
+    // public shortName                         string // short name
 	public pos                               Pos
 	public finalPos                          Pos // final pos
 	public isJava                            bool //class imported from CLASSPATH

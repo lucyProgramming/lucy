@@ -49,7 +49,7 @@ public class RunLucyPackage {
         {
             _, _, err = this.buildPackage("", "lucy/lang", new ImportStack())
             if err != null {
-                printf("build  buildin package '%s' failed,err:%v\n", "lucy/lang", err)
+                printf("build  buildin package '%s' failed,err:%s\n", "lucy/lang", err.getMessage())
                 return err 
             }
         }

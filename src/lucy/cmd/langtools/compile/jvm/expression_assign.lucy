@@ -1,97 +1,101 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
-class  BuildExpressionAssign {
-	
+class BuildExpressionAssign {
+    eb BuildExpression
 
-	eb BuildExpression
-    
-    fn BuildExpressionAssign(eb BuildExpression){
+    fn BuildExpressionAssign(eb BuildExpression) {
         this.super()
         this.eb = eb
     }
 
-	fn  buildExpressionAssign(
-		c cg.ClassHighLevel,
-		code cg.AttributeCode,
-		e ast.Expression,
-		context Context,
-		state StackMapState) -> (maxStack char) {
-		stackLength := len(state.stacks)
-		defer  {
-			state.popStack(len(state.stacks) - stackLength)
-		}
-		bin := e.data.(ast.ExpressionBinary)
-		left := bin.left.unPackList()[0]
-		right := bin.right.unPackList()[0]
-		var remainStack char
-		var op []byte
-		var leftValueKind LeftValueKind
-		if left.isIdentifier(ast.UnderScore) == false {
-			maxStack, remainStack, op, leftValueKind =
-				this.eb.BuildExpressionLeftValue.getLeftValue(c, code, left, context, state)
-		}
-		stack := this.eb.build(c, code, right, context, state)
-		if t := remainStack + stack; t > maxStack {
-			maxStack = t
-		}
-		if left.isIdentifier(ast.UnderScore) {
-			if jvmSlotSize(right.value) == 1 {
-				code.codes[code.codeLength] = cg.OP_pop
-			} else {
-				code.codes[code.codeLength] = cg.OP_pop2
-			}
-			code.codeLength++
-		} else {
-			currentStack := remainStack + jvmSlotSize(left.value)
-			if e.isStatementExpression == false {
-				currentStack += this.eb.dupStackLeaveValueBelow(code, leftValueKind, left.value)
-				if currentStack > maxStack {
-					maxStack = currentStack
-				}
-			}
-			copyOPs(code, op)
-		}
-		return
-	}
-	
-	// a,b,c = 122,fdfd2232,"hello";
-	fn  buildAssign(
-		c cg.ClassHighLevel,
-		code cg.AttributeCode,
-		e ast.Expression,
-		context Context,
-		state StackMapState) -> (maxStack char) {
-		bin := e.data.(ast.ExpressionBinary)
+    fn buildExpressionAssign(
+        c cg.ClassHighLevel , 
+        code cg.AttributeCode , 
+        e ast.Expression , 
+        context Context , 
+        state StackMapState) -> (maxStack char) {
+        stackLength := len(state.stacks)
+        defer {
 
-		if e.isStatementExpression == false || len(bin.left.unPackList()) == 1 {
-			return this.buildExpressionAssign(c, code, e, context, state)
-		}
-		if values := bin.right.unPackList() ; len(values) == 1 {
-			maxStack = this.eb.build(c, code, values[0], context, state)
-		} else {
-			maxStack = this.eb.buildExpressions(c, code, values, context, state)
-		}
-		autoVar := new MultiValueAutoVar(c, code, state)
-		for k, v := range bin.left.unPackList() {
-			if v.isIdentifier(ast.UnderScore) {
-				continue
-			}
-			stackLength := len(state.stacks)
-			stack, remainStack, op, _ :=
-				this.eb.BuildExpressionLeftValue.getLeftValue(c, code, v, context, state)
-			if stack > maxStack {
-				maxStack = stack
-			}
-			stack = autoVar.unPack(c, code, k, v.value)
-			if t := remainStack + stack; t > maxStack {
-				maxStack = t
-			}
-			copyOPs(code, op)
-			state.popStack(len(state.stacks) - stackLength)
-		}
-		return
-	}
+            state.popStack(len(state.stacks) - stackLength)
+        }
+
+        bin := e.data.(ast.ExpressionBinary)
+        left := bin.left.unPackList()[0]
+        right := bin.right.unPackList()[0]
+        var remainStack char
+        var op []byte
+        var leftValueKind LeftValueKind
+        if left.isIdentifier(ast.UnderScore) == false {
+            maxStack , remainStack , op , leftValueKind =
+                this.eb.BuildExpressionLeftValue.getLeftValue(c , code , left , context , state)
+        }
+        stack := this.eb.build(c , code , right , context , state)
+        if t := remainStack + stack ; t > maxStack {
+            maxStack = t
+        }
+        if left.isIdentifier(ast.UnderScore) {
+            if jvmSlotSize(right.value) == 1 {
+                code.codes[code.codeLength] = cg.OP_pop
+            } else {
+                code.codes[code.codeLength] = cg.OP_pop2
+            }
+
+            code.codeLength++
+        } else {
+            currentStack := remainStack + jvmSlotSize(left.value)
+            if e.isStatementExpression == false {
+                currentStack += this.eb.dupStackLeaveValueBelow(code , leftValueKind , left.value)
+                if currentStack > maxStack {
+                    maxStack = currentStack
+                }
+            }
+            copyOPs(code , op)
+        }
+
+        return
+    }
+
+     // a,b,c = 122,fdfd2232,"hello";
+    fn buildAssign(
+        c cg.ClassHighLevel , 
+        code cg.AttributeCode , 
+        e ast.Expression , 
+        context Context , 
+        state StackMapState) -> (maxStack char) {
+        bin := e.data.(ast.ExpressionBinary)
+
+        if e.isStatementExpression == false || len(bin.left.unPackList()) == 1 {
+            return this.buildExpressionAssign(c , code , e , context , state)
+        }
+        if values := bin.right.unPackList() ; len(values) == 1 {
+            maxStack = this.eb.build(c , code , values[0] , context , state)
+        } else {
+            maxStack = this.eb.buildExpressions(c , code , values , context , state)
+        }
+
+        autoVar := new MultiValueAutoVar(c , code , state)
+        for k , v := range bin.left.unPackList() {
+            if v.isIdentifier(ast.UnderScore) {
+                continue
+            }
+            stackLength := len(state.stacks)
+            stack , remainStack , op , _ :=
+                this.eb.BuildExpressionLeftValue.getLeftValue(c , code , v , context , state)
+            if stack > maxStack {
+                maxStack = stack
+            }
+            stack = autoVar.unPack(c , code , k , v.value)
+            if t := remainStack + stack ; t > maxStack {
+                maxStack = t
+            }
+            copyOPs(code , op)
+            state.popStack(len(state.stacks) - stackLength)
+        }
+
+        return
+    }
 
 }
 

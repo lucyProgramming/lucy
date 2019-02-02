@@ -1,239 +1,242 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
-class FunctionParser extends ParserExtends{
-
-    fn FunctionParser(parser Parser){
+class FunctionParser extends ParserExtends {
+    fn FunctionParser(parser Parser) {
         this.super(parser)
     }
-	
-	/*
+
+    /*
 		when isAbstract is true , means can have no body
 	*/
-	fn parse(needName bool, isAbstract bool , needSource bool) -> (f ast.Function, err error) {
-		f = new ast.Function()
-		f.startLine = this.parser.token.startLine 
-		defer {
-			if f.endLine == 0 {
-				//default value 
-				f.endLine = this.parser.token.startLine
-			}
-		}
-		offset := this.parser.token.offset
-		this.next(lfIsToken) // skip fn key word
-		this.parser.unExpectNewLineAndSkip()
-		if needName && this.parser.token.Type != lex.TokenIdentifier {
-			err = new error(sprintf("%s expect function name,but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.description))
-			this.parser.errs.append( err)
-			this.consume(untilLp)
-		}
-		if this.parser.token.Type == lex.TokenIdentifier {
-			f.name = this.parser.token.stringValue
-			f.locateDefinition = this.parser.token.locateDefinition
-			f.findUsage = this.parser.token.findUsage
-			f.rename = this.parser.token.rename
-			f.pos = this.parser.mkPos()
-			this.next(lfNotToken)
-		}
-		if f.pos == null {
-			f.pos = this.parser.mkPos()
-		}
-		f.Type, err = this.parseFunctionType()
-		if err != null {
-			if isAbstract {
-				this.consume(untilSemicolonOrLf)
-			} else {
-				this.consume(untilLc)
-			}
-		}
-		if isAbstract {
-			return f, null
-		}
-		this.parser.ifTokenIsLfThenSkip(true)
-		if this.parser.token.Type != lex.TokenLc {
-			err = new error(sprintf("%s except '{' but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.description))
-			this.parser.errs.append( err)
-			return f, null 
-		}
-		f.block = new ast.Block()
-		f.block.isFunctionBlock = true
-		f.block.Fn = f
-		f.block.pos = this.parser.mkPos()
-		this.next(lfNotToken) // skip {
-		this.parser.BlockParser.parseStatementList(f.block, false)
-		if this.parser.token.Type != lex.TokenRc {
-			err = new error(sprintf("%s expect '}', but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.description))
-			this.parser.errs.append(err)
-			this.consume(untilRc)
-		} else {
-			if needSource {
-				f.sourceCode =
-				this.parser.
-					bs[offset : this.parser.lexer.getOffSet()]
-			}
-			this.next(lfIsToken)
-		}
-		f.endLine = this.parser.token.startLine 
-		return f, null
-	}
-	
-	//(a,b int)->(total int)
-	fn parseFunctionType() -> (functionType ast.FunctionType, err error) {
-		functionType = new ast.FunctionType()
-		if this.parser.token.Type == lex.TokenLt {
-			this.next(lfNotToken)
-			functionType.templateNames, err = this.parser.parseNameList()
-			if err != null {
-				this.consume(untilLp)
-				goto skipTemplateNames
-			}
-			this.parser.errs.appendAll(functionType.checkTemplateNameDuplication())
-			this.next(lfIsToken)
-		}
-		this.parser.unExpectNewLineAndSkip()
-	skipTemplateNames:
-		if this.parser.token.Type != lex.TokenLp {
-			err = new error(sprintf("%s fn declared wrong,missing '(',but '%s'",
-				this.parser.errMsgPrefix() , this.parser.token.description ))
-			this.parser.errs.append( err)
-			return
-		}
-		this.next(lfIsToken)               // skip (
-		if this.parser.token.Type == lex.TokenLf {
-			// , containsLf
-			functionType.lpContainsLf = true 
-			this.next(lfNotToken)
-		}else if this.parser.token.Type == lex.TokenComment {
-			functionType.lpContainsInlineComment = this.parser.token.stringValue 
-			this.next(lfNotToken)
-		}else {
-			//nothing
-		}
-		if this.parser.token.Type != lex.TokenRp { // not )
-			functionType.parameterList, err = this.parseParameterOrReturnList()
-			if err != null {
-				this.consume(untilRp)
-				this.next(lfNotToken)
-			}
-		}
-		this.parser.ifTokenIsLfThenSkip(true)
-		if this.parser.token.Type != lex.TokenRp { // not )
-			err = new error(sprintf("%s fn declared wrong,missing ')',but '%s'",
-				this.parser.errMsgPrefix() , this.parser.token.description))
-			this.parser.errs.append( err)
-			return
-		}
-		this.next(lfIsToken)                   // skip )
-		if this.parser.token.Type == lex.TokenArrow { // ->  parse return list
-			this.next(lfNotToken) // skip ->
-			if this.parser.token.Type != lex.TokenLp {
-				err = new error(sprintf("%s fn declared wrong, not '(' after '->'",
-					this.parser.errMsgPrefix()))
-				this.parser.errs.append( err)
-				return
-			}
-			this.next(lfIsToken) // skip (
-			if this.parser.token.Type == lex.TokenLf {
-				// , containsLf
-				functionType.returnLpContainsLf = true 
-				this.next(lfNotToken)
-			}else if this.parser.token.Type == lex.TokenComment {
-				functionType.returnLpContainsInlineComment = this.parser.token.stringValue 
-				this.next(lfNotToken)
-			}else {
-				//nothing
-			}
-			if this.parser.token.Type != lex.TokenRp {
-				functionType.returnList, err = this.parseParameterOrReturnList()
-				if err != null { // skip until next (,continue to analyse
-					this.consume(untilRp)
-					this.next(lfIsToken)
-				}
-			}
-			this.parser.ifTokenIsLfThenSkip(true)
-			if this.parser.token.Type != lex.TokenRp {
-				err = new error(sprintf("%s fn declared wrong,expected ')',but '%s'",
-					this.parser.errMsgPrefix() , this.parser.token.description))
-				this.parser.errs.append( err)
-				return
-			}
-			this.next(lfIsToken) // skip )
-		} else {
-			functionType.returnList = new []ast.Variable(1)
-			functionType.returnList[0] = new ast.Variable()
-			functionType.returnList[0].pos = this.parser.mkPos()
-			functionType.returnList[0].Type = new ast.Type()
-			functionType.returnList[0].Type.pos = this.parser.mkPos()
-			functionType.returnList[0].Type.Type = ast.VariableTypeVoid
-		}
-		return functionType, err
-	}
+    fn parse(needName bool , isAbstract bool , needSource bool) -> (f ast.Function , err error) {
+        f = new ast.Function()
+        f.startLine = this.parser.token.startLine
+        defer {
 
-	/*
+            if f.endLine == 0 {
+                //default value 
+                f.endLine = this.parser.token.startLine
+            }
+        }
+
+        offset := this.parser.token.offset
+        this.next(lfIsToken) // skip fn key word
+        this.parser.unExpectNewLineAndSkip()
+        if needName && this.parser.token.Type != lex.TokenIdentifier {
+            err = new error(sprintf("%s expect function name,but '%s'" , this.parser.errMsgPrefix() , this.parser.token.description))
+            this.parser.errs.append(err)
+            this.consume(untilLp)
+        }
+        if this.parser.token.Type == lex.TokenIdentifier {
+            f.name = this.parser.token.stringValue
+            f.locateDefinition = this.parser.token.locateDefinition
+            f.findUsage = this.parser.token.findUsage
+            f.rename = this.parser.token.rename
+            f.pos = this.parser.mkPos()
+            this.next(lfNotToken)
+        }
+        if f.pos == null {
+            f.pos = this.parser.mkPos()
+        }
+        f.Type , err = this.parseFunctionType()
+        if err != null {
+            if isAbstract {
+                this.consume(untilSemicolonOrLf)
+            } else {
+                this.consume(untilLc)
+            }
+
+        }
+        if isAbstract {
+            return f , null
+        }
+        this.parser.ifTokenIsLfThenSkip(true)
+        if this.parser.token.Type != lex.TokenLc {
+            err = new error(sprintf("%s except '{' but '%s'" , this.parser.errMsgPrefix() , this.parser.token.description))
+            this.parser.errs.append(err)
+            return f , null
+        }
+        f.block = new ast.Block()
+        f.block.isFunctionBlock = true
+        f.block.Fn = f
+        f.block.pos = this.parser.mkPos()
+        this.next(lfNotToken) // skip {
+        this.parser.BlockParser.parseStatementList(f.block , false)
+        if this.parser.token.Type != lex.TokenRc {
+            err = new error(sprintf("%s expect '}', but '%s'" , this.parser.errMsgPrefix() , this.parser.token.description))
+            this.parser.errs.append(err)
+            this.consume(untilRc)
+        } else {
+            if needSource {
+                f.sourceCode =
+                    this.parser.
+                        bs[offset : this.parser.lexer.getOffSet()]
+            }
+            this.next(lfIsToken)
+        }
+
+        f.endLine = this.parser.token.startLine
+        return f , null
+    }
+
+     //(a,b int)->(total int)
+    fn parseFunctionType() -> (functionType ast.FunctionType , err error) {
+        functionType = new ast.FunctionType()
+        if this.parser.token.Type == lex.TokenLt {
+            this.next(lfNotToken)
+            functionType.templateNames , err = this.parser.parseNameList()
+            if err != null {
+                this.consume(untilLp)
+                goto skipTemplateNames
+            }
+            this.parser.errs.appendAll(functionType.checkTemplateNameDuplication())
+            this.next(lfIsToken)
+        }
+        this.parser.unExpectNewLineAndSkip()
+    skipTemplateNames:
+
+        if this.parser.token.Type != lex.TokenLp {
+            err = new error(sprintf("%s fn declared wrong,missing '(',but '%s'" , this.parser.errMsgPrefix() , this.parser.token.description))
+            this.parser.errs.append(err)
+            return
+        }
+        this.next(lfIsToken) // skip (
+        if this.parser.token.Type == lex.TokenLf {
+            // , containsLf
+            functionType.lpContainsLf = true
+            this.next(lfNotToken)
+        } else if this.parser.token.Type == lex.TokenComment {
+            functionType.lpContainsInlineComment = this.parser.token.stringValue
+            this.next(lfNotToken)
+        } else {
+            //nothing
+        }
+
+        if this.parser.token.Type != lex.TokenRp {
+            functionType.parameterList , err = this.parseParameterOrReturnList()
+            if err != null {
+                this.consume(untilRp)
+                this.next(lfNotToken)
+            }
+        }
+        this.parser.ifTokenIsLfThenSkip(true)
+        if this.parser.token.Type != lex.TokenRp {
+            err = new error(sprintf("%s fn declared wrong,missing ')',but '%s'" , this.parser.errMsgPrefix() , this.parser.token.description))
+            this.parser.errs.append(err)
+            return
+        }
+        this.next(lfIsToken) // skip )
+        if this.parser.token.Type == lex.TokenArrow {
+            this.next(lfNotToken) // skip ->
+            if this.parser.token.Type != lex.TokenLp {
+                err = new error(sprintf("%s fn declared wrong, not '(' after '->'" , this.parser.errMsgPrefix()))
+                this.parser.errs.append(err)
+                return
+            }
+            this.next(lfIsToken) // skip (
+            if this.parser.token.Type == lex.TokenLf {
+                // , containsLf
+                functionType.returnLpContainsLf = true
+                this.next(lfNotToken)
+            } else if this.parser.token.Type == lex.TokenComment {
+                functionType.returnLpContainsInlineComment = this.parser.token.stringValue
+                this.next(lfNotToken)
+            } else {
+                //nothing
+            }
+
+            if this.parser.token.Type != lex.TokenRp {
+                functionType.returnList , err = this.parseParameterOrReturnList()
+                if err != null {
+                    this.consume(untilRp)
+                    this.next(lfIsToken)
+                }
+            }
+            this.parser.ifTokenIsLfThenSkip(true)
+            if this.parser.token.Type != lex.TokenRp {
+                err = new error(sprintf("%s fn declared wrong,expected ')',but '%s'" , this.parser.errMsgPrefix() , this.parser.token.description))
+                this.parser.errs.append(err)
+                return
+            }
+            this.next(lfIsToken) // skip )
+        } else {
+            functionType.returnList = new []ast.Variable(1)
+            functionType.returnList[0] = new ast.Variable()
+            functionType.returnList[0].pos = this.parser.mkPos()
+            functionType.returnList[0].Type = new ast.Type()
+            functionType.returnList[0].Type.pos = this.parser.mkPos()
+            functionType.returnList[0].Type.Type = ast.VariableTypeVoid
+        }
+
+        return functionType , err
+    }
+
+    /*
 		parse default value
 		a int = ""
 		int = 1
 	*/
-	fn parseTypedNameDefaultValue() -> (returnList []ast.Variable, err error) {
-		returnList, err = this.parser.parseTypedName()
-		if this.parser.token.Type != lex.TokenAssign {
-			return
-		}
-		this.next(lfIsToken) // skip =
-		for k, v := range returnList {
-			v.defaultValueExpression, _ = this.parser.ExpressionParser.parseExpression(false)
-			if v.defaultValueExpression == null {
-				this.consume(untilComma)
-				this.next(lfNotToken)
-				continue
-			}
-			if this.parser.token.Type != lex.TokenComma ||
-				k == len(returnList)-1 {
-				break
-			} else {
-				this.next(lfNotToken) // skip ,
-			}
-		}
-		return returnList, err
-	}
-	fn parseParameterOrReturnList() -> (returnList []ast.Variable = []ast.Variable{}, err error) {
-		for this.parser.token.Type != lex.TokenRp {
-			if this.parser.token.Type == lex.TokenComma {
-				this.parser.errs.append( new error(sprintf("%s extra comma",
-					this.parser.errMsgPrefix())))
-				this.next(lfNotToken)
-				continue
-			}
-			var v []ast.Variable
-			v, err = this.parseTypedNameDefaultValue()
-			if v != null {
-				returnList.appendAll(v)
-			}
-			if err != null {
-				break
-			}
-			if this.parser.token.Type != lex.TokenComma{
-				break
-			}
-			this.next(lfIsToken)
-			if this.parser.token.Type == lex.TokenLf {
-				// , containsLf
-				t := v[ len(v) -1 ]
-				t.containsLf = true
-				this.next(lfNotToken)
-			}else if this.parser.token.Type == lex.TokenComment {
-				t := v[ len(v) -1 ]
-				t.inlineComment = this.parser.token.stringValue
-				this.next(lfNotToken)  // skip comment 
-			}else {
-				//nothing
-			}
-		}
-		return
-	}	
-	 
+    fn parseTypedNameDefaultValue() -> (returnList []ast.Variable , err error) {
+        returnList , err = this.parser.parseTypedName()
+        if this.parser.token.Type != lex.TokenAssign {
+            return
+        }
+        this.next(lfIsToken) // skip =
+        for k , v := range returnList {
+            v.defaultValueExpression , _ = this.parser.ExpressionParser.parseExpression(false)
+            if v.defaultValueExpression == null {
+                this.consume(untilComma)
+                this.next(lfNotToken)
+                continue
+            }
+            if this.parser.token.Type != lex.TokenComma ||
+                k == len(returnList) - 1 {
+                break
+            } else {
+                this.next(lfNotToken) // skip ,
+            }
+
+        }
+
+        return returnList , err
+    }
+    fn parseParameterOrReturnList() -> (returnList []ast.Variable = []ast.Variable{} , err error) {
+        for this.parser.token.Type != lex.TokenRp {
+            if this.parser.token.Type == lex.TokenComma {
+                this.parser.errs.append(new error(sprintf("%s extra comma" , this.parser.errMsgPrefix())))
+                this.next(lfNotToken)
+                continue
+            }
+            var v []ast.Variable
+            v , err = this.parseTypedNameDefaultValue()
+            if v != null {
+                returnList.appendAll(v)
+            }
+            if err != null {
+                break
+            }
+            if this.parser.token.Type != lex.TokenComma {
+                break
+            }
+            this.next(lfIsToken)
+            if this.parser.token.Type == lex.TokenLf {
+                // , containsLf
+                t := v[len(v) - 1]
+                t.containsLf = true
+                this.next(lfNotToken)
+            } else if this.parser.token.Type == lex.TokenComment {
+                t := v[len(v) - 1]
+                t.inlineComment = this.parser.token.stringValue
+                this.next(lfNotToken) // skip comment 
+            } else {
+                //nothing
+            }
+
+        }
+
+        return
+    }
+
 }
 
