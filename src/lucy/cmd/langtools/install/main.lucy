@@ -5,30 +5,33 @@ import "lucy/os"
 flagParser := new flag.FlagParser()
 
 fn printUsage() {
-	print("install directory and sub directories")
-	print(flagParser.helpMsg()) 
+    print("install directory and sub directories")
+    print(flagParser.helpMsg())
 }
+
 
 public fn install(args []string) {
-	var lucyRoot = common.getLucyRoot()
-	var verbose = flagParser.boolOption("-v" , false  , "package name" ) 
-	packageName , err := flagParser.parse(args )
-	if null != err {
-	    printUsage()
-	    os.exit(1)
-	}
-	if 0 == packageName.size() {
-		printUsage()
-		os.exit(2)
-	}
-	paths  := common.getLucyPath()
-	w  := common.findPackageInWhichDirectory( paths ,packageName[0] )
-	new Install(lucyRoot ,
-		w + "/src/" + packageName[0] ,
-		packageName[0] ,
-		verbose.getValue() ) . install ()
+    var lucyRoot = common.getLucyRoot()
+    var verbose = flagParser.boolOption("-v" , false , "package name")
+    packageName , err := flagParser.parse(args)
+    if null != err {
+        printUsage()
+        os.exit(1)
+    }
+    if 0 == packageName.size() {
+        printUsage()
+        os.exit(2)
+    }
+    paths := common.getLucyPath()
+    w := common.findPackageInWhichDirectory(paths , packageName[0])
+    new Install(lucyRoot,
+        w + "/src/" + packageName[0],
+        packageName[0],
+        verbose.getValue()).install()
 }
 
+
 fn main(args []string) {
-	install(args)
+    install(args)
 }
+

@@ -10,21 +10,20 @@ import "lucy/cmd/langtools/compile/parser"
 import "lucy/cmd/langtools/compile/common" as compileCommon
 import "java/lang/Runtime"
 
-
 public class RunLucyPackage {
-	lucyRoot            string
-	lucyPath            []string
-	mainPackageLucyPath string
-	Package             string
-	command             string
-	compilerExe         []string
-	classPaths          []string
-	flags               Flags = new Flags()
-	packagesCompiled    map{string -> PackageCompiled}
-	lucyProgramArgs     []string // lucy application args
-    public runOverExit  bool 
-    
-    public fn RunCommand(command string, args []string) -> (err error){
+           lucyRoot            string                        
+           lucyPath            []string                      
+           mainPackageLucyPath string                        
+           Package             string                        
+           command             string                        
+           compilerExe         []string                      
+           classPaths          []string                      
+           flags               Flags = new Flags()
+           packagesCompiled    map{string -> PackageCompiled}
+           lucyProgramArgs     []string                       // lucy application args
+    public runOverExit         bool                          
+
+    public fn RunCommand(command string , args []string) -> (err error) {
         this.command = command
         err = this.parseCmd(args) // skip run
         if err != null {
@@ -43,20 +42,22 @@ public class RunLucyPackage {
         this.classPaths = common.getClassPath()
         this.packagesCompiled = new map{string -> PackageCompiled}()
         founds := this.findPackageIn(this.Package)
-        this.foundError(this.Package, founds)
+        this.foundError(this.Package , founds)
         this.mainPackageLucyPath = founds[0]
         //
         {
-            _, _, err = this.buildPackage("", "lucy/lang", new ImportStack())
+
+            _ , _ , err = this.buildPackage("" , "lucy/lang" , new ImportStack())
             if err != null {
-                printf("build  buildin package '%s' failed,err:%s\n", "lucy/lang", err.getMessage())
-                return err 
+                printf("build  buildin package '%s' failed,err:%s\n" , "lucy/lang" , err.getMessage())
+                return err
             }
         }
-        _, meta, err := this.buildPackage(this.mainPackageLucyPath, this.Package, new ImportStack())
+
+        _ , meta , err := this.buildPackage(this.mainPackageLucyPath , this.Package , new ImportStack())
         if err != null {
             print(err)
-            return 
+            return
         }
         if this.flags.build.getValue() {
             return
@@ -68,93 +69,92 @@ public class RunLucyPackage {
 
     }
             `)
-            
+
             os.exit(4)
         }
-        cmdArray := []string{"java" , this.Package + "/" + ast.MainFunctionName }
+        cmdArray := []string{"java" , this.Package + "/" + ast.MainFunctionName}
         cmdArray.appendAll(this.lucyProgramArgs)
         var envs = new string[](len(os.getEnvs()))
         {
-			var i = 0
-            for k, v := range os.getEnvs() {
-              	envs[i] = k+ "=" + v
-				i++
+
+            var i = 0
+            for k , v := range os.getEnvs() {
+                envs[i] = k + "=" + v
+                i++
             }
+
         }
-        p := Runtime.getRuntime().exec(
-            copy(new string[](len(cmdArray)) ,cmdArray ) ,
-            envs
-        )
-        Run.runFn(fn() {
+
+        p := Runtime.getRuntime().exec(copy(new string[](len(cmdArray)) , cmdArray),
+            envs)
+        Run.runFn(fn () {
             lucyIo.ioCopy(os.stderr , p.getErrorStream())
         })
-        Run.runFn(fn() {
+        Run.runFn(fn () {
             lucyIo.ioCopy(os.stdout , p.getInputStream())
         })
-        Run.runFn(fn() {
+        Run.runFn(fn () {
             lucyIo.ioCopy(p.getOutputStream() , os.stdin)
         })
         code := p.waitFor() // wait for exit
         if this.runOverExit {
-            os.exit(code)  
+            os.exit(code)
         }
     }
-
     fn help() {
         this.flags.help()
     }
-
-    fn parseCmd(args []string) ->(err error) {
+    fn parseCmd(args []string) -> (err error) {
         var lucyProgramArgs []string
         runArgs := []string{}
-        for k, v := range args {
+        for k , v := range args {
             if v.startsWith("-") == false {
                 this.Package = v
-                lucyProgramArgs = args[k+1:]
+                lucyProgramArgs = args[k + 1:]
                 break
             }
             runArgs.append(v)
         }
-        _, err = this.flags.parser.parse(runArgs)
+
+        _ , err = this.flags.parser.parse(runArgs)
         if err != null {
             return err
         }
         this.lucyProgramArgs = lucyProgramArgs
         return null
     }
-
     /*
         find package in which directory
     */
     fn findPackageIn(packageName string) -> (paths []string = []string{}) {
         pathHavePackage := []string{}
-        for _, v := range this.lucyPath {
+        for _ , v := range this.lucyPath {
             if new io.File(v + "/src/" + packageName).isDirectory() {
                 pathHavePackage.append(v)
             }
         }
+
         return pathHavePackage
     }
-    
     /*
         check package if need rebuild
     */
-    fn needCompile(lucyPath string, packageName string) -> (meta common.PackageMeta,
-        need bool, lucyFiles []LucyFile) {
-        if p := this.packagesCompiled[packageName]; p != null {
-            return p.meta, false, null
+    fn needCompile(lucyPath string , packageName string) -> (meta common.PackageMeta,
+        need bool , lucyFiles []LucyFile) {
+        if p := this.packagesCompiled[packageName] ; p != null {
+            return p.meta , false , null
         }
         need = true
-        sourceFileDir := lucyPath +"/src/" + packageName
+        sourceFileDir := lucyPath + "/src/" + packageName
         fis := new io.File(sourceFileDir).listFiles()
         fisM := new map{string -> LucyFile}()
         lucyFiles = []LucyFile{}
-        for _, v := range fis {
-            if v.getName().endsWith( ".lucy") {
+        for _ , v := range fis {
+            if v.getName().endsWith(".lucy") {
                 t := new LucyFile()
                 t.realpathName = v.getAbsolutePath()
                 t.name = v.getName()
-                tt ,e := os.readFile(t.realpathName)
+                tt , e := os.readFile(t.realpathName)
                 if e != null {
                     panic(e)
                 }
@@ -163,36 +163,38 @@ public class RunLucyPackage {
                 fisM[v.getName()] = t
             }
         }
+
         if len(lucyFiles) == 0 {
-            panic(sprintf("no lucy source files in '%s'", sourceFileDir))
+            panic(sprintf("no lucy source files in '%s'" , sourceFileDir))
             return
         }
         if this.flags.forceReBuild.getValue() {
             return
         }
-        destinationDir := lucyPath +  "/class/" +  packageName
-        bs, err := os.readFile(destinationDir + "/maintain.json")
+        destinationDir := lucyPath + "/class/" + packageName
+        bs , err := os.readFile(destinationDir + "/maintain.json")
         if err != null {
             return
         }
         meta = new common.PackageMeta()
-        _, err = json.decode(javaArray2Lucy(bs), meta)
-        if err != null { // this is not happening
+        _ , err = json.decode(javaArray2Lucy(bs) , meta)
+        if err != null {
             print(err)
             err = null
             return
         }
-        compiledFrom := new map{ string -> common.FileMeta }()
+        compiledFrom := new map{string -> common.FileMeta}()
         for v := range meta.compiledFrom {
             compiledFrom[v.name] = v
         }
+
         // new or add
 
-        for _, v := range fisM {
-            if v := compiledFrom[v.name]; v == null { // new file
+        for _ , v := range fisM {
+            if v := compiledFrom[v.name] ; v == null {
                 return
             }
-            if (new io.File(v.realpathName).lastModified()/1000L) > (compiledFrom[v.name].lastModify) { // modified
+            if (new io.File(v.realpathName).lastModified() / 1000L) > (compiledFrom[v.name].lastModify) {
                 return
             }
         }
@@ -203,33 +205,38 @@ public class RunLucyPackage {
                 return
             }
         }
+
         // if class file is missing
         {
-            fis := new io.File(destinationDir).list()
-            fisM := new map{string -> bool }()
 
-            for _, v := range fis {
+            fis := new io.File(destinationDir).list()
+            fisM := new map{string -> bool}()
+
+            for _ , v := range fis {
                 if v.endsWith(".class") {
                     fisM[v] = true
                 }
             }
-            for _, v := range meta.classes {
+
+            for _ , v := range meta.classes {
                 if fisM.keyExist(v) == false {
                     return
                 }
             }
+
         }
+
         need = false
         return
     }
-
     fn parseImports(files []LucyFile) -> (imports []string = []string{}) {
         importNodes := []ast.TopNode{}
-        for _,v := range files {
-            parser.parse(importNodes ,  v.realpathName , v.bs , true ,10 , -1,-1,-1 ,-1 , -1)
+        for _ , v := range files {
+            parser.parse(importNodes , v.realpathName , v.bs , true , 10 , -1 , -1 , -1 , -1 , -1)
         }
-        m := new map{string->bool}()
-        for _,v := range importNodes{
+
+        m := new map{string -> bool}()
+        for _ , v := range importNodes {
             name := v.node.(ast.Import)
             if m.keyExist(name.Import) {
                 continue
@@ -237,14 +244,14 @@ public class RunLucyPackage {
             m[name.Import] = true
             imports.append(name.Import)
         }
+
         return this.javaPackageFilter(imports)
     }
-
     fn javaPackageFilter(is []string) -> (lucyPackages []string = []string{}) {
         var that = this
-        existInClassPath := fn(name string) -> (found []string = []string{}) {
-            for _, v := range that.classPaths {
-                if new io.File(v +"/" + name).isDirectory() {
+        existInClassPath := fn (name string) -> (found []string = []string{}) {
+            for _ , v := range that.classPaths {
+                if new io.File(v + "/" + name).isDirectory() {
                     found.append(v)
                     continue
                 }
@@ -252,28 +259,34 @@ public class RunLucyPackage {
                     found.append(v)
                 }
             }
+
             return
         }
-        existInLucyPath := fn(name string) -> (found []string = []string{}) {
-            for _, v := range that.lucyPath {
+
+        existInLucyPath := fn (name string) -> (found []string = []string{}) {
+            for _ , v := range that.lucyPath {
                 if new io.File(v + "/src/" + name).isDirectory() {
                     found.append(v)
                 }
             }
+
             return
         }
-        formatPaths := fn(paths []string) -> (s string = "") {
-            for _, v := range paths {
+
+        formatPaths := fn (paths []string) -> (s string = "") {
+            for _ , v := range paths {
                 s += "\t" + v + "\n"
             }
+
             return s
         }
-        for _, i := range is {
+
+        for _ , i := range is {
             found := existInLucyPath(i)
             if len(found) > 1 {
-                panic(sprintf("not 1 package named '%s' in $LUCYPATH", i))
+                panic(sprintf("not 1 package named '%s' in $LUCYPATH" , i))
             }
-            if len(found) == 1 { // perfect found in lucyPath
+            if len(found) == 1 {
                 if i != "lucy/lang" {
                     lucyPackages.append(i)
                 }
@@ -281,42 +294,40 @@ public class RunLucyPackage {
             }
             found = existInClassPath(i)
             if len(found) > 1 {
-                errMsg := sprintf("not 1 package named '%s' in $CLASSPATH,which CLASSPATH are:\n", i)
+                errMsg := sprintf("not 1 package named '%s' in $CLASSPATH,which CLASSPATH are:\n" , i)
                 errMsg += formatPaths(this.classPaths)
                 panic(errMsg)
             }
             if len(found) == 0 {
-                errMsg := sprintf("package named '%s' not found in $CLASSPATH,which CLASSPATH are:\n", i)
+                errMsg := sprintf("package named '%s' not found in $CLASSPATH,which CLASSPATH are:\n" , i)
                 errMsg += formatPaths(this.classPaths)
                 panic(errMsg)
             }
         }
-    }
 
-    fn foundError(packageName string, founds []string) {
+    }
+    fn foundError(packageName string , founds []string) {
         if len(founds) == 0 {
-            panic(sprintf("package '%s' not found", packageName))
+            panic(sprintf("package '%s' not found" , packageName))
         }
         if len(founds) > 1 {
-            panic(sprintf("package '%s' in '%s'", packageName,  founds + ""))
+            panic(sprintf("package '%s' in '%s'" , packageName , founds + ""))
         }
-
     }
-
-    fn buildPackage(lucyPath string, packageName string, importStack ImportStack) -> (needBuild bool,
-        meta common.PackageMeta, err error) {
-        if p := this.packagesCompiled[packageName]; p != null  {
-            return true, p.meta, null
+    fn buildPackage(lucyPath string , packageName string , importStack ImportStack) -> (needBuild bool,
+        meta common.PackageMeta , err error) {
+        if p := this.packagesCompiled[packageName] ; p != null {
+            return true , p.meta , null
         }
         if lucyPath == "" {
             founds := this.findPackageIn(packageName)
-            this.foundError(packageName, founds)
+            this.foundError(packageName , founds)
             lucyPath = founds[0]
         }
-        meta, needBuild, lucyFiles := this.needCompile(lucyPath, packageName)
+        meta , needBuild , lucyFiles := this.needCompile(lucyPath , packageName)
 
-        if needBuild == false { //current package no need to compile,but I need to check dependies
-            for k, v := range meta.imports {
+        if needBuild == false {
+            for k , v := range meta.imports {
                 i := (new ImportStack()).fromLast(importStack)
                 t := new PackageCompiled()
                 t.packageName = packageName
@@ -324,11 +335,11 @@ public class RunLucyPackage {
                 if err != null {
                     return
                 }
-                need, m, e := this.buildPackage("", v.name, i)
+                need , m , e := this.buildPackage("" , v.name , i)
                 if e != null {
-                    return false, null, e
+                    return false , null , e
                 }
-                if need { // means at least one package is rebuild
+                if need {
                     needBuild = true
                 }
                 if m.compileTime > v.linkTime {
@@ -336,14 +347,15 @@ public class RunLucyPackage {
                     needBuild = true
                 }
             }
+
         }
-        if needBuild == false { // no need actually
+        if needBuild == false {
             return
         }
         //compile this package really
         is := this.parseImports(lucyFiles)
         importsMetas := new []common.PackageMeta(len(is))
-        for k, i := range is {
+        for k , i := range is {
             im := (new ImportStack()).fromLast(importStack)
             t := new PackageCompiled()
             t.packageName = packageName
@@ -352,86 +364,99 @@ public class RunLucyPackage {
                 return
             }
             var m common.PackageMeta
-            _, m, err = this.buildPackage("", i, im) // compile depend
+            _ , m , err = this.buildPackage("" , i , im) // compile depend
             if err != null {
                 return
             }
-            importsMetas[k] = m 
+            importsMetas[k] = m
         }
+
         //build this package
-        //read  files
         destinationDir := lucyPath + "/class/" + packageName
         new io.File(destinationDir).mkdirs()
         if this.flags.verbose.getValue() {
-            printf("# %s\n", packageName) // compile this package
+            printf("# %s\n" , packageName) // compile this package
         }
         files := new []string(len(lucyFiles))
-        for k,v := range lucyFiles{
+        for k , v := range lucyFiles {
             files[k] = v.realpathName
         }
+
         f := new compileCommon.Flags()
         if cf := this.flags.compilerFlags.getValue() ; cf == null && cf == "" {
             f.parseArgs(["-package-name" , packageName])
-        }else {
+        } else {
             a := ["-package-name" , packageName]
-            for  v := range cf.split(" ") {
+            for v := range cf.split(" ") {
                 a.append(v)
             }
+
             f.parseArgs(a)
         }
+
         hasMain , _ := lc.Main(destinationDir , f , files , this.lucyPath , this.classPaths , true , true)
         // make_node_objects maitain.json
         meta = new common.PackageMeta()
         meta.compiledFrom = new common.FileMeta[](len(lucyFiles))
-        for k, v := range lucyFiles {
+        for k , v := range lucyFiles {
             t := new common.FileMeta()
             t.name = v.name
             t.lastModify = new io.File(v.realpathName).lastModified() / 1000L
             meta.compiledFrom[k] = t
         }
+
         meta.compileTime = System.currentTimeMillis() / long(1000)
         meta.imports = new common.Import[](len(is))
-        for k,_ := range meta.imports {
+        for k , _ := range meta.imports {
             meta.imports[k] = new common.Import()
             meta.imports[k].name = is[k]
-            meta.imports[k].linkTime = importsMetas[k].compileTime 
+            meta.imports[k].linkTime = importsMetas[k].compileTime
         }
+
         fis := new io.File(destinationDir).list()
         {
+
             classFiles := []string{}
-            for k, v := range fis {
+            for k , v := range fis {
                 if v.endsWith(".class") {
                     classFiles.append(v)
                 }
             }
-            meta.classes = copy(new string[](len(classFiles)),classFiles )
+
+            meta.classes = copy(new string[](len(classFiles)) , classFiles)
         }
-        meta.hasMain = hasMain 
-        bs, err := json.encode(meta , "\t")
+
+        meta.hasMain = hasMain
+        bs , err := json.encode(meta , "\t")
         if err != null {
             return
         }
         err = os.writeFile(lucyPath + "/class/" + packageName + "/maintain.json",
-            copy(new byte[](len(bs)) ,bs ))
+            copy(new byte[](len(bs)) , bs))
         t := new PackageCompiled()
         t.meta = meta
         t.packageName = packageName
         this.packagesCompiled[packageName] = t
         needBuild = true
-        
+
         {
+
             //verything is done delete old class files
-            classFileMap := new map{string->bool}()
+            classFileMap := new map{string -> bool}()
             for v := range meta.classes {
-                classFileMap[v] = true 
+                classFileMap[v] = true
             }
+
             list := new io.File(destinationDir).list()
             for v := range list {
                 if classFileMap.keyExist(v) == false {
                     new io.File(destinationDir).delete()
                 }
             }
+
         }
+
         return
-    }
-}
+    }}
+
+

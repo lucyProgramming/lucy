@@ -5,69 +5,67 @@ import "java/io"
 import "lucy/os"
 import "java/lang/System"
 
-
 class FileCacher {
-    caches map{string -> LucyFile}
-    maxSize int // max cache cache number
-    printFileCacheInfo bool 
-    
-    fn FileCacher(maxSize int ,printFileCacheInfo bool ) {
+    caches             map{string -> LucyFile}
+    maxSize            int                     // max cache cache number
+    printFileCacheInfo bool                   
+
+    fn FileCacher(maxSize int , printFileCacheInfo bool) {
         this.super()
-        this.maxSize = maxSize 
+        this.maxSize = maxSize
         this.caches = new map{string -> LucyFile}()
         this.printFileCacheInfo = printFileCacheInfo
     }
-
     private fn set(filename string , f LucyFile) {
-        if len(this.caches)  > this.maxSize {
-            var firstUnuse int 
-            var firstUnuseFilename string 
-            for k,v := range this.caches {
+        if len(this.caches) > this.maxSize {
+            var firstUnuse int
+            var firstUnuseFilename string
+            for k , v := range this.caches {
                 firstUnuse = v.lastUse
-                firstUnuseFilename = k 
+                firstUnuseFilename = k
                 break
             }
-            for k,v := range this.caches {
+
+            for k , v := range this.caches {
                 if v.lastUse < firstUnuse {
                     firstUnuse = v.lastUse
-                    firstUnuseFilename = k 
+                    firstUnuseFilename = k
                 }
             }
-            this.caches.remove(firstUnuseFilename)  // remove cache
+
+            this.caches.remove(firstUnuseFilename) // remove cache
         }
-        this.caches[filename] = f 
+        this.caches[filename] = f
     }
-    
     fn get(filename string) -> (f LucyFile) {
-        if this.maxSize < 0  {  
+        if this.maxSize < 0 {
             //
             f = this.readLucyFile(filename)
-            return f 
+            return f
         }
         if this.caches.keyExist(filename) == false {
             f = this.readLucyFile(filename)
             this.set(filename , f)
-            return 
+            return
         }
         f = this.caches[filename]
-        if f.lastModify < (new io.File(filename).lastModified() / 1000L) {  // file modified
+        if f.lastModify < (new io.File(filename).lastModified() / 1000L) {
             f = this.readLucyFile(filename)
             this.set(filename , f)
             if this.printFileCacheInfo {
                 printf("file cache:file '%s' modified\n" , filename)
             }
-            return 
+            return
         }
         newF := new LucyFile()
-        newF.bs = f.bs 
+        newF.bs = f.bs
         newF.realPathName = f.realPathName
         f = newF
         if this.printFileCacheInfo {
             printf("file cache:file '%s' hit cache\n" , filename)
         }
     }
-    
-    fn readLucyFile(filename string)-> (f LucyFile){
+    fn readLucyFile(filename string) -> (f LucyFile) {
         f = new LucyFile()
         f.realPathName = filename
         f.lastModify = int(new io.File(filename).lastModified() / 1000L)
@@ -75,7 +73,8 @@ class FileCacher {
         if err != null {
             panic(err)
         }
-        f.bs =  javaArray2Lucy(t)
+        f.bs = javaArray2Lucy(t)
         f.lastUse = int(System.currentTimeMillis() / 1000L)
-    }
-}
+    }}
+
+

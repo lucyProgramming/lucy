@@ -1,48 +1,51 @@
-import "lucy/cmd/langtools/common" 
+import "lucy/cmd/langtools/common"
 import "java/io"
 
-
-public fn locateLucyFile(file string ) -> (lucyPath string , pacakgenName string) {
+public fn locateLucyFile(file string) -> (lucyPath string , pacakgenName string) {
     lucyPaths := common.getLucyPath()
     eles := common.getPathElements(file)
     lucyPaths2 := []string{}
     for path := range lucyPaths {
         prefixNotMatch := false
         t := common.getPathElements(path)
-        for kk,vv := range t {
+        for kk , vv := range t {
             if vv != eles[kk] {
                 prefixNotMatch = true
                 break
             }
         }
+
         if prefixNotMatch {
             continue
         }
         if new io.File(path + "/src").isDirectory() == false {
             continue
         }
-        tt := eles[len(t) + 1 : len(eles)-1]
+        tt := eles[len(t) + 1 : len(eles) - 1]
         pacakgenName = ""
         for kk , vv := range tt {
             pacakgenName += vv
-            if kk != len(tt) -1 {
+            if kk != len(tt) - 1 {
                 pacakgenName += "/"
             }
         }
-        constainsLucyFiles := false 
-        if fs := new io.File(path + "/src/" + pacakgenName).listFiles()  ; len(fs) > 0 {
+
+        constainsLucyFiles := false
+        if fs := new io.File(path + "/src/" + pacakgenName).listFiles() ; len(fs) > 0 {
             for f := range fs {
                 if f.isFile() && f.getName().endsWith(".lucy") {
-                    constainsLucyFiles = true 
+                    constainsLucyFiles = true
                     break
                 }
             }
+
         }
         if constainsLucyFiles == false {
             continue
         }
         lucyPaths2.append(path)
     }
+
     if len(lucyPaths2) > 1 {
         panic("file located at 2 locations:" + lucyPaths)
     }
@@ -53,19 +56,20 @@ public fn locateLucyFile(file string ) -> (lucyPath string , pacakgenName string
 }
 
 
-public fn locateDir(dir string) -> (lucyPath string , pacakgenName string ) {
+public fn locateDir(dir string) -> (lucyPath string , pacakgenName string) {
     lucyPaths := common.getLucyPath()
     eles := common.getPathElements(dir)
     lucyPaths2 := []string{}
     for path := range lucyPaths {
         prefixNotMatch := false
         t := common.getPathElements(path)
-        for kk,vv := range t {
+        for kk , vv := range t {
             if vv != eles[kk] {
                 prefixNotMatch = true
                 break
             }
         }
+
         if prefixNotMatch {
             continue
         }
@@ -76,24 +80,27 @@ public fn locateDir(dir string) -> (lucyPath string , pacakgenName string ) {
         pacakgenName = ""
         for kk , vv := range tt {
             pacakgenName += vv
-            if kk != len(tt) -1 {
+            if kk != len(tt) - 1 {
                 pacakgenName += "/"
             }
         }
-        constainsLucyFiles := false 
-        if fs := new io.File(path + "/src/" + pacakgenName).listFiles()  ; len(fs) > 0 {
+
+        constainsLucyFiles := false
+        if fs := new io.File(path + "/src/" + pacakgenName).listFiles() ; len(fs) > 0 {
             for f := range fs {
                 if f.isFile() && f.getName().endsWith(".lucy") {
-                    constainsLucyFiles = true 
+                    constainsLucyFiles = true
                     break
                 }
             }
+
         }
         if constainsLucyFiles == false {
             continue
         }
         lucyPaths2.append(path)
     }
+
     if len(lucyPaths2) == 0 {
         panic("directory not found in LUCYPATH")
     }
@@ -102,3 +109,4 @@ public fn locateDir(dir string) -> (lucyPath string , pacakgenName string ) {
     }
     lucyPath = lucyPaths2[0]
 }
+

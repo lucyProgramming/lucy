@@ -1,63 +1,68 @@
+public final class FloatOption extends Option {
+    private floatDefaultValue float
+    private floatValue        float
 
-public final class FloatOption  extends Option{
-	private floatDefaultValue float 
-	private floatValue float 
-	
-	fn FloatOption(d float) {
-		this.super() 
-		.floatDefaultValue = d 
-	}
-	
-	protected fn reset() {
-		this.floatValue = .floatDefaultValue 
-	}
-	
-	protected fn parse(s string)  {
-		bs := []byte(s)
-		var k int 
-		var b byte 
-		isNegative := false 
-		if bs[0] == '-' {
-			isNegative = true 
-			bs = bs[1:]
-		}
-		if false == ('0' <= bs[0]  && bs[0] <= '9') {
-			panic("expect number")
-		}
-		var value float
-		for k,b = range bs {
-			if b == '.'{
-				break
-			}
-			if '0' <= b  && b <= '9'{
-				value = value * 10.0 + float(b- '0')
-			}else {
-				panic(sprintf("'%s' format float wrong" , s ))
-				
-			}
-		}
-		if b == '.' {
-			bs = bs[k+1:]
-			index := len(bs) -1 
-			var t float
-			for index >= 0{
-			    b = bs[index]
-				if '0' <= b  && b <= '9'{
-					t = t * 0.1 + float(b - '0') / 10.0
-				}else {
-					panic(sprintf("'%s' format float wrong" , s ))
-					 
-				}
-				index --
-			} 
-			value += t 
-		}
-		if isNegative {
-			value = -value 
-		}
-		.floatValue = value 
-	} 
+    fn FloatOption(d float) {
+        this.super()
+        .floatDefaultValue = d
+    }
 
-	public fn getValue() -> (v float = this.floatValue ){  }
-	
+    protected fn reset() {
+        this.floatValue = .floatDefaultValue
+    }
+
+    protected fn parse(s string) {
+        bs := []byte(s)
+        var k int
+        var b byte
+        isNegative := false
+        if bs[0] == '-' {
+            isNegative = true
+            bs = bs[1:]
+        }
+        if false == ('0' <= bs[0] && bs[0] <= '9') {
+            panic("expect number")
+        }
+        var value float
+        for k , b = range bs {
+            if b == '.' {
+                break
+            }
+            if '0' <= b && b <= '9' {
+                value = value * 10.0 + float(b - '0')
+            } else {
+                panic(sprintf("'%s' format float wrong" , s))
+
+            }
+
+        }
+
+        if b == '.' {
+            bs = bs[k + 1:]
+            index := len(bs) - 1
+            var t float
+            for index >= 0 {
+                b = bs[index]
+                if '0' <= b && b <= '9' {
+                    t = t * 0.1 + float(b - '0') / 10.0
+                } else {
+                    panic(sprintf("'%s' format float wrong" , s))
+
+                }
+
+                index--
+            }
+
+            value += t
+        }
+        if isNegative {
+            value = -value
+        }
+        .floatValue = value
+    }
+
+    public fn getValue() -> (v float = this.floatValue){}
+
 }
+
+

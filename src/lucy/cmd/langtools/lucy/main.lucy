@@ -7,7 +7,7 @@ import "lucy/cmd/langtools/tool"
 import "lucy/cmd/langtools/http"
 
 fn printUsage() {
-	msg := `lucy is a new programing language build on jvm
+    msg := `lucy is a new programing language build on jvm
     version                print version
     build                  build package and don't run
     install                install directory and it's sub directories 
@@ -15,38 +15,39 @@ fn printUsage() {
     clean                  clean compiled files
     http                   the http service for lucy
     test                   test a package`
-	print(msg)
+    print(msg)
 }
 
 fn main(args []string) {
-	if len(args) == 0 {
-		printUsage()
-		os.exit(0)
-	}
-	switch args[0] {
-	case "version":
-		printf("lucy-%s\n", "0.0.1")
-		os.exit(0)
-	case "build":
-	    t := ["-build"]
-	    t.appendAll(args[1:])
-		(new run.RunLucyPackage()).RunCommand("run", t )
-	case "run":
-		r := (new run.RunLucyPackage())
-		r.runOverExit = true 
-		r.RunCommand(args[0], args[1:])
-	case "install":
-		install.install(args[1:])
-	case "clean":
-		clean.clean(args[1:])
-	case "test":
-		test.test(args[1:])
-	case "tool":
-		tool.tool(args[1:])
-	case "http":
-		http.http(args[1:])
-	default:
-		printUsage()
-		os.exit(1)
-	}
+    if len(args) == 0 {
+        printUsage()
+        os.exit(0)
+    }
+    switch args[0] {
+        case "version":
+            printf("lucy-%s\n" , "0.0.1")
+            os.exit(0)
+        case "build":
+            t := ["-build"]
+            t.appendAll(args[1:])
+            (new run.RunLucyPackage()).RunCommand("run" , t)
+        case "run":
+            r := (new run.RunLucyPackage())
+            r.runOverExit = true
+            r.RunCommand(args[0] , args[1:])
+        case "install":
+            install.install(args[1:])
+        case "clean":
+            clean.clean(args[1:])
+        case "test":
+            test.test(args[1:])
+        case "tool":
+            tool.tool(args[1:])
+        case "http":
+            http.http(args[1:])
+        default:
+            printUsage()
+            os.exit(1)
+    }
+
 }

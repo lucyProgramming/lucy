@@ -1,34 +1,34 @@
 import "lucy/os/flag"
 
-
 class Flags {
-	forceReBuild  flag.BoolOption
-	build         flag.BoolOption
-	verbose       flag.BoolOption
-	compilerFlags flag.StringOption 
-	h          flag.BoolOption
-    parser        flag.FlagParser
-	
-	fn Flags(){
-	    this.super()
+    forceReBuild  flag.BoolOption  
+    build         flag.BoolOption  
+    verbose       flag.BoolOption  
+    compilerFlags flag.StringOption
+    h             flag.BoolOption  
+    parser        flag.FlagParser  
+
+    fn Flags() {
+        this.super()
         this.parser = new flag.FlagParser()
-        this.forceReBuild = this.parser.boolOption( "-forceReBuild", false, "force rebuild all package")
-        this.compilerFlags = this.parser.stringOption("-cf", "", "compiler flags")
-        this.build = this.parser.boolOption("-build", false, "build package and no run")
-        this.verbose = this.parser.boolOption("-v", false, "verbose")
-        this.h = this.parser.boolOption("-h", false, "print help message")
-	}
-	
-	
-	fn help()  {
-		usage := `run a lucy package
+        this.forceReBuild = this.parser.boolOption("-forceReBuild" , false , "force rebuild all package")
+        this.compilerFlags = this.parser.stringOption("-cf" , "" , "compiler flags")
+        this.build = this.parser.boolOption("-build" , false , "build package and no run")
+        this.verbose = this.parser.boolOption("-v" , false , "verbose")
+        this.h = this.parser.boolOption("-h" , false , "print help message")
+    }
+
+    fn help() {
+        usage := `run a lucy package
     -forceReBuild           force rebuild all package 
     -cf                     compiler flags
     -build                  build the package and no run 
     -v                      print the package been compile
     -h                      print this help message
 		`
-		print(usage)
-	}
+        print(usage)
+    }
 
 }
+
+

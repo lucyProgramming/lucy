@@ -7,7 +7,6 @@ public class Fmt {
         this.super()
         this.indentIncrement = indentIncrement
     }
-
     public fn fmt(nodes []ast.TopNode) -> (format string = "") {
         for k , n := range nodes {
             if t , ok := n.node.(ast.Comment) ; ok {
@@ -16,6 +15,7 @@ public class Fmt {
                 } else {
                     format += "//" + t.comment // contains \n
                 }
+
                 continue
             }
             if t , ok := n.node.(ast.Block) ; ok &&
@@ -27,10 +27,11 @@ public class Fmt {
             }
             if t , ok := n.node.(ast.Function) ; ok {
                 if t.isPublic() {
-                    format += "public " +  this.formatFunction("" , t , false) + "\n"
-                }else {
+                    format += "public " + this.formatFunction("" , t , false) + "\n"
+                } else {
                     format += this.formatFunction("" , t , false) + "\n"
                 }
+
                 continue
             }
             if t , ok := n.node.(ast.Enum) ; ok {
@@ -73,7 +74,6 @@ public class Fmt {
         }
 
     }
-
     fn formatConstant(indent string , c ast.Constant) -> (format string = "") {
         format = indent
         if c.isPublic() {
@@ -85,7 +85,6 @@ public class Fmt {
         }
         format += " = " + this.formatExpression(indent + this.indentIncrement , c.defaultValueExpression)
     }
-
     fn formatFunction(indent string , f ast.Function , isAbstract bool) -> (format string = "") {
         format += "fn "
         if f.name != null && f.name != "" {
@@ -190,13 +189,12 @@ public class Fmt {
         if len(f.block.statements) > 0 {
             format += " {\n"
             format += this.formatBlock(indent + this.indentIncrement , f.block)
-            format += indent + "}\n"
+            format += indent + "}"
         } else {
-            format += "{}\n"
+            format += "{}"
         }
 
     }
-
     fn formatClass(indent string , c ast.Class) -> (format string = "") {
         format = indent
         if c.isPublic() {
@@ -205,7 +203,7 @@ public class Fmt {
         if c.isFinal() {
             format += "final "
         }
-        if c.isAbstract()  && c.isInterface() == false{
+        if c.isAbstract() && c.isInterface() == false {
             format += "abstract "
         }
         if c.isInterface() {
@@ -370,19 +368,17 @@ public class Fmt {
                 method.Function.name = c.name
             }
             m += this.formatFunction(indent + this.indentIncrement , method.Function , method.isAbstract())
-            format += m
+            format += m + "\n"
         }
 
         format += indent + "}\n"
     }
-
     fn mkSpacing(length int) -> (s string = "") {
         for i := 0 ; i < length ; i++ {
             s += " "
         }
 
     }
-
     fn getFieldAccessControlString(f ast.ClassFieldDeclaration) -> (access string = "") {
         if f.fields[0].isPublic() {
             access = "public"
@@ -394,7 +390,6 @@ public class Fmt {
             access = "private"
         }
     }
-
     fn getFieldDeclarationGroupMeta(fs []ast.ClassFieldDeclaration) -> (maxName string = "",
         maxAccessRange string = "" , maxTypeName string = "" , hasFinal bool , hasStatic bool) {
         for f := range fs {
@@ -422,7 +417,6 @@ public class Fmt {
         }
 
     }
-
     fn getFieldDeclarationName(f ast.ClassFieldDeclaration) -> (name string = "") {
         for kk , ff := range f.nameList {
             name += ff.name
@@ -432,7 +426,6 @@ public class Fmt {
         }
 
     }
-
     fn formatEnum(indent string , e ast.Enum) -> (format string = "") {
         format = indent
         if e.isPublic() {
@@ -479,22 +472,19 @@ public class Fmt {
 
         format += indent + "}\n"
     }
-
     fn formatImport(indent string , i ast.Import) -> (format string = "") {
         format = indent
         format += "import \"" + i.Import + "\""
         if i.alias != null {
             format += " as " + i.alias
         }
-    }
-     // block can have no "{}"
+    }     // block can have no "{}"
     fn formatBlock(indent string , block ast.Block) -> (format string = "") {
         for s := range block.statements {
             format += this.formatStatement(indent , s)
         }
 
     }
-
     fn formatStatement(indent string , s ast.Statement) -> (format string = "") {
         switch s.Type {
             case ast.StatementTypeExpression:
@@ -557,12 +547,10 @@ public class Fmt {
         }
 
     }
-
     fn formatTypealias(indent string , a ast.TypeAlias) -> (format string = "") {
         format = indent
         format += sprintf("typealias %s = %s\n" , a.name , a.Type.typeName())
-    }
-    fn formatDefer(indent string , d ast.StatementDefer) -> (format string = "") {
+    }    fn formatDefer(indent string , d ast.StatementDefer) -> (format string = "") {
         format = indent
         if d.isOneStatement {
             format += "defer {\n"
@@ -575,7 +563,6 @@ public class Fmt {
         }
 
     }
-
     fn formatIf(indent string , s ast.StatementIf) -> (format string = "") {
         format = indent
         format += "if "
@@ -610,7 +597,6 @@ public class Fmt {
             format += indent + "}\n"
         }
     }
-
     fn formatGoto(indent string , s ast.StatementGoTo , inlineComment string) -> (format string = "") {
         format = indent
         if inlineComment == null {
@@ -620,7 +606,6 @@ public class Fmt {
         }
 
     }
-
     fn formatFor(indent string , s ast.StatementFor) -> (format string = "") {
         format = indent
         format += "for "
@@ -662,7 +647,6 @@ public class Fmt {
         format += this.formatBlock(indent + this.indentIncrement , s.block)
         format += indent + "}\n"
     }
-
     fn formatSwitch(indent string , s ast.StatementSwitch) -> (format string = "") {
         format = indent
         format += "switch "
@@ -716,7 +700,6 @@ public class Fmt {
         }
         format += indent + "}\n"
     }
-
     fn formatWhen(indent string , w ast.StatementWhen) -> (format string = "") {
         format = indent
         if len(w.prefixExpressions) > 0 {
@@ -780,7 +763,6 @@ public class Fmt {
         }
         format += indent + "}\n"
     }
-
     fn formatReturn(indent string , s ast.StatementReturn , inlineComment string) -> (format string = "") {
         format = indent
         format += "return"
@@ -815,7 +797,6 @@ public class Fmt {
         }
 
     }
-
     fn formatExpression(indent string , e ast.Expression) -> (format string = "") {
         switch e.Type {
             case ast.ExpressionTypeNull:
@@ -1176,12 +1157,13 @@ public class Fmt {
                         }
 
                     }
+
                     if m.containsLf() {
                         format += indent + "}"
-                    }else {
+                    } else {
                         format += "}"
                     }
-                    
+
                 } else {
                     format += sprintf("map{%s -> %s}{" , m.Type.Map.K.typeName() , m.Type.Map.V.typeName())
                     if m.containsLf() {
@@ -1245,7 +1227,6 @@ public class Fmt {
         }
 
     }
-
     fn getStringMaxWideLength(s string) -> (length int) {
         t := s.split("\n")
         for v := range t {
@@ -1253,7 +1234,7 @@ public class Fmt {
                 length = len(v)
             }
         }
-    }
-}
+
+    }}
 
 

@@ -1,41 +1,44 @@
+public final class IntOption extends Option {
+    private intDefaultValue int
+    private intValue        int
 
-public final class IntOption  extends Option{
-	private intDefaultValue int 
-	private intValue int 
-	
-	fn IntOption(d int) {
-		this.super() ;
-		.intDefaultValue = d 
-	}
-	
-	protected fn reset() {
-		this.intValue = .intDefaultValue 
-	}
-	
-	protected fn parse(s string) {
-		bs := []byte(s)
-		isNegative := false 
-		if bs[0] == '-' {
-			isNegative = true 
-			bs = bs[1:]
-		}
-		if false == ('0' <= bs[0]  && bs[0] <= '9') {
-			panic("expect number")
-		}
-		var value int 
-		for b := range bs {
-			if '0' <= b  && b <= '9'{
-				value = value * 10 + int(b - '0')
-			}else {
-				panic(sprintf("'%s' format int wrong" , s ))
-			}
-		}
-		if isNegative {
-			value = -value 
-		}
-		this.intValue = value 
-	}
-	
-	public fn getValue() -> (v int = this.intValue ){   }
+    fn IntOption(d int) {
+        this.super()
+        .intDefaultValue = d
+    }
+
+    protected fn reset() {
+        this.intValue = .intDefaultValue
+    }
+
+    protected fn parse(s string) {
+        bs := []byte(s)
+        isNegative := false
+        if bs[0] == '-' {
+            isNegative = true
+            bs = bs[1:]
+        }
+        if false == ('0' <= bs[0] && bs[0] <= '9') {
+            panic("expect number")
+        }
+        var value int
+        for b := range bs {
+            if '0' <= b && b <= '9' {
+                value = value * 10 + int(b - '0')
+            } else {
+                panic(sprintf("'%s' format int wrong" , s))
+            }
+
+        }
+
+        if isNegative {
+            value = -value
+        }
+        this.intValue = value
+    }
+
+    public fn getValue() -> (v int = this.intValue){}
 
 }
+
+
