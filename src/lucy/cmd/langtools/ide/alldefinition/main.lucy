@@ -1,23 +1,24 @@
-
 import "lucy/cmd/langtools/ide"
 import "lucy/os"
 import "lucy/encoding/json"
 
-public fn getAllDefinition(dir string) -> (result ide.Definition[]){
+public fn getAllDefinition(dir string) -> (result ide.Definition[]) {
     lucyFileNames := ide.getLucyFiles(dir)
     if len(lucyFileNames) == 0 {
         print("the directory contains no lucy file")
         os.exit(1)
     }
     lucyPath , packageName := ide.locateDir(dir)
-    result = new AllDefinition(ide.readLucyFiles(lucyFileNames) , packageName ,  lucyPath , true).getAllDefinition()
+    result = new AllDefinition(ide.readLucyFiles(lucyFileNames) , packageName , lucyPath , true).getAllDefinition()
 }
 
-fn main (args []string) {
+
+fn main(args []string) {
     dir := new Flags().parseArgs(args)
-     bs,err := json.encode(getAllDefinition(dir) , "\t")
+    bs , err := json.encode(getAllDefinition(dir) , "\t")
     if err != null {
         print(err)
     }
     print(string(bs))
 }
+

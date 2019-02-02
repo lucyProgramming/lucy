@@ -8,14 +8,16 @@ public fn findDefinition(file string , pos int , bs []byte , storePackage []ast.
     fileSystem := FileSystems.getDefault()
     searchFile := ""
     for v := range lucyFiles {
-        if fileSystem.getPath(file).getFileName().toString() == 
-            fileSystem.getPath(v.realPathName).getFileName().toString(){
+        if fileSystem.getPath(file).getFileName().toString() ==
+            fileSystem.getPath(v.realPathName).getFileName().toString() {
             if len(bs) > 0 {
-                v.bs = bs 
+                v.bs = bs
             }
-            v.locateDefinition = pos 
+            v.locateDefinition = pos
             searchFile = v.realPathName
         }
     }
-    result = new FindDefinition(lucyFiles,packageName , true , searchFile , pos >> 16 , storePackage).find()
+
+    result = new FindDefinition(lucyFiles , packageName , true , searchFile , pos >> 16 , storePackage).find()
 }
+

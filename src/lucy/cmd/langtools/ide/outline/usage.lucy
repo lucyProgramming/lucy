@@ -1,12 +1,12 @@
 import "lucy/os"
 
-
 const usage = `
     outline of file.
        -file   file to be located
 `
 
-fn printUsageAndExit(code int ){
+fn printUsageAndExit(code int) {
     print(usage)
     os.exit(code)
 }
+

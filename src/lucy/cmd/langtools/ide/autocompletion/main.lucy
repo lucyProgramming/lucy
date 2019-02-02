@@ -1,32 +1,32 @@
-
 import "lucy/encoding/json"
 import "lucy/cmd/langtools/ide"
 import "java/nio/file/FileSystems"
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/os"
 
-
-public fn autoCompletion(file string , pos int , bs []byte) -> (result []ast.AutoCompletionItem){
+public fn autoCompletion(file string , pos int , bs []byte) -> (result []ast.AutoCompletionItem) {
     lucyPath , packageName := ide.locateLucyFile(file)
-    var lucyFiles = ide.readLucyFiles(ide.getLucyFiles(lucyPath + "/src/" + packageName))    
+    var lucyFiles = ide.readLucyFiles(ide.getLucyFiles(lucyPath + "/src/" + packageName))
     fileSystem := FileSystems.getDefault()
     for v := range lucyFiles {
-        if fileSystem.getPath(file).getFileName().toString() == 
-            fileSystem.getPath(v.realPathName).getFileName().toString(){
+        if fileSystem.getPath(file).getFileName().toString() ==
+            fileSystem.getPath(v.realPathName).getFileName().toString() {
             //read buffer file instead 
             if len(bs) > 0 {
                 v.bs = bs
             }
             file = v.realPathName
-            v.autoCompletion = pos 
+            v.autoCompletion = pos
         }
     }
+
     result = new AutoCompletion(lucyFiles , packageName , file , pos >> 16).getAutoCompletion()
 }
 
+
 fn main(args []string) {
     file , bufferFile , pos := new Flags().parseArgs(args)
-    var bs []byte 
+    var bs []byte
     if bufferFile != null && bufferFile != "" {
         t , err := os.readFile(bufferFile)
         if null != err {
@@ -34,12 +34,13 @@ fn main(args []string) {
         }
         bs = javaArray2Lucy(t)
     }
-    items := autoCompletion(file ,  pos , bs)
-    result := copy(new ast.AutoCompletionItem[](len(items)) ,   items)
-    bs,err := json.encode(result)
+    items := autoCompletion(file , pos , bs)
+    result := copy(new ast.AutoCompletionItem[](len(items)) , items)
+    bs , err := json.encode(result)
     if err != null {
         panic(err)
     }
     print(string(bs))
 }
+
 

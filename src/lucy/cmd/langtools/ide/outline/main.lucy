@@ -4,13 +4,13 @@ import "lucy/os"
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/encoding/json"
 
-public fn outLine(filename string) ->(definitions []ide.Definition = []ide.Definition{}) {
-    bs,_ := os.readFile(filename)
+public fn outLine(filename string) -> (definitions []ide.Definition = []ide.Definition{}) {
+    bs , _ := os.readFile(filename)
     tops := []ast.TopNode{}
     parser.parse(tops , filename , javaArray2Lucy(bs) , false , 10 , -1 , -1 , -1 , -1 , -1)
     blockNum := 1
-    for v := range tops{
-        when v.node.(type){
+    for v := range tops {
+        when v.node.(type) {
             case ast.Line:
                 continue
             case ast.Comment:
@@ -36,7 +36,8 @@ public fn outLine(filename string) ->(definitions []ide.Definition = []ide.Defin
                         definition.name = vv.name
                         definition.pos = vv.pos
                     }
-                }else {
+
+                } else {
                     bin := t.data.(ast.ExpressionBinary)
                     list := []ast.Expression{bin.left}
                     if bin.left.Type == ast.ExpressionTypeList {
@@ -52,7 +53,9 @@ public fn outLine(filename string) ->(definitions []ide.Definition = []ide.Defin
                         definition.name = vv.data.(ast.ExpressionIdentifier).name
                         definition.pos = vv.pos
                     }
+
                 }
+
             case ast.Class:
                 t := v.node.(ast.Class)
                 definition := new ide.Definition()
@@ -65,9 +68,10 @@ public fn outLine(filename string) ->(definitions []ide.Definition = []ide.Defin
                     definition := new ide.Definition()
                     inners.append(definition)
                     definition.Type = "field"
-                    definition.pos = vv.pos 
+                    definition.pos = vv.pos
                     definition.name = vv.name
                 }
+
                 for vv := range t.methods {
                     for vvv := range vv {
                         definition := new ide.Definition()
@@ -76,7 +80,9 @@ public fn outLine(filename string) ->(definitions []ide.Definition = []ide.Defin
                         definition.pos = vvv.Function.pos
                         definition.name = vvv.Function.name
                     }
+
                 }
+
                 definition.inners = copy(new ide.Definition[](len(inners)) , inners)
             case ast.Function:
                 t := v.node.(ast.Function)
@@ -92,15 +98,16 @@ public fn outLine(filename string) ->(definitions []ide.Definition = []ide.Defin
                 definitions.append(definition)
                 definition.Type = "enum"
                 definition.pos = t.pos
-                definition.name = t.name 
+                definition.name = t.name
                 definition.inners = new ide.Definition[](len(t.enums))
-                for k,v := range t.enums{
+                for k , v := range t.enums {
                     d := new ide.Definition()
                     d.Type = "enumItem"
                     d.name = v.name
-                    d.pos = v.pos 
-                    definition.inners[k] = d 
+                    d.pos = v.pos
+                    definition.inners[k] = d
                 }
+
             case ast.TypeAlias:
                 t := v.node.(ast.TypeAlias)
                 definition := new ide.Definition()
@@ -118,12 +125,14 @@ public fn outLine(filename string) ->(definitions []ide.Definition = []ide.Defin
                 blockNum++
         }
     }
+
 }
 
 
 fn main(args []string) {
     filename := new Flags().parseArgs(args)
     definitions := outLine(filename)
-    bs :=  new json.Encoder(definitions , "" , "\t").encode()
+    bs := new json.Encoder(definitions , "" , "\t").encode()
     print(string(bs))
 }
+

@@ -5,29 +5,30 @@ import "java/nio/file/FileSystems"
 import "lucy/cmd/langtools/common"
 import "lucy/cmd/langtools/ide/gotodefinition"
 
-
-public fn findUsage(file string , pos int , scope string , storePackage []ast.Package) -> (result ast.Usage[]){
+public fn findUsage(file string , pos int , scope string , storePackage []ast.Package) -> (result ast.Usage[]) {
     definition := gotodefinition.findDefinition(file , pos , null , storePackage)
     if definition == null {
         print("find usage cannot find definition")
-        return null 
+        return null
     }
     lucyPath , packageName := ide.locateLucyFile(definition.filename)
-    var lucyFiles = ide.readLucyFiles(ide.getLucyFiles(lucyPath + "/src/" + packageName))    
+    var lucyFiles = ide.readLucyFiles(ide.getLucyFiles(lucyPath + "/src/" + packageName))
     fileSystem := FileSystems.getDefault()
     for v := range lucyFiles {
-        if fileSystem.getPath(definition.filename).getFileName().toString() == 
-            fileSystem.getPath(v.realPathName).getFileName().toString(){
-            v.findUsage = (definition.endLine << 16) | int(char(definition.endColumnOffset - 1)) 
+        if fileSystem.getPath(definition.filename).getFileName().toString() ==
+            fileSystem.getPath(v.realPathName).getFileName().toString() {
+            v.findUsage = (definition.endLine << 16) | int(char(definition.endColumnOffset - 1))
         }
     }
+
     result = sortUsages(new FindUsage(lucyFiles , packageName , true , common.getLucyPath() , scope).find())
 }
+
 
 fn main(args []string) {
     f := new Flags()
     file , pos := f.parseArgs(args)
-    result := findUsage(file , pos, "" , null)
+    result := findUsage(file , pos , "" , null)
     bs , err := json.encode(result)
     if err != null {
         panic(err)
@@ -35,27 +36,9 @@ fn main(args []string) {
     print(string(bs))
 }
 
-fn sortUsages (usages []ast.Usage) -> (result ast.Usage[]){
+
+fn sortUsages(usages []ast.Usage) -> (result ast.Usage[]) {
     // if len(usages) == 0 {
-    //     return null 
-    // }
-    // m := new map{string -> []ast.Usage} () 
-    // for v := range usages{
-    //     if m[v.Type] == null {
-    //         m[v.Type] = [v]
-    //     }else {
-    //         m[v.Type].append(v)
-    //     }
-    // }
-    // if len(m) == 1 {
-    //     for v := range m {
-    //         return copy(new ast.Usage[](len(v)) , v)
-    //     }
-    // }
-    // m2 := new map{string -> ast.Usage[]} ()
-    // for k,v := range m {
-    //     m2[k] = copy(new ast.Usage[](len(v)) , v)
-    // } 
-    // return m2
-    return copy(new ast.Usage[](len(usages)) , usages )
+    return copy(new ast.Usage[](len(usages)) , usages)
 }
+

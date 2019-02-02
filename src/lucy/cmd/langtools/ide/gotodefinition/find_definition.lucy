@@ -3,63 +3,65 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/os"
 import "lucy/cmd/langtools/common"
 
-
 class FindDefinition {
-    lucyFiles []ide.LucyFile 
-    packageName string
-    printErr bool 
-    searchFile string 
-    matchLine int 
-    storePackage []ast.Package
+    lucyFiles    []ide.LucyFile
+    packageName  string        
+    printErr     bool          
+    searchFile   string        
+    matchLine    int           
+    storePackage []ast.Package 
 
     fn FindDefinition(
-        lucyFiles []ide.LucyFile , 
-        packageName string , 
-        printErr bool , 
+        lucyFiles []ide.LucyFile,
+        packageName string,
+        printErr bool,
         searchFile string,
         matchLine int,
-        storePackage []ast.Package){
-            
+        storePackage []ast.Package) {
         this.super()
         this.lucyFiles = lucyFiles
         this.packageName = packageName
-        this.printErr = printErr 
+        this.printErr = printErr
         this.searchFile = searchFile
-        this.matchLine = matchLine 
+        this.matchLine = matchLine
         this.storePackage = storePackage
     }
-    
-    fn find() -> (result ast.Pos){
+
+    fn find() -> (result ast.Pos) {
         //parse ast and typecheck
-        loader := new ide.PackageLoader(common.getLucyPath() ,common.getClassPath())
-        loader.onlyAnalyzeGlobals = true 
+        loader := new ide.PackageLoader(common.getLucyPath() , common.getClassPath())
+        loader.onlyAnalyzeGlobals = true
         var p ast.Package
-        var es []error 
+        var es []error
         {
+
             defer {
-                err := catch()  // may be panic 
+
+                err := catch() // may be panic 
                 if err != null {
                     err.printStackTrace()
                 }
             }
-            p , es = ide.parseAstAndTypeCheck(
-                this.packageName ,
-                this.lucyFiles , 
-                false ,
-                this.searchFile ,
-                this.matchLine , 
+
+            p , es = ide.parseAstAndTypeCheck(this.packageName,
+                this.lucyFiles,
+                false,
+                this.searchFile,
+                this.matchLine,
                 loader)
         }
+
         if p == null {
-            return 
+            return
         }
         if this.printErr {
-            for v := range es{
+            for v := range es {
                 os.stderr.println(v.getMessage())
             }
+
         }
         if null != this.storePackage {
-            this.storePackage[0] = p 
+            this.storePackage[0] = p
         }
         if p.getLocationDefinition() != null {
             if p.getLocationDefinition().loadDefinitionFromOutside != null {
@@ -68,8 +70,10 @@ class FindDefinition {
             return p.getLocationDefinition()
         }
     }
-    
+
     fn loadDefinitionFromOutside(out ast.LoadDefinitionFromOutside) -> (result ast.Pos) {
         // primary load definition from class file
     }
 }
+
+

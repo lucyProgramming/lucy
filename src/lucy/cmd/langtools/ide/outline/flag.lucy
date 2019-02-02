@@ -1,31 +1,30 @@
-
 import "lucy/os/flag"
 
-
 class Flags {
-	file flag.StringOption
-	parser flag.FlagParser
-	
-	fn Flags(){
-		this.super()
-		this.parser = new flag.FlagParser()
-		this.file = this.parser.stringOption("-file")
-	}
-	
-	fn parseArgs(args []string) ->(file string ) {
-		nodefine,err := this.parser.parse(args)
-		if err != null {
-			panic(err)
-		}
-		if len(nodefine) > 0 {
-			print("args provides but not used:" + nodefine)
-			printUsageAndExit(1)
-		}
-		if this.file.getValue() == "" {
-			print("file not provided")
-			printUsageAndExit(1)
-		}
-		file = this.file.getValue()
-	}
+    file   flag.StringOption
+    parser flag.FlagParser  
+
+    fn Flags() {
+        this.super()
+        this.parser = new flag.FlagParser()
+        this.file = this.parser.stringOption("-file")
+    }
+
+    fn parseArgs(args []string) -> (file string) {
+        nodefine , err := this.parser.parse(args)
+        if err != null {
+            panic(err)
+        }
+        if len(nodefine) > 0 {
+            print("args provides but not used:" + nodefine)
+            printUsageAndExit(1)
+        }
+        if this.file.getValue() == "" {
+            print("file not provided")
+            printUsageAndExit(1)
+        }
+        file = this.file.getValue()
+    }
 }
+
 
