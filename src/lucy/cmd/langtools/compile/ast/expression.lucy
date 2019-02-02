@@ -33,9 +33,9 @@ public class Expression {
     public fn Expression() {
         this.super()
     }
-    public fn containsLfOrInlineComment() ->(constains bool) {
-		return this.containsLf || this.inlineComment != null
-	}
+    public fn containsLfOrInlineComment() -> (constains bool) {
+        return this.containsLf || this.inlineComment != null
+    }
 
     public fn isIdentifier(identifier string) -> (is bool) {
         if this.Type != ExpressionTypeIdentifier {
@@ -146,33 +146,33 @@ public class Expression {
     fn fromConst(c Constant) {
         this.op = c.name
         switch c.Type.Type {
-        case VariableTypeBool:
-            this.Type = ExpressionTypeBool
-            this.boolValue = c.boolValue
-        case VariableTypeByte:
-            this.Type = ExpressionTypeByte
-            this.longValue = c.longValue
-        case VariableTypeShort:
-            this.Type = ExpressionTypeShort
-            this.longValue = c.longValue
-        case VariableTypeChar:
-            this.Type = ExpressionTypeChar
-            this.longValue = c.longValue
-        case VariableTypeInt:
-            this.Type = ExpressionTypeInt
-            this.longValue = c.longValue
-        case VariableTypeLong:
-            this.Type = ExpressionTypeLong
-            this.longValue = c.longValue
-        case VariableTypeFloat:
-            this.Type = ExpressionTypeFloat
-            this.doubleValue = c.doubleValue
-        case VariableTypeDouble:
-            this.Type = ExpressionTypeDouble
-            this.doubleValue = c.doubleValue
-        case VariableTypeString:
-            this.Type = ExpressionTypeString
-            this.stringValue = c.stringValue
+            case VariableTypeBool:
+                this.Type = ExpressionTypeBool
+                this.boolValue = c.boolValue
+            case VariableTypeByte:
+                this.Type = ExpressionTypeByte
+                this.longValue = c.longValue
+            case VariableTypeShort:
+                this.Type = ExpressionTypeShort
+                this.longValue = c.longValue
+            case VariableTypeChar:
+                this.Type = ExpressionTypeChar
+                this.longValue = c.longValue
+            case VariableTypeInt:
+                this.Type = ExpressionTypeInt
+                this.longValue = c.longValue
+            case VariableTypeLong:
+                this.Type = ExpressionTypeLong
+                this.longValue = c.longValue
+            case VariableTypeFloat:
+                this.Type = ExpressionTypeFloat
+                this.doubleValue = c.doubleValue
+            case VariableTypeDouble:
+                this.Type = ExpressionTypeDouble
+                this.doubleValue = c.doubleValue
+            case VariableTypeString:
+                this.Type = ExpressionTypeString
+                this.stringValue = c.stringValue
         }
 
     }
@@ -348,292 +348,292 @@ public class Expression {
             return null , []error{err}
         }
         switch this.Type {
-        case ExpressionTypeAutoCompletion:
-            block.inheritedAttribute.p.autoCompletionItems = searchRightValueForAutoCompletionItems(this.pos , block)
-        case ExpressionTypeNull:
-            this.value = new Type()
-            this.value.Type = VariableTypeNull
-            this.value.pos = this.pos
-            returnValueTypes = [this.value]
-        case ExpressionTypeDot:
-            if block.inheritedAttribute.Class == null {
-                errs = []error{new error(sprintf("%s '%s' must in class scope" , this.pos.errMsgPrefix() , this.op))}
-            } else {
+            case ExpressionTypeAutoCompletion:
+                block.inheritedAttribute.p.autoCompletionItems = searchRightValueForAutoCompletionItems(this.pos , block)
+            case ExpressionTypeNull:
                 this.value = new Type()
-                this.value.Type = VariableTypeDynamicSelector
+                this.value.Type = VariableTypeNull
                 this.value.pos = this.pos
-                this.value.Class = block.inheritedAttribute.Class
                 returnValueTypes = [this.value]
-            }
+            case ExpressionTypeDot:
+                if block.inheritedAttribute.Class == null {
+                    errs = []error{new error(sprintf("%s '%s' must in class scope" , this.pos.errMsgPrefix() , this.op))}
+                } else {
+                    this.value = new Type()
+                    this.value.Type = VariableTypeDynamicSelector
+                    this.value.pos = this.pos
+                    this.value.Class = block.inheritedAttribute.Class
+                    returnValueTypes = [this.value]
+                }
 
-        case ExpressionTypeBool:
-            this.value = new Type()
-            this.value.Type = VariableTypeBool
-            this.value.pos = this.pos
-            returnValueTypes = [this.value]
-        case ExpressionTypeByte:
-            this.value = new Type()
-            this.value.Type = VariableTypeByte
-            this.value.pos = this.pos
-            returnValueTypes = [this.value]
-        case ExpressionTypeShort:
-            this.value = new Type()
-            this.value.Type = VariableTypeShort
-            this.value.pos = this.pos
-            returnValueTypes = [this.value]
-        case ExpressionTypeInt:
-            this.value = new Type()
-            this.value.Type = VariableTypeInt
-            this.value.pos = this.pos
-            returnValueTypes = [this.value]
-        case ExpressionTypeChar:
-            this.value = new Type()
-            this.value.Type = VariableTypeChar
-            this.value.pos = this.pos
-            returnValueTypes = [this.value]
-        case ExpressionTypeFloat:
-            this.value = new Type()
-            this.value.Type = VariableTypeFloat
-            this.value.pos = this.pos
-            returnValueTypes = [this.value]
-        case ExpressionTypeDouble:
-            this.value = new Type()
-            this.value.Type = VariableTypeDouble
-            this.value.pos = this.pos
-            returnValueTypes = [this.value]
-        case ExpressionTypeLong:
-            this.value = new Type()
-            this.value.Type = VariableTypeLong
-            this.value.pos = this.pos
-            returnValueTypes = [this.value]
-        case ExpressionTypeString:
-            this.value = new Type()
-            this.value.Type = VariableTypeString
-            this.value.pos = this.pos
-            returnValueTypes = [this.value]
-        case ExpressionTypeIdentifier:
-            tt , err := ExpressionCheckIdentifier.check(this , block)
-            if err != null {
-                errs.append(err)
-            }
-            if tt != null {
-                this.value = tt
-                returnValueTypes = []Type{tt}
-            }
-            //binaries
-        case ExpressionTypeLogicalOr , 
-            ExpressionTypeLogicalAnd , 
-            ExpressionTypeOr , 
-            ExpressionTypeAnd , 
-            ExpressionTypeXor , 
-            ExpressionTypeLsh , 
-            ExpressionTypeRsh , 
-            ExpressionTypeEq , 
-            ExpressionTypeNe , 
-            ExpressionTypeGe , 
-            ExpressionTypeGt , 
-            ExpressionTypeLe , 
-            ExpressionTypeLt , 
-            ExpressionTypeAdd , 
-            ExpressionTypeSub , 
-            ExpressionTypeMul , 
-            ExpressionTypeDiv , 
-            ExpressionTypeMod:
-            tt := ExpressionCheckBinary.check(this , block , errs)
-            if tt != null {
-                returnValueTypes = []Type{tt}
-            }
-            this.value = tt
-        case ExpressionTypeMap:
-            tt := ExpressionCheckMap.check(this , block , errs)
-            if tt != null {
-                returnValueTypes = []Type{tt}
-            }
-            this.value = tt
-        case ExpressionTypeVarAssign:
-            ExpressionCheckVarAssign.check(this , block , errs)
-            this.value = mkVoidType(this.pos)
-            returnValueTypes = []Type{this.value}
-        case ExpressionTypeAssign:
-            tt := ExpressionCheckAssign.check(this , block , errs)
-            if tt != null {
-                returnValueTypes = []Type{tt}
-            }
-            this.value = tt
-        case ExpressionTypeincrement , 
-            ExpressionTypeDecrement , 
-            ExpressionTypePrefixincrement , 
-            ExpressionTypePrefixDecrement:
-            tt := ExpressionCheckUnary.checkincrementExpression(this , block , errs)
-            if tt != null {
-                returnValueTypes = []Type{tt}
-            }
-            this.value = tt
-        case ExpressionTypeConst:
-            errs = ExpressionCheckConst.check(this , block)
-            returnValueTypes = []Type{mkVoidType(this.pos)}
-            this.value = returnValueTypes[0]
-        case ExpressionTypeVar:
-            ExpressionCheckVar.check(this , block , errs)
-            returnValueTypes = []Type{mkVoidType(this.pos)}
-            this.value = returnValueTypes[0]
-        case ExpressionTypeFunctionCall:
-            returnValueTypes = ExpressionCheckFunctionCall.checkFunctionCallExpression(this , block , errs)
-            this.multiValues = returnValueTypes
-            if len(returnValueTypes) > 0 {
-                this.value = returnValueTypes[0]
-            }
-        case ExpressionTypeMethodCall:
-            returnValueTypes = ExpressionCheckMethodCall.check(this , block , errs)
-            this.multiValues = returnValueTypes
-            if len(returnValueTypes) > 0 {
-                this.value = returnValueTypes[0]
-            }
-        case ExpressionTypeTypeAssert:
-            returnValueTypes = ExpressionCheckTypeAssert.check(this , block , errs)
-            this.multiValues = returnValueTypes
-            if len(returnValueTypes) > 0 {
-                this.value = returnValueTypes[0]
-            }
-        case ExpressionTypeNot , ExpressionTypeNegative , ExpressionTypeBitwiseNot:
-            tt := ExpressionCheckUnary.checkUnaryExpression(this , block , errs)
-            if tt != null {
-                returnValueTypes = []Type{tt}
-            }
-            this.value = tt
-        case ExpressionTypeQuestion:
-            tt := ExpressionCheckQuestion.check(this , block , errs)
-            if tt != null {
-                returnValueTypes = []Type{tt}
-            }
-            this.value = tt
-        case ExpressionTypeIndex:
-            tt := ExpressionCheckIndex.check(this , block , errs)
-            if tt != null {
-                returnValueTypes = []Type{tt}
-                this.value = tt
-            }
-        case ExpressionTypeSelection:
-            tt := ExpressionCheckSelection.check(this , block , errs)
-            if tt != null {
-                returnValueTypes = []Type{tt}
-                this.value = tt
-            }
-        case ExpressionTypeSelectionConst:
-            tt := ExpressionSelectConst.check(this , block , errs)
-            if tt != null {
-                returnValueTypes = []Type{tt}
-                this.value = tt
-            }
-        case ExpressionTypeCheckCast:
-            tt := ExpressionCheckTypeConversion.check(this , block , errs)
-            if tt != null {
-                returnValueTypes = []Type{tt}
-                this.value = tt
-            }
-        case ExpressionTypeNew:
-            tt := ExpressionCheckNew.check(this , block , errs)
-            if tt != null {
-                returnValueTypes = []Type{tt}
-                this.value = tt
-            }
-        case ExpressionTypePlusAssign , 
-            ExpressionTypeMinusAssign , 
-            ExpressionTypeMulAssign , 
-            ExpressionTypeDivAssign , 
-            ExpressionTypeModAssign , 
-            ExpressionTypeAndAssign , 
-            ExpressionTypeOrAssign , 
-            ExpressionTypeLshAssign , 
-            ExpressionTypeRshAssign , 
-            ExpressionTypeXorAssign:
-            tt := ExpressionCheckOpAssign.check(this , block , errs)
-            if tt != null {
-                returnValueTypes = []Type{tt}
-            }
-            this.value = tt
-        case ExpressionTypeRange:
-            errs.append(new error(sprintf("%s range is only work with 'for' statement" , errMsgPrefix(this.pos))))
-        case ExpressionTypeSlice:
-            tt := ExpressionCheckSlice.check(this , block , errs)
-            this.value = tt
-            if tt != null {
-                returnValueTypes = []Type{tt}
-            }
-        case ExpressionTypeArray:
-            tt := ExprssionCheckArray.check(this , block , errs)
-            this.value = tt
-            if tt != null {
-                returnValueTypes = []Type{tt}
-            }
-        case ExpressionTypeFunctionLiteral:
-            f := this.data.(Function)
-            if block.inheritedAttribute.p.statementLevelFunctions == null {
-                block.inheritedAttribute.p.statementLevelFunctions = [f]
-            } else {
-                block.inheritedAttribute.p.statementLevelFunctions.append(f)
-            }
-
-            if this.isStatementExpression {
-                err := block.insert(f.name , f.pos , f)
+            case ExpressionTypeBool:
+                this.value = new Type()
+                this.value.Type = VariableTypeBool
+                this.value.pos = this.pos
+                returnValueTypes = [this.value]
+            case ExpressionTypeByte:
+                this.value = new Type()
+                this.value.Type = VariableTypeByte
+                this.value.pos = this.pos
+                returnValueTypes = [this.value]
+            case ExpressionTypeShort:
+                this.value = new Type()
+                this.value.Type = VariableTypeShort
+                this.value.pos = this.pos
+                returnValueTypes = [this.value]
+            case ExpressionTypeInt:
+                this.value = new Type()
+                this.value.Type = VariableTypeInt
+                this.value.pos = this.pos
+                returnValueTypes = [this.value]
+            case ExpressionTypeChar:
+                this.value = new Type()
+                this.value.Type = VariableTypeChar
+                this.value.pos = this.pos
+                returnValueTypes = [this.value]
+            case ExpressionTypeFloat:
+                this.value = new Type()
+                this.value.Type = VariableTypeFloat
+                this.value.pos = this.pos
+                returnValueTypes = [this.value]
+            case ExpressionTypeDouble:
+                this.value = new Type()
+                this.value.Type = VariableTypeDouble
+                this.value.pos = this.pos
+                returnValueTypes = [this.value]
+            case ExpressionTypeLong:
+                this.value = new Type()
+                this.value.Type = VariableTypeLong
+                this.value.pos = this.pos
+                returnValueTypes = [this.value]
+            case ExpressionTypeString:
+                this.value = new Type()
+                this.value.Type = VariableTypeString
+                this.value.pos = this.pos
+                returnValueTypes = [this.value]
+            case ExpressionTypeIdentifier:
+                tt , err := ExpressionCheckIdentifier.check(this , block)
                 if err != null {
                     errs.append(err)
                 }
-            }
-            if f.locateDefinition {
-                block.inheritedAttribute.p.setLocationDefinition(f)
-                return
-            }
-            if f.findUsage {
-                u := new Usage()
-                u.Type = "declaration"
-                u.pos = f.pos
-                f.findUsageInstances = [u]
-                block.inheritedAttribute.p.findUsage = f.findUsageInstances
-            }
-            es := f.check(block)
-            errs.appendAll(es)
-            returnValueTypes = new []Type(1)
-            returnValueTypes[0] = new Type()
-            returnValueTypes[0].Type = VariableTypeFunction
-            returnValueTypes[0].pos = this.pos
-            returnValueTypes[0].functionType = f.Type
-            this.value = returnValueTypes[0]
-        case ExpressionTypeList:
-            errs.append(new error(sprintf("%s cannot have expression '%s' at this scope," +
-                "this may be cause by the compiler error,please contact the author" , this.pos.errMsgPrefix() , this.op)))
-        case ExpressionTypeGlobal:
-            returnValueTypes = new []Type(1)
-            returnValueTypes[0] = new Type()
-            returnValueTypes[0].Type = VariableTypePackage
-            returnValueTypes[0].pos = this.pos
-            returnValueTypes[0].Package = block.inheritedAttribute.p
-            this.value = returnValueTypes[0]
-        case ExpressionTypeParenthesis:
-            ee := this.data.(Expression) // override
-            returnValueTypes , errs = ee.check(block)
-            if len(returnValueTypes) > 0 {
+                if tt != null {
+                    this.value = tt
+                    returnValueTypes = []Type{tt}
+                }
+                //binaries
+            case ExpressionTypeLogicalOr,
+                ExpressionTypeLogicalAnd,
+                ExpressionTypeOr,
+                ExpressionTypeAnd,
+                ExpressionTypeXor,
+                ExpressionTypeLsh,
+                ExpressionTypeRsh,
+                ExpressionTypeEq,
+                ExpressionTypeNe,
+                ExpressionTypeGe,
+                ExpressionTypeGt,
+                ExpressionTypeLe,
+                ExpressionTypeLt,
+                ExpressionTypeAdd,
+                ExpressionTypeSub,
+                ExpressionTypeMul,
+                ExpressionTypeDiv,
+                ExpressionTypeMod:
+                tt := ExpressionCheckBinary.check(this , block , errs)
+                if tt != null {
+                    returnValueTypes = []Type{tt}
+                }
+                this.value = tt
+            case ExpressionTypeMap:
+                tt := ExpressionCheckMap.check(this , block , errs)
+                if tt != null {
+                    returnValueTypes = []Type{tt}
+                }
+                this.value = tt
+            case ExpressionTypeVarAssign:
+                ExpressionCheckVarAssign.check(this , block , errs)
+                this.value = mkVoidType(this.pos)
+                returnValueTypes = []Type{this.value}
+            case ExpressionTypeAssign:
+                tt := ExpressionCheckAssign.check(this , block , errs)
+                if tt != null {
+                    returnValueTypes = []Type{tt}
+                }
+                this.value = tt
+            case ExpressionTypeincrement,
+                ExpressionTypeDecrement,
+                ExpressionTypePrefixincrement,
+                ExpressionTypePrefixDecrement:
+                tt := ExpressionCheckUnary.checkincrementExpression(this , block , errs)
+                if tt != null {
+                    returnValueTypes = []Type{tt}
+                }
+                this.value = tt
+            case ExpressionTypeConst:
+                errs = ExpressionCheckConst.check(this , block)
+                returnValueTypes = []Type{mkVoidType(this.pos)}
                 this.value = returnValueTypes[0]
-            }
-            return returnValueTypes , errs
-        case ExpressionTypeVArgs:
-            var t Type
-            t , errs = this.data.(Expression).checkSingleValueContextExpression(block)
-            if len(errs) > 0 {
+            case ExpressionTypeVar:
+                ExpressionCheckVar.check(this , block , errs)
+                returnValueTypes = []Type{mkVoidType(this.pos)}
+                this.value = returnValueTypes[0]
+            case ExpressionTypeFunctionCall:
+                returnValueTypes = ExpressionCheckFunctionCall.checkFunctionCallExpression(this , block , errs)
+                this.multiValues = returnValueTypes
+                if len(returnValueTypes) > 0 {
+                    this.value = returnValueTypes[0]
+                }
+            case ExpressionTypeMethodCall:
+                returnValueTypes = ExpressionCheckMethodCall.check(this , block , errs)
+                this.multiValues = returnValueTypes
+                if len(returnValueTypes) > 0 {
+                    this.value = returnValueTypes[0]
+                }
+            case ExpressionTypeTypeAssert:
+                returnValueTypes = ExpressionCheckTypeAssert.check(this , block , errs)
+                this.multiValues = returnValueTypes
+                if len(returnValueTypes) > 0 {
+                    this.value = returnValueTypes[0]
+                }
+            case ExpressionTypeNot , ExpressionTypeNegative , ExpressionTypeBitwiseNot:
+                tt := ExpressionCheckUnary.checkUnaryExpression(this , block , errs)
+                if tt != null {
+                    returnValueTypes = []Type{tt}
+                }
+                this.value = tt
+            case ExpressionTypeQuestion:
+                tt := ExpressionCheckQuestion.check(this , block , errs)
+                if tt != null {
+                    returnValueTypes = []Type{tt}
+                }
+                this.value = tt
+            case ExpressionTypeIndex:
+                tt := ExpressionCheckIndex.check(this , block , errs)
+                if tt != null {
+                    returnValueTypes = []Type{tt}
+                    this.value = tt
+                }
+            case ExpressionTypeSelection:
+                tt := ExpressionCheckSelection.check(this , block , errs)
+                if tt != null {
+                    returnValueTypes = []Type{tt}
+                    this.value = tt
+                }
+            case ExpressionTypeSelectionConst:
+                tt := ExpressionSelectConst.check(this , block , errs)
+                if tt != null {
+                    returnValueTypes = []Type{tt}
+                    this.value = tt
+                }
+            case ExpressionTypeCheckCast:
+                tt := ExpressionCheckTypeConversion.check(this , block , errs)
+                if tt != null {
+                    returnValueTypes = []Type{tt}
+                    this.value = tt
+                }
+            case ExpressionTypeNew:
+                tt := ExpressionCheckNew.check(this , block , errs)
+                if tt != null {
+                    returnValueTypes = []Type{tt}
+                    this.value = tt
+                }
+            case ExpressionTypePlusAssign,
+                ExpressionTypeMinusAssign,
+                ExpressionTypeMulAssign,
+                ExpressionTypeDivAssign,
+                ExpressionTypeModAssign,
+                ExpressionTypeAndAssign,
+                ExpressionTypeOrAssign,
+                ExpressionTypeLshAssign,
+                ExpressionTypeRshAssign,
+                ExpressionTypeXorAssign:
+                tt := ExpressionCheckOpAssign.check(this , block , errs)
+                if tt != null {
+                    returnValueTypes = []Type{tt}
+                }
+                this.value = tt
+            case ExpressionTypeRange:
+                errs.append(new error(sprintf("%s range is only work with 'for' statement" , errMsgPrefix(this.pos))))
+            case ExpressionTypeSlice:
+                tt := ExpressionCheckSlice.check(this , block , errs)
+                this.value = tt
+                if tt != null {
+                    returnValueTypes = []Type{tt}
+                }
+            case ExpressionTypeArray:
+                tt := ExprssionCheckArray.check(this , block , errs)
+                this.value = tt
+                if tt != null {
+                    returnValueTypes = []Type{tt}
+                }
+            case ExpressionTypeFunctionLiteral:
+                f := this.data.(Function)
+                if block.inheritedAttribute.p.statementLevelFunctions == null {
+                    block.inheritedAttribute.p.statementLevelFunctions = [f]
+                } else {
+                    block.inheritedAttribute.p.statementLevelFunctions.append(f)
+                }
+
+                if this.isStatementExpression {
+                    err := block.insert(f.name , f.pos , f)
+                    if err != null {
+                        errs.append(err)
+                    }
+                }
+                if f.locateDefinition {
+                    block.inheritedAttribute.p.setLocationDefinition(f)
+                    return
+                }
+                if f.findUsage {
+                    u := new Usage()
+                    u.Type = "declaration"
+                    u.pos = f.pos
+                    f.findUsageInstances = [u]
+                    block.inheritedAttribute.p.findUsage = f.findUsageInstances
+                }
+                es := f.check(block)
+                errs.appendAll(es)
+                returnValueTypes = new []Type(1)
+                returnValueTypes[0] = new Type()
+                returnValueTypes[0].Type = VariableTypeFunction
+                returnValueTypes[0].pos = this.pos
+                returnValueTypes[0].functionType = f.Type
+                this.value = returnValueTypes[0]
+            case ExpressionTypeList:
+                errs.append(new error(sprintf("%s cannot have expression '%s' at this scope," +
+                    "this may be cause by the compiler error,please contact the author" , this.pos.errMsgPrefix() , this.op)))
+            case ExpressionTypeGlobal:
+                returnValueTypes = new []Type(1)
+                returnValueTypes[0] = new Type()
+                returnValueTypes[0].Type = VariableTypePackage
+                returnValueTypes[0].pos = this.pos
+                returnValueTypes[0].Package = block.inheritedAttribute.p
+                this.value = returnValueTypes[0]
+            case ExpressionTypeParenthesis:
+                ee := this.data.(Expression) // override
+                returnValueTypes , errs = ee.check(block)
+                if len(returnValueTypes) > 0 {
+                    this.value = returnValueTypes[0]
+                }
                 return returnValueTypes , errs
-            }
-            this.value = t
-            returnValueTypes = []Type{t}
-            if t == null {
-                return
-            }
-            if t.Type != VariableTypeJavaArray {
-                errs.append(new error(sprintf("%s cannot pack non java array to variable-length arguments" , errMsgPrefix(this.pos))))
-                return
-            }
-            t.isVariableArgs = true
-        default:
-           panic(sprintf("unhandled type:%s" , this.op))
+            case ExpressionTypeVArgs:
+                var t Type
+                t , errs = this.data.(Expression).checkSingleValueContextExpression(block)
+                if len(errs) > 0 {
+                    return returnValueTypes , errs
+                }
+                this.value = t
+                returnValueTypes = []Type{t}
+                if t == null {
+                    return
+                }
+                if t.Type != VariableTypeJavaArray {
+                    errs.append(new error(sprintf("%s cannot pack non java array to variable-length arguments" , errMsgPrefix(this.pos))))
+                    return
+                }
+                t.isVariableArgs = true
+            default:
+                panic(sprintf("unhandled type:%s" , this.op))
         }
 
         return returnValueTypes , errs
@@ -757,14 +757,14 @@ public class Expression {
             panic("not number")
         }
         switch this.Type {
-        case ExpressionTypeByte , 
-            ExpressionTypeChar , 
-            ExpressionTypeShort , 
-            ExpressionTypeInt , 
-            ExpressionTypeLong:
-            return this.longValue
-        case ExpressionTypeFloat , ExpressionTypeDouble:
-            return long(this.doubleValue)
+            case ExpressionTypeByte,
+                ExpressionTypeChar,
+                ExpressionTypeShort,
+                ExpressionTypeInt,
+                ExpressionTypeLong:
+                return this.longValue
+            case ExpressionTypeFloat , ExpressionTypeDouble:
+                return long(this.doubleValue)
         }
 
         panic("no match")
@@ -775,15 +775,15 @@ public class Expression {
             panic("not number")
         }
         switch this.Type {
-        case ExpressionTypeByte , 
-            ExpressionTypeChar , 
-            ExpressionTypeShort , 
-            ExpressionTypeInt , 
-            ExpressionTypeLong:
-            return double(this.longValue)
-        case ExpressionTypeFloat , 
-            ExpressionTypeDouble:
-            return double(this.doubleValue)
+            case ExpressionTypeByte,
+                ExpressionTypeChar,
+                ExpressionTypeShort,
+                ExpressionTypeInt,
+                ExpressionTypeLong:
+                return double(this.longValue)
+            case ExpressionTypeFloat,
+                ExpressionTypeDouble:
+                return double(this.doubleValue)
         }
 
         panic("no match")
@@ -823,27 +823,27 @@ public class Expression {
             panic("not a number")
         }
         switch to {
-        case VariableTypeByte:
-            this.longValue = this.getLongValue()
-            this.Type = ExpressionTypeByte
-        case VariableTypeShort:
-            this.longValue = this.getLongValue()
-            this.Type = ExpressionTypeShort
-        case VariableTypeChar:
-            this.longValue = this.getLongValue()
-            this.Type = ExpressionTypeChar
-        case VariableTypeInt:
-            this.longValue = this.getLongValue()
-            this.Type = ExpressionTypeInt
-        case VariableTypeLong:
-            this.longValue = this.getLongValue()
-            this.Type = ExpressionTypeLong
-        case VariableTypeFloat:
-            this.doubleValue = this.getDoubleValue()
-            this.Type = ExpressionTypeFloat
-        case VariableTypeDouble:
-            this.doubleValue = this.getDoubleValue()
-            this.Type = ExpressionTypeDouble
+            case VariableTypeByte:
+                this.longValue = this.getLongValue()
+                this.Type = ExpressionTypeByte
+            case VariableTypeShort:
+                this.longValue = this.getLongValue()
+                this.Type = ExpressionTypeShort
+            case VariableTypeChar:
+                this.longValue = this.getLongValue()
+                this.Type = ExpressionTypeChar
+            case VariableTypeInt:
+                this.longValue = this.getLongValue()
+                this.Type = ExpressionTypeInt
+            case VariableTypeLong:
+                this.longValue = this.getLongValue()
+                this.Type = ExpressionTypeLong
+            case VariableTypeFloat:
+                this.doubleValue = this.getDoubleValue()
+                this.Type = ExpressionTypeFloat
+            case VariableTypeDouble:
+                this.doubleValue = this.getDoubleValue()
+                this.Type = ExpressionTypeDouble
         }
 
     }
@@ -896,19 +896,20 @@ public class Expression {
 
     fn checkIfConstantExceeds(errs []error) {
         switch this.Type {
-        case ExpressionTypeByte:
-            this.byteExceedsError(errs)
-        case ExpressionTypeChar:
-            this.charExceedsError(errs)
-        case ExpressionTypeShort:
-            this.shortExceedsError(errs)
-        case ExpressionTypeInt:
-            this.intExceedsError(errs)
-        case ExpressionTypeLong:
-            //TODO:: long check
+            case ExpressionTypeByte:
+                this.byteExceedsError(errs)
+            case ExpressionTypeChar:
+                this.charExceedsError(errs)
+            case ExpressionTypeShort:
+                this.shortExceedsError(errs)
+            case ExpressionTypeInt:
+                this.intExceedsError(errs)
+            case ExpressionTypeLong:
+                //TODO:: long check
 
         }
 
     }
 }
+
 

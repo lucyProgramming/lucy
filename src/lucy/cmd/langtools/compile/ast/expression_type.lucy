@@ -79,7 +79,6 @@ public class ExpressionTypeAssert extends ExpressionTypeConversion {
     public isType            bool // a.(type)  type is a key word , value is good enough 
 }
 
-
 public class ExpressionQuestion {
     public selection Expression
     public True      Expression
@@ -198,12 +197,31 @@ public class ExpressionNew {
 public class ExpressionMap {
     public Type          Type          
     public keyValuePairs []ExpressionKV
+
+    public fn containsLf() -> (contains bool) {
+        for k , v := range this.keyValuePairs {
+            if v.containsLfOrInlineComment() {
+                contains = true
+                return
+            }
+        }
+    }
 }
 
 
 public class ExpressionKV {
     public key   Expression
     public value Expression
+    /*
+		a // this is a inline comment
+	*/
+    public inlineComment string //   in
+
+    public containsLf bool // constains "\n"
+
+    public fn containsLfOrInlineComment() -> (constains bool) {
+        return this.containsLf || this.inlineComment != null
+    }
 }
 
 
@@ -225,4 +243,5 @@ public class ExpressionArray {
     public Type        Type        
     public expressions []Expression
 }
+
 

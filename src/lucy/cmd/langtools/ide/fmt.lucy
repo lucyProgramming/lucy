@@ -188,6 +188,7 @@ public class Fmt {
         } else {
             format += "{}\n"
         }
+
     }
 
     fn formatClass(indent string , c ast.Class) -> (format string = "") {
@@ -596,7 +597,6 @@ public class Fmt {
             }
 
         }
-
         if s.Else != null {
             format += " else {\n"
             format += this.formatBlock(indent + this.indentIncrement , s.Else)
@@ -1138,23 +1138,65 @@ public class Fmt {
                 m := e.data.(ast.ExpressionMap)
                 if m.Type == null {
                     format += "{"
+                    if m.containsLf() {
+                        format += "\n"
+                        format += indent + this.indentIncrement
+                    }
                     for k , v := range m.keyValuePairs {
                         format += this.formatExpression(indent , v.key) + " -> "
                         format += this.formatExpression(indent , v.value)
                         if k != len(m.keyValuePairs) - 1 {
-                            format += " , "
+                            if v.containsLfOrInlineComment() == false {
+                                format += " , "
+                            } else {
+                                format += ","
+                            }
+
+                            if v.containsLf {
+                                format += "\n"
+                                format += indent + this.indentIncrement
+                            } else if v.inlineComment != null {
+                                format += "//" + v.inlineComment
+                                format += indent + this.indentIncrement
+                            }
+                        } else {
+                            if m.containsLf() {
+                                format += "\n"
+                            }
                         }
+
                     }
 
                     format += "}"
                 } else {
                     format += sprintf("map{%s -> %s}{" , m.Type.Map.K.typeName() , m.Type.Map.V.typeName())
+                    if m.containsLf() {
+                        format += "\n"
+                        format += indent + this.indentIncrement
+                    }
                     for k , v := range m.keyValuePairs {
                         format += this.formatExpression(indent , v.key) + " -> "
                         format += this.formatExpression(indent , v.value)
                         if k != len(m.keyValuePairs) - 1 {
-                            format += " , "
+                            if v.containsLfOrInlineComment() == false {
+                                format += " , "
+                            } else {
+                                format += ","
+                            }
+
+                            if v.containsLf {
+                                format += "\n"
+                                format += indent + this.indentIncrement
+                            } else if v.inlineComment != null {
+                                format += "//" + v.inlineComment
+                                format += indent + this.indentIncrement
+                            }
+                        } else {
+                            if m.containsLf() {
+                                format += "\n"
+                            }
                         }
+
                     }
 
                     format += "}"
