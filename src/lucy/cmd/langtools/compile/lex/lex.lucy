@@ -836,7 +836,7 @@ public class Lexer {
 				c, eof = this.getChar()
 			}
 			token.endColumnOffset = this.columnOffset
-			token.literalRaw = string(this.bs[token.offset-1 : this.offset ])
+			token.literalRaw = string(this.bs[token.offset : this.offset ])
 			token.Type = TokenLiteralString
 			token.stringValue = string(bs)
 			token.description = string(bs)

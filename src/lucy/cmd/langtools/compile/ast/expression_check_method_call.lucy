@@ -1,659 +1,675 @@
 import "lucy/cmd/langtools/compile/common"
 
+
+
 class ExpressionCheckMethodCall {
-	
-	static fn autoCompletion(block Block , object Type , isThis bool) {
-		ExpressionCheckSelection.autoCompletion(object , block , isThis)
-	}
-	
-	static fn check(e Expression , block Block, errs []error) -> (valueTypes []Type) {
-		call := e.data.(ExpressionMethodCall)
-		if call.args == null {
-		    call.args = []Expression{}
-		}
-		object, es := call.Expression.checkSingleValueContextExpression(block)
-		errs.appendAll(es)
-		if object == null {
-			return null
-		}
-		if call.autoCompletion {
-			ExpressionCheckMethodCall.autoCompletion(block , object , call.Expression.isIdentifier(ThisPointerName))
-			return 
-		}
-		
-		// call father`s construction method
-		if call.name == Super && object.Type == VariableTypeObject {
-			.checkMethodCallExpressionOnSuper(e , block, errs, object)
-			return []Type{mkVoidType(e.pos)}
-		}
-		switch object.Type {
-		case VariableTypePackage:
-			return .checkMethodCallExpressionOnPackage(e , block, errs, object.Package)
-		case VariableTypeMap:
-			return .checkMethodCallExpressionOnMap(e , block, errs, object.Map)
-		case VariableTypeArray:
-			return .checkMethodCallExpressionOnArray(e , block, errs, object)
-		case VariableTypeJavaArray:
-			return .checkMethodCallExpressionOnJavaArray(e , block, errs, object)
-		case VariableTypeDynamicSelector:
-			if call.name == "finalize" {
-				errs.append(new error(sprintf("%s cannot call '%s'", e.pos.errMsgPrefix(), call.name)))
-				return null
-			}
-			return .checkMethodCallExpressionOnDynamicSelector(e , block, errs, object)
-		case VariableTypeString:
-			if call.name == "finalize" {
-				errs.append(new error(sprintf("%s cannot call '%s'", e.pos.errMsgPrefix(), call.name)))
-				return null
-			} 
-			if err := loadJavaStringClass(block  , e.pos); err != null {
-				errs.append(err)
-				return null
-			}
-			errsLength := len(errs)
-			args := checkExpressions(block, call.args, errs, true)
-			if len(errs) > errsLength {
-				return null
-			}
-			ms, matched, err := javaStringClass.accessMethod(block , e.pos, errs,new map{string -> bool} (), call, args,
-				false , javaStringClass.name , null)
-			if err != null {
-				errs.append(err)
-				return .returnValuesForFailCall(javaStringClass , block , call.name , e.pos)
-			}
-			if matched {
-				call.Class = javaStringClass
-				if false == call.Expression.isIdentifier(ThisPointerName) &&
-					ms[0].isPublic() == false {
-					errs.append(new error(sprintf("%s method '%s' is not public", e.pos.errMsgPrefix(), call.name)))
-				}
-				call.method = ms[0]
-				return ms[0].Function.Type.mkCallReturnTypes(e.pos)
-			} else {
-				errs.append(methodsNotMatchError(e.pos, call.name, ms, args))
-				return .returnValuesForFailCall(javaStringClass , block ,  call.name , e.pos)
-			}
-		case VariableTypeObject, 
-			VariableTypeClass:
-			defer {
-				if call.locateDefinition && block.inheritedAttribute.p.getLocationDefinition() == null {
-					x := object.Class.getMethodOrFieldHandleByName(block , call.name)
-					block.inheritedAttribute.p.setLocationDefinition(x)
-				}
-				
-			}
-			if call.name == "finalize" {
-				errs.append(new error(sprintf("%s cannot call '%s'", e.pos.errMsgPrefix(), call.name)))
-				return null
-			}
-			call.Class = object.Class
-			errsLength := len(errs)
-			callArgTypes := checkExpressions(block, call.args, errs, true)
-			if len(errs) > errsLength {
-				return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
-			}
-			if object.Class.isInterface() {
-				if object.Type == VariableTypeClass {
-					errs.append(new error(sprintf("%s cannot method call on interface '%s'",
-						e.pos.errMsgPrefix(), object.Class.name)))
-					
-					return .returnValuesForFailCall(object.Class , block ,call.name , e.pos)
-				}
-				if call.locateDefinition {
-					m ,_ := object.Class.getFieldOrMethod(block ,
-						e.pos , call.name ,  new map{string->bool}(),false , object.Class.name)
-					block.inheritedAttribute.p.setLocationDefinition(m)
-					return 
-				}
-				ms, matched, err := 
-					object.Class.accessInterfaceObjectMethod(block , e.pos, errs, new map{string -> bool}(), call.name, call, callArgTypes, false , object.Class.name)
-				if err != null {
-					errs.append(err)
-					return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
-				}
-				if matched {
-					if call.locateDefinition {
-						block.inheritedAttribute.p.setLocationDefinition(ms[0].Function)
-						return 
-					}
-					if ms[0].isStatic() {
-						errs.append(new error(sprintf("%s method '%s' is static",
-							e.pos.errMsgPrefix(), call.name)))
-					}
-					call.method = ms[0]
-					return ms[0].Function.Type.mkCallReturnTypes(e.pos)
-				}
-				errs.append(methodsNotMatchError(e.pos, call.name, ms, callArgTypes))
-				return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
-			}
-			if len(call.parameterTypes) > 0 {
-				errs.append(new error(sprintf("%s method call expect no parameter types",
-					errMsgPrefix(e.pos))))
-			}
-			if call.locateDefinition {
-				m ,_ := object.Class.getFieldOrMethod(block ,
-						e.pos , call.name , new map{string->bool}(), false , object.Class.name)
-				block.inheritedAttribute.p.setLocationDefinition(m) 
-				return 
-			}
-			
-			fieldMethodHandler := []ClassField{null}
-			ms, matched, err := object.Class.accessMethod(block , e.pos, errs,new map{string -> bool} (), call, callArgTypes,
-				false, object.Class.name , fieldMethodHandler)
-			if err != null {
-				errs.append(err)
-				if len(ms) > 0 {
-					return ms[0].Function.Type.mkCallReturnTypes(e.pos)
-				}
-				return null
-			}
-			if fieldMethodHandler[0] != null {
-				if call.locateDefinition {
-					block.inheritedAttribute.p.setLocationDefinition(fieldMethodHandler[0])
-					return 
-				}
-				err := call.Expression.fieldAccessAble(block, fieldMethodHandler[0])
-				if err != null {
-					errs.append(err)
-				}
-				call.fieldMethodHandler = fieldMethodHandler[0]
-				return fieldMethodHandler[0].Type.functionType.mkCallReturnTypes(e.pos)
-			}
-			if matched {
-				m := ms[0]
-				if call.locateDefinition {
-					block.inheritedAttribute.p.setLocationDefinition(m)
-					return 
-					//TODO if java 
-				}
-				err := call.Expression.methodAccessAble(block, m)
-				if err != null {
-					errs.append(err)
-				}
-				call.method = m
-				return m.Function.Type.mkCallReturnTypes(e.pos)
-			}
-			errs.append(methodsNotMatchError(e.pos, call.name, ms, callArgTypes))
-			return null
-		default:
-			errs.append(new error(sprintf("%s cannot make_node_objects method call '%s' on '%s'",
-				e.pos.errMsgPrefix(), call.name, object.typeString())))
-			return null
-		}
-	}
+    static fn autoCompletion(block Block , object Type , isThis bool) {
+        ExpressionCheckSelection.autoCompletion(object , block , isThis)
+    }
 
+    static fn check(e Expression , block Block , errs []error) -> (valueTypes []Type) {
+        call := e.data.(ExpressionMethodCall)
+        if call.args == null {
+            call.args = []Expression{}
+        }
+        object , es := call.Expression.checkSingleValueContextExpression(block)
+        errs.appendAll(es)
+        if object == null {
+            return null
+        }
+        if call.autoCompletion {
+            ExpressionCheckMethodCall.autoCompletion(block , object , call.Expression.isIdentifier(ThisPointerName))
+            return
+        }
+        // call father`s construction method
+        if call.name == Super && object.Type == VariableTypeObject {
+            .checkMethodCallExpressionOnSuper(e , block , errs , object)
+            return []Type{mkVoidType(e.pos)}
+        }
+        switch object.Type {
+        case VariableTypePackage:
+            return .checkMethodCallExpressionOnPackage(e , block , errs , object.Package)
+        case VariableTypeMap:
+            return .checkMethodCallExpressionOnMap(e , block , errs , object.Map)
+        case VariableTypeArray:
+            return .checkMethodCallExpressionOnArray(e , block , errs , object)
+        case VariableTypeJavaArray:
+            return .checkMethodCallExpressionOnJavaArray(e , block , errs , object)
+        case VariableTypeDynamicSelector:
+            if call.name == "finalize" {
+                errs.append(new error(sprintf("%s cannot call '%s'" , e.pos.errMsgPrefix() , call.name)))
+                return null
+            }
+            return .checkMethodCallExpressionOnDynamicSelector(e , block , errs , object)
+        case VariableTypeString:
+            if call.name == "finalize" {
+                errs.append(new error(sprintf("%s cannot call '%s'" , e.pos.errMsgPrefix() , call.name)))
+                return null
+            }
+            if err := loadJavaStringClass(block , e.pos) ; err != null {
+                errs.append(err)
+                return null
+            }
+            errsLength := len(errs)
+            args := checkExpressions(block , call.args , errs , true)
+            if len(errs) > errsLength {
+                return null
+            }
+            ms , matched , err := javaStringClass.accessMethod(block , e.pos , errs , new map{string -> bool}() , call , args , 
+                false , javaStringClass.name , null)
+            if err != null {
+                errs.append(err)
+                return .returnValuesForFailCall(javaStringClass , block , call.name , e.pos)
+            }
+            if matched {
+                call.Class = javaStringClass
+                if false == call.Expression.isIdentifier(ThisPointerName) &&
+                    ms[0].isPublic() == false {
+                    errs.append(new error(sprintf("%s method '%s' is not public" , e.pos.errMsgPrefix() , call.name)))
+                }
+                call.method = ms[0]
+                return ms[0].Function.Type.mkCallReturnTypes(e.pos)
+            } else {
+                errs.append(methodsNotMatchError(e.pos , call.name , ms , args))
+                return .returnValuesForFailCall(javaStringClass , block , call.name , e.pos)
+            }
 
-	static fn returnValuesForFailCall(c Class , block Block ,  name string , pos Pos ) ->(valueType []Type) {
-		x := c.getMethodOrFieldHandleByName(block , name )
-		if x == null {
-			return 
-		}
-		when x.(type) {
-			case ClassField:
-				t := x.(ClassField)
-				if t.Type.functionType != null {
-					return t.Type.functionType.mkCallReturnTypes(pos)
-				}
-			case ClassMethod:
-				t := x.(ClassMethod)
-				if t.Function != null && t.Function.Type != null {
-					return t.Function.Type.mkCallReturnTypes(pos)
-				}
-		}
-	} 
-	
-	/*
+        case VariableTypeObject , 
+            VariableTypeClass:
+            defer {
+
+                if call.locateDefinition && block.inheritedAttribute.p.getLocationDefinition() == null {
+                    x := object.Class.getMethodOrFieldHandleByName(block , call.name)
+                    block.inheritedAttribute.p.setLocationDefinition(x)
+                }
+            }
+
+            if call.name == "finalize" {
+                errs.append(new error(sprintf("%s cannot call '%s'" , e.pos.errMsgPrefix() , call.name)))
+                return null
+            }
+            call.Class = object.Class
+            errsLength := len(errs)
+            callArgTypes := checkExpressions(block , call.args , errs , true)
+            if len(errs) > errsLength {
+                return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
+            }
+            if object.Class.isInterface() {
+                if object.Type == VariableTypeClass {
+                    errs.append(new error(sprintf("%s cannot method call on interface '%s'" , 
+                        e.pos.errMsgPrefix() , object.Class.name)))
+
+                    return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
+                }
+                if call.locateDefinition {
+                    m , _ := object.Class.getFieldOrMethod(block , 
+                        e.pos , call.name , new map{string -> bool}() , false , object.Class.name)
+                    block.inheritedAttribute.p.setLocationDefinition(m)
+                    return
+                }
+                ms , matched , err :=
+                    object.Class.accessInterfaceObjectMethod(block , e.pos , errs , new map{string -> bool}() , call.name , call , callArgTypes , false , object.Class.name)
+                if err != null {
+                    errs.append(err)
+                    return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
+                }
+                if matched {
+                    if call.locateDefinition {
+                        block.inheritedAttribute.p.setLocationDefinition(ms[0].Function)
+                        return
+                    }
+                    if ms[0].isStatic() {
+                        errs.append(new error(sprintf("%s method '%s' is static" , 
+                            e.pos.errMsgPrefix() , call.name)))
+                    }
+                    call.method = ms[0]
+                    return ms[0].Function.Type.mkCallReturnTypes(e.pos)
+                }
+                errs.append(methodsNotMatchError(e.pos , call.name , ms , callArgTypes))
+                return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
+            }
+            if len(call.parameterTypes) > 0 {
+                errs.append(new error(sprintf("%s method call expect no parameter types" , 
+                    errMsgPrefix(e.pos))))
+            }
+            if call.locateDefinition {
+                m , _ := object.Class.getFieldOrMethod(block , 
+                    e.pos , call.name , new map{string -> bool}() , false , object.Class.name)
+                block.inheritedAttribute.p.setLocationDefinition(m)
+                return
+            }
+            fieldMethodHandler := []ClassField{null}
+            ms , matched , err := object.Class.accessMethod(block , e.pos , errs , new map{string -> bool}() , call , callArgTypes , 
+                false , object.Class.name , fieldMethodHandler)
+            if err != null {
+                errs.append(err)
+                if len(ms) > 0 {
+                    return ms[0].Function.Type.mkCallReturnTypes(e.pos)
+                }
+                return null
+            }
+            if fieldMethodHandler[0] != null {
+                if call.locateDefinition {
+                    block.inheritedAttribute.p.setLocationDefinition(fieldMethodHandler[0])
+                    return
+                }
+                err := call.Expression.fieldAccessAble(block , fieldMethodHandler[0])
+                if err != null {
+                    errs.append(err)
+                }
+                call.fieldMethodHandler = fieldMethodHandler[0]
+                return fieldMethodHandler[0].Type.functionType.mkCallReturnTypes(e.pos)
+            }
+            if matched {
+                m := ms[0]
+                if call.locateDefinition {
+                    block.inheritedAttribute.p.setLocationDefinition(m)
+                    return
+                    //TODO if java 
+                }
+                err := call.Expression.methodAccessAble(block , m)
+                if err != null {
+                    errs.append(err)
+                }
+                call.method = m
+                return m.Function.Type.mkCallReturnTypes(e.pos)
+            }
+            errs.append(methodsNotMatchError(e.pos , call.name , ms , callArgTypes))
+            return null
+        default:
+           errs.append(new error(sprintf("%s cannot make_node_objects method call '%s' on '%s'" , 
+               e.pos.errMsgPrefix() , call.name , object.typeString())))
+           return null
+        }
+
+    }
+
+    static fn returnValuesForFailCall(c Class , block Block , name string , pos Pos) -> (valueType []Type) {
+        x := c.getMethodOrFieldHandleByName(block , name)
+        if x == null {
+            return
+        }
+        when x.(type) {
+        case ClassField:
+            t := x.(ClassField)
+            if t.Type.functionType != null {
+                return t.Type.functionType.mkCallReturnTypes(pos)
+            }
+        case ClassMethod:
+            t := x.(ClassMethod)
+            if t.Function != null && t.Function.Type != null {
+                return t.Function.Type.mkCallReturnTypes(pos)
+            }
+        }
+    }
+
+    /*
 		this.super()
 	*/
-	static fn checkMethodCallExpressionOnSuper(
-	    e Expression,
-		block Block,
-		errs []error,
-		object Type) {
-		call := e.data.(ExpressionMethodCall)
-		if call.Expression.isIdentifier(ThisPointerName) == false {
-			errs.append(new error(sprintf("%s call father`s constuction must use 'thi.super()'",
-				e.pos.errMsgPrefix())))
-			return
-		}
-		if block.inheritedAttribute.isConstructionMethod == false ||
-			block.isFunctionBlock == false ||
-			block.inheritedAttribute.statementOffset != 0 {
-			errs.append(new error(sprintf("%s call father`s constuction on must first statement of a constructon method",
-					e.pos.errMsgPrefix())))
-			return
-		}
-		if object.Class.loadFromOutSide {
-			err := object.Class.loadSuperClass(block , e.pos)
-			if err != null {
-				errs.append(err)
-				return
-			}
-			if object.Class.superClass == null {
-				return
-			}
-		} else {
-			if object.Class.superClass == null {
-				return
-			}
-		}
-		errsLength := len(errs)
-		callArgsTypes := checkExpressions(block, call.args, errs, true)
-		if len(errs) > errsLength {
-			return
-		}
-		ms, matched, err := object.Class.superClass.accessConstructionMethod(block , e.pos, errs,
-			null, call, callArgsTypes)
-		if err != null {
-			errs.append(new error(sprintf("%s %s", e.pos.errMsgPrefix(), err.getMessage())))
-			return
-		}
-		if matched {
-			m := ms[0]
-			if call.locateDefinition {
-				if object.Class.loadFromOutSide == false {
-					block.inheritedAttribute.p.setLocationDefinition(m)
-					return 
-				}else {
-					//TODO :: 
-				}
-			}
-			if err := object.Class.superClass.constructionMethodAccessAble(e.pos, m); err != null {
-				errs.append(err)
-			}
-			call.name = "<init>"
-			call.method = m
-			call.Class = object.Class.superClass
-			block.statements[0].isCallFatherConstructionStatement = true
-			block.inheritedAttribute.Function.callFatherConstructionExpression = e
-			return
-		}
-		errs.append(methodsNotMatchError(e.pos, object.typeString(), ms, callArgsTypes))
-	}
+    static fn checkMethodCallExpressionOnSuper(
+        e Expression , 
+        block Block , 
+        errs []error , 
+        object Type) {
+        call := e.data.(ExpressionMethodCall)
+        if call.Expression.isIdentifier(ThisPointerName) == false {
+            errs.append(new error(sprintf("%s call father`s constuction must use 'thi.super()'" , 
+                e.pos.errMsgPrefix())))
+            return
+        }
+        if block.inheritedAttribute.isConstructionMethod == false ||
+            block.isFunctionBlock == false ||
+            block.inheritedAttribute.statementOffset != 0 {
+            errs.append(new error(sprintf("%s call father`s constuction on must first statement of a constructon method" , 
+                e.pos.errMsgPrefix())))
+            return
+        }
+        if object.Class.loadFromOutSide {
+            err := object.Class.loadSuperClass(block , e.pos)
+            if err != null {
+                errs.append(err)
+                return
+            }
+            if object.Class.superClass == null {
+                return
+            }
+        } else {
+            if object.Class.superClass == null {
+                return
+            }
+        }
 
-	static fn checkMethodCallExpressionOnDynamicSelector(e Expression , block Block, errs []error, object Type) -> (valueTypes []Type) {
-		call := e.data.(ExpressionMethodCall)
-		if call.name == Super {
-			errs.append(new error(sprintf("%s access '%s' at '%s' not allow",
-				e.pos.errMsgPrefix(), Super, object.typeString())))
-			return null
-		}
-		fieldMethodHandler :=[]ClassField{null}
-		errsLength := len(errs)
-		callArgTypes := checkExpressions(block, call.args, errs, true)
-		if len(errs) > errsLength {
-			return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
-		}
-		ms, matched, err := object.Class.accessMethod(block , e.pos, errs,new map{string -> bool} (),call, callArgTypes, false, object.Class.name, fieldMethodHandler)
-		if err != null {
-			errs.append(err)
-			return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
-		}
-		if matched {
-			if fieldMethodHandler[0] != null {
-				if call.locateDefinition {
-					if object.Class.loadFromOutSide == false {
-						block.inheritedAttribute.p.setLocationDefinition(fieldMethodHandler[0])
-						return 
-					}else {
-						//TODO :: 
-					}
-				}
-				call.fieldMethodHandler = fieldMethodHandler[0]
-				return fieldMethodHandler[0].Type.functionType.mkCallReturnTypes(e.pos)
-			} else {
-				method := ms[0]
-				call.method = method
-				if call.locateDefinition {
-					if object.Class.loadFromOutSide == false {
-						block.inheritedAttribute.p.setLocationDefinition(method)
-						return 
-					}else {
-						//TODO :: 
-					}
-				}
-				return method.Function.Type.mkCallReturnTypes(e.pos)
-			}
-		} else {
-			errs.append(methodsNotMatchError(e.pos, call.name, ms, callArgTypes))
-		}
-		return null
-	}
+        errsLength := len(errs)
+        callArgsTypes := checkExpressions(block , call.args , errs , true)
+        if len(errs) > errsLength {
+            return
+        }
+        ms , matched , err := object.Class.superClass.accessConstructionMethod(block , e.pos , errs , 
+            null , call , callArgsTypes)
+        if err != null {
+            errs.append(new error(sprintf("%s %s" , e.pos.errMsgPrefix() , err.getMessage())))
+            return
+        }
+        if matched {
+            m := ms[0]
+            if call.locateDefinition {
+                if object.Class.loadFromOutSide == false {
+                    block.inheritedAttribute.p.setLocationDefinition(m)
+                    return
+                } else {
+                    //TODO :: 
+                }
 
-	
-	static fn checkMethodCallExpressionOnJavaArray(e Expression , block Block, errs []error, array Type) -> (valueTypes []Type) {
-		call := e.data.(ExpressionMethodCall)
-		switch call.name {
-		case common.ArrayMethodSize:
-			result := new Type()
-			result.Type = VariableTypeInt
-			result.pos = e.pos
-			if len(call.args) > 0 {
-				errs.append(new error(sprintf("%s method '%s' expect no arguments",
-					call.args[0].pos.errMsgPrefix(), call.name)))
-			}
-			return []Type{result}
-		default:
-			errs.append(new error(sprintf("%s unkown call '%s' on '%s'",
-				e.pos.errMsgPrefix(), call.name, array.typeString())))
-		}
-		return null
-	}
-	
-	static fn checkMethodCallExpressionOnPackage(
-	    e Expression ,
-		block Block,
-		errs []error,
-		p Package) -> (valueTypes []Type) {
-		call := e.data.(ExpressionMethodCall)
-		d, exists := p.block.nameExists(call.name , e.pos)
-		if exists == false {
-			errs.append(new error(sprintf("%s function '%s' not found", e.pos.errMsgPrefix(), call.name)))
-			return null
-		}
-		if call.locateDefinition {
-			block.inheritedAttribute.p.setLocationDefinition(d)
-			return 
-		}
-		if f ,ok := d.(Function) ; ok {
-			if f.isPublic() == false &&
-				p.isSame(block.inheritedAttribute.p) == false {
-				errs.append(new error(sprintf("%s function '%s' is not public",
-					e.pos.errMsgPrefix(), call.name)))
-			}
-			if f.name ==  MainFunctionName {
-				errs.append(new error(sprintf("%s function '%s' is a entrance",
-					e.pos.errMsgPrefix(), call.name)))
-			}
-			if call.locateDefinition {
-				if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
-					block.inheritedAttribute.p.setLocationDefinition(f) 
-					return 
-				}else {
-					//TODO :: 
-				}
-			}
-			if f.templateFunction != null {
-				// better convert to function call
-				methodCall := e.data.(ExpressionMethodCall)
-				functionCall := new ExpressionFunctionCall()
-				functionCall.args = methodCall.args
-				functionCall.Function = f
-				functionCall.parameterTypes = methodCall.parameterTypes
-				e.Type = ExpressionTypeFunctionCall
-				e.data = functionCall
-				return ExpressionCheckFunctionCall.checkFunctionCall(e , block, errs, f, functionCall)
-			} else {
-				methodCall := e.data.(ExpressionMethodCall)
-				methodCall.packageFunction = f
-				valueTypes = f.Type.mkCallReturnTypes(e.pos)
-				errsLength := len(errs)
-				callArgsTypes := checkExpressions(block, methodCall.args, errs, true)
-				if len(errs) > errsLength {
-					return
-				}
-				var err error
-				methodCall.vArgs, err = f.Type.fitArgs(block , e.pos, call.args, callArgsTypes, f)
-				if err != null {
-					errs.append(err)
-				}
-				return
-			}
-		}
-		if v , ok:= d.(Variable) ; ok {
-			if call.locateDefinition {
-				if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
-					block.inheritedAttribute.p.setLocationDefinition(v)
-					return 
-				}else {
-					//TODO :: 
-				}
-			}
-			if v.isPublic() == false && p.isSame(block.inheritedAttribute.p) == false {
-				errs.append(new error( sprintf("%s variable '%s' is not public",
-					e.pos.errMsgPrefix(), call.name)))
-			}
-			if v.Type.Type != VariableTypeFunction {
-				errs.append(new error(sprintf("%s variable '%s' is not a function",
-					e.pos.errMsgPrefix(), call.name)))
-				return null
-			}
-			call := e.data.(ExpressionMethodCall)
-			if len(call.parameterTypes) > 0 {
-				errs.append(new error(sprintf("%s variable '%s' cannot be a template fucntion",
-					errMsgPrefix(call.parameterTypes[0].pos), call.name)))
-			}
-			ret := v.Type.functionType.mkCallReturnTypes(e.pos)
-			errsLength := len(errs)
-			callArgsTypes := checkExpressions(block, call.args, errs, true)
-			if len(errs) > errsLength {
-				return ret
-			}
-			vArgs, err := v.Type.functionType.fitArgs(block , e.pos, call.args, callArgsTypes, null)
-			if err != null {
-				errs.append(err)
-			}
-			call.packageGlobalVariableFunction = v
-			call.vArgs = vArgs
-			return ret
-		}
-		if c,ok := d.(Class) ; ok {
-			if call.locateDefinition {
-				if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
-					block.inheritedAttribute.p.setLocationDefinition(c)
-				}else {
-					//TODO :: 
-				}
-			}
-			if c.isPublic() == false && p.isSame(block.inheritedAttribute.p) == false {
-				errs.append(new error(sprintf("%s class '%s' is not public",
-					e.pos.errMsgPrefix(), call.name)))
-			}
-			conversion := new ExpressionTypeConversion()
-			conversion.Type = new Type()
-			conversion.Type.Type = VariableTypeObject
-			conversion.Type.pos = e.pos
-			conversion.Type.Class = c
-			e.Type = ExpressionTypeCheckCast
-			if len(call.args) >= 1 {
-				conversion.Expression = call.args[0]
-			}
-			e.data = conversion
-			if len(call.args) != 1 {
-				errs.append(new error(sprintf("%s cast type expect 1 argument", e.pos.errMsgPrefix())))
-				return []Type{conversion.Type.cloneType()}
-			}
-			return []Type{ExpressionCheckTypeConversion.check(e , block, errs)}
-		}
-		if t ,ok:= d.(Type) ; ok {
-			if call.locateDefinition {
-				if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
-					block.inheritedAttribute.p.setLocationDefinition(t)
-				}else {
-					//TODO :: 
-				}
-			}
-			if len(call.args) != 1 {
-				errs.append(new error(sprintf("%s cast type expect 1 argument",
-					e.pos.errMsgPrefix())))
-				result := p.block.typeAliases[call.name].cloneType()
-				result.pos = e.pos
-				return []Type{result}
-			}
-			conversion := new ExpressionTypeConversion()
-			conversion.Type = p.block.typeAliases[call.name]
-			e.Type = ExpressionTypeCheckCast
-			if len(call.args) >= 1 {
-				conversion.Expression = call.args[0]
-			}
-			e.data = conversion
-			return []Type{ExpressionCheckTypeConversion.check(e , block, errs)}
-		}
-		errs.append(new error(sprintf("%s '%s' is not a function",
-			e.pos.errMsgPrefix(), call.name)))
-		return null
-		 
-	}
-	static fn checkMethodCallExpressionOnArray(
-	    e Expression,
-		block Block,
-		errs []error,
-		array Type) -> (valueTypes []Type)  {
-		call := e.data.(ExpressionMethodCall)
-		switch call.name {
-		case common.ArrayMethodSize,
-			common.ArrayMethodCap,
-			common.ArrayMethodStart,
-			common.ArrayMethodEnd:
-			result := new Type()
-			result.Type = VariableTypeInt
-			result.pos = e.pos
-			if len(call.args) > 0 {
-				errs.append(new error(sprintf("%s too mamy argument to call,method '%s' expect no arguments",
-					call.args[0].pos.errMsgPrefix(), call.name)))
-			}
-			return []Type{result}
-		case common.ArrayMethodAppend,
-			common.ArrayMethodAppendAll:
-			if len(call.args) == 0 {
-				errs.append(new error(sprintf("%s too few arguments to call %s,expect at least one argument",
-					e.pos.errMsgPrefix(), call.name)))
-			}
-			ts := checkExpressions(block, call.args, errs, true)
-			for _, t := range ts {
-				if t == null {
-					continue
-				}
-				if call.name == common.ArrayMethodAppend {
-					if array.array.assignAble(block , errs, t) == false {
-						errs.append(new error(sprintf("%s cannot use '%s' as '%s' to call method '%s'",
-							t.pos.errMsgPrefix(), t.typeString(), array.array.typeString(), call.name)))
-					}
-				} else {
-					if array.assignAble(block , errs, t) == false {
-						errs.append(new error(sprintf("%s cannot use '%s' as '%s' to call method '%s'",
-							t.pos.errMsgPrefix(), t.typeString(), array.typeString(), call.name)))
-					}
-				}
-			}
-			result := new Type()
-			result.Type = VariableTypeVoid
-			result.pos = e.pos
-			return [result]
-		case common.ArrayMethodGetUnderlyingArray:
-			result := new Type()
-			result.Type = VariableTypeJavaArray
-			result.pos = e.pos
-			result.array = array.array.cloneType()
-			result.array.pos = e.pos
-			if len(call.args) > 0 {
-				errs.append(new error(sprintf("%s too mamy argument to call,method '%s' expect no arguments",
-					call.args[0].pos.errMsgPrefix(), call.name)))
-			}
-			return []Type{result}
-		case common.ArrayMethodSetReadOnly:
-			if len(call.args) == 0 {
-				errs.append(new error(sprintf("%s too few arguments to call %s,expect one argument",
-					e.pos.errMsgPrefix(), call.name)))
-			}else {
-				checkExpressions(block , call.args , errs , true)
-				if call.args[0].value != null && call.args[0].value.Type != VariableTypeBool {
-					errs.append(new error(sprintf("%s expect bool argument",
-						e.pos.errMsgPrefix())))
-				}
-				if len(call.args) > 1 {
-					errs.append(new error(sprintf("%s too few arguments to call %s,expect one argument",
-						e.pos.errMsgPrefix(), call.name)))
-				}
-			}
-			result := new Type()
-			result.Type = VariableTypeVoid
-			result.pos = e.pos
-			return [result]
-		default:
-			errs.append(new error(sprintf("%s unkown call '%s' on array", e.pos.errMsgPrefix(), call.name)))
-		}
-		return null
-	}
-	
-	static fn checkMethodCallExpressionOnMap(
-	    e Expression ,
-		block Block,
-		errs []error,
-		m Map)->(valueTypes []Type)  {
-		call := e.data.(ExpressionMethodCall)
-		switch call.name {
-		case common.MapMethodKeyExist:
-			ret := new Type()
-			ret.pos = e.pos
-			ret.Type = VariableTypeBool
-			if len(call.args) != 1 {
-				pos := e.pos
-				if len(call.args) != 0 {
-					pos = call.args[1].pos
-				}
-				errs.append(new error(sprintf("%s call '%s' expect one argument",
-					pos.errMsgPrefix(), call.name)))
-				return [ret]
-			}
-			t, es := call.args[0].checkSingleValueContextExpression(block)
-			errs.appendAll(es)
-			if t == null {
-				return [ret]
-			}
-			if false == m.K.assignAble(block, errs, t) {
-				errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-					t.pos.errMsgPrefix(), t.typeString(), m.K.typeString())))
-			}
-			return [ret]
-		case common.MapMethodRemove:
-			ret := new Type()
-			ret.pos = e.pos
-			ret.Type = VariableTypeVoid
-			if len(call.args) == 0 {
-				errs.append(new error(sprintf("%s remove expect at last 1 argement",
-					e.pos.errMsgPrefix())))
-				return [ret]
-			}
-			ts := checkExpressions(block, call.args, errs, true)
-			for _, t := range ts {
-				if t == null {
-					continue
-				}
-				if m.K.assignAble(block , errs, t) == false {
-					errs.append(new error(sprintf("%s cannot use '%s' as '%s' for map-key",
-						t.pos.errMsgPrefix(), t.typeString(), m.K.typeString())))
-				}
-			}
-			return [ret]
-		case common.MapMethodRemoveAll:
-			ret := new Type()
-			ret.pos = e.pos
-			ret.Type = VariableTypeVoid
-			if len(call.args) > 0 {
-				errs.append(new error(sprintf("%s '%s' expect no arguments",
-					e.pos.errMsgPrefix(), common.MapMethodRemoveAll)))
-			}
-			return [ret]
-		case common.MapMethodSize:
-			ret := new Type()
-			ret.pos = e.pos
-			ret.Type = VariableTypeInt
-			if len(call.args) > 0 {
-				errs.append(new error(sprintf("%s too many argument to call '%s''",
-					call.args[0].pos.errMsgPrefix(), call.name)))
-			}
-			return [ret]
-		
+            }
+            if err := object.Class.superClass.constructionMethodAccessAble(e.pos , m) ; err != null {
+                errs.append(err)
+            }
+            call.name = "<init>"
+            call.method = m
+            call.Class = object.Class.superClass
+            block.statements[0].isCallFatherConstructionStatement = true
+            block.inheritedAttribute.Function.callFatherConstructionExpression = e
+            return
+        }
+        errs.append(methodsNotMatchError(e.pos , object.typeString() , ms , callArgsTypes))
+    }
 
-		default:
-			errs.append(new error(sprintf("%s unkown call '%s' on map",
-				e.pos.errMsgPrefix(), call.name)))
-			return null
-		}
-		return null
-	}
+    static fn checkMethodCallExpressionOnDynamicSelector(e Expression , block Block , errs []error , object Type) -> (valueTypes []Type) {
+        call := e.data.(ExpressionMethodCall)
+        if call.name == Super {
+            errs.append(new error(sprintf("%s access '%s' at '%s' not allow" , 
+                e.pos.errMsgPrefix() , Super , object.typeString())))
+            return null
+        }
+        fieldMethodHandler := []ClassField{null}
+        errsLength := len(errs)
+        callArgTypes := checkExpressions(block , call.args , errs , true)
+        if len(errs) > errsLength {
+            return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
+        }
+        ms , matched , err := object.Class.accessMethod(block , e.pos , errs , new map{string -> bool}() , call , callArgTypes , false , object.Class.name , fieldMethodHandler)
+        if err != null {
+            errs.append(err)
+            return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
+        }
+        if matched {
+            if fieldMethodHandler[0] != null {
+                if call.locateDefinition {
+                    if object.Class.loadFromOutSide == false {
+                        block.inheritedAttribute.p.setLocationDefinition(fieldMethodHandler[0])
+                        return
+                    } else {
+                        //TODO :: 
+                    }
+
+                }
+                call.fieldMethodHandler = fieldMethodHandler[0]
+                return fieldMethodHandler[0].Type.functionType.mkCallReturnTypes(e.pos)
+            } else {
+                method := ms[0]
+                call.method = method
+                if call.locateDefinition {
+                    if object.Class.loadFromOutSide == false {
+                        block.inheritedAttribute.p.setLocationDefinition(method)
+                        return
+                    } else {
+                        //TODO :: 
+                    }
+
+                }
+                return method.Function.Type.mkCallReturnTypes(e.pos)
+            }
+
+        } else {
+            errs.append(methodsNotMatchError(e.pos , call.name , ms , callArgTypes))
+        }
+
+        return null
+    }
+
+    static fn checkMethodCallExpressionOnJavaArray(e Expression , block Block , errs []error , array Type) -> (valueTypes []Type) {
+        call := e.data.(ExpressionMethodCall)
+        switch call.name {
+        case common.ArrayMethodSize:
+            result := new Type()
+            result.Type = VariableTypeInt
+            result.pos = e.pos
+            if len(call.args) > 0 {
+                errs.append(new error(sprintf("%s method '%s' expect no arguments" , 
+                    call.args[0].pos.errMsgPrefix() , call.name)))
+            }
+            return []Type{result}
+        default:
+           errs.append(new error(sprintf("%s unkown call '%s' on '%s'" , 
+               e.pos.errMsgPrefix() , call.name , array.typeString())))
+        }
+
+        return null
+    }
+
+    static fn checkMethodCallExpressionOnPackage(
+        e Expression , 
+        block Block , 
+        errs []error , 
+        p Package) -> (valueTypes []Type) {
+        call := e.data.(ExpressionMethodCall)
+        d , exists := p.block.nameExists(call.name , e.pos)
+        if exists == false {
+            errs.append(new error(sprintf("%s function '%s' not found" , e.pos.errMsgPrefix() , call.name)))
+            return null
+        }
+        if call.locateDefinition {
+            block.inheritedAttribute.p.setLocationDefinition(d)
+            return
+        }
+        if f , ok := d.(Function) ; ok {
+            if f.isPublic() == false &&
+                p.isSame(block.inheritedAttribute.p) == false {
+                errs.append(new error(sprintf("%s function '%s' is not public" , 
+                    e.pos.errMsgPrefix() , call.name)))
+            }
+            if f.name == MainFunctionName {
+                errs.append(new error(sprintf("%s function '%s' is a entrance" , 
+                    e.pos.errMsgPrefix() , call.name)))
+            }
+            if call.locateDefinition {
+                if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
+                    block.inheritedAttribute.p.setLocationDefinition(f)
+                    return
+                } else {
+                    //TODO :: 
+                }
+
+            }
+            if f.templateFunction != null {
+                // better convert to function call
+                methodCall := e.data.(ExpressionMethodCall)
+                functionCall := new ExpressionFunctionCall()
+                functionCall.args = methodCall.args
+                functionCall.Function = f
+                functionCall.parameterTypes = methodCall.parameterTypes
+                e.Type = ExpressionTypeFunctionCall
+                e.data = functionCall
+                return ExpressionCheckFunctionCall.checkFunctionCall(e , block , errs , f , functionCall)
+            } else {
+                methodCall := e.data.(ExpressionMethodCall)
+                methodCall.packageFunction = f
+                valueTypes = f.Type.mkCallReturnTypes(e.pos)
+                errsLength := len(errs)
+                callArgsTypes := checkExpressions(block , methodCall.args , errs , true)
+                if len(errs) > errsLength {
+                    return
+                }
+                var err error
+                methodCall.vArgs , err = f.Type.fitArgs(block , e.pos , call.args , callArgsTypes , f)
+                if err != null {
+                    errs.append(err)
+                }
+                return
+            }
+
+        }
+        if v , ok := d.(Variable) ; ok {
+            if call.locateDefinition {
+                if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
+                    block.inheritedAttribute.p.setLocationDefinition(v)
+                    return
+                } else {
+                    //TODO :: 
+                }
+
+            }
+            if v.isPublic() == false && p.isSame(block.inheritedAttribute.p) == false {
+                errs.append(new error(sprintf("%s variable '%s' is not public" , 
+                    e.pos.errMsgPrefix() , call.name)))
+            }
+            if v.Type.Type != VariableTypeFunction {
+                errs.append(new error(sprintf("%s variable '%s' is not a function" , 
+                    e.pos.errMsgPrefix() , call.name)))
+                return null
+            }
+            call := e.data.(ExpressionMethodCall)
+            if len(call.parameterTypes) > 0 {
+                errs.append(new error(sprintf("%s variable '%s' cannot be a template fucntion" , 
+                    errMsgPrefix(call.parameterTypes[0].pos) , call.name)))
+            }
+            ret := v.Type.functionType.mkCallReturnTypes(e.pos)
+            errsLength := len(errs)
+            callArgsTypes := checkExpressions(block , call.args , errs , true)
+            if len(errs) > errsLength {
+                return ret
+            }
+            vArgs , err := v.Type.functionType.fitArgs(block , e.pos , call.args , callArgsTypes , null)
+            if err != null {
+                errs.append(err)
+            }
+            call.packageGlobalVariableFunction = v
+            call.vArgs = vArgs
+            return ret
+        }
+        if c , ok := d.(Class) ; ok {
+            if call.locateDefinition {
+                if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
+                    block.inheritedAttribute.p.setLocationDefinition(c)
+                } else {
+                    //TODO :: 
+                }
+
+            }
+            if c.isPublic() == false && p.isSame(block.inheritedAttribute.p) == false {
+                errs.append(new error(sprintf("%s class '%s' is not public" , 
+                    e.pos.errMsgPrefix() , call.name)))
+            }
+            conversion := new ExpressionTypeConversion()
+            conversion.Type = new Type()
+            conversion.Type.Type = VariableTypeObject
+            conversion.Type.pos = e.pos
+            conversion.Type.Class = c
+            e.Type = ExpressionTypeCheckCast
+            if len(call.args) >= 1 {
+                conversion.Expression = call.args[0]
+            }
+            e.data = conversion
+            if len(call.args) != 1 {
+                errs.append(new error(sprintf("%s cast type expect 1 argument" , e.pos.errMsgPrefix())))
+                return []Type{conversion.Type.cloneType()}
+            }
+            return []Type{ExpressionCheckTypeConversion.check(e , block , errs)}
+        }
+        if t , ok := d.(Type) ; ok {
+            if call.locateDefinition {
+                if p.isSame(block.inheritedAttribute.p) || p.javaPackage == null {
+                    block.inheritedAttribute.p.setLocationDefinition(t)
+                } else {
+                    //TODO :: 
+                }
+
+            }
+            if len(call.args) != 1 {
+                errs.append(new error(sprintf("%s cast type expect 1 argument" , 
+                    e.pos.errMsgPrefix())))
+                result := p.block.typeAliases[call.name].cloneType()
+                result.pos = e.pos
+                return []Type{result}
+            }
+            conversion := new ExpressionTypeConversion()
+            conversion.Type = p.block.typeAliases[call.name]
+            e.Type = ExpressionTypeCheckCast
+            if len(call.args) >= 1 {
+                conversion.Expression = call.args[0]
+            }
+            e.data = conversion
+            return []Type{ExpressionCheckTypeConversion.check(e , block , errs)}
+        }
+        errs.append(new error(sprintf("%s '%s' is not a function" , 
+            e.pos.errMsgPrefix() , call.name)))
+        return null
+
+    }
+    static fn checkMethodCallExpressionOnArray(
+        e Expression , 
+        block Block , 
+        errs []error , 
+        array Type) -> (valueTypes []Type) {
+        call := e.data.(ExpressionMethodCall)
+        switch call.name {
+        case common.ArrayMethodSize , 
+            common.ArrayMethodCap , 
+            common.ArrayMethodStart , 
+            common.ArrayMethodEnd:
+            result := new Type()
+            result.Type = VariableTypeInt
+            result.pos = e.pos
+            if len(call.args) > 0 {
+                errs.append(new error(sprintf("%s too mamy argument to call,method '%s' expect no arguments" , 
+                    call.args[0].pos.errMsgPrefix() , call.name)))
+            }
+            return []Type{result}
+        case common.ArrayMethodAppend , 
+            common.ArrayMethodAppendAll:
+            if len(call.args) == 0 {
+                errs.append(new error(sprintf("%s too few arguments to call %s,expect at least one argument" , 
+                    e.pos.errMsgPrefix() , call.name)))
+            }
+            ts := checkExpressions(block , call.args , errs , true)
+            for _ , t := range ts {
+                if t == null {
+                    continue
+                }
+                if call.name == common.ArrayMethodAppend {
+                    if array.array.assignAble(block , errs , t) == false {
+                        errs.append(new error(sprintf("%s cannot use '%s' as '%s' to call method '%s'" , 
+                            t.pos.errMsgPrefix() , t.typeString() , array.array.typeString() , call.name)))
+                    }
+                } else {
+                    if array.assignAble(block , errs , t) == false {
+                        errs.append(new error(sprintf("%s cannot use '%s' as '%s' to call method '%s'" , 
+                            t.pos.errMsgPrefix() , t.typeString() , array.typeString() , call.name)))
+                    }
+                }
+
+            }
+
+            result := new Type()
+            result.Type = VariableTypeVoid
+            result.pos = e.pos
+            return [result]
+        case common.ArrayMethodGetUnderlyingArray:
+            result := new Type()
+            result.Type = VariableTypeJavaArray
+            result.pos = e.pos
+            result.array = array.array.cloneType()
+            result.array.pos = e.pos
+            if len(call.args) > 0 {
+                errs.append(new error(sprintf("%s too mamy argument to call,method '%s' expect no arguments" , 
+                    call.args[0].pos.errMsgPrefix() , call.name)))
+            }
+            return []Type{result}
+        case common.ArrayMethodSetReadOnly:
+            if len(call.args) == 0 {
+                errs.append(new error(sprintf("%s too few arguments to call %s,expect one argument" , 
+                    e.pos.errMsgPrefix() , call.name)))
+            } else {
+                checkExpressions(block , call.args , errs , true)
+                if call.args[0].value != null && call.args[0].value.Type != VariableTypeBool {
+                    errs.append(new error(sprintf("%s expect bool argument" , 
+                        e.pos.errMsgPrefix())))
+                }
+                if len(call.args) > 1 {
+                    errs.append(new error(sprintf("%s too few arguments to call %s,expect one argument" , 
+                        e.pos.errMsgPrefix() , call.name)))
+                }
+            }
+
+            result := new Type()
+            result.Type = VariableTypeVoid
+            result.pos = e.pos
+            return [result]
+        default:
+           errs.append(new error(sprintf("%s unkown call '%s' on array" , e.pos.errMsgPrefix() , call.name)))
+        }
+
+        return null
+    }
+
+    static fn checkMethodCallExpressionOnMap(
+        e Expression , 
+        block Block , 
+        errs []error , 
+        m Map) -> (valueTypes []Type) {
+        call := e.data.(ExpressionMethodCall)
+        switch call.name {
+        case common.MapMethodKeyExist:
+            ret := new Type()
+            ret.pos = e.pos
+            ret.Type = VariableTypeBool
+            if len(call.args) != 1 {
+                pos := e.pos
+                if len(call.args) != 0 {
+                    pos = call.args[1].pos
+                }
+                errs.append(new error(sprintf("%s call '%s' expect one argument" , 
+                    pos.errMsgPrefix() , call.name)))
+                return [ret]
+            }
+            t , es := call.args[0].checkSingleValueContextExpression(block)
+            errs.appendAll(es)
+            if t == null {
+                return [ret]
+            }
+            if false == m.K.assignAble(block , errs , t) {
+                errs.append(new error(sprintf("%s cannot use '%s' as '%s'" , 
+                    t.pos.errMsgPrefix() , t.typeString() , m.K.typeString())))
+            }
+            return [ret]
+        case common.MapMethodRemove:
+            ret := new Type()
+            ret.pos = e.pos
+            ret.Type = VariableTypeVoid
+            if len(call.args) == 0 {
+                errs.append(new error(sprintf("%s remove expect at last 1 argement" , 
+                    e.pos.errMsgPrefix())))
+                return [ret]
+            }
+            ts := checkExpressions(block , call.args , errs , true)
+            for _ , t := range ts {
+                if t == null {
+                    continue
+                }
+                if m.K.assignAble(block , errs , t) == false {
+                    errs.append(new error(sprintf("%s cannot use '%s' as '%s' for map-key" , 
+                        t.pos.errMsgPrefix() , t.typeString() , m.K.typeString())))
+                }
+            }
+
+            return [ret]
+        case common.MapMethodRemoveAll:
+            ret := new Type()
+            ret.pos = e.pos
+            ret.Type = VariableTypeVoid
+            if len(call.args) > 0 {
+                errs.append(new error(sprintf("%s '%s' expect no arguments" , 
+                    e.pos.errMsgPrefix() , common.MapMethodRemoveAll)))
+            }
+            return [ret]
+        case common.MapMethodSize:
+            ret := new Type()
+            ret.pos = e.pos
+            ret.Type = VariableTypeInt
+            if len(call.args) > 0 {
+                errs.append(new error(sprintf("%s too many argument to call '%s''" , 
+                    call.args[0].pos.errMsgPrefix() , call.name)))
+            }
+            return [ret]
+
+        default:
+           errs.append(new error(sprintf("%s unkown call '%s' on map" , 
+               e.pos.errMsgPrefix() , call.name)))
+           return null
+        }
+
+        return null
+    }
 
 }
 
- 
