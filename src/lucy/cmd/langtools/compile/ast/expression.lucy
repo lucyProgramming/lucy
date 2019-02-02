@@ -33,6 +33,9 @@ public class Expression {
     public fn Expression() {
         this.super()
     }
+    public fn containsLfOrInlineComment() ->(constains bool) {
+		return this.containsLf || this.inlineComment != null
+	}
 
     public fn isIdentifier(identifier string) -> (is bool) {
         if this.Type != ExpressionTypeIdentifier {

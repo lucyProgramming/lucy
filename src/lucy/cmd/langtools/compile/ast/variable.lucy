@@ -30,6 +30,10 @@ public class Variable {
 
     public containsLf bool // constains "\n"
 
+    public fn containsLfOrInlineComment() ->(constains bool) {
+		return this.containsLf || this.inlineComment != null
+	}
+
     public fn isPublic() -> (is bool) {
         return this.accessFlags &
             cg.AccFieldPublic != 0

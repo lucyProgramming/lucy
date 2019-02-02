@@ -29,7 +29,10 @@ public class Type {
     public inlineComment string //   in
 
     public containsLf bool // constains "\n"
-
+    
+    public fn containsLfOrInlineComment() ->(constains bool) {
+		return this.containsLf || this.inlineComment != null
+	}
     // copy to t 
     fn cp(t Type) {
         t.Type = this.Type

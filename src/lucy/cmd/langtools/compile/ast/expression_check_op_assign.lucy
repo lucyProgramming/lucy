@@ -1,108 +1,108 @@
-
 class ExpressionCheckOpAssign {
-	static fn check(e Expression , block Block, errs []error) -> (valueType Type) {
-		bin := e.data.(ExpressionBinary)
-		if bin.left.Type == ExpressionTypeList {
-			list := bin.left.data.([]Expression)
-			if len(list) > 1 {
-				errs.append(new error(sprintf("%s expect 1 expression on left",
-						errMsgPrefix(e.pos))))
-			}
-			bin.left = list[0]
-		}
-		left := bin.left.getLeftValue(block, errs)
-		if bin.right == null {
-			return 
-		}
-		right, es := bin.right.checkSingleValueContextExpression(block)
-		errs.appendAll(es)
-		if left == null || right == null {
-			if left == null && 
-				bin.left.Type == ExpressionTypeIdentifier && 
-				right != null {
-				identifier := bin.left.data.(ExpressionIdentifier)
-				vd := new Variable()
-				vd.name = identifier.name
-				vd.pos = bin.left.pos
-				vd.Type = right
-				// create the var
-				block.insert(identifier.name , bin.left.pos , vd)
-			}
-			return
-		}
-		valueType = left.cloneType()
-		valueType.pos = e.pos
-		if err := right.rightValueValid(); err != null {
-			errs.append(err)
-			return valueType
-		}
-		if bin.left.Type == ExpressionTypeIdentifier &&
-			e.isStatementExpression == false {
-			/*
+    static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
+        bin := e.data.(ExpressionBinary)
+        if bin.left.Type == ExpressionTypeList {
+            list := bin.left.data.([]Expression)
+            if len(list) > 1 {
+                errs.append(new error(sprintf("%s expect 1 expression on left",
+                    errMsgPrefix(e.pos))))
+            }
+            bin.left = list[0]
+        }
+        left := bin.left.getLeftValue(block , errs)
+        if bin.right == null {
+            return
+        }
+        right , es := bin.right.checkSingleValueContextExpression(block)
+        errs.appendAll(es)
+        if left == null || right == null {
+            if left == null &&
+                bin.left.Type == ExpressionTypeIdentifier &&
+                right != null {
+                identifier := bin.left.data.(ExpressionIdentifier)
+                vd := new Variable()
+                vd.name = identifier.name
+                vd.pos = bin.left.pos
+                vd.Type = right
+                // create the var
+                block.insert(identifier.name , bin.left.pos , vd)
+            }
+            return
+        }
+        valueType = left.cloneType()
+        valueType.pos = e.pos
+        if err := right.rightValueValid() ; err != null {
+            errs.append(err)
+            return valueType
+        }
+        if bin.left.Type == ExpressionTypeIdentifier &&
+            e.isStatementExpression == false {
+            /*
 				var a = 1
 				print(a += 1)
 			*/
-			t := bin.left.data.(ExpressionIdentifier)
-			if t.Variable != null {
-				t.Variable.used = true
-			}
-		}
-		convertExpressionToNeed(block , bin.right, left, right)
-		/*
+            t := bin.left.data.(ExpressionIdentifier)
+            if t.Variable != null {
+                t.Variable.used = true
+            }
+        }
+        convertExpressionToNeed(block , bin.right , left , right)
+        /*
 			var  s string
 			s += "11111111"
 		*/
-		if left.Type == VariableTypeString {
-			if right.Type == VariableTypeString &&
-				(e.Type == ExpressionTypePlusAssign) {
-				return valueType
-			}
-		}
-		//number
-		if e.Type == ExpressionTypePlusAssign ||
-			e.Type == ExpressionTypeMinusAssign ||
-			e.Type == ExpressionTypeMulAssign ||
-			e.Type == ExpressionTypeDivAssign ||
-			e.Type == ExpressionTypeModAssign {
-			if left.assignAble(block , errs, right) {
-				return
-			}
-			if left.isInteger() && 
-				right.isInteger() && 
-				bin.right.isLiteral()  {
-				bin.right.convertToNumberType(left.Type)
-				return
-			}
-			if left.isFloat() && 
-				right.isFloat() && 
-				bin.right.isLiteral()  {
-				bin.right.convertToNumberType(left.Type)
-				return
-			}
-		}
-		if e.Type == ExpressionTypeAndAssign ||
-			e.Type == ExpressionTypeOrAssign ||
-			e.Type == ExpressionTypeXorAssign {
-			if left.isInteger() && left.assignAble(block , errs, right) {
-				return
-			}
-		}
-		if e.Type == ExpressionTypeLshAssign ||
-			e.Type == ExpressionTypeRshAssign {
-			if left.isInteger() && right.isInteger() {
-				if right.Type == VariableTypeLong {
-					bin.right.convertToNumberType(VariableTypeInt)
-				}
-				return
-			}
-		}
-		errs.append(new error(sprintf("%s cannot apply algorithm '%s' on '%s' and '%s'",
-			e.pos.errMsgPrefix(),
-			e.op,
-			left.typeString(),
-			right.typeString())))
-			
-	}
+        if left.Type == VariableTypeString {
+            if right.Type == VariableTypeString &&
+                (e.Type == ExpressionTypePlusAssign) {
+                return valueType
+            }
+        }
+        //number
+        if e.Type == ExpressionTypePlusAssign ||
+            e.Type == ExpressionTypeMinusAssign ||
+            e.Type == ExpressionTypeMulAssign ||
+            e.Type == ExpressionTypeDivAssign ||
+            e.Type == ExpressionTypeModAssign {
+            if left.assignAble(block , errs , right) {
+                return
+            }
+            if left.isInteger() &&
+                right.isInteger() &&
+                bin.right.isLiteral() {
+                bin.right.convertToNumberType(left.Type)
+                return
+            }
+            if left.isFloat() &&
+                right.isFloat() &&
+                bin.right.isLiteral() {
+                bin.right.convertToNumberType(left.Type)
+                return
+            }
+        }
+        if e.Type == ExpressionTypeAndAssign ||
+            e.Type == ExpressionTypeOrAssign ||
+            e.Type == ExpressionTypeXorAssign {
+            if left.isInteger() && left.assignAble(block , errs , right) {
+                return
+            }
+        }
+        if e.Type == ExpressionTypeLshAssign ||
+            e.Type == ExpressionTypeRshAssign {
+            if left.isInteger() && right.isInteger() {
+                if right.Type == VariableTypeLong {
+                    bin.right.convertToNumberType(VariableTypeInt)
+                }
+                return
+            }
+        }
+        errs.append(new error(sprintf("%s cannot apply algorithm '%s' on '%s' and '%s'",
+            e.pos.errMsgPrefix(),
+            e.op,
+            left.typeString(),
+            right.typeString())))
+
+    }
+
+}
 
 
-} 

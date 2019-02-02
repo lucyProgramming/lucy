@@ -1,363 +1,368 @@
 import "lucy/jvm/cg"
 
-typealias BuildInFunctionChecker = fn(
-	f Function,
-	e ExpressionFunctionCall,
-	block Block,
-	errs []error,
-	args []Type,
-	pos Pos) // usEed in build function
+typealias BuildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error , args []Type , pos Pos)
 
 
 public class Function {
-	public callFatherConstructionExpression Expression
-	public templateFunction                 TemplateFunction
-	parameterTypes                   		map { string -> Type }     //typed parameters
-	public entrance                         cg.MethodHighLevel // make_node_objects call from
-	buildInFunctionChecker           		BuildInFunctionChecker
-	public accessFlags                      char
-	public Type                             FunctionType = new FunctionType()
-	public closure                          Closure = new Closure()
-	public name                             string // if name is null string,means no name function
-	public block                            Block = new Block()
-	public pos                              Pos
-	public jvmDescriptor                    string
-	public closureVariableOffSet            char // for closure
-	public sourceCode                       []byte // source code for template function
-	public hasDefer                         bool
-	public haveDefaultValue                 bool
-	public defaultValueStartAt              int
-	public isGlobal                         bool
-	public isBuildIn                        bool
-	public loadedFromCorePackage            bool
-	public used                             bool
-	public templateClonedFunction           bool
-	public comment                          string
-	public isClosureFunction                bool
-	public locateDefinition     			bool 
-	public findUsage  						bool 
-	public rename 							bool 
-	findUsageInstances 						[]Usage 
-	public startLine 						int 
-	public endLine 							int 
+    public callFatherConstructionExpression Expression            
+    public templateFunction                 TemplateFunction      
+           parameterTypes                   map{string -> Type}    //typed parameters
+    public entrance                         cg.MethodHighLevel     // make_node_objects call from
+           buildInFunctionChecker           BuildInFunctionChecker
+    public accessFlags                      char                  
+    public Type                             FunctionType = new FunctionType()
+    public closure                          Closure = new Closure()
+    public name                             string                 // if name is null string,means no name function
+    public block                            Block = new Block()
+    public pos                              Pos                   
+    public jvmDescriptor                    string                
+    public closureVariableOffSet            char                   // for closure
+    public sourceCode                       []byte                 // source code for template function
+    public hasDefer                         bool                  
+    public haveDefaultValue                 bool                  
+    public defaultValueStartAt              int                   
+    public isGlobal                         bool                  
+    public isBuildIn                        bool                  
+    public loadedFromCorePackage            bool                  
+    public used                             bool                  
+    public templateClonedFunction           bool                  
+    public comment                          string                
+    public isClosureFunction                bool                  
+    public locateDefinition                 bool                  
+    public findUsage                        bool                  
+    public rename                           bool                  
+           findUsageInstances               []Usage               
+    public startLine                        int                   
+    public endLine                          int                   
 
-	
-	public fn isPublic() -> (is bool) {
-		return this.accessFlags&cg.AccMethodPublic != 0
-	}
-	
-	fn mkSuggest() ->(s string ) {
-		s = sprintf("%s(" , this.name)
-		length := len(this.Type.parameterList)
-		if this.haveDefaultValue {
-			length = this.defaultValueStartAt
-		}
-		if this.Type.parameterList != null {
-			for k , v := range this.Type.parameterList[:length] {
-				if v.name != null && v.name != "" {
-					s += v.name 
-				}else {
-					s += "var" + k
-				}
-				if k != length - 1 {
-					s += " , "
-				}
-			}
-		}
-		s += ")"
-	}
-	
-	public fn mkDescription() ->(d string = "") {
-		if this.isBuildIn {
-			return this.mkBuildInFunctionDescription()
-		}
-		if this.comment != null {
-			d += this.comment
-		}
-		d += this.readableMsg(true)
-	}
-	
-	public fn mkBuildInFunctionDescription() ->(d string = "") {
-		//TODO:: more information 
-		d = "buildin " + this.name 
-	}
+    public fn isPublic() -> (is bool) {
+        return this.accessFlags & cg.AccMethodPublic != 0
+    }
 
-	
-	public fn nameLiteralFunction() -> (name string) {
-		if this.name != null && this.name != "" {
-			return this.name
-		}
-		var t string
-		if this.name != null && this.name != "" {
-			t = this.block.inheritedAttribute.classAndFunctionNames + this.name
-		}
-		return t
-	}
+    fn mkSuggest() -> (s string) {
+        s = sprintf("%s(" , this.name)
+        length := len(this.Type.parameterList)
+        if this.haveDefaultValue {
+            length = this.defaultValueStartAt
+        }
+        if this.Type.parameterList != null {
+            for k , v := range this.Type.parameterList[:length] {
+                if v.name != null && v.name != "" {
+                    s += v.name
+                } else {
+                    s += "var" + k
+                }
 
-	public fn readableMsg(format bool...) -> (r string)  {
-		if this.name == null ||
-			this.name == "" {
-			return "fn " + this.Type.typeString(format)
-		} else {
-			return "fn " + this.name + this.Type.typeString(format)
-		}
-	}
-	
-	fn makeName() {
-		if this.name == null || this.name == "" {
-			if this.block.inheritedAttribute.classAndFunctionNames == null ||
-				this.block.inheritedAttribute.classAndFunctionNames == "" {
-				this.name = sprintf("literal$%d", this.pos.endLine)
-			} else {
-				this.name = sprintf("%s$literal%d",
-					this.block.inheritedAttribute.classAndFunctionNames, this.pos.endLine)
-			}
-		}
-		name := this.name
-		if name == SpecialMethodInit {
-			name = "init"
-		}
-		if this.block.inheritedAttribute.classAndFunctionNames == null ||
-			this.block.inheritedAttribute.classAndFunctionNames == "" {
-			this.block.inheritedAttribute.classAndFunctionNames = name
-		} else {
-			this.block.inheritedAttribute.classAndFunctionNames += "$" + name
-		}
-	}
+                if k != length - 1 {
+                    s += " , "
+                }
+            }
 
-	fn checkBlock(errs []error) {
-		this.makeName()
-		this.makeLastReturnStatement()
-		errs.appendAll(this.block.check())
-	}
+        }
+        s += ")"
+    }
 
-	fn check(b Block) -> (errs []error= []error{}) {
-		this.block.inherit(b)
-		this.block.inheritedAttribute.Function = this
-		this.checkParametersAndReturns(errs, true, false)
-		if this.templateFunction == null {
-			this.checkBlock(errs)
-		}
-		return errs
-	}
-	
-	fn cloneFunction() -> (ret Function, es []error) {
-		ret, es = parseFunctionHandler(this.sourceCode, this.pos)
-		if ret != null {
-			ret.templateClonedFunction = true
-		}
-	}
-	
-	fn makeLastReturnStatement() {
-		if this.block.inheritedAttribute.isCompileTask {
-			s := new StatementReturn()
-			t := new Statement()
-			t.Type = StatementTypeReturn
-			t.StatementReturn = s
-			t.isCompilerAuto = true 
-			t.pos = this.block.endPos
-			if this.block == null {
-				this.block = new Block()
-				this.block.pos = this.pos
-			}
-			if this.block.statements == null {
-				this.block.statements = [t]
-			}else {
-				this.block.statements.append(t)
-			}
-		}
-	}
-	
-	public fn isGlobalMain() -> (is bool) {
-		return this.isGlobal &&
-			this.name == MainFunctionName
-	}
+    public fn mkDescription() -> (d string = "") {
+        if this.isBuildIn {
+            return this.mkBuildInFunctionDescription()
+        }
+        if this.comment != null {
+            d += this.comment
+        }
+        d += this.readableMsg(true)
+    }
 
-	fn checkParametersAndReturns(
-		errs []error,
-		checkReturnVarExpression bool,
-		isAbstract bool) {
-		var err error
-		if this.locateDefinition {
-			this.block.inheritedAttribute.p.setLocationDefinition(this) 
-			return 
-		}
-		for k, v := range this.Type.parameterList {
-			if v.name == null {
-				v.name = ""
-			}
-			if v.locateDefinition {
-				this.block.inheritedAttribute.p.setLocationDefinition(v)
-				return 
-			}
-			if v.findUsage {
-				u := new Usage()
+    public fn mkBuildInFunctionDescription() -> (d string = "") {
+        //TODO:: more information 
+        d = "buildin " + this.name
+    }
+
+    public fn nameLiteralFunction() -> (name string) {
+        if this.name != null && this.name != "" {
+            return this.name
+        }
+        var t string
+        if this.name != null && this.name != "" {
+            t = this.block.inheritedAttribute.classAndFunctionNames + this.name
+        }
+        return t
+    }
+
+    public fn readableMsg(format bool...) -> (r string) {
+        if this.name == null ||
+            this.name == "" {
+            return "fn " + this.Type.typeString(format)
+        } else {
+            return "fn " + this.name + this.Type.typeString(format)
+        }
+
+    }
+
+    fn makeName() {
+        if this.name == null || this.name == "" {
+            if this.block.inheritedAttribute.classAndFunctionNames == null ||
+                this.block.inheritedAttribute.classAndFunctionNames == "" {
+                this.name = sprintf("literal$%d" , this.pos.endLine)
+            } else {
+                this.name = sprintf("%s$literal%d",
+                    this.block.inheritedAttribute.classAndFunctionNames , this.pos.endLine)
+            }
+
+        }
+        name := this.name
+        if name == SpecialMethodInit {
+            name = "init"
+        }
+        if this.block.inheritedAttribute.classAndFunctionNames == null ||
+            this.block.inheritedAttribute.classAndFunctionNames == "" {
+            this.block.inheritedAttribute.classAndFunctionNames = name
+        } else {
+            this.block.inheritedAttribute.classAndFunctionNames += "$" + name
+        }
+
+    }
+
+    fn checkBlock(errs []error) {
+        this.makeName()
+        this.makeLastReturnStatement()
+        errs.appendAll(this.block.check())
+    }
+
+    fn check(b Block) -> (errs []error = []error{}) {
+        this.block.inherit(b)
+        this.block.inheritedAttribute.Function = this
+        this.checkParametersAndReturns(errs , true , false)
+        if this.templateFunction == null {
+            this.checkBlock(errs)
+        }
+        return errs
+    }
+
+    fn cloneFunction() -> (ret Function , es []error) {
+        ret , es = parseFunctionHandler(this.sourceCode , this.pos)
+        if ret != null {
+            ret.templateClonedFunction = true
+        }
+    }
+
+    fn makeLastReturnStatement() {
+        if this.block.inheritedAttribute.isCompileTask {
+            s := new StatementReturn()
+            t := new Statement()
+            t.Type = StatementTypeReturn
+            t.StatementReturn = s
+            t.isCompilerAuto = true
+            t.pos = this.block.endPos
+            if this.block == null {
+                this.block = new Block()
+                this.block.pos = this.pos
+            }
+            if this.block.statements == null {
+                this.block.statements = [t]
+            } else {
+                this.block.statements.append(t)
+            }
+
+        }
+    }
+
+    public fn isGlobalMain() -> (is bool) {
+        return this.isGlobal &&
+            this.name == MainFunctionName
+    }
+
+    fn checkParametersAndReturns(
+        errs []error,
+        checkReturnVarExpression bool,
+        isAbstract bool) {
+        var err error
+        if this.locateDefinition {
+            this.block.inheritedAttribute.p.setLocationDefinition(this)
+            return
+        }
+        for k , v := range this.Type.parameterList {
+            if v.name == null {
+                v.name = ""
+            }
+            if v.locateDefinition {
+                this.block.inheritedAttribute.p.setLocationDefinition(v)
+                return
+            }
+            if v.findUsage {
+                u := new Usage()
                 u.Type = "declaration"
-                u.pos = v.pos 
-				v.findUsageInstances = [u]
-				this.block.inheritedAttribute.p.findUsage = v.findUsageInstances
-			}
-			v.isFunctionParameter = true
-			if len(v.Type.getParameterType(this.Type)) > 0 {
-				if this.templateFunction == null {
-					this.templateFunction = new TemplateFunction()
-				}
-			} else {
-				err = v.Type.resolve(this.block)
-				if err != null {
-					errs.append(err)
-				}
-				if isAbstract == false {
-					err = this.block.insert(v.name, v.pos, v)
-					if err != null {
-						errs.append(err)
-						continue
-					}
-				}
-			}
-			if v.Type.isVariableArgs && v.defaultValueExpression != null {
-				errs.append(new error( sprintf("%s vargs cannot have default value",
-					errMsgPrefix(v.Type.pos))))
-			}
-			if v.Type.isVariableArgs {
-				if k != len(this.Type.parameterList)-1 {
-					errs.append(new error( sprintf("%s only last parameter can be use as vargs",
-						errMsgPrefix(v.Type.pos))))
-				} else {
-					this.Type.parameterList = this.Type.parameterList[0:k]
-					this.Type.vArgs = v
-				}
-				continue
-			}
-			if this.templateFunction != null {
-				continue
-			}
-			if v.defaultValueExpression == null && this.haveDefaultValue {
-				errs.append(new error( sprintf("%s missing default value for '%s'",
-						errMsgPrefix(v.defaultValueExpression.pos) , v.name)))
-			}
-			if v.defaultValueExpression != null {
-				if this.haveDefaultValue == false {
-					this.defaultValueStartAt = k
-					this.haveDefaultValue = true
-				}
-				t, es := v.defaultValueExpression.checkSingleValueContextExpression(this.block)
-				errs.appendAll(es)
-				if t != null {
-					if v.Type.assignAble(this.block , errs, t) == false {
-						errs.append(new error( sprintf("%s cannot use '%s' as '%s'",
-							errMsgPrefix(v.defaultValueExpression.pos), t.typeString(), v.Type.typeString())))
-						continue
-					}
-				}
-				if v.defaultValueExpression.isLiteral() == false {
-					errs.append(new error( sprintf("%s default value must be literal",
-						errMsgPrefix(v.defaultValueExpression.pos))))
-					continue
-				}
-				if v.defaultValueExpression.Type == ExpressionTypeNull {
-					errs.append(new error( sprintf("%s cannot use 'null' as default value",
-						errMsgPrefix(v.defaultValueExpression.pos))))
-				}
-			}
-		}
-		if this.Type.voidReturn() == false {
-			//handler return
-			for _, v := range this.Type.returnList {
-				if v.name == null {
-					v.name = ""
-				}
-				if v.locateDefinition {
-					this.block.inheritedAttribute.p.setLocationDefinition(v)
-					return
-				}
-				if v.findUsage {
-					u := new Usage()
-					u.Type = "declaration"
-					u.pos = v.pos 
-					v.findUsageInstances = [u]
-					this.block.inheritedAttribute.p.findUsage = v.findUsageInstances
-				}
-				v.isReturn = true
-				if len(v.Type.getParameterType(this.Type)) > 0 {
-					if this.templateFunction == null {
-						this.templateFunction = new TemplateFunction()
-					}
-				} else {
-					err = v.Type.resolve(this.block)
-					if err != null {
-						errs.append(err)
-					}
-					if isAbstract == false {
-						err = this.block.insert(v.name, v.pos, v)
-						if err != null {
-							errs.append(err)
-							continue
-						}
-					}
-				}
-				if this.templateFunction != null {
-					continue
-				}
-				if checkReturnVarExpression == false {
-					// eval expression later
-					continue
-				}
-				if v.defaultValueExpression == null && 
-					this.block.inheritedAttribute.isCompileTask {
-					v.defaultValueExpression = v.Type.mkDefaultValueExpression()
-					continue
-				}
-				if v.defaultValueExpression == null {
-					continue
-				}
-				t, es := v.defaultValueExpression.checkSingleValueContextExpression(this.block)
-				if len(es) > 0 {
-					errs.appendAll(es)
-					continue
-				}
-				if t != null && v.Type.assignAble(this.block , errs, t) == false {
-					err = new error(sprintf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.defaultValueExpression.pos),
-						t.typeString(), v.Type.typeString()))
-					errs.append(err)
-				}
-			}
-		}
-	}
-	
-	fn checkReturnVarExpression() -> (errs []error= []error{}) {
-		if this.Type.voidReturn() {
-			return null
-		}
-		for _, v := range this.Type.returnList {
-			if v.defaultValueExpression == null && 
-				this.block.inheritedAttribute.isCompileTask {
-				v.defaultValueExpression = v.Type.mkDefaultValueExpression()
-				continue
-			}
-			if v.defaultValueExpression == null {
-				continue
-			}
-			t, es := v.defaultValueExpression.checkSingleValueContextExpression(this.block)
-			if len(es) > 0 {
-				errs.appendAll(es)
-				continue
-			}
-			if t != null && v.Type.assignAble(this.block , errs, t) == false {
-				err := new error(sprintf("%s cannot assign '%s' to '%s'", errMsgPrefix(v.defaultValueExpression.pos),
-					t.typeString(), v.Type.typeString()))
-				errs.append(err)
-			}
-		}
-		return errs
-	}
-	
-	fn reduceFindUsageInstances(block Block) {
+                u.pos = v.pos
+                v.findUsageInstances = [u]
+                this.block.inheritedAttribute.p.findUsage = v.findUsageInstances
+            }
+            v.isFunctionParameter = true
+            if len(v.Type.getParameterType(this.Type)) > 0 {
+                if this.templateFunction == null {
+                    this.templateFunction = new TemplateFunction()
+                }
+            } else {
+                err = v.Type.resolve(this.block)
+                if err != null {
+                    errs.append(err)
+                }
+                if isAbstract == false {
+                    err = this.block.insert(v.name , v.pos , v)
+                    if err != null {
+                        errs.append(err)
+                        continue
+                    }
+                }
+            }
+
+            if v.Type.isVariableArgs && v.defaultValueExpression != null {
+                errs.append(new error(sprintf("%s vargs cannot have default value",
+                    errMsgPrefix(v.Type.pos))))
+            }
+            if v.Type.isVariableArgs {
+                if k != len(this.Type.parameterList) - 1 {
+                    errs.append(new error(sprintf("%s only last parameter can be use as vargs",
+                        errMsgPrefix(v.Type.pos))))
+                } else {
+                    this.Type.parameterList = this.Type.parameterList[0 : k]
+                    this.Type.vArgs = v
+                }
+
+                continue
+            }
+            if this.templateFunction != null {
+                continue
+            }
+            if v.defaultValueExpression == null && this.haveDefaultValue {
+                errs.append(new error(sprintf("%s missing default value for '%s'",
+                    errMsgPrefix(v.defaultValueExpression.pos) , v.name)))
+            }
+            if v.defaultValueExpression != null {
+                if this.haveDefaultValue == false {
+                    this.defaultValueStartAt = k
+                    this.haveDefaultValue = true
+                }
+                t , es := v.defaultValueExpression.checkSingleValueContextExpression(this.block)
+                errs.appendAll(es)
+                if t != null {
+                    if v.Type.assignAble(this.block , errs , t) == false {
+                        errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
+                            errMsgPrefix(v.defaultValueExpression.pos) , t.typeString() , v.Type.typeString())))
+                        continue
+                    }
+                }
+                if v.defaultValueExpression.isLiteral() == false {
+                    errs.append(new error(sprintf("%s default value must be literal",
+                        errMsgPrefix(v.defaultValueExpression.pos))))
+                    continue
+                }
+                if v.defaultValueExpression.Type == ExpressionTypeNull {
+                    errs.append(new error(sprintf("%s cannot use 'null' as default value",
+                        errMsgPrefix(v.defaultValueExpression.pos))))
+                }
+            }
+        }
+
+        if this.Type.voidReturn() == false {
+            //handler return
+            for _ , v := range this.Type.returnList {
+                if v.name == null {
+                    v.name = ""
+                }
+                if v.locateDefinition {
+                    this.block.inheritedAttribute.p.setLocationDefinition(v)
+                    return
+                }
+                if v.findUsage {
+                    u := new Usage()
+                    u.Type = "declaration"
+                    u.pos = v.pos
+                    v.findUsageInstances = [u]
+                    this.block.inheritedAttribute.p.findUsage = v.findUsageInstances
+                }
+                v.isReturn = true
+                if len(v.Type.getParameterType(this.Type)) > 0 {
+                    if this.templateFunction == null {
+                        this.templateFunction = new TemplateFunction()
+                    }
+                } else {
+                    err = v.Type.resolve(this.block)
+                    if err != null {
+                        errs.append(err)
+                    }
+                    if isAbstract == false {
+                        err = this.block.insert(v.name , v.pos , v)
+                        if err != null {
+                            errs.append(err)
+                            continue
+                        }
+                    }
+                }
+
+                if this.templateFunction != null {
+                    continue
+                }
+                if checkReturnVarExpression == false {
+                    // eval expression later
+                    continue
+                }
+                if v.defaultValueExpression == null &&
+                    this.block.inheritedAttribute.isCompileTask {
+                    v.defaultValueExpression = v.Type.mkDefaultValueExpression()
+                    continue
+                }
+                if v.defaultValueExpression == null {
+                    continue
+                }
+                t , es := v.defaultValueExpression.checkSingleValueContextExpression(this.block)
+                if len(es) > 0 {
+                    errs.appendAll(es)
+                    continue
+                }
+                if t != null && v.Type.assignAble(this.block , errs , t) == false {
+                    err = new error(sprintf("%s cannot assign '%s' to '%s'" , errMsgPrefix(v.defaultValueExpression.pos),
+                        t.typeString() , v.Type.typeString()))
+                    errs.append(err)
+                }
+            }
+
+        }
+    }
+
+    fn checkReturnVarExpression() -> (errs []error = []error{}) {
+        if this.Type.voidReturn() {
+            return null
+        }
+        for _ , v := range this.Type.returnList {
+            if v.defaultValueExpression == null &&
+                this.block.inheritedAttribute.isCompileTask {
+                v.defaultValueExpression = v.Type.mkDefaultValueExpression()
+                continue
+            }
+            if v.defaultValueExpression == null {
+                continue
+            }
+            t , es := v.defaultValueExpression.checkSingleValueContextExpression(this.block)
+            if len(es) > 0 {
+                errs.appendAll(es)
+                continue
+            }
+            if t != null && v.Type.assignAble(this.block , errs , t) == false {
+                err := new error(sprintf("%s cannot assign '%s' to '%s'" , errMsgPrefix(v.defaultValueExpression.pos),
+                    t.typeString() , v.Type.typeString()))
+                errs.append(err)
+            }
+        }
+
+        return errs
+    }
+
+    fn reduceFindUsageInstances(block Block) {
         if this.findUsage == false {
-            return 
+            return
         }
         this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
-        block.inheritedAttribute.p.findUsage = this.findUsageInstances 
-    }  
+        block.inheritedAttribute.p.findUsage = this.findUsageInstances
+    }
 }
+
 

@@ -1,47 +1,49 @@
 import "lucy/cmd/langtools/compile/ast"
 import "java/lang/Object"
 
-
 class MakeHover {
     from Object
-    
+
     fn MakeHover(from Object) {
         this.super()
         this.from = from
     }
+    
+    fn make() -> (s string) {
+        when this.from.(type) {
+            case ast.Enum:
+                s = this.from.(ast.Enum).mkDescription()
+            case ast.Class:
+                s = this.from.(ast.Class).mkDescription()
+            case ast.ClassField:
+                s = this.from.(ast.ClassField).mkDescription()
+            case ast.Function:
+                s = this.from.(ast.Function).mkDescription()
+            case ast.ClassMethod:
+                s = this.from.(ast.ClassMethod).mkDescription()
+            case ast.EnumName:
+                s = this.from.(ast.EnumName).mkDescription()
+            case ast.Variable:
+                s = this.from.(ast.Variable).mkDescription()
+            case ast.Constant:
+                s = this.from.(ast.Constant).mkDescription()
+            case ast.TypeAlias:
+                s = this.from.(ast.TypeAlias).mkDescription()
+            case ast.Type:
+                t := this.from.(ast.Type)
+                if t.isPrimitive() {
+                    s = "buildin " + t.typeString()
+                } else {
+                    s = t.typeString()
+                }
 
-    fn make() -> (s string){
-        when this.from.(type){
-        case ast.Enum:
-            s = this.from.(ast.Enum).mkDescription()
-        case ast.Class:
-            s = this.from.(ast.Class).mkDescription()
-        case ast.ClassField:
-            s = this.from.(ast.ClassField).mkDescription()
-        case ast.Function:
-            s = this.from.(ast.Function).mkDescription()
-        case ast.ClassMethod:
-            s = this.from.(ast.ClassMethod).mkDescription()
-        case ast.EnumName:
-            s = this.from.(ast.EnumName).mkDescription()
-        case ast.Variable:
-            s = this.from.(ast.Variable).mkDescription()
-        case ast.Constant:
-            s = this.from.(ast.Constant).mkDescription()
-        case ast.TypeAlias:
-            s = this.from.(ast.TypeAlias).mkDescription()
-        case ast.Type:
-            t := this.from.(ast.Type)
-            if t.isPrimitive() {
-                s = "buildin " + t.typeString()
-            }else {
-                s = t.typeString()
-            }
-        case ast.Import:
-            t := this.from.(ast.Import)
-            s = t.mkDescription()
-        default:
-            s = sprintf("'%s' un handled" , this.from.getClass().toString())
+            case ast.Import:
+                t := this.from.(ast.Import)
+                s = t.mkDescription()
+            default:
+                s = sprintf("'%s' un handled" , this.from.getClass().toString())
         }
     }
 }
+
+

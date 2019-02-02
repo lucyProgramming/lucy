@@ -1,18 +1,15 @@
-
 import "java/lang/Double"
 import "java/lang/Long"
 import "java/lang/Float"
 
-
-public fn packDouble2Object(d double) -> (o Double = Double.valueOf(d)) {} 
-
-public fn packLong2Object(l long) -> (o Long = Long.valueOf(l)) {}
-
-public fn packFloat2Object(f float) -> (o Float = Float.valueOf(f))  {}
+fn packDouble2Object(d double) -> (o Double = Double.valueOf(d)) {
+}
 
 
+fn packLong2Object(l long) -> (o Long = Long.valueOf(l)) {
+}
 
 
-
-
+fn packFloat2Object(f float) -> (o Float = Float.valueOf(f)) {
+}
 
