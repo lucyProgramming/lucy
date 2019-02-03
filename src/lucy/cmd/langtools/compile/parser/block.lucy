@@ -2,12 +2,12 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 import "lucy/jvm/cg"
 
-class BlockParser extends ParserExtends {
+class BlockParser extends ParserFather {
     StatementForParser    StatementForParser   
     StatementIfParser     StatementIfParser    
     StatementWhenParser   StatementWhenParser  
     StatementSwitchParser StatementSwitchParser
-
+    
     fn BlockParser(parser Parser) {
         this.super(parser)
         this.StatementForParser = new StatementForParser(parser , this)

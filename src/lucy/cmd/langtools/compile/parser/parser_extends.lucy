@@ -3,10 +3,10 @@ import "lucy/cmd/langtools/compile/lex"
 
 
 
-class ParserExtends {
+class ParserFather {
 	protected parser Parser
 	
-	fn ParserExtends(parser Parser) {
+	fn ParserFather(parser Parser) {
 		this.super()
 		this.parser = parser 
 	}

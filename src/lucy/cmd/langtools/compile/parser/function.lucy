@@ -1,7 +1,7 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
-class FunctionParser extends ParserExtends {
+class FunctionParser extends ParserFather {
     fn FunctionParser(parser Parser) {
         this.super(parser)
     }

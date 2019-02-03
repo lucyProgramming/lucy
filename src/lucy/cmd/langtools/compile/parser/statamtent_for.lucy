@@ -2,7 +2,7 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
 
-class StatementForParser extends ParserExtends{
+class StatementForParser extends ParserFather{
 	bp BlockParser
 
 	fn StatementForParser(parser Parser ,bp BlockParser){

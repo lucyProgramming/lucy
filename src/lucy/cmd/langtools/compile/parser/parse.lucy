@@ -35,7 +35,7 @@ class Parser {
     BlockParser            BlockParser     
     TypeParser             TypeParser      
     EnumParser             EnumParser      
-    tokenStack             []lex.Token      // token stack for look back 
+    tokenStackForLookback  []lex.Token      // token stack for look back 
 
     /*
 		call before parse source file
@@ -84,7 +84,7 @@ class Parser {
                     c.isMulti = this.token.Type == lex.TokenMultiLineComment
                     c.comment = this.token.stringValue
                     this.tops.append(new ast.TopNode(c))
-                    comment.read()
+                    this.next(lfIsToken)
                 } else {
                     this.tops.append(new ast.TopNode(new ast.Line()))
                     this.next(lfIsToken)
@@ -127,7 +127,7 @@ class Parser {
                     c.comment = this.token.stringValue
                     c.isMulti = this.token.Type == lex.TokenMultiLineComment
                     this.tops.append(new ast.TopNode(c))
-                    comment.read()
+                    this.next(lfIsToken)
                 case lex.TokenSemicolon:
                     // empty statement, no big deal
                     this.next(lfNotToken)
@@ -139,12 +139,12 @@ class Parser {
                         // look like a function 
                         f := new lex.Token()
                         f.Type = lex.TokenFn
-                        this.tokenStack = [f , idenfierToken , this.token]
+                        this.tokenStackForLookback = [f , idenfierToken , this.token]
                         this.errs.append(new error(sprintf("%s missing 'fn'" , this.errMsgPrefix(this.mkPos(idenfierToken)))))
                         this.next(lfIsToken) // restore 
                         continue
                     } else {
-                        this.tokenStack = [idenfierToken , this.token]
+                        this.tokenStackForLookback = [idenfierToken , this.token]
                         this.next(lfIsToken) // restore 
                         e , _ := this.ExpressionParser.parseExpression(true)
                         if e != null {
@@ -153,9 +153,10 @@ class Parser {
                             this.tops.append(new ast.TopNode(e))
                         }
                     }
+
                 case lex.TokenLf:
                     this.tops.append(new ast.TopNode(new ast.Line()))
-                    this.next(lfNotToken) 
+                    this.next(lfNotToken)
                     continue
                 case lex.TokenPublic:
                     accessControlToken = this.token
@@ -533,9 +534,9 @@ class Parser {
             this.consumeFoundValidToken = false
             return
         }
-        if len(this.tokenStack) > 0 {
-            this.token = this.tokenStack[0]
-            this.tokenStack = this.tokenStack[1:]
+        if len(this.tokenStackForLookback) > 0 {
+            this.token = this.tokenStackForLookback[0]
+            this.tokenStackForLookback = this.tokenStackForLookback[1:]
             return
         }
         var err error
@@ -726,7 +727,7 @@ class Parser {
         if len(names) == 1 &&
             this.token.Type == lex.TokenSelection {
             // XXX.
-            this.tokenStack = [token , this.token]
+            this.tokenStackForLookback = [token , this.token]
             this.next(lfIsToken) // restore the stack 
             var t ast.Type
             t , err = this.parseType()

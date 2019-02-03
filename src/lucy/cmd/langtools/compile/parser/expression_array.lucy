@@ -1,7 +1,7 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
-class ExpressionArrayParser extends ParserExtends {
+class ExpressionArrayParser extends ParserFather {
 	ep ExpressionParser
 	
 	fn ExpressionArrayParser(parser Parser , ep ExpressionParser) {

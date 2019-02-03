@@ -1,7 +1,7 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
-class ExpressionBinaryParser extends ParserExtends {
+class ExpressionBinaryParser extends ParserFather {
     ep ExpressionParser
     fn ExpressionBinaryParser(parser Parser , ep ExpressionParser) {
         this.super(parser)

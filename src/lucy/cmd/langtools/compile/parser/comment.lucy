@@ -1,27 +1,30 @@
- 
-import "lucy/cmd/langtools/compile/lex"
+// import "lucy/cmd/langtools/compile/lex"
 
 
-class CommentParser extends ParserExtends {
-	comment string
-	fn CommentParser(parser Parser){
-		this.super(parser)
-	}
-	fn reset() {
-		this.comment = ""
-	}
-	fn read() {
-		if this.parser.token.Type == lex.TokenComment {
-			for this.parser.token.Type == lex.TokenComment {
-				if this.comment == null {
-					this.comment = ""
-				} 
-				this.comment += "//" + this.parser.token.stringValue
-				this.parser.next(lfIsToken)
-			}
-		} else {
-			this.comment = "/*" + this.parser.token.stringValue + "*/\n"
-			this.parser.next(lfIsToken)
-		}
-	}
+class CommentParser extends ParserFather {
+    comment string
+
+    fn CommentParser(parser Parser) {
+        this.super(parser)
+    }
+    fn reset() {
+        this.comment = ""
+    }
+
+     // fn read() {
+     // 	if this.parser.token.Type == lex.TokenComment {
+     // 		for this.parser.token.Type == lex.TokenComment {
+     // 			if this.comment == null {
+     // 				this.comment = ""
+     // 			} 
+     // 			this.comment += "//" + this.parser.token.stringValue
+     // 			this.parser.next(lfIsToken)
+     // 		}
+     // 	} else {
+     // 		this.comment = "/*" + this.parser.token.stringValue + "*/\n"
+     // 		this.parser.next(lfIsToken)
+     // 	}
+     // }
 }
+
+

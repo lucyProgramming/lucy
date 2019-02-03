@@ -1,7 +1,7 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
-class EnumParser extends ParserExtends {
+class EnumParser extends ParserFather {
     fn EnumParser(parser Parser) {
         this.super(parser)
     }
@@ -46,7 +46,7 @@ class EnumParser extends ParserExtends {
                     c.comment = this.parser.token.stringValue
                     c.isMulti = this.parser.token.Type == lex.TokenMultiLineComment
                     e.appendFmt(c)
-                    comment.read()
+                    this.next(lfIsToken)
                 case lex.TokenIdentifier:
                     enumName := new ast.EnumName()
                     enumName.name = this.parser.token.stringValue
@@ -86,7 +86,7 @@ class EnumParser extends ParserExtends {
                             c.comment = this.parser.token.stringValue
                             c.isMulti = this.parser.token.Type == lex.TokenMultiLineComment
                             e.appendFmt(c)
-                            comment.read()
+                            this.next(lfIsToken)
                         }
 
                         if this.parser.token.Type != lex.TokenIdentifier {

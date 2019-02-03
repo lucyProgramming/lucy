@@ -323,7 +323,7 @@ fn searchRightValueForAutoCompletionItems(pos Pos , block Block) -> (items []Aut
             item.Type = "function"
             item.name = name
             item.functionDefinition = v.readableMsg(true)
-            item.suggest = v.mkSuggest()
+            item.suggest = v.mkSuggestForAutoCompletion()
             item.description = v.readableMsg(true)
             items.append(item)
             names[name] = true

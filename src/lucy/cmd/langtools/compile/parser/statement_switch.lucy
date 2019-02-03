@@ -1,7 +1,7 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
-class StatementSwitchParser extends ParserExtends {
+class StatementSwitchParser extends ParserFather {
     bp BlockParser
     fn StatementSwitchParser(parser Parser , bp BlockParser) {
         this.super(parser)

@@ -4,20 +4,20 @@ import "lucy/os"
 import "lucy/cmd/langtools/common"
 
 class AllDefinition {
-    lucyFiles   []ide.LucyFile
+    lucyFile   []ide.LucyFile
     packageName string        
     printErr    bool          
     lucyPath    string        
-
+    
     fn AllDefinition(lucyFiles []ide.LucyFile , packageName string , lucyPath string , printErr bool) {
         this.super()
-        this.lucyFiles = lucyFiles
+        this.lucyFile = lucyFiles
         this.lucyPath = lucyPath
         this.packageName = packageName
         this.printErr = printErr
     }
     fn getAllDefinition() -> (alldefinition ide.Definition[]) {
-        nodes , errs := ide.parseAst(this.lucyFiles)
+        nodes , errs := ide.parseAst(this.lucyFile)
         if this.printErr {
             for v := range errs {
                 os.stderr.println(v.getMessage())

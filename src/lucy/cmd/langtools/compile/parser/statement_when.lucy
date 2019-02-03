@@ -2,9 +2,10 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
 
-class StatementWhenParser extends ParserExtends {
+class StatementWhenParser extends ParserFather {
 	
 	bp BlockParser
+
 	fn StatementWhenParser(parser Parser ,bp BlockParser){
 		this.super(parser)
 		this.bp = bp
@@ -21,7 +22,7 @@ class StatementWhenParser extends ParserExtends {
 			idenfierToken := this.parser.token
 			this.parser.next(lfIsToken) 
 			thisToken := this.parser.token
-			this.parser.tokenStack = [idenfierToken , thisToken ]  // restore on stack
+			this.parser.tokenStackForLookback = [idenfierToken , thisToken ]  // restore on stack
 			this.parser.next(lfIsToken)  // restore idenfierToken token
 			if thisToken.Type == lex.TokenLc {
 				condition , err = this.parser.parseType()

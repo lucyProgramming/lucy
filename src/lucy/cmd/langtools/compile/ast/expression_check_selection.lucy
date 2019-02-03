@@ -261,7 +261,7 @@ class ExpressionCheckSelection {
             item := new AutoCompletionItem()
             item.Type = "function"
             item.name = name
-            item.suggest = v.mkSuggest()
+            item.suggest = v.mkSuggestForAutoCompletion()
             item.description = v.readableMsg(true)
             items.append(item)
         }
@@ -313,7 +313,7 @@ class ExpressionCheckSelection {
                     
                     item.description = method.mkDescription() 
                     item.name =  method.Function.name
-                    item.suggest = method.Function.mkSuggest()
+                    item.suggest = method.Function.mkSuggestForAutoCompletion()
                     items.append(item)
                 }
             }else {
@@ -339,7 +339,7 @@ class ExpressionCheckSelection {
                         item.Type = "method"
                         item.description = method.mkDescription() 
                         item.name =  method.Function.name
-                        item.suggest = method.Function.mkSuggest()
+                        item.suggest = method.Function.mkSuggestForAutoCompletion()
                         items.append(item)
                     }
                 }
@@ -409,7 +409,7 @@ class ExpressionCheckSelection {
                         item.Type = "method"
                     }
                     item.name =  method.Function.name
-                    item.suggest = method.Function.mkSuggest()
+                    item.suggest = method.Function.mkSuggestForAutoCompletion()
                     item.description = method.mkDescription() 
                     items.append(item)
                 }
@@ -448,7 +448,7 @@ class ExpressionCheckSelection {
                             item.Type = "method"
                         }
                         item.name =  method.Function.name
-                        item.suggest = method.Function.mkSuggest()
+                        item.suggest = method.Function.mkSuggestForAutoCompletion()
                         item.description = method.mkDescription() 
                         items.append(item)
                     }
@@ -517,7 +517,7 @@ class ExpressionCheckSelection {
                         item.Type = "method"
                     }
                     item.name =  method.Function.name
-                    item.suggest = method.Function.mkSuggest()
+                    item.suggest = method.Function.mkSuggestForAutoCompletion()
                     item.description = method.mkDescription() 
                     items.append(item)
                 }
@@ -556,7 +556,7 @@ class ExpressionCheckSelection {
                             item.Type = "method"
                         }
                         item.name =  method.Function.name
-                        item.suggest = method.Function.mkSuggest()
+                        item.suggest = method.Function.mkSuggestForAutoCompletion()
                         item.description = method.mkDescription() 
                         items.append(item)
                     }

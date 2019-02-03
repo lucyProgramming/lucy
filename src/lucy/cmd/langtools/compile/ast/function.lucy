@@ -39,7 +39,7 @@ public class Function {
         return this.accessFlags & cg.AccMethodPublic != 0
     }
 
-    fn mkSuggest() -> (s string) {
+    fn mkSuggestForAutoCompletion() -> (s string) {
         s = sprintf("%s(" , this.name)
         length := len(this.Type.parameterList)
         if this.haveDefaultValue {
@@ -271,10 +271,10 @@ public class Function {
                     return
                 }
                 if v.findUsage {
-                    u := new Usage()
-                    u.Type = "declaration"
-                    u.pos = v.pos
-                    v.findUsageInstances = [u]
+                    usage := new Usage()
+                    usage.Type = "declaration"
+                    usage.pos = v.pos
+                    v.findUsageInstances = [usage]
                     this.block.inheritedAttribute.p.findUsage = v.findUsageInstances
                 }
                 v.isReturn = true

@@ -2,7 +2,7 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
 
-class StatementIfParser extends ParserExtends {
+class StatementIfParser extends ParserFather {
 	bp BlockParser
 
 	fn StatementIfParser(parser Parser ,bp BlockParser){

@@ -2,7 +2,7 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 import "lucy/jvm/cg"
 
-class ClassParser extends ParserExtends {
+class ClassParser extends ParserFather {
     fn ClassParser(parser Parser) {
         this.super(parser)
     }
@@ -167,7 +167,7 @@ class ClassParser extends ParserExtends {
                     c.comment = this.parser.token.stringValue
                     c.isMulti = this.parser.token.Type == lex.TokenMultiLineComment
                     classDefinition.appendFmt(c)
-                    comment.read()
+                    this.next(lfIsToken)
                 case lex.TokenLf:
                     classDefinition.appendFmt(new ast.Line())
                     this.next(lfNotToken) //TODO::delete more lines 
@@ -391,7 +391,7 @@ class ClassParser extends ParserExtends {
             this.parser.errs.append(new error(sprintf("%s missing 'fn'" , this.parser.errMsgPrefix(idenfierPos))))
             t := new lex.Token()
             t.Type = lex.TokenFn
-            this.parser.tokenStack = [t , idenfierToken , this.parser.token]
+            this.parser.tokenStackForLookback = [t , idenfierToken , this.parser.token]
             this.next(lfIsToken) // restore fn 
             return
         }
