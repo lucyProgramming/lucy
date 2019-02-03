@@ -1,44 +1,23 @@
-
-
 public class PackageMeta {
-	public compiledFrom FileMeta[]
-	public imports      Import[]
-	public compileTime  long // in seconds
-	public classes      string[]
-	public hasMain bool 
-	public lucyVersion string 
-	
+    public compiledFrom FileMeta[]
+    public imports      Import[]  
+    public compileTime  long       // in seconds
+    public classes      string[]  
+    public hasMain      bool      
+    public lucyVersion  string    
+
 }
 
 
 public class Import {
-	public name string 
-	public linkTime long  // in seconds 
+    public name     string
+    public linkTime long   // in seconds 
 }
+
 
 public class FileMeta {
-	public lastModify long // in seconds 
-	public name string 
+    public lastModify long   // in seconds 
+    public name       string
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

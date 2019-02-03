@@ -4,34 +4,32 @@ import "lucy/os/flag"
 
 flagParser := new flag.FlagParser()
 
-fn printUsageAndExit(code int){
-	print("Usage: clean compiled class files ")
-	print(flagParser.helpMsg())
-	os.exit(code)
+fn printUsageAndExit(code int) {
+    print("Usage: clean compiled class files ")
+    print(flagParser.helpMsg())
+    os.exit(code)
 }
 
 public fn clean(args []string) {
-	recursive := flagParser.boolOption("-r" , false , "clean sub directory too")
-	verbose := flagParser.boolOption("-v" , false , "verbose")
-	packageName , err := flagParser.parse(args)
-	if err != null {
-		printf("parse command line failed,err:%s\n" , err.toString())
-		os.exit(2)
-	}
-	if len(packageName) == 0 {
-		printUsageAndExit(1)
-	}
-	lucyRoot := common.getLucyRoot()
-	lucyPath  := common.getLucyPath()
-	new Clean(
-		lucyRoot ,
-		lucyPath ,  
-		packageName[0] , 
-		recursive.getValue() ,
-		verbose.getValue()
-	) .clean()
+    recursive := flagParser.boolOption("-r" , false , "clean sub directory too")
+    verbose := flagParser.boolOption("-v" , false , "verbose")
+    packageName , err := flagParser.parse(args)
+    if err != null {
+        printf("parse command line failed,err:%s\n" , err.toString())
+        os.exit(2)
+    }
+    if len(packageName) == 0 {
+        printUsageAndExit(1)
+    }
+    lucyRoot := common.getLucyRoot()
+    lucyPath := common.getLucyPath()
+    new Clean(lucyRoot,
+        lucyPath,
+        packageName[0],
+        recursive.getValue(),
+        verbose.getValue()).clean()
 }
 
-fn main(args []string){
-	clean(args)
+fn main(args []string) {
+    clean(args)
 }

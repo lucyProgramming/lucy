@@ -1,306 +1,310 @@
 import "lucy/jvm/cg"
 
 public class ForRangeAttr {
-	public identifierKey   ExpressionIdentifier
-	public identifierValue ExpressionIdentifier
-	public expressionKey   Expression
-	public expressionValue Expression
-	public rangeOn         Expression
+    public identifierKey   ExpressionIdentifier
+    public identifierValue ExpressionIdentifier
+    public expressionKey   Expression          
+    public expressionValue Expression          
+    public rangeOn         Expression          
 }
 
+
 public class StatementFor {
-	public rangeAttr           ForRangeAttr
-	public exits               []cg.Exit
-	public continueCodeOffset  int
-	public pos                 Pos
-	initExpressionBlock Block = new Block()
-	/*
+    public rangeAttr           ForRangeAttr
+    public exits               []cg.Exit   
+    public continueCodeOffset  int         
+    public pos                 Pos         
+           initExpressionBlock Block = new Block()
+    /*
 		for i := 0 ; i < 10 ;i ++ {
 			
 		}
 	*/
-	public Init      Expression
-	public condition Expression
-	public increment Expression
-	public block     Block
-	public inlineComment string 
-	
+    public Init          Expression
+    public condition     Expression
+    public increment     Expression
+    public block         Block     
+    public inlineComment string    
 
-	fn checkRange() ->(errs []error= []error{})  {
-		//
-		var rangeExpression Expression
-		bin := this.condition.data.(ExpressionBinary)
-		if bin.right.Type == ExpressionTypeRange {
-			rangeExpression = this.condition.data.(Expression)
-		} else if bin.right.Type == ExpressionTypeList {
-			t := bin.right.data.([]Expression)
-			if len(t) > 1 {
-				errs.append(
-					new error(sprintf("%s for range statement only allow one argument on the right",
-						errMsgPrefix(t[1].pos))))
-			}
-			rangeExpression = t[0].data.(Expression)
-		}
-		rangeOn, es := rangeExpression.checkSingleValueContextExpression(this.initExpressionBlock)
-		errs.appendAll(es)
-		if rangeOn == null {
-			if this.block != null {
-				this.block.inherit(this.initExpressionBlock)
-				errs.appendAll(this.block.check())
-			}
-			return errs
-		}
-		if rangeOn.Type == VariableTypeString {
-			// byte[]("")
-			conversion := new ExpressionTypeConversion()
-			conversion.Type = new Type()
-			conversion.Type.Type = VariableTypeJavaArray
-			conversion.Type.pos = rangeOn.pos
-			conversion.Type.array = new Type()
-			conversion.Type.array.Type = VariableTypeByte
-			conversion.Type.array.pos = rangeOn.pos
-			conversion.Expression = rangeExpression
-			bs := new Expression()
-			bs.Type = ExpressionTypeCheckCast
-			bs.data = conversion
-			bs.pos = rangeOn.pos
-			bs.value = conversion.Type
-			rangeExpression = bs
-			rangeOn = conversion.Type
-		}
-		if rangeOn.Type != VariableTypeArray &&
-			rangeOn.Type != VariableTypeJavaArray &&
-			rangeOn.Type != VariableTypeMap {
-			errs.append( new error(sprintf("%s cannot range on '%s'",
-				errMsgPrefix(rangeExpression.pos), rangeOn.typeString())))
-			if this.block != null {
-				this.block.inherit(this.initExpressionBlock)
-				errs.appendAll(this.block.check())
-			}
-			return errs
-		}
-		var lefts []Expression
-		if bin.left.Type == ExpressionTypeList {
-			lefts = bin.left.data.([]Expression)
-		} else {
-			lefts = []Expression{bin.left}
-		}
-		if len(lefts) > 2 {
-			errs.append(
-				new error(sprintf("%s cannot have more than 2 expressions on the left",
-					errMsgPrefix(lefts[2].pos))))
-			lefts = lefts[0:2]
-		}
-		modelKv := len(lefts) == 2
-		this.rangeAttr = new ForRangeAttr()
-		this.rangeAttr.rangeOn = rangeExpression
-		var err error
-		if this.condition.Type == ExpressionTypeVarAssign {
-			for _, v := range lefts {
-				if v.Type != ExpressionTypeIdentifier {
-					errs.append(
-						new error(sprintf("%s not a identifier on left",
-							errMsgPrefix(v.pos))))
-				}
-			}
-			var identifierK ExpressionIdentifier
-			var identifierV ExpressionIdentifier
-			var posK, posV Pos
-			if modelKv {
-				identifierK = lefts[0].data.(ExpressionIdentifier)
-				identifierV = lefts[1].data.(ExpressionIdentifier)
-				posK = lefts[0].pos
-				posV = lefts[1].pos
-			} else {
-				identifierV = lefts[0].data.(ExpressionIdentifier)
-				posV = lefts[0].pos
-			}
-			if identifierV.name != UnderScore {
-				vd := new Variable()
-				vd.locateDefinition = identifierV.locateDefinition
-				vd.findUsage = identifierV.findUsage 
-				vd.pos = posV
-				if vd.locateDefinition{
-					this.initExpressionBlock.inheritedAttribute.p.setLocationDefinition(vd)
-					return 
-				}
-				if vd.findUsage {
-					u := new Usage()
-					u.Type = "declaration"
-					u.pos = vd.pos 
-					vd.findUsageInstances = [u]
-					this.initExpressionBlock.inheritedAttribute.p.findUsage = vd.findUsageInstances 
-				}
-				if rangeOn.Type == VariableTypeArray ||
-					rangeOn.Type == VariableTypeJavaArray {
-					vd.Type = rangeOn.array.cloneType()
-				} else {
-					vd.Type = rangeOn.Map.V.cloneType()
-				}
-				vd.name = identifierV.name
-				if this.initExpressionBlock.inheritedAttribute.Function != null {
-					if err := this.initExpressionBlock.inheritedAttribute.Function.Type.
-						reDefineParameterOrReturnVar(vd) ; err != null{
-						errs.append(err)
-					}
-				}
-				err = this.initExpressionBlock.insert(identifierV.name, this.condition.pos, vd)
-				if err != null {
-					errs.append(err)
-				}
-				identifierV.Variable = vd
-				this.rangeAttr.identifierValue = identifierV
-			}
-			if modelKv &&
-				identifierK.name != UnderScore {
-				vd := new Variable()
-				var vt Type
-				if rangeOn.Type == VariableTypeArray ||
-					rangeOn.Type == VariableTypeJavaArray {
-					vt = new Type()
-					vt.Type = VariableTypeInt
-				} else {
-					vt = rangeOn.Map.K.cloneType()
-					vt.pos = rangeOn.pos
-				}
-				vd.name = identifierK.name
-				vd.Type = vt
-				vd.pos = posK
-				vd.locateDefinition = identifierK.locateDefinition
-				vd.findUsage = identifierK.findUsage 
-				if vd.locateDefinition {
-					this.initExpressionBlock.inheritedAttribute.p.setLocationDefinition(vd)  
-					return 
-				}
-				if vd.findUsage {
-					u := new Usage()
-					u.Type = "declaration"
-					u.pos = vd.pos 
-					vd.findUsageInstances = [u]
-					this.initExpressionBlock.inheritedAttribute.p.findUsage = vd.findUsageInstances 
-				}
-				if this.initExpressionBlock.inheritedAttribute.Function != null {
-					if err := this.initExpressionBlock.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(vd) ; err != null{
-						errs.append(err)
-					}
-				}
-				err = this.initExpressionBlock.insert(identifierK.name, posK, vd)
-				if err != null {
-					errs.append(err)
-				}
-				identifierK.Variable = vd
-				this.rangeAttr.identifierKey = identifierK
-			}
-		} else { // k,v = range arr
-			if modelKv {
-				if false == lefts[0].isIdentifier(UnderScore) {
-					this.rangeAttr.expressionKey = lefts[0]
-				}
-				if false == lefts[1].isIdentifier(UnderScore) {
-					this.rangeAttr.expressionValue = lefts[1]
-				}
-			} else {
-				if false == lefts[0].isIdentifier(UnderScore) {
-					this.rangeAttr.expressionValue = lefts[0]
-				}
-			}
-			var receiverKType Type
-			if this.rangeAttr.expressionKey != null {
-				receiverKType = this.rangeAttr.expressionKey.getLeftValue(this.initExpressionBlock, errs)
-				if receiverKType == null {
-					goto checkBlock 
-				}
-			}
-			var receiverVType Type
-			if this.rangeAttr.expressionValue != null {
-				receiverVType = this.rangeAttr.expressionValue.getLeftValue(this.initExpressionBlock, errs)
-				if receiverVType == null {
-					goto checkBlock 
-				}
-			}
-			var kType, vType Type
-			if rangeOn.Type == VariableTypeArray ||
-				rangeOn.Type == VariableTypeJavaArray {
-				kType = new Type()
-				kType.Type = VariableTypeInt
+    fn checkRange() -> (errs []error = []error{}) {
+        //
+        var rangeExpression Expression
+        bin := this.condition.data.(ExpressionBinary)
+        if bin.right.Type == ExpressionTypeRange {
+            rangeExpression = this.condition.data.(Expression)
+        } else if bin.right.Type == ExpressionTypeList {
+            t := bin.right.data.([]Expression)
+            if len(t) > 1 {
+                errs.append(new error(sprintf("%s for range statement only allow one argument on the right",
+                    errMsgPrefix(t[1].pos))))
+            }
+            rangeExpression = t[0].data.(Expression)
+        }
+        rangeOn , es := rangeExpression.checkSingleValueContextExpression(this.initExpressionBlock)
+        errs.appendAll(es)
+        if rangeOn == null {
+            if this.block != null {
+                this.block.inherit(this.initExpressionBlock)
+                errs.appendAll(this.block.check())
+            }
+            return errs
+        }
+        if rangeOn.Type == VariableTypeString {
+            // byte[]("")
+            conversion := new ExpressionTypeConversion()
+            conversion.Type = new Type()
+            conversion.Type.Type = VariableTypeJavaArray
+            conversion.Type.pos = rangeOn.pos
+            conversion.Type.array = new Type()
+            conversion.Type.array.Type = VariableTypeByte
+            conversion.Type.array.pos = rangeOn.pos
+            conversion.Expression = rangeExpression
+            bs := new Expression()
+            bs.Type = ExpressionTypeCheckCast
+            bs.data = conversion
+            bs.pos = rangeOn.pos
+            bs.value = conversion.Type
+            rangeExpression = bs
+            rangeOn = conversion.Type
+        }
+        if rangeOn.Type != VariableTypeArray &&
+            rangeOn.Type != VariableTypeJavaArray &&
+            rangeOn.Type != VariableTypeMap {
+            errs.append(new error(sprintf("%s cannot range on '%s'",
+                errMsgPrefix(rangeExpression.pos) , rangeOn.typeString())))
+            if this.block != null {
+                this.block.inherit(this.initExpressionBlock)
+                errs.appendAll(this.block.check())
+            }
+            return errs
+        }
+        var lefts []Expression
+        if bin.left.Type == ExpressionTypeList {
+            lefts = bin.left.data.([]Expression)
+        } else {
+            lefts = []Expression{bin.left}
+        }
 
-				vType = rangeOn.array
-			} else {
-				kType = rangeOn.Map.K
-				vType = rangeOn.Map.V
-			}
-			if receiverKType != null {
-				if receiverKType.assignAble(this.initExpressionBlock,errs, kType) == false {
-					err = new error(sprintf("%s cannot use '%s' as '%s' for index",
-						errMsgPrefix(this.rangeAttr.expressionKey.pos),
-						receiverKType.typeString(), kType.typeString()))
-					errs.append(err)
-					goto checkBlock 
-				}
-			}
-			if receiverVType != null {
-				if receiverVType.assignAble( this.initExpressionBlock, errs, vType) == false {
-					err = new error(sprintf("%s cannot use '%s' as '%s' for value destination",
-						errMsgPrefix(this.rangeAttr.expressionKey.pos),
-						receiverKType.typeString(), kType.typeString()))
-					errs.append(err)
-					goto checkBlock 
-				}
-			}
-		}
-	checkBlock:
-		if this.block != null {
-			this.block.inherit(this.initExpressionBlock)
-			errs.appendAll(this.block.check())
-		}
-		return errs
-	}
+        if len(lefts) > 2 {
+            errs.append(new error(sprintf("%s cannot have more than 2 expressions on the left",
+                errMsgPrefix(lefts[2].pos))))
+            lefts = lefts[0 : 2]
+        }
+        modelKv := len(lefts) == 2
+        this.rangeAttr = new ForRangeAttr()
+        this.rangeAttr.rangeOn = rangeExpression
+        var err error
+        if this.condition.Type == ExpressionTypeVarAssign {
+            for _ , v := range lefts {
+                if v.Type != ExpressionTypeIdentifier {
+                    errs.append(new error(sprintf("%s not a identifier on left",
+                        errMsgPrefix(v.pos))))
+                }
+            }
 
-	fn check(block Block) ->(errs []error = []error{})  {
-		this.initExpressionBlock.inherit(block)
-		this.initExpressionBlock.inheritedAttribute.forStatement = this
-		this.initExpressionBlock.inheritedAttribute.forBreak = this
-		if this.Init == null &&
-			this.increment == null &&
-			this.condition != null &&
-			this.condition.canBeUsedForRange() {
-			// for k,v := range arr
-			return this.checkRange()
-		}
-		if this.Init != null {
-			this.Init.isStatementExpression = true
-			if err := this.Init.canBeUsedAsStatement(); err != null {
-				errs.append(err)
-			}
-			_, es := this.Init.check(this.initExpressionBlock)
-			errs.appendAll(es)
-		}
-		if this.condition != null {
-			if err := this.condition.canBeUsedAsCondition(); err != null {
-				errs.append(err)
-			}
-			t, es := this.condition.checkSingleValueContextExpression(this.initExpressionBlock)
-			errs.appendAll(es)
-			if t != null && t.Type != VariableTypeBool {
-				errs.append( new error(sprintf("%s condition must be bool expression,but %s",
-					errMsgPrefix(this.condition.pos), t.typeString())))
-			}
-		}
-		if this.increment != null {
-			this.increment.isStatementExpression = true
-			if err := this.increment.canBeUsedAsStatement(); err != null {
-				errs.append(err)
-			}
-			_, es := this.increment.check(this.initExpressionBlock)
-			errs.appendAll(es)
-		}
-		if this.block != null {
-			this.block.inherit(this.initExpressionBlock)
-			errs.appendAll( this.block.check())
-		}
-		return errs
-	}	
+            var identifierK ExpressionIdentifier
+            var identifierV ExpressionIdentifier
+            var posK , posV Pos
+            if modelKv {
+                identifierK = lefts[0].data.(ExpressionIdentifier)
+                identifierV = lefts[1].data.(ExpressionIdentifier)
+                posK = lefts[0].pos
+                posV = lefts[1].pos
+            } else {
+                identifierV = lefts[0].data.(ExpressionIdentifier)
+                posV = lefts[0].pos
+            }
+
+            if identifierV.name != UnderScore {
+                vd := new Variable()
+                vd.locateDefinition = identifierV.locateDefinition
+                vd.findUsage = identifierV.findUsage
+                vd.pos = posV
+                if vd.locateDefinition {
+                    this.initExpressionBlock.inheritedAttribute.p.setLocationDefinition(vd)
+                    return
+                }
+                if vd.findUsage {
+                    u := new Usage()
+                    u.Type = "declaration"
+                    u.pos = vd.pos
+                    vd.findUsageInstances = [u]
+                    this.initExpressionBlock.inheritedAttribute.p.findUsage = vd.findUsageInstances
+                }
+                if rangeOn.Type == VariableTypeArray ||
+                    rangeOn.Type == VariableTypeJavaArray {
+                    vd.Type = rangeOn.array.cloneType()
+                } else {
+                    vd.Type = rangeOn.Map.V.cloneType()
+                }
+
+                vd.name = identifierV.name
+                if this.initExpressionBlock.inheritedAttribute.Function != null {
+                    if err := this.initExpressionBlock.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(vd) ; err != null {
+                        errs.append(err)
+                    }
+                }
+                err = this.initExpressionBlock.insert(identifierV.name , this.condition.pos , vd)
+                if err != null {
+                    errs.append(err)
+                }
+                identifierV.Variable = vd
+                this.rangeAttr.identifierValue = identifierV
+            }
+            if modelKv &&
+                identifierK.name != UnderScore {
+                vd := new Variable()
+                var vt Type
+                if rangeOn.Type == VariableTypeArray ||
+                    rangeOn.Type == VariableTypeJavaArray {
+                    vt = new Type()
+                    vt.Type = VariableTypeInt
+                } else {
+                    vt = rangeOn.Map.K.cloneType()
+                    vt.pos = rangeOn.pos
+                }
+
+                vd.name = identifierK.name
+                vd.Type = vt
+                vd.pos = posK
+                vd.locateDefinition = identifierK.locateDefinition
+                vd.findUsage = identifierK.findUsage
+                if vd.locateDefinition {
+                    this.initExpressionBlock.inheritedAttribute.p.setLocationDefinition(vd)
+                    return
+                }
+                if vd.findUsage {
+                    u := new Usage()
+                    u.Type = "declaration"
+                    u.pos = vd.pos
+                    vd.findUsageInstances = [u]
+                    this.initExpressionBlock.inheritedAttribute.p.findUsage = vd.findUsageInstances
+                }
+                if this.initExpressionBlock.inheritedAttribute.Function != null {
+                    if err := this.initExpressionBlock.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(vd) ; err != null {
+                        errs.append(err)
+                    }
+                }
+                err = this.initExpressionBlock.insert(identifierK.name , posK , vd)
+                if err != null {
+                    errs.append(err)
+                }
+                identifierK.Variable = vd
+                this.rangeAttr.identifierKey = identifierK
+            }
+        } else {
+            if modelKv {
+                if false == lefts[0].isIdentifier(UnderScore) {
+                    this.rangeAttr.expressionKey = lefts[0]
+                }
+                if false == lefts[1].isIdentifier(UnderScore) {
+                    this.rangeAttr.expressionValue = lefts[1]
+                }
+            } else {
+                if false == lefts[0].isIdentifier(UnderScore) {
+                    this.rangeAttr.expressionValue = lefts[0]
+                }
+            }
+
+            var receiverKType Type
+            if this.rangeAttr.expressionKey != null {
+                receiverKType = this.rangeAttr.expressionKey.getLeftValue(this.initExpressionBlock , errs)
+                if receiverKType == null {
+                    goto checkBlock
+                }
+            }
+            var receiverVType Type
+            if this.rangeAttr.expressionValue != null {
+                receiverVType = this.rangeAttr.expressionValue.getLeftValue(this.initExpressionBlock , errs)
+                if receiverVType == null {
+                    goto checkBlock
+                }
+            }
+            var kType , vType Type
+            if rangeOn.Type == VariableTypeArray ||
+                rangeOn.Type == VariableTypeJavaArray {
+                kType = new Type()
+                kType.Type = VariableTypeInt
+
+                vType = rangeOn.array
+            } else {
+                kType = rangeOn.Map.K
+                vType = rangeOn.Map.V
+            }
+
+            if receiverKType != null {
+                if receiverKType.assignAble(this.initExpressionBlock , errs , kType) == false {
+                    err = new error(sprintf("%s cannot use '%s' as '%s' for index",
+                        errMsgPrefix(this.rangeAttr.expressionKey.pos),
+                        receiverKType.typeString() , kType.typeString()))
+                    errs.append(err)
+                    goto checkBlock
+                }
+            }
+            if receiverVType != null {
+                if receiverVType.assignAble(this.initExpressionBlock , errs , vType) == false {
+                    err = new error(sprintf("%s cannot use '%s' as '%s' for value destination",
+                        errMsgPrefix(this.rangeAttr.expressionKey.pos),
+                        receiverKType.typeString() , kType.typeString()))
+                    errs.append(err)
+                    goto checkBlock
+                }
+            }
+        }
+
+    checkBlock:
+
+        if this.block != null {
+            this.block.inherit(this.initExpressionBlock)
+            errs.appendAll(this.block.check())
+        }
+        return errs
+    }
+
+    fn check(block Block) -> (errs []error = []error{}) {
+        this.initExpressionBlock.inherit(block)
+        this.initExpressionBlock.inheritedAttribute.forStatement = this
+        this.initExpressionBlock.inheritedAttribute.forBreak = this
+        if this.Init == null &&
+            this.increment == null &&
+            this.condition != null &&
+            this.condition.canBeUsedForRange() {
+            // for k,v := range arr
+            return this.checkRange()
+        }
+        if this.Init != null {
+            this.Init.isStatementExpression = true
+            if err := this.Init.canBeUsedAsStatement() ; err != null {
+                errs.append(err)
+            }
+            _ , es := this.Init.check(this.initExpressionBlock)
+            errs.appendAll(es)
+        }
+        if this.condition != null {
+            if err := this.condition.canBeUsedAsCondition() ; err != null {
+                errs.append(err)
+            }
+            t , es := this.condition.checkSingleValueContextExpression(this.initExpressionBlock)
+            errs.appendAll(es)
+            if t != null && t.Type != VariableTypeBool {
+                errs.append(new error(sprintf("%s condition must be bool expression,but %s",
+                    errMsgPrefix(this.condition.pos) , t.typeString())))
+            }
+        }
+        if this.increment != null {
+            this.increment.isStatementExpression = true
+            if err := this.increment.canBeUsedAsStatement() ; err != null {
+                errs.append(err)
+            }
+            _ , es := this.increment.check(this.initExpressionBlock)
+            errs.appendAll(es)
+        }
+        if this.block != null {
+            this.block.inherit(this.initExpressionBlock)
+            errs.appendAll(this.block.check())
+        }
+        return errs
+    }
 }
-
 
 

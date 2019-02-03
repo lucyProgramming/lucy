@@ -1,6 +1,6 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
-import "lucy/cmd/langtools/compile/common"
+import "lucy/cmd/langtools/compile/common" as common
 
 class BuildinFunctionCall {
     eb                        BuildExpression          

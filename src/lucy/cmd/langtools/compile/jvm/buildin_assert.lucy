@@ -2,14 +2,13 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildinFunctionAssert {
-    
     eb BuildExpression
-    
-    fn BuildinFunctionAssert(eb BuildExpression){
+
+    fn BuildinFunctionAssert(eb BuildExpression) {
         this.super()
         this.eb = eb
     }
-    
+
     fn build(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
@@ -20,59 +19,64 @@ class BuildinFunctionAssert {
         length := int(len(call.args))
         lengthOffset := code.maxLocals
         code.maxLocals++
-        
-        state.appendLocals(c, typeInt)
-        loadInt(c, code, length)
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, lengthOffset))
+
+        state.appendLocals(c , typeInt)
+        loadInt(c , code , length)
+        copyOPs(code , storeLocalVariableOps(ast.VariableTypeInt , lengthOffset))
         stepOffset := code.maxLocals
         code.maxLocals++
-        state.appendLocals(c, typeInt)
+        state.appendLocals(c , typeInt)
         code.codes[code.codeLength] = cg.OP_iconst_0
         code.codeLength++
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, stepOffset))
+        copyOPs(code , storeLocalVariableOps(ast.VariableTypeInt , stepOffset))
         exits := []cg.Exit{}
-        for _, a := range call.args {
-            stack := this.eb.build(c, code, a, context, state)
+        for _ , a := range call.args {
+            stack := this.eb.build(c , code , a , context , state)
             if stack > maxStack {
                 maxStack = stack
             }
-            exits.append(new cg.Exit(cg.OP_ifeq, code))
+            exits.append(new cg.Exit(cg.OP_ifeq , code))
             code.codes[code.codeLength] = cg.OP_iinc
-            code.codes[code.codeLength+1] = byte(stepOffset)
-            code.codes[code.codeLength+2] = 1
+            code.codes[code.codeLength + 1] = byte(stepOffset)
+            code.codes[code.codeLength + 2] = 1
             code.codeLength += 3
         }
-        writeExits(exits, code.codeLength)
-        context.MakeStackMap(code, state, code.codeLength)
-        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, lengthOffset))
-        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, stepOffset))
-        okExit := (new cg.Exit(cg.OP_if_icmpeq, code))
+
+        writeExits(exits , code.codeLength)
+        context.MakeStackMap(code , state , code.codeLength)
+        copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , lengthOffset))
+        copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , stepOffset))
+        okExit := (new cg.Exit(cg.OP_if_icmpeq , code))
         code.codes[code.codeLength] = cg.OP_ldc_w
-        c.insertStringConst("assert failed,expression->'%d'", code.codes[code.codeLength+1:code.codeLength+3])
+        c.insertStringConst("assert failed,expression->'%d'" , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
-        loadInt(c, code, 1)
+        loadInt(c , code , 1)
         code.codes[code.codeLength] = cg.OP_anewarray
-        c.insertClassConst(javaRootClass, code.codes[code.codeLength+1:code.codeLength+3])
+        c.insertClassConst(javaRootClass , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         code.codes[code.codeLength] = cg.OP_dup
         code.codeLength++
         code.codes[code.codeLength] = cg.OP_iconst_0
         code.codeLength++
-        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, stepOffset))
+        copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , stepOffset))
         if 5 > maxStack {
             maxStack = 5
         }
-        TypeConverterAndPrimitivePacker.packPrimitives(c, code,  typeInt)
+        TypeConverterAndPrimitivePacker.packPrimitives(c , code , typeInt)
         code.codes[code.codeLength] = cg.OP_aastore
         code.codeLength++
-        c.insertMethodCall(code, cg.OP_invokestatic, javaStringClass,
-            "format", "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;")
+        c.insertMethodCall(code,
+            cg.OP_invokestatic,
+            javaStringClass,
+            "format",
+            "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/lang/String;")
 
         code.codes[code.codeLength] = cg.OP_new
-        c.insertClassConst(javaExceptionClass, code.codes[code.codeLength+1:code.codeLength+3])
+        c.insertClassConst(javaExceptionClass,
+            code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         code.codes[code.codeLength] = cg.OP_dup_x1
-        code.codes[code.codeLength+1] = cg.OP_swap
+        code.codes[code.codeLength + 1] = cg.OP_swap
         code.codeLength += 2
         c.insertMethodCall(code,
             cg.OP_invokespecial,
@@ -81,11 +85,11 @@ class BuildinFunctionAssert {
             "(Ljava/lang/String;)V")
         code.codes[code.codeLength] = cg.OP_athrow
         code.codeLength++
-        writeExits([]cg.Exit{okExit}, code.codeLength)
-        context.MakeStackMap(code, state, code.codeLength)
+        writeExits([]cg.Exit{okExit} , code.codeLength)
+        context.MakeStackMap(code , state , code.codeLength)
         return
     }
 
-
 }
+
 
