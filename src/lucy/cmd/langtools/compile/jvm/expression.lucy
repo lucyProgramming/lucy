@@ -241,8 +241,10 @@ class BuildExpression {
         arrayListObject := state.newObjectVariableType(javaRootObjectArray)
         state.pushStack(c , arrayListObject)
         defer {
+
             state.popStack(1)
         }
+
         index := int(0)
         for _ , v := range es {
             currentStack := char(1)

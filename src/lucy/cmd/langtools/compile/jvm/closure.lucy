@@ -1,205 +1,194 @@
- import "lucy/cmd/langtools/compile/ast"
- import "lucy/jvm/cg"
+import "lucy/cmd/langtools/compile/ast"
+import "lucy/jvm/cg"
 
-enum  ClosureKind{
-	ClosureClassInt = 1 ,
-	ClosureClassLong ,
-	ClosureClassFloat ,
-	ClosureClassDouble ,
-	ClosureClassString ,
-	ClosureClassObject
+enum ClosureKind {
+    ClosureClassInt,
+    ClosureClassLong,
+    ClosureClassFloat,
+    ClosureClassDouble,
+    ClosureClassString,
+    ClosureClassObject
 }
 
-class Closure  {
-	closureObjectMetas map { ClosureKind -> ClosureObjectMeta }
 
-	fn getMeta(t ast.VariableTypeKind) -> (meta ClosureObjectMeta) {
-		switch t {
-		case ast.VariableTypeBool , 
-			ast.VariableTypeByte ,
-			ast.VariableTypeShort ,
-		    ast.VariableTypeEnum , 
-			ast.VariableTypeChar , 
-			ast.VariableTypeInt:
-			meta = this.closureObjectMetas[ClosureClassInt]
-		case ast.VariableTypeLong:
-			meta = this.closureObjectMetas[ClosureClassLong]
-		case ast.VariableTypeFloat:
-			meta = this.closureObjectMetas[ClosureClassFloat]
-		case ast.VariableTypeDouble:
-			meta = this.closureObjectMetas[ClosureClassDouble]
-		case ast.VariableTypeString:
-			meta = this.closureObjectMetas[ClosureClassString]
-		default:
-			meta = this.closureObjectMetas[ClosureClassObject]
-		}
-		return
-	}
+class Closure {
+    closureObjectMetas map{ClosureKind -> ClosureObjectMeta}
 
-	/*
+    fn getMeta(t ast.VariableTypeKind) -> (meta ClosureObjectMeta) {
+        switch t {
+            case ast.VariableTypeBool,
+                ast.VariableTypeByte,
+                ast.VariableTypeShort,
+                ast.VariableTypeEnum,
+                ast.VariableTypeChar,
+                ast.VariableTypeInt:
+                meta = this.closureObjectMetas[ClosureClassInt]
+            case ast.VariableTypeLong:
+                meta = this.closureObjectMetas[ClosureClassLong]
+            case ast.VariableTypeFloat:
+                meta = this.closureObjectMetas[ClosureClassFloat]
+            case ast.VariableTypeDouble:
+                meta = this.closureObjectMetas[ClosureClassDouble]
+            case ast.VariableTypeString:
+                meta = this.closureObjectMetas[ClosureClassString]
+            default:
+                meta = this.closureObjectMetas[ClosureClassObject]
+        }
+
+        return
+    }
+
+    /*
 		create a closure var, init and leave on stack
 	*/
-	fn createClosureVar(c cg.ClassHighLevel,
-		code cg.AttributeCode, v ast.Type) -> (maxStack char) {
-		maxStack = 2
-		var meta ClosureObjectMeta
-		switch v.Type {
-		case ast.VariableTypeBool ,
-			ast.VariableTypeByte ,
-			ast.VariableTypeShort ,
-            ast.VariableTypeEnum ,
-			 ast.VariableTypeChar , 
-			 ast.VariableTypeInt:
-			meta = this.closureObjectMetas[ClosureClassInt]
-		case ast.VariableTypeLong:
-			meta = this.closureObjectMetas[ClosureClassLong]
-		case ast.VariableTypeFloat:
-			meta = this.closureObjectMetas[ClosureClassFloat]
-		case ast.VariableTypeDouble:
-			meta = this.closureObjectMetas[ClosureClassDouble]
-		case ast.VariableTypeString:
-			meta = this.closureObjectMetas[ClosureClassString]
-		default:
-		    meta = this.closureObjectMetas[ClosureClassObject]
-		}
-		code.codes[code.codeLength] = cg.OP_new
-		c.insertClassConst(meta.className, code.codes[code.codeLength+1:code.codeLength+3])
-		code.codes[code.codeLength+3] = cg.OP_dup
-		code.codeLength += 4
-		code.codes[code.codeLength] = cg.OP_invokespecial
-		c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-			     meta.className,
-			    specialMethodInit,
-			"()V"
-		), code.codes[code.codeLength+1:code.codeLength+3])
-		code.codeLength += 3
-		return
-	}
+    fn createClosureVar(c cg.ClassHighLevel,
+        code cg.AttributeCode , v ast.Type) -> (maxStack char) {
+        maxStack = 2
+        var meta ClosureObjectMeta
+        switch v.Type {
+            case ast.VariableTypeBool,
+                ast.VariableTypeByte,
+                ast.VariableTypeShort,
+                ast.VariableTypeEnum,
+                ast.VariableTypeChar,
+                ast.VariableTypeInt:
+                meta = this.closureObjectMetas[ClosureClassInt]
+            case ast.VariableTypeLong:
+                meta = this.closureObjectMetas[ClosureClassLong]
+            case ast.VariableTypeFloat:
+                meta = this.closureObjectMetas[ClosureClassFloat]
+            case ast.VariableTypeDouble:
+                meta = this.closureObjectMetas[ClosureClassDouble]
+            case ast.VariableTypeString:
+                meta = this.closureObjectMetas[ClosureClassString]
+            default:
+                meta = this.closureObjectMetas[ClosureClassObject]
+        }
 
-	fn storeLocalClosureVar(c cg.ClassHighLevel, code cg.AttributeCode, v ast.Variable) {
-		var meta ClosureObjectMeta
-		switch v.Type.Type {
-		case ast.VariableTypeBool ,
-			ast.VariableTypeByte ,
-			ast.VariableTypeShort ,
-             ast.VariableTypeEnum ,
-			  ast.VariableTypeChar ,
-			   ast.VariableTypeInt:
-			meta = this.closureObjectMetas[ClosureClassInt]
-		case ast.VariableTypeLong:
-			meta = this.closureObjectMetas[ClosureClassLong]
-		case ast.VariableTypeFloat:
-			meta = this.closureObjectMetas[ClosureClassFloat]
-		case ast.VariableTypeDouble:
-			meta = this.closureObjectMetas[ClosureClassDouble]
-		case ast.VariableTypeString:
-			meta = this.closureObjectMetas[ClosureClassString]
-		default:
-			meta = this.closureObjectMetas[ClosureClassObject]
-		}
-		code.codes[code.codeLength] = cg.OP_putfield
-		c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-			    meta.className,
-			  meta.fieldName,
-			meta.fieldDescription
-		), code.codes[code.codeLength+1:code.codeLength+3])
-		code.codeLength += 3
-	}
+        code.codes[code.codeLength] = cg.OP_new
+        c.insertClassConst(meta.className , code.codes[code.codeLength + 1 : code.codeLength + 3])
+        code.codes[code.codeLength + 3] = cg.OP_dup
+        code.codeLength += 4
+        code.codes[code.codeLength] = cg.OP_invokespecial
+        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
+            specialMethodInit,
+            "()V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+        code.codeLength += 3
+        return
+    }
 
-	/*
+    fn storeLocalClosureVar(c cg.ClassHighLevel , code cg.AttributeCode , v ast.Variable) {
+        var meta ClosureObjectMeta
+        switch v.Type.Type {
+            case ast.VariableTypeBool,
+                ast.VariableTypeByte,
+                ast.VariableTypeShort,
+                ast.VariableTypeEnum,
+                ast.VariableTypeChar,
+                ast.VariableTypeInt:
+                meta = this.closureObjectMetas[ClosureClassInt]
+            case ast.VariableTypeLong:
+                meta = this.closureObjectMetas[ClosureClassLong]
+            case ast.VariableTypeFloat:
+                meta = this.closureObjectMetas[ClosureClassFloat]
+            case ast.VariableTypeDouble:
+                meta = this.closureObjectMetas[ClosureClassDouble]
+            case ast.VariableTypeString:
+                meta = this.closureObjectMetas[ClosureClassString]
+            default:
+                meta = this.closureObjectMetas[ClosureClassObject]
+        }
+
+        code.codes[code.codeLength] = cg.OP_putfield
+        c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(meta.className,
+            meta.fieldName,
+            meta.fieldDescription) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+        code.codeLength += 3
+    }
+
+    /*
 		create a closure var on stack
 	*/
-	fn loadLocalClosureVar(c cg.ClassHighLevel, code cg.AttributeCode,
-		v ast.Variable) -> (maxStack char) {
-		copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, v.localValOffset))
-		this.unPack(c, code, v.Type)
-		maxStack = jvmSlotSize(v.Type)
-		return
-	}
+    fn loadLocalClosureVar(c cg.ClassHighLevel , code cg.AttributeCode,
+        v ast.Variable) -> (maxStack char) {
+        copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , v.localValOffset))
+        this.unPack(c , code , v.Type)
+        maxStack = jvmSlotSize(v.Type)
+        return
+    }
 
-	/*
+    /*
 		closure object is on stack
 	*/
-	fn unPack(c cg.ClassHighLevel, code cg.AttributeCode, v ast.Type) {
-		var meta ClosureObjectMeta
-		switch v.Type {
-		case ast.VariableTypeBool , 
-			ast.VariableTypeByte ,
-			ast.VariableTypeShort ,
-             ast.VariableTypeEnum , 
-			 ast.VariableTypeChar ,
-			 ast.VariableTypeInt:
-			meta = this.closureObjectMetas[ClosureClassInt]
-		case ast.VariableTypeLong:
-			meta = this.closureObjectMetas[ClosureClassLong]
-		case ast.VariableTypeFloat:
-			meta = this.closureObjectMetas[ClosureClassFloat]
-		case ast.VariableTypeDouble:
-			meta = this.closureObjectMetas[ClosureClassDouble]
-		case ast.VariableTypeString:
-			meta = this.closureObjectMetas[ClosureClassString]
-		default:
-			meta = this.closureObjectMetas[ClosureClassObject]
-		}
-		code.codes[code.codeLength] = cg.OP_getfield
-		c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-			      meta.className,
-			      meta.fieldName,
-			 meta.fieldDescription
-		), code.codes[code.codeLength+1:code.codeLength+3])
-		code.codeLength += 3
-		if v.isPointer() && v.Type != ast.VariableTypeString {
-			TypeConverterAndPrimitivePacker.castPointer(c, code, v)
-		}
-	}
-}
+    fn unPack(c cg.ClassHighLevel , code cg.AttributeCode , v ast.Type) {
+        var meta ClosureObjectMeta
+        switch v.Type {
+            case ast.VariableTypeBool,
+                ast.VariableTypeByte,
+                ast.VariableTypeShort,
+                ast.VariableTypeEnum,
+                ast.VariableTypeChar,
+                ast.VariableTypeInt:
+                meta = this.closureObjectMetas[ClosureClassInt]
+            case ast.VariableTypeLong:
+                meta = this.closureObjectMetas[ClosureClassLong]
+            case ast.VariableTypeFloat:
+                meta = this.closureObjectMetas[ClosureClassFloat]
+            case ast.VariableTypeDouble:
+                meta = this.closureObjectMetas[ClosureClassDouble]
+            case ast.VariableTypeString:
+                meta = this.closureObjectMetas[ClosureClassString]
+            default:
+                meta = this.closureObjectMetas[ClosureClassObject]
+        }
 
+        code.codes[code.codeLength] = cg.OP_getfield
+        c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(meta.className,
+            meta.fieldName,
+            meta.fieldDescription) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+        code.codeLength += 3
+        if v.isPointer() && v.Type != ast.VariableTypeString {
+            TypeConverterAndPrimitivePacker.castPointer(c , code , v)
+        }
+    }
+}
 
 
 class ClosureObjectMeta {
-	className        string
-	fieldName        string
-	fieldDescription string
-	fn ClosureObjectMeta(className , fieldName , fieldDescription string){
-		this.super()
-		this.className = className
-		this.fieldName = fieldName
-		this.fieldDescription = fieldDescription
-	}
+    className        string
+    fieldName        string
+    fieldDescription string
+    fn ClosureObjectMeta(className string , fieldName string , fieldDescription string) {
+        this.super()
+        this.className = className
+        this.fieldName = fieldName
+        this.fieldDescription = fieldDescription
+    }
 }
 
 
 {
-	closure.closureObjectMetas = new map { ClosureKind -> ClosureObjectMeta } ()
-	closure.closureObjectMetas[ClosureClassInt] = new ClosureObjectMeta(
-		"lucy/deps/ClosureInt",
-		"value",
-		"I"
-	)
-	closure.closureObjectMetas[ClosureClassLong] = new ClosureObjectMeta(
-		"lucy/deps/ClosureLong",
-		"value",
-		"J"
-	)
-	closure.closureObjectMetas[ClosureClassFloat] = new ClosureObjectMeta(
-		"lucy/deps/ClosureFloat",
-		"value",
-		"F"
-	)
-	closure.closureObjectMetas[ClosureClassDouble] = new ClosureObjectMeta(
-		"lucy/deps/ClosureDouble",
-		"value",
-		"D"
-	)
-	closure.closureObjectMetas[ClosureClassString] = new ClosureObjectMeta(
-		"lucy/deps/ClosureString",
-		"value",
-		"Ljava/lang/String;"
-	)
-	closure.closureObjectMetas[ClosureClassObject] = new ClosureObjectMeta(
-		"lucy/deps/ClosureObject",
-		"value",
-		"Ljava/lang/Object;"
-	)
+
+    closure.closureObjectMetas = new map{ClosureKind -> ClosureObjectMeta}()
+    closure.closureObjectMetas[ClosureClassInt] = new ClosureObjectMeta("lucy/deps/ClosureInt",
+        "value",
+        "I")
+    closure.closureObjectMetas[ClosureClassLong] = new ClosureObjectMeta("lucy/deps/ClosureLong",
+        "value",
+        "J")
+    closure.closureObjectMetas[ClosureClassFloat] = new ClosureObjectMeta("lucy/deps/ClosureFloat",
+        "value",
+        "F")
+    closure.closureObjectMetas[ClosureClassDouble] = new ClosureObjectMeta("lucy/deps/ClosureDouble",
+        "value",
+        "D")
+    closure.closureObjectMetas[ClosureClassString] = new ClosureObjectMeta("lucy/deps/ClosureString",
+        "value",
+        "Ljava/lang/String;")
+    closure.closureObjectMetas[ClosureClassObject] = new ClosureObjectMeta("lucy/deps/ClosureObject",
+        "value",
+        "Ljava/lang/Object;")
+
+
 }
 

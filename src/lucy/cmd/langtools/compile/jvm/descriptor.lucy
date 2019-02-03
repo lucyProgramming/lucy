@@ -25,119 +25,119 @@ public class Descriptor {
 
     static fn typeDescriptor(typ ast.Type) -> (d string) {
         switch typ.Type {
-        case ast.VariableTypeBool:
-            return "Z"
-        case ast.VariableTypeByte:
-            return "B"
-        case ast.VariableTypeShort:
-            return "S"
-        case ast.VariableTypeChar:
-            return "C"
-        case ast.VariableTypeInt , 
-            ast.VariableTypeEnum:
-            return "I"
-        case ast.VariableTypeLong:
-            return "J"
-        case ast.VariableTypeFloat:
-            return "F"
-        case ast.VariableTypeDouble:
-            return "D"
-        case ast.VariableTypeArray:
-            meta := ArrayMetas[typ.array.Type] // combination type
-            return "L" + meta.className + ";"
-        case ast.VariableTypeString:
-            return "Ljava/lang/String;"
-        case ast.VariableTypeVoid:
-            return "V"
-        case ast.VariableTypeObject:
-            return "L" + typ.Class.name + ";"
-        case ast.VariableTypeMap:
-            return "L" + mapClass + ";"
-        case ast.VariableTypeFunction:
-            return "L" + javaMethodHandleClass + ";"
-        case ast.VariableTypeJavaArray:
-            return "[" + .typeDescriptor(typ.array)
-        case ast.VariableTypeName:
-        case ast.VariableTypeDynamicSelector:
-        case ast.VariableTypeGlobal:
-        case ast.VariableTypeClass:
-        case ast.VariableTypePackage:
-        case ast.VariableTypeNull:
-        case ast.VariableTypeTemplate:
+            case ast.VariableTypeBool:
+                return "Z"
+            case ast.VariableTypeByte:
+                return "B"
+            case ast.VariableTypeShort:
+                return "S"
+            case ast.VariableTypeChar:
+                return "C"
+            case ast.VariableTypeInt,
+                ast.VariableTypeEnum:
+                return "I"
+            case ast.VariableTypeLong:
+                return "J"
+            case ast.VariableTypeFloat:
+                return "F"
+            case ast.VariableTypeDouble:
+                return "D"
+            case ast.VariableTypeArray:
+                meta := ArrayMetas[typ.array.Type] // combination type
+                return "L" + meta.className + ";"
+            case ast.VariableTypeString:
+                return "Ljava/lang/String;"
+            case ast.VariableTypeVoid:
+                return "V"
+            case ast.VariableTypeObject:
+                return "L" + typ.Class.name + ";"
+            case ast.VariableTypeMap:
+                return "L" + mapClass + ";"
+            case ast.VariableTypeFunction:
+                return "L" + javaMethodHandleClass + ";"
+            case ast.VariableTypeJavaArray:
+                return "[" + .typeDescriptor(typ.array)
+            case ast.VariableTypeName:
+            case ast.VariableTypeDynamicSelector:
+            case ast.VariableTypeGlobal:
+            case ast.VariableTypeClass:
+            case ast.VariableTypePackage:
+            case ast.VariableTypeNull:
+            case ast.VariableTypeTemplate:
         }
 
     }
 
     public static fn ParseType(bs []byte) -> (bsSlieced []byte , t ast.Type , err error) {
         switch bs[0] {
-        case 'V':
-            bs = bs[1:]
-            t = new ast.Type()
-            t.Type = ast.VariableTypeVoid
-            return bs , t , err
-        case 'B':
-            bs = bs[1:]
-            t = new ast.Type()
-            t.Type = ast.VariableTypeByte
-            return bs , t , err
-        case 'D':
-            bs = bs[1:]
-            t = new ast.Type()
-            t.Type = ast.VariableTypeDouble
-            return bs , t , err
-        case 'F':
-            bs = bs[1:]
-            t = new ast.Type()
-            t.Type = ast.VariableTypeFloat
-            return bs , t , err
-        case 'I':
-            bs = bs[1:]
-            t = new ast.Type()
-            t.Type = ast.VariableTypeInt
-            return bs , t , err
-        case 'J':
-            bs = bs[1:]
-            t = new ast.Type()
-            t.Type = ast.VariableTypeLong
-            return bs , t , err
-        case 'C':
-            bs = bs[1:]
-            t = new ast.Type()
-            t.Type = ast.VariableTypeChar
-            return bs , t , err
-        case 'S':
-            bs = bs[1:]
-            t = new ast.Type()
-            t.Type = ast.VariableTypeShort
-            return bs , t , err
-        case 'Z':
-            bs = bs[1:]
-            t = new ast.Type()
-            t.Type = ast.VariableTypeBool
-            return bs , t , err
-        case 'L':
-            bs = bs[1:]
-            index := common.Bytes.indexByte(bs , ';') // end token
-            t = new ast.Type()
-            t.Type = ast.VariableTypeObject
-            t.Class = new ast.Class()
-            t.Class.name = string(bs[ : index])
-            bs = bs[index + 1:] // skip ;
-            t.Class.notImportedYet = true
-            if t.Class.name == javaStringClass {
-                t.Type = ast.VariableTypeString
-            }
-            return bs , t , null
-        case '[':
-            bs = bs[1:]
-            var array ast.Type
-            bs , array , err = .ParseType(bs)
-            t = new ast.Type()
-            if err == null {
-                t.Type = ast.VariableTypeJavaArray
-                t.array = array
-            }
-            return bs , t , err
+            case 'V':
+                bs = bs[1:]
+                t = new ast.Type()
+                t.Type = ast.VariableTypeVoid
+                return bs , t , err
+            case 'B':
+                bs = bs[1:]
+                t = new ast.Type()
+                t.Type = ast.VariableTypeByte
+                return bs , t , err
+            case 'D':
+                bs = bs[1:]
+                t = new ast.Type()
+                t.Type = ast.VariableTypeDouble
+                return bs , t , err
+            case 'F':
+                bs = bs[1:]
+                t = new ast.Type()
+                t.Type = ast.VariableTypeFloat
+                return bs , t , err
+            case 'I':
+                bs = bs[1:]
+                t = new ast.Type()
+                t.Type = ast.VariableTypeInt
+                return bs , t , err
+            case 'J':
+                bs = bs[1:]
+                t = new ast.Type()
+                t.Type = ast.VariableTypeLong
+                return bs , t , err
+            case 'C':
+                bs = bs[1:]
+                t = new ast.Type()
+                t.Type = ast.VariableTypeChar
+                return bs , t , err
+            case 'S':
+                bs = bs[1:]
+                t = new ast.Type()
+                t.Type = ast.VariableTypeShort
+                return bs , t , err
+            case 'Z':
+                bs = bs[1:]
+                t = new ast.Type()
+                t.Type = ast.VariableTypeBool
+                return bs , t , err
+            case 'L':
+                bs = bs[1:]
+                index := common.Bytes.indexByte(bs , ';') // end token
+                t = new ast.Type()
+                t.Type = ast.VariableTypeObject
+                t.Class = new ast.Class()
+                t.Class.name = string(bs[:index])
+                bs = bs[index + 1:] // skip ;
+                t.Class.notImportedYet = true
+                if t.Class.name == javaStringClass {
+                    t.Type = ast.VariableTypeString
+                }
+                return bs , t , null
+            case '[':
+                bs = bs[1:]
+                var array ast.Type
+                bs , array , err = .ParseType(bs)
+                t = new ast.Type()
+                if err == null {
+                    t.Type = ast.VariableTypeJavaArray
+                    t.array = array
+                }
+                return bs , t , err
         }
 
         return bs , null , new error(sprintf("unkown type:%s" , string(bs)))
@@ -170,4 +170,5 @@ public class Descriptor {
         return t , null
     }
 }
+
 

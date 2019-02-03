@@ -1,13 +1,10 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
-
 class BuildExpressionQuestion {
-    
-
     eb BuildExpression
-    
-    fn BuildExpressionQuestion(eb BuildExpression){
+
+    fn BuildExpressionQuestion(eb BuildExpression) {
         this.super()
         this.eb = eb
     }
@@ -19,25 +16,26 @@ class BuildExpressionQuestion {
         context Context,
         state StackMapState) -> (maxStack char) {
         question := e.data.(ast.ExpressionQuestion)
-        maxStack = this.eb.build(c, code, question.selection, context, state)
-        falseExit := new cg.Exit(cg.OP_ifeq, code)
+        maxStack = this.eb.build(c , code , question.selection , context , state)
+        falseExit := new cg.Exit(cg.OP_ifeq , code)
         //true part
-        stack := this.eb.build(c, code, question.True, context, state)
+        stack := this.eb.build(c , code , question.True , context , state)
         if stack > maxStack {
             maxStack = stack
         }
-        trueExit := new cg.Exit(cg.OP_goto, code)
-        context.MakeStackMap(code, state, code.codeLength)
-        writeExits([]cg.Exit{falseExit}, code.codeLength)
-        stack = this.eb.build(c, code, question.False, context, state)
+        trueExit := new cg.Exit(cg.OP_goto , code)
+        context.MakeStackMap(code , state , code.codeLength)
+        writeExits([]cg.Exit{falseExit} , code.codeLength)
+        stack = this.eb.build(c , code , question.False , context , state)
         if stack > maxStack {
             maxStack = stack
         }
-        state.pushStack(c, e.value)
-        context.MakeStackMap(code, state, code.codeLength)
+        state.pushStack(c , e.value)
+        context.MakeStackMap(code , state , code.codeLength)
         state.popStack(1)
-        writeExits([]cg.Exit{trueExit}, code.codeLength)
+        writeExits([]cg.Exit{trueExit} , code.codeLength)
         return
     }
 }
+
 

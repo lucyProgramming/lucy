@@ -91,8 +91,10 @@ class BuildExpressionRelation {
             state.pushStack(c , typeBool)
             context.MakeStackMap(code , state , code.codeLength)
             defer {
+
                 state.popStack(1)
             }
+
             return
         }
         if bin.left.value.Type == ast.VariableTypeBool ||
@@ -122,8 +124,10 @@ class BuildExpressionRelation {
             state.pushStack(c , typeBool)
             context.MakeStackMap(code , state , code.codeLength)
             defer {
+
                 state.popStack(1)
             }
+
             return
         }
         if bin.left.value.Type == ast.VariableTypeNull ||
@@ -154,8 +158,10 @@ class BuildExpressionRelation {
             state.pushStack(c , typeBool)
             context.MakeStackMap(code , state , code.codeLength)
             defer {
+
                 state.popStack(1)
             }
+
             return
         }
         //string compare
@@ -199,8 +205,10 @@ class BuildExpressionRelation {
             state.pushStack(c , typeBool)
             context.MakeStackMap(code , state , code.codeLength)
             defer {
+
                 state.popStack(1)
             }
+
             return
         }
         if bin.left.value.isPointer() && bin.right.value.isPointer() {
@@ -232,8 +240,10 @@ class BuildExpressionRelation {
             state.pushStack(c , typeBool)
             context.MakeStackMap(code , state , code.codeLength)
             defer {
+
                 state.popStack(1)
             }
+
             return
         }
         return

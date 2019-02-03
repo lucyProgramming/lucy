@@ -1,19 +1,15 @@
-
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildTemplateFunctionCall {
     eb BuildExpression
-    bp BuildPackage
+    bp BuildPackage   
 
-
-    fn BuildTemplateFunctionCall(eb BuildExpression , bp BuildPackage){
+    fn BuildTemplateFunctionCall(eb BuildExpression , bp BuildPackage) {
         this.super()
         this.eb = eb
         this.bp = bp
     }
-
-
 
     fn buildTemplateFunctionCall(
         c cg.ClassHighLevel,
@@ -38,17 +34,15 @@ class BuildTemplateFunctionCall {
             c.appendMethod(method)
             call.templateFunctionCallPair.Function.entrance = method
             //build function
-            this.bp.BuildFunction.buildFunction(c, null, method, call.templateFunctionCallPair.Function)
+            this.bp.BuildFunction.buildFunction(c , null , method , call.templateFunctionCallPair.Function)
             call.templateFunctionCallPair.entrance = method
         }
-        maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c, code, call.args, call.vArgs, context, state)
+        maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
         code.codes[code.codeLength] = cg.OP_invokestatic
-        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-            call.templateFunctionCallPair.entrance.Class.name,
+        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.templateFunctionCallPair.entrance.Class.name,
             call.templateFunctionCallPair.entrance.name,
-            call.templateFunctionCallPair.entrance.Descriptor
-        ),
-            code.codes[code.codeLength+1:code.codeLength+3])
+            call.templateFunctionCallPair.entrance.Descriptor),
+            code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         if e.isStatementExpression {
             if call.templateFunctionCallPair.Function.Type.voidReturn() == false {
@@ -63,12 +57,13 @@ class BuildTemplateFunctionCall {
                         code.codes[code.codeLength] = cg.OP_pop2
                         code.codeLength++
                     }
+
                 }
+
             }
         }
         return
     }
-
 
 }
 

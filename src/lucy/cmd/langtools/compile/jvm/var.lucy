@@ -33,9 +33,12 @@ var typeString = new ast.Type()
 var typeBool = new ast.Type()
 
 {
+
     typeInt.Type = ast.VariableTypeInt
     typeString.Type = ast.VariableTypeString
     typeBool.Type = ast.VariableTypeBool
+
+
 
 }
 
