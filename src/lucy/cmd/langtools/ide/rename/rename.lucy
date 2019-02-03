@@ -57,14 +57,12 @@ class ReName {
                 u = v
                 break
             }
-
             this.renameImport(u , t)
             return
         }
         for k , v := range grouyByFileName {
             this.renameOneFile(k , v)
         }
-
     }
 
     fn renameOneFile(filename string , usages []ast.Usage) {
@@ -189,7 +187,6 @@ class ReName {
         }
 
     }
-
 }
 
 

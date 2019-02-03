@@ -82,7 +82,7 @@ class ExpressionParser extends ParserFather {
         if err != null {
             return null , err
         }
-        for this.parser.token.Type == lex.TokenComma && statementLevel { //        read more
+        for this.parser.token.Type == lex.TokenComma && statementLevel { //         read more
             this.next(lfNotToken) //  skip comma
             var left2 ast.Expression
             left2 , err = this.ExpressionQuestionParser.parseQuestionExpression() //

@@ -137,7 +137,7 @@ class ClassParser extends ParserFather {
             err = new error(sprintf("%s expect '{' but '%s'",
                 this.parser.errMsgPrefix() , this.parser.token.description))
             this.parser.errs.append(err)
-            return null , err
+            return classDefinition , err
         }
         this.next(lfNotToken) // skip {
         comment := new CommentParser(this.parser)
