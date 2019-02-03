@@ -2,18 +2,18 @@ import "lucy/os/flag"
 
 // parse cmd args
 class Flags {
-    host flag.StringOption
-    port  flag.IntOption
-    parser flag.FlagParser
-    
+    host   flag.StringOption
+    port   flag.IntOption   
+    parser flag.FlagParser  
+
     fn Flags() {
         this.super()
         this.parser = new flag.FlagParser()
-        this.port = this.parser.intOption("-port" , 2018)   // 2018 is the birth year of lucy
+        this.port = this.parser.intOption("-port" , 2018) // 2018 is the birth year of lucy
         this.host = this.parser.stringOption("-host" , "127.0.0.1")
     }
-    
-    fn parseArgs(args  []string) -> (host string , port int ){
+
+    fn parseArgs(args []string) -> (host string , port int) {
         this.parser.parse(args)
         port = this.port.getValue()
         if port < 0 {
@@ -25,3 +25,5 @@ class Flags {
         }
     }
 }
+
+

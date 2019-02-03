@@ -1,6 +1,5 @@
 import "com/sun/net/httpserver/HttpServer"
 
-
 public fn registerHandlers(prefix string , server HttpServer) {
     gotoDefinition := new GotoDefinition()
     server.createContext(prefix + "/gotoDefinition" , gotoDefinition)
@@ -20,8 +19,6 @@ public fn registerHandlers(prefix string , server HttpServer) {
     server.createContext(prefix + "/diagnose" , diag)
     status := new Status()
     server.createContext(prefix + "/status" , status)
+    rename := new Rename()
+    server.createContext(prefix + "/rename" , rename)
 }
-
-
-
-

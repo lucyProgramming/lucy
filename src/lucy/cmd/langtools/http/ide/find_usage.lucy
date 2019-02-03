@@ -33,7 +33,7 @@ class FindUsage implements HttpHandler {
         }
         line := Integer.parseInt(paramters["line"])
         column := Integer.parseInt(paramters["column"])
-        usages := findusage.findUsage(file , (line << 16) | int(char(column)) , "" , null)
+        usages := findusage.findUsage(file , (line << 16) | int(char(column)) , "" , null , null)
         bs , _ := json.encode(usages , "\t")
         exchange.sendResponseHeaders(200 , long(len(bs)))
         os.write(copy(new byte[](len(bs)) , bs))

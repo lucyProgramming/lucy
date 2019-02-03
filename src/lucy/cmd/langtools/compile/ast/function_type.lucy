@@ -350,7 +350,9 @@ public class FunctionType {
 				}
 			} else { // no default value
 				errMsg := sprintf("%s too few paramaters to call\n", errMsgPrefix(from))
-				errMsg += haveAndWant
+				if haveAndWant != null {
+					errMsg += haveAndWant
+				}
 				err = new error(sprintf(errMsg))
 				return
 			}

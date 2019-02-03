@@ -8,6 +8,7 @@ public class Encoder {
     c       Class 
     indent  string
     indents string
+
     public fn Encoder(x Object , indents string = "" , indent string = "") {
         this.super()
         this.x = x

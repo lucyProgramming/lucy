@@ -1,6 +1,5 @@
 import "lucy/os"
 
-
 const usage = `
     find definition of a element. 
        -file   file to be located
@@ -9,14 +8,8 @@ const usage = `
        -column which column (zero based)
 `
 
-fn printUsageAndExit(code int ){
-	os.stderr.println(usage)
-	os.exit(code)
+fn printUsageAndExit(code int) {
+    os.stderr.println(usage)
+    os.exit(code)
 }
-
-
-
-
-
-
 

@@ -1,17 +1,18 @@
-import "lucy/cmd/langtools/ide" as ideLib 
-import "lucy/cmd/langtools/compile/parser"  
-import "lucy/cmd/langtools/compile/ast"  
+import "lucy/cmd/langtools/ide" as ideLib
+import "lucy/cmd/langtools/compile/parser"
+import "lucy/cmd/langtools/compile/ast"
 import "com/sun/net/httpserver/HttpHandler"
 import "com/sun/net/httpserver/HttpExchange"
 import "lucy/cmd/langtools/http/g"
 import "java/lang/System"
-import "lucy/os"  as lucyOs
+import "lucy/os" as lucyOs
 
 class Fmt implements HttpHandler {
     public fn handle(exchange HttpExchange) {
         os := exchange.getResponseBody()
         now := System.currentTimeMillis()
         defer {
+
             CallStatus.collect(callStatus , "fmt" , System.currentTimeMillis() - now)
             e := catch()
             if e != null {
@@ -21,10 +22,11 @@ class Fmt implements HttpHandler {
             }
             exchange.close()
         }
+
         uri := exchange.getRequestURI()
         paramters := g.parseQuery(uri.getQuery())
         file := paramters["file"]
-        if file == null || file == ""{
+        if file == null || file == "" {
             bs := byte[]("file not provide")
             exchange.sendResponseHeaders(400 , long(len(bs)))
             os.write(bs)
@@ -32,11 +34,11 @@ class Fmt implements HttpHandler {
         }
         bs := g.readBodyBytes(exchange.getRequestBody())
         if len(bs) == 0 {
-            t,err := lucyOs.readFile(file)
+            t , err := lucyOs.readFile(file)
             if err != null {
                 panic(err)
             }
-            bs = javaArray2Lucy(t) 
+            bs = javaArray2Lucy(t)
         }
         var tops = new []ast.TopNode(0)
         es := parser.parse(tops , "" , bs , false , 10 , -1 , -1 , -1 , -1 , -1)
@@ -45,17 +47,24 @@ class Fmt implements HttpHandler {
             for v := range es {
                 errmsg += v.getMessage() + "\n"
             }
+
             bs := byte[](errmsg)
             exchange.sendResponseHeaders(400 , long(len(bs)))
             os.write(bs)
             return
         }
         {
+
             formator := new ideLib.Fmt("    ")
             s := formator.fmt(tops)
             bs := byte[](s)
+            header := exchange.getResponseHeaders()
+            header.set("Content-Type" , "Content-Type: text/html; charset=utf-8")
             exchange.sendResponseHeaders(200 , long(len(bs)))
             os.write(bs)
         }
-    } 
+
+    }
 }
+
+

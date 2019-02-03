@@ -5,7 +5,11 @@ import "java/nio/file/FileSystems"
 import "lucy/cmd/langtools/common"
 import "lucy/cmd/langtools/ide/gotodefinition"
 
-public fn findUsage(file string , pos int , scope string , storePackage []ast.Package) -> (result ast.Usage[]) {
+public fn findUsage(file string,
+    pos int,
+    scope string,
+    storePackage []ast.Package,
+    bs []byte) -> (result ast.Usage[]) {
     definition := gotodefinition.findDefinition(file , pos , null , storePackage)
     if definition == null {
         print("find usage cannot find definition")
@@ -17,9 +21,12 @@ public fn findUsage(file string , pos int , scope string , storePackage []ast.Pa
     for v := range lucyFiles {
         if fileSystem.getPath(definition.filename).getFileName().toString() ==
             fileSystem.getPath(v.realPathName).getFileName().toString() {
-            v.findUsage =
-                (definition.endLine << 16) |
-                    int(char(definition.endColumnOffset - 1))
+            v.findUsage = (definition.endLine << 16) |
+                int(char(definition.endColumnOffset - 1))
+            if len(bs) > 0 {
+                v.bs = bs
+            }
+            v.realPathName = file
         }
     }
 
@@ -33,7 +40,7 @@ public fn findUsage(file string , pos int , scope string , storePackage []ast.Pa
 fn main(args []string) {
     f := new Flags()
     file , pos := f.parseArgs(args)
-    result := findUsage(file , pos , "" , null)
+    result := findUsage(file , pos , "" , null , null)
     bs , err := json.encode(result)
     if err != null {
         panic(err)

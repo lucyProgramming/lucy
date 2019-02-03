@@ -6,6 +6,7 @@ class Status implements HttpHandler {
     public fn handle(exchange HttpExchange) {
         os := exchange.getResponseBody()
         defer {
+
             e := catch()
             if e != null {
                 exchange.sendResponseHeaders(500 , 0L)
@@ -14,8 +15,11 @@ class Status implements HttpHandler {
             }
             exchange.close()
         }
+
         bs := new json.Encoder(allStatus , "" , "\t").encode()
         exchange.sendResponseHeaders(200 , long(len(bs)))
-        os.write(copy(new byte[](len(bs)) ,bs ))
-    } 
+        os.write(copy(new byte[](len(bs)) , bs))
+    }
 }
+
+

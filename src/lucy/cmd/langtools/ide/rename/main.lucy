@@ -2,9 +2,9 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/ide/findusage"
 import "lucy/os"
 
-public fn rename(filename string , to string , pos int) {
+public fn rename(filename string , bsForTheCurrentFile []byte , to string , pos int) {
     storePackage := []ast.Package{null}
-    usages := findusage.findUsage(filename , pos , null , storePackage)
+    usages := findusage.findUsage(filename , pos , null , storePackage , bsForTheCurrentFile)
     if len(usage) == 0 {
         return
     }
@@ -12,7 +12,18 @@ public fn rename(filename string , to string , pos int) {
         storePackage[0].locateDefinitionBaseOn == null {
         return
     }
-    new ReName(usages , storePackage[0].locateDefinitionBaseOn , to).rename()
+    if len(bsForTheCurrentFile) == 0 {
+        t , err := os.readFile(filename)
+        if err != null {
+            panic(err)
+        }
+        bsForTheCurrentFile = javaArray2Lucy(t)
+    }
+    new ReName(usages,
+        storePackage[0].locateDefinitionBaseOn,
+        filename,
+        to,
+        bsForTheCurrentFile).rename()
 }
 
 fn main(args []string) {

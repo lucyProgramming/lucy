@@ -1,19 +1,36 @@
 import "lucy/cmd/langtools/compile/ast"
 import "java/lang/Object"
+import "lucy/os"
 
 typealias filename = string
 
 
 class ReName {
-    usages ast.Usage[]
-    on     Object     
-    to     string     
+    usages              ast.Usage[]
+    on                  Object     
+    to                  []byte     
+    bsForTheCurrentFile []byte     
+    filename            string     
+    oldLength           int        
 
-    public fn ReName(usages ast.Usage[] , on Object , to string) {
+    public fn ReName(usages ast.Usage[],
+        on Object,
+        filename string,
+        to string,
+        bsForTheCurrentFile []byte) {
         this.super()
         this.usages = usages
         this.on = on
-        this.to = to
+        this.filename = filename
+        this.to = []byte(to)
+        this.bsForTheCurrentFile = bsForTheCurrentFile
+        if len(usages) > 0 {
+            this.oldLength = usages[0].pos.endColumnOffset - usages[0].pos.startColumnOffset
+        }
+        if i , ok := this.on.(ast.Import) ; ok {
+            i.mkAccessName()
+            this.oldLength = len(i.accessName)
+        }
     }
 
     fn rename() {
@@ -22,7 +39,7 @@ class ReName {
             // init method cannot be renamed
             return
         }
-        grouyByFileName := new map{string -> []ast.Usage}()
+        grouyByFileName := new map{filename -> []ast.Usage}()
         for _ , v := range this.usages {
             if grouyByFileName.keyExist(v.pos.filename) {
                 grouyByFileName[v.pos.filename].append(v)
@@ -33,10 +50,131 @@ class ReName {
         }
 
         if t , ok := this.on.(ast.Import) ; ok == true {
-            // init method cannot be renamed
-            this.renameImport(grouyByFileName , t)
+            // import only can be used in on file 
+            var u []ast.Usage
+            for v := range grouyByFileName {
+                u = v
+                break
+            }
+
+            this.renameImport(u , t)
             return
         }
+        for k , v := range grouyByFileName {
+            this.renameOneFile(k , v)
+        }
+
+    }
+
+    fn renameOneFile(filename string , usages []ast.Usage) {
+        var bs []byte
+        if filename == this.filename {
+            bs = this.bsForTheCurrentFile
+        } else {
+            t , err := os.readFile(filename)
+            if err != null {
+                panic(err)
+            }
+            //read the file form disk
+            bs = javaArray2Lucy(t)
+        }
+
+        usagesGroupByLine := this.getUsageGroupByLine(usages)
+        length := len(bs)
+        line := 0
+        column := 0
+        newBs := []byte{}
+        increment := this.oldLength - 1
+        for i := 0 ; i < length ; i++ {
+            if bs[i] == '\n' {
+                line++
+                column = 0
+                newBs.append(bs[i])
+                continue
+            }
+            if false == this.matchColumn(usagesGroupByLine[line] , column) {
+                column++
+                newBs.append(bs[i])
+                continue
+            }
+            newBs.appendAll(this.to)
+            i += increment
+            column += this.oldLength
+        }
+
+        err := os.writeFile(filename,
+            newBs.getUnderlyingArray(),
+            newBs.start(),
+            newBs.size())
+        if err != null {
+            panic(err)
+        }
+    }
+
+    fn renameImport(usages []ast.Usage , Import ast.Import) {
+        if Import.aliasPos != null {
+            // in this case 
+            // renameOneFile is perfect
+            usages[0].pos = Import.aliasPos
+            this.renameOneFile(this.filename , usages)
+            return
+        }
+        bs := this.bsForTheCurrentFile
+        usagesGroupByLine := this.getUsageGroupByLine(usages)
+        length := len(bs)
+        line := 0
+        column := 0
+        newBs := []byte{}
+        increment := this.oldLength - 1
+        firstUsage := true
+        for i := 0 ; i < length ; i++ {
+            if bs[i] == '\n' {
+                line++
+                column = 0
+                newBs.append(bs[i])
+                continue
+            }
+            if false == this.matchColumn(usagesGroupByLine[line] , column) {
+                column++
+                newBs.append(bs[i])
+                continue
+            }
+            if firstUsage == false {
+                newBs.appendAll(this.to)
+                i += increment
+                column += this.oldLength
+            } else {
+                importResourceLength := usages[0].pos.endColumnOffset - usages[0].pos.startColumnOffset
+                for j := 0 ; j < importResourceLength ; j++ {
+                    column++
+                    newBs.append(bs[i+j])
+                }
+                newBs.appendAll([]byte(" as " ) , this.to)
+                firstUsage = false
+                i += importResourceLength - 1
+            }
+
+        }
+
+        err := os.writeFile(this.filename,
+            newBs.getUnderlyingArray(),
+            newBs.start(),
+            newBs.size())
+        if err != null {
+            panic(err)
+        }
+    }
+
+    fn matchColumn(usages []ast.Usage , column int) -> (match bool) {
+        if len(usages) == 0 {
+            return
+        }
+        for v := range usages {
+            if v.pos.startColumnOffset == column {
+                return true
+            }
+        }
+
     }
 
     fn getUsageGroupByLine(usages []ast.Usage) -> (ret map{int -> []ast.Usage} = new map{int -> []ast.Usage}()) {
@@ -50,8 +188,6 @@ class ReName {
         }
 
     }
-
-    fn renameImport(grouyByFileName map{string -> []ast.Usage} , i ast.Import){}
 
 }
 

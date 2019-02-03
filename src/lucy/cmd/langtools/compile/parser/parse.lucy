@@ -865,6 +865,7 @@ class Parser {
                 } else {
                     i.accessName = this.token.stringValue
                     i.alias = this.token.stringValue
+                    i.aliasPos = this.mkPos()
                     i.locateDefinition = i.locateDefinition || this.token.locateDefinition
                     i.findUsage = i.findUsage || this.token.findUsage
                     this.next(lfIsToken) // skip identifier

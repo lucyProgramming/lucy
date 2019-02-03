@@ -32,7 +32,6 @@ public fn readFile(filepath string) -> (bs byte[] , err error) {
 
 public fn writeFile(filepath string , bs byte[] , start int = 0 , length int = -1) -> (err error) {
     defer {
-
         e := catch()
         if e != null {
             err = e

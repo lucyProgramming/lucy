@@ -343,7 +343,7 @@ public class Package {
             if v.alias.findUsage {
                 u := new Usage()
                 u.Type = "declaration"
-                u.pos = v.pos
+                u.pos = v.alias.pos
                 v.alias.findUsageInstances = [u]
                 this.findUsageIsGlobal = true
                 this.findUsage = v.alias.findUsageInstances

@@ -63,7 +63,6 @@ public class Variable {
         if this.comment != null {
             s += this.comment
         }
-        s += sprintf("variable %s %s" , this.name , this.Type.typeString())
+        s += sprintf("var %s %s" , this.name , this.Type.typeString())
     }
 }
-

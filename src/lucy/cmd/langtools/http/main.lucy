@@ -9,12 +9,12 @@ import "lucy/encoding/json"
 
 public fn http(args []string) {
     host , port := new Flags().parseArgs(args)
-    printf("listen on %s:%s\n" ,host, port)
-    server := HttpServer.create(new InetSocketAddress(host , port), 0)
-    server.createContext("/exit", new ExitHandler())
-    ide.registerHandlers("/ide",server)
+    printf("listen on %s:%s\n" , host , port)
+    server := HttpServer.create(new InetSocketAddress(host , port) , 0)
+    server.createContext("/exit" , new ExitHandler())
+    ide.registerHandlers("/ide" , server)
     doc.registerHandlers("/doc" , server)
-    json.enablePrintErr = true 
+    json.enablePrintErr = true
     server.start()
 }
 
@@ -28,3 +28,5 @@ class ExitHandler implements HttpHandler {
         os.exit(0)
     }
 }
+
+
