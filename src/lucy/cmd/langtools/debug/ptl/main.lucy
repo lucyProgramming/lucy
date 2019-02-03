@@ -76,12 +76,10 @@ fn main(args []string) {
 
 }
 
-
 fn printToken(tok lex.Token) {
     if tok == null {
         return
     }
     print(tok.toString())
 }
-
 

@@ -1,4 +1,3 @@
-
 import "lucy/cmd/langtools/ide/hover"
 import "com/sun/net/httpserver/HttpHandler"
 import "com/sun/net/httpserver/HttpExchange"
@@ -11,6 +10,7 @@ class GetHover implements HttpHandler {
         os := exchange.getResponseBody()
         now := System.currentTimeMillis()
         defer {
+
             CallStatus.collect(callStatus , "hover" , System.currentTimeMillis() - now)
             e := catch()
             if e != null {
@@ -20,15 +20,16 @@ class GetHover implements HttpHandler {
             }
             exchange.close()
         }
+
         bs := g.readBodyBytes(exchange.getRequestBody())
         uri := exchange.getRequestURI()
         paramters := g.parseQuery(uri.getQuery())
         file := paramters["file"]
-        if file == null || file == ""{
+        if file == null || file == "" {
             bs := byte[]("file not provide")
             exchange.sendResponseHeaders(400 , long(len(bs)))
             os.write(bs)
-            return 
+            return
         }
         line := Integer.parseInt(paramters["line"])
         column := Integer.parseInt(paramters["column"])
@@ -38,6 +39,8 @@ class GetHover implements HttpHandler {
         header.set("Content-Type" , "Content-Type: text/html; charset=utf-8")
         exchange.sendResponseHeaders(200 , long(len(bs)))
         print(string(bs))
-        os.write(copy(new byte[](len(bs)) ,bs )) 
-    } 
+        os.write(copy(new byte[](len(bs)) , bs))
+    }
 }
+
+

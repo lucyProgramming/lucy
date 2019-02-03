@@ -17,7 +17,8 @@ class ReName {
     }
 
     fn rename() {
-        if t , ok := this.on.(ast.ClassMethod) ; ok == true && t.Function.name == ast.SpecialMethodInit {
+        if t , ok := this.on.(ast.ClassMethod) ; ok == true &&
+            t.Function.name == ast.SpecialMethodInit {
             // init method cannot be renamed
             return
         }

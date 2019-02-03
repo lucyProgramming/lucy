@@ -1,0 +1,47 @@
+import "lucy/cmd/langtools/ide/rename"
+import "com/sun/net/httpserver/HttpHandler"
+import "com/sun/net/httpserver/HttpExchange"
+import "lucy/cmd/langtools/http/g"
+import "java/lang/System"
+import "java/lang/Integer"
+
+class Rename implements HttpHandler {
+    public fn handle(exchange HttpExchange) {
+        os := exchange.getResponseBody()
+        now := System.currentTimeMillis()
+        defer {
+
+            CallStatus.collect(callStatus , "outline" , System.currentTimeMillis() - now)
+            e := catch()
+            if e != null {
+                exchange.sendResponseHeaders(500 , 0L)
+                os.write(byte[]("internal error"))
+                e.printStackTrace()
+            }
+            exchange.close()
+        }
+
+        uri := exchange.getRequestURI()
+        paramters := g.parseQuery(uri.getQuery())
+        filename := paramters["filename"]
+        if filename == null || filename == "" {
+            bs := byte[]("filename not provide")
+            exchange.sendResponseHeaders(400 , long(len(bs)))
+            os.write(bs)
+            return
+        }
+        to := paramters["to"]
+        if to == null || to == "" {
+            bs := byte[]("rename to not provide")
+            exchange.sendResponseHeaders(400 , long(len(bs)))
+            os.write(bs)
+            return
+        }
+        line := Integer.parseInt(paramters["line"])
+        column := Integer.parseInt(paramters["column"])
+        rename.rename(filename , to , line << 16 | int(char(column)))
+        exchange.sendResponseHeaders(200 , 0L)
+    }
+}
+
+

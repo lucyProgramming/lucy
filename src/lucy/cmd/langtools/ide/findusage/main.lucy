@@ -17,13 +17,18 @@ public fn findUsage(file string , pos int , scope string , storePackage []ast.Pa
     for v := range lucyFiles {
         if fileSystem.getPath(definition.filename).getFileName().toString() ==
             fileSystem.getPath(v.realPathName).getFileName().toString() {
-            v.findUsage = (definition.endLine << 16) | int(char(definition.endColumnOffset - 1))
+            v.findUsage =
+                (definition.endLine << 16) |
+                    int(char(definition.endColumnOffset - 1))
         }
     }
 
-    result = sortUsages(new FindUsage(lucyFiles , packageName , true , common.getLucyPath() , scope).find())
+    result = sortUsages(new FindUsage(lucyFiles,
+        packageName,
+        true,
+        common.getLucyPath(),
+        scope).find())
 }
-
 
 fn main(args []string) {
     f := new Flags()
@@ -35,7 +40,6 @@ fn main(args []string) {
     }
     print(string(bs))
 }
-
 
 fn sortUsages(usages []ast.Usage) -> (result ast.Usage[]) {
     // if len(usages) == 0 {

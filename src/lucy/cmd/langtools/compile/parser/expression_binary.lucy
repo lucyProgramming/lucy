@@ -1,538 +1,569 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
+class ExpressionBinaryParser extends ParserExtends {
+    ep ExpressionParser
+    fn ExpressionBinaryParser(parser Parser , ep ExpressionParser) {
+        this.super(parser)
+        this.ep = ep
+    }
 
-class ExpressionBinaryParser extends ParserExtends{
-	ep ExpressionParser
-	fn ExpressionBinaryParser(parser Parser , ep ExpressionParser){
-		this.super(parser)
-		this.ep = ep 
-	}
-	
-	// ||
-	fn parseLogicalOrExpression() -> (e ast.Expression,err error) {
-		left, err := this.parseLogicalAndExpression()
-		if err != null {
-			return null, err
-		}
-		for this.parser.token.Type == lex.TokenLogicalOr {
-			token := this.parser.token 
-			pos := this.parser.mkPos()
-			name := this.parser.token.description
-			this.next(lfIsToken)
-			var containsLf bool 
-			var inlineComment string 
-			if this.parser.token.Type == lex.TokenLf {
-				containsLf = true 
-				this.next(lfNotToken)
-			}else if this.parser.token.Type == lex.TokenComment {
-				inlineComment = this.parser.token.stringValue
-				this.next(lfNotToken)
-			}else {
-				//nothing
-			}
-			var right ast.Expression
-			if token.autoCompletion {
-				right = new ast.Expression()
-				right.Type = ast.ExpressionTypeAutoCompletion
-				right.pos = this.parser.mkPos()
-			}else { 
-				right, err = this.parseLogicalAndExpression()
-				if right == null { // err must not null
-					return left, err
-				}
-			}
-			newExpression := new ast.Expression()
-			newExpression.pos = pos
-			newExpression.op = name
-			newExpression.Type = ast.ExpressionTypeLogicalOr
-			binary := new ast.ExpressionBinary()
-			binary.containsLf = containsLf
-			binary.inlineComment = inlineComment
-			binary.left = left
-			binary.right = right
-			newExpression.data = binary
-			left = newExpression
-		}
-		return left, null
-	}
+     // ||
+    fn parseLogicalOrExpression() -> (e ast.Expression , err error) {
+        left , err := this.parseLogicalAndExpression()
+        if err != null {
+            return null , err
+        }
+        for this.parser.token.Type == lex.TokenLogicalOr {
+            token := this.parser.token
+            pos := this.parser.mkPos()
+            name := this.parser.token.description
+            this.next(lfIsToken)
+            var containsLf bool
+            var inlineComment string
+            if this.parser.token.Type == lex.TokenLf {
+                containsLf = true
+                this.next(lfNotToken)
+            } else if this.parser.token.Type == lex.TokenComment {
+                inlineComment = this.parser.token.stringValue
+                this.next(lfNotToken)
+            } else {
+                //nothing
+            }
 
-	// &&
-	fn parseLogicalAndExpression() -> (e ast.Expression,err error) {
-		left, err := this.parseEqualExpression()
-		if err != null {
-			return null, err
-		}
-		for this.parser.token.Type == lex.TokenLogicalAnd {
-			token := this.parser.token 
-			pos := this.parser.mkPos()
-			name := this.parser.token.description
-			this.next(lfIsToken)
-			var containsLf bool 
-			var inlineComment string 
-			if this.parser.token.Type == lex.TokenLf {
-				containsLf = true 
-				this.next(lfNotToken)
-			}else if this.parser.token.Type == lex.TokenComment {
-				inlineComment = this.parser.token.stringValue
-				this.next(lfNotToken)
-			}else {
-				//nothing
-			}
-			var right ast.Expression
-			if token.autoCompletion {
-				right = new ast.Expression()
-				right.Type = ast.ExpressionTypeAutoCompletion
-				right.pos = this.parser.mkPos()
-			}else {
-				right, err = this.parseEqualExpression()
-				if right == null { // err must not null
-					return left, err
-				}
-			}
-			
-			newExpression := new ast.Expression()
-			newExpression.pos = pos
-			newExpression.op = name
-			newExpression.Type = ast.ExpressionTypeLogicalAnd
-			binary := new ast.ExpressionBinary()
-			binary.containsLf = containsLf
-			binary.inlineComment = inlineComment
-			binary.left = left
-			binary.right = right
-			newExpression.data = binary
-			left = newExpression
-		}
-		return left, null
-	}
+            var right ast.Expression
+            if token.autoCompletion {
+                right = new ast.Expression()
+                right.Type = ast.ExpressionTypeAutoCompletion
+                right.pos = this.parser.mkPos()
+            } else {
+                right , err = this.parseLogicalAndExpression()
+                if right == null {
+                    return left , err
+                }
+            }
 
-	// == and !=
-	fn parseEqualExpression() -> (e ast.Expression,err error) {
-		left, err := this.parseRelationExpression()
-		if err != null {
-			return null, err
-		}
-		for this.parser.token.Type == lex.TokenEqual ||
-			this.parser.token.Type == lex.TokenNe {
-			typ := this.parser.token.Type
-			token := this.parser.token 
-			name := this.parser.token.description
-			pos := this.parser.mkPos()
-			this.next(lfIsToken)
-			var containsLf bool 
-			var inlineComment string 
-			if this.parser.token.Type == lex.TokenLf {
-				containsLf = true 
-				this.next(lfNotToken)
-			}else if this.parser.token.Type == lex.TokenComment {
-				inlineComment = this.parser.token.stringValue
-				this.next(lfNotToken)
-			}else {
-				//nothing
-			}
-			var right ast.Expression
-			if token.autoCompletion {
-				right = new ast.Expression()
-				right.Type = ast.ExpressionTypeAutoCompletion
-				right.pos = this.parser.mkPos()
-			}else {
-				right, err = this.parseRelationExpression()
-				if right == null { // err must not null
-					return left, err
-				}
-			}
-			
-			newExpression := new ast.Expression()
-			newExpression.pos = pos
-			newExpression.op = name
-			if typ == lex.TokenEqual {
-				newExpression.Type = ast.ExpressionTypeEq
-			} else {
-				newExpression.Type = ast.ExpressionTypeNe
-			}
-			binary := new ast.ExpressionBinary()
-			binary.containsLf = containsLf
-			binary.inlineComment = inlineComment
-			binary.left = left
-			binary.right = right
-			newExpression.data = binary
-			left = newExpression
-		}
-		return left, null
-	}
+            newExpression := new ast.Expression()
+            newExpression.pos = pos
+            newExpression.op = name
+            newExpression.Type = ast.ExpressionTypeLogicalOr
+            binary := new ast.ExpressionBinary()
+            binary.containsLf = containsLf
+            binary.inlineComment = inlineComment
+            binary.left = left
+            binary.right = right
+            newExpression.data = binary
+            left = newExpression
+        }
 
-	// > < >= <=
-	fn parseRelationExpression() -> (e ast.Expression,err error) {
-		left, err := this.parseOrExpression()
-		if err != null {
-			return null, err
-		}
-		for this.parser.token.Type == lex.TokenGt ||
-			this.parser.token.Type == lex.TokenGe ||
-			this.parser.token.Type == lex.TokenLt ||
-			this.parser.token.Type == lex.TokenLe {
-			typ := this.parser.token.Type
-			token := this.parser.token 
-			name := this.parser.token.description
-			pos := this.parser.mkPos()
-			this.next(lfIsToken)
-			var containsLf bool 
-			var inlineComment string 
-			if this.parser.token.Type == lex.TokenLf {
-				containsLf = true 
-				this.next(lfNotToken)
-			}else if this.parser.token.Type == lex.TokenComment {
-				inlineComment = this.parser.token.stringValue
-				this.next(lfNotToken)
-			}else {
-				//nothing
-			}
-			var right ast.Expression
-			if token.autoCompletion {
-				right = new ast.Expression()
-				right.Type = ast.ExpressionTypeAutoCompletion
-				right.pos = this.parser.mkPos()
-			}else {
-				right, err = this.parseOrExpression()
-				if right == null { // err must not null
-					return left, err
-				}
-			}
-			
-			newExpression := new ast.Expression()
-			newExpression.pos = pos
-			newExpression.op = name
-			if typ == lex.TokenGt {
-				newExpression.Type = ast.ExpressionTypeGt
-			} else if typ == lex.TokenGe {
-				newExpression.Type = ast.ExpressionTypeGe
-			} else if typ == lex.TokenLt {
-				newExpression.Type = ast.ExpressionTypeLt
-			} else {
-				newExpression.Type = ast.ExpressionTypeLe
-			}
-			binary := new ast.ExpressionBinary()
-			binary.containsLf = containsLf
-			binary.inlineComment = inlineComment
-			binary.left = left
-			binary.right = right
-			newExpression.data = binary
-			left = newExpression
-		}
-		return left, null
-	}
+        return left , null
+    }
 
-	//  |
-	fn parseOrExpression() -> (e ast.Expression,err error) {
-		left, err := this.parseXorExpression()
-		if err != null {
-			return null, err
-		}
-		for this.parser.token.Type == lex.TokenOr {
-			pos := this.parser.mkPos()
-			token := this.parser.token 
-			name := this.parser.token.description
-			this.next(lfIsToken)
-			var containsLf bool 
-			var inlineComment string 
-			if this.parser.token.Type == lex.TokenLf {
-				containsLf = true 
-				this.next(lfNotToken)
-			}else if this.parser.token.Type == lex.TokenComment {
-				inlineComment = this.parser.token.stringValue
-				this.next(lfNotToken)
-			}else {
-				//nothing
-			}
-			var right ast.Expression
-			if token.autoCompletion {
-				right = new ast.Expression()
-				right.Type = ast.ExpressionTypeAutoCompletion
-				right.pos = this.parser.mkPos()
-			}else{
-				right, err = this.parseXorExpression()
-				if right == null { // err must not null
-					return left, err
-				}
-			}
-			newExpression := new ast.Expression()
-			newExpression.pos = pos
-			newExpression.op = name
-			newExpression.Type = ast.ExpressionTypeOr
-			binary := new ast.ExpressionBinary()
-			binary.containsLf = containsLf
-			binary.inlineComment = inlineComment
-			binary.left = left
-			binary.right = right
-			newExpression.data = binary
-			left = newExpression
-		}
-		return left, null
-	}
+     // &&
+    fn parseLogicalAndExpression() -> (e ast.Expression , err error) {
+        left , err := this.parseEqualExpression()
+        if err != null {
+            return null , err
+        }
+        for this.parser.token.Type == lex.TokenLogicalAnd {
+            token := this.parser.token
+            pos := this.parser.mkPos()
+            name := this.parser.token.description
+            this.next(lfIsToken)
+            var containsLf bool
+            var inlineComment string
+            if this.parser.token.Type == lex.TokenLf {
+                containsLf = true
+                this.next(lfNotToken)
+            } else if this.parser.token.Type == lex.TokenComment {
+                inlineComment = this.parser.token.stringValue
+                this.next(lfNotToken)
+            } else {
+                //nothing
+            }
 
-	// ^
-	fn parseXorExpression() -> (e ast.Expression,err error) {
-		left, err := this.parseAndExpression()
-		if err != null {
-			return null, err
-		}
-		for this.parser.token.Type == lex.TokenXor {
-			token := this.parser.token 
-			pos := this.parser.mkPos()
-			name := this.parser.token.description
-			this.next(lfIsToken)
-			var containsLf bool 
-			var inlineComment string 
-			if this.parser.token.Type == lex.TokenLf {
-				containsLf = true 
-				this.next(lfNotToken)
-			}else if this.parser.token.Type == lex.TokenComment {
-				inlineComment = this.parser.token.stringValue
-				this.next(lfNotToken)
-			}else {
-				//nothing
-			}
-			var right ast.Expression
-			if token.autoCompletion {
-				right = new ast.Expression()
-				right.Type = ast.ExpressionTypeAutoCompletion
-				right.pos = this.parser.mkPos()
-			}else {
-				right, err = this.parseAndExpression()
-				if right == null { // err must not null
-					return left, err
-				}
-			}
-			newExpression := new ast.Expression()
-			newExpression.pos = pos
-			newExpression.op = name
-			newExpression.Type = ast.ExpressionTypeXor
-			binary := new ast.ExpressionBinary()
-			binary.containsLf = containsLf
-			binary.inlineComment = inlineComment
-			binary.left = left
-			binary.right = right
-			newExpression.data = binary
-			left = newExpression
-		}
-		return left, null
-	}
+            var right ast.Expression
+            if token.autoCompletion {
+                right = new ast.Expression()
+                right.Type = ast.ExpressionTypeAutoCompletion
+                right.pos = this.parser.mkPos()
+            } else {
+                right , err = this.parseEqualExpression()
+                if right == null {
+                    return left , err
+                }
+            }
 
-	// &
-	fn parseAndExpression() -> (e ast.Expression,err error) {
-		left, err := this.parseShiftExpression()
-		if err != null {
-			return null, err
-		}
-		for this.parser.token.Type == lex.TokenAnd {
-			token := this.parser.token 
-			pos := this.parser.mkPos()
-			name := this.parser.token.description
-			this.next(lfIsToken)
-			var containsLf bool 
-			var inlineComment string 
-			if this.parser.token.Type == lex.TokenLf {
-				containsLf = true 
-				this.next(lfNotToken)
-			}else if this.parser.token.Type == lex.TokenComment {
-				inlineComment = this.parser.token.stringValue
-				this.next(lfNotToken)
-			}else {
-				//nothing
-			}
-			var right ast.Expression
-			if token.autoCompletion {
-				right = new ast.Expression()
-				right.Type = ast.ExpressionTypeAutoCompletion
-				right.pos = this.parser.mkPos()
-			}else {
-				right, err = this.parseShiftExpression()
-				if right == null { // err must not null
-					return left, err
-				}
-			}
-			
-			newExpression := new ast.Expression()
-			newExpression.pos = pos
-			newExpression.Type = ast.ExpressionTypeAnd
-			newExpression.op = name
-			binary := new ast.ExpressionBinary()
-			binary.containsLf = containsLf
-			binary.inlineComment = inlineComment
-			binary.left = left
-			binary.right = right
-			newExpression.data = binary
-			left = newExpression
-		}
-		return left, null
-	}
+            newExpression := new ast.Expression()
+            newExpression.pos = pos
+            newExpression.op = name
+            newExpression.Type = ast.ExpressionTypeLogicalAnd
+            binary := new ast.ExpressionBinary()
+            binary.containsLf = containsLf
+            binary.inlineComment = inlineComment
+            binary.left = left
+            binary.right = right
+            newExpression.data = binary
+            left = newExpression
+        }
 
-	// << >>
-	fn parseShiftExpression() -> (e ast.Expression,err error) {
-		left, err := this.parseAddExpression()
-		if err != null {
-			return null, err
-		}
-		for this.parser.token.Type == lex.TokenLsh ||
-			this.parser.token.Type == lex.TokenRsh {
-			token := this.parser.token 
-			typ := this.parser.token.Type
-			name := this.parser.token.description
-			pos := this.parser.mkPos()
-			this.next(lfIsToken)
-			var containsLf bool 
-			var inlineComment string 
-			if this.parser.token.Type == lex.TokenLf {
-				containsLf = true 
-				this.next(lfNotToken)
-			}else if this.parser.token.Type == lex.TokenComment {
-				inlineComment = this.parser.token.stringValue
-				this.next(lfNotToken)
-			}else {
-				//nothing
-			}
-			var right ast.Expression
-			if token.autoCompletion {
-				right = new ast.Expression()
-				right.Type = ast.ExpressionTypeAutoCompletion
-				right.pos = this.parser.mkPos()
-			}else {
-				right, err = this.parseAddExpression()
-				if right == null { // err must not null
-					return left, err
-				}
-			}
-			newExpression := new ast.Expression()
-			newExpression.pos = pos
-			newExpression.op = name
-			if typ == lex.TokenLsh {
-				newExpression.Type = ast.ExpressionTypeLsh
-			} else {
-				newExpression.Type = ast.ExpressionTypeRsh
-			}
-			binary := new ast.ExpressionBinary()
-			binary.containsLf = containsLf
-			binary.inlineComment = inlineComment
-			binary.left = left
-			binary.right = right
-			newExpression.data = binary
-			left = newExpression
-		}
-		return left, null
-	}
+        return left , null
+    }
 
-	// + -
-	fn parseAddExpression() -> (e ast.Expression,err error) {
-		left, err := this.parseMulExpression()
-		if err != null {
-			return null, err
-		}
-		for this.parser.token.Type == lex.TokenAdd ||
-			this.parser.token.Type == lex.TokenSub {
-			typ := this.parser.token.Type
-			token := this.parser.token 
-			name := this.parser.token.description
-			pos := this.parser.mkPos()
-			this.next(lfIsToken)
-			var containsLf bool 
-			var inlineComment string 
-			if this.parser.token.Type == lex.TokenLf {
-				containsLf = true 
-				this.next(lfNotToken)
-			}else if this.parser.token.Type == lex.TokenComment {
-				inlineComment = this.parser.token.stringValue
-				this.next(lfNotToken)
-			}else {
-				//nothing
-			}
-			var right ast.Expression
-			if token.autoCompletion {
-				right = new ast.Expression()
-				right.Type = ast.ExpressionTypeAutoCompletion
-				right.pos = this.parser.mkPos()
-			}else {
-				right, err = this.parseMulExpression()
-				if right == null { // err must not null
-					return left, err
-				}
-			}
-			newExpression := new ast.Expression()
-			newExpression.pos = pos
-			newExpression.op = name
-			if typ == lex.TokenAdd {
-				newExpression.Type = ast.ExpressionTypeAdd
-			} else {
-				newExpression.Type = ast.ExpressionTypeSub
-			}
-			binary := new ast.ExpressionBinary()
-			binary.containsLf = containsLf
-			binary.inlineComment = inlineComment
-			binary.left = left
-			binary.right = right
-			newExpression.data = binary
-			left = newExpression
-		}
-		return left, null
-	}
+     // == and !=
+    fn parseEqualExpression() -> (e ast.Expression , err error) {
+        left , err := this.parseRelationExpression()
+        if err != null {
+            return null , err
+        }
+        for this.parser.token.Type == lex.TokenEqual ||
+                this.parser.token.Type == lex.TokenNe {
+            typ := this.parser.token.Type
+            token := this.parser.token
+            name := this.parser.token.description
+            pos := this.parser.mkPos()
+            this.next(lfIsToken)
+            var containsLf bool
+            var inlineComment string
+            if this.parser.token.Type == lex.TokenLf {
+                containsLf = true
+                this.next(lfNotToken)
+            } else if this.parser.token.Type == lex.TokenComment {
+                inlineComment = this.parser.token.stringValue
+                this.next(lfNotToken)
+            } else {
+                //nothing
+            }
 
-	// * / %
-	fn parseMulExpression() -> (e ast.Expression,err error) {
-		left, err := this.ep.ExpressionSuffix.parseSuffixExpression()
-		if err != null {
-			return null, err
-		}
-		for this.parser.token.Type == lex.TokenMul ||
-			this.parser.token.Type == lex.TokenDiv ||
-			this.parser.token.Type == lex.TokenMod {
-			typ := this.parser.token.Type
-			token := this.parser.token 
-			name := this.parser.token.description
-			pos := this.parser.mkPos()
-			this.next(lfIsToken)
-			var containsLf bool 
-			var inlineComment string 
-			if this.parser.token.Type == lex.TokenLf {
-				containsLf = true 
-				this.next(lfNotToken)
-			}else if this.parser.token.Type == lex.TokenComment {
-				inlineComment = this.parser.token.stringValue
-				this.next(lfNotToken)
-			}else {
-				//nothing
-			}
-			var right ast.Expression
-			if token.autoCompletion {
-				right = new ast.Expression()
-				right.Type = ast.ExpressionTypeAutoCompletion
-				right.pos = this.parser.mkPos()
-			}else {
-				right, err = this.ep.ExpressionSuffix.parseSuffixExpression()
-				if right == null { // err must not null
-					return left, err
-				}
-			}
-			newExpression := new ast.Expression()
-			newExpression.pos = pos
-			newExpression.op = name
-			if typ == lex.TokenMul {
-				newExpression.Type = ast.ExpressionTypeMul
-			} else if typ == lex.TokenDiv {
-				newExpression.Type = ast.ExpressionTypeDiv
-			} else {
-				newExpression.Type = ast.ExpressionTypeMod
-			}
-			binary := new ast.ExpressionBinary()
-			binary.containsLf = containsLf
-			binary.inlineComment = inlineComment
-			binary.containsLf = containsLf
-			binary.inlineComment = inlineComment
-			binary.left = left
-			binary.right = right
-			newExpression.data = binary
-			left = newExpression
-		}
-		return left, null
-	}
+            var right ast.Expression
+            if token.autoCompletion {
+                right = new ast.Expression()
+                right.Type = ast.ExpressionTypeAutoCompletion
+                right.pos = this.parser.mkPos()
+            } else {
+                right , err = this.parseRelationExpression()
+                if right == null {
+                    return left , err
+                }
+            }
 
-} 
+            newExpression := new ast.Expression()
+            newExpression.pos = pos
+            newExpression.op = name
+            if typ == lex.TokenEqual {
+                newExpression.Type = ast.ExpressionTypeEq
+            } else {
+                newExpression.Type = ast.ExpressionTypeNe
+            }
+
+            binary := new ast.ExpressionBinary()
+            binary.containsLf = containsLf
+            binary.inlineComment = inlineComment
+            binary.left = left
+            binary.right = right
+            newExpression.data = binary
+            left = newExpression
+        }
+
+        return left , null
+    }
+
+     // > < >= <=
+    fn parseRelationExpression() -> (e ast.Expression , err error) {
+        left , err := this.parseOrExpression()
+        if err != null {
+            return null , err
+        }
+        for this.parser.token.Type == lex.TokenGt ||
+                this.parser.token.Type == lex.TokenGe ||
+                this.parser.token.Type == lex.TokenLt ||
+                this.parser.token.Type == lex.TokenLe {
+            typ := this.parser.token.Type
+            token := this.parser.token
+            name := this.parser.token.description
+            pos := this.parser.mkPos()
+            this.next(lfIsToken)
+            var containsLf bool
+            var inlineComment string
+            if this.parser.token.Type == lex.TokenLf {
+                containsLf = true
+                this.next(lfNotToken)
+            } else if this.parser.token.Type == lex.TokenComment {
+                inlineComment = this.parser.token.stringValue
+                this.next(lfNotToken)
+            } else {
+                //nothing
+            }
+
+            var right ast.Expression
+            if token.autoCompletion {
+                right = new ast.Expression()
+                right.Type = ast.ExpressionTypeAutoCompletion
+                right.pos = this.parser.mkPos()
+            } else {
+                right , err = this.parseOrExpression()
+                if right == null {
+                    return left , err
+                }
+            }
+
+            newExpression := new ast.Expression()
+            newExpression.pos = pos
+            newExpression.op = name
+            if typ == lex.TokenGt {
+                newExpression.Type = ast.ExpressionTypeGt
+            } else if typ == lex.TokenGe {
+                newExpression.Type = ast.ExpressionTypeGe
+            } else if typ == lex.TokenLt {
+                newExpression.Type = ast.ExpressionTypeLt
+            } else {
+                newExpression.Type = ast.ExpressionTypeLe
+            }
+
+            binary := new ast.ExpressionBinary()
+            binary.containsLf = containsLf
+            binary.inlineComment = inlineComment
+            binary.left = left
+            binary.right = right
+            newExpression.data = binary
+            left = newExpression
+        }
+
+        return left , null
+    }
+
+     //  |
+    fn parseOrExpression() -> (e ast.Expression , err error) {
+        left , err := this.parseXorExpression()
+        if err != null {
+            return null , err
+        }
+        for this.parser.token.Type == lex.TokenOr {
+            pos := this.parser.mkPos()
+            token := this.parser.token
+            name := this.parser.token.description
+            this.next(lfIsToken)
+            var containsLf bool
+            var inlineComment string
+            if this.parser.token.Type == lex.TokenLf {
+                containsLf = true
+                this.next(lfNotToken)
+            } else if this.parser.token.Type == lex.TokenComment {
+                inlineComment = this.parser.token.stringValue
+                this.next(lfNotToken)
+            } else {
+                //nothing
+            }
+
+            var right ast.Expression
+            if token.autoCompletion {
+                right = new ast.Expression()
+                right.Type = ast.ExpressionTypeAutoCompletion
+                right.pos = this.parser.mkPos()
+            } else {
+                right , err = this.parseXorExpression()
+                if right == null {
+                    return left , err
+                }
+            }
+
+            newExpression := new ast.Expression()
+            newExpression.pos = pos
+            newExpression.op = name
+            newExpression.Type = ast.ExpressionTypeOr
+            binary := new ast.ExpressionBinary()
+            binary.containsLf = containsLf
+            binary.inlineComment = inlineComment
+            binary.left = left
+            binary.right = right
+            newExpression.data = binary
+            left = newExpression
+        }
+
+        return left , null
+    }
+
+     // ^
+    fn parseXorExpression() -> (e ast.Expression , err error) {
+        left , err := this.parseAndExpression()
+        if err != null {
+            return null , err
+        }
+        for this.parser.token.Type == lex.TokenXor {
+            token := this.parser.token
+            pos := this.parser.mkPos()
+            name := this.parser.token.description
+            this.next(lfIsToken)
+            var containsLf bool
+            var inlineComment string
+            if this.parser.token.Type == lex.TokenLf {
+                containsLf = true
+                this.next(lfNotToken)
+            } else if this.parser.token.Type == lex.TokenComment {
+                inlineComment = this.parser.token.stringValue
+                this.next(lfNotToken)
+            } else {
+                //nothing
+            }
+
+            var right ast.Expression
+            if token.autoCompletion {
+                right = new ast.Expression()
+                right.Type = ast.ExpressionTypeAutoCompletion
+                right.pos = this.parser.mkPos()
+            } else {
+                right , err = this.parseAndExpression()
+                if right == null {
+                    return left , err
+                }
+            }
+
+            newExpression := new ast.Expression()
+            newExpression.pos = pos
+            newExpression.op = name
+            newExpression.Type = ast.ExpressionTypeXor
+            binary := new ast.ExpressionBinary()
+            binary.containsLf = containsLf
+            binary.inlineComment = inlineComment
+            binary.left = left
+            binary.right = right
+            newExpression.data = binary
+            left = newExpression
+        }
+
+        return left , null
+    }
+
+     // &
+    fn parseAndExpression() -> (e ast.Expression , err error) {
+        left , err := this.parseShiftExpression()
+        if err != null {
+            return null , err
+        }
+        for this.parser.token.Type == lex.TokenAnd {
+            token := this.parser.token
+            pos := this.parser.mkPos()
+            name := this.parser.token.description
+            this.next(lfIsToken)
+            var containsLf bool
+            var inlineComment string
+            if this.parser.token.Type == lex.TokenLf {
+                containsLf = true
+                this.next(lfNotToken)
+            } else if this.parser.token.Type == lex.TokenComment {
+                inlineComment = this.parser.token.stringValue
+                this.next(lfNotToken)
+            } else {
+                //nothing
+            }
+
+            var right ast.Expression
+            if token.autoCompletion {
+                right = new ast.Expression()
+                right.Type = ast.ExpressionTypeAutoCompletion
+                right.pos = this.parser.mkPos()
+            } else {
+                right , err = this.parseShiftExpression()
+                if right == null {
+                    return left , err
+                }
+            }
+
+            newExpression := new ast.Expression()
+            newExpression.pos = pos
+            newExpression.Type = ast.ExpressionTypeAnd
+            newExpression.op = name
+            binary := new ast.ExpressionBinary()
+            binary.containsLf = containsLf
+            binary.inlineComment = inlineComment
+            binary.left = left
+            binary.right = right
+            newExpression.data = binary
+            left = newExpression
+        }
+
+        return left , null
+    }
+
+     // << >>
+    fn parseShiftExpression() -> (e ast.Expression , err error) {
+        left , err := this.parseAddExpression()
+        if err != null {
+            return null , err
+        }
+        for this.parser.token.Type == lex.TokenLsh ||
+                this.parser.token.Type == lex.TokenRsh {
+            token := this.parser.token
+            typ := this.parser.token.Type
+            name := this.parser.token.description
+            pos := this.parser.mkPos()
+            this.next(lfIsToken)
+            var containsLf bool
+            var inlineComment string
+            if this.parser.token.Type == lex.TokenLf {
+                containsLf = true
+                this.next(lfNotToken)
+            } else if this.parser.token.Type == lex.TokenComment {
+                inlineComment = this.parser.token.stringValue
+                this.next(lfNotToken)
+            } else {
+                //nothing
+            }
+
+            var right ast.Expression
+            if token.autoCompletion {
+                right = new ast.Expression()
+                right.Type = ast.ExpressionTypeAutoCompletion
+                right.pos = this.parser.mkPos()
+            } else {
+                right , err = this.parseAddExpression()
+                if right == null {
+                    return left , err
+                }
+            }
+
+            newExpression := new ast.Expression()
+            newExpression.pos = pos
+            newExpression.op = name
+            if typ == lex.TokenLsh {
+                newExpression.Type = ast.ExpressionTypeLsh
+            } else {
+                newExpression.Type = ast.ExpressionTypeRsh
+            }
+
+            binary := new ast.ExpressionBinary()
+            binary.containsLf = containsLf
+            binary.inlineComment = inlineComment
+            binary.left = left
+            binary.right = right
+            newExpression.data = binary
+            left = newExpression
+        }
+
+        return left , null
+    }
+
+     // + -
+    fn parseAddExpression() -> (e ast.Expression , err error) {
+        left , err := this.parseMulExpression()
+        if err != null {
+            return null , err
+        }
+        for this.parser.token.Type == lex.TokenAdd ||
+                this.parser.token.Type == lex.TokenSub {
+            typ := this.parser.token.Type
+            token := this.parser.token
+            name := this.parser.token.description
+            pos := this.parser.mkPos()
+            this.next(lfIsToken)
+            var containsLf bool
+            var inlineComment string
+            if this.parser.token.Type == lex.TokenLf {
+                containsLf = true
+                this.next(lfNotToken)
+            } else if this.parser.token.Type == lex.TokenComment {
+                inlineComment = this.parser.token.stringValue
+                this.next(lfNotToken)
+            } else {
+                //nothing
+            }
+
+            var right ast.Expression
+            if token.autoCompletion {
+                right = new ast.Expression()
+                right.Type = ast.ExpressionTypeAutoCompletion
+                right.pos = this.parser.mkPos()
+            } else {
+                right , err = this.parseMulExpression()
+                if right == null {
+                    return left , err
+                }
+            }
+
+            newExpression := new ast.Expression()
+            newExpression.pos = pos
+            newExpression.op = name
+            if typ == lex.TokenAdd {
+                newExpression.Type = ast.ExpressionTypeAdd
+            } else {
+                newExpression.Type = ast.ExpressionTypeSub
+            }
+
+            binary := new ast.ExpressionBinary()
+            binary.containsLf = containsLf
+            binary.inlineComment = inlineComment
+            binary.left = left
+            binary.right = right
+            newExpression.data = binary
+            left = newExpression
+        }
+
+        return left , null
+    }
+
+     // * / %
+    fn parseMulExpression() -> (e ast.Expression , err error) {
+        left , err := this.ep.ExpressionSuffix.parseSuffixExpression()
+        if err != null {
+            return null , err
+        }
+        for this.parser.token.Type == lex.TokenMul ||
+                this.parser.token.Type == lex.TokenDiv ||
+                this.parser.token.Type == lex.TokenMod {
+            typ := this.parser.token.Type
+            token := this.parser.token
+            name := this.parser.token.description
+            pos := this.parser.mkPos()
+            this.next(lfIsToken)
+            var containsLf bool
+            var inlineComment string
+            if this.parser.token.Type == lex.TokenLf {
+                containsLf = true
+                this.next(lfNotToken)
+            } else if this.parser.token.Type == lex.TokenComment {
+                inlineComment = this.parser.token.stringValue
+                this.next(lfNotToken)
+            } else {
+                //nothing
+            }
+
+            var right ast.Expression
+            if token.autoCompletion {
+                right = new ast.Expression()
+                right.Type = ast.ExpressionTypeAutoCompletion
+                right.pos = this.parser.mkPos()
+            } else {
+                right , err = this.ep.ExpressionSuffix.parseSuffixExpression()
+                if right == null {
+                    return left , err
+                }
+            }
+
+            newExpression := new ast.Expression()
+            newExpression.pos = pos
+            newExpression.op = name
+            if typ == lex.TokenMul {
+                newExpression.Type = ast.ExpressionTypeMul
+            } else if typ == lex.TokenDiv {
+                newExpression.Type = ast.ExpressionTypeDiv
+            } else {
+                newExpression.Type = ast.ExpressionTypeMod
+            }
+
+            binary := new ast.ExpressionBinary()
+            binary.containsLf = containsLf
+            binary.inlineComment = inlineComment
+            binary.containsLf = containsLf
+            binary.inlineComment = inlineComment
+            binary.left = left
+            binary.right = right
+            newExpression.data = binary
+            left = newExpression
+        }
+
+        return left , null
+    }
+
+}
+
 

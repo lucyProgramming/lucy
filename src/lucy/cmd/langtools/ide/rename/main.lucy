@@ -1,17 +1,16 @@
-
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/ide/findusage"
 import "lucy/os"
 
-public fn rename( file string, to string, pos int) {
+public fn rename(filename string , to string , pos int) {
     storePackage := []ast.Package{null}
-    usages := findusage.findUsage(file , pos , null , storePackage)
-    if len(usage)  == 0 {
-        return 
+    usages := findusage.findUsage(filename , pos , null , storePackage)
+    if len(usage) == 0 {
+        return
     }
-    if storePackage[0] == null  || 
-        storePackage[0].locateDefinitionBaseOn == null{
-        return 
+    if storePackage[0] == null ||
+        storePackage[0].locateDefinitionBaseOn == null {
+        return
     }
     new ReName(usages , storePackage[0].locateDefinitionBaseOn , to).rename()
 }

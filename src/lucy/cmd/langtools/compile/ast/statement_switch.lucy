@@ -1,215 +1,227 @@
 import "lucy/jvm/cg"
 
-public class StatementSwitchCase  {
-	public matches []Expression
-	public block   Block
-	public inlineComment string 
+public class StatementSwitchCase {
+    public matches       []Expression
+    public block         Block       
+    public inlineComment string      
 }
 
-public class StatementSwitch  {
-	public prefixExpressions    []Expression
-	initExpressionBlock  Block = new Block() 
-	public pos                  Pos
-	public endPos               Pos
-	public condition            Expression //switch
-	public cases                []StatementSwitchCase
-	public defaultBlock         Block
-	public exits                []cg.Exit
-	public inlineComment string 
-	public defaultInlineComment string 
-	
-	fn check(block Block) ->(errs []error = []error{})  {
-		this.initExpressionBlock.inherit(block)
-		for _, v := range this.prefixExpressions {
-			v.isStatementExpression = true
-			_, es := v.check(this.initExpressionBlock)
-			errs.appendAll(es)
-			if err := v.canBeUsedAsStatement(); err != null {
-				errs.append(err)
-			}
-		}
-		if this.condition == null {
-			errs.appendAll(this.checkBlocks())
-			return errs
-		}
-		conditionType, es := this.condition.checkSingleValueContextExpression(this.initExpressionBlock)
-		errs.appendAll(es)
-		if conditionType == null {
-			return errs
-		}
-		if err := conditionType.isTyped(); err != null {
-			errs.append(err)
-			return errs
-		}
-		if conditionType.Type == VariableTypeBool {
-			errs.append(new error(sprintf("%s bool expression not allow for switch",
-				conditionType.pos.errMsgPrefix())))
-		}
-		if len(this.cases) == 0 {
-			errs.append(new error(sprintf("%s switch statement has no cases",
-				this.endPos.errMsgPrefix())))
-		}
-		longMap :=  new map {long -> Pos } () 
-		doubleMap := new map {double -> Pos }()
-		stringMap := new map{string -> Pos }()
-		enumNamesMap := new map {string -> Pos }()
-		enumPackageName := ""
-		var longValue long
-		var doubleValue double
-		var stringValue string
-		var enumName string
-		containsBool := false 
-		for _, v := range this.cases {
-			for _, e := range v.matches {
-				valueValid := false
-				t, es := e.checkSingleValueContextExpression(this.initExpressionBlock)
-				errs.appendAll(es)
-				if t == null {
-					continue
-				}
-				if t.Type == VariableTypeBool { // bool condition
-					containsBool = true 
-					continue
-				}
-				if conditionType.assignAble(block , errs, t) == false {
-					errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-						e.pos.errMsgPrefix(), t.typeString(), conditionType.typeString())))
-					continue
-				}
-				if conditionType.Type == VariableTypeEnum {
-					if t.enumName == null {
-						errs.append(new error(sprintf("%s enum value is not literal",
-							errMsgPrefix(e.pos))))
-						continue
-					} else {
-						if e.value.Type == VariableTypePackage &&
-							(enumPackageName == null || enumPackageName == "") {
-							enumPackageName = e.value.Package.name
-						}
-						enumName = t.enumName.name
-						valueValid = true
-					}
-				}
-				if conditionType.isPrimitive() {
-					if e.isLiteral() {
-						switch e.Type {
-						case ExpressionTypeByte , 
-							ExpressionTypeShort,
-							ExpressionTypeChar,
-							ExpressionTypeInt , 
-							ExpressionTypeLong:
-							longValue = e.longValue
-						case ExpressionTypeFloat,
-							ExpressionTypeDouble:
-							doubleValue = e.doubleValue
-						case ExpressionTypeString:
-							stringValue = e.stringValue
-						}
-						valueValid = true
-					} else {
-						errs.append(new error(sprintf("%s expression is not literal",
-							errMsgPrefix(e.pos))))
-						continue
-					}
-				}
-				if err := e.canBeUsedAsCondition(); err != null {
-					errs.append(err)
-					continue
-				}
-				if valueValid {
-					fn errMsg(first Pos, which string) -> (err error) {
-						errMsg := sprintf("%s  '%s' duplicate case,first declared at:\n",
-							e.pos.errMsgPrefix(), which)
-						errMsg += sprintf("\t%s", first.errMsgPrefix())
-						return new error(errMsg)
-					}
-					switch conditionType.Type {
-					case VariableTypeByte,
-						VariableTypeShort,
-						VariableTypeChar,
-						VariableTypeInt,
-						VariableTypeLong:
-						if first := longMap[longValue]; first != null {
-							errs.append(errMsg(first, e.literalRaw ))
-							continue // no check body
-						} else {
-							longMap[longValue] = e.pos
-						}
-					case VariableTypeDouble:
-						if first := doubleMap[doubleValue]; first != null {
-							errs.append(errMsg(first, e.literalRaw))
-							continue // no check body
-						} else {
-							doubleMap[doubleValue] = e.pos
-						}
-					case VariableTypeString:
-						if first := stringMap[stringValue]; first != null {
-							errs.append( errMsg(first, e.literalRaw ))
-							continue // no check body
-						} else {
-							stringMap[stringValue] = e.pos
-						}
-					case VariableTypeEnum:
-						if first := enumNamesMap[enumName]; first != null {
-							errs.append(errMsg(first, enumName))
-							continue // no check body
-						} else {
-							enumNamesMap[enumName] = e.pos
-						}
-					}
-				}
-			}
-		}
-		
-		if conditionType.Type == VariableTypeEnum &&
-			len(enumNamesMap) < len(conditionType.Enum.enums) &&
-			this.defaultBlock == null &&
-			containsBool == false {
-			//some enum are missing, not allow
-			errMsg := sprintf("%s switch for enum '%s' is not complete\n",
-				this.endPos.errMsgPrefix(), conditionType.Enum.name)
-			errMsg += "\tyou can use 'default:' or give missing enums,which are:\n"
-			var i = 0 
-			for _, v := range conditionType.Enum.enums {
-				ok := enumNamesMap.keyExist(v.name)
-				if ok {
-					//handled
-					i++
-					continue
-				}
-				if enumPackageName == null ||
-					enumPackageName == "" {
-					errMsg += sprintf("\t\tcase %s:\n", v.name)
-				} else {
-					errMsg += sprintf("\t\tcase %s.%s:\n", enumPackageName, v.name)
-				}
-			}
-			if i > (len(conditionType.Enum.enums) / 2 + len(conditionType.Enum.enums) % 2 ) {
-				errs.append(new error(errMsg))
-			}
-		}
-		errs.appendAll(this.checkBlocks())
-		return errs
-	}
-	
-	
-	fn checkBlocks() -> (errs []error = []error{}) {
-		for v := range this.cases {
-			if v.block == null {
-				continue
-			}
-			v.block.inherit(this.initExpressionBlock)
-			v.block.inheritedAttribute.forBreak = this
-			errs.appendAll(v.block.check())
-		}
-		if this.defaultBlock != null {
-			this.defaultBlock.inherit(this.initExpressionBlock)
-			this.defaultBlock.inheritedAttribute.forBreak = this
-			errs.appendAll(this.defaultBlock.check())
-		}
-	}
-	
-}
 
+public class StatementSwitch {
+    public prefixExpressions    []Expression         
+           initExpressionBlock  Block = new Block()
+    public pos                  Pos                  
+    public endPos               Pos                  
+    public condition            Expression            //switch
+    public cases                []StatementSwitchCase
+    public defaultBlock         Block                
+    public exits                []cg.Exit            
+    public inlineComment        string               
+    public defaultInlineComment string               
+
+    fn check(block Block) -> (errs []error = []error{}) {
+        this.initExpressionBlock.inherit(block)
+        for _ , v := range this.prefixExpressions {
+            v.isStatementExpression = true
+            _ , es := v.check(this.initExpressionBlock)
+            errs.appendAll(es)
+            if err := v.canBeUsedAsStatement() ; err != null {
+                errs.append(err)
+            }
+        }
+
+        if this.condition == null {
+            errs.appendAll(this.checkBlocks())
+            return errs
+        }
+        conditionType , es := this.condition.checkSingleValueContextExpression(this.initExpressionBlock)
+        errs.appendAll(es)
+        if conditionType == null {
+            return errs
+        }
+        if err := conditionType.isTyped() ; err != null {
+            errs.append(err)
+            return errs
+        }
+        if conditionType.Type == VariableTypeBool {
+            errs.append(new error(sprintf("%s bool expression not allow for switch",
+                conditionType.pos.errMsgPrefix())))
+        }
+        if len(this.cases) == 0 {
+            errs.append(new error(sprintf("%s switch statement has no cases",
+                this.endPos.errMsgPrefix())))
+        }
+        longMap := new map{long -> Pos}()
+        doubleMap := new map{double -> Pos}()
+        stringMap := new map{string -> Pos}()
+        enumNamesMap := new map{string -> Pos}()
+        enumPackageName := ""
+        var longValue long
+        var doubleValue double
+        var stringValue string
+        var enumName string
+        containsBool := false
+        for _ , v := range this.cases {
+            for _ , e := range v.matches {
+                valueValid := false
+                t , es := e.checkSingleValueContextExpression(this.initExpressionBlock)
+                errs.appendAll(es)
+                if t == null {
+                    continue
+                }
+                if t.Type == VariableTypeBool {
+                    containsBool = true
+                    continue
+                }
+                if conditionType.assignAble(block , errs , t) == false {
+                    errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
+                        e.pos.errMsgPrefix() , t.typeString() , conditionType.typeString())))
+                    continue
+                }
+                if conditionType.Type == VariableTypeEnum {
+                    if t.enumName == null {
+                        errs.append(new error(sprintf("%s enum value is not literal",
+                            errMsgPrefix(e.pos))))
+                        continue
+                    } else {
+                        if e.value.Type == VariableTypePackage &&
+                            (enumPackageName == null || enumPackageName == "") {
+                            enumPackageName = e.value.Package.name
+                        }
+                        enumName = t.enumName.name
+                        valueValid = true
+                    }
+
+                }
+                if conditionType.isPrimitive() {
+                    if e.isLiteral() {
+                        switch e.Type {
+                            case ExpressionTypeByte,
+                                ExpressionTypeShort,
+                                ExpressionTypeChar,
+                                ExpressionTypeInt,
+                                ExpressionTypeLong:
+                                longValue = e.longValue
+                            case ExpressionTypeFloat,
+                                ExpressionTypeDouble:
+                                doubleValue = e.doubleValue
+                            case ExpressionTypeString:
+                                stringValue = e.stringValue
+                        }
+
+                        valueValid = true
+                    } else {
+                        errs.append(new error(sprintf("%s expression is not literal",
+                            errMsgPrefix(e.pos))))
+                        continue
+                    }
+
+                }
+                if err := e.canBeUsedAsCondition() ; err != null {
+                    errs.append(err)
+                    continue
+                }
+                if valueValid {
+                    fn errMsg(first Pos , which string) -> (err error) {
+                        errMsg := sprintf("%s  '%s' duplicate case,first declared at:\n",
+                            e.pos.errMsgPrefix() , which)
+                        errMsg += sprintf("\t%s" , first.errMsgPrefix())
+                        return new error(errMsg)
+                    }
+                    switch conditionType.Type {
+                        case VariableTypeByte,
+                            VariableTypeShort,
+                            VariableTypeChar,
+                            VariableTypeInt,
+                            VariableTypeLong:
+                            if first := longMap[longValue] ; first != null {
+                                errs.append(errMsg(first , e.literalRaw))
+                                continue  // no check body
+                            } else {
+                                longMap[longValue] = e.pos
+                            }
+
+                        case VariableTypeDouble:
+                            if first := doubleMap[doubleValue] ; first != null {
+                                errs.append(errMsg(first , e.literalRaw))
+                                continue  // no check body
+                            } else {
+                                doubleMap[doubleValue] = e.pos
+                            }
+
+                        case VariableTypeString:
+                            if first := stringMap[stringValue] ; first != null {
+                                errs.append(errMsg(first , e.literalRaw))
+                                continue  // no check body
+                            } else {
+                                stringMap[stringValue] = e.pos
+                            }
+
+                        case VariableTypeEnum:
+                            if first := enumNamesMap[enumName] ; first != null {
+                                errs.append(errMsg(first , enumName))
+                                continue  // no check body
+                            } else {
+                                enumNamesMap[enumName] = e.pos
+                            }
+
+                    }
+
+                }
+            }
+
+        }
+
+        if conditionType.Type == VariableTypeEnum &&
+            len(enumNamesMap) < len(conditionType.Enum.enums) &&
+            this.defaultBlock == null &&
+            containsBool == false {
+            //some enum are missing, not allow
+            errMsg := sprintf("%s switch for enum '%s' is not complete\n",
+                this.endPos.errMsgPrefix() , conditionType.Enum.name)
+            errMsg += "\tyou can use 'default:' or give missing enums,which are:\n"
+            var i = 0
+            for _ , v := range conditionType.Enum.enums {
+                ok := enumNamesMap.keyExist(v.name)
+                if ok {
+                    //handled
+                    i++
+                    continue
+                }
+                if enumPackageName == null ||
+                    enumPackageName == "" {
+                    errMsg += sprintf("\t\tcase %s:\n" , v.name)
+                } else {
+                    errMsg += sprintf("\t\tcase %s.%s:\n" , enumPackageName , v.name)
+                }
+
+            }
+
+            if i > (len(conditionType.Enum.enums) / 2 + len(conditionType.Enum.enums) % 2) {
+                errs.append(new error(errMsg))
+            }
+        }
+        errs.appendAll(this.checkBlocks())
+        return errs
+    }
+
+    fn checkBlocks() -> (errs []error = []error{}) {
+        for v := range this.cases {
+            if v.block == null {
+                continue
+            }
+            v.block.inherit(this.initExpressionBlock)
+            v.block.inheritedAttribute.forBreak = this
+            errs.appendAll(v.block.check())
+        }
+
+        if this.defaultBlock != null {
+            this.defaultBlock.inherit(this.initExpressionBlock)
+            this.defaultBlock.inheritedAttribute.forBreak = this
+            errs.appendAll(this.defaultBlock.check())
+        }
+    }
+
+}
 
 

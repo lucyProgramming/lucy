@@ -1,50 +1,39 @@
- import "lucy/cmd/langtools/compile/ast"
+import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
-
-const	lfIsToken  = true
-const	lfNotToken = false
+const lfIsToken = true
+const lfNotToken = false
 
 {
-	ast.parseFunctionHandler = ParseFunction
+
+    ast.parseFunctionHandler = ParseFunction
+
+
+
 }
 
-var	untilLp = {
-		lex.TokenLp-> true
-	}
-var	untilRp = {
-		lex.TokenRp-> true
-	}
-var	untilGt = {
-		lex.TokenGt-> true
-	}
-var	untilLc = {
-		lex.TokenLc-> true
-	}
-var	untilRc = {
-		lex.TokenRc-> true
-	}
-var	untilComma = {
-		lex.TokenComma-> true,
-	}
-var	untilSemicolonOrLf = {
-		lex.TokenSemicolon-> true,
-		lex.TokenLf->        true
-	}
- 
- 
+var untilLp = {lex.TokenLp -> true}
+var untilRp = {lex.TokenRp -> true}
+var untilGt = {lex.TokenGt -> true}
+var untilLc = {lex.TokenLc -> true}
+var untilRc = {lex.TokenRc -> true}
+var untilComma = {lex.TokenComma -> true}
+var untilSemicolonOrLf = {
+    lex.TokenSemicolon -> true,
+    lex.TokenLf -> true
+}
 
-fn ParseFunction(bs []byte, pos ast.Pos) -> (f ast.Function,es []error) {
-	parser := new Parser(bs , null ,pos.filename , false , 10 )
-	parser.lexer = new lex.Lexer(bs, pos.endLine, pos.endColumnOffset , -1 , -1 , -1 , -1 , -1 )
-	parser.next(lfNotToken) // read fn
-	f, _ = parser.FunctionParser.parse(true, false,false)
-	return f, parser.errs
+fn ParseFunction(bs []byte , pos ast.Pos) -> (f ast.Function , es []error) {
+    parser := new Parser(bs , null , pos.filename , false , 10)
+    parser.lexer = new lex.Lexer(bs , pos.endLine , pos.endColumnOffset , -1 , -1 , -1 , -1 , -1)
+    parser.next(lfNotToken) // read fn
+    f , _ = parser.FunctionParser.parse(true , false , false)
+    return f , parser.errs
 }
 
 var autoNameIndex = 1
 
 fn compileAutoName() -> (name string) {
-	name = sprintf("autoName$%d", autoNameIndex)
-	autoNameIndex++
+    name = sprintf("autoName$%d" , autoNameIndex)
+    autoNameIndex++
 }

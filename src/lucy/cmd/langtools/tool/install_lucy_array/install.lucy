@@ -1,34 +1,33 @@
-
 import "lucy/os"
 import "java/io"
 
 class InstallLucyArray {
-	
-	fn install() {
-		path := os.getEnv("LUCYROOT")
-		if path == "" {
-			print("env variable LUCYPATH is not set")
-			os.exit(1)
-		}
-		dest := path + "/lib/lucy/deps/"
-		new io.File(dest).mkdirs()
-		for _, v := range installs {
-			javaFile := v.className + ".java"
-			t := array_template.replace("ArrayTTT", v.className)
-			t = t.replace("TTT",v.typename)
-			t = t.replace("IMPORTS", v.imports)
-			dest := dest + javaFile
-			err := os.writeFile(dest , byte[](t))
-			if err != null {
-				panic(err)
-			}
-			print("install:" , dest)
-		}
-		print("please use 'javac' compile the installed files")
-	}
+    fn install() {
+        path := os.getEnv("LUCYROOT")
+        if path == "" {
+            print("env variable LUCYPATH is not set")
+            os.exit(1)
+        }
+        dest := path + "/lib/lucy/deps/"
+        new io.File(dest).mkdirs()
+        for _ , v := range installs {
+            javaFile := v.className + ".java"
+            t := array_template.replace("ArrayTTT" , v.className)
+            t = t.replace("TTT" , v.typename)
+            t = t.replace("IMPORTS" , v.imports)
+            dest := dest + javaFile
+            err := os.writeFile(dest , byte[](t))
+            if err != null {
+                panic(err)
+            }
+            print("install:" , dest)
+        }
+
+        print("please use 'javac' compile the installed files")
+    }
 }
 
 
 public fn install(args []string) {
-	new InstallLucyArray().install()
+    new InstallLucyArray().install()
 }

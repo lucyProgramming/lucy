@@ -11,6 +11,7 @@ class FindUsage implements HttpHandler {
         os := exchange.getResponseBody()
         now := System.currentTimeMillis()
         defer {
+
             CallStatus.collect(callStatus , "findusage" , System.currentTimeMillis() - now)
             e := catch()
             if e != null {
@@ -20,10 +21,11 @@ class FindUsage implements HttpHandler {
             }
             exchange.close()
         }
+
         uri := exchange.getRequestURI()
         paramters := g.parseQuery(uri.getQuery())
         file := paramters["file"]
-        if file == null || file == ""{
+        if file == null || file == "" {
             bs := byte[]("file not provide")
             exchange.sendResponseHeaders(400 , long(len(bs)))
             os.write(bs)
@@ -31,9 +33,11 @@ class FindUsage implements HttpHandler {
         }
         line := Integer.parseInt(paramters["line"])
         column := Integer.parseInt(paramters["column"])
-        usages := findusage.findUsage(file ,(line << 16) | int(char(column)) , "" , null)
-        bs,_ := json.encode(usages , "\t")
+        usages := findusage.findUsage(file , (line << 16) | int(char(column)) , "" , null)
+        bs , _ := json.encode(usages , "\t")
         exchange.sendResponseHeaders(200 , long(len(bs)))
-        os.write(copy(new byte[](len(bs)) ,bs )) 
-    } 
+        os.write(copy(new byte[](len(bs)) , bs))
+    }
 }
+
+

@@ -18,7 +18,6 @@ public fn parse(
     errs = p.parse()
 }
 
-
 class Parser {
     onlyParseImport        bool            
     bs                     []byte          
@@ -105,7 +104,6 @@ class Parser {
         isAbstract := false
         var finalPos ast.Pos
         fn resetProperty() {
-			
             accessControlToken = null
             isFinal = false
             isAbstract = false
@@ -155,10 +153,9 @@ class Parser {
                             this.tops.append(new ast.TopNode(e))
                         }
                     }
-
                 case lex.TokenLf:
                     this.tops.append(new ast.TopNode(new ast.Line()))
-                    this.next(lfNotToken) //TODO::delete more lines 
+                    this.next(lfNotToken) 
                     continue
                 case lex.TokenPublic:
                     accessControlToken = this.token
@@ -282,6 +279,7 @@ class Parser {
                         }
                         this.tops.append(new ast.TopNode(v))
                     }
+
                     resetProperty()
                     this.ifTokenIsLfThenSkip(false)
                     continue

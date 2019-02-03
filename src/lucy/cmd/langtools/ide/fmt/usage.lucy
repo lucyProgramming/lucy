@@ -4,9 +4,8 @@ const usage = `
     format lucy files
 `
 
-fn printUsageAndExit(code int ){    
+fn printUsageAndExit(code int) {
     print(usage)
     os.exit(code)
 }
-
 

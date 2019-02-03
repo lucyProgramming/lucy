@@ -82,7 +82,7 @@ class ExpressionParser extends ParserExtends {
         if err != null {
             return null , err
         }
-        for this.parser.token.Type == lex.TokenComma && statementLevel { //       read more
+        for this.parser.token.Type == lex.TokenComma && statementLevel { //        read more
             this.next(lfNotToken) //  skip comma
             var left2 ast.Expression
             left2 , err = this.ExpressionQuestionParser.parseQuestionExpression() //
@@ -303,6 +303,7 @@ class ExpressionParser extends ParserExtends {
             } else {
                 m.keyValuePairs.append(t)
             }
+
             if this.parser.token.Type == lex.TokenComma {
                 // read next  key value pair
                 this.next(lfIsToken)

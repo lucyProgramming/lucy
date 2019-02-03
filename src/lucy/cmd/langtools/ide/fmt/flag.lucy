@@ -1,19 +1,18 @@
 import "lucy/os/flag"
 
 class Flags {
-
-    std flag.BoolOption 
+    std    flag.BoolOption
     parser flag.FlagParser
-    
-    fn Flags(){
+
+    fn Flags() {
         this.super()
         this.parser = new flag.FlagParser()
         this.std = this.parser.boolOption("-std")
     }
-    
-    fn parseArgs(args []string) ->(files []string , std bool ) {
-        var err error 
-        files ,err = this.parser.parse(args)
+
+    fn parseArgs(args []string) -> (files []string , std bool) {
+        var err error
+        files , err = this.parser.parse(args)
         if err != null {
             panic(err)
         }
@@ -23,6 +22,9 @@ class Flags {
                 printUsageAndExit(1)
             }
         }
+
         std = this.std.getValue()
     }
 }
+
+

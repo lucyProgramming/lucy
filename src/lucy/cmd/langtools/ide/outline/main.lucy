@@ -128,7 +128,6 @@ public fn outLine(filename string) -> (definitions []ide.Definition = []ide.Defi
 
 }
 
-
 fn main(args []string) {
     filename := new Flags().parseArgs(args)
     definitions := outLine(filename)

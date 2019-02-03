@@ -1,138 +1,144 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
-class StatementSwitchParser extends ParserExtends{
-	bp BlockParser
-	fn StatementSwitchParser(parser Parser ,bp BlockParser){
-		this.super(parser)
-		this.bp = bp
-	}
-	
-	fn parseSwitch() -> (statementSwitch ast.StatementSwitch,err error) {
-		statementSwitch = new ast.StatementSwitch()
-		statementSwitch.pos = this.parser.mkPos()
-		this.next(lfIsToken) // skip switch key word
-		this.parser.unExpectNewLineAndSkip()
-		statementSwitch.endPos = this.parser.mkPos()
-		statementSwitch.condition, err = this.parser.ExpressionParser.parseExpression(false)
-		if statementSwitch.condition == null  {
-			return null ,err 
-		}
-		this.parser.ifTokenIsLfThenSkip(true)
-		for this.parser.token.Type == lex.TokenSemicolon {
-			if statementSwitch.condition != null {
-				statementSwitch.prefixExpressions.append(statementSwitch.condition)
-				statementSwitch.condition = null
-			}
-			this.parser.next(lfNotToken)
-			statementSwitch.condition, _ = this.parser.ExpressionParser.parseExpression(false)
-			this.parser.ifTokenIsLfThenSkip(true)
-		}
-		if this.parser.token.Type != lex.TokenLc {
-			err = new error(sprintf("%s expect '{',but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.description))
-			this.parser.errs.append(err)
-			return statementSwitch , err 
-		}
-		this.next(lfIsToken) // skip {  , must be case
-		this.parser.expectNewLine()
-		if this.parser.token.Type == lex.TokenComment {
-			statementSwitch.inlineComment = this.parser.token.stringValue 
-			this.next(lfNotToken)
-		}else if this.parser.token.Type == lex.TokenLf {
-			this.next(lfNotToken)
-		}
-		if this.parser.token.Type != lex.TokenCase {
-			err = new error(sprintf("%s expect 'case',but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.description))
-			this.parser.errs.append( err)
-		}
-		for this.parser.token.Type == lex.TokenCase {
-			this.next(lfIsToken) // skip case
-			this.parser.unExpectNewLineAndSkip()
-			es, _ := this.parser.ExpressionParser.parseExpressions(lex.TokenColon)
-			if es == null {
-				return statementSwitch, err
-			}
-			if this.parser.token.Type != lex.TokenColon {
-				err = new error(sprintf("%s expect ':',but '%s'",
-					this.parser.errMsgPrefix(), this.parser.token.description))
-				this.parser.errs.append(err)
-				t := new ast.StatementSwitchCase()
-				t.matches = es 
-				if statementSwitch.cases == null {
-					statementSwitch.cases = [t]
-				}else {
-					statementSwitch.cases.append(t)
-				}
-				print("in parse")
-				this.parser.ifTokenIsLfThenSkip(true) 
-				continue
-			}
-			this.next(lfIsToken) // skip :
-			this.parser.expectNewLine()
-			t := new ast.StatementSwitchCase()
-			if this.parser.token.Type == lex.TokenComment {
-				t.inlineComment = this.parser.token.stringValue 
-				this.next(lfNotToken)
-			}else if this.parser.token.Type == lex.TokenLf {
-				this.next(lfNotToken)
-			}
-			var block ast.Block
-			if this.parser.token.Type != lex.TokenCase &&
-				this.parser.token.Type != lex.TokenDefault &&
-				this.parser.token.Type != lex.TokenRc {
-				block = new ast.Block()
-				block.isSwitchBlock = true
-				this.bp.parseStatementList(block, false)
-			}
-			t.matches = es
-			t.block = block
-			if statementSwitch.cases == null {
-                statementSwitch.cases = [t]
-			}else {
-			    statementSwitch.cases.append(t)
-			}
-		}
-		//default value
-		if this.parser.token.Type == lex.TokenDefault {
-			this.next(lfIsToken) // skip default key word
-			this.parser.unExpectNewLineAndSkip()
-			block := new ast.Block()
-			if this.parser.token.Type != lex.TokenColon {
-				err = new error(sprintf("%s missing colon after 'default'",
-					this.parser.errMsgPrefix()))
-				this.parser.errs.append( err)
-			} else {
-				this.next(lfIsToken) // skip :
-				block.pos = this.parser.mkPos()
-				this.parser.expectNewLine()
-				if this.parser.token.Type == lex.TokenComment {
-					statementSwitch.defaultInlineComment = this.parser.token.stringValue 
-					this.next(lfNotToken)
-				}else if this.parser.token.Type == lex.TokenLf {
-					this.next(lfNotToken)
-				}
-			}
-			block.isSwitchBlock = true
-			statementSwitch.defaultBlock = block
-			if this.parser.token.Type != lex.TokenRc {
-				this.bp.parseStatementList(block, false)
-				statementSwitch.defaultBlock = block
-			}
-		}
-		this.parser.ifTokenIsLfThenSkip(true)
-		if this.parser.token.Type != lex.TokenRc {
-			err = new error(sprintf("%s expect '}',but '%s'",
-				this.parser.errMsgPrefix(), this.parser.token.description))
-			this.parser.errs.append(err)
-			statementSwitch.endPos = this.parser.mkPos()
-			return statementSwitch, err
-		}
-		statementSwitch.endPos = this.parser.mkPos()
-		this.next(lfIsToken) //  skip }
-		return statementSwitch, null
-	}
+class StatementSwitchParser extends ParserExtends {
+    bp BlockParser
+    fn StatementSwitchParser(parser Parser , bp BlockParser) {
+        this.super(parser)
+        this.bp = bp
+    }
 
-} 
+    fn parseSwitch() -> (statementSwitch ast.StatementSwitch , err error) {
+        statementSwitch = new ast.StatementSwitch()
+        statementSwitch.pos = this.parser.mkPos()
+        this.next(lfIsToken) // skip switch key word
+        this.parser.unExpectNewLineAndSkip()
+        statementSwitch.endPos = this.parser.mkPos()
+        statementSwitch.condition , err = this.parser.ExpressionParser.parseExpression(false)
+        if statementSwitch.condition == null {
+            return null , err
+        }
+        this.parser.ifTokenIsLfThenSkip(true)
+        for this.parser.token.Type == lex.TokenSemicolon {
+            if statementSwitch.condition != null {
+                statementSwitch.prefixExpressions.append(statementSwitch.condition)
+                statementSwitch.condition = null
+            }
+            this.parser.next(lfNotToken)
+            statementSwitch.condition , _ = this.parser.ExpressionParser.parseExpression(false)
+            this.parser.ifTokenIsLfThenSkip(true)
+        }
+
+        if this.parser.token.Type != lex.TokenLc {
+            err = new error(sprintf("%s expect '{',but '%s'",
+                this.parser.errMsgPrefix() , this.parser.token.description))
+            this.parser.errs.append(err)
+            return statementSwitch , err
+        }
+        this.next(lfIsToken) // skip {  , must be case
+        this.parser.expectNewLine()
+        if this.parser.token.Type == lex.TokenComment {
+            statementSwitch.inlineComment = this.parser.token.stringValue
+            this.next(lfNotToken)
+        } else if this.parser.token.Type == lex.TokenLf {
+            this.next(lfNotToken)
+        }
+        if this.parser.token.Type != lex.TokenCase {
+            err = new error(sprintf("%s expect 'case',but '%s'",
+                this.parser.errMsgPrefix() , this.parser.token.description))
+            this.parser.errs.append(err)
+        }
+        for this.parser.token.Type == lex.TokenCase {
+            this.next(lfIsToken) // skip case
+            this.parser.unExpectNewLineAndSkip()
+            es , _ := this.parser.ExpressionParser.parseExpressions(lex.TokenColon)
+            if es == null {
+                return statementSwitch , err
+            }
+            if this.parser.token.Type != lex.TokenColon {
+                err = new error(sprintf("%s expect ':',but '%s'",
+                    this.parser.errMsgPrefix() , this.parser.token.description))
+                this.parser.errs.append(err)
+                t := new ast.StatementSwitchCase()
+                t.matches = es
+                if statementSwitch.cases == null {
+                    statementSwitch.cases = [t]
+                } else {
+                    statementSwitch.cases.append(t)
+                }
+
+                print("in parse")
+                this.parser.ifTokenIsLfThenSkip(true)
+                continue
+            }
+            this.next(lfIsToken) // skip :
+            this.parser.expectNewLine()
+            t := new ast.StatementSwitchCase()
+            if this.parser.token.Type == lex.TokenComment {
+                t.inlineComment = this.parser.token.stringValue
+                this.next(lfNotToken)
+            } else if this.parser.token.Type == lex.TokenLf {
+                this.next(lfNotToken)
+            }
+            var block ast.Block
+            if this.parser.token.Type != lex.TokenCase &&
+                this.parser.token.Type != lex.TokenDefault &&
+                this.parser.token.Type != lex.TokenRc {
+                block = new ast.Block()
+                block.isSwitchBlock = true
+                this.bp.parseStatementList(block , false)
+            }
+            t.matches = es
+            t.block = block
+            if statementSwitch.cases == null {
+                statementSwitch.cases = [t]
+            } else {
+                statementSwitch.cases.append(t)
+            }
+
+        }
+
+        //default value
+        if this.parser.token.Type == lex.TokenDefault {
+            this.next(lfIsToken) // skip default key word
+            this.parser.unExpectNewLineAndSkip()
+            block := new ast.Block()
+            if this.parser.token.Type != lex.TokenColon {
+                err = new error(sprintf("%s missing colon after 'default'",
+                    this.parser.errMsgPrefix()))
+                this.parser.errs.append(err)
+            } else {
+                this.next(lfIsToken) // skip :
+                block.pos = this.parser.mkPos()
+                this.parser.expectNewLine()
+                if this.parser.token.Type == lex.TokenComment {
+                    statementSwitch.defaultInlineComment = this.parser.token.stringValue
+                    this.next(lfNotToken)
+                } else if this.parser.token.Type == lex.TokenLf {
+                    this.next(lfNotToken)
+                }
+            }
+
+            block.isSwitchBlock = true
+            statementSwitch.defaultBlock = block
+            if this.parser.token.Type != lex.TokenRc {
+                this.bp.parseStatementList(block , false)
+                statementSwitch.defaultBlock = block
+            }
+        }
+        this.parser.ifTokenIsLfThenSkip(true)
+        if this.parser.token.Type != lex.TokenRc {
+            err = new error(sprintf("%s expect '}',but '%s'",
+                this.parser.errMsgPrefix() , this.parser.token.description))
+            this.parser.errs.append(err)
+            statementSwitch.endPos = this.parser.mkPos()
+            return statementSwitch , err
+        }
+        statementSwitch.endPos = this.parser.mkPos()
+        this.next(lfIsToken) //  skip }
+        return statementSwitch , null
+    }
+
+}
+
 

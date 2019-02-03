@@ -1,24 +1,25 @@
 import "java/lang/Object"
 
 public interface loadImport {
-    public abstract fn loadImport(importName string) -> (Object , error)}
+    public abstract fn loadImport(importName string) -> (Object , error)
+}
 
 
-public const MagicIdentifierFile ="__FILE__"
-public const MagicIdentifierLine ="__LINE__"
-public const MagicIdentifierTime ="__TIME__"
-public const MagicIdentifierClass ="__CLASS__"
-public const MainFunctionName ="main"
-public const ThisPointerName ="this"
-public const UnderScore ="_"
-public const LucyRootClass ="lucy/lang/Lucy"
-public const JavaRootClass ="java/lang/Object"
-public const DefaultExceptionClass ="java/lang/Exception"
-public const JavaThrowableClass ="java/lang/Throwable"
-public const JavaStringClassName ="java/lang/String"
-public const Super ="super"
-public const SpecialMethodInit ="<init>"
-const ClassInitMethod ="<clinit>"
+public const MagicIdentifierFile = "__FILE__"
+public const MagicIdentifierLine = "__LINE__"
+public const MagicIdentifierTime = "__TIME__"
+public const MagicIdentifierClass = "__CLASS__"
+public const MainFunctionName = "main"
+public const ThisPointerName = "this"
+public const UnderScore = "_"
+public const LucyRootClass = "lucy/lang/Lucy"
+public const JavaRootClass = "java/lang/Object"
+public const DefaultExceptionClass = "java/lang/Exception"
+public const JavaThrowableClass = "java/lang/Throwable"
+public const JavaStringClassName = "java/lang/String"
+public const Super = "super"
+public const SpecialMethodInit = "<init>"
+const ClassInitMethod = "<clinit>"
 
 fn isMagicIdentifier(name string) -> (is bool) {
     return name == MagicIdentifierFile ||
@@ -26,7 +27,6 @@ fn isMagicIdentifier(name string) -> (is bool) {
         name == MagicIdentifierTime ||
         name == MagicIdentifierClass
 }
-
 
 var buildInFunctionsMap = new map{string -> Function}()
 
@@ -53,6 +53,7 @@ public var JavaBytesType Type
     JavaBytesType.array.Type = VariableTypeByte
 
 
+
 }
 
 fn loadJavaStringClass(block Block , pos Pos) -> (err error) {
@@ -69,6 +70,6 @@ fn loadJavaStringClass(block Block , pos Pos) -> (err error) {
     } else {
         panic("loaded java string class is not a class")
     }
-}
 
+}
 

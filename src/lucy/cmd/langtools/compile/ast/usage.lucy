@@ -2,7 +2,7 @@
 	provide usage message for ide
 */
 public class Usage {
-     // a string indicate different usage 
+    // a string indicate different usage 
     public Type string
     public pos  Pos    // where to use 
 }

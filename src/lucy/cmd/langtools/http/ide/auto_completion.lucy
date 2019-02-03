@@ -7,12 +7,12 @@ import "lucy/encoding/json"
 import "lucy/cmd/langtools/compile/ast"
 import "java/lang/System"
 
-
 class AutoCompletion implements HttpHandler {
     public fn handle(exchange HttpExchange) {
         os := exchange.getResponseBody()
         now := System.currentTimeMillis()
         defer {
+
             CallStatus.collect(callStatus , "autocompletion" , System.currentTimeMillis() - now)
             e := catch()
             if e != null {
@@ -23,10 +23,11 @@ class AutoCompletion implements HttpHandler {
             }
             exchange.close()
         }
+
         uri := exchange.getRequestURI()
         paramters := g.parseQuery(uri.getQuery())
         file := paramters["file"]
-        if file == null || file == ""{
+        if file == null || file == "" {
             bs := byte[]("file not provide")
             exchange.sendResponseHeaders(400 , long(len(bs)))
             os.write(bs)
@@ -41,10 +42,12 @@ class AutoCompletion implements HttpHandler {
             os.write(bs)
             return
         }
-        usages := autocompletion.autoCompletion(file , (line << 16) | int(char(column)) ,bs)
+        usages := autocompletion.autoCompletion(file , (line << 16) | int(char(column)) , bs)
         result := copy(new ast.AutoCompletionItem[](len(usages)) , usages)
-        bs,_ = json.encode(result , "\t")
+        bs , _ = json.encode(result , "\t")
         exchange.sendResponseHeaders(200 , long(len(bs)))
-        os.write(copy(new byte[](len(bs)) ,bs )) 
-    } 
+        os.write(copy(new byte[](len(bs)) , bs))
+    }
 }
+
+

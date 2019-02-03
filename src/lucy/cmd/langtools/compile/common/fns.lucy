@@ -1,10 +1,8 @@
-
 public fn getBaseName(filepath string) -> (name string) {
-	index := filepath.lastIndexOf("/")
-	if index  < 0 {
-		return filepath
-	}
-	return filepath[index+1:]  // skip '/'
+    index := filepath.lastIndexOf("/")
+    if index < 0 {
+        return filepath
+    }
+    return filepath[index + 1:] // skip '/'
 }
-
 
