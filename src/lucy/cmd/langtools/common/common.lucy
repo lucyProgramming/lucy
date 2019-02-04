@@ -26,21 +26,17 @@ public fn getLucyPath() -> (paths []string) {
         for v := range lucyPath.split(";") {
             ps[v] = true
         }
-
     } else {
         for v := range lucyPath.split(":") {
             ps[v] = true
         }
-
     }
-
     paths = new []string(ps.size())
     i := 0
     for k , _ := range ps {
         paths[i] = k
         i++
     }
-
 }
 
 public fn getClassPath() -> (paths []string) {
@@ -52,14 +48,11 @@ public fn getClassPath() -> (paths []string) {
         for v := range classPaths.split(";") {
             ps[v] = true
         }
-
     } else {
         for v := range classPaths.split(":") {
             ps[v] = true
         }
-
     }
-
     paths = new []string(ps.size())
     i := 0
     for k , _ := range ps {

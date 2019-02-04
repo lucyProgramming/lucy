@@ -64,7 +64,7 @@ class StackMapState {
         if len(this.stacks) == 0 {
             panic("already 0")
         }
-        this.stacks = this.stacks[ : len(this.stacks) - num]
+        this.stacks = this.stacks[:len(this.stacks) - num]
     }
     fn pushStack(c cg.ClassHighLevel , v ast.Type) {
         if this == null {
@@ -73,57 +73,58 @@ class StackMapState {
         this.stacks.append(this.newStackMapVerificationTypeInfo(c , v))
     }
 
-    fn newStackMapVerificationTypeInfo(c cg.ClassHighLevel , 
+    fn newStackMapVerificationTypeInfo(c cg.ClassHighLevel,
         t ast.Type) -> (ret cg.StackMapVerificationTypeInfo) {
         ret = new cg.StackMapVerificationTypeInfo()
         switch t.Type {
-        case ast.VariableTypeBool , 
-            ast.VariableTypeByte , 
-            ast.VariableTypeShort , 
-            ast.VariableTypeEnum , 
-            ast.VariableTypeChar , 
-            ast.VariableTypeInt:
-            ret.Verify = new cg.StackMapIntegerVariableInfo()
-        case ast.VariableTypeLong:
-            ret.Verify = new cg.StackMapLongVariableInfo()
-        case ast.VariableTypeFloat:
-            ret.Verify = new cg.StackMapFloatVariableInfo()
-        case ast.VariableTypeDouble:
-            ret.Verify = new cg.StackMapDoubleVariableInfo()
-        case ast.VariableTypeNull:
-            ret.Verify = new cg.StackMapNullVariableInfo()
-        case ast.VariableTypeString:
-            ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(javaStringClass))
-        case ast.VariableTypeObject:
-            ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(t.Class.name))
-        case ast.VariableTypeFunction:
-            ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(javaMethodHandleClass))
-        case ast.VariableTypeMap:
-            ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(mapClass))
-        case ast.VariableTypeArray:
-            meta := ArrayMetas[t.array.Type]
-            ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(meta.className))
-        case ast.VariableTypeJavaArray:
-            d := Descriptor.typeDescriptor(t)
-            ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(d))
-        case ast.VariableTypeVoid:
-            // handle at ast
-        case ast.VariableTypeName:
-            // handle at ast
-        case ast.VariableTypeDynamicSelector:
-            // handle at ast
-        case ast.VariableTypeGlobal:
-            // handle at ast
-        case ast.VariableTypeClass:
-            //
-        case ast.VariableTypePackage:
-            // handle at ast
-        case ast.VariableTypeTemplate:
-            // handle at ast
+            case ast.VariableTypeBool,
+                ast.VariableTypeByte,
+                ast.VariableTypeShort,
+                ast.VariableTypeEnum,
+                ast.VariableTypeChar,
+                ast.VariableTypeInt:
+                ret.Verify = new cg.StackMapIntegerVariableInfo()
+            case ast.VariableTypeLong:
+                ret.Verify = new cg.StackMapLongVariableInfo()
+            case ast.VariableTypeFloat:
+                ret.Verify = new cg.StackMapFloatVariableInfo()
+            case ast.VariableTypeDouble:
+                ret.Verify = new cg.StackMapDoubleVariableInfo()
+            case ast.VariableTypeNull:
+                ret.Verify = new cg.StackMapNullVariableInfo()
+            case ast.VariableTypeString:
+                ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(javaStringClass))
+            case ast.VariableTypeObject:
+                ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(t.Class.name))
+            case ast.VariableTypeFunction:
+                ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(javaMethodHandleClass))
+            case ast.VariableTypeMap:
+                ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(mapClass))
+            case ast.VariableTypeArray:
+                meta := ArrayMetas[t.array.Type]
+                ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(meta.className))
+            case ast.VariableTypeJavaArray:
+                d := Descriptor.typeDescriptor(t)
+                ret.Verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(d))
+            case ast.VariableTypeVoid:
+                // handle at ast
+            case ast.VariableTypeName:
+                // handle at ast
+            case ast.VariableTypeDynamicSelector:
+                // handle at ast
+            case ast.VariableTypeGlobal:
+                // handle at ast
+            case ast.VariableTypeClass:
+                //
+            case ast.VariableTypePackage:
+                // handle at ast
+            case ast.VariableTypeTemplate:
+                // handle at ast
         }
 
         return ret
     }
 
 }
+
 

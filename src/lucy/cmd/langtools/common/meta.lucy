@@ -5,7 +5,6 @@ public class PackageMeta {
     public classes      string[]  
     public hasMain      bool      
     public lucyVersion  string    
-
 }
 
 
