@@ -33,7 +33,6 @@ public class Lexer {
         this.findUsage = findUsage
         this.rename = rename
         this.autoCompletion = autoCompletion
-
     }
     public fn getLineAndColumn() -> (line int , column int) {
         return this.line , this.columnOffset

@@ -26,10 +26,8 @@ class BuildinFunctionBlackHole {
             } else {
                 code.codes[code.codeLength] = cg.OP_pop2
             }
-
             code.codeLength++
         }
-
         return
     }
 

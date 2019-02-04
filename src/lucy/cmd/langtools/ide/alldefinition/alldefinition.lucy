@@ -4,20 +4,20 @@ import "lucy/os"
 import "lucy/cmd/langtools/common"
 
 class AllDefinition {
-    lucyFile   []ide.LucyFile
+    lucyFiles   []ide.LucyFile
     packageName string        
     printErr    bool          
     lucyPath    string        
-    
+
     fn AllDefinition(lucyFiles []ide.LucyFile , packageName string , lucyPath string , printErr bool) {
         this.super()
-        this.lucyFile = lucyFiles
+        this.lucyFiles = lucyFiles
         this.lucyPath = lucyPath
         this.packageName = packageName
         this.printErr = printErr
     }
     fn getAllDefinition() -> (alldefinition ide.Definition[]) {
-        nodes , errs := ide.parseAst(this.lucyFile)
+        nodes , errs := ide.parseAst(this.lucyFiles)
         if this.printErr {
             for v := range errs {
                 os.stderr.println(v.getMessage())
@@ -47,7 +47,6 @@ class AllDefinition {
             item.name = name
             items.append(item)
         }
-
         for name , v := range p.block.constants {
             item := new ide.Definition()
             item.Type = "constant"
@@ -55,7 +54,6 @@ class AllDefinition {
             item.name = name
             items.append(item)
         }
-
         for name , v := range p.block.functions {
             item := new ide.Definition()
             item.Type = "function"
@@ -63,7 +61,6 @@ class AllDefinition {
             item.name = name
             items.append(item)
         }
-
         for name , v := range p.block.enums {
             item := new ide.Definition()
             item.Type = "enum"
@@ -71,7 +68,6 @@ class AllDefinition {
             item.name = name
             items.append(item)
         }
-
         for name , v := range p.block.classes {
             item := new ide.Definition()
             item.Type = "class"
@@ -79,7 +75,6 @@ class AllDefinition {
             item.name = name
             items.append(item)
         }
-
         for name , v := range p.block.typeAliases {
             item := new ide.Definition()
             item.Type = "typealias"
@@ -87,7 +82,6 @@ class AllDefinition {
             item.name = v.alias.name
             items.append(item)
         }
-
         return copy(new ide.Definition[](len(items)) , items)
     }
 }
