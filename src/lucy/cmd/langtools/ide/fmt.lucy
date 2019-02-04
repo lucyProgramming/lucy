@@ -63,7 +63,11 @@ public class Fmt {
                 continue
             }
             if t , ok := n.node.(ast.Expression) ; ok {
-                format += this.formatExpression("" , t) + "\n"
+                if t.inlineComment != null {
+                    format += this.formatExpression("" , t) + " //" + t.inlineComment
+                } else {
+                    format += this.formatExpression("" , t) + "\n"
+                }
                 continue
             }
             if t , ok := n.node.(ast.TypeAlias) ; ok {
@@ -232,12 +236,11 @@ public class Fmt {
                     } else {
                         format += ","
                     }
-
                     if v.containsLf {
                         format += "\n"
                         format += this.indentIncrement + indent
                     } else if v.inlineComment != null {
-                        format += " //" + v.inlineComment
+                        format += "//" + v.inlineComment
                         format += this.indentIncrement + indent
                     }
                 }
@@ -251,7 +254,7 @@ public class Fmt {
                 if t.isMulti {
                     format += indent + this.indentIncrement + sprintf("/*%s*/" , t.comment)
                 } else {
-                    format += indent + this.indentIncrement + " //" + t.comment
+                    format += indent + this.indentIncrement + "//" + t.comment
                 }
 
                 continue
@@ -263,7 +266,6 @@ public class Fmt {
             if field , ok := f.(ast.ClassFieldDeclaration) ; ok {
                 fields := []ast.ClassFieldDeclaration{}
                 {
-
                     t , ok := c.fmts[k].(ast.ClassFieldDeclaration)
                     for ok {
                         fields.append(t)
@@ -273,7 +275,6 @@ public class Fmt {
                         }
                         t , ok = c.fmts[k].(ast.ClassFieldDeclaration)
                     }
-
                     k--
                 }
 
@@ -494,7 +495,6 @@ public class Fmt {
                 } else {
                     format = indent + this.formatExpression(indent , s.Expression) + " //" + s.inlineComment
                 }
-
             case ast.StatementTypeIf:
                 format += this.formatIf(indent , s.statementIf)
             case ast.StatementTypeBlock:
@@ -518,7 +518,6 @@ public class Fmt {
                 } else {
                     format += indent + "break" + " //" + s.inlineComment
                 }
-
             case ast.StatementTypeSwitch:
                 format += this.formatSwitch(indent , s.StatementSwitch)
             case ast.StatementTypeWhen:
@@ -943,7 +942,13 @@ public class Fmt {
                 } else {
                     format += this.formatExpression(indent , call.Expression) + "." + call.name + "("
                 }
-
+                if call.lpContainsLf {
+                    format += "\n"
+                    format += this.indentIncrement + indent
+                } else if call.lpInlineComment != null {
+                    format += " //" + call.lpInlineComment
+                    format += this.indentIncrement + indent
+                }
                 for k , v := range call.args {
                     format += this.formatExpression(indent , v)
                     if k != len(call.args) - 1 {
@@ -967,6 +972,13 @@ public class Fmt {
             case ast.ExpressionTypeFunctionCall:
                 call := e.data.(ast.ExpressionFunctionCall)
                 format += this.formatExpression(indent , call.Expression) + "("
+                if call.lpContainsLf {
+                    format += "\n"
+                    format += this.indentIncrement + indent
+                } else if call.lpInlineComment != null {
+                    format += " //" + call.lpInlineComment
+                    format += this.indentIncrement + indent
+                }
                 for k , v := range call.args {
                     format += this.formatExpression(indent , v)
                     if k != len(call.args) - 1 {
@@ -975,7 +987,6 @@ public class Fmt {
                         } else {
                             format += ","
                         }
-
                         if v.containsLf {
                             format += "\n"
                             format += this.indentIncrement + indent
@@ -1002,6 +1013,13 @@ public class Fmt {
             case ast.ExpressionTypeNew:
                 n := e.data.(ast.ExpressionNew)
                 format += "new " + n.Type.typeName() + "("
+                if n.lpContainsLf {
+                    format += "\n"
+                    format += this.indentIncrement + indent
+                } else if n.lpInlineComment != null {
+                    format += " //" + n.lpInlineComment
+                    format += this.indentIncrement + indent
+                }
                 for k , v := range n.args {
                     format += this.formatExpression(indent , v)
                     if k != len(n.args) - 1 {

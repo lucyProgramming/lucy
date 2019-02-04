@@ -1,26 +1,24 @@
-
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
-
 class AutoVariableForRangeMap {
-	MapObject               char
-	KeySets                 char
-	KeySetsK, KeySetsLength char
-	K, V                    char
+    MapObject                char
+    KeySets                  char
+    KeySetsK , KeySetsLength char
+    K , V                    char
 }
 
-class BuildForRangeMap {
-    
-    eb BuildExpression
-    bb  BuildBlock
 
-    fn BuildForRangeMap(eb BuildExpression , bb  BuildBlock){
+class BuildForRangeMap {
+    eb BuildExpression
+    bb BuildBlock     
+
+    fn BuildForRangeMap(eb BuildExpression , bb BuildBlock) {
         this.super()
         this.eb = eb
         this.bb = bb
     }
-    
+
     fn build(
         c cg.ClassHighLevel,
         code cg.AttributeCode,
@@ -28,8 +26,7 @@ class BuildForRangeMap {
         context Context,
         state StackMapState) -> (maxStack char) {
         attr := s.rangeAttr
-        maxStack = this.eb.build(
-            c,
+        maxStack = this.eb.build(c,
             code,
             attr.rangeOn,
             context,
@@ -37,16 +34,18 @@ class BuildForRangeMap {
         // if null skip
         code.codes[code.codeLength] = cg.OP_dup
         code.codeLength++
-        noNullExit := new cg.Exit(cg.OP_ifnonnull, code)
+        noNullExit := new cg.Exit(cg.OP_ifnonnull , code)
         code.codes[code.codeLength] = cg.OP_pop
         code.codeLength++
-        s.exits.append( new cg.Exit(cg.OP_goto, code))
-        writeExits([]cg.Exit{noNullExit}, code.codeLength)
-        state.pushStack(c, attr.rangeOn.value)
-        context.MakeStackMap(code, state, code.codeLength)
+        s.exits.append(new cg.Exit(cg.OP_goto , code))
+        writeExits([]cg.Exit{noNullExit} , code.codeLength)
+        state.pushStack(c , attr.rangeOn.value)
+        context.MakeStackMap(code , state , code.codeLength)
         state.popStack(1)
         forState := new StackMapState(state)
-        defer state.addTop(forState) // add top
+        defer {
+            state.addTop(forState)
+        }
         //keySets
         code.codes[code.codeLength] = cg.OP_dup
         if 2 > maxStack {
@@ -54,20 +53,16 @@ class BuildForRangeMap {
         }
         code.codeLength++
         code.codes[code.codeLength] = cg.OP_invokevirtual
-        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-            mapClass,
+        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(mapClass,
             "keySet",
-            "()Ljava/util/Set;"
-        ), code.codes[code.codeLength+1:code.codeLength+3])
+            "()Ljava/util/Set;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         code.codes[code.codeLength] = cg.OP_invokeinterface
-        c.insertInterfaceMethodrefConst(new cg.ConstantInfoInterfaceMethodrefHighLevel(
-            "java/util/Set",
+        c.insertInterfaceMethodrefConst(new cg.ConstantInfoInterfaceMethodrefHighLevel("java/util/Set",
             "toArray",
-            "()[Ljava/lang/Object;"
-        ), code.codes[code.codeLength+1:code.codeLength+3])
-        code.codes[code.codeLength+3] = 1
-        code.codes[code.codeLength+4] = 0
+            "()[Ljava/lang/Object;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+        code.codes[code.codeLength + 3] = 1
+        code.codes[code.codeLength + 4] = 0
         code.codeLength += 5
         // get length
         code.codes[code.codeLength] = cg.OP_dup
@@ -75,196 +70,192 @@ class BuildForRangeMap {
         if 3 > maxStack {
             maxStack = 3
         }
-        var autoVar  = new AutoVariableForRangeMap()
+        var autoVar = new AutoVariableForRangeMap()
         {
+
             autoVar.KeySetsLength = code.maxLocals
             code.maxLocals++
-            forState.appendLocals(c, typeInt)
+            forState.appendLocals(c , typeInt)
             t := new ast.Type()
             t.Type = ast.VariableTypeJavaArray
             t.array = forState.newObjectVariableType(javaRootClass)
             autoVar.KeySets = code.maxLocals
             code.maxLocals++
-            forState.appendLocals(c, t)
+            forState.appendLocals(c , t)
             autoVar.MapObject = code.maxLocals
             code.maxLocals++
-            forState.appendLocals(c, forState.newObjectVariableType(mapClass))
+            forState.appendLocals(c , forState.newObjectVariableType(mapClass))
             autoVar.KeySetsK = code.maxLocals
             code.maxLocals++
-            forState.appendLocals(c, typeInt)
+            forState.appendLocals(c , typeInt)
 
         }
+
         code.codes[code.codeLength] = cg.OP_arraylength
         code.codeLength++
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsLength))
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, autoVar.KeySets))
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, autoVar.MapObject))
+        copyOPs(code , storeLocalVariableOps(ast.VariableTypeInt , autoVar.KeySetsLength))
+        copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject , autoVar.KeySets))
+        copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject , autoVar.MapObject))
         // k set to -1
         code.codes[code.codeLength] = cg.OP_iconst_m1
         code.codeLength++
-        copyOPs(code, storeLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsK))
+        copyOPs(code , storeLocalVariableOps(ast.VariableTypeInt , autoVar.KeySetsK))
         //handle captured vars
         if s.condition.Type == ast.ExpressionTypeVarAssign {
             if attr.identifierValue != null && attr.identifierValue.Variable.beenCapturedAsLeftValue > 0 {
-                closure.createClosureVar(c, code, attr.identifierValue.Variable.Type)
+                closure.createClosureVar(c , code , attr.identifierValue.Variable.Type)
                 attr.identifierValue.Variable.localValOffset = code.maxLocals
                 code.maxLocals++
                 copyOPs(code,
-                    storeLocalVariableOps(ast.VariableTypeObject, attr.identifierValue.Variable.localValOffset))
+                    storeLocalVariableOps(ast.VariableTypeObject , attr.identifierValue.Variable.localValOffset))
                 forState.appendLocals(c,
                     forState.newObjectVariableType(closure.getMeta(attr.identifierValue.Variable.Type.Type).className))
             }
             if attr.identifierKey != null &&
                 attr.identifierKey.Variable.beenCapturedAsLeftValue > 0 {
-                closure.createClosureVar(c, code, attr.identifierKey.Variable.Type)
+                closure.createClosureVar(c , code , attr.identifierKey.Variable.Type)
                 attr.identifierKey.Variable.localValOffset = code.maxLocals
                 code.maxLocals++
                 copyOPs(code,
-                    storeLocalVariableOps(ast.VariableTypeObject, attr.identifierKey.Variable.localValOffset))
+                    storeLocalVariableOps(ast.VariableTypeObject , attr.identifierKey.Variable.localValOffset))
                 forState.appendLocals(c,
                     forState.newObjectVariableType(closure.getMeta(attr.identifierKey.Variable.Type.Type).className))
             }
         }
-
         s.continueCodeOffset = code.codeLength
-        context.MakeStackMap(code, forState, code.codeLength)
+        context.MakeStackMap(code , forState , code.codeLength)
         blockState := new StackMapState(forState)
         code.codes[code.codeLength] = cg.OP_iinc
         if autoVar.K > 255 {
             panic("over 255")
         }
-        code.codes[code.codeLength+1] = byte(autoVar.KeySetsK)
-        code.codes[code.codeLength+2] = 1
+        code.codes[code.codeLength + 1] = byte(autoVar.KeySetsK)
+        code.codes[code.codeLength + 2] = 1
         code.codeLength += 3
         // load k
-        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsK))
+        copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , autoVar.KeySetsK))
 
         // load length
-        copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsLength))
+        copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , autoVar.KeySetsLength))
         if 2 > maxStack {
             maxStack = 2
         }
-        s.exits.append(new cg.Exit(cg.OP_if_icmpge, code))
+        s.exits.append(new cg.Exit(cg.OP_if_icmpge , code))
         if attr.identifierValue != null || attr.expressionValue != null {
             // load k sets
-            copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.KeySets))
+            copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , autoVar.KeySets))
 
             // swap
-            copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsK))
+            copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , autoVar.KeySetsK))
             //get object for hashMap
             code.codes[code.codeLength] = cg.OP_aaload
             code.codeLength++
             // load  map object
-            copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.MapObject))
+            copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , autoVar.MapObject))
             // swap
             code.codes[code.codeLength] = cg.OP_swap
             code.codeLength++
             code.codes[code.codeLength] = cg.OP_invokevirtual
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-                mapClass,
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(mapClass,
                 "get",
-                "(Ljava/lang/Object;)Ljava/lang/Object;"
-            ), code.codes[code.codeLength+1:code.codeLength+3])
+                "(Ljava/lang/Object;)Ljava/lang/Object;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
             if attr.rangeOn.value.Map.V.isPointer() == false {
-                TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, attr.rangeOn.value.Map.V)
+                TypeConverterAndPrimitivePacker.unPackPrimitives(c , code , attr.rangeOn.value.Map.V)
             } else {
-                TypeConverterAndPrimitivePacker.castPointer(c, code, attr.rangeOn.value.Map.V)
+                TypeConverterAndPrimitivePacker.castPointer(c , code , attr.rangeOn.value.Map.V)
             }
             autoVar.V = code.maxLocals
             code.maxLocals += jvmSlotSize(attr.rangeOn.value.Map.V)
             //store to V
-            copyOPs(code, storeLocalVariableOps(attr.rangeOn.value.Map.V.Type, autoVar.V))
-            blockState.appendLocals(c, attr.rangeOn.value.Map.V)
+            copyOPs(code , storeLocalVariableOps(attr.rangeOn.value.Map.V.Type , autoVar.V))
+            blockState.appendLocals(c , attr.rangeOn.value.Map.V)
         }
-
         // store to k,if need
         if attr.identifierKey != null || attr.expressionKey != null {
             // load k sets
-            copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, autoVar.KeySets))
+            copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , autoVar.KeySets))
             // load k
-            copyOPs(code, loadLocalVariableOps(ast.VariableTypeInt, autoVar.KeySetsK))
+            copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , autoVar.KeySetsK))
             code.codes[code.codeLength] = cg.OP_aaload
             code.codeLength++
             if attr.rangeOn.value.Map.K.isPointer() == false {
-                TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, attr.rangeOn.value.Map.K)
+                TypeConverterAndPrimitivePacker.unPackPrimitives(c , code , attr.rangeOn.value.Map.K)
             } else {
-                TypeConverterAndPrimitivePacker.castPointer(c, code, attr.rangeOn.value.Map.K)
+                TypeConverterAndPrimitivePacker.castPointer(c , code , attr.rangeOn.value.Map.K)
             }
             autoVar.K = code.maxLocals
             code.maxLocals += jvmSlotSize(attr.rangeOn.value.Map.K)
-            copyOPs(code, storeLocalVariableOps(attr.rangeOn.value.Map.K.Type, autoVar.K))
-            blockState.appendLocals(c, attr.rangeOn.value.Map.K)
+            copyOPs(code , storeLocalVariableOps(attr.rangeOn.value.Map.K.Type , autoVar.K))
+            blockState.appendLocals(c , attr.rangeOn.value.Map.K)
         }
-
         // store k and v into user defined variable
         //store v in real v
         if s.condition.Type == ast.ExpressionTypeVarAssign {
             if attr.identifierValue != null {
                 if attr.identifierValue.Variable.beenCapturedAsLeftValue > 0 {
-                    copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject,
+                    copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject,
                         attr.identifierValue.Variable.localValOffset))
                     copyOPs(code,
                         loadLocalVariableOps(attr.identifierValue.Variable.Type.Type,
-                            autoVar.V))
-                    this.eb.storeLocalVar(c, code, attr.identifierValue.Variable)
+                        autoVar.V))
+                    this.eb.storeLocalVar(c , code , attr.identifierValue.Variable)
                 } else {
                     attr.identifierValue.Variable.localValOffset = autoVar.V
                 }
             }
             if attr.identifierKey != null {
                 if attr.identifierKey.Variable.beenCapturedAsLeftValue > 0 {
-                    copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, attr.identifierKey.Variable.localValOffset))
+                    copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , attr.identifierKey.Variable.localValOffset))
                     copyOPs(code,
-                        loadLocalVariableOps(attr.identifierKey.Variable.Type.Type, autoVar.K))
-                    this.eb.storeLocalVar(c, code, attr.identifierKey.Variable)
+                        loadLocalVariableOps(attr.identifierKey.Variable.Type.Type , autoVar.K))
+                    this.eb.storeLocalVar(c , code , attr.identifierKey.Variable)
                 } else {
                     attr.identifierKey.Variable.localValOffset = autoVar.K
                 }
             }
-        } else { // for k,v  = range xxx
+        } else {
             // store v
             if attr.expressionValue != null {
                 stackLength := len(blockState.stacks)
-                stack, remainStack, op, _ :=
-                    this.eb.BuildExpressionLeftValue.getLeftValue(c, code, attr.expressionValue, context, blockState)
-                if stack > maxStack { // this means  current stack is 0
+                stack , remainStack , op , _ :=
+                    this.eb.BuildExpressionLeftValue.getLeftValue(c , code , attr.expressionValue , context , blockState)
+                if stack > maxStack {
                     maxStack = stack
                 }
                 copyOPs(code,
-                    loadLocalVariableOps(attr.rangeOn.value.Map.V.Type, autoVar.V))
-                if t := remainStack + jvmSlotSize(attr.rangeOn.value.Map.V); t > maxStack {
+                    loadLocalVariableOps(attr.rangeOn.value.Map.V.Type , autoVar.V))
+                if t := remainStack + jvmSlotSize(attr.rangeOn.value.Map.V) ; t > maxStack {
                     maxStack = t
                 }
-                copyOPs(code, op)
+                copyOPs(code , op)
                 forState.popStack(len(blockState.stacks) - stackLength)
             }
             if attr.expressionKey != null {
                 stackLength := len(blockState.stacks)
-                stack, remainStack, op, _ :=
-                    this.eb.BuildExpressionLeftValue.getLeftValue(c, code, attr.expressionKey, context, blockState)
-                if stack > maxStack { // this means  current stack is 0
+                stack , remainStack , op , _ :=
+                    this.eb.BuildExpressionLeftValue.getLeftValue(c , code , attr.expressionKey , context , blockState)
+                if stack > maxStack {
                     maxStack = stack
                 }
                 copyOPs(code,
-                    loadLocalVariableOps(attr.rangeOn.value.Map.K.Type, autoVar.K))
-                if t := remainStack + jvmSlotSize(attr.rangeOn.value.Map.K); t > maxStack {
+                    loadLocalVariableOps(attr.rangeOn.value.Map.K.Type , autoVar.K))
+                if t := remainStack + jvmSlotSize(attr.rangeOn.value.Map.K) ; t > maxStack {
                     maxStack = t
                 }
-                copyOPs(code, op)
+                copyOPs(code , op)
                 blockState.popStack(len(blockState.stacks) - stackLength)
             }
         }
         // build block
-        this.bb.buildBlock(c, code, s.block, context, blockState)
+        this.bb.buildBlock(c , code , s.block , context , blockState)
         forState.addTop(blockState)
         if s.block.notExecuteToLastStatement == false {
-            jumpTo(code, s.continueCodeOffset)
+            jumpTo(code , s.continueCodeOffset)
         }
-
         return
     }
 
-
 }
+
 

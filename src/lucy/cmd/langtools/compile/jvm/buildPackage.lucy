@@ -354,7 +354,7 @@ public class BuildPackage {
 
     fn mkGlobalFunctions() {
         ms := new map{string -> cg.MethodHighLevel}()
-        for k , f := range this.Package.block.functions { //  first round
+        for k , f := range this.Package.block.functions { //   first round
             if f.templateFunction != null {
                 t := new cg.AttributeTemplateFunction()
                 t.name = f.name
@@ -367,7 +367,6 @@ public class BuildPackage {
                 } else {
                     this.mainClass.templateFunctions.append(t)
                 }
-
                 continue
             }
             if f.isBuildIn {
@@ -415,14 +414,18 @@ public class BuildPackage {
         //dump main c
         f := new io.FileOutputStream(this.dir + "/main.class" , false)
         defer {
+
             f.close()
         }
+
         this.mainClass.toLow().outPut(f)
         for _ , c := range this.classes {
             f := new io.FileOutputStream(this.dir + "/" + common.getBaseName(c.name) + ".class" , false)
             defer {
+
                 f.close()
             }
+
             c.toLow().outPut(f)
         }
 

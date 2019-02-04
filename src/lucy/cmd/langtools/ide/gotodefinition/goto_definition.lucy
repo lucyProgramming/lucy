@@ -18,6 +18,12 @@ public fn findDefinition(file string , pos int , bs []byte , storePackage []ast.
         }
     }
 
-    result = new FindDefinition(lucyFiles , packageName , true , searchFile , pos >> 16 , storePackage).find()
+    result = new FindDefinition(
+        lucyFiles,
+        packageName,
+        true,
+        searchFile,
+        pos >> 16,
+        storePackage).find()
 }
 

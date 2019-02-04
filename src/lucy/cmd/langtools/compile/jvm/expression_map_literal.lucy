@@ -32,6 +32,7 @@ class BuildExpressionMap {
         defer {
             state.popStack(1)
         }
+
         for _ , v := range values {
             code.codes[code.codeLength] = cg.OP_dup
             code.codeLength++
@@ -76,7 +77,6 @@ class BuildExpressionMap {
         maxStack = this.eb.build(c , code , call.Expression , context , state)
         stackLength := len(state.stacks)
         defer {
-
             state.popStack(len(state.stacks) - stackLength)
         }
 

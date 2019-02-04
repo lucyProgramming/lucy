@@ -19,7 +19,6 @@ class BuildExpressionFunction {
         state StackMapState) -> (maxStack char) {
         function := e.data.(ast.Function)
         defer {
-
             if e.isStatementExpression == false {
                 stack := this.packFunction2MethodHandle(c , code , function , context)
                 if stack > maxStack {
@@ -107,10 +106,12 @@ class BuildExpressionFunction {
                     code.codes[code.codeLength] = cg.OP_getfield
                     c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(c.name,
                         v.name,
-                        field.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                        field.descriptor),
+                        code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
                 } else {
-                    copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , v.localValOffset))
+                    copyOPs(code,
+                        loadLocalVariableOps(ast.VariableTypeObject , v.localValOffset))
                     if 3 > maxStack {
                         maxStack = 3
                     }
@@ -127,7 +128,8 @@ class BuildExpressionFunction {
                     code.codes[code.codeLength] = cg.OP_getfield
                     c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(c.name,
                         v.name,
-                        field.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                        field.descriptor),
+                        code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
                 } else {
                     copyOPs(code , loadLocalVariableOps(v.Type.Type , v.localValOffset))
@@ -192,26 +194,32 @@ class BuildExpressionFunction {
         code.codes[code.codeLength] = cg.OP_invokestatic
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandles",
             "lookup",
-            "()Ljava/lang/invoke/MethodHandles$Lookup;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+            "()Ljava/lang/invoke/MethodHandles$Lookup;"),
+            code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         code.codes[code.codeLength] = cg.OP_ldc_w
-        c.insertClassConst(function.entrance.Class.name , code.codes[code.codeLength + 1 : code.codeLength + 3])
+        c.insertClassConst(function.entrance.Class.name,
+            code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         code.codes[code.codeLength] = cg.OP_ldc_w
-        c.insertStringConst(function.entrance.name , code.codes[code.codeLength + 1 : code.codeLength + 3])
+        c.insertStringConst(function.entrance.name,
+            code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         code.codes[code.codeLength] = cg.OP_ldc_w
-        c.insertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(function.entrance.Descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+        c.insertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(function.entrance.Descriptor),
+            code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         code.codes[code.codeLength] = cg.OP_invokevirtual
         if function.isClosureFunction {
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandles$Lookup",
                 "findVirtual",
-                "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;"),
+                code.codes[code.codeLength + 1 : code.codeLength + 3])
         } else {
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandles$Lookup",
                 "findStatic",
-                "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;"),
+                code.codes[code.codeLength + 1 : code.codeLength + 3])
         }
 
         code.codeLength += 3

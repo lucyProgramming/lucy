@@ -18,7 +18,6 @@ class BuildExpressionArithmetic {
         bin := e.data.(ast.ExpressionBinary)
         stackLength := len(state.stacks)
         defer {
-
             state.popStack(len(state.stacks) - stackLength)
         }
 

@@ -74,7 +74,6 @@ class Parser {
                     }
                     this.tops.append(new ast.TopNode(t))
                 }
-
                 continue
             }
             if this.onlyParseImport == false {
@@ -136,7 +135,7 @@ class Parser {
                     idenfierToken := this.token
                     this.next(lfIsToken)
                     if this.token.Type == lex.TokenLp {
-                        // look like a function 
+                        // looks like a function 
                         f := new lex.Token()
                         f.Type = lex.TokenFn
                         this.tokenStackForLookback = [f , idenfierToken , this.token]
@@ -151,6 +150,10 @@ class Parser {
                             e.isPublic = isPublic()
                             e.isGlobal = true
                             this.tops.append(new ast.TopNode(e))
+                            if this.token.Type == lex.TokenComment {
+                                e.inlineComment = this.token.stringValue
+                                this.next(lfIsToken)
+                            }
                         }
                     }
 
@@ -182,7 +185,6 @@ class Parser {
                         isFinal = true
                         finalPos = pos
                     }
-
                     continue
                 case lex.TokenVar:
                     pos := this.mkPos()
@@ -203,6 +205,10 @@ class Parser {
                     this.tops.append(new ast.TopNode(e))
                     resetProperty()
                     this.ifTokenIsLfThenSkip(false)
+                    if this.token.Type == lex.TokenComment {
+                        e.inlineComment = this.token.stringValue
+                        this.next(lfIsToken)
+                    }
                 case lex.TokenEnum:
                     e , _ := this.EnumParser.parse()
                     if e == null {
@@ -307,6 +313,10 @@ class Parser {
                             e.isPublic = isPublic()
                             e.isGlobal = true
                             this.tops.append(new ast.TopNode(e))
+                            if this.token.Type == lex.TokenComment {
+                                e.inlineComment = this.token.stringValue
+                                this.next(lfIsToken)
+                            }
                         }
                     } else {
                         this.errs.append(new error(sprintf("%s token '%s' is not except",

@@ -47,7 +47,6 @@ class BuildExpressionincrement {
         }
         stackLength := len(state.stacks)
         defer {
-
             state.popStack(len(state.stacks) - stackLength)
         }
 

@@ -34,9 +34,7 @@ class FindDefinition {
         var p ast.Package
         var es []error
         {
-
             defer {
-
                 err := catch() // may be panic 
                 if err != null {
                     err.printStackTrace()

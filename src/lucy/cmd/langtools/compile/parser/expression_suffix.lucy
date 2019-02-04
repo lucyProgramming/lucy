@@ -309,7 +309,14 @@ class ExpressionSuffix extends ParserFather {
                     this.parser.errs.append(err)
                     return prefix , null
                 }
-                this.next(lfNotToken) // skip (
+                this.next(lfIsToken) // skip (
+                if this.parser.token.Type == lex.TokenLf {
+                    n.lpContainsLf = true 
+                    this.next(lfNotToken)
+                }else if this.parser.token.Type == lex.TokenComment {
+                    n.lpInlineComment = this.parser.token.stringValue 
+                    this.next(lfNotToken)
+                }
                 var es []ast.Expression
                 if this.parser.token.Type != lex.TokenRp {
                     es , err = this.ep.parseExpressions(lex.TokenRp)
@@ -638,7 +645,16 @@ class ExpressionSuffix extends ParserFather {
     }
 
     fn parseCallExpression(on ast.Expression) -> (e ast.Expression , err error) {
-        this.next(lfNotToken) // skip (
+        this.next(lfIsToken) // skip (
+        var lpContainsLf bool
+        var lpInlineComment string
+        if this.parser.token.Type == lex.TokenLf {
+            lpContainsLf = true
+            this.next(lfNotToken)
+        } else if this.parser.token.Type == lex.TokenComment {
+            lpInlineComment = this.parser.token.stringValue
+            this.next(lfNotToken)
+        }
         var args = []ast.Expression{}
         if this.parser.token.Type != lex.TokenRp {
             args , err = this.ep.parseExpressions(lex.TokenRp)
@@ -647,7 +663,6 @@ class ExpressionSuffix extends ParserFather {
             }
         }
         {
-
             pos := this.parser.mkPos()
             if this.parser.lastToken != null {
                 pos = new ast.Pos()
@@ -682,6 +697,8 @@ class ExpressionSuffix extends ParserFather {
             call.Expression = selection.Expression
             call.autoCompletion = selection.autoCompletion
             call.args = args
+            call.lpContainsLf = lpContainsLf
+            call.lpInlineComment = lpInlineComment
             result.pos = on.pos
             result.data = call
         } else {
@@ -690,11 +707,16 @@ class ExpressionSuffix extends ParserFather {
             call := new ast.ExpressionFunctionCall()
             call.Expression = on
             call.args = args
+            call.lpContainsLf = lpContainsLf
+            call.lpInlineComment = lpInlineComment
             result.data = call
             result.pos = pos
         }
+        return result , null
+    }
+}
 
-        /*
+/*
 		if this.parser.token.Type == lex.TokenLt { // <
 
 				template function call return type binds
@@ -723,9 +745,3 @@ class ExpressionSuffix extends ParserFather {
 			}
 		}
 		*/
-        return result , null
-    }
-
-}
-
-

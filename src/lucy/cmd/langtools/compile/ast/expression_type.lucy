@@ -101,6 +101,14 @@ public class ExpressionFunctionCall {
     public Function                 Function                
     public parameterTypes           []Type                   // for template function
     public templateFunctionCallPair TemplateFunctionInstance
+    // call(LF
+    public lpContainsLf bool
+    // call(// inline comment 
+    public lpInlineComment string
+    // public fn lpContainsLfOrInlineComment() -> (constains bool) {
+    //     return this.lpContainsLf || this.lpInlineComment != null
+    // }
+
 }
 
 
@@ -123,6 +131,13 @@ public class ExpressionMethodCall {
     public findUsage                     bool    
     public rename                        bool    
     public autoCompletion                bool    
+    // call(LF
+    public lpContainsLf bool
+    // call(// inline comment 
+    public lpInlineComment string
+    // public fn containsLfOrInlineComment() -> (constains bool) {
+    //     return this.lpContainsLf || this.lpInlineComment != null
+    // }
 }
 
 
@@ -192,6 +207,13 @@ public class ExpressionNew {
     public args         []Expression          
     public construction ClassMethod           
     public vArgs        CallVariableLengthArgs
+    // call(LF
+    public lpContainsLf bool
+    // call(// inline comment 
+    public lpInlineComment string
+    // public fn containsLfOrInlineComment() -> (constains bool) {
+    //     return this.lpContainsLf || this.lpInlineComment != null
+    // }
 }
 
 

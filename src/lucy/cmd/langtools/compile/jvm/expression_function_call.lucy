@@ -28,7 +28,10 @@ class BuildExpressionFunctionCall {
             methodHandleInvokeMethodName,
             Descriptor.methodDescriptor(call.Expression.value.functionType)) , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
-        if t := popCallResult(code , e , call.Expression.value.functionType) ; t > maxStack {
+        if t := popCallResult(
+            code,
+            e,
+            call.Expression.value.functionType) ; t > maxStack {
             maxStack = t
         }
         return
@@ -75,7 +78,6 @@ class BuildExpressionFunctionCall {
 
             state.pushStack(c , state.newObjectVariableType(call.Function.entrance.Class.name))
             defer {
-
                 state.popStack(1)
             }
 

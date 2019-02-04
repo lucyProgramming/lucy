@@ -19,7 +19,6 @@ class BuildExpressionCallArgs {
         currentStack := char(0)
         stackLength := len(state.stacks)
         defer {
-
             state.popStack(len(state.stacks) - stackLength) // let`s pop
         }
 
@@ -74,14 +73,10 @@ class BuildExpressionCallArgs {
                     currentStack -= 2
                     index++
                 }
-
             }
-
         }
-
         return
     }
-
 }
 
 
