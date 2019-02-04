@@ -29,11 +29,11 @@ public class Type {
     public inlineComment string //   in
 
     public containsLf bool // constains "\n"
-    
-    public fn containsLfOrInlineComment() ->(constains bool) {
-		return this.containsLf || this.inlineComment != null
-	}
-    // copy to t 
+
+    public fn containsLfOrInlineComment() -> (constains bool) {
+        return this.containsLf || this.inlineComment != null
+    }
+     // copy to t 
     fn cp(t Type) {
         t.Type = this.Type
         t.isBuildIn = this.isBuildIn
@@ -82,35 +82,35 @@ public class Type {
         e.pos = this.pos
         e.value = this.cloneType()
         switch this.Type {
-        case VariableTypeBool:
-            e.Type = ExpressionTypeBool
-            e.boolValue = false
-        case VariableTypeByte:
-            e.Type = ExpressionTypeByte
-            e.longValue = long(0)
-        case VariableTypeShort:
-            e.Type = ExpressionTypeInt
-            e.longValue = long(0)
-        case VariableTypeChar:
-            e.Type = ExpressionTypeInt
-            e.longValue = long(0)
-        case VariableTypeInt:
-            e.Type = ExpressionTypeInt
-            e.longValue = long(0)
-        case VariableTypeLong:
-            e.Type = ExpressionTypeLong
-            e.longValue = long(0)
-        case VariableTypeFloat:
-            e.Type = ExpressionTypeFloat
-            e.doubleValue = double(0)
-        case VariableTypeDouble:
-            e.Type = ExpressionTypeDouble
-            e.doubleValue = double(0)
-        case VariableTypeEnum:
-            e.Type = ExpressionTypeInt
-            e.longValue = long(this.Enum.defaultValue)
-        default:
-           e.Type = ExpressionTypeNull
+            case VariableTypeBool:
+                e.Type = ExpressionTypeBool
+                e.boolValue = false
+            case VariableTypeByte:
+                e.Type = ExpressionTypeByte
+                e.longValue = long(0)
+            case VariableTypeShort:
+                e.Type = ExpressionTypeInt
+                e.longValue = long(0)
+            case VariableTypeChar:
+                e.Type = ExpressionTypeInt
+                e.longValue = long(0)
+            case VariableTypeInt:
+                e.Type = ExpressionTypeInt
+                e.longValue = long(0)
+            case VariableTypeLong:
+                e.Type = ExpressionTypeLong
+                e.longValue = long(0)
+            case VariableTypeFloat:
+                e.Type = ExpressionTypeFloat
+                e.doubleValue = double(0)
+            case VariableTypeDouble:
+                e.Type = ExpressionTypeDouble
+                e.doubleValue = double(0)
+            case VariableTypeEnum:
+                e.Type = ExpressionTypeInt
+                e.longValue = long(this.Enum.defaultValue)
+            default:
+                e.Type = ExpressionTypeNull
         }
 
         return e
@@ -130,15 +130,15 @@ public class Type {
             return null
         }
         switch this.Type {
-        case VariableTypePackage:
-            return new error(sprintf("%s use package '%s' without selector" , 
-                this.pos.errMsgPrefix() , this.Package.name))
-        case VariableTypeClass:
-            return new error(sprintf("%s use class '%s' without selector" , 
-                this.pos.errMsgPrefix() , this.Class.name))
-        default:
-           return new error(sprintf("%s '%s' is not right value valid" , 
-               this.pos.errMsgPrefix() , this.typeString()))
+            case VariableTypePackage:
+                return new error(sprintf("%s use package '%s' without selector",
+                    this.pos.errMsgPrefix() , this.Package.name))
+            case VariableTypeClass:
+                return new error(sprintf("%s use class '%s' without selector",
+                    this.pos.errMsgPrefix() , this.Class.name))
+            default:
+                return new error(sprintf("%s '%s' is not right value valid",
+                    this.pos.errMsgPrefix() , this.typeString()))
         }
 
     }
@@ -154,7 +154,7 @@ public class Type {
 			null is only untyped right value
 		*/
         if this.Type == VariableTypeNull {
-            return new error(sprintf("%s '%s' is not typed" , 
+            return new error(sprintf("%s '%s' is not typed",
                 this.pos.errMsgPrefix() , this.typeString()))
         }
         return null
@@ -207,60 +207,60 @@ public class Type {
         }
         this.resolved = true // single threading
         switch this.Type {
-        case VariableTypeTemplate:
-            if block.inheritedAttribute.Function.parameterTypes == null {
-                return new error(sprintf("%s parameter type '%s' not in a template function" , 
-                    errMsgPrefix(this.pos) , this.name))
-            }
-            if block.inheritedAttribute.Function.parameterTypes[this.name] == null {
-                return new error(sprintf("%s parameter type '%s' not found" , 
-                    errMsgPrefix(this.pos) , this.name))
-            }
-            pos := this.pos // keep pos
-            if this.locateDefinition {
-                block.inheritedAttribute.p.setLocationDefinition(block.inheritedAttribute.Function.parameterTypes[this.name])
-            }
-            block.inheritedAttribute.Function.parameterTypes[this.name].cp(this)
-            this.pos = pos // keep pos
-            return null
-        case VariableTypeName:
-            return this.resolveName(block)
-        case VariableTypeGlobal:
-            d , exists := block.inheritedAttribute.p.block.nameExists(this.name , this.pos)
-            if exists == false {
-                return new error(sprintf("%s '%s' not found" , 
-                    errMsgPrefix(this.pos) , this.name))
-            }
-            return this.makeTypeFrom(block , d)
-        case VariableTypeArray , VariableTypeJavaArray:
-            return this.array.resolve(block)
-        case VariableTypeMap:
-            if this.Map.K != null {
-                err = this.Map.K.resolve(block)
-                if err != null {
-                    return err
+            case VariableTypeTemplate:
+                if block.inheritedAttribute.Function.parameterTypes == null {
+                    return new error(sprintf("%s parameter type '%s' not in a template function",
+                        errMsgPrefix(this.pos) , this.name))
                 }
-            }
-            if this.Map.V != null {
-                return this.Map.V.resolve(block)
-            }
-        case VariableTypeFunction:
-            for _ , v := range this.functionType.parameterList {
-                if err = v.Type.resolve(block) ; err != null {
-                    return err
+                if block.inheritedAttribute.Function.parameterTypes[this.name] == null {
+                    return new error(sprintf("%s parameter type '%s' not found",
+                        errMsgPrefix(this.pos) , this.name))
                 }
-            }
+                pos := this.pos // keep pos
+                if this.locateDefinition {
+                    block.inheritedAttribute.p.setLocationDefinition(block.inheritedAttribute.Function.parameterTypes[this.name])
+                }
+                block.inheritedAttribute.Function.parameterTypes[this.name].cp(this)
+                this.pos = pos // keep pos
+                return null
+            case VariableTypeName:
+                return this.resolveName(block)
+            case VariableTypeGlobal:
+                d , exists := block.inheritedAttribute.p.block.nameExists(this.name , this.pos)
+                if exists == false {
+                    return new error(sprintf("%s '%s' not found",
+                        errMsgPrefix(this.pos) , this.name))
+                }
+                return this.makeTypeFrom(block , d)
+            case VariableTypeArray , VariableTypeJavaArray:
+                return this.array.resolve(block)
+            case VariableTypeMap:
+                if this.Map.K != null {
+                    err = this.Map.K.resolve(block)
+                    if err != null {
+                        return err
+                    }
+                }
+                if this.Map.V != null {
+                    return this.Map.V.resolve(block)
+                }
+            case VariableTypeFunction:
+                for _ , v := range this.functionType.parameterList {
+                    if err = v.Type.resolve(block) ; err != null {
+                        return err
+                    }
+                }
 
-            for _ , v := range this.functionType.returnList {
-                if err = v.Type.resolve(block) ; err != null {
-                    return err
+                for _ , v := range this.functionType.returnList {
+                    if err = v.Type.resolve(block) ; err != null {
+                        return err
+                    }
                 }
-            }
 
-        case this.isPrimitive():
-            if this.locateDefinition {
-                block.inheritedAttribute.p.setLocationDefinition(this)
-            }
+            case this.isPrimitive():
+                if this.locateDefinition {
+                    block.inheritedAttribute.p.setLocationDefinition(this)
+                }
         }
 
         return null
@@ -334,15 +334,15 @@ public class Type {
             if this.locatePackageDefinition {
                 block.inheritedAttribute.p.setLocationDefinition(i)
             }
-            return null , new error(sprintf("%s type named '%s' not found" , 
+            return null , new error(sprintf("%s type named '%s' not found",
                 errMsgPrefix(this.pos) , this.name))
         }
         index := this.name.indexOf(".")
-        packageName := this.name[ : index]
+        packageName := this.name[:index]
         className := this.name[index + 1:]
         i := block.inheritedAttribute.p.getImport(this.pos.filename , packageName)
         if null == i {
-            return null , new error(sprintf("%s package '%s' not imported" , 
+            return null , new error(sprintf("%s package '%s' not imported",
                 errMsgPrefix(this.pos) , packageName))
         }
         {
@@ -359,7 +359,7 @@ public class Type {
         }
         p , err := block.inheritedAttribute.p.load(i.Import)
         if err != null {
-            return null , new error(sprintf("%s %s" , 
+            return null , new error(sprintf("%s %s",
                 errMsgPrefix(this.pos) , err.getMessage()))
         }
         if this.autoCompletion {
@@ -388,7 +388,7 @@ public class Type {
 
                 block.inheritedAttribute.p.autoCompletionItems = items
             } else {
-                return null , new error(sprintf("%s '%s' is not a package" , 
+                return null , new error(sprintf("%s '%s' is not a package",
                     errMsgPrefix(this.pos) , packageName))
             }
 
@@ -398,12 +398,12 @@ public class Type {
             var exists bool
             d , exists = pp.block.nameExists(className , this.pos)
             if exists == false {
-                err = new error(sprintf("%s '%s' not found" , 
+                err = new error(sprintf("%s '%s' not found",
                     errMsgPrefix(this.pos) , className))
             }
             return d , err
         } else {
-            return null , new error(sprintf("%s '%s' is not a package" , 
+            return null , new error(sprintf("%s '%s' is not a package",
                 errMsgPrefix(this.pos) , packageName))
         }
 
@@ -412,7 +412,7 @@ public class Type {
     fn makeTypeFrom(block Block , d Object) -> (err error) {
         if c , ok := d.(Class) ; ok {
             if c.loadFromOutSide && c.isPublic() == false {
-                err = new error(sprintf("%s class '%s' is not public" , 
+                err = new error(sprintf("%s class '%s' is not public",
                     errMsgPrefix(this.pos) , c.name))
             }
             if this.locateDefinition {
@@ -442,7 +442,7 @@ public class Type {
         }
         if dd , ok := d.(Enum) ; ok {
             if dd.loadFromOutSide && dd.isPublic() == false {
-                block.inheritedAttribute.p.errors.append(new error(sprintf("%s enum '%s' is not public" , 
+                block.inheritedAttribute.p.errors.append(new error(sprintf("%s enum '%s' is not public",
                     errMsgPrefix(this.pos) , dd.name)))
             }
             if this.locateDefinition {
@@ -453,7 +453,7 @@ public class Type {
             this.Enum = dd
             return null
         }
-        return new error(sprintf("%s name '%s' is not a type" , 
+        return new error(sprintf("%s name '%s' is not a type",
             errMsgPrefix(this.pos) , this.name))
     }
 
@@ -496,65 +496,65 @@ public class Type {
 
     public fn typeName(prefix string = "") -> (ret string) {
         switch this.Type {
-        case VariableTypeBool:
-            return prefix + "bool"
-        case VariableTypeByte:
-            return prefix + "byte"
-        case VariableTypeChar:
-            return prefix + "char"
-        case VariableTypeShort:
-            return prefix + "short"
-        case VariableTypeInt:
-            return prefix + "int"
-        case VariableTypeLong:
-            return prefix + "long"
-        case VariableTypeFloat:
-            return prefix + "float"
-        case VariableTypeDouble:
-            return prefix + "double"
-        case VariableTypeString:
-            return prefix + "string"
-        case VariableTypeObject:
-            return prefix + this.name
-        case VariableTypeMap:
-            ret = prefix + "map{"
-            ret += this.Map.K.typeName()
-            ret += " -> "
-            ret += this.Map.V.typeName()
-            ret += "}"
-            return ret
-        case VariableTypeArray:
-            return this.array.typeName(prefix + "[]")
-        case VariableTypeJavaArray:
-            if this.isVariableArgs {
-                ret = prefix + this.array.typeName() + "..."
+            case VariableTypeBool:
+                return prefix + "bool"
+            case VariableTypeByte:
+                return prefix + "byte"
+            case VariableTypeChar:
+                return prefix + "char"
+            case VariableTypeShort:
+                return prefix + "short"
+            case VariableTypeInt:
+                return prefix + "int"
+            case VariableTypeLong:
+                return prefix + "long"
+            case VariableTypeFloat:
+                return prefix + "float"
+            case VariableTypeDouble:
+                return prefix + "double"
+            case VariableTypeString:
+                return prefix + "string"
+            case VariableTypeObject:
+                return prefix + this.name
+            case VariableTypeMap:
+                ret = prefix + "map{"
+                ret += this.Map.K.typeName()
+                ret += " -> "
+                ret += this.Map.V.typeName()
+                ret += "}"
                 return ret
-            } else {
-                ret = prefix + this.array.typeName() + "[]"
-                return ret
-            }
+            case VariableTypeArray:
+                return this.array.typeName(prefix + "[]")
+            case VariableTypeJavaArray:
+                if this.isVariableArgs {
+                    ret = prefix + this.array.typeName() + "..."
+                    return ret
+                } else {
+                    ret = prefix + this.array.typeName() + "[]"
+                    return ret
+                }
 
-        case VariableTypeFunction:
-            ret = prefix + "fn " + this.functionType.typeName()
-            return
-        case VariableTypeEnum:
-            ret = prefix + this.name
-        case VariableTypeClass:
-            panic("not happening")
-        case VariableTypeName:
-            ret = prefix + this.name // resolve wrong, but typeString is ok to return
-        case VariableTypeTemplate:
-            ret = prefix + this.name
-        case VariableTypeDynamicSelector:
-            panic("not happening")
-        case VariableTypeVoid:
-            panic("not happening")
-        case VariableTypePackage:
-            panic("not happening")
-        case VariableTypeNull:
-            panic("not happening")
-        case VariableTypeGlobal:
-            ret = prefix + this.name
+            case VariableTypeFunction:
+                ret = prefix + "fn " + this.functionType.typeName()
+                return
+            case VariableTypeEnum:
+                ret = prefix + this.name
+            case VariableTypeClass:
+                panic("not happening")
+            case VariableTypeName:
+                ret = prefix + this.name // resolve wrong, but typeString is ok to return
+            case VariableTypeTemplate:
+                ret = prefix + this.name
+            case VariableTypeDynamicSelector:
+                panic("not happening")
+            case VariableTypeVoid:
+                panic("not happening")
+            case VariableTypePackage:
+                panic("not happening")
+            case VariableTypeNull:
+                panic("not happening")
+            case VariableTypeGlobal:
+                ret = prefix + this.name
         }
 
     }
@@ -562,65 +562,65 @@ public class Type {
     public fn typeString(prefix string = "") -> (ret string) {
         // if this.alias != null {
         switch this.Type {
-        case VariableTypeBool:
-            return prefix + "bool"
-        case VariableTypeByte:
-            return prefix + "byte"
-        case VariableTypeChar:
-            return prefix + "char"
-        case VariableTypeShort:
-            return prefix + "short"
-        case VariableTypeInt:
-            return prefix + "int"
-        case VariableTypeLong:
-            return prefix + "long"
-        case VariableTypeFloat:
-            return prefix + "float"
-        case VariableTypeDouble:
-            return prefix + "double"
-        case VariableTypeString:
-            return prefix + "string"
-        case VariableTypeObject:
-            return prefix + "object@" + this.Class.name
-        case VariableTypeMap:
-            ret = prefix + "map{"
-            ret += this.Map.K.typeString()
-            ret += " -> "
-            ret += this.Map.V.typeString()
-            ret += "}"
-            return ret
-        case VariableTypeArray:
-            return this.array.typeString(prefix + "[]")
-        case VariableTypeJavaArray:
-            if this.isVariableArgs {
-                ret = prefix + this.array.typeString() + "..."
+            case VariableTypeBool:
+                return prefix + "bool"
+            case VariableTypeByte:
+                return prefix + "byte"
+            case VariableTypeChar:
+                return prefix + "char"
+            case VariableTypeShort:
+                return prefix + "short"
+            case VariableTypeInt:
+                return prefix + "int"
+            case VariableTypeLong:
+                return prefix + "long"
+            case VariableTypeFloat:
+                return prefix + "float"
+            case VariableTypeDouble:
+                return prefix + "double"
+            case VariableTypeString:
+                return prefix + "string"
+            case VariableTypeObject:
+                return prefix + "object@" + this.Class.name
+            case VariableTypeMap:
+                ret = prefix + "map{"
+                ret += this.Map.K.typeString()
+                ret += " -> "
+                ret += this.Map.V.typeString()
+                ret += "}"
                 return ret
-            } else {
-                ret = prefix + this.array.typeString() + "[]"
-                return ret
-            }
+            case VariableTypeArray:
+                return this.array.typeString(prefix + "[]")
+            case VariableTypeJavaArray:
+                if this.isVariableArgs {
+                    ret = prefix + this.array.typeString() + "..."
+                    return ret
+                } else {
+                    ret = prefix + this.array.typeString() + "[]"
+                    return ret
+                }
 
-        case VariableTypeFunction:
-            ret = prefix + "fn " + this.functionType.typeString()
-            return
-        case VariableTypeEnum:
-            ret = prefix + "enum(" + this.Enum.name + ")"
-        case VariableTypeClass:
-            ret = prefix + sprintf("class@%s" , this.Class.name)
-        case VariableTypeName:
-            ret = prefix + this.name // resolve wrong, but typeString is ok to return
-        case VariableTypeTemplate:
-            ret = prefix + this.name
-        case VariableTypeDynamicSelector:
-            ret = prefix + "dynamicSelector@" + this.Class.name
-        case VariableTypeVoid:
-            ret = prefix + "void"
-        case VariableTypePackage:
-            ret = prefix + "package@" + this.Package.name
-        case VariableTypeNull:
-            ret = prefix + "null"
-        case VariableTypeGlobal:
-            ret = prefix + "global." + this.name
+            case VariableTypeFunction:
+                ret = prefix + "fn " + this.functionType.typeString()
+                return
+            case VariableTypeEnum:
+                ret = prefix + "enum(" + this.Enum.name + ")"
+            case VariableTypeClass:
+                ret = prefix + sprintf("class@%s" , this.Class.name)
+            case VariableTypeName:
+                ret = prefix + this.name // resolve wrong, but typeString is ok to return
+            case VariableTypeTemplate:
+                ret = prefix + this.name
+            case VariableTypeDynamicSelector:
+                ret = prefix + "dynamicSelector@" + this.Class.name
+            case VariableTypeVoid:
+                ret = prefix + "void"
+            case VariableTypePackage:
+                ret = prefix + "package@" + this.Package.name
+            case VariableTypeNull:
+                ret = prefix + "null"
+            case VariableTypeGlobal:
+                ret = prefix + "global." + this.name
         }
 
     }
@@ -869,4 +869,5 @@ public class Type {
         return this.Class != null && this.Class.name == JavaStringClassName
     }
 }
+
 

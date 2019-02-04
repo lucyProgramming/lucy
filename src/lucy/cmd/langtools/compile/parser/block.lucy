@@ -7,7 +7,7 @@ class BlockParser extends ParserFather {
     StatementIfParser     StatementIfParser    
     StatementWhenParser   StatementWhenParser  
     StatementSwitchParser StatementSwitchParser
-    
+
     fn BlockParser(parser Parser) {
         this.super(parser)
         this.StatementForParser = new StatementForParser(parser , this)
@@ -24,7 +24,7 @@ class BlockParser extends ParserFather {
         return new error(sprintf("%s not valid token '%s' after defer",
             this.parser.errMsgPrefix() , this.parser.token.description))
     }
-
+    
     fn parseStatementList(block ast.Block , isGlobal bool) {
         if block.statements == null {
             block.statements = []ast.Statement{}
@@ -33,6 +33,7 @@ class BlockParser extends ParserFather {
             block.pos = this.parser.mkPos()
         }
         defer {
+
             if block.endPos == null {
                 block.endPos = this.parser.mkPos()
             }
@@ -72,6 +73,7 @@ class BlockParser extends ParserFather {
                     } else {
                         s.Type = ast.StatementTypeCommentMultiLine
                     }
+
                     s.comment = this.parser.token.stringValue
                     block.statements.append(s)
                     // comment.read()

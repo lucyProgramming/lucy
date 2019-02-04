@@ -643,9 +643,7 @@ public class Fmt {
             } else {
                 format += "{ // " + s.inlineComment
             }
-
         }
-
         format += this.formatBlock(indent + this.indentIncrement , s.block)
         format += indent + "}\n"
     }

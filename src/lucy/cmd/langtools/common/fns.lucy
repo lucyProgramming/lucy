@@ -1,10 +1,44 @@
 import "java/lang/Double"
 import "java/lang/Long"
 import "java/lang/Float"
+import "java/io"
 
-fn packDouble2Object(d double) -> (o Double = Double.valueOf(d)){}
+public fn packDouble2Object(d double) -> (o Double = Double.valueOf(d)){}
 
-fn packLong2Object(l long) -> (o Long = Long.valueOf(l)){}
+public fn packLong2Object(l long) -> (o Long = Long.valueOf(l)){}
 
-fn packFloat2Object(f float) -> (o Float = Float.valueOf(f)){}
+public fn packFloat2Object(f float) -> (o Float = Float.valueOf(f)){}
 
+public fn validIdentifier(identifier string) -> (valid bool) {
+    if identifier == null || identifier == "" {
+        return
+    }
+    bs := []byte(identifier)
+    // valid start 
+    if bs[0] != '_' &&
+        bs[0] != '$' &&
+        (!(bs[0] >= 'a' && bs[0] <= 'z')) &&
+        (!(bs[0] >= 'A' && bs[0] <= 'Z')) {
+        return
+    }
+    length := bs.size()
+    for i := 1 ; i < length ; i++ {
+        if bs[0] != '_' &&
+            bs[0] != '$' &&
+            (!(bs[0] >= 'a' && bs[0] <= 'z')) &&
+            (!(bs[0] >= 'A' && bs[0] <= 'Z')) &&
+            (!(bs[0] >= '0' && bs[0] <= '9')) {
+            return
+        }
+    }
+    valid = true
+}
+
+public fn haveFileType(dir string , suffix string) -> (have bool) {
+    files := new io.File(dir).listFiles()
+    for f := range files {
+        if f.isFile() && f.getName().endsWith(suffix) {
+            return true
+        }
+    }
+}

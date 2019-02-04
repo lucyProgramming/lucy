@@ -12,7 +12,7 @@ public class Expression {
     public value                 Type        
     public multiValues           []Type      
     public pos                   Pos         
-    public endPos                Pos         
+    // public endPos                Pos         
     public data                  Object      
     public isStatementExpression bool        
     public op                    string      

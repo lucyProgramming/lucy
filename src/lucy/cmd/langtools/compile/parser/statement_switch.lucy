@@ -118,7 +118,6 @@ class StatementSwitchParser extends ParserFather {
                     this.next(lfNotToken)
                 }
             }
-
             block.isSwitchBlock = true
             statementSwitch.defaultBlock = block
             if this.parser.token.Type != lex.TokenRc {
@@ -136,6 +135,9 @@ class StatementSwitchParser extends ParserFather {
         }
         statementSwitch.endPos = this.parser.mkPos()
         this.next(lfIsToken) //  skip }
+        if this.parser.token.Type == lex.TokenLf {
+            this.next(lfIsToken)
+        }
         return statementSwitch , null
     }
 

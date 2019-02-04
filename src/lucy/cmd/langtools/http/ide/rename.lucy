@@ -4,6 +4,7 @@ import "com/sun/net/httpserver/HttpExchange"
 import "lucy/cmd/langtools/http/g"
 import "java/lang/System"
 import "java/lang/Integer"
+import "lucy/cmd/langtools/common"
 
 
 class Rename implements HttpHandler {
@@ -33,6 +34,12 @@ class Rename implements HttpHandler {
         to := paramters["to"]
         if to == null || to == "" {
             bs := byte[]("rename to not provide")
+            exchange.sendResponseHeaders(400 , long(len(bs)))
+            os.write(bs)
+            return
+        }
+        if common.validIdentifier(to) == false {
+            bs := byte[]("to is not a valid identifier")
             exchange.sendResponseHeaders(400 , long(len(bs)))
             os.write(bs)
             return

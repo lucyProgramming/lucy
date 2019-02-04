@@ -70,6 +70,5 @@ fn loadJavaStringClass(block Block , pos Pos) -> (err error) {
     } else {
         panic("loaded java string class is not a class")
     }
-
 }
 

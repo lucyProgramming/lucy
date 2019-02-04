@@ -118,6 +118,5 @@ public fn twoPathEqual(p1 string , p2 string) -> (equal bool) {
             return false
         }
     }
-
     return true
 }

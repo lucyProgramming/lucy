@@ -14,7 +14,8 @@ class TypeParser extends ParserFather {
                 this.parser.unExpectNewLineAndSkip()
                 if this.parser.token.Type != lex.TokenRb {
                     // [ and ] not match
-                    err = new error(sprintf("%s '[' and ']' not match" , this.parser.errMsgPrefix()))
+                    err = new error(sprintf("%s '[' and ']' not match",
+                        this.parser.errMsgPrefix()))
                     this.parser.errs.append(err)
                     return null , err
                 }
@@ -198,7 +199,7 @@ class TypeParser extends ParserFather {
             ret = newRet
             return ret , null
         }
-        for this.parser.token.Type == lex.TokenLb { //  int [
+        for this.parser.token.Type == lex.TokenLb { //   int [
             this.next(lfIsToken) // skip [
             this.parser.unExpectNewLineAndSkip()
             if this.parser.token.Type != lex.TokenRb {
