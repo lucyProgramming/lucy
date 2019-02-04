@@ -13,7 +13,6 @@ fn divisionByZeroErr(pos Pos) -> (err error) {
     return new error(sprintf("%s division by zero" , pos.errMsgPrefix()))
 }
 
-
 fn checkExpressions(block Block , es []Expression , errs []error , singleValueContext bool) -> (valueTypes []Type) {
     valueTypes = []Type{}
     for _ , v := range es {
@@ -45,7 +44,6 @@ fn checkExpressions(block Block , es []Expression , errs []error , singleValueCo
 
 }
 
-
 fn getExtraExpressionPos(args []Expression , n int) -> (pos Pos) {
     i := 0
     for _ , a := range args {
@@ -63,14 +61,12 @@ fn getExtraExpressionPos(args []Expression , n int) -> (pos Pos) {
     return null
 }
 
-
 fn mkVoidType(pos Pos) -> (voidType Type) {
     result := new Type()
     result.Type = VariableTypeVoid // means no return;
     result.pos = pos
     return result
 }
-
 
 /*
 	when access from global,should check if access from package
@@ -99,7 +95,6 @@ fn shouldAccessFromImports(block Block , name string , from Pos , alreadyHave Po
     should = from.endLine < alreadyHave.endLine
     return i , should
 }
-
 
 fn methodsNotMatchError(pos Pos , name string , ms []ClassMethod , want []Type) -> (err error) {
     if len(ms) == 0 {
@@ -134,7 +129,6 @@ fn methodsNotMatchError(pos Pos , name string , ms []ClassMethod , want []Type) 
     return new error(errMsg)
 }
 
-
 fn searchBuildIns(name string , lucyBuildInPackage Package) -> (t Object) {
     t = buildInFunctionsMap[name]
     if t != null {
@@ -146,7 +140,6 @@ fn searchBuildIns(name string , lucyBuildInPackage Package) -> (t Object) {
     }
     return null
 }
-
 
 fn checkConst(block Block , c Constant , errs []error) -> (err error) {
     if c.locateDefinition {
@@ -234,11 +227,9 @@ fn checkConst(block Block , c Constant , errs []error) -> (err error) {
     return
 }
 
-
 fn convertExpressionToNeed(block Block , e Expression , need Type , eval Type) {
     convertExpressionsToNeeds(block , [e] , [need] , [eval])
 }
-
 
 fn convertExpressionsToNeeds(block Block , expressions []Expression , needs []Type , eval []Type) {
     errs := []error{} // no return
@@ -273,19 +264,16 @@ fn convertExpressionsToNeeds(block Block , expressions []Expression , needs []Ty
     return
 }
 
-
 // check out package name is valid or not
 fn packageNameIsValid(name string) -> (valid bool) {
     //TODO:: check is package name is valid
     return true
 }
 
-
 fn correctLastUsageType(t string , usage []Usage) -> (u Usage) {
     u = usage[len(usage) - 1]
     u.Type = t
 }
-
 
 fn searchRightValueForAutoCompletionItems(pos Pos , block Block) -> (items []AutoCompletionItem = []AutoCompletionItem{}) {
     names := new map{string -> bool}()
@@ -363,12 +351,10 @@ fn searchRightValueForAutoCompletionItems(pos Pos , block Block) -> (items []Aut
 
             }
         }
-    }
-)
+    })
     items.appendAll(AutoCompletionItem.getKeywordAutoCompletionItems())
     items.appendAll(AutoCompletionItem.getBuildFunctionAutoCompletionItems())
 }
-
 
 fn searchLableForAutoCompletionItems(block Block) -> (items []AutoCompletionItem = []AutoCompletionItem{}) {
     names := new map{string -> bool}()
@@ -389,10 +375,8 @@ fn searchLableForAutoCompletionItems(block Block) -> (items []AutoCompletionItem
         }
         isFunctionBlock = b.isFunctionBlock || isFunctionBlock
         // I cannot stop the process
-    }
-)
+    })
 }
-
 
 fn searchTypeForAutoCompletionItems(pos Pos , block Block) -> (items []AutoCompletionItem = []AutoCompletionItem{}) {
     names := new map{string -> bool}()
@@ -442,11 +426,9 @@ fn searchTypeForAutoCompletionItems(pos Pos , block Block) -> (items []AutoCompl
 
             }
         }
-    }
-)
+    })
     items.appendAll(AutoCompletionItem.getTypeAutoCompletionItem())
 }
-
 
 fn searchLeftValueForAutoCompletionItems(block Block , pos Pos) -> (items []AutoCompletionItem = []AutoCompletionItem{}) {
     names := new map{string -> bool}()
@@ -486,10 +468,8 @@ fn searchLeftValueForAutoCompletionItems(block Block , pos Pos) -> (items []Auto
 
             }
         }
-    }
-)
+    })
 }
-
 
 fn getPos(x Object) -> (pos Pos) {
     if t , ok := x.(Constant) ; ok {
@@ -529,7 +509,6 @@ fn getPos(x Object) -> (pos Pos) {
         return t.pos
     }
 }
-
 
 fn checkFormat(formatLiteral string , pos Pos , args []Type) -> (err error) {
     for v := range args {

@@ -2,14 +2,15 @@ import "lucy/os/flag"
 
 class Flags {
     forceReBuild flag.BoolOption
-    parser flag.FlagParser 
+    parser       flag.FlagParser
+    
     fn Flags() {
         this.super()
-        this.parser = new flag.FlagParser ()
-        this.forceReBuild = this.parser.boolOption("-forceReBuild" )
+        this.parser = new flag.FlagParser()
+        this.forceReBuild = this.parser.boolOption("-forceReBuild")
     }
 
-    fn parseArgs(args []string) ->(packageName string, forceReBuild bool) {
+    fn parseArgs(args []string) -> (packageName string , forceReBuild bool) {
         noDefine , err := this.parser.parse(args)
         if err != null {
             panic(err)
@@ -18,10 +19,10 @@ class Flags {
             panic("package name not provide")
         }
         if len(noDefine) > 1 {
-            panic("args provided not used:" + noDefine )
-        } 
+            panic("args provided not used:" + noDefine)
+        }
         packageName = noDefine[0]
-        forceReBuild = this.forceReBuild.getValue() 
+        forceReBuild = this.forceReBuild.getValue()
     }
 }
 

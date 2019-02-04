@@ -1,23 +1,20 @@
 import "lucy/cmd/langtools/common"
 import "lucy/os"
 
-
-fn printUsageAndExit(code int){
-	print("expect package name")	
-	os.exit(code)
+fn printUsageAndExit(code int) {
+    print("expect package name")
+    os.exit(code)
 }
-
 
 public fn test(args []string) {
-	packageName , forceReBuild := new Flags().parseArgs(args)
-	lucyRoot := common.getLucyRoot()
-	lcyPaths  := common.getLucyPath()
-	new Test(lucyRoot , lcyPaths ,packageName , forceReBuild ).test()
-	os.exit(0)
+    packageName , forceReBuild := new Flags().parseArgs(args)
+    lucyRoot := common.getLucyRoot()
+    lcyPaths := common.getLucyPath()
+    new Test(lucyRoot , lcyPaths , packageName , forceReBuild).test()
+    os.exit(0)
 }
 
-
-fn main(args []string){
-	test(args)
+fn main(args []string) {
+    test(args)
 }
 

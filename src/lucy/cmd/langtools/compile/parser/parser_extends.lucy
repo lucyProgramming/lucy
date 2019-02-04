@@ -1,19 +1,18 @@
-
 import "lucy/cmd/langtools/compile/lex"
 
-
-
 class ParserFather {
-	protected parser Parser
-	
-	fn ParserFather(parser Parser) {
-		this.super()
-		this.parser = parser 
-	}
-	protected fn next(lfIsToken bool) {
-		this.parser.next(lfIsToken)
-	}
-	protected fn consume(c map{ lex.TokenKind -> bool } ) {
-		this.parser.consume(c)
-	}
+    protected parser Parser
+
+    fn ParserFather(parser Parser) {
+        this.super()
+        this.parser = parser
+    }
+    protected fn next(lfIsToken bool) {
+        this.parser.next(lfIsToken)
+    }
+    protected fn consume(c map{lex.TokenKind -> bool}) {
+        this.parser.consume(c)
+    }
 }
+
+

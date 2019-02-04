@@ -1054,7 +1054,6 @@ public class Fmt {
                         } else {
                             format += ","
                         }
-
                     }
                     if v.containsLf {
                         format += "\n"

@@ -5,6 +5,7 @@ import "lucy/binary"
 class BuildReturn {
     eb BuildExpression
     bb BuildBlock     
+
     fn BuildReturn(eb BuildExpression , bb BuildBlock) {
         this.super()
         this.eb = eb
@@ -188,7 +189,7 @@ class BuildReturn {
             maxStack = 1
         }
         index := len(statementReturn.defers) - 1
-        for index >= 0 { //  build defer,cannot have return statement is defer
+        for index >= 0 { //   build defer,cannot have return statement is defer
             state := statementReturn.defers[index].stackMapState.(StackMapState)
             state = new StackMapState(state) // clone
             state.addTop(from)

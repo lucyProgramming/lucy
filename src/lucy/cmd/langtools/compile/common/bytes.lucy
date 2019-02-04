@@ -6,7 +6,6 @@ public class Bytes {
                 break
             }
         }
-
     }
 }
 

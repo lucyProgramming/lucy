@@ -1,24 +1,21 @@
-
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildFor {
-    
-    eb BuildExpression
-    bb  BuildBlock
-    BuildForRangeArray BuildForRangeArray
+    eb                     BuildExpression       
+    bb                     BuildBlock            
+    BuildForRangeArray     BuildForRangeArray    
     BuildForRangeJavaArray BuildForRangeJavaArray
-    BuildForRangeMap BuildForRangeMap
+    BuildForRangeMap       BuildForRangeMap      
 
-    fn BuildFor(eb BuildExpression , bb  BuildBlock){
+    fn BuildFor(eb BuildExpression , bb BuildBlock) {
         this.super()
         this.eb = eb
         this.bb = bb
-        this.BuildForRangeArray = new BuildForRangeArray(eb ,bb)
-        this.BuildForRangeJavaArray = new BuildForRangeJavaArray(eb ,bb)
-        this.BuildForRangeMap = new BuildForRangeMap(eb ,bb)
+        this.BuildForRangeArray = new BuildForRangeArray(eb , bb)
+        this.BuildForRangeJavaArray = new BuildForRangeJavaArray(eb , bb)
+        this.BuildForRangeMap = new BuildForRangeMap(eb , bb)
     }
-
 
     fn buildForStatement(
         c cg.ClassHighLevel,
@@ -28,58 +25,61 @@ class BuildFor {
         state StackMapState) -> (maxStack char) {
         if s.rangeAttr != null {
             if s.rangeAttr.rangeOn.value.Type == ast.VariableTypeArray {
-                return this.BuildForRangeArray.build(c, code, s, context, state)
+                return this.BuildForRangeArray.build(c , code , s , context , state)
             } else if s.rangeAttr.rangeOn.value.Type == ast.VariableTypeJavaArray {
-                return this.BuildForRangeJavaArray.build(c, code, s, context, state)
-            } else { // for map
-                return this.BuildForRangeMap.build(c, code, s, context, state)
+                return this.BuildForRangeJavaArray.build(c , code , s , context , state)
+            } else {
+                return this.BuildForRangeMap.build(c , code , s , context , state)
             }
         }
         forState := new StackMapState(state)
-        defer  {
+        defer {
+
             state.addTop(forState)
         }
+
         //init
         if s.Init != null {
-            stack := this.eb.build(c, code, s.Init, context, forState)
+            stack := this.eb.build(c , code , s.Init , context , forState)
             if stack > maxStack {
                 maxStack = stack
             }
         }
         var firstTimeExit cg.Exit
         if s.condition != null {
-            stack, exit := this.bb.buildConditionNotOkExit(c, code, context, forState, s.condition)
+            stack , exit := this.bb.buildConditionNotOkExit(c , code , context , forState , s.condition)
             if stack > maxStack {
                 maxStack = stack
             }
-            s.exits.append( exit)
-            firstTimeExit = new cg.Exit(cg.OP_goto, code) // goto body
+            s.exits.append(exit)
+            firstTimeExit = new cg.Exit(cg.OP_goto , code) // goto body
         }
         s.continueCodeOffset = code.codeLength
-        context.MakeStackMap(code, forState, code.codeLength)
+        context.MakeStackMap(code , forState , code.codeLength)
         if s.increment != null {
-            stack := this.eb.build(c, code, s.increment, context, forState)
+            stack := this.eb.build(c , code , s.increment , context , forState)
             if stack > maxStack {
                 maxStack = stack
             }
         }
         if s.condition != null {
-            stack, exit := this.bb.buildConditionNotOkExit(c, code, context, forState, s.condition)
+            stack , exit := this.bb.buildConditionNotOkExit(c , code , context , forState , s.condition)
             if stack > maxStack {
                 maxStack = stack
             }
-            s.exits.append( exit)
+            s.exits.append(exit)
         }
         if firstTimeExit != null {
-            writeExits([]cg.Exit{firstTimeExit}, code.codeLength)
-            context.MakeStackMap(code, forState, code.codeLength)
+            writeExits([]cg.Exit{firstTimeExit} , code.codeLength)
+            context.MakeStackMap(code , forState , code.codeLength)
         }
-        this.bb.buildBlock(c, code, s.block, context, forState)
+        this.bb.buildBlock(c , code , s.block , context , forState)
         if s.block.notExecuteToLastStatement == false {
-            jumpTo(code, s.continueCodeOffset)
+            jumpTo(code , s.continueCodeOffset)
         }
         return
     }
 
 }
+
 

@@ -3,57 +3,58 @@ import "lucy/cmd/langtools/lucy/run"
 import "lucy/cmd/langtools/common"
 
 final class Test {
-	lucyPath []string
-	packageName string 
-	lucyRoot string
-	forceReBuild bool 
-	
-	public fn Test(lucyRoot string , lucyPath []string , packageName string , forceReBuild bool){
-	    this.super()
-		this.lucyRoot = lucyRoot
-		this.lucyPath = lucyPath
-		this.packageName = packageName
-		this.forceReBuild = forceReBuild
-	}
-	
-	//real test method
-	public fn test(){
-    	w := common.findPackageInWhichDirectory(this.lucyPath , this.packageName)
-		//check is test exist
-		dir := w + "/src/" + this.packageName + "/test" 
-		if f := new io.File(dir) ;  f.isDirectory() == false {
-			printf("dir '%s' is not directory\n" , dir)
-			return 
-		}
-		if err := this.testDir(this.packageName + "/test" , dir )  ;   err != null {
-			print(err)
-			return  
-		}
-	}
-	
-	private fn testDir(packageName  ,  dir string) ->(err error ){
-		fis  := (new io.File (dir)) .listFiles() 
-		lucyFiles := []io.File{} 
-		for v := range fis {
-		    name := v.getName()
-		    if v.isDirectory(){
-		        this.testDir(packageName + "/" + name , dir + "/" + name)
-		        continue
-		    }
-		    if name.endsWith(".lucy")  {
-		        lucyFiles.append(v)
-		    }
-		}
-		if lucyFiles.size() == 0 {  // no lucy files
-		    return 
-		}
-		//TODO:: support args
-		print(packageName)
-		if this.forceReBuild {
-			new run.RunLucyPackage().RunCommand("test" , ["-forceReBuild",packageName ])
-		}else {
-			new run.RunLucyPackage().RunCommand("test" , [packageName])
-		}
-	}
+    lucyPath     []string
+    packageName  string  
+    lucyRoot     string  
+    forceReBuild bool    
+
+    public fn Test(lucyRoot string , lucyPath []string , packageName string , forceReBuild bool) {
+        this.super()
+        this.lucyRoot = lucyRoot
+        this.lucyPath = lucyPath
+        this.packageName = packageName
+        this.forceReBuild = forceReBuild
+    }
+
+     //real test method
+    public fn test() {
+        w := common.findPackageInWhichDirectory(this.lucyPath , this.packageName)
+        //check is test exist
+        dir := w + "/src/" + this.packageName + "/test"
+        if f := new io.File(dir) ; f.isDirectory() == false {
+            printf("dir '%s' is not directory\n" , dir)
+            return
+        }
+        if err := this.testDir(this.packageName + "/test" , dir) ; err != null {
+            print(err)
+            return
+        }
+    }
+
+    private fn testDir(packageName string , dir string) -> (err error) {
+        fis := (new io.File(dir)).listFiles()
+        lucyFiles := []io.File{}
+        for v := range fis {
+            name := v.getName()
+            if v.isDirectory() {
+                this.testDir(packageName + "/" + name , dir + "/" + name)
+                continue
+            }
+            if name.endsWith(".lucy") {
+                lucyFiles.append(v)
+            }
+        }
+        if lucyFiles.size() == 0 {
+            return
+        }
+        //TODO:: support args
+        print(packageName)
+        if this.forceReBuild {
+            new run.RunLucyPackage().RunCommand("test" , ["-forceReBuild" , packageName])
+        } else {
+            new run.RunLucyPackage().RunCommand("test" , [packageName])
+        }
+    }
 }
+
 
