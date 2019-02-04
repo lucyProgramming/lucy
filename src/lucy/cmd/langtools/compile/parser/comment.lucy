@@ -11,20 +11,31 @@ class CommentParser extends ParserFather {
         this.comment = ""
     }
 
-     // fn read() {
-     // 	if this.parser.token.Type == lex.TokenComment {
-     // 		for this.parser.token.Type == lex.TokenComment {
-     // 			if this.comment == null {
-     // 				this.comment = ""
-     // 			} 
-     // 			this.comment += "//" + this.parser.token.stringValue
-     // 			this.parser.next(lfIsToken)
-     // 		}
-     // 	} else {
-     // 		this.comment = "/*" + this.parser.token.stringValue + "*/\n"
-     // 		this.parser.next(lfIsToken)
-     // 	}
-     // }
+    fn setComment(isMulti bool , comment string) {
+        if this.comment == null {
+            this.comment = ""
+        }
+        if isMulti {
+            this.comment = comment
+        } else {
+            this.comment += "//" + comment
+        }
+    }
+
+    // fn read() {
+    // 	if this.parser.token.Type == lex.TokenComment {
+    // 		for this.parser.token.Type == lex.TokenComment {
+    // 			if this.comment == null {
+    // 				this.comment = ""
+    // 			} 
+    // 			this.comment += "//" + this.parser.token.stringValue
+    // 			this.parser.next(lfIsToken)
+    // 		}
+    // 	} else {
+    // 		this.comment = "/*" + this.parser.token.stringValue + "*/\n"
+    // 		this.parser.next(lfIsToken)
+    // 	}
+    // }
 }
 
 

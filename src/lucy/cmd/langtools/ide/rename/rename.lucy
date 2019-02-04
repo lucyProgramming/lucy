@@ -6,24 +6,24 @@ typealias filename = string
 
 
 class ReName {
-    usages              ast.Usage[]
-    on                  Object     
-    to                  []byte     
-    bsForTheCurrentFile []byte     
-    filename            string     
-    oldLength           int        
+    usages    ast.Usage[]
+    on        Object     
+    to        []byte     
+    bs        []byte     
+    filename  string     
+    oldLength int        
 
     public fn ReName(usages ast.Usage[],
         on Object,
         filename string,
         to string,
-        bsForTheCurrentFile []byte) {
+        bs []byte) {
         this.super()
         this.usages = usages
         this.on = on
         this.filename = filename
         this.to = []byte(to)
-        this.bsForTheCurrentFile = bsForTheCurrentFile
+        this.bs = bs
         if len(usages) > 0 {
             this.oldLength = usages[0].pos.endColumnOffset - usages[0].pos.startColumnOffset
         }
@@ -68,7 +68,7 @@ class ReName {
     fn renameOneFile(filename string , usages []ast.Usage) {
         var bs []byte
         if filename == this.filename {
-            bs = this.bsForTheCurrentFile
+            bs = this.bs
         } else {
             t , err := os.readFile(filename)
             if err != null {
@@ -118,7 +118,7 @@ class ReName {
             this.renameOneFile(this.filename , usages)
             return
         }
-        bs := this.bsForTheCurrentFile
+        bs := this.bs
         usagesGroupByLine := this.getUsageGroupByLine(usages)
         length := len(bs)
         line := 0
@@ -146,9 +146,9 @@ class ReName {
                 importResourceLength := usages[0].pos.endColumnOffset - usages[0].pos.startColumnOffset
                 for j := 0 ; j < importResourceLength ; j++ {
                     column++
-                    newBs.append(bs[i+j])
+                    newBs.append(bs[i + j])
                 }
-                newBs.appendAll([]byte(" as " ) , this.to)
+                newBs.appendAll([]byte(" as ") , this.to)
                 firstUsage = false
                 i += importResourceLength - 1
             }

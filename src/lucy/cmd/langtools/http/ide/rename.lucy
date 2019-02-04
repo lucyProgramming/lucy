@@ -6,7 +6,6 @@ import "java/lang/System"
 import "java/lang/Integer"
 import "lucy/cmd/langtools/common"
 
-
 class Rename implements HttpHandler {
     public fn handle(exchange HttpExchange) {
         os := exchange.getResponseBody()

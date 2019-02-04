@@ -9,7 +9,11 @@ class AllDefinition {
     printErr    bool          
     lucyPath    string        
 
-    fn AllDefinition(lucyFiles []ide.LucyFile , packageName string , lucyPath string , printErr bool) {
+    fn AllDefinition(
+        lucyFiles []ide.LucyFile,
+        packageName string,
+        lucyPath string,
+        printErr bool) {
         this.super()
         this.lucyFiles = lucyFiles
         this.lucyPath = lucyPath
