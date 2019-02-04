@@ -13,7 +13,7 @@ public fn validIdentifier(identifier string) -> (valid bool) {
     if identifier == null || identifier == "" {
         return
     }
-    bs := []byte(identifier)
+    bs := byte[](identifier)
     // valid start 
     if bs[0] != '_' &&
         bs[0] != '$' &&

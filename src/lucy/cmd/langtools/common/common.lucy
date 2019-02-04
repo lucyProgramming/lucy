@@ -72,11 +72,11 @@ public fn getClassPath() -> (paths []string) {
 public fn findPackageInWhichDirectory(lucyPath []string , packageName string) -> (which string) {
     ps := []string{}
     for _ , v := range lucyPath {
-        if true == new io.File(v + "/src/" + packageName).isDirectory() {
+        if p := v + "/src/" + packageName ; true == new io.File(p).isDirectory() &&
+            haveFileType(p , ".lucy") {
             ps.append(v)
         }
     }
-
     if ps.size() == 0 {
         panic(sprintf("package '%s' not found" , packageName))
     }

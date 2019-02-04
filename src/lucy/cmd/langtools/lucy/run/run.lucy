@@ -249,7 +249,7 @@ public class RunLucyPackage {
     }
     fn javaPackageFilter(is []string) -> (lucyPackages []string = []string{}) {
         var that = this
-        existInClassPath := fn (name string) -> (found []string = []string{}) {
+        foundInClassPath := fn (name string) -> (found []string = []string{}) {
             for _ , v := range that.classPaths {
                 if new io.File(v + "/" + name).isDirectory() {
                     found.append(v)
@@ -259,30 +259,25 @@ public class RunLucyPackage {
                     found.append(v)
                 }
             }
-
             return
         }
-
-        existInLucyPath := fn (name string) -> (found []string = []string{}) {
+        foundInLucyPath := fn (name string) -> (found []string = []string{}) {
             for _ , v := range that.lucyPath {
-                if new io.File(v + "/src/" + name).isDirectory() {
+                if d := v + "/src/" + name ; new io.File(d).isDirectory() &&
+                    common.haveFileType(d , ".lucy") {
                     found.append(v)
                 }
             }
-
             return
         }
-
         formatPaths := fn (paths []string) -> (s string = "") {
             for _ , v := range paths {
                 s += "\t" + v + "\n"
             }
-
             return s
         }
-
         for _ , i := range is {
-            found := existInLucyPath(i)
+            found := foundInLucyPath(i)
             if len(found) > 1 {
                 panic(sprintf("not 1 package named '%s' in $LUCYPATH" , i))
             }
@@ -292,7 +287,7 @@ public class RunLucyPackage {
                 }
                 continue
             }
-            found = existInClassPath(i)
+            found = foundInClassPath(i)
             if len(found) > 1 {
                 errMsg := sprintf("not 1 package named '%s' in $CLASSPATH,which CLASSPATH are:\n" , i)
                 errMsg += formatPaths(this.classPaths)
