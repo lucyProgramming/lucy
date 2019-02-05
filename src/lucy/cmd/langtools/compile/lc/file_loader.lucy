@@ -169,7 +169,7 @@ public class FileLoader implements ast.loadImport {
             return null
         }
         //name
-        if t := cg.getAttributeByName(c.AttributeGroupedByName , cg.AttributeNameSignature) ; t != null && len(t) > 0 {
+        if t := cg.getAttributeByName(c.attributeGroupedByName , cg.AttributeNameSignature) ; t != null && len(t) > 0 {
             //TODO:: support signature???
         }
         astClass = new ast.Class()
@@ -256,7 +256,7 @@ public class FileLoader implements ast.loadImport {
         astClass.accessFlags = c.accessFlags
         astClass.loadFromOutSide = true
         astClass.fields = new map{string -> ast.ClassField}()
-        if t := cg.getAttributeByName(c.AttributeGroupedByName , cg.AttributeNameLucyClassConst) ; len(t) > 0 {
+        if t := cg.getAttributeByName(c.attributeGroupedByName , cg.AttributeNameLucyClassConst) ; len(t) > 0 {
             attr := new cg.AttributeLucyClassConst()
             attr.fromBs(c , t[0].info)
             var t ast.Type
@@ -285,7 +285,7 @@ public class FileLoader implements ast.loadImport {
             if err != null {
                 panic(err)
             }
-            if t := cg.getAttributeByName(v.AttributeGroupedByName , cg.AttributeNameLucyFieldDescriptor) ; t != null && len(t) > 0 {
+            if t := cg.getAttributeByName(v.attributeGroupedByName , cg.AttributeNameLucyFieldDescriptor) ; t != null && len(t) > 0 {
                 d := new cg.AttributeLucyFieldDescriptor("" , char(0))
                 d.fromBs(c , t[0].info)
                 _ , f.Type , err = jvm.LucyFieldSignature.decode([]byte(d.descriptor))
@@ -371,7 +371,7 @@ public class FileLoader implements ast.loadImport {
             name := string(c.constPools[v.nameIndex].info)
             en.name = name
             en.Enum = e
-            constValue := v.AttributeGroupedByName[cg.AttributeNameConstValue][0] // must have this attribute
+            constValue := v.attributeGroupedByName[cg.AttributeNameConstValue][0] // must have this attribute
             en.value = int(binary.BigEndian.getInt(c.constPools[binary.BigEndian.getChar(constValue.info)].info))
             e.enums.append(en)
         }

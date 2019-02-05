@@ -45,11 +45,11 @@ public class StatementSwitch {
         }
         if conditionType.Type == VariableTypeBool {
             errs.append(new error(sprintf("%s bool expression not allow for switch",
-                conditionType.pos.errMsgPrefix())))
+                        conditionType.pos.errMsgPrefix())))
         }
         if len(this.cases) == 0 {
             errs.append(new error(sprintf("%s switch statement has no cases",
-                this.endPos.errMsgPrefix())))
+                        this.endPos.errMsgPrefix())))
         }
         longMap := new map{long -> Pos}()
         doubleMap := new map{double -> Pos}()
@@ -75,13 +75,13 @@ public class StatementSwitch {
                 }
                 if conditionType.assignAble(block , errs , t) == false {
                     errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-                        e.pos.errMsgPrefix() , t.typeString() , conditionType.typeString())))
+                                e.pos.errMsgPrefix() , t.typeString() , conditionType.typeString())))
                     continue
                 }
                 if conditionType.Type == VariableTypeEnum {
                     if t.enumName == null {
                         errs.append(new error(sprintf("%s enum value is not literal",
-                            errMsgPrefix(e.pos))))
+                                    errMsgPrefix(e.pos))))
                         continue
                     } else {
                         if e.value.Type == VariableTypePackage &&
@@ -112,7 +112,7 @@ public class StatementSwitch {
                         valueValid = true
                     } else {
                         errs.append(new error(sprintf("%s expression is not literal",
-                            errMsgPrefix(e.pos))))
+                                    errMsgPrefix(e.pos))))
                         continue
                     }
 

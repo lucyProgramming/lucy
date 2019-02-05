@@ -32,7 +32,7 @@ public class ClassDecoder {
         this.parseInterfaces()
         this.parseFields()
         this.parserMethods()
-        this.classFile.AttributeGroupedByName = this.parseAttributes()
+        this.classFile.attributeGroupedByName = this.parseAttributes()
         return this.classFile
     }
 
@@ -153,7 +153,7 @@ public class ClassDecoder {
             f.nameIndex = binary.BigEndian.getChar(this.bs[2:])
             f.descriptorIndex = binary.BigEndian.getChar(this.bs[4:])
             this.bs = this.bs[6:]
-            f.AttributeGroupedByName = this.parseAttributes()
+            f.attributeGroupedByName = this.parseAttributes()
             this.classFile.fields[i] = f
         }
     }
@@ -168,7 +168,7 @@ public class ClassDecoder {
             m.nameIndex = binary.BigEndian.getChar(this.bs[2:])
             m.descriptorIndex = binary.BigEndian.getChar(this.bs[4:])
             this.bs = this.bs[6:]
-            m.AttributeGroupedByName = this.parseAttributes()
+            m.attributeGroupedByName = this.parseAttributes()
             this.classFile.methods[i] = m
         }
     }

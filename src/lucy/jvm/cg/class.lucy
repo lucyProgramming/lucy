@@ -26,11 +26,11 @@ public class Class {
 	public fields                  []FieldInfo
 	public methods                 []MethodInfo
 	public attributes              []AttributeInfo
-	public AttributeGroupedByName  AttributeGroupedByName
+	public attributeGroupedByName  AttributeGroupedByName
 	public TypeAlias               []AttributeLucyTypeAlias
-	public AttributeLucyEnum       AttributeLucyEnum
-	public AttributeLucyClassConst AttributeLucyClassConst
-	public AttributeInnerClasses   AttributeInnerClasses
+	public attributeLucyEnum       AttributeLucyEnum
+	public attributeLucyClassConst AttributeLucyClassConst
+	public attributeInnerClasses   AttributeInnerClasses
 	//const caches
 	public utf8Constants               map{string -> ConstPool }
 	public intConstants                map{int-> ConstPool }
@@ -351,14 +351,14 @@ public class Class {
 		for _, v := range this.TypeAlias {
 			this.attributes.append(v.toAttributeInfo(this))
 		}
-		if this.AttributeLucyEnum != null {
-			this.attributes.append( this.AttributeLucyEnum.toAttributeInfo(this))
+		if this.attributeLucyEnum != null {
+			this.attributes.append( this.attributeLucyEnum.toAttributeInfo(this))
 		}
-		if this.AttributeLucyClassConst != null {
-			this.attributes.append( this.AttributeLucyClassConst.toAttributeInfo(this))
+		if this.attributeLucyClassConst != null {
+			this.attributes.append( this.attributeLucyClassConst.toAttributeInfo(this))
 		}
-		if this.AttributeInnerClasses != null {
-			if a := this.AttributeInnerClasses.toAttributeInfo(this); a != null {
+		if this.attributeInnerClasses != null {
+			if a := this.attributeInnerClasses.toAttributeInfo(this); a != null {
 				this.attributes.append(a)
 			}
 		}
@@ -380,10 +380,10 @@ public class Class {
 	}
 	
 	public fn isInnerClass() -> (is bool) {
-		if len(this.AttributeGroupedByName[AttributeNameInnerClasses]) == 0 {
+		if len(this.attributeGroupedByName[AttributeNameInnerClasses]) == 0 {
 			return
 		}
-		innerClass := this.AttributeGroupedByName[AttributeNameInnerClasses][0]
+		innerClass := this.attributeGroupedByName[AttributeNameInnerClasses][0]
 		var attr  = new AttributeInnerClasses()
 		thisClassName := string(this.constPools[binary.BigEndian.getChar(this.constPools[this.thisClass].info)].info)
 		attr.fromBs(this, innerClass.info)
@@ -498,7 +498,7 @@ public class Class {
 		}
 	}	
 	public fn getAttributeByName( name string) -> (attrs []AttributeInfo) {
-		return getAttributeByName(this.AttributeGroupedByName , name)
+		return getAttributeByName(this.attributeGroupedByName , name)
 	}
 	
 	public fn getName()-> (name string){

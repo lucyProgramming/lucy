@@ -11,7 +11,7 @@ public class StatementLabel {
     public pos                 Pos      
     public findUsage           bool     
     public findUsageInstances  []Usage  
-    public inlineComment       string       
+    public inlineComment       string   
     public locateDefinition    bool     
     /*
 		defer {
@@ -26,7 +26,7 @@ public class StatementLabel {
         this.exits = []cg.Exit{}
     }
 
-     // check this label is read to goto
+    // check this label is read to goto
     fn ready(block Block , from Pos) -> (err error) {
         ss := []Statement{}
         for _ , v := range this.block.statements {

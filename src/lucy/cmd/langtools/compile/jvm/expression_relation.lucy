@@ -18,7 +18,6 @@ class BuildExpressionRelation {
         bin := e.data.(ast.ExpressionBinary)
         stackLength := len(state.stacks)
         defer {
-
             state.popStack(len(state.stacks) - stackLength)
         }
 
@@ -91,10 +90,8 @@ class BuildExpressionRelation {
             state.pushStack(c , typeBool)
             context.MakeStackMap(code , state , code.codeLength)
             defer {
-
                 state.popStack(1)
             }
-
             return
         }
         if bin.left.value.Type == ast.VariableTypeBool ||
@@ -124,7 +121,6 @@ class BuildExpressionRelation {
             state.pushStack(c , typeBool)
             context.MakeStackMap(code , state , code.codeLength)
             defer {
-
                 state.popStack(1)
             }
 
@@ -158,7 +154,6 @@ class BuildExpressionRelation {
             state.pushStack(c , typeBool)
             context.MakeStackMap(code , state , code.codeLength)
             defer {
-
                 state.popStack(1)
             }
 
@@ -171,8 +166,8 @@ class BuildExpressionRelation {
             stack := this.eb.build(c , code , bin.right , context , state)
             code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaStringClass,
-                "compareTo",
-                "(Ljava/lang/String;)I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                    "compareTo",
+                    "(Ljava/lang/String;)I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
             if t := char(1) + stack ; t > maxStack {
                 maxStack = t
@@ -205,7 +200,6 @@ class BuildExpressionRelation {
             state.pushStack(c , typeBool)
             context.MakeStackMap(code , state , code.codeLength)
             defer {
-
                 state.popStack(1)
             }
 
@@ -240,7 +234,6 @@ class BuildExpressionRelation {
             state.pushStack(c , typeBool)
             context.MakeStackMap(code , state , code.codeLength)
             defer {
-
                 state.popStack(1)
             }
 

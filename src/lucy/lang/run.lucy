@@ -1,18 +1,19 @@
 import "java/lang/Runnable"
 import "java/lang/Thread"
 
-
 public final class Run implements Runnable {
-	private f fn() 
-	public fn Run(f fn ()) {
-		this.super()
-		this.f = f
-	}
-	public fn run() {
-		this.f()
-	}
-	public static fn runFn(f fn()) {
-		r := new Run(f)
-		new Thread(r).start() 
-	}
+    private f fn ()
+    public fn Run(f fn ()) {
+        this.super()
+        this.f = f
+    }
+    public fn run() {
+        this.f()
+    }
+    public static fn runFn(f fn ()) {
+        r := new Run(f)
+        new Thread(r).start()
+    }
 }
+
+

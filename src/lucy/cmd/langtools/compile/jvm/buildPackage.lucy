@@ -97,7 +97,7 @@ public class BuildPackage {
         c.accessFlags = e.accessFlags
         c.superClass = ast.JavaRootClass
         c.fields = new map{string -> cg.FieldHighLevel}()
-        c.Class.AttributeLucyEnum = new cg.AttributeLucyEnum()
+        c.Class.attributeLucyEnum = new cg.AttributeLucyEnum()
         for _ , v := range e.enums {
             field := new cg.FieldHighLevel()
             if e.accessFlags & cg.AccClassPublic != 0 {
@@ -279,7 +279,7 @@ public class BuildPackage {
                 attr.constants.append(cos)
             }
 
-            c.Class.AttributeLucyClassConst = attr
+            c.Class.attributeLucyClassConst = attr
         }
         c.fields = new map{string -> cg.FieldHighLevel}()
         c.methods = new map{string -> []cg.MethodHighLevel}()

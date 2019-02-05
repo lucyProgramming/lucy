@@ -5,8 +5,8 @@ class ExpressionCheckQuestion {
         errs.appendAll(es)
         if condition != null {
             if condition.Type != VariableTypeBool {
-                errs.append(new error(sprintf("%s not a bool expression" , 
-                    condition.pos.errMsgPrefix())))
+                errs.append(new error(sprintf("%s not a bool expression",
+                            condition.pos.errMsgPrefix())))
             }
             if err := question.selection.canBeUsedAsCondition() ; err != null {
                 errs.append(err)
@@ -38,8 +38,8 @@ class ExpressionCheckQuestion {
             if tType != null &&
                 fType != null &&
                 tType.assignAble(block , errs , fType) == false {
-                errs.append(new error(sprintf("%s cannot use '%s' as '%s'" , 
-                    fType.pos.errMsgPrefix() , fType.typeString() , tType.typeString())))
+                errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
+                            fType.pos.errMsgPrefix() , fType.typeString() , tType.typeString())))
             }
             if valueType == null && fType != null {
                 valueType = fType.cloneType()
@@ -48,4 +48,5 @@ class ExpressionCheckQuestion {
         }
     }
 }
+
 

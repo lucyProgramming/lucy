@@ -2,6 +2,7 @@ import "lucy/binary"
 
 public class AttributeLucyMethodDescriptor {
 	public descriptor string
+	
 	fn toAttributeInfo(c Class) -> (ret AttributeInfo)  {
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const(AttributeNameLucyMethodDescriptor)

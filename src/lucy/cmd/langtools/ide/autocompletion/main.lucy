@@ -23,7 +23,6 @@ public fn autoCompletion(file string , pos int , bs []byte) -> (result []ast.Aut
     result = new AutoCompletion(lucyFiles , packageName , file , pos >> 16).getAutoCompletion()
 }
 
-
 fn main(args []string) {
     file , bufferFile , pos := new Flags().parseArgs(args)
     var bs []byte
@@ -42,5 +41,4 @@ fn main(args []string) {
     }
     print(string(bs))
 }
-
 

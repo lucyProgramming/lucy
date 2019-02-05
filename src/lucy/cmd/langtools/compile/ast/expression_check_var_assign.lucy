@@ -22,15 +22,15 @@ class ExpressionCheckVarAssign {
         if len(lefts) > len(assignTypes) {
             pos := values[len(values) - 1].pos
             errs.append(new error(sprintf("%s too few values , assign %d values to %d destinations",
-                pos.errMsgPrefix(),
-                len(assignTypes),
-                len(lefts))))
+                        pos.errMsgPrefix(),
+                        len(assignTypes),
+                        len(lefts))))
         } else if len(lefts) < len(assignTypes) {
             pos := getExtraExpressionPos(values , len(lefts))
             errs.append(new error(sprintf("%s too many values , assign %d values to %d destinations",
-                pos.errMsgPrefix(),
-                len(assignTypes),
-                len(lefts))))
+                        pos.errMsgPrefix(),
+                        len(assignTypes),
+                        len(lefts))))
         }
         var err error
         noNewVariable := true
@@ -53,7 +53,7 @@ class ExpressionCheckVarAssign {
                 }
                 if t.assignAble(block , errs , variableType) == false {
                     errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-                        t.pos.errMsgPrefix() , variableType.typeString() , t.typeString())))
+                                t.pos.errMsgPrefix() , variableType.typeString() , t.typeString())))
                 }
                 continue
             }
@@ -65,9 +65,9 @@ class ExpressionCheckVarAssign {
                 if variableType != null {
                     if variable.Type.assignAble(block , errs , variableType) == false {
                         errs.append(new error(sprintf("%s cannot assign '%s' to '%s'",
-                            assignTypes[k].pos.errMsgPrefix(),
-                            variable.Type.typeString(),
-                            variableType.typeString())))
+                                    assignTypes[k].pos.errMsgPrefix(),
+                                    variable.Type.typeString(),
+                                    variableType.typeString())))
                     }
                 }
                 identifier.Variable = variable

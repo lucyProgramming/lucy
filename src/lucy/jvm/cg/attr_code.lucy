@@ -16,7 +16,6 @@ public class AttributeCode {
         } else {
             this.exceptions.append(e)
         }
-
     }
 
     fn toAttributeInfo(c Class) -> (ret AttributeInfo) {
@@ -73,7 +72,6 @@ public class AttributeCode {
                 bb.appendAll(v.info)
                 b.appendAll(bb)
             }
-
             bs.appendAll(b)
         }
     }

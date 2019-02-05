@@ -3,88 +3,90 @@ import "java/lang/Object" as javaRootClass
 /*
 	root object for lucy language default object
 */
-public class Lucy extends javaRootClass {}
-
-public fn copy < destArray, srcArray > (dest destArray , src srcArray , start int = 0 , end int = -1) -> (r destArray = dest) {
-	if src == null  || 
-		src.size() == 0 {
-		return
-	}
-	if end == -1 {
-		end = src.size()
-	}
-	for i := start ; i < end ; i++ {
-		dest[i] = src[i] 
-	}
+public class Lucy extends javaRootClass {
 }
 
-public fn javaArray2Lucy  <array > (java array[] ,start int = 0 , end int = -1) -> (lucy []array) {
-	import "lucy/deps"
-	if end == -1 {
-		end = java.size()  
-	}
-	typealias retType = []array
-	when array {
-		case bool:
-			a := new deps.ArrayBool()
-			a.start = start 
-			a.end = end 
-			a.cap = len(java)
-			a.elements = java
-			lucy = retType(a)	
-		case byte:
-			a := new deps.ArrayByte()
-			a.start = start 
-			a.end = end 
-			a.cap = len(java)
-			a.elements = java
-			lucy = retType(a)
-			
-		case short:
-			a := new deps.ArrayShort()
-			a.start = start 
-			a.end = end 
-			a.cap = len(java)
-			a.elements = java
-			lucy = retType(a)
-			
-		case int:
-			a := new deps.ArrayInt()
-			a.start = start 
-			a.end = end 
-			a.cap = len(java)
-			a.elements = java
-			lucy = retType(a) 
-		case long:
-			a := new deps.ArrayLong()
-			a.start = start 
-			a.end = end 
-			a.cap = len(java)
-			a.elements = java
-			lucy = retType(a)
-			
-		case float:
-			a := new deps.ArrayFloat()
-			a.start = start 
-			a.end = end 
-			a.cap = len(java)
-			a.elements = java
-			lucy = retType(a)
-			
-		case double:
-			a := new deps.ArrayDouble()
-			a.start = start 
-			a.end = end 
-			a.cap = len(java)
-			a.elements = java
-			lucy = retType(a)
-			
-		case string:
-			a := new deps.ArrayString()
-			a.start = start 
-			a.end = end 
-			a.cap = len(java)
-			a.elements = java
-			lucy = retType(a)
-	}
+
+public fn copy <destArray , srcArray> (dest destArray , src srcArray , start int = 0 , end int = -1) -> (r destArray = dest) {
+    if src == null ||
+        src.size() == 0 {
+        return
+    }
+    if end == -1 {
+        end = src.size()
+    }
+    for i := start ; i < end ; i++ {
+        dest[i] = src[i]
+    }
+}
+
+public fn javaArray2Lucy <array> (java array[] , start int = 0 , end int = -1) -> (lucy []array) {
+    import "lucy/deps"
+    if end == -1 {
+        end = java.size()
+    }
+    typealias retType = []array
+    when array {
+        case bool:
+            a := new deps.ArrayBool()
+            a.start = start
+            a.end = end
+            a.cap = len(java)
+            a.elements = java
+            lucy = retType(a)
+        case byte:
+            a := new deps.ArrayByte()
+            a.start = start
+            a.end = end
+            a.cap = len(java)
+            a.elements = java
+            lucy = retType(a)
+
+        case short:
+            a := new deps.ArrayShort()
+            a.start = start
+            a.end = end
+            a.cap = len(java)
+            a.elements = java
+            lucy = retType(a)
+
+        case int:
+            a := new deps.ArrayInt()
+            a.start = start
+            a.end = end
+            a.cap = len(java)
+            a.elements = java
+            lucy = retType(a)
+        case long:
+            a := new deps.ArrayLong()
+            a.start = start
+            a.end = end
+            a.cap = len(java)
+            a.elements = java
+            lucy = retType(a)
+
+        case float:
+            a := new deps.ArrayFloat()
+            a.start = start
+            a.end = end
+            a.cap = len(java)
+            a.elements = java
+            lucy = retType(a)
+
+        case double:
+            a := new deps.ArrayDouble()
+            a.start = start
+            a.end = end
+            a.cap = len(java)
+            a.elements = java
+            lucy = retType(a)
+
+        case string:
+            a := new deps.ArrayString()
+            a.start = start
+            a.end = end
+            a.cap = len(java)
+            a.elements = java
+            lucy = retType(a)
+    }
 }

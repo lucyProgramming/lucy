@@ -71,7 +71,7 @@ class ExpressionCheckFunctionCall {
 
             if d == null {
                 errs.append(new error(sprintf("%s '%s' not found",
-                    call.Expression.pos.errMsgPrefix() , identifier.name)))
+                            call.Expression.pos.errMsgPrefix() , identifier.name)))
                 return null
             }
             if identifier.locateDefinition {
@@ -95,7 +95,7 @@ class ExpressionCheckFunctionCall {
                 typeConversion.Type = d.(Type)
                 if len(call.args) != 1 {
                     errs.append(new error(sprintf("%s cast type expect 1 argument",
-                        e.pos.errMsgPrefix())))
+                                e.pos.errMsgPrefix())))
                     return null
                 }
                 e.Type = ExpressionTypeCheckCast
@@ -115,7 +115,7 @@ class ExpressionCheckFunctionCall {
                 typeConversion.Type.pos = e.pos
                 if len(call.args) != 1 {
                     errs.append(new error(sprintf("%s cast type expect 1 argument",
-                        e.pos.errMsgPrefix())))
+                                e.pos.errMsgPrefix())))
                     return null
                 }
                 e.Type = ExpressionTypeCheckCast
@@ -134,7 +134,7 @@ class ExpressionCheckFunctionCall {
                 v.used = true
                 if v.Type.Type != VariableTypeFunction {
                     errs.append(new error(sprintf("%s '%s' is not a function , but '%s' ",
-                        call.Expression.pos.errMsgPrefix() , v.name , v.Type.typeString())))
+                                call.Expression.pos.errMsgPrefix() , v.name , v.Type.typeString())))
                     return null
                 }
                 call.Expression.value = new Type()
@@ -145,7 +145,7 @@ class ExpressionCheckFunctionCall {
                 return .checkFunctionPointerCall(e , block , errs , v.Type.functionType , call)
             }
             errs.append(new error(sprintf("%s cannot make_node_objects call on '%s'",
-                call.Expression.pos.errMsgPrefix() , block.identifierIsWhat(d))))
+                        call.Expression.pos.errMsgPrefix() , block.identifierIsWhat(d))))
             return null
 
         }
@@ -156,8 +156,8 @@ class ExpressionCheckFunctionCall {
         }
         if functionPointer.Type != VariableTypeFunction {
             errs.append(new error(sprintf("%s '%s' is not a function , but '%s'",
-                e.pos.errMsgPrefix(),
-                call.Expression.op , functionPointer.typeString())))
+                        e.pos.errMsgPrefix(),
+                        call.Expression.op , functionPointer.typeString())))
             return null
         }
         if call.Expression.Type == ExpressionTypeFunctionLiteral {
@@ -237,7 +237,7 @@ class ExpressionCheckFunctionCall {
             } else {
                 if len(call.parameterTypes) > 0 {
                     errs.append(new error(sprintf("%s function is not a template function",
-                        errMsgPrefix(e.pos))))
+                                errMsgPrefix(e.pos))))
                 }
                 var err error
                 call.vArgs , err = f.Type.fitArgs(block , e.pos , call.args , callArgsTypes , f)
@@ -264,12 +264,12 @@ class ExpressionCheckFunctionCall {
             }
             if k >= len(argTypes) || argTypes[k] == null {
                 errs.append(new error(sprintf("%s missing typed parameter,index at %d",
-                    e.pos.errMsgPrefix() , k)))
+                            e.pos.errMsgPrefix() , k)))
                 return
             }
             if err := v.Type.canBeBindWithType(f.Type , parameterTypes , argTypes[k]) ; err != null {
                 errs.append(new error(sprintf("%s %s",
-                    errMsgPrefix(argTypes[k].pos) , err.getMessage())))
+                            errMsgPrefix(argTypes[k].pos) , err.getMessage())))
                 return
             }
             t := v.Type.cloneType()
@@ -292,12 +292,12 @@ class ExpressionCheckFunctionCall {
                     continue
                 }
                 errs.append(new error(sprintf("%s missing typed return value,index at %d",
-                    e.pos.errMsgPrefix() , k)))
+                            e.pos.errMsgPrefix() , k)))
                 return
             }
             if err := v.Type.canBeBindWithType(f.Type , parameterTypes , tps[0]) ; err != null {
                 errs.append(new error(sprintf("%s %s",
-                    errMsgPrefix(tps[0].pos) , err.getMessage())))
+                            errMsgPrefix(tps[0].pos) , err.getMessage())))
                 return null
             }
             t := v.Type.cloneType()
@@ -349,7 +349,7 @@ class ExpressionCheckFunctionCall {
         // when all ok ,ret is not a template function any more
         if len(tps) > 0 {
             errs.append(new error(sprintf("%s to many parameter type to call template function",
-                errMsgPrefix(e.pos))))
+                        errMsgPrefix(e.pos))))
         }
         return ret
     }

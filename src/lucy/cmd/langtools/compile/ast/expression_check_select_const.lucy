@@ -1,27 +1,27 @@
 class ExpressionSelectConst {
-
-	static fn check(e Expression , block Block, errs []error) ->(valueType Type) {
-		selection := e.data.(ExpressionSelection)
-		object, es := selection.Expression.checkSingleValueContextExpression(block)
-		errs.appendAll(es)
-		if object == null {
-			return  
-		}
-		if object.Type != VariableTypeClass {
-			errs.append(new error(sprintf("%s not a class , but '%s'",
-				object.pos.errMsgPrefix(), object.typeString())))
-			return 
-		}
-		if object.Class.block.constants == null ||
-			object.Class.block.constants[selection.name] == null {
-			errs.append(new error(sprintf("%s const '%s' not found",
-				e.pos.errMsgPrefix(), selection.name)))
-			return 
-		}
-		c := object.Class.block.constants[selection.name]
-		e.fromConst(c)
-		valueType = c.Type.cloneType()
-		valueType.pos = e.pos
-	}
+    static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
+        selection := e.data.(ExpressionSelection)
+        object , es := selection.Expression.checkSingleValueContextExpression(block)
+        errs.appendAll(es)
+        if object == null {
+            return
+        }
+        if object.Type != VariableTypeClass {
+            errs.append(new error(sprintf("%s not a class , but '%s'",
+                        object.pos.errMsgPrefix() , object.typeString())))
+            return
+        }
+        if object.Class.block.constants == null ||
+            object.Class.block.constants[selection.name] == null {
+            errs.append(new error(sprintf("%s const '%s' not found",
+                        e.pos.errMsgPrefix() , selection.name)))
+            return
+        }
+        c := object.Class.block.constants[selection.name]
+        e.fromConst(c)
+        valueType = c.Type.cloneType()
+        valueType.pos = e.pos
+    }
 }
+
 

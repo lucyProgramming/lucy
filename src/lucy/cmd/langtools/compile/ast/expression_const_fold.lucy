@@ -1,379 +1,378 @@
-
 class ExpressionConstFold {
-
-	static fn constantFold(e Expression , errs []error ) -> (is bool, err error) {
-		if e.isLiteral() {
-			return true, null
-		}
-		// ~
-		if e.Type == ExpressionTypeBitwiseNot {
-			ee := e.data.(Expression)
-			is, err = ee.constantFold(errs)
-			if err != null || is == false {
-				return
-			}
-			if ee.isInteger() == false {
-				is = false 
-				err = new error(sprintf("%s cannot apply '~' on a non-integer expression",
-					errMsgPrefix(e.pos)))
-				return
-			}
-			e.Type = ee.Type
-			e.longValue = ~ee.longValue
-			e.literalRaw = "~" + ee.literalRaw
-		    return
-		}
-		// !
-		if e.Type == ExpressionTypeNot {
-			ee := e.data.(Expression)
-			is, err = ee.constantFold(errs)
-			if err != null || is == false {
-				return
-			}
-			if ee.Type != ExpressionTypeBool {
-				is = false 
-				err = new error(sprintf("%s cannot apply '!' on a non-bool expression",
-					errMsgPrefix(e.pos)))
-				return
-			}
-			e.Type = ExpressionTypeBool
-			e.boolValue = !ee.boolValue
-			e.literalRaw = "!" + ee.literalRaw
-			return
-		}
-		// -
-		if e.Type == ExpressionTypeNegative {
-			ee := e.data.(Expression)
-			is, err = ee.constantFold(errs)
-			if err != null || is == false {
-				return
-			}
-			if ee.isNumber() == false {
-			    is = false
-			    err = new error(sprintf("%s cannot apply '-' on a '%s'",
-					errMsgPrefix(e.pos) ,e.op))
-			    return
-			}
-			e.Type = ee.Type
-			if ee.isInteger() {
-				e.longValue = -ee.longValue
-			}else {  // must be float
-				e.doubleValue = -ee.doubleValue
-			}
-			e.literalRaw = "-" + ee.literalRaw
-			return
-		}
-		// && and ||
-		if e.Type == ExpressionTypeLogicalAnd || e.Type == ExpressionTypeLogicalOr {
-			bin := e.data.(ExpressionBinary)
-			is , err = .constantFold(bin.left , errs)
-			if is == false || err != null {
-			    return
-			}
-			is , err = .constantFold(bin.right , errs)
-			if is == false || err != null {
-			    return
-			}
-			if bin.left.Type != ExpressionTypeBool ||
-				bin.right.Type != ExpressionTypeBool {
-				err = e.binaryWrongOpErr()
-				return
-			}
-			is = true
-			if e.Type == ExpressionTypeLogicalAnd {
-				e.boolValue = bin.left.boolValue && bin.right.boolValue
-			} else {
-				e.boolValue = bin.left.boolValue || bin.right.boolValue
-			}
-			e.literalRaw = bin.left.literalRaw + " " + e.op + " " + bin.right.literalRaw
-			e.Type = ExpressionTypeBool
-			return
-		}
-		// + - * / % algebra arithmetic
-		if e.Type == ExpressionTypeAdd ||
-			e.Type == ExpressionTypeSub ||
-			e.Type == ExpressionTypeMul ||
-			e.Type == ExpressionTypeDiv ||
-			e.Type == ExpressionTypeMod {
-			bin := e.data.(ExpressionBinary)
-			is,err = .constantFold(bin.left , errs)
-			if is == false || err != null {
-			    return
-			}
-			is,err = .constantFold(bin.right , errs)
-			if is == false || err != null {
-			    return
-			}
-			if bin.left.Type != bin.right.Type {
-				return
-			} 
-			switch bin.left.Type {
-			case bin.left.isInteger():
-				left := bin.left.longValue
-				right := bin.right.longValue
-				switch e.Type {
-				case ExpressionTypeAdd:
-					e.longValue = left + right
-				case ExpressionTypeSub:
-					e.longValue = left - right
-				case ExpressionTypeMul:
-					e.longValue = left * right
-				case ExpressionTypeDiv:
-					if right == 0 {
-						err = divisionByZeroErr(bin.right.pos)
-					}
-					e.longValue = left / right
-				case ExpressionTypeMod:
-					if right == 0 {
-						err = divisionByZeroErr(bin.right.pos)
-					}
-					e.longValue = left % right
-				default:
-					return false, null
-				}
-				if e.Type == ExpressionTypeAdd || 
-					e.Type == ExpressionTypeSub || 
-					e.Type == ExpressionTypeMul {
-					e.checkIfConstantExceeds(errs)
-				}
-				e.literalRaw = bin.left.literalRaw + " " + e.op + " " + bin.right.literalRaw 
-				e.Type = bin.left.Type
-				is = true
-				e.checkIfConstantExceeds(errs)
-				return
-			case ExpressionTypeFloat,
-				ExpressionTypeDouble:
-				left := bin.left.doubleValue
-				right := bin.right.doubleValue
-				switch e.Type {
-				case ExpressionTypeAdd:
-					e.doubleValue = left + right
-				case ExpressionTypeSub:
-					e.doubleValue = left - right
-				case ExpressionTypeMul:
-					e.doubleValue = left * right
-				case ExpressionTypeDiv:
-					if right == 0d {
-						err = divisionByZeroErr(bin.right.pos)
-					}
-					e.doubleValue = left / right
-				case ExpressionTypeMod:
-					if right == 0d {
-						err = divisionByZeroErr(bin.right.pos)
-					}
-					e.doubleValue = left % right
-				default:
-					return false, null
-				}
-				e.literalRaw = bin.left.literalRaw + " " + e.op + " " +  bin.right.literalRaw 
-				e.Type = bin.left.Type
-				e.checkIfConstantExceeds(errs)
-				is = true
-				return
-			case ExpressionTypeString:
-				left := bin.left.stringValue
-				right := bin.right.stringValue
-				if e.Type == ExpressionTypeAdd {
-					if len(left)+len(right) < 65536 {
-						e.Type = ExpressionTypeString
-						e.literalRaw = bin.left.literalRaw + " " + e.op + " " +  bin.right.literalRaw 
-						e.stringValue = left + right
-					} else {
-						return false, null
-					}
-				} else {
-					return false, null
-				}
-			default:
-				return false, null
-			}
-		}
-		// <<  >>
-		if e.Type == ExpressionTypeLsh || e.Type == ExpressionTypeRsh {
-			bin := e.data.(ExpressionBinary)
-			is,err = .constantFold(bin.left , errs)
-			if is == false || err != null {
-			    return
-			}
-			is,err = .constantFold(bin.right , errs)
-			if is == false || err != null {
-			    return
-			}
-			if bin.left.Type != bin.right.Type {
-				return
-			} 
-			if bin.left.isInteger() == false || bin.right.isInteger() == false {
-				return
-			}
+    static fn constantFold(e Expression , errs []error) -> (is bool , err error) {
+        if e.isLiteral() {
+            return true , null
+        }
+        // ~
+        if e.Type == ExpressionTypeBitwiseNot {
+            ee := e.data.(Expression)
+            is , err = ee.constantFold(errs)
+            if err != null || is == false {
+                return
+            }
+            if ee.isInteger() == false {
+                is = false
+                err = new error(sprintf("%s cannot apply '~' on a non-integer expression",
+                        errMsgPrefix(e.pos)))
+                return
+            }
+            e.Type = ee.Type
+            e.longValue = ~ee.longValue
+            e.literalRaw = "~" + ee.literalRaw
+            return
+        }
+        // !
+        if e.Type == ExpressionTypeNot {
+            ee := e.data.(Expression)
+            is , err = ee.constantFold(errs)
+            if err != null || is == false {
+                return
+            }
+            if ee.Type != ExpressionTypeBool {
+                is = false
+                err = new error(sprintf("%s cannot apply '!' on a non-bool expression",
+                        errMsgPrefix(e.pos)))
+                return
+            }
+            e.Type = ExpressionTypeBool
+            e.boolValue = !ee.boolValue
+            e.literalRaw = "!" + ee.literalRaw
+            return
+        }
+        // -
+        if e.Type == ExpressionTypeNegative {
+            ee := e.data.(Expression)
+            is , err = ee.constantFold(errs)
+            if err != null || is == false {
+                return
+            }
+            if ee.isNumber() == false {
+                is = false
+                err = new error(sprintf("%s cannot apply '-' on a '%s'",
+                        errMsgPrefix(e.pos) , e.op))
+                return
+            }
+            e.Type = ee.Type
+            if ee.isInteger() {
+                e.longValue = -ee.longValue
+            } else {
+                e.doubleValue = -ee.doubleValue
+            }
+            e.literalRaw = "-" + ee.literalRaw
+            return
+        }
+        // && and ||
+        if e.Type == ExpressionTypeLogicalAnd || e.Type == ExpressionTypeLogicalOr {
+            bin := e.data.(ExpressionBinary)
+            is , err = .constantFold(bin.left , errs)
+            if is == false || err != null {
+                return
+            }
+            is , err = .constantFold(bin.right , errs)
+            if is == false || err != null {
+                return
+            }
+            if bin.left.Type != ExpressionTypeBool ||
+                bin.right.Type != ExpressionTypeBool {
+                err = e.binaryWrongOpErr()
+                return
+            }
+            is = true
+            if e.Type == ExpressionTypeLogicalAnd {
+                e.boolValue = bin.left.boolValue && bin.right.boolValue
+            } else {
+                e.boolValue = bin.left.boolValue || bin.right.boolValue
+            }
+            e.literalRaw = bin.left.literalRaw + " " + e.op + " " + bin.right.literalRaw
+            e.Type = ExpressionTypeBool
+            return
+        }
+        // + - * / % algebra arithmetic
+        if e.Type == ExpressionTypeAdd ||
+            e.Type == ExpressionTypeSub ||
+            e.Type == ExpressionTypeMul ||
+            e.Type == ExpressionTypeDiv ||
+            e.Type == ExpressionTypeMod {
+            bin := e.data.(ExpressionBinary)
+            is , err = .constantFold(bin.left , errs)
+            if is == false || err != null {
+                return
+            }
+            is , err = .constantFold(bin.right , errs)
+            if is == false || err != null {
+                return
+            }
+            if bin.left.Type != bin.right.Type {
+                return
+            }
+            switch bin.left.Type {
+                case bin.left.isInteger():
+                    left := bin.left.longValue
+                    right := bin.right.longValue
+                    switch e.Type {
+                        case ExpressionTypeAdd:
+                            e.longValue = left + right
+                        case ExpressionTypeSub:
+                            e.longValue = left - right
+                        case ExpressionTypeMul:
+                            e.longValue = left * right
+                        case ExpressionTypeDiv:
+                            if right == 0 {
+                                err = divisionByZeroErr(bin.right.pos)
+                            }
+                            e.longValue = left / right
+                        case ExpressionTypeMod:
+                            if right == 0 {
+                                err = divisionByZeroErr(bin.right.pos)
+                            }
+                            e.longValue = left % right
+                        default:
+                            return false , null
+                    }
+                    if e.Type == ExpressionTypeAdd ||
+                        e.Type == ExpressionTypeSub ||
+                        e.Type == ExpressionTypeMul {
+                        e.checkIfConstantExceeds(errs)
+                    }
+                    e.literalRaw = bin.left.literalRaw + " " + e.op + " " + bin.right.literalRaw
+                    e.Type = bin.left.Type
+                    is = true
+                    e.checkIfConstantExceeds(errs)
+                    return
+                case ExpressionTypeFloat,
+                    ExpressionTypeDouble:
+                    left := bin.left.doubleValue
+                    right := bin.right.doubleValue
+                    switch e.Type {
+                        case ExpressionTypeAdd:
+                            e.doubleValue = left + right
+                        case ExpressionTypeSub:
+                            e.doubleValue = left - right
+                        case ExpressionTypeMul:
+                            e.doubleValue = left * right
+                        case ExpressionTypeDiv:
+                            if right == 0d {
+                                err = divisionByZeroErr(bin.right.pos)
+                            }
+                            e.doubleValue = left / right
+                        case ExpressionTypeMod:
+                            if right == 0d {
+                                err = divisionByZeroErr(bin.right.pos)
+                            }
+                            e.doubleValue = left % right
+                        default:
+                            return false , null
+                    }
+                    e.literalRaw = bin.left.literalRaw + " " + e.op + " " + bin.right.literalRaw
+                    e.Type = bin.left.Type
+                    e.checkIfConstantExceeds(errs)
+                    is = true
+                    return
+                case ExpressionTypeString:
+                    left := bin.left.stringValue
+                    right := bin.right.stringValue
+                    if e.Type == ExpressionTypeAdd {
+                        if len(left) + len(right) < 65536 {
+                            e.Type = ExpressionTypeString
+                            e.literalRaw = bin.left.literalRaw + " " + e.op + " " + bin.right.literalRaw
+                            e.stringValue = left + right
+                        } else {
+                            return false , null
+                        }
+                    } else {
+                        return false , null
+                    }
+                default:
+                    return false , null
+            }
+        }
+        // <<  >>
+        if e.Type == ExpressionTypeLsh || e.Type == ExpressionTypeRsh {
+            bin := e.data.(ExpressionBinary)
+            is , err = .constantFold(bin.left , errs)
+            if is == false || err != null {
+                return
+            }
+            is , err = .constantFold(bin.right , errs)
+            if is == false || err != null {
+                return
+            }
+            if bin.left.Type != bin.right.Type {
+                return
+            }
+            if bin.left.isInteger() == false || bin.right.isInteger() == false {
+                return
+            }
             if e.Type == ExpressionTypeLsh {
                 e.longValue = bin.left.longValue << byte(bin.right.getLongValue())
             } else {
                 e.longValue = bin.left.longValue >> byte(bin.right.getLongValue())
             }
-			e.literalRaw = bin.left.literalRaw + " " + e.op + " " +  bin.right.literalRaw 
-			e.Type = bin.left.Type
-			e.checkIfConstantExceeds(errs)
-			return
-		}
-		// & | ^
-		if e.Type == ExpressionTypeAnd ||
-			e.Type == ExpressionTypeOr ||
-			e.Type == ExpressionTypeXor {
-
-			bin := e.data.(ExpressionBinary)
-			is,err = .constantFold(bin.left , errs)
-			if is == false || err != null {
-			    return
-			}
-			is,err = .constantFold(bin.right, errs)
-			if is == false || err != null {
-			    return
-			}
-			if bin.left.Type != bin.right.Type {
-				return
-			} 
-			if bin.left.isInteger() == false || bin.right.isInteger() == false ||
-				bin.left.Type != bin.right.Type {
-				return
-			}
-			if e.Type == ExpressionTypeAnd {
+            e.literalRaw = bin.left.literalRaw + " " + e.op + " " + bin.right.literalRaw
+            e.Type = bin.left.Type
+            e.checkIfConstantExceeds(errs)
+            return
+        }
+        // & | ^
+        if e.Type == ExpressionTypeAnd ||
+            e.Type == ExpressionTypeOr ||
+            e.Type == ExpressionTypeXor {
+            bin := e.data.(ExpressionBinary)
+            is , err = .constantFold(bin.left , errs)
+            if is == false || err != null {
+                return
+            }
+            is , err = .constantFold(bin.right , errs)
+            if is == false || err != null {
+                return
+            }
+            if bin.left.Type != bin.right.Type {
+                return
+            }
+            if bin.left.isInteger() == false || bin.right.isInteger() == false ||
+                bin.left.Type != bin.right.Type {
+                return
+            }
+            if e.Type == ExpressionTypeAnd {
                 e.longValue = bin.left.longValue & bin.right.longValue
             } else if e.Type == ExpressionTypeOr {
                 e.longValue = bin.left.longValue | bin.right.longValue
             } else {
                 e.longValue = bin.left.longValue ^ bin.right.longValue
             }
-			e.literalRaw = bin.left.literalRaw + " " + e.op + " " +  bin.right.literalRaw 
-			is = true
-			e.Type = bin.left.Type
-			return
-		}
-		if e.Type == ExpressionTypeNot {
-			ee := e.data.(Expression)
-			is, err = ee.constantFold(errs)
-			if err != null {
-				return
-			}
-			if is == false {
-				return
-			}
-			if ee.Type != ExpressionTypeBool {
-				return false, new error(sprintf("!(not) can only apply to bool expression") )
-			}
-			is = true
-			e.Type = ExpressionTypeBool
-			e.boolValue = !ee.boolValue
-			e.literalRaw = "!" + ee.literalRaw
-			return
-		}
-		//  == != > < >= <=
-		if e.Type == ExpressionTypeEq ||
-			e.Type == ExpressionTypeNe ||
-			e.Type == ExpressionTypeGe ||
-			e.Type == ExpressionTypeGt ||
-			e.Type == ExpressionTypeLe ||
-			e.Type == ExpressionTypeLt {
-			bin := e.data.(ExpressionBinary)
-			is,err = .constantFold(bin.left , errs)
-			if is == false || err != null {
-			    return
-			}
-			is,err = .constantFold(bin.right , errs)
-			if is == false || err != null {
-			    return
-			}
-			if bin.left.Type != bin.right.Type {
-				return
-			}
-			if bin.left.Type != bin.right.Type {
-				return false, null
-			}
-			if bin.left.Type == ExpressionTypeBool &&
-				bin.right.Type == ExpressionTypeBool &&
-				e.isEqOrNe() {
-				if e.Type == ExpressionTypeEq {
-					e.boolValue = bin.left.boolValue == bin.right.boolValue
-				} else {
-					e.boolValue = bin.left.boolValue != bin.right.boolValue
-				}
-				e.Type = ExpressionTypeBool
-				if e.boolValue {
-					e.literalRaw = "true"
-				}else {
-					e.literalRaw = "false"
-				}
-				is = true
-				return
-			}		
-			switch bin.left.Type {
-				case ExpressionTypeString:
-					left := bin.left.stringValue
-					right := bin.right.stringValue
-					switch e.Type {
-					case ExpressionTypeEq:
-						e.boolValue = left == right
-					case ExpressionTypeNe:
-						e.boolValue = left != right
-					case ExpressionTypeGe:
-						e.boolValue = left >= right
-					case ExpressionTypeGt:
-						e.boolValue = left > right
-					case ExpressionTypeLe:
-						e.boolValue = left <= right
-					case ExpressionTypeLt:
-						e.boolValue = left < right
-					}
-					is = true
-					e.Type = ExpressionTypeBool
-					return
-				case ExpressionTypeByte,
-					ExpressionTypeShort ,
-					ExpressionTypeChar ,
-					ExpressionTypeInt,
-					ExpressionTypeLong:
-					left := bin.left.longValue
-					right := bin.right.longValue
-					switch e.Type {
-					case ExpressionTypeEq:
-						e.boolValue = left == right
-					case ExpressionTypeNe:
-						e.boolValue = left != right
-					case ExpressionTypeGe:
-						e.boolValue = left >= right
-					case ExpressionTypeGt:
-						e.boolValue = left > right
-					case ExpressionTypeLe:
-						e.boolValue = left <= right
-					case ExpressionTypeLt:
-						e.boolValue = left < right
-					}
-					is = true
-					e.Type = ExpressionTypeBool
-					return
-				case ExpressionTypeFloat,
-					ExpressionTypeDouble:
-					left := bin.left.doubleValue
-					right := bin.right.doubleValue
-					switch e.Type {
-					case ExpressionTypeEq:
-						e.boolValue = left == right
-					case ExpressionTypeNe:
-						e.boolValue = left != right
-					case ExpressionTypeGe:
-						e.boolValue = left >= right
-					case ExpressionTypeGt:
-						e.boolValue = left > right
-					case ExpressionTypeLe:
-						e.boolValue = left <= right
-					case ExpressionTypeLt:
-						e.boolValue = left < right
-					}
-					is = true
-					e.Type = ExpressionTypeBool
-					return
-					return false , null 
-			}
-			return
-		}
-	}
+            e.literalRaw = bin.left.literalRaw + " " + e.op + " " + bin.right.literalRaw
+            is = true
+            e.Type = bin.left.Type
+            return
+        }
+        if e.Type == ExpressionTypeNot {
+            ee := e.data.(Expression)
+            is , err = ee.constantFold(errs)
+            if err != null {
+                return
+            }
+            if is == false {
+                return
+            }
+            if ee.Type != ExpressionTypeBool {
+                return false , new error(sprintf("!(not) can only apply to bool expression"))
+            }
+            is = true
+            e.Type = ExpressionTypeBool
+            e.boolValue = !ee.boolValue
+            e.literalRaw = "!" + ee.literalRaw
+            return
+        }
+        //  == != > < >= <=
+        if e.Type == ExpressionTypeEq ||
+            e.Type == ExpressionTypeNe ||
+            e.Type == ExpressionTypeGe ||
+            e.Type == ExpressionTypeGt ||
+            e.Type == ExpressionTypeLe ||
+            e.Type == ExpressionTypeLt {
+            bin := e.data.(ExpressionBinary)
+            is , err = .constantFold(bin.left , errs)
+            if is == false || err != null {
+                return
+            }
+            is , err = .constantFold(bin.right , errs)
+            if is == false || err != null {
+                return
+            }
+            if bin.left.Type != bin.right.Type {
+                return
+            }
+            if bin.left.Type != bin.right.Type {
+                return false , null
+            }
+            if bin.left.Type == ExpressionTypeBool &&
+                bin.right.Type == ExpressionTypeBool &&
+                e.isEqOrNe() {
+                if e.Type == ExpressionTypeEq {
+                    e.boolValue = bin.left.boolValue == bin.right.boolValue
+                } else {
+                    e.boolValue = bin.left.boolValue != bin.right.boolValue
+                }
+                e.Type = ExpressionTypeBool
+                if e.boolValue {
+                    e.literalRaw = "true"
+                } else {
+                    e.literalRaw = "false"
+                }
+                is = true
+                return
+            }
+            switch bin.left.Type {
+                case ExpressionTypeString:
+                    left := bin.left.stringValue
+                    right := bin.right.stringValue
+                    switch e.Type {
+                        case ExpressionTypeEq:
+                            e.boolValue = left == right
+                        case ExpressionTypeNe:
+                            e.boolValue = left != right
+                        case ExpressionTypeGe:
+                            e.boolValue = left >= right
+                        case ExpressionTypeGt:
+                            e.boolValue = left > right
+                        case ExpressionTypeLe:
+                            e.boolValue = left <= right
+                        case ExpressionTypeLt:
+                            e.boolValue = left < right
+                    }
+                    is = true
+                    e.Type = ExpressionTypeBool
+                    return
+                case ExpressionTypeByte,
+                    ExpressionTypeShort,
+                    ExpressionTypeChar,
+                    ExpressionTypeInt,
+                    ExpressionTypeLong:
+                    left := bin.left.longValue
+                    right := bin.right.longValue
+                    switch e.Type {
+                        case ExpressionTypeEq:
+                            e.boolValue = left == right
+                        case ExpressionTypeNe:
+                            e.boolValue = left != right
+                        case ExpressionTypeGe:
+                            e.boolValue = left >= right
+                        case ExpressionTypeGt:
+                            e.boolValue = left > right
+                        case ExpressionTypeLe:
+                            e.boolValue = left <= right
+                        case ExpressionTypeLt:
+                            e.boolValue = left < right
+                    }
+                    is = true
+                    e.Type = ExpressionTypeBool
+                    return
+                case ExpressionTypeFloat,
+                    ExpressionTypeDouble:
+                    left := bin.left.doubleValue
+                    right := bin.right.doubleValue
+                    switch e.Type {
+                        case ExpressionTypeEq:
+                            e.boolValue = left == right
+                        case ExpressionTypeNe:
+                            e.boolValue = left != right
+                        case ExpressionTypeGe:
+                            e.boolValue = left >= right
+                        case ExpressionTypeGt:
+                            e.boolValue = left > right
+                        case ExpressionTypeLe:
+                            e.boolValue = left <= right
+                        case ExpressionTypeLt:
+                            e.boolValue = left < right
+                    }
+                    is = true
+                    e.Type = ExpressionTypeBool
+                    return
+                    return false , null
+            }
+            return
+        }
+    }
 }
+
+

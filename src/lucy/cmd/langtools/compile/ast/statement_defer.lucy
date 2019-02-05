@@ -1,27 +1,30 @@
 import "java/lang/Object"
 
 public class StatementDefer {
-	public pos            Pos
-	public labels         []StatementLabel
-	public startPc        int         // for jvm
-	public stackMapState  Object // *jvm.StackMapState
-	public block          Block = new Block()
-	public exceptionClass Class
-	public inlineComment string 
-	public isOneStatement bool 
-	
-	public fn resetLabels() {
-		for _, v := range this.labels {
-			v.reset()
-		}
-	}
-	
-	fn registerExceptionClass(c Class) -> (err error) {
-		if this.exceptionClass != null {
-			return new error(sprintf("exception class already registed as '%s'",
-				this.exceptionClass.name))
-		}
-		this.exceptionClass = c
-		return null
-	}
+    public pos            Pos             
+    public labels         []StatementLabel
+    public startPc        int              // for jvm
+    public stackMapState  Object           // *jvm.StackMapState
+    public block          Block = new Block()
+    public exceptionClass Class           
+    public inlineComment  string          
+    public isOneStatement bool            
+
+    public fn resetLabels() {
+        for _ , v := range this.labels {
+            v.reset()
+        }
+    }
+
+    fn registerExceptionClass(c Class) -> (err error) {
+        if this.exceptionClass != null {
+            return new error(
+                sprintf("exception class already registed as '%s'",
+                    this.exceptionClass.name))
+        }
+        this.exceptionClass = c
+        return null
+    }
 }
+
+

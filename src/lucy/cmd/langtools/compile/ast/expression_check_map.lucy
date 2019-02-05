@@ -11,8 +11,8 @@ class ExpressionCheckMap {
         noType := m.Type == null
         if noType && len(m.keyValuePairs) == 0 {
             errs.append(new error(sprintf("%s map literal has no type and no initiational values," +
-                "cannot inference it`s type",
-                e.pos.errMsgPrefix())))
+                            "cannot inference it`s type",
+                        e.pos.errMsgPrefix())))
             return null
         }
         if m.Type == null {
@@ -48,12 +48,12 @@ class ExpressionCheckMap {
                     if mapK.assignAble(block , errs , kType) == false {
                         if noType {
                             errs.append(new error(sprintf("%s mix '%s' and '%s' for map value",
-                                v.key.pos.errMsgPrefix(),
-                                kType.typeString() , mapK.typeString())))
+                                        v.key.pos.errMsgPrefix(),
+                                        kType.typeString() , mapK.typeString())))
                         } else {
                             errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-                                v.key.pos.errMsgPrefix(),
-                                kType.typeString() , mapK.typeString())))
+                                        v.key.pos.errMsgPrefix(),
+                                        kType.typeString() , mapK.typeString())))
                         }
 
                     }
@@ -125,12 +125,12 @@ class ExpressionCheckMap {
                 if mapV.assignAble(block , errs , vType) == false {
                     if noType {
                         errs.append(new error(sprintf("%s mix '%s' and '%s' for map key",
-                            errMsgPrefix(v.value.pos),
-                            vType.typeString() , mapV.typeString())))
+                                    errMsgPrefix(v.value.pos),
+                                    vType.typeString() , mapV.typeString())))
                     } else {
                         errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-                            errMsgPrefix(v.value.pos),
-                            vType.typeString() , mapV.typeString())))
+                                    errMsgPrefix(v.value.pos),
+                                    vType.typeString() , mapV.typeString())))
                     }
 
                 }

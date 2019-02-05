@@ -11,8 +11,7 @@ public class Expression {
     public isCompilerAuto        bool         // compile auto expression
     public value                 Type        
     public multiValues           []Type      
-    public pos                   Pos         
-    // public endPos                Pos         
+    public pos                   Pos                 
     public data                  Object      
     public isStatementExpression bool        
     public op                    string      

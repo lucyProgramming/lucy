@@ -76,7 +76,7 @@ public class Fmt {
             panic(n.node.getClass().toString() + " not handle")
         }
     }
-    
+
     fn formatConstant(indent string , c ast.Constant) -> (format string = "") {
         format = indent
         if c.isPublic() {
@@ -90,7 +90,7 @@ public class Fmt {
             " = " + this.formatExpression(indent + this.indentIncrement , c.defaultValueExpression)
         if c.inlineComment != null {
             format += " //" + c.inlineComment
-        }else {
+        } else {
             format += "\n"
         }
     }
@@ -177,7 +177,6 @@ public class Fmt {
                     } else {
                         format += ","
                     }
-
                 }
                 if v.containsLf {
                     format += "\n"
@@ -954,7 +953,7 @@ public class Fmt {
                     format += this.indentIncrement + indent
                 }
                 for k , v := range call.args {
-                    format += this.formatExpression(indent , v)
+                    format += this.formatExpression(indent + this.indentIncrement , v)
                     if k != len(call.args) - 1 {
                         if v.containsLfOrInlineComment() == false {
                             format += " , "
@@ -984,7 +983,7 @@ public class Fmt {
                     format += this.indentIncrement + indent
                 }
                 for k , v := range call.args {
-                    format += this.formatExpression(indent , v)
+                    format += this.formatExpression(indent + this.indentIncrement , v)
                     if k != len(call.args) - 1 {
                         if v.containsLfOrInlineComment() == false {
                             format += " , "
@@ -1025,7 +1024,7 @@ public class Fmt {
                     format += this.indentIncrement + indent
                 }
                 for k , v := range n.args {
-                    format += this.formatExpression(indent , v)
+                    format += this.formatExpression(indent + this.indentIncrement , v)
                     if k != len(n.args) - 1 {
                         if v.containsLfOrInlineComment() == false {
                             format += " , "

@@ -21,7 +21,7 @@ class ExpressionCheckVar {
         if ev.Type == null && len(ev.initValues) == 0 {
             // looks impossible
             errs.append(new error(sprintf("%s expression var have not type and no initValues",
-                errMsgPrefix(e.pos))))
+                        errMsgPrefix(e.pos))))
             return
         }
         var err error
@@ -39,24 +39,24 @@ class ExpressionCheckVar {
             if len(ev.variables) > len(valueTypes) {
                 pos := ev.initValues[len(ev.initValues) - 1].pos // last Pos
                 errs.append(new error(sprintf("%s too few values , assign %d values to %d destinations",
-                    pos.errMsgPrefix(),
-                    len(valueTypes),
-                    len(ev.variables))))
+                            pos.errMsgPrefix(),
+                            len(valueTypes),
+                            len(ev.variables))))
             } else if len(ev.variables) < len(valueTypes) {
                 pos := getExtraExpressionPos(ev.initValues , len(ev.variables))
                 errs.append(new error(sprintf("%s too many values , assign %d values to %d destinations",
-                    pos.errMsgPrefix(),
-                    len(valueTypes),
-                    len(ev.variables))))
+                            pos.errMsgPrefix(),
+                            len(valueTypes),
+                            len(ev.variables))))
             }
             for k , v := range ev.variables {
                 if k < len(valueTypes) && valueTypes[k] != null {
                     if v.Type != null {
                         if v.Type.assignAble(block , errs , valueTypes[k]) == false {
                             err = new error(sprintf("%s cannot assign  '%s' to '%s'",
-                                errMsgPrefix(valueTypes[k].pos),
-                                valueTypes[k].typeString(),
-                                v.Type.typeString()))
+                                    errMsgPrefix(valueTypes[k].pos),
+                                    valueTypes[k].typeString(),
+                                    v.Type.typeString()))
                             errs.append(err)
                             continue
                         }

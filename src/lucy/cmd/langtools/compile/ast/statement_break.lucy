@@ -12,7 +12,7 @@ public class StatementBreak {
         }
         if block.inheritedAttribute.Defer != null {
             return []error{new error(sprintf("%s cannot has 'break' in 'defer'",
-                    this.pos.errMsgPrefix()))}
+                        this.pos.errMsgPrefix()))}
         }
         if t , ok := block.inheritedAttribute.forBreak.(StatementFor) ; ok {
             this.statementFor = t

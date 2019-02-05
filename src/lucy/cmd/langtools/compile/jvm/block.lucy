@@ -220,22 +220,22 @@ class BuildBlock {
 			innerClass.innerClass = s.Class.name
 			innerClass.outerClass = c.name
 			innerClass.name = oldName
-			if c.Class.AttributeInnerClasses == null{
-			    c.Class.AttributeInnerClasses = new cg.AttributeInnerClasses()
+			if c.Class.attributeInnerClasses == null{
+			    c.Class.attributeInnerClasses = new cg.AttributeInnerClasses()
 			}
-            if c.Class.AttributeInnerClasses.classes == null {
-                c.Class.AttributeInnerClasses.classes = []cg.InnerClass{}
+            if c.Class.attributeInnerClasses.classes == null {
+                c.Class.attributeInnerClasses.classes = []cg.InnerClass{}
             }
-            c.Class.AttributeInnerClasses.classes.append(innerClass)
+            c.Class.attributeInnerClasses.classes.append(innerClass)
 			t := this.bp.buildClass(s.Class)
 			this.bp.putClass(t)
-			if t.Class.AttributeInnerClasses == null {
-			    t.Class.AttributeInnerClasses = new cg.AttributeInnerClasses()
+			if t.Class.attributeInnerClasses == null {
+			    t.Class.attributeInnerClasses = new cg.AttributeInnerClasses()
 			}
-			if t.Class.AttributeInnerClasses.classes == null {
-			    t.Class.AttributeInnerClasses.classes = []cg.InnerClass{innerClass}
+			if t.Class.attributeInnerClasses.classes == null {
+			    t.Class.attributeInnerClasses.classes = []cg.InnerClass{innerClass}
 			}else {
-                 t.Class.AttributeInnerClasses.classes.append(innerClass)
+                 t.Class.attributeInnerClasses.classes.append(innerClass)
 			}
 		case ast.StatementTypeNop:
 			// nop
