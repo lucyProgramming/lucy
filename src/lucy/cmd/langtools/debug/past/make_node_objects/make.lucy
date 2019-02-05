@@ -706,7 +706,7 @@ public class MakeNodesObjects {
                 ret := new map{string -> Object}()
                 ret["op"] = e.op
                 slice := e.data.(ast.ExpressionSlice)
-                ret["expression"] = this.makeExpression(slice.expressionOn)
+                ret["expression"] = this.makeExpression(slice.on)
                 if slice.start != null {
                     ret["start"] = this.makeExpression(slice.start)
                 }

@@ -944,14 +944,14 @@ public class Fmt {
                             indent +
                             this.indentIncremental +
                             call.name + "("
-                            indent += this.indentIncremental 
+                        indent += this.indentIncremental
                     } else if call.Expression.inlineComment != null {
                         format += this.formatExpression(indent , call.Expression) +
-                            ". //" + call.Expression.inlineComment + 
+                            ". //" + call.Expression.inlineComment +
                             indent +
                             this.indentIncremental +
                             call.name + "("
-                            indent += this.indentIncremental 
+                        indent += this.indentIncremental
                     } else {
                         format += this.formatExpression(indent , call.Expression) + "." + call.name + "("
                     }
@@ -1140,7 +1140,7 @@ public class Fmt {
                 format = "range " + this.formatExpression(indent + this.indentIncremental , e.data.(ast.Expression))
             case ast.ExpressionTypeSlice:
                 s := e.data.(ast.ExpressionSlice)
-                format += this.formatExpression(indent , s.expressionOn) + "["
+                format += this.formatExpression(indent , s.on) + "["
                 if s.start != null {
                     format += this.formatExpression(indent + this.indentIncremental , s.start)
                 }

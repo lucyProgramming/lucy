@@ -21,7 +21,7 @@ class BuildExpressionSlice {
         }
 
         slice := e.data.(ast.ExpressionSlice)
-        maxStack = this.eb.build(c , code , slice.expressionOn , context , state)
+        maxStack = this.eb.build(c , code , slice.on , context , state)
         state.pushStack(c , state.newObjectVariableType(javaStringClass))
         // build start
         stack := this.eb.build(c , code , slice.start , context , state)
@@ -56,7 +56,7 @@ class BuildExpressionSlice {
     fn buildSlice(c cg.ClassHighLevel , code cg.AttributeCode,
         e ast.Expression , context Context , state StackMapState) -> (maxStack char) {
         slice := e.data.(ast.ExpressionSlice)
-        if slice.expressionOn.value.Type == ast.VariableTypeString {
+        if slice.on.value.Type == ast.VariableTypeString {
             return this.buildStringSlice(c , code , e , context , state)
         }
         stackLength := len(state.stacks)
@@ -65,8 +65,8 @@ class BuildExpressionSlice {
         }
 
         meta := ArrayMetas[e.value.array.Type]
-        maxStack = this.eb.build(c , code , slice.expressionOn , context , state)
-        state.pushStack(c , slice.expressionOn.value)
+        maxStack = this.eb.build(c , code , slice.on , context , state)
+        state.pushStack(c , slice.on.value)
         if slice.end != null {
             // build start
             stack := this.eb.build(c , code , slice.start , context , state)

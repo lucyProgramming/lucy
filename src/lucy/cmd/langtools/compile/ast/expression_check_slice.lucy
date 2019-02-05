@@ -2,7 +2,7 @@
 class ExpressionCheckSlice {
 	static fn check(e Expression , block Block, errs []error) ->(valueType Type) {
 		on := e.data.(ExpressionSlice)
-		sliceOn, es := on.expressionOn.checkSingleValueContextExpression(block)
+		sliceOn, es := on.on.checkSingleValueContextExpression(block)
 		errs.appendAll(es)
 		if sliceOn == null {
 			return

@@ -419,7 +419,7 @@ class ExpressionSuffix extends ParserFather {
                         newExpression.pos = this.parser.mkPos()
                         slice := new ast.ExpressionSlice()
                         newExpression.data = slice
-                        slice.expressionOn = prefix
+                        slice.on = prefix
                         slice.end = end
                         prefix = newExpression
                     } else {
@@ -448,7 +448,7 @@ class ExpressionSuffix extends ParserFather {
                             slice := new ast.ExpressionSlice()
                             newExpression.data = slice
                             slice.start = e
-                            slice.expressionOn = prefix
+                            slice.on = prefix
                             slice.end = end
                             prefix = newExpression
                         } else {
