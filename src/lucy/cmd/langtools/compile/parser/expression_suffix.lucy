@@ -672,6 +672,8 @@ class ExpressionSuffix extends ParserFather {
             call.Expression = selection.Expression
             call.autoCompletion = selection.autoCompletion
             call.args = args
+            call.Expression.containsLf = selection.containsLf
+            call.Expression.inlineComment = selection.inlineComment
             call.lpContainsLf = lpContainsLf
             call.lpInlineComment = lpInlineComment
             result.pos = on.pos
