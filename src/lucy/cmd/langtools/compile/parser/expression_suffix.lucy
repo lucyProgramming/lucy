@@ -138,7 +138,7 @@ class ExpressionSuffix extends ParserFather {
                 this.parser.ifTokenIsLfThenSkip(true)
                 if this.parser.token.Type != lex.TokenRp {
                     err = new error(sprintf("%s '(' and ')' not matched, but '%s'",
-                        this.parser.errMsgPrefix() , this.parser.token.description))
+                            this.parser.errMsgPrefix() , this.parser.token.description))
                     this.parser.errs.append(err)
                     return prefix , null
                 }
@@ -287,10 +287,10 @@ class ExpressionSuffix extends ParserFather {
                 }
                 this.next(lfIsToken) // skip (
                 if this.parser.token.Type == lex.TokenLf {
-                    n.lpContainsLf = true 
+                    n.lpContainsLf = true
                     this.next(lfNotToken)
-                }else if this.parser.token.Type == lex.TokenComment {
-                    n.lpInlineComment = this.parser.token.stringValue 
+                } else if this.parser.token.Type == lex.TokenComment {
+                    n.lpInlineComment = this.parser.token.stringValue
                     this.next(lfNotToken)
                 }
                 var es []ast.Expression
@@ -358,7 +358,7 @@ class ExpressionSuffix extends ParserFather {
                 return this.parseSuffixExpression()
             default:
                 err = new error(sprintf("%s unkown begining of a expression, token:'%s'",
-                    this.parser.errMsgPrefix() , this.parser.token.description))
+                        this.parser.errMsgPrefix() , this.parser.token.description))
                 this.parser.errs.append(err)
                 return null , err
         }
@@ -517,7 +517,6 @@ class ExpressionSuffix extends ParserFather {
                     autoCompletion := this.parser.token.autoCompletion
                     this.next(lfIsToken) // skip . 
                     if autoCompletion {
-                        // print("!!!!!!!!!!",prefix.op)
                         newExpression := new ast.Expression()
                         newExpression.pos = pos
                         newExpression.op = "selection"
@@ -601,7 +600,7 @@ class ExpressionSuffix extends ParserFather {
                         this.next(lfIsToken)
                     } else {
                         err = new error(sprintf("%s expect  'identifier' or '(',but '%s'",
-                            this.parser.errMsgPrefix() , this.parser.token.description))
+                                this.parser.errMsgPrefix() , this.parser.token.description))
                         this.parser.errs.append(err)
                         return prefix , err
                     }
@@ -649,8 +648,8 @@ class ExpressionSuffix extends ParserFather {
             this.parser.ifTokenIsLfThenSkip(true)
             if this.parser.token.Type != lex.TokenRp {
                 err = new error(sprintf("%s except ')' ,but '%s'",
-                    this.parser.errMsgPrefix(pos),
-                    this.parser.token.description))
+                        this.parser.errMsgPrefix(pos),
+                        this.parser.token.description))
                 this.parser.errs.append(err)
             }
         }
@@ -691,6 +690,7 @@ class ExpressionSuffix extends ParserFather {
         return result , null
     }
 }
+
 
 /*
 		if this.parser.token.Type == lex.TokenLt { // <

@@ -3,8 +3,8 @@ import "java/lang/Integer"
 
 public class Error {
     public pos ast.Pos
-    public err string
-    
+    public err string 
+
     public static fn convertErrors(ess []error) -> (result map{string -> Error[]}) {
         es := new map{string -> []Error}()
         for e := range ess {
@@ -13,13 +13,13 @@ public class Error {
                 e.pos = new ast.Pos()
                 e.pos.filename = t.pos.filename
                 e.pos.startLine = t.pos.startLine
-                e.pos.startColumnOffset  = t.pos.startColumnOffset
+                e.pos.startColumnOffset = t.pos.startColumnOffset
                 e.pos.endLine = t.pos.endLine
                 e.pos.endColumnOffset = t.pos.endColumnOffset
                 e.err = t.err
                 if es.keyExist(e.pos.filename) {
                     es[e.pos.filename].append(e)
-                }else {
+                } else {
                     es[e.pos.filename] = [e]
                 }
                 continue
@@ -32,19 +32,19 @@ public class Error {
             rest := v[v.indexOf(".lucy") + 6:] // skip :
             line := Integer.parseInt(rest[:rest.indexOf(":")])
             line--
-            rest = rest[rest.indexOf(":") + 1 :]
+            rest = rest[rest.indexOf(":") + 1:]
             var index int
             var column int
-            for k,v := range rest {
+            for k , v := range rest {
                 index = k
                 if v >= '0' && v <= '9' {
                     column = column * 10 + (v - '0')
-                }else {
+                } else {
                     break
                 }
-            } 
+            }
             column--
-            rest =rest[index:]
+            rest = rest[index:]
             t := new Error()
             t.pos = new ast.Pos()
             t.pos.filename = filename
@@ -55,13 +55,15 @@ public class Error {
             t.err = rest
             if es.keyExist(filename) {
                 es[filename].append(t)
-            }else {
+            } else {
                 es[filename] = [t]
             }
         }
         result = new map{string -> Error[]}()
-        for k,v := range es {
+        for k , v := range es {
             result[k] = copy(new Error[](len(v)) , v)
         }
     }
 }
+
+

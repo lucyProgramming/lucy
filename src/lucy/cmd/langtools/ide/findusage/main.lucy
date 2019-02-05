@@ -26,11 +26,12 @@ public fn findUsage(filename string,
         }
     }
 
-    result = sortUsages(new FindUsage(lucyFiles,
-        packageName,
-        true,
-        common.getLucyPath(),
-        scope).find())
+    result = sortUsages(
+        new FindUsage(lucyFiles,
+            packageName,
+            true,
+            common.getLucyPath(),
+            scope).find())
 }
 
 fn main(args []string) {

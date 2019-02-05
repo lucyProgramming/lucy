@@ -55,7 +55,7 @@ class Fmt implements HttpHandler {
         }
         {
 
-            formator := new ideLib.Fmt("    ")
+            formator := new ideLib.Fmt()
             s := formator.fmt(tops)
             bs := byte[](s)
             header := exchange.getResponseHeaders()

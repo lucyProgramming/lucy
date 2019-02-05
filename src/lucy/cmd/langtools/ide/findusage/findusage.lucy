@@ -4,66 +4,65 @@ import "lucy/os"
 import "java/io"
 import "lucy/cmd/langtools/common"
 
-
 class FindUsage {
-    lucyFiles []ide.LucyFile
-    packageName string
-    printErr bool
-    lucyPath []string
-    loader ide.PackageLoader
-    scope string 
-    
-    fn FindUsage(lucyFiles []ide.LucyFile , packageName string , printErr bool , lucyPath []string, scope string) {
+    lucyFiles   []ide.LucyFile   
+    packageName string           
+    printErr    bool             
+    lucyPath    []string         
+    loader      ide.PackageLoader
+    scope       string           
+
+    fn FindUsage(lucyFiles []ide.LucyFile , packageName string , printErr bool , lucyPath []string , scope string) {
         this.super()
         this.lucyFiles = lucyFiles
         this.packageName = packageName
         this.printErr = printErr
-        this.lucyPath = lucyPath 
-        this.scope =  scope
-        
+        this.lucyPath = lucyPath
+        this.scope = scope
+
     }
-    
-    fn find() -> (result []ast.Usage){
-        loader := new ide.PackageLoader(common.getLucyPath() ,common.getClassPath())
+
+    fn find() -> (result []ast.Usage) {
+        loader := new ide.PackageLoader(common.getLucyPath() , common.getClassPath())
         this.loader = loader
         p , es := ide.parseAstAndTypeCheck(this.packageName , this.lucyFiles , false , "" , -1 , loader)
         if this.printErr {
-            for v := range es{
+            for v := range es {
                 os.stderr.println(v.getMessage())
             }
         }
         result = p.findUsage
-        /* 
+        /*
             set this package to cache 
             when another trying to load this pacakge could use the cache and the "findUsage" has created in memory
         */
         loader.setCache(this.packageName , p)
-        
+
         if p.findUsageIsGlobal {
             if this.scope != null && this.scope != "" {
                 lucyPath , pacakgenName := ide.locateDir(this.scope)
                 this.searchDir(pacakgenName , lucyPath + "/src/" + pacakgenName)
-            }else {
+            } else {
                 this.searchLucyPath()
-            }    
+            }
         }
     }
-    
+
     fn searchLucyPath() {
-        for _,v := range this.lucyPath {
+        for _ , v := range this.lucyPath {
             this.searchDir("" , v + "/src/")
         }
     }
 
-    fn searchDir(packageName string , dir string ) {
+    fn searchDir(packageName string , dir string) {
         list := (new io.File(dir)).list()
-        containsLucyFile := false 
+        containsLucyFile := false
         for v := range list {
             if subDir := dir + "/" + v ; new io.File(subDir).isDirectory() {
                 if packageName == "" {
                     this.searchDir(v , subDir)
                     continue
-                }else {
+                } else {
                     this.searchDir(packageName + "/" + v , subDir)
                     continue
                 }
@@ -74,24 +73,25 @@ class FindUsage {
         }
         if containsLucyFile == false {
             // no lucy files
-            return 
+            return
         }
         if packageName == "lucy/lang" {
             // this is a core package 
-            return 
+            return
         }
         if this.loader.getCache(packageName) != null {
             //handled 
             // when handle sub directory may load the package
-            return 
+            return
         }
         defer {
             if e := catch() ; e != null {
                 e.printStackTrace()
             }
         }
+
         lucyFiles := ide.readLucyFiles(ide.getLucyFiles(dir))
-        p , es := ide.parseAstAndTypeCheck(packageName , lucyFiles , false ,"" , -1 , this.loader)
+        p , es := ide.parseAstAndTypeCheck(packageName , lucyFiles , false , "" , -1 , this.loader)
         if this.printErr {
             for v := range es {
                 v.printStackTrace()
@@ -99,6 +99,8 @@ class FindUsage {
             }
         }
         // set this package to jvm 
-        this.loader.setCache(packageName , p )
+        this.loader.setCache(packageName , p)
     }
 }
+
+

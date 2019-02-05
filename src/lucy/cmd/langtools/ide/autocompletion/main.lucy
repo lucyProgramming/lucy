@@ -19,7 +19,6 @@ public fn autoCompletion(file string , pos int , bs []byte) -> (result []ast.Aut
             v.autoCompletion = pos
         }
     }
-
     result = new AutoCompletion(lucyFiles , packageName , file , pos >> 16).getAutoCompletion()
 }
 
@@ -34,7 +33,9 @@ fn main(args []string) {
         bs = javaArray2Lucy(t)
     }
     items := autoCompletion(file , pos , bs)
-    result := copy(new ast.AutoCompletionItem[](len(items)) , items)
+    result := copy(
+        new ast.AutoCompletionItem[](
+            len(items)) , items)
     bs , err := json.encode(result)
     if err != null {
         panic(err)
