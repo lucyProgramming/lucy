@@ -2,8 +2,6 @@ import "lucy/cmd/langtools/compile/ast"
 import "java/lang/Object"
 import "lucy/os"
 
-typealias filename = string
-
 
 class ReName {
     usages    ast.Usage[]
@@ -40,7 +38,7 @@ class ReName {
             // panic("contruction method not allow rename")
             return
         }
-        grouyByFileName := new map{filename -> []ast.Usage}()
+        grouyByFileName := new map{string -> []ast.Usage}()
         for _ , v := range this.usages {
             if grouyByFileName.keyExist(v.pos.filename) {
                 grouyByFileName[v.pos.filename].append(v)
@@ -49,7 +47,6 @@ class ReName {
             }
 
         }
-
         if t , ok := this.on.(ast.Import) ; ok == true {
             // import only can be used in on file 
             var u []ast.Usage

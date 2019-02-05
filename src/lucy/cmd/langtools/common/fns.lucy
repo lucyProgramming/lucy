@@ -1,4 +1,4 @@
-import "java/lang/Double" 
+import "java/lang/Double"
 import "java/lang/Long"
 import "java/lang/Float"
 import "java/io"

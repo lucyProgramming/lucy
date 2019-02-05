@@ -354,11 +354,12 @@ public class BuildPackage {
 
     fn mkGlobalFunctions() {
         ms := new map{string -> cg.MethodHighLevel}()
-        for k , f := range this.Package.block.functions { //   first round
+        for k , f := range this.Package.block.functions { //    first round
             if f.templateFunction != null {
                 t := new cg.AttributeTemplateFunction()
                 t.name = f.name
                 t.filename = f.pos.filename
+                t.accessFlags = f.accessFlags
                 t.startLine = char(f.pos.endLine)
                 t.startColumn = char(f.pos.endColumnOffset)
                 t.code = string(f.sourceCode)
@@ -414,7 +415,6 @@ public class BuildPackage {
         //dump main c
         f := new io.FileOutputStream(this.dir + "/main.class" , false)
         defer {
-
             f.close()
         }
 
@@ -422,7 +422,6 @@ public class BuildPackage {
         for _ , c := range this.classes {
             f := new io.FileOutputStream(this.dir + "/" + common.getBaseName(c.name) + ".class" , false)
             defer {
-
                 f.close()
             }
 
