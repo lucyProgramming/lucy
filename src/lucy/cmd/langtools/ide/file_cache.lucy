@@ -41,7 +41,7 @@ class FileCacher {
         if this.maxSize < 0 {
             //
             f = this.readLucyFile(filename)
-            return f
+            return
         }
         if this.caches.keyExist(filename) == false {
             f = this.readLucyFile(filename)

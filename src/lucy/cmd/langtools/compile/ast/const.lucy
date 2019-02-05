@@ -17,8 +17,7 @@ public class Constant {
     public boolValue              bool      
     public findUsage              bool      
     public locateDefinition       bool      
-           findUsageInstances     []Usage   
-    public rename                 bool      
+           findUsageInstances     []Usage       
     public getHover               bool      
 
     /*

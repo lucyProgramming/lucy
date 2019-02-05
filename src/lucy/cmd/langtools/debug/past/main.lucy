@@ -10,92 +10,69 @@ import "lucy/encoding/json"
 import "lucy/cmd/langtools/debug/past/make_node_objects"
 import "lucy/cmd/langtools/compile/parser"
 
-
 fn main(args []string) {
-	lucyFiles := new map { string-> []ast.TopNode}()
-	nodes :=  []ast.TopNode{}
-	errs := []error{}
-	if len(args) == 0 {
-		print("no file to parse")
-		os.exit(1)
-	}
-	for _, v := range args {
-		b, err := os.readFile(v)
-		if err != null {
-			panic(err)
-		}
-		bs := javaArray2Lucy(b)
-		//UTF-16 (BE)
-		if len(bs) >= 2 &&
-			bs[0] == 0xfe &&
-			bs[1] == 0xff {
-			printf("file:%s looks like UTF-16(BE) file\n", v)
-			os.exit(2)
-		}
-		//UTF-16 (LE)
-		if len(bs) >= 2 &&
-			bs[0] == 0xff &&
-			bs[1] == 0xfe {
-			printf("file:%s looks like UTF-16(LE) file\n", v)
-			os.exit(2)
-		}
-		//UTF-32 (LE)
-		if len(bs) >= 4 &&
-			bs[0] == 0x0 &&
-			bs[1] == 0x0 &&
-			bs[2] == 0xfe &&
-			bs[3] == 0xff {
-			printf("file:%s looks like UTF-32(LE) file\n", v)
-			os.exit(2)
-		}
-		//UTF-32 (BE)
-		if len(bs) >= 4 &&
-			bs[0] == 0xff &&
-			bs[1] == 0xfe &&
-			bs[2] == 0x0 &&
-			bs[3] == 0x0 {
-			printf("file:%s looks like UTF-32(BE) file\n", v)
-			os.exit(2)
-		}
-		
-		if len(bs) >= 3 &&
-			bs[0] == 0xef &&
-			bs[1] == 0xbb &&
-			bs[2] == 0xbf {
-			// utf8 bom
-			bs = bs[3:]
-		}
-		length := len(nodes)
-		es := parser.parse(nodes, v, bs, false, 10 , -1,-1,-1 , -1 , -1)
-		lucyFiles[v] = nodes[length:len(nodes)]
-		errs.appendAll(es)
-	}
-	for _, v := range errs {
-		print(v)
-	}
-	ret := (new make_node_objects.MakeNodesObjects()).make(lucyFiles)
-	bs, _ := json.encode(ret , "\t")
-	print(string(bs))
+    lucyFiles := new map{string -> []ast.TopNode}()
+    nodes := []ast.TopNode{}
+    errs := []error{}
+    if len(args) == 0 {
+        print("no file to parse")
+        os.exit(1)
+    }
+    for _ , v := range args {
+        b , err := os.readFile(v)
+        if err != null {
+            panic(err)
+        }
+        bs := javaArray2Lucy(b)
+        //UTF-16 (BE)
+        if len(bs) >= 2 &&
+            bs[0] == 0xfe &&
+            bs[1] == 0xff {
+            printf("file:%s looks like UTF-16(BE) file\n" , v)
+            os.exit(2)
+        }
+        //UTF-16 (LE)
+        if len(bs) >= 2 &&
+            bs[0] == 0xff &&
+            bs[1] == 0xfe {
+            printf("file:%s looks like UTF-16(LE) file\n" , v)
+            os.exit(2)
+        }
+        //UTF-32 (LE)
+        if len(bs) >= 4 &&
+            bs[0] == 0x0 &&
+            bs[1] == 0x0 &&
+            bs[2] == 0xfe &&
+            bs[3] == 0xff {
+            printf("file:%s looks like UTF-32(LE) file\n" , v)
+            os.exit(2)
+        }
+        //UTF-32 (BE)
+        if len(bs) >= 4 &&
+            bs[0] == 0xff &&
+            bs[1] == 0xfe &&
+            bs[2] == 0x0 &&
+            bs[3] == 0x0 {
+            printf("file:%s looks like UTF-32(BE) file\n" , v)
+            os.exit(2)
+        }
+        if len(bs) >= 3 &&
+            bs[0] == 0xef &&
+            bs[1] == 0xbb &&
+            bs[2] == 0xbf {
+            // utf8 bom
+            bs = bs[3:]
+        }
+        length := len(nodes)
+        es := parser.parse(nodes , v , bs , false , 10 , -1 , -1 , -1 , -1)
+        lucyFiles[v] = nodes[length : len(nodes)]
+        errs.appendAll(es)
+    }
+    for _ , v := range errs {
+        print(v)
+    }
+    ret := (new make_node_objects.MakeNodesObjects()).make(lucyFiles)
+    bs , _ := json.encode(ret , "\t")
+    print(string(bs))
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

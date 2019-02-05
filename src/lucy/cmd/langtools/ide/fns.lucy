@@ -10,18 +10,14 @@ public fn readLucyFiles(filenames []string) -> (lucyFiles []LucyFile = []LucyFil
         t := fileCache.get(v)
         lucyFiles.append(t)
     }
-
 }
-
 
 public fn parseAst(lucyFiles []LucyFile) -> (nodes []ast.TopNode = []ast.TopNode{} , errs []error = []error{}) {
     for _ , v := range lucyFiles {
         errs.appendAll(parser.parse(nodes , v.realPathName , v.bs , false , 10,
-            v.locateDefinition , v.getHover , v.findUsage , v.rename , v.autoCompletion))
+            v.locateDefinition , v.getHover , v.findUsage , v.autoCompletion))
     }
-
 }
-
 
 public fn parseAstAndTypeCheck(
     packageName string,
@@ -52,7 +48,6 @@ public fn parseAstAndTypeCheck(
     }
 }
 
-
 public fn getLucyFiles(dir string) -> (lucyFiles []string = []string{}) {
     list := new io.File(dir).listFiles()
     for v := range list {
@@ -62,5 +57,4 @@ public fn getLucyFiles(dir string) -> (lucyFiles []string = []string{}) {
     }
 
 }
-
 

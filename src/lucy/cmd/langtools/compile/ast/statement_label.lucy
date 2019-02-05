@@ -11,8 +11,7 @@ public class StatementLabel {
     public pos                 Pos      
     public findUsage           bool     
     public findUsageInstances  []Usage  
-    public inlineComment       string   
-    public rename              bool     
+    public inlineComment       string       
     public locateDefinition    bool     
     /*
 		defer {

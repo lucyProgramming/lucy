@@ -20,7 +20,7 @@ public class Variable {
     public globalVarClassName       string    
     public locateDefinition         bool      
     public findUsage                bool      
-    public rename                   bool      
+    // public rename                   bool      
     public findUsageInstances       []Usage   
 
     /*
@@ -49,7 +49,6 @@ public class Variable {
         v.comment = this.comment
         v.locateDefinition = this.locateDefinition
         v.findUsage = this.findUsage
-        v.rename = this.rename
     }
     fn reduceFindUsageInstances(block Block) {
         if this.findUsage == false {

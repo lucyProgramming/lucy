@@ -10,8 +10,7 @@ public class ClassField {
     public accessFlags            char      
     public jvmDescriptor          string    
     public locateDefinition       bool      
-    public findUsage              bool      
-    public rename                 bool      
+    public findUsage              bool            
     public autoCompletion         bool      
     public findUsageInstances     []Usage   
 

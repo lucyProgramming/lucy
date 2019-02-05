@@ -1,27 +1,24 @@
-
-
 public class LucyFile {
-	public realPathName string 
-	public bs []byte
+    public realPathName string
+    public bs           []byte
     /*
         when locate is bigger than zero,means to trying to locate something
     */
-    public locateDefinition int 
-    public getHover,
-        findUsage int 
-    public rename int 
-    public autoCompletion int 
-    
+    public locateDefinition     int
+    public getHover , findUsage int
+    public autoCompletion       int
+
     public lastModify int // in second 
-    public lastUse int  // in second 
-    
-    fn LucyFile(){
+    public lastUse    int // in second 
+
+    fn LucyFile() {
         this.super()
-        this.locateDefinition = -1 
-        this.getHover = -1 
-        this.findUsage = -1 
-        this.rename = -1
+        this.locateDefinition = -1
+        this.getHover = -1
+        this.findUsage = -1
         this.autoCompletion = -1
     }
 
 }
+
+

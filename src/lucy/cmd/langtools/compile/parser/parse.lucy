@@ -11,10 +11,9 @@ public fn parse(
     locateDefinition int,
     getHover int,
     findUsage int,
-    rename int,
     autoCompletion int) -> (errs []error) {
     p := new Parser(bs , tops , filename , onlyParseImport , nErrors2Stop)
-    p.lexer = new lex.Lexer(bs , 0 , 0 , locateDefinition , getHover , findUsage , rename , autoCompletion)
+    p.lexer = new lex.Lexer(bs , 0 , 0 , locateDefinition , getHover , findUsage ,  autoCompletion)
     errs = p.parse()
 }
 
@@ -453,7 +452,6 @@ class Parser {
             vd.name = v.name
             vd.pos = v.pos
             vd.locateDefinition = v.locateDefinition
-            vd.rename = v.rename
             vd.getHover = v.getHover
             vd.findUsage = v.findUsage
             vd.containsLf = v.containsLf
@@ -472,7 +470,6 @@ class Parser {
             for _ , c := range constants {
                 c.Type = variableType.cloneType()
             }
-
         }
         if this.token.Type != lex.TokenAssign {
             err = new error(sprintf("%s missing assign" , this.errMsgPrefix()))
@@ -490,8 +487,10 @@ class Parser {
             this.errs.append(err)
         }
         constComment := comment.comment
+        var inlineComment string 
         if this.token.Type == lex.TokenComment {
             constComment = "//" + this.token.stringValue
+            inlineComment = this.token.stringValue
             this.next(lfIsToken)
         }
         for k , v := range constants {
@@ -501,6 +500,7 @@ class Parser {
             if k < len(es) {
                 constants[k].defaultValueExpression = es[k]
             }
+            v.inlineComment = inlineComment
         }
 
         return
@@ -518,7 +518,6 @@ class Parser {
             vd := new ast.Variable()
             vd.locateDefinition = v.locateDefinition
             vd.findUsage = v.findUsage
-            vd.rename = v.rename
             vd.name = v.name
             vd.pos = v.pos
             vd.containsLf = v.containsLf
@@ -688,7 +687,6 @@ class Parser {
         ret.name = this.token.stringValue
         ret.locateDefinition = this.token.locateDefinition
         ret.findUsage = this.token.findUsage
-        ret.rename = this.token.rename
         this.next(lfIsToken) // skip identifier
         if this.token.Type != lex.TokenAssign {
             err = new error(sprintf("%s expect '=',but '%s'" , this.errMsgPrefix() , this.token.description))
@@ -765,7 +763,6 @@ class Parser {
                 vs[k] = vd
                 vd.locateDefinition = v.locateDefinition
                 vd.findUsage = v.findUsage
-                vd.rename = v.rename
                 vd.name = v.name
                 vd.pos = v.pos
                 vd.containsLf = v.containsLf
@@ -901,7 +898,6 @@ class Parser {
             t.locateDefinition = this.token.locateDefinition
             t.findUsage = this.token.findUsage
             t.getHover = this.token.getHover
-            t.rename = this.token.rename
             t.autoCompletion = this.token.autoCompletion
             names.append(t)
             this.next(lfIsToken)

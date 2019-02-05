@@ -20,7 +20,7 @@ public class Type {
     public locatePackageDefinition bool            
     public packagePos              Pos             
     public findUsage               bool            
-    public rename                  bool            
+    // public rename                  bool            
     public getHover                bool            
     public autoCompletion          bool            
     /*
@@ -179,7 +179,6 @@ public class Type {
         cloned.locateDefinition = this.locateDefinition
         cloned.locatePackageDefinition = this.locatePackageDefinition
         cloned.findUsage = this.findUsage
-        cloned.rename = this.rename
         cloned.getHover = this.getHover
         cloned.enumName = this.enumName
         cloned.Function = this.Function

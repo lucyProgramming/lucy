@@ -18,7 +18,6 @@ class ClassParser extends ParserFather {
         className := this.parser.token.stringValue
         name.locateDefinition = this.parser.token.locateDefinition
         name.findUsage = this.parser.token.findUsage
-        name.rename = this.parser.token.rename
         name.autoCompletion = this.parser.token.autoCompletion
         pos := this.parser.mkPos()
         this.next(lfNotToken)
@@ -35,7 +34,6 @@ class ClassParser extends ParserFather {
                 className += "." + this.parser.token.stringValue
                 name.locateDefinition = this.parser.token.locateDefinition
                 name.findUsage = name.findUsage || this.parser.token.findUsage
-                name.rename = name.rename || this.parser.token.rename
                 name.autoCompletion = name.autoCompletion || this.parser.token.autoCompletion
                 pos = this.parser.mkPos()
                 this.next(lfNotToken) // skip name identifier
@@ -282,7 +280,6 @@ class ClassParser extends ParserFather {
                     m.Function = f
                     m.locateDefinition = f.locateDefinition
                     m.findUsage = f.findUsage
-                    m.rename = f.rename
                     if accessControlToken != null {
                         switch accessControlToken.Type {
                             case lex.TokenPrivate:
@@ -432,7 +429,6 @@ class ClassParser extends ParserFather {
             f := new ast.ClassField()
             f.locateDefinition = v.locateDefinition
             f.findUsage = v.findUsage
-            f.rename = v.rename
             f.name = v.name
             f.pos = v.pos
             f.Type = t.cloneType()

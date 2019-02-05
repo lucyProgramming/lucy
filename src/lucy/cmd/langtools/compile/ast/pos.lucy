@@ -32,7 +32,7 @@ public class NameWithPos {
     public packagePos              Pos   
     public findUsage               bool  
     public getHover                bool  
-    public rename                  bool  
+    // public rename                  bool  
     public autoCompletion          bool  
     /*
 		a // this is a inline comment

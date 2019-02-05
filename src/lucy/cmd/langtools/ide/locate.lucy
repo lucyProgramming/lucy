@@ -55,7 +55,6 @@ public fn locateLucyFile(file string) -> (lucyPath string , pacakgenName string)
     lucyPath = lucyPaths2[0]
 }
 
-
 public fn locateDir(dir string) -> (lucyPath string , pacakgenName string) {
     lucyPaths := common.getLucyPath()
     eles := common.getPathElements(dir)

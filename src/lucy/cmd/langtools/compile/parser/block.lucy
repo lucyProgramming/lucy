@@ -477,7 +477,6 @@ class BlockParser extends ParserFather {
             identifier := e.data.(ast.ExpressionIdentifier)
             label.name = identifier.name
             label.findUsage = identifier.findUsage
-            label.rename = identifier.rename
             label.locateDefinition = identifier.locateDefinition
             label.block = block
             err := block.insert(label.name , e.pos , label) // insert first,so this label can be found before it is checked

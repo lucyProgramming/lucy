@@ -1,87 +1,82 @@
-
 import "lucy/cmd/langtools/compile/lc"
 import "lucy/cmd/langtools/compile/ast"
 import "java/lang/Object"
+import "lucy/cmd/langtools/common"
 import "java/io"
 
-
-
 public class PackageLoader extends lc.FileLoader {
-    public onlyAnalyzeGlobals bool
-    public errors []error 
+    public onlyAnalyzeGlobals bool   
+    public errors             []error
 
-    public fn PackageLoader(lucyPath , classPaths []string){
-        this.super(lucyPath ,classPaths )
+    public fn PackageLoader(lucyPath []string , classPaths []string) {
+        this.super(lucyPath , classPaths)
     }
-    
     public fn loadImport(importName string) -> (x Object , err error) {
         if x = this.getCache(importName) ; x != null {
-            return 
+            return
         }
-        realPaths  := []lc.Resource{}
+        realPaths := []lc.Resource{}
         foundInLucy := false
-        for _, v := range this.lucyPath {
-            if  p := v + "/src/" + importName ;  new io.File(p).isDirectory() { // directory is package
+        for _ , v := range this.lucyPath {
+            if p := v + "/src/" + importName ; new io.File(p).isDirectory() &&
+                common.haveFileType(p , ".lucy") {
                 realPaths.append(new lc.Resource(
                     lc.resourceKindLucyPackage,
                     p,
-                    importName
-                ))
+                    importName))
                 foundInLucy = true
                 continue
             }
         }
         if foundInLucy == false {
-            for _, v := range this.classPaths {
-                if p := v + "/" + importName  ; new io.File(p).isDirectory() { // directory is package
+            for _ , v := range this.classPaths {
+                if p := v + "/" + importName ; new io.File(p).isDirectory() {
                     realPaths.append(new lc.Resource(
                         lc.resourceKindJavaPackage,
                         p,
-                        importName
-                    ))
+                        importName))
                 }
-                if p := v + "/" + importName + ".class" ; new io.File(p).isFile() { // directory is package
+                if p := v + "/" + importName + ".class" ; new io.File(p).isFile() {
                     realPaths.append(new lc.Resource(
-                       lc.resourceKindJavaClass,
-                       p,
-                       importName
-                    ))
+                        lc.resourceKindJavaClass,
+                        p,
+                        importName))
                 }
             }
         }
         if len(realPaths) == 0 {
-            return null, new error(sprintf("resource '%s' not found", importName))
+            return null , new error(sprintf("resource '%s' not found" , importName))
         }
-        realPathMap := new map { string -> []lc.Resource } ()
-        for _, v := range realPaths {
+        realPathMap := new map{string -> []lc.Resource}()
+        for _ , v := range realPaths {
             if realPathMap.keyExist(v.realPath) {
-                realPathMap[v.realPath].append( v)
+                realPathMap[v.realPath].append(v)
             } else {
                 realPathMap[v.realPath] = []lc.Resource{v}
             }
-        } 
+        }
         if len(realPathMap) > 1 {
             errMsg := "not 1 resource named '" + importName + "' present:\n"
-            for _, v := range realPathMap {
+            for _ , v := range realPathMap {
                 switch v[0].kind {
-                case lc.resourceKindJavaClass:
-                    errMsg += sprintf("\t in '%s' is a java class\n", v[0].realPath)
-                case lc.resourceKindJavaPackage:
-                    errMsg += sprintf("\t in '%s' is a java package\n", v[0].realPath)
-                case lc.resourceKindLucyClass:
-                    errMsg += sprintf("\t in '%s' is a lucy class\n", v[0].realPath)
-                case lc.resourceKindLucyPackage:
-                    errMsg += sprintf("\t in '%s' is a lucy package\n", v[0].realPath)
+                    case lc.resourceKindJavaClass:
+                        errMsg += sprintf("\t in '%s' is a java class\n" , v[0].realPath)
+                    case lc.resourceKindJavaPackage:
+                        errMsg += sprintf("\t in '%s' is a java package\n" , v[0].realPath)
+                    case lc.resourceKindLucyClass:
+                        errMsg += sprintf("\t in '%s' is a lucy class\n" , v[0].realPath)
+                    case lc.resourceKindLucyPackage:
+                        errMsg += sprintf("\t in '%s' is a lucy package\n" , v[0].realPath)
                 }
             }
-            return null, new error(sprintf(errMsg))
+            return null , new error(sprintf(errMsg))
         }
         if realPaths[0].kind == lc.resourceKindJavaClass {
             c := this.loadClass(realPaths[0])
-            if cc ,ok := c.(ast.Class) ; ok  {
+            if cc , ok := c.(ast.Class) ; ok {
                 this.caches[cc.name] = cc
             }
-            return c, null
+            return c , null
         } else if realPaths[0].kind == lc.resourceKindLucyClass {
             panic("not happening")
         } else if realPaths[0].kind == lc.resourceKindJavaPackage {
@@ -89,23 +84,23 @@ public class PackageLoader extends lc.FileLoader {
             if p != null {
                 this.caches[p.name] = p
             }
-            return p, null
-        } else { // lucy package
+            return p , null
+        } else {
             p := this.loadLucyPackage(realPaths[0])
             if p != null {
                 this.caches[p.name] = p
             }
-            return p ,null
+            return p , null
         }
     }
-    
-    public fn  loadLucyPackage(r lc.Resource) -> (p ast.Package) {
+
+    public fn loadLucyPackage(r lc.Resource) -> (p ast.Package) {
         lucyFiles := readLucyFiles(getLucyFiles(r.realPath))
-        var es []error 
-        p , es =  parseAstAndTypeCheck(r.name , lucyFiles , this.onlyAnalyzeGlobals , "" , -1 ,this)
+        var es []error
+        p , es = parseAstAndTypeCheck(r.name , lucyFiles , this.onlyAnalyzeGlobals , "" , -1 , this)
         if this.errors == null {
-            this.errors = es 
-        }else {
+            this.errors = es
+        } else {
             this.errors.appendAll(es)
         }
     }

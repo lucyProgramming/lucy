@@ -4,8 +4,7 @@ public class ClassMethod {
     public isCompilerAuto     bool    
     public Function           Function
     public locateDefinition   bool    
-    public findUsage          bool    
-    public rename             bool    
+    public findUsage          bool       
     public findUsageInstances []Usage 
     public comment            string  
 

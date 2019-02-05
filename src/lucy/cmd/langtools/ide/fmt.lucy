@@ -31,7 +31,6 @@ public class Fmt {
                 } else {
                     format += this.formatFunction("" , t , false) + "\n"
                 }
-
                 continue
             }
             if t , ok := n.node.(ast.Enum) ; ok {
@@ -43,7 +42,7 @@ public class Fmt {
                 continue
             }
             if t , ok := n.node.(ast.Constant) ; ok {
-                format += this.formatConstant("" , t) + "\n"
+                format += this.formatConstant("" , t)
                 continue
             }
             if t , ok := n.node.(ast.Line) ; ok {
@@ -76,8 +75,8 @@ public class Fmt {
             }
             panic(n.node.getClass().toString() + " not handle")
         }
-
     }
+    
     fn formatConstant(indent string , c ast.Constant) -> (format string = "") {
         format = indent
         if c.isPublic() {
@@ -87,7 +86,13 @@ public class Fmt {
         if c.Type != null {
             format += " " + c.Type.typeName()
         }
-        format += " = " + this.formatExpression(indent + this.indentIncrement , c.defaultValueExpression)
+        format +=
+            " = " + this.formatExpression(indent + this.indentIncrement , c.defaultValueExpression)
+        if c.inlineComment != null {
+            format += " //" + c.inlineComment
+        }else {
+            format += "\n"
+        }
     }
     fn formatFunction(indent string , f ast.Function , isAbstract bool) -> (format string = "") {
         format += "fn "
@@ -102,7 +107,6 @@ public class Fmt {
                     format += " , "
                 }
             }
-
             format += "> "
         }
         format += "("
@@ -480,7 +484,7 @@ public class Fmt {
             format += " as " + i.alias
         }
     }
-     // block can have no "{}"
+    // block can have no "{}"
     fn formatBlock(indent string , block ast.Block) -> (format string = "") {
         for s := range block.statements {
             format += this.formatStatement(indent , s)

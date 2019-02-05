@@ -9,7 +9,6 @@ public class Lexer {
     locateDefinition int   
     getHover         int   
     findUsage        int   
-    rename           int   
     autoCompletion   int   
     columnOffset     int   
     lastColumnOffset int   
@@ -20,7 +19,6 @@ public class Lexer {
         locateDefinition int,
         getHover int,
         findUsage int,
-        rename int,
         autoCompletion int) {
         this.super()
         this.bs = bs
@@ -31,7 +29,6 @@ public class Lexer {
         this.locateDefinition = locateDefinition
         this.getHover = getHover
         this.findUsage = findUsage
-        this.rename = rename
         this.autoCompletion = autoCompletion
     }
     public fn getLineAndColumn() -> (line int , column int) {
@@ -132,7 +129,6 @@ public class Lexer {
 
     fn lexNumber(token Token , c byte) -> (eof bool , err error) {
         defer {
-
             e := catch()
             if err == null && e != null {
                 err = e
@@ -283,7 +279,7 @@ public class Lexer {
 
         return
     }
-     //store line and column in a int 
+    //store line and column in a int 
     fn getLineAndColumnFromPos(pos int) -> (line int , column int) {
         line = pos >> 16
         column = int(short(pos))
@@ -346,12 +342,6 @@ public class Lexer {
                 token.autoCompletion = true
             }
         }
-        if this.rename != -1 {
-            line , column := this.getLineAndColumnFromPos(this.rename)
-            if line == token.startLine && column >= token.startColumnOffset && column <= this.columnOffset {
-                token.rename = true
-            }
-        }
         return
     }
 
@@ -360,7 +350,6 @@ public class Lexer {
         for c == ' ' || c == '\t' {
             c , eof = this.getChar()
         }
-
         if eof {
             return
         }
@@ -478,7 +467,6 @@ public class Lexer {
                         } else {
                             b = t
                         }
-
                         c , eof = this.getChar()
                     }
 
@@ -615,7 +603,7 @@ public class Lexer {
         }
         for c == ' ' ||
                 c == '\t' ||
-                c == '\r' { //  skip empty
+                c == '\r' { //   skip empty
             c , eof = this.getChar()
         }
 

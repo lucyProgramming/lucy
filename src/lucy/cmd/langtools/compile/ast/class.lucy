@@ -17,7 +17,7 @@ public class Class {
 
     public notImportedYet bool   // not imported
     public name           string // binary name
-     // public shortName                         string // short name
+    // public shortName                         string // short name
     public pos                Pos                         
     public finalPos           Pos                          // final pos
     public isJava             bool                         //class imported from CLASSPATH
@@ -133,7 +133,6 @@ public class Class {
         m.Function.block.Fn = m.Function
         m.Function.name = SpecialMethodInit
         {
-
             e := new Expression()
             e.op = "methodCall"
             e.Type = ExpressionTypeMethodCall
@@ -141,7 +140,6 @@ public class Class {
             call := new ExpressionMethodCall()
             call.name = Super
             {
-
                 t := new Expression()
                 t.Type = ExpressionTypeIdentifier
                 t.pos = this.pos
@@ -155,7 +153,6 @@ public class Class {
             e.data = call
             m.Function.block.statements = new []Statement(1)
             {
-
                 t := new Statement()
                 t.Type = StatementTypeExpression
                 t.Expression = e
@@ -282,7 +279,6 @@ public class Class {
                     m.Function.block.variables[ThisPointerName].name = ThisPointerName
                     m.Function.block.variables[ThisPointerName].pos = m.Function.pos
                     {
-
                         t := new Type()
                         t.Type = VariableTypeObject
                         t.Class = this
@@ -316,7 +312,6 @@ public class Class {
             }
 
             {
-
                 t := new Class()
                 t.name = superClassName
                 t.notImportedYet = true
@@ -330,7 +325,6 @@ public class Class {
             variableType.pos = this.superClassName.pos
             variableType.locatePackageDefinition = this.superClassName.locatePackageDefinition
             variableType.packagePos = this.superClassName.packagePos
-            variableType.rename = this.superClassName.rename
             variableType.locateDefinition = this.superClassName.locateDefinition
             variableType.autoCompletion = this.superClassName.autoCompletion
             variableType.findUsage = this.superClassName.findUsage
@@ -377,7 +371,6 @@ public class Class {
             t.pos = i.pos
             t.name = i.name
             t.locateDefinition = i.locateDefinition
-            t.rename = t.rename
             t.autoCompletion = i.autoCompletion
             t.findUsage = i.findUsage
             t.locatePackageDefinition = i.locatePackageDefinition
@@ -1239,7 +1232,6 @@ public class Class {
             return new error(errMsg)
         }
         {
-
             inters := this.interfaces
             m = new map{string -> bool}()
             arr = []string{}

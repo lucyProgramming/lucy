@@ -6,7 +6,7 @@ public class TypeAlias {
     public comment            string 
     public locateDefinition   bool   
     public findUsage          bool   
-    public rename             bool   
+    // public rename             bool   
            findUsageInstances []Usage
            used               bool   
     public inlineComment      string 
