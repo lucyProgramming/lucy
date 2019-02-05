@@ -1,5 +1,5 @@
 import "java/lang/Object" as Object
-import "lucy/cmd/langtools/compile/ast" as ast
+import "lucy/cmd/langtools/compile/ast"
 
 public class MakeNodesObjects {
     public fn make(files map{string -> []ast.TopNode}) -> (x Object) {
@@ -71,7 +71,6 @@ public class MakeNodesObjects {
             ret["comment"] = f.comment
         }
         {
-
             if len(f.Type.parameterList) == 1 {
                 for _ , v := range f.Type.parameterList {
                     p := new map{string -> Object}()
@@ -141,7 +140,6 @@ public class MakeNodesObjects {
             ret["comment"] = e.comment
         }
         {
-
             var t = new Object[](len(e.enums))
             for k , v := range e.enums {
                 en := new map{string -> Object}()
@@ -620,7 +618,6 @@ public class MakeNodesObjects {
                 ret["op"] = e.op
                 ret["type"] = n.Type.typeString()
                 {
-
                     var t Object[] = new Object[](len(n.args))
                     for k , v := range n.args {
                         t[k] = this.makeExpression(v)
@@ -655,7 +652,6 @@ public class MakeNodesObjects {
                     ret["type"] = v.Type.typeString()
                 }
                 {
-
                     var t Object[] = new Object[](len(v.variables))
                     for kk , vv := range v.variables {
                         t[kk] = vv.name
@@ -677,7 +673,6 @@ public class MakeNodesObjects {
                 ret := new map{string -> Object}()
                 ret["op"] = e.op
                 {
-
                     var t Object[] = new Object[](len(e.data.([]ast.Constant)))
                     for k , v := range e.data.([]ast.Constant) {
                         m := new map{string -> Object}()
@@ -727,7 +722,6 @@ public class MakeNodesObjects {
                     ret["type"] = m.Type.typeString()
                 }
                 {
-
                     var t Object[] = new Object[](len(m.keyValuePairs))
                     for k , v := range m.keyValuePairs {
                         tt := new map{string -> Object}()

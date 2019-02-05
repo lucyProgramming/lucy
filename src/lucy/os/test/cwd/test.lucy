@@ -1,10 +1,9 @@
+import "lucy/os"
 
-import "lucy/os";
+fn main(args []string) {
+    print("working directory:" , os.getCwd())
+    for k , v := range os.getEnvs() {
+        print(k , "=" , v)
+    }
 
-fn main(args []string){
-	print("working directory:" , os.getCwd());
-	for k , v := range os.getEnvs(){
-		print( k , "=" , v);
-	}
-	
 }

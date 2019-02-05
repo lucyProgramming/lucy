@@ -22,7 +22,6 @@ class InstallLucyArray {
             }
             print("install:" , dest)
         }
-
         print("please use 'javac' compile the installed files")
     }
 }
