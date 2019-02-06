@@ -266,6 +266,10 @@ public class Fmt {
                 format += "\n"
                 continue
             }
+            if t , ok := f.(ast.Constant) ; ok {
+                format += this.formatConstant(indent + this.indentIncremental , t)
+                continue
+            }
             if field , ok := f.(ast.ClassFieldDeclaration) ; ok {
                 fields := []ast.ClassFieldDeclaration{}
                 {

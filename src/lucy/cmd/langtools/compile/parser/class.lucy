@@ -10,7 +10,7 @@ class ClassParser extends ParserFather {
     fn parseClassName() -> (name ast.NameWithPos , err error) {
         if this.parser.token.Type != lex.TokenIdentifier {
             err = new error(sprintf("%s expect identifier for class`s name,but '%s'",
-                this.parser.errMsgPrefix() , this.parser.token.description))
+                    this.parser.errMsgPrefix() , this.parser.token.description))
             this.parser.errs.append(err)
             return null , err
         }
@@ -25,8 +25,8 @@ class ClassParser extends ParserFather {
             this.next(lfNotToken) // skip .
             if this.parser.token.Type != lex.TokenIdentifier {
                 err = new error(sprintf("%s expect identifer for class`s name,but '%s'",
-                    this.parser.errMsgPrefix(),
-                    this.parser.token.description))
+                        this.parser.errMsgPrefix(),
+                        this.parser.token.description))
                 this.parser.errs.append(err)
             } else {
                 name.locatePackageDefinition = name.locateDefinition
@@ -68,7 +68,6 @@ class ClassParser extends ParserFather {
         classDefinition = new ast.Class()
         classDefinition.startLine = this.parser.token.startLine
         defer {
-
             if classDefinition.endLine == 0 {
                 //default value 
                 classDefinition.endLine = this.parser.token.startLine
@@ -133,7 +132,7 @@ class ClassParser extends ParserFather {
         this.parser.ifTokenIsLfThenSkip(true)
         if this.parser.token.Type != lex.TokenLc {
             err = new error(sprintf("%s expect '{' but '%s'",
-                this.parser.errMsgPrefix() , this.parser.token.description))
+                    this.parser.errMsgPrefix() , this.parser.token.description))
             this.parser.errs.append(err)
             return classDefinition , err
         }
@@ -187,7 +186,7 @@ class ClassParser extends ParserFather {
                         this.parser.BlockParser.parseStatementList(block , false)
                         if this.parser.token.Type != lex.TokenRc {
                             this.parser.errs.append(new error(sprintf("%s expect '}' , but '%s'" , this.parser.errMsgPrefix(),
-                                this.parser.token.description)))
+                                        this.parser.token.description)))
                         } else {
                             this.next(lfIsToken) // skip }
                             if classDefinition.staticBlocks == null {
@@ -259,7 +258,7 @@ class ClassParser extends ParserFather {
                     if isAbstract &&
                         (classDefinition.isAbstract() == false) {
                         this.parser.errs.append(new error(sprintf("%s cannot have abstact method is non-abstract class",
-                            this.parser.errMsgPrefix())))
+                                    this.parser.errMsgPrefix())))
                     }
                     var f ast.Function
                     f , _ = this.parser.FunctionParser.parse(true , isAbstract || isInterface , false)
@@ -318,10 +317,10 @@ class ClassParser extends ParserFather {
                     pos := this.parser.mkPos()
                     this.parser.parseImports()
                     this.parser.errs.append(new error(sprintf("%s cannot have import at this scope",
-                        this.parser.errMsgPrefix(pos))))
+                                this.parser.errMsgPrefix(pos))))
                 default:
                     this.parser.errs.append(new error(sprintf("%s unexpected '%s'",
-                        this.parser.errMsgPrefix() , this.parser.token.description)))
+                                this.parser.errMsgPrefix() , this.parser.token.description)))
                     this.next(lfNotToken)
             }
 
@@ -329,7 +328,7 @@ class ClassParser extends ParserFather {
 
         if this.parser.token.Type != lex.TokenRc {
             this.parser.errs.append(new error(sprintf("%s expect '}' , but '%s'",
-                this.parser.errMsgPrefix() , this.parser.token.description)))
+                        this.parser.errMsgPrefix() , this.parser.token.description)))
         }
         return
     }
@@ -345,9 +344,10 @@ class ClassParser extends ParserFather {
         for _ , v := range cs {
             if classDefinition.block.constants.keyExist(v.name) {
                 this.parser.errs.append(new error(sprintf("%s const %s alreay declared",
-                    this.parser.errMsgPrefix() , v.name)))
+                            this.parser.errMsgPrefix() , v.name)))
                 continue
             }
+            classDefinition.appendFmt(v)
             classDefinition.block.constants[v.name] = v
         }
 
@@ -423,7 +423,7 @@ class ClassParser extends ParserFather {
         for k , v := range names {
             if classDefinition.fields.keyExist(v.name) {
                 this.parser.errs.append(new error(sprintf("%s field %s is alreay declared",
-                    this.parser.errMsgPrefix() , v.name)))
+                            this.parser.errMsgPrefix() , v.name)))
                 continue
             }
             f := new ast.ClassField()
@@ -471,14 +471,14 @@ class ClassParser extends ParserFather {
             return null
         }
         return new error(sprintf("%s not a valid token after 'volatile'",
-            this.parser.errMsgPrefix()))
+                this.parser.errMsgPrefix()))
     }
     fn validAfterAbstract() -> (err error) {
         if this.parser.token.Type == lex.TokenFn {
             return null
         }
         return new error(sprintf("%s not a valid token after 'abstract'",
-            this.parser.errMsgPrefix()))
+                this.parser.errMsgPrefix()))
     }
     fn validAfterSynchronized() -> (err error) {
         if this.parser.token.Type == lex.TokenFn ||
@@ -486,7 +486,7 @@ class ClassParser extends ParserFather {
             return null
         }
         return new error(sprintf("%s not a valid token after 'synchronized'",
-            this.parser.errMsgPrefix()))
+                this.parser.errMsgPrefix()))
     }
     fn validAfterStatic() -> (err error) {
         if this.parser.token.Type == lex.TokenIdentifier ||
@@ -495,7 +495,7 @@ class ClassParser extends ParserFather {
             return null
         }
         return new error(sprintf("%s not a valid token after 'static'",
-            this.parser.errMsgPrefix()))
+                this.parser.errMsgPrefix()))
     }
     fn validAfterFinal() -> (err error) {
         if this.parser.token.Type == lex.TokenFn ||
@@ -504,7 +504,7 @@ class ClassParser extends ParserFather {
             return null
         }
         return new error(sprintf("%s not a valid token after 'final'",
-            this.parser.errMsgPrefix()))
+                this.parser.errMsgPrefix()))
     }
     fn validAfterAccessControlToken(keyWord string) -> (err error) {
         if this.parser.token.Type == lex.TokenIdentifier ||
@@ -516,7 +516,7 @@ class ClassParser extends ParserFather {
             return null
         }
         return new error(sprintf("%s not a valid token after '%s'",
-            this.parser.errMsgPrefix() , keyWord))
+                this.parser.errMsgPrefix() , keyWord))
     }
 }
 
