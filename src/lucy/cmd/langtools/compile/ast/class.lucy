@@ -208,7 +208,7 @@ public class Class {
         for _ , v := range this.fields {
             if v.name == Super {
                 errs.append(new error(sprintf("%s 'super' not allow for field name",
-                    errMsgPrefix(v.pos))))
+                            errMsgPrefix(v.pos))))
             }
             if v.locateDefinition {
                 this.block.inheritedAttribute.p.setLocationDefinition(v)
@@ -251,14 +251,14 @@ public class Class {
                     for _ , v := range m.Function.Type.parameterList {
                         if v.defaultValueExpression != null {
                             errs.append(new error(sprintf("%s abstract method parameter '%s' cannot have default value '%s'",
-                                errMsgPrefix(v.pos) , v.name , v.defaultValueExpression.op)))
+                                        errMsgPrefix(v.pos) , v.name , v.defaultValueExpression.op)))
                         }
                     }
 
                     for _ , v := range m.Function.Type.returnList {
                         if v.defaultValueExpression != null {
                             errs.append(new error(sprintf("%s abstract method return variable '%s' cannot have default value '%s'",
-                                errMsgPrefix(v.pos) , v.name , v.defaultValueExpression.op)))
+                                        errMsgPrefix(v.pos) , v.name , v.defaultValueExpression.op)))
                         }
                     }
 
@@ -269,7 +269,7 @@ public class Class {
                 m.Function.checkParametersAndReturns(errs , false , m.isAbstract())
                 if len(m.Function.Type.templateNames) > 0 {
                     errs.append(new error(sprintf("%s cannot use template for method",
-                        errMsgPrefix(m.Function.pos))))
+                                errMsgPrefix(m.Function.pos))))
                 }
                 if m.isStatic() == false {
                     if m.Function.block.variables == null {
@@ -334,7 +334,7 @@ public class Class {
             }
             if variableType.Type != VariableTypeObject {
                 err = new error(sprintf("%s '%s' is not a class",
-                    this.pos.errMsgPrefix() , this.superClassName.name))
+                        this.pos.errMsgPrefix() , this.superClassName.name))
                 return err
             }
             this.superClass = variableType.Class
@@ -350,7 +350,7 @@ public class Class {
             if this.isInterface() {
                 if this.superClass.name != JavaRootClass {
                     err = new error(sprintf("%s interface`s super-class must be '%s'",
-                        errMsgPrefix(this.superClassName.pos) , JavaRootClass))
+                            errMsgPrefix(this.superClassName.pos) , JavaRootClass))
                     return err
                 }
             }
@@ -382,7 +382,7 @@ public class Class {
             }
             if t.Type != VariableTypeObject {
                 errs.append(new error(sprintf("%s '%s' is not a object , but '%s'",
-                    errMsgPrefix(i.pos) , i.name , t.typeString())))
+                            errMsgPrefix(i.pos) , i.name , t.typeString())))
                 continue
             }
             if t.Class.findUsageInstances != null {
@@ -391,7 +391,7 @@ public class Class {
             }
             if t.Class.isInterface() == false {
                 errs.append(new error(sprintf("%s '%s' is not a interface",
-                    errMsgPrefix(i.pos) , i.name)))
+                            errMsgPrefix(i.pos) , i.name)))
                 continue
             }
             this.interfaces.append(t.Class)
@@ -597,7 +597,7 @@ public class Class {
             return null , err
         }
         notFoundErr := new error(sprintf("%s field or method named '%s' not found on class '%s'",
-            pos.errMsgPrefix() , name , fromClassName))
+                pos.errMsgPrefix() , name , fromClassName))
         if classChecked[this.name] {
             return null , notFoundErr
         }
@@ -651,16 +651,16 @@ public class Class {
         if this.loadFromOutSide {
             if this.isPublic() == false {
                 return new error(sprintf("%s class '%s' is not public",
-                    pos.errMsgPrefix() , this.name))
+                        pos.errMsgPrefix() , this.name))
             }
             if method.isPublic() == false {
                 return new error(sprintf("%s method '%s' is not public",
-                    pos.errMsgPrefix() , method.Function.name))
+                        pos.errMsgPrefix() , method.Function.name))
             }
         } else {
             if method.isPrivate() {
                 return new error(sprintf("%s method '%s' is private",
-                    pos.errMsgPrefix() , method.Function.name))
+                        pos.errMsgPrefix() , method.Function.name))
             }
         }
 
@@ -679,7 +679,7 @@ public class Class {
             return null , err
         }
         notFoundErr := new error(sprintf("%s field named '%s' not found on class '%s'",
-            pos.errMsgPrefix() , name , fromClassName))
+                pos.errMsgPrefix() , name , fromClassName))
         if classChecked.keyExist(this.name) {
             return null , notFoundErr
         }
@@ -852,7 +852,7 @@ public class Class {
                 for _ , m := range this.methods[call.name] {
                     if fromSub && m.ableAccessFromSubClass() == false {
                         return null , false , new error(sprintf("%s method '%s' not found on class '%s'",
-                            pos.errMsgPrefix() , call.name , fromClassName))
+                                pos.errMsgPrefix() , call.name , fromClassName))
                     }
                     call.vArgs , err = m.Function.Type.fitArgs(block , pos , call.args,
                         callArgTypes , m.Function)
@@ -1087,7 +1087,7 @@ public class Class {
                         errs.append(new error(errMsg))
                     } else {
                         errs.append(new error(sprintf("%s missing implementation method '%s' define on abstract class '%s'",
-                            pos.errMsgPrefix() , m.Function.readableMsg() , super.name)))
+                                    pos.errMsgPrefix() , m.Function.readableMsg() , super.name)))
                     }
 
                 }
@@ -1158,7 +1158,7 @@ public class Class {
             }
             if exist != null {
                 errs.append(new error(sprintf("%s method '%s' override '%s'",
-                    errMsgPrefix(v[0].Function.pos) , name , exist.name)))
+                            errMsgPrefix(v[0].Function.pos) , name , exist.name)))
             }
         }
 
@@ -1177,7 +1177,7 @@ public class Class {
 
             if exist != null {
                 errs.append(new error(sprintf("%s method '%s' override '%s'",
-                    errMsgPrefix(v[0].Function.pos) , name , exist.name)))
+                            errMsgPrefix(v[0].Function.pos) , name , exist.name)))
             }
         }
 
@@ -1198,7 +1198,7 @@ public class Class {
         }
         if this.superClass.isFinal() {
             return new error(sprintf("%s class name '%s' have super class  named '%s' that is final",
-                this.pos.errMsgPrefix() , this.name , this.superClass.name))
+                    this.pos.errMsgPrefix() , this.name , this.superClass.name))
         }
         for c.name != JavaRootClass {
             if m.keyExist(c.name) {
@@ -1298,7 +1298,7 @@ public class Class {
                     f2.functionType = v.Function.Type
                     if f1.equal(f2) {
                         errs.append(new error(sprintf("%s override final method '%s'",
-                            errMsgPrefix(m.Function.pos) , name)))
+                                    errMsgPrefix(m.Function.pos) , name)))
                     }
                 }
 
@@ -1315,7 +1315,7 @@ public class Class {
                 ff := this.superClass.fields[name]
                 if ff.isFinal() {
                     errs.append(new error(sprintf("%s override final field '%s'",
-                        errMsgPrefix(f.pos) , name)))
+                                errMsgPrefix(f.pos) , name)))
                 }
             }
 
@@ -1353,7 +1353,7 @@ public class Class {
                     pos = nameMatch[0].Function.pos
                 }
                 errs.append(new error(sprintf("%s missing implementation method '%s' define on interface '%s'",
-                    pos.errMsgPrefix() , m.Function.readableMsg() , inter.name)))
+                            pos.errMsgPrefix() , m.Function.readableMsg() , inter.name)))
             }
 
         }
@@ -1370,7 +1370,7 @@ public class Class {
         if this.isInterface() {
             for _ , v := range this.fields {
                 errs.append(new error(sprintf("%s interface '%s' expect no field named '%s'",
-                    errMsgPrefix(v.pos) , this.name , v.name)))
+                            errMsgPrefix(v.pos) , this.name , v.name)))
             }
 
             return errs
@@ -1389,12 +1389,12 @@ public class Class {
                 }
                 if v.Type.assignAble(this.block , errs , assignment) == false {
                     errs.append(new error(sprintf("%s cannot assign '%s' as '%s' for default value",
-                        v.defaultValueExpression.pos.errMsgPrefix() , assignment.typeString() , v.Type.typeString())))
+                                v.defaultValueExpression.pos.errMsgPrefix() , assignment.typeString() , v.Type.typeString())))
                     continue
                 }
                 if assignment.Type == VariableTypeNull {
                     errs.append(new error(sprintf("%s pointer types default value is '%s' already",
-                        v.pos.errMsgPrefix() , assignment.typeString())))
+                                v.pos.errMsgPrefix() , assignment.typeString())))
                     continue
                 }
                 if v.isStatic() &&
@@ -1473,7 +1473,7 @@ public class Class {
                 } else {
                     if this.isInterface() {
                         errs.append(new error(sprintf("%s interface method cannot have implementation",
-                            errMsgPrefix(method.Function.pos))))
+                                    errMsgPrefix(method.Function.pos))))
                         continue
                     }
                     errs.appendAll(method.Function.checkReturnVarExpression())
@@ -1481,12 +1481,12 @@ public class Class {
                     if isConstruction {
                         if method.isFirstStatementCallFatherConstruction() == false {
                             errs.append(new error(sprintf("%s construction method should call father construction method first, 'this.super()'",
-                                errMsgPrefix(method.Function.pos))))
+                                        errMsgPrefix(method.Function.pos))))
                         }
                     }
                     if isConstruction && method.Function.Type.voidReturn() == false {
                         errs.append(new error(sprintf("%s construction method expect no return values",
-                            errMsgPrefix(method.Function.Type.parameterList[0].pos))))
+                                    errMsgPrefix(method.Function.Type.parameterList[0].pos))))
                     }
                     method.Function.block.inheritedAttribute.isConstructionMethod = isConstruction
                     method.Function.checkBlock(errs)
@@ -1502,11 +1502,11 @@ public class Class {
     fn checkModifierOk() -> (errs []error = []error{}) {
         if this.isInterface() && this.isFinal() {
             errs.append(new error(sprintf("%s interface '%s' cannot be final",
-                errMsgPrefix(this.finalPos) , this.name)))
+                        errMsgPrefix(this.finalPos) , this.name)))
         }
         if this.isAbstract() && this.isFinal() {
             errs.append(new error(sprintf("%s abstract class '%s' cannot be final",
-                errMsgPrefix(this.finalPos) , this.name)))
+                        errMsgPrefix(this.finalPos) , this.name)))
         }
         return errs
     }

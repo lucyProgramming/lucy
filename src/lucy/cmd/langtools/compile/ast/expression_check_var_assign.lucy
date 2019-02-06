@@ -111,7 +111,8 @@ class ExpressionCheckVarAssign {
                     vd.isGlobal = true
                 } else {
                     if block.inheritedAttribute.Function != null {
-                        if err := block.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(vd) ; err != null {
+                        if err := block.inheritedAttribute.Function.Type.
+                            reDefineParameterOrReturnVar(vd) ; err != null {
                             errs.append(err)
                         }
                     }

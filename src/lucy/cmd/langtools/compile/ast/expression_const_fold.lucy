@@ -18,7 +18,7 @@ class ExpressionConstFold {
             }
             e.Type = ee.Type
             e.longValue = ~ee.longValue
-            e.literalRaw = "~" + ee.literalRaw
+
             return
         }
         // !
@@ -36,7 +36,6 @@ class ExpressionConstFold {
             }
             e.Type = ExpressionTypeBool
             e.boolValue = !ee.boolValue
-            e.literalRaw = "!" + ee.literalRaw
             return
         }
         // -
@@ -58,7 +57,6 @@ class ExpressionConstFold {
             } else {
                 e.doubleValue = -ee.doubleValue
             }
-            e.literalRaw = "-" + ee.literalRaw
             return
         }
         // && and ||
@@ -83,7 +81,6 @@ class ExpressionConstFold {
             } else {
                 e.boolValue = bin.left.boolValue || bin.right.boolValue
             }
-            e.literalRaw = bin.left.literalRaw + " " + e.op + " " + bin.right.literalRaw
             e.Type = ExpressionTypeBool
             return
         }
@@ -134,7 +131,6 @@ class ExpressionConstFold {
                         e.Type == ExpressionTypeMul {
                         e.checkIfConstantExceeds(errs)
                     }
-                    e.literalRaw = bin.left.literalRaw + " " + e.op + " " + bin.right.literalRaw
                     e.Type = bin.left.Type
                     is = true
                     e.checkIfConstantExceeds(errs)
@@ -163,7 +159,7 @@ class ExpressionConstFold {
                         default:
                             return false , null
                     }
-                    e.literalRaw = bin.left.literalRaw + " " + e.op + " " + bin.right.literalRaw
+
                     e.Type = bin.left.Type
                     e.checkIfConstantExceeds(errs)
                     is = true
@@ -174,7 +170,6 @@ class ExpressionConstFold {
                     if e.Type == ExpressionTypeAdd {
                         if len(left) + len(right) < 65536 {
                             e.Type = ExpressionTypeString
-                            e.literalRaw = bin.left.literalRaw + " " + e.op + " " + bin.right.literalRaw
                             e.stringValue = left + right
                         } else {
                             return false , null
@@ -208,7 +203,6 @@ class ExpressionConstFold {
             } else {
                 e.longValue = bin.left.longValue >> byte(bin.right.getLongValue())
             }
-            e.literalRaw = bin.left.literalRaw + " " + e.op + " " + bin.right.literalRaw
             e.Type = bin.left.Type
             e.checkIfConstantExceeds(errs)
             return
@@ -240,7 +234,6 @@ class ExpressionConstFold {
             } else {
                 e.longValue = bin.left.longValue ^ bin.right.longValue
             }
-            e.literalRaw = bin.left.literalRaw + " " + e.op + " " + bin.right.literalRaw
             is = true
             e.Type = bin.left.Type
             return
@@ -260,7 +253,6 @@ class ExpressionConstFold {
             is = true
             e.Type = ExpressionTypeBool
             e.boolValue = !ee.boolValue
-            e.literalRaw = "!" + ee.literalRaw
             return
         }
         //  == != > < >= <=
@@ -294,11 +286,6 @@ class ExpressionConstFold {
                     e.boolValue = bin.left.boolValue != bin.right.boolValue
                 }
                 e.Type = ExpressionTypeBool
-                if e.boolValue {
-                    e.literalRaw = "true"
-                } else {
-                    e.literalRaw = "false"
-                }
                 is = true
                 return
             }
