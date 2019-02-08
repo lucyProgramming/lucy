@@ -48,7 +48,7 @@ public class AttributeCode {
     /*
 		mk line number attribute
 	*/
-    public fn mKLineNumber(lineNumber int) {
+    public fn appendLineNumber(lineNumber int) {
         if this.lineNumbers == null {
             this.lineNumbers = new AttributeLineNumber()
         }

@@ -42,7 +42,6 @@ class Context {
         }
 
         defer {
-
             this.lastStackMapOffset = offset // rewrite
             this.lastStackMapState = state
             this.lastStackMapStateLocals = new []cg.StackMapVerificationTypeInfo(len(state.locals))
@@ -77,11 +76,11 @@ class Context {
             if len(this.lastStackMapStateLocals) == len(state.locals) && len(state.stacks) == 1 {
                 if delta <= 64 {
                     code.attributeStackMap.append(new cg.StackMapSameLocals1StackItemFrame(byte(delta + 64),
-                        state.stacks[0]))
+                            state.stacks[0]))
                 } else {
                     code.attributeStackMap.append(new cg.StackMapSameLocals1StackItemFrameExtended(247b,
-                        delta,
-                        state.stacks[0]))
+                            delta,
+                            state.stacks[0]))
                 }
 
                 return
@@ -111,7 +110,7 @@ class Context {
         return
     }
 
-    fn appendLimeNumberAndSourceFile(
+    fn appendLineNumber(
         pos ast.Pos,
         code cg.AttributeCode,
         c cg.ClassHighLevel) {
@@ -123,12 +122,11 @@ class Context {
         if oldFileName == null {
             oldFileName = ""
         }
-        // c.insertSourceFile(pos.filename)
         this.currentSourceFile = pos.filename
         this.currentLineNumber = pos.endLine
         if this.currentSourceFile != oldFileName ||
             this.currentLineNumber != oldLine {
-            code.mKLineNumber(pos.endLine + 1)
+            code.appendLineNumber(pos.endLine + 1)
         }
     }
 

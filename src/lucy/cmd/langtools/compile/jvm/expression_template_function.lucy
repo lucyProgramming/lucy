@@ -40,8 +40,8 @@ class BuildTemplateFunctionCall {
         maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
         code.codes[code.codeLength] = cg.OP_invokestatic
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.templateFunctionCallPair.entrance.Class.name,
-            call.templateFunctionCallPair.entrance.name,
-            call.templateFunctionCallPair.entrance.Descriptor),
+                call.templateFunctionCallPair.entrance.name,
+                call.templateFunctionCallPair.entrance.Descriptor),
             code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         if e.isStatementExpression {

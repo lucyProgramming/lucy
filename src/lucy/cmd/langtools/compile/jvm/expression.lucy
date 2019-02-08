@@ -70,7 +70,7 @@ class BuildExpression {
         context Context,
         state StackMapState) -> (maxStack char) {
         if e.isCompilerAuto == false {
-            context.appendLimeNumberAndSourceFile(e.pos , code , c)
+            context.appendLineNumber(e.pos , code , c)
         }
         switch e.Type {
             case ast.ExpressionTypeNull:

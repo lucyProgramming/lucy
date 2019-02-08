@@ -23,8 +23,8 @@ class BuildExpressionMap {
         maxStack = 2
         code.codes[code.codeLength] = cg.OP_invokespecial
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(mapClass,
-            specialMethodInit,
-            "()V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                specialMethodInit,
+                "()V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         values := e.data.(ast.ExpressionMap).keyValuePairs
         hashMapObject := state.newObjectVariableType(mapClass)
@@ -57,8 +57,8 @@ class BuildExpressionMap {
             // put in hashmap
             code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(mapClass,
-                "put",
-                "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                    "put",
+                    "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codes[code.codeLength + 3] = cg.OP_pop
             code.codeLength += 4
             state.popStack(2)
@@ -94,8 +94,8 @@ class BuildExpressionMap {
                 }
                 code.codes[code.codeLength] = cg.OP_invokevirtual
                 c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(mapClass,
-                    "containsKey",
-                    "(Ljava/lang/Object;)Z") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                        "containsKey",
+                        "(Ljava/lang/Object;)Z") , code.codes[code.codeLength + 1 : code.codeLength + 3])
                 code.codeLength += 3
                 if e.isStatementExpression {
                     code.codes[code.codeLength] = cg.OP_pop
@@ -124,8 +124,8 @@ class BuildExpressionMap {
                     //call remove
                     code.codes[code.codeLength] = cg.OP_invokevirtual
                     c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(mapClass,
-                        "remove",
-                        "(Ljava/lang/Object;)Ljava/lang/Object;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                            "remove",
+                            "(Ljava/lang/Object;)Ljava/lang/Object;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codes[code.codeLength + 3] = cg.OP_pop
                     code.codeLength += 4
                     if k != len(call.args) - 1 {
@@ -136,14 +136,14 @@ class BuildExpressionMap {
             case common.MapMethodRemoveAll:
                 code.codes[code.codeLength] = cg.OP_invokevirtual
                 c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(mapClass,
-                    "clear",
-                    "()V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                        "clear",
+                        "()V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
                 code.codeLength += 3
             case common.MapMethodSize:
                 code.codes[code.codeLength] = cg.OP_invokevirtual
                 c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(mapClass,
-                    "size",
-                    "()I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                        "size",
+                        "()I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
                 code.codeLength += 3
                 if e.isStatementExpression {
                     code.codes[code.codeLength] = cg.OP_pop

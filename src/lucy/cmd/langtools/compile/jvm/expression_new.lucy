@@ -50,8 +50,8 @@ class BuildExpressionNew {
             d = Descriptor.methodDescriptor(n.construction.Function.Type)
         }
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(n.Type.Class.name,
-            specialMethodInit,
-            d) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                specialMethodInit,
+                d) , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         return
     }
@@ -68,8 +68,8 @@ class BuildExpressionNew {
         code.codeLength += 4
         code.codes[code.codeLength] = cg.OP_invokespecial
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(mapClass,
-            specialMethodInit,
-            "()V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                specialMethodInit,
+                "()V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         return
     }
@@ -157,8 +157,8 @@ class BuildExpressionNew {
         }
         code.codes[code.codeLength] = cg.OP_invokespecial
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
-            specialMethodInit,
-            meta.constructorFuncDescriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                specialMethodInit,
+                meta.constructorFuncDescriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         return
     }
