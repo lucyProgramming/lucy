@@ -13,7 +13,7 @@ public class PackageLoader extends lc.FileLoader {
     }
     public fn loadImport(importName string) -> (x Object , err error) {
         if x = this.getCache(importName) ; x != null {
-            printf("%s hit cache\n" , importName)
+            // printf("%s hit cache\n" , importName)
             return
         }
         realPaths := []lc.Resource{}
@@ -42,6 +42,17 @@ public class PackageLoader extends lc.FileLoader {
                             lc.resourceKindJavaClass,
                             p,
                             importName))
+                }
+            }
+            for _ , v := range this.classPaths {
+                fis := new io.File(v).listFiles()
+                for f := range fis {
+                    if f.isFile() && f.getName().endsWith(".jar") {
+                        e := this.importExistsInJarFile(v + "/" + f.getName() , importName)
+                        if null != e {
+                            realPaths.append(e)
+                        }
+                    }
                 }
             }
         }

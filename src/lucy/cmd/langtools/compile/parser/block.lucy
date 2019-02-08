@@ -498,7 +498,7 @@ class BlockParser extends ParserFather {
 
             if isDefer {
                 d := new ast.StatementDefer()
-                d.isOneStatement = true
+                d.onlyOneStatement = true
                 d.pos = deferPos
                 {
 

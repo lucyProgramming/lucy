@@ -490,17 +490,20 @@ public class Fmt {
     // block can have no "{}"
     fn formatBlock(indent string , block ast.Block) -> (format string = "") {
         for s := range block.statements {
-            format += this.formatStatement(indent , s)
+            format += this.formatStatement(indent , s , false )
         }
 
     }
-    fn formatStatement(indent string , s ast.Statement) -> (format string = "") {
+    fn formatStatement(indent string , s ast.Statement , noIndent bool) -> (format string = "") {
         switch s.Type {
             case ast.StatementTypeExpression:
+                if noIndent == false {
+                    format += indent
+                }
                 if s.inlineComment == null {
-                    format = indent + this.formatExpression(indent , s.Expression) + "\n"
+                    format += this.formatExpression(indent , s.Expression) + "\n"
                 } else {
-                    format = indent + this.formatExpression(indent , s.Expression) + " //" + s.inlineComment
+                    format += this.formatExpression(indent , s.Expression) + " //" + s.inlineComment
                 }
             case ast.StatementTypeIf:
                 format += this.formatIf(indent , s.statementIf)
@@ -516,7 +519,6 @@ public class Fmt {
                 } else {
                     format += indent + "continue " + " //" + s.inlineComment
                 }
-
             case ast.StatementTypeReturn:
                 format += this.formatReturn(indent , s.StatementReturn , s.inlineComment)
             case ast.StatementTypeBreak:
@@ -560,10 +562,9 @@ public class Fmt {
     }
     fn formatDefer(indent string , d ast.StatementDefer) -> (format string = "") {
         format = indent
-        if d.isOneStatement {
-            format += "defer {\n"
-            format += this.formatStatement(indent + this.indentIncremental , d.block.statements[0])
-            format += indent + "}\n"
+        if d.onlyOneStatement {
+            format += "defer "
+            format += this.formatStatement(indent + this.indentIncremental , d.block.statements[0] , true)
         } else {
             format += "defer {\n"
             format += this.formatBlock(indent + this.indentIncremental , d.block)
@@ -776,7 +777,7 @@ public class Fmt {
             format += " "
         }
         for k , v := range s.expressions {
-            format += this.formatExpression(indent + this.indentIncremental, v)
+            format += this.formatExpression(indent + this.indentIncremental , v)
             if k != len(s.expressions) - 1 {
                 if v.containsLfOrInlineComment() == false {
                     format += " , "

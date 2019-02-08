@@ -282,7 +282,7 @@ public class Lexer {
     //store line and column in a int 
     fn getLineAndColumnFromPos(pos int) -> (line int , column int) {
         line = pos >> 16
-        column = int(short(pos))
+        column = int(char(pos))
     }
 
     fn lexIdentifier(c byte) -> (token Token , err error) {
