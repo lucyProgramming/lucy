@@ -1,6 +1,6 @@
 import "java/lang/Object"
 import "java/lang/Class"
-import "java/lang/reflect/array"
+import "java/lang/reflect/Array"
 import "java/util/AbstractMap"
 
 public class Encoder {
@@ -141,21 +141,20 @@ public class Encoder {
         } else {
             panic(sprintf("'%s' not valid for map key" , typeName))
         }
-
     }
 
     private fn encodeArray() -> (bs []byte) {
-        if 0 == array.getLength(this.x) {
+        if 0 == Array.getLength(this.x) {
             return ['[' , ']']
         }
         bs = []byte("[")
         if this.indent != "" {
             bs.append('\n')
         }
-        length := array.getLength(this.x)
+        length := Array.getLength(this.x)
         for i := 0 ; i < length ; i++ {
             bs.appendAll([]byte(this.indents + this.indent))
-            bs2 := new Encoder(array.get(this.x , i) , this.indents + this.indent , this.indent).encode()
+            bs2 := new Encoder(Array.get(this.x , i) , this.indents + this.indent , this.indent).encode()
             bs.appendAll(bs2)
             if i != length - 1 {
                 bs.append(',')

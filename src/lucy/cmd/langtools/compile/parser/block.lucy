@@ -264,6 +264,9 @@ class BlockParser extends ParserFather {
                         this.consume(untilRc)
                     }
                     this.next(lfIsToken) // skip }
+                    if this.parser.token.Type == lex.TokenLf {
+                        this.next(lfIsToken)
+                    }
                     if isDefer {
                         d := new ast.StatementDefer()
                         d.block = newBlock

@@ -1,21 +1,40 @@
+import "java/util/zip"
 
-
-public enum  resourceKind {
-	resourceKindJavaClass = 1,
-	resourceKindJavaPackage,
-	resourceKindLucyClass,
-	resourceKindLucyPackage
+public enum resourceKind {
+    resourceKindJavaClass,
+    resourceKindJavaPackage,
+    resourceKindLucyClass,
+    resourceKindLucyPackage
 }
+
 
 public class Resource {
-	public kind     resourceKind
-	public realPath string
-	public name     string
-	
-	public fn Resource(kind resourceKind , realPath string , name  string) {
-	    this.super()
-	    this.kind = kind
-	    this.realPath = realPath
-	    this.name = name
-	}
+    public kind          resourceKind  
+    public realPath      string        
+    public name          string        
+           loadFromJar   []zip.ZipEntry
+           loadFromJarBs [][]byte           
+
+    public fn Resource(kind resourceKind , realPath string , name string) {
+        this.super()
+        this.kind = kind
+        this.realPath = realPath
+        this.name = name
+    }
+    public fn toString() -> (s string) {
+        kindString := ""
+        switch this.kind {
+            case resourceKindJavaClass:
+                kindString = "java class"
+            case resourceKindJavaPackage:
+                kindString = "java package"
+            case resourceKindLucyClass:
+                kindString = "lucy package"
+            case resourceKindLucyPackage:
+                kindString = "lucy package"
+        }
+        return sprintf("load '%s' as '%s' from '%s'" , this.name , kindString , this.realPath)
+    }
 }
+
+

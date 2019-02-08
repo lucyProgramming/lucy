@@ -6,7 +6,9 @@ public class ArrayString   {
 	public int start;
 	public int end; // not include
 	public int cap;
+	boolean readOnly ; 
 	static String outOfRangeMsg = "index out range";
+	static String readOnlyArrayException = "array is readOnly";
 	public String[] elements;
 	public int size(){
 		return this.end - this.start;
@@ -29,9 +31,17 @@ public class ArrayString   {
 	public ArrayString(){
 		
 	}
+
+	public synchronized setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly
+	}
+
 	public synchronized void set(int index , String value) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
+		}
+		if if(this.readOnly) {
+			throw new Exception(readOnlyArrayException);
 		}
 		index += this.start ; 
 		if (index >= this.end ){
@@ -39,6 +49,7 @@ public class ArrayString   {
 		}
 		this.elements[index] = value ; 
 	}
+
 	public synchronized String get(int index) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
@@ -48,8 +59,7 @@ public class ArrayString   {
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
 		return this.elements[index]  ; 
-	}	
-	
+	}
 
 	public  synchronized ArrayString slice(int start,int end){
 		int length = end - start ;
@@ -63,7 +73,11 @@ public class ArrayString   {
 		result.cap = this.cap;
 		return result;
 	}
+
 	public synchronized void append(String e){
+		if if(this.readOnly) {
+			throw new Exception(readOnlyArrayException);
+		}
 		if(this.end < this.cap){
 		}else{
 			this.expand(this.cap * 2);
@@ -71,6 +85,9 @@ public class ArrayString   {
 		this.elements[this.end++] = e;
 	}
 	public synchronized  void append(ArrayString es){
+		if if(this.readOnly) {
+			throw new Exception(readOnlyArrayException);
+		}
 		if (es == null) { //no need 
 			return  ;
 		}

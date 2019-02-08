@@ -9,6 +9,7 @@ import "lucy/cmd/langtools/compile/lc"
 import "lucy/cmd/langtools/compile/parser"
 import "lucy/cmd/langtools/compile/common" as compileCommon
 import "java/lang/Runtime"
+import "java/util/zip"
 
 public class RunLucyPackage {
            lucyRoot            string                        
@@ -86,14 +87,14 @@ public class RunLucyPackage {
         p := Runtime.getRuntime().exec(copy(new string[](len(cmdArray)) , cmdArray),
             envs)
         Run.runFn(fn () {
-            lucyIo.ioCopy(os.stderr , p.getErrorStream())
-        })
+                lucyIo.ioCopy(os.stderr , p.getErrorStream())
+            })
         Run.runFn(fn () {
-            lucyIo.ioCopy(os.stdout , p.getInputStream())
-        })
+                lucyIo.ioCopy(os.stdout , p.getInputStream())
+            })
         Run.runFn(fn () {
-            lucyIo.ioCopy(p.getOutputStream() , os.stdin)
-        })
+                lucyIo.ioCopy(p.getOutputStream() , os.stdin)
+            })
         code := p.waitFor() // wait for exit
         if this.runOverExit {
             os.exit(code)
@@ -203,26 +204,21 @@ public class RunLucyPackage {
                 return
             }
         }
-
         // if class file is missing
         {
             fis := new io.File(destinationDir).list()
             fisM := new map{string -> bool}()
-
             for _ , v := range fis {
                 if v.endsWith(".class") {
                     fisM[v] = true
                 }
             }
-
             for _ , v := range meta.classes {
                 if fisM.keyExist(v) == false {
                     return
                 }
             }
-
         }
-
         need = false
         return
     }
@@ -254,6 +250,31 @@ public class RunLucyPackage {
                 }
                 if new io.File(v + "/" + name + ".class").isFile() {
                     found.append(v)
+                    continue
+                }
+            }
+            for _ , v := range that.classPaths {
+                fis := new io.File(v).listFiles()
+                for f := range fis {
+                    if f.isFile() == false || f.getName().endsWith(".jar") == false {
+                        continue
+                    }
+                    zipfile := new zip.ZipFile(v + "/" + f.getName())
+                    defer {
+                        zipfile.close()
+                    }
+                    entries := zipfile.entries()
+                    for entries.hasMoreElements() {
+                        entry := entries.nextElement().(zip.ZipEntry)
+                        if entry.getName() == name + "/" && entry.isDirectory() {
+                            found.append(v + "/" + f.getName())
+                            continue
+                        }
+                        if entry.getName() == name + ".class" && entry.isDirectory() == false {
+                            found.append(v + "/" + f.getName())
+                            continue
+                        }
+                    }
                 }
             }
             return

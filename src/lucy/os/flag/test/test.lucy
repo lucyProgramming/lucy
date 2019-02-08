@@ -1,27 +1,21 @@
-
-
-
 import "lucy/os/flag"
 
-
-
 fn main(args []string) {
-	flag := new flag.FlagParser()
-	b := flag.boolOption("-b",false,"bool")
-	i := flag.intOption("-i" , 123 ,"")
-	
-	f := flag.floatOption("-f" )
-	no,err := flag.parse(["-b","-i" ,"-456" , "121" ,"-aaa" , "-f" ,"-11111" , "fdfdfd"])
-	if err != null {
-	    panic(err)
-	}
-	print(no)
-	print(b.getValue())
-	print(i.getValue())
-	print(f.getValue())
-	print(flag.helpMsg());
-	
-	flag.walkOptions(fn ( o flag.Option) {
-	    print(o.name , o.defaultValueString , o.usage)
-	})
+    flag := new flag.FlagParser()
+    b := flag.boolOption("-b" , false , "bool")
+    i := flag.intOption("-i" , 123 , "")
+
+    f := flag.floatOption("-f")
+    no , err := flag.parse(["-b" , "-i" , "-456" , "121" , "-aaa" , "-f" , "-11111" , "fdfdfd"])
+    if err != null {
+        panic(err)
+    }
+    print(no)
+    print(b.getValue())
+    print(i.getValue())
+    print(f.getValue())
+    print(flag.helpMsg())
+    flag.walkOptions(fn (o flag.Option) {
+            print(o.name , o.defaultValueString , o.usage)
+        })
 }

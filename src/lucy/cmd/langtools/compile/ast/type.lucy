@@ -21,8 +21,8 @@ public class Type {
     public packagePos              Pos             
     public findUsage               bool            
     // public rename                  bool            
-    public getHover                bool            
-    public autoCompletion          bool            
+    public getHover       bool
+    public autoCompletion bool
     /*
 		a // this is a inline comment
 	*/
@@ -33,7 +33,7 @@ public class Type {
     public fn containsLfOrInlineComment() -> (constains bool) {
         return this.containsLf || this.inlineComment != null
     }
-     // copy to t 
+    // copy to t 
     fn cp(t Type) {
         t.Type = this.Type
         t.isBuildIn = this.isBuildIn
@@ -132,13 +132,13 @@ public class Type {
         switch this.Type {
             case VariableTypePackage:
                 return new error(sprintf("%s use package '%s' without selector",
-                    this.pos.errMsgPrefix() , this.Package.name))
+                            this.pos.errMsgPrefix() , this.Package.name))
             case VariableTypeClass:
                 return new error(sprintf("%s use class '%s' without selector",
-                    this.pos.errMsgPrefix() , this.Class.name))
+                            this.pos.errMsgPrefix() , this.Class.name))
             default:
                 return new error(sprintf("%s '%s' is not right value valid",
-                    this.pos.errMsgPrefix() , this.typeString()))
+                            this.pos.errMsgPrefix() , this.typeString()))
         }
 
     }
@@ -155,7 +155,7 @@ public class Type {
 		*/
         if this.Type == VariableTypeNull {
             return new error(sprintf("%s '%s' is not typed",
-                this.pos.errMsgPrefix() , this.typeString()))
+                        this.pos.errMsgPrefix() , this.typeString()))
         }
         return null
     }
@@ -209,11 +209,11 @@ public class Type {
             case VariableTypeTemplate:
                 if block.inheritedAttribute.Function.parameterTypes == null {
                     return new error(sprintf("%s parameter type '%s' not in a template function",
-                        errMsgPrefix(this.pos) , this.name))
+                                errMsgPrefix(this.pos) , this.name))
                 }
                 if block.inheritedAttribute.Function.parameterTypes[this.name] == null {
                     return new error(sprintf("%s parameter type '%s' not found",
-                        errMsgPrefix(this.pos) , this.name))
+                                errMsgPrefix(this.pos) , this.name))
                 }
                 pos := this.pos // keep pos
                 if this.locateDefinition {
@@ -228,7 +228,7 @@ public class Type {
                 d , exists := block.inheritedAttribute.p.block.nameExists(this.name , this.pos)
                 if exists == false {
                     return new error(sprintf("%s '%s' not found",
-                        errMsgPrefix(this.pos) , this.name))
+                                errMsgPrefix(this.pos) , this.name))
                 }
                 return this.makeTypeFrom(block , d)
             case VariableTypeArray , VariableTypeJavaArray:
@@ -312,7 +312,6 @@ public class Type {
                 return err
             }
         }
-
         if d == null {
             return new error(sprintf("%s type named '%s' not found" , errMsgPrefix(this.pos) , this.name))
         }
@@ -334,7 +333,7 @@ public class Type {
                 block.inheritedAttribute.p.setLocationDefinition(i)
             }
             return null , new error(sprintf("%s type named '%s' not found",
-                errMsgPrefix(this.pos) , this.name))
+                        errMsgPrefix(this.pos) , this.name))
         }
         index := this.name.indexOf(".")
         packageName := this.name[:index]
@@ -342,10 +341,9 @@ public class Type {
         i := block.inheritedAttribute.p.getImport(this.pos.filename , packageName)
         if null == i {
             return null , new error(sprintf("%s package '%s' not imported",
-                errMsgPrefix(this.pos) , packageName))
+                        errMsgPrefix(this.pos) , packageName))
         }
         {
-
             pos := this.pos
             if this.packagePos != null {
                 pos = this.packagePos
@@ -359,7 +357,7 @@ public class Type {
         p , err := block.inheritedAttribute.p.load(i.Import)
         if err != null {
             return null , new error(sprintf("%s %s",
-                errMsgPrefix(this.pos) , err.getMessage()))
+                        errMsgPrefix(this.pos) , err.getMessage()))
         }
         if this.autoCompletion {
             items := []AutoCompletionItem{}
@@ -388,22 +386,22 @@ public class Type {
                 block.inheritedAttribute.p.autoCompletionItems = items
             } else {
                 return null , new error(sprintf("%s '%s' is not a package",
-                    errMsgPrefix(this.pos) , packageName))
+                            errMsgPrefix(this.pos) , packageName))
             }
-
             return null , new error("FLASE ERROR") // it's ok 
         }
         if pp , ok := p.(Package) ; ok {
             var exists bool
+            // print(pp.name , pp , pp.name , pp.block.classes)
             d , exists = pp.block.nameExists(className , this.pos)
             if exists == false {
                 err = new error(sprintf("%s '%s' not found",
-                    errMsgPrefix(this.pos) , className))
+                        errMsgPrefix(this.pos) , className))
             }
             return d , err
         } else {
             return null , new error(sprintf("%s '%s' is not a package",
-                errMsgPrefix(this.pos) , packageName))
+                        errMsgPrefix(this.pos) , packageName))
         }
 
     }
@@ -412,7 +410,7 @@ public class Type {
         if c , ok := d.(Class) ; ok {
             if c.loadFromOutSide && c.isPublic() == false {
                 err = new error(sprintf("%s class '%s' is not public",
-                    errMsgPrefix(this.pos) , c.name))
+                        errMsgPrefix(this.pos) , c.name))
             }
             if this.locateDefinition {
                 block.inheritedAttribute.p.setLocationDefinition(c)
@@ -442,7 +440,7 @@ public class Type {
         if dd , ok := d.(Enum) ; ok {
             if dd.loadFromOutSide && dd.isPublic() == false {
                 block.inheritedAttribute.p.errors.append(new error(sprintf("%s enum '%s' is not public",
-                    errMsgPrefix(this.pos) , dd.name)))
+                            errMsgPrefix(this.pos) , dd.name)))
             }
             if this.locateDefinition {
                 block.inheritedAttribute.p.setLocationDefinition(dd)
@@ -453,30 +451,30 @@ public class Type {
             return null
         }
         return new error(sprintf("%s name '%s' is not a type",
-            errMsgPrefix(this.pos) , this.name))
+                    errMsgPrefix(this.pos) , this.name))
     }
 
     public fn isNumber() -> (is bool) {
         return this.isInteger() ||
-            this.isFloat()
+                this.isFloat()
     }
 
     public fn isPointer() -> (is bool) {
         return this.Type == VariableTypeObject ||
-            this.Type == VariableTypeArray ||
-            this.Type == VariableTypeJavaArray ||
-            this.Type == VariableTypeMap ||
-            this.Type == VariableTypeString ||
-            this.Type == VariableTypeNull ||
-            this.Type == VariableTypeFunction
+                this.Type == VariableTypeArray ||
+                this.Type == VariableTypeJavaArray ||
+                this.Type == VariableTypeMap ||
+                this.Type == VariableTypeString ||
+                this.Type == VariableTypeNull ||
+                this.Type == VariableTypeFunction
     }
 
     public fn isInteger() -> (is bool) {
         return this.Type == VariableTypeByte ||
-            this.Type == VariableTypeShort ||
-            this.Type == VariableTypeInt ||
-            this.Type == VariableTypeLong ||
-            this.Type == VariableTypeChar
+                this.Type == VariableTypeShort ||
+                this.Type == VariableTypeInt ||
+                this.Type == VariableTypeLong ||
+                this.Type == VariableTypeChar
     }
 
     /*
@@ -484,13 +482,13 @@ public class Type {
 	*/
     fn isFloat() -> (is bool) {
         return this.Type == VariableTypeFloat ||
-            this.Type == VariableTypeDouble
+                this.Type == VariableTypeDouble
     }
 
     public fn isPrimitive() -> (is bool) {
         return this.isNumber() ||
-            this.Type == VariableTypeString ||
-            this.Type == VariableTypeBool
+                this.Type == VariableTypeString ||
+                this.Type == VariableTypeBool
     }
 
     public fn typeName(prefix string = "") -> (ret string) {
@@ -736,7 +734,6 @@ public class Type {
             return true
         }
         {
-
             // try string first
             if leftValue.isString() && rightValue.isString() {
                 return true
@@ -771,7 +768,7 @@ public class Type {
         }
         if leftValue.Type == VariableTypeMap && rightValue.Type == VariableTypeMap {
             return leftValue.Map.K.assignAble(block , errs , rightValue.Map.K) &&
-                leftValue.Map.V.assignAble(block , errs , rightValue.Map.V)
+                    leftValue.Map.V.assignAble(block , errs , rightValue.Map.V)
         }
         if leftValue.Type == VariableTypeFunction &&
             rightValue.Type == VariableTypeFunction {
@@ -845,7 +842,7 @@ public class Type {
         }
         if leftValue.Type == VariableTypeMap {
             return leftValue.Map.K.equal(compareTo.Map.K) &&
-                leftValue.Map.V.equal(compareTo.Map.V)
+                    leftValue.Map.V.equal(compareTo.Map.V)
         }
         if leftValue.Type == VariableTypeEnum {
             return leftValue.Enum.name == compareTo.Enum.name

@@ -2,11 +2,13 @@
 package lucy.deps;
 import java.lang.reflect.* ; 
 
-public class ArrayBool {
+public class ArrayBool   {
 	public int start;
 	public int end; // not include
 	public int cap;
+	boolean readOnly ; 
 	static String outOfRangeMsg = "index out range";
+	static String readOnlyArrayException = "array is readOnly";
 	public boolean[] elements;
 	public int size(){
 		return this.end - this.start;
@@ -29,9 +31,17 @@ public class ArrayBool {
 	public ArrayBool(){
 		
 	}
+
+	public synchronized setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly
+	}
+
 	public synchronized void set(int index , boolean value) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
+		}
+		if if(this.readOnly) {
+			throw new Exception(readOnlyArrayException);
 		}
 		index += this.start ; 
 		if (index >= this.end ){
@@ -39,6 +49,7 @@ public class ArrayBool {
 		}
 		this.elements[index] = value ; 
 	}
+
 	public synchronized boolean get(int index) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
@@ -48,8 +59,7 @@ public class ArrayBool {
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
 		return this.elements[index]  ; 
-	}	
-	
+	}
 
 	public  synchronized ArrayBool slice(int start,int end){
 		int length = end - start ;
@@ -63,7 +73,11 @@ public class ArrayBool {
 		result.cap = this.cap;
 		return result;
 	}
+
 	public synchronized void append(boolean e){
+		if if(this.readOnly) {
+			throw new Exception(readOnlyArrayException);
+		}
 		if(this.end < this.cap){
 		}else{
 			this.expand(this.cap * 2);
@@ -71,6 +85,9 @@ public class ArrayBool {
 		this.elements[this.end++] = e;
 	}
 	public synchronized  void append(ArrayBool es){
+		if if(this.readOnly) {
+			throw new Exception(readOnlyArrayException);
+		}
 		if (es == null) { //no need 
 			return  ;
 		}

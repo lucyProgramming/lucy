@@ -471,14 +471,14 @@ class ClassParser extends ParserFather {
             return null
         }
         return new error(sprintf("%s not a valid token after 'volatile'",
-                this.parser.errMsgPrefix()))
+                    this.parser.errMsgPrefix()))
     }
     fn validAfterAbstract() -> (err error) {
         if this.parser.token.Type == lex.TokenFn {
             return null
         }
         return new error(sprintf("%s not a valid token after 'abstract'",
-                this.parser.errMsgPrefix()))
+                    this.parser.errMsgPrefix()))
     }
     fn validAfterSynchronized() -> (err error) {
         if this.parser.token.Type == lex.TokenFn ||
@@ -486,7 +486,7 @@ class ClassParser extends ParserFather {
             return null
         }
         return new error(sprintf("%s not a valid token after 'synchronized'",
-                this.parser.errMsgPrefix()))
+                    this.parser.errMsgPrefix()))
     }
     fn validAfterStatic() -> (err error) {
         if this.parser.token.Type == lex.TokenIdentifier ||
@@ -495,7 +495,7 @@ class ClassParser extends ParserFather {
             return null
         }
         return new error(sprintf("%s not a valid token after 'static'",
-                this.parser.errMsgPrefix()))
+                    this.parser.errMsgPrefix()))
     }
     fn validAfterFinal() -> (err error) {
         if this.parser.token.Type == lex.TokenFn ||
@@ -504,7 +504,7 @@ class ClassParser extends ParserFather {
             return null
         }
         return new error(sprintf("%s not a valid token after 'final'",
-                this.parser.errMsgPrefix()))
+                    this.parser.errMsgPrefix()))
     }
     fn validAfterAccessControlToken(keyWord string) -> (err error) {
         if this.parser.token.Type == lex.TokenIdentifier ||
@@ -516,7 +516,7 @@ class ClassParser extends ParserFather {
             return null
         }
         return new error(sprintf("%s not a valid token after '%s'",
-                this.parser.errMsgPrefix() , keyWord))
+                    this.parser.errMsgPrefix() , keyWord))
     }
 }
 

@@ -6,7 +6,8 @@ import "java/lang/Object"
 import "lucy/binary"
 import "java/io"
 import "lucy/os"
-import "lucy/cmd/langtools/common" as langtoolsCommon 
+import "java/util/zip"
+import "lucy/cmd/langtools/common" as langtoolsCommon
 
 /*
 	load from file implementation
@@ -32,19 +33,66 @@ public class FileLoader implements ast.loadImport {
     public fn getCache(name string) -> (cache Object) {
         cache = this.caches[name]
         if cache != null {
-            return cache
+            return
         }
         if cache = javaCaches[name] ; cache != null {
-            //print("hit java cache" , name )
+            // print("hit java cache" , name)
         }
-        return cache
     }
 
+    public fn importExistsInJarFile(jarfile string , importName string) -> (exists Resource) {
+        zipfile := new zip.ZipFile(jarfile)
+        defer {
+            zipfile.close()
+        }
+        entries := zipfile.entries()
+        for entries.hasMoreElements() {
+            entry := entries.nextElement().(zip.ZipEntry)
+            if entry.getName() == importName + "/" && entry.isDirectory() {
+                exists = new Resource(resourceKindJavaPackage , jarfile , importName)
+                for entries.hasMoreElements() {
+                    entry := entries.nextElement().(zip.ZipEntry)
+                    if entry.isDirectory() {
+                        break
+                    }
+                    if entry.getName().endsWith(".class") == false {
+                        continue
+                    }
+                    if exists.loadFromJar == null {
+                        exists.loadFromJar = [entry]
+                        exists.loadFromJarBs = [this.readBsFromZip(zipfile , entry)]
+                    } else {
+                        exists.loadFromJar.append(entry)
+                        exists.loadFromJarBs.append(this.readBsFromZip(zipfile , entry))
+                    }
+                }
+                return
+            }
+            if entry.getName() == importName + ".class" && entry.isDirectory() == false {
+                exists = new Resource(resourceKindJavaClass , jarfile , importName)
+                exists.loadFromJar = [entry]
+                exists.loadFromJarBs = [this.readBsFromZip(zipfile , entry)]
+                return
+            }
+        }
+    }
 
-    
+    public fn readBsFromZip(zipfile zip.ZipFile , entry zip.ZipEntry) -> (bs []byte) {
+        bs = []byte{}
+        s := zipfile.getInputStream(entry)
+        defer s.close()
+        buff := new byte[](1024)
+        for {
+            n := s.read(buff)
+            if n == -1 {
+                break
+            }
+            bs.appendAll(javaArray2Lucy(buff , 0 , n))   
+        }
+    }
 
     public fn loadImport(importName string) -> (x Object , err error) {
-        /*fer {
+        /*
             e := catch()
             if err == null && e != null{
                 err =  e
@@ -56,17 +104,17 @@ public class FileLoader implements ast.loadImport {
         realPaths := []Resource{}
         foundInLucy := false
         for _ , v := range this.lucyPath {
-            if p := v + "/class/" + importName ; new io.File(p).isDirectory()  && langtoolsCommon.haveFileType(p , ".class"){
+            if p := v + "/class/" + importName ; new io.File(p).isDirectory() && langtoolsCommon.haveFileType(p , ".class") {
                 realPaths.append(new Resource(resourceKindLucyPackage,
-                    p,
-                    importName))
+                        p,
+                        importName))
                 foundInLucy = true
                 continue
             }
             if p := v + "/class/" + importName + ".class" ; new io.File(p).isFile() {
                 realPaths.append(new Resource(resourceKindLucyClass,
-                    p,
-                    importName))
+                        p,
+                        importName))
                 foundInLucy = true
                 continue
             }
@@ -75,13 +123,25 @@ public class FileLoader implements ast.loadImport {
             for _ , v := range this.classPaths {
                 if p := v + "/" + importName ; new io.File(p).isDirectory() && langtoolsCommon.haveFileType(p , ".class") {
                     realPaths.append(new Resource(resourceKindJavaPackage,
-                        p,
-                        importName))
+                            p,
+                            importName))
                 }
                 if p := v + "/" + importName + ".class" ; new io.File(p).isFile() {
                     realPaths.append(new Resource(resourceKindJavaClass,
-                        p,
-                        importName))
+                            p,
+                            importName))
+                }
+            }
+            //
+            for _ , v := range this.classPaths {
+                fis := new io.File(v).listFiles()
+                for f := range fis {
+                    if f.isFile() && f.getName().endsWith(".jar") {
+                        e := this.importExistsInJarFile(v + "/" + f.getName() , importName)
+                        if null != e {
+                            realPaths.append(e)
+                        }
+                    }
                 }
             }
         }
@@ -109,9 +169,8 @@ public class FileLoader implements ast.loadImport {
                     case resourceKindLucyPackage:
                         errMsg += sprintf("\t in '%s' is a lucy package\n" , v[0].realPath)
                 }
-
             }
-            return null , new error(sprintf(errMsg))
+            return null , new error(errMsg)
         }
         if realPaths[0].kind == resourceKindLucyClass {
             if common.getBaseName(realPaths[0].realPath) == MainClassName {
@@ -146,7 +205,6 @@ public class FileLoader implements ast.loadImport {
             return p , null
         }
     }
-
     /*
         lucy and java have no difference
     */
@@ -158,7 +216,6 @@ public class FileLoader implements ast.loadImport {
             i.notImportedYet = true
             astClass.interfaces[k] = i
         }
-
     }
 
     public fn loadAsJava(c cg.Class) -> (astClass ast.Class) {
@@ -174,7 +231,6 @@ public class FileLoader implements ast.loadImport {
         }
         astClass = new ast.Class()
         {
-
             nameIndex := binary.BigEndian.getChar(c.constPools[c.thisClass].info)
             astClass.name = string(c.constPools[nameIndex].info)
             if astClass.name != ast.JavaRootClass {
@@ -241,7 +297,6 @@ public class FileLoader implements ast.loadImport {
         //name
         astClass = new ast.Class()
         {
-
             nameIndex := binary.BigEndian.getChar(c.constPools[c.thisClass].info)
             astClass.name = string(c.constPools[nameIndex].info)
             if astClass.name != ast.JavaRootClass {
@@ -358,7 +413,6 @@ public class FileLoader implements ast.loadImport {
     fn loadLucyEnum(c cg.Class) -> (e ast.Enum) {
         e = new ast.Enum()
         {
-
             nameIndex := binary.BigEndian.getChar(c.constPools[c.thisClass].info)
             e.name = string(c.constPools[nameIndex].info)
         }
@@ -466,7 +520,6 @@ public class FileLoader implements ast.loadImport {
                 }
             }
         }
-
         for _ , m := range c.methods {
             name := string(c.constPools[m.nameIndex].info)
             if name == ast.MainFunctionName {
@@ -601,36 +654,62 @@ public class FileLoader implements ast.loadImport {
     }
 
     public fn loadJavaPackage(r Resource) -> (p ast.Package) {
-        fis := new io.File(r.realPath).list()
         p = new ast.Package(r.name , true , null)
         p.block.classes = new map{string -> ast.Class}()
-        for _ , v := range fis {
-            if v.endsWith(".class") == false {
-                continue
-            }
-            bs , err := os.readFile(r.realPath + "/" + v)
-            if err != null {
-                panic(err)
-            }
-            c := new cg.ClassDecoder(javaArray2Lucy(bs)).decode()
-            cc := this.loadAsJava(c)
-            if cc != null {
-                if p.block.classes == null {
-                    p.block.classes = new map{string -> ast.Class}()
+        if len(r.loadFromJar) == 0 {
+            fis := new io.File(r.realPath).list()
+            for _ , v := range fis {
+                if v.endsWith(".class") == false {
+                    continue
                 }
-                javaCaches[cc.name] = cc
-                this.caches[cc.name] = cc
-                p.block.classes[common.getBaseName(cc.name)] = cc
+                bs , err := os.readFile(r.realPath + "/" + v)
+                if err != null {
+                    panic(err)
+                }
+                c := new cg.ClassDecoder(javaArray2Lucy(bs)).decode()
+                cc := this.loadAsJava(c)
+                if cc != null {
+                    if p.block.classes == null {
+                        p.block.classes = new map{string -> ast.Class}()
+                    }
+                    javaCaches[cc.name] = cc
+                    this.caches[cc.name] = cc
+                    p.block.classes[common.getBaseName(cc.name)] = cc
+                }
+            }
+        } else {
+            for k,v := range r.loadFromJar {
+                if v.getName().endsWith(".class") == false {
+                    continue
+                }
+                c := new cg.ClassDecoder(r.loadFromJarBs[k]).decode()
+                cc := this.loadAsJava(c)
+                if cc != null {
+                    if p.block.classes == null {
+                        p.block.classes = new map{string -> ast.Class}()
+                    }
+                    javaCaches[cc.name] = cc
+                    this.caches[cc.name] = cc
+                    p.block.classes[common.getBaseName(cc.name)] = cc
+                }
             }
         }
     }
 
     public fn loadClass(r Resource) -> (c Object) {
-        bs , err := os.readFile(r.realPath)
-        if err != null {
-            return null
+        var bs []byte
+        var err error
+        if len(r.loadFromJar) == 0 {
+            var t byte[]
+            t , err = os.readFile(r.realPath)
+            if err != null {
+                return null
+            }
+            bs = javaArray2Lucy(t)
+        } else {
+            bs = r.loadFromJarBs[0]
         }
-        cc := (new cg.ClassDecoder(javaArray2Lucy(bs))).decode()
+        cc := (new cg.ClassDecoder(bs)).decode()
         if r.kind == resourceKindLucyClass {
             if t := cc.getAttributeByName(cg.AttributeNameLucyEnum) ; len(t) > 0 {
                 return this.loadLucyEnum(cc)

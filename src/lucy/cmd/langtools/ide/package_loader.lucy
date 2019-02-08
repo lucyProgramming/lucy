@@ -13,6 +13,7 @@ public class PackageLoader extends lc.FileLoader {
     }
     public fn loadImport(importName string) -> (x Object , err error) {
         if x = this.getCache(importName) ; x != null {
+            printf("%s hit cache\n" , importName)
             return
         }
         realPaths := []lc.Resource{}
@@ -21,26 +22,26 @@ public class PackageLoader extends lc.FileLoader {
             if p := v + "/src/" + importName ; new io.File(p).isDirectory() &&
                 common.haveFileType(p , ".lucy") {
                 realPaths.append(new lc.Resource(
-                    lc.resourceKindLucyPackage,
-                    p,
-                    importName))
+                        lc.resourceKindLucyPackage,
+                        p,
+                        importName))
                 foundInLucy = true
                 continue
             }
         }
         if foundInLucy == false {
             for _ , v := range this.classPaths {
-                if p := v + "/" + importName ; new io.File(p).isDirectory() {
+                if p := v + "/" + importName ; new io.File(p).isDirectory() && common.haveFileType(p , ".class") {
                     realPaths.append(new lc.Resource(
-                        lc.resourceKindJavaPackage,
-                        p,
-                        importName))
+                            lc.resourceKindJavaPackage,
+                            p,
+                            importName))
                 }
                 if p := v + "/" + importName + ".class" ; new io.File(p).isFile() {
                     realPaths.append(new lc.Resource(
-                        lc.resourceKindJavaClass,
-                        p,
-                        importName))
+                            lc.resourceKindJavaClass,
+                            p,
+                            importName))
                 }
             }
         }
@@ -83,6 +84,8 @@ public class PackageLoader extends lc.FileLoader {
             p := this.loadJavaPackage(realPaths[0])
             if p != null {
                 this.caches[p.name] = p
+                lc.javaCaches[p.name] = p
+                p.javaPackage = new ast.JavaPackage()
             }
             return p , null
         } else {

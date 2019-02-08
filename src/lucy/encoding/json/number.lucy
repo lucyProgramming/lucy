@@ -55,7 +55,8 @@ class Number {
             bs[k] = '0'
         }
 
-    }    fn getLong() -> (longValue long) {
+    }
+    fn getLong() -> (longValue long) {
         this.prepare()
         for v := range this.integerPart {
             longValue = longValue * 10 + long(v - '0')
@@ -64,7 +65,8 @@ class Number {
         if this.isNegative {
             longValue = -longValue
         }
-    }    fn getDouble() -> (doubleValue double) {
+    }
+    fn getDouble() -> (doubleValue double) {
         this.prepare()
         for v := range this.integerPart {
             doubleValue = doubleValue * 10.0 + double(v - '0')
@@ -81,6 +83,7 @@ class Number {
         if this.isNegative {
             doubleValue = -doubleValue
         }
-    }}
+    }
+}
 
 

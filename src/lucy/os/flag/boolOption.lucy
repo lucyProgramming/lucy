@@ -1,21 +1,22 @@
+public final class BoolOption extends Option {
+    private boolDefaultValue bool
+    private boolValue        bool
 
-public final class BoolOption  extends Option {
-	private boolDefaultValue bool 
-	private boolValue bool 
-	
-	fn BoolOption(d bool) {
-		this.super() 
-		.boolDefaultValue = d 
-	}
-	
-	protected fn reset() {
-		this.boolValue = this.boolDefaultValue 
-	}
-	
-	//special case 
-	protected fn parse(s string)   {
-		this.boolValue = !this.boolDefaultValue
-	}
-	// if flag is nerver parse then panic
-	public fn getValue() -> (b bool = this.boolValue) {}
+    fn BoolOption(d bool) {
+        this.super()
+        .boolDefaultValue = d
+    }
+
+    protected fn reset() {
+        this.boolValue = this.boolDefaultValue
+    }
+
+    //special case 
+    protected fn parse(s string) {
+        this.boolValue = !this.boolDefaultValue
+    }
+    // if flag is nerver parse then panic
+    public fn getValue() -> (b bool = this.boolValue){}
 }
+
+

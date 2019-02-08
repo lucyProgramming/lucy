@@ -1,125 +1,123 @@
-
 /*
 	a simple but yet powerful command line arguments parser for lucy programing language 
 */
-public final class  FlagParser {
+public final class FlagParser {
+    options map{string -> Option}
 
-	options map{string -> Option}
-	
-	public fn FlagParser() {
-	    this.super()
-		this.options = new map{ string -> Option }()
-	}
-	
-	public fn walkOptions(walkFn fn (o Option)) {
-		for v := range this.options {
-			walkFn(v)
-		}
-	}
-	
-	private fn check(option string) {
-	    if option.startsWith("-") == false {
-    	    panic(new error(sprintf("'%s' not a valid option" , option )))
-    	}
-		if this.options.keyExist(option)  {
-			panic(new error(sprintf("option already '%s' exists" , option )))
-		}
-	}
-	
-	public fn boolOption(option string , d bool = false ,usage string = "" ) ->(o BoolOption){
-		.check(option)
-		o = new BoolOption(d)
-		o.typ = OptionTypeBool
-		o.usage = usage
-		o.name = option 
-		o.defaultValueString = "" + d
-		this.options[option] = o
-		o.reset()
-	} 
-	
-	public fn intOption(option string , d int = 0 ,usage string = "") ->(o IntOption){
-		.check(option)
-		o = new IntOption(d);
-		o.typ = OptionTypeInt
-		o.usage = usage 
-		o.name = option 
-		o.defaultValueString = "" + d
-		this.options[option] = o
-		o.reset()
-	} 
-	
-	public fn stringOption(option string , d string = "" ,usage string = "") ->(o StringOption){
-		.check(option)
-		o = new StringOption(d);
-		o.typ = OptionTypeString
-		o.usage = usage 
-		o.name = option 
-		o.defaultValueString = "" + d
-		this.options[option] = o
-		o.reset()
-	}
+    public fn FlagParser() {
+        this.super()
+        this.options = new map{string -> Option}()
+    }
 
-	public fn floatOption(option string , d float = 0f,usage string = "") ->(o FloatOption){
-		.check(option)
-		o = new FloatOption(d);
-		o.typ = OptionTypeFloat
-		o.usage = usage 
-		o.name = option 
-		o.defaultValueString = "" + d
-		this.options[option] = o
-		o.reset()
-	}
-		
-	
-	public fn parse(args []string)->(noDefine []string , err error){
-	    defer {
-	        e := catch()
-			if e != null && err == null {
-				err = e 
-			}
-		}
-		for v := range this.options{
-			v.reset()
-		}
-		noDefine = []string{} 
-		for k := 0 ; k < args.size() ; k++{
-			v := args[k]
-			if false == this.options.keyExist(v) {
-				noDefine.append(v)
-				continue
-			}
-			o := this.options[v]
-			if o.typ == OptionTypeBool {
-				//special case 
-				o.parse(v)
-			}else {
-				if k == len(args) - 1 {
-					err = new error(sprintf("no value  after '%s'" , v ))
-					return 
-				}
-				o.parse(args[++k])
-			}
-			
-		}
-	}
-	public fn helpMsg(prefix string = "") -> (msg string){
-		msg = prefix + "flag provides are:\n"
-		for k,v := range this.options {
-			switch  v.typ{
-				case OptionTypeBool:
-					msg += prefix + sprintf("\t %s default:%s\n" , k ,v.defaultValueString)
-					msg += prefix + "\t\tusage:" + v.usage + "\n"
-				case OptionTypeInt:
-					msg += prefix + sprintf("\t %s default:%s\n" , k ,v.defaultValueString)
-					msg += prefix + "\t\tusage:" + v.usage + "\n"
-				case OptionTypeString:
-					msg += prefix + sprintf("\t %s default:'%s'\n" , k ,v.defaultValueString)
-					msg += prefix + "\t\tusage:" + v.usage + "\n"
-				case OptionTypeFloat:
-					msg += prefix + sprintf("\t %s default:%s\n" , k ,v.defaultValueString)
-					msg += prefix + "\t\tusage:" + v.usage + "\n"
-			}
-		}
-	}
-} 
+    public fn walkOptions(walkFn fn (o Option)) {
+        for v := range this.options {
+            walkFn(v)
+        }
+    }
+
+    private fn check(option string) {
+        if option.startsWith("-") == false {
+            panic(new error(sprintf("'%s' not a valid option" , option)))
+        }
+        if this.options.keyExist(option) {
+            panic(new error(sprintf("option already '%s' exists" , option)))
+        }
+    }
+
+    public fn boolOption(option string , d bool = false , usage string = "") -> (o BoolOption) {
+        .check(option)
+        o = new BoolOption(d)
+        o.typ = OptionTypeBool
+        o.usage = usage
+        o.name = option
+        o.defaultValueString = "" + d
+        this.options[option] = o
+        o.reset()
+    }
+
+    public fn intOption(option string , d int = 0 , usage string = "") -> (o IntOption) {
+        .check(option)
+        o = new IntOption(d)
+        o.typ = OptionTypeInt
+        o.usage = usage
+        o.name = option
+        o.defaultValueString = "" + d
+        this.options[option] = o
+        o.reset()
+    }
+
+    public fn stringOption(option string , d string = "" , usage string = "") -> (o StringOption) {
+        .check(option)
+        o = new StringOption(d)
+        o.typ = OptionTypeString
+        o.usage = usage
+        o.name = option
+        o.defaultValueString = "" + d
+        this.options[option] = o
+        o.reset()
+    }
+
+    public fn floatOption(option string , d float = 0f , usage string = "") -> (o FloatOption) {
+        .check(option)
+        o = new FloatOption(d)
+        o.typ = OptionTypeFloat
+        o.usage = usage
+        o.name = option
+        o.defaultValueString = "" + d
+        this.options[option] = o
+        o.reset()
+    }
+
+    public fn parse(args []string) -> (noDefine []string , err error) {
+        defer {
+            e := catch()
+            if e != null && err == null {
+                err = e
+            }
+        }
+        for v := range this.options {
+            v.reset()
+        }
+        noDefine = []string{}
+        for k := 0 ; k < args.size() ; k++ {
+            v := args[k]
+            if false == this.options.keyExist(v) {
+                noDefine.append(v)
+                continue
+            }
+            o := this.options[v]
+            if o.typ == OptionTypeBool {
+                //special case 
+                o.parse(v)
+            } else {
+                if k == len(args) - 1 {
+                    err = new error(sprintf("no value  after '%s'" , v))
+                    return
+                }
+                o.parse(args[++k])
+            }
+
+        }
+    }
+    public fn helpMsg(prefix string = "") -> (msg string) {
+        msg = prefix + "flag provides are:\n"
+        for k , v := range this.options {
+            switch v.typ {
+                case OptionTypeBool:
+                    msg += prefix + sprintf("\t %s default:%s\n" , k , v.defaultValueString)
+                    msg += prefix + "\t\tusage:" + v.usage + "\n"
+                case OptionTypeInt:
+                    msg += prefix + sprintf("\t %s default:%s\n" , k , v.defaultValueString)
+                    msg += prefix + "\t\tusage:" + v.usage + "\n"
+                case OptionTypeString:
+                    msg += prefix + sprintf("\t %s default:'%s'\n" , k , v.defaultValueString)
+                    msg += prefix + "\t\tusage:" + v.usage + "\n"
+                case OptionTypeFloat:
+                    msg += prefix + sprintf("\t %s default:%s\n" , k , v.defaultValueString)
+                    msg += prefix + "\t\tusage:" + v.usage + "\n"
+            }
+        }
+    }
+}
+
 

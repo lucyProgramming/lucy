@@ -1,84 +1,70 @@
-
-
-
-
-
-fn testFloat()->(ok bool = false){
-	var a ,b float
-	a = 1.0
-	b = 2.0
-	if 3.0 != a + b {
-		return 
-	}
-	if -1.0 != a - b {
-		return 
-	}
-	if 1.0 != b - a {
-		return 
-	}
-	if 2.0 != b * a {
-		return 
-	}
-
-	if 2.0 != b / a {
-		return 
-	}
-	if 0.5 != a / b {
-		return 
-	}
-	if 0.0 != b % a {
-		return 
-	}
-	if 1.0 != a % b {
-		return 
-	}
-	ok = true
+fn testFloat() -> (ok bool = false) {
+    var a , b float
+    a = 1.0
+    b = 2.0
+    if 3.0 != a + b {
+        return
+    }
+    if -1.0 != a - b {
+        return
+    }
+    if 1.0 != b - a {
+        return
+    }
+    if 2.0 != b * a {
+        return
+    }
+    if 2.0 != b / a {
+        return
+    }
+    if 0.5 != a / b {
+        return
+    }
+    if 0.0 != b % a {
+        return
+    }
+    if 1.0 != a % b {
+        return
+    }
+    ok = true
 }
 
-
-
-fn testDouble()->(ok bool = false){
-	var a ,b double
-	a = 1.0
-	b = 2.0
-	if 3.0 != a + b {
-	}
-	if -1.0 != a - b {
-		return 
-	}
-	if 1.0 != b - a {
-		return 
-	}
-	if 2.0 != b * a {
-		return 
-	}
-	if 2.0 != b / a {
-		return 
-	}
-	if 0.5 != a / b {
-		return 
-	}
-	if 0.0 != b % a {
-		return 
-	}
-	if 1.0 != a % b {
-		return 
-	}
-	ok = true
+fn testDouble() -> (ok bool = false) {
+    var a , b double
+    a = 1.0
+    b = 2.0
+    if 3.0 != a + b {
+    }
+    if -1.0 != a - b {
+        return
+    }
+    if 1.0 != b - a {
+        return
+    }
+    if 2.0 != b * a {
+        return
+    }
+    if 2.0 != b / a {
+        return
+    }
+    if 0.5 != a / b {
+        return
+    }
+    if 0.0 != b % a {
+        return
+    }
+    if 1.0 != a % b {
+        return
+    }
+    ok = true
 }
 
-
-
-
-
-
-fn testFloats(){
-	if false == testFloat() {
-		panic(new error("test float failed"))
-	}
-    if false == testDouble()  {
-		panic(new error("test double failed"))
-	}
+fn testFloats() {
+    if false == testFloat() {
+        panic(new error("test float failed"))
+    }
+    if false == testDouble() {
+        panic(new error("test double failed"))
+    }
 }
-
 

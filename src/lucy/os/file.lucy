@@ -2,13 +2,11 @@ import "java/io"
 
 public fn readFile(filepath string) -> (bs byte[] , err error) {
     defer {
-
         e := catch()
         if e != null {
             err = e
         }
     }
-
     f := new io.File(filepath)
     if f.exists() == false {
         err = new error("file not exits")
@@ -27,6 +25,7 @@ public fn readFile(filepath string) -> (bs byte[] , err error) {
     defer {
         stream.close()
     }
+
     stream.read(bs)
 }
 
@@ -51,6 +50,7 @@ public fn writeFile(filepath string , bs byte[] , start int = 0 , length int = -
     defer {
         stream.close()
     }
+
     stream.write(bs , start , length)
 }
 

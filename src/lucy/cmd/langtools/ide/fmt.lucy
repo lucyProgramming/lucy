@@ -776,7 +776,7 @@ public class Fmt {
             format += " "
         }
         for k , v := range s.expressions {
-            format += this.formatExpression(indent , v)
+            format += this.formatExpression(indent + this.indentIncremental, v)
             if k != len(s.expressions) - 1 {
                 if v.containsLfOrInlineComment() == false {
                     format += " , "

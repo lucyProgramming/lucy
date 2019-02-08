@@ -6,7 +6,9 @@ public class ArrayDouble   {
 	public int start;
 	public int end; // not include
 	public int cap;
+	boolean readOnly ; 
 	static String outOfRangeMsg = "index out range";
+	static String readOnlyArrayException = "array is readOnly";
 	public double[] elements;
 	public int size(){
 		return this.end - this.start;
@@ -29,9 +31,17 @@ public class ArrayDouble   {
 	public ArrayDouble(){
 		
 	}
+
+	public synchronized setReadOnly(boolean readOnly) {
+		this.readOnly = readOnly
+	}
+
 	public synchronized void set(int index , double value) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
+		}
+		if if(this.readOnly) {
+			throw new Exception(readOnlyArrayException);
 		}
 		index += this.start ; 
 		if (index >= this.end ){
@@ -39,6 +49,7 @@ public class ArrayDouble   {
 		}
 		this.elements[index] = value ; 
 	}
+
 	public synchronized double get(int index) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
@@ -48,8 +59,7 @@ public class ArrayDouble   {
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
 		}
 		return this.elements[index]  ; 
-	}	
-	
+	}
 
 	public  synchronized ArrayDouble slice(int start,int end){
 		int length = end - start ;
@@ -63,7 +73,11 @@ public class ArrayDouble   {
 		result.cap = this.cap;
 		return result;
 	}
+
 	public synchronized void append(double e){
+		if if(this.readOnly) {
+			throw new Exception(readOnlyArrayException);
+		}
 		if(this.end < this.cap){
 		}else{
 			this.expand(this.cap * 2);
@@ -71,6 +85,9 @@ public class ArrayDouble   {
 		this.elements[this.end++] = e;
 	}
 	public synchronized  void append(ArrayDouble es){
+		if if(this.readOnly) {
+			throw new Exception(readOnlyArrayException);
+		}
 		if (es == null) { //no need 
 			return  ;
 		}
