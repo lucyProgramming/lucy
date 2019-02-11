@@ -46,6 +46,7 @@ fn main(args []string) {
         case "http":
             http.http(args[1:])
         default:
+            print("command '%s' not found\n" , args[0])
             printUsage()
             os.exit(1)
     }

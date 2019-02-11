@@ -22,7 +22,7 @@ public class PackageLoader extends lc.FileLoader {
             if p := v + "/src/" + importName ; new io.File(p).isDirectory() &&
                 common.haveFileType(p , ".lucy") {
                 realPaths.append(new lc.Resource(
-                        lc.resourceKindLucyPackage,
+                        lc.ResourceKindLucyPackage,
                         p,
                         importName))
                 foundInLucy = true
@@ -33,13 +33,13 @@ public class PackageLoader extends lc.FileLoader {
             for _ , v := range this.classPaths {
                 if p := v + "/" + importName ; new io.File(p).isDirectory() && common.haveFileType(p , ".class") {
                     realPaths.append(new lc.Resource(
-                            lc.resourceKindJavaPackage,
+                            lc.ResourceKindJavaPackage,
                             p,
                             importName))
                 }
                 if p := v + "/" + importName + ".class" ; new io.File(p).isFile() {
                     realPaths.append(new lc.Resource(
-                            lc.resourceKindJavaClass,
+                            lc.ResourceKindJavaClass,
                             p,
                             importName))
                 }
@@ -71,38 +71,37 @@ public class PackageLoader extends lc.FileLoader {
             errMsg := "not 1 resource named '" + importName + "' present:\n"
             for _ , v := range realPathMap {
                 switch v[0].kind {
-                    case lc.resourceKindJavaClass:
+                    case lc.ResourceKindJavaClass:
                         errMsg += sprintf("\t in '%s' is a java class\n" , v[0].realPath)
-                    case lc.resourceKindJavaPackage:
+                    case lc.ResourceKindJavaPackage:
                         errMsg += sprintf("\t in '%s' is a java package\n" , v[0].realPath)
-                    case lc.resourceKindLucyClass:
+                    case lc.ResourceKindLucyClass:
                         errMsg += sprintf("\t in '%s' is a lucy class\n" , v[0].realPath)
-                    case lc.resourceKindLucyPackage:
+                    case lc.ResourceKindLucyPackage:
                         errMsg += sprintf("\t in '%s' is a lucy package\n" , v[0].realPath)
                 }
             }
             return null , new error(sprintf(errMsg))
         }
-        if realPaths[0].kind == lc.resourceKindJavaClass {
+        if realPaths[0].kind == lc.ResourceKindJavaClass {
             c := this.loadClass(realPaths[0])
             if cc , ok := c.(ast.Class) ; ok {
-                this.caches[cc.name] = cc
+                this.setCache(cc.name , cc)
             }
             return c , null
-        } else if realPaths[0].kind == lc.resourceKindLucyClass {
+        } else if realPaths[0].kind == lc.ResourceKindLucyClass {
             panic("not happening")
-        } else if realPaths[0].kind == lc.resourceKindJavaPackage {
+        } else if realPaths[0].kind == lc.ResourceKindJavaPackage {
             p := this.loadJavaPackage(realPaths[0])
             if p != null {
-                this.caches[p.name] = p
-                lc.javaCaches[p.name] = p
+                this.cacheJavaImports(p.name , p)
                 p.javaPackage = new ast.JavaPackage()
             }
             return p , null
         } else {
             p := this.loadLucyPackage(realPaths[0])
             if p != null {
-                this.caches[p.name] = p
+                this.setCache(p.name , p)
             }
             return p , null
         }

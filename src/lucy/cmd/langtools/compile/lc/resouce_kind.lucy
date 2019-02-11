@@ -1,10 +1,10 @@
 import "java/util/zip"
 
 public enum ResourceKind {
-    resourceKindJavaClass,
-    resourceKindJavaPackage,
-    resourceKindLucyClass,
-    resourceKindLucyPackage
+    ResourceKindJavaClass,
+    ResourceKindJavaPackage,
+    ResourceKindLucyClass,
+    ResourceKindLucyPackage
 }
 
 
@@ -24,13 +24,13 @@ public class Resource {
     public fn toString() -> (s string) {
         kindString := ""
         switch this.kind {
-            case resourceKindJavaClass:
+            case ResourceKindJavaClass:
                 kindString = "java class"
-            case resourceKindJavaPackage:
+            case ResourceKindJavaPackage:
                 kindString = "java package"
-            case resourceKindLucyClass:
+            case ResourceKindLucyClass:
                 kindString = "lucy package"
-            case resourceKindLucyPackage:
+            case ResourceKindLucyPackage:
                 kindString = "lucy package"
         }
         return sprintf("load '%s' as '%s' from '%s'" , this.name , kindString , this.realPath)

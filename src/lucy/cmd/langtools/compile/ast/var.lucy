@@ -1,7 +1,7 @@
 import "java/lang/Object"
 
 public interface loadImport {
-    public abstract fn loadImport(importName string) -> (Object , error)
+    public fn loadImport(importName string) -> (Object , error)
 }
 
 
@@ -23,9 +23,9 @@ const ClassInitMethod = "<clinit>"
 
 fn isMagicIdentifier(name string) -> (is bool) {
     return name == MagicIdentifierFile ||
-        name == MagicIdentifierLine ||
-        name == MagicIdentifierTime ||
-        name == MagicIdentifierClass
+            name == MagicIdentifierLine ||
+            name == MagicIdentifierTime ||
+            name == MagicIdentifierClass
 }
 
 var buildInFunctionsMap = new map{string -> Function}()
@@ -33,10 +33,8 @@ var buildInFunctionsMap = new map{string -> Function}()
 public var parseFunctionHandler fn (bs []byte , pos Pos)->( f Function,es []error)
 
 var javaStringClass Class
-public var LucyBytesType Type
-// []byte
-public var JavaBytesType Type
-// byte[]
+public var LucyBytesType Type // []byte
+public var JavaBytesType Type // byte[]
 
 {
 

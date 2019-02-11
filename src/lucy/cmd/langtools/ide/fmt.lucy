@@ -218,7 +218,6 @@ public class Fmt {
         } else {
             format += "class "
         }
-
         if len(c.fmts) == 0 &&
             c.superClassName == null &&
             len(c.interfaceNames) == 0 {
@@ -339,16 +338,13 @@ public class Fmt {
                             d += this.mkSpacing(t)
                         }
                     }
-
                     if f.inlineComment != null {
                         d += " //" + f.inlineComment
                     } else {
                         d += "\n"
                     }
-
                     format += d
                 }
-
                 continue
             }
             // must be a method 
@@ -369,7 +365,7 @@ public class Fmt {
             if method.isStatic() {
                 m += "static "
             }
-            if method.isAbstract() {
+            if method.isAbstract() && c.isInterface() == false {
                 m += "abstract "
             }
             if method.Function.name == "<init>" {
@@ -490,7 +486,7 @@ public class Fmt {
     // block can have no "{}"
     fn formatBlock(indent string , block ast.Block) -> (format string = "") {
         for s := range block.statements {
-            format += this.formatStatement(indent , s , false )
+            format += this.formatStatement(indent , s , false)
         }
 
     }
