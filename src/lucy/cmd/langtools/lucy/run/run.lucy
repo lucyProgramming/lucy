@@ -132,14 +132,15 @@ public class RunLucyPackage {
                 pathHavePackage.append(v)
             }
         }
-
         return pathHavePackage
     }
     /*
         check package if need rebuild
     */
-    fn needCompile(lucyPath string , packageName string) -> (meta common.PackageMeta,
-        need bool , lucyFiles []LucyFile) {
+    fn needCompile(lucyPath string , packageName string) -> (
+        meta common.PackageMeta,
+        need bool,
+        lucyFiles []LucyFile) {
         if p := this.packagesCompiled[packageName] ; p != null {
             return p.meta , false , null
         }
@@ -383,7 +384,6 @@ public class RunLucyPackage {
             }
             importsMetas[k] = m
         }
-
         //build this package
         destinationDir := lucyPath + "/class/" + packageName
         new io.File(destinationDir).mkdirs()
@@ -394,7 +394,6 @@ public class RunLucyPackage {
         for k , v := range lucyFiles {
             files[k] = v.realpathName
         }
-
         f := new compileCommon.Flags()
         if cf := this.flags.compilerFlags.getValue() ; cf == null && cf == "" {
             f.parseArgs(["-package-name" , packageName])
@@ -403,11 +402,9 @@ public class RunLucyPackage {
             for v := range cf.split(" ") {
                 a.append(v)
             }
-
             f.parseArgs(a)
         }
-
-        hasMain , _ := lc.Main(destinationDir , f , files , this.lucyPath , this.classPaths , true , true)
+        hasMain , _ , compiledFileNames := lc.Main(destinationDir , f , files , this.lucyPath , this.classPaths , true , true)
         // make_node_objects maitain.json
         meta = new common.PackageMeta()
         meta.compiledFrom = new common.FileMeta[](len(lucyFiles))
@@ -417,7 +414,22 @@ public class RunLucyPackage {
             t.lastModify = new io.File(v.realpathName).lastModified() / 1000L
             meta.compiledFrom[k] = t
         }
-
+        {
+            m := new map{string -> bool}()
+            for v := range compiledFileNames {
+                m[v] = true
+            }
+            fis := new io.File(destinationDir).listFiles()
+            for v := range fis {
+                if v.isFile() || v.getName().endsWith(".class") == false {
+                    continue
+                }
+                if m.keyExist(v.getName()) == false {
+                    //remove old compile class 
+                    new io.File(destinationDir + "/" + v.getName()).delete()
+                }
+            }
+        }
         meta.compileTime = System.currentTimeMillis() / long(1000)
         meta.imports = new common.Import[](len(is))
         for k , _ := range meta.imports {
@@ -425,19 +437,7 @@ public class RunLucyPackage {
             meta.imports[k].name = is[k]
             meta.imports[k].linkTime = importsMetas[k].compileTime
         }
-
-        fis := new io.File(destinationDir).list()
-        {
-            classFiles := []string{}
-            for k , v := range fis {
-                if v.endsWith(".class") {
-                    classFiles.append(v)
-                }
-            }
-
-            meta.classes = copy(new string[](len(classFiles)) , classFiles)
-        }
-
+        meta.classes = copy(new string[](len(compiledFileNames)) , compiledFileNames)
         meta.hasMain = hasMain
         bs , err := json.encode(meta , "\t")
         if err != null {

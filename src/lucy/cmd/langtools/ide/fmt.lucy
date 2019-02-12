@@ -374,7 +374,6 @@ public class Fmt {
             m += this.formatFunction(indent + this.indentIncremental , method.Function , method.isAbstract())
             format += m + "\n"
         }
-
         format += indent + "}\n"
     }
     fn mkSpacing(length int) -> (s string = "") {

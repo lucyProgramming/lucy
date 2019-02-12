@@ -651,16 +651,16 @@ public class Class {
         if this.loadFromOutSide {
             if this.isPublic() == false {
                 return new error(sprintf("%s class '%s' is not public",
-                        pos.errMsgPrefix() , this.name))
+                            pos.errMsgPrefix() , this.name))
             }
             if method.isPublic() == false {
                 return new error(sprintf("%s method '%s' is not public",
-                        pos.errMsgPrefix() , method.Function.name))
+                            pos.errMsgPrefix() , method.Function.name))
             }
         } else {
             if method.isPrivate() {
                 return new error(sprintf("%s method '%s' is private",
-                        pos.errMsgPrefix() , method.Function.name))
+                            pos.errMsgPrefix() , method.Function.name))
             }
         }
 
@@ -852,7 +852,7 @@ public class Class {
                 for _ , m := range this.methods[call.name] {
                     if fromSub && m.ableAccessFromSubClass() == false {
                         return null , false , new error(sprintf("%s method '%s' not found on class '%s'",
-                                pos.errMsgPrefix() , call.name , fromClassName))
+                                    pos.errMsgPrefix() , call.name , fromClassName))
                     }
                     call.vArgs , err = m.Function.Type.fitArgs(block , pos , call.args,
                         callArgTypes , m.Function)
@@ -880,7 +880,7 @@ public class Class {
             return ms , false , null
         }
         return this.superClass.accessMethod(block , pos , errs , classChecked , call,
-            callArgTypes , true , fromClassName , fieldMethodHandler)
+                callArgTypes , true , fromClassName , fieldMethodHandler)
     }
 
     /*
@@ -1198,7 +1198,7 @@ public class Class {
         }
         if this.superClass.isFinal() {
             return new error(sprintf("%s class name '%s' have super class  named '%s' that is final",
-                    this.pos.errMsgPrefix() , this.name , this.superClass.name))
+                        this.pos.errMsgPrefix() , this.name , this.superClass.name))
         }
         for c.name != JavaRootClass {
             if m.keyExist(c.name) {

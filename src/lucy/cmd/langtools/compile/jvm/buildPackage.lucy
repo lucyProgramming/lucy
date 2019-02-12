@@ -11,12 +11,18 @@ public class BuildPackage {
     BuildBlock      BuildBlock                      
     BuildFunction   BuildFunction                   
     dir             string                          
+
     public fn BuildPackage() {
         this.super()
         this.BuildExpression = new BuildExpression(this)
         this.BuildBlock = new BuildBlock(this.BuildExpression , this)
         this.BuildFunction = new BuildFunction(this.BuildExpression , this.BuildBlock)
+    }
 
+    public fn getCompiledClassFileNames() -> (cs []string = ["main.class"]) {
+        for v := range this.classes {
+            cs.append(common.getBaseName(v.name) + ".class")
+        }
     }
 
     public fn make(p ast.Package , dir string) {
@@ -225,8 +231,8 @@ public class BuildPackage {
         for _ , v := range blockMethods {
             codes[codeLength] = cg.OP_invokestatic
             this.mainClass.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(this.mainClass.name,
-                v.name,
-                "()V") , codes[codeLength + 1 : codeLength + 3])
+                    v.name,
+                    "()V") , codes[codeLength + 1 : codeLength + 3])
             codeLength += 3
         }
 
@@ -354,7 +360,7 @@ public class BuildPackage {
 
     fn mkGlobalFunctions() {
         ms := new map{string -> cg.MethodHighLevel}()
-        for k , f := range this.Package.block.functions { //    first round
+        for k , f := range this.Package.block.functions { //      first round
             if f.templateFunction != null {
                 t := new cg.AttributeTemplateFunction()
                 t.name = f.name
@@ -417,7 +423,6 @@ public class BuildPackage {
         defer {
             f.close()
         }
-
         this.mainClass.toLow().outPut(f)
         for _ , c := range this.classes {
             f := new io.FileOutputStream(this.dir + "/" + common.getBaseName(c.name) + ".class" , false)
@@ -445,8 +450,8 @@ public class BuildPackage {
         method.code.codes[0] = cg.OP_aload_0
         method.code.codes[1] = cg.OP_invokespecial
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(c.superClass,
-            specialMethodInit,
-            "()V") , method.code.codes[2 : 4])
+                specialMethodInit,
+                "()V") , method.code.codes[2 : 4])
         method.code.maxStack = 1
         method.code.codes[4] = cg.OP_return
         c.appendMethod(method)

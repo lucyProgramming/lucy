@@ -27,11 +27,11 @@ class Flags {
             printUsageAndExit(1)
         }
         if this.line.getValue() < 0 {
-            print("line not provided or negative...")
+            print("line not provided or negative")
             printUsageAndExit(1)
         }
         if this.column.getValue() < 0 {
-            print("column not provided or negative...")
+            print("column not provided or negative")
             printUsageAndExit(1)
         }
         file = this.file.getValue()

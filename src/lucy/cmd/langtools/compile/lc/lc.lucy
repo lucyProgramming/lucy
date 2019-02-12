@@ -12,10 +12,10 @@ public fn Main(
     lucyPath []string,
     classPaths []string,
     ifErrExit bool,
-    printError bool) -> (hasMain bool , es []error) {
+    printError bool) -> (hasMain bool , es []error , compiledFileNames []string) {
     var compiler = new Compiler()
     if len(files) == 0 {
-        return false , [new error("no file specfied")]
+        return false , [new error("no file specfied")] , null 
     }
     compiler.flags = flags
     compiler.destinationDir = destinationDir
@@ -77,7 +77,13 @@ public class Compiler {
         print(string(bs))
     }
 
-    fn compile(files []string , lucyPath []string , classPaths []string) -> (hasMain bool , es []error) {
+    fn compile(
+        files []string,
+        lucyPath []string,
+        classPaths []string) -> (
+        hasMain bool,
+        es []error,
+        compiledFileNames []string) {
         this.lucyPath = lucyPath
         this.classPaths = classPaths
         this.Files = files
@@ -148,7 +154,8 @@ public class Compiler {
             this.exit()
         }
         this.buildPackage.make(p , this.destinationDir)
-        return p.hasMain() , null
+        hasMain =  p.hasMain() 
+        compiledFileNames = this.buildPackage.getCompiledClassFileNames()
     }
 }
 
