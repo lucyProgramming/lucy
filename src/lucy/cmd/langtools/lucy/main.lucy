@@ -25,7 +25,7 @@ fn main(args []string) {
     }
     switch args[0] {
         case "version":
-            printf("lucy-%s\n" , "0.0.1")
+            printf("lucy-%s\n" , "0.1")
             os.exit(0)
         case "build":
             t := ["-build"]

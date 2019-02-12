@@ -1,21 +1,21 @@
-
 enum OptionType {
-	OptionTypeBool = 1 ,
-	OptionTypeInt ,
-	OptionTypeString ,
-	OptionTypeFloat 
+    OptionTypeBool,
+    OptionTypeInt,
+    OptionTypeString,
+    OptionTypeFloat
 }
 
 
 public abstract class Option {
-	protected typ OptionType
-	public usage string 
-	public defaultValueString string 
-	public name string 
-	
-	protected abstract fn reset() 
-	
-	protected abstract fn parse(arg string)  
-	
+    protected typ                OptionType
+    public    usage              string    
+    public    defaultValueString string    
+    public    name               string    
+
+    protected abstract fn reset()
+
+    protected abstract fn parse(arg string)
+
 }
+
 
