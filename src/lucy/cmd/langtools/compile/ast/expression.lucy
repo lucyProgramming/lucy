@@ -123,7 +123,7 @@ public class Expression {
         this.op = "checkcast"
         this.data = c
     }
-
+    
     fn convertToNumberType(typ VariableTypeKind) {
         if this.isLiteral() {
             this.convertLiteralToNumberType(typ)

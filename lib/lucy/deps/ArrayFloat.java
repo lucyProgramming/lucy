@@ -6,9 +6,7 @@ public class ArrayFloat   {
 	public int start;
 	public int end; // not include
 	public int cap;
-	boolean readOnly ; 
 	static String outOfRangeMsg = "index out range";
-	static String readOnlyArrayException = "array is readOnly";
 	public float[] elements;
 	public int size(){
 		return this.end - this.start;
@@ -32,16 +30,9 @@ public class ArrayFloat   {
 		
 	}
 
-	public synchronized setReadOnly(boolean readOnly) {
-		this.readOnly = readOnly
-	}
-
 	public synchronized void set(int index , float value) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
-		}
-		if if(this.readOnly) {
-			throw new Exception(readOnlyArrayException);
 		}
 		index += this.start ; 
 		if (index >= this.end ){
@@ -75,9 +66,6 @@ public class ArrayFloat   {
 	}
 
 	public synchronized void append(float e){
-		if if(this.readOnly) {
-			throw new Exception(readOnlyArrayException);
-		}
 		if(this.end < this.cap){
 		}else{
 			this.expand(this.cap * 2);
@@ -85,9 +73,6 @@ public class ArrayFloat   {
 		this.elements[this.end++] = e;
 	}
 	public synchronized  void append(ArrayFloat es){
-		if if(this.readOnly) {
-			throw new Exception(readOnlyArrayException);
-		}
 		if (es == null) { //no need 
 			return  ;
 		}

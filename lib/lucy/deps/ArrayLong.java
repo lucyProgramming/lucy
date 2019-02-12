@@ -6,9 +6,7 @@ public class ArrayLong   {
 	public int start;
 	public int end; // not include
 	public int cap;
-	boolean readOnly ; 
 	static String outOfRangeMsg = "index out range";
-	static String readOnlyArrayException = "array is readOnly";
 	public long[] elements;
 	public int size(){
 		return this.end - this.start;
@@ -32,16 +30,9 @@ public class ArrayLong   {
 		
 	}
 
-	public synchronized setReadOnly(boolean readOnly) {
-		this.readOnly = readOnly
-	}
-
 	public synchronized void set(int index , long value) {
 		if (index < 0 ){
 			throw new ArrayIndexOutOfBoundsException (outOfRangeMsg);
-		}
-		if if(this.readOnly) {
-			throw new Exception(readOnlyArrayException);
 		}
 		index += this.start ; 
 		if (index >= this.end ){
@@ -75,9 +66,6 @@ public class ArrayLong   {
 	}
 
 	public synchronized void append(long e){
-		if if(this.readOnly) {
-			throw new Exception(readOnlyArrayException);
-		}
 		if(this.end < this.cap){
 		}else{
 			this.expand(this.cap * 2);
@@ -85,9 +73,6 @@ public class ArrayLong   {
 		this.elements[this.end++] = e;
 	}
 	public synchronized  void append(ArrayLong es){
-		if if(this.readOnly) {
-			throw new Exception(readOnlyArrayException);
-		}
 		if (es == null) { //no need 
 			return  ;
 		}

@@ -623,7 +623,7 @@ public class Fmt {
             }
 
         } else if s.Init == null && s.condition != null && s.increment == null {
-            format += this.formatExpression(indent + this.indentIncremental , s.condition) + " "
+            format += this.formatExpression(indent , s.condition) + " "
             if s.inlineComment == null {
                 format += "{\n"
             } else {
@@ -632,13 +632,13 @@ public class Fmt {
 
         } else {
             if s.Init != null {
-                format += this.formatExpression(indent + this.indentIncremental , s.Init) + " ; "
+                format += this.formatExpression(indent , s.Init) + " ; "
             }
             if s.condition != null {
-                format += this.formatExpression(indent + this.indentIncremental , s.condition) + " ; "
+                format += this.formatExpression(indent , s.condition) + " ; "
             }
             if s.increment != null {
-                format += this.formatExpression(indent + this.indentIncremental , s.increment) + " "
+                format += this.formatExpression(indent , s.increment) + " "
             }
             if s.inlineComment == null {
                 format += "{\n"
@@ -826,7 +826,6 @@ public class Fmt {
                             } else {
                                 format += ","
                             }
-
                         }
                     }
                     format += "}"
@@ -840,7 +839,6 @@ public class Fmt {
                             } else {
                                 format += ","
                             }
-
                         }
                     }
                     format += "]"

@@ -40,7 +40,6 @@ class FindDefinition {
                     err.printStackTrace()
                 }
             }
-
             p , es = ide.parseAstAndTypeCheck(this.packageName,
                 this.lucyFiles,
                 false,

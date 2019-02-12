@@ -93,7 +93,6 @@ class Parser {
             }
 
         }
-
         if this.onlyParseImport {
             return this.errs
         }
@@ -239,7 +238,7 @@ class Parser {
                 case lex.TokenLc:
                     b := new ast.Block()
                     b.pos = this.mkPos()
-                    this.next(lfIsToken) // skip {
+                    this.next(lfNotToken) // skip {
                     this.BlockParser.parseStatementList(b , true)
                     if this.token.Type != lex.TokenRc {
                         this.errs.append(new error(sprintf("%s expect '}', but '%s'",

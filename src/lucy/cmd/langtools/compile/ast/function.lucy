@@ -4,6 +4,7 @@ typealias BuildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , b
 
 
 public class Function {
+    //this.super()
     public callFatherConstructionExpression Expression            
     public templateFunction                 TemplateFunction      
            parameterTypes                   map{string -> Type}    //typed parameters

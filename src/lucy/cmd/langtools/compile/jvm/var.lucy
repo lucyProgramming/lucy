@@ -39,6 +39,5 @@ var typeBool = new ast.Type()
     typeBool.Type = ast.VariableTypeBool
 
 
-
 }
 

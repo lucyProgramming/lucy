@@ -82,10 +82,8 @@ public fn findPackageInWhichDirectory(lucyPath []string , packageName string) ->
 
 public fn getPaths() -> (lucyRoot string , lucyPath []string , err error) {
     defer {
-
         err = catch()
     }
-
     lucyRoot = getLucyRoot()
     lucyPath = getLucyPath()
 }
