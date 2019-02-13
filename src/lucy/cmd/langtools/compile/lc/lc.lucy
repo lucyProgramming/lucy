@@ -15,7 +15,7 @@ public fn Main(
     printError bool) -> (hasMain bool , es []error , compiledFileNames []string) {
     var compiler = new Compiler()
     if len(files) == 0 {
-        return false , [new error("no file specfied")] , null 
+        return false , [new error("no file specfied")] , null
     }
     compiler.flags = flags
     compiler.destinationDir = destinationDir
@@ -133,8 +133,17 @@ public class Compiler {
                 // utf8 bom
                 bs = bs[3:]
             }
-            this.Errs.appendAll(parser.parse(this.Tops , v , bs,
-                    this.flags.onlyImport.getValue() , this.NErrs2StopCompile , -1 , -1 , -1 , -1))
+            this.Errs.appendAll(
+                parser.parse(
+                    this.Tops,
+                    v,
+                    bs,
+                    this.flags.onlyImport.getValue(),
+                    this.NErrs2StopCompile,
+                    -1,
+                    -1,
+                    -1,
+                    -1))
             this.shouldExit()
         }
         // parse import only
@@ -154,7 +163,7 @@ public class Compiler {
             this.exit()
         }
         this.buildPackage.make(p , this.destinationDir)
-        hasMain =  p.hasMain() 
+        hasMain = p.hasMain()
         compiledFileNames = this.buildPackage.getCompiledClassFileNames()
     }
 }

@@ -1,47 +1,44 @@
-
-
-
-public fn quickSort <array> (s array, l int, r int,asc bool) {
-    if  l< r  && asc{        
-        i ,j := l, r
+public fn quickSort <array> (s array , l int , r int , asc bool) {
+    if l < r && asc {
+        i , j := l , r
         x := s[l]
-        for  i < j {  
-            for i < j && s[j]>= x { 
-            	j--
-            } 
-            if i < j {
-            	s[i++] = s[j]
-            } 
-            for i < j && s[i]< x{ 
-            	i++
-            }   
-            if i < j  {
-                s[j--] = s[i]
-            }
-        }  
-        s[i] = x; 
-        quickSort(s, l, i - 1,asc)
-        quickSort(s, i + 1, r,asc)
-    } 
-    if  l< r  && asc == false {        
-        i ,j := l, r
-        x := s[l]
-        for  i < j {  
-            for i < j && s[j] < x { 
+        for i < j {
+            for i < j && s[j] >= x {
                 j--
-            } 
+            }
             if i < j {
                 s[i++] = s[j]
-            } 
-            for i < j && s[i] >=  x{ 
+            }
+            for i < j && s[i] < x {
                 i++
-            }   
-            if i < j  {
+            }
+            if i < j {
                 s[j--] = s[i]
             }
-        }  
+        }
         s[i] = x
-        quickSort(s, l, i - 1,asc)
-        quickSort(s, i + 1, r,asc)
-    } 
+        quickSort(s , l , i - 1 , asc)
+        quickSort(s , i + 1 , r , asc)
+    }
+    if l < r && asc == false {
+        i , j := l , r
+        x := s[l]
+        for i < j {
+            for i < j && s[j] < x {
+                j--
+            }
+            if i < j {
+                s[i++] = s[j]
+            }
+            for i < j && s[i] >= x {
+                i++
+            }
+            if i < j {
+                s[j--] = s[i]
+            }
+        }
+        s[i] = x
+        quickSort(s , l , i - 1 , asc)
+        quickSort(s , i + 1 , r , asc)
+    }
 }
