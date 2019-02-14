@@ -32,7 +32,7 @@ class BuildinFunctionCatchPanic {
                 {
                     verificationTypeInfo := new cg.StackMapVerificationTypeInfo()
                     uninitializedVariableInfo := new cg.StackMapUninitializedVariableInfo(char(code.codeLength - 4))
-                    verificationTypeInfo.Verify = uninitializedVariableInfo
+                    verificationTypeInfo.verify = uninitializedVariableInfo
                     state.stacks.append(verificationTypeInfo)
                     state.stacks.append(verificationTypeInfo)
                 }
@@ -51,7 +51,7 @@ class BuildinFunctionCatchPanic {
             code.codeLength += 4
             verificationTypeInfo := new cg.StackMapVerificationTypeInfo()
             uninitializedVariableInfo := new cg.StackMapUninitializedVariableInfo(char(code.codeLength - 4))
-            verificationTypeInfo.Verify = uninitializedVariableInfo
+            verificationTypeInfo.verify = uninitializedVariableInfo
             state.stacks.append(verificationTypeInfo)
             state.stacks.append(verificationTypeInfo)
             

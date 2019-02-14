@@ -116,7 +116,7 @@ class BuildFunction {
             if method.isConstruction {
                 method.code.maxLocals = 1
                 t := new cg.StackMapVerificationTypeInfo()
-                t.Verify = new cg.StackMapUninitializedThisVariableInfo()
+                t.verify = new cg.StackMapUninitializedThisVariableInfo()
                 state.locals.append(t)
                 this.mkParametersOffset(c , method.code , f , state)
                 stack := this.eb.build(c , method.code , f.callFatherConstructionExpression,

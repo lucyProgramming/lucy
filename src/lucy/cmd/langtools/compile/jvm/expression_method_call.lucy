@@ -63,7 +63,7 @@ class BuildExpressionMethodCall {
                     state.popStack(1)
                     v := new cg.StackMapUninitializedThisVariableInfo() // make_node_objects it right
                     t := new cg.StackMapVerificationTypeInfo()
-                    t.Verify = v
+                    t.verify = v
                     state.stacks.append(t)
                 }
                 stack := this.eb.BuildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)

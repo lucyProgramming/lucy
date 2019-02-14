@@ -33,7 +33,7 @@ class BuildExpressionArray {
 
             verify := new cg.StackMapVerificationTypeInfo()
             unInit := new cg.StackMapUninitializedVariableInfo(char(code.codeLength - 4))
-            verify.Verify = unInit
+            verify.verify = unInit
             state.stacks.append(verify , verify)
         }
 

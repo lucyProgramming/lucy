@@ -33,7 +33,7 @@ class BuildExpressionTypeConversion {
             c.insertClassConst(meta.className, code.codes[code.codeLength+1:code.codeLength+3])
             code.codes[code.codeLength+3] = cg.OP_dup
             t := new cg.StackMapVerificationTypeInfo()
-            t.Verify = new cg.StackMapUninitializedVariableInfo(char(code.codeLength))
+            t.verify = new cg.StackMapUninitializedVariableInfo(char(code.codeLength))
             state.stacks.append(t, t)
             code.codeLength += 4
         }
@@ -47,7 +47,7 @@ class BuildExpressionTypeConversion {
             c.insertClassConst(javaStringClass, code.codes[code.codeLength+1:code.codeLength+3])
             code.codes[code.codeLength+3] = cg.OP_dup
             t := new cg.StackMapVerificationTypeInfo()
-            t.Verify = new cg.StackMapUninitializedVariableInfo(char(code.codeLength))
+            t.verify = new cg.StackMapUninitializedVariableInfo(char(code.codeLength))
             state.stacks.append( t, t)
             code.codeLength += 4
         }

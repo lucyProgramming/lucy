@@ -2,7 +2,7 @@ import "java/lang/Object"
 import "lucy/binary"
 
 interface StackMap {
-    public abstract fn toBytes() -> ([]byte)
+    public fn toBytes() -> ([]byte)
 }
 
 
@@ -206,36 +206,36 @@ public class StackMapUninitializedVariableInfo {
 
 
 public class StackMapVerificationTypeInfo {
-    public Verify Object
+    public verify Object
     public fn toBytes() -> (bs []byte) {
-        if _ , ok := this.Verify.(StackMapTopVariableInfo) ; ok {
+        if _ , ok := this.verify.(StackMapTopVariableInfo) ; ok {
             return []byte{0b}
         }
-        if _ , ok := this.Verify.(StackMapIntegerVariableInfo) ; ok {
+        if _ , ok := this.verify.(StackMapIntegerVariableInfo) ; ok {
             return []byte{1b}
         }
-        if _ , ok := this.Verify.(StackMapFloatVariableInfo) ; ok {
+        if _ , ok := this.verify.(StackMapFloatVariableInfo) ; ok {
             return []byte{2b}
         }
-        if _ , ok := this.Verify.(StackMapDoubleVariableInfo) ; ok {
+        if _ , ok := this.verify.(StackMapDoubleVariableInfo) ; ok {
             return []byte{3b}
         }
-        if _ , ok := this.Verify.(StackMapLongVariableInfo) ; ok {
+        if _ , ok := this.verify.(StackMapLongVariableInfo) ; ok {
             return []byte{4b}
         }
-        if _ , ok := this.Verify.(StackMapNullVariableInfo) ; ok {
+        if _ , ok := this.verify.(StackMapNullVariableInfo) ; ok {
             return []byte{5b}
         }
-        if _ , ok := this.Verify.(StackMapUninitializedThisVariableInfo) ; ok {
+        if _ , ok := this.verify.(StackMapUninitializedThisVariableInfo) ; ok {
             return []byte{6b}
         }
-        if v , ok := this.Verify.(StackMapObjectVariableInfo) ; ok {
+        if v , ok := this.verify.(StackMapObjectVariableInfo) ; ok {
             bs = new []byte(3)
             bs[0] = 7b
             binary.BigEndian.putChar(bs[1:] , v.index)
             return bs
         }
-        if v , ok := this.Verify.(StackMapUninitializedVariableInfo) ; ok {
+        if v , ok := this.verify.(StackMapUninitializedVariableInfo) ; ok {
             bs = new []byte(3)
             bs[0] = 8b
             binary.BigEndian.putChar(bs[1:] , v.codeOffset)
