@@ -7,7 +7,7 @@ class BlockParser extends ParserFather {
     StatementIfParser     StatementIfParser    
     StatementWhenParser   StatementWhenParser  
     StatementSwitchParser StatementSwitchParser
-
+    
     fn BlockParser(parser Parser) {
         this.super(parser)
         this.StatementForParser = new StatementForParser(parser , this)
@@ -102,7 +102,6 @@ class BlockParser extends ParserFather {
                         isDefer = true
                         deferPos = pos
                     }
-
                 case lex.TokenVar:
                     pos := this.parser.mkPos()
                     this.next(lfIsToken) // skip var key word

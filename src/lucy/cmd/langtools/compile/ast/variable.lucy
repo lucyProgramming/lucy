@@ -20,7 +20,6 @@ public class Variable {
     public globalVarClassName       string    
     public locateDefinition         bool      
     public findUsage                bool      
-    // public rename                   bool      
     public findUsageInstances       []Usage   
 
     /*
@@ -30,15 +29,15 @@ public class Variable {
 
     public containsLf bool // constains "\n"
 
-    public fn containsLfOrInlineComment() ->(constains bool) {
-		return this.containsLf || this.inlineComment != null
-	}
+    public fn containsLfOrInlineComment() -> (constains bool) {
+        return this.containsLf || this.inlineComment != null
+    }
 
     public fn isPublic() -> (is bool) {
         return this.accessFlags &
-            cg.AccFieldPublic != 0
+                cg.AccFieldPublic != 0
     }
-     // copy to v
+    // copy to v
     fn cp(v Variable) {
         v.isBuildIn = this.isBuildIn
         v.isGlobal = this.isGlobal
@@ -54,7 +53,7 @@ public class Variable {
         if this.findUsage == false {
             return
         }
-        this.findUsageInstances = this.findUsageInstances[ : len(this.findUsageInstances) - 1]
+        this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
         block.inheritedAttribute.p.findUsage = this.findUsageInstances
     }
 
@@ -65,3 +64,5 @@ public class Variable {
         s += sprintf("var %s %s" , this.name , this.Type.typeString())
     }
 }
+
+

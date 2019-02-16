@@ -496,7 +496,7 @@ public class Block {
         //TODO:: check it or not
         return null
     }
-
+    
     public fn insert(name string , pos Pos , d Object) -> (err error) {
         if err = this.nameIsValid(name , pos) ; err != null {
             return err

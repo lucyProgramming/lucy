@@ -11,7 +11,7 @@ public class Expression {
     public isCompilerAuto        bool         // compile auto expression
     public value                 Type        
     public multiValues           []Type      
-    public pos                   Pos                 
+    public pos                   Pos         
     public data                  Object      
     public isStatementExpression bool        
     public op                    string      
@@ -45,11 +45,11 @@ public class Expression {
 
     fn isRelation() -> (is bool) {
         return this.Type == ExpressionTypeEq ||
-            this.Type == ExpressionTypeNe ||
-            this.Type == ExpressionTypeGe ||
-            this.Type == ExpressionTypeGt ||
-            this.Type == ExpressionTypeLe ||
-            this.Type == ExpressionTypeLt
+                this.Type == ExpressionTypeNe ||
+                this.Type == ExpressionTypeGe ||
+                this.Type == ExpressionTypeGt ||
+                this.Type == ExpressionTypeLe ||
+                this.Type == ExpressionTypeLt
     }
 
     public fn unPackList() -> (list []Expression = [this]) {
@@ -83,7 +83,7 @@ public class Expression {
         }
         bin := this.data.(ExpressionBinary)
         return bin.left.Type == ExpressionTypeNull ||
-            bin.right.Type == ExpressionTypeNull
+                bin.right.Type == ExpressionTypeNull
     }
 
     /*
@@ -123,7 +123,7 @@ public class Expression {
         this.op = "checkcast"
         this.data = c
     }
-    
+
     fn convertToNumberType(typ VariableTypeKind) {
         if this.isLiteral() {
             this.convertLiteralToNumberType(typ)
@@ -178,8 +178,8 @@ public class Expression {
 
     public fn isLiteral() -> (is bool) {
         return this.Type == ExpressionTypeBool ||
-            this.Type == ExpressionTypeString ||
-            this.isNumber()
+                this.Type == ExpressionTypeString ||
+                this.isNumber()
     }
 
     /*
@@ -274,24 +274,24 @@ public class Expression {
 
     fn isNumber() -> (is bool) {
         return this.isInteger() ||
-            this.isFloat()
+                this.isFloat()
     }
 
     fn isInteger() -> (is bool) {
         return this.Type == ExpressionTypeByte ||
-            this.Type == ExpressionTypeShort ||
-            this.Type == ExpressionTypeChar ||
-            this.Type == ExpressionTypeInt ||
-            this.Type == ExpressionTypeLong
+                this.Type == ExpressionTypeShort ||
+                this.Type == ExpressionTypeChar ||
+                this.Type == ExpressionTypeInt ||
+                this.Type == ExpressionTypeLong
     }
     fn isFloat() -> (is bool) {
         return this.Type == ExpressionTypeFloat ||
-            this.Type == ExpressionTypeDouble
+                this.Type == ExpressionTypeDouble
     }
 
     fn isEqOrNe() -> (is bool) {
         return this.Type == ExpressionTypeEq ||
-            this.Type == ExpressionTypeNe
+                this.Type == ExpressionTypeNe
     }
 
     /*
@@ -307,7 +307,7 @@ public class Expression {
         }
 
         return this.Type == ExpressionTypeincrement ||
-            this.Type == ExpressionTypePrefixincrement
+                this.Type == ExpressionTypePrefixincrement
     }
 
     /*
@@ -600,7 +600,7 @@ public class Expression {
                 this.value = returnValueTypes[0]
             case ExpressionTypeList:
                 errs.append(new error(sprintf("%s cannot have expression '%s' at this scope," +
-                    "this may be cause by the compiler error,please contact the author" , this.pos.errMsgPrefix() , this.op)))
+                                "this may be cause by the compiler error,please contact the author" , this.pos.errMsgPrefix() , this.op)))
             case ExpressionTypeGlobal:
                 returnValueTypes = new []Type(1)
                 returnValueTypes[0] = new Type()
@@ -627,14 +627,16 @@ public class Expression {
                     return
                 }
                 if t.Type != VariableTypeJavaArray {
-                    errs.append(new error(sprintf("%s cannot pack non java array to variable-length arguments" , errMsgPrefix(this.pos))))
+                    errs.append(
+                        new error(
+                            sprintf("%s cannot pack non java array to variable-length arguments",
+                                errMsgPrefix(this.pos))))
                     return
                 }
                 t.isVariableArgs = true
             default:
                 panic(sprintf("unhandled type:%s" , this.op))
         }
-
         return returnValueTypes , errs
     }
 

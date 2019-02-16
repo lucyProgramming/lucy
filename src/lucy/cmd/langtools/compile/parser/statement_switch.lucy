@@ -31,7 +31,7 @@ class StatementSwitchParser extends ParserFather {
 
         if this.parser.token.Type != lex.TokenLc {
             err = new error(sprintf("%s expect '{',but '%s'",
-                this.parser.errMsgPrefix() , this.parser.token.description))
+                    this.parser.errMsgPrefix() , this.parser.token.description))
             this.parser.errs.append(err)
             return statementSwitch , err
         }
@@ -45,7 +45,7 @@ class StatementSwitchParser extends ParserFather {
         }
         if this.parser.token.Type != lex.TokenCase {
             err = new error(sprintf("%s expect 'case',but '%s'",
-                this.parser.errMsgPrefix() , this.parser.token.description))
+                    this.parser.errMsgPrefix() , this.parser.token.description))
             this.parser.errs.append(err)
         }
         for this.parser.token.Type == lex.TokenCase {
@@ -57,7 +57,7 @@ class StatementSwitchParser extends ParserFather {
             }
             if this.parser.token.Type != lex.TokenColon {
                 err = new error(sprintf("%s expect ':',but '%s'",
-                    this.parser.errMsgPrefix() , this.parser.token.description))
+                        this.parser.errMsgPrefix() , this.parser.token.description))
                 this.parser.errs.append(err)
                 t := new ast.StatementSwitchCase()
                 t.matches = es
@@ -105,7 +105,7 @@ class StatementSwitchParser extends ParserFather {
             block := new ast.Block()
             if this.parser.token.Type != lex.TokenColon {
                 err = new error(sprintf("%s missing colon after 'default'",
-                    this.parser.errMsgPrefix()))
+                        this.parser.errMsgPrefix()))
                 this.parser.errs.append(err)
             } else {
                 this.next(lfIsToken) // skip :
@@ -128,7 +128,7 @@ class StatementSwitchParser extends ParserFather {
         this.parser.ifTokenIsLfThenSkip(true)
         if this.parser.token.Type != lex.TokenRc {
             err = new error(sprintf("%s expect '}',but '%s'",
-                this.parser.errMsgPrefix() , this.parser.token.description))
+                    this.parser.errMsgPrefix() , this.parser.token.description))
             this.parser.errs.append(err)
             statementSwitch.endPos = this.parser.mkPos()
             return statementSwitch , err

@@ -39,7 +39,7 @@ class StatementIfParser extends ParserFather {
         this.parser.ifTokenIsLfThenSkip(true)
         if this.parser.token.Type != lex.TokenLc {
             err = new error(sprintf("%s missing '{' after condition,but '%s'",
-                this.parser.errMsgPrefix() , this.parser.token.description))
+                    this.parser.errMsgPrefix() , this.parser.token.description))
             this.parser.errs.append(err)
             return statementIf , err
         }
@@ -55,7 +55,7 @@ class StatementIfParser extends ParserFather {
         this.bp.parseStatementList(statementIf.block , false)
         if this.parser.token.Type != lex.TokenRc {
             this.parser.errs.append(new error(sprintf("%s expect '}', but '%s'",
-                this.parser.errMsgPrefix() , this.parser.token.description)))
+                        this.parser.errMsgPrefix() , this.parser.token.description)))
             this.consume(untilRc)
         }
         this.next(lfIsToken) // skip }
@@ -65,7 +65,7 @@ class StatementIfParser extends ParserFather {
             if this.parser.token.Type == lex.TokenElseif ||
                 this.parser.token.Type == lex.TokenElse {
                 this.parser.errs.append(new error(sprintf("%s unexpected new line",
-                    this.parser.errMsgPrefix(pos))))
+                            this.parser.errMsgPrefix(pos))))
             }
         }
         if this.parser.token.Type == lex.TokenElseif {
@@ -79,7 +79,7 @@ class StatementIfParser extends ParserFather {
             this.next(lfNotToken)
             if this.parser.token.Type == lex.TokenElse {
                 this.parser.errs.append(new error(sprintf("%s unexpected new line",
-                    this.parser.errMsgPrefix(pos))))
+                            this.parser.errMsgPrefix(pos))))
             }
         }
         if this.parser.token.Type == lex.TokenElse {
@@ -101,18 +101,18 @@ class StatementIfParser extends ParserFather {
             this.bp.parseStatementList(statementIf.Else , false)
             if this.parser.token.Type != lex.TokenRc {
                 err = new error(sprintf("%s expect '}', but '%s'",
-                    this.parser.errMsgPrefix() , this.parser.token.description))
+                        this.parser.errMsgPrefix() , this.parser.token.description))
                 this.parser.errs.append(err)
                 this.consume(untilRc)
             }
             this.next(lfIsToken) // skip }
-			if this.parser.token.Type == lex.TokenLf {
-				this.next(lfIsToken)
-			}
+            if this.parser.token.Type == lex.TokenLf {
+                this.next(lfIsToken)
+            }
         }
         return statementIf , err
     }
-	
+
     fn parseElseIfList() -> (elseIfList []ast.StatementElseIf , err error) {
         elseIfList = []ast.StatementElseIf{}
         var condition ast.Expression
@@ -128,7 +128,7 @@ class StatementIfParser extends ParserFather {
             elseIfList.append(t)
             if this.parser.token.Type != lex.TokenLc {
                 err = new error(sprintf("%s not '{' after a expression,but '%s'",
-                    this.parser.errMsgPrefix() , this.parser.token.description))
+                        this.parser.errMsgPrefix() , this.parser.token.description))
                 this.parser.errs.append(err)
                 return elseIfList , err
             }
@@ -145,7 +145,7 @@ class StatementIfParser extends ParserFather {
             t.block = block
             if this.parser.token.Type != lex.TokenRc {
                 err = new error(sprintf("%s expect '}', but '%s'",
-                    this.parser.errMsgPrefix() , this.parser.token.description))
+                        this.parser.errMsgPrefix() , this.parser.token.description))
                 this.parser.errs.append(err)
                 this.consume(untilRc)
             }

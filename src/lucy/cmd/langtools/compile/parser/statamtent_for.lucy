@@ -33,8 +33,9 @@ class StatementForParser extends ParserFather {
                     goto parseBlock
                 }
                 if this.parser.token.Type != lex.TokenSemicolon {
-                    this.parser.errs.append(new error(sprintf("%s missing semicolon after expression",
-                        this.parser.errMsgPrefix())))
+                    this.parser.errs.append(
+                        new error(sprintf("%s missing semicolon after expression",
+                                this.parser.errMsgPrefix())))
                     goto parseBlock
                 }
             }
@@ -49,11 +50,10 @@ class StatementForParser extends ParserFather {
             }
         }
     parseBlock:
-
         this.parser.ifTokenIsLfThenSkip(true)
         if this.parser.token.Type != lex.TokenLc {
             err = new error(sprintf("%s expect '{',but '%s'",
-                this.parser.errMsgPrefix() , this.parser.token.description))
+                    this.parser.errMsgPrefix() , this.parser.token.description))
             this.parser.errs.append(err)
             return
         }
@@ -68,13 +68,13 @@ class StatementForParser extends ParserFather {
         this.bp.parseStatementList(statementFor.block , false)
         if this.parser.token.Type != lex.TokenRc {
             this.parser.errs.append(new error(sprintf("%s expect '}', but '%s'",
-                this.parser.errMsgPrefix() , this.parser.token.description)))
+                        this.parser.errMsgPrefix() , this.parser.token.description)))
             this.consume(untilRc)
         }
         this.next(lfIsToken) // skip }
-		if this.parser.token.Type == lex.TokenLf {
-			this.next(lfIsToken)
-		}
+        if this.parser.token.Type == lex.TokenLf {
+            this.next(lfIsToken)
+        }
         return statementFor , null
     }
 

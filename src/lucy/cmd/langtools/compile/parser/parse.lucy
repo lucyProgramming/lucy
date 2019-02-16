@@ -284,9 +284,7 @@ class Parser {
                         }
                         this.tops.append(new ast.TopNode(v))
                     }
-
                     resetProperty()
-                    this.ifTokenIsLfThenSkip(false)
                     continue
                 case lex.TokenTypeAlias:
                     a , _ := this.parseTypeAlias(comment)
@@ -491,6 +489,8 @@ class Parser {
             constComment = "//" + this.token.stringValue
             inlineComment = this.token.stringValue
             this.next(lfIsToken)
+        }else if this.token.Type == lex.TokenLf {
+            this.next(lfIsToken)
         }
         for k , v := range constants {
             if v != null {
@@ -644,7 +644,6 @@ class Parser {
             } else {
                 this.next(lfIsToken)
             }
-
         }
     }
 
@@ -924,10 +923,8 @@ class Parser {
                 return names , err
             }
         }
-
         return
     }
-
     fn parseType() -> (ret ast.Type , err error) {
         return this.TypeParser.parseType()
     }
