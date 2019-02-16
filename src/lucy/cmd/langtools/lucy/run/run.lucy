@@ -7,7 +7,6 @@ import "java/lang/System"
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lc"
 import "lucy/cmd/langtools/compile/parser"
-import "lucy/cmd/langtools/compile/common" as compileCommon
 import "java/lang/Runtime"
 import "java/util/zip"
 
@@ -394,17 +393,16 @@ public class RunLucyPackage {
         for k , v := range lucyFiles {
             files[k] = v.realpathName
         }
-        f := new compileCommon.Flags()
-        if cf := this.flags.compilerFlags.getValue() ; cf == null && cf == "" {
-            f.parseArgs(["-package-name" , packageName])
-        } else {
-            a := ["-package-name" , packageName]
-            for v := range cf.split(" ") {
-                a.append(v)
-            }
-            f.parseArgs(a)
-        }
-        hasMain , _ , compiledFileNames := lc.Main(destinationDir , f , files , this.lucyPath , this.classPaths , true , true)
+        hasMain , _ , compiledFileNames := lc.Main(
+            destinationDir,
+            files,
+            this.lucyPath,
+            this.classPaths,
+            true,
+            false,
+            false,
+            packageName,
+            true)
         // make_node_objects maitain.json
         meta = new common.PackageMeta()
         meta.compiledFrom = new common.FileMeta[](len(lucyFiles))

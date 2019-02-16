@@ -1,23 +1,26 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/jvm"
 import "lucy/cmd/langtools/compile/parser"
-import "lucy/cmd/langtools/compile/common"
 import "lucy/os"
 import "lucy/encoding/json"
 
 public fn Main(
     destinationDir string,
-    flags common.Flags,
     files []string,
     lucyPath []string,
     classPaths []string,
     ifErrExit bool,
+    onlyImport bool,
+    disableCheckUnUse bool,
+    packageName string,
     printError bool) -> (hasMain bool , es []error , compiledFileNames []string) {
     var compiler = new Compiler()
     if len(files) == 0 {
         return false , [new error("no file specfied")] , null
     }
-    compiler.flags = flags
+    compiler.onlyImport = onlyImport
+    compiler.packageName = packageName
+    compiler.disableCheckUnUse = disableCheckUnUse
     compiler.destinationDir = destinationDir
     compiler.ifErrExit = ifErrExit
     compiler.printError = printError
@@ -25,38 +28,41 @@ public fn Main(
 }
 
 public class Compiler {
-    Tops              []ast.TopNode   
-    Files             []string        
-    Errs              []error         
-    NErrs2StopCompile int             
+    tops              []ast.TopNode   
+    files             []string        
+    errs              []error         
+    nErrs2StopCompile int             
     lucyPath          []string        
-    classPaths        []string        
-    buildPackage      jvm.BuildPackage = new jvm.BuildPackage()
-    flags             common.Flags    
+    classPath         []string        
+    buildPackage      jvm.BuildPackage = new jvm.BuildPackage(char(52) , char(0) )
     destinationDir    string          
-    ifErrExit         bool            
-    printError        bool            
+    onlyImport        bool            
+    packageName       string          
+    disableCheckUnUse bool            
+
+    ifErrExit  bool
+    printError bool
 
     fn Compiler() {
         this.super()
-        this.Errs = []error{}
-        this.NErrs2StopCompile = 10
-        this.Tops = []ast.TopNode{}
+        this.errs = []error{}
+        this.nErrs2StopCompile = 10
+        this.tops = []ast.TopNode{}
     }
 
     fn shouldExit() {
-        if len(this.Errs) > this.NErrs2StopCompile {
+        if len(this.errs) > this.nErrs2StopCompile {
             this.exit()
         }
     }
 
     fn exit() {
         code := 0
-        if len(this.Errs) > 0 {
+        if len(this.errs) > 0 {
             code = 2
         }
         if this.printError {
-            for _ , v := range this.Errs {
+            for _ , v := range this.errs {
                 os.stderr.println(v.getMessage())
             }
         }
@@ -66,11 +72,11 @@ public class Compiler {
     }
 
     fn dumpImports() {
-        if len(this.Errs) > 0 {
+        if len(this.errs) > 0 {
             this.exit()
         }
-        is := new string[](len(this.Tops))
-        for k , v := range this.Tops {
+        is := new string[](len(this.tops))
+        for k , v := range this.tops {
             is[k] = v.node.(ast.Import).Import
         }
         bs , _ := json.encode(is)
@@ -80,17 +86,17 @@ public class Compiler {
     fn compile(
         files []string,
         lucyPath []string,
-        classPaths []string) -> (
+        classPath []string) -> (
         hasMain bool,
         es []error,
         compiledFileNames []string) {
         this.lucyPath = lucyPath
-        this.classPaths = classPaths
-        this.Files = files
-        for _ , v := range this.Files {
+        this.classPath = classPath
+        this.files = files
+        for _ , v := range this.files {
             b , err := os.readFile(v)
             if err != null {
-                this.Errs.append(err)
+                this.errs.append(err)
                 continue
             }
             bs := javaArray2Lucy(b)
@@ -133,13 +139,13 @@ public class Compiler {
                 // utf8 bom
                 bs = bs[3:]
             }
-            this.Errs.appendAll(
+            this.errs.appendAll(
                 parser.parse(
-                    this.Tops,
+                    this.tops,
                     v,
                     bs,
-                    this.flags.onlyImport.getValue(),
-                    this.NErrs2StopCompile,
+                    this.onlyImport,
+                    this.nErrs2StopCompile,
                     -1,
                     -1,
                     -1,
@@ -147,19 +153,19 @@ public class Compiler {
             this.shouldExit()
         }
         // parse import only
-        if this.flags.onlyImport.getValue() {
+        if this.onlyImport {
             this.dumpImports()
             return
         }
-        if t := this.flags.packageName.getValue() ; t == null ||
+        if t := this.packageName ; t == null ||
             t == "" {
             print("package name not specfied")
             os.exit(1)
         }
-        var loader = new FileLoader(lucyPath , classPaths)
-        p := new ast.Package(this.flags.packageName.getValue() , this.flags.disableCheckUnUse.getValue() , loader)
-        this.Errs.appendAll(p.typeCheck(this.Tops))
-        if len(this.Errs) > 0 {
+        var loader = new FileLoader(lucyPath , classPath)
+        p := new ast.Package(this.packageName , this.disableCheckUnUse , loader)
+        this.errs.appendAll(p.typeCheck(this.tops))
+        if len(this.errs) > 0 {
             this.exit()
         }
         this.buildPackage.make(p , this.destinationDir)

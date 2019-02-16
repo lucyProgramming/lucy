@@ -9,7 +9,7 @@ public class BigEndian {
         _ = bs[1]
         v = ((char(bs[0]) << 8) & char(0xff00)) | ((char(bs[1]) << 0) & char(0xff))
     }
-
+    
     public static fn putInt(bs []byte , v int) {
         _ = bs[3]
         bs[0] = byte(v >> 24)

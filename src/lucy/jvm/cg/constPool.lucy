@@ -35,23 +35,22 @@ class ConstantInfoClass {
         p.tag = ConstantPoolTagClass
         p.info = new []byte(2)
         binary.BigEndian.putChar(p.info , this.nameIndex)
-        return p
+
     }
 }
 
 
 class ConstantInfoString {
-    index char
-    fn ConstantInfoString(index char) {
+    utf8Index char
+    fn ConstantInfoString(utf8Index char) {
         this.super()
-        this.index = index
+        this.utf8Index = utf8Index
     }
     fn ToConstPool() -> (p ConstPool) {
         p = new ConstPool()
         p.tag = ConstantPoolTagString
         p.info = new []byte(2)
-        binary.BigEndian.putChar(p.info , this.index)
-        return p
+        binary.BigEndian.putChar(p.info , this.utf8Index)
     }
 }
 
@@ -67,7 +66,6 @@ class ConstantInfoInteger {
         p.tag = ConstantPoolTagInteger
         p.info = new []byte(4)
         binary.BigEndian.putInt(p.info , (this.value))
-        return p
     }
 }
 
@@ -83,7 +81,6 @@ class ConstantInfoFloat {
         p.tag = ConstantPoolTagFloat
         p.info = new []byte(4)
         binary.BigEndian.putInt(p.info , Float.floatToIntBits(this.value))
-        return p
     }
 }
 
@@ -99,7 +96,6 @@ class ConstantInfoLong {
         p.tag = ConstantPoolTagLong
         p.info = new []byte(8)
         binary.BigEndian.putLong(p.info , (this.value))
-        return p
     }
 }
 
@@ -115,7 +111,6 @@ class ConstantInfoDouble {
         p.tag = ConstantPoolTagDouble
         p.info = new []byte(8)
         binary.BigEndian.putLong(p.info , Double.doubleToLongBits(this.value))
-        return p
     }
 }
 
@@ -133,7 +128,7 @@ class ConstantInfoNameAndType {
         p.info = new []byte(4)
         binary.BigEndian.putChar(p.info , this.nameIndex)
         binary.BigEndian.putChar(p.info[2:] , this.descriptorIndex)
-        return p
+
     }
 }
 
@@ -151,7 +146,7 @@ class ConstantInfoMethodref {
         p.info = new []byte(4)
         binary.BigEndian.putChar(p.info , this.classIndex)
         binary.BigEndian.putChar(p.info[2:] , this.nameAndTypeIndex)
-        return p
+
     }
 }
 
@@ -170,7 +165,7 @@ class ConstantInfoInterfaceMethodref {
         p.info = new []byte(4)
         binary.BigEndian.putChar(p.info , char(this.classIndex))
         binary.BigEndian.putChar(p.info[2:] , char(this.nameAndTypeIndex))
-        return p
+
     }
 }
 
@@ -189,7 +184,7 @@ class ConstantInfoFieldref {
         p.info = new []byte(4)
         binary.BigEndian.putChar(p.info , this.classIndex)
         binary.BigEndian.putChar(p.info[2:] , this.nameAndTypeIndex)
-        return p
+
     }
 }
 
@@ -203,7 +198,7 @@ class ConstantInfoMethodHandle {
         p.info = new []byte(3)
         p.info[0] = byte(this.referenceKind)
         binary.BigEndian.putChar(p.info[1:] , char(this.referenceIndex))
-        return p
+
     }
 }
 
@@ -224,7 +219,7 @@ class ConstantInfoUtf8 {
         p.info = new []byte(2)
         binary.BigEndian.putChar(p.info , char(this.length))
         p.info.appendAll(this.bs)
-        return p
+
     }
 }
 
@@ -240,7 +235,7 @@ class ConstantInfoMethodType {
         p.tag = ConstantPoolTagMethodType
         p.info = new []byte(2)
         binary.BigEndian.putChar(p.info , char(this.descriptorIndex))
-        return p
+
     }
 }
 

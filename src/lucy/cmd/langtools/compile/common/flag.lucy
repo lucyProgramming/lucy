@@ -1,32 +1,32 @@
-import "lucy/os/flag"
+// import "lucy/os/flag"
 
-public class Flags {
-    public onlyImport        flag.BoolOption  
-    public packageName       flag.StringOption
-    public jvmMajorVersion   flag.IntOption   
-    public jvmMinorVersion   flag.IntOption   
-    public disableCheckUnUse flag.BoolOption  
-    public release           flag.BoolOption  
-    public parser            flag.FlagParser  
+// public class Flags {
+//     public onlyImport        flag.BoolOption  
+//     public packageName       flag.StringOption
+//     public jvmMajorVersion   flag.IntOption   
+//     public jvmMinorVersion   flag.IntOption   
+//     public disableCheckUnUse flag.BoolOption  
+//     public release           flag.BoolOption  
+//     public parser            flag.FlagParser  
 
-    public fn Flags() {
-        this.super()
-        this.parser = new flag.FlagParser()
-        this.onlyImport = this.parser.boolOption("-only-import")
-        this.packageName = this.parser.stringOption("-package-name" , "")
-        this.jvmMajorVersion = this.parser.intOption("-jvm-major-version" , 52)
-        this.jvmMinorVersion = this.parser.intOption("-jvm-minor-version" , 0)
-        this.disableCheckUnUse = this.parser.boolOption("-disable-check-unuse")
-        this.release = this.parser.boolOption("-release")
-    }
+//     public fn Flags() {
+//         this.super()
+//         this.parser = new flag.FlagParser()
+//         this.onlyImport = this.parser.boolOption("-only-import")
+//         this.packageName = this.parser.stringOption("-package-name" , "")
+//         this.jvmMajorVersion = this.parser.intOption("-jvm-major-version" , 52)
+//         this.jvmMinorVersion = this.parser.intOption("-jvm-minor-version" , 0)
+//         this.disableCheckUnUse = this.parser.boolOption("-disable-check-unuse")
+//         this.release = this.parser.boolOption("-release")
+//     }
 
-    public fn parseArgs(args []string) -> (files []string) {
-        var err error
-        files , err = this.parser.parse(args)
-        if err != null {
-            panic(err)
-        }
-    }
-}
+//     public fn parseArgs(args []string) -> (files []string) {
+//         var err error
+//         files , err = this.parser.parse(args)
+//         if err != null {
+//             panic(err)
+//         }
+//     }
+// }
 
 

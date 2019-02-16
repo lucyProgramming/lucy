@@ -11,12 +11,17 @@ public class BuildPackage {
     BuildBlock      BuildBlock                      
     BuildFunction   BuildFunction                   
     dir             string                          
+    majorVersion    char                            
+    minorVersion    char                            
 
-    public fn BuildPackage() {
+    public fn BuildPackage(majorVersion char,
+        minorVersion char) {
         this.super()
         this.BuildExpression = new BuildExpression(this)
         this.BuildBlock = new BuildBlock(this.BuildExpression , this)
         this.BuildFunction = new BuildFunction(this.BuildExpression , this.BuildBlock)
+        this.majorVersion = majorVersion
+        this.minorVersion = minorVersion
     }
 
     public fn getCompiledClassFileNames() -> (cs []string = ["main.class"]) {
@@ -28,7 +33,7 @@ public class BuildPackage {
     public fn make(p ast.Package , dir string) {
         this.Package = p
         this.dir = dir
-        mainClass := new cg.ClassHighLevel()
+        mainClass := new cg.ClassHighLevel(this.majorVersion , this.minorVersion)
         this.mainClass = mainClass
         mainClass.accessFlags |= cg.AccClassPublic
         mainClass.accessFlags |= cg.AccClassFinal
@@ -97,7 +102,7 @@ public class BuildPackage {
     }
 
     fn mkEnum(e ast.Enum) -> (c cg.ClassHighLevel) {
-        c = new cg.ClassHighLevel()
+        c = new cg.ClassHighLevel(this.majorVersion , this.minorVersion)
         c.name = e.name
         c.insertSourceFile(e.pos.filename)
         c.accessFlags = e.accessFlags
@@ -245,7 +250,7 @@ public class BuildPackage {
     }
 
     fn buildClass(astClass ast.Class) -> (c cg.ClassHighLevel) {
-        c = new cg.ClassHighLevel()
+        c = new cg.ClassHighLevel(this.majorVersion , this.minorVersion)
         c.name = astClass.name
         c.insertSourceFile(astClass.pos.filename)
         c.accessFlags = astClass.accessFlags
@@ -360,7 +365,7 @@ public class BuildPackage {
 
     fn mkGlobalFunctions() {
         ms := new map{string -> cg.MethodHighLevel}()
-        for k , f := range this.Package.block.functions { //      first round
+        for k , f := range this.Package.block.functions { //         first round
             if f.templateFunction != null {
                 t := new cg.AttributeTemplateFunction()
                 t.name = f.name

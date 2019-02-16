@@ -7,7 +7,11 @@ public class Lucy extends javaRootClass {
 }
 
 
-public fn copy <destArray , srcArray> (dest destArray , src srcArray , start int = 0 , end int = -1) -> (r destArray = dest) {
+public fn copy <destArray , srcArray> (
+    dest destArray,
+    src srcArray,
+    start int = 0,
+    end int = -1) -> (r destArray = dest) {
     if src == null ||
         src.size() == 0 {
         return
@@ -20,7 +24,10 @@ public fn copy <destArray , srcArray> (dest destArray , src srcArray , start int
     }
 }
 
-public fn javaArray2Lucy <array> (java array[] , start int = 0 , end int = -1) -> (lucy []array) {
+public fn javaArray2Lucy <array> (
+    java array[],
+    start int = 0,
+    end int = -1) -> (lucy []array) {
     import "lucy/deps"
     if end == -1 {
         end = java.size()

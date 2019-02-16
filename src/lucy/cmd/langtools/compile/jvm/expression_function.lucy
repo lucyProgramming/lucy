@@ -51,7 +51,7 @@ class BuildExpressionFunction {
         }
         // function have captured vars
         className := this.bp.newClassName("closureFunction$" + function.name)
-        closureClass := new cg.ClassHighLevel()
+        closureClass := new cg.ClassHighLevel(this.eb.bp.majorVersion , this.eb.bp.minorVersion)
         closureClass.name = className
         closureClass.superClass = ast.LucyRootClass
         closureClass.accessFlags = 0

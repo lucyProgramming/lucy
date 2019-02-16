@@ -16,8 +16,7 @@ public class FileLoader implements ast.loadImport {
     public lucyPath , classPaths []string             
     public caches                map{string -> Object}
     // class loaded from CLASSPATH
-    static javaImports map{string -> Object} = new map{string -> Object}() 
-    
+    static javaImports map{string -> Object} = new map{string -> Object}()
 
     public fn FileLoader(lucyPath []string , classPaths []string) {
         this.super()
@@ -460,11 +459,10 @@ public class FileLoader implements ast.loadImport {
                 stringValue = string(c.constPools[valueIndex].info)
                 return
         }
-
     }
 
     fn loadLucyMainClass(pack ast.Package , c cg.Class) {
-        maincClass := new cg.ClassHighLevel()
+        maincClass := new cg.ClassHighLevel(char(0) , char(0))
         maincClass.name = pack.name + "/main"
         pack.block.variables = new map{string -> ast.Variable}()
         pack.block.constants = new map{string -> ast.Constant}()

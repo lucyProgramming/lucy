@@ -9,7 +9,6 @@ public const AccClassAbstract char = 0x0400 //  不能被实例化。
 public const AccClassSynthetic char = 0x1000 //标识并非Java源码生成的代码。
 public const AccClassAnnotation char = 0x2000 // 标识注解类型
 public const AccClassEnum char = 0x4000 // 标识枚举类型
-
 public class Class {
            writer                  io.OutputStream         
            magic                   int                      //0xCAFEBABE
@@ -264,9 +263,9 @@ public class Class {
         return info.selfIndex
     }
 
-    fn fromHighLevel(high ClassHighLevel) {
-        this.majorVersion = char(52)
-        this.minorVersion = char(0)
+    fn fromHighLevel(high ClassHighLevel , majorVersion char , minorVersion char) {
+        this.majorVersion = majorVersion
+        this.minorVersion = minorVersion
         if len(this.constPools) == 0 {
             this.constPools = []ConstPool{null} // jvm const pool index begin at 1
         }
@@ -312,9 +311,6 @@ public class Class {
                 if m.AttributeLucyMethodDescriptor != null {
                     info.attributes.append(m.AttributeLucyMethodDescriptor.toAttributeInfo(this))
                 }
-                //if m.AttributeLucyTriggerPackageInitMethod != null {
-                //info.attributes . append(  m.AttributeLucyTriggerPackageInitMethod.toAttributeInfo(this))
-                //}
                 if m.AttributeDefaultParameters != null {
                     info.attributes.append(m.AttributeDefaultParameters.toAttributeInfo(this))
                 }
