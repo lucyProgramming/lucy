@@ -50,9 +50,9 @@ final class Test {
         //TODO:: support args
         print(packageName)
         if this.forceReBuild {
-            new run.RunLucyPackage().RunCommand("test" , ["-forceReBuild" , packageName])
+            new run.RunLucyPackage().run("test" , ["-forceReBuild" , packageName])
         } else {
-            new run.RunLucyPackage().RunCommand("test" , [packageName])
+            new run.RunLucyPackage().run("test" , [packageName])
         }
     }
 }

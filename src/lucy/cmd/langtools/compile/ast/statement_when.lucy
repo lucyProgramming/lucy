@@ -30,7 +30,6 @@ public class StatementWhen {
                     return v
                 }
             }
-
         }
         if this.typeExpression.Type != ExpressionTypeTypeAssert ||
             this.typeExpression.data.(ExpressionTypeAssert).isType == false {
@@ -61,9 +60,7 @@ public class StatementWhen {
                         continue
                     }
                 }
-
             }
-
         }
         for v := range this.cases {
             if v.block != null {
@@ -71,7 +68,6 @@ public class StatementWhen {
                 errs.appendAll(v.block.check())
             }
         }
-
         if this.defaultBlock != null {
             this.defaultBlock.inherit(this.initExpressionBlock)
             errs.appendAll(this.defaultBlock.check())
@@ -105,7 +101,6 @@ public class StatementWhen {
                     return v
                 }
             }
-
             return null
         }
         for _ , t := range this.cases {

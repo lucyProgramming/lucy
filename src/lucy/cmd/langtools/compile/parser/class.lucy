@@ -38,7 +38,6 @@ class ClassParser extends ParserFather {
                 pos = this.parser.mkPos()
                 this.next(lfNotToken) // skip name identifier
             }
-
         }
         name.name = className
         name.pos = pos
@@ -58,9 +57,7 @@ class ClassParser extends ParserFather {
             } else {
                 break
             }
-
         }
-
     }
 
     fn parse(isAbstract bool) -> (classDefinition ast.Class , err error) {
@@ -171,6 +168,7 @@ class ClassParser extends ParserFather {
                 case lex.TokenRc:
                     classDefinition.endLine = this.parser.token.startLine
                     this.next(lfNotToken)
+                    this.parser.ifTokenIsLfThenSkip(false)
                     return
                 case lex.TokenSemicolon:
                     this.next(lfNotToken)
@@ -194,7 +192,6 @@ class ClassParser extends ParserFather {
                             } else {
                                 classDefinition.staticBlocks.append(block)
                             }
-
                         }
 
                         continue

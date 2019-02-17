@@ -15,7 +15,7 @@ public class RunLucyPackage {
            lucyPath            []string                      
            mainPackageLucyPath string                        
            Package             string                        
-           command             string                        
+           commandName         string                        
            compilerExe         []string                      
            classPaths          []string                      
            flags               Flags = new Flags()
@@ -23,8 +23,8 @@ public class RunLucyPackage {
            lucyProgramArgs     []string                       // lucy application args
     public runOverExit         bool                          
 
-    public fn RunCommand(command string , args []string) -> (err error) {
-        this.command = command
+    public fn run(commandName string , args []string) -> (err error) {
+        this.commandName = commandName
         err = this.parseCmd(args) // skip run
         if err != null {
             this.help()
@@ -68,7 +68,6 @@ public class RunLucyPackage {
 
     }
             `)
-
             os.exit(4)
         }
         cmdArray := []string{"java" , this.Package + "/" + ast.MainFunctionName}
@@ -80,9 +79,7 @@ public class RunLucyPackage {
                 envs[i] = k + "=" + v
                 i++
             }
-
         }
-
         p := Runtime.getRuntime().exec(copy(new string[](len(cmdArray)) , cmdArray),
             envs)
         Run.runFn(fn () {
@@ -327,8 +324,13 @@ public class RunLucyPackage {
             panic(sprintf("package '%s' in '%s'" , packageName , founds + ""))
         }
     }
-    fn buildPackage(lucyPath string , packageName string , importStack ImportStack) -> (needBuild bool,
-        meta common.PackageMeta , err error) {
+    fn buildPackage(
+        lucyPath string,
+        packageName string,
+        importStack ImportStack) -> (
+        needBuild bool,
+        meta common.PackageMeta,
+        err error) {
         if p := this.packagesCompiled[packageName] ; p != null {
             return true , p.meta , null
         }
@@ -462,9 +464,7 @@ public class RunLucyPackage {
                     new io.File(destinationDir).delete()
                 }
             }
-
         }
-
         return
     }
 }

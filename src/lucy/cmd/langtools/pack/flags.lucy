@@ -1,0 +1,32 @@
+import "lucy/os/flag"
+
+class Flags {
+    parser      flag.FlagParser  
+    packageName flag.StringOption
+    installDir  flag.StringOption
+    fn Flags() {
+        this.super()
+        this.parser = new flag.FlagParser()
+        this.packageName = this.parser.stringOption("-package-name")
+        this.installDir = this.parser.stringOption("-install-dir")
+    }
+    fn parseArgs(args []string) -> (
+        jarFlags []string,
+        packageName string,
+        installDir string) {
+        jarFlags , err := this.parser.parse(args)
+        if err != null {
+            panic(err)
+        }
+        packageName = this.packageName.getValue()
+        installDir = this.installDir.getValue()
+        if packageName == "" {
+            panic("-package-name is null string")
+        }
+        if installDir == "" {
+            panic("-install-dir is null string")
+        }
+    }
+}
+
+

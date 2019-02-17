@@ -5,6 +5,7 @@ import "lucy/cmd/langtools/test"
 import "lucy/cmd/langtools/clean"
 import "lucy/cmd/langtools/tool"
 import "lucy/cmd/langtools/http"
+import "lucy/cmd/langtools/pack"
 
 fn printUsage() {
     msg := `lucy is a new programing language build on jvm
@@ -13,6 +14,7 @@ fn printUsage() {
     install                install directory and it's sub directories 
     run                    run a lucy package
     clean                  clean compiled files
+    pack                   package a "lucy package" use the "jar" command line
     http                   the http service for lucy
     test                   test a package`
     print(msg)
@@ -30,11 +32,11 @@ fn main(args []string) {
         case "build":
             t := ["-build"]
             t.appendAll(args[1:])
-            (new run.RunLucyPackage()).RunCommand("run" , t)
+            (new run.RunLucyPackage()).run("run" , t)
         case "run":
             r := (new run.RunLucyPackage())
             r.runOverExit = true
-            r.RunCommand(args[0] , args[1:])
+            r.run(args[0] , args[1:])
         case "install":
             install.install(args[1:])
         case "clean":
@@ -45,6 +47,8 @@ fn main(args []string) {
             tool.tool(args[1:])
         case "http":
             http.http(args[1:])
+        case "pack":
+            pack.pack(args[1:])
         default:
             print("command '%s' not found\n" , args[0])
             printUsage()

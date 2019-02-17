@@ -758,7 +758,6 @@ public class Fmt {
             d += this.formatBlock(indent + this.indentIncremental + this.indentIncremental , c.block)
             format += d
         }
-
         if w.defaultBlock != null {
             format += indent + this.indentIncremental + "default:\n"
             format += this.formatBlock(indent + this.indentIncremental + this.indentIncremental , w.defaultBlock)
@@ -779,7 +778,6 @@ public class Fmt {
                 } else {
                     format += ","
                 }
-
             }
             if v.containsLf {
                 format += "\n"
@@ -791,13 +789,11 @@ public class Fmt {
                 indent += this.indentIncremental
             }
         }
-
         if inlineComment == null {
             format += "\n"
         } else {
             format += " //" + inlineComment
         }
-
     }
     fn formatExpression(indent string , e ast.Expression) -> (format string = "") {
         switch e.Type {

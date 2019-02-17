@@ -30,15 +30,10 @@ public final class IntOption extends Option {
             }
 
         }
-
         if isNegative {
             value = -value
         }
         this.intValue = value
     }
-
     public fn getValue() -> (v int = this.intValue){}
-
 }
-
-

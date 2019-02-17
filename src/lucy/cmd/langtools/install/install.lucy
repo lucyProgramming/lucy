@@ -43,7 +43,7 @@ class Install {
         if this.verbose {
             printf("install:%s\n" , packageName)
         }
-        err := new run.RunLucyPackage().RunCommand("install" , ["-build" , packageName])
+        err := new run.RunLucyPackage().run("install" , ["-build" , packageName])
         if err != null {
             printf("install failed,err:%s\n" , err.toString())
         }

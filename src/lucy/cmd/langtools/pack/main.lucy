@@ -1,0 +1,8 @@
+public fn pack(args []string) {
+    jarFlags , packageName , installDir := new Flags().parseArgs(args)
+    new Pack(jarFlags , packageName , installDir).pack()
+}
+
+fn main(args []string) {
+    pack(args)
+}

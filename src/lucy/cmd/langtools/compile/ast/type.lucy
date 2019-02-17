@@ -813,7 +813,6 @@ public class Type {
                 }
                 return has == true
             }
-
         }
         return false
     }

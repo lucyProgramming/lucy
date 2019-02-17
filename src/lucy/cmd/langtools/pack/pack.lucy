@@ -1,0 +1,128 @@
+import "lucy/cmd/langtools/lucy/run"
+import "lucy/cmd/langtools/common"
+import "java/io"
+import "lucy/encoding/json"
+import "lucy/os"
+import "java/lang/Runtime"
+
+
+class Pack {
+    jarFlags               []string           
+    packageName            string             
+    lucyPath               []string           
+    installDir             string             
+    packageClsssFileCopied map{string -> bool}
+    lucyRoot               string             
+
+    fn Pack(
+        jarFlags []string,
+        packageName string,
+        installDir string) {
+        this.super()
+        this.jarFlags = jarFlags
+        this.packageName = packageName
+        this.lucyRoot = common.getLucyRoot()
+        this.lucyPath = common.getLucyPath()
+        this.installDir = installDir
+        this.packageClsssFileCopied = new map{string -> bool}()
+    }
+
+    fn pack() {
+        // build the packge 
+        if err := new run.RunLucyPackage().
+            run("pack" , ["-build" , this.packageName]) ; err != null {
+            panic(err)
+        }
+        this.copyClassFiles("lucy/lang")
+        this.copyLib(this.lucyRoot + "/lib" , this.installDir)
+        this.copyClassFiles(this.packageName)
+        this.callJarCommandLine()
+    }
+
+    fn deleteTempDirectory() {
+        new io.File(this.installDir).delete()
+    }
+
+    fn callJarCommandLine() {
+        args := new string[](len(this.jarFlags) + 2)
+        args[0] = "jar"
+        for k , v := range this.jarFlags {
+            args[k + 1] = v
+        }
+        args[args.size() - 1] = "./"
+        p := Runtime.getRuntime().exec(args , null , new io.File(this.installDir))
+        code := p.waitFor()
+        if code != 0 {
+            panic(sprintf("exec jar exception , code:%d" , code))
+        }
+    }
+    fn copyLib(src string , dest string) {
+        fis := new io.File(src).listFiles()
+        new io.File(dest).mkdirs()
+        for v := range fis {
+            if v.isDirectory() {
+                this.copyLib(src + "/" + v.getName() , dest + "/" + v.getName())
+                continue
+            }
+            // not a class file
+            if v.getName().endsWith(".class") == false {
+                continue
+            }
+            t , err := os.readFile(src + "/" + v.getName())
+            if err != null {
+                panic(err)
+            }
+            err = os.writeFile(dest + "/" + v.getName() , t)
+            if err != null {
+                panic(err)
+            }
+        }
+    }
+    fn copyClassFiles(packageName string) {
+        var dir string
+        if packageName == "lucy/lang" {
+            dir = this.lucyRoot + "/class/" + packageName
+        } else {
+            dir = common.findPackageInWhichDirectory(this.lucyPath , this.packageName) +
+                "/class/" + packageName
+        }
+        meta := this.readMaintain(dir)
+        for v := range meta.imports {
+            if this.packageClsssFileCopied.keyExist(v.name) {
+                continue
+            }
+            this.copyClassFiles(v.name)
+            this.packageClsssFileCopied[v.name] = true
+        }
+        // copy class files
+        fis := new io.File(dir).listFiles()
+        destinationDir := this.installDir + "/" + packageName
+        new io.File(destinationDir).mkdirs()
+        for v := range fis {
+            if v.isFile() == false ||
+                v.getName().endsWith(".class") == false {
+                continue
+            }
+            t , err := os.readFile(dir + "/" + v.getName())
+            if err != null {
+                panic(err)
+            }
+            err = os.writeFile(destinationDir + "/" + v.getName() , t)
+            if err != null {
+                panic(err)
+            }
+        }
+    }
+    fn readMaintain(dir string) -> (meta common.PackageMeta) {
+        t , err := os.readFile(dir + "/maintain.json")
+        if err != null {
+            print(dir + "/maintain.json")
+            panic(err)
+        }
+        bs := javaArray2Lucy(t)
+        meta = new common.PackageMeta()
+        new json.Decoder(meta , bs).decode()
+    }
+}
+
+

@@ -12,7 +12,7 @@ public fn getAttributeByName(
     a AttributeGroupedByName,
     name string) -> (attrs []AttributeInfo) {
     if a == null {
-        return null
+        return
     }
     return a[name]
 }

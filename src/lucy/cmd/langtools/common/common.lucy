@@ -59,7 +59,6 @@ public fn getClassPath() -> (paths []string) {
         paths[i] = k
         i++
     }
-
 }
 
 public fn findPackageInWhichDirectory(lucyPath []string , packageName string) -> (which string) {
@@ -95,7 +94,6 @@ public fn getPathElements(path string) -> (elements []string) {
     for i := 0 ; i < t.getNameCount() ; i++ {
         elements[i] = t.getName(i).toString()
     }
-
 }
 
 public fn twoPathEqual(p1 string , p2 string) -> (equal bool) {

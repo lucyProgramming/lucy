@@ -300,7 +300,7 @@ public class AutoCompletionItem {
         item := new AutoCompletionItem()
         item.Type = "function"
         item.name = "panic"
-        item.suggest = "panic(reason)"
+        item.suggest = "panic(err)"
         items.append(item)
 
         item = new AutoCompletionItem()
@@ -568,7 +568,7 @@ public class AutoCompletionItem {
         item = new AutoCompletionItem()
         item.Type = "method"
         item.name = "remove"
-        item.suggest = sprintf("remove( key, ...)")
+        item.suggest = sprintf("remove(key, ...)")
         items.append(item)
 
         //removeAll
