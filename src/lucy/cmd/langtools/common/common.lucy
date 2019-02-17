@@ -41,15 +41,15 @@ public fn getLucyPath() -> (paths []string) {
 
 public fn getClassPath() -> (paths []string) {
     envs := os.getEnvs()
-    classPaths := envs["CLASSPATH"]
+    classPath := envs["CLASSPATH"]
     osName := System.getProperty("os.name").toLowerCase()
     ps := new map{string -> bool}()
     if osName.startsWith("windows") {
-        for v := range classPaths.split(";") {
+        for v := range classPath.split(";") {
             ps[v] = true
         }
     } else {
-        for v := range classPaths.split(":") {
+        for v := range classPath.split(":") {
             ps[v] = true
         }
     }

@@ -13,15 +13,15 @@ import "lucy/cmd/langtools/common" as langtoolsCommon
 	load from file implementation
 */
 public class FileLoader implements ast.loadImport {
-    public lucyPath , classPaths []string             
+    public lucyPath , classPath []string             
     public caches                map{string -> Object}
     // class loaded from CLASSPATH
     static javaImports map{string -> Object} = new map{string -> Object}()
 
-    public fn FileLoader(lucyPath []string , classPaths []string) {
+    public fn FileLoader(lucyPath []string , classPath []string) {
         this.super()
         this.lucyPath = lucyPath
-        this.classPaths = classPaths
+        this.classPath = classPath
         this.caches = new map{string -> Object}()
     }
 
@@ -126,7 +126,7 @@ public class FileLoader implements ast.loadImport {
             }
         }
         if foundInLucy == false {
-            for _ , v := range this.classPaths {
+            for _ , v := range this.classPath {
                 if p := v + "/" + importName ; new io.File(p).isDirectory() && langtoolsCommon.haveFileType(p , ".class") {
                     realPaths.append(new Resource(ResourceKindJavaPackage,
                             p,
@@ -139,7 +139,7 @@ public class FileLoader implements ast.loadImport {
                 }
             }
             //
-            for _ , v := range this.classPaths {
+            for _ , v := range this.classPath {
                 fis := new io.File(v).listFiles()
                 for f := range fis {
                     if f.isFile() && f.getName().endsWith(".jar") {

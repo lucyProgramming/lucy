@@ -3,10 +3,10 @@ import "java/io/File"
 
 final class Clean {
     lucyPath    []string
-    packageName string  
-    lucyRoot    string  
-    recursive   bool    
-    verbose     bool    
+    packageName string
+    lucyRoot    string
+    recursive   bool
+    verbose     bool
 
     fn Clean(
         lucyRoot string,

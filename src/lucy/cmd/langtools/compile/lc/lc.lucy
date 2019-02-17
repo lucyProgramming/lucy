@@ -8,7 +8,7 @@ public fn Main(
     destinationDir string,
     files []string,
     lucyPath []string,
-    classPaths []string,
+    classPath []string,
     ifErrExit bool,
     onlyImport bool,
     disableCheckUnUse bool,
@@ -24,7 +24,7 @@ public fn Main(
     compiler.destinationDir = destinationDir
     compiler.ifErrExit = ifErrExit
     compiler.printError = printError
-    return compiler.compile(files , lucyPath , classPaths)
+    return compiler.compile(files , lucyPath , classPath)
 }
 
 public class Compiler {

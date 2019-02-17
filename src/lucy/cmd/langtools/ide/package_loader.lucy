@@ -8,8 +8,8 @@ public class PackageLoader extends lc.FileLoader {
     public onlyAnalyzeGlobals bool   
     public errors             []error
 
-    public fn PackageLoader(lucyPath []string , classPaths []string) {
-        this.super(lucyPath , classPaths)
+    public fn PackageLoader(lucyPath []string , classPath []string) {
+        this.super(lucyPath , classPath)
     }
     public fn loadImport(importName string) -> (x Object , err error) {
         if x = this.getCache(importName) ; x != null {
@@ -30,7 +30,7 @@ public class PackageLoader extends lc.FileLoader {
             }
         }
         if foundInLucy == false {
-            for _ , v := range this.classPaths {
+            for _ , v := range this.classPath {
                 if p := v + "/" + importName ; new io.File(p).isDirectory() && common.haveFileType(p , ".class") {
                     realPaths.append(new lc.Resource(
                             lc.ResourceKindJavaPackage,
@@ -44,7 +44,7 @@ public class PackageLoader extends lc.FileLoader {
                             importName))
                 }
             }
-            for _ , v := range this.classPaths {
+            for _ , v := range this.classPath {
                 fis := new io.File(v).listFiles()
                 for f := range fis {
                     if f.isFile() && f.getName().endsWith(".jar") {

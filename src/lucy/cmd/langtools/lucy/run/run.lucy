@@ -17,7 +17,7 @@ public class RunLucyPackage {
            Package             string
            commandName         string
            compilerExe         []string
-           classPaths          []string
+           classPath          []string
            flags               Flags = new Flags()
            packagesCompiled    map{string -> PackageCompiled}
            lucyProgramArgs     []string                       // lucy application args
@@ -39,7 +39,7 @@ public class RunLucyPackage {
         }
         this.lucyRoot = common.getLucyRoot()
         this.lucyPath = common.getLucyPath()
-        this.classPaths = common.getClassPath()
+        this.classPath = common.getClassPath()
         this.packagesCompiled = new map{string -> PackageCompiled}()
         founds := this.findPackageIn(this.Package)
         this.foundError(this.Package , founds)
@@ -240,7 +240,7 @@ public class RunLucyPackage {
     fn javaPackageFilter(is []string) -> (lucyPackages []string = []string{}) {
         var that = this
         foundInClassPath := fn (name string) -> (found []string = []string{}) {
-            for _ , v := range that.classPaths {
+            for _ , v := range that.classPath {
                 if new io.File(v + "/" + name).isDirectory() {
                     found.append(v)
                     continue
@@ -250,7 +250,7 @@ public class RunLucyPackage {
                     continue
                 }
             }
-            for _ , v := range that.classPaths {
+            for _ , v := range that.classPath {
                 fis := new io.File(v).listFiles()
                 for f := range fis {
                     if f.isFile() == false || f.getName().endsWith(".jar") == false {
@@ -305,12 +305,12 @@ public class RunLucyPackage {
             found = foundInClassPath(i)
             if len(found) > 1 {
                 errMsg := sprintf("not 1 package named '%s' in $CLASSPATH,which CLASSPATH are:\n" , i)
-                errMsg += formatPaths(this.classPaths)
+                errMsg += formatPaths(this.classPath)
                 panic(errMsg)
             }
             if len(found) == 0 {
                 errMsg := sprintf("package named '%s' not found in $CLASSPATH,which CLASSPATH are:\n" , i)
-                errMsg += formatPaths(this.classPaths)
+                errMsg += formatPaths(this.classPath)
                 panic(errMsg)
             }
         }
@@ -399,7 +399,7 @@ public class RunLucyPackage {
             destinationDir,
             files,
             this.lucyPath,
-            this.classPaths,
+            this.classPath,
             true,
             false,
             false,
