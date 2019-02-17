@@ -5,6 +5,6 @@ public class FieldHighLevel {
 	public descriptor                   string
 	public accessFlags                  char
 	public attributeConstantValue       AttributeConstantValue
-	public AttributeLucyFieldDescriptor AttributeLucyFieldDescriptor
-	public AttributeLucyConst           AttributeLucyConst
+	public attributeLucyFieldDescriptor AttributeLucyFieldDescriptor
+	public attributeLucyConst           AttributeLucyConst
 }

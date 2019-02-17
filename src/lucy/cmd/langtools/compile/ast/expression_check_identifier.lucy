@@ -137,7 +137,7 @@ class ExpressionCheckIdentifier {
 				block.inheritedAttribute.p.setLocationDefinition(t)
 				return 
 			}
-			t.used = true
+			t.used++
 			e.fromConst(t)
 			result := t.Type.cloneType()
 			result.pos = e.pos

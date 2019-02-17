@@ -146,7 +146,6 @@ class ConstantInfoMethodref {
         p.info = new []byte(4)
         binary.BigEndian.putChar(p.info , this.classIndex)
         binary.BigEndian.putChar(p.info[2:] , this.nameAndTypeIndex)
-
     }
 }
 

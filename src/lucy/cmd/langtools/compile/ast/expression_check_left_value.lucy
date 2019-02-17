@@ -51,7 +51,7 @@ class ExpressionCheckLeftValue {
 			}
             errs.append(new error(sprintf("%s identifier '%s' is '%s' , cannot be used as left value",
                 e.pos.errMsgPrefix(), identifier.name, block.identifierIsWhat(d))))
-            return null
+            return
 		case ExpressionTypeIndex:
 			result = ExpressionCheckIndex.check(e , block, errs)
 			e.value = result

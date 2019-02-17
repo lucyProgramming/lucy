@@ -139,34 +139,33 @@ public class Package {
 
     fn loadCorePackage() -> (err error) {
         if this.name == common.CorePackage {
-            return null
+            return 
         }
         var pp Object
         pp , err = this.load(common.CorePackage)
         if err != null {
-            return err
+            return 
         }
         lucyBuildInPackage := pp.(Package)
         lucyBuildInPackage.markBuildIn()
         this.block.outer = lucyBuildInPackage.block
         lucyBuildInPackage.block.inheritedAttribute = new InheritedAttribute()
         this.lucyBuildInPackage = lucyBuildInPackage
-        return null
     }
 
     fn getImport(file string , accessName string) -> (i Import) {
         if this.files == null {
-            return null
+            return 
         }
         if t := this.files[file] ; t != null && t.imports != null {
             return t.imports[accessName]
         }
-        return null
+        return 
     }
 
     fn getSourceFile(fileName string) -> (file SourceFile) {
         if this.files == null {
-            return null
+            return
         }
         return this.files[fileName]
     }
@@ -180,7 +179,7 @@ public class Package {
             f.pos = b.pos
             f.block = b
             this.initFunctions[k] = f
-            f.used = true
+            f.used++
         }
 
     }
@@ -553,7 +552,7 @@ public class Package {
         }
         for _ , v := range this.files {
             for _ , i := range v.imports {
-                if i.used == false {
+                if i.used == 0 {
                     errMsg := sprintf("%s' imported not used" , i.Import)
                     t := new CompileError(sprintf("%s %s" , errMsgPrefix(i.pos) , errMsg))
                     t.pos = i.pos

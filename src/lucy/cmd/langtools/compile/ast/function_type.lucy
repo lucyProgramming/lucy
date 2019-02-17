@@ -251,7 +251,7 @@ public class FunctionType {
 
     public fn voidReturn() -> (is bool) {
         return len(this.returnList) == 0 ||
-            this.returnList[0].Type.Type == VariableTypeVoid
+                this.returnList[0].Type.Type == VariableTypeVoid
     }
 
     fn mkCallReturnTypes(pos Pos) -> (valueTypes []Type) {
@@ -354,7 +354,9 @@ public class FunctionType {
                 // lucy programming language does not support overload 
                 // so modify the arguments is safe
                 for i := len(callArgsTypes) ; i < len(f.Type.parameterList) ; i++ {
-                    args.append(f.Type.parameterList[i].defaultValueExpression)
+                    args.append(f.Type.parameterList[i].defaultValueExpression.
+                            cloneFunctionDefaultParameterArgExpression(from))
+
                 }
             } else {
                 errMsg := sprintf("%s too few paramaters to call\n" , errMsgPrefix(from))

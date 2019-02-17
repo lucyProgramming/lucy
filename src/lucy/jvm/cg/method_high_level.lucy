@@ -2,13 +2,13 @@ public class MethodHighLevel {
     public isConstruction                bool                         
     public Class                         ClassHighLevel               
     public name                          string                       
-    public Descriptor                    string                       
+    public descriptor                    string                       
     public accessFlags                   char                         
     public code                          AttributeCode                
-    public AttributeLucyMethodDescriptor AttributeLucyMethodDescriptor
-    public AttributeDefaultParameters    AttributeDefaultParameters   
-    public AttributeMethodParameters     AttributeMethodParameters    
-    public AttributeLucyReturnListNames  AttributeMethodParameters    
+    public attributeLucyMethodDescriptor AttributeLucyMethodDescriptor
+    public attributeDefaultParameters    AttributeDefaultParameters   
+    public attributeMethodParameters     AttributeMethodParameters    
+    public attributeLucyReturnListNames  AttributeMethodParameters    
 }
 
 

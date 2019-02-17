@@ -13,7 +13,7 @@ class ExpressionCheckMap {
             errs.append(new error(sprintf("%s map literal has no type and no initiational values," +
                             "cannot inference it`s type",
                         e.pos.errMsgPrefix())))
-            return null
+            return
         }
         if m.Type == null {
             m.Type = new Type()

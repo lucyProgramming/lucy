@@ -38,7 +38,7 @@ class BuildinFunctionCall {
             code.codes[code.codeLength] = cg.OP_invokestatic
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.Function.entrance.Class.name,
                 call.Function.name,
-                call.Function.entrance.Descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                call.Function.entrance.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
             if e.isStatementExpression {
                 if call.Function.Type.voidReturn() == false {

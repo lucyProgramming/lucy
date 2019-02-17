@@ -28,7 +28,6 @@ public final class IntOption extends Option {
             } else {
                 panic(sprintf("'%s' format int wrong" , s))
             }
-
         }
         if isNegative {
             value = -value

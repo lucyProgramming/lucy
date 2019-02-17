@@ -8,7 +8,7 @@ class ExpressionBinaryParser extends ParserFather {
         this.ep = ep
     }
 
-     // ||
+    // ||
     fn parseLogicalOrExpression() -> (e ast.Expression , err error) {
         left , err := this.parseLogicalAndExpression()
         if err != null {
@@ -42,7 +42,6 @@ class ExpressionBinaryParser extends ParserFather {
                     return left , err
                 }
             }
-
             newExpression := new ast.Expression()
             newExpression.pos = pos
             newExpression.op = name
@@ -55,11 +54,10 @@ class ExpressionBinaryParser extends ParserFather {
             newExpression.data = binary
             left = newExpression
         }
-
         return left , null
     }
 
-     // &&
+    // &&
     fn parseLogicalAndExpression() -> (e ast.Expression , err error) {
         left , err := this.parseEqualExpression()
         if err != null {
@@ -81,7 +79,6 @@ class ExpressionBinaryParser extends ParserFather {
             } else {
                 //nothing
             }
-
             var right ast.Expression
             if token.autoCompletion {
                 right = new ast.Expression()
@@ -93,7 +90,6 @@ class ExpressionBinaryParser extends ParserFather {
                     return left , err
                 }
             }
-
             newExpression := new ast.Expression()
             newExpression.pos = pos
             newExpression.op = name
@@ -110,14 +106,14 @@ class ExpressionBinaryParser extends ParserFather {
         return left , null
     }
 
-     // == and !=
+    // == and !=
     fn parseEqualExpression() -> (e ast.Expression , err error) {
         left , err := this.parseRelationExpression()
         if err != null {
             return null , err
         }
         for this.parser.token.Type == lex.TokenEqual ||
-                this.parser.token.Type == lex.TokenNe {
+            this.parser.token.Type == lex.TokenNe {
             typ := this.parser.token.Type
             token := this.parser.token
             name := this.parser.token.description
@@ -168,16 +164,16 @@ class ExpressionBinaryParser extends ParserFather {
         return left , null
     }
 
-     // > < >= <=
+    // > < >= <=
     fn parseRelationExpression() -> (e ast.Expression , err error) {
         left , err := this.parseOrExpression()
         if err != null {
             return null , err
         }
         for this.parser.token.Type == lex.TokenGt ||
-                this.parser.token.Type == lex.TokenGe ||
-                this.parser.token.Type == lex.TokenLt ||
-                this.parser.token.Type == lex.TokenLe {
+            this.parser.token.Type == lex.TokenGe ||
+            this.parser.token.Type == lex.TokenLt ||
+            this.parser.token.Type == lex.TokenLe {
             typ := this.parser.token.Type
             token := this.parser.token
             name := this.parser.token.description
@@ -232,7 +228,7 @@ class ExpressionBinaryParser extends ParserFather {
         return left , null
     }
 
-     //  |
+    //  |
     fn parseOrExpression() -> (e ast.Expression , err error) {
         left , err := this.parseXorExpression()
         if err != null {
@@ -283,7 +279,7 @@ class ExpressionBinaryParser extends ParserFather {
         return left , null
     }
 
-     // ^
+    // ^
     fn parseXorExpression() -> (e ast.Expression , err error) {
         left , err := this.parseAndExpression()
         if err != null {
@@ -334,7 +330,7 @@ class ExpressionBinaryParser extends ParserFather {
         return left , null
     }
 
-     // &
+    // &
     fn parseAndExpression() -> (e ast.Expression , err error) {
         left , err := this.parseShiftExpression()
         if err != null {
@@ -385,14 +381,14 @@ class ExpressionBinaryParser extends ParserFather {
         return left , null
     }
 
-     // << >>
+    // << >>
     fn parseShiftExpression() -> (e ast.Expression , err error) {
         left , err := this.parseAddExpression()
         if err != null {
             return null , err
         }
         for this.parser.token.Type == lex.TokenLsh ||
-                this.parser.token.Type == lex.TokenRsh {
+            this.parser.token.Type == lex.TokenRsh {
             token := this.parser.token
             typ := this.parser.token.Type
             name := this.parser.token.description
@@ -443,14 +439,14 @@ class ExpressionBinaryParser extends ParserFather {
         return left , null
     }
 
-     // + -
+    // + -
     fn parseAddExpression() -> (e ast.Expression , err error) {
         left , err := this.parseMulExpression()
         if err != null {
             return null , err
         }
         for this.parser.token.Type == lex.TokenAdd ||
-                this.parser.token.Type == lex.TokenSub {
+            this.parser.token.Type == lex.TokenSub {
             typ := this.parser.token.Type
             token := this.parser.token
             name := this.parser.token.description
@@ -501,15 +497,15 @@ class ExpressionBinaryParser extends ParserFather {
         return left , null
     }
 
-     // * / %
+    // * / %
     fn parseMulExpression() -> (e ast.Expression , err error) {
         left , err := this.ep.ExpressionSuffix.parseSuffixExpression()
         if err != null {
             return null , err
         }
         for this.parser.token.Type == lex.TokenMul ||
-                this.parser.token.Type == lex.TokenDiv ||
-                this.parser.token.Type == lex.TokenMod {
+            this.parser.token.Type == lex.TokenDiv ||
+            this.parser.token.Type == lex.TokenMod {
             typ := this.parser.token.Type
             token := this.parser.token
             name := this.parser.token.description

@@ -232,7 +232,7 @@ public class Expression {
             this.Type == ExpressionTypeMap ||
             this.Type == ExpressionTypeQuestion ||
             this.Type == ExpressionTypeParenthesis {
-            return null
+            return
         }
         errMsg := sprintf("cannot use '%s' as condition" , this.op)
         err = new CompileError(sprintf("%s %s" , this.pos.errMsgPrefix() , errMsg))
@@ -263,7 +263,7 @@ public class Expression {
             this.Type == ExpressionTypePrefixDecrement ||
             this.Type == ExpressionTypeVar ||
             this.Type == ExpressionTypeConst {
-            return null
+            return
         }
         errMsg := sprintf("expression '%s' evaluate but not used" , this.op)
         err = new CompileError(sprintf("%s %s" , this.pos.errMsgPrefix() , errMsg))
@@ -909,7 +909,16 @@ public class Expression {
                 //TODO:: long check
 
         }
-
+    }
+    fn cloneFunctionDefaultParameterArgExpression(callPos Pos) -> (e Expression) {
+        e = new Expression()
+        e.Type = this.Type
+        e.boolValue = this.boolValue
+        e.longValue = this.longValue
+        e.doubleValue = this.doubleValue
+        e.stringValue = this.stringValue 
+        e.pos = callPos
+        e.value = this.value 
     }
 }
 

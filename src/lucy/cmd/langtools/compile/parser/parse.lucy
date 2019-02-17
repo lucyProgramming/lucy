@@ -319,9 +319,7 @@ class Parser {
                             this.errMsgPrefix() , this.token.description)))
                         this.next(lfNotToken)
                     }
-
             }
-
         }
 
         return this.errs

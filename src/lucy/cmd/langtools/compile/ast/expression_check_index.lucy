@@ -4,7 +4,7 @@ class ExpressionCheckIndex {
         on , es := index.Expression.checkSingleValueContextExpression(block)
         errs.appendAll(es)
         if on == null {
-            return null
+            return
         }
         switch on.Type {
             case VariableTypeArray,
@@ -66,7 +66,7 @@ class ExpressionCheckIndex {
             default:
                 errs.append(new error(sprintf("%s cannot index '%s'",
                     on.pos.errMsgPrefix() , on.typeString())))
-                return null
+                return
         }
 
     }

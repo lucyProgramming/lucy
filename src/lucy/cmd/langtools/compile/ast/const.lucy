@@ -3,7 +3,7 @@ import "lucy/jvm/cg"
 public class Constant {
     public isGlobal               bool      
     public isBuildIn              bool      
-    public used                   bool      
+    public used                   int      
     public pos                    Pos       
     public Type                   Type      
     public name                   string    
@@ -48,6 +48,7 @@ public class Constant {
     }
 
     fn reduceFindUsageInstances(block Block) {
+        this.used--
         if this.findUsage == false {
             return
         }

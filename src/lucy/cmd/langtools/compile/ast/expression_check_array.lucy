@@ -9,7 +9,7 @@ class ExprssionCheckArray {
                 new error(
                     sprintf("%s array literal has no type and no expression, cannot inference it`s type ",
                         errMsgPrefix(e.pos))))
-            return null
+            return
         }
         var noType = true
         if arr.Type != null {
@@ -17,7 +17,7 @@ class ExprssionCheckArray {
             err := arr.Type.resolve(block)
             if err != null {
                 errs.append(err)
-                return null
+                return
             }
         }
         for _ , v := range arr.expressions {
@@ -57,7 +57,7 @@ class ExprssionCheckArray {
         }
 
         if arr.Type == null {
-            return null
+            return
         }
         valueType = arr.Type.cloneType()
         valueType.pos = e.pos

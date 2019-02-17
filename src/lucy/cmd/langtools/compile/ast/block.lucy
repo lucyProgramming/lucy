@@ -6,32 +6,32 @@ public class Block {
     /*
 		should analyse at ast stage
 	*/
-    public notExecuteToLastStatement bool                         
-    public defers                    []StatementDefer             
+    public notExecuteToLastStatement bool
+    public defers                    []StatementDefer
     public isFunctionBlock           bool                          // function block
-    public Fn                        Function                     
+    public Fn                        Function
     public isClassBlock              bool                          // class block
-           isPackageBlock            bool                         
+           isPackageBlock            bool
            Package                   Package                       // when isPackageBlock is true this field shoule not be null
-    public Class                     Class                        
+    public Class                     Class
     public isForBlock                bool                          // for top block
     public isSwitchBlock             bool                          // switch statement list block
     public isWhenBlock               bool                          // template swtich statement list block
-    public pos                       Pos                          
-    public endPos                    Pos                          
-    public outer                     Block                        
+    public pos                       Pos
+    public endPos                    Pos
+    public outer                     Block
     public inheritedAttribute        InheritedAttribute = new InheritedAttribute()
-    public statements                []Statement                  
-    public constants                 map{string -> Constant}      
-    public functions                 map{string -> Function}      
-    public classes                   map{string -> Class}         
-    public enums                     map{string -> Enum}          
-    public enumNames                 map{string -> EnumName}      
+    public statements                []Statement
+    public constants                 map{string -> Constant}
+    public functions                 map{string -> Function}
+    public classes                   map{string -> Class}
+    public enums                     map{string -> Enum}
+    public enumNames                 map{string -> EnumName}
     public labels                    map{string -> StatementLabel}
-    public typeAliases               map{string -> Type}          
-    public variables                 map{string -> Variable}      
-           checkConstantsCalled      bool                         
-    public isCompilerAuto            bool                         
+    public typeAliases               map{string -> Type}
+    public variables                 map{string -> Variable}
+           checkConstantsCalled      bool
+    public isCompilerAuto            bool
 
     /*
     
@@ -54,7 +54,7 @@ public class Block {
                     u.pos = pos
                     t.findUsageInstances.append(u)
                 }
-                t.used = true
+                t.used++
                 return t , true
             }
         }
@@ -79,7 +79,7 @@ public class Block {
                     u.pos = pos
                     t.findUsageInstances.append(u)
                 }
-                t.used = true
+                t.used++
                 return t , true
             }
         }
@@ -91,7 +91,7 @@ public class Block {
                     u.pos = pos
                     t.findUsageInstances.append(u)
                 }
-                t.used = true
+                t.used++
                 return t , true
             }
         }
@@ -103,7 +103,7 @@ public class Block {
                     u.pos = pos
                     t.findUsageInstances.append(u)
                 }
-                t.used = true
+                t.used++
                 return t , true
             }
         }
@@ -115,7 +115,7 @@ public class Block {
                     u.pos = pos
                     t.findUsageInstances.append(u)
                 }
-                t.used = true
+                t.used++
                 return t , true
             }
         }
@@ -156,7 +156,7 @@ public class Block {
                         }
 
                     }
-                    lable.used = true
+                    lable.used++
                     return lable
                 }
             }
@@ -177,7 +177,7 @@ public class Block {
         for bb != null {
             if bb.classes != null {
                 if t := bb.classes[name] ; t != null {
-                    t.used = true
+                    t.used++
                     if t.findUsageInstances != null {
                         u := new Usage()
                         u.Type = "declaration"
@@ -189,7 +189,7 @@ public class Block {
             }
             if bb.enums != null {
                 if t := bb.enums[name] ; t != null {
-                    t.used = true
+                    t.used++
                     if t.findUsageInstances != null {
                         u := new Usage()
                         u.Type = "declaration"
@@ -307,7 +307,6 @@ public class Block {
         this.inheritedAttribute.classMethod = father.inheritedAttribute.classMethod
         this.inheritedAttribute.classAndFunctionNames = father.inheritedAttribute.classAndFunctionNames
         this.inheritedAttribute.p = father.inheritedAttribute.p
-
         if this.isFunctionBlock || this.isClassBlock {
             this.inheritedAttribute.forBreak = null
             this.inheritedAttribute.forStatement = null
@@ -324,7 +323,7 @@ public class Block {
             return es
         }
         for _ , v := range this.constants {
-            if v.used ||
+            if v.used > 0 ||
                 v.isGlobal {
                 continue
             }
@@ -332,7 +331,7 @@ public class Block {
         }
 
         for _ , v := range this.enums {
-            if v.used ||
+            if v.used > 0 ||
                 v.isGlobal {
                 continue
             }
@@ -340,7 +339,7 @@ public class Block {
         }
 
         for _ , v := range this.classes {
-            if v.used ||
+            if v.used > 0 ||
                 v.isGlobal {
                 continue
             }
@@ -348,7 +347,7 @@ public class Block {
         }
 
         for _ , v := range this.functions {
-            if v.used ||
+            if v.used > 0 ||
                 v.isGlobal {
                 continue
             }
@@ -356,7 +355,7 @@ public class Block {
         }
 
         for _ , v := range this.labels {
-            if v.used {
+            if v.used > 0 {
                 continue
             }
             es.append(new error(sprintf("%s label '%s' has declared,but not used" , v.pos.errMsgPrefix() , v.name)))
@@ -496,7 +495,7 @@ public class Block {
         //TODO:: check it or not
         return null
     }
-    
+
     public fn insert(name string , pos Pos , d Object) -> (err error) {
         if err = this.nameIsValid(name , pos) ; err != null {
             return err

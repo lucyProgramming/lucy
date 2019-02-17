@@ -9,7 +9,7 @@ import "lucy/cmd/langtools/compile/common"
 public class Class {
     public isGlobal                          bool
     public isBuildIn                         bool
-    public used                              bool
+    public used                              int
            resolveFatherCalled               bool
            loadSuperClassCalled              bool
            resolveInterfacesCalled           bool
@@ -18,28 +18,28 @@ public class Class {
     public notImportedYet bool   // not imported
     public name           string // binary name
     // public shortName                         string // short name
-    public pos                Pos                         
+    public pos                Pos
     public finalPos           Pos                          // final pos
     public isJava             bool                         //class imported from CLASSPATH
     public block              Block = new Block()
-    public accessFlags        char                        
-    public fields             map{string -> ClassField}   
+    public accessFlags        char
+    public fields             map{string -> ClassField}
     public methods            map{string -> []ClassMethod}
-    public superClassName     NameWithPos                 
-    public superClass         Class                       
-    public interfaceNames     []NameWithPos               
-    public interfaces         []Class                     
-    public loadFromOutSide    bool                        
-    public staticBlocks       []Block                     
-    public comment            string                      
+    public superClassName     NameWithPos
+    public superClass         Class
+    public interfaceNames     []NameWithPos
+    public interfaces         []Class
+    public loadFromOutSide    bool
+    public staticBlocks       []Block
+    public comment            string
            closure            Closure = new Closure()
-    public locateDefinition   bool                        
-    public findUsage          bool                        
-           findUsageInstances []Usage                     
-           hierarchyOk        bool                        
+    public locateDefinition   bool
+    public findUsage          bool
+           findUsageInstances []Usage
+           hierarchyOk        bool
 
-    public startLine                  int 
-    public endLine                    int 
+    public startLine                  int
+    public endLine                    int
     public suggestExtendsOrImplements bool
 
     public fmts []Object // use for format 
@@ -1536,6 +1536,7 @@ public class Class {
     }
 
     fn reduceFindUsageInstances(block Block) {
+        this.used--
         if this.findUsage == false {
             return
         }

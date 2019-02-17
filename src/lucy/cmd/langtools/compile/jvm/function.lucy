@@ -165,10 +165,10 @@ class BuildFunction {
         if LucyMethodSignature.need(f.Type) {
             d := new cg.AttributeLucyMethodDescriptor()
             d.descriptor = LucyMethodSignature.encode(f.Type)
-            method.AttributeLucyMethodDescriptor = d
+            method.attributeLucyMethodDescriptor = d
         }
         if f.haveDefaultValue {
-            method.AttributeDefaultParameters = DefaultValueParse.encode(c , f)
+            method.attributeDefaultParameters = DefaultValueParse.encode(c , f)
         }
         if method.isConstruction == false {
             if t := this.buildFunctionParameterAndReturnList(c , method.code , f , context , state) ; t > method.code.maxStack {
@@ -177,15 +177,15 @@ class BuildFunction {
         }
         {
 
-            method.AttributeMethodParameters = new cg.AttributeMethodParameters()
+            method.attributeMethodParameters = new cg.AttributeMethodParameters()
             for _ , v := range f.Type.parameterList {
                 p := new cg.MethodParameter()
                 p.name = v.name
                 p.accessFlags = cg.MethodParameterTypeAccMandated
-                if method.AttributeMethodParameters.parameters == null {
-                    method.AttributeMethodParameters.parameters = [p]
+                if method.attributeMethodParameters.parameters == null {
+                    method.attributeMethodParameters.parameters = [p]
                 } else {
-                    method.AttributeMethodParameters.parameters.append(p)
+                    method.attributeMethodParameters.parameters.append(p)
                 }
 
             }
@@ -193,15 +193,15 @@ class BuildFunction {
         }
 
         if f.Type.voidReturn() == false {
-            method.AttributeLucyReturnListNames = new cg.AttributeMethodParameters()
+            method.attributeLucyReturnListNames = new cg.AttributeMethodParameters()
             for _ , v := range f.Type.returnList {
                 p := new cg.MethodParameter()
                 p.name = v.name
                 p.accessFlags = cg.MethodParameterTypeAccMandated
-                if method.AttributeLucyReturnListNames == null {
-                    method.AttributeLucyReturnListNames = new cg.AttributeMethodParameters()
+                if method.attributeLucyReturnListNames == null {
+                    method.attributeLucyReturnListNames = new cg.AttributeMethodParameters()
                 }
-                method.AttributeLucyReturnListNames.append(p)
+                method.attributeLucyReturnListNames.append(p)
             }
 
         }

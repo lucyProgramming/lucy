@@ -13,7 +13,12 @@ fn divisionByZeroErr(pos Pos) -> (err error) {
     return new error(sprintf("%s division by zero" , pos.errMsgPrefix()))
 }
 
-fn checkExpressions(block Block , es []Expression , errs []error , singleValueContext bool) -> (valueTypes []Type) {
+fn checkExpressions(
+    block Block,
+    es []Expression,
+    errs []error,
+    singleValueContext bool) -> (
+    valueTypes []Type) {
     valueTypes = []Type{}
     for _ , v := range es {
         if v == null {
@@ -26,7 +31,7 @@ fn checkExpressions(block Block , es []Expression , errs []error , singleValueCo
         } else {
             if len(ts) > 1 && singleValueContext {
                 errs.append(new error(sprintf("%s multi value in single value context",
-                    errMsgPrefix(v.pos))))
+                            errMsgPrefix(v.pos))))
             }
             for _ , t := range ts {
                 if t == null {
@@ -39,12 +44,10 @@ fn checkExpressions(block Block , es []Expression , errs []error , singleValueCo
 
             valueTypes.appendAll(ts)
         }
-
     }
-
 }
 
-fn getExtraExpressionPos(args []Expression , n int) -> (pos Pos) {
+fn getExtraExpressionPos(args []Expression , n int) -> (extra Pos) {
     i := 0
     for _ , a := range args {
         if a.haveMultiValue() {
@@ -52,20 +55,15 @@ fn getExtraExpressionPos(args []Expression , n int) -> (pos Pos) {
         } else {
             i++
         }
-
-        if i >= n {
+        if i >= n && a.pos != null {
             return a.pos
         }
     }
-
-    return null
 }
 
-fn mkVoidType(pos Pos) -> (voidType Type) {
-    result := new Type()
-    result.Type = VariableTypeVoid // means no return;
-    result.pos = pos
-    return result
+fn mkVoidType(pos Pos) -> (voidType Type = new Type()) {
+    voidType.Type = VariableTypeVoid
+    voidType.pos = pos
 }
 
 /*
@@ -80,7 +78,6 @@ fn shouldAccessFromImports(block Block , name string , from Pos , alreadyHave Po
         } else {
             return null , false
         }
-
     }
     i = block.inheritedAttribute.p.getImport(from.filename , name)
     if i == null {
@@ -167,7 +164,7 @@ fn checkConst(block Block , c Constant , errs []error) -> (err error) {
     }
     if is == false {
         err = new error(sprintf("%s const named '%s' is not defined by const value",
-            c.pos.errMsgPrefix() , c.name))
+                c.pos.errMsgPrefix() , c.name))
         return err
     }
     t , _ := c.defaultValueExpression.checkSingleValueContextExpression(block)
@@ -180,7 +177,7 @@ fn checkConst(block Block , c Constant , errs []error) -> (err error) {
 
             } else {
                 err = new error(sprintf("%s cannot use '%s' as '%s' for initialization value",
-                    c.pos.errMsgPrefix() , c.Type.typeString() , t.typeString()))
+                        c.pos.errMsgPrefix() , c.Type.typeString() , t.typeString()))
                 return err
             }
 
@@ -196,25 +193,25 @@ fn checkConst(block Block , c Constant , errs []error) -> (err error) {
             c.longValue = c.defaultValueExpression.longValue
             if (c.longValue >> 8) != 0 {
                 err = new error(sprintf("%s constant %d exceeds max byte",
-                    c.defaultValueExpression.pos.errMsgPrefix() , c.longValue))
+                        c.defaultValueExpression.pos.errMsgPrefix() , c.longValue))
             }
         case VariableTypeShort:
             c.longValue = c.defaultValueExpression.longValue
             if (c.longValue >> 16) != 0 {
                 err = new error(sprintf("%s constant %d exceeds max short",
-                    c.defaultValueExpression.pos.errMsgPrefix() , c.longValue))
+                        c.defaultValueExpression.pos.errMsgPrefix() , c.longValue))
             }
         case VariableTypeChar:
             c.longValue = c.defaultValueExpression.longValue
             if (c.longValue >> 16) != 0 {
                 err = new error(sprintf("%s constant %d exceeds max char",
-                    c.defaultValueExpression.pos.errMsgPrefix() , c.longValue))
+                        c.defaultValueExpression.pos.errMsgPrefix() , c.longValue))
             }
         case VariableTypeInt:
             c.longValue = c.defaultValueExpression.longValue
             if (c.longValue >> 32) != 0 {
                 err = new error(sprintf("%s constant %d exceeds max int",
-                    c.defaultValueExpression.pos.errMsgPrefix() , c.longValue))
+                        c.defaultValueExpression.pos.errMsgPrefix() , c.longValue))
             }
         case VariableTypeLong:
             c.longValue = c.defaultValueExpression.longValue
@@ -278,80 +275,80 @@ fn correctLastUsageType(t string , usage []Usage) -> (u Usage) {
 fn searchRightValueForAutoCompletionItems(pos Pos , block Block) -> (items []AutoCompletionItem = []AutoCompletionItem{}) {
     names := new map{string -> bool}()
     block.walk(fn (b Block) {
-        for name , v := range b.variables {
-            if names.keyExist(name) {
-                continue
-            }
-            item := new AutoCompletionItem()
-            item.Type = "variable"
-            item.name = name
-            items.append(item)
-            names[name] = true
-        }
-
-        for name , v := range b.constants {
-            if names.keyExist(name) {
-                continue
-            }
-            item := new AutoCompletionItem()
-            item.Type = "constant"
-            item.name = name
-            items.append(item)
-            names[name] = true
-        }
-
-        for name , v := range b.functions {
-            if names.keyExist(name) {
-                continue
-            }
-            if v.isGlobalMain() {
-                continue
-            }
-            item := new AutoCompletionItem()
-            item.Type = "function"
-            item.name = name
-            item.functionDefinition = v.readableMsg(true)
-            item.suggest = v.mkSuggestForAutoCompletion()
-            item.description = v.readableMsg(true)
-            items.append(item)
-            names[name] = true
-        }
-
-        for name , v := range b.enumNames {
-            if names.keyExist(name) {
-                continue
-            }
-            item := new AutoCompletionItem()
-            item.Type = "enumItem"
-            item.name = name
-            items.append(item)
-            names[name] = true
-        }
-
-        for name , v := range b.classes {
-            if names.keyExist(name) {
-                continue
-            }
-            item := new AutoCompletionItem()
-            item.Type = "class"
-            item.name = name
-            items.append(item)
-            names[name] = true
-        }
-
-        if b.isPackageBlock && (b.Package.name != "lucy/lang" || b.Package == block.inheritedAttribute.p) {
-            s := block.inheritedAttribute.p.getSourceFile(pos.filename)
-            if s != null {
-                for name , _ := range s.imports {
-                    item := new AutoCompletionItem()
-                    item.Type = "import"
-                    item.name = name
-                    items.append(item)
+            for name , v := range b.variables {
+                if names.keyExist(name) {
+                    continue
                 }
-
+                item := new AutoCompletionItem()
+                item.Type = "variable"
+                item.name = name
+                items.append(item)
+                names[name] = true
             }
-        }
-    })
+
+            for name , v := range b.constants {
+                if names.keyExist(name) {
+                    continue
+                }
+                item := new AutoCompletionItem()
+                item.Type = "constant"
+                item.name = name
+                items.append(item)
+                names[name] = true
+            }
+
+            for name , v := range b.functions {
+                if names.keyExist(name) {
+                    continue
+                }
+                if v.isGlobalMain() {
+                    continue
+                }
+                item := new AutoCompletionItem()
+                item.Type = "function"
+                item.name = name
+                item.functionDefinition = v.readableMsg(true)
+                item.suggest = v.mkSuggestForAutoCompletion()
+                item.description = v.readableMsg(true)
+                items.append(item)
+                names[name] = true
+            }
+
+            for name , v := range b.enumNames {
+                if names.keyExist(name) {
+                    continue
+                }
+                item := new AutoCompletionItem()
+                item.Type = "enumItem"
+                item.name = name
+                items.append(item)
+                names[name] = true
+            }
+
+            for name , v := range b.classes {
+                if names.keyExist(name) {
+                    continue
+                }
+                item := new AutoCompletionItem()
+                item.Type = "class"
+                item.name = name
+                items.append(item)
+                names[name] = true
+            }
+
+            if b.isPackageBlock && (b.Package.name != "lucy/lang" || b.Package == block.inheritedAttribute.p) {
+                s := block.inheritedAttribute.p.getSourceFile(pos.filename)
+                if s != null {
+                    for name , _ := range s.imports {
+                        item := new AutoCompletionItem()
+                        item.Type = "import"
+                        item.name = name
+                        items.append(item)
+                    }
+
+                }
+            }
+        })
     items.appendAll(AutoCompletionItem.getKeywordAutoCompletionItems())
     items.appendAll(AutoCompletionItem.getBuildFunctionAutoCompletionItems())
 }
@@ -360,115 +357,115 @@ fn searchLableForAutoCompletionItems(block Block) -> (items []AutoCompletionItem
     names := new map{string -> bool}()
     isFunctionBlock := false
     block.walk(fn (b Block) {
-        if isFunctionBlock == false {
-            for name , v := range b.labels {
-                if names.keyExist(name) {
-                    continue
+            if isFunctionBlock == false {
+                for name , v := range b.labels {
+                    if names.keyExist(name) {
+                        continue
+                    }
+                    item := new AutoCompletionItem()
+                    item.Type = "label"
+                    item.name = name
+                    items.append(item)
+                    names[name] = true
                 }
-                item := new AutoCompletionItem()
-                item.Type = "label"
-                item.name = name
-                items.append(item)
-                names[name] = true
-            }
 
-        }
-        isFunctionBlock = b.isFunctionBlock || isFunctionBlock
-        // I cannot stop the process
-    })
+            }
+            isFunctionBlock = b.isFunctionBlock || isFunctionBlock
+            // I cannot stop the process
+        })
 }
 
 fn searchTypeForAutoCompletionItems(pos Pos , block Block) -> (items []AutoCompletionItem = []AutoCompletionItem{}) {
     names := new map{string -> bool}()
     block.walk(fn (b Block) {
-        for name , v := range b.enums {
-            if names.keyExist(name) {
-                continue
-            }
-            item := new AutoCompletionItem()
-            item.Type = "enum"
-            item.name = name
-            items.append(item)
-            names[name] = true
-        }
-
-        for name , v := range b.classes {
-            if names.keyExist(name) {
-                continue
-            }
-            item := new AutoCompletionItem()
-            item.Type = "class"
-            item.name = name
-            items.append(item)
-            names[name] = true
-        }
-
-        for name , v := range b.typeAliases {
-            if names.keyExist(name) {
-                continue
-            }
-            item := new AutoCompletionItem()
-            item.Type = "typealias"
-            item.name = name
-            items.append(item)
-            names[name] = true
-        }
-
-        if b.isPackageBlock && (b.Package.name != "lucy/lang" || b.Package == block.inheritedAttribute.p) {
-            s := block.inheritedAttribute.p.getSourceFile(pos.filename)
-            if s != null {
-                for name , _ := range s.imports {
-                    item := new AutoCompletionItem()
-                    item.Type = "import"
-                    item.name = name
-                    items.append(item)
+            for name , v := range b.enums {
+                if names.keyExist(name) {
+                    continue
                 }
-
+                item := new AutoCompletionItem()
+                item.Type = "enum"
+                item.name = name
+                items.append(item)
+                names[name] = true
             }
-        }
-    })
+
+            for name , v := range b.classes {
+                if names.keyExist(name) {
+                    continue
+                }
+                item := new AutoCompletionItem()
+                item.Type = "class"
+                item.name = name
+                items.append(item)
+                names[name] = true
+            }
+
+            for name , v := range b.typeAliases {
+                if names.keyExist(name) {
+                    continue
+                }
+                item := new AutoCompletionItem()
+                item.Type = "typealias"
+                item.name = name
+                items.append(item)
+                names[name] = true
+            }
+
+            if b.isPackageBlock && (b.Package.name != "lucy/lang" || b.Package == block.inheritedAttribute.p) {
+                s := block.inheritedAttribute.p.getSourceFile(pos.filename)
+                if s != null {
+                    for name , _ := range s.imports {
+                        item := new AutoCompletionItem()
+                        item.Type = "import"
+                        item.name = name
+                        items.append(item)
+                    }
+
+                }
+            }
+        })
     items.appendAll(AutoCompletionItem.getTypeAutoCompletionItem())
 }
 
 fn searchLeftValueForAutoCompletionItems(block Block , pos Pos) -> (items []AutoCompletionItem = []AutoCompletionItem{}) {
     names := new map{string -> bool}()
     block.walk(fn (b Block) {
-        for name , v := range b.variables {
-            if names.keyExist(name) {
-                continue
-            }
-            item := new AutoCompletionItem()
-            item.Type = "variable"
-            item.name = name
-            items.append(item)
-            names[name] = true
-        }
-
-        // CLASS.FIELD = ""
-        for name , v := range b.classes {
-            if names.keyExist(name) {
-                continue
-            }
-            item := new AutoCompletionItem()
-            item.Type = "class"
-            item.name = name
-            items.append(item)
-            names[name] = true
-        }
-
-        if b.isPackageBlock && (b.Package.name != "lucy/lang" || b.Package == block.inheritedAttribute.p) {
-            s := block.inheritedAttribute.p.getSourceFile(pos.filename)
-            if s != null {
-                for name , _ := range s.imports {
-                    item := new AutoCompletionItem()
-                    item.Type = "import"
-                    item.name = name
-                    items.append(item)
+            for name , v := range b.variables {
+                if names.keyExist(name) {
+                    continue
                 }
-
+                item := new AutoCompletionItem()
+                item.Type = "variable"
+                item.name = name
+                items.append(item)
+                names[name] = true
             }
-        }
-    })
+
+            // CLASS.FIELD = ""
+            for name , v := range b.classes {
+                if names.keyExist(name) {
+                    continue
+                }
+                item := new AutoCompletionItem()
+                item.Type = "class"
+                item.name = name
+                items.append(item)
+                names[name] = true
+            }
+
+            if b.isPackageBlock && (b.Package.name != "lucy/lang" || b.Package == block.inheritedAttribute.p) {
+                s := block.inheritedAttribute.p.getSourceFile(pos.filename)
+                if s != null {
+                    for name , _ := range s.imports {
+                        item := new AutoCompletionItem()
+                        item.Type = "import"
+                        item.name = name
+                        items.append(item)
+                    }
+
+                }
+            }
+        })
 }
 
 fn getPos(x Object) -> (pos Pos) {
@@ -518,7 +515,6 @@ fn checkFormat(formatLiteral string , pos Pos , args []Type) -> (err error) {
     }
 
     defer {
-
         e := catch()
         if e != null {
             err = new error(sprintf("%s %s" , pos.errMsgPrefix() , e.getMessage()))

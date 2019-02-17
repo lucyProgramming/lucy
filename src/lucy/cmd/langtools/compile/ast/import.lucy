@@ -4,7 +4,7 @@ public class Import {
     public accessName         string 
     public Import             string  // full name
     public pos                Pos    
-    public used               bool   
+    public used               int   
     public alias              string 
     public aliasPos           Pos    
     public locateDefinition   bool   
@@ -13,7 +13,7 @@ public class Import {
     public findUsageInstances []Usage
 
     fn mkUsed(pos Pos) {
-        this.used = true
+        this.used++
         if this.findUsage == false {
             return
         }
@@ -39,14 +39,13 @@ public class Import {
     public fn mkAccessName() -> (err error) {
         if this.accessName != null && this.accessName != "" {
             this.alias = this.accessName
-            return null
+            return
         }
         if false == packageNameIsValid(this.Import) {
             return new error(sprintf("%s '%s' is not a valid name",
                 this.pos.errMsgPrefix() , this.Import))
         }
         this.accessName = common.getBaseName(this.Import)
-        return null
     }
 
 }

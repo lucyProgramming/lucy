@@ -1,7 +1,7 @@
 import "lucy/jvm/cg"
 
 public class StatementLabel {
-    public used                bool     
+    public used                int     
     public codeOffsetGenerated bool     
     public codeOffset          int      
     public block               Block    

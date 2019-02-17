@@ -4,15 +4,15 @@ import "java/io"
 import "lucy/encoding/json"
 import "lucy/os"
 import "java/lang/Runtime"
-
+import "lucy/io" as lucyIo
 
 class Pack {
-    jarFlags               []string           
-    packageName            string             
-    lucyPath               []string           
-    installDir             string             
+    jarFlags               []string
+    packageName            string
+    lucyPath               []string
+    installDir             string
     packageClsssFileCopied map{string -> bool}
-    lucyRoot               string             
+    lucyRoot               string
 
     fn Pack(
         jarFlags []string,
@@ -51,6 +51,12 @@ class Pack {
         }
         args[args.size() - 1] = "./"
         p := Runtime.getRuntime().exec(args , null , new io.File(this.installDir))
+        Run.runFn(fn () {
+                lucyIo.ioCopy(os.stderr , p.getErrorStream())
+            })
+        Run.runFn(fn () {
+                lucyIo.ioCopy(os.stdout , p.getInputStream())
+            })
         code := p.waitFor()
         if code != 0 {
             panic(sprintf("exec jar exception , code:%d" , code))
@@ -124,5 +130,3 @@ class Pack {
         new json.Decoder(meta , bs).decode()
     }
 }
-
-

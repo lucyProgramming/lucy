@@ -290,11 +290,11 @@ public class Class {
                 field.attributes.append(f.attributeConstantValue.toAttributeInfo(this))
             }
             field.descriptorIndex = this.insertUtf8Const(f.descriptor)
-            if f.AttributeLucyFieldDescriptor != null {
-                field.attributes.append(f.AttributeLucyFieldDescriptor.toAttributeInfo(this))
+            if f.attributeLucyFieldDescriptor != null {
+                field.attributes.append(f.attributeLucyFieldDescriptor.toAttributeInfo(this))
             }
-            if f.AttributeLucyConst != null {
-                field.attributes.append(f.AttributeLucyConst.toAttributeInfo(this))
+            if f.attributeLucyConst != null {
+                field.attributes.append(f.attributeLucyConst.toAttributeInfo(this))
             }
             this.fields.append(field)
         }
@@ -304,25 +304,25 @@ public class Class {
                 info := new MethodInfo()
                 info.accessFlags = m.accessFlags
                 info.nameIndex = this.insertUtf8Const(m.name)
-                info.descriptorIndex = this.insertUtf8Const(m.Descriptor)
+                info.descriptorIndex = this.insertUtf8Const(m.descriptor)
                 info.attributes = []AttributeInfo{}
                 if m.code != null {
                     info.attributes.append(m.code.toAttributeInfo(this))
                 }
-                if m.AttributeLucyMethodDescriptor != null {
-                    info.attributes.append(m.AttributeLucyMethodDescriptor.toAttributeInfo(this))
+                if m.attributeLucyMethodDescriptor != null {
+                    info.attributes.append(m.attributeLucyMethodDescriptor.toAttributeInfo(this))
                 }
-                if m.AttributeDefaultParameters != null {
-                    info.attributes.append(m.AttributeDefaultParameters.toAttributeInfo(this))
+                if m.attributeDefaultParameters != null {
+                    info.attributes.append(m.attributeDefaultParameters.toAttributeInfo(this))
                 }
-                if m.AttributeMethodParameters != null {
-                    t := m.AttributeMethodParameters.toAttributeInfo(this)
+                if m.attributeMethodParameters != null {
+                    t := m.attributeMethodParameters.toAttributeInfo(this)
                     if t != null {
                         info.attributes.append(t)
                     }
                 }
-                if m.AttributeLucyReturnListNames != null {
-                    t := m.AttributeLucyReturnListNames.toAttributeInfo(this , AttributeNameLucyReturnListNames)
+                if m.attributeLucyReturnListNames != null {
+                    t := m.attributeLucyReturnListNames.toAttributeInfo(this , AttributeNameLucyReturnListNames)
                     if t != null {
                         info.attributes.append(t)
                     }

@@ -67,7 +67,6 @@ public class BuildPackage {
             } else {
                 autoName = sprintf("%s$%d" , prefix , i)
             }
-
             if _ , exists := this.Package.block.nameExists(autoName , null) ; exists {
                 continue
             }
@@ -79,7 +78,6 @@ public class BuildPackage {
             }
 
         }
-
         panic("new class name overflow") // impossible
     }
 
@@ -158,7 +156,7 @@ public class BuildPackage {
                     f.attributeConstantValue.index = this.mainClass.Class.insertStringConst(v.stringValue)
             }
 
-            f.AttributeLucyConst = new cg.AttributeLucyConst()
+            f.attributeLucyConst = new cg.AttributeLucyConst()
             f.descriptor = Descriptor.typeDescriptor(v.Type)
             this.mainClass.fields[k] = f
         }
@@ -190,10 +188,10 @@ public class BuildPackage {
             }
             f.accessFlags |= cg.AccFieldVolatile
             if LucyFieldSignature.need(v.Type) {
-                f.AttributeLucyFieldDescriptor = new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.encode(v.Type) , char(0))
+                f.attributeLucyFieldDescriptor = new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.encode(v.Type) , char(0))
                 if v.Type.Type == ast.VariableTypeFunction {
                     if v.Type.functionType.vArgs != null {
-                        f.AttributeLucyFieldDescriptor.methodAccessFlag |=
+                        f.attributeLucyFieldDescriptor.methodAccessFlag |=
                             cg.AccMethodVarargs
                     }
                 }
@@ -219,7 +217,7 @@ public class BuildPackage {
             method.accessFlags |= cg.AccMethodPrivate
             method.name = this.mainClass.newMethodName("block")
             method.Class = this.mainClass
-            method.Descriptor = "()V"
+            method.descriptor = "()V"
             method.code = new cg.AttributeCode()
             this.BuildFunction.buildFunction(this.mainClass , null , method , v)
             this.mainClass.appendMethod(method)
@@ -229,7 +227,7 @@ public class BuildPackage {
         method := new cg.MethodHighLevel()
         method.accessFlags |= cg.AccMethodStatic
         method.name = "<clinit>"
-        method.Descriptor = "()V"
+        method.descriptor = "()V"
         codes := new []byte(65536)
         codeLength := int(0)
         method.code = new cg.AttributeCode()
@@ -331,7 +329,7 @@ public class BuildPackage {
             f.descriptor = Descriptor.typeDescriptor(v.Type)
             if LucyFieldSignature.need(v.Type) {
                 t := new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.encode(v.Type) , char(0))
-                f.AttributeLucyFieldDescriptor = t
+                f.attributeLucyFieldDescriptor = t
             }
             c.fields[v.name] = f
         }
@@ -348,11 +346,11 @@ public class BuildPackage {
                 method.accessFlags |= cg.AccMethodSynthetic
             }
             if LucyMethodSignature.need(vv.Function.Type) {
-                method.AttributeLucyMethodDescriptor = new cg.AttributeLucyMethodDescriptor()
-                method.AttributeLucyMethodDescriptor.descriptor = LucyMethodSignature.encode(vv.Function.Type)
+                method.attributeLucyMethodDescriptor = new cg.AttributeLucyMethodDescriptor()
+                method.attributeLucyMethodDescriptor.descriptor = LucyMethodSignature.encode(vv.Function.Type)
             }
             method.Class = c
-            method.Descriptor = Descriptor.methodDescriptor(vv.Function.Type)
+            method.descriptor = Descriptor.methodDescriptor(vv.Function.Type)
             method.isConstruction = name == specialMethodInit
             if vv.isAbstract() == false {
                 method.code = new cg.AttributeCode()
@@ -390,9 +388,9 @@ public class BuildPackage {
             method.Class = c
             method.name = f.name
             if f.name == ast.MainFunctionName {
-                method.Descriptor = "([Ljava/lang/String;)V"
+                method.descriptor = "([Ljava/lang/String;)V"
             } else {
-                method.Descriptor = Descriptor.methodDescriptor(f.Type)
+                method.descriptor = Descriptor.methodDescriptor(f.Type)
             }
 
             method.accessFlags = 0
@@ -401,8 +399,8 @@ public class BuildPackage {
                 method.accessFlags |= cg.AccMethodPublic
             }
             if LucyMethodSignature.need(f.Type) {
-                method.AttributeLucyMethodDescriptor = new cg.AttributeLucyMethodDescriptor()
-                method.AttributeLucyMethodDescriptor.descriptor = LucyMethodSignature.encode(f.Type)
+                method.attributeLucyMethodDescriptor = new cg.AttributeLucyMethodDescriptor()
+                method.attributeLucyMethodDescriptor.descriptor = LucyMethodSignature.encode(f.Type)
             }
             if f.Type.vArgs != null {
                 method.accessFlags |= cg.AccMethodVarargs
@@ -446,7 +444,7 @@ public class BuildPackage {
     fn mkClassDefaultConstruction(c cg.ClassHighLevel) {
         method := new cg.MethodHighLevel()
         method.name = specialMethodInit
-        method.Descriptor = "()V"
+        method.descriptor = "()V"
         method.accessFlags |= cg.AccMethodPublic
         method.code = new cg.AttributeCode()
         method.code.codes = new []byte(5)

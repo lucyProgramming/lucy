@@ -1,5 +1,5 @@
 class ImportStack {
-    Stacks []PackageCompiled             
+    Stacks []PackageCompiled
     M      map{string -> PackageCompiled}
 
     fn fromLast(last ImportStack) -> (self ImportStack) {

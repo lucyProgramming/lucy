@@ -313,7 +313,7 @@ class ExpressionCheckFunctionCall {
                 errs.appendAll(es)
                 return null
             }
-            cloneFunction.used = true
+            cloneFunction.used++
             cloneFunction.templateFunction = null
             call.templateFunctionCallPair.Function = cloneFunction
             cloneFunction.parameterTypes = parameterTypes

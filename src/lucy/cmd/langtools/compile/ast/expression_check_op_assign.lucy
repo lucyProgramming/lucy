@@ -95,14 +95,15 @@ class ExpressionCheckOpAssign {
                 return
             }
         }
-        errs.append(new error(sprintf("%s cannot apply algorithm '%s' on '%s' and '%s'",
+        errs.append(
+            new error(
+                sprintf("%s cannot apply algorithm '%s' on '%s' and '%s'",
                     e.pos.errMsgPrefix(),
                     e.op,
                     left.typeString(),
                     right.typeString())))
 
     }
-
 }
 
 

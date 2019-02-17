@@ -5,8 +5,7 @@ public class TypeAlias {
     public pos                Pos    
     public comment            string 
     public locateDefinition   bool   
-    public findUsage          bool   
-    // public rename             bool   
+    public findUsage          bool      
            findUsageInstances []Usage
            used               bool   
     public inlineComment      string 
@@ -19,6 +18,7 @@ public class TypeAlias {
         tt.alias = null
         s += sprintf("typealias %s@%s" , this.name , tt.typeString())
     }
+    
     fn reduceFindUsageInstances(block Block) {
         if this.findUsage == false {
             return

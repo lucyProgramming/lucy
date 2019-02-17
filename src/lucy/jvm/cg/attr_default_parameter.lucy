@@ -17,7 +17,7 @@ public class AttributeDefaultParameters {
 	
 	fn toAttributeInfo(c Class) -> (info AttributeInfo) {
 		if  len(this.constants) == 0 {
-			return null
+			return
 		}
 		info = new AttributeInfo()
 		info.nameIndex = c.insertUtf8Const(AttributeNameLucyDefaultParameters)

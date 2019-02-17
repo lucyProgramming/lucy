@@ -2,7 +2,7 @@
 class SourceFile {
     imports            map{string -> Import} // accessName -> Import
     importsByResources map{string -> Import} // resourceName -> Import
-    filename           string               
+    filename           string
     /*
 		rename will modify this file 
 	*/
@@ -29,11 +29,11 @@ class SourceFile {
         }
         if this.imports.keyExist(i.accessName) {
             return new error(sprintf("%s '%s' reimported",
-                i.pos.errMsgPrefix() , i.Import))
+                        i.pos.errMsgPrefix() , i.Import))
         }
         if this.importsByResources.keyExist(i.Import) {
             return new error(sprintf("%s '%s' reimported",
-                i.pos.errMsgPrefix() , i.accessName))
+                        i.pos.errMsgPrefix() , i.accessName))
         }
         this.importsByResources[i.Import] = i
         this.imports[i.accessName] = i

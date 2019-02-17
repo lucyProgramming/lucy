@@ -1,7 +1,7 @@
 import "lucy/os/flag"
 
 class Flags {
-    parser      flag.FlagParser  
+    parser      flag.FlagParser
     packageName flag.StringOption
     installDir  flag.StringOption
     fn Flags() {
@@ -21,10 +21,12 @@ class Flags {
         packageName = this.packageName.getValue()
         installDir = this.installDir.getValue()
         if packageName == "" {
-            panic("-package-name is null string")
+            print("-package-name is null string")
+            printUsageAndExit(1)
         }
         if installDir == "" {
-            panic("-install-dir is null string")
+            print("-install-dir is null string")
+            printUsageAndExit(1)
         }
     }
 }

@@ -25,7 +25,7 @@ public class Function {
     public isGlobal                         bool                  
     public isBuildIn                        bool                  
     public loadedFromCorePackage            bool                  
-    public used                             bool                  
+    public used                             int                  
     public templateClonedFunction           bool                  
     public comment                          string                
     public isClosureFunction                bool                  
@@ -167,7 +167,7 @@ public class Function {
 
     public fn isGlobalMain() -> (is bool) {
         return this.isGlobal &&
-            this.name == MainFunctionName
+                this.name == MainFunctionName
     }
 
     fn checkParametersAndReturns(
@@ -215,12 +215,12 @@ public class Function {
 
             if v.Type.isVariableArgs && v.defaultValueExpression != null {
                 errs.append(new error(sprintf("%s vargs cannot have default value",
-                    errMsgPrefix(v.Type.pos))))
+                            errMsgPrefix(v.Type.pos))))
             }
             if v.Type.isVariableArgs {
                 if k != len(this.Type.parameterList) - 1 {
                     errs.append(new error(sprintf("%s only last parameter can be use as vargs",
-                        errMsgPrefix(v.Type.pos))))
+                                errMsgPrefix(v.Type.pos))))
                 } else {
                     this.Type.parameterList = this.Type.parameterList[0 : k]
                     this.Type.vArgs = v
@@ -233,7 +233,7 @@ public class Function {
             }
             if v.defaultValueExpression == null && this.haveDefaultValue {
                 errs.append(new error(sprintf("%s missing default value for '%s'",
-                    errMsgPrefix(v.defaultValueExpression.pos) , v.name)))
+                            errMsgPrefix(v.defaultValueExpression.pos) , v.name)))
             }
             if v.defaultValueExpression != null {
                 if this.haveDefaultValue == false {
@@ -245,18 +245,18 @@ public class Function {
                 if t != null {
                     if v.Type.assignAble(this.block , errs , t) == false {
                         errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-                            errMsgPrefix(v.defaultValueExpression.pos) , t.typeString() , v.Type.typeString())))
+                                    errMsgPrefix(v.defaultValueExpression.pos) , t.typeString() , v.Type.typeString())))
                         continue
                     }
                 }
                 if v.defaultValueExpression.isLiteral() == false {
                     errs.append(new error(sprintf("%s default value must be literal",
-                        errMsgPrefix(v.defaultValueExpression.pos))))
+                                errMsgPrefix(v.defaultValueExpression.pos))))
                     continue
                 }
                 if v.defaultValueExpression.Type == ExpressionTypeNull {
                     errs.append(new error(sprintf("%s cannot use 'null' as default value",
-                        errMsgPrefix(v.defaultValueExpression.pos))))
+                                errMsgPrefix(v.defaultValueExpression.pos))))
                 }
             }
         }
@@ -318,7 +318,7 @@ public class Function {
                 }
                 if t != null && v.Type.assignAble(this.block , errs , t) == false {
                     err = new error(sprintf("%s cannot assign '%s' to '%s'" , errMsgPrefix(v.defaultValueExpression.pos),
-                        t.typeString() , v.Type.typeString()))
+                            t.typeString() , v.Type.typeString()))
                     errs.append(err)
                 }
             }
@@ -345,7 +345,7 @@ public class Function {
             }
             if t != null && v.Type.assignAble(this.block , errs , t) == false {
                 err := new error(sprintf("%s cannot assign '%s' to '%s'" , errMsgPrefix(v.defaultValueExpression.pos),
-                    t.typeString() , v.Type.typeString()))
+                        t.typeString() , v.Type.typeString()))
                 errs.append(err)
             }
         }
@@ -354,6 +354,7 @@ public class Function {
     }
 
     fn reduceFindUsageInstances(block Block) {
+        this.used--
         if this.findUsage == false {
             return
         }

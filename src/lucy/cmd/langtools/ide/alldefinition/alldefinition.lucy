@@ -5,9 +5,9 @@ import "lucy/cmd/langtools/common"
 
 class AllDefinition {
     lucyFiles   []ide.LucyFile
-    packageName string        
-    printErr    bool          
-    lucyPath    string        
+    packageName string
+    printErr    bool
+    lucyPath    string
 
     fn AllDefinition(
         lucyFiles []ide.LucyFile,

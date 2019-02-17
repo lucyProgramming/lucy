@@ -14,13 +14,13 @@ class ExpressionCheckBinary {
         if left != null {
             if err := left.rightValueValid() ; err != null {
                 errs.append(err)
-                return null
+                return 
             }
         }
         if right != null {
             if err := right.rightValueValid() ; err != null {
                 errs.append(err)
-                return null
+                return 
             }
         }
         // &&  ||

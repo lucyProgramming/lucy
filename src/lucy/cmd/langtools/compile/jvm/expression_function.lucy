@@ -43,7 +43,7 @@ class BuildExpressionFunction {
             }
             function.entrance = method
             method.Class = c
-            method.Descriptor = Descriptor.methodDescriptor(function.Type)
+            method.descriptor = Descriptor.methodDescriptor(function.Type)
             method.code = new cg.AttributeCode()
             this.bp.BuildFunction.buildFunction(c , null , method , function)
             c.appendMethod(method)
@@ -66,7 +66,7 @@ class BuildExpressionFunction {
         if function.Type.vArgs != null {
             method.accessFlags |= cg.AccMethodVarargs
         }
-        method.Descriptor = Descriptor.methodDescriptor(function.Type)
+        method.descriptor = Descriptor.methodDescriptor(function.Type)
         method.Class = closureClass
         function.entrance = method
         closureClass.appendMethod(method)
@@ -206,7 +206,7 @@ class BuildExpressionFunction {
             code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         code.codes[code.codeLength] = cg.OP_ldc_w
-        c.insertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(function.entrance.Descriptor),
+        c.insertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(function.entrance.descriptor),
             code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         code.codes[code.codeLength] = cg.OP_invokevirtual

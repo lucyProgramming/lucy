@@ -14,7 +14,7 @@ fn printUsage() {
     install                install directory and it's sub directories 
     run                    run a lucy package
     clean                  clean compiled files
-    pack                   package a "lucy package" use the "jar" command line
+    pack                   package a lucy package use the jar tool
     http                   the http service for lucy
     test                   test a package`
     print(msg)
@@ -54,5 +54,4 @@ fn main(args []string) {
             printUsage()
             os.exit(1)
     }
-
 }

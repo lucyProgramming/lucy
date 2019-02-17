@@ -351,7 +351,6 @@ class BlockParser extends ParserFather {
                     statementGoto.pos = pos
                     statementGoto.locateDefinition = this.parser.token.locateDefinition
                     statementGoto.findUsage = this.parser.token.findUsage
-                    statementGoto.rename = this.parser.token.rename
                     statementGoto.autoCompletion = this.parser.token.autoCompletion
                     statementGoto.labelName = this.parser.token.stringValue
                     g := new ast.Statement()

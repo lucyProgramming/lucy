@@ -225,10 +225,10 @@ public class FileLoader implements ast.loadImport {
 
     public fn loadAsJava(c cg.Class) -> (astClass ast.Class) {
         if c.isSynthetic() {
-            return null
+            return
         }
         if c.isInnerClass() {
-            return null
+            return
         }
         //name
         if t := cg.getAttributeByName(c.attributeGroupedByName , cg.AttributeNameSignature) ; t != null && len(t) > 0 {
@@ -294,10 +294,10 @@ public class FileLoader implements ast.loadImport {
 
     fn loadAsLucy(c cg.Class) -> (astClass ast.Class) {
         if c.isSynthetic() {
-            return null
+            return
         }
         if c.isInnerClass() {
-            return null
+            return
         }
         //name
         astClass = new ast.Class()
@@ -363,7 +363,7 @@ public class FileLoader implements ast.loadImport {
                 }
             }
             if f.Type.Type == ast.VariableTypeEnum {
-                loadEnumForVariableType(this , f.Type)
+                loadEnumVariableType(this , f.Type)
             }
             f.accessFlags = v.accessFlags
             astClass.fields[f.name] = f
@@ -520,7 +520,7 @@ public class FileLoader implements ast.loadImport {
                     }
                 }
                 if typ.Type == ast.VariableTypeEnum {
-                    loadEnumForVariableType(this , typ)
+                    loadEnumVariableType(this , typ)
                 }
             }
         }
@@ -568,7 +568,7 @@ public class FileLoader implements ast.loadImport {
             function.entrance = new cg.MethodHighLevel()
             function.entrance.name = function.name
             function.entrance.Class = maincClass
-            function.entrance.Descriptor = function.jvmDescriptor
+            function.entrance.descriptor = function.jvmDescriptor
             function.isGlobal = true
             pack.block.functions[name] = function
         }
@@ -589,7 +589,7 @@ public class FileLoader implements ast.loadImport {
             typ.alias = alias
             pack.block.typeAliases[name] = typ
             if typ.Type == ast.VariableTypeEnum {
-                loadEnumForVariableType(this , typ)
+                loadEnumVariableType(this , typ)
             }
         }
         for _ , v := range c.getAttributeByName(cg.AttributeNameLucyTemplateFunction) {

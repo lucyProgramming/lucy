@@ -1,142 +1,146 @@
 import "lucy/jvm/cg"
 import "java/lang/Object"
 
-
 public class EnumName {
-	public Enum    Enum
-	public name    string
-	public pos     Pos
-	public value   int // int is bigger enough
-	public comment string
-	public noNeed  Expression
-	public locateDefinition 	bool 
-	public findUsage  bool 
-	public rename 	bool 
-	public getHover  bool
-	used bool 
-    findUsageInstances []Usage 
-	public containsLf bool 
-	public inlineComment string 
-	
-	public fn mkDescription() -> (s string = ""){
-		if this.comment != null {
-			s += this.comment
-		}
-		s += sprintf("%s enumItem@%d\n" , this.name  , this.value) 
-	}
-	
-	fn reduceFindUsageInstances(block Block) {
+    public Enum               Enum
+    public name               string
+    public pos                Pos
+    public value              int        // int is bigger enough
+    public comment            string
+    public noNeed             Expression
+    public locateDefinition   bool
+    public findUsage          bool
+    public rename             bool
+    public getHover           bool
+           used               int
+           findUsageInstances []Usage
+    public containsLf         bool
+    public inlineComment      string
+
+    public fn mkDescription() -> (s string = "") {
+        if this.comment != null {
+            s += this.comment
+        }
+        s += sprintf("%s enumItem@%d\n" , this.name , this.value)
+    }
+
+    fn reduceFindUsageInstances(block Block) {
+		this.used--
         if this.findUsage == false {
-            return 
+            return
         }
         this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
-        block.inheritedAttribute.p.findUsage = this.findUsageInstances 
+        block.inheritedAttribute.p.findUsage = this.findUsageInstances
     }
 }
 
-public class Enum   {
-	public isGlobal        bool
-	public isBuildIn       bool
-	public accessFlags     char
-	public name            string
-	public pos             Pos
-	public enums           []EnumName
-	public Init            Expression //should be a int expression
-	public used            bool
-	public defaultValue    int
-	public loadFromOutSide bool
-	public firstValueIndex int
-	public comment         string
-	// public shortName      string 
-	public locateDefinition 	bool 
-	public findUsage  bool 
-	public rename 	bool 
-	public getHover  bool  
-    findUsageInstances []Usage 
 
-	public fmts []Object   // use for format 
-    
-    public fn appendFmt(f Object ){
+public class Enum {
+    public isGlobal        bool
+    public isBuildIn       bool
+    public accessFlags     char
+    public name            string
+    public pos             Pos
+    public enums           []EnumName
+    public Init            Expression //should be a int expression
+    public used            int
+    public defaultValue    int
+    public loadFromOutSide bool
+    public firstValueIndex int
+    public comment         string
+    // public shortName      string 
+    public locateDefinition   bool
+    public findUsage          bool
+    public rename             bool
+    public getHover           bool
+           findUsageInstances []Usage
+
+    public fmts []Object // use for format 
+
+    public fn appendFmt(f Object) {
         if this.fmts == null {
             this.fmts = [f]
-        }else {
+        } else {
             this.fmts.append(f)
         }
     }
-	
-	public fn isPublic() -> (is bool) {
-		return this.accessFlags&cg.AccClassPublic != 0
-	}
 
-	public fn mkDescription() ->(s string = "") {
-		if this.comment != null {
-			s += this.comment
-		}
-		if this.isPublic() {
-			s += "public "
-		}
-		s += this.name + "\n"
-	}
+    public fn isPublic() -> (is bool) {
+        return this.accessFlags & cg.AccClassPublic != 0
+    }
 
-	fn check(block Block) -> (errs []error = []error{}) {
-		if this.locateDefinition {
-			block.inheritedAttribute.p.setLocationDefinition(this)
-		}
-		if this.findUsage {
-			u := new Usage()
-			u.Type = "declaration"
-			u.pos = this.pos 
-			this.findUsageInstances = [u]
-			block.inheritedAttribute.p.findUsage = this.findUsageInstances
-			block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal
-		}
-		for _ , vv := range this.enums {
-			if vv.locateDefinition {
-				block.inheritedAttribute.p.setLocationDefinition(vv)
-			}
-			if vv.findUsage {
-				u := new Usage()
-				u.Type = "declaration"
-				u.pos = vv.pos 
-				vv.findUsageInstances = [u]
-				block.inheritedAttribute.p.findUsage = vv.findUsageInstances
-				block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal
-			}
-		}
-		var initV int = 0
-		if this.Init != null {
-			if is, err := this.Init.constantFold(errs); err != null {
-				errs.append(err)
-			} else {
-				if is == false {
-					err := new error(sprintf("%s enum type must inited by 'int' literal",
-						this.pos.errMsgPrefix()))
-					errs.append(err)
-				} else {
-					initV = int(this.Init.getLongValue())
-				}
-			}
-		}
-		this.defaultValue = initV
-		for k, v := range this.enums {
-			if v.noNeed != null {
-				errs.append(new error(sprintf("%s enum only expect 1 init value",
-					v.pos.errMsgPrefix())))
-			}
-			if k < this.firstValueIndex {
-				v.value = initV - int(this.firstValueIndex-k)
-			} else {
-				v.value = initV + int(k-this.firstValueIndex)
-			}
-		}
-		return errs
-	}
-	
-	fn reduceFindUsageInstances(block Block) {
+    public fn mkDescription() -> (s string = "") {
+        if this.comment != null {
+            s += this.comment
+        }
+        if this.isPublic() {
+            s += "public "
+        }
+        s += this.name + "\n"
+    }
+
+    fn check(block Block) -> (errs []error = []error{}) {
+        if this.locateDefinition {
+            block.inheritedAttribute.p.setLocationDefinition(this)
+        }
+        if this.findUsage {
+            u := new Usage()
+            u.Type = "declaration"
+            u.pos = this.pos
+            this.findUsageInstances = [u]
+            block.inheritedAttribute.p.findUsage = this.findUsageInstances
+            block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal
+        }
+        for _ , vv := range this.enums {
+            if vv.locateDefinition {
+                block.inheritedAttribute.p.setLocationDefinition(vv)
+            }
+            if vv.findUsage {
+                u := new Usage()
+                u.Type = "declaration"
+                u.pos = vv.pos
+                vv.findUsageInstances = [u]
+                block.inheritedAttribute.p.findUsage = vv.findUsageInstances
+                block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal
+            }
+        }
+        var initV int = 0
+        if this.Init != null {
+            if is , err := this.Init.constantFold(errs) ; err != null {
+                errs.append(err)
+            } else {
+                if is == false {
+                    err := new error(sprintf("%s enum type must inited by 'int' literal",
+                            this.pos.errMsgPrefix()))
+                    errs.append(err)
+                } else {
+                    initV = int(this.Init.getLongValue())
+                }
+            }
+        }
+        this.defaultValue = initV
+        for k , v := range this.enums {
+            if v.noNeed != null {
+                errs.append(new error(sprintf("%s enum only expect 1 init value",
+                            v.pos.errMsgPrefix())))
+            }
+            if k < this.firstValueIndex {
+                v.value = initV - int(this.firstValueIndex - k)
+            } else {
+                v.value = initV + int(k - this.firstValueIndex)
+            }
+        }
+        return errs
+    }
+
+    fn reduceFindUsageInstances(block Block) {
+		this.used--
         if this.findUsage == false {
-            return 
+            return
         }
         this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
-        block.inheritedAttribute.p.findUsage = this.findUsageInstances 
-    } 
+        block.inheritedAttribute.p.findUsage = this.findUsageInstances
+    }
 }
+
+

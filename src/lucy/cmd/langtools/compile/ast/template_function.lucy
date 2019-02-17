@@ -9,7 +9,8 @@ public class TemplateFunctionInstance {
 
 public class TemplateFunction {
     instances []TemplateFunctionInstance
-
+    public Class     cg.ClassHighLevel     
+        
     fn instanceExists(parameterTypes []Type) -> (instance TemplateFunctionInstance) {
         fn equal(instance TemplateFunctionInstance) -> (isEqual bool) {
             if len(instance.parameterTypes) != len(parameterTypes) {

@@ -24,11 +24,11 @@ enum JsonSyntaxTreeType {
 
 
 class JsonSyntaxTreeNode {
-    Type          JsonSyntaxTreeType               
-    boolValue     bool                             
+    Type          JsonSyntaxTreeType
+    boolValue     bool
     numberValue   Number                            // number value
-    stringValue   string                           
-    arrayElements []JsonSyntaxTreeNode             
+    stringValue   string
+    arrayElements []JsonSyntaxTreeNode
     object        map{string -> JsonSyntaxTreeNode}
     fn nodeType() -> (name string) {
         switch this.Type {
@@ -50,9 +50,9 @@ class JsonSyntaxTreeNode {
 
 
 public class Decoder {
-    x      Object            
-    bs     []byte            
-    offset int               
+    x      Object
+    bs     []byte
+    offset int
     tree   JsonSyntaxTreeNode
 
     public fn Decoder(x Object , bs []byte) {
@@ -360,7 +360,7 @@ public class Decoder {
         s = string(bs)
     }
 
-     // no check 
+    // no check 
     private static fn hexByte2Int(b byte) -> (v int) {
         switch b {
             case b >= 'a' && b <= 'f':
@@ -372,7 +372,7 @@ public class Decoder {
         }
     }
 
-     // 
+    // 
     private fn parseTrue() {
         this.offset++ // skip 't' 
         if this.bs[this.offset++] != 'r' ||

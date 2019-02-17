@@ -25,7 +25,6 @@ public fn readFile(filepath string) -> (bs byte[] , err error) {
     defer {
         stream.close()
     }
-
     stream.read(bs)
 }
 
@@ -36,7 +35,6 @@ public fn writeFile(filepath string , bs byte[] , start int = 0 , length int = -
             err = e
         }
     }
-
     if length == -1 {
         length = bs.size()
     }

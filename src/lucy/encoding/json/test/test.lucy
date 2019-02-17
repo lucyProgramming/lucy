@@ -1,22 +1,22 @@
-
 import "lucy/encoding/json"
 
 public class PackageMeta {
-	public compiledFrom FileMeta[]
-	public imports      string[]
-	public compileTime  long
-	public classes      string[]
-	public floatValue float 
+    public compiledFrom FileMeta[]
+    public imports      string[]
+    public compileTime  long
+    public classes      string[]
+    public floatValue   float
 }
 
 
 public class FileMeta {
-	public lastModify long
-	public name string 
+    public lastModify long
+    public name       string
 }
 
+
 fn main(args []string) {
-	var bs = []byte(`
+    var bs = []byte(`
 		{
 	"compiledFrom": [
 		{
@@ -42,25 +42,21 @@ fn main(args []string) {
 	"floatValue":1e2
 }
 	`)
-	m := new PackageMeta()
-	_,err := json.decode(bs , m  )
-	if err != null {
-		panic(err)
-	}
-	print(m.compileTime)
-	print(m.floatValue)
-	for v := range m.compiledFrom {
-		assert(v != null)
-		print(v.name , v.lastModify)
-	}
-	for v := range m.imports{
-		print(v)
-	}
-	for v := range m.classes{
-		print(v)
-	}
-
-
-	
-	
+    m := new PackageMeta()
+    _ , err := json.decode(bs , m)
+    if err != null {
+        panic(err)
+    }
+    print(m.compileTime)
+    print(m.floatValue)
+    for v := range m.compiledFrom {
+        assert(v != null)
+        print(v.name , v.lastModify)
+    }
+    for v := range m.imports {
+        print(v)
+    }
+    for v := range m.classes {
+        print(v)
+    }
 }

@@ -1,13 +1,12 @@
 public class StatementGoTo {
     public defers           []StatementDefer
-    public labelName        string          
-    public statementLabel   StatementLabel  
-    public pos              Pos             
-    public locateDefinition bool            
-    public findUsage        bool             // useless 
-    public rename           bool             // useless 
-    public inlineComment    string          
-    public autoCompletion   bool            
+    public labelName        string
+    public statementLabel   StatementLabel
+    public pos              Pos
+    public locateDefinition bool
+    public findUsage        bool
+    public inlineComment    string
+    public autoCompletion   bool
 
     fn checkStatementGoTo(block Block) -> (err error) {
         if this.autoCompletion {
@@ -17,7 +16,7 @@ public class StatementGoTo {
         label := block.searchLabel(this.labelName , this.pos)
         if label == null {
             return new error(sprintf("%s label named '%s' not found",
-                    this.pos.errMsgPrefix() , this.labelName))
+                        this.pos.errMsgPrefix() , this.labelName))
         }
         if this.locateDefinition {
             block.inheritedAttribute.p.setLocationDefinition(label)
@@ -35,13 +34,11 @@ public class StatementGoTo {
             bs.append(currentBlock)
             currentBlock = currentBlock.outer
         }
-
         for _ , b := range bs {
             if b.defers != null {
                 this.defers.appendAll(b.defers)
             }
         }
-
     }
 }
 

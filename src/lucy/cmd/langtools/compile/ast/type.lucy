@@ -4,25 +4,24 @@ public class Type {
     public Type                    VariableTypeKind
     public isBuildIn               bool             // build in type alias
     public isVariableArgs          bool             // int ...
-    public resolved                bool            
-    public pos                     Pos             
-    public name                    string          
-    public array                   Type            
-    public Class                   Class           
-    public Enum                    Enum            
+    public resolved                bool
+    public pos                     Pos
+    public name                    string
+    public array                   Type
+    public Class                   Class
+    public Enum                    Enum
     public enumName                EnumName         // indicate a const
-    public Function                Function        
-    public functionType            FunctionType    
-    public Map                     Map             
-    public Package                 Package         
-    public alias                   TypeAlias       
-    public locateDefinition        bool            
-    public locatePackageDefinition bool            
-    public packagePos              Pos             
-    public findUsage               bool            
-    // public rename                  bool            
-    public getHover       bool
-    public autoCompletion bool
+    public Function                Function
+    public functionType            FunctionType
+    public Map                     Map
+    public Package                 Package
+    public alias                   TypeAlias
+    public locateDefinition        bool
+    public locatePackageDefinition bool
+    public packagePos              Pos
+    public findUsage               bool
+    public getHover                bool
+    public autoCompletion          bool
     /*
 		a // this is a inline comment
 	*/

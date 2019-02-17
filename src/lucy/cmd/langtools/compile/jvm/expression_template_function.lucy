@@ -18,10 +18,23 @@ class BuildTemplateFunctionCall {
         context Context,
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionFunctionCall)
+        if call.Function.templateFunction.Class == null {
+            // new a class 
+            className := this.bp.newClassName(call.Function.name)
+            templateFunctionClass := new cg.ClassHighLevel(this.bp.majorVersion , this.bp.minorVersion)
+            templateFunctionClass.accessFlags |= cg.AccClassSynthetic
+            templateFunctionClass.name = className
+            call.Function.templateFunction.Class = templateFunctionClass
+            call.Function.templateFunction.Class.superClass = ast.JavaRootClass
+            this.bp.mkClassDefaultConstruction(templateFunctionClass) 
+            this.bp.putClass(templateFunctionClass)
+            templateFunctionClass.insertSourceFile(call.Function.pos.filename)
+        }
         if call.templateFunctionCallPair.entrance == null {
             method := new cg.MethodHighLevel()
-            method.Class = c
-            method.name = c.newMethodName(nameTemplateFunction(call.templateFunctionCallPair.Function))
+            method.Class = call.Function.templateFunction.Class
+            method.name = call.Function.templateFunction.Class.
+                newMethodName(nameTemplateFunction(call.templateFunctionCallPair.Function))
             method.accessFlags |= cg.AccClassPublic
             method.accessFlags |= cg.AccClassFinal
             method.accessFlags |= cg.AccMethodStatic
@@ -29,19 +42,19 @@ class BuildTemplateFunctionCall {
             if call.templateFunctionCallPair.Function.Type.vArgs != null {
                 method.accessFlags |= cg.AccMethodVarargs
             }
-            method.Descriptor = Descriptor.methodDescriptor(call.templateFunctionCallPair.Function.Type)
+            method.descriptor = Descriptor.methodDescriptor(call.templateFunctionCallPair.Function.Type)
             method.code = new cg.AttributeCode()
-            c.appendMethod(method)
+            call.Function.templateFunction.Class.appendMethod(method)
             call.templateFunctionCallPair.Function.entrance = method
             //build function
-            this.bp.BuildFunction.buildFunction(c , null , method , call.templateFunctionCallPair.Function)
+            this.bp.BuildFunction.buildFunction(call.Function.templateFunction.Class , null , method , call.templateFunctionCallPair.Function)
             call.templateFunctionCallPair.entrance = method
         }
         maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
         code.codes[code.codeLength] = cg.OP_invokestatic
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.templateFunctionCallPair.entrance.Class.name,
                 call.templateFunctionCallPair.entrance.name,
-                call.templateFunctionCallPair.entrance.Descriptor),
+                call.templateFunctionCallPair.entrance.descriptor),
             code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         if e.isStatementExpression {

@@ -347,8 +347,6 @@ class ClassParser extends ParserFather {
             classDefinition.appendFmt(v)
             classDefinition.block.constants[v.name] = v
         }
-
-        return null
     }
     fn parseField(
         classDefinition ast.Class,
@@ -460,19 +458,18 @@ class ClassParser extends ParserFather {
             classDefinition.fields[v.name] = f
         }
 
-        return null
     }
 
     fn validAfterVolatile(token lex.Token) -> (err error) {
         if token.Type == lex.TokenIdentifier {
-            return null
+            return
         }
         return new error(sprintf("%s not a valid token after 'volatile'",
                     this.parser.errMsgPrefix()))
     }
     fn validAfterAbstract() -> (err error) {
         if this.parser.token.Type == lex.TokenFn {
-            return null
+            return
         }
         return new error(sprintf("%s not a valid token after 'abstract'",
                     this.parser.errMsgPrefix()))
@@ -480,7 +477,7 @@ class ClassParser extends ParserFather {
     fn validAfterSynchronized() -> (err error) {
         if this.parser.token.Type == lex.TokenFn ||
             this.parser.token.Type == lex.TokenFinal {
-            return null
+            return
         }
         return new error(sprintf("%s not a valid token after 'synchronized'",
                     this.parser.errMsgPrefix()))
@@ -489,7 +486,7 @@ class ClassParser extends ParserFather {
         if this.parser.token.Type == lex.TokenIdentifier ||
             this.parser.token.Type == lex.TokenFn ||
             this.parser.token.Type == lex.TokenFinal {
-            return null
+            return
         }
         return new error(sprintf("%s not a valid token after 'static'",
                     this.parser.errMsgPrefix()))

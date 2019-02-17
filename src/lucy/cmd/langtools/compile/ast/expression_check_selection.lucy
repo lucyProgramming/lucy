@@ -4,7 +4,7 @@ class ExpressionCheckSelection {
         object , es := selection.Expression.checkSingleValueContextExpression(block)
         errs.appendAll(es)
         if object == null {
-            return null
+            return
         }
         if selection.autoCompletion {
             ExpressionCheckSelection.autoCompletion(object , block , selection.Expression.isIdentifier(ThisPointerName))
@@ -15,12 +15,12 @@ class ExpressionCheckSelection {
                 if selection.name == Super {
                     errs.append(new error(sprintf("%s access '%s' at '%s' not allow",
                                 e.pos.errMsgPrefix() , Super , object.typeString())))
-                    return null
+                    return
                 }
                 access , err := object.Class.getFieldOrMethod(block , e.pos , selection.name , new map{string -> bool}() , false , object.Class.name)
                 if err != null {
                     errs.append(err)
-                    return null
+                    return
                 }
                 if field , ok := access.(ClassField) ; ok {
                     selection.field = field

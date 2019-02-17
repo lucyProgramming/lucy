@@ -11,17 +11,17 @@ import "java/lang/Runtime"
 import "java/util/zip"
 
 public class RunLucyPackage {
-           lucyRoot            string                        
-           lucyPath            []string                      
-           mainPackageLucyPath string                        
-           Package             string                        
-           commandName         string                        
-           compilerExe         []string                      
-           classPaths          []string                      
+           lucyRoot            string
+           lucyPath            []string
+           mainPackageLucyPath string
+           Package             string
+           commandName         string
+           compilerExe         []string
+           classPaths          []string
            flags               Flags = new Flags()
            packagesCompiled    map{string -> PackageCompiled}
            lucyProgramArgs     []string                       // lucy application args
-    public runOverExit         bool                          
+    public runOverExit         bool
 
     public fn run(commandName string , args []string) -> (err error) {
         this.commandName = commandName

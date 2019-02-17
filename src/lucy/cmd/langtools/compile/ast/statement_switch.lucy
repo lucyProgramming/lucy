@@ -108,7 +108,6 @@ public class StatementSwitch {
                             case ExpressionTypeString:
                                 stringValue = e.stringValue
                         }
-
                         valueValid = true
                     } else {
                         errs.append(new error(sprintf("%s expression is not literal",
@@ -148,7 +147,6 @@ public class StatementSwitch {
                             } else {
                                 doubleMap[doubleValue] = e.pos
                             }
-
                         case VariableTypeString:
                             if first := stringMap[stringValue] ; first != null {
                                 errs.append(errMsg(first , e.literalRaw))
@@ -156,7 +154,6 @@ public class StatementSwitch {
                             } else {
                                 stringMap[stringValue] = e.pos
                             }
-
                         case VariableTypeEnum:
                             if first := enumNamesMap[enumName] ; first != null {
                                 errs.append(errMsg(first , enumName))
@@ -164,12 +161,9 @@ public class StatementSwitch {
                             } else {
                                 enumNamesMap[enumName] = e.pos
                             }
-
                     }
-
                 }
             }
-
         }
 
         if conditionType.Type == VariableTypeEnum &&

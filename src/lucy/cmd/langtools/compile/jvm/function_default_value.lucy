@@ -5,35 +5,34 @@ import "lucy/binary"
 public class DefaultValueParse {
     static fn encode(
         c cg.ClassHighLevel,
-        f ast.Function) -> (d cg.AttributeDefaultParameters) {
-        ret := new cg.AttributeDefaultParameters()
-        ret.start = char(f.defaultValueStartAt)
-        ret.constants = []char{}
-        for i := ret.start ; i < char(len(f.Type.parameterList)) ; i++ {
+        f ast.Function) -> (dp cg.AttributeDefaultParameters) {
+        dp = new cg.AttributeDefaultParameters()
+        dp.start = char(f.defaultValueStartAt)
+        dp.constants = []char{}
+        for i := dp.start ; i < char(len(f.Type.parameterList)) ; i++ {
             switch f.Type.parameterList[i].defaultValueExpression.Type {
                 case ast.ExpressionTypeBool:
                     if f.Type.parameterList[i].defaultValueExpression.boolValue {
-                        ret.constants.append(c.Class.insertIntConst(1))
+                        dp.constants.append(c.Class.insertIntConst(1))
                     } else {
-                        ret.constants.append(c.Class.insertIntConst(0))
+                        dp.constants.append(c.Class.insertIntConst(0))
                     }
-
-                case ast.ExpressionTypeByte , ast.ExpressionTypeShort , ast.ExpressionTypeChar , ast.ExpressionTypeInt:
+                case ast.ExpressionTypeByte,
+                    ast.ExpressionTypeShort,
+                    ast.ExpressionTypeChar,
+                    ast.ExpressionTypeInt:
                     t := f.Type.parameterList[i].defaultValueExpression.longValue
-                    ret.constants.append(c.Class.insertIntConst(int(t)))
+                    dp.constants.append(c.Class.insertIntConst(int(t)))
                 case ast.ExpressionTypeLong:
-                    ret.constants.append(c.Class.insertLongConst(f.Type.parameterList[i].defaultValueExpression.longValue))
+                    dp.constants.append(c.Class.insertLongConst(f.Type.parameterList[i].defaultValueExpression.longValue))
                 case ast.ExpressionTypeFloat:
-                    ret.constants.append(c.Class.insertFloatConst(float(f.Type.parameterList[i].defaultValueExpression.doubleValue)))
+                    dp.constants.append(c.Class.insertFloatConst(float(f.Type.parameterList[i].defaultValueExpression.doubleValue)))
                 case ast.ExpressionTypeDouble:
-                    ret.constants.append(c.Class.insertDoubleConst(f.Type.parameterList[i].defaultValueExpression.doubleValue))
+                    dp.constants.append(c.Class.insertDoubleConst(f.Type.parameterList[i].defaultValueExpression.doubleValue))
                 case ast.ExpressionTypeString:
-                    ret.constants.append(c.Class.insertStringConst(f.Type.parameterList[i].defaultValueExpression.stringValue))
+                    dp.constants.append(c.Class.insertStringConst(f.Type.parameterList[i].defaultValueExpression.stringValue))
             }
-
         }
-
-        return ret
     }
 
     public static fn decode(c cg.Class , f ast.Function , dp cg.AttributeDefaultParameters) {
@@ -82,11 +81,8 @@ public class DefaultValueParse {
                     v.defaultValueExpression.stringValue =
                         string(c.constPools[utf8Index].info)
             }
-
         }
-
     }
-
 }
 
 

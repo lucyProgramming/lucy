@@ -4,11 +4,11 @@ class ExpressionCheckTypeAssert {
         object , es := assertion.Expression.checkSingleValueContextExpression(block)
         errs.appendAll(es)
         if object == null {
-            return null
+            return
         }
         if err := object.rightValueValid() ; err != null {
             errs.append(err)
-            return null
+            return
         }
         if assertion.isType {
             return [object]
@@ -16,17 +16,17 @@ class ExpressionCheckTypeAssert {
         if object.isPointer() == false {
             errs.append(new error(sprintf("%s expression is not pointer",
                 errMsgPrefix(object.pos))))
-            return null
+            return
         }
         err := assertion.Type.resolve(block)
         if err != null {
             errs.append(err)
-            return null
+            return
         }
         if assertion.Type.validForTypeAssertOrConversion() == false {
             errs.append(new error(sprintf("%s cannot use '%s' for type assertion",
                 errMsgPrefix(assertion.Type.pos) , assertion.Type.typeString())))
-            return null
+            return
         }
         if len(e.lefts) > 1 {
             assertion.multiValueContext = true

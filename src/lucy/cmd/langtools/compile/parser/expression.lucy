@@ -53,7 +53,6 @@ class ExpressionParser extends ParserFather {
             } else {
                 //nothing
             }
-
             for this.parser.token.Type == lex.TokenComma {
                 this.parser.errs.append(new error(sprintf("%s missing expression" , this.parser.errMsgPrefix())))
                 this.next(lfNotToken) // skip ,
@@ -66,11 +65,8 @@ class ExpressionParser extends ParserFather {
                     goto end
                 }
             }
-
         }
-
     end:
-
         return es , null
     }
 
@@ -84,10 +80,11 @@ class ExpressionParser extends ParserFather {
         }
         for this.parser.token.Type == lex.TokenComma && statementLevel { //          read more
             this.next(lfNotToken) //  skip comma
+
             var left2 ast.Expression
-            left2 , err = this.ExpressionQuestionParser.parseQuestionExpression() //
-            if err != null {
-                return null , err
+            left2 , _ = this.ExpressionQuestionParser.parseQuestionExpression() //
+            if left2 == null {
+                break 
             }
             if left.Type == ast.ExpressionTypeList {
                 left.data.([]ast.Expression).append(left2)
@@ -100,9 +97,7 @@ class ExpressionParser extends ParserFather {
                 newExpression.data = list
                 left = newExpression
             }
-
         }
-
         switch this.parser.token.Type {
             case lex.TokenAssign:
                 return this.parseEquationRight(left , ast.ExpressionTypeAssign , true)

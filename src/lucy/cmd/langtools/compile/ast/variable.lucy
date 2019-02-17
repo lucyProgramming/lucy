@@ -1,26 +1,26 @@
 import "lucy/jvm/cg"
 
 public class Variable {
-    public isBuildIn                bool      
-    public isGlobal                 bool      
-    public isFunctionParameter      bool      
-    public isReturn                 bool      
-    public beenCapturedAsLeftValue  int       
-    public beenCapturedAsRightValue int       
+    public isBuildIn                bool
+    public isGlobal                 bool
+    public isFunctionParameter      bool
+    public isReturn                 bool
+    public beenCapturedAsLeftValue  int
+    public beenCapturedAsRightValue int
     public used                     bool       // use as right value
     public accessFlags              char       // public private or protected
-    public pos                      Pos       
+    public pos                      Pos
     public defaultValueExpression   Expression
-    public name                     string    
-    public Type                     Type      
+    public name                     string
+    public Type                     Type
     public localValOffset           char       // offset in stack frame
     public jvmDescriptor            string     // jvm
-    public comment                  string    
+    public comment                  string
     public crlf                     bool       // constains crlf  
-    public globalVarClassName       string    
-    public locateDefinition         bool      
-    public findUsage                bool      
-    public findUsageInstances       []Usage   
+    public globalVarClassName       string
+    public locateDefinition         bool
+    public findUsage                bool
+    public findUsageInstances       []Usage
 
     /*
 		a // this is a inline comment
@@ -49,6 +49,7 @@ public class Variable {
         v.locateDefinition = this.locateDefinition
         v.findUsage = this.findUsage
     }
+
     fn reduceFindUsageInstances(block Block) {
         if this.findUsage == false {
             return
@@ -64,5 +65,4 @@ public class Variable {
         s += sprintf("var %s %s" , this.name , this.Type.typeString())
     }
 }
-
 

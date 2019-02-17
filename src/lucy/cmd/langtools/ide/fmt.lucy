@@ -247,7 +247,6 @@ public class Fmt {
                     }
                 }
             }
-
         }
         format += " {\n"
         for k := 0 ; k < len(c.fmts) ; k++ {
@@ -258,7 +257,6 @@ public class Fmt {
                 } else {
                     format += indent + this.indentIncremental + "//" + t.comment
                 }
-
                 continue
             }
             if t , ok := f.(ast.Line) ; ok {
@@ -283,7 +281,6 @@ public class Fmt {
                     }
                     k--
                 }
-
                 maxName , maxAccessRange , maxTypeName , hasFinal , hasStatic :=
                     this.getFieldDeclarationGroupMeta(fields)
                 for k , f := range fields {
@@ -302,7 +299,6 @@ public class Fmt {
                         } else {
                             d += "      "
                         }
-
                     }
                     if hasStatic {
                         if f.fields[0].isStatic() {
@@ -318,9 +314,7 @@ public class Fmt {
                         if k != len(f.nameList) - 1 {
                             name += " , "
                         }
-                        // if v.containsLf {
                     }
-
                     d += name
                     if t := len(maxName) - len(name) ; t > 0 {
                         d += this.mkSpacing(t)
@@ -334,7 +328,8 @@ public class Fmt {
                         list.data = f.initValues
                         d += this.formatExpression(this.mkSpacing(len(d)) , list)
                     } else {
-                        if t := len(maxTypeName) - len(f.fields[0].Type.typeName()) ; t > 0 {
+                        if t := len(maxTypeName) - len(f.fields[0].Type.typeName()) ; t > 0 &&
+                            f.inlineComment != null {
                             d += this.mkSpacing(t)
                         }
                     }
