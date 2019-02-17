@@ -1,6 +1,6 @@
 public class AttributeInfo {
-    public nameIndex       char  
-           attributeLength int   
+    public nameIndex       char
+           attributeLength int
     public info            []byte
 }
 
