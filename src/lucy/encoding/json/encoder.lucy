@@ -5,7 +5,7 @@ import "java/util/AbstractMap"
 
 public class Encoder {
     x       Object
-    c       Class 
+    c       Class
     indent  string
     indents string
 

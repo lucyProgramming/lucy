@@ -2,7 +2,6 @@ import "lucy/cmd/langtools/compile/ast"
 
 public class Fmt {
     indentIncremental string
-
     public fn Fmt(indentIncrement string = "    ") {
         this.super()
         this.indentIncremental = indentIncrement
@@ -15,7 +14,6 @@ public class Fmt {
                 } else {
                     format += "//" + t.comment // contains \n
                 }
-
                 continue
             }
             if t , ok := n.node.(ast.Block) ; ok &&

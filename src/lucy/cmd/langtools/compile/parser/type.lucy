@@ -236,39 +236,38 @@ class TypeParser extends ParserFather {
             this.parser.token.Type == lex.TokenFn
     }
 
-    fn parseIdentifierType() -> (ret ast.Type = new ast.Type() , err error) {
-        ret.pos = this.parser.mkPos()
-        ret.Type = ast.VariableTypeName
-        ret.name = this.parser.token.stringValue
-        ret.locateDefinition = this.parser.token.locateDefinition
-        ret.findUsage = this.parser.token.findUsage
-        ret.autoCompletion = this.parser.token.autoCompletion
-        ret.getHover = this.parser.token.getHover
+    fn parseIdentifierType() -> (identifierType ast.Type = new ast.Type() , err error) {
+        identifierType.pos = this.parser.mkPos()
+        identifierType.Type = ast.VariableTypeName
+        identifierType.name = this.parser.token.stringValue
+        identifierType.locateDefinition = this.parser.token.locateDefinition
+        identifierType.findUsage = this.parser.token.findUsage
+        identifierType.autoCompletion = this.parser.token.autoCompletion
+        identifierType.getHover = this.parser.token.getHover
         this.next(lfIsToken) // skip name identifier
         for this.parser.token.Type == lex.TokenSelection {
-            ret.locatePackageDefinition = ret.locateDefinition
-            ret.locateDefinition = false
-            ret.packagePos = ret.pos
-            ret.name += "."
-            ret.autoCompletion = ret.autoCompletion || this.parser.token.autoCompletion
+            identifierType.locatePackageDefinition = identifierType.locateDefinition
+            identifierType.locateDefinition = false
+            identifierType.packagePos = identifierType.pos
+            identifierType.name += "."
+            identifierType.autoCompletion = identifierType.autoCompletion || this.parser.token.autoCompletion
             this.next(lfNotToken) // skip .
-            if ret.autoCompletion {
-                return ret , null
+            if identifierType.autoCompletion {
+                return identifierType , null
             }
             if this.parser.token.Type != lex.TokenIdentifier {
-                return ret , new error(sprintf("%s not a identifier after dot",
+                return identifierType , new error(sprintf("%s not a identifier after dot",
                     this.parser.errMsgPrefix()))
             }
-            ret.name += this.parser.token.stringValue
-            ret.locateDefinition = this.parser.token.locateDefinition
-            ret.findUsage = ret.findUsage || this.parser.token.findUsage
-            ret.getHover = ret.getHover || this.parser.token.getHover
-            ret.autoCompletion = ret.autoCompletion || this.parser.token.autoCompletion
-            ret.pos = this.parser.mkPos() //  override pos
+            identifierType.name += this.parser.token.stringValue
+            identifierType.locateDefinition = this.parser.token.locateDefinition
+            identifierType.findUsage = identifierType.findUsage || this.parser.token.findUsage
+            identifierType.getHover = identifierType.getHover || this.parser.token.getHover
+            identifierType.autoCompletion = identifierType.autoCompletion || this.parser.token.autoCompletion
+            identifierType.pos = this.parser.mkPos() //  override pos
             this.next(lfIsToken) // skip identifier
         }
-
-        return ret , null
+        return identifierType , null
     }
 
     fn parseTypes(endTokens lex.TokenKind...) -> (ts []ast.Type , err error) {
@@ -299,20 +298,15 @@ class TypeParser extends ParserFather {
             } else {
                 //nothing
             }
-
             for _ , v := range endTokens {
                 if v == this.parser.token.Type {
                     this.parser.errs.append(new error(sprintf("%s extra comma" , this.parser.errMsgPrefix())))
                     goto end
                 }
             }
-
         }
-
     end:
-
     }
-
 }
 
 

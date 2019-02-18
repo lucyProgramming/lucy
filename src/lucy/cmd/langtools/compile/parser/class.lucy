@@ -300,7 +300,9 @@ class ClassParser extends ParserFather {
                         f.accessFlags |= cg.AccMethodFinal
                     }
                     classDefinition.appendFmt(m)
-                    if f.name == classDefinition.name && isInterface == false {
+                    if f.name == classDefinition.name &&
+                        isInterface == false &&
+                        isStatic == false {
                         f.name = ast.SpecialMethodInit
                     }
                     if classDefinition.methods[f.name] == null {
@@ -308,7 +310,6 @@ class ClassParser extends ParserFather {
                     } else {
                         classDefinition.methods[f.name].append(m)
                     }
-
                     resetProperty()
                 case lex.TokenImport:
                     pos := this.parser.mkPos()
