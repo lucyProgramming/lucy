@@ -1,22 +1,22 @@
 public class Token {
     public Type              TokenKind
     public offset            int       // start offset
-    public endOffset         int      
-    public startLine         int      
-    public endLine           int      
-    public startColumnOffset int      
-    public endColumnOffset   int      
-    public description       string   
-    public stringValue       string   
-    public longValue         long     
-    public doubleValue       double   
-    public boolValue         bool     
-    public locateDefinition  bool     
-    public getHover          bool     
-    public findUsage         bool     
-    public literalRaw        string   
-    public rename            bool     
-    public autoCompletion    bool     
+    public endOffset         int
+    public startLine         int
+    public endLine           int
+    public startColumnOffset int
+    public endColumnOffset   int
+    public description       string
+    public stringValue       string
+    public longValue         long
+    public doubleValue       double
+    public boolValue         bool
+    public locateDefinition  bool
+    public getHover          bool
+    public findUsage         bool
+    public literalRaw        string
+    public rename            bool
+    public autoCompletion    bool
 
     public fn toString() -> (s string) {
         s = sprintf("%s Type:%d startLine:%d endLine:%d columnOffset:%d\n",

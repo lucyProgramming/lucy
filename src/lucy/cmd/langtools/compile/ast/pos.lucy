@@ -1,15 +1,15 @@
 public class Pos {
     public filename          string
-    public startLine         int   
-    public endLine           int   
-    public startColumnOffset int   
-    public endColumnOffset   int   
+    public startLine         int
+    public endLine           int
+    public startColumnOffset int
+    public endColumnOffset   int
     /*
 		offset at bs , for special use.
 		for template function only currently
 	*/
-    public startOffset               int                      
-    public endOffset                 int                      
+    public startOffset               int
+    public endOffset                 int
     public loadDefinitionFromOutside LoadDefinitionFromOutside
 
     public fn errMsgPrefix() -> (prefix string) {
@@ -23,16 +23,15 @@ fn errMsgPrefix(pos Pos) -> (prefix string) {
     return pos.errMsgPrefix()
 }
 
-
 public class NameWithPos {
     public name                    string
-    public pos                     Pos   
-    public locateDefinition        bool  
-    public locatePackageDefinition bool  
-    public packagePos              Pos   
-    public findUsage               bool  
-    public getHover                bool   
-    public autoCompletion          bool  
+    public pos                     Pos
+    public locateDefinition        bool
+    public locatePackageDefinition bool
+    public packagePos              Pos
+    public findUsage               bool
+    public getHover                bool
+    public autoCompletion          bool
     /*
 		a // this is a inline comment
 	*/
