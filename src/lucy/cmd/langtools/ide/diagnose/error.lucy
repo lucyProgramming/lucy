@@ -52,6 +52,9 @@ public class Error {
             t.pos.endLine = line
             t.pos.startColumnOffset = column
             t.pos.endColumnOffset = column
+            if len(rest) > 0 && rest[0] == ' ' {
+                rest = rest[1:]
+            }
             t.err = rest
             if es.keyExist(filename) {
                 es[filename].append(t)

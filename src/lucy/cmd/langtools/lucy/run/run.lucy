@@ -16,8 +16,7 @@ public class RunLucyPackage {
            mainPackageLucyPath string
            Package             string
            commandName         string
-           compilerExe         []string
-           classPath          []string
+           classPath           []string
            flags               Flags = new Flags()
            packagesCompiled    map{string -> PackageCompiled}
            lucyProgramArgs     []string                       // lucy application args
@@ -41,9 +40,7 @@ public class RunLucyPackage {
         this.lucyPath = common.getLucyPath()
         this.classPath = common.getClassPath()
         this.packagesCompiled = new map{string -> PackageCompiled}()
-        founds := this.findPackageIn(this.Package)
-        this.foundError(this.Package , founds)
-        this.mainPackageLucyPath = founds[0]
+        this.mainPackageLucyPath = common.findPackageInWhichDirectory(this.lucyPath , this.Package)
         //
         {
             _ , _ , err = this.buildPackage("" , "lucy/lang" , new ImportStack())
@@ -110,25 +107,12 @@ public class RunLucyPackage {
             }
             runArgs.append(v)
         }
-
         _ , err = this.flags.parser.parse(runArgs)
         if err != null {
             return err
         }
         this.lucyProgramArgs = lucyProgramArgs
         return null
-    }
-    /*
-        find package in which directory
-    */
-    fn findPackageIn(packageName string) -> (paths []string = []string{}) {
-        pathHavePackage := []string{}
-        for _ , v := range this.lucyPath {
-            if new io.File(v + "/src/" + packageName).isDirectory() {
-                pathHavePackage.append(v)
-            }
-        }
-        return pathHavePackage
     }
     /*
         check package if need rebuild
@@ -335,9 +319,7 @@ public class RunLucyPackage {
             return true , p.meta , null
         }
         if lucyPath == "" {
-            founds := this.findPackageIn(packageName)
-            this.foundError(packageName , founds)
-            lucyPath = founds[0]
+            lucyPath = common.findPackageInWhichDirectory(this.lucyPath , packageName)
         }
         meta , needBuild , lucyFiles := this.needCompile(lucyPath , packageName)
 
