@@ -298,7 +298,6 @@ public class Type {
             } else {
                 loadFromImport = true
             }
-
             if loadFromImport {
                 d , err = this.getNameFromImport(block)
                 if err != null {
@@ -325,11 +324,11 @@ public class Type {
         if this.name.indexOf(".") < 0 {
             i := block.inheritedAttribute.p.getImport(this.pos.filename , this.name)
             if i != null {
+                if this.locateDefinition {
+                    block.inheritedAttribute.p.setLocationDefinition(i)
+                }
                 i.mkUsed(this.pos)
                 return block.inheritedAttribute.p.load(i.Import)
-            }
-            if this.locatePackageDefinition {
-                block.inheritedAttribute.p.setLocationDefinition(i)
             }
             return null , new error(sprintf("%s type named '%s' not found",
                         errMsgPrefix(this.pos) , this.name))
@@ -402,7 +401,6 @@ public class Type {
             return null , new error(sprintf("%s '%s' is not a package",
                         errMsgPrefix(this.pos) , packageName))
         }
-
     }
 
     fn makeTypeFrom(block Block , d Object) -> (err error) {
@@ -411,7 +409,7 @@ public class Type {
                 err = new error(sprintf("%s class '%s' is not public",
                         errMsgPrefix(this.pos) , c.name))
             }
-            if this.locateDefinition {
+            if this.locateDefinition && c.pos != null {
                 block.inheritedAttribute.p.setLocationDefinition(c)
             }
             this.Type = VariableTypeObject

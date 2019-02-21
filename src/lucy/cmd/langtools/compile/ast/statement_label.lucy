@@ -1,18 +1,18 @@
 import "lucy/jvm/cg"
 
 public class StatementLabel {
-    public used                int     
-    public codeOffsetGenerated bool     
-    public codeOffset          int      
-    public block               Block    
-    public name                string   
+    public used                int
+    public codeOffsetGenerated bool
+    public codeOffset          int
+    public block               Block
+    public name                string
     public exits               []cg.Exit
     public statement           Statement
-    public pos                 Pos      
-    public findUsage           bool     
-    public findUsageInstances  []Usage  
-    public inlineComment       string   
-    public locateDefinition    bool     
+    public pos                 Pos
+    public findUsage           bool
+    public findUsageInstances  []Usage
+    public inlineComment       string
+    public locateDefinition    bool
     /*
 		defer {
 			xxx:
