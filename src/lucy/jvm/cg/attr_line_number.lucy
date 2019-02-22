@@ -7,12 +7,26 @@ public class AttributeLineNumber {
         this.super()
         this.lineNumbers = []AttributeLinePc{}
     }
+
+    static fn fromBs(bs []byte) -> (ln AttributeLineNumber) {
+        length := binary.BigEndian.getChar(bs)
+        bs = bs[2:]
+        ln = new AttributeLineNumber()
+        ln.lineNumbers = new []AttributeLinePc(length)
+        for i := 0 ; i < length ; i++ {
+            ln.lineNumbers[i] = new AttributeLinePc()
+            ln.lineNumbers[i].startPc = binary.BigEndian.getChar(bs)
+            ln.lineNumbers[i].lineNumber = binary.BigEndian.getChar(bs[2:])
+            bs = bs[4:]
+        }
+    }
+    
     fn toAttributeInfo(c Class) -> (ret AttributeInfo) {
         if this == null || len(this.lineNumbers) == 0 {
             return null
         }
         ret = new AttributeInfo()
-        ret.nameIndex = c.insertUtf8Const("LineNumberTable")
+        ret.nameIndex = c.insertUtf8Const(AttributeNameLineNumberTable)
         ret.info = new []byte(2)
         binary.BigEndian.putChar(ret.info , char(len(this.lineNumbers)))
         for _ , v := range this.lineNumbers {

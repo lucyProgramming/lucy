@@ -45,6 +45,44 @@ public class AttributeCode {
         return ret
     }
 
+    static fn fromBs(c Class , bs []byte) -> (code AttributeCode) {
+        code = new AttributeCode()
+        code.maxStack = binary.BigEndian.getChar(bs)
+        code.maxLocals = binary.BigEndian.getChar(bs[2:])
+        code.codeLength = binary.BigEndian.getInt(bs[4:])
+        bs = bs[8:]
+        code.codes = bs[:code.codeLength]
+        bs = bs[code.codeLength:]
+        exceptionLength := binary.BigEndian.getChar(bs)
+        bs = bs[2:]
+        code.exceptions = new []ExceptionTable(exceptionLength)
+        for i := 0 ; i < exceptionLength ; i++ {
+            e := new ExceptionTable()
+            e.startPc = binary.BigEndian.getChar(bs)
+            e.endPc = binary.BigEndian.getChar(bs[2:])
+            e.handlerPc = binary.BigEndian.getChar(bs[4:])
+            e.catchType = binary.BigEndian.getChar(bs[6:])
+            bs = bs[8:]
+        }
+        attrLength := binary.BigEndian.getChar(bs)
+        bs = bs[2:]
+        for i := 0 ; i < attrLength ; i++ {
+            name := string(c.constPools[binary.BigEndian.getChar(bs)].info)
+            length := binary.BigEndian.getInt(bs[2:])
+            bs = bs[6:]
+            attrBs := bs[:length]
+            bs = bs[length:]
+            switch name {
+                case AttributeNameStackMap:
+                    code.attributeStackMap = AttributeStackMap.fromBs(attrBs)
+                case AttributeNameLineNumberTable:
+                    code.lineNumbers = AttributeLineNumber.fromBs(attrBs)
+                default:
+                    //nothing
+            }
+        }
+    }
+
     /*
 		mk line number attribute
 	*/

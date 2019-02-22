@@ -6,6 +6,8 @@ public const AttributeNameStackMap = "StackMapTable"
 public const AttributeNameSignature = "Signature"
 public const AttributeNameMethodParameters = "MethodParameters"
 public const AttributeNameInnerClasses = "InnerClasses"
+public const AttributeNameCode = "Code"
+public const AttributeNameLineNumberTable = "LineNumberTable"
 
 public const AttributeNameLucyFieldDescriptor = "LucyFieldDescriptor"
 public const AttributeNameLucyMethodDescriptor = "LucyMethodDescriptor"
