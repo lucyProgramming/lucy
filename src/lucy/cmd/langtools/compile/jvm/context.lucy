@@ -88,24 +88,20 @@ class Context {
             if len(this.lastStackMapStateLocals) < len(state.locals) && len(state.stacks) == 0 {
                 num := len(state.locals) - len(this.lastStackMapStateLocals)
                 if num <= 3 {
-                    appendFrame := new cg.StackMapAppendFrame()
-                    appendFrame.frameType = byte(num + 251)
-                    appendFrame.delta = delta
-                    appendFrame.locals = new []cg.StackMapVerificationTypeInfo(num)
-                    copy(appendFrame.locals , state.locals[len(state.locals) - num:])
+                    locals := new []cg.StackMapVerificationTypeInfo(num)
+                    appendFrame := new cg.StackMapAppendFrame(byte(num + 251) , delta , locals)
+                    copy(locals , state.locals[len(state.locals) - num:])
                     code.attributeStackMap.append(appendFrame)
                     return
                 }
             }
         }
         // full frame
-        fullFrame := new cg.StackMapFullFrame()
-        fullFrame.frameType = 255
-        fullFrame.delta = delta
-        fullFrame.locals = new []cg.StackMapVerificationTypeInfo(len(state.locals))
-        copy(fullFrame.locals , state.locals)
-        fullFrame.stacks = new []cg.StackMapVerificationTypeInfo(len(state.stacks))
-        copy(fullFrame.stacks , state.stacks)
+        locals := new []cg.StackMapVerificationTypeInfo(len(state.locals))
+        copy(locals , state.locals)
+        stacks := new []cg.StackMapVerificationTypeInfo(len(state.stacks))
+        copy(stacks , state.stacks)
+        fullFrame := new cg.StackMapFullFrame(255b , delta , locals , stacks)
         code.attributeStackMap.append(fullFrame)
         return
     }

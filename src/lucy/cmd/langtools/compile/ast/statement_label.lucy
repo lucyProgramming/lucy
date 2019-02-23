@@ -37,7 +37,6 @@ public class StatementLabel {
                 ss.append(v)
             }
         }
-
         if len(ss) == 0 {
             return null
         }

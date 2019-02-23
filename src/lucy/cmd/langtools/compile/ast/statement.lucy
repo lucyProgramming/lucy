@@ -80,7 +80,6 @@ public class Statement {
                 } else {
                     block.defers.append(this.Defer)
                 }
-
                 block.inheritedAttribute.Function.hasDefer = true
                 this.Defer.block.inherit(block)
                 this.Defer.block.inheritedAttribute.Defer = this.Defer
@@ -96,7 +95,6 @@ public class Statement {
                     } else {
                         block.inheritedAttribute.Defer.labels = [this.StatementLabel]
                     }
-
                 }
                 if this.StatementLabel.findUsage {
                     u := new Usage()
@@ -108,7 +106,6 @@ public class Statement {
                     } else {
                         this.StatementLabel.findUsageInstances.append(u)
                     }
-
                 }
                 if this.StatementLabel.locateDefinition {
                     block.inheritedAttribute.p.setLocationDefinition(this.StatementLabel)

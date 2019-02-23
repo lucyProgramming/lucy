@@ -348,7 +348,7 @@ class BlockParser extends ParserFather {
                         continue
                     }
                     statementGoto := new ast.StatementGoTo()
-                    statementGoto.pos = pos
+                    statementGoto.pos = this.parser.mkPos()
                     statementGoto.locateDefinition = this.parser.token.locateDefinition
                     statementGoto.findUsage = this.parser.token.findUsage
                     statementGoto.autoCompletion = this.parser.token.autoCompletion
@@ -464,7 +464,6 @@ class BlockParser extends ParserFather {
             label := new ast.StatementLabel()
             statement.StatementLabel = label
             block.statements.append(statement)
-
             label.pos = e.pos
             label.codeOffset = -1
             label.statement = statement

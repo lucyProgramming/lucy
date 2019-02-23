@@ -36,7 +36,7 @@ public class NameWithPos {
 		a // this is a inline comment
 	*/
     public inlineComment string //   in
-    
+
     public containsLf bool // constains "\n"
 
     public fn NameWithPos(name string , Pos Pos) {
