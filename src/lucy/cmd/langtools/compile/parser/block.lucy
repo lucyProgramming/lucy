@@ -457,6 +457,9 @@ class BlockParser extends ParserFather {
             if this.parser.token.Type != lex.TokenLf {
                 this.parser.errs.append(new error(sprintf("%s expect new line",
                     this.parser.errMsgPrefix())))
+            }else {
+                //skip lf 
+                this.next(lfIsToken)
             }
             statement := new ast.Statement()
             statement.pos = pos
