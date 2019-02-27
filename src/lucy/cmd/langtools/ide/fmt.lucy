@@ -746,9 +746,10 @@ public class Fmt {
                     d += indent + this.indentIncremental
                 }
             }
-
             d += ":\n"
-            d += this.formatBlock(indent + this.indentIncremental + this.indentIncremental , c.block)
+            if c.block != null {
+                d += this.formatBlock(indent + this.indentIncremental + this.indentIncremental , c.block)
+            }
             format += d
         }
         if w.defaultBlock != null {

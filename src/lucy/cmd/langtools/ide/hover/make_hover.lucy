@@ -8,7 +8,7 @@ class MakeHover {
         this.super()
         this.from = from
     }
-    
+
     fn make() -> (s string) {
         when this.from.(type) {
             case ast.Enum:
@@ -36,12 +36,16 @@ class MakeHover {
                 } else {
                     s = t.typeString()
                 }
-
             case ast.Import:
                 t := this.from.(ast.Import)
+                s = t.mkDescription()
+            case ast.StatementLabel:
+                t := this.from.(ast.StatementLabel)
                 s = t.mkDescription()
             default:
                 s = sprintf("'%s' un handled" , this.from.getClass().toString())
         }
     }
 }
+
+

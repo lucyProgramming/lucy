@@ -13,6 +13,11 @@ public class StatementLabel {
     public findUsageInstances  []Usage
     public inlineComment       string
     public locateDefinition    bool
+
+    public fn mkDescription() ->(d string) {
+        d = sprintf("lable:%s" , this.name)
+    }
+
     /*
 		defer {
 			xxx:

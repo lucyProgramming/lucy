@@ -1,14 +1,14 @@
 public class TypeAlias {
-    public name               string 
-    public aliasName          string 
-    public Type               Type   
-    public pos                Pos    
-    public comment            string 
-    public locateDefinition   bool   
-    public findUsage          bool      
+    public name               string
+    public aliasName          string
+    public Type               Type
+    public pos                Pos
+    public comment            string
+    public locateDefinition   bool
+    public findUsage          bool
            findUsageInstances []Usage
-           used               bool   
-    public inlineComment      string 
+           used               bool
+    public inlineComment      string
 
     public fn mkDescription() -> (s string = "") {
         if this.comment != null {
@@ -18,7 +18,7 @@ public class TypeAlias {
         tt.alias = null
         s += sprintf("typealias %s@%s" , this.name , tt.typeString())
     }
-    
+
     fn reduceFindUsageInstances(block Block) {
         if this.findUsage == false {
             return

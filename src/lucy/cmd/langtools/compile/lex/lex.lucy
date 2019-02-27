@@ -3,15 +3,15 @@ import "java/lang/String"
 
 public class Lexer {
     bs               []byte
-    lastLine         int   
-    line             int   
-    offset , end     int   
-    locateDefinition int   
-    getHover         int   
-    findUsage        int   
-    autoCompletion   int   
-    columnOffset     int   
-    lastColumnOffset int   
+    lastLine         int
+    line             int
+    offset , end     int
+    locateDefinition int
+    getHover         int
+    findUsage        int
+    autoCompletion   int
+    columnOffset     int
+    lastColumnOffset int
 
     public fn Lexer(bs []byte,
         startLine int,
@@ -71,7 +71,7 @@ public class Lexer {
 
     fn isLetter(c byte) -> (is bool) {
         return ('a' <= c && c <= 'z') ||
-            ('A' <= c && c <= 'Z')
+                ('A' <= c && c <= 'Z')
     }
     fn isDigit(c byte) -> (is bool) {
         return '0' <= c && c <= '9'
@@ -81,8 +81,8 @@ public class Lexer {
     }
     fn isHex(c byte) -> (is bool) {
         return '0' <= c && c <= '9' ||
-            ('a' <= c && c <= 'f') ||
-            ('A' <= c && c <= 'F')
+                ('a' <= c && c <= 'f') ||
+                ('A' <= c && c <= 'F')
     }
 
     fn hexByte2ByteValue(c byte) -> (b byte) {
@@ -483,7 +483,7 @@ public class Lexer {
                         }
                         if this.isHex(c) == false {
                             err = new error(sprintf("not enough hex number for unicode, expect '%d' , but '%d'",
-                                n , i))
+                                    n , i))
                             this.unGetChar()
                             break
                         }
@@ -534,7 +534,7 @@ public class Lexer {
         c , _ := this.getChar()
         var eof bool
         for c != '*' &&
-                eof == false {
+            eof == false {
             c , eof = this.getChar()
             bs.append(c)
         }
@@ -602,8 +602,8 @@ public class Lexer {
             return
         }
         for c == ' ' ||
-                c == '\t' ||
-                c == '\r' { //   skip empty
+            c == '\t' ||
+            c == '\r' { //    skip empty
             c , eof = this.getChar()
         }
 
@@ -826,9 +826,10 @@ public class Lexer {
                     bs := []byte{}
                     for c != '\n' && eof == false {
                         c , eof = this.getChar()
-                        bs.append(c)
+                        if eof == false {
+                            bs.append(c)
+                        }
                     }
-
                     token.Type = TokenComment
                     token.stringValue = string(bs)
                     token.description = string(bs)
