@@ -1,5 +1,6 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
+import "lucy/binary"
 
 class AutoVariableForRangeJavaArray {
     protected Elements char
@@ -10,7 +11,7 @@ class AutoVariableForRangeJavaArray {
 
 class BuildForRangeJavaArray {
     eb BuildExpression
-    bb BuildBlock     
+    bb BuildBlock
 
     fn BuildForRangeJavaArray(eb BuildExpression , bb BuildBlock) {
         this.super()
@@ -43,7 +44,6 @@ class BuildForRangeJavaArray {
         attr := s.rangeAttr
         var autoVar = new AutoVariableForRangeJavaArray()
         {
-
             autoVar.Elements = code.maxLocals
             code.maxLocals++
             forState.appendLocals(c , attr.rangeOn.value)
@@ -99,13 +99,18 @@ class BuildForRangeJavaArray {
         context.MakeStackMap(code , forState , code.codeLength)
         blockState := new StackMapState(forState)
 
-        code.codes[code.codeLength] = cg.OP_iinc
         if autoVar.K > 255 {
-            panic("over 255")
+            code.codes[code.codeLength] = cg.OP_wide
+            code.codes[code.codeLength + 1] = cg.OP_iinc
+            binary.BigEndian.putChar(code.codes[code.codeLength + 2:] , autoVar.K)
+            binary.BigEndian.putChar(code.codes[code.codeLength + 4:] , char(1))
+            code.codeLength += 6
+        } else {
+            code.codes[code.codeLength] = cg.OP_iinc
+            code.codes[code.codeLength + 1] = byte(autoVar.K)
+            code.codes[code.codeLength + 2] = 1b
+            code.codeLength += 3
         }
-        code.codes[code.codeLength + 1] = byte(autoVar.K)
-        code.codes[code.codeLength + 2] = 1b
-        code.codeLength += 3
 
         // load  k
         copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , autoVar.K))
@@ -150,7 +155,7 @@ class BuildForRangeJavaArray {
             //store to v tmp
             copyOPs(code,
                 storeLocalVariableOps(attr.rangeOn.value.array.Type,
-                autoVar.V))
+                    autoVar.V))
 
             blockState.appendLocals(c , attr.rangeOn.value.array)
         }
@@ -161,7 +166,7 @@ class BuildForRangeJavaArray {
                     copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , attr.identifierValue.Variable.localValOffset))
                     copyOPs(code,
                         loadLocalVariableOps(attr.rangeOn.value.array.Type,
-                        autoVar.V))
+                            autoVar.V))
                     this.eb.storeLocalVar(c , code , attr.identifierValue.Variable)
                 } else {
                     attr.identifierValue.Variable.localValOffset = autoVar.V
@@ -170,7 +175,7 @@ class BuildForRangeJavaArray {
             if attr.identifierKey != null {
                 if attr.identifierKey.Variable.beenCapturedAsLeftValue > 0 {
                     copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject,
-                        attr.identifierKey.Variable.localValOffset))
+                            attr.identifierKey.Variable.localValOffset))
                     copyOPs(code,
                         loadLocalVariableOps(ast.VariableTypeInt , autoVar.K))
                     this.eb.storeLocalVar(c , code , attr.identifierKey.Variable)
@@ -190,7 +195,7 @@ class BuildForRangeJavaArray {
                 }
                 //load v
                 copyOPs(code , loadLocalVariableOps(attr.rangeOn.value.array.Type,
-                    autoVar.V))
+                        autoVar.V))
                 if t := remainStack + jvmSlotSize(attr.rangeOn.value.array) ; t > maxStack {
                     maxStack = t
                 }

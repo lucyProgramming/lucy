@@ -533,7 +533,6 @@ public class Block {
             return null
         }
         if v , ok := d.(Variable) ; ok {
-            v.localValOffset = char(65535) // overflow
             this.variables[name] = v
             return null
         }

@@ -1,5 +1,6 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
+import "lucy/binary"
 
 class BuildExpressionincrement {
     eb BuildExpression
@@ -18,25 +19,32 @@ class BuildExpressionincrement {
             identifier.Variable.beenCapturedAsLeftValue == 0 &&
             identifier.Variable.Type.Type == ast.VariableTypeInt &&
             identifier.Variable.isGlobal == false {
-            if identifier.Variable.localValOffset > 255 {
-                panic("over 255")
-            }
             if e.isStatementExpression == false {
                 if e.Type == ast.ExpressionTypeincrement || e.Type == ast.ExpressionTypeDecrement {
                     copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , identifier.Variable.localValOffset)) // load to stack top
                     maxStack = 1
                 }
             }
-            code.codes[code.codeLength] = cg.OP_iinc
-            code.codes[code.codeLength + 1] = byte(identifier.Variable.localValOffset)
-            if e.isincrement() {
-                code.codes[code.codeLength + 2] = 1
+            if identifier.Variable.localValOffset > 255 {
+                code.codes[code.codeLength] = cg.OP_wide
+                code.codes[code.codeLength + 1] = cg.OP_iinc
+                binary.BigEndian.putChar(code.codes[code.codeLength + 2:] , identifier.Variable.localValOffset)
+                if e.isincrement() {
+                    binary.BigEndian.putChar(code.codes[code.codeLength + 4:] , char(1))
+                } else {
+                    binary.BigEndian.putChar(code.codes[code.codeLength + 4:] , char(-1))
+                }
+                code.codeLength += 6
             } else {
-                code.codes[code.codeLength + 2] = -1
+                code.codes[code.codeLength] = cg.OP_iinc
+                code.codes[code.codeLength + 1] = byte(identifier.Variable.localValOffset)
+                if e.isincrement() {
+                    code.codes[code.codeLength + 2] = 1
+                } else {
+                    code.codes[code.codeLength + 2] = -1
+                }
                 code.codeLength += 3
             }
-
-            code.codeLength += 3
             if e.isStatementExpression == false {
                 if e.Type == ast.ExpressionTypePrefixincrement || e.Type == ast.ExpressionTypePrefixDecrement {
                     copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , identifier.Variable.localValOffset)) // load to stack top

@@ -1,5 +1,6 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
+import "lucy/binary"
 
 class AutoVariableForRangeMap {
     MapObject                char
@@ -125,13 +126,18 @@ class BuildForRangeMap {
         s.continueCodeOffset = code.codeLength
         context.MakeStackMap(code , forState , code.codeLength)
         blockState := new StackMapState(forState)
-        code.codes[code.codeLength] = cg.OP_iinc
-        if autoVar.K > 255 {
-            panic("over 255")
+         if autoVar.K > 255 {
+            code.codes[code.codeLength] = cg.OP_wide
+            code.codes[code.codeLength + 1] = cg.OP_iinc
+            binary.BigEndian.putChar(code.codes[code.codeLength + 2:] , autoVar.K)
+            binary.BigEndian.putChar(code.codes[code.codeLength + 4:] , char(1))
+            code.codeLength += 6
+        } else {
+            code.codes[code.codeLength] = cg.OP_iinc
+            code.codes[code.codeLength + 1] = byte(autoVar.K)
+            code.codes[code.codeLength + 2] = 1b
+            code.codeLength += 3
         }
-        code.codes[code.codeLength + 1] = byte(autoVar.KeySetsK)
-        code.codes[code.codeLength + 2] = 1
-        code.codeLength += 3
         // load k
         copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , autoVar.KeySetsK))
 
