@@ -26,7 +26,6 @@ class AllDefinition {
             for v := range errs {
                 os.stderr.println(v.getMessage())
             }
-
         }
         loader := new ide.PackageLoader(common.getLucyPath() , common.getClassPath())
         loader.onlyAnalyzeGlobals = true
@@ -37,7 +36,6 @@ class AllDefinition {
             for v := range errs {
                 os.stderr.println(v.getMessage())
             }
-
         }
         return this.mkResult(p)
     }

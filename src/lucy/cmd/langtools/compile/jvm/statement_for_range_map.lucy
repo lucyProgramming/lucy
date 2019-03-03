@@ -5,14 +5,14 @@ import "lucy/binary"
 class AutoVariableForRangeMap {
     MapObject                char
     KeySets                  char
-    KeySetsK , KeySetsLength char
+    KeySetsK , KeySetsLength char // loop control vars 
     K , V                    char
 }
 
 
 class BuildForRangeMap {
     eb BuildExpression
-    bb BuildBlock     
+    bb BuildBlock
 
     fn BuildForRangeMap(eb BuildExpression , bb BuildBlock) {
         this.super()
@@ -55,13 +55,13 @@ class BuildForRangeMap {
         code.codeLength++
         code.codes[code.codeLength] = cg.OP_invokevirtual
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(mapClass,
-            "keySet",
-            "()Ljava/util/Set;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                "keySet",
+                "()Ljava/util/Set;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         code.codes[code.codeLength] = cg.OP_invokeinterface
         c.insertInterfaceMethodrefConst(new cg.ConstantInfoInterfaceMethodrefHighLevel("java/util/Set",
-            "toArray",
-            "()[Ljava/lang/Object;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                "toArray",
+                "()[Ljava/lang/Object;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codes[code.codeLength + 3] = 1
         code.codes[code.codeLength + 4] = 0
         code.codeLength += 5
@@ -73,7 +73,6 @@ class BuildForRangeMap {
         }
         var autoVar = new AutoVariableForRangeMap()
         {
-
             autoVar.KeySetsLength = code.maxLocals
             code.maxLocals++
             forState.appendLocals(c , typeInt)
@@ -126,15 +125,15 @@ class BuildForRangeMap {
         s.continueCodeOffset = code.codeLength
         context.MakeStackMap(code , forState , code.codeLength)
         blockState := new StackMapState(forState)
-         if autoVar.K > 255 {
+        if autoVar.KeySetsK > 255 {
             code.codes[code.codeLength] = cg.OP_wide
             code.codes[code.codeLength + 1] = cg.OP_iinc
-            binary.BigEndian.putChar(code.codes[code.codeLength + 2:] , autoVar.K)
+            binary.BigEndian.putChar(code.codes[code.codeLength + 2:] , autoVar.KeySetsK)
             binary.BigEndian.putChar(code.codes[code.codeLength + 4:] , char(1))
             code.codeLength += 6
         } else {
             code.codes[code.codeLength] = cg.OP_iinc
-            code.codes[code.codeLength + 1] = byte(autoVar.K)
+            code.codes[code.codeLength + 1] = byte(autoVar.KeySetsK)
             code.codes[code.codeLength + 2] = 1b
             code.codeLength += 3
         }
@@ -163,8 +162,8 @@ class BuildForRangeMap {
             code.codeLength++
             code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(mapClass,
-                "get",
-                "(Ljava/lang/Object;)Ljava/lang/Object;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                    "get",
+                    "(Ljava/lang/Object;)Ljava/lang/Object;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
             if attr.rangeOn.value.Map.V.isPointer() == false {
                 TypeConverterAndPrimitivePacker.unPackPrimitives(c , code , attr.rangeOn.value.Map.V)
@@ -201,10 +200,10 @@ class BuildForRangeMap {
             if attr.identifierValue != null {
                 if attr.identifierValue.Variable.beenCapturedAsLeftValue > 0 {
                     copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject,
-                        attr.identifierValue.Variable.localValOffset))
+                            attr.identifierValue.Variable.localValOffset))
                     copyOPs(code,
                         loadLocalVariableOps(attr.identifierValue.Variable.Type.Type,
-                        autoVar.V))
+                            autoVar.V))
                     this.eb.storeLocalVar(c , code , attr.identifierValue.Variable)
                 } else {
                     attr.identifierValue.Variable.localValOffset = autoVar.V

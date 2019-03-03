@@ -1,26 +1,26 @@
 public class Statement {
     public Type              StatementTypeKind
     public checked           bool              // if checked
-    public pos               Pos              
-    public statementIf       StatementIf      
-    public Expression        Expression       
-    public TypeAlias         TypeAlias        
-    public StatementFor      StatementFor     
-    public StatementReturn   StatementReturn  
-    public StatementSwitch   StatementSwitch  
-    public StatementWhen     StatementWhen    
-    public StatementBreak    StatementBreak   
-    public block             Block            
+    public pos               Pos
+    public statementIf       StatementIf
+    public Expression        Expression
+    public TypeAlias         TypeAlias
+    public StatementFor      StatementFor
+    public StatementReturn   StatementReturn
+    public StatementSwitch   StatementSwitch
+    public StatementWhen     StatementWhen
+    public StatementBreak    StatementBreak
+    public block             Block
     public StatementContinue StatementContinue
-    public StatementLabel    StatementLabel   
-    public StatementGoTo     StatementGoTo    
-    public Defer             StatementDefer   
-    public Class             Class            
-    public Enum              Enum             
-    public Import            Import           
-    public comment           string           
-    public inlineComment     string           
-    public isCompilerAuto    bool             
+    public StatementLabel    StatementLabel
+    public StatementGoTo     StatementGoTo
+    public Defer             StatementDefer
+    public Class             Class
+    public Enum              Enum
+    public Import            Import
+    public comment           string
+    public inlineComment     string
+    public isCompilerAuto    bool
 
     /*
 		statement contructed from static field default value
@@ -41,7 +41,7 @@ public class Statement {
             return false
         }
         return this.Expression.Type == ExpressionTypeVarAssign ||
-            this.Expression.Type == ExpressionTypeVar
+                this.Expression.Type == ExpressionTypeVar
     }
 
     fn check(block Block) -> (errs []error) {
@@ -160,7 +160,7 @@ public class Statement {
             case StatementTypeImport:
                 if block.inheritedAttribute.Function.templateClonedFunction == false {
                     errs.append(new error(sprintf("%s cannot have 'import' at this scope , non-template function",
-                        errMsgPrefix(this.Import.pos))))
+                                errMsgPrefix(this.Import.pos))))
                     return errs
                 }
                 err := this.Import.mkAccessName()
@@ -171,7 +171,7 @@ public class Statement {
                 if this.Import.accessName != null &&
                     this.Import.accessName == UnderScore {
                     errs.append(new error(sprintf("%s import at block scope , must be used",
-                        errMsgPrefix(this.Import.pos))))
+                                errMsgPrefix(this.Import.pos))))
                     return null
                 }
                 if err := block.inheritedAttribute.p.insertImport(this.Import) ; err != null {

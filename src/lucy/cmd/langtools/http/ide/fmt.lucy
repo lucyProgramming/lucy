@@ -5,14 +5,13 @@ import "com/sun/net/httpserver/HttpHandler"
 import "com/sun/net/httpserver/HttpExchange"
 import "lucy/cmd/langtools/http/g"
 import "java/lang/System"
-import "lucy/os" as lucyOs
+import "lucy/os" as lucyos
 
 class Fmt implements HttpHandler {
     public fn handle(exchange HttpExchange) {
         os := exchange.getResponseBody()
         now := System.currentTimeMillis()
         defer {
-
             CallStatus.collect(callStatus , "fmt" , System.currentTimeMillis() - now)
             e := catch()
             if e != null {
@@ -22,7 +21,6 @@ class Fmt implements HttpHandler {
             }
             exchange.close()
         }
-
         uri := exchange.getRequestURI()
         paramters := g.parseQuery(uri.getQuery())
         file := paramters["file"]
@@ -34,7 +32,7 @@ class Fmt implements HttpHandler {
         }
         bs := g.readBodyBytes(exchange.getRequestBody())
         if len(bs) == 0 {
-            t , err := lucyOs.readFile(file)
+            t , err := lucyos.readFile(file)
             if err != null {
                 panic(err)
             }
@@ -54,7 +52,6 @@ class Fmt implements HttpHandler {
             return
         }
         {
-
             formator := new ideLib.Fmt()
             s := formator.fmt(tops)
             bs := byte[](s)

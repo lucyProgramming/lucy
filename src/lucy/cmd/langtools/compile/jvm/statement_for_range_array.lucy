@@ -3,7 +3,7 @@ import "lucy/jvm/cg"
 import "lucy/binary"
 
 class AutoVariableForRangeArray extends AutoVariableForRangeJavaArray {
-    start char
+    start char // loop control var
 }
 
 
@@ -146,15 +146,15 @@ class BuildForRangeArray {
         s.continueCodeOffset = code.codeLength
         context.MakeStackMap(code , forState , code.codeLength)
         blockState := new StackMapState(forState)
-        if autoVar.K > 255 {
+        if autoVar.start > 255 {
             code.codes[code.codeLength] = cg.OP_wide
             code.codes[code.codeLength + 1] = cg.OP_iinc
-            binary.BigEndian.putChar(code.codes[code.codeLength + 2:] , autoVar.K)
+            binary.BigEndian.putChar(code.codes[code.codeLength + 2:] , autoVar.start)
             binary.BigEndian.putChar(code.codes[code.codeLength + 4:] , char(1))
             code.codeLength += 6
         } else {
             code.codes[code.codeLength] = cg.OP_iinc
-            code.codes[code.codeLength + 1] = byte(autoVar.K)
+            code.codes[code.codeLength + 1] = byte(autoVar.start)
             code.codes[code.codeLength + 2] = 1b
             code.codeLength += 3
         }

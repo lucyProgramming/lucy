@@ -85,7 +85,6 @@ class ExpressionCheckFunctionCall {
                     t.pos = e.pos
                     t.err = errMsg
                     errs.append(t)
-
                 }
                 call.Function = f
                 return .checkFunctionCall(e , block , errs , f , call)
@@ -189,7 +188,12 @@ class ExpressionCheckFunctionCall {
         return ret
     }
 
-    static fn checkFunctionCall(e Expression , block Block , errs []error , f Function , call ExpressionFunctionCall) -> (valueTypes []Type) {
+    static fn checkFunctionCall(
+        e Expression,
+        block Block,
+        errs []error,
+        f Function,
+        call ExpressionFunctionCall) -> (returnValues []Type) {
         if f.templateFunction != null {
             errsLength := len(errs)
             callArgsTypes := checkExpressions(block , call.args , errs , true)
@@ -202,19 +206,19 @@ class ExpressionCheckFunctionCall {
             if len(errs) != errsLength {
                 return null
             }
-            ret := tf.Type.mkCallReturnTypes(e.pos)
+            returnValues = tf.Type.mkCallReturnTypes(e.pos)
             var err error
             call.vArgs , err = tf.Type.fitArgs(block , e.pos , call.args , callArgsTypes , tf)
             if err != null {
                 errs.append(err)
             }
-            return ret
+            return
         } else {
-            ret := f.Type.mkCallReturnTypes(e.pos)
+            returnValues = f.Type.mkCallReturnTypes(e.pos)
             errsLength := len(errs)
             callArgsTypes := checkExpressions(block , call.args , errs , true)
             if len(errs) > errsLength {
-                return ret
+                return returnValues
             }
             if f.isBuildIn {
                 if f.loadedFromCorePackage {
@@ -223,17 +227,10 @@ class ExpressionCheckFunctionCall {
                     if err != null {
                         errs.append(err)
                     }
-                    return ret
+                    return returnValues
                 } else {
-                    length := len(errs)
                     f.buildInFunctionChecker(f , e.data.(ExpressionFunctionCall) , block , errs , callArgsTypes , e.pos)
-                    if len(errs) == length {
-                        //special case ,avoid null pointer
-                        return ret
-                    }
-                    return null //
                 }
-
             } else {
                 if len(call.parameterTypes) > 0 {
                     errs.append(new error(sprintf("%s function is not a template function",
@@ -244,11 +241,9 @@ class ExpressionCheckFunctionCall {
                 if err != null {
                     errs.append(err)
                 }
-                return ret
+                return
             }
-
         }
-
     }
 
     static fn checkTemplateFunctionCall(e Expression , block Block , errs []error,

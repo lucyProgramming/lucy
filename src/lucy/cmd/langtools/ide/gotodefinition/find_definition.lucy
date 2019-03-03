@@ -47,7 +47,6 @@ class FindDefinition {
                 this.matchLine,
                 loader)
         }
-
         if p == null {
             return
         }
@@ -55,7 +54,6 @@ class FindDefinition {
             for v := range es {
                 os.stderr.println(v.getMessage())
             }
-
         }
         if null != this.storePackage {
             this.storePackage[0] = p

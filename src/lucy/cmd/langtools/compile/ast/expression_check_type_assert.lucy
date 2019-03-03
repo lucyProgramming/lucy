@@ -15,18 +15,23 @@ class ExpressionCheckTypeAssert {
         }
         if object.isPointer() == false {
             errs.append(new error(sprintf("%s expression is not pointer",
-                errMsgPrefix(object.pos))))
+                        errMsgPrefix(object.pos))))
             return
         }
         err := assertion.Type.resolve(block)
         if err != null {
             errs.append(err)
-            return
-        }
-        if assertion.Type.validForTypeAssertOrConversion() == false {
-            errs.append(new error(sprintf("%s cannot use '%s' for type assertion",
-                errMsgPrefix(assertion.Type.pos) , assertion.Type.typeString())))
-            return
+        } else {
+            if object.assignAble(block , errs , assertion.Type) == false {
+                errs.append(
+                    new error(
+                        sprintf("%s '%s' is not sub class of '%s'",
+                            assertion.Type.pos.errMsgPrefix() , assertion.Type.typeString() , object.typeString())))
+            }
+            if assertion.Type.validForTypeAssertOrConversion() == false {
+                errs.append(new error(sprintf("%s cannot use '%s' for type assertion",
+                            errMsgPrefix(assertion.Type.pos) , assertion.Type.typeString())))
+            }
         }
         if len(e.lefts) > 1 {
             assertion.multiValueContext = true

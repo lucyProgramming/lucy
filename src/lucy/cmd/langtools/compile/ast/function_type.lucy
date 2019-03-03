@@ -1,13 +1,13 @@
 public class FunctionType {
-    public templateNames           []NameWithPos     
+    public templateNames           []NameWithPos
     public templateNamesMap        map{string -> Pos}
-    public parameterList           []Variable        
-    public returnList              []Variable        
-    public vArgs                   Variable          
-    public lpContainsLf            bool              
-    public lpContainsInlineComment string            
+    public parameterList           []Variable
+    public returnList              []Variable
+    public vArgs                   Variable
+    public lpContainsLf            bool
+    public lpContainsInlineComment string
 
-    public returnLpContainsLf            bool  
+    public returnLpContainsLf            bool
     public returnLpContainsInlineComment string
 
     fn reDefineParameterOrReturnVar(reDefine Variable) -> (err error) {
@@ -81,14 +81,15 @@ public class FunctionType {
             if len(this.parameterList) > 0 {
                 s += " , "
             }
-            if this.vArgs.name != null && this.vArgs.name != "" {
+            if this.vArgs.name != null &&
+                this.vArgs.name != "" {
                 s += this.vArgs.name + " "
             }
             s += this.vArgs.Type.typeName()
         }
         s += ")"
         if this.voidReturn() == false {
-            s += "->( "
+            s += " -> ("
             for k , v := range this.returnList {
                 if v.name != null && v.name != "" {
                     s += v.name + " "

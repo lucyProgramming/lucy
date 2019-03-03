@@ -5,7 +5,8 @@ import "lucy/binary"
 class AutoVariableForRangeJavaArray {
     protected Elements char
     protected end      char
-    protected K , V    char
+    protected K        char // loop control var when range java array 
+    protected V        char
 }
 
 

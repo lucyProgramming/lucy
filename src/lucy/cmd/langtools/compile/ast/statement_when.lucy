@@ -2,22 +2,22 @@ import "lucy/jvm/cg"
 
 public class StatementWhenCase {
     public matches       []Type
-    public block         Block 
+    public block         Block
     public inlineComment string
 }
 
 
 public class StatementWhen {
-    public pos                 Pos                
-    public condition           Type               
-    public typeExpression      Expression         
+    public pos                 Pos
+    public condition           Type
+    public typeExpression      Expression
     public prefixExpressions   []Expression        // not support now 
     public cases               []StatementWhenCase
-    public defaultBlock        Block              
-    public inlineComment       string             
-    public elseInlineComment   string             
+    public defaultBlock        Block
+    public inlineComment       string
+    public elseInlineComment   string
     public initExpressionBlock Block = new Block()
-    public exits               []cg.Exit          
+    public exits               []cg.Exit
 
     fn checkWhenType(block Block) -> (errs []error = []error{}) {
         this.initExpressionBlock.inherit(block)
@@ -34,12 +34,12 @@ public class StatementWhen {
         if this.typeExpression.Type != ExpressionTypeTypeAssert ||
             this.typeExpression.data.(ExpressionTypeAssert).isType == false {
             errs.append(new error(sprintf("%s expression is not a XXX.(type)",
-                condtitionType.pos.errMsgPrefix())))
+                        condtitionType.pos.errMsgPrefix())))
         }
         if condtitionType != null {
             if condtitionType.isPointer() == false {
                 errs.append(new error(sprintf("%s is not a pointer at all",
-                    condtitionType.pos.errMsgPrefix())))
+                            condtitionType.pos.errMsgPrefix())))
             }
             for v := range this.cases {
                 for _ , match := range v.matches {
@@ -54,9 +54,16 @@ public class StatementWhen {
                         errs.append(new error(errMsg))
                         continue
                     }
+                    if condtitionType.assignAble(block , errs , match ) == false {
+                        errs.append(
+                            new error(
+                                sprintf("%s '%s' is not sub class of '%s'",
+                                    match.pos.errMsgPrefix() , match.typeString() , condtitionType.typeString())))
+                        continue
+                    }
                     if match.validForTypeAssertOrConversion() == false {
                         errs.append(new error(sprintf("%s '%s' is not valid for type assert",
-                            match.typeString() , condtitionType.typeString())))
+                                    match.typeString() , condtitionType.typeString())))
                         continue
                     }
                 }
@@ -86,7 +93,7 @@ public class StatementWhen {
         }
         if len(this.condition.getParameterType(block.inheritedAttribute.Function.Type)) == 0 {
             errs.append(new error(sprintf("%s '%s' constains no parameter type",
-                this.condition.pos.errMsgPrefix() , this.condition.typeString())))
+                        this.condition.pos.errMsgPrefix() , this.condition.typeString())))
         }
         if err := this.condition.resolve(block) ; err != null {
             errs.append(err)
@@ -136,7 +143,7 @@ public class StatementWhen {
         if match == null {
             if this.defaultBlock == null {
                 errs.append(new error(sprintf("%s condition resolve as '%s' has no match and no 'default block'",
-                    errMsgPrefix(this.condition.pos) , this.condition.typeString())))
+                            errMsgPrefix(this.condition.pos) , this.condition.typeString())))
             } else {
                 switchStatement.Type = StatementTypeBlock
                 switchStatement.block = this.defaultBlock

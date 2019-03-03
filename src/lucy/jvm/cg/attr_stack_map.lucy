@@ -1,14 +1,13 @@
-import "java/lang/Object"
 import "lucy/binary"
 
-interface StackMap {
+public interface StackMap {
     public fn toBytes() -> ([]byte)
 }
 
 
 public class AttributeStackMap {
     public StackMaps []StackMap
-
+    
     static fn fromBs(bs []byte) -> (sm AttributeStackMap) {
         length := binary.BigEndian.getChar(bs)
         bs = bs[2:]
@@ -110,8 +109,8 @@ public class StackMapSameFrame implements StackMap {
 
 
 public class StackMapSameLocals1StackItemFrame implements StackMap {
-    frameType byte                        
-    stack     StackMapVerificationTypeInfo
+    public frameType byte
+    public stack     StackMapVerificationTypeInfo
 
     public fn StackMapSameLocals1StackItemFrame(frameType byte , stack StackMapVerificationTypeInfo) {
         this.super()
@@ -127,8 +126,8 @@ public class StackMapSameLocals1StackItemFrame implements StackMap {
 
 
 public class StackMapSameLocals1StackItemFrameExtended implements StackMap {
-    public frameType byte                        
-    public delta     char                        
+    public frameType byte
+    public delta     char
     public stack     StackMapVerificationTypeInfo
     public fn StackMapSameLocals1StackItemFrameExtended(frameType byte , delta char , stack StackMapVerificationTypeInfo) {
         this.super()
@@ -182,8 +181,8 @@ public class StackMapSameFrameExtended implements StackMap {
 
 
 public class StackMapAppendFrame implements StackMap {
-    public frameType byte                          
-    public delta     char                          
+    public frameType byte
+    public delta     char
     public locals    []StackMapVerificationTypeInfo
 
     public fn StackMapAppendFrame(frameType byte , delta char , locals []StackMapVerificationTypeInfo) {
@@ -200,15 +199,14 @@ public class StackMapAppendFrame implements StackMap {
         for _ , v := range this.locals {
             bs.appendAll(v.toBytes())
         }
-
         return bs
     }
 }
 
 
 public class StackMapFullFrame implements StackMap {
-    public frameType byte                          
-    public delta     char                          
+    public frameType byte
+    public delta     char
     public locals    []StackMapVerificationTypeInfo
     public stacks    []StackMapVerificationTypeInfo
 
@@ -244,28 +242,35 @@ public class StackMapFullFrame implements StackMap {
 }
 
 
-public class StackMapTopVariableInfo{}
+public class StackMapTopVariableInfo implements VerificationTypeInfo {
+}
 
 
-public class StackMapIntegerVariableInfo{}
+public class StackMapIntegerVariableInfo implements VerificationTypeInfo {
+}
 
 
-public class StackMapFloatVariableInfo{}
+public class StackMapFloatVariableInfo implements VerificationTypeInfo {
+}
 
 
-public class StackMapLongVariableInfo{}
+public class StackMapLongVariableInfo implements VerificationTypeInfo {
+}
 
 
-public class StackMapDoubleVariableInfo{}
+public class StackMapDoubleVariableInfo implements VerificationTypeInfo {
+}
 
 
-public class StackMapNullVariableInfo{}
+public class StackMapNullVariableInfo implements VerificationTypeInfo {
+}
 
 
-public class StackMapUninitializedThisVariableInfo{}
+public class StackMapUninitializedThisVariableInfo implements VerificationTypeInfo {
+}
 
 
-public class StackMapObjectVariableInfo {
+public class StackMapObjectVariableInfo implements VerificationTypeInfo {
     public index char
     public fn StackMapObjectVariableInfo(index char) {
         this.super()
@@ -274,7 +279,7 @@ public class StackMapObjectVariableInfo {
 }
 
 
-public class StackMapUninitializedVariableInfo {
+public class StackMapUninitializedVariableInfo implements VerificationTypeInfo {
     public codeOffset char
     public fn StackMapUninitializedVariableInfo(codeOffset char) {
         this.super()
@@ -282,9 +287,13 @@ public class StackMapUninitializedVariableInfo {
     }
 }
 
+// this interface has no method at all 
+// but it is use for the compiler to type check
+public interface VerificationTypeInfo{}
+
 
 public class StackMapVerificationTypeInfo {
-    public verify Object
+    public verify VerificationTypeInfo
     static fn fromBs(bs []byte) -> (v StackMapVerificationTypeInfo , remain []byte) {
         vType := bs[0]
         switch vType {

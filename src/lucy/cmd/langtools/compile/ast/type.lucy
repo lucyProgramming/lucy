@@ -527,9 +527,8 @@ public class Type {
                     ret = prefix + this.array.typeName() + "[]"
                     return ret
                 }
-
             case VariableTypeFunction:
-                ret = prefix + "fn " + this.functionType.typeName()
+                ret = prefix + "fn" + this.functionType.typeName()
                 return
             case VariableTypeEnum:
                 ret = prefix + this.name

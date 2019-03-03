@@ -45,7 +45,7 @@ public class AttributeCode {
         return ret
     }
 
-    static fn fromBs(c Class , bs []byte) -> (code AttributeCode) {
+    public static fn fromBs(c Class , bs []byte) -> (code AttributeCode) {
         code = new AttributeCode()
         code.maxStack = binary.BigEndian.getChar(bs)
         code.maxLocals = binary.BigEndian.getChar(bs[2:])
