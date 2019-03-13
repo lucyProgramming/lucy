@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 class ExpressionConstFold {
     static fn constantFold(e Expression , errs []error) -> (is bool , err error) {
         if e.isLiteral() {

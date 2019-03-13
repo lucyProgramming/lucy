@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 import "lucy/cmd/langtools/ide/hover"
 import "com/sun/net/httpserver/HttpHandler"
 import "com/sun/net/httpserver/HttpExchange"

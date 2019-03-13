@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 
 fn forCondtion(){
 	for i := 0 ; i< 10 ;i ++ {} 

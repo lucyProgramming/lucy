@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 public const OP_nop byte = 0x00 //什么都不做。
 public const OP_aconst_null byte = 0x01 // 将 null 推送至栈顶。
 public const OP_iconst_m1 byte = 0x02 //将 int 型-1 推送至栈顶。

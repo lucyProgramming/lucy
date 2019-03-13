@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 public class AttributeInfo {
     public nameIndex       char
            attributeLength int

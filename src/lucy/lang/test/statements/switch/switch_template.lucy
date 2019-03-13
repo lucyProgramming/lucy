@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 import "lucy/lang"
 
 fn testT <T> ( t T) ->(typeString string) {

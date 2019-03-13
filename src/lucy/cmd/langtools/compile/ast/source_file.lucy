@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 //different from different source file
 class SourceFile {
     imports            map{string -> Import} // accessName -> Import

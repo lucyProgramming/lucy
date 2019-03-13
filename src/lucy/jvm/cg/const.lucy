@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 public const ConstantPoolMaxSize = 65536
 public const ClassMagicNumber = 0xcafebabe
 public const AttributeNameSourceFile = "SourceFile"

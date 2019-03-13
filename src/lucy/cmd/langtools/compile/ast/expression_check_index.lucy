@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 class ExpressionCheckIndex {
     static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
         index := e.data.(ExpressionIndex)

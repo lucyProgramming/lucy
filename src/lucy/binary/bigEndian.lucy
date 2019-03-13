@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 public class BigEndian {
     public static fn putChar(bs []byte , v char) {
         _ = bs[1]

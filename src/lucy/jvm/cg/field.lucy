@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 
  
 public const	AccFieldPublic    char = 0x0001 //public，表示字段可以从任何包访问。

@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 import "lucy/os/flag"
 
 // parse cmd args

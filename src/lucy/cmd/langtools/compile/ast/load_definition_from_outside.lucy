@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 /*
 	when javaPackage is not null 
 		packageName indicate "java package name" and name indicate "class name"

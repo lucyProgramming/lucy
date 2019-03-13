@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 import "com/sun/net/httpserver/HttpServer"
 
 public fn registerHandlers(prefix string , server HttpServer){}

@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 import "lucy/binary"
 import "java/lang/Float"
 import "java/lang/Double"

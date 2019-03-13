@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 class ExpressionCheckUnary {
     static fn checkUnaryExpression(e Expression , block Block , errs []error) -> (valueType Type) {
         ee := e.data.(Expression)

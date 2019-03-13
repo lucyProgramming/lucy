@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 //array  
 public const ArrayMethodSize = "size"
 public const ArrayMethodCap = "cap"

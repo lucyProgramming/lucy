@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 public class Pos {
     public filename          string
     public startLine         int

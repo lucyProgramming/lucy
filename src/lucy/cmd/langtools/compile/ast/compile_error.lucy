@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 public class CompileError extends error {
     // pos of this error 
     // public startPos Pos

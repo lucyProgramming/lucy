@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 class ExpressionCheckConst {
     static fn check(e Expression , block Block) -> (errs []error = []error{}) {
         cs := e.data.([]Constant)

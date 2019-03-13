@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 public final class StringOption extends Option {
     private stringDefaultValue string
     private stringValue        string

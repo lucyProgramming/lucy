@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 class ExpressionCheckFunctionCall {
     static fn checkFunctionCallExpression(e Expression , block Block , errs []error) -> (valueTypes []Type) {
         call := e.data.(ExpressionFunctionCall)

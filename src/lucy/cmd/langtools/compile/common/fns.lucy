@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 public fn getBaseName(filepath string) -> (name string) {
     index := filepath.lastIndexOf("/")
     if index < 0 {

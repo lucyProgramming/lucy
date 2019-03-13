@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 /*
     ptl is short for "print token list"
     this tool is use for parse a lucy file ".lucy" and print token list for debugging

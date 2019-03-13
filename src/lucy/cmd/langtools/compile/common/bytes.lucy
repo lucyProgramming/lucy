@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 public class Bytes {
     public static fn indexByte(bs []byte , b byte) -> (index int = -1) {
         for k , v := range bs {

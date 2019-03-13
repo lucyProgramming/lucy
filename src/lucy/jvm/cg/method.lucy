@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 public const AccMethodPublic char = 0x0001 //public，方法可以从包外访问
 public const AccMethodPrivate char = 0x0002 //private，方法只能本类中访问
 public const AccMethodProtected char = 0x0004 //protected，方法在自身和子类可以访问

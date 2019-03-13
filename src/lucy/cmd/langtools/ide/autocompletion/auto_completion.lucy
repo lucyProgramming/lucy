@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/ide"
 import "lucy/cmd/langtools/common"

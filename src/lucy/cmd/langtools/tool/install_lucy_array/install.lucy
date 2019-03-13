@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 //TODO:: rewrite using lucy
 import "lucy/os"
 import "java/io"

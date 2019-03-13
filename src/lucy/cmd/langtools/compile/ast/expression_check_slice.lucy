@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 
 class ExpressionCheckSlice {
 	static fn check(e Expression , block Block, errs []error) ->(valueType Type) {

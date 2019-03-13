@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 public final class IntOption extends Option {
     private intDefaultValue int
     private intValue        int

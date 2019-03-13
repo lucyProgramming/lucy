@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 public fn quickSort <array> (s array , l int , r int , asc bool) {
     if l < r && asc {
         i , j := l , r

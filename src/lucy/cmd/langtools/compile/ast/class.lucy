@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 import "lucy/jvm/cg"
 import "java/lang/Object"
 import "lucy/cmd/langtools/compile/common"

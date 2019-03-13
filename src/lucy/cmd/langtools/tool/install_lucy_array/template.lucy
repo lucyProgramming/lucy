@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 const array_template = `
 package lucy.deps;
 import java.lang.reflect.* ; 

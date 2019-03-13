@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 import "lucy/jvm/cg"
 
 typealias BuildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error , args []Type , pos Pos)

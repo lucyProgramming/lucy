@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 import "java/lang/Object"
 import "java/lang/Class"
 import "java/lang/reflect/Array"

@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 fn testFloat() -> (ok bool = false) {
     var a , b float
     a = 1.0

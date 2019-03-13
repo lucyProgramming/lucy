@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 class ImportStack {
     Stacks []PackageCompiled
     M      map{string -> PackageCompiled}

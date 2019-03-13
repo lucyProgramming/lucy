@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 public final class FloatOption extends Option {
     private floatDefaultValue float
     private floatValue        float

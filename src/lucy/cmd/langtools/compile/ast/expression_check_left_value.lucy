@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 class ExpressionCheckLeftValue {
 	
 	static fn getLeftValue(e Expression, block Block, errs []error) -> (result Type) {

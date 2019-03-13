@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 import "lucy/binary"
 
 public const MethodParameterTypeAccFinal = 0x0010

@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 class ExpressionCheckTypeAssert {
     static fn check(e Expression , block Block , errs []error) -> (valueTypes []Type) {
         assertion := e.data.(ExpressionTypeAssert)

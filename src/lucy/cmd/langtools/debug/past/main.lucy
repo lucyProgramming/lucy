@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 /*
     past is short for "print abstract syntax tree"
     this tool is use for parse a lucy and print "ast" debugging

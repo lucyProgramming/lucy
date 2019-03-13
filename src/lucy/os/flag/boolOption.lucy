@@ -1,3 +1,5 @@
+// all rights reserved , check the LICENSE file
+
 public final class BoolOption extends Option {
     private boolDefaultValue bool
     private boolValue        bool
