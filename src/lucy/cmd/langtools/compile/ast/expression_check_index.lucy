@@ -22,12 +22,12 @@ class ExpressionCheckIndex {
                             indexValue := index.index.getLongValue()
                             if indexValue < 0 {
                                 errs.append(new error(sprintf("%s index '%d' is negative",
-                                    index.index.pos.errMsgPrefix() , indexValue)))
+                                            index.index.pos.errMsgPrefix() , indexValue)))
                             }
                         }
                     } else {
                         errs.append(new error(sprintf("%s only integer can be used as index,but '%s'",
-                            index.index.pos.errMsgPrefix() , indexType.typeString())))
+                                    index.index.pos.errMsgPrefix() , indexType.typeString())))
                     }
 
                 }
@@ -44,7 +44,7 @@ class ExpressionCheckIndex {
                 }
                 if on.Map.K.assignAble(block , errs , indexType) == false {
                     errs.append(new error(sprintf("%s cannot use '%s' as '%s' for index",
-                        index.index.pos.errMsgPrefix() , indexType.typeString() , on.Map.K.typeString())))
+                                index.index.pos.errMsgPrefix() , indexType.typeString() , on.Map.K.typeString())))
                 }
                 return
             case VariableTypeString:
@@ -57,7 +57,7 @@ class ExpressionCheckIndex {
                         }
                     } else {
                         errs.append(new error(sprintf("%s only integer can be used as index,but '%s'",
-                            index.index.pos.errMsgPrefix() , indexType.typeString())))
+                                    index.index.pos.errMsgPrefix() , indexType.typeString())))
                     }
 
                 }
@@ -67,7 +67,7 @@ class ExpressionCheckIndex {
                 return
             default:
                 errs.append(new error(sprintf("%s cannot index '%s'",
-                    on.pos.errMsgPrefix() , on.typeString())))
+                            on.pos.errMsgPrefix() , on.typeString())))
                 return
         }
 
