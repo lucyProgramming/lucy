@@ -1,0 +1,12 @@
+// all rights reserved , check the LICENSE file
+
+import "lucy/os"
+
+const usage = `
+    
+`
+
+fn printUsageAndExit(code int) {
+    print(usage)
+    os.exit(code)
+}

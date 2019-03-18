@@ -1,19 +1,12 @@
 // all rights reserved , check the LICENSE file
 
 import "lucy/os/flag"
-import "lucy/os"
-
-//TODO:: missing add files
-fn printUsageAndExit(code int) {
-    
-    os.exit(code)
-}
 
 class Flags {
-    parser      flag.FlagParser  
+    parser      flag.FlagParser
     packageName flag.StringOption
     installDir  flag.StringOption
-    
+
     fn Flags() {
         this.super()
         this.parser = new flag.FlagParser()
