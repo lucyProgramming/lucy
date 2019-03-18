@@ -29,7 +29,7 @@ fn main(args []string) {
     }
     switch args[0] {
         case "version":
-            printf("lucy-%s\n" , "0.1")
+            printf("lucy-%s\n" , "0.2")
             os.exit(0)
         case "build":
             t := ["-build"]
@@ -52,7 +52,7 @@ fn main(args []string) {
         case "pack":
             pack.pack(args[1:])
         default:
-            print("command '%s' not found\n" , args[0])
+            printf("command '%s' not found\n" , args[0])
             printUsage()
             os.exit(1)
     }

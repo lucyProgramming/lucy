@@ -9,17 +9,18 @@ public const MethodParameterTypeAccMandated = 0x8000
 public class AttributeMethodParameters {
     public parameters []MethodParameter
 
-    public fn fromBs(c Class , bs []byte) {
+    public static fn fromBs(c Class , bs []byte) -> (pa AttributeMethodParameters){
         if len(bs) != int(bs[0]) * 4 + 1 {
             panic("impossible")
         }
+        pa = new AttributeMethodParameters()
         bs = bs[1:]
-        this.parameters = []MethodParameter{}
+        pa.parameters = []MethodParameter{}
         for len(bs) > 0 {
             p := new MethodParameter()
             p.name = string(c.constPools[binary.BigEndian.getChar(bs)].info)
             p.accessFlags = binary.BigEndian.getChar(bs[2:])
-            this.parameters.append(p)
+            pa.parameters.append(p)
             bs = bs[4:]
         }
     }

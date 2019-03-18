@@ -5,9 +5,10 @@ import "lucy/binary"
 public class AttributeLucyTypeAlias {
 	public alias   string
 	public comment string
-	public fn fromBs(c Class, bs []byte) {
-		this.alias = string(c.constPools[binary.BigEndian.getChar(bs)].info)
-		this.comment = string(c.constPools[binary.BigEndian.getChar(bs[2:])].info)
+
+	public static fn fromBs(c Class, bs []byte) -> (at AttributeLucyTypeAlias = new AttributeLucyTypeAlias()){
+		at.alias = string(c.constPools[binary.BigEndian.getChar(bs)].info)
+		at.comment = string(c.constPools[binary.BigEndian.getChar(bs[2:])].info)
 	}
 	
 	fn toAttributeInfo(c Class) -> (ret AttributeInfo)  {

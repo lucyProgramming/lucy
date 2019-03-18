@@ -7,12 +7,14 @@ public class AttributeLucyFieldDescriptor {
 	public descriptor       string
 	public methodAccessFlag char
 
-	public fn fromBs(c Class, bs []byte) {
+	public static fn fromBs(c Class, bs []byte)  -> (fd AttributeLucyFieldDescriptor){
+		
 		if len(bs) != 4 {
 			panic("length is not 4")
 		}
-		this.descriptor = string(c.constPools[binary.BigEndian.getChar(bs[0:2])].info)
-		this.methodAccessFlag = binary.BigEndian.getChar(bs[2:4])
+		descriptor := string(c.constPools[binary.BigEndian.getChar(bs[0:2])].info)
+		methodAccessFlag := binary.BigEndian.getChar(bs[2:4])
+		fd = new AttributeLucyFieldDescriptor(descriptor ,methodAccessFlag )
 	}
 
 	public fn AttributeLucyFieldDescriptor(Descriptor string , methodAccessFlag char){

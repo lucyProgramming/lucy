@@ -8,21 +8,21 @@ public class InnerClass {
     public name        string
     public accessFlags char  
 
-    fn fromBs(c Class , bs []byte) {
+    static fn  fromBs(c Class , bs []byte) ->(ic InnerClass = new InnerClass()) {
         nameIndex := binary.BigEndian.getChar(c.constPools[binary.BigEndian.getChar(bs)].info)
-        this.innerClass = string(c.constPools[nameIndex].info)
+        ic.innerClass = string(c.constPools[nameIndex].info)
         if 0 == binary.BigEndian.getChar(bs[2:]) {
             //TODO:: what zero means???
         } else {
             nameIndex = binary.BigEndian.getChar(c.constPools[binary.BigEndian.getChar(bs[2:])].info)
-            this.outerClass = string(c.constPools[nameIndex].info)
+            ic.outerClass = string(c.constPools[nameIndex].info)
         }
         if 0 == binary.BigEndian.getChar(bs[4:]) {
             //TODO:: what zero means???
         } else {
-            this.name = string(c.constPools[binary.BigEndian.getChar(bs[4:])].info)
+            ic.name = string(c.constPools[binary.BigEndian.getChar(bs[4:])].info)
         }
-        this.accessFlags = binary.BigEndian.getChar(bs[6:])
+        ic.accessFlags = binary.BigEndian.getChar(bs[6:])
     }
 }
 
@@ -37,8 +37,7 @@ public class AttributeInnerClasses {
         }
         this.classes = []InnerClass{}
         for len(bs) > 0 {
-            inner := new InnerClass()
-            inner.fromBs(c , bs[:8])
+            inner := InnerClass.fromBs(c , bs[:8])
             this.classes.append(inner)
             bs = bs[8:]
         }

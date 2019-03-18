@@ -6,15 +6,16 @@ public class AttributeLucyClassConst {
 	
 	public constants []LucyClassConst
 	
-	public fn fromBs(c Class, bs []byte) {
-	    this.constants = []LucyClassConst{}
+	public static fn fromBs(c Class, bs []byte) -> (cs AttributeLucyClassConst){
+		cs = new AttributeLucyClassConst()
+	    cs.constants = []LucyClassConst{}
 		for len(bs) > 0 {
 			constant := new LucyClassConst()
 			constant.name = string(c.constPools[binary.BigEndian.getChar(bs)].info)
 			constant.descriptor = string(c.constPools[binary.BigEndian.getChar(bs[2:])].info)
 			constant.valueIndex = binary.BigEndian.getChar(bs[4:])
 			bs = bs[6:]
-			this.constants.append(constant)
+			cs.constants.append(constant)
 		}
 	}
 	

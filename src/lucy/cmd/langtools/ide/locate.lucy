@@ -16,7 +16,6 @@ public fn locateLucyFile(file string) -> (lucyPath string , pacakgenName string)
                 break
             }
         }
-
         if prefixNotMatch {
             continue
         }
@@ -40,7 +39,6 @@ public fn locateLucyFile(file string) -> (lucyPath string , pacakgenName string)
                     break
                 }
             }
-
         }
         if constainsLucyFiles == false {
             continue

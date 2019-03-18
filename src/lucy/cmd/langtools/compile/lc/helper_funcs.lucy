@@ -4,16 +4,14 @@ import "lucy/jvm/cg"
 import "lucy/cmd/langtools/compile/ast"
 
 fn parseMethodParameter(c cg.Class , bs []byte , f ast.Function) {
-    a := new cg.AttributeMethodParameters()
-    a.fromBs(c , bs)
+    a := cg.AttributeMethodParameters.fromBs(c , bs)
     for k , v := range a.parameters {
         f.Type.parameterList[k].name = v.name
     }
 }
 
 fn parseReturnListNames(c cg.Class , bs []byte , f ast.Function) {
-    a := new cg.AttributeMethodParameters()
-    a.fromBs(c , bs)
+    a := cg.AttributeMethodParameters.fromBs(c , bs)
     for k , v := range a.parameters {
         f.Type.returnList[k].name = v.name
     }

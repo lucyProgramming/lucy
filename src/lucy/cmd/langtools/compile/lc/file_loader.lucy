@@ -16,7 +16,7 @@ import "lucy/cmd/langtools/common" as langtoolsCommon
 */
 public class FileLoader implements ast.loadImport {
     public lucyPath , classPath []string             
-    public caches                map{string -> Object}
+    public caches               map{string -> Object}
     // class loaded from CLASSPATH
     static javaImports map{string -> Object} = new map{string -> Object}()
 
@@ -319,8 +319,7 @@ public class FileLoader implements ast.loadImport {
         astClass.loadFromOutSide = true
         astClass.fields = new map{string -> ast.ClassField}()
         if t := cg.getAttributeByName(c.attributeGroupedByName , cg.AttributeNameLucyClassConst) ; len(t) > 0 {
-            attr := new cg.AttributeLucyClassConst()
-            attr.fromBs(c , t[0].info)
+            attr := cg.AttributeLucyClassConst.fromBs(c , t[0].info)
             var t ast.Type
             var err error
             for _ , v := range attr.constants {
@@ -348,8 +347,7 @@ public class FileLoader implements ast.loadImport {
                 panic(err)
             }
             if t := cg.getAttributeByName(v.attributeGroupedByName , cg.AttributeNameLucyFieldDescriptor) ; t != null && len(t) > 0 {
-                d := new cg.AttributeLucyFieldDescriptor("" , char(0))
-                d.fromBs(c , t[0].info)
+                d := cg.AttributeLucyFieldDescriptor.fromBs(c , t[0].info)
                 _ , f.Type , err = jvm.LucyFieldSignature.decode([]byte(d.descriptor))
                 if err != null {
                     panic(err)
@@ -503,8 +501,7 @@ public class FileLoader implements ast.loadImport {
                 vd.isGlobal = true
                 pack.block.variables[name] = vd
                 if t := f.getAttributeByName(cg.AttributeNameLucyFieldDescriptor) ; t != null && len(t) > 0 {
-                    d := new cg.AttributeLucyFieldDescriptor("" , char(0))
-                    d.fromBs(c , t[0].info)
+                    d := cg.AttributeLucyFieldDescriptor.fromBs(c , t[0].info)
                     _ , vd.Type , err = jvm.LucyFieldSignature.decode([]byte(d.descriptor))
                     if err != null {
                         panic(err)
@@ -579,8 +576,7 @@ public class FileLoader implements ast.loadImport {
             pack.block.typeAliases = new map{string -> ast.Type}()
         }
         for _ , v := range c.getAttributeByName(cg.AttributeNameLucyTypeAlias) {
-            attr := new cg.AttributeLucyTypeAlias()
-            attr.fromBs(c , v.info)
+            attr := cg.AttributeLucyTypeAlias.fromBs(c , v.info)
             name , typ , err := jvm.LucyTypeAlias.decode([]byte(attr.alias))
             if err != null {
                 panic(err)
