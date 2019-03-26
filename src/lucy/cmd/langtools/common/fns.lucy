@@ -5,6 +5,7 @@ import "java/lang/Long"
 import "java/lang/Float"
 import "java/io"
 
+
 public fn packDouble2Object(d double) -> (o Double = Double.valueOf(d)){}
 
 public fn packLong2Object(l long) -> (o Long = Long.valueOf(l)){}

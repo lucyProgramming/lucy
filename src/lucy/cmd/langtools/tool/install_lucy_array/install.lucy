@@ -8,7 +8,7 @@ class InstallLucyArray {
     fn install() {
         path := os.getEnv("LUCYROOT")
         if path == "" {
-            print("env variable LUCYPATH is not set")
+            print("env variable LUCYROOT is not set")
             os.exit(1)
         }
         dest := path + "/lib/lucy/deps/"

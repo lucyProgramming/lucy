@@ -18,9 +18,6 @@ public fn getLucyPath() -> (paths []string) {
     if envs.keyExist("LUCYROOT") == false {
         panic("env variable LUCYROOT is not set")
     }
-    if envs.keyExist("LUCYPATH") == false {
-        panic("env variable LUCYPATH is not set")
-    }
     ps := {envs["LUCYROOT"] -> true}
     lucyPath := envs["LUCYPATH"]
     osName := System.getProperty("os.name").toLowerCase()
@@ -36,8 +33,22 @@ public fn getLucyPath() -> (paths []string) {
     paths = new []string(ps.size())
     i := 0
     for k , _ := range ps {
-        paths[i] = k
+        paths[i] = FileSystems.getDefault().getPath(k).toString()
         i++
+    }
+    if len(paths) == 0 {
+        paths = [FileSystems.getDefault().getPath(os.getCwd()).toString()]
+    } else {
+        p := FileSystems.getDefault().getPath(os.getCwd()).toString()
+        found := false
+        for v := range paths {
+            if v == p {
+                found = true
+            }
+        }
+        if found == false {
+            paths.append(p)
+        }
     }
 }
 
