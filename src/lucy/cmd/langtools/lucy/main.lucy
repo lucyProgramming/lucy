@@ -8,6 +8,7 @@ import "lucy/cmd/langtools/clean"
 import "lucy/cmd/langtools/tool"
 import "lucy/cmd/langtools/http"
 import "lucy/cmd/langtools/pack"
+import "lucy/cmd/langtools/common"
 
 fn printUsage() {
     msg := `lucy is a new programing language build on jvm
@@ -18,8 +19,32 @@ fn printUsage() {
     clean                  clean compiled files
     pack                   package a lucy package use the jar tool
     http                   the http service for lucy
+    env                    print env for lucy 
     test                   test a package`
     print(msg)
+}
+
+const version = "0.2"
+
+fn printEvn() {
+    printf("lucy-%s\n" , version)
+    lucyRoot , lucyPath , _ := common.getLucyRootAndLucyPath()
+    if lucyRoot == null || lucyRoot == "" {
+        print("LUCYROOT not set")
+    } else {
+        printf("LUCYROOT:%s\n" , lucyRoot)
+    }
+    if len(lucyPath) == 0 {
+        print("LUCYPATH not set")
+    } else {
+        printf("LUCYPATH:%s\n" , lucyPath + "")
+    }
+    classPaths := common.getClassPath()
+    if len(classPaths) == 0 {
+        print("CLASSPATH not set")
+    } else {
+        printf("CLASSPATH:%s\n" , classPaths + "")
+    }
 }
 
 fn main(args []string) {
@@ -29,7 +54,7 @@ fn main(args []string) {
     }
     switch args[0] {
         case "version":
-            printf("lucy-%s\n" , "0.2")
+            printf("lucy-%s\n" , version)
             os.exit(0)
         case "build":
             t := ["-build"]
@@ -51,6 +76,8 @@ fn main(args []string) {
             http.http(args[1:])
         case "pack":
             pack.pack(args[1:])
+        case "env":
+            printEvn()
         default:
             printf("command '%s' not found\n" , args[0])
             printUsage()

@@ -92,7 +92,7 @@ public fn findPackageInWhichDirectory(lucyPath []string , packageName string) ->
     which = ps[0]
 }
 
-public fn getPaths() -> (lucyRoot string , lucyPath []string , err error) {
+public fn getLucyRootAndLucyPath() -> (lucyRoot string , lucyPath []string , err error) {
     defer {
         err = catch()
     }
