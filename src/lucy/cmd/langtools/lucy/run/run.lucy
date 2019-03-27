@@ -74,9 +74,22 @@ public class RunLucyPackage {
         var envs = new string[](len(os.getEnvs()))
         {
             var i = 0
+            classPathEnvFound := false
             for k , v := range os.getEnvs() {
+                if k == "CLASSPATH" {
+                    envs[i] = k + "=" + this.getClassPathEvnString()
+                    classPathEnvFound = true
+                    i++
+                    continue
+                }
                 envs[i] = k + "=" + v
                 i++
+            }
+            if classPathEnvFound == false {
+                envs2 := new string[](len(envs) + 1)
+                copy(envs2 , envs , 0 , len(envs))
+                envs2[len(envs)] = "CLASSPATH=" + this.getClassPathEvnString()
+                envs = envs2
             }
         }
         p := Runtime.getRuntime().exec(copy(new string[](len(cmdArray)) , cmdArray),
@@ -300,8 +313,40 @@ public class RunLucyPackage {
                 panic(errMsg)
             }
         }
-
     }
+
+    fn getClassPathEvnString() -> (path string = "") {
+        cp := new []string(len(this.classPath))
+        copy(cp , this.classPath)
+        for v := range this.lucyPath {
+            v += "/class/"
+            found := false
+            for vv := range cp {
+                if common.twoPathEqual(vv , v) {
+                    found = true
+                    break
+                }
+            }
+            if found == false {
+                cp.append(v)
+            }
+        }
+
+        osName := System.getProperty("os.name").toLowerCase()
+        var delimiter string
+        if osName.startsWith("windows") {
+            delimiter = ";"
+        } else {
+            delimiter = ":"
+        }
+        for k , v := range cp {
+            path += v
+            if k != len(path) - 1 {
+                path += delimiter
+            }
+        }
+    }
+
     fn foundError(packageName string , founds []string) {
         if len(founds) == 0 {
             panic(sprintf("package '%s' not found" , packageName))

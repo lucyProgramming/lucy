@@ -891,9 +891,7 @@ public class Lexer {
                             token.Type = TokenLiteralByte
                             token.longValue = long(t[0])
                         }
-
                     }
-
                 }
                 return
             case ':':

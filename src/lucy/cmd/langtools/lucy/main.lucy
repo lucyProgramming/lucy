@@ -32,18 +32,18 @@ fn printEvn() {
     if lucyRoot == null || lucyRoot == "" {
         print("LUCYROOT not set")
     } else {
-        printf("LUCYROOT:%s\n" , lucyRoot)
+        printf("LUCYROOT=%s\n" , lucyRoot)
     }
     if len(lucyPath) == 0 {
         print("LUCYPATH not set")
     } else {
-        printf("LUCYPATH:%s\n" , lucyPath + "")
+        printf("LUCYPATH=%s\n" , lucyPath + "")
     }
     classPaths := common.getClassPath()
     if len(classPaths) == 0 {
         print("CLASSPATH not set")
     } else {
-        printf("CLASSPATH:%s\n" , classPaths + "")
+        printf("CLASSPATH=%s\n" , classPaths + "")
     }
 }
 

@@ -16,7 +16,6 @@ public fn getEnvs() -> (envs map{string -> string} = new map{string -> string}()
     for v := range ks {
         envs[string(v)] = string(es.get(v))
     }
-
 }
 
 /*
