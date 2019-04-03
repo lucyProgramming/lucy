@@ -14,7 +14,6 @@ class AutoCompletion implements HttpHandler {
         os := exchange.getResponseBody()
         now := System.currentTimeMillis()
         defer {
-
             CallStatus.collect(callStatus , "autocompletion" , System.currentTimeMillis() - now)
             e := catch()
             if e != null {
@@ -46,7 +45,7 @@ class AutoCompletion implements HttpHandler {
         }
         usages := autocompletion.autoCompletion(file , (line << 16) | int(char(column)) , bs)
         result := copy(new ast.AutoCompletionItem[](len(usages)) , usages)
-        bs , _ = json.encode(result , "\t")
+        bs = new json.Encoder(result , "" , "\t").encode()
         exchange.sendResponseHeaders(200 , long(len(bs)))
         os.write(copy(new byte[](len(bs)) , bs))
     }

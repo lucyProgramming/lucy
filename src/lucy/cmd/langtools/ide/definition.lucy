@@ -3,9 +3,9 @@
 import "lucy/cmd/langtools/compile/ast"
 
 public class Definition {
-    public Type   string      
-    public name   string      
-    public pos    ast.Pos     
+    public Type   string
+    public name   string
+    public pos    ast.Pos
     public inners Definition[]
 }
 

@@ -12,7 +12,6 @@ class Diagnose implements HttpHandler {
         os := exchange.getResponseBody()
         now := System.currentTimeMillis()
         defer {
-
             CallStatus.collect(callStatus , "diagnose" , System.currentTimeMillis() - now)
             e := catch()
             if e != null {
@@ -33,7 +32,7 @@ class Diagnose implements HttpHandler {
             return
         }
         diags := diagnose.diagnose(file , g.readBodyBytes(exchange.getRequestBody()))
-        bs , _ := json.encode(diags , "\t")
+        bs := new json.Encoder(diags , "" , "\t").encode()
         exchange.sendResponseHeaders(200 , long(len(bs)))
         os.write(copy(new byte[](len(bs)) , bs))
     }

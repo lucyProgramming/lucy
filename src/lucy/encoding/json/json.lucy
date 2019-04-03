@@ -3,27 +3,17 @@
 import "java/lang/Object"
 import "java/lang/Class"
 
-public var enablePrintErr bool
 
 public fn encode(x Object , indent string = "") -> (bs []byte , err error) {
     defer {
         err = catch()
-        if err != null && enablePrintErr {
-            print("encode json error")
-            err.printStackTrace()
-        }
     }
-
     bs = new Encoder(x , "" , indent).encode()
 }
 
 public fn decode(bs []byte , x Object) -> (x2 Object , err error) {
     defer {
         err = catch()
-        if err != null && enablePrintErr {
-            print("decode json error")
-            err.printStackTrace()
-        }
     }
 
     x2 = new Decoder(x , bs).decode()

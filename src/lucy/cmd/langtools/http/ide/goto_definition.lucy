@@ -13,7 +13,6 @@ class GotoDefinition implements HttpHandler {
         os := exchange.getResponseBody()
         now := System.currentTimeMillis()
         defer {
-
             CallStatus.collect(callStatus , "gotodefinition" , System.currentTimeMillis() - now)
             e := catch()
             if e != null {
@@ -39,7 +38,7 @@ class GotoDefinition implements HttpHandler {
             (line << 16) | int(char(column)),
             g.readBodyBytes(exchange.getRequestBody()),
             null)
-        bs , _ := json.encode(pos , "\t")
+        bs := new json.Encoder(pos , "" , "\t").encode()
         exchange.sendResponseHeaders(200 , long(len(bs)))
         os.write(copy(new byte[](len(bs)) , bs))
     }

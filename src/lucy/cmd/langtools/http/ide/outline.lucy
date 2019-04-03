@@ -32,9 +32,11 @@ class OutLine implements HttpHandler {
             return
         }
         definitions := outline.outLine(filename)
-        t := copy(new ide.Definition[](len(definitions)) ,definitions )
-        bs ,_ := json.encode(t , "\t")
+        t := copy(new ide.Definition[](len(definitions)) , definitions)
+        bs := new json.Encoder(t , "" , "\t").encode()
         exchange.sendResponseHeaders(200 , long(len(bs)))
-        os.write(copy(new byte[](len(bs)) ,bs))
-    } 
+        os.write(copy(new byte[](len(bs)) , bs))
+    }
 }
+
+

@@ -13,7 +13,6 @@ class FindUsage implements HttpHandler {
         os := exchange.getResponseBody()
         now := System.currentTimeMillis()
         defer {
-
             CallStatus.collect(callStatus , "findusage" , System.currentTimeMillis() - now)
             e := catch()
             if e != null {
@@ -36,7 +35,7 @@ class FindUsage implements HttpHandler {
         line := Integer.parseInt(paramters["line"])
         column := Integer.parseInt(paramters["column"])
         usages := findusage.findUsage(file , (line << 16) | int(char(column)) , "" , null , null)
-        bs , _ := json.encode(usages , "\t")
+        bs := new json.Encoder(usages , "" , "\t").encode()
         exchange.sendResponseHeaders(200 , long(len(bs)))
         os.write(copy(new byte[](len(bs)) , bs))
     }

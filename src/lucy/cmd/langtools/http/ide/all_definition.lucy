@@ -31,8 +31,10 @@ class AllDefinition implements HttpHandler {
             return
         }
         definitions := alldefinition.getAllDefinition(dir)
-        bs ,_ := json.encode(definitions , "\t")
+        bs := new json.Encoder(definitions , "" , "\t").encode()
         exchange.sendResponseHeaders(200 , long(len(bs)))
-        os.write(copy(new byte[](len(bs)) ,bs))
-    } 
+        os.write(copy(new byte[](len(bs)) , bs))
+    }
 }
+
+
