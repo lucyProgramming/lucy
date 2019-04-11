@@ -13,28 +13,28 @@ public const AccClassAnnotation char = 0x2000 // 标识注解类型
 public const AccClassEnum char = 0x4000 // 标识枚举类型
 
 public class Class {
-           writer                  io.OutputStream         
+           writer                  io.OutputStream
            magic                   int                      //0xCAFEBABE
-    public minorVersion            char                    
-    public majorVersion            char                    
-    public constPools              []ConstPool             
-    public accessFlags             char                    
-    public thisClass               char                    
-    public superClass              char                    
-    public interfaces              []char                  
-    public fields                  []FieldInfo             
-    public methods                 []MethodInfo            
-    public attributes              []AttributeInfo         
-    public attributeGroupedByName  AttributeGroupedByName  
+    public minorVersion            char
+    public majorVersion            char
+    public constPools              []ConstPool
+    public accessFlags             char
+    public thisClass               char
+    public superClass              char
+    public interfaces              []char
+    public fields                  []FieldInfo
+    public methods                 []MethodInfo
+    public attributes              []AttributeInfo
+    public attributeGroupedByName  AttributeGroupedByName
     public TypeAlias               []AttributeLucyTypeAlias
-    public attributeLucyEnum       AttributeLucyEnum       
-    public attributeLucyClassConst AttributeLucyClassConst 
-    public attributeInnerClasses   AttributeInnerClasses   
+    public attributeLucyEnum       AttributeLucyEnum
+    public attributeLucyClassConst AttributeLucyClassConst
+    public attributeInnerClasses   AttributeInnerClasses
     //const caches
     public utf8Constants               map{string -> ConstPool}
-    public intConstants                map{int -> ConstPool}   
-    public longConstants               map{long -> ConstPool}  
-    public floatConstants              map{float -> ConstPool} 
+    public intConstants                map{int -> ConstPool}
+    public longConstants               map{long -> ConstPool}
+    public floatConstants              map{float -> ConstPool}
     public doubleConstants             map{double -> ConstPool}
     public classConstants              map{string -> ConstPool}
     public stringConstants             map{string -> ConstPool}
@@ -43,6 +43,7 @@ public class Class {
     public methodrefConstants          map{string -> ConstPool}
     public interfaceMethodrefConstants map{string -> ConstPool}
     public methodTypeConstants         map{string -> ConstPool}
+    public attributeGlobalFunction     AttributeGlobalFunction
 
     public fn isSynthetic() -> (is bool) {
         return (this.accessFlags & AccClassSynthetic) != 0
@@ -354,7 +355,9 @@ public class Class {
         for _ , v := range high.templateFunctions {
             this.attributes.append(v.toAttributeInfo(this))
         }
-
+        if this.attributeGlobalFunction != null {
+            this.attributes.append(this.attributeGlobalFunction.toAttributeInfo(this))
+        }
         this.ifConstPoolOverMaxSize()
         return
     }

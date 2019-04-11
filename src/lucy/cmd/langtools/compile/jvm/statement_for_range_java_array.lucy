@@ -43,6 +43,7 @@ class BuildForRangeJavaArray {
         forState := new StackMapState(state)
         defer {
             state.addTop(forState)
+            insertLocalVariables2Code(c.Class , code , s.initExpressionBlock.variables)
         }
         attr := s.rangeAttr
         var autoVar = new AutoVariableForRangeJavaArray()

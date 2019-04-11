@@ -5,21 +5,26 @@ import "lucy/jvm/cg"
 
 class BuildFunction {
     eb BuildExpression
-    bb BuildBlock     
-    fn BuildFunction(eb BuildExpression , bb BuildBlock) {
+    bb BuildBlock
+
+    fn BuildFunction(
+        eb BuildExpression,
+        bb BuildBlock) {
         this.super()
         this.eb = eb
         this.bb = bb
     }
 
-    fn mkParametersOffset(c cg.ClassHighLevel , code cg.AttributeCode,
-        f ast.Function , state StackMapState) {
-        for _ , v := range f.Type.parameterList { //  insert into locals
+    fn mkParametersOffset(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        f ast.Function,
+        state StackMapState) {
+        for _ , v := range f.Type.parameterList { //    insert into locals
             v.localValOffset = code.maxLocals
             code.maxLocals += jvmSlotSize(v.Type)
             state.appendLocals(c , v.Type)
         }
-
         if f.Type.vArgs != null {
             f.Type.vArgs.localValOffset = code.maxLocals
             code.maxLocals++
@@ -48,13 +53,17 @@ class BuildFunction {
             code.maxLocals++
             copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject , v.localValOffset))
             state.appendLocals(c , state.newObjectVariableType(closure.getMeta(v.Type.Type).className))
+            v.startPc = char(code.codeLength)
         }
-
         return
     }
 
-    fn buildFunctionParameterAndReturnList(c cg.ClassHighLevel , code cg.AttributeCode,
-        f ast.Function , context Context , state StackMapState) -> (maxStack char) {
+    fn buildFunctionParameterAndReturnList(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        f ast.Function,
+        context Context,
+        state StackMapState) -> (maxStack char) {
         this.mkParametersOffset(c , code , f , state)
         maxStack = this.mkCapturedParameters(c , code , f , state)
         if f.Type.voidReturn() == false {
@@ -81,7 +90,6 @@ class BuildFunction {
                     v.localValOffset = code.maxLocals
                     code.maxLocals += jvmSlotSize(v.Type)
                 }
-
                 stack := this.eb.build(c , code , v.defaultValueExpression , context , state)
                 if t := currentStack + stack ; t > maxStack {
                     maxStack = t
@@ -93,14 +101,15 @@ class BuildFunction {
                 } else {
                     state.appendLocals(c , v.Type)
                 }
-
             }
-
         }
         return
     }
 
-    fn buildFunction(c cg.ClassHighLevel , astClass ast.Class , method cg.MethodHighLevel,
+    fn buildFunction(
+        c cg.ClassHighLevel,
+        astClass ast.Class,
+        method cg.MethodHighLevel,
         f ast.Function) {
         context := new Context()
         context.lastStackMapOffset = -1
@@ -109,10 +118,8 @@ class BuildFunction {
         method.code.codes = new []byte(65536)
         method.code.codeLength = 0
         defer {
-
             method.code.codes = method.code.codes[0 : method.code.codeLength]
         }
-
         state := new StackMapState(null)
         if method.accessFlags & cg.AccMethodStatic == 0 {
             if method.isConstruction {
@@ -148,12 +155,11 @@ class BuildFunction {
             }
             code.codes[code.codeLength] = cg.OP_invokespecial
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
-                specialMethodInit,
-                meta.constructorFuncDescriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                    specialMethodInit,
+                    meta.constructorFuncDescriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
             copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject , char(1)))
             {
-
                 // String[] java style
                 t := new ast.Type()
                 t.Type = ast.VariableTypeJavaArray
@@ -178,7 +184,6 @@ class BuildFunction {
             }
         }
         {
-
             method.attributeMethodParameters = new cg.AttributeMethodParameters()
             for _ , v := range f.Type.parameterList {
                 p := new cg.MethodParameter()
@@ -231,7 +236,7 @@ class BuildFunction {
         context.multiValueVarOffset = code.maxLocals
         code.maxLocals++
         copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject,
-            context.multiValueVarOffset))
+                context.multiValueVarOffset))
         state.appendLocals(c , state.newObjectVariableType(javaRootObjectArray))
         maxStack = 1
         return
@@ -253,8 +258,8 @@ class BuildFunction {
             state.popStack(1)
             code.codes[code.codeLength] = cg.OP_putfield
             c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(c.name,
-                v.name,
-                Descriptor.typeDescriptor(v.Type)) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                    v.name,
+                    Descriptor.typeDescriptor(v.Type)) , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
         }
 

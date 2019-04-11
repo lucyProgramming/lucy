@@ -24,6 +24,8 @@ public class Variable {
     public findUsage                bool
     public findUsageInstances       []Usage
 
+    public startPc char
+
     /*
 		a // this is a inline comment
 	*/
@@ -67,4 +69,5 @@ public class Variable {
         s += sprintf("var %s %s" , this.name , this.Type.typeString())
     }
 }
+
 

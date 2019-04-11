@@ -77,9 +77,11 @@ class BuildExpressionSelection {
                         selection.packageVariable.jvmDescriptor = Descriptor.typeDescriptor(e.value)
                     }
                     code.codes[code.codeLength] = cg.OP_getstatic
-                    c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(selection.Expression.value.Package.name + "/main",
+                    c.insertFieldRefConst(
+                        new cg.ConstantInfoFieldrefHighLevel(selection.Expression.value.Package.name + "/main",
                             selection.packageVariable.name,
-                            selection.packageVariable.jvmDescriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                            selection.packageVariable.jvmDescriptor),
+                        code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
                     return
                 }
@@ -90,19 +92,25 @@ class BuildExpressionSelection {
                 }
                 if selection.packageFunction != null {
                     code.codes[code.codeLength] = cg.OP_invokestatic
-                    c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandles",
+                    c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+                            "java/lang/invoke/MethodHandles",
                             "lookup",
-                            "()Ljava/lang/invoke/MethodHandles$Lookup;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                            "()Ljava/lang/invoke/MethodHandles$Lookup;"),
+                        code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
                     code.codes[code.codeLength] = cg.OP_ldc_w
-                    c.insertClassConst(selection.Expression.value.Package.name + "/main",
+                    c.insertClassConst(
+                        selection.packageFunction.entrance.Class.name,
                         code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
                     code.codes[code.codeLength] = cg.OP_ldc_w
                     c.insertStringConst(selection.name , code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
                     code.codes[code.codeLength] = cg.OP_ldc_w
-                    c.insertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(Descriptor.methodDescriptor(selection.packageFunction.Type)) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                    c.insertMethodTypeConst(
+                        new cg.ConstantInfoMethodTypeHighLevel(
+                            Descriptor.methodDescriptor(selection.packageFunction.Type)),
+                        code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
                     code.codes[code.codeLength] = cg.OP_invokevirtual
                     c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandles$Lookup",

@@ -6,456 +6,457 @@ import "lucy/jvm/cg"
 import "lucy/binary"
 
 class BuildBlock {
-	eb BuildExpression
-	bp BuildPackage
-	BuildFor BuildFor
-	BuildIf BuildIf
-	BuildSwitch BuildSwitch
-	BuildReturn BuildReturn
-	BuildWhen BuildWhen
+    eb          BuildExpression
+    bp          BuildPackage
+    BuildFor    BuildFor
+    BuildIf     BuildIf
+    BuildSwitch BuildSwitch
+    BuildReturn BuildReturn
+    BuildWhen   BuildWhen
 
-	
-	fn BuildBlock(eb BuildExpression, bp BuildPackage){
-		this.super()
-		this.eb = eb
-		this.bp = bp
-		this.BuildFor = new BuildFor(eb , this)
-		this.BuildIf = new BuildIf(eb , this)
-		this.BuildSwitch = new BuildSwitch(eb , this)
-		this.BuildReturn = new BuildReturn(eb , this)
-		this.BuildWhen = new BuildWhen(eb , this)
-		
-	}
-	fn buildBlock(
-		c cg.ClassHighLevel,
-		code cg.AttributeCode,
-		b ast.Block,
-		context Context,
-		state StackMapState) {
-		notToHere := false
-		for _, s := range b.statements {
-			if notToHere == true && s.Type == ast.StatementTypeLabel {
-				notToHere = len(s.StatementLabel.exits) == 0
-				//continue compile block from this label statement
-			}
-			if notToHere {
-				continue
-			}
-			if s.isCallFatherConstructionStatement {
-				// special case
-				// no need to build
-				// this statement is build before
-				continue
-			}
-			maxStack := this.buildStatement(c, code, b, s, context, state)
-			if maxStack > code.maxStack {
-				code.maxStack = maxStack
-			}
-			if len(state.stacks) > 0 {
-				var ss []string
-				for _, v := range state.stacks {
-					ss.append(v.toString())
-				}
-				print("stacks:", ss)
-				panic(sprintf("stack is not empty:%d", len(state.stacks)))
-			}
-			//unCondition goto
-			if this.statementIsUnConditionJump(s) {
-				notToHere = true
-				continue
-			}
-			//block deadEnd
-			if s.Type == ast.StatementTypeBlock {
-				notToHere = s.block.notExecuteToLastStatement
-				continue
-			}
-			if s.Type == ast.StatementTypeIf && s.statementIf.Else != null {
-				t := s.statementIf.block.notExecuteToLastStatement
-				for _, v := range s.statementIf.elseIfList {
-					t = t && v.block.notExecuteToLastStatement
-				}
-				t = t && s.statementIf.Else.notExecuteToLastStatement
-				notToHere = t
-				continue
-			}
-			if s.Type == ast.StatementTypeSwitch && s.StatementSwitch.defaultBlock != null {
-				t := s.StatementSwitch.defaultBlock.notExecuteToLastStatement
-				for _, v := range s.StatementSwitch.cases {
-					if v.block != null {
-						t = t && v.block.notExecuteToLastStatement
-					} else {
-						//this will fallthrough
-						t = false
-						break
-					}
-				}
-				t = t && s.StatementSwitch.defaultBlock.notExecuteToLastStatement
-				notToHere = t
-				continue
-			}
-		}
-		b.notExecuteToLastStatement = notToHere
-		if b.isFunctionBlock == false &&
-			len(b.defers) > 0 &&
-			b.notExecuteToLastStatement == false {
-			this.buildDefers(c, code, context, b.defers, state)
-		}
-		return
-	}
-	
-	fn statementIsUnConditionJump(s ast.Statement) ->(is bool) {
-		return s.Type == ast.StatementTypeReturn ||
-			s.Type == ast.StatementTypeGoTo ||
-			s.Type == ast.StatementTypeContinue ||
-			s.Type == ast.StatementTypeBreak
-	}
+    fn BuildBlock(eb BuildExpression , bp BuildPackage) {
+        this.super()
+        this.eb = eb
+        this.bp = bp
+        this.BuildFor = new BuildFor(eb , this)
+        this.BuildIf = new BuildIf(eb , this)
+        this.BuildSwitch = new BuildSwitch(eb , this)
+        this.BuildReturn = new BuildReturn(eb , this)
+        this.BuildWhen = new BuildWhen(eb , this)
+    }
 
-	fn buildStatement(
-		c cg.ClassHighLevel,
-		code cg.AttributeCode,
-		block ast.Block,
-		s ast.Statement,
-		context Context,
-		state StackMapState) -> (maxStack char) {
-		//print(s.pos)
-		switch s.Type {
-		case ast.StatementTypeComment,
-			ast.StatementTypeCommentMultiLine:
-			//handle at ast
-		case ast.StatementTypeEmptyLine:
-			//handle at ast
-		case ast.StatementTypeImport:
-			//handle at ast
-		case ast.StatementTypeEnum:
-			//TODO::build 
-		case ast.StatementTypeWhen:
-			//type on a template name already handled at ast stage
-			s.StatementWhen.exits = []cg.Exit{} //could compile multi times
-			maxStack = this.BuildWhen.buildWhenStatement(c, code, s.StatementWhen , context, state)
-			if len(s.StatementWhen.exits) > 0 {
-				writeExits(s.StatementWhen.exits, code.codeLength)
-				context.MakeStackMap(code, state, code.codeLength)
-			}
-		case ast.StatementTypeExpression:
-			maxStack = this.eb.build(c, code, s.Expression, context, state)
-		case ast.StatementTypeIf:
-			s.statementIf.exits = []cg.Exit{} //could compile multi times
-			maxStack = this.BuildIf.buildIfStatement(c, code, s.statementIf, context, state)
-			if len(s.statementIf.exits) > 0 {
-				writeExits(s.statementIf.exits, code.codeLength)
-				context.MakeStackMap(code, state, code.codeLength)
-			}
-		case ast.StatementTypeBlock:
-			blockState := new StackMapState(state)
-			s.block.exits = []cg.Exit{}
-			this.buildBlock(c, code, s.block, context, blockState)
-			state.addTop(blockState)
-			if len(s.block.exits) > 0 {
-				writeExits(s.statementIf.exits, code.codeLength)
-				context.MakeStackMap(code, state, code.codeLength)
-			}
-		case ast.StatementTypeFor:
-			s.StatementFor.exits = []cg.Exit{} //could compile multi times
-			maxStack = this.BuildFor.buildForStatement(c, code, s.StatementFor, context, state)
-			writeExits(s.StatementFor.exits, code.codeLength)
-			context.MakeStackMap(code, state, code.codeLength)
-		case ast.StatementTypeContinue:
-			this.buildDefers(c, code, context, s.StatementContinue.defers, state)
-			jumpTo(code, s.StatementContinue.statementFor.continueCodeOffset)
-		case ast.StatementTypeBreak:
-			this.buildDefers(c, code, context, s.StatementBreak.defers, state)
-			exit := new cg.Exit(cg.OP_goto, code)
-			if s.StatementBreak.statementFor != null {
-				s.StatementBreak.statementFor.exits.append(exit)
-			} else if s.StatementBreak.statementSwitch != null { // switch
-				s.StatementBreak.statementSwitch.exits.append(exit)
-			} else {
-				s.StatementBreak.switchTemplateBlock.exits.append(exit)
-			}
-		case ast.StatementTypeReturn:
-			maxStack = this.BuildReturn.buildReturnStatement(c, code,
-				s.StatementReturn, context, state)
-		case ast.StatementTypeSwitch:
-			s.StatementSwitch.exits = []cg.Exit{} //could compile multi times
-			maxStack = this.BuildSwitch.buildSwitchStatement(c, code, s.StatementSwitch, context, state)
-			if len(s.StatementSwitch.exits) > 0 {
-				if code.codeLength == context.lastStackMapOffset {
-					code.codes[code.codeLength] = cg.OP_nop
-					code.codeLength++
-				}
-				writeExits(s.StatementSwitch.exits, code.codeLength)
-				context.MakeStackMap(code, state, code.codeLength)
-			}
-		case ast.StatementTypeGoTo:
-			this.buildDefers(c, code, context, s.StatementGoTo.defers, state)
-			if s.StatementGoTo.statementLabel.codeOffsetGenerated {
-				jumpTo(code, s.StatementGoTo.statementLabel.codeOffset)
-			} else {
-				exit := new cg.Exit(cg.OP_goto, code)
-				if s.StatementGoTo.statementLabel.exits == null {
-					s.StatementGoTo.statementLabel.exits = [exit]
-				}else {
-					s.StatementGoTo.statementLabel.exits.append(exit)
-				}
-			}
-		case ast.StatementTypeLabel:
-			s.StatementLabel.codeOffsetGenerated = true
-			s.StatementLabel.codeOffset = code.codeLength
-			if len(s.StatementLabel.exits) > 0 {
-				writeExits(s.StatementLabel.exits, code.codeLength) // back patch
-			}
-			context.MakeStackMap(code, state, code.codeLength)
-		case ast.StatementTypeDefer: // nothing to do  ,defer will do after block is compiled
-			s.Defer.startPc = code.codeLength
-			s.Defer.stackMapState = (new StackMapState(state))
-		case ast.StatementTypeClass:
-			oldName := s.Class.name
-			var name string
-			if block.inheritedAttribute.classAndFunctionNames == null ||
-			    block.inheritedAttribute.classAndFunctionNames == "" {
-				name = s.Class.name
-			} else {
-				name = block.inheritedAttribute.classAndFunctionNames + "$" + s.Class.name
-			}
-			s.Class.name = this.bp.newClassName(name)
-			innerClass := new cg.InnerClass()
-			innerClass.innerClass = s.Class.name
-			innerClass.outerClass = c.name
-			innerClass.name = oldName
-			if c.Class.attributeInnerClasses == null{
-			    c.Class.attributeInnerClasses = new cg.AttributeInnerClasses()
-			}
-            if c.Class.attributeInnerClasses.classes == null {
-                c.Class.attributeInnerClasses.classes = []cg.InnerClass{}
+    fn insertLocalVariables2Code(c cg.Class , code cg.AttributeCode , b ast.Block) {
+        insertLocalVariables2Code(c , code , b.variables)
+    }
+    
+    fn buildBlock(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        b ast.Block,
+        context Context,
+        state StackMapState) {
+        defer this.insertLocalVariables2Code(c.Class , code , b)
+        notToHere := false
+        for _ , s := range b.statements {
+            if notToHere == true && s.Type == ast.StatementTypeLabel {
+                notToHere = len(s.StatementLabel.exits) == 0
+                //continue compile block from this label statement
             }
-            c.Class.attributeInnerClasses.classes.append(innerClass)
-			t := this.bp.buildClass(s.Class)
-			this.bp.putClass(t)
-			if t.Class.attributeInnerClasses == null {
-			    t.Class.attributeInnerClasses = new cg.AttributeInnerClasses()
-			}
-			if t.Class.attributeInnerClasses.classes == null {
-			    t.Class.attributeInnerClasses.classes = []cg.InnerClass{innerClass}
-			}else {
-                 t.Class.attributeInnerClasses.classes.append(innerClass)
-			}
-		case ast.StatementTypeNop:
-			// nop
-		case ast.StatementTypeTypeAlias:
-			// handled at ast stage
-		}
-		return
-	}
+            if notToHere {
+                continue
+            }
+            if s.isCallFatherConstructionStatement {
+                // special case
+                // no need to build
+                // this statement is build before
+                continue
+            }
+            maxStack := this.buildStatement(c , code , b , s , context , state)
+            if maxStack > code.maxStack {
+                code.maxStack = maxStack
+            }
+            if len(state.stacks) > 0 {
+                var ss []string
+                for _ , v := range state.stacks {
+                    ss.append(v.toString())
+                }
+                print("stacks:" , ss)
+                panic(sprintf("stack is not empty:%d" , len(state.stacks)))
+            }
+            //unCondition goto
+            if this.statementIsUnConditionJump(s) {
+                notToHere = true
+                continue
+            }
+            //block deadEnd
+            if s.Type == ast.StatementTypeBlock {
+                notToHere = s.block.notExecuteToLastStatement
+                continue
+            }
+            if s.Type == ast.StatementTypeIf && s.statementIf.Else != null {
+                t := s.statementIf.block.notExecuteToLastStatement
+                for _ , v := range s.statementIf.elseIfList {
+                    t = t && v.block.notExecuteToLastStatement
+                }
+                t = t && s.statementIf.Else.notExecuteToLastStatement
+                notToHere = t
+                continue
+            }
+            if s.Type == ast.StatementTypeSwitch && s.StatementSwitch.defaultBlock != null {
+                t := s.StatementSwitch.defaultBlock.notExecuteToLastStatement
+                for _ , v := range s.StatementSwitch.cases {
+                    if v.block != null {
+                        t = t && v.block.notExecuteToLastStatement
+                    } else {
+                        //this will fallthrough
+                        t = false
+                        break
+                    }
+                }
+                t = t && s.StatementSwitch.defaultBlock.notExecuteToLastStatement
+                notToHere = t
+                continue
+            }
+        }
+        b.notExecuteToLastStatement = notToHere
+        if b.isFunctionBlock == false &&
+            len(b.defers) > 0 &&
+            b.notExecuteToLastStatement == false {
+            this.buildDefers(c , code , context , b.defers , state)
+        }
+        return
+    }
 
-	fn buildDefers(c cg.ClassHighLevel,
-		code cg.AttributeCode, context Context, ds []ast.StatementDefer, from StackMapState) {
-		if len(ds) == 0 {
-			return
-		}
-		code.codes[code.codeLength] = cg.OP_aconst_null
-		code.codeLength++
-		index := len(ds) - 1
-		for index >= 0 { // build defer,cannot have return statement is defer
-			state := ds[index].stackMapState.(StackMapState)
-			state = (new StackMapState(state))
-			state.addTop(from)
-			state.pushStack(c, state.newObjectVariableType(throwableClass))
-			context.MakeStackMap(code, state, code.codeLength)
-			e := new cg.ExceptionTable()
-			e.startPc = char(ds[index].startPc)
-			e.endPc = char(code.codeLength)
-			e.handlerPc = char(code.codeLength)
-			if ds[index].exceptionClass == null {
-				e.catchType = c.Class.insertClassConst(ast.DefaultExceptionClass)
-			} else {
-				e.catchType = c.Class.insertClassConst(ds[index].exceptionClass.name) // custom c
-			}
-			code.appendException(e)
-			//expect exception on stack
-			copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject,
-				context.exceptionVarOffset)) // this code will make_node_objects stack is empty
-			state.popStack(1)
-			// build block
-			context.Defer = ds[index]
-			this.buildBlock(c, code, ds[index].block, context, state)
-			from.addTop(state)
-			context.Defer = null
-			ds[index].resetLabels()
+    fn statementIsUnConditionJump(s ast.Statement) -> (is bool) {
+        return s.Type == ast.StatementTypeReturn ||
+                s.Type == ast.StatementTypeGoTo ||
+                s.Type == ast.StatementTypeContinue ||
+                s.Type == ast.StatementTypeBreak
+    }
 
-			//if need throw
-			copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset))
-			code.codes[code.codeLength] = cg.OP_dup
-			code.codeLength++
-			state.pushStack(c, state.newObjectVariableType(throwableClass))
-			context.MakeStackMap(code, state, code.codeLength+6)
-			context.MakeStackMap(code, state, code.codeLength+7)
-			state.popStack(1)
-			code.codes[code.codeLength] = cg.OP_ifnonnull
-			binary.BigEndian.putChar(code.codes[code.codeLength+1:code.codeLength+3], char(6))
-			code.codes[code.codeLength+3] = cg.OP_goto
-			binary.BigEndian.putChar(code.codes[code.codeLength+4:code.codeLength+6],char(4)) // goto pop
-			code.codes[code.codeLength+6] = cg.OP_athrow
-			code.codes[code.codeLength+7] = cg.OP_pop // pop exception on stack
-			code.codeLength += 8
-			if index != 0 {
-				code.codes[code.codeLength] = cg.OP_aconst_null
-				code.codeLength++
-			}
-			index--
-		}
-	}
+    fn buildStatement(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        block ast.Block,
+        s ast.Statement,
+        context Context,
+        state StackMapState) -> (maxStack char) {
+        //print(s.pos)
+        switch s.Type {
+            case ast.StatementTypeComment,
+                ast.StatementTypeCommentMultiLine:
+                //handle at ast
+            case ast.StatementTypeEmptyLine:
+                //handle at ast
+            case ast.StatementTypeImport:
+                //handle at ast
+            case ast.StatementTypeEnum:
+                //TODO::build 
+            case ast.StatementTypeWhen:
+                //type on a template name already handled at ast stage
+                s.StatementWhen.exits = []cg.Exit{} //could compile multi times
+                maxStack = this.BuildWhen.buildWhenStatement(c , code , s.StatementWhen , context , state)
+                if len(s.StatementWhen.exits) > 0 {
+                    writeExits(s.StatementWhen.exits , code.codeLength)
+                    context.MakeStackMap(code , state , code.codeLength)
+                }
+            case ast.StatementTypeExpression:
+                maxStack = this.eb.build(c , code , s.Expression , context , state)
+            case ast.StatementTypeIf:
+                s.statementIf.exits = []cg.Exit{} //could compile multi times
+                maxStack = this.BuildIf.buildIfStatement(c , code , s.statementIf , context , state)
+                if len(s.statementIf.exits) > 0 {
+                    writeExits(s.statementIf.exits , code.codeLength)
+                    context.MakeStackMap(code , state , code.codeLength)
+                }
+            case ast.StatementTypeBlock:
+                blockState := new StackMapState(state)
+                s.block.exits = []cg.Exit{}
+                this.buildBlock(c , code , s.block , context , blockState)
+                state.addTop(blockState)
+                if len(s.block.exits) > 0 {
+                    writeExits(s.statementIf.exits , code.codeLength)
+                    context.MakeStackMap(code , state , code.codeLength)
+                }
+            case ast.StatementTypeFor:
+                s.StatementFor.exits = []cg.Exit{} //could compile multi times
+                maxStack = this.BuildFor.buildForStatement(c , code , s.StatementFor , context , state)
+                writeExits(s.StatementFor.exits , code.codeLength)
+                context.MakeStackMap(code , state , code.codeLength)
+            case ast.StatementTypeContinue:
+                this.buildDefers(c , code , context , s.StatementContinue.defers , state)
+                jumpTo(code , s.StatementContinue.statementFor.continueCodeOffset)
+            case ast.StatementTypeBreak:
+                this.buildDefers(c , code , context , s.StatementBreak.defers , state)
+                exit := new cg.Exit(cg.OP_goto , code)
+                if s.StatementBreak.statementFor != null {
+                    s.StatementBreak.statementFor.exits.append(exit)
+                } else if s.StatementBreak.statementSwitch != null {
+                    s.StatementBreak.statementSwitch.exits.append(exit)
+                } else {
+                    s.StatementBreak.switchTemplateBlock.exits.append(exit)
+                }
+            case ast.StatementTypeReturn:
+                maxStack = this.BuildReturn.buildReturnStatement(c , code,
+                    s.StatementReturn , context , state)
+            case ast.StatementTypeSwitch:
+                s.StatementSwitch.exits = []cg.Exit{} //could compile multi times
+                maxStack = this.BuildSwitch.buildSwitchStatement(c , code , s.StatementSwitch , context , state)
+                if len(s.StatementSwitch.exits) > 0 {
+                    if code.codeLength == context.lastStackMapOffset {
+                        code.codes[code.codeLength] = cg.OP_nop
+                        code.codeLength++
+                    }
+                    writeExits(s.StatementSwitch.exits , code.codeLength)
+                    context.MakeStackMap(code , state , code.codeLength)
+                }
+            case ast.StatementTypeGoTo:
+                this.buildDefers(c , code , context , s.StatementGoTo.defers , state)
+                if s.StatementGoTo.statementLabel.codeOffsetGenerated {
+                    jumpTo(code , s.StatementGoTo.statementLabel.codeOffset)
+                } else {
+                    exit := new cg.Exit(cg.OP_goto , code)
+                    if s.StatementGoTo.statementLabel.exits == null {
+                        s.StatementGoTo.statementLabel.exits = [exit]
+                    } else {
+                        s.StatementGoTo.statementLabel.exits.append(exit)
+                    }
+                }
+            case ast.StatementTypeLabel:
+                s.StatementLabel.codeOffsetGenerated = true
+                s.StatementLabel.codeOffset = code.codeLength
+                if len(s.StatementLabel.exits) > 0 {
+                    writeExits(s.StatementLabel.exits , code.codeLength) // back patch
+                }
+                context.MakeStackMap(code , state , code.codeLength)
+            case ast.StatementTypeDefer:
+                s.Defer.startPc = code.codeLength
+                s.Defer.stackMapState = (new StackMapState(state))
+            case ast.StatementTypeClass:
+                oldName := s.Class.name
+                var name string
+                if block.inheritedAttribute.classAndFunctionNames == null ||
+                    block.inheritedAttribute.classAndFunctionNames == "" {
+                    name = s.Class.name
+                } else {
+                    name = block.inheritedAttribute.classAndFunctionNames + "$" + s.Class.name
+                }
+                s.Class.name = this.bp.newClassName(name)
+                innerClass := new cg.InnerClass()
+                innerClass.innerClass = s.Class.name
+                innerClass.outerClass = c.name
+                innerClass.name = oldName
+                if c.Class.attributeInnerClasses == null {
+                    c.Class.attributeInnerClasses = new cg.AttributeInnerClasses()
+                }
+                if c.Class.attributeInnerClasses.classes == null {
+                    c.Class.attributeInnerClasses.classes = []cg.InnerClass{}
+                }
+                c.Class.attributeInnerClasses.classes.append(innerClass)
+                t := this.bp.buildClass(s.Class)
+                this.bp.putClass(t)
+                if t.Class.attributeInnerClasses == null {
+                    t.Class.attributeInnerClasses = new cg.AttributeInnerClasses()
+                }
+                if t.Class.attributeInnerClasses.classes == null {
+                    t.Class.attributeInnerClasses.classes = []cg.InnerClass{innerClass}
+                } else {
+                    t.Class.attributeInnerClasses.classes.append(innerClass)
+                }
+            case ast.StatementTypeNop:
+                // nop
+            case ast.StatementTypeTypeAlias:
+                // handled at ast stage
+        }
+        return
+    }
 
-	/*
+    fn buildDefers(c cg.ClassHighLevel,
+        code cg.AttributeCode , context Context , ds []ast.StatementDefer , from StackMapState) {
+        if len(ds) == 0 {
+            return
+        }
+        code.codes[code.codeLength] = cg.OP_aconst_null
+        code.codeLength++
+        index := len(ds) - 1
+        for index >= 0 { //      build defer,cannot have return statement is defer
+            state := ds[index].stackMapState.(StackMapState)
+            state = (new StackMapState(state))
+            state.addTop(from)
+            state.pushStack(c , state.newObjectVariableType(throwableClass))
+            context.MakeStackMap(code , state , code.codeLength)
+            e := new cg.ExceptionTable()
+            e.startPc = char(ds[index].startPc)
+            e.endPc = char(code.codeLength)
+            e.handlerPc = char(code.codeLength)
+            if ds[index].exceptionClass == null {
+                e.catchType = c.Class.insertClassConst(ast.DefaultExceptionClass)
+            } else {
+                e.catchType = c.Class.insertClassConst(ds[index].exceptionClass.name) // custom c
+            }
+            code.appendException(e)
+            //expect exception on stack
+            copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject,
+                    context.exceptionVarOffset)) // this code will make_node_objects stack is empty
+            state.popStack(1)
+            // build block
+            context.Defer = ds[index]
+            this.buildBlock(c , code , ds[index].block , context , state)
+            from.addTop(state)
+            context.Defer = null
+            ds[index].resetLabels()
+
+            //if need throw
+            copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , context.exceptionVarOffset))
+            code.codes[code.codeLength] = cg.OP_dup
+            code.codeLength++
+            state.pushStack(c , state.newObjectVariableType(throwableClass))
+            context.MakeStackMap(code , state , code.codeLength + 6)
+            context.MakeStackMap(code , state , code.codeLength + 7)
+            state.popStack(1)
+            code.codes[code.codeLength] = cg.OP_ifnonnull
+            binary.BigEndian.putChar(code.codes[code.codeLength + 1 : code.codeLength + 3] , char(6))
+            code.codes[code.codeLength + 3] = cg.OP_goto
+            binary.BigEndian.putChar(code.codes[code.codeLength + 4 : code.codeLength + 6] , char(4)) // goto pop
+            code.codes[code.codeLength + 6] = cg.OP_athrow
+            code.codes[code.codeLength + 7] = cg.OP_pop // pop exception on stack
+            code.codeLength += 8
+            if index != 0 {
+                code.codes[code.codeLength] = cg.OP_aconst_null
+                code.codeLength++
+            }
+            index--
+        }
+    }
+
+    /*
 		compile condition for false  &&  generate exit
 	*/
-	fn buildConditionNotOkExit(
-		c cg.ClassHighLevel,
-		code cg.AttributeCode,
-		context Context,
-		state StackMapState,
-		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
-		if condition.is2IntCompare() {
-			return this.build2IntCompareConditionNotOk(c, code, context, state, condition)
-		} else if condition.isCompare2Null() {
-			return this.buildNullCompareConditionNotOk(c, code, context, state, condition)
-		} else if condition.is2StringCompare() {
-			return this.buildStringCompareConditionNotOk(c, code, context, state, condition)
-		} else if condition.is2PointerCompare() {
-			return this.buildPointerCompareConditionNotOk(c, code, context, state, condition)
-		} else {
-			maxStack = this.eb.build(c, code, condition, context, state)
-			exit = new cg.Exit(cg.OP_ifeq, code)
-			return
-		}
-	}
+    fn buildConditionNotOkExit(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        context Context,
+        state StackMapState,
+        condition ast.Expression) -> (maxStack char , exit cg.Exit) {
+        if condition.is2IntCompare() {
+            return this.build2IntCompareConditionNotOk(c , code , context , state , condition)
+        } else if condition.isCompare2Null() {
+            return this.buildNullCompareConditionNotOk(c , code , context , state , condition)
+        } else if condition.is2StringCompare() {
+            return this.buildStringCompareConditionNotOk(c , code , context , state , condition)
+        } else if condition.is2PointerCompare() {
+            return this.buildPointerCompareConditionNotOk(c , code , context , state , condition)
+        } else {
+            maxStack = this.eb.build(c , code , condition , context , state)
+            exit = new cg.Exit(cg.OP_ifeq , code)
+            return
+        }
+    }
 
-	fn build2IntCompareConditionNotOk(
-		c cg.ClassHighLevel,
-		code cg.AttributeCode,
-		context Context,
-		state StackMapState,
-		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
-		bin := condition.data.(ast.ExpressionBinary)
-		stack := this.eb.build(c, code, bin.left, context, state)
-		if stack > maxStack {
-			maxStack = stack
-		}
-		state.pushStack(c, bin.left.value)
-		stack = this.eb.build(c, code, bin.right, context, state)
-		if t := char(1) + stack; t > maxStack {
-			maxStack = t
-		}
-		state.popStack(1)
-		switch condition.Type {
-		case ast.ExpressionTypeEq:
-			exit = new cg.Exit(cg.OP_if_icmpne, code)
-		case ast.ExpressionTypeNe:
-			exit = new cg.Exit(cg.OP_if_icmpeq, code)
-		case ast.ExpressionTypeGe:
-			exit = new cg.Exit(cg.OP_if_icmplt, code)
-		case ast.ExpressionTypeGt:
-			exit = new cg.Exit(cg.OP_if_icmple, code)
-		case ast.ExpressionTypeLe:
-			exit = new cg.Exit(cg.OP_if_icmpgt, code)
-		case ast.ExpressionTypeLt:
-			exit = new cg.Exit(cg.OP_if_icmpge, code)
-		}
-		return
-	}
-	fn buildNullCompareConditionNotOk(
-		c cg.ClassHighLevel,
-		code cg.AttributeCode,
-		context Context,
-		state StackMapState,
-		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
-		var noNullExpression ast.Expression
-		bin := condition.data.(ast.ExpressionBinary)
-		if bin.left.Type != ast.ExpressionTypeNull {
-			noNullExpression = bin.left
-		} else {
-			noNullExpression = bin.right
-		}
-		stack := this.eb.build(c, code, noNullExpression, context, state)
-		if stack > maxStack {
-			maxStack = stack
-		}
-		switch condition.Type {
-		case ast.ExpressionTypeEq:
-			exit = new cg.Exit(cg.OP_ifnonnull, code)
-		case ast.ExpressionTypeNe:
-			exit = new cg.Exit(cg.OP_ifnull, code)
-		}
-		return
-	}
+    fn build2IntCompareConditionNotOk(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        context Context,
+        state StackMapState,
+        condition ast.Expression) -> (maxStack char , exit cg.Exit) {
+        bin := condition.data.(ast.ExpressionBinary)
+        stack := this.eb.build(c , code , bin.left , context , state)
+        if stack > maxStack {
+            maxStack = stack
+        }
+        state.pushStack(c , bin.left.value)
+        stack = this.eb.build(c , code , bin.right , context , state)
+        if t := char(1) + stack ; t > maxStack {
+            maxStack = t
+        }
+        state.popStack(1)
+        switch condition.Type {
+            case ast.ExpressionTypeEq:
+                exit = new cg.Exit(cg.OP_if_icmpne , code)
+            case ast.ExpressionTypeNe:
+                exit = new cg.Exit(cg.OP_if_icmpeq , code)
+            case ast.ExpressionTypeGe:
+                exit = new cg.Exit(cg.OP_if_icmplt , code)
+            case ast.ExpressionTypeGt:
+                exit = new cg.Exit(cg.OP_if_icmple , code)
+            case ast.ExpressionTypeLe:
+                exit = new cg.Exit(cg.OP_if_icmpgt , code)
+            case ast.ExpressionTypeLt:
+                exit = new cg.Exit(cg.OP_if_icmpge , code)
+        }
+        return
+    }
+    fn buildNullCompareConditionNotOk(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        context Context,
+        state StackMapState,
+        condition ast.Expression) -> (maxStack char , exit cg.Exit) {
+        var noNullExpression ast.Expression
+        bin := condition.data.(ast.ExpressionBinary)
+        if bin.left.Type != ast.ExpressionTypeNull {
+            noNullExpression = bin.left
+        } else {
+            noNullExpression = bin.right
+        }
+        stack := this.eb.build(c , code , noNullExpression , context , state)
+        if stack > maxStack {
+            maxStack = stack
+        }
+        switch condition.Type {
+            case ast.ExpressionTypeEq:
+                exit = new cg.Exit(cg.OP_ifnonnull , code)
+            case ast.ExpressionTypeNe:
+                exit = new cg.Exit(cg.OP_ifnull , code)
+        }
+        return
+    }
 
-	fn buildStringCompareConditionNotOk(
-		c cg.ClassHighLevel,
-		code cg.AttributeCode,
-		context Context,
-		state StackMapState,
-		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
-		bin := condition.data.(ast.ExpressionBinary)
-		stack := this.eb.build(c, code, bin.left, context, state)
-		if stack > maxStack {
-			maxStack = stack
-		}
-		state.pushStack(c, bin.left.value)
-		stack = this.eb.build(c, code, bin.right, context, state)
-		if t := char(1) + stack; t > maxStack {
-			maxStack = t
-		}
-		code.codes[code.codeLength] = cg.OP_invokevirtual
-		c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-			javaStringClass,
-			"compareTo",
-			"(Ljava/lang/String;)I"
-		), code.codes[code.codeLength+1:code.codeLength+3])
-		code.codeLength += 3
-		state.popStack(1)
-		switch condition.Type {
-		case ast.ExpressionTypeEq:
-			exit = new cg.Exit(cg.OP_ifne, code)
-		case ast.ExpressionTypeNe:
-			exit = new cg.Exit(cg.OP_ifeq, code)
-		case ast.ExpressionTypeGe:
-			exit = new cg.Exit(cg.OP_iflt, code)
-		case ast.ExpressionTypeGt:
-			exit = new cg.Exit(cg.OP_ifle, code)
-		case ast.ExpressionTypeLe:
-			exit = new cg.Exit(cg.OP_ifgt, code)
-		case ast.ExpressionTypeLt:
-			exit = new cg.Exit(cg.OP_ifge, code)
-		}
-		return
-	}
+    fn buildStringCompareConditionNotOk(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        context Context,
+        state StackMapState,
+        condition ast.Expression) -> (maxStack char , exit cg.Exit) {
+        bin := condition.data.(ast.ExpressionBinary)
+        stack := this.eb.build(c , code , bin.left , context , state)
+        if stack > maxStack {
+            maxStack = stack
+        }
+        state.pushStack(c , bin.left.value)
+        stack = this.eb.build(c , code , bin.right , context , state)
+        if t := char(1) + stack ; t > maxStack {
+            maxStack = t
+        }
+        code.codes[code.codeLength] = cg.OP_invokevirtual
+        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+                javaStringClass,
+                "compareTo",
+                "(Ljava/lang/String;)I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+        code.codeLength += 3
+        state.popStack(1)
+        switch condition.Type {
+            case ast.ExpressionTypeEq:
+                exit = new cg.Exit(cg.OP_ifne , code)
+            case ast.ExpressionTypeNe:
+                exit = new cg.Exit(cg.OP_ifeq , code)
+            case ast.ExpressionTypeGe:
+                exit = new cg.Exit(cg.OP_iflt , code)
+            case ast.ExpressionTypeGt:
+                exit = new cg.Exit(cg.OP_ifle , code)
+            case ast.ExpressionTypeLe:
+                exit = new cg.Exit(cg.OP_ifgt , code)
+            case ast.ExpressionTypeLt:
+                exit = new cg.Exit(cg.OP_ifge , code)
+        }
+        return
+    }
 
-	fn buildPointerCompareConditionNotOk(
-		c cg.ClassHighLevel,
-		code cg.AttributeCode,
-		context Context,
-		state StackMapState,
-		condition ast.Expression) -> (maxStack char, exit cg.Exit) {
-		bin := condition.data.(ast.ExpressionBinary)
-		stack := this.eb.build(c, code, bin.left, context, state)
-		if stack > maxStack {
-			maxStack = stack
-		}
-		state.pushStack(c, bin.left.value)
-		stack = this.eb.build(c, code, bin.right, context, state)
-		if t := char(1) + stack; t > maxStack {
-			maxStack = t
-		}
-		switch condition.Type {
-		case ast.ExpressionTypeEq:
-			exit = new cg.Exit(cg.OP_if_acmpne, code)
-		case ast.ExpressionTypeNe:
-			exit = new cg.Exit(cg.OP_if_acmpeq, code)
-		}
-		state.popStack(1)
-		return
-	}
-
-
+    fn buildPointerCompareConditionNotOk(
+        c cg.ClassHighLevel,
+        code cg.AttributeCode,
+        context Context,
+        state StackMapState,
+        condition ast.Expression) -> (maxStack char , exit cg.Exit) {
+        bin := condition.data.(ast.ExpressionBinary)
+        stack := this.eb.build(c , code , bin.left , context , state)
+        if stack > maxStack {
+            maxStack = stack
+        }
+        state.pushStack(c , bin.left.value)
+        stack = this.eb.build(c , code , bin.right , context , state)
+        if t := char(1) + stack ; t > maxStack {
+            maxStack = t
+        }
+        switch condition.Type {
+            case ast.ExpressionTypeEq:
+                exit = new cg.Exit(cg.OP_if_acmpne , code)
+            case ast.ExpressionTypeNe:
+                exit = new cg.Exit(cg.OP_if_acmpeq , code)
+        }
+        state.popStack(1)
+        return
+    }
 
 }
 

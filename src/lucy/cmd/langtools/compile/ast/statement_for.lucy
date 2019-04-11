@@ -5,18 +5,18 @@ import "lucy/jvm/cg"
 public class ForRangeAttr {
     public identifierKey   ExpressionIdentifier
     public identifierValue ExpressionIdentifier
-    public expressionKey   Expression          
-    public expressionValue Expression          
-    public rangeOn         Expression          
+    public expressionKey   Expression
+    public expressionValue Expression
+    public rangeOn         Expression
 }
 
 
 public class StatementFor {
     public rangeAttr           ForRangeAttr
-    public exits               []cg.Exit   
-    public continueCodeOffset  int         
-    public pos                 Pos         
-           initExpressionBlock Block = new Block()
+    public exits               []cg.Exit
+    public continueCodeOffset  int
+    public pos                 Pos
+    public initExpressionBlock Block = new Block()
     /*
 		for i := 0 ; i < 10 ;i ++ {
 			
@@ -25,8 +25,8 @@ public class StatementFor {
     public Init          Expression
     public condition     Expression
     public increment     Expression
-    public block         Block     
-    public inlineComment string    
+    public block         Block
+    public inlineComment string
 
     fn checkRange() -> (errs []error = []error{}) {
         //

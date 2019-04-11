@@ -10,8 +10,8 @@ class BuildinFunctionPrint {
         this.super()
         this.eb = eb
     }
-
-    /*        function print
+    
+    /*function print
     */
     fn mkBuildInPrint(
         c cg.ClassHighLevel,
@@ -23,21 +23,20 @@ class BuildinFunctionPrint {
         // get stream from stdout
         code.codes[code.codeLength] = cg.OP_getstatic
         c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel("java/lang/System",
-            "out",
-            "Ljava/io/PrintStream;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                "out",
+                "Ljava/io/PrintStream;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         maxStack = char(1)
         if len(call.args) == 0 {
             code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/io/PrintStream",
-                "println",
-                "()V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                    "println",
+                    "()V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
             return
         }
         length := len(state.stacks)
         defer {
-
             // print have no return value,stack is empty
             state.popStack(len(state.stacks) - length)
         }
@@ -52,50 +51,50 @@ class BuildinFunctionPrint {
                 case ast.VariableTypeBool:
                     code.codes[code.codeLength] = cg.OP_invokevirtual
                     c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/io/PrintStream",
-                        "println",
-                        "(Z)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                            "println",
+                            "(Z)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
                 case ast.VariableTypeChar:
                     code.codes[code.codeLength] = cg.OP_invokevirtual
                     c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/io/PrintStream",
-                        "println",
-                        "(C)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                            "println",
+                            "(C)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
                 case ast.VariableTypeByte , ast.VariableTypeShort , ast.VariableTypeEnum , ast.VariableTypeInt:
                     code.codes[code.codeLength] = cg.OP_invokevirtual
                     c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/io/PrintStream",
-                        "println",
-                        "(I)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                            "println",
+                            "(I)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
                 case ast.VariableTypeLong:
                     code.codes[code.codeLength] = cg.OP_invokevirtual
                     c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/io/PrintStream",
-                        "println",
-                        "(J)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                            "println",
+                            "(J)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
                 case ast.VariableTypeFloat:
                     code.codes[code.codeLength] = cg.OP_invokevirtual
                     c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/io/PrintStream",
-                        "println",
-                        "(F)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                            "println",
+                            "(F)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
                 case ast.VariableTypeDouble:
                     code.codes[code.codeLength] = cg.OP_invokevirtual
                     c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/io/PrintStream",
-                        "println",
-                        "(D)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                            "println",
+                            "(D)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
                 case ast.VariableTypeString:
                     code.codes[code.codeLength] = cg.OP_invokevirtual
                     c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/io/PrintStream",
-                        "println",
-                        "(Ljava/lang/String;)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                            "println",
+                            "(Ljava/lang/String;)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
                 default:
                     code.codes[code.codeLength] = cg.OP_invokevirtual
                     c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/io/PrintStream",
-                        "println",
-                        "(Ljava/lang/Object;)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                            "println",
+                            "(Ljava/lang/Object;)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
             }
 
@@ -119,8 +118,8 @@ class BuildinFunctionPrint {
             }
             code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaStringClass,
-                "concat",
-                "(Ljava/lang/String;)Ljava/lang/String;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                    "concat",
+                    "(Ljava/lang/String;)Ljava/lang/String;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
             if k != len(call.args) - 1 {
                 code.codes[code.codeLength] = cg.OP_ldc_w
@@ -131,8 +130,8 @@ class BuildinFunctionPrint {
                 }
                 code.codes[code.codeLength] = cg.OP_invokevirtual
                 c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaStringClass,
-                    "concat",
-                    "(Ljava/lang/String;)Ljava/lang/String;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                        "concat",
+                        "(Ljava/lang/String;)Ljava/lang/String;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
                 code.codeLength += 3
             }
         }
@@ -140,8 +139,8 @@ class BuildinFunctionPrint {
         // call println
         code.codes[code.codeLength] = cg.OP_invokevirtual
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/io/PrintStream",
-            "println",
-            "(Ljava/lang/String;)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                "println",
+                "(Ljava/lang/String;)V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         return
     }

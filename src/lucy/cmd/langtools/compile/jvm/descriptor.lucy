@@ -59,15 +59,25 @@ public class Descriptor {
                 return "L" + javaMethodHandleClass + ";"
             case ast.VariableTypeJavaArray:
                 return "[" + .typeDescriptor(typ.array)
-            case ast.VariableTypeName:
-            case ast.VariableTypeDynamicSelector:
-            case ast.VariableTypeGlobal:
-            case ast.VariableTypeClass:
-            case ast.VariableTypePackage:
-            case ast.VariableTypeNull:
-            case ast.VariableTypeTemplate:
+            default:
         }
+    }
 
+    static fn getSignature(t ast.Type) -> (d string) {
+        if t.Type == ast.VariableTypeString {
+            return javaStringClass
+        } else if t.Type == ast.VariableTypeMap {
+            return mapClass
+        } else if t.Type == ast.VariableTypeObject {
+            return t.Class.name
+        } else if t.Type == ast.VariableTypeArray {
+            meta := ArrayMetas[t.array.Type]
+            return meta.className
+        } else if t.Type == ast.VariableTypeFunction {
+            return javaMethodHandleClass
+        } else {
+            return Descriptor.typeDescriptor(t)
+        }
     }
 
     public static fn ParseType(bs []byte) -> (bsSlieced []byte , t ast.Type , err error) {

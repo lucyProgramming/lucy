@@ -1,17 +1,13 @@
 // all rights reserved , check the LICENSE file
 
- 
+
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
-
 class BuildinFunctionPrintf {
-
-
-
     eb BuildExpression
-    
-    fn BuildinFunctionPrintf(eb BuildExpression){
+
+    fn BuildinFunctionPrintf(eb BuildExpression) {
         this.super()
         this.eb = eb
     }
@@ -33,21 +29,20 @@ class BuildinFunctionPrintf {
         meta := call.buildInFunctionMeta.(ast.BuildInFunctionPrintfMeta)
         code.codes[code.codeLength] = cg.OP_getstatic
         c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-                 "java/lang/System",
+                "java/lang/System",
                 "out",
-             "Ljava/io/PrintStream;"
-        ), code.codes[code.codeLength+1:code.codeLength+3])
+                "Ljava/io/PrintStream;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         maxStack = 1
-        state.pushStack(c, state.newObjectVariableType(javaPrintStreamClass))
-        stack := this.eb.build(c, code, meta.format, context, state)
-        if t := char(1) + stack; t > maxStack {
+        state.pushStack(c , state.newObjectVariableType(javaPrintStreamClass))
+        stack := this.eb.build(c , code , meta.format , context , state)
+        if t := char(1) + stack ; t > maxStack {
             maxStack = t
         }
-        state.pushStack(c, state.newObjectVariableType(javaStringClass))
-        loadInt(c, code, int(meta.argsLength))
+        state.pushStack(c , state.newObjectVariableType(javaStringClass))
+        loadInt(c , code , int(meta.argsLength))
         code.codes[code.codeLength] = cg.OP_anewarray
-        c.insertClassConst("java/lang/Object", code.codes[code.codeLength+1:code.codeLength+3])
+        c.insertClassConst("java/lang/Object" , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         currentStack := char(3)
         if currentStack > maxStack {
@@ -56,23 +51,23 @@ class BuildinFunctionPrintf {
         objectArray := new ast.Type()
         objectArray.Type = ast.VariableTypeJavaArray
         objectArray.array = state.newObjectVariableType(javaRootClass)
-        state.pushStack(c, objectArray)
+        state.pushStack(c , objectArray)
         index := int(0)
-        for _, v := range call.args {
+        for _ , v := range call.args {
             currentStack = 3
             code.codes[code.codeLength] = cg.OP_dup
             code.codeLength++
-            loadInt(c, code, index)
+            loadInt(c , code , index)
             currentStack += 2
-            state.pushStack(c, objectArray)
-            state.pushStack(c, typeInt)
-            stack := this.eb.build(c, code, v, context, state)
+            state.pushStack(c , objectArray)
+            state.pushStack(c , typeInt)
+            stack := this.eb.build(c , code , v , context , state)
             state.popStack(2)
-            if t := currentStack + stack; t > maxStack {
+            if t := currentStack + stack ; t > maxStack {
                 maxStack = t
             }
             if v.value.isPointer() == false {
-                TypeConverterAndPrimitivePacker.packPrimitives(c, code, v.value)
+                TypeConverterAndPrimitivePacker.packPrimitives(c , code , v.value)
             }
             code.codes[code.codeLength] = cg.OP_aastore
             code.codeLength++
@@ -81,15 +76,13 @@ class BuildinFunctionPrintf {
         code.codes[code.codeLength] = cg.OP_invokevirtual
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
                 javaPrintStreamClass,
-              "printf",
-             "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/io/PrintStream;"
-        ),
-            code.codes[code.codeLength+1:code.codeLength+3])
-        code.codes[code.codeLength+3] = cg.OP_pop
+                "printf",
+                "(Ljava/lang/String;[Ljava/lang/Object;)Ljava/io/PrintStream;"),
+            code.codes[code.codeLength + 1 : code.codeLength + 3])
+        code.codes[code.codeLength + 3] = cg.OP_pop
         code.codeLength += 4
         return
     }
-
 
 }
 

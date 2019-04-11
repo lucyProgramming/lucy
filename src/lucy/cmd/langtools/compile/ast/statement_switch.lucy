@@ -11,7 +11,7 @@ public class StatementSwitchCase {
 
 public class StatementSwitch {
     public prefixExpressions    []Expression         
-           initExpressionBlock  Block = new Block()
+     public      initExpressionBlock  Block = new Block()
     public pos                  Pos                  
     public endPos               Pos                  
     public condition            Expression            //switch

@@ -6,15 +6,15 @@ import "lucy/cmd/langtools/compile/common"
 import "java/io"
 
 public class BuildPackage {
-    Package         ast.Package                     
+    Package         ast.Package
     classes         map{string -> cg.ClassHighLevel}
-    mainClass       cg.ClassHighLevel               
-    BuildExpression BuildExpression                 
-    BuildBlock      BuildBlock                      
-    BuildFunction   BuildFunction                   
-    dir             string                          
-    majorVersion    char                            
-    minorVersion    char                            
+    mainClass       cg.ClassHighLevel
+    BuildExpression BuildExpression
+    BuildBlock      BuildBlock
+    BuildFunction   BuildFunction
+    dir             string
+    majorVersion    char
+    minorVersion    char
 
     public fn BuildPackage(majorVersion char,
         minorVersion char) {
@@ -360,12 +360,11 @@ public class BuildPackage {
             }
             c.appendMethod(method)
         }
-
     }
 
     fn mkGlobalFunctions() {
         ms := new map{string -> cg.MethodHighLevel}()
-        for k , f := range this.Package.block.functions { //         first round
+        for k , f := range this.Package.block.functions { //               first round
             if f.templateFunction != null {
                 t := new cg.AttributeTemplateFunction()
                 t.name = f.name
@@ -384,20 +383,34 @@ public class BuildPackage {
             if f.isBuildIn {
                 continue
             }
-            this.mainClass.insertSourceFile(f.pos.filename)
-            c := this.mainClass
+            var functionClass cg.ClassHighLevel
+            if f.name == ast.MainFunctionName {
+                functionClass = this.mainClass
+                this.mainClass.insertSourceFile(f.pos.filename)
+            } else {
+                functionClass = new cg.ClassHighLevel(this.majorVersion , this.minorVersion)
+                functionClass.name = this.Package.name + "/" + f.name // not
+                functionClass.superClass = ast.LucyRootClass
+                this.mkClassDefaultConstruction(functionClass)
+                functionClass.accessFlags |= cg.AccClassPublic
+                functionClass.accessFlags |= cg.AccClassFinal
+                functionClass.accessFlags |= cg.AccClassSynthetic
+                functionClass.Class.attributeGlobalFunction = new cg.AttributeGlobalFunction()
+                functionClass.insertSourceFile(f.pos.filename)
+                this.putClass(functionClass)
+            }
             method := new cg.MethodHighLevel()
-            method.Class = c
+            method.Class = functionClass
             method.name = f.name
             if f.name == ast.MainFunctionName {
                 method.descriptor = "([Ljava/lang/String;)V"
             } else {
                 method.descriptor = Descriptor.methodDescriptor(f.Type)
             }
-
             method.accessFlags = 0
             method.accessFlags |= cg.AccMethodStatic
-            if f.accessFlags & cg.AccMethodPublic != 0 || f.name == ast.MainFunctionName {
+            if f.accessFlags & cg.AccMethodPublic != 0 ||
+                f.name == ast.MainFunctionName {
                 method.accessFlags |= cg.AccMethodPublic
             }
             if LucyMethodSignature.need(f.Type) {
@@ -410,7 +423,7 @@ public class BuildPackage {
             ms[k] = method
             f.entrance = method
             method.code = new cg.AttributeCode()
-            this.mainClass.appendMethod(method)
+            functionClass.appendMethod(method)
         }
 
         for k , f := range this.Package.block.functions {
@@ -419,7 +432,6 @@ public class BuildPackage {
             }
             this.BuildFunction.buildFunction(ms[k].Class , null , ms[k] , f)
         }
-
     }
 
     fn dumpClass() {
@@ -434,10 +446,8 @@ public class BuildPackage {
             defer {
                 f.close()
             }
-
             c.toLow().outPut(f)
         }
-
     }
 
     /*

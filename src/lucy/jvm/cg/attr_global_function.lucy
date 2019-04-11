@@ -1,0 +1,10 @@
+//this indicated the class is a global function generated class 
+public class AttributeGlobalFunction {
+    fn toAttributeInfo(c Class) -> (ret AttributeInfo) {
+        ret = new AttributeInfo()
+        ret.nameIndex = c.insertUtf8Const(AttributeNameLucyGlobalFunction)
+        return ret 
+    }
+}
+
+

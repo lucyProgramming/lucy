@@ -9,7 +9,7 @@ public class AttributeLineNumber {
         this.super()
         this.lineNumbers = []AttributeLinePc{}
     }
-
+    
     static fn fromBs(bs []byte) -> (ln AttributeLineNumber) {
         length := binary.BigEndian.getChar(bs)
         bs = bs[2:]
@@ -40,6 +40,8 @@ public class AttributeLineNumber {
         ret.attributeLength = (len(ret.info))
         return ret
     }
+
+    
 }
 
 

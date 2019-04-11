@@ -6,7 +6,7 @@ import "lucy/binary"
 
 class BuildSwitch {
     eb BuildExpression
-    bb BuildBlock     
+    bb BuildBlock
 
     fn BuildSwitch(eb BuildExpression , bb BuildBlock) {
         this.super()
@@ -42,8 +42,8 @@ class BuildSwitch {
                 case ast.VariableTypeString:
                     code.codes[code.codeLength] = cg.OP_invokevirtual
                     c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaStringClass,
-                        "compareTo",
-                        "(Ljava/lang/String;)I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                            "compareTo",
+                            "(Ljava/lang/String;)I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
                 default:
                     context.MakeStackMap(code , state , code.codeLength + 7)
@@ -58,16 +58,14 @@ class BuildSwitch {
                     code.codes[code.codeLength + 7] = cg.OP_iconst_0
                     code.codeLength += 8
             }
-
         }
-
         for _ , v := range s.prefixExpressions {
             stack := this.eb.build(c , code , v , context , state)
             if stack > maxStack {
                 maxStack = stack
             }
         }
-
+        defer insertLocalVariables2Code(c.Class , code , s.initExpressionBlock.variables)
         stack := this.eb.build(c , code , s.condition , context , state)
         if stack > maxStack {
             maxStack = stack

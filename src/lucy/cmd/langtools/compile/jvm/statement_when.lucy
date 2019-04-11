@@ -25,7 +25,7 @@ class BuildWhen {
                 maxStack = stack
             }
         }
-
+        defer insertLocalVariables2Code(c.Class , code , s.initExpressionBlock.variables)
         stack := this.eb.build(c , code , s.typeExpression , context , state)
         if stack > maxStack {
             maxStack = stack

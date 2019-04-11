@@ -5,15 +5,15 @@ import "lucy/jvm/cg"
 import "lucy/cmd/langtools/compile/common" as common
 
 class BuildinFunctionCall {
-    eb                        BuildExpression          
-    BuildinFunctionAssert     BuildinFunctionAssert    
+    eb                        BuildExpression
+    BuildinFunctionAssert     BuildinFunctionAssert
     BuildinFunctionCatchPanic BuildinFunctionCatchPanic
-    BuildinFunctionLen        BuildinFunctionLen       
-    BuildinFunctionPrint      BuildinFunctionPrint     
-    BuildinFunctionPrintf     BuildinFunctionPrintf    
-    BuildinFunctionSprintf    BuildinFunctionSprintf   
-    BuildinFunctionBlackHole  BuildinFunctionBlackHole 
-
+    BuildinFunctionLen        BuildinFunctionLen
+    BuildinFunctionPrint      BuildinFunctionPrint
+    BuildinFunctionPrintf     BuildinFunctionPrintf
+    BuildinFunctionSprintf    BuildinFunctionSprintf
+    BuildinFunctionBlackHole  BuildinFunctionBlackHole
+    
     fn BuildinFunctionCall(eb BuildExpression) {
         this.super()
         this.eb = eb
@@ -25,7 +25,6 @@ class BuildinFunctionCall {
         this.BuildinFunctionSprintf = new BuildinFunctionSprintf(eb)
         this.BuildinFunctionAssert = new BuildinFunctionAssert(eb)
         this.BuildinFunctionBlackHole = new BuildinFunctionBlackHole(eb)
-
     }
 
     fn mkBuildInFunctionCall(
@@ -39,8 +38,8 @@ class BuildinFunctionCall {
             maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
             code.codes[code.codeLength] = cg.OP_invokestatic
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.Function.entrance.Class.name,
-                call.Function.name,
-                call.Function.entrance.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                    call.Function.name,
+                    call.Function.entrance.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
             if e.isStatementExpression {
                 if call.Function.Type.voidReturn() == false {

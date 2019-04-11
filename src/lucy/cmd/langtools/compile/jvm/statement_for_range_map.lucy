@@ -48,6 +48,7 @@ class BuildForRangeMap {
         forState := new StackMapState(state)
         defer {
             state.addTop(forState)
+            insertLocalVariables2Code(c.Class , code , s.initExpressionBlock.variables)
         }
         //keySets
         code.codes[code.codeLength] = cg.OP_dup

@@ -6,8 +6,10 @@ class ExpressionCheckMethodCall {
     static fn autoCompletion(block Block , object Type , isThis bool) {
         ExpressionCheckSelection.autoCompletion(object , block , isThis)
     }
-
-    static fn check(e Expression , block Block , errs []error) -> (valueTypes []Type) {
+    static fn check(
+        e Expression,
+        block Block,
+        errs []error) -> (valueTypes []Type) {
         call := e.data.(ExpressionMethodCall)
         if call.args == null {
             call.args = []Expression{}

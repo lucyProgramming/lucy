@@ -42,20 +42,20 @@ class BuildinFunctionLen {
             meta := ArrayMetas[a0.value.array.Type]
             code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
-                "size",
-                "()I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                    "size",
+                    "()I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
         } else if a0.value.Type == ast.VariableTypeMap {
             code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(mapClass,
-                "size",
-                "()I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                    "size",
+                    "()I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
         } else if a0.value.Type == ast.VariableTypeString {
             code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaStringClass,
-                "length",
-                "()I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                    "length",
+                    "()I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
         }
         writeExits([]cg.Exit{noNullExit} , code.codeLength)

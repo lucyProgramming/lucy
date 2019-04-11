@@ -36,10 +36,9 @@ class BuildFor {
         }
         forState := new StackMapState(state)
         defer {
-
             state.addTop(forState)
+            insertLocalVariables2Code(c.Class , code , s.initExpressionBlock.variables)
         }
-
         //init
         if s.Init != null {
             stack := this.eb.build(c , code , s.Init , context , forState)

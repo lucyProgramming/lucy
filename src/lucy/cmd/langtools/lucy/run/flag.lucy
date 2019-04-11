@@ -3,13 +3,13 @@
 import "lucy/os/flag"
 
 class Flags {
-    forceReBuild  flag.BoolOption  
-    build         flag.BoolOption  
-    verbose       flag.BoolOption  
+    forceReBuild  flag.BoolOption
+    build         flag.BoolOption
+    verbose       flag.BoolOption
     compilerFlags flag.StringOption
-    h             flag.BoolOption  
-    parser        flag.FlagParser  
-
+    h             flag.BoolOption
+    parser        flag.FlagParser
+    
     fn Flags() {
         this.super()
         this.parser = new flag.FlagParser()

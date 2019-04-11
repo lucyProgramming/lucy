@@ -15,7 +15,7 @@ import "lucy/cmd/langtools/common" as langtoolsCommon
 	load from file implementation
 */
 public class FileLoader implements ast.loadImport {
-    public lucyPath , classPath []string             
+    public lucyPath , classPath []string
     public caches               map{string -> Object}
     // class loaded from CLASSPATH
     static javaImports map{string -> Object} = new map{string -> Object}()
@@ -421,7 +421,6 @@ public class FileLoader implements ast.loadImport {
             nameIndex := binary.BigEndian.getChar(c.constPools[c.thisClass].info)
             e.name = string(c.constPools[nameIndex].info)
         }
-
         e.loadFromOutSide = true
         e.accessFlags = c.accessFlags
         e.enums = []ast.EnumName{}
@@ -644,6 +643,16 @@ public class FileLoader implements ast.loadImport {
                 mkEnums(e)
                 continue
             }
+            if t := classFile.getAttributeByName(cg.AttributeNameLucyGlobalFunction) ; len(t) > 0 {
+                fs := this.loadLucyGlobalFunction(classFile)
+                if p.block.functions == null {
+                    p.block.functions = new map{string -> ast.Function}()
+                }
+                for f := range fs {
+                    p.block.functions[f.name] = f
+                }
+                continue
+            }
             c := this.loadAsLucy(classFile)
             if c != null {
                 if p.block.classes == null {
@@ -652,6 +661,62 @@ public class FileLoader implements ast.loadImport {
                 this.caches[c.name] = c
                 p.block.classes[common.getBaseName(common.getBaseName(c.name))] = c
             }
+        }
+    }
+
+    public fn loadLucyGlobalFunction(c cg.Class) -> (fs []ast.Function = []ast.Function{}) {
+        cc := new cg.ClassHighLevel(char(0) , char(0))
+        cc.name = c.getName()
+        for _ , m := range c.methods {
+            name := string(c.constPools[m.nameIndex].info)
+            if name == ast.MainFunctionName {
+                //this is main function
+                continue
+            }
+            if name == ast.SpecialMethodInit {
+                continue
+            }
+            function := new ast.Function()
+            function.name = name
+            function.accessFlags = m.accessFlags
+            function.jvmDescriptor = string(c.constPools[m.descriptorIndex].info)
+            function.Type , err := jvm.Descriptor.ParseFunctionType(c.constPools[m.descriptorIndex].info)
+            if err != null {
+                panic(err)
+            }
+            if t := m.getAttributeByName(cg.AttributeNameLucyMethodDescriptor) ; t != null && len(t) > 0 {
+                index := binary.BigEndian.getChar(t[0].info)
+                _ , err := jvm.LucyMethodSignature.decode(function.Type , c.constPools[index].info)
+                if err != null {
+                    panic(err)
+                }
+            }
+            loadEnumForFunction(this , function)
+            if t := m.getAttributeByName(cg.AttributeNameMethodParameters) ; t != null && len(t) > 0 {
+                parseMethodParameter(c , t[0].info , function)
+            }
+            if t := m.getAttributeByName(cg.AttributeNameLucyReturnListNames) ; t != null && len(t) > 0 {
+                parseReturnListNames(c , t[0].info , function)
+            }
+            if t := m.getAttributeByName(cg.AttributeNameLucyDefaultParameters) ; t != null && len(t) > 0 {
+                dp := new cg.AttributeDefaultParameters()
+                dp.fromBytes(t[0].info)
+                jvm.DefaultValueParse.decode(c , function , dp)
+            }
+            if (function.accessFlags & cg.AccMethodVarargs) != 0 {
+                function.Type.vArgs = function.Type.parameterList[len(function.Type.parameterList) - 1]
+                if function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
+                    panic("variable args is not array")
+                }
+                function.Type.vArgs.Type.isVariableArgs = true
+                function.Type.parameterList = function.Type.parameterList[:len(function.Type.parameterList) - 1]
+            }
+            function.entrance = new cg.MethodHighLevel()
+            function.entrance.name = function.name
+            function.entrance.Class = cc
+            function.entrance.descriptor = function.jvmDescriptor
+            function.isGlobal = true
+            fs.append(function)
         }
     }
 
