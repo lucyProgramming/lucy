@@ -21,7 +21,7 @@ public class Fmt {
             if t , ok := n.node.(ast.Block) ; ok &&
                 t.isCompilerAuto == false {
                 format += "{\n"
-                format += this.formatBlock(this.indentIncremental , t) + "\n\n"
+                format += this.formatBlock(this.indentIncremental , t)
                 format += "}\n"
                 continue
             }

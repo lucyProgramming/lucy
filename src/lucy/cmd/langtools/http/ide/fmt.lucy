@@ -47,7 +47,6 @@ class Fmt implements HttpHandler {
             for v := range es {
                 errmsg += v.getMessage() + "\n"
             }
-
             bs := byte[](errmsg)
             exchange.sendResponseHeaders(400 , long(len(bs)))
             os.write(bs)
