@@ -3,7 +3,7 @@
 import "java/lang/Object"
 import "lucy/jvm/cg"
 
-public class Block {
+public class Block implements TopNodeInterface {
     public exits []cg.Exit // for switch template
     /*
 		should analyse at ast stage

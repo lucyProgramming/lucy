@@ -1,12 +1,16 @@
 // all rights reserved , check the LICENSE file
 
-import "java/lang/Object"
 
 public class TopNode  {
-	public node Object
+	public node TopNodeInterface
 	
-	public fn TopNode(n Object) {
+	public fn TopNode(n TopNodeInterface) {
 		this.super()
 		this.node = n
 	}
 }
+
+// this empty interface indicate TopNode 
+// the class can be use as TopNodeInterface will implements this interface
+// so the type checker can check TopNode must be subclass 
+public interface TopNodeInterface {} 

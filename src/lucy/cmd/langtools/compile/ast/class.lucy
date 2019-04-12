@@ -8,7 +8,7 @@ import "lucy/cmd/langtools/compile/common"
 	public abstract final class {}
 	unlike function class not accept capture
 */
-public class Class {
+public class Class implements TopNodeInterface {
     public isGlobal                          bool
     public isBuildIn                         bool
     public used                              int

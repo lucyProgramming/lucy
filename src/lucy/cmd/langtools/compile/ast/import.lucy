@@ -2,7 +2,7 @@
 
 import "lucy/cmd/langtools/compile/common" as common
 
-public class Import {
+public class Import implements TopNodeInterface {
     public accessName         string 
     public Import             string  // full name
     public pos                Pos    

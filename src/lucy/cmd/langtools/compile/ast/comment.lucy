@@ -1,11 +1,11 @@
 // all rights reserved , check the LICENSE file
 
 
-public class Comment {
+public class Comment  implements TopNodeInterface{
     public comment string 
     public isMulti bool 
 }
 
-public class Line {
+public class Line implements TopNodeInterface {
     // indicate a line 
 }

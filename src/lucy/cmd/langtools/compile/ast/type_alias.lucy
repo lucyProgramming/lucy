@@ -1,6 +1,6 @@
 // all rights reserved , check the LICENSE file
 
-public class TypeAlias {
+public class TypeAlias implements TopNodeInterface {
     public name               string
     public aliasName          string
     public Type               Type

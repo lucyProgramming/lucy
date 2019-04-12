@@ -37,7 +37,7 @@ public class EnumName {
 }
 
 
-public class Enum {
+public class Enum implements TopNodeInterface {
     public isGlobal        bool
     public isBuildIn       bool
     public accessFlags     char
