@@ -21,7 +21,7 @@ public const JavaThrowableClass = "java/lang/Throwable"
 public const JavaStringClassName = "java/lang/String"
 public const Super = "super"
 public const SpecialMethodInit = "<init>"
-const ClassInitMethod = "<clinit>"
+public const ClassInitMethod = "<clinit>"
 
 fn isMagicIdentifier(name string) -> (is bool) {
     return name == MagicIdentifierFile ||

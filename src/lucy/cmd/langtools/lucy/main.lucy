@@ -65,17 +65,17 @@ fn main(args []string) {
             r.runOverExit = true
             r.run(args[0] , args[1:])
         case "install":
-            install.install(args[1:])
+            install.installFn(args[1:])
         case "clean":
-            clean.clean(args[1:])
+            clean.cleanFn(args[1:])
         case "test":
-            test.test(args[1:])
+            test.testFn(args[1:])
         case "tool":
             tool.tool(args[1:])
         case "http":
             http.http(args[1:])
         case "pack":
-            pack.pack(args[1:])
+            pack.packFn(args[1:])
         case "env":
             printEvn()
         default:

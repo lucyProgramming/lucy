@@ -47,7 +47,7 @@ class Rename implements HttpHandler {
         }
         line := Integer.parseInt(paramters["line"])
         column := Integer.parseInt(paramters["column"])
-        rename.rename(filename,
+        rename.renameFn(filename,
             g.readBodyBytes(exchange.getRequestBody()),
             to,
             line << 16 | int(char(column)))

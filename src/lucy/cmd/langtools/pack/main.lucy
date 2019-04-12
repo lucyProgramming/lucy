@@ -1,10 +1,10 @@
 // all rights reserved , check the LICENSE file
 
-public fn pack(args []string) {
+public fn packFn(args []string) {
     jarFlags , packageName , installDir := new Flags().parseArgs(args)
     new Pack(jarFlags , packageName , installDir).pack()
 }
 
 fn main(args []string) {
-    pack(args)
+    packFn(args)
 }

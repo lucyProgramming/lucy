@@ -532,8 +532,10 @@ public class Lexer {
     fn lexMultiLineComment() -> (comment string , err error) {
         bs := []byte{}
     redo:
-        c , _ := this.getChar()
-        var eof bool
+        c , eof := this.getChar()
+        if eof == false {
+            bs.append(c)
+        }
         for c != '*' &&
             eof == false {
             c , eof = this.getChar()
@@ -603,7 +605,7 @@ public class Lexer {
         }
         for c == ' ' ||
             c == '\t' ||
-            c == '\r' { //    skip empty
+            c == '\r' { //     skip empty
             c , eof = this.getChar()
         }
 

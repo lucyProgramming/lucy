@@ -315,6 +315,9 @@ public class Class {
                 if m.attributeLucyMethodDescriptor != null {
                     info.attributes.append(m.attributeLucyMethodDescriptor.toAttributeInfo(this))
                 }
+                if m.attributeTriggerPackageInitMethod != null {
+                    info.attributes.append(m.attributeTriggerPackageInitMethod.toAttributeInfo(this)) 
+                }
                 if m.attributeDefaultParameters != null {
                     info.attributes.append(m.attributeDefaultParameters.toAttributeInfo(this))
                 }

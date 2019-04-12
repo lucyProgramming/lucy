@@ -1,16 +1,17 @@
 // all rights reserved , check the LICENSE file
 
 public class MethodHighLevel {
-    public isConstruction                bool                         
-    public Class                         ClassHighLevel               
-    public name                          string                       
-    public descriptor                    string                       
-    public accessFlags                   char                         
-    public code                          AttributeCode                
-    public attributeLucyMethodDescriptor AttributeLucyMethodDescriptor
-    public attributeDefaultParameters    AttributeDefaultParameters   
-    public attributeMethodParameters     AttributeMethodParameters    
-    public attributeLucyReturnListNames  AttributeMethodParameters    
+    public isConstruction                    bool
+    public Class                             ClassHighLevel
+    public name                              string
+    public descriptor                        string
+    public accessFlags                       char
+    public code                              AttributeCode
+    public attributeLucyMethodDescriptor     AttributeLucyMethodDescriptor
+    public attributeDefaultParameters        AttributeDefaultParameters
+    public attributeMethodParameters         AttributeMethodParameters
+    public attributeLucyReturnListNames      AttributeMethodParameters
+    public attributeTriggerPackageInitMethod AttributeTriggerPackageInitMethod
 }
 
 

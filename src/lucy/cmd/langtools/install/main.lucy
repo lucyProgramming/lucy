@@ -12,7 +12,7 @@ fn printUsage() {
 }
 
 
-public fn install(args []string) {
+public fn installFn(args []string) {
     var lucyRoot = common.getLucyRoot()
     var verbose = flagParser.boolOption("-v" , false , "package name")
     packageName , err := flagParser.parse(args)
@@ -34,6 +34,6 @@ public fn install(args []string) {
 
 
 fn main(args []string) {
-    install(args)
+    installFn(args)
 }
 

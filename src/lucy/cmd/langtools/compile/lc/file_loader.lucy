@@ -11,6 +11,9 @@ import "lucy/os"
 import "java/util/zip"
 import "lucy/cmd/langtools/common" as langtoolsCommon
 
+// import "lucy/cmd/langtools/compile/parser"
+
+
 /*
 	load from file implementation
 */
@@ -524,8 +527,12 @@ public class FileLoader implements ast.loadImport {
         }
         for _ , m := range c.methods {
             name := string(c.constPools[m.nameIndex].info)
-            if name == ast.MainFunctionName {
+            if name == ast.MainFunctionName  || name == ast.SpecialMethodInit || name  == ast.ClassInitMethod{
                 // this is main function
+                continue
+            }
+            if t := m.getAttributeByName(cg.AttributeNameLucyTriggerPackageInitMethod) ; len(t) > 0 {
+                pack.packageInitMethod = name
                 continue
             }
             function := new ast.Function()
@@ -596,6 +603,9 @@ public class FileLoader implements ast.loadImport {
             pos.filename = attr.filename
             pos.endLine = int(attr.startLine)
             pos.endColumnOffset = int(attr.startColumn)
+            // if ast.parseFunctionHandler == null {
+            //     ast.parseFunctionHandler = parser.parseFunction 
+            // }
             f , es := ast.parseFunctionHandler([]byte(attr.code) , pos)
             if len(es) > 0 {
                 panic(es[0])

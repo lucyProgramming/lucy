@@ -6,7 +6,7 @@ import "java/nio/file/FileSystems"
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/os"
 
-public fn autoCompletion(file string , pos int , bs []byte) -> (result []ast.AutoCompletionItem) {
+public fn autoCompletion2(file string , pos int , bs []byte) -> (result []ast.AutoCompletionItem) {
     lucyPath , packageName := ide.locateLucyFile(file)
     var lucyFiles = ide.readLucyFiles(ide.getLucyFiles(lucyPath + "/src/" + packageName))
     fileSystem := FileSystems.getDefault()
@@ -34,7 +34,7 @@ fn main(args []string) {
         }
         bs = javaArray2Lucy(t)
     }
-    items := autoCompletion(file , pos , bs)
+    items := autoCompletion2(file , pos , bs)
     result := copy(
         new ast.AutoCompletionItem[](
             len(items)) , items)

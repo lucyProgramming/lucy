@@ -2,41 +2,40 @@
 
 import "lucy/jvm/cg"
 
-typealias BuildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error , args []Type , pos Pos)
-
+typealias BuildInFunctionChecker = fn(f Function , e ExpressionFunctionCall , block Block , errs []error , args []Type , pos Pos)
 
 public class Function {
     //this.super()
-    public callFatherConstructionExpression Expression            
-    public templateFunction                 TemplateFunction      
+    public callFatherConstructionExpression Expression
+    public templateFunction                 TemplateFunction
            parameterTypes                   map{string -> Type}    //typed parameters
     public entrance                         cg.MethodHighLevel     // make_node_objects call from
            buildInFunctionChecker           BuildInFunctionChecker
-    public accessFlags                      char                  
+    public accessFlags                      char
     public Type                             FunctionType = new FunctionType()
     public closure                          Closure = new Closure()
     public name                             string                 // if name is null string,means no name function
     public block                            Block = new Block()
-    public pos                              Pos                   
-    public jvmDescriptor                    string                
+    public pos                              Pos
+    public jvmDescriptor                    string
     public closureVariableOffSet            char                   // for closure
     public sourceCode                       []byte                 // source code for template function
-    public hasDefer                         bool                  
-    public haveDefaultValue                 bool                  
-    public defaultValueStartAt              int                   
-    public isGlobal                         bool                  
-    public isBuildIn                        bool                  
-    public loadedFromCorePackage            bool                  
-    public used                             int                  
-    public templateClonedFunction           bool                  
-    public comment                          string                
-    public isClosureFunction                bool                  
-    public locateDefinition                 bool                  
-    public findUsage                        bool                  
-    public rename                           bool                  
-           findUsageInstances               []Usage               
-    public startLine                        int                   
-    public endLine                          int                   
+    public hasDefer                         bool
+    public haveDefaultValue                 bool
+    public defaultValueStartAt              int
+    public isGlobal                         bool
+    public isBuildIn                        bool
+    public loadedFromCorePackage            bool
+    public used                             int
+    public templateClonedFunction           bool
+    public comment                          string
+    public isClosureFunction                bool
+    public locateDefinition                 bool
+    public findUsage                        bool
+    public rename                           bool
+           findUsageInstances               []Usage
+    public startLine                        int
+    public endLine                          int
 
     public fn isPublic() -> (is bool) {
         return this.accessFlags & cg.AccMethodPublic != 0

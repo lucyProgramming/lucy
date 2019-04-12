@@ -11,7 +11,7 @@ public fn getHover (file string , pos int , bs []byte) ->(s string = "") {
         bs = javaArray2Lucy(t)
     }
     storePackage := []ast.Package{null}
-    gotodefinition.findDefinition(file , pos , bs , storePackage)
+    gotodefinition.findDefinitionFn(file , pos , bs , storePackage)
     if storePackage[0] == null || 
         storePackage[0].locateDefinitionBaseOn == null {
         return 

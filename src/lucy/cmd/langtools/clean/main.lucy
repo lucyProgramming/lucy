@@ -12,7 +12,7 @@ fn printUsageAndExit(code int) {
     os.exit(code)
 }
 
-public fn clean(args []string) {
+public fn cleanFn(args []string) {
     recursive := flagParser.boolOption("-r" , false , "clean sub directory too")
     verbose := flagParser.boolOption("-v" , false , "verbose")
     packageName , err := flagParser.parse(args)
@@ -33,5 +33,5 @@ public fn clean(args []string) {
 }
 
 fn main(args []string) {
-    clean(args)
+    cleanFn(args)
 }

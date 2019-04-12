@@ -8,7 +8,7 @@ fn printUsageAndExit(code int) {
     os.exit(code)
 }
 
-public fn test(args []string) {
+public fn testFn(args []string) {
     packageName , forceReBuild := new Flags().parseArgs(args)
     lucyRoot := common.getLucyRoot()
     lcyPaths := common.getLucyPath()
@@ -17,6 +17,6 @@ public fn test(args []string) {
 }
 
 fn main(args []string) {
-    test(args)
+    testFn(args)
 }
 

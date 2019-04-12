@@ -34,7 +34,7 @@ class GotoDefinition implements HttpHandler {
         }
         line := Integer.parseInt(paramters["line"])
         column := Integer.parseInt(paramters["column"])
-        pos := gotodefinition.findDefinition(file,
+        pos := gotodefinition.findDefinitionFn(file,
             (line << 16) | int(char(column)),
             g.readBodyBytes(exchange.getRequestBody()),
             null)

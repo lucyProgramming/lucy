@@ -1,5 +1,8 @@
 // all rights reserved , check the LICENSE file
 
+import "java/lang/System"
+
+
 public fn getBaseName(filepath string) -> (name string) {
     index := filepath.lastIndexOf("/")
     if index < 0 {
@@ -8,3 +11,6 @@ public fn getBaseName(filepath string) -> (name string) {
     return filepath[index + 1:] // skip '/'
 }
 
+public fn onWinows() -> (on bool) {
+    on = System.getProperty("os.name").toLowerCase().startsWith("windows")
+}

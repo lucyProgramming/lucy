@@ -23,17 +23,17 @@ public class AttributeTemplateFunction {
     }
 
     fn toAttributeInfo(c Class) -> (ret AttributeInfo) {
-        info := new AttributeInfo()
-        info.nameIndex = c.insertUtf8Const(AttributeNameLucyTemplateFunction)
-        info.attributeLength = 12
-        info.info = new []byte(info.attributeLength)
-        binary.BigEndian.putChar(info.info , c.insertUtf8Const(this.name))
-        binary.BigEndian.putChar(info.info[2:] , c.insertUtf8Const(this.filename))
-        binary.BigEndian.putChar(info.info[4:] , this.startLine)
-        binary.BigEndian.putChar(info.info[6:] , this.startColumn)
-        binary.BigEndian.putChar(info.info[8:] , c.insertUtf8Const(this.code))
-        binary.BigEndian.putChar(info.info[10:] , this.accessFlags)
-        return info
+        ret = new AttributeInfo()
+        ret.nameIndex = c.insertUtf8Const(AttributeNameLucyTemplateFunction)
+        ret.attributeLength = 12
+        ret.info = new []byte(ret.attributeLength)
+        binary.BigEndian.putChar(ret.info , c.insertUtf8Const(this.name))
+        binary.BigEndian.putChar(ret.info[2:] , c.insertUtf8Const(this.filename))
+        binary.BigEndian.putChar(ret.info[4:] , this.startLine)
+        binary.BigEndian.putChar(ret.info[6:] , this.startColumn)
+        binary.BigEndian.putChar(ret.info[8:] , c.insertUtf8Const(this.code))
+        binary.BigEndian.putChar(ret.info[10:] , this.accessFlags)
+        return ret
     }
 }
 

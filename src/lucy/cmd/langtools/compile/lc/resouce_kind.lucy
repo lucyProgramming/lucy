@@ -11,11 +11,11 @@ public enum ResourceKind {
 
 
 public class Resource {
-    public kind          ResourceKind  
-    public realPath      string        
-    public name          string        
+    public kind          ResourceKind
+    public realPath      string
+    public name          string
            loadFromJar   []zip.ZipEntry
-           loadFromJarBs [][]byte      
+           loadFromJarBs [][]byte
 
     public fn Resource(kind ResourceKind , realPath string , name string) {
         this.super()

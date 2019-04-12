@@ -6,34 +6,35 @@ import "java/lang/Object"
 import "lucy/cmd/langtools/common" as langtoolsCommon
 
 public class Package {
-    public name                    string                   
+    public name                    string
+    public packageInitMethod       string
     public block                   Block = new Block() // package always have a default block
            files                   map{string -> SourceFile}
-    public initFunctions           []Function               
+    public initFunctions           []Function
     public nErrors2Stop            int                       // number of errors should stop compile
-           errors                  []error                  
-           statementLevelFunctions []Function               
-           statementLevelClass     []Class                  
-           disableCheckUnuse       bool                     
+           errors                  []error
+           statementLevelFunctions []Function
+           statementLevelClass     []Class
+           disableCheckUnuse       bool
 
     public javaPackage        JavaPackage
-    public matchFile          string     
-    public matchLine          int        
-    public printFileMatchInfo bool       
-    public loader             loadImport 
+    public matchFile          string
+    public matchLine          int
+    public printFileMatchInfo bool
+    public loader             loadImport
 
     /*
 		for lucy tool goto definition
 	*/
-    private locateDefinition       Pos     
-    public  locateDefinitionBaseOn Object  
-    public  loadLucyPackageName    []string
+    private locateDefinition       Pos
+    public  locateDefinitionBaseOn Object
+    public  loadLucyPackages       []Package
 
     /*
 		for usage 
 	*/
     public findUsage         []Usage
-    public findUsageIsGlobal bool   
+    public findUsageIsGlobal bool
 
     public onlyAnalyzeGlobals bool
 
@@ -141,12 +142,12 @@ public class Package {
 
     fn loadCorePackage() -> (err error) {
         if this.name == common.CorePackage {
-            return 
+            return
         }
         var pp Object
         pp , err = this.load(common.CorePackage)
         if err != null {
-            return 
+            return
         }
         lucyBuildInPackage := pp.(Package)
         lucyBuildInPackage.markBuildIn()
@@ -157,12 +158,12 @@ public class Package {
 
     fn getImport(file string , accessName string) -> (i Import) {
         if this.files == null {
-            return 
+            return
         }
         if t := this.files[file] ; t != null && t.imports != null {
             return t.imports[accessName]
         }
-        return 
+        return
     }
 
     fn getSourceFile(fileName string) -> (file SourceFile) {
@@ -607,12 +608,11 @@ public class Package {
         t , err := this.loader.loadImport(resource)
         if pp , ok := t.(Package) ; ok {
             if pp.javaPackage == null {
-                if this.loadLucyPackageName == null {
-                    this.loadLucyPackageName = [resource]
+                if this.loadLucyPackages == null {
+                    this.loadLucyPackages = [pp]
                 } else {
-                    this.loadLucyPackageName.append(resource)
+                    this.loadLucyPackages.append(pp)
                 }
-
             }
         }
         if c , ok := t.(Class) ; ok && c != null {
@@ -621,6 +621,15 @@ public class Package {
             }
         }
         return t , err
+    }
+
+    public fn loadPackageContainsPackageInitMethod() -> (contains bool) {
+        for v := range this.loadLucyPackages {
+            if v.packageInitMethod != null && v.packageInitMethod != "" {
+                contains = true
+                return
+            }
+        }
     }
 
     fn loadClass(className string) -> (c Class , err error) {

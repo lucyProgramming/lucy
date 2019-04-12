@@ -424,7 +424,7 @@ public class RunLucyPackage {
         for k , v := range lucyFiles {
             files[k] = v.realpathName
         }
-        hasMain , _ , compiledFileNames := lc.Main(
+        hasMain , _ , compiledFileNames := lc.Main2(
             destinationDir,
             files,
             this.lucyPath,

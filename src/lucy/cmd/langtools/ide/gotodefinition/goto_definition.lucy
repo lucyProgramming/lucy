@@ -4,7 +4,7 @@ import "lucy/cmd/langtools/ide"
 import "java/nio/file/FileSystems"
 import "lucy/cmd/langtools/compile/ast"
 
-public fn findDefinition(file string , pos int , bs []byte , storePackage []ast.Package) -> (result ast.Pos) {
+public fn findDefinitionFn(file string , pos int , bs []byte , storePackage []ast.Package) -> (result ast.Pos) {
     lucyPath , packageName := ide.locateLucyFile(file)
     lucyFiles := ide.readLucyFiles(ide.getLucyFiles(lucyPath + "/src/" + packageName))
     fileSystem := FileSystems.getDefault()
