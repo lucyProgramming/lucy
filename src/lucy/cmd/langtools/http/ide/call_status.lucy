@@ -1,10 +1,10 @@
 // all rights reserved , check the LICENSE file
 
 public class CallStatus {
-    public times          int   
+    public times          int
     public usedTime       long   // in millisecond 
     public usedTimeString string
-    public avgTime        long  
+    public avgTime        long
     public avgTimeString  string
 
     fn add(usedTime long) {

@@ -16,9 +16,6 @@ public fn Main2(
     disableCheckUnUse bool,
     packageName string,
     printError bool) -> (hasMain bool , es []error , compiledFileNames []string) {
-    if ast.parseFunctionHandler == null {
-        ast.parseFunctionHandler = parser.parseFunction 
-    }
     var compiler = new Compiler()
     if len(files) == 0 {
         return false , [new error("no file specfied")] , null
@@ -33,17 +30,17 @@ public fn Main2(
 }
 
 public class Compiler {
-    tops              []ast.TopNode   
-    files             []string        
-    errs              []error         
-    nErrs2StopCompile int             
-    lucyPath          []string        
-    classPath         []string        
-    buildPackage      jvm.BuildPackage = new jvm.BuildPackage(char(52) , char(0) )
-    destinationDir    string          
-    onlyImport        bool            
-    packageName       string          
-    disableCheckUnUse bool            
+    tops              []ast.TopNode
+    files             []string
+    errs              []error
+    nErrs2StopCompile int
+    lucyPath          []string
+    classPath         []string
+    buildPackage      jvm.BuildPackage = new jvm.BuildPackage(char(52) , char(0))
+    destinationDir    string
+    onlyImport        bool
+    packageName       string
+    disableCheckUnUse bool
 
     ifErrExit  bool
     printError bool
@@ -75,7 +72,7 @@ public class Compiler {
             os.exit(code)
         }
     }
-    
+
     fn dumpImports() {
         if len(this.errs) > 0 {
             this.exit()

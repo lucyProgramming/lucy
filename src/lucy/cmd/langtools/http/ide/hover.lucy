@@ -12,7 +12,6 @@ class GetHover implements HttpHandler {
         os := exchange.getResponseBody()
         now := System.currentTimeMillis()
         defer {
-
             CallStatus.collect(callStatus , "hover" , System.currentTimeMillis() - now)
             e := catch()
             if e != null {
