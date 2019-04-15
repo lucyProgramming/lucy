@@ -2,8 +2,8 @@
 
 
 public fn packFn(args []string) {
-    packageName , outputFile , manifestFile := new Flags().parseArgs(args)
-    new Pack(packageName , outputFile , manifestFile).pack()
+    packageName , outputFile , manifestFile , verbose := new Flags().parseArgs(args)
+    new Pack(packageName , outputFile , manifestFile , verbose).pack()
 }
 
 fn main(args []string) {

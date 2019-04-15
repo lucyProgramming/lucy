@@ -98,7 +98,6 @@ public final class FlagParser {
                 }
                 o.parse(args[++k])
             }
-
         }
     }
     public fn helpMsg(prefix string = "") -> (msg string) {

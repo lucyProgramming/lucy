@@ -7,5 +7,3 @@ public fn abs <T> (a T) -> (b T = a) {
     }
 }
 
-
-

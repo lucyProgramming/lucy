@@ -17,17 +17,20 @@ class Pack {
     lucyRoot               string
     manifestFile           string
     jarFile                jar.JarOutputStream
+    verbose                bool
 
     fn Pack(
         packageName string,
         outputFile string,
-        manifestFile string) {
+        manifestFile string,
+        verbose bool) {
         this.super()
         this.manifestFile = manifestFile
         this.packageName = packageName
         this.lucyRoot = common.getLucyRoot()
         this.lucyPath = common.getLucyPath()
         this.outputFile = outputFile
+        this.verbose = verbose
         this.packageClsssFileCopied = new map{string -> bool}()
     }
 
@@ -45,6 +48,9 @@ class Pack {
         defer outputFileStream.close()
         var manifestFileStream io.FileInputStream
         if this.manifestFile != null && this.manifestFile != "" {
+            if this.verbose {
+                printf("manifest:%s\n" , this.manifestFile)
+            }
             manifestFileStream = new io.FileInputStream(this.manifestFile)
         }
         defer {
@@ -83,6 +89,9 @@ class Pack {
                 this.jarFile.putNextEntry(zipEntry)
                 directoryEntryWrited = true
             }
+            if this.verbose {
+                print("create entry:" , src + "/" + v.getName())
+            }
             t , err := os.readFile(src + "/" + v.getName())
             if err != null {
                 panic(err)
@@ -120,6 +129,9 @@ class Pack {
                 continue
             }
             t , err := os.readFile(dir + "/" + v.getName())
+            if this.verbose {
+                print("create entry:" , dir + "/" + v.getName())
+            }
             if err != null {
                 panic(err)
             }

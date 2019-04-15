@@ -31,7 +31,12 @@ class ExpressionCheckAssign {
         // }
         bin.left.multiValues = leftTypes
         if len(lefts) > len(valueTypes) {
-            pos := values[len(values) - 1].pos
+            var pos Pos
+            if len(values) > 0 {
+                pos = values[len(values) - 1].pos
+            } else {
+                pos = e.pos
+            }
             errs.append(new error(sprintf("%s cannot assign %d value to %d detinations",
                         pos.errMsgPrefix(),
                         len(valueTypes),

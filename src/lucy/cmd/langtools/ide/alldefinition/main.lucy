@@ -14,7 +14,6 @@ public fn getAllDefinition(dir string) -> (result ide.Definition[]) {
     result = new AllDefinition(ide.readLucyFiles(lucyFileNames) , packageName , lucyPath , true).getAllDefinition()
 }
 
-
 fn main(args []string) {
     dir := new Flags().parseArgs(args)
     bs , err := json.encode(getAllDefinition(dir) , "\t")

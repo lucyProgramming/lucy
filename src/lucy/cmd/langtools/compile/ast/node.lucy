@@ -12,6 +12,6 @@ public class TopNode  {
 
 // this empty interface indicate TopNode 
 // the class can be use as TopNodeInterface will implements this interface
-// so the type checker can check TopNode must be subclass 
+// so the type checker can check TopNode must be subclass in lucy "assertion expression" or "when type statement"
 // this is more safe
 public interface TopNodeInterface {} 

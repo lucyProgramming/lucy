@@ -7,18 +7,22 @@ class Flags {
     packageName  flag.StringOption
     outputFile   flag.StringOption
     manifestFile flag.StringOption
+    verbose      flag.BoolOption
+    
     fn Flags() {
         this.super()
         this.parser = new flag.FlagParser()
         this.packageName = this.parser.stringOption("-package-name")
         this.outputFile = this.parser.stringOption("-o")
         this.manifestFile = this.parser.stringOption("-manifest")
+        this.verbose = this.parser.boolOption("-v")
     }
 
     fn parseArgs(args []string) -> (
         packageName string,
         outputFile string,
-        manifestFile string) {
+        manifestFile string,
+        verbose bool) {
         noUse , err := this.parser.parse(args)
         if err != null {
             panic(err)
@@ -37,6 +41,7 @@ class Flags {
             printUsageAndExit(1)
         }
         manifestFile = this.manifestFile.getValue()
+        verbose = this.verbose.getValue()
     }
 }
 
