@@ -3,34 +3,40 @@
 import "lucy/os/flag"
 
 class Flags {
-    parser      flag.FlagParser
-    packageName flag.StringOption
-    installDir  flag.StringOption
-
+    parser       flag.FlagParser
+    packageName  flag.StringOption
+    outputFile   flag.StringOption
+    manifestFile flag.StringOption
     fn Flags() {
         this.super()
         this.parser = new flag.FlagParser()
         this.packageName = this.parser.stringOption("-package-name")
-        this.installDir = this.parser.stringOption("-install-dir")
+        this.outputFile = this.parser.stringOption("-o")
+        this.manifestFile = this.parser.stringOption("-manifest")
     }
+
     fn parseArgs(args []string) -> (
-        jarFlags []string,
         packageName string,
-        installDir string) {
-        jarFlags , err := this.parser.parse(args)
+        outputFile string,
+        manifestFile string) {
+        noUse , err := this.parser.parse(args)
         if err != null {
             panic(err)
         }
+        if len(noUse) > 0 {
+            panic("flag defined but not used:" + noUse)
+        }
         packageName = this.packageName.getValue()
-        installDir = this.installDir.getValue()
+        outputFile = this.outputFile.getValue()
         if packageName == "" {
             print("-package-name is null string")
             printUsageAndExit(1)
         }
-        if installDir == "" {
-            print("-install-dir is null string")
+        if outputFile == "" {
+            print("-o out put file is null string")
             printUsageAndExit(1)
         }
+        manifestFile = this.manifestFile.getValue()
     }
 }
 

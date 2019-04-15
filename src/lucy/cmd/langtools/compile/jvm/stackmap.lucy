@@ -63,8 +63,8 @@ class StackMapState {
         if num < 0 {
             panic("negative num")
         }
-        if len(this.stacks) == 0 {
-            panic("already 0")
+        if len(this.stacks) < num {
+            panic("stack down flow")
         }
         this.stacks = this.stacks[:len(this.stacks) - num]
     }

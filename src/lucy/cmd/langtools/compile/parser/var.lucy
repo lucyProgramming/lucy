@@ -20,7 +20,7 @@ var untilSemicolonOrLf = {
         lex.TokenLf -> true
     }
 
-fn parseFunction(bs []byte , pos ast.Pos) -> (f ast.Function , es []error) {
+public fn parseFunction(bs []byte , pos ast.Pos) -> (f ast.Function , es []error) {
     parser := new Parser(bs , null , pos.filename , false , 10)
     parser.lexer = new lex.Lexer(bs , pos.endLine , pos.endColumnOffset , -1 , -1 , -1 , -1)
     parser.next(lfNotToken) // read fn

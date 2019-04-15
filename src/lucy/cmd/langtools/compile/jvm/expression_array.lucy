@@ -20,7 +20,6 @@ class BuildExpressionArray {
         state StackMapState) -> (maxStack char) {
         length := len(state.stacks)
         defer {
-
             state.popStack(len(state.stacks) - length)
         }
 

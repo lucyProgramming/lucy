@@ -1,92 +1,100 @@
 // all rights reserved , check the LICENSE file
+// TODO::need better implementation,use lib jar not the command line to impletation this tool
 
 import "lucy/cmd/langtools/lucy/run"
 import "lucy/cmd/langtools/common"
 import "java/io"
 import "lucy/encoding/json"
 import "lucy/os"
-import "java/lang/Runtime"
-import "lucy/io" as lucyIo
+import "java/util/jar"
+import "java/util/zip"
 
 class Pack {
-    jarFlags               []string
     packageName            string
     lucyPath               []string
-    installDir             string
+    outputFile             string
     packageClsssFileCopied map{string -> bool}
     lucyRoot               string
+    manifestFile           string
+    jarFile                jar.JarOutputStream
 
     fn Pack(
-        jarFlags []string,
         packageName string,
-        installDir string) {
+        outputFile string,
+        manifestFile string) {
         this.super()
-        this.jarFlags = jarFlags
+        this.manifestFile = manifestFile
         this.packageName = packageName
         this.lucyRoot = common.getLucyRoot()
         this.lucyPath = common.getLucyPath()
-        this.installDir = installDir
+        this.outputFile = outputFile
         this.packageClsssFileCopied = new map{string -> bool}()
     }
 
     fn pack() {
+        if this.manifestFile == null ||
+            this.manifestFile == "" {
+            printf("warn: no manifest file provide!!\n")
+        }
         // build the packge 
         if err := new run.RunLucyPackage().
             run("pack" , ["-build" , this.packageName]) ; err != null {
             panic(err)
         }
-        this.copyClassFiles("lucy/lang")
-        this.copyLib(this.lucyRoot + "/lib" , this.installDir)
-        this.copyClassFiles(this.packageName)
-        this.callJarCommandLine()
+        outputFileStream := new io.FileOutputStream(this.outputFile)
+        defer outputFileStream.close()
+        var manifestFileStream io.FileInputStream
+        if this.manifestFile != null && this.manifestFile != "" {
+            manifestFileStream = new io.FileInputStream(this.manifestFile)
+        }
+        defer {
+            if manifestFileStream != null {
+                manifestFileStream.close()
+            }
+        }
+        if this.manifestFile != null && this.manifestFile != "" {
+            manifest := new jar.Manifest(manifestFileStream)
+            this.jarFile = new jar.JarOutputStream(outputFileStream , manifest)
+        } else {
+            this.jarFile = new jar.JarOutputStream(outputFileStream)
+        }
+        // the core package must be dumped 
+        this.dumpPackageClassFiles("lucy/lang")
+        this.dumpLib(this.lucyRoot + "/lib/lucy" , "lucy")
+        this.dumpPackageClassFiles(this.packageName)
+        this.jarFile.flush()
+        this.jarFile.finish()
     }
 
-    fn deleteTempDirectory() {
-        new io.File(this.installDir).delete()
-    }
-
-    fn callJarCommandLine() {
-        args := new string[](len(this.jarFlags) + 2)
-        args[0] = "jar"
-        for k , v := range this.jarFlags {
-            args[k + 1] = v
-        }
-        args[args.size() - 1] = "./"
-        p := Runtime.getRuntime().exec(args , null , new io.File(this.installDir))
-        Run.runFn(fn () {
-                lucyIo.ioCopy(os.stderr , p.getErrorStream())
-            })
-        Run.runFn(fn () {
-                lucyIo.ioCopy(os.stdout , p.getInputStream())
-            })
-        code := p.waitFor()
-        if code != 0 {
-            panic(sprintf("exec jar exception , code:%d" , code))
-        }
-    }
-    fn copyLib(src string , dest string) {
+    fn dumpLib(src string , packageName string) {
         fis := new io.File(src).listFiles()
-        new io.File(dest).mkdirs()
+        directoryEntryWrited := false
         for v := range fis {
             if v.isDirectory() {
-                this.copyLib(src + "/" + v.getName() , dest + "/" + v.getName())
+                this.dumpLib(src + "/" + v.getName() , packageName + "/" + v.getName())
                 continue
             }
             // not a class file
             if v.getName().endsWith(".class") == false {
                 continue
             }
+            if directoryEntryWrited == false {
+                zipEntry := new zip.ZipEntry(packageName + "/")
+                this.jarFile.putNextEntry(zipEntry)
+                directoryEntryWrited = true
+            }
             t , err := os.readFile(src + "/" + v.getName())
             if err != null {
                 panic(err)
             }
-            err = os.writeFile(dest + "/" + v.getName() , t)
-            if err != null {
-                panic(err)
-            }
+            zipEntry := new zip.ZipEntry(packageName + "/" + v.getName())
+            this.jarFile.putNextEntry(zipEntry)
+            this.jarFile.write(t)
         }
     }
-    fn copyClassFiles(packageName string) {
+
+    //dump package files 
+    fn dumpPackageClassFiles(packageName string) {
         var dir string
         if packageName == "lucy/lang" {
             dir = this.lucyRoot + "/class/" + packageName
@@ -99,13 +107,13 @@ class Pack {
             if this.packageClsssFileCopied.keyExist(v.name) {
                 continue
             }
-            this.copyClassFiles(v.name)
+            this.dumpPackageClassFiles(v.name)
             this.packageClsssFileCopied[v.name] = true
         }
         // copy class files
         fis := new io.File(dir).listFiles()
-        destinationDir := this.installDir + "/" + packageName
-        new io.File(destinationDir).mkdirs()
+        zipEntry := new zip.ZipEntry(packageName + "/")
+        this.jarFile.putNextEntry(zipEntry)
         for v := range fis {
             if v.isFile() == false ||
                 v.getName().endsWith(".class") == false {
@@ -115,12 +123,12 @@ class Pack {
             if err != null {
                 panic(err)
             }
-            err = os.writeFile(destinationDir + "/" + v.getName() , t)
-            if err != null {
-                panic(err)
-            }
+            zipEntry := new zip.ZipEntry(packageName + "/" + v.getName())
+            this.jarFile.putNextEntry(zipEntry)
+            this.jarFile.write(t)
         }
     }
+
     fn readMaintain(dir string) -> (meta common.PackageMeta) {
         t , err := os.readFile(dir + "/maintain.json")
         if err != null {
@@ -132,3 +140,5 @@ class Pack {
         new json.Decoder(meta , bs).decode()
     }
 }
+
+

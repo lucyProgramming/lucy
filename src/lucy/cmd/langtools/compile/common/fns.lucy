@@ -2,7 +2,6 @@
 
 import "java/lang/System"
 
-
 public fn getBaseName(filepath string) -> (name string) {
     index := filepath.lastIndexOf("/")
     if index < 0 {
@@ -12,5 +11,9 @@ public fn getBaseName(filepath string) -> (name string) {
 }
 
 public fn onWinows() -> (on bool) {
-    on = System.getProperty("os.name").toLowerCase().startsWith("windows")
+    on = System.
+        getProperty("os.name").
+        toLowerCase().
+        startsWith("windows")
+
 }

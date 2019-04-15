@@ -33,7 +33,10 @@ class BuildExpressionArithmetic {
                 maxStack = t
             }
             switch e.value.Type {
-                case ast.VariableTypeByte , ast.VariableTypeShort , ast.VariableTypeChar , ast.VariableTypeInt:
+                case ast.VariableTypeByte,
+                    ast.VariableTypeShort,
+                    ast.VariableTypeChar,
+                    ast.VariableTypeInt:
                     if e.Type == ast.ExpressionTypeAnd {
                         code.codes[code.codeLength] = cg.OP_iand
                     } else if e.Type == ast.ExpressionTypeOr {
@@ -41,7 +44,6 @@ class BuildExpressionArithmetic {
                     } else {
                         code.codes[code.codeLength] = cg.OP_ixor
                     }
-
                 case ast.VariableTypeLong:
                     if e.Type == ast.ExpressionTypeAnd {
                         code.codes[code.codeLength] = cg.OP_land
@@ -50,9 +52,7 @@ class BuildExpressionArithmetic {
                     } else {
                         code.codes[code.codeLength] = cg.OP_lxor
                     }
-
             }
-
             code.codeLength++
             return
         }

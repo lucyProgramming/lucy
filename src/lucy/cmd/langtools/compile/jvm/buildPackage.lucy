@@ -5,7 +5,6 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 import "lucy/cmd/langtools/compile/common"
 import "java/io"
-import "java/lang/System"
 
 public class BuildPackage {
     Package         ast.Package
@@ -76,34 +75,34 @@ public class BuildPackage {
             if this.classes != null && this.classes[autoName] != null {
                 continue
             } else {
-                // if this.checkWinClassFileAleadyExist(autoName) {
-                //     //
-                //     continue
-                // }
+                if this.checkClassFileAleadyExist(autoName) {
+                    //
+                    continue
+                }
                 return autoName
             }
         }
         panic("new class name overflow") // impossible
     }
 
-    // on windows Array.class == array.class filesystem is not case sensitve
-    // fn checkWinClassFileAleadyExist(name string) -> (exist bool) {
-    //     // not a windows system 
-    //     if false == System.getProperty("os.name").toLowerCase().startsWith("win") {
-    //         return false
-    //     }
-    //     for k , _ := range this.classes {
-    //         if k.toLowerCase() == name {
-    //             return true
-    //         }
-    //     }
-    //     //
-    //     for k , _ := range this.Package.block.classes {
-    //         if k.toLowerCase() == name {
-    //             return true
-    //         }
-    //     }
-    // }
+    //on windows Array.class == array.class filesystem is not case sensitve
+    fn checkClassFileAleadyExist(name string) -> (exist bool) {
+        // not a windows system 
+        if common.onWinows() == false {
+            return 
+        }
+        for k , _ := range this.classes {
+            if k.toLowerCase() == name {
+                return true
+            }
+        }
+        //
+        for k , _ := range this.Package.block.classes {
+            if k.toLowerCase() == name {
+                return true
+            }
+        }
+    }
 
     // fn newGlobalFunctionName(name string) -> (autoName string) {
     //     for i := 0 ; i < 65536 ; i++ {
@@ -135,7 +134,7 @@ public class BuildPackage {
         if this.classes.keyExist(name) {
             panic(sprintf("name:'%s' already been token" , name))
         }
-        if System.getProperty("os.name").toLowerCase().startsWith("windows") {
+        if common.onWinows() {
             for k , _ := range this.classes {
                 if k.toLowerCase() == c.name.toLowerCase() {
                     msg := sprintf("on windows class file '%s.class' == '%s.class'\n" , k , c.name)

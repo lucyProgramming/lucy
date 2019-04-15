@@ -1,8 +1,9 @@
 // all rights reserved , check the LICENSE file
 
+
 public fn packFn(args []string) {
-    jarFlags , packageName , installDir := new Flags().parseArgs(args)
-    new Pack(jarFlags , packageName , installDir).pack()
+    packageName , outputFile , manifestFile := new Flags().parseArgs(args)
+    new Pack(packageName , outputFile , manifestFile).pack()
 }
 
 fn main(args []string) {
