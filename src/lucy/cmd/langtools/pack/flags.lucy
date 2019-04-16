@@ -4,15 +4,13 @@ import "lucy/os/flag"
 
 class Flags {
     parser       flag.FlagParser
-    packageName  flag.StringOption
     outputFile   flag.StringOption
     manifestFile flag.StringOption
     verbose      flag.BoolOption
-    
+
     fn Flags() {
         this.super()
         this.parser = new flag.FlagParser()
-        this.packageName = this.parser.stringOption("-package-name")
         this.outputFile = this.parser.stringOption("-o")
         this.manifestFile = this.parser.stringOption("-manifest")
         this.verbose = this.parser.boolOption("-v")
@@ -27,19 +25,24 @@ class Flags {
         if err != null {
             panic(err)
         }
-        if len(noUse) > 0 {
+        if len(noUse) == 0 {
+            print("no package name specified")
+            printUsageAndExit(1)
+        }
+        packageName = noUse[0]
+        noUse = noUse[1:]
+        if len(noUse) > 1 {
             panic("flag defined but not used:" + noUse)
+            printUsageAndExit(1)
         }
-        packageName = this.packageName.getValue()
         outputFile = this.outputFile.getValue()
-        if packageName == "" {
-            print("-package-name is null string")
-            printUsageAndExit(1)
-        }
         if outputFile == "" {
-            print("-o out put file is null string")
+            print("-o output file is null string")
             printUsageAndExit(1)
         }
+        if outputFile.endsWith(".jar") == false {
+            panic("-o output file should end with .jar")
+        } 
         manifestFile = this.manifestFile.getValue()
         verbose = this.verbose.getValue()
     }

@@ -59,7 +59,11 @@ public class Package {
     public fn setLocationDefinition(x Object) {
         this.locateDefinition = getPos(x)
         if this.locateDefinition == null {
-            printf("cannot get pos from '%s'\n" , x.toString())
+            if f , ok := x.(Function) ; ok && f.isBuildIn {
+                printf("buildin function[%s] has no body,it is implemented directly codegen\n" , f.name)
+            } else {
+                printf("cannot get pos from '%s'\n" , x.toString())
+            }
         }
         this.locateDefinitionBaseOn = x
     }

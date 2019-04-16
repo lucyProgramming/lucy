@@ -4,7 +4,6 @@ import "lucy/os"
 
 const usage = `
     -o                 the outout file name
-    -package-name      the "package name" you want package 
     -manifest          the optional jar manifest file 
     -v                 verbose
 `
