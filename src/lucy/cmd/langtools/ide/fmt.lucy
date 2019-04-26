@@ -34,11 +34,11 @@ public class Fmt {
                 continue
             }
             if t , ok := n.node.(ast.Enum) ; ok {
-                format += this.formatEnum("" , t) + "\n\n"
+                format += this.formatEnum("" , t)
                 continue
             }
             if t , ok := n.node.(ast.Class) ; ok {
-                format += this.formatClass("" , t) + "\n\n"
+                format += this.formatClass("" , t)
                 continue
             }
             if t , ok := n.node.(ast.Constant) ; ok {
@@ -283,7 +283,7 @@ public class Fmt {
                 }
                 maxName , maxAccessRange , maxTypeName , hasFinal , hasStatic :=
                     this.getFieldDeclarationGroupMeta(fields)
-                
+
                 for k , f := range fields {
                     d := indent + this.indentIncremental
                     if maxAccessRange != "" {
