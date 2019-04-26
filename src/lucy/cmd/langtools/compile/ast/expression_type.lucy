@@ -74,33 +74,25 @@ public enum ExpressionTypeKind {
     ExpressionTypeDot,    // .
     ExpressionTypeAutoCompletion    //auto completion 
 }
-
-
 public class ExpressionTypeAssert extends ExpressionTypeConversion {
     public multiValueContext bool
     public isType            bool // a.(type)  type is a key word , value is good enough 
 }
-
-
 public class ExpressionQuestion {
     public selection Expression
     public True      Expression
     public False     Expression
 }
-
-
 public class ExpressionSlice {
     public on          Expression
     public start , end Expression
 }
-
-
 public class ExpressionFunctionCall {
     public buildInFunctionMeta      Object                   // for build in function only
-    public Expression               Expression              
-    public args                     []Expression            
-    public vArgs                    CallVariableLengthArgs  
-    public Function                 Function                
+    public Expression               Expression
+    public args                     []Expression
+    public vArgs                    CallVariableLengthArgs
+    public Function                 Function
     public parameterTypes           []Type                   // for template function
     public templateFunctionCallPair TemplateFunctionInstance
     // call(LF
@@ -112,26 +104,25 @@ public class ExpressionFunctionCall {
     // }
 
 }
-
 public class ExpressionMethodCall {
     public Class              Class                  // for object or class
-    public Expression         Expression            
-    public args               []Expression          
+    public Expression         Expression
+    public args               []Expression
     public vArgs              CallVariableLengthArgs
-    public name               string                
-    public method             ClassMethod           
-    public fieldMethodHandler ClassField            
+    public name               string
+    public method             ClassMethod
+    public fieldMethodHandler ClassField
     /*
 		unSupport !!!!!!
 	*/
-    public parameterTypes                []Type  
+    public parameterTypes                []Type
     public packageFunction               Function
     public packageGlobalVariableFunction Variable
-    public locateDefinition              bool    
-    public getHover                      bool    
-    public findUsage                     bool    
-    public rename                        bool    
-    public autoCompletion                bool    
+    public locateDefinition              bool
+    public getHover                      bool
+    public findUsage                     bool
+    public rename                        bool
+    public autoCompletion                bool
     // call(LF
     public lpContainsLf bool
     // call(// inline comment 
@@ -140,73 +131,59 @@ public class ExpressionMethodCall {
     //     return this.lpContainsLf || this.lpInlineComment != null
     // }
 }
-
-
 public class ExpressionVar {
-    public Type       Type        
-    public variables  []Variable  
+    public Type       Type
+    public variables  []Variable
     public initValues []Expression
 }
-
-
 public class ExpressionVarAssign {
     public lefts            []Expression
     public initValues       []Expression
     public ifDeclaredBefore []bool       // used for colon assign
 }
-
-
 public class ExpressionTypeConversion {
-    public Type       Type      
+    public Type       Type
     public Expression Expression
 }
-
-
 public class ExpressionIdentifier {
-    public name             string  
+    public name             string
     public Variable         Variable
     public Function         Function
     public enumName         EnumName
-    public comment          string  
-    public locateDefinition bool    
-    public autoCompletion   bool    
-    public getHover         bool    
-    public findUsage        bool    
-    public rename           bool    
+    public comment          string
+    public locateDefinition bool
+    public autoCompletion   bool
+    public getHover         bool
+    public findUsage        bool
+    public rename           bool
 }
-
-
 public class ExpressionIndex {
     public Expression Expression
     public index      Expression
 }
-
-
 public class ExpressionSelection {
-    public Expression       Expression 
-    public name             string     
+    public Expression       Expression
+    public name             string
     public field            ClassField  // expression is class or object
     public method           ClassMethod // pack to method handle
     public packageFunction  Function    // expression is package , pack function to method handle
     public packageVariable  Variable    // expression is package , get package variable
     public packageEnumName  EnumName    // expression is package , get enumName
-    public locateDefinition bool       
-    public getHover         bool       
-    public findUsage        bool       
-    public rename           bool       
+    public locateDefinition bool
+    public getHover         bool
+    public findUsage        bool
+    public rename           bool
     /*
 		a // this is a inline comment
 	*/
     public inlineComment  string //   in
     public containsLf     bool   // constains "\n"
-    public autoCompletion bool  
+    public autoCompletion bool
 }
-
-
 public class ExpressionNew {
-    public Type         Type                  
-    public args         []Expression          
-    public construction ClassMethod           
+    public Type         Type
+    public args         []Expression
+    public construction ClassMethod
     public vArgs        CallVariableLengthArgs
     // call(LF
     public lpContainsLf bool
@@ -216,10 +193,8 @@ public class ExpressionNew {
     //     return this.lpContainsLf || this.lpInlineComment != null
     // }
 }
-
-
 public class ExpressionMap {
-    public Type          Type          
+    public Type          Type
     public keyValuePairs []ExpressionKV
 
     public fn containsLf() -> (contains bool) {
@@ -232,8 +207,6 @@ public class ExpressionMap {
 
     }
 }
-
-
 public class ExpressionKV {
     public key   Expression
     public value Expression
@@ -248,8 +221,6 @@ public class ExpressionKV {
         return this.containsLf || this.inlineComment != null
     }
 }
-
-
 /*
 	for some general purpose
 */
@@ -262,11 +233,7 @@ public class ExpressionBinary {
     public inlineComment string //   in
     public containsLf    bool   // constains "\n"
 }
-
-
 public class ExpressionArray {
-    public Type        Type        
+    public Type        Type
     public expressions []Expression
 }
-
-

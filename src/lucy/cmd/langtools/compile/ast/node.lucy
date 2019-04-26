@@ -1,17 +1,18 @@
 // all rights reserved , check the LICENSE file
 
 
-public class TopNode  {
-	public node TopNodeInterface
-	
-	public fn TopNode(n TopNodeInterface) {
-		this.super()
-		this.node = n
-	}
+public class TopNode {
+    public node TopNodeInterface
+
+    public fn TopNode(n TopNodeInterface) {
+        this.super()
+        this.node = n
+    }
 }
 
 // this empty interface indicate TopNode 
 // the class can be use as TopNodeInterface will implements this interface
 // so the type checker can check TopNode must be subclass in lucy "assertion expression" or "when type statement"
 // this is more safe
-public interface TopNodeInterface {} 
+public interface TopNodeInterface{}
+

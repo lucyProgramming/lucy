@@ -9,20 +9,20 @@ public class Expression implements TopNodeInterface {
 		public hello := "hai...."
 	*/
     public isPublic              bool         // for global
-    public isGlobal              bool        
+    public isGlobal              bool
     public isCompilerAuto        bool         // compile auto expression
-    public value                 Type        
-    public multiValues           []Type      
-    public pos                   Pos         
-    public data                  Object      
-    public isStatementExpression bool        
-    public op                    string      
+    public value                 Type
+    public multiValues           []Type
+    public pos                   Pos
+    public data                  Object
+    public isStatementExpression bool
+    public op                    string
     public lefts                 []Expression // left values
-    public boolValue             bool        
-    public longValue             long        
-    public doubleValue           double      
-    public stringValue           string      
-    public literalRaw            string      
+    public boolValue             bool
+    public longValue             long
+    public doubleValue           double
+    public stringValue           string
+    public literalRaw            string
 
     /*
 		a // this is a inline comment
@@ -918,10 +918,9 @@ public class Expression implements TopNodeInterface {
         e.boolValue = this.boolValue
         e.longValue = this.longValue
         e.doubleValue = this.doubleValue
-        e.stringValue = this.stringValue 
+        e.stringValue = this.stringValue
         e.pos = callPos
-        e.value = this.value 
+        e.value = this.value
     }
 }
-
 

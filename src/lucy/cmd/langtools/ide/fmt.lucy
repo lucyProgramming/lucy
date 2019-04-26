@@ -221,7 +221,7 @@ public class Fmt {
         if len(c.fmts) == 0 &&
             c.superClassName == null &&
             len(c.interfaceNames) == 0 {
-            format += c.name + "{}\n"
+            format += c.name + "{}\n\n"
             return
         }
         format += c.name
@@ -370,14 +370,15 @@ public class Fmt {
             m += this.formatFunction(indent + this.indentIncremental , method.Function , method.isAbstract())
             format += m + "\n"
         }
-        format += indent + "}\n"
+        format += indent + "}\n\n"
     }
+
     fn mkSpacing(length int) -> (s string = "") {
         for i := 0 ; i < length ; i++ {
             s += " "
         }
-
     }
+
     fn getFieldAccessControlString(f ast.ClassFieldDeclaration) -> (access string = "") {
         if f.fields[0].isPublic() {
             access = "public"
@@ -1251,5 +1252,4 @@ public class Fmt {
         }
     }
 }
-
 
