@@ -1,419 +1,418 @@
 // all rights reserved , check the LICENSE file
 
 public class FunctionType {
-    public templateNames           []NameWithPos
-    public templateNamesMap        map{string -> Pos}
-    public parameterList           []Variable
-    public returnList              []Variable
-    public vArgs                   Variable
-    public lpContainsLf            bool
-    public lpContainsInlineComment string
+	public templateNames           []NameWithPos
+	public templateNamesMap        map{string -> Pos}
+	public parameterList           []Variable
+	public returnList              []Variable
+	public vArgs                   Variable
+	public lpContainsLf            bool
+	public lpContainsInlineComment string
 
-    public returnLpContainsLf            bool
-    public returnLpContainsInlineComment string
+	public returnLpContainsLf            bool
+	public returnLpContainsInlineComment string
 
-    fn reDefineParameterOrReturnVar(reDefine Variable) -> (err error) {
-        if v := this.searchName(reDefine.name) ; v != null {
-            errMsg := sprintf("%s reDefine parameter or return variable '%s',first declared at:\n",
-                reDefine.pos.errMsgPrefix() , v.name)
-            errMsg += sprintf("\t%s" , v.pos.errMsgPrefix())
-            return new error(errMsg)
-        }
-    }
+	fn reDefineParameterOrReturnVar(reDefine Variable) -> (err error) {
+		if v := this.searchName(reDefine.name) ; v != null {
+			errMsg := sprintf("%s reDefine parameter or return variable '%s',first declared at:\n",
+				reDefine.pos.errMsgPrefix() , v.name)
+			errMsg += sprintf("\t%s" , v.pos.errMsgPrefix())
+			return new error(errMsg)
+		}
+	}
 
-    public fn checkTemplateNameDuplication() -> (errs []error) {
-        errs = []error{}
-        m := new map{string -> Pos}()
-        for _ , v := range this.templateNames {
-            if p := m[v.name] ; p != null {
-                errMsg := sprintf("%s duplicated name '%s' , first declaraed at:\n",
-                    v.pos.errMsgPrefix() , v.name)
-                errMsg += sprintf("\t%s\n" , p.errMsgPrefix())
-                errs.append(new error(errMsg))
-                continue
-            }
-            m[v.name] = v.pos
-        }
-        this.templateNamesMap = m
-        return errs
-    }
+	public fn checkTemplateNameDuplication() -> (errs []error) {
+		errs = []error{}
+		m := new map{string -> Pos}()
+		for _ , v := range this.templateNames {
+			if p := m[v.name] ; p != null {
+				errMsg := sprintf("%s duplicated name '%s' , first declaraed at:\n",
+					v.pos.errMsgPrefix() , v.name)
+				errMsg += sprintf("\t%s\n" , p.errMsgPrefix())
+				errs.append(new error(errMsg))
+				continue
+			}
+			m[v.name] = v.pos
+		}
+		this.templateNamesMap = m
+		return errs
+	}
 
-    fn haveTemplateName(name string) -> (have bool) {
-        have = this.templateNamesMap != null &&
-            this.templateNamesMap.keyExist(name)
-    }
+	fn haveTemplateName(name string) -> (have bool) {
+		have = this.templateNamesMap != null &&
+			this.templateNamesMap.keyExist(name)
+	}
 
-    fn cloneFunctionType() -> (ret FunctionType) {
-        ret = new FunctionType()
-        ret.parameterList = new []Variable(len(this.parameterList))
-        for k , v := range this.parameterList {
-            p := new Variable()
-            v.copyThis2Another(p)
-            ret.parameterList[k] = p
-        }
-        if this.vArgs != null {
-            p := new Variable()
-            this.vArgs.copyThis2Another(p)
-            ret.vArgs = p
-        }
-        ret.returnList = new []Variable(len(this.returnList))
-        for k , v := range this.returnList {
-            p := new Variable()
-            v.copyThis2Another(p)
-            ret.returnList[k] = p
-        }
-        return
-    }
+	fn cloneFunctionType() -> (ret FunctionType) {
+		ret = new FunctionType()
+		ret.parameterList = new []Variable(len(this.parameterList))
+		for k , v := range this.parameterList {
+			p := new Variable()
+			v.copyThis2Another(p)
+			ret.parameterList[k] = p
+		}
+		if this.vArgs != null {
+			p := new Variable()
+			this.vArgs.copyThis2Another(p)
+			ret.vArgs = p
+		}
+		ret.returnList = new []Variable(len(this.returnList))
+		for k , v := range this.returnList {
+			p := new Variable()
+			v.copyThis2Another(p)
+			ret.returnList[k] = p
+		}
+		return
+	}
 
-    fn typeName() -> (s string) {
-        s = "("
-        for k , v := range this.parameterList {
-            if v.name != null && v.name != "" {
-                s += v.name + " "
-            }
-            s += v.Type.typeName()
-            if v.defaultValueExpression != null {
-                s += " = " + v.defaultValueExpression.literalRaw
-            }
-            if k != len(this.parameterList) - 1 {
-                s += " , "
-            }
-        }
-        if this.vArgs != null {
-            if len(this.parameterList) > 0 {
-                s += " , "
-            }
-            if this.vArgs.name != null &&
-                this.vArgs.name != "" {
-                s += this.vArgs.name + " "
-            }
-            s += this.vArgs.Type.typeName()
-        }
-        s += ")"
-        if this.voidReturn() == false {
-            s += " -> ("
-            for k , v := range this.returnList {
-                if v.name != null && v.name != "" {
-                    s += v.name + " "
-                }
-                s += v.Type.typeName()
-                if k != len(this.returnList) - 1 {
-                    s += ","
-                }
-            }
-            s += ")"
-        }
-        return s
-    }
-    fn typeString(needFormat bool...) -> (s string = "") {
-        if len(this.templateNames) > 0 {
-            s += "<"
-            for k , v := range this.templateNames {
-                s += v.name
-                if k != len(this.templateNames) - 1 {
-                    s += " , "
-                }
-            }
-            s += ">"
-        }
-        s += "("
-        if len(needFormat) > 0 && this.parameterCount() > 1 {
-            s += "\n"
-        }
-        for k , v := range this.parameterList {
-            if len(needFormat) > 0 && this.parameterCount() > 1 {
-                s += "\t"
-            }
-            if v.name != null && v.name != "" {
-                s += v.name + " "
-            }
-            s += v.Type.typeString()
-            if v.defaultValueExpression != null {
-                s += " = " + v.defaultValueExpression.op
-            }
-            if k != len(this.parameterList) - 1 {
-                s += ","
-            }
-            if len(needFormat) > 0 && this.parameterCount() > 1 {
-                s += "\n"
-            }
-        }
-        if this.vArgs != null {
-            if len(this.parameterList) > 0 {
-                s += ","
-            }
-            if len(needFormat) > 0 && this.parameterCount() > 1 {
-                s += "\n"
-            }
-            if this.vArgs.name != null && this.vArgs.name != "" {
-                s += this.vArgs.name + " "
-            }
-            s += this.vArgs.Type.typeString()
-        }
-        s += ")"
-        if this.voidReturn() == false {
-            s += "->("
-            if len(needFormat) > 0 && len(this.returnList) > 1 {
-                s += "\n"
-            }
-            for k , v := range this.returnList {
-                if len(needFormat) > 0 && len(this.returnList) > 1 {
-                    s += "\t"
-                }
-                if v.name != null && v.name != "" {
-                    s += v.name + " "
-                }
-                s += v.Type.typeString()
-                if k != len(this.returnList) - 1 {
-                    s += ","
-                }
-                if len(needFormat) > 0 && len(this.returnList) > 1 {
-                    s += "\n"
-                }
-            }
-            s += ")"
-        }
-    }
+	fn typeName() -> (s string) {
+		s = "("
+		for k , v := range this.parameterList {
+			if v.name != null && v.name != "" {
+				s += v.name + " "
+			}
+			s += v.Type.typeName()
+			if v.defaultValueExpression != null {
+				s += " = " + v.defaultValueExpression.literalRaw
+			}
+			if k != len(this.parameterList) - 1 {
+				s += " , "
+			}
+		}
+		if this.vArgs != null {
+			if len(this.parameterList) > 0 {
+				s += " , "
+			}
+			if this.vArgs.name != null &&
+				this.vArgs.name != "" {
+				s += this.vArgs.name + " "
+			}
+			s += this.vArgs.Type.typeName()
+		}
+		s += ")"
+		if this.voidReturn() == false {
+			s += " -> ("
+			for k , v := range this.returnList {
+				if v.name != null && v.name != "" {
+					s += v.name + " "
+				}
+				s += v.Type.typeName()
+				if k != len(this.returnList) - 1 {
+					s += ","
+				}
+			}
+			s += ")"
+		}
+		return s
+	}
+	fn typeString(needFormat bool...) -> (s string = "") {
+		if len(this.templateNames) > 0 {
+			s += "<"
+			for k , v := range this.templateNames {
+				s += v.name
+				if k != len(this.templateNames) - 1 {
+					s += " , "
+				}
+			}
+			s += ">"
+		}
+		s += "("
+		if len(needFormat) > 0 && this.parameterCount() > 1 {
+			s += "\n"
+		}
+		for k , v := range this.parameterList {
+			if len(needFormat) > 0 && this.parameterCount() > 1 {
+				s += "\t"
+			}
+			if v.name != null && v.name != "" {
+				s += v.name + " "
+			}
+			s += v.Type.typeString()
+			if v.defaultValueExpression != null {
+				s += " = " + v.defaultValueExpression.op
+			}
+			if k != len(this.parameterList) - 1 {
+				s += ","
+			}
+			if len(needFormat) > 0 && this.parameterCount() > 1 {
+				s += "\n"
+			}
+		}
+		if this.vArgs != null {
+			if len(this.parameterList) > 0 {
+				s += ","
+			}
+			if len(needFormat) > 0 && this.parameterCount() > 1 {
+				s += "\n"
+			}
+			if this.vArgs.name != null && this.vArgs.name != "" {
+				s += this.vArgs.name + " "
+			}
+			s += this.vArgs.Type.typeString()
+		}
+		s += ")"
+		if this.voidReturn() == false {
+			s += "->("
+			if len(needFormat) > 0 && len(this.returnList) > 1 {
+				s += "\n"
+			}
+			for k , v := range this.returnList {
+				if len(needFormat) > 0 && len(this.returnList) > 1 {
+					s += "\t"
+				}
+				if v.name != null && v.name != "" {
+					s += v.name + " "
+				}
+				s += v.Type.typeString()
+				if k != len(this.returnList) - 1 {
+					s += ","
+				}
+				if len(needFormat) > 0 && len(this.returnList) > 1 {
+					s += "\n"
+				}
+			}
+			s += ")"
+		}
+	}
 
-    fn searchName(name string) -> (variable Variable) {
-        if name == null ||
-            name == "" {
-            return null
-        }
-        for _ , v := range this.parameterList {
-            if v.name == null {
-                continue
-            }
-            if name == v.name {
-                return v
-            }
-        }
-        if this.vArgs != null {
-            if this.vArgs.name != null &&
-                this.vArgs.name == name {
-                return this.vArgs
-            }
-        }
-        if this.voidReturn() == false {
-            for _ , v := range this.returnList {
-                if v.name == null {
-                    continue
-                }
-                if name == v.name {
-                    return v
-                }
-            }
-        }
-    }
+	fn searchName(name string) -> (variable Variable) {
+		if name == null ||
+			name == "" {
+			return null
+		}
+		for _ , v := range this.parameterList {
+			if v.name == null {
+				continue
+			}
+			if name == v.name {
+				return v
+			}
+		}
+		if this.vArgs != null {
+			if this.vArgs.name != null &&
+				this.vArgs.name == name {
+				return this.vArgs
+			}
+		}
+		if this.voidReturn() == false {
+			for _ , v := range this.returnList {
+				if v.name == null {
+					continue
+				}
+				if name == v.name {
+					return v
+				}
+			}
+		}
+	}
 
-    fn equal(compare FunctionType) -> (equal bool) {
-        if len(this.parameterList) != len(compare.parameterList) {
-            return
-        }
-        for k , v := range this.parameterList {
-            if false == v.Type.equal(compare.parameterList[k].Type) {
-                return
-            }
-        }
-        if (this.vArgs == null) != (compare.vArgs == null) {
-            return
-        }
-        if this.vArgs != null {
-            if this.vArgs.Type.equal(compare.vArgs.Type) == false {
-                return
-            }
-        }
-        if this.voidReturn() != compare.voidReturn() {
-            return
-        }
-        if this.voidReturn() == false {
-            for k , v := range this.returnList {
-                if false == v.Type.equal(compare.returnList[k].Type) {
-                    return
-                }
-            }
-        }
-        return true
-    }
+	fn equal(compare FunctionType) -> (equal bool) {
+		if len(this.parameterList) != len(compare.parameterList) {
+			return
+		}
+		for k , v := range this.parameterList {
+			if false == v.Type.equal(compare.parameterList[k].Type) {
+				return
+			}
+		}
+		if (this.vArgs == null) != (compare.vArgs == null) {
+			return
+		}
+		if this.vArgs != null {
+			if this.vArgs.Type.equal(compare.vArgs.Type) == false {
+				return
+			}
+		}
+		if this.voidReturn() != compare.voidReturn() {
+			return
+		}
+		if this.voidReturn() == false {
+			for k , v := range this.returnList {
+				if false == v.Type.equal(compare.returnList[k].Type) {
+					return
+				}
+			}
+		}
+		return true
+	}
 
-    private fn callHave(ts []Type) -> (have string = "(") {
-        for k , v := range ts {
-            if v == null {
-                continue
-            }
-            if v.name != null && v.name != "" {
-                have += v.name + " "
-            }
-            have += v.typeString()
-            if k != len(ts) - 1 {
-                have += ","
-            }
-        }
-        have += ")"
-    }
+	private fn callHave(ts []Type) -> (have string = "(") {
+		for k , v := range ts {
+			if v == null {
+				continue
+			}
+			if v.name != null && v.name != "" {
+				have += v.name + " "
+			}
+			have += v.typeString()
+			if k != len(ts) - 1 {
+				have += ","
+			}
+		}
+		have += ")"
+	}
 
-    public fn voidReturn() -> (is bool) {
-        return len(this.returnList) == 0 ||
-                this.returnList[0].Type.Type == VariableTypeVoid
-    }
+	public fn voidReturn() -> (is bool) {
+		return len(this.returnList) == 0 ||
+				this.returnList[0].Type.Type == VariableTypeVoid
+	}
 
-    fn mkCallReturnTypes(pos Pos) -> (valueTypes []Type) {
-        if len(this.returnList) == 0 {
-            t := new Type()
-            t.Type = VariableTypeVoid // means no return ;
-            t.pos = pos
-            return []Type{t}
-        }
-        ret := new []Type(len(this.returnList))
-        for k , v := range this.returnList {
-            ret[k] = v.Type.cloneType()
-            ret[k].pos = pos
-        }
-        return ret
-    }
+	fn mkCallReturnTypes(pos Pos) -> (valueTypes []Type) {
+		if len(this.returnList) == 0 {
+			t := new Type()
+			t.Type = VariableTypeVoid // means no return ;
+			t.pos = pos
+			return []Type{t}
+		}
+		ret := new []Type(len(this.returnList))
+		for k , v := range this.returnList {
+			ret[k] = v.Type.cloneType()
+			ret[k].pos = pos
+		}
+		return ret
+	}
 
-    fn getParameterTypes() -> (patameterTypes []Type) {
-        ret := new []Type(len(this.parameterList))
-        for k , v := range this.parameterList {
-            ret[k] = v.Type
-        }
-        return ret
-    }
+	fn getParameterTypes() -> (patameterTypes []Type) {
+		ret := new []Type(len(this.parameterList))
+		for k , v := range this.parameterList {
+			ret[k] = v.Type
+		}
+		return ret
+	}
 
-    fn callArgsHasNoNil(ts []Type) -> (is bool) {
-        for _ , t := range ts {
-            if t == null {
-                return false
-            }
-        }
-        return true
-    }
+	fn callArgsHasNoNil(ts []Type) -> (is bool) {
+		for _ , t := range ts {
+			if t == null {
+				return false
+			}
+		}
+		return true
+	}
 
-    fn fitArgs(
-        block Block,
-        from Pos,
-        args []Expression,
-        callArgsTypes []Type,
-        f Function) -> (vArgs CallVariableLengthArgs , err error) {
-        if this.vArgs != null {
-            vArgs = new CallVariableLengthArgs()
-            vArgs.noArgs = true
-            vArgs.Type = this.vArgs.Type
-            vArgs.start = len(this.parameterList)
-        }
-        var haveAndWant string
-        if this.callArgsHasNoNil(callArgsTypes) {
-            haveAndWant = sprintf("\thave %s\n" , this.callHave(callArgsTypes))
-            haveAndWant += sprintf("\twant %s\n" , this.wantArgs())
-        }
-        errs := []error{}
-        if len(callArgsTypes) > len(this.parameterList) {
-            if this.vArgs == null {
-                errMsg := sprintf("%s too many paramaters to call\n" , errMsgPrefix(from))
-                if haveAndWant != null {
-                    errMsg += haveAndWant
-                }
-                err = new error(sprintf(errMsg))
-                return
-            }
-            v := this.vArgs
-            for _ , t := range callArgsTypes[len(this.parameterList):] {
-                if t == null {
-                    return
-                }
-                if t.isVariableArgs {
-                    if len(callArgsTypes[len(this.parameterList):]) > 1 {
-                        errMsg := sprintf("%s too many argument to call\n",
-                            errMsgPrefix(t.pos))
-                        errMsg += haveAndWant
-                        err = new error(sprintf(errMsg))
-                        return
-                    }
-                    if false == v.Type.assignAble(block , errs , t) {
-                        err = new error(sprintf("%s cannot use '%s' as '%s'",
-                                errMsgPrefix(t.pos),
-                                t.typeString() , v.Type.typeString()))
-                        return
-                    }
-                    vArgs.packArray2VArgs = true
-                    continue
-                }
-                if false == v.Type.theArray.assignAble(block , errs , t) {
-                    err = new error(sprintf("%s cannot use '%s' as '%s'",
-                            errMsgPrefix(t.pos),
-                            t.typeString() , v.Type.typeString()))
-                    return
-                }
-            }
-            vArgs.noArgs = false
-            k := len(this.parameterList)
-            vArgs.length = len(callArgsTypes) - k
-            vArgs.expressions = args[k:]
-        }
-        if len(callArgsTypes) < len(this.parameterList) {
-            if f != null && f.haveDefaultValue && len(callArgsTypes) >= f.defaultValueStartAt {
-                // java programming language have not default value feature
-                // so must be lucy function or method 
-                // lucy programming language does not support overload 
-                // so modify the arguments is safe
-                for i := len(callArgsTypes) ; i < len(f.Type.parameterList) ; i++ {
-                    args.append(f.Type.parameterList[i].defaultValueExpression.
-                            cloneFunctionDefaultParameterArgExpression(from))
+	fn fitArgs(
+		block Block,
+		from Pos,
+		args []Expression,
+		callArgsTypes []Type,
+		f Function) -> (vArgs CallVariableLengthArgs , err error) {
+		if this.vArgs != null {
+			vArgs = new CallVariableLengthArgs()
+			vArgs.noArgs = true
+			vArgs.Type = this.vArgs.Type
+			vArgs.start = len(this.parameterList)
+		}
+		var haveAndWant string
+		if this.callArgsHasNoNil(callArgsTypes) {
+			haveAndWant = sprintf("\thave %s\n" , this.callHave(callArgsTypes))
+			haveAndWant += sprintf("\twant %s\n" , this.wantArgs())
+		}
+		errs := []error{}
+		if len(callArgsTypes) > len(this.parameterList) {
+			if this.vArgs == null {
+				errMsg := sprintf("%s too many paramaters to call\n" , errMsgPrefix(from))
+				if haveAndWant != null {
+					errMsg += haveAndWant
+				}
+				err = new error(sprintf(errMsg))
+				return
+			}
+			v := this.vArgs
+			for _ , t := range callArgsTypes[len(this.parameterList):] {
+				if t == null {
+					return
+				}
+				if t.isVariableArgs {
+					if len(callArgsTypes[len(this.parameterList):]) > 1 {
+						errMsg := sprintf("%s too many argument to call\n",
+							errMsgPrefix(t.pos))
+						errMsg += haveAndWant
+						err = new error(sprintf(errMsg))
+						return
+					}
+					if false == v.Type.assignAble(block , errs , t) {
+						err = new error(sprintf("%s cannot use '%s' as '%s'",
+								errMsgPrefix(t.pos),
+								t.typeString() , v.Type.typeString()))
+						return
+					}
+					vArgs.packArray2VArgs = true
+					continue
+				}
+				if false == v.Type.theArray.assignAble(block , errs , t) {
+					err = new error(sprintf("%s cannot use '%s' as '%s'",
+							errMsgPrefix(t.pos),
+							t.typeString() , v.Type.typeString()))
+					return
+				}
+			}
+			vArgs.noArgs = false
+			k := len(this.parameterList)
+			vArgs.length = len(callArgsTypes) - k
+			vArgs.expressions = args[k:]
+		}
+		if len(callArgsTypes) < len(this.parameterList) {
+			if f != null && f.haveDefaultValue && len(callArgsTypes) >= f.defaultValueStartAt {
+				// java programming language have not default value feature
+				// so must be lucy function or method 
+				// lucy programming language does not support overload 
+				// so modify the arguments is safe
+				for i := len(callArgsTypes) ; i < len(f.Type.parameterList) ; i++ {
+					args.append(f.Type.parameterList[i].defaultValueExpression.
+							cloneFunctionDefaultParameterArgExpression(from))
 
-                }
-            } else {
-                errMsg := sprintf("%s too few paramaters to call\n" , errMsgPrefix(from))
-                if haveAndWant != null {
-                    errMsg += haveAndWant
-                }
-                err = new error(sprintf(errMsg))
-                return
-            }
-        }
-        for k , v := range this.parameterList {
-            if k < len(callArgsTypes) && callArgsTypes[k] != null {
-                if v.Type.assignAble(block , errs , callArgsTypes[k]) {
-                    continue
-                }
-                //TODO :: convert or not ???
-                errMsg := sprintf("%s cannot use '%s' as '%s'",
-                    errMsgPrefix(callArgsTypes[k].pos),
-                    callArgsTypes[k].typeString() , v.Type.typeString())
-                err = new error(sprintf(errMsg))
-                return
-            }
-        }
-    }
+				}
+			} else {
+				errMsg := sprintf("%s too few paramaters to call\n" , errMsgPrefix(from))
+				if haveAndWant != null {
+					errMsg += haveAndWant
+				}
+				err = new error(sprintf(errMsg))
+				return
+			}
+		}
+		for k , v := range this.parameterList {
+			if k < len(callArgsTypes) && callArgsTypes[k] != null {
+				if v.Type.assignAble(block , errs , callArgsTypes[k]) {
+					continue
+				}
+				//TODO :: convert or not ???
+				errMsg := sprintf("%s cannot use '%s' as '%s'",
+					errMsgPrefix(callArgsTypes[k].pos),
+					callArgsTypes[k].typeString() , v.Type.typeString())
+				err = new error(sprintf(errMsg))
+				return
+			}
+		}
+	}
 
-    private fn parameterCount() -> (count int) {
-        count = len(this.parameterList)
-        if this.vArgs != null {
-            count++
-        }
-    }
+	private fn parameterCount() -> (count int) {
+		count = len(this.parameterList)
+		if this.vArgs != null {
+			count++
+		}
+	}
 
-    private fn wantArgs() -> (want string = "(") {
-        for k , v := range this.parameterList {
-            if v.name != null && v.name != "" {
-                want += v.name + " "
-            }
-            want += v.Type.typeString()
-            if k != len(this.parameterList) - 1 {
-                want += ","
-            }
-        }
-        if this.vArgs != null {
-            if len(this.parameterList) > 0 {
-                want += ","
-            }
-            if this.vArgs.name != null && this.vArgs.name != "" {
-                want += this.vArgs.name + " "
-            }
-            want += this.vArgs.Type.typeString()
-        }
-        want += ")"
-        return want
-    }
+	private fn wantArgs() -> (want string = "(") {
+		for k , v := range this.parameterList {
+			if v.name != null && v.name != "" {
+				want += v.name + " "
+			}
+			want += v.Type.typeString()
+			if k != len(this.parameterList) - 1 {
+				want += ","
+			}
+		}
+		if this.vArgs != null {
+			if len(this.parameterList) > 0 {
+				want += ","
+			}
+			if this.vArgs.name != null && this.vArgs.name != "" {
+				want += this.vArgs.name + " "
+			}
+			want += this.vArgs.Type.typeString()
+		}
+		want += ")"
+		return want
+	}
 }
-
 

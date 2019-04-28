@@ -10,8 +10,8 @@ public class LucyFile {
     public getHover , findUsage int
     public autoCompletion       int
 
-    public lastModify int // in second 
-    public lastUse    int // in second 
+    // public lastModify int // in second 
+    // public lastUse    int // in second 
 
     fn LucyFile() {
         this.super()

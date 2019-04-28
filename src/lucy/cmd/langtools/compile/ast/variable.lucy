@@ -41,7 +41,7 @@ public class Variable {
 		return this.accessFlags &
 				cg.AccFieldPublic != 0
 	}
-	// copy to v
+	// copy to another
 	fn copyThis2Another(another Variable) {
 		another.isBuildIn = this.isBuildIn
 		another.isGlobal = this.isGlobal

@@ -1,5 +1,5 @@
 // all rights reserved , check the LICENSE file
 
 // no cache
-fileCache := new FileCacher(-1 , true)
+fileCache := new FileCache()
 
