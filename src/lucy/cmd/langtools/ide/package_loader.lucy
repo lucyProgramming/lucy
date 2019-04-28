@@ -7,118 +7,117 @@ import "lucy/cmd/langtools/common"
 import "java/io"
 
 public class PackageLoader extends lc.FileLoader {
-    public onlyAnalyzeGlobals bool   
-    public errors             []error
+	public onlyAnalyzeGlobals bool
+	public errors             []error
 
-    public fn PackageLoader(lucyPath []string , classPath []string) {
-        this.super(lucyPath , classPath)
-    }
-    public fn loadImport(importName string) -> (x Object , err error) {
-        if x = this.getCache(importName) ; x != null {
-            // printf("%s hit cache\n" , importName)
-            return
-        }
-        realPaths := []lc.Resource{}
-        foundInLucy := false
-        for _ , v := range this.lucyPath {
-            if p := v + "/src/" + importName ; new io.File(p).isDirectory() &&
-                common.haveFileType(p , ".lucy") {
-                realPaths.append(new lc.Resource(
-                        lc.ResourceKindLucyPackage,
-                        p,
-                        importName))
-                foundInLucy = true
-                continue
-            }
-        }
-        if foundInLucy == false {
-            for _ , v := range this.classPath {
-                if p := v + "/" + importName ; new io.File(p).isDirectory() && common.haveFileType(p , ".class") {
-                    realPaths.append(new lc.Resource(
-                            lc.ResourceKindJavaPackage,
-                            p,
-                            importName))
-                }
-                if p := v + "/" + importName + ".class" ; new io.File(p).isFile() {
-                    realPaths.append(new lc.Resource(
-                            lc.ResourceKindJavaClass,
-                            p,
-                            importName))
-                }
-            }
-            for _ , v := range this.classPath {
-                fis := new io.File(v).listFiles()
-                for f := range fis {
-                    if f.isFile() && f.getName().endsWith(".jar") {
-                        e := this.importExistsInJarFile(v + "/" + f.getName() , importName)
-                        if null != e {
-                            realPaths.append(e)
-                        }
-                    }
-                }
-            }
-        }
-        if len(realPaths) == 0 {
-            return null , new error(sprintf("resource '%s' not found" , importName))
-        }
-        realPathMap := new map{string -> []lc.Resource}()
-        for _ , v := range realPaths {
-            if realPathMap.keyExist(v.realPath) {
-                realPathMap[v.realPath].append(v)
-            } else {
-                realPathMap[v.realPath] = []lc.Resource{v}
-            }
-        }
-        if len(realPathMap) > 1 {
-            errMsg := "not 1 resource named '" + importName + "' present:\n"
-            for _ , v := range realPathMap {
-                switch v[0].kind {
-                    case lc.ResourceKindJavaClass:
-                        errMsg += sprintf("\t in '%s' is a java class\n" , v[0].realPath)
-                    case lc.ResourceKindJavaPackage:
-                        errMsg += sprintf("\t in '%s' is a java package\n" , v[0].realPath)
-                    case lc.ResourceKindLucyClass:
-                        errMsg += sprintf("\t in '%s' is a lucy class\n" , v[0].realPath)
-                    case lc.ResourceKindLucyPackage:
-                        errMsg += sprintf("\t in '%s' is a lucy package\n" , v[0].realPath)
-                }
-            }
-            return null , new error(sprintf(errMsg))
-        }
-        if realPaths[0].kind == lc.ResourceKindJavaClass {
-            c := this.loadClass(realPaths[0])
-            if cc , ok := c.(ast.Class) ; ok {
-                this.setCache(cc.name , cc)
-            }
-            return c , null
-        } else if realPaths[0].kind == lc.ResourceKindLucyClass {
-            panic("not happening")
-        } else if realPaths[0].kind == lc.ResourceKindJavaPackage {
-            p := this.loadJavaPackage(realPaths[0])
-            if p != null {
-                this.cacheJavaImports(p.name , p)
-                p.javaPackage = new ast.JavaPackage()
-            }
-            return p , null
-        } else {
-            p := this.loadLucyPackage(realPaths[0])
-            if p != null {
-                this.setCache(p.name , p)
-            }
-            return p , null
-        }
-    }
+	public fn PackageLoader(lucyPath []string , classPath []string) {
+		this.super(lucyPath , classPath)
+	}
+	public fn loadImport(importName string) -> (x Object , err error) {
+		if x = this.getCache(importName) ; x != null {
+			// printf("%s hit cache\n" , importName)
+			return
+		}
+		realPaths := []lc.Resource{}
+		foundInLucy := false
+		for _ , v := range this.lucyPath {
+			if p := v + "/src/" + importName ; new io.File(p).isDirectory() &&
+				common.haveFileType(p , ".lucy") {
+				realPaths.append(new lc.Resource(
+						lc.ResourceKindLucyPackage,
+						p,
+						importName))
+				foundInLucy = true
+				continue
+			}
+		}
+		if foundInLucy == false {
+			for _ , v := range this.classPath {
+				if p := v + "/" + importName ; new io.File(p).isDirectory() && common.haveFileType(p , ".class") {
+					realPaths.append(new lc.Resource(
+							lc.ResourceKindJavaPackage,
+							p,
+							importName))
+				}
+				if p := v + "/" + importName + ".class" ; new io.File(p).isFile() {
+					realPaths.append(new lc.Resource(
+							lc.ResourceKindJavaClass,
+							p,
+							importName))
+				}
+			}
+			for _ , v := range this.classPath {
+				fis := new io.File(v).listFiles()
+				for f := range fis {
+					if f.isFile() && f.getName().endsWith(".jar") {
+						e := this.importExistsInJarFile(v + "/" + f.getName() , importName)
+						if null != e {
+							realPaths.append(e)
+						}
+					}
+				}
+			}
+		}
+		if len(realPaths) == 0 {
+			return null , new error(sprintf("resource '%s' not found" , importName))
+		}
+		realPathMap := new map{string -> []lc.Resource}()
+		for _ , v := range realPaths {
+			if realPathMap.keyExist(v.realPath) {
+				realPathMap[v.realPath].append(v)
+			} else {
+				realPathMap[v.realPath] = []lc.Resource{v}
+			}
+		}
+		if len(realPathMap) > 1 {
+			errMsg := "not 1 resource named '" + importName + "' present:\n"
+			for _ , v := range realPathMap {
+				switch v[0].kind {
+					case lc.ResourceKindJavaClass:
+						errMsg += sprintf("\t in '%s' is a java class\n" , v[0].realPath)
+					case lc.ResourceKindJavaPackage:
+						errMsg += sprintf("\t in '%s' is a java package\n" , v[0].realPath)
+					case lc.ResourceKindLucyClass:
+						errMsg += sprintf("\t in '%s' is a lucy class\n" , v[0].realPath)
+					case lc.ResourceKindLucyPackage:
+						errMsg += sprintf("\t in '%s' is a lucy package\n" , v[0].realPath)
+				}
+			}
+			return null , new error(sprintf(errMsg))
+		}
+		if realPaths[0].kind == lc.ResourceKindJavaClass {
+			c := this.loadClass(realPaths[0])
+			if cc , ok := c.(ast.Class) ; ok {
+				this.setCache(cc.name , cc)
+			}
+			return c , null
+		} else if realPaths[0].kind == lc.ResourceKindLucyClass {
+			panic("not happening")
+		} else if realPaths[0].kind == lc.ResourceKindJavaPackage {
+			p := this.loadJavaPackage(realPaths[0])
+			if p != null {
+				this.cacheJavaImports(p.name , p)
+				p.javaPackage = new ast.JavaPackage()
+			}
+			return p , null
+		} else {
+			p := this.loadLucyPackage(realPaths[0])
+			if p != null {
+				this.setCache(p.name , p)
+			}
+			return p , null
+		}
+	}
 
-    public fn loadLucyPackage(r lc.Resource) -> (p ast.Package) {
-        lucyFiles := readLucyFiles(getLucyFiles(r.realPath))
-        var es []error
-        p , es = parseAstAndTypeCheck(r.name , lucyFiles , this.onlyAnalyzeGlobals , "" , -1 , this)
-        if this.errors == null {
-            this.errors = es
-        } else {
-            this.errors.appendAll(es)
-        }
-    }
+	public fn loadLucyPackage(r lc.Resource) -> (p ast.Package) {
+		lucyFiles := readLucyFiles(getLucyFiles(r.realPath))
+		var es []error
+		p , es = parseAstAndTypeCheck(r.name , lucyFiles , this.onlyAnalyzeGlobals , "" , -1 , this)
+		if this.errors == null {
+			this.errors = es
+		} else {
+			this.errors.appendAll(es)
+		}
+	}
 }
-
 

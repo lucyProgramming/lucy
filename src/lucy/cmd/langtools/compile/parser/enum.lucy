@@ -4,135 +4,136 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
 class EnumParser extends ParserFather {
-    fn EnumParser(parser Parser) {
-        this.super(parser)
-    }
-    fn parse() -> (e ast.Enum , err error) {
-        e = new ast.Enum()
-        this.next(lfIsToken) // skip enum
-        this.parser.unExpectNewLineAndSkip()
-        if this.parser.token.Type != lex.TokenIdentifier {
-            err = new error(sprintf("%s expect 'identifier' for enum name, but '%s'",
-                    this.parser.errMsgPrefix() , this.parser.token.description))
-            this.parser.errs.append(err)
-            e.name = compileAutoName()
-            this.consume(untilLc)
-        } else {
-            e.name = this.parser.token.stringValue
-            e.findUsage = this.parser.token.findUsage
-            e.locateDefinition = this.parser.token.locateDefinition
-            e.rename = this.parser.token.rename
-            e.pos = this.parser.mkPos()
-            this.next(lfNotToken) // skip enum name
-        }
+	fn EnumParser(parser Parser) {
+		this.super(parser)
+	}
+	fn parse() -> (e ast.Enum , err error) {
+		e = new ast.Enum()
+		this.next(lfIsToken) // skip enum
+		this.parser.unExpectNewLineAndSkip()
+		if this.parser.token.Type != lex.TokenIdentifier {
+			err = new error(sprintf("%s expect 'identifier' for enum name, but '%s'",
+					this.parser.errMsgPrefix() , this.parser.token.description))
+			this.parser.errs.append(err)
+			e.name = compileAutoName()
+			this.consume(untilLc)
+		} else {
+			e.name = this.parser.token.stringValue
+			e.findUsage = this.parser.token.findUsage
+			e.locateDefinition = this.parser.token.locateDefinition
+			e.rename = this.parser.token.rename
+			e.pos = this.parser.mkPos()
+			this.next(lfNotToken) // skip enum name
+		}
 
-        if e.pos == null {
-            e.pos = this.parser.mkPos()
-        }
-        comment := new CommentParser(this.parser)
-        if this.parser.token.Type != lex.TokenLc {
-            err = new error(sprintf("%s expect '{',but '%s'" , this.parser.errMsgPrefix() , this.parser.token.description))
-            this.parser.errs.append(err)
-            this.consume(untilLc)
-        }
-        this.next(lfNotToken)
-        for this.parser.token.Type != lex.TokenRc &&
-            this.parser.token.Type != lex.TokenEof {
-            switch this.parser.token.Type {
-                case lex.TokenLf:
-                    e.appendFmt(new ast.Line())
-                    this.next(lfNotToken) //TODO::delete more lines???
-                case lex.TokenMultiLineComment,
-                    lex.TokenComment:
-                    c := new ast.Comment()
-                    c.comment = this.parser.token.stringValue
-                    c.isMulti = this.parser.token.Type == lex.TokenMultiLineComment
-                    e.appendFmt(c)
-                    this.next(lfIsToken)
-                case lex.TokenIdentifier:
-                    enumName := new ast.EnumName()
-                    enumName.name = this.parser.token.stringValue
-                    enumName.locateDefinition = this.parser.token.locateDefinition
-                    enumName.findUsage = this.parser.token.findUsage
-                    enumName.rename = this.parser.token.rename
-                    pos := this.parser.mkPos()
-                    var value ast.Expression
-                    this.next(lfIsToken) // skip name 
-                    if this.parser.token.Type == lex.TokenAssign {
-                        this.next(lfNotToken)
-                        value , _ = this.parser.ExpressionParser.parseExpression(false)
-                    }
-                    enumComment := comment.comment
-                    var containsComma ast.Pos
-                    if this.parser.token.Type == lex.TokenComma {
-                        this.parser.next(lfIsToken)
-                        containsComma = this.parser.mkPos()
-                    }
-                    if this.parser.token.Type == lex.TokenLf {
-                        enumName.containsLf = true
-                        this.next(lfNotToken)
-                    }
-                    appendFmtsDone := false
-                    if containsComma != null {
-                        for this.parser.token.Type == lex.TokenLf ||
-                            this.parser.token.Type == lex.TokenMultiLineComment ||
-                            this.parser.token.Type == lex.TokenComment {
-                            if this.parser.token.Type == lex.TokenLf {
-                                this.next(lfIsToken)
-                                continue
-                            }
-                            if false == appendFmtsDone {
-                                e.appendFmt(enumName)
-                                appendFmtsDone = true
-                            }
-                            c := new ast.Comment()
-                            c.comment = this.parser.token.stringValue
-                            c.isMulti = this.parser.token.Type == lex.TokenMultiLineComment
-                            e.appendFmt(c)
-                            this.next(lfIsToken)
-                        }
-                        if this.parser.token.Type != lex.TokenIdentifier {
-                            this.parser.errs.append(new error(sprintf("%s expect identifier, but '%s'",
-                                        this.parser.errMsgPrefix(containsComma) , this.parser.token.description)))
-                        }
-                    }
-                    if e.Init == null && value != null {
-                        e.Init = value
-                        e.firstValueIndex = len(e.enums)
-                        value = null
-                    }
-                    enumName.pos = pos
-                    enumName.noNeed = value
-                    enumName.Enum = e
-                    enumName.comment = enumComment
-                    if e.enums == null {
-                        e.enums = [enumName]
-                    } else {
-                        e.enums.append(enumName)
-                    }
-                    if appendFmtsDone == false {
-                        e.appendFmt(enumName)
-                    }
-                    comment.reset()
-                    // case lex.TokenComma:
-                default:
-                    this.parser.errs.append(new error(sprintf("%s token '%s' is not except",
-                                this.parser.errMsgPrefix() , this.parser.token.description)))
-                    this.next(lfNotToken)
-                    comment.reset()
-            }
+		if e.pos == null {
+			e.pos = this.parser.mkPos()
+		}
+		comment := new CommentParser(this.parser)
+		if this.parser.token.Type != lex.TokenLc {
+			err = new error(sprintf("%s expect '{',but '%s'" , this.parser.errMsgPrefix() , this.parser.token.description))
+			this.parser.errs.append(err)
+			this.consume(untilLc)
+		}
+		this.next(lfNotToken)
+		for this.parser.token.Type != lex.TokenRc &&
+			this.parser.token.Type != lex.TokenEof {
+			switch this.parser.token.Type {
+				case lex.TokenLf:
+					e.appendFmt(new ast.Line())
+					this.next(lfNotToken) //TODO::delete more lines???
+				case lex.TokenMultiLineComment,
+					lex.TokenComment:
+					c := new ast.Comment()
+					c.comment = this.parser.token.stringValue
+					c.isMulti = this.parser.token.Type == lex.TokenMultiLineComment
+					e.appendFmt(c)
+					this.next(lfIsToken)
+				case lex.TokenIdentifier:
+					enumName := new ast.EnumName()
+					enumName.name = this.parser.token.stringValue
+					enumName.locateDefinition = this.parser.token.locateDefinition
+					enumName.findUsage = this.parser.token.findUsage
+					enumName.rename = this.parser.token.rename
+					pos := this.parser.mkPos()
+					var value ast.Expression
+					this.next(lfIsToken) // skip name 
+					if this.parser.token.Type == lex.TokenAssign {
+						this.next(lfNotToken)
+						value , _ = this.parser.ExpressionParser.parseExpression(false)
+					}
+					enumComment := comment.comment
+					var containsComma ast.Pos
+					if this.parser.token.Type == lex.TokenComma {
+						this.parser.next(lfIsToken)
+						containsComma = this.parser.mkPos()
+					}
+					if this.parser.token.Type == lex.TokenLf &&
+						containsComma == null {
+						enumName.containsLf = true
+						this.next(lfNotToken)
+					}
+					appendFmtsDone := false
+					if containsComma != null {
+						for this.parser.token.Type == lex.TokenLf ||
+							this.parser.token.Type == lex.TokenMultiLineComment ||
+							this.parser.token.Type == lex.TokenComment {
+							if this.parser.token.Type == lex.TokenLf {
+								this.next(lfIsToken)
+								continue
+							}
+							if false == appendFmtsDone {
+								e.appendFmt(enumName)
+								appendFmtsDone = true
+							}
+							c := new ast.Comment()
+							c.comment = this.parser.token.stringValue
+							c.isMulti = this.parser.token.Type == lex.TokenMultiLineComment
+							e.appendFmt(c)
+							this.next(lfNotToken)
+						}
+						if this.parser.token.Type != lex.TokenIdentifier {
+							this.parser.errs.append(new error(sprintf("%s expect identifier, but '%s'",
+										this.parser.errMsgPrefix(containsComma) , this.parser.token.description)))
+						}
+					}
+					if e.Init == null && value != null {
+						e.Init = value
+						e.firstValueIndex = len(e.enums)
+						value = null
+					}
+					enumName.pos = pos
+					enumName.noNeed = value
+					enumName.Enum = e
+					enumName.comment = enumComment
+					if e.enums == null {
+						e.enums = [enumName]
+					} else {
+						e.enums.append(enumName)
+					}
+					if appendFmtsDone == false {
+						e.appendFmt(enumName)
+					}
+					comment.reset()
+					// case lex.TokenComma:
+				default:
+					this.parser.errs.append(new error(sprintf("%s token '%s' is not except",
+								this.parser.errMsgPrefix() , this.parser.token.description)))
+					this.next(lfNotToken)
+					comment.reset()
+			}
 
-        }
+		}
 
-        this.parser.ifTokenIsLfThenSkip(true)
-        if this.parser.token.Type != lex.TokenRc {
-            err = new error(sprintf("%s expect '}',but '%s'",
-                    this.parser.errMsgPrefix() , this.parser.token.description))
-            this.parser.errs.append(err)
-            this.consume(untilRc)
-        }
-        this.next(lfNotToken)
-        return e , err
-    }
+		this.parser.ifTokenIsLfThenSkip(true)
+		if this.parser.token.Type != lex.TokenRc {
+			err = new error(sprintf("%s expect '}',but '%s'",
+					this.parser.errMsgPrefix() , this.parser.token.description))
+			this.parser.errs.append(err)
+			this.consume(untilRc)
+		}
+		this.next(lfNotToken)
+		return e , err
+	}
 }
 

@@ -437,7 +437,7 @@ public class Fmt {
 				if t.isMulti {
 					format += indent + this.indentIncremental + sprintf("/*%s*/" , t.comment)
 				} else {
-					format += indent + this.indentIncremental + "//" + t.comment + "\n"
+					format += indent + this.indentIncremental + "//" + t.comment
 				}
 				continue
 			}

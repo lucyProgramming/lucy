@@ -1,10 +1,9 @@
 // all rights reserved , check the LICENSE file
 
 class LucyFile {
-    realpathName string
-    name         string
-    bs           []byte
-    lastModify   long  
+	realpathName string
+	name         string
+	bs           []byte
+	lastModify   long
 }
-
 

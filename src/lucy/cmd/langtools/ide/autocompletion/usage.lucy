@@ -2,7 +2,6 @@
 
 import "lucy/os"
 
-
 const usage = `
     show auto completion items.
        -file   file to be located
@@ -11,7 +10,7 @@ const usage = `
        -column which column (zero based)
 `
 
-fn printUsageAndExit(code int ){
-    print(usage)
-    os.exit(code)
+fn printUsageAndExit(code int) {
+	print(usage)
+	os.exit(code)
 }

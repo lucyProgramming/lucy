@@ -5,932 +5,931 @@ import "lucy/cmd/langtools/compile/lex"
 import "lucy/jvm/cg"
 
 public fn parse(
-    tops []ast.TopNode,
-    filename string,
-    bs []byte,
-    onlyParseImport bool,
-    nErrors2Stop int,
-    locateDefinition int,
-    getHover int,
-    findUsage int,
-    autoCompletion int) -> (errs []error) {
-    p := new Parser(bs , tops , filename , onlyParseImport , nErrors2Stop)
-    p.lexer = new lex.Lexer(bs , 0 , 0 , locateDefinition , getHover , findUsage ,  autoCompletion)
-    errs = p.parse()
+	tops []ast.TopNode,
+	filename string,
+	bs []byte,
+	onlyParseImport bool,
+	nErrors2Stop int,
+	locateDefinition int,
+	getHover int,
+	findUsage int,
+	autoCompletion int) -> (errs []error) {
+	p := new Parser(bs , tops , filename , onlyParseImport , nErrors2Stop)
+	p.lexer = new lex.Lexer(bs , 0 , 0 , locateDefinition , getHover , findUsage , autoCompletion)
+	errs = p.parse()
 }
 
 class Parser {
-    onlyParseImport        bool            
-    bs                     []byte          
-    tops                   []ast.TopNode   
-    lexer                  lex.Lexer       
-    filename               string          
-    lastToken              lex.Token       
-    token                  lex.Token       
-    errs                   []error         
-    nErrors2Stop           int             
-    consumeFoundValidToken bool            
-    ExpressionParser       ExpressionParser
-    FunctionParser         FunctionParser  
-    ClassParser            ClassParser     
-    BlockParser            BlockParser     
-    TypeParser             TypeParser      
-    EnumParser             EnumParser      
-    tokenStackForLookBack  []lex.Token      // token stack for look back 
+	onlyParseImport        bool
+	bs                     []byte
+	tops                   []ast.TopNode
+	lexer                  lex.Lexer
+	filename               string
+	lastToken              lex.Token
+	token                  lex.Token
+	errs                   []error
+	nErrors2Stop           int
+	consumeFoundValidToken bool
+	ExpressionParser       ExpressionParser
+	FunctionParser         FunctionParser
+	ClassParser            ClassParser
+	BlockParser            BlockParser
+	TypeParser             TypeParser
+	EnumParser             EnumParser
+	tokenStackForLookBack  []lex.Token      // token stack for look back 
 
-    /*
+	/*
 		call before parse source file
 	*/
-    fn Parser(bs []byte , tops []ast.TopNode , filename string , onlyParseImport bool , nErrors2Stop int) {
-        this.super()
-        this.ExpressionParser = new ExpressionParser(this)
-        this.FunctionParser = new FunctionParser(this)
-        this.TypeParser = new TypeParser(this)
-        this.ClassParser = new ClassParser(this)
-        this.BlockParser = new BlockParser(this)
-        this.EnumParser = new EnumParser(this)
-        this.errs = []error{}
-        this.bs = bs
-        this.tops = tops
-        this.filename = filename
-        this.onlyParseImport = onlyParseImport
-        this.nErrors2Stop = nErrors2Stop
-    }
+	fn Parser(bs []byte , tops []ast.TopNode , filename string , onlyParseImport bool , nErrors2Stop int) {
+		this.super()
+		this.ExpressionParser = new ExpressionParser(this)
+		this.FunctionParser = new FunctionParser(this)
+		this.TypeParser = new TypeParser(this)
+		this.ClassParser = new ClassParser(this)
+		this.BlockParser = new BlockParser(this)
+		this.EnumParser = new EnumParser(this)
+		this.errs = []error{}
+		this.bs = bs
+		this.tops = tops
+		this.filename = filename
+		this.onlyParseImport = onlyParseImport
+		this.nErrors2Stop = nErrors2Stop
+	}
 
-    fn parse() -> (errs []error) {
-        this.next(lfNotToken) //
-        if this.token.Type == lex.TokenEof {
-            return null
-        }
-        comment := new CommentParser(this)
-        for this.token.Type == lex.TokenComment ||
-                this.token.Type == lex.TokenMultiLineComment ||
-                this.token.Type == lex.TokenImport ||
-                this.token.Type == lex.TokenLf {
-            if this.token.Type == lex.TokenImport {
-                for k , t := range this.parseImports() {
-                    if k == 0 {
-                        t.comment = comment.comment
-                        comment.reset()
-                    }
-                    this.tops.append(new ast.TopNode(t))
-                }
-                continue
-            }
-            if this.onlyParseImport == false {
-                if this.token.Type == lex.TokenComment ||
-                    this.token.Type == lex.TokenMultiLineComment {
-                    c := new ast.Comment()
-                    c.isMulti = this.token.Type == lex.TokenMultiLineComment
-                    c.comment = this.token.stringValue
-                    this.tops.append(new ast.TopNode(c))
-                    this.next(lfIsToken)
-                } else {
-                    this.tops.append(new ast.TopNode(new ast.Line()))
-                    this.next(lfIsToken)
-                }
+	fn parse() -> (errs []error) {
+		this.next(lfNotToken) //
+		if this.token.Type == lex.TokenEof {
+			return null
+		}
+		comment := new CommentParser(this)
+		for this.token.Type == lex.TokenComment ||
+			this.token.Type == lex.TokenMultiLineComment ||
+			this.token.Type == lex.TokenImport ||
+			this.token.Type == lex.TokenLf {
+			if this.token.Type == lex.TokenImport {
+				for k , t := range this.parseImports() {
+					if k == 0 {
+						t.comment = comment.comment
+						comment.reset()
+					}
+					this.tops.append(new ast.TopNode(t))
+				}
+				continue
+			}
+			if this.onlyParseImport == false {
+				if this.token.Type == lex.TokenComment ||
+					this.token.Type == lex.TokenMultiLineComment {
+					c := new ast.Comment()
+					c.isMulti = this.token.Type == lex.TokenMultiLineComment
+					c.comment = this.token.stringValue
+					this.tops.append(new ast.TopNode(c))
+					this.next(lfIsToken)
+				} else {
+					this.tops.append(new ast.TopNode(new ast.Line()))
+					this.next(lfIsToken)
+				}
 
-            } else {
-                this.next(lfIsToken)
-            }
+			} else {
+				this.next(lfIsToken)
+			}
 
-        }
-        if this.onlyParseImport {
-            return this.errs
-        }
-        var accessControlToken lex.Token
-        isFinal := false
-        isAbstract := false
-        var finalPos ast.Pos
-        fn resetProperty() {
-            accessControlToken = null
-            isFinal = false
-            isAbstract = false
-            finalPos = null
-            comment.reset()
-        }
+		}
+		if this.onlyParseImport {
+			return this.errs
+		}
+		var accessControlToken lex.Token
+		isFinal := false
+		isAbstract := false
+		var finalPos ast.Pos
+		fn resetProperty() {
+			accessControlToken = null
+			isFinal = false
+			isAbstract = false
+			finalPos = null
+			comment.reset()
+		}
 
-        fn isPublic() -> (is bool) {
-            return accessControlToken != null &&
-                accessControlToken.Type == lex.TokenPublic
-        }
+		fn isPublic() -> (is bool) {
+			return accessControlToken != null &&
+					accessControlToken.Type == lex.TokenPublic
+		}
 
-        for this.token.Type != lex.TokenEof {
-            if len(this.errs) > this.nErrors2Stop {
-                break
-            }
-            switch this.token.Type {
-                case lex.TokenComment,
-                    lex.TokenMultiLineComment:
-                    c := new ast.Comment()
-                    c.comment = this.token.stringValue
-                    c.isMulti = this.token.Type == lex.TokenMultiLineComment
-                    this.tops.append(new ast.TopNode(c))
-                    this.next(lfIsToken)
-                case lex.TokenSemicolon:
-                    // empty statement, no big deal
-                    this.next(lfNotToken)
-                    continue
-                case lex.TokenIdentifier:
-                    identifierToken := this.token
-                    this.next(lfIsToken)
-                    if this.token.Type == lex.TokenLp {
-                        // looks like a function 
-                        f := new lex.Token()
-                        f.Type = lex.TokenFn
-                        this.tokenStackForLookBack = [f , identifierToken , this.token]
-                        this.errs.append(new error(sprintf("%s missing 'fn'" , this.errMsgPrefix(this.mkPos(identifierToken)))))
-                        this.next(lfIsToken) // restore 
-                        continue
-                    } else {
-                        this.tokenStackForLookBack = [identifierToken , this.token]
-                        this.next(lfIsToken) // restore 
-                        e , _ := this.ExpressionParser.parseExpression(true)
-                        if e != null {
-                            e.isPublic = isPublic()
-                            e.isGlobal = true
-                            this.tops.append(new ast.TopNode(e))
-                            if this.token.Type == lex.TokenComment {
-                                e.inlineComment = this.token.stringValue
-                                this.next(lfIsToken)
-                            }
-                        }
-                    }
+		for this.token.Type != lex.TokenEof {
+			if len(this.errs) > this.nErrors2Stop {
+				break
+			}
+			switch this.token.Type {
+				case lex.TokenComment,
+					lex.TokenMultiLineComment:
+					c := new ast.Comment()
+					c.comment = this.token.stringValue
+					c.isMulti = this.token.Type == lex.TokenMultiLineComment
+					this.tops.append(new ast.TopNode(c))
+					this.next(lfIsToken)
+				case lex.TokenSemicolon:
+					// empty statement, no big deal
+					this.next(lfNotToken)
+					continue
+				case lex.TokenIdentifier:
+					identifierToken := this.token
+					this.next(lfIsToken)
+					if this.token.Type == lex.TokenLp {
+						// looks like a function 
+						f := new lex.Token()
+						f.Type = lex.TokenFn
+						this.tokenStackForLookBack = [f , identifierToken , this.token]
+						this.errs.append(new error(sprintf("%s missing 'fn'" , this.errMsgPrefix(this.mkPos(identifierToken)))))
+						this.next(lfIsToken) // restore 
+						continue
+					} else {
+						this.tokenStackForLookBack = [identifierToken , this.token]
+						this.next(lfIsToken) // restore 
+						e , _ := this.ExpressionParser.parseExpression(true)
+						if e != null {
+							e.isPublic = isPublic()
+							e.isGlobal = true
+							this.tops.append(new ast.TopNode(e))
+							if this.token.Type == lex.TokenComment {
+								e.inlineComment = this.token.stringValue
+								this.next(lfIsToken)
+							}
+						}
+					}
 
-                case lex.TokenLf:
-                    this.tops.append(new ast.TopNode(new ast.Line()))
-                    this.next(lfNotToken)
-                    continue
-                case lex.TokenPublic:
-                    accessControlToken = this.token
-                    this.next(lfIsToken)
-                    this.unExpectNewLineAndSkip()
-                    if err := this.validAfterPublic() ; err != null {
-                        accessControlToken = null
-                    }
-                    continue
-                case lex.TokenAbstract:
-                    this.next(lfIsToken)
-                    this.unExpectNewLineAndSkip()
-                    if err := this.validAfterAbstract() ; err == null {
-                        isAbstract = true
-                    }
-                case lex.TokenFinal:
-                    pos := this.mkPos()
-                    this.next(lfIsToken)
-                    this.unExpectNewLineAndSkip()
-                    if err := this.validAfterFinal() ; err != null {
-                        isFinal = false
-                    } else {
-                        isFinal = true
-                        finalPos = pos
-                    }
-                    continue
-                case lex.TokenVar:
-                    pos := this.mkPos()
-                    this.next(lfIsToken) // skip var key word
-                    vs , _ := this.parseVar()
-                    if vs == null {
-                        resetProperty()
-                        continue
-                    }
-                    isPublic := isPublic()
-                    e := new ast.Expression()
-                    e.Type = ast.ExpressionTypeVar
-                    e.data = vs
-                    e.pos = pos
-                    e.isPublic = isPublic
-                    e.isGlobal = true
-                    e.op = "var"
-                    this.tops.append(new ast.TopNode(e))
-                    resetProperty()
-                    this.ifTokenIsLfThenSkip(false)
-                    if this.token.Type == lex.TokenComment {
-                        e.inlineComment = this.token.stringValue
-                        this.next(lfIsToken)
-                    }
-                case lex.TokenEnum:
-                    e , _ := this.EnumParser.parse()
-                    if e == null {
-                        resetProperty()
-                        continue
-                    }
-                    e.comment = comment.comment
-                    isPublic := isPublic()
-                    if isPublic {
-                        e.accessFlags |= cg.AccClassPublic
-                    }
-                    if e != null {
-                        this.tops.append(new ast.TopNode(e))
-                    }
-                    resetProperty()
-                    this.ifTokenIsLfThenSkip(false)
-                case lex.TokenFn:
-                    f , _ := this.FunctionParser.parse(true , false , true)
-                    if f != null {
-                        f.comment = comment.comment
-                        isPublic := isPublic()
-                        if isPublic {
-                            f.accessFlags |= cg.AccMethodPublic
-                        }
-                        this.tops.append(new ast.TopNode(f))
-                        this.ifTokenIsLfThenSkip(false)
-                    }
-                    resetProperty()
-                case lex.TokenLc:
-                    b := new ast.Block()
-                    b.pos = this.mkPos()
-                    this.next(lfNotToken) // skip {
-                    this.BlockParser.parseStatementList(b , true)
-                    if this.token.Type != lex.TokenRc {
-                        this.errs.append(new error(sprintf("%s expect '}', but '%s'",
-                            this.errMsgPrefix() , this.token.description)))
-                        this.consume(untilRc)
-                    }
-                    this.next(lfIsToken) // skip }
-                    this.tops.append(new ast.TopNode(b))
-                    this.ifTokenIsLfThenSkip(false)
-                case lex.TokenClass,
-                    lex.TokenInterface:
-                    c , _ := this.ClassParser.parse(isAbstract)
-                    if c == null {
-                        resetProperty()
-                        continue
-                    }
-                    c.comment = comment.comment
-                    this.tops.append(new ast.TopNode(c))
-                    isPublic := isPublic()
-                    if isPublic {
-                        c.accessFlags |= cg.AccClassPublic
-                    }
-                    if isAbstract {
-                        c.accessFlags |= cg.AccClassAbstract
-                    }
-                    if isFinal {
-                        c.accessFlags |= cg.AccClassFinal
-                        c.finalPos = finalPos
-                    }
-                    resetProperty()
-                    this.ifTokenIsLfThenSkip(false)
-                case lex.TokenConst:
-                    this.next(lfIsToken) // skip const key word
-                    cs , _ := this.parseConst(comment)
-                    if cs == null {
-                        resetProperty()
-                        continue
-                    }
-                    isPublic := isPublic()
-                    for _ , v := range cs {
-                        if isPublic {
-                            v.accessFlags |= cg.AccFieldPublic
-                        }
-                        this.tops.append(new ast.TopNode(v))
-                    }
-                    resetProperty()
-                    continue
-                case lex.TokenTypeAlias:
-                    a , _ := this.parseTypeAlias(comment)
-                    if a == null {
-                        resetProperty()
-                        continue
-                    }
-                    this.tops.append(new ast.TopNode(a))
-                    this.ifTokenIsLfThenSkip(false)
-                case lex.TokenImport:
-                    pos := this.mkPos()
-                    this.parseImports()
-                    this.errs.append(new error(sprintf("%s cannot have import at this scope",
-                        this.errMsgPrefix(pos))))
-                    this.ifTokenIsLfThenSkip(false)
-                case lex.TokenEof:
-                    break
-                default:
-                    if this.ExpressionParser.looksLikeExpression() {
-                        e , _ := this.ExpressionParser.parseExpression(true)
-                        if e != null {
-                            e.isPublic = isPublic()
-                            e.isGlobal = true
-                            this.tops.append(new ast.TopNode(e))
-                            if this.token.Type == lex.TokenComment {
-                                e.inlineComment = this.token.stringValue
-                                this.next(lfIsToken)
-                            }
-                        }
-                    } else {
-                        this.errs.append(new error(sprintf("%s token '%s' is not except",
-                            this.errMsgPrefix() , this.token.description)))
-                        this.next(lfNotToken)
-                    }
-            }
-        }
+				case lex.TokenLf:
+					this.tops.append(new ast.TopNode(new ast.Line()))
+					this.next(lfNotToken)
+					continue
+				case lex.TokenPublic:
+					accessControlToken = this.token
+					this.next(lfIsToken)
+					this.unExpectNewLineAndSkip()
+					if err := this.validAfterPublic() ; err != null {
+						accessControlToken = null
+					}
+					continue
+				case lex.TokenAbstract:
+					this.next(lfIsToken)
+					this.unExpectNewLineAndSkip()
+					if err := this.validAfterAbstract() ; err == null {
+						isAbstract = true
+					}
+				case lex.TokenFinal:
+					pos := this.mkPos()
+					this.next(lfIsToken)
+					this.unExpectNewLineAndSkip()
+					if err := this.validAfterFinal() ; err != null {
+						isFinal = false
+					} else {
+						isFinal = true
+						finalPos = pos
+					}
+					continue
+				case lex.TokenVar:
+					pos := this.mkPos()
+					this.next(lfIsToken) // skip var key word
+					vs , _ := this.parseVar()
+					if vs == null {
+						resetProperty()
+						continue
+					}
+					isPublic := isPublic()
+					e := new ast.Expression()
+					e.Type = ast.ExpressionTypeVar
+					e.data = vs
+					e.pos = pos
+					e.isPublic = isPublic
+					e.isGlobal = true
+					e.op = "var"
+					this.tops.append(new ast.TopNode(e))
+					resetProperty()
+					this.ifTokenIsLfThenSkip(false)
+					if this.token.Type == lex.TokenComment {
+						e.inlineComment = this.token.stringValue
+						this.next(lfIsToken)
+					}
+				case lex.TokenEnum:
+					e , _ := this.EnumParser.parse()
+					if e == null {
+						resetProperty()
+						continue
+					}
+					e.comment = comment.comment
+					isPublic := isPublic()
+					if isPublic {
+						e.accessFlags |= cg.AccClassPublic
+					}
+					if e != null {
+						this.tops.append(new ast.TopNode(e))
+					}
+					resetProperty()
+					this.ifTokenIsLfThenSkip(false)
+				case lex.TokenFn:
+					f , _ := this.FunctionParser.parse(true , false , true)
+					if f != null {
+						f.comment = comment.comment
+						isPublic := isPublic()
+						if isPublic {
+							f.accessFlags |= cg.AccMethodPublic
+						}
+						this.tops.append(new ast.TopNode(f))
+						this.ifTokenIsLfThenSkip(false)
+					}
+					resetProperty()
+				case lex.TokenLc:
+					b := new ast.Block()
+					b.pos = this.mkPos()
+					this.next(lfNotToken) // skip {
+					this.BlockParser.parseStatementList(b , true)
+					if this.token.Type != lex.TokenRc {
+						this.errs.append(new error(sprintf("%s expect '}', but '%s'",
+									this.errMsgPrefix() , this.token.description)))
+						this.consume(untilRc)
+					}
+					this.next(lfIsToken) // skip }
+					this.tops.append(new ast.TopNode(b))
+					this.ifTokenIsLfThenSkip(false)
+				case lex.TokenClass,
+					lex.TokenInterface:
+					c , _ := this.ClassParser.parse(isAbstract)
+					if c == null {
+						resetProperty()
+						continue
+					}
+					c.comment = comment.comment
+					this.tops.append(new ast.TopNode(c))
+					isPublic := isPublic()
+					if isPublic {
+						c.accessFlags |= cg.AccClassPublic
+					}
+					if isAbstract {
+						c.accessFlags |= cg.AccClassAbstract
+					}
+					if isFinal {
+						c.accessFlags |= cg.AccClassFinal
+						c.finalPos = finalPos
+					}
+					resetProperty()
+					this.ifTokenIsLfThenSkip(false)
+				case lex.TokenConst:
+					this.next(lfIsToken) // skip const key word
+					cs , _ := this.parseConst(comment)
+					if cs == null {
+						resetProperty()
+						continue
+					}
+					isPublic := isPublic()
+					for _ , v := range cs {
+						if isPublic {
+							v.accessFlags |= cg.AccFieldPublic
+						}
+						this.tops.append(new ast.TopNode(v))
+					}
+					resetProperty()
+					continue
+				case lex.TokenTypeAlias:
+					a , _ := this.parseTypeAlias(comment)
+					if a == null {
+						resetProperty()
+						continue
+					}
+					this.tops.append(new ast.TopNode(a))
+					this.ifTokenIsLfThenSkip(false)
+				case lex.TokenImport:
+					pos := this.mkPos()
+					this.parseImports()
+					this.errs.append(new error(sprintf("%s cannot have import at this scope",
+								this.errMsgPrefix(pos))))
+					this.ifTokenIsLfThenSkip(false)
+				case lex.TokenEof:
+					break
+				default:
+					if this.ExpressionParser.looksLikeExpression() {
+						e , _ := this.ExpressionParser.parseExpression(true)
+						if e != null {
+							e.isPublic = isPublic()
+							e.isGlobal = true
+							this.tops.append(new ast.TopNode(e))
+							if this.token.Type == lex.TokenComment {
+								e.inlineComment = this.token.stringValue
+								this.next(lfIsToken)
+							}
+						}
+					} else {
+						this.errs.append(new error(sprintf("%s token '%s' is not except",
+									this.errMsgPrefix() , this.token.description)))
+						this.next(lfNotToken)
+					}
+			}
+		}
 
-        return this.errs
-    }
+		return this.errs
+	}
 
-    fn validAfterPublic() -> (err error) {
-        if this.token.Type == lex.TokenFn ||
-            this.token.Type == lex.TokenClass ||
-            this.token.Type == lex.TokenEnum ||
-            this.token.Type == lex.TokenIdentifier ||
-            this.token.Type == lex.TokenInterface ||
-            this.token.Type == lex.TokenConst ||
-            this.token.Type == lex.TokenVar ||
-            this.token.Type == lex.TokenFinal ||
-            this.token.Type == lex.TokenAbstract {
-            return null
-        }
-        err = new error(sprintf("%s cannot have token '%s' after 'public'",
-            this.errMsgPrefix() , this.token.description))
-        this.errs.append(err)
-        return err
-    }
-    fn validAfterAbstract() -> (err error) {
-        if this.token.Type == lex.TokenClass {
-            return null
-        }
-        err = new error(sprintf("%s cannot have token '%s' after 'abstract'",
-            this.errMsgPrefix() , this.token.description))
-        this.errs.append(err)
-        return err
-    }
-    fn validAfterFinal() -> (err error) {
-        if this.token.Type == lex.TokenClass ||
-            this.token.Type == lex.TokenInterface {
-            return null
-        }
-        err = new error(sprintf("%s cannot have token '%s' after 'final'",
-            this.errMsgPrefix() , this.token.description))
-        this.errs.append(err)
-        return err
-    }
+	fn validAfterPublic() -> (err error) {
+		if this.token.Type == lex.TokenFn ||
+			this.token.Type == lex.TokenClass ||
+			this.token.Type == lex.TokenEnum ||
+			this.token.Type == lex.TokenIdentifier ||
+			this.token.Type == lex.TokenInterface ||
+			this.token.Type == lex.TokenConst ||
+			this.token.Type == lex.TokenVar ||
+			this.token.Type == lex.TokenFinal ||
+			this.token.Type == lex.TokenAbstract {
+			return null
+		}
+		err = new error(sprintf("%s cannot have token '%s' after 'public'",
+				this.errMsgPrefix() , this.token.description))
+		this.errs.append(err)
+		return err
+	}
+	fn validAfterAbstract() -> (err error) {
+		if this.token.Type == lex.TokenClass {
+			return null
+		}
+		err = new error(sprintf("%s cannot have token '%s' after 'abstract'",
+				this.errMsgPrefix() , this.token.description))
+		this.errs.append(err)
+		return err
+	}
+	fn validAfterFinal() -> (err error) {
+		if this.token.Type == lex.TokenClass ||
+			this.token.Type == lex.TokenInterface {
+			return null
+		}
+		err = new error(sprintf("%s cannot have token '%s' after 'final'",
+				this.errMsgPrefix() , this.token.description))
+		this.errs.append(err)
+		return err
+	}
 
-    /*
+	/*
 		statement ending
 	*/
-    fn isStatementEnding() -> (is bool) {
-        return this.token.Type == lex.TokenSemicolon ||
-            this.token.Type == lex.TokenLf ||
-            this.token.Type == lex.TokenRc ||
-            this.token.Type == lex.TokenComment ||
-            this.token.Type == lex.TokenMultiLineComment
-    }
-    fn validStatementEnding() -> (err error) {
-        if this.isStatementEnding() {
-            return null
-        }
-        err = new error(sprintf("%s expect semicolon or new line , but '%s'",
-            this.errMsgPrefix() , this.token.description))
-        this.errs.append(err)
-        return err
-    }
+	fn isStatementEnding() -> (is bool) {
+		return this.token.Type == lex.TokenSemicolon ||
+				this.token.Type == lex.TokenLf ||
+				this.token.Type == lex.TokenRc ||
+				this.token.Type == lex.TokenComment ||
+				this.token.Type == lex.TokenMultiLineComment
+	}
+	fn validStatementEnding() -> (err error) {
+		if this.isStatementEnding() {
+			return null
+		}
+		err = new error(sprintf("%s expect semicolon or new line , but '%s'",
+				this.errMsgPrefix() , this.token.description))
+		this.errs.append(err)
+		return err
+	}
 
-    fn mkPosFromStart(start ast.Pos , t lex.Token...) -> (pos ast.Pos) {
-        token := this.token
-        if len(t) > 0 {
-            token = t[0]
-        }
-        if token != null {
-            pos = new ast.Pos()
-            pos.filename = this.filename
-            pos.startLine = start.startLine
-            pos.endLine = start.endLine
-            pos.startColumnOffset = start.startColumnOffset
-            pos.endColumnOffset = token.endColumnOffset
-            pos.startOffset = token.offset
-            pos.endOffset = token.endOffset
-            return
-        } else {
-            line , _ := this.lexer.getLineAndColumn()
-            pos = new ast.Pos()
-            pos.filename = this.filename
-            pos.endLine = line
-            return
-        }
+	fn mkPosFromStart(start ast.Pos , t lex.Token...) -> (pos ast.Pos) {
+		token := this.token
+		if len(t) > 0 {
+			token = t[0]
+		}
+		if token != null {
+			pos = new ast.Pos()
+			pos.filename = this.filename
+			pos.startLine = start.startLine
+			pos.endLine = start.endLine
+			pos.startColumnOffset = start.startColumnOffset
+			pos.endColumnOffset = token.endColumnOffset
+			pos.startOffset = token.offset
+			pos.endOffset = token.endOffset
+			return
+		} else {
+			line , _ := this.lexer.getLineAndColumn()
+			pos = new ast.Pos()
+			pos.filename = this.filename
+			pos.endLine = line
+			return
+		}
 
-    }
+	}
 
-    fn mkPos(t lex.Token...) -> (pos ast.Pos) {
-        token := this.token
-        if len(t) > 0 {
-            token = t[0]
-        }
-        if token != null {
-            pos = new ast.Pos()
-            pos.filename = this.filename
-            pos.startLine = token.startLine
-            pos.endLine = token.endLine
-            pos.startColumnOffset = token.startColumnOffset
-            pos.endColumnOffset = token.endColumnOffset
-            pos.startOffset = token.offset
-            pos.endOffset = token.endOffset
-            return
-        } else {
-            line , column := this.lexer.getLineAndColumn()
-            pos = new ast.Pos()
-            pos.filename = this.filename
-            pos.startLine = line
-            pos.startColumnOffset = column
-            pos.endLine = line
-            pos.endColumnOffset = column
-            return
-        }
+	fn mkPos(t lex.Token...) -> (pos ast.Pos) {
+		token := this.token
+		if len(t) > 0 {
+			token = t[0]
+		}
+		if token != null {
+			pos = new ast.Pos()
+			pos.filename = this.filename
+			pos.startLine = token.startLine
+			pos.endLine = token.endLine
+			pos.startColumnOffset = token.startColumnOffset
+			pos.endColumnOffset = token.endColumnOffset
+			pos.startOffset = token.offset
+			pos.endOffset = token.endOffset
+			return
+		} else {
+			line , column := this.lexer.getLineAndColumn()
+			pos = new ast.Pos()
+			pos.filename = this.filename
+			pos.startLine = line
+			pos.startColumnOffset = column
+			pos.endLine = line
+			pos.endColumnOffset = column
+			return
+		}
 
-    }
+	}
 
-     // str := "hello world"   a,b = 123 or a b ;
-    fn parseConst(comment CommentParser) -> (constants []ast.Constant , err error) {
-        names , err := this.parseNameList()
-        if err != null {
-            return
-        }
-        constants = new []ast.Constant(len(names))
-        for k , v := range names {
-            vd := new ast.Constant()
-            vd.name = v.name
-            vd.pos = v.pos
-            vd.locateDefinition = v.locateDefinition
-            vd.getHover = v.getHover
-            vd.findUsage = v.findUsage
-            vd.containsLf = v.containsLf
-            vd.inlineComment = v.inlineComment
-            constants[k] = vd
-        }
+	// str := "hello world"   a,b = 123 or a b ;
+	fn parseConst(comment CommentParser) -> (constants []ast.Constant , err error) {
+		names , err := this.parseNameList()
+		if err != null {
+			return
+		}
+		constants = new []ast.Constant(len(names))
+		for k , v := range names {
+			vd := new ast.Constant()
+			vd.name = v.name
+			vd.pos = v.pos
+			vd.locateDefinition = v.locateDefinition
+			vd.getHover = v.getHover
+			vd.findUsage = v.findUsage
+			vd.containsLf = v.containsLf
+			vd.inlineComment = v.inlineComment
+			constants[k] = vd
+		}
 
-        var variableType ast.Type
-        if this.TypeParser.isValidTypeBegin() {
-            variableType , err = this.parseType()
-            if variableType == null {
-                return
-            }
-        }
-        if variableType != null {
-            for _ , c := range constants {
-                c.Type = variableType.cloneType()
-            }
-        }
-        if this.token.Type != lex.TokenAssign {
-            err = new error(sprintf("%s missing assign" , this.errMsgPrefix()))
-            this.errs.append(err)
-            return
-        }
-        this.next(lfNotToken) // skip =
-        es , err := this.ExpressionParser.parseExpressions(lex.TokenSemicolon)
-        if err != null {
-            return
-        }
-        if len(es) != len(constants) {
-            err = new error(sprintf("%s cannot assign %d value to %d constant",
-                this.errMsgPrefix() , len(es) , len(constants)))
-            this.errs.append(err)
-        }
-        constComment := comment.comment
-        var inlineComment string 
-        if this.token.Type == lex.TokenComment {
-            constComment = "//" + this.token.stringValue
-            inlineComment = this.token.stringValue
-            this.next(lfIsToken)
-        }else if this.token.Type == lex.TokenLf {
-            this.next(lfIsToken)
-        }
-        for k , v := range constants {
-            if v != null {
-                v.comment = constComment
-            }
-            if k < len(es) {
-                constants[k].defaultValueExpression = es[k]
-            }
-            v.inlineComment = inlineComment
-        }
+		var variableType ast.Type
+		if this.TypeParser.isValidTypeBegin() {
+			variableType , err = this.parseType()
+			if variableType == null {
+				return
+			}
+		}
+		if variableType != null {
+			for _ , c := range constants {
+				c.Type = variableType.cloneType()
+			}
+		}
+		if this.token.Type != lex.TokenAssign {
+			err = new error(sprintf("%s missing assign" , this.errMsgPrefix()))
+			this.errs.append(err)
+			return
+		}
+		this.next(lfNotToken) // skip =
+		es , err := this.ExpressionParser.parseExpressions(lex.TokenSemicolon)
+		if err != null {
+			return
+		}
+		if len(es) != len(constants) {
+			err = new error(sprintf("%s cannot assign %d value to %d constant",
+					this.errMsgPrefix() , len(es) , len(constants)))
+			this.errs.append(err)
+		}
+		constComment := comment.comment
+		var inlineComment string
+		if this.token.Type == lex.TokenComment {
+			constComment = "//" + this.token.stringValue
+			inlineComment = this.token.stringValue
+			this.next(lfIsToken)
+		} else if this.token.Type == lex.TokenLf {
+			this.next(lfIsToken)
+		}
+		for k , v := range constants {
+			if v != null {
+				v.comment = constComment
+			}
+			if k < len(es) {
+				constants[k].defaultValueExpression = es[k]
+			}
+			v.inlineComment = inlineComment
+		}
 
-        return
-    }
+		return
+	}
 
-     // str := "hello world"   a,b = 123 or a b ;
-    fn parseVar() -> (ret ast.ExpressionVar , err error) {
-        names , err := this.parseNameList()
-        if err != null {
-            return
-        }
-        ret = new ast.ExpressionVar()
-        ret.variables = new []ast.Variable(len(names))
-        for k , v := range names {
-            vd := new ast.Variable()
-            vd.locateDefinition = v.locateDefinition
-            vd.findUsage = v.findUsage
-            vd.name = v.name
-            vd.pos = v.pos
-            vd.containsLf = v.containsLf
-            vd.inlineComment = v.inlineComment
-            ret.variables[k] = vd
-        }
+	// str := "hello world"   a,b = 123 or a b ;
+	fn parseVar() -> (ret ast.ExpressionVar , err error) {
+		names , err := this.parseNameList()
+		if err != null {
+			return
+		}
+		ret = new ast.ExpressionVar()
+		ret.variables = new []ast.Variable(len(names))
+		for k , v := range names {
+			vd := new ast.Variable()
+			vd.locateDefinition = v.locateDefinition
+			vd.findUsage = v.findUsage
+			vd.name = v.name
+			vd.pos = v.pos
+			vd.containsLf = v.containsLf
+			vd.inlineComment = v.inlineComment
+			ret.variables[k] = vd
+		}
 
-        if this.token.Type != lex.TokenAssign {
-            ret.Type , err = this.parseType()
-        }
-        if this.token.Type == lex.TokenAssign {
-            this.next(lfNotToken) // skip = or :=
-            ret.initValues , err = this.ExpressionParser.parseExpressions(lex.TokenSemicolon)
-            if err != null {
-                return
-            }
-        }
-        return
-    }
+		if this.token.Type != lex.TokenAssign {
+			ret.Type , err = this.parseType()
+		}
+		if this.token.Type == lex.TokenAssign {
+			this.next(lfNotToken) // skip = or :=
+			ret.initValues , err = this.ExpressionParser.parseExpressions(lex.TokenSemicolon)
+			if err != null {
+				return
+			}
+		}
+		return
+	}
 
-    fn next(lfIsToken bool) {
-        if this.consumeFoundValidToken {
-            this.consumeFoundValidToken = false
-            return
-        }
-        if len(this.tokenStackForLookBack) > 0 {
-            this.token = this.tokenStackForLookBack[0]
-            this.tokenStackForLookBack = this.tokenStackForLookBack[1:]
-            return
-        }
-        var err error
-        var tok lex.Token
-        this.lastToken = this.token
-        for {
-            tok , err = this.lexer.next()
-            if tok != null {
-                this.token = tok
-            }
-            if err != null {
-                this.errs.append(new error(sprintf("%s %s" , this.errMsgPrefix() , err.getMessage())))
-            }
-            if tok == null {
-                continue
-            }
-            this.token = tok
-            if lfIsToken {
-                break
-            }
-            if tok.Type != lex.TokenLf {
-                break
-            }
-        }
+	fn next(lfIsToken bool) {
+		if this.consumeFoundValidToken {
+			this.consumeFoundValidToken = false
+			return
+		}
+		if len(this.tokenStackForLookBack) > 0 {
+			this.token = this.tokenStackForLookBack[0]
+			this.tokenStackForLookBack = this.tokenStackForLookBack[1:]
+			return
+		}
+		var err error
+		var tok lex.Token
+		this.lastToken = this.token
+		for {
+			tok , err = this.lexer.next()
+			if tok != null {
+				this.token = tok
+			}
+			if err != null {
+				this.errs.append(new error(sprintf("%s %s" , this.errMsgPrefix() , err.getMessage())))
+			}
+			if tok == null {
+				continue
+			}
+			this.token = tok
+			if lfIsToken {
+				break
+			}
+			if tok.Type != lex.TokenLf {
+				break
+			}
+		}
 
-        return
-    }
-    /*
+		return
+	}
+	/*
 		pos.errMsgPrefix() only receive one argument
 	*/
-    fn errMsgPrefix(pos ast.Pos...) -> (prefix string) {
-        if len(pos) > 0 {
-            return pos[0].errMsgPrefix()
-        }
-        return this.mkPos().errMsgPrefix()
-    }
+	fn errMsgPrefix(pos ast.Pos...) -> (prefix string) {
+		if len(pos) > 0 {
+			return pos[0].errMsgPrefix()
+		}
+		return this.mkPos().errMsgPrefix()
+	}
 
-    fn consume(until map{lex.TokenKind -> bool}) {
-        if len(until) == 0 {
-            panic("no token to consume")
-        }
-        for this.token.Type != lex.TokenEof {
-            if this.token.Type == lex.TokenPublic ||
-                this.token.Type == lex.TokenProtected ||
-                this.token.Type == lex.TokenPrivate ||
-                this.token.Type == lex.TokenClass ||
-                this.token.Type == lex.TokenInterface ||
-                this.token.Type == lex.TokenFn ||
-                this.token.Type == lex.TokenFor ||
-                this.token.Type == lex.TokenIf ||
-                this.token.Type == lex.TokenSwitch ||
-                this.token.Type == lex.TokenEnum ||
-                this.token.Type == lex.TokenConst ||
-                this.token.Type == lex.TokenVar ||
-                this.token.Type == lex.TokenImport ||
-                this.token.Type == lex.TokenTypeAlias ||
-                this.token.Type == lex.TokenGoto ||
-                this.token.Type == lex.TokenBreak ||
-                this.token.Type == lex.TokenContinue ||
-                this.token.Type == lex.TokenDefer ||
-                this.token.Type == lex.TokenReturn ||
-                this.token.Type == lex.TokenPass ||
-                this.token.Type == lex.TokenExtends ||
-                this.token.Type == lex.TokenImplements ||
-                this.token.Type == lex.TokenGlobal ||
-                this.token.Type == lex.TokenCase ||
-                this.token.Type == lex.TokenDefault {
-                if until.keyExist(this.token.Type) == false {
-                    this.consumeFoundValidToken = true
-                    return
-                }
-            }
-            if this.token.Type == lex.TokenLc {
-                if until.keyExist(lex.TokenLc) == false {
-                    this.consumeFoundValidToken = true
-                    return
-                }
-            }
-            if this.token.Type == lex.TokenRc {
-                if until.keyExist(lex.TokenRc) == false {
-                    this.consumeFoundValidToken = true
-                    return
-                }
-            }
-            if until.keyExist(this.token.Type) {
-                return
-            }
-            this.next(lfIsToken)
-        }
+	fn consume(until map{lex.TokenKind -> bool}) {
+		if len(until) == 0 {
+			panic("no token to consume")
+		}
+		for this.token.Type != lex.TokenEof {
+			if this.token.Type == lex.TokenPublic ||
+				this.token.Type == lex.TokenProtected ||
+				this.token.Type == lex.TokenPrivate ||
+				this.token.Type == lex.TokenClass ||
+				this.token.Type == lex.TokenInterface ||
+				this.token.Type == lex.TokenFn ||
+				this.token.Type == lex.TokenFor ||
+				this.token.Type == lex.TokenIf ||
+				this.token.Type == lex.TokenSwitch ||
+				this.token.Type == lex.TokenEnum ||
+				this.token.Type == lex.TokenConst ||
+				this.token.Type == lex.TokenVar ||
+				this.token.Type == lex.TokenImport ||
+				this.token.Type == lex.TokenTypeAlias ||
+				this.token.Type == lex.TokenGoto ||
+				this.token.Type == lex.TokenBreak ||
+				this.token.Type == lex.TokenContinue ||
+				this.token.Type == lex.TokenDefer ||
+				this.token.Type == lex.TokenReturn ||
+				this.token.Type == lex.TokenPass ||
+				this.token.Type == lex.TokenExtends ||
+				this.token.Type == lex.TokenImplements ||
+				this.token.Type == lex.TokenGlobal ||
+				this.token.Type == lex.TokenCase ||
+				this.token.Type == lex.TokenDefault {
+				if until.keyExist(this.token.Type) == false {
+					this.consumeFoundValidToken = true
+					return
+				}
+			}
+			if this.token.Type == lex.TokenLc {
+				if until.keyExist(lex.TokenLc) == false {
+					this.consumeFoundValidToken = true
+					return
+				}
+			}
+			if this.token.Type == lex.TokenRc {
+				if until.keyExist(lex.TokenRc) == false {
+					this.consumeFoundValidToken = true
+					return
+				}
+			}
+			if until.keyExist(this.token.Type) {
+				return
+			}
+			this.next(lfIsToken)
+		}
 
-    }
+	}
 
-    fn ifTokenIsLfThenSkip(skipMulti bool) {
-        if this.token.Type == lex.TokenLf {
-            if skipMulti {
-                this.next(lfNotToken)
-            } else {
-                this.next(lfIsToken)
-            }
-        }
-    }
+	fn ifTokenIsLfThenSkip(skipMulti bool) {
+		if this.token.Type == lex.TokenLf {
+			if skipMulti {
+				this.next(lfNotToken)
+			} else {
+				this.next(lfIsToken)
+			}
+		}
+	}
 
-    fn unExpectNewLineAndSkip() {
-        if err := this.unExpectNewLine() ; err != null {
-            this.next(lfNotToken)
-        }
-    }
+	fn unExpectNewLineAndSkip() {
+		if err := this.unExpectNewLine() ; err != null {
+			this.next(lfNotToken)
+		}
+	}
 
-    fn unExpectNewLine() -> (err error) {
-        if this.token.Type == lex.TokenLf {
-            err = new error(sprintf("%s unexpected new line",
-                this.errMsgPrefix(this.mkPos())))
-            this.errs.append(err)
-        }
-        return err
-    }
+	fn unExpectNewLine() -> (err error) {
+		if this.token.Type == lex.TokenLf {
+			err = new error(sprintf("%s unexpected new line",
+					this.errMsgPrefix(this.mkPos())))
+			this.errs.append(err)
+		}
+		return err
+	}
 
-    fn expectNewLine() -> (err error) {
-        if this.token.Type != lex.TokenLf &&
-            this.token.Type != lex.TokenComment {
-            err = new error(sprintf("%s expect new line , but '%s'",
-                this.errMsgPrefix() , this.token.description))
-            this.errs.append(err)
-        }
-        return err
-    }
+	fn expectNewLine() -> (err error) {
+		if this.token.Type != lex.TokenLf &&
+			this.token.Type != lex.TokenComment {
+			err = new error(sprintf("%s expect new line , but '%s'",
+					this.errMsgPrefix() , this.token.description))
+			this.errs.append(err)
+		}
+		return err
+	}
 
-    fn parseTypeAlias(comment CommentParser) -> (alias ast.TypeAlias , err error) {
-        this.next(lfIsToken) // skip type key word
-        this.unExpectNewLineAndSkip()
-        if this.token.Type != lex.TokenIdentifier {
-            err = new error(sprintf("%s expect identifer,but '%s'" , this.errMsgPrefix() , this.token.description))
-            this.errs.append(err)
-            return null , err
-        }
-        ret := new ast.TypeAlias()
-        ret.pos = this.mkPos()
-        ret.name = this.token.stringValue
-        ret.locateDefinition = this.token.locateDefinition
-        ret.findUsage = this.token.findUsage
-        this.next(lfIsToken) // skip identifier
-        if this.token.Type != lex.TokenAssign {
-            err = new error(sprintf("%s expect '=',but '%s'" , this.errMsgPrefix() , this.token.description))
-            this.errs.append(err)
-            return null , err
-        }
-        this.next(lfNotToken) // skip =
-        ret.Type , err = this.parseType()
-        if ret.Type == null {
-            return null , err
-        }
-        ret.comment = comment.comment
-        if this.token.Type == lex.TokenComment {
-            this.next(lfIsToken)
-        }
-        return ret , err
-    }
+	fn parseTypeAlias(comment CommentParser) -> (alias ast.TypeAlias , err error) {
+		this.next(lfIsToken) // skip type key word
+		this.unExpectNewLineAndSkip()
+		if this.token.Type != lex.TokenIdentifier {
+			err = new error(sprintf("%s expect identifer,but '%s'" , this.errMsgPrefix() , this.token.description))
+			this.errs.append(err)
+			return null , err
+		}
+		ret := new ast.TypeAlias()
+		ret.pos = this.mkPos()
+		ret.name = this.token.stringValue
+		ret.locateDefinition = this.token.locateDefinition
+		ret.findUsage = this.token.findUsage
+		this.next(lfIsToken) // skip identifier
+		if this.token.Type != lex.TokenAssign {
+			err = new error(sprintf("%s expect '=',but '%s'" , this.errMsgPrefix() , this.token.description))
+			this.errs.append(err)
+			return null , err
+		}
+		this.next(lfNotToken) // skip =
+		ret.Type , err = this.parseType()
+		if ret.Type == null {
+			return null , err
+		}
+		ret.comment = comment.comment
+		if this.token.Type == lex.TokenComment {
+			this.next(lfIsToken)
+		}
+		return ret , err
+	}
 
-    /*
+	/*
 		a int
 		int
 	*/
-    fn parseTypedName() -> (vs []ast.Variable , err error) {
-        if this.token.Type != lex.TokenIdentifier {
-            /*
+	fn parseTypedName() -> (vs []ast.Variable , err error) {
+		if this.token.Type != lex.TokenIdentifier {
+			/*
 				not identifier begin
 				must be type
 				// int
 			*/
-            var t ast.Type
-            t , err = this.parseType()
-            if t == null {
-                return null , err
-            }
-            v := new ast.Variable()
-            v.Type = t
-            v.name = ""
-            v.pos = this.mkPos()
-            return [v] , null
-        }
-        token := this.token
-        names , err := this.parseNameList()
-        if err != null {
-            return null , err
-        }
-        if len(names) == 1 &&
-            this.token.Type == lex.TokenSelection {
-            // XXX.
-            this.tokenStackForLookBack = [token , this.token]
-            this.next(lfIsToken) // restore the stack 
-            var t ast.Type
-            t , err = this.parseType()
-            if t == null {
-                return null , err
-            }
-            v := new ast.Variable()
-            v.Type = t
-            v.name = ""
-            v.pos = this.mkPos()
-            return [v] , null
-        }
-        if this.TypeParser.isValidTypeBegin() {
-            /*
+			var t ast.Type
+			t , err = this.parseType()
+			if t == null {
+				return null , err
+			}
+			v := new ast.Variable()
+			v.Type = t
+			v.name = ""
+			v.pos = this.mkPos()
+			return [v] , null
+		}
+		token := this.token
+		names , err := this.parseNameList()
+		if err != null {
+			return null , err
+		}
+		if len(names) == 1 &&
+			this.token.Type == lex.TokenSelection {
+			// XXX.
+			this.tokenStackForLookBack = [token , this.token]
+			this.next(lfIsToken) // restore the stack 
+			var t ast.Type
+			t , err = this.parseType()
+			if t == null {
+				return null , err
+			}
+			v := new ast.Variable()
+			v.Type = t
+			v.name = ""
+			v.pos = this.mkPos()
+			return [v] , null
+		}
+		if this.TypeParser.isValidTypeBegin() {
+			/*
 				a , b int
 			*/
-            var t ast.Type
-            t , err = this.parseType()
-            if t == null {
-                return null , err
-            }
-            vs = new []ast.Variable(len(names))
-            for k , v := range names {
-                vd := new ast.Variable()
-                vs[k] = vd
-                vd.locateDefinition = v.locateDefinition
-                vd.findUsage = v.findUsage
-                vd.name = v.name
-                vd.pos = v.pos
-                vd.containsLf = v.containsLf
-                vd.inlineComment = v.inlineComment
-                vd.Type = t.cloneType()
-            }
+			var t ast.Type
+			t , err = this.parseType()
+			if t == null {
+				return null , err
+			}
+			vs = new []ast.Variable(len(names))
+			for k , v := range names {
+				vd := new ast.Variable()
+				vs[k] = vd
+				vd.locateDefinition = v.locateDefinition
+				vd.findUsage = v.findUsage
+				vd.name = v.name
+				vd.pos = v.pos
+				vd.containsLf = v.containsLf
+				vd.inlineComment = v.inlineComment
+				vd.Type = t.cloneType()
+			}
 
-            return vs , null
-        } else {
-            /*
+			return vs , null
+		} else {
+			/*
 				syntax a,b
 				not valid type after name list, "a" and "b" must indicate types
 			*/
-            vs = new []ast.Variable(len(names))
-            for k , v := range names {
-                vd := new ast.Variable()
-                vs[k] = vd
-                vd.pos = v.pos
-                vd.name = ""
-                vd.containsLf = v.containsLf
-                vd.inlineComment = v.inlineComment
-                vd.Type = new ast.Type()
-                vd.Type.Type = ast.VariableTypeName
-                vd.Type.pos = v.pos
-                vd.Type.name = v.name
-                vd.Type.autoCompletion = v.autoCompletion
-                vd.Type.locateDefinition = v.locateDefinition
-                vd.Type.getHover = v.getHover
-                vd.Type.findUsage = v.findUsage
-                vd.Type.pos = v.pos // override pos
-            }
+			vs = new []ast.Variable(len(names))
+			for k , v := range names {
+				vd := new ast.Variable()
+				vs[k] = vd
+				vd.pos = v.pos
+				vd.name = ""
+				vd.containsLf = v.containsLf
+				vd.inlineComment = v.inlineComment
+				vd.Type = new ast.Type()
+				vd.Type.Type = ast.VariableTypeName
+				vd.Type.pos = v.pos
+				vd.Type.name = v.name
+				vd.Type.autoCompletion = v.autoCompletion
+				vd.Type.locateDefinition = v.locateDefinition
+				vd.Type.getHover = v.getHover
+				vd.Type.findUsage = v.findUsage
+				vd.Type.pos = v.pos // override pos
+			}
 
-            return vs , null
-        }
+			return vs , null
+		}
 
-    }
+	}
 
-     // a,b int or int,bool  c xxx
-    fn parseTypedNames() -> (vs []ast.Variable , err error) {
-        vs = []ast.Variable{}
-        for this.token.Type != lex.TokenEof {
-            var ns []ast.NameWithPos
-            ns , err = this.parseNameList()
-            if err != null {
-                return vs , err
-            }
-            var t ast.Type
-            t , err = this.parseType()
-            if t == null {
-                return vs , err
-            }
-            for _ , v := range ns {
-                vd := new ast.Variable()
-                vd.name = v.name
-                vd.pos = v.pos
-                vd.containsLf = v.containsLf
-                vd.inlineComment = v.inlineComment
-                vd.Type = t.cloneType()
-                vs.append(vd)
-            }
+	// a,b int or int,bool  c xxx
+	fn parseTypedNames() -> (vs []ast.Variable , err error) {
+		vs = []ast.Variable{}
+		for this.token.Type != lex.TokenEof {
+			var ns []ast.NameWithPos
+			ns , err = this.parseNameList()
+			if err != null {
+				return vs , err
+			}
+			var t ast.Type
+			t , err = this.parseType()
+			if t == null {
+				return vs , err
+			}
+			for _ , v := range ns {
+				vd := new ast.Variable()
+				vd.name = v.name
+				vd.pos = v.pos
+				vd.containsLf = v.containsLf
+				vd.inlineComment = v.inlineComment
+				vd.Type = t.cloneType()
+				vs.append(vd)
+			}
 
-            if this.token.Type != lex.TokenComma {
-                break
-            } else {
-                this.next(lfNotToken)
-            }
+			if this.token.Type != lex.TokenComma {
+				break
+			} else {
+				this.next(lfNotToken)
+			}
 
-        }
+		}
 
-        return vs , null
-    }
+		return vs , null
+	}
 
-    fn parseImports() -> (imports []ast.Import = []ast.Import{}) {
-        for this.token.Type == lex.TokenImport ||
-                this.token.Type == lex.TokenLf {
-            if this.token.Type == lex.TokenLf {
-                this.next(lfNotToken)
-                continue
-            }
-            this.next(lfIsToken) // skip import key word
-            this.unExpectNewLineAndSkip()
-            if this.token.Type != lex.TokenLiteralString {
-                this.errs.append(new error(sprintf("%s expect 'package' after import,but '%s'",
-                    this.errMsgPrefix() , this.token.description)))
-                this.consume(untilSemicolonOrLf)
-                this.next(lfNotToken)
-                continue
-            }
-            i := new ast.Import()
-            i.pos = this.mkPos()
-            i.Import = this.token.stringValue
-            i.findUsage = this.token.findUsage
-            i.locateDefinition = this.token.locateDefinition
-            imports.append(i)
-            this.next(lfIsToken)
+	fn parseImports() -> (imports []ast.Import = []ast.Import{}) {
+		for this.token.Type == lex.TokenImport ||
+			this.token.Type == lex.TokenLf {
+			if this.token.Type == lex.TokenLf {
+				this.next(lfNotToken)
+				continue
+			}
+			this.next(lfIsToken) // skip import key word
+			this.unExpectNewLineAndSkip()
+			if this.token.Type != lex.TokenLiteralString {
+				this.errs.append(new error(sprintf("%s expect 'package' after import,but '%s'",
+							this.errMsgPrefix() , this.token.description)))
+				this.consume(untilSemicolonOrLf)
+				this.next(lfNotToken)
+				continue
+			}
+			i := new ast.Import()
+			i.pos = this.mkPos()
+			i.Import = this.token.stringValue
+			i.findUsage = this.token.findUsage
+			i.locateDefinition = this.token.locateDefinition
+			imports.append(i)
+			this.next(lfIsToken)
 
-            if this.token.Type == lex.TokenAs {
-                /*
+			if this.token.Type == lex.TokenAs {
+				/*
 					import "xxxxxxxxxxx" as yyy
 				*/
-                this.next(lfNotToken) // skip as
-                if this.token.Type != lex.TokenIdentifier {
-                    this.errs.append(new error(sprintf("%s expect 'identifier' after 'as',but '%s'",
-                        this.errMsgPrefix() , this.token.description)))
-                    this.consume(untilSemicolonOrLf)
-                    this.next(lfNotToken)
-                    continue
-                } else {
-                    i.accessName = this.token.stringValue
-                    i.alias = this.token.stringValue
-                    i.aliasPos = this.mkPos()
-                    i.locateDefinition = i.locateDefinition || this.token.locateDefinition
-                    i.findUsage = i.findUsage || this.token.findUsage
-                    this.next(lfIsToken) // skip identifier
-                }
+				this.next(lfNotToken) // skip as
+				if this.token.Type != lex.TokenIdentifier {
+					this.errs.append(new error(sprintf("%s expect 'identifier' after 'as',but '%s'",
+								this.errMsgPrefix() , this.token.description)))
+					this.consume(untilSemicolonOrLf)
+					this.next(lfNotToken)
+					continue
+				} else {
+					i.accessName = this.token.stringValue
+					i.alias = this.token.stringValue
+					i.aliasPos = this.mkPos()
+					i.locateDefinition = i.locateDefinition || this.token.locateDefinition
+					i.findUsage = i.findUsage || this.token.findUsage
+					this.next(lfIsToken) // skip identifier
+				}
 
-            }
-        }
+			}
+		}
 
-    }
+	}
 
-     //at least one name
-    fn parseNameList() -> (names []ast.NameWithPos , err error) {
-        if this.token.Type != lex.TokenIdentifier {
-            err = new error(sprintf("%s expect identifier,but '%s'",
-                this.errMsgPrefix() , this.token.description))
-            this.errs.append(err)
-            return null , err
-        }
-        names = []ast.NameWithPos{}
-        for this.token.Type == lex.TokenIdentifier {
-            t := new ast.NameWithPos(this.token.stringValue , this.mkPos())
-            t.locateDefinition = this.token.locateDefinition
-            t.findUsage = this.token.findUsage
-            t.getHover = this.token.getHover
-            t.autoCompletion = this.token.autoCompletion
-            names.append(t)
-            this.next(lfIsToken)
-            if this.token.Type != lex.TokenComma {
-                // not a ,
-                break
-            }
-            // current is ","
-            this.next(lfIsToken)
-            if this.token.Type == lex.TokenLf {
-                // , containsLf
-                t.containsLf = true
-                this.next(lfNotToken)
-            } else if this.token.Type == lex.TokenComment {
-                t.inlineComment = this.token.stringValue
-                this.next(lfNotToken) // skip comment 
-            } else {
-                //nothing
-            }
+	//at least one name
+	fn parseNameList() -> (names []ast.NameWithPos , err error) {
+		if this.token.Type != lex.TokenIdentifier {
+			err = new error(sprintf("%s expect identifier,but '%s'",
+					this.errMsgPrefix() , this.token.description))
+			this.errs.append(err)
+			return null , err
+		}
+		names = []ast.NameWithPos{}
+		for this.token.Type == lex.TokenIdentifier {
+			t := new ast.NameWithPos(this.token.stringValue , this.mkPos())
+			t.locateDefinition = this.token.locateDefinition
+			t.findUsage = this.token.findUsage
+			t.getHover = this.token.getHover
+			t.autoCompletion = this.token.autoCompletion
+			names.append(t)
+			this.next(lfIsToken)
+			if this.token.Type != lex.TokenComma {
+				// not a ,
+				break
+			}
+			// current is ","
+			this.next(lfIsToken)
+			if this.token.Type == lex.TokenLf {
+				// , containsLf
+				t.containsLf = true
+				this.next(lfNotToken)
+			} else if this.token.Type == lex.TokenComment {
+				t.inlineComment = this.token.stringValue
+				this.next(lfNotToken) // skip comment 
+			} else {
+				//nothing
+			}
 
-            if this.token.Type != lex.TokenIdentifier {
-                err = new error(sprintf("%s not a 'identifier' after a comma,but '%s'",
-                    this.errMsgPrefix() , this.token.description))
-                this.errs.append(err)
-                return names , err
-            }
-        }
-        return
-    }
-    fn parseType() -> (ret ast.Type , err error) {
-        return this.TypeParser.parseType()
-    }
-    fn parseTypes(endTokens lex.TokenKind...) -> (ts []ast.Type , err error) {
-        return this.TypeParser.parseTypes()
-    }
+			if this.token.Type != lex.TokenIdentifier {
+				err = new error(sprintf("%s not a 'identifier' after a comma,but '%s'",
+						this.errMsgPrefix() , this.token.description))
+				this.errs.append(err)
+				return names , err
+			}
+		}
+		return
+	}
+	fn parseType() -> (ret ast.Type , err error) {
+		return this.TypeParser.parseType()
+	}
+	fn parseTypes(endTokens lex.TokenKind...) -> (ts []ast.Type , err error) {
+		return this.TypeParser.parseTypes()
+	}
 }
-
 

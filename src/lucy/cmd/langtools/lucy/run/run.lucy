@@ -169,13 +169,11 @@ public class RunLucyPackage {
         destinationDir := lucyPath + "/class/" + packageName
         bs , err := os.readFile(destinationDir + "/maintain.json")
         if err != null {
-            panic(err)
             return
         }
         meta = new common.PackageMeta()
         _ , err = json.decode(javaArray2Lucy(bs) , meta)
         if err != null {
-            panic(err)
             return
         }
         compiledFrom := new map{string -> common.FileMeta}()

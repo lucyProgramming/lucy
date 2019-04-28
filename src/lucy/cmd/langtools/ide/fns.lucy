@@ -8,53 +8,53 @@ import "java/io"
 
 
 public fn readLucyFiles(filenames []string) -> (lucyFiles []LucyFile = []LucyFile{}) {
-    for v := range filenames {
-        t := fileCache.get(v)
-        lucyFiles.append(t)
-    }
+	for v := range filenames {
+		t := fileCache.get(v)
+		lucyFiles.append(t)
+	}
 }
 
 public fn parseAst(lucyFiles []LucyFile) -> (nodes []ast.TopNode = []ast.TopNode{} , errs []error = []error{}) {
-    for _ , v := range lucyFiles {
-        errs.appendAll(parser.parse(nodes , v.realPathName , v.bs , false , 10,
-                v.locateDefinition , v.getHover , v.findUsage , v.autoCompletion))
-    }
+	for _ , v := range lucyFiles {
+		errs.appendAll(parser.parse(nodes , v.realPathName , v.bs , false , 10,
+				v.locateDefinition , v.getHover , v.findUsage , v.autoCompletion))
+	}
 }
 
 public fn parseAstAndTypeCheck(
-    packageName string,
-    lucyFiles []LucyFile,
-    onlyAnalyzeGlobals bool,
-    matchFile string,
-    matchLine int,
-    loader ast.loadImport) -> (p ast.Package , errs []error) {
-    // now := System.currentTimeMillis()
-    nodes , es := parseAst(lucyFiles)
-    // print("prase ast used:", System.currentTimeMillis() - now ,packageName)
-    p = new ast.Package(packageName , false , loader)
-    p.onlyAnalyzeGlobals = onlyAnalyzeGlobals
-    p.matchFile = matchFile
-    // p.printFileMatchInfo = true 
-    if matchLine != -1 {
-        p.matchLine = matchLine
-    }
-    errs = p.typeCheck(nodes)
-    // print("type check package:",  onlyAnalyzeGlobals , System.currentTimeMillis() - now ,packageName)
-    if len(es) > 0 {
-        if len(errs) == 0 {
-            errs = es
-        } else {
-            errs.appendAll(es)
-        }
-    }
+	packageName string,
+	lucyFiles []LucyFile,
+	onlyAnalyzeGlobals bool,
+	matchFile string,
+	matchLine int,
+	loader ast.loadImport) -> (p ast.Package , errs []error) {
+	// now := System.currentTimeMillis()
+	nodes , es := parseAst(lucyFiles)
+	// print("prase ast used:", System.currentTimeMillis() - now ,packageName)
+	p = new ast.Package(packageName , false , loader)
+	p.onlyAnalyzeGlobals = onlyAnalyzeGlobals
+	p.matchFile = matchFile
+	// p.printFileMatchInfo = true 
+	if matchLine != -1 {
+		p.matchLine = matchLine
+	}
+	errs = p.typeCheck(nodes)
+	// print("type check package:",  onlyAnalyzeGlobals , System.currentTimeMillis() - now ,packageName)
+	if len(es) > 0 {
+		if len(errs) == 0 {
+			errs = es
+		} else {
+			errs.appendAll(es)
+		}
+	}
 }
 
 public fn getLucyFiles(dir string) -> (lucyFiles []string = []string{}) {
-    list := new io.File(dir).listFiles()
-    for v := range list {
-        if v.getName().endsWith(".lucy") {
-            lucyFiles.append(v.getAbsolutePath())
-        }
-    }
+	list := new io.File(dir).listFiles()
+	for v := range list {
+		if v.getName().endsWith(".lucy") {
+			lucyFiles.append(v.getAbsolutePath())
+		}
+	}
 }
 

@@ -3,8 +3,7 @@
 import "lucy/cmd/langtools/common"
 
 class PackageCompiled {
-    packageName string
-    meta        common.PackageMeta
+	packageName string
+	meta        common.PackageMeta
 }
-
 

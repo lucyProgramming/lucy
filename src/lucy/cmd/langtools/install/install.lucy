@@ -4,52 +4,51 @@ import "java/io"
 import "lucy/cmd/langtools/lucy/run"
 
 class Install {
-    dir         string
-    verbose     bool  
-    packageName string
-    lucyRoot    string
+	dir         string
+	verbose     bool
+	packageName string
+	lucyRoot    string
 
-    fn Install(lucyRoot string , dir string , packageName string , verbose bool) {
-        this.super()
-        this.dir = dir
-        this.packageName = packageName
-        this.verbose = verbose
-        this.lucyRoot = lucyRoot
-    }
+	fn Install(lucyRoot string , dir string , packageName string , verbose bool) {
+		this.super()
+		this.dir = dir
+		this.packageName = packageName
+		this.verbose = verbose
+		this.lucyRoot = lucyRoot
+	}
 
-    fn install() {
-        f := new io.File(this.dir)
-        if f.isDirectory() == false {
-            printf("'%s' is not a directory" , this.dir)
-            return
-        }
-        this.installDir(this.dir , this.packageName)
-    }
+	fn install() {
+		f := new io.File(this.dir)
+		if f.isDirectory() == false {
+			printf("'%s' is not a directory" , this.dir)
+			return
+		}
+		this.installDir(this.dir , this.packageName)
+	}
 
-    fn installDir(dir string , packageName string) {
-        f := new io.File(dir)
-        fs := f.listFiles()
-        hasLucyFile := false
-        for f := range fs {
-            if f.isDirectory() {
-                this.installDir(dir + "/" + f.getName() , packageName + "/" + f.getName())
-                continue
-            }
-            if f.getName().endsWith(".lucy") {
-                hasLucyFile = true
-            }
-        }
-        if false == hasLucyFile {
-            return
-        }
-        if this.verbose {
-            printf("install:%s\n" , packageName)
-        }
-        err := new run.RunLucyPackage().run("install" , ["-build" , packageName])
-        if err != null {
-            printf("install failed,err:%s\n" , err.toString())
-        }
-    }
+	fn installDir(dir string , packageName string) {
+		f := new io.File(dir)
+		fs := f.listFiles()
+		hasLucyFile := false
+		for f := range fs {
+			if f.isDirectory() {
+				this.installDir(dir + "/" + f.getName() , packageName + "/" + f.getName())
+				continue
+			}
+			if f.getName().endsWith(".lucy") {
+				hasLucyFile = true
+			}
+		}
+		if false == hasLucyFile {
+			return
+		}
+		if this.verbose {
+			printf("install:%s\n" , packageName)
+		}
+		err := new run.RunLucyPackage().run("install" , ["-build" , packageName])
+		if err != null {
+			printf("install failed,err:%s\n" , err.toString())
+		}
+	}
 }
-
 
