@@ -29,7 +29,7 @@ class ExpressionCheckSelection {
                     result := field.Type.cloneType()
                     result.pos = e.pos
                     if selection.locateDefinition {
-                        block.inheritedAttribute.p.setLocationDefinition(field)
+                        block.inheritedAttribute.p.setLocatedDefinitionPos(field)
                         return
                     }
                     return result
@@ -41,7 +41,7 @@ class ExpressionCheckSelection {
                     result.functionType = method.Function.Type
                     result.pos = e.pos
                     if selection.locateDefinition {
-                        block.inheritedAttribute.p.setLocationDefinition(method)
+                        block.inheritedAttribute.p.setLocatedDefinitionPos(method)
                         return
                     }
                     return result
@@ -49,7 +49,7 @@ class ExpressionCheckSelection {
             case VariableTypePackage:
                 d , ok := object.Package.block.nameExists(selection.name , e.pos)
                 if selection.locateDefinition {
-                    block.inheritedAttribute.p.setLocationDefinition(d)
+                    block.inheritedAttribute.p.setLocatedDefinitionPos(d)
                     return
                 }
                 if ok == false {
@@ -172,7 +172,7 @@ class ExpressionCheckSelection {
                     }
                     if selection.locateDefinition {
                         if object.Class.loadFromOutSide == false {
-                            block.inheritedAttribute.p.setLocationDefinition(field)
+                            block.inheritedAttribute.p.setLocatedDefinitionPos(field)
                             return
                         } else {
                             //TODO :: locateDefinition
@@ -190,7 +190,7 @@ class ExpressionCheckSelection {
                     }
                     if selection.locateDefinition {
                         if object.Class.loadFromOutSide == false {
-                            block.inheritedAttribute.p.setLocationDefinition(field)
+                            block.inheritedAttribute.p.setLocatedDefinitionPos(field)
                             return
                         }
                     }

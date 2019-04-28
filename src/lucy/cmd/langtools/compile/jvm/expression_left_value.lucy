@@ -22,7 +22,7 @@ class BuildExpressionLeftValue {
         leftValueType LeftValueKind) {
         identifier := e.data.(ast.ExpressionIdentifier)
         meta := closure.getMeta(identifier.Variable.Type.Type)
-        if context.function.closure.closureVariableExist(identifier.Variable) {
+        if context.theFunction.closure.closureVariableExist(identifier.Variable) {
             copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , char(0)))
             code.codes[code.codeLength] = cg.OP_getfield
             c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(c.name,

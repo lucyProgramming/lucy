@@ -94,8 +94,8 @@ class BuildinFunctionCatchPanic {
             copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)) // store
             //check cast
             code.codes[code.codeLength] = cg.OP_checkcast
-            if context.Defer.exceptionClass != null {
-                c.insertClassConst(context.Defer.exceptionClass.name, code.codes[code.codeLength+1:code.codeLength+3])
+            if context.statementDefer.exceptionClass != null {
+                c.insertClassConst(context.statementDefer.exceptionClass.name, code.codes[code.codeLength+1:code.codeLength+3])
             } else {
                 c.insertClassConst(ast.DefaultExceptionClass, code.codes[code.codeLength+1:code.codeLength+3])
             }

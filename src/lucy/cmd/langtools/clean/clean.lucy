@@ -4,50 +4,49 @@ import "lucy/cmd/langtools/common"
 import "java/io/File"
 
 final class Clean {
-    lucyPath    []string
-    packageName string
-    lucyRoot    string
-    recursive   bool
-    verbose     bool
+	lucyPath    []string
+	packageName string
+	lucyRoot    string
+	recursive   bool
+	verbose     bool
 
-    fn Clean(
-        lucyRoot string,
-        lucyPath []string,
-        packageName string,
-        recursive bool,
-        verbose bool) {
-        this.super()
-        this.lucyRoot = lucyRoot
-        this.lucyPath = lucyPath
-        this.packageName = packageName
-        this.recursive = recursive
-        this.verbose = verbose
-    }
+	fn Clean(
+		lucyRoot string,
+		lucyPath []string,
+		packageName string,
+		recursive bool,
+		verbose bool) {
+		this.super()
+		this.lucyRoot = lucyRoot
+		this.lucyPath = lucyPath
+		this.packageName = packageName
+		this.recursive = recursive
+		this.verbose = verbose
+	}
 
-    fn clean() {
-        w := common.findPackageInWhichDirectory(this.lucyPath , this.packageName)
-        dir := w + "/class/" + this.packageName
-        this.cleanDir(dir)
-    }
-    private fn cleanDir(dir string) {
-        f := new File(dir)
-        fs := f.listFiles()
-        for f := range fs {
-            if f.isDirectory() && this.recursive {
-                sub := sprintf("%s/%s" , dir , f.getName())
-                this.cleanDir(sub)
-                continue
-            }
-            if name := f.getName() ; name == "maintain.json" ||
-                f.getName().endsWith(".class") {
-                if this.verbose {
-                    print(sprintf("clean: %s/%s" , dir , name))
-                }
-                new File(dir + "/" + name).delete()
-            }
-        }
+	fn clean() {
+		w := common.findPackageInWhichDirectory(this.lucyPath , this.packageName)
+		dir := w + "/class/" + this.packageName
+		this.cleanDir(dir)
+	}
+	private fn cleanDir(dir string) {
+		f := new File(dir)
+		fs := f.listFiles()
+		for f := range fs {
+			if f.isDirectory() && this.recursive {
+				sub := sprintf("%s/%s" , dir , f.getName())
+				this.cleanDir(sub)
+				continue
+			}
+			if name := f.getName() ; name == "maintain.json" ||
+				f.getName().endsWith(".class") {
+				if this.verbose {
+					print(sprintf("clean: %s/%s" , dir , name))
+				}
+				new File(dir + "/" + name).delete()
+			}
+		}
 
-    }
+	}
 }
-
 

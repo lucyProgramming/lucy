@@ -218,7 +218,7 @@ public class Type {
 				}
 				pos := this.pos // keep pos
 				if this.locateDefinition {
-					block.inheritedAttribute.p.setLocationDefinition(block.inheritedAttribute.Function.parameterTypes[this.name])
+					block.inheritedAttribute.p.setLocatedDefinitionPos(block.inheritedAttribute.Function.parameterTypes[this.name])
 				}
 				block.inheritedAttribute.Function.parameterTypes[this.name].cp(this)
 				this.pos = pos // keep pos
@@ -259,7 +259,7 @@ public class Type {
 
 			case this.isPrimitive():
 				if this.locateDefinition {
-					block.inheritedAttribute.p.setLocationDefinition(this)
+					block.inheritedAttribute.p.setLocatedDefinitionPos(this)
 				}
 		}
 
@@ -327,7 +327,7 @@ public class Type {
 			i := block.inheritedAttribute.p.getImport(this.pos.filename , this.name)
 			if i != null {
 				if this.locateDefinition {
-					block.inheritedAttribute.p.setLocationDefinition(i)
+					block.inheritedAttribute.p.setLocatedDefinitionPos(i)
 				}
 				i.mkUsed(this.pos)
 				return block.inheritedAttribute.p.load(i.Import)
@@ -352,7 +352,7 @@ public class Type {
 		}
 
 		if this.locatePackageDefinition {
-			block.inheritedAttribute.p.setLocationDefinition(i)
+			block.inheritedAttribute.p.setLocatedDefinitionPos(i)
 		}
 		p , err := block.inheritedAttribute.p.load(i.Import)
 		if err != null {
@@ -412,7 +412,7 @@ public class Type {
 						errMsgPrefix(this.pos) , c.name))
 			}
 			if this.locateDefinition && c.pos != null {
-				block.inheritedAttribute.p.setLocationDefinition(c)
+				block.inheritedAttribute.p.setLocatedDefinitionPos(c)
 			}
 			this.Type = VariableTypeObject
 			this.Class = c
@@ -425,9 +425,9 @@ public class Type {
 			t.cp(this)
 			if this.locateDefinition {
 				if t.alias == null {
-					block.inheritedAttribute.p.setLocationDefinition(t)
+					block.inheritedAttribute.p.setLocatedDefinitionPos(t)
 				} else {
-					block.inheritedAttribute.p.setLocationDefinition(t.alias)
+					block.inheritedAttribute.p.setLocatedDefinitionPos(t.alias)
 				}
 
 			}
@@ -442,7 +442,7 @@ public class Type {
 							errMsgPrefix(this.pos) , dd.name)))
 			}
 			if this.locateDefinition {
-				block.inheritedAttribute.p.setLocationDefinition(dd)
+				block.inheritedAttribute.p.setLocatedDefinitionPos(dd)
 				return
 			}
 			this.Type = VariableTypeEnum

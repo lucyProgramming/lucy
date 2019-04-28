@@ -4,561 +4,558 @@ import "java/lang/Object"
 import "lucy/jvm/cg"
 
 public class Block implements TopNodeInterface {
-    public exits []cg.Exit // for switch template
-    /*
+	public exits []cg.Exit // for switch template
+	/*
 		should analyse at ast stage
 	*/
-    public notExecuteToLastStatement bool
-    public defers                    []StatementDefer
-    public isFunctionBlock           bool                          // function block
-    public Fn                        Function
-    public isClassBlock              bool                          // class block
-           isPackageBlock            bool
-           Package                   Package                       // when isPackageBlock is true this field shoule not be null
-    public Class                     Class
-    public isForBlock                bool                          // for top block
-    public isSwitchBlock             bool                          // switch statement list block
-    public isWhenBlock               bool                          // template swtich statement list block
-    public pos                       Pos
-    public endPos                    Pos
-    public outer                     Block
-    public inheritedAttribute        InheritedAttribute = new InheritedAttribute()
-    public statements                []Statement
-    public constants                 map{string -> Constant}
-    public functions                 map{string -> Function}
-    public classes                   map{string -> Class}
-    public enums                     map{string -> Enum}
-    public enumNames                 map{string -> EnumName}
-    public labels                    map{string -> StatementLabel}
-    public typeAliases               map{string -> Type}
-    public variables                 map{string -> Variable}
-           checkConstantsCalled      bool
-    public isCompilerAuto            bool
+	public notExecuteToLastStatement bool
+	public defers                    []StatementDefer
+	public isFunctionBlock           bool                          // function block
+	public Fn                        Function
+	public isClassBlock              bool                          // class block
+	       isPackageBlock            bool
+	       package                   Package                       // when isPackageBlock is true this field should not be null
+	public Class                     Class
+	public isForBlock                bool                          // for top block
+	public isSwitchBlock             bool                          // switch statement list block
+	public isWhenBlock               bool                          // template switch statement list block
+	public pos                       Pos
+	public endPos                    Pos
+	public outer                     Block
+	public inheritedAttribute        InheritedAttribute = new InheritedAttribute()
+	public statements                []Statement
+	public constants                 map{string -> Constant}
+	public functions                 map{string -> Function}
+	public classes                   map{string -> Class}
+	public enums                     map{string -> Enum}
+	public enumNames                 map{string -> EnumName}
+	public labels                    map{string -> StatementLabel}
+	public typeAliases               map{string -> Type}
+	public variables                 map{string -> Variable}
+	       checkConstantsCalled      bool
+	public isCompilerAuto            bool
 
-    /*
+	/*
     
     */
-    fn walk(f fn (block Block)) {
-        b := this
-        for b != null {
-            f(b)
-            b = b.outer
-        }
+	fn walk(f fn(block Block)) {
+		b := this
+		for b != null {
+			f(b)
+			b = b.outer
+		}
 
-    }
+	}
 
-    public fn nameExists(name string , pos Pos) -> (x Object , exist bool) {
-        if this.functions != null {
-            if t := this.functions[name] ; t != null {
-                if t.findUsage {
-                    u := new Usage()
-                    u.Type = "value read"
-                    u.pos = pos
-                    t.findUsageInstances.append(u)
-                }
-                t.used++
-                return t , true
-            }
-        }
-        if this.variables != null {
-            if t := this.variables[name] ; t != null {
-                if t.findUsage {
-                    u := new Usage()
-                    u.Type = "value read"
-                    u.pos = pos
-                    t.findUsageInstances.append(u)
-                }
-                return t , true
-            }
-        }
-        if this.constants != null {
-            if t := this.constants[name] ; t != null {
-                if t.findUsage {
-                    e := new error("")
-                    e.printStackTrace()
-                    u := new Usage()
-                    u.Type = "value read"
-                    u.pos = pos
-                    t.findUsageInstances.append(u)
-                }
-                t.used++
-                return t , true
-            }
-        }
-        if this.enumNames != null {
-            if t := this.enumNames[name] ; t != null {
-                if t.findUsage {
-                    u := new Usage()
-                    u.Type = "value read"
-                    u.pos = pos
-                    t.findUsageInstances.append(u)
-                }
-                t.used++
-                return t , true
-            }
-        }
-        if this.classes != null {
-            if t := this.classes[name] ; t != null {
-                if t.findUsage {
-                    u := new Usage()
-                    u.Type = "declaration"
-                    u.pos = pos
-                    t.findUsageInstances.append(u)
-                }
-                t.used++
-                return t , true
-            }
-        }
-        if this.enums != null {
-            if t := this.enums[name] ; t != null {
-                if t.findUsage {
-                    u := new Usage()
-                    u.Type = "declaration"
-                    u.pos = pos
-                    t.findUsageInstances.append(u)
-                }
-                t.used++
-                return t , true
-            }
-        }
-        if this.typeAliases != null {
-            if t := this.typeAliases[name] ; t != null {
-                if t.alias != null && t.alias.findUsage {
-                    u := new Usage()
-                    u.Type = "declaration"
-                    u.pos = pos
-                    t.alias.findUsageInstances.append(u)
-                }
-                if t.alias != null {
-                    t.alias.used = true
-                }
-                return t , true
-            }
-        }
-        return null , false
-    }
+	public fn nameExists(name string , pos Pos) -> (x Object , exist bool) {
+		if this.functions != null {
+			if t := this.functions[name] ; t != null {
+				if t.findUsage {
+					u := new Usage()
+					u.Type = "value read"
+					u.pos = pos
+					t.findUsageInstances.append(u)
+				}
+				t.used++
+				return t , true
+			}
+		}
+		if this.variables != null {
+			if t := this.variables[name] ; t != null {
+				if t.findUsage {
+					u := new Usage()
+					u.Type = "value read"
+					u.pos = pos
+					t.findUsageInstances.append(u)
+				}
+				return t , true
+			}
+		}
+		if this.constants != null {
+			if t := this.constants[name] ; t != null {
+				if t.findUsage {
+					u := new Usage()
+					u.Type = "value read"
+					u.pos = pos
+					t.findUsageInstances.append(u)
+				}
+				t.used++
+				return t , true
+			}
+		}
+		if this.enumNames != null {
+			if t := this.enumNames[name] ; t != null {
+				if t.findUsage {
+					u := new Usage()
+					u.Type = "value read"
+					u.pos = pos
+					t.findUsageInstances.append(u)
+				}
+				t.used++
+				return t , true
+			}
+		}
+		if this.classes != null {
+			if t := this.classes[name] ; t != null {
+				if t.findUsage {
+					u := new Usage()
+					u.Type = "declaration"
+					u.pos = pos
+					t.findUsageInstances.append(u)
+				}
+				t.used++
+				return t , true
+			}
+		}
+		if this.enums != null {
+			if t := this.enums[name] ; t != null {
+				if t.findUsage {
+					u := new Usage()
+					u.Type = "declaration"
+					u.pos = pos
+					t.findUsageInstances.append(u)
+				}
+				t.used++
+				return t , true
+			}
+		}
+		if this.typeAliases != null {
+			if t := this.typeAliases[name] ; t != null {
+				if t.alias != null && t.alias.findUsage {
+					u := new Usage()
+					u.Type = "declaration"
+					u.pos = pos
+					t.alias.findUsageInstances.append(u)
+				}
+				if t.alias != null {
+					t.alias.used = true
+				}
+				return t , true
+			}
+		}
+		return null , false
+	}
 
-    /*
+	/*
         search label
     */
-    fn searchLabel(name string , pos Pos) -> (label StatementLabel) {
-        outer := this
-        for {
-            if outer.labels != null {
-                if label = outer.labels[name] ; label != null {
-                    if label.findUsage {
-                        u := new Usage()
-                        u.Type = "value read"
-                        u.pos = pos
-                        if label.findUsageInstances == null {
-                            label.findUsageInstances = [u]
-                            this.inheritedAttribute.p.findUsage = label.findUsageInstances
-                        } else {
-                            label.findUsageInstances.append(u)
-                        }
+	fn searchLabel(name string , pos Pos) -> (label StatementLabel) {
+		outer := this
+		for {
+			if outer.labels != null {
+				if label = outer.labels[name] ; label != null {
+					if label.findUsage {
+						u := new Usage()
+						u.Type = "value read"
+						u.pos = pos
+						if label.findUsageInstances == null {
+							label.findUsageInstances = [u]
+							this.inheritedAttribute.p.findUsage = label.findUsageInstances
+						} else {
+							label.findUsageInstances.append(u)
+						}
 
-                    }
-                    label.used++
-                    return label
-                }
-            }
-            if outer.isFunctionBlock {
-                return null
-            }
-            outer = outer.outer
-        }
+					}
+					label.used++
+					return label
+				}
+			}
+			if outer.isFunctionBlock {
+				return null
+			}
+			outer = outer.outer
+		}
 
-        return null
-    }
+		return null
+	}
 
-    /*
+	/*
         search type
     */
-    fn searchType(name string , pos Pos) -> (x Object) {
-        bb := this
-        for bb != null {
-            if bb.classes != null {
-                if t := bb.classes[name] ; t != null {
-                    t.used++
-                    if t.findUsageInstances != null {
-                        u := new Usage()
-                        u.Type = "declaration"
-                        u.pos = pos
-                        t.findUsageInstances.append(u)
-                    }
-                    return t
-                }
-            }
-            if bb.enums != null {
-                if t := bb.enums[name] ; t != null {
-                    t.used++
-                    if t.findUsageInstances != null {
-                        u := new Usage()
-                        u.Type = "declaration"
-                        u.pos = pos
-                        t.findUsageInstances.append(u)
-                    }
-                    return t
-                }
-            }
-            if bb.typeAliases != null {
-                if t := bb.typeAliases[name] ; t != null {
-                    if t.alias.findUsageInstances != null {
-                        u := new Usage()
-                        u.Type = "declaration"
-                        u.pos = pos
-                        t.alias.findUsageInstances.append(u)
-                    }
-                    return t
-                }
-            }
-            if bb.isFunctionBlock && bb.Fn.parameterTypes != null {
-                if t := bb.Fn.parameterTypes[name] ; t != null {
-                    return t
-                }
-            }
-            bb = bb.outer
-        }
+	fn searchType(name string , pos Pos) -> (x Object) {
+		bb := this
+		for bb != null {
+			if bb.classes != null {
+				if t := bb.classes[name] ; t != null {
+					t.used++
+					if t.findUsageInstances != null {
+						u := new Usage()
+						u.Type = "declaration"
+						u.pos = pos
+						t.findUsageInstances.append(u)
+					}
+					return t
+				}
+			}
+			if bb.enums != null {
+				if t := bb.enums[name] ; t != null {
+					t.used++
+					if t.findUsageInstances != null {
+						u := new Usage()
+						u.Type = "declaration"
+						u.pos = pos
+						t.findUsageInstances.append(u)
+					}
+					return t
+				}
+			}
+			if bb.typeAliases != null {
+				if t := bb.typeAliases[name] ; t != null {
+					if t.alias.findUsageInstances != null {
+						u := new Usage()
+						u.Type = "declaration"
+						u.pos = pos
+						t.alias.findUsageInstances.append(u)
+					}
+					return t
+				}
+			}
+			if bb.isFunctionBlock && bb.Fn.parameterTypes != null {
+				if t := bb.Fn.parameterTypes[name] ; t != null {
+					return t
+				}
+			}
+			bb = bb.outer
+		}
 
-        return null
-    }
+		return null
+	}
 
-    fn identifierIsWhat(x Object) -> (w string) {
-        if x == null {
-            w = "null"
-            return
-        }
-        return x.getClass().getName()
-    }
+	fn identifierIsWhat(x Object) -> (w string) {
+		if x == null {
+			w = "null"
+			return
+		}
+		return x.getClass().getName()
+	}
 
-    /*
+	/*
         search identifier
     */
-    fn searchIdentifier(from Pos , name string , isCaptureVar []bool) -> (x Object , err error) {
-        if x , _ = this.nameExists(name , from) ; x != null {
-            return x , null
-        }
-        if this.isFunctionBlock && this.Fn != null {
-            if this.Fn.parameterTypes != null {
-                if t := this.Fn.parameterTypes[name] ; t != null {
-                    return t , null
-                }
-            }
-        }
-        if this.isFunctionBlock &&
-            len(this.inheritedAttribute.Function.parameterTypes) > 0 {
-            return searchBuildIns(name , this.inheritedAttribute.p.lucyBuildInPackage) , null
-        }
-        if this.isFunctionBlock &&
-            name == ThisPointerName {
-            return null , null
-        }
-        if this.outer == null {
-            return searchBuildIns(name , null) , null // 
-        }
-        t , err := this.outer.searchIdentifier(from , name , isCaptureVar) // search by outer block
-        if err != null {
-            return t , err
-        }
-        if t != null {
-            if v , ok := t.(Variable) ; ok {
-                if v.isGlobal == false {
-                    if this.isFunctionBlock &&
-                        this.inheritedAttribute.Function.isGlobal == false {
-                        this.inheritedAttribute.Function.closure.insertVar(from , v)
-                        isCaptureVar[0] = true
-                    }
-                    //cannot search variable from class body
-                    if this.isClassBlock {
-                        return null , new error(sprintf("%s trying to access variable '%s' from class" , from.errMsgPrefix() , name))
-                    }
-                }
-            }
-            if f , ok := t.(Function) ; ok {
-                if f.isGlobal == false {
-                    if this.isClassBlock {
-                        this.Class.closure.insertFunction(from , f)
-                    }
-                    if this.isFunctionBlock {
-                        this.Fn.closure.insertFunction(from , f)
-                    }
-                }
-            }
-        }
-        return t , null
-    }
+	fn searchIdentifier(from Pos , name string , isCaptureVar []bool) -> (x Object , err error) {
+		if x , _ = this.nameExists(name , from) ; x != null {
+			return x , null
+		}
+		if this.isFunctionBlock && this.Fn != null {
+			if this.Fn.parameterTypes != null {
+				if t := this.Fn.parameterTypes[name] ; t != null {
+					return t , null
+				}
+			}
+		}
+		if this.isFunctionBlock &&
+			len(this.inheritedAttribute.Function.parameterTypes) > 0 {
+			return searchBuildIns(name , this.inheritedAttribute.p.lucyBuildInPackage) , null
+		}
+		if this.isFunctionBlock &&
+			name == ThisPointerName {
+			return null , null
+		}
+		if this.outer == null {
+			return searchBuildIns(name , null) , null // 
+		}
+		t , err := this.outer.searchIdentifier(from , name , isCaptureVar) // search by outer block
+		if err != null {
+			return t , err
+		}
+		if t != null {
+			if v , ok := t.(Variable) ; ok {
+				if v.isGlobal == false {
+					if this.isFunctionBlock &&
+						this.inheritedAttribute.Function.isGlobal == false {
+						this.inheritedAttribute.Function.closure.insertVar(from , v)
+						isCaptureVar[0] = true
+					}
+					//cannot search variable from class body
+					if this.isClassBlock {
+						return null , new error(sprintf("%s trying to access variable '%s' from class" , from.errMsgPrefix() , name))
+					}
+				}
+			}
+			if f , ok := t.(Function) ; ok {
+				if f.isGlobal == false {
+					if this.isClassBlock {
+						this.Class.closure.insertFunction(from , f)
+					}
+					if this.isFunctionBlock {
+						this.Fn.closure.insertFunction(from , f)
+					}
+				}
+			}
+		}
+		return t , null
+	}
 
-    fn inherit(father Block) {
-        if this.outer != null {
-            return
-        }
-        if this == father {
-            panic("inherit from self")
-        }
-        if this.inheritedAttribute == null {
-            this.inheritedAttribute = new InheritedAttribute()
-        }
-        this.outer = father
-        this.inheritedAttribute.forBreak = father.inheritedAttribute.forBreak
-        this.inheritedAttribute.statementOffset = father.inheritedAttribute.statementOffset
-        this.inheritedAttribute.isConstructionMethod = father.inheritedAttribute.isConstructionMethod
-        this.inheritedAttribute.forStatement = father.inheritedAttribute.forStatement
-        this.inheritedAttribute.Function = father.inheritedAttribute.Function
-        this.inheritedAttribute.Class = father.inheritedAttribute.Class
-        this.inheritedAttribute.Defer = father.inheritedAttribute.Defer
-        this.inheritedAttribute.classMethod = father.inheritedAttribute.classMethod
-        this.inheritedAttribute.classAndFunctionNames = father.inheritedAttribute.classAndFunctionNames
-        this.inheritedAttribute.p = father.inheritedAttribute.p
-        if this.isFunctionBlock || this.isClassBlock {
-            this.inheritedAttribute.forBreak = null
-            this.inheritedAttribute.forStatement = null
-            this.inheritedAttribute.statementOffset = 0
-            this.inheritedAttribute.isConstructionMethod = false
-            this.inheritedAttribute.classMethod = null
-            this.inheritedAttribute.Defer = null
-        }
-    }
+	fn inherit(father Block) {
+		if this.outer != null {
+			return
+		}
+		if this == father {
+			panic("inherit from self")
+		}
+		if this.inheritedAttribute == null {
+			this.inheritedAttribute = new InheritedAttribute()
+		}
+		this.outer = father
+		this.inheritedAttribute.forBreak = father.inheritedAttribute.forBreak
+		this.inheritedAttribute.statementOffset = father.inheritedAttribute.statementOffset
+		this.inheritedAttribute.isConstructionMethod = father.inheritedAttribute.isConstructionMethod
+		this.inheritedAttribute.forStatement = father.inheritedAttribute.forStatement
+		this.inheritedAttribute.Function = father.inheritedAttribute.Function
+		this.inheritedAttribute.Class = father.inheritedAttribute.Class
+		this.inheritedAttribute.Defer = father.inheritedAttribute.Defer
+		this.inheritedAttribute.classMethod = father.inheritedAttribute.classMethod
+		this.inheritedAttribute.classAndFunctionNames = father.inheritedAttribute.classAndFunctionNames
+		this.inheritedAttribute.p = father.inheritedAttribute.p
+		if this.isFunctionBlock || this.isClassBlock {
+			this.inheritedAttribute.forBreak = null
+			this.inheritedAttribute.forStatement = null
+			this.inheritedAttribute.statementOffset = 0
+			this.inheritedAttribute.isConstructionMethod = false
+			this.inheritedAttribute.classMethod = null
+			this.inheritedAttribute.Defer = null
+		}
+	}
 
-    fn checkUnUsed() -> (es []error) {
-        es = []error{}
-        if this.inheritedAttribute.p.disableCheckUnUse {
-            return es
-        }
-        for _ , v := range this.constants {
-            if v.used > 0 ||
-                v.isGlobal {
-                continue
-            }
-            es.append(new error(sprintf("%s constant '%s' has declared,but not used" , v.pos.errMsgPrefix() , v.name)))
-        }
+	fn checkUnUsed() -> (es []error) {
+		es = []error{}
+		if this.inheritedAttribute.p.disableCheckUnUse {
+			return es
+		}
+		for _ , v := range this.constants {
+			if v.used > 0 ||
+				v.isGlobal {
+				continue
+			}
+			es.append(new error(sprintf("%s constant '%s' has declared,but not used" , v.pos.errMsgPrefix() , v.name)))
+		}
 
-        for _ , v := range this.enums {
-            if v.used > 0 ||
-                v.isGlobal {
-                continue
-            }
-            es.append(new error(sprintf("%s enum '%s' has declared,but not used" , v.pos.errMsgPrefix() , v.name)))
-        }
+		for _ , v := range this.enums {
+			if v.used > 0 ||
+				v.isGlobal {
+				continue
+			}
+			es.append(new error(sprintf("%s enum '%s' has declared,but not used" , v.pos.errMsgPrefix() , v.name)))
+		}
 
-        for _ , v := range this.classes {
-            if v.used > 0 ||
-                v.isGlobal {
-                continue
-            }
-            es.append(new error(sprintf("%s class '%s' has declared,but not used" , v.pos.errMsgPrefix() , v.name)))
-        }
+		for _ , v := range this.classes {
+			if v.used > 0 ||
+				v.isGlobal {
+				continue
+			}
+			es.append(new error(sprintf("%s class '%s' has declared,but not used" , v.pos.errMsgPrefix() , v.name)))
+		}
 
-        for _ , v := range this.functions {
-            if v.used > 0 ||
-                v.isGlobal {
-                continue
-            }
-            es.append(new error(sprintf("%s function '%s' has declared,but not used" , v.pos.errMsgPrefix() , v.name)))
-        }
+		for _ , v := range this.functions {
+			if v.used > 0 ||
+				v.isGlobal {
+				continue
+			}
+			es.append(new error(sprintf("%s function '%s' has declared,but not used" , v.pos.errMsgPrefix() , v.name)))
+		}
 
-        for _ , v := range this.labels {
-            if v.used > 0 {
-                continue
-            }
-            es.append(new error(sprintf("%s label '%s' has declared,but not used" , v.pos.errMsgPrefix() , v.name)))
-        }
+		for _ , v := range this.labels {
+			if v.used > 0 {
+				continue
+			}
+			es.append(new error(sprintf("%s label '%s' has declared,but not used" , v.pos.errMsgPrefix() , v.name)))
+		}
 
-        for _ , v := range this.variables {
-            if v.used ||
-                v.isGlobal ||
-                v.isFunctionParameter ||
-                v.name == ThisPointerName ||
-                v.isReturn {
-                continue
-            }
-            es.append(new error(sprintf("%s variable '%s' has declared,but not used" , v.pos.errMsgPrefix() , v.name)))
-        }
+		for _ , v := range this.variables {
+			if v.used ||
+				v.isGlobal ||
+				v.isFunctionParameter ||
+				v.name == ThisPointerName ||
+				v.isReturn {
+				continue
+			}
+			es.append(new error(sprintf("%s variable '%s' has declared,but not used" , v.pos.errMsgPrefix() , v.name)))
+		}
 
-        return es
-    }
+		return es
+	}
 
-    fn check() -> (errs []error = []error{}) {
-        for k , s := range this.statements {
-            if s.isStaticFieldDefaultValue {
-                // no need to check
-                continue
-            }
-            this.inheritedAttribute.statementOffset = k
-            errs.appendAll(s.check(this))
-            if this.inheritedAttribute.p.shouldStop(errs) {
-                return errs
-            }
-            if this.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
-                return errs
-            }
-        }
+	fn check() -> (errs []error = []error{}) {
+		for k , s := range this.statements {
+			if s.isStaticFieldDefaultValue {
+				// no need to check
+				continue
+			}
+			this.inheritedAttribute.statementOffset = k
+			errs.appendAll(s.check(this))
+			if this.inheritedAttribute.p.shouldStop(errs) {
+				return errs
+			}
+			if this.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+				return errs
+			}
+		}
 
-        errs.appendAll(this.checkUnUsed())
-        return errs
-    }
+		errs.appendAll(this.checkUnUsed())
+		return errs
+	}
 
-    fn checkConstants() -> (errs []error = new []error(0)) {
-        if this.checkConstantsCalled {
-            return null
-        }
-        this.checkConstantsCalled = true
-        for _ , c := range this.constants {
-            if err := this.nameIsValid(c.name , c.pos) ; err != null {
-                errs.append(err)
-                this.constants.remove(c.name)
-                continue
-            }
-            err := checkConst(this , c , errs)
-            if err != null {
-                errs.append(err)
-            }
-            if err != null && c.Type == null {
-                this.constants.remove(c.name)
-            }
-        }
+	fn checkConstants() -> (errs []error = new []error(0)) {
+		if this.checkConstantsCalled {
+			return null
+		}
+		this.checkConstantsCalled = true
+		for _ , c := range this.constants {
+			if err := this.nameIsValid(c.name , c.pos) ; err != null {
+				errs.append(err)
+				this.constants.remove(c.name)
+				continue
+			}
+			err := checkConst(this , c , errs)
+			if err != null {
+				errs.append(err)
+			}
+			if err != null && c.Type == null {
+				this.constants.remove(c.name)
+			}
+		}
 
-        return errs
-    }
+		return errs
+	}
 
-    fn checkNameExist(name string , pos Pos) -> (err error) {
-        if this.variables == null {
-            this.variables = new map{string -> Variable}()
-        }
-        if v := this.variables[name] ; v != null {
-            errMsg := sprintf("%s name '%s' already declared as variable,first declared at:\n" , pos.errMsgPrefix() , name)
-            errMsg += sprintf("\t%s" , v.pos.errMsgPrefix())
-            return new error(errMsg)
-        }
-        if this.classes == null {
-            this.classes = new map{string -> Class}()
-        }
-        if c := this.classes[name] ; c != null {
-            errMsg := sprintf("%s name '%s' already declared as class,first declared at:\n" , pos.errMsgPrefix() , name)
-            errMsg += sprintf("\t%s" , c.pos.errMsgPrefix())
-            return new error(errMsg)
-        }
-        if this.functions == null {
-            this.functions = new map{string -> Function}()
-        }
-        if f := this.functions[name] ; f != null {
-            errMsg := sprintf("%s name '%s' already declared as function,first declared at:\n" , pos.errMsgPrefix() , name)
-            errMsg += sprintf("\t%s" , f.pos.errMsgPrefix())
-            return new error(errMsg)
-        }
-        if this.constants == null {
-            this.constants = new map{string -> Constant}()
-        }
-        if c := this.constants[name] ; c != null {
-            errMsg := sprintf("%s name '%s' already declared as const,first declared at:\n" , pos.errMsgPrefix() , name)
-            errMsg += sprintf("\t%s" , c.pos.errMsgPrefix())
-            return new error(errMsg)
-        }
-        if this.enumNames == null {
-            this.enumNames = new map{string -> EnumName}()
-        }
-        if en := this.enumNames[name] ; en != null {
-            errMsg := sprintf("%s name '%s' already declared as enumName,first declared at:\n" , pos.errMsgPrefix() , name)
-            errMsg += sprintf("\t%s" , en.pos.errMsgPrefix())
-            return new error(errMsg)
-        }
-        if this.typeAliases == null {
-            this.typeAliases = new map{string -> Type}()
-        }
-        if t := this.typeAliases[name] ; t != null {
-            errMsg := sprintf("%s name '%s' already declared as enumName,first declared at:\n" , pos.errMsgPrefix() , name)
-            errMsg += sprintf("\t%s" , t.pos.errMsgPrefix())
-            return new error(errMsg)
-        }
-        if this.enums == null {
-            this.enums = new map{string -> Enum}()
-        }
-        if e := this.enums[name] ; e != null {
-            errMsg := sprintf("%s name %s already declared as enum,first declared at:\n" , pos.errMsgPrefix() , name)
-            errMsg += sprintf("\t%s" , e.pos.errMsgPrefix())
-            return new error(errMsg)
-        }
-        return null
-    }
+	fn checkNameExist(name string , pos Pos) -> (err error) {
+		if this.variables == null {
+			this.variables = new map{string -> Variable}()
+		}
+		if v := this.variables[name] ; v != null {
+			errMsg := sprintf("%s name '%s' already declared as variable,first declared at:\n" , pos.errMsgPrefix() , name)
+			errMsg += sprintf("\t%s" , v.pos.errMsgPrefix())
+			return new error(errMsg)
+		}
+		if this.classes == null {
+			this.classes = new map{string -> Class}()
+		}
+		if c := this.classes[name] ; c != null {
+			errMsg := sprintf("%s name '%s' already declared as class,first declared at:\n" , pos.errMsgPrefix() , name)
+			errMsg += sprintf("\t%s" , c.pos.errMsgPrefix())
+			return new error(errMsg)
+		}
+		if this.functions == null {
+			this.functions = new map{string -> Function}()
+		}
+		if f := this.functions[name] ; f != null {
+			errMsg := sprintf("%s name '%s' already declared as function,first declared at:\n" , pos.errMsgPrefix() , name)
+			errMsg += sprintf("\t%s" , f.pos.errMsgPrefix())
+			return new error(errMsg)
+		}
+		if this.constants == null {
+			this.constants = new map{string -> Constant}()
+		}
+		if c := this.constants[name] ; c != null {
+			errMsg := sprintf("%s name '%s' already declared as const,first declared at:\n" , pos.errMsgPrefix() , name)
+			errMsg += sprintf("\t%s" , c.pos.errMsgPrefix())
+			return new error(errMsg)
+		}
+		if this.enumNames == null {
+			this.enumNames = new map{string -> EnumName}()
+		}
+		if en := this.enumNames[name] ; en != null {
+			errMsg := sprintf("%s name '%s' already declared as enumName,first declared at:\n" , pos.errMsgPrefix() , name)
+			errMsg += sprintf("\t%s" , en.pos.errMsgPrefix())
+			return new error(errMsg)
+		}
+		if this.typeAliases == null {
+			this.typeAliases = new map{string -> Type}()
+		}
+		if t := this.typeAliases[name] ; t != null {
+			errMsg := sprintf("%s name '%s' already declared as enumName,first declared at:\n" , pos.errMsgPrefix() , name)
+			errMsg += sprintf("\t%s" , t.pos.errMsgPrefix())
+			return new error(errMsg)
+		}
+		if this.enums == null {
+			this.enums = new map{string -> Enum}()
+		}
+		if e := this.enums[name] ; e != null {
+			errMsg := sprintf("%s name %s already declared as enum,first declared at:\n" , pos.errMsgPrefix() , name)
+			errMsg += sprintf("\t%s" , e.pos.errMsgPrefix())
+			return new error(errMsg)
+		}
+		return null
+	}
 
-    fn nameIsValid(name string , pos Pos) -> (err error) {
-        if name == null ||
-            name == "" {
-            return new error(sprintf(`%s null name` , pos.errMsgPrefix()))
-        }
-        if name == ThisPointerName {
-            return new error(sprintf("%s '%s' already been taken" , pos.errMsgPrefix() , ThisPointerName))
-        }
-        if name == "_" {
-            return new error(sprintf("%s '%s' is not a valid name" , pos.errMsgPrefix() , name))
-        }
-        if isMagicIdentifier(name) {
-            return new error(sprintf("%s '%s' is not a magic identifier" , pos.errMsgPrefix() , name))
-        }
-        //TODO:: check it or not
-        return null
-    }
+	fn nameIsValid(name string , pos Pos) -> (err error) {
+		if name == null ||
+			name == "" {
+			return new error(sprintf(`%s null name` , pos.errMsgPrefix()))
+		}
+		if name == ThisPointerName {
+			return new error(sprintf("%s '%s' already been taken" , pos.errMsgPrefix() , ThisPointerName))
+		}
+		if name == "_" {
+			return new error(sprintf("%s '%s' is not a valid name" , pos.errMsgPrefix() , name))
+		}
+		if isMagicIdentifier(name) {
+			return new error(sprintf("%s '%s' is not a magic identifier" , pos.errMsgPrefix() , name))
+		}
+		//TODO:: check it or not
+		return null
+	}
 
-    public fn insert(name string , pos Pos , d Object) -> (err error) {
-        if err = this.nameIsValid(name , pos) ; err != null {
-            return err
-        }
-        // handle label
-        if label , ok := d.(StatementLabel) ; ok {
-            if this.labels == null {
-                this.labels = new map{string -> StatementLabel}()
-            }
-            if l := this.labels[name] ; l != null {
-                errMsg := sprintf("%s name '%s' already declared as enumName,first declared at:" , pos.errMsgPrefix() , name)
-                errMsg += sprintf("\t%s" , l.statement.pos.errMsgPrefix())
-                return new error(errMsg)
-            }
-            this.labels[name] = label
-            return null
-        }
-        err = this.checkNameExist(name , pos)
-        if err != null {
-            return err
-        }
-        if buildInFunctionsMap[name] != null {
-            return new error(sprintf("%s function named '%s' is buildin" , pos.errMsgPrefix() , name))
-        }
-        if c , ok := d.(Class) ; ok {
-            this.classes[name] = c
-            return null
-        }
-        if f , ok := d.(Function) ; ok {
-            this.functions[name] = f
-            return null
-        }
-        if c , ok := d.(Constant) ; ok {
-            this.constants[name] = c
-            return null
-        }
-        if v , ok := d.(Variable) ; ok {
-            this.variables[name] = v
-            return null
-        }
-        if e , ok := d.(Enum) ; ok {
-            this.enums[name] = e
-            for _ , v := range e.enums {
-                err = this.insert(v.name , v.pos , v)
-                if err != null {
-                    return err
-                }
-            }
+	public fn insert(name string , pos Pos , d Object) -> (err error) {
+		if err = this.nameIsValid(name , pos) ; err != null {
+			return err
+		}
+		// handle label
+		if label , ok := d.(StatementLabel) ; ok {
+			if this.labels == null {
+				this.labels = new map{string -> StatementLabel}()
+			}
+			if l := this.labels[name] ; l != null {
+				errMsg := sprintf("%s name '%s' already declared as enumName,first declared at:" , pos.errMsgPrefix() , name)
+				errMsg += sprintf("\t%s" , l.statement.pos.errMsgPrefix())
+				return new error(errMsg)
+			}
+			this.labels[name] = label
+			return null
+		}
+		err = this.checkNameExist(name , pos)
+		if err != null {
+			return err
+		}
+		if buildInFunctionsMap[name] != null {
+			return new error(sprintf("%s function named '%s' is build in" , pos.errMsgPrefix() , name))
+		}
+		if c , ok := d.(Class) ; ok {
+			this.classes[name] = c
+			return null
+		}
+		if f , ok := d.(Function) ; ok {
+			this.functions[name] = f
+			return null
+		}
+		if c , ok := d.(Constant) ; ok {
+			this.constants[name] = c
+			return null
+		}
+		if v , ok := d.(Variable) ; ok {
+			this.variables[name] = v
+			return null
+		}
+		if e , ok := d.(Enum) ; ok {
+			this.enums[name] = e
+			for _ , v := range e.enums {
+				err = this.insert(v.name , v.pos , v)
+				if err != null {
+					return err
+				}
+			}
 
-            return null
-        }
-        if en , ok := d.(EnumName) ; ok {
-            this.enumNames[name] = en
-            return null
-        }
-        if t , ok := d.(Type) ; ok {
-            this.typeAliases[name] = t
-            return null
-        }
-        panic("not happening")
-    }
+			return null
+		}
+		if en , ok := d.(EnumName) ; ok {
+			this.enumNames[name] = en
+			return null
+		}
+		if t , ok := d.(Type) ; ok {
+			this.typeAliases[name] = t
+			return null
+		}
+		panic("not happening")
+	}
 }
-
 

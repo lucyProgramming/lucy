@@ -37,7 +37,7 @@ class BuildinFunctionCall {
         if call.Function.loadedFromCorePackage {
             maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
             code.codes[code.codeLength] = cg.OP_invokestatic
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.Function.entrance.Class.name,
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.Function.entrance.classHighLevel.name,
                     call.Function.name,
                     call.Function.entrance.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3

@@ -3,189 +3,188 @@
 import "lucy/binary"
 
 public class ClassHighLevel {
-    public Class Class
-    /*
+	public Class Class
+	/*
 		one class file can be compile form multi source file
 	*/
-           sourceFiles              map{string -> bool}
-    public name                     string
-    public accessFlags              char
-    public superClass               string
-    public interfaces               []string
-    public fields                   map{string -> FieldHighLevel}
-    public methods                  map{string -> []MethodHighLevel}
-    public triggerPackageInitMethod MethodHighLevel
-    public templateFunctions        []AttributeTemplateFunction
-           majorVersion             char
-           minorVersion             char
+	       sourceFiles              map{string -> bool}
+	public name                     string
+	public accessFlags              char
+	public superClass               string
+	public interfaces               []string
+	public fields                   map{string -> FieldHighLevel}
+	public methods                  map{string -> []MethodHighLevel}
+	public triggerPackageInitMethod MethodHighLevel
+	public templateFunctions        []AttributeTemplateFunction
+	       majorVersion             char
+	       minorVersion             char
 
-    public fn ClassHighLevel(
-        majorVersion char,
-        minorVersion char) {
-        this.super()
-        this.Class = new Class()
-        this.majorVersion = majorVersion
-        this.minorVersion = minorVersion
-    }
+	public fn ClassHighLevel(
+		majorVersion char,
+		minorVersion char) {
+		this.super()
+		this.Class = new Class()
+		this.majorVersion = majorVersion
+		this.minorVersion = minorVersion
+	}
 
-    public fn insertSourceFile(filename string) {
-        if this.sourceFiles == null {
-            this.sourceFiles = {filename -> true}
-            return
-        }
-        this.sourceFiles[filename] = true
-    }
+	public fn insertSourceFile(filename string) {
+		if this.sourceFiles == null {
+			this.sourceFiles = {filename -> true}
+			return
+		}
+		this.sourceFiles[filename] = true
+	}
 
-    public fn insertMethodRefConst(mr ConstantInfoMethodrefHighLevel,
-        location []byte) {
-        binary.BigEndian.putChar(location , this.Class.insertMethodrefConst(mr))
-    }
+	public fn insertMethodRefConst(mr ConstantInfoMethodrefHighLevel,
+		location []byte) {
+		binary.BigEndian.putChar(location , this.Class.insertMethodrefConst(mr))
+	}
 
-    public fn insertMethodCall(
-        code AttributeCode,
-        op byte,
-        className string,
-        method string,
-        descriptor string) {
-        code.codes[code.codeLength] = op
-        this.insertMethodRefConst(
-            new ConstantInfoMethodrefHighLevel(className , method , descriptor),
-            code.codes[code.codeLength + 1 : code.codeLength + 3])
-        code.codeLength += 3
-    }
+	public fn insertMethodCall(
+		code AttributeCode,
+		op byte,
+		className string,
+		method string,
+		descriptor string) {
+		code.codes[code.codeLength] = op
+		this.insertMethodRefConst(
+			new ConstantInfoMethodrefHighLevel(className , method , descriptor),
+			code.codes[code.codeLength + 1 : code.codeLength + 3])
+		code.codeLength += 3
+	}
 
-    /*
+	/*
 		new a method name,make_node_objects sure it does exists before
 	*/
-    public fn newMethodName(prefix string) -> (name string) {
-        if this.methods == null ||
-            this.methods[prefix] == null {
-            return prefix
-        }
-        for i := 0 ; i < 65535 ; i++ {
-            if i == 0 {
-                name = prefix
-            } else {
-                name = sprintf("%s$%d" , prefix , i)
-            }
-            if false == this.methods.keyExist(name) {
-                return name
-            }
-        }
-        panic("names over flow") // this is not happening
-    }
+	public fn newMethodName(prefix string) -> (name string) {
+		if this.methods == null ||
+			this.methods[prefix] == null {
+			return prefix
+		}
+		for i := 0 ; i < 65535 ; i++ {
+			if i == 0 {
+				name = prefix
+			} else {
+				name = sprintf("%s$%d" , prefix , i)
+			}
+			if false == this.methods.keyExist(name) {
+				return name
+			}
+		}
+		panic("names over flow") // this is not happening
+	}
 
-    public fn insertStringConst(s string , location []byte) {
-        binary.BigEndian.putChar(location , this.Class.insertStringConst(s))
-    }
+	public fn insertStringConst(s string , location []byte) {
+		binary.BigEndian.putChar(location , this.Class.insertStringConst(s))
+	}
 
-    public fn appendMethod(ms MethodHighLevel...) {
-        if this.methods == null {
-            this.methods = new map{string -> []MethodHighLevel}()
-        }
-        for _ , v := range ms {
-            if v.name == null ||
-                v.name == "" {
-                panic("null name")
-            }
-            if this.methods.keyExist(v.name) {
-                this.methods[v.name].append(v)
-            } else {
-                this.methods[v.name] = []MethodHighLevel{v}
-            }
-        }
-    }
+	public fn appendMethod(ms MethodHighLevel...) {
+		if this.methods == null {
+			this.methods = new map{string -> []MethodHighLevel}()
+		}
+		for _ , v := range ms {
+			if v.name == null ||
+				v.name == "" {
+				panic("null name")
+			}
+			if this.methods.keyExist(v.name) {
+				this.methods[v.name].append(v)
+			} else {
+				this.methods[v.name] = []MethodHighLevel{v}
+			}
+		}
+	}
 
-    public fn insertInterfaceMethodrefConst(
-        constant ConstantInfoInterfaceMethodrefHighLevel,
-        location []byte) {
-        binary.BigEndian.putChar(location,
-            this.Class.insertInterfaceMethodrefConst(constant))
-    }
+	public fn insertInterfaceMethodrefConst(
+		constant ConstantInfoInterfaceMethodrefHighLevel,
+		location []byte) {
+		binary.BigEndian.putChar(location,
+			this.Class.insertInterfaceMethodrefConst(constant))
+	}
 
-    public fn insertMethodTypeConst(constant ConstantInfoMethodTypeHighLevel,
-        location []byte) {
-        binary.BigEndian.putChar(location,
-            this.Class.insertMethodTypeConst(constant))
-    }
+	public fn insertMethodTypeConst(constant ConstantInfoMethodTypeHighLevel,
+		location []byte) {
+		binary.BigEndian.putChar(location,
+			this.Class.insertMethodTypeConst(constant))
+	}
 
-    public fn insertFieldRefConst(constant ConstantInfoFieldrefHighLevel,
-        location []byte) {
-        binary.BigEndian.putChar(location,
-            this.Class.insertFieldRefConst(constant))
-    }
+	public fn insertFieldRefConst(constant ConstantInfoFieldrefHighLevel,
+		location []byte) {
+		binary.BigEndian.putChar(location,
+			this.Class.insertFieldRefConst(constant))
+	}
 
-    public fn insertClassConst(className string , location []byte) {
-        binary.BigEndian.putChar(location,
-            this.Class.insertClassConst(className))
-    }
-    public fn insertIntConst(i int , location []byte) {
-        binary.BigEndian.putChar(location,
-            this.Class.insertIntConst(i))
-    }
+	public fn insertClassConst(className string , location []byte) {
+		binary.BigEndian.putChar(location,
+			this.Class.insertClassConst(className))
+	}
+	public fn insertIntConst(i int , location []byte) {
+		binary.BigEndian.putChar(location,
+			this.Class.insertIntConst(i))
+	}
 
-    public fn insertLongConst(value long , location []byte) {
-        binary.BigEndian.putChar(location,
-            this.Class.insertLongConst(value))
-    }
+	public fn insertLongConst(value long , location []byte) {
+		binary.BigEndian.putChar(location,
+			this.Class.insertLongConst(value))
+	}
 
-    public fn insertFloatConst(value float , location []byte) {
-        binary.BigEndian.putChar(location,
-            this.Class.insertFloatConst(value))
-    }
+	public fn insertFloatConst(value float , location []byte) {
+		binary.BigEndian.putChar(location,
+			this.Class.insertFloatConst(value))
+	}
 
-    public fn insertDoubleConst(value double , location []byte) {
-        binary.BigEndian.putChar(location,
-            this.Class.insertDoubleConst(value))
-    }
+	public fn insertDoubleConst(value double , location []byte) {
+		binary.BigEndian.putChar(location,
+			this.Class.insertDoubleConst(value))
+	}
 
-    /*
+	/*
 		source files
 	*/
-    fn getSourceFile() -> (name string) {
-        if len(this.sourceFiles) == 0 {
-            return ""
-        }
-        if len(this.sourceFiles) == 1 {
-            for k , _ := range this.sourceFiles {
-                return k
-            }
-        }
-        var s string
-        for k , _ := range this.sourceFiles {
-            index := len(k) - 1
-            for index >= 0 {
-                if k[index] == '/' || k[index] == '\\' {
-                    break
-                }
-                index--
-            }
-            s = k[:index]
-            break
-        }
-        s += "/{"
-        i := 0
-        for f , _ := range this.sourceFiles {
-            index := len(f) - 1
-            for index >= 0 {
-                if f[index] == '/' || f[index] == '\\' {
-                    break
-                }
-                index--
-            }
-            s += f[index + 1:]
-            if i != len(this.sourceFiles) - 1 {
-                s += ","
-            }
-            i++
-        }
-        s += "}"
-        return s
-    }
-    public fn toLow() -> (c Class) {
-        this.Class.fromHighLevel(this , this.majorVersion , this.minorVersion)
-        return this.Class
-    }
+	fn getSourceFile() -> (name string) {
+		if len(this.sourceFiles) == 0 {
+			return ""
+		}
+		if len(this.sourceFiles) == 1 {
+			for k , _ := range this.sourceFiles {
+				return k
+			}
+		}
+		var s string
+		for k , _ := range this.sourceFiles {
+			index := len(k) - 1
+			for index >= 0 {
+				if k[index] == '/' || k[index] == '\\' {
+					break
+				}
+				index--
+			}
+			s = k[:index]
+			break
+		}
+		s += "/{"
+		i := 0
+		for f , _ := range this.sourceFiles {
+			index := len(f) - 1
+			for index >= 0 {
+				if f[index] == '/' || f[index] == '\\' {
+					break
+				}
+				index--
+			}
+			s += f[index + 1:]
+			if i != len(this.sourceFiles) - 1 {
+				s += ","
+			}
+			i++
+		}
+		s += "}"
+		return s
+	}
+	public fn toLow() -> (c Class) {
+		this.Class.fromHighLevel(this , this.majorVersion , this.minorVersion)
+		return this.Class
+	}
 }
-
 

@@ -2,18 +2,18 @@
 
 import "java/lang/System"
 
-public fn getBaseName(filepath string) -> (name string) {
-    index := filepath.lastIndexOf("/")
-    if index < 0 {
-        return filepath
-    }
-    return filepath[index + 1:] // skip '/'
+public fn getBaseName(filePath string) -> (name string) {
+	index := filePath.lastIndexOf("/")
+	if index < 0 {
+		return filePath
+	}
+	return filePath[index + 1:] // skip '/'
 }
 
-public fn onWinows() -> (on bool) {
-    on = System.
-        getProperty("os.name").
-        toLowerCase().
-        startsWith("windows")
-
+public fn onWindows() -> (on bool) {
+	on = System.
+		getProperty("os.name").
+		toLowerCase().
+		startsWith("windows")
 }
+

@@ -60,11 +60,11 @@ class FindDefinition {
         if null != this.storePackage {
             this.storePackage[0] = p
         }
-        if p.getLocationDefinition() != null {
-            if p.getLocationDefinition().loadDefinitionFromOutside != null {
-                return this.loadDefinitionFromOutside(p.getLocationDefinition().loadDefinitionFromOutside)
+        if p.getLocatedDefinitionPos() != null {
+            if p.getLocatedDefinitionPos().loadDefinitionFromOutside != null {
+                return this.loadDefinitionFromOutside(p.getLocatedDefinitionPos().loadDefinitionFromOutside)
             }
-            return p.getLocationDefinition()
+            return p.getLocatedDefinitionPos()
         }
     }
 

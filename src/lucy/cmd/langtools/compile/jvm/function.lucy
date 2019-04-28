@@ -113,8 +113,7 @@ class BuildFunction {
         f ast.Function) {
         context := new Context()
         context.lastStackMapOffset = -1
-        context.c = astClass
-        context.function = f
+        context.theFunction = f
         method.code.codes = new []byte(65536)
         method.code.codeLength = 0
         defer {
@@ -194,9 +193,7 @@ class BuildFunction {
                 } else {
                     method.attributeMethodParameters.parameters.append(p)
                 }
-
             }
-
         }
 
         if f.Type.voidReturn() == false {
@@ -233,10 +230,10 @@ class BuildFunction {
         f ast.Function , context Context , state StackMapState) -> (maxStack char) {
         code.codes[code.codeLength] = cg.OP_aconst_null
         code.codeLength++
-        context.multiValueVarOffset = code.maxLocals
+        context.multiValueReturnVarOffset = code.maxLocals
         code.maxLocals++
         copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject,
-                context.multiValueVarOffset))
+                context.multiValueReturnVarOffset))
         state.appendLocals(c , state.newObjectVariableType(javaRootObjectArray))
         maxStack = 1
         return

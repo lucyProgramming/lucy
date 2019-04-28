@@ -4,130 +4,128 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class Context {
-    c                       ast.Class                        
-    function                ast.Function                     
-    exceptionVarOffset      char                             
-    multiValueVarOffset     char                             
-    currentSourceFile       string                           
-    currentLineNumber       int                              
-    Defer                   ast.StatementDefer               
-    lastStackMapState       StackMapState                    
-    lastStackMapStateLocals []cg.StackMapVerificationTypeInfo
-    lastStackMapStateStacks []cg.StackMapVerificationTypeInfo
-    lastStackMapOffset      int                              
-    stackMapOffsets         []int                            
+	theFunction               ast.Function
+	exceptionVarOffset        char
+	multiValueReturnVarOffset char
+	currentSourceFile         string
+	currentLineNumber         int
+	statementDefer            ast.StatementDefer
+	lastStackMapState         StackMapState
+	lastStackMapStateLocals   []cg.StackMapVerificationTypeInfo
+	lastStackMapStateStacks   []cg.StackMapVerificationTypeInfo
+	lastStackMapOffset        int
+	stackMapOffsets           []int
 
-    fn MakeStackMap(code cg.AttributeCode , state StackMapState , offset int) {
-        if code.attributeStackMap == null {
-            code.attributeStackMap = new cg.AttributeStackMap()
-        }
-        if this.lastStackMapOffset == offset {
-            code.attributeStackMap.StackMaps =
-                code.attributeStackMap.StackMaps[0 : len(code.attributeStackMap.StackMaps) - 1]
-            this.stackMapOffsets = this.stackMapOffsets[0 : len(this.stackMapOffsets) - 1]
-            this.lastStackMapState = null
-            if len(this.stackMapOffsets) > 0 {
-                this.lastStackMapOffset = this.stackMapOffsets[len(this.stackMapOffsets) - 1]
-            } else {
-                this.lastStackMapOffset = -1
-            }
-
-        }
-        var delta char
-        if this.lastStackMapOffset == -1 {
-            /*
+	fn MakeStackMap(
+		code cg.AttributeCode,
+		state StackMapState,
+		offset int) {
+		if code.attributeStackMap == null {
+			code.attributeStackMap = new cg.AttributeStackMap()
+		}
+		if this.lastStackMapOffset == offset {
+			code.attributeStackMap.StackMaps =
+				code.attributeStackMap.StackMaps[0 : len(code.attributeStackMap.StackMaps) - 1]
+			this.stackMapOffsets = this.stackMapOffsets[0 : len(this.stackMapOffsets) - 1]
+			this.lastStackMapState = null
+			if len(this.stackMapOffsets) > 0 {
+				this.lastStackMapOffset = this.stackMapOffsets[len(this.stackMapOffsets) - 1]
+			} else {
+				this.lastStackMapOffset = -1
+			}
+		}
+		var delta char
+		if this.lastStackMapOffset == -1 {
+			/*
 				first one
 			*/
-            delta = char(offset)
-        } else {
-            delta = char(offset - this.lastStackMapOffset - 1)
-        }
+			delta = char(offset)
+		} else {
+			delta = char(offset - this.lastStackMapOffset - 1)
+		}
 
-        defer {
-            this.lastStackMapOffset = offset // rewrite
-            this.lastStackMapState = state
-            this.lastStackMapStateLocals = new []cg.StackMapVerificationTypeInfo(len(state.locals))
-            if len(state.locals) > 0 {
-                copy(this.lastStackMapStateLocals , state.locals)
-            }
-            this.lastStackMapStateStacks = new []cg.StackMapVerificationTypeInfo(len(state.stacks))
-            if len(state.stacks) > 0 {
-                copy(this.lastStackMapStateStacks , state.stacks)
-            }
-            if this.stackMapOffsets == null {
-                this.stackMapOffsets = [offset]
-            } else {
-                this.stackMapOffsets.append(offset)
-            }
+		defer {
+			this.lastStackMapOffset = offset // rewrite
+			this.lastStackMapState = state
+			this.lastStackMapStateLocals = new []cg.StackMapVerificationTypeInfo(len(state.locals))
+			if len(state.locals) > 0 {
+				copy(this.lastStackMapStateLocals , state.locals)
+			}
+			this.lastStackMapStateStacks = new []cg.StackMapVerificationTypeInfo(len(state.stacks))
+			if len(state.stacks) > 0 {
+				copy(this.lastStackMapStateStacks , state.stacks)
+			}
+			if this.stackMapOffsets == null {
+				this.stackMapOffsets = [offset]
+			} else {
+				this.stackMapOffsets.append(offset)
+			}
+		}
 
-        }
-
-        if state == this.lastStackMapState {
-            if len(state.locals) == len(this.lastStackMapStateLocals) && len(state.stacks) == 0 {
-                /*
+		if state == this.lastStackMapState {
+			if len(state.locals) == len(this.lastStackMapStateLocals) && len(state.stacks) == 0 {
+				/*
 					same frame or same frame extended
 				*/
-                if delta <= 63 {
-                    code.attributeStackMap.append(new cg.StackMapSameFrame(byte(delta)))
-                } else {
-                    code.attributeStackMap.append(new cg.StackMapSameFrameExtended(251b , delta))
-                }
+				if delta <= 63 {
+					code.attributeStackMap.append(new cg.StackMapSameFrame(byte(delta)))
+				} else {
+					code.attributeStackMap.append(new cg.StackMapSameFrameExtended(251b , delta))
+				}
 
-                return
-            }
-            if len(this.lastStackMapStateLocals) == len(state.locals) && len(state.stacks) == 1 {
-                if delta <= 64 {
-                    code.attributeStackMap.append(new cg.StackMapSameLocals1StackItemFrame(byte(delta + 64),
-                            state.stacks[0]))
-                } else {
-                    code.attributeStackMap.append(new cg.StackMapSameLocals1StackItemFrameExtended(247b,
-                            delta,
-                            state.stacks[0]))
-                }
+				return
+			}
+			if len(this.lastStackMapStateLocals) == len(state.locals) && len(state.stacks) == 1 {
+				if delta <= 64 {
+					code.attributeStackMap.append(new cg.StackMapSameLocals1StackItemFrame(byte(delta + 64),
+							state.stacks[0]))
+				} else {
+					code.attributeStackMap.append(new cg.StackMapSameLocals1StackItemFrameExtended(247b,
+							delta,
+							state.stacks[0]))
+				}
 
-                return
-            }
-            if len(this.lastStackMapStateLocals) < len(state.locals) && len(state.stacks) == 0 {
-                num := len(state.locals) - len(this.lastStackMapStateLocals)
-                if num <= 3 {
-                    locals := new []cg.StackMapVerificationTypeInfo(num)
-                    appendFrame := new cg.StackMapAppendFrame(byte(num + 251) , delta , locals)
-                    copy(locals , state.locals[len(state.locals) - num:])
-                    code.attributeStackMap.append(appendFrame)
-                    return
-                }
-            }
-        }
-        // full frame
-        locals := new []cg.StackMapVerificationTypeInfo(len(state.locals))
-        copy(locals , state.locals)
-        stacks := new []cg.StackMapVerificationTypeInfo(len(state.stacks))
-        copy(stacks , state.stacks)
-        fullFrame := new cg.StackMapFullFrame(255b , delta , locals , stacks)
-        code.attributeStackMap.append(fullFrame)
-        return
-    }
+				return
+			}
+			if len(this.lastStackMapStateLocals) < len(state.locals) && len(state.stacks) == 0 {
+				num := len(state.locals) - len(this.lastStackMapStateLocals)
+				if num <= 3 {
+					locals := new []cg.StackMapVerificationTypeInfo(num)
+					appendFrame := new cg.StackMapAppendFrame(byte(num + 251) , delta , locals)
+					copy(locals , state.locals[len(state.locals) - num:])
+					code.attributeStackMap.append(appendFrame)
+					return
+				}
+			}
+		}
+		// full frame
+		locals := new []cg.StackMapVerificationTypeInfo(len(state.locals))
+		copy(locals , state.locals)
+		stacks := new []cg.StackMapVerificationTypeInfo(len(state.stacks))
+		copy(stacks , state.stacks)
+		fullFrame := new cg.StackMapFullFrame(255b , delta , locals , stacks)
+		code.attributeStackMap.append(fullFrame)
+		return
+	}
 
-    fn appendLineNumber(
-        pos ast.Pos,
-        code cg.AttributeCode,
-        c cg.ClassHighLevel) {
-        if pos == null {
-            return
-        }
-        oldFileName := this.currentSourceFile
-        oldLine := this.currentLineNumber
-        if oldFileName == null {
-            oldFileName = ""
-        }
-        this.currentSourceFile = pos.filename
-        this.currentLineNumber = pos.endLine
-        if this.currentSourceFile != oldFileName ||
-            this.currentLineNumber != oldLine {
-            code.appendLineNumber(pos.endLine + 1)
-        }
-    }
-
+	fn appendLineNumber(
+		pos ast.Pos,
+		code cg.AttributeCode,
+		c cg.ClassHighLevel) {
+		if pos == null {
+			return
+		}
+		oldFileName := this.currentSourceFile
+		oldLine := this.currentLineNumber
+		if oldFileName == null {
+			oldFileName = ""
+		}
+		this.currentSourceFile = pos.filename
+		this.currentLineNumber = pos.endLine
+		if this.currentSourceFile != oldFileName ||
+			this.currentLineNumber != oldLine {
+			code.appendLineNumber(pos.endLine + 1)
+		}
+	}
 }
-
 

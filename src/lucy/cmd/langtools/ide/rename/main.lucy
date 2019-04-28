@@ -5,30 +5,30 @@ import "lucy/cmd/langtools/ide/findusage"
 import "lucy/os"
 
 public fn renameFn(filename string , bs []byte , to string , pos int) {
-    storePackage := []ast.Package{null}
-    usages := findusage.findUsage2(filename , pos , null , storePackage , bs)
-    if len(usage) == 0 {
-        return
-    }
-    if storePackage[0] == null ||
-        storePackage[0].locatedDefinitionBaseOn == null {
-        return
-    }
-    if len(bs) == 0 {
-        t , err := os.readFile(filename)
-        if err != null {
-            panic(err)
-        }
-        bs = javaArray2Lucy(t)
-    }
-    new ReName(usages,
-        storePackage[0].locatedDefinitionBaseOn,
-        filename,
-        to,
-        bs).rename()
+	storePackage := []ast.Package{null}
+	usages := findusage.findUsage2(filename , pos , null , storePackage , bs)
+	if len(usage) == 0 {
+		return
+	}
+	if storePackage[0] == null ||
+		storePackage[0].locatedDefinitionPosBaseOn == null {
+		return
+	}
+	if len(bs) == 0 {
+		t , err := os.readFile(filename)
+		if err != null {
+			panic(err)
+		}
+		bs = javaArray2Lucy(t)
+	}
+	new ReName(usages,
+		storePackage[0].locatedDefinitionPosBaseOn,
+		filename,
+		to,
+		bs).rename()
 }
 
 fn main(args []string) {
-    print("un support now")
-    os.exit(1)
+	print("un support now")
+	os.exit(1)
 }

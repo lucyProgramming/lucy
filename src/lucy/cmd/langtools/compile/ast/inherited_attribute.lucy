@@ -3,24 +3,23 @@
 import "java/lang/Object"
 
 public class InheritedAttribute {
-    statementOffset      int            // should not inherite
-    isConstructionMethod bool          
-    forStatement         StatementFor   // if this statement is in for or not
-    forBreak             Object        
-    Function             Function      
-    Class                Class         
-    Defer                StatementDefer
-    classMethod          ClassMethod   
+	statementOffset      int            // should not inherite
+	isConstructionMethod bool
+	forStatement         StatementFor   // if this statement is in for or not
+	forBreak             Object
+	Function             Function
+	Class                Class
+	Defer                StatementDefer
+	classMethod          ClassMethod
 
-    public classAndFunctionNames string
+	public classAndFunctionNames string
 
-    p Package
+	p Package
 
-     // isCompileTask bool 
-    fn InheritedAttribute() {
-        this.super()
-        this.classAndFunctionNames = ""
-    }
+	// isCompileTask bool 
+	fn InheritedAttribute() {
+		this.super()
+		this.classAndFunctionNames = ""
+	}
 }
-
 

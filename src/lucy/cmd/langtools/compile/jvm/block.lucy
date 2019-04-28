@@ -280,10 +280,10 @@ class BuildBlock {
                     context.exceptionVarOffset)) // this code will make_node_objects stack is empty
             state.popStack(1)
             // build block
-            context.Defer = ds[index]
+            context.statementDefer = ds[index]
             this.buildBlock(c , code , ds[index].block , context , state)
             from.addTop(state)
-            context.Defer = null
+            context.statementDefer = null
             ds[index].resetLabels()
 
             //if need throw

@@ -2,8 +2,8 @@
 
 
 
-public enum  VariableTypeKind {
-	VariableTypeBool =1 ,
+public enum VariableTypeKind {
+	VariableTypeBool,
 	VariableTypeByte,
 	VariableTypeShort,
 	VariableTypeChar,
@@ -24,14 +24,13 @@ public enum  VariableTypeKind {
 	VariableTypeName,
 	VariableTypeTemplate,
 	VariableTypeVoid,
-	
 	VariableTypePackage,
 	VariableTypeNull,
 	VariableTypeGlobal,
-	VariableTypeDynamicSelector 
+	VariableTypeDynamicSelector
 }
-
 public class Map {
 	public K Type
 	public V Type
 }
+

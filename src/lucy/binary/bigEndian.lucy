@@ -1,56 +1,55 @@
 // all rights reserved , check the LICENSE file
 
 public class BigEndian {
-    public static fn putChar(bs []byte , v char) {
-        _ = bs[1]
-        bs[0] = byte(v >> 8)
-        bs[1] = byte(v)
-    }
+	public static fn putChar(bs []byte , v char) {
+		_ = bs[1]
+		bs[0] = byte(v >> 8)
+		bs[1] = byte(v)
+	}
 
-    public static fn getChar(bs []byte) -> (v char) {
-        _ = bs[1]
-        v = ((char(bs[0]) << 8) & char(0xff00)) | ((char(bs[1]) << 0) & char(0xff))
-    }
-    
-    public static fn putInt(bs []byte , v int) {
-        _ = bs[3]
-        bs[0] = byte(v >> 24)
-        bs[1] = byte(v >> 16)
-        bs[2] = byte(v >> 8)
-        bs[3] = byte(v)
-    }
+	public static fn getChar(bs []byte) -> (v char) {
+		_ = bs[1]
+		v = ((char(bs[0]) << 8) & char(0xff00)) | ((char(bs[1]) << 0) & char(0xff))
+	}
 
-    public static fn getInt(bs []byte) -> (v int) {
-        _ = bs[3]
-        v = ((int(bs[0]) << 24) & 0xff000000) |
-            ((int(bs[1]) << 16) & 0xff0000) |
-            ((int(bs[2]) << 8) & 0xff00) |
-            ((int(bs[3]) << 0) & 0xff)
-    }
+	public static fn putInt(bs []byte , v int) {
+		_ = bs[3]
+		bs[0] = byte(v >> 24)
+		bs[1] = byte(v >> 16)
+		bs[2] = byte(v >> 8)
+		bs[3] = byte(v)
+	}
 
-    public static fn putLong(bs []byte , v long) {
-        _ = bs[7]
-        bs[0] = byte(v >> 56)
-        bs[1] = byte(v >> 48)
-        bs[2] = byte(v >> 40)
-        bs[3] = byte(v >> 32)
-        bs[4] = byte(v >> 24)
-        bs[5] = byte(v >> 16)
-        bs[6] = byte(v >> 8)
-        bs[7] = byte(v)
-    }
+	public static fn getInt(bs []byte) -> (v int) {
+		_ = bs[3]
+		v = ((int(bs[0]) << 24) & 0xff000000) |
+			((int(bs[1]) << 16) & 0xff0000) |
+			((int(bs[2]) << 8) & 0xff00) |
+			((int(bs[3]) << 0) & 0xff)
+	}
 
-    public static fn getLong(bs []byte) -> (v long) {
-        _ = bs[7]
-        v = ((long(bs[0]) << 56) & 0xff00000000000000L) |
-            ((long(bs[1]) << 48) & 0xff000000000000L) |
-            ((long(bs[2]) << 40) & 0xff0000000000L) |
-            ((long(bs[3]) << 32) & 0xff00000000L) |
-            ((long(bs[4]) << 24) & 0xff000000L) |
-            ((long(bs[5]) << 16) & 0xff0000L) |
-            ((long(bs[6]) << 8) & 0xff00L) |
-            ((long(bs[7]) << 0) & 0xffL)
-    }
+	public static fn putLong(bs []byte , v long) {
+		_ = bs[7]
+		bs[0] = byte(v >> 56)
+		bs[1] = byte(v >> 48)
+		bs[2] = byte(v >> 40)
+		bs[3] = byte(v >> 32)
+		bs[4] = byte(v >> 24)
+		bs[5] = byte(v >> 16)
+		bs[6] = byte(v >> 8)
+		bs[7] = byte(v)
+	}
+
+	public static fn getLong(bs []byte) -> (v long) {
+		_ = bs[7]
+		v = ((long(bs[0]) << 56) & 0xff00000000000000L) |
+			((long(bs[1]) << 48) & 0xff000000000000L) |
+			((long(bs[2]) << 40) & 0xff0000000000L) |
+			((long(bs[3]) << 32) & 0xff00000000L) |
+			((long(bs[4]) << 24) & 0xff000000L) |
+			((long(bs[5]) << 16) & 0xff0000L) |
+			((long(bs[6]) << 8) & 0xff00L) |
+			((long(bs[7]) << 0) & 0xffL)
+	}
 }
-
 

@@ -4,267 +4,266 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildExpressionArithmetic {
-    eb BuildExpression
+	eb BuildExpression
 
-    fn BuildExpressionArithmetic(eb BuildExpression) {
-        this.super()
-        this.eb = eb
-    }
+	fn BuildExpressionArithmetic(eb BuildExpression) {
+		this.super()
+		this.eb = eb
+	}
 
-    fn buildArithmetic(
-        c cg.ClassHighLevel,
-        code cg.AttributeCode,
-        e ast.Expression,
-        context Context,
-        state StackMapState) -> (maxStack char) {
-        bin := e.data.(ast.ExpressionBinary)
-        stackLength := len(state.stacks)
-        defer {
-            state.popStack(len(state.stacks) - stackLength)
-        }
+	fn buildArithmetic(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		bin := e.data.(ast.ExpressionBinary)
+		stackLength := len(state.stacks)
+		defer {
+			state.popStack(len(state.stacks) - stackLength)
+		}
 
-        if e.Type == ast.ExpressionTypeOr ||
-            e.Type == ast.ExpressionTypeAnd ||
-            e.Type == ast.ExpressionTypeXor {
-            maxStack = this.eb.build(c , code , bin.left , context , state)
-            state.pushStack(c , bin.left.value)
-            stack := this.eb.build(c , code , bin.right , context , state)
-            if t := stack + jvmSlotSize(bin.left.value) ; t > maxStack {
-                maxStack = t
-            }
-            switch e.value.Type {
-                case ast.VariableTypeByte,
-                    ast.VariableTypeShort,
-                    ast.VariableTypeChar,
-                    ast.VariableTypeInt:
-                    if e.Type == ast.ExpressionTypeAnd {
-                        code.codes[code.codeLength] = cg.OP_iand
-                    } else if e.Type == ast.ExpressionTypeOr {
-                        code.codes[code.codeLength] = cg.OP_ior
-                    } else {
-                        code.codes[code.codeLength] = cg.OP_ixor
-                    }
-                case ast.VariableTypeLong:
-                    if e.Type == ast.ExpressionTypeAnd {
-                        code.codes[code.codeLength] = cg.OP_land
-                    } else if e.Type == ast.ExpressionTypeOr {
-                        code.codes[code.codeLength] = cg.OP_lor
-                    } else {
-                        code.codes[code.codeLength] = cg.OP_lxor
-                    }
-            }
-            code.codeLength++
-            return
-        }
-        if e.Type == ast.ExpressionTypeAdd ||
-            e.Type == ast.ExpressionTypeSub ||
-            e.Type == ast.ExpressionTypeMul ||
-            e.Type == ast.ExpressionTypeDiv ||
-            e.Type == ast.ExpressionTypeMod {
-            //handle string first
-            if bin.left.value.Type == ast.VariableTypeString ||
-                bin.right.value.Type == ast.VariableTypeString {
-                return this.eb.BuildExpressionStrcat.buildStrCat(c , code , e , context , state)
-            }
-            maxStack = this.eb.build(c , code , bin.left , context , state)
-            state.pushStack(c , e.value)
-            stack := this.eb.build(c , code , bin.right , context , state)
-            if t := jvmSlotSize(bin.left.value) + stack ; t > maxStack {
-                maxStack = t
-            }
-            switch e.value.Type {
-                case ast.VariableTypeByte:
-                    switch e.Type {
-                        case ast.ExpressionTypeAdd:
-                            code.codes[code.codeLength] = cg.OP_iadd
-                            code.codes[code.codeLength + 1] = cg.OP_i2b
-                            code.codeLength += 2
-                        case ast.ExpressionTypeSub:
-                            code.codes[code.codeLength] = cg.OP_isub
-                            code.codes[code.codeLength + 1] = cg.OP_i2b
-                            code.codeLength += 2
-                        case ast.ExpressionTypeMul:
-                            code.codes[code.codeLength] = cg.OP_imul
-                            code.codes[code.codeLength + 1] = cg.OP_i2b
-                            code.codeLength += 2
-                        case ast.ExpressionTypeDiv:
-                            code.codes[code.codeLength] = cg.OP_idiv
-                            code.codeLength++
-                        case ast.ExpressionTypeMod:
-                            code.codes[code.codeLength] = cg.OP_irem
-                            code.codeLength++
-                    }
+		if e.Type == ast.ExpressionTypeOr ||
+			e.Type == ast.ExpressionTypeAnd ||
+			e.Type == ast.ExpressionTypeXor {
+			maxStack = this.eb.build(c , code , bin.left , context , state)
+			state.pushStack(c , bin.left.value)
+			stack := this.eb.build(c , code , bin.right , context , state)
+			if t := stack + jvmSlotSize(bin.left.value) ; t > maxStack {
+				maxStack = t
+			}
+			switch e.value.Type {
+				case ast.VariableTypeByte,
+					ast.VariableTypeShort,
+					ast.VariableTypeChar,
+					ast.VariableTypeInt:
+					if e.Type == ast.ExpressionTypeAnd {
+						code.codes[code.codeLength] = cg.OP_iand
+					} else if e.Type == ast.ExpressionTypeOr {
+						code.codes[code.codeLength] = cg.OP_ior
+					} else {
+						code.codes[code.codeLength] = cg.OP_ixor
+					}
+				case ast.VariableTypeLong:
+					if e.Type == ast.ExpressionTypeAnd {
+						code.codes[code.codeLength] = cg.OP_land
+					} else if e.Type == ast.ExpressionTypeOr {
+						code.codes[code.codeLength] = cg.OP_lor
+					} else {
+						code.codes[code.codeLength] = cg.OP_lxor
+					}
+			}
+			code.codeLength++
+			return
+		}
+		if e.Type == ast.ExpressionTypeAdd ||
+			e.Type == ast.ExpressionTypeSub ||
+			e.Type == ast.ExpressionTypeMul ||
+			e.Type == ast.ExpressionTypeDiv ||
+			e.Type == ast.ExpressionTypeMod {
+			//handle string first
+			if bin.left.value.Type == ast.VariableTypeString ||
+				bin.right.value.Type == ast.VariableTypeString {
+				return this.eb.BuildExpressionStrcat.buildStrCat(c , code , e , context , state)
+			}
+			maxStack = this.eb.build(c , code , bin.left , context , state)
+			state.pushStack(c , e.value)
+			stack := this.eb.build(c , code , bin.right , context , state)
+			if t := jvmSlotSize(bin.left.value) + stack ; t > maxStack {
+				maxStack = t
+			}
+			switch e.value.Type {
+				case ast.VariableTypeByte:
+					switch e.Type {
+						case ast.ExpressionTypeAdd:
+							code.codes[code.codeLength] = cg.OP_iadd
+							code.codes[code.codeLength + 1] = cg.OP_i2b
+							code.codeLength += 2
+						case ast.ExpressionTypeSub:
+							code.codes[code.codeLength] = cg.OP_isub
+							code.codes[code.codeLength + 1] = cg.OP_i2b
+							code.codeLength += 2
+						case ast.ExpressionTypeMul:
+							code.codes[code.codeLength] = cg.OP_imul
+							code.codes[code.codeLength + 1] = cg.OP_i2b
+							code.codeLength += 2
+						case ast.ExpressionTypeDiv:
+							code.codes[code.codeLength] = cg.OP_idiv
+							code.codeLength++
+						case ast.ExpressionTypeMod:
+							code.codes[code.codeLength] = cg.OP_irem
+							code.codeLength++
+					}
 
-                case ast.VariableTypeShort:
-                    switch e.Type {
-                        case ast.ExpressionTypeAdd:
-                            code.codes[code.codeLength] = cg.OP_iadd
-                            code.codes[code.codeLength + 1] = cg.OP_i2s
-                            code.codeLength += 2
-                        case ast.ExpressionTypeSub:
-                            code.codes[code.codeLength] = cg.OP_isub
-                            code.codes[code.codeLength + 1] = cg.OP_i2s
-                            code.codeLength += 2
-                        case ast.ExpressionTypeMul:
-                            code.codes[code.codeLength] = cg.OP_imul
-                            code.codes[code.codeLength + 1] = cg.OP_i2s
-                            code.codeLength += 2
-                        case ast.ExpressionTypeDiv:
-                            code.codes[code.codeLength] = cg.OP_idiv
-                            code.codeLength++
-                        case ast.ExpressionTypeMod:
-                            code.codes[code.codeLength] = cg.OP_irem
-                            code.codeLength++
-                    }
+				case ast.VariableTypeShort:
+					switch e.Type {
+						case ast.ExpressionTypeAdd:
+							code.codes[code.codeLength] = cg.OP_iadd
+							code.codes[code.codeLength + 1] = cg.OP_i2s
+							code.codeLength += 2
+						case ast.ExpressionTypeSub:
+							code.codes[code.codeLength] = cg.OP_isub
+							code.codes[code.codeLength + 1] = cg.OP_i2s
+							code.codeLength += 2
+						case ast.ExpressionTypeMul:
+							code.codes[code.codeLength] = cg.OP_imul
+							code.codes[code.codeLength + 1] = cg.OP_i2s
+							code.codeLength += 2
+						case ast.ExpressionTypeDiv:
+							code.codes[code.codeLength] = cg.OP_idiv
+							code.codeLength++
+						case ast.ExpressionTypeMod:
+							code.codes[code.codeLength] = cg.OP_irem
+							code.codeLength++
+					}
 
-                case ast.VariableTypeChar:
-                    switch e.Type {
-                        case ast.ExpressionTypeAdd:
-                            code.codes[code.codeLength] = cg.OP_iadd
-                            code.codes[code.codeLength + 1] = cg.OP_i2c
-                            code.codeLength += 2
-                        case ast.ExpressionTypeSub:
-                            code.codes[code.codeLength] = cg.OP_isub
-                            code.codes[code.codeLength + 1] = cg.OP_i2c
-                            code.codeLength += 2
-                        case ast.ExpressionTypeMul:
-                            code.codes[code.codeLength] = cg.OP_imul
-                            code.codes[code.codeLength + 1] = cg.OP_i2c
-                            code.codeLength += 2
-                        case ast.ExpressionTypeDiv:
-                            code.codes[code.codeLength] = cg.OP_idiv
-                            code.codeLength++
-                        case ast.ExpressionTypeMod:
-                            code.codes[code.codeLength] = cg.OP_irem
-                            code.codeLength++
-                    }
+				case ast.VariableTypeChar:
+					switch e.Type {
+						case ast.ExpressionTypeAdd:
+							code.codes[code.codeLength] = cg.OP_iadd
+							code.codes[code.codeLength + 1] = cg.OP_i2c
+							code.codeLength += 2
+						case ast.ExpressionTypeSub:
+							code.codes[code.codeLength] = cg.OP_isub
+							code.codes[code.codeLength + 1] = cg.OP_i2c
+							code.codeLength += 2
+						case ast.ExpressionTypeMul:
+							code.codes[code.codeLength] = cg.OP_imul
+							code.codes[code.codeLength + 1] = cg.OP_i2c
+							code.codeLength += 2
+						case ast.ExpressionTypeDiv:
+							code.codes[code.codeLength] = cg.OP_idiv
+							code.codeLength++
+						case ast.ExpressionTypeMod:
+							code.codes[code.codeLength] = cg.OP_irem
+							code.codeLength++
+					}
 
-                case ast.VariableTypeInt:
-                    switch e.Type {
-                        case ast.ExpressionTypeAdd:
-                            code.codes[code.codeLength] = cg.OP_iadd
-                        case ast.ExpressionTypeSub:
-                            code.codes[code.codeLength] = cg.OP_isub
-                        case ast.ExpressionTypeMul:
-                            code.codes[code.codeLength] = cg.OP_imul
-                        case ast.ExpressionTypeDiv:
-                            code.codes[code.codeLength] = cg.OP_idiv
-                        case ast.ExpressionTypeMod:
-                            code.codes[code.codeLength] = cg.OP_irem
-                    }
+				case ast.VariableTypeInt:
+					switch e.Type {
+						case ast.ExpressionTypeAdd:
+							code.codes[code.codeLength] = cg.OP_iadd
+						case ast.ExpressionTypeSub:
+							code.codes[code.codeLength] = cg.OP_isub
+						case ast.ExpressionTypeMul:
+							code.codes[code.codeLength] = cg.OP_imul
+						case ast.ExpressionTypeDiv:
+							code.codes[code.codeLength] = cg.OP_idiv
+						case ast.ExpressionTypeMod:
+							code.codes[code.codeLength] = cg.OP_irem
+					}
 
-                    code.codeLength++
-                case ast.VariableTypeFloat:
-                    switch e.Type {
-                        case ast.ExpressionTypeAdd:
-                            code.codes[code.codeLength] = cg.OP_fadd
-                        case ast.ExpressionTypeSub:
-                            code.codes[code.codeLength] = cg.OP_fsub
-                        case ast.ExpressionTypeMul:
-                            code.codes[code.codeLength] = cg.OP_fmul
-                        case ast.ExpressionTypeDiv:
-                            code.codes[code.codeLength] = cg.OP_fdiv
-                        case ast.ExpressionTypeMod:
-                            code.codes[code.codeLength] = cg.OP_frem
-                    }
+					code.codeLength++
+				case ast.VariableTypeFloat:
+					switch e.Type {
+						case ast.ExpressionTypeAdd:
+							code.codes[code.codeLength] = cg.OP_fadd
+						case ast.ExpressionTypeSub:
+							code.codes[code.codeLength] = cg.OP_fsub
+						case ast.ExpressionTypeMul:
+							code.codes[code.codeLength] = cg.OP_fmul
+						case ast.ExpressionTypeDiv:
+							code.codes[code.codeLength] = cg.OP_fdiv
+						case ast.ExpressionTypeMod:
+							code.codes[code.codeLength] = cg.OP_frem
+					}
 
-                    code.codeLength++
-                case ast.VariableTypeDouble:
-                    switch e.Type {
-                        case ast.ExpressionTypeAdd:
-                            code.codes[code.codeLength] = cg.OP_dadd
-                        case ast.ExpressionTypeSub:
-                            code.codes[code.codeLength] = cg.OP_dsub
-                        case ast.ExpressionTypeMul:
-                            code.codes[code.codeLength] = cg.OP_dmul
-                        case ast.ExpressionTypeDiv:
-                            code.codes[code.codeLength] = cg.OP_ddiv
-                        case ast.ExpressionTypeMod:
-                            code.codes[code.codeLength] = cg.OP_drem
-                    }
+					code.codeLength++
+				case ast.VariableTypeDouble:
+					switch e.Type {
+						case ast.ExpressionTypeAdd:
+							code.codes[code.codeLength] = cg.OP_dadd
+						case ast.ExpressionTypeSub:
+							code.codes[code.codeLength] = cg.OP_dsub
+						case ast.ExpressionTypeMul:
+							code.codes[code.codeLength] = cg.OP_dmul
+						case ast.ExpressionTypeDiv:
+							code.codes[code.codeLength] = cg.OP_ddiv
+						case ast.ExpressionTypeMod:
+							code.codes[code.codeLength] = cg.OP_drem
+					}
 
-                    code.codeLength++
-                case ast.VariableTypeLong:
-                    switch e.Type {
-                        case ast.ExpressionTypeAdd:
-                            code.codes[code.codeLength] = cg.OP_ladd
-                        case ast.ExpressionTypeSub:
-                            code.codes[code.codeLength] = cg.OP_lsub
-                        case ast.ExpressionTypeMul:
-                            code.codes[code.codeLength] = cg.OP_lmul
-                        case ast.ExpressionTypeDiv:
-                            code.codes[code.codeLength] = cg.OP_ldiv
-                        case ast.ExpressionTypeMod:
-                            code.codes[code.codeLength] = cg.OP_lrem
-                    }
+					code.codeLength++
+				case ast.VariableTypeLong:
+					switch e.Type {
+						case ast.ExpressionTypeAdd:
+							code.codes[code.codeLength] = cg.OP_ladd
+						case ast.ExpressionTypeSub:
+							code.codes[code.codeLength] = cg.OP_lsub
+						case ast.ExpressionTypeMul:
+							code.codes[code.codeLength] = cg.OP_lmul
+						case ast.ExpressionTypeDiv:
+							code.codes[code.codeLength] = cg.OP_ldiv
+						case ast.ExpressionTypeMod:
+							code.codes[code.codeLength] = cg.OP_lrem
+					}
 
-                    code.codeLength++
-            }
+					code.codeLength++
+			}
 
-            return
-        }
-        if e.Type == ast.ExpressionTypeLsh ||
-            e.Type == ast.ExpressionTypeRsh {
-            maxStack = this.eb.build(c , code , bin.left , context , state)
-            state.pushStack(c , bin.left.value)
-            stack := this.eb.build(c , code , bin.right , context , state)
-            if t := stack + jvmSlotSize(bin.left.value) ; t > maxStack {
-                maxStack = t
-            }
-            switch e.value.Type {
-                case ast.VariableTypeByte:
-                    if e.Type == ast.ExpressionTypeLsh {
-                        code.codes[code.codeLength] = cg.OP_ishl
-                        code.codes[code.codeLength + 1] = cg.OP_i2b
-                        code.codeLength += 2
-                    } else {
-                        code.codes[code.codeLength] = cg.OP_ishr
-                        code.codeLength++
-                    }
+			return
+		}
+		if e.Type == ast.ExpressionTypeLsh ||
+			e.Type == ast.ExpressionTypeRsh {
+			maxStack = this.eb.build(c , code , bin.left , context , state)
+			state.pushStack(c , bin.left.value)
+			stack := this.eb.build(c , code , bin.right , context , state)
+			if t := stack + jvmSlotSize(bin.left.value) ; t > maxStack {
+				maxStack = t
+			}
+			switch e.value.Type {
+				case ast.VariableTypeByte:
+					if e.Type == ast.ExpressionTypeLsh {
+						code.codes[code.codeLength] = cg.OP_ishl
+						code.codes[code.codeLength + 1] = cg.OP_i2b
+						code.codeLength += 2
+					} else {
+						code.codes[code.codeLength] = cg.OP_ishr
+						code.codeLength++
+					}
 
-                case ast.VariableTypeShort:
-                    if e.Type == ast.ExpressionTypeLsh {
-                        code.codes[code.codeLength] = cg.OP_ishl
-                        code.codes[code.codeLength + 1] = cg.OP_i2s
-                        code.codeLength += 2
-                    } else {
-                        code.codes[code.codeLength] = cg.OP_ishr
-                        code.codeLength++
-                    }
+				case ast.VariableTypeShort:
+					if e.Type == ast.ExpressionTypeLsh {
+						code.codes[code.codeLength] = cg.OP_ishl
+						code.codes[code.codeLength + 1] = cg.OP_i2s
+						code.codeLength += 2
+					} else {
+						code.codes[code.codeLength] = cg.OP_ishr
+						code.codeLength++
+					}
 
-                case ast.VariableTypeChar:
-                    if e.Type == ast.ExpressionTypeLsh {
-                        code.codes[code.codeLength] = cg.OP_ishl
-                        code.codes[code.codeLength + 1] = cg.OP_i2c
-                        code.codeLength += 2
-                    } else {
-                        code.codes[code.codeLength] = cg.OP_ishr
-                        code.codeLength++
-                    }
+				case ast.VariableTypeChar:
+					if e.Type == ast.ExpressionTypeLsh {
+						code.codes[code.codeLength] = cg.OP_ishl
+						code.codes[code.codeLength + 1] = cg.OP_i2c
+						code.codeLength += 2
+					} else {
+						code.codes[code.codeLength] = cg.OP_ishr
+						code.codeLength++
+					}
 
-                case ast.VariableTypeInt:
-                    if e.Type == ast.ExpressionTypeLsh {
-                        code.codes[code.codeLength] = cg.OP_ishl
-                    } else {
-                        code.codes[code.codeLength] = cg.OP_ishr
-                    }
+				case ast.VariableTypeInt:
+					if e.Type == ast.ExpressionTypeLsh {
+						code.codes[code.codeLength] = cg.OP_ishl
+					} else {
+						code.codes[code.codeLength] = cg.OP_ishr
+					}
 
-                    code.codeLength++
-                case ast.VariableTypeLong:
-                    if e.Type == ast.ExpressionTypeLsh {
-                        code.codes[code.codeLength] = cg.OP_lshl
-                    } else {
-                        code.codes[code.codeLength] = cg.OP_lshr
-                    }
+					code.codeLength++
+				case ast.VariableTypeLong:
+					if e.Type == ast.ExpressionTypeLsh {
+						code.codes[code.codeLength] = cg.OP_lshl
+					} else {
+						code.codes[code.codeLength] = cg.OP_lshr
+					}
 
-                    code.codeLength++
-            }
+					code.codeLength++
+			}
 
-            return
-        }
-        return
-    }
+			return
+		}
+		return
+	}
 
 }
-
 

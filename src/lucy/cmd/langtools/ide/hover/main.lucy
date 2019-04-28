@@ -13,10 +13,10 @@ public fn getHover (file string , pos int , bs []byte) ->(s string = "") {
     storePackage := []ast.Package{null}
     gotodefinition.findDefinitionFn(file , pos , bs , storePackage)
     if storePackage[0] == null || 
-        storePackage[0].locatedDefinitionBaseOn == null {
+        storePackage[0].locatedDefinitionPosBaseOn == null {
         return 
     }
-    return new MakeHover(storePackage[0].locatedDefinitionBaseOn).make()
+    return new MakeHover(storePackage[0].locatedDefinitionPosBaseOn).make()
 }
 
 

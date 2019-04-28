@@ -100,7 +100,7 @@ class BuildExpressionSelection {
                     code.codeLength += 3
                     code.codes[code.codeLength] = cg.OP_ldc_w
                     c.insertClassConst(
-                        selection.packageFunction.entrance.Class.name,
+                        selection.packageFunction.entrance.classHighLevel.name,
                         code.codes[code.codeLength + 1 : code.codeLength + 3])
                     code.codeLength += 3
                     code.codes[code.codeLength] = cg.OP_ldc_w

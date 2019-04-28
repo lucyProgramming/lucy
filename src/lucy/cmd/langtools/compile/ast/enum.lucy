@@ -83,7 +83,7 @@ public class Enum implements TopNodeInterface {
 
     fn check(block Block) -> (errs []error = []error{}) {
         if this.locateDefinition {
-            block.inheritedAttribute.p.setLocationDefinition(this)
+            block.inheritedAttribute.p.setLocatedDefinitionPos(this)
         }
         if this.findUsage {
             u := new Usage()
@@ -95,7 +95,7 @@ public class Enum implements TopNodeInterface {
         }
         for _ , vv := range this.enums {
             if vv.locateDefinition {
-                block.inheritedAttribute.p.setLocationDefinition(vv)
+                block.inheritedAttribute.p.setLocatedDefinitionPos(vv)
             }
             if vv.findUsage {
                 u := new Usage()

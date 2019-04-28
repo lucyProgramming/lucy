@@ -61,24 +61,24 @@ class BuildExpressionFunctionCall {
         if call.Function.isClosureFunction == false {
             maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
             code.codes[code.codeLength] = cg.OP_invokestatic
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.Function.entrance.Class.name,
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.Function.entrance.classHighLevel.name,
                 call.Function.entrance.name,
                 call.Function.entrance.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
         } else {
             //closure function call
-            if context.function.closure.closureFunctionExist(call.Function) {
+            if context.theFunction.closure.closureFunctionExist(call.Function) {
                 copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , char(0)))
                 code.codes[code.codeLength] = cg.OP_getfield
                 c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(c.name,
                     call.Function.name,
-                    "L" + call.Function.entrance.Class.name + ";") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                    "L" + call.Function.entrance.classHighLevel.name + ";") , code.codes[code.codeLength + 1 : code.codeLength + 3])
                 code.codeLength += 3
             } else {
                 copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , call.Function.closureVariableOffSet))
             }
 
-            state.pushStack(c , state.newObjectVariableType(call.Function.entrance.Class.name))
+            state.pushStack(c , state.newObjectVariableType(call.Function.entrance.classHighLevel.name))
             defer {
                 state.popStack(1)
             }
@@ -88,7 +88,7 @@ class BuildExpressionFunctionCall {
                 maxStack = t
             }
             code.codes[code.codeLength] = cg.OP_invokevirtual
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.Function.entrance.Class.name,
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.Function.entrance.classHighLevel.name,
                 call.Function.name,
                 call.Function.entrance.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3

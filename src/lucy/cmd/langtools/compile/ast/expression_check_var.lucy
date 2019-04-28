@@ -127,7 +127,7 @@ class ExpressionCheckVar {
         }
         for _ , v := range ev.variables {
             if v.locateDefinition {
-                block.inheritedAttribute.p.setLocationDefinition(v)
+                block.inheritedAttribute.p.setLocatedDefinitionPos(v)
                 return
             }
             if v.findUsage {

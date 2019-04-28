@@ -17,7 +17,7 @@ fn printUsage() {
     install                install directory and it's sub directories 
     run                    run a lucy package
     clean                  clean compiled files
-    pack                   package a lucy package use the jar tool
+    pack                   package a lucy package to a jar file
     http                   the http service for lucy
     env                    print env for lucy 
     test                   test a package`

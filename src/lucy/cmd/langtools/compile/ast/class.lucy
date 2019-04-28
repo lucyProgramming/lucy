@@ -213,7 +213,7 @@ public class Class implements TopNodeInterface {
                             errMsgPrefix(v.pos))))
             }
             if v.locateDefinition {
-                this.block.inheritedAttribute.p.setLocationDefinition(v)
+                this.block.inheritedAttribute.p.setLocatedDefinitionPos(v)
                 return
             }
             if v.autoCompletion {
@@ -238,7 +238,7 @@ public class Class implements TopNodeInterface {
         for _ , ms := range this.methods {
             for _ , m := range ms {
                 if m.locateDefinition {
-                    this.block.inheritedAttribute.p.setLocationDefinition(m)
+                    this.block.inheritedAttribute.p.setLocatedDefinitionPos(m)
                     return
                 }
                 if m.findUsage {
@@ -1380,7 +1380,7 @@ public class Class implements TopNodeInterface {
         staticFieldAssignStatements := []Statement{}
         for _ , v := range this.fields {
             if v.locateDefinition {
-                this.block.inheritedAttribute.p.setLocationDefinition(v)
+                this.block.inheritedAttribute.p.setLocatedDefinitionPos(v)
                 return
             }
             if v.defaultValueExpression != null {

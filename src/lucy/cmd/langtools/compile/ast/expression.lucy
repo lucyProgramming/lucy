@@ -582,7 +582,7 @@ public class Expression implements TopNodeInterface {
                     }
                 }
                 if f.locateDefinition {
-                    block.inheritedAttribute.p.setLocationDefinition(f)
+                    block.inheritedAttribute.p.setLocatedDefinitionPos(f)
                     return
                 }
                 if f.findUsage {

@@ -35,7 +35,7 @@ class ExpressionCheckLeftValue {
                     v.beenCapturedAsLeftValue++
                 }
 				if identifier.locateDefinition {
-					block.inheritedAttribute.p.setLocationDefinition(v)
+					block.inheritedAttribute.p.setLocatedDefinitionPos(v)
 					return 
 				}
 				if v.findUsageInstances != null {
@@ -84,7 +84,7 @@ class ExpressionCheckLeftValue {
 					return 
 				}
 				if selection.locateDefinition {
-					block.inheritedAttribute.p.setLocationDefinition(field)
+					block.inheritedAttribute.p.setLocatedDefinitionPos(field)
 					return 
 				}
 				selection.field = field
@@ -101,7 +101,7 @@ class ExpressionCheckLeftValue {
 				selection.field = field
 				if field != null {
 					if selection.locateDefinition {
-						block.inheritedAttribute.p.setLocationDefinition(field)
+						block.inheritedAttribute.p.setLocatedDefinitionPos(field)
 						return 
 					}
 					err := selection.Expression.fieldAccessAble(block, field)
@@ -128,7 +128,7 @@ class ExpressionCheckLeftValue {
                             e.pos.errMsgPrefix(), object.Package.name, selection.name)))
                     }
 					if selection.locateDefinition {
-						block.inheritedAttribute.p.setLocationDefinition(v)
+						block.inheritedAttribute.p.setLocatedDefinitionPos(v)
 						return 
 					}
                     selection.packageVariable = v

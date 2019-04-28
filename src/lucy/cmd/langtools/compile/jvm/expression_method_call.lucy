@@ -239,7 +239,7 @@ class BuildExpressionMethodCall {
             code.codes[code.codeLength] = cg.OP_invokestatic
             c.insertMethodRefConst(
                 new cg.ConstantInfoMethodrefHighLevel(
-                    call.packageFunction.entrance.Class.name,
+                    call.packageFunction.entrance.classHighLevel.name,
                     call.name,
                     Descriptor.methodDescriptor(call.packageFunction.Type)),
                 code.codes[code.codeLength + 1 : code.codeLength + 3])

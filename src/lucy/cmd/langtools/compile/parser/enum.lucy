@@ -68,8 +68,7 @@ class EnumParser extends ParserFather {
 						this.parser.next(lfIsToken)
 						containsComma = this.parser.mkPos()
 					}
-					if this.parser.token.Type == lex.TokenLf &&
-						containsComma == null {
+					if this.parser.token.Type == lex.TokenLf {
 						enumName.containsLf = true
 						this.next(lfNotToken)
 					}

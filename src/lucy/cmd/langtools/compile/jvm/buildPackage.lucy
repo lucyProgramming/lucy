@@ -75,7 +75,7 @@ public class BuildPackage {
             if this.classes != null && this.classes[autoName] != null {
                 continue
             } else {
-                if this.checkClassFileAleadyExist(autoName) {
+                if this.checkClassFileAlreadyExist(autoName) {
                     //
                     continue
                 }
@@ -86,9 +86,9 @@ public class BuildPackage {
     }
 
     //on windows Array.class == array.class filesystem is not case sensitve
-    fn checkClassFileAleadyExist(name string) -> (exist bool) {
+    fn checkClassFileAlreadyExist(name string) -> (exist bool) {
         // not a windows system 
-        if common.onWinows() == false {
+        if common.onWindows() == false {
             return 
         }
         for k , _ := range this.classes {
@@ -104,20 +104,6 @@ public class BuildPackage {
         }
     }
 
-    // fn newGlobalFunctionName(name string) -> (autoName string) {
-    //     for i := 0 ; i < 65536 ; i++ {
-    //         if i == 0 {
-    //             //use prefix only
-    //             autoName = name
-    //         } else {
-    //             autoName = sprintf("%s$%d" , name , i)
-    //         }
-    //         if false == this.checkWinClassFileAleadyExist(autoName) {
-    //             return autoName
-    //         }
-    //     }
-    //     panic("not possible")
-    // }
 
     fn putClass(c cg.ClassHighLevel) {
         if c.name == null ||
@@ -134,7 +120,7 @@ public class BuildPackage {
         if this.classes.keyExist(name) {
             panic(sprintf("name:'%s' already been token" , name))
         }
-        if common.onWinows() {
+        if common.onWindows() {
             for k , _ := range this.classes {
                 if k.toLowerCase() == c.name.toLowerCase() {
                     msg := sprintf("on windows class file '%s.class' == '%s.class'\n" , k , c.name)
@@ -260,7 +246,7 @@ public class BuildPackage {
             method.accessFlags |= cg.AccMethodFinal
             method.accessFlags |= cg.AccMethodPrivate
             method.name = this.mainClass.newMethodName("block")
-            method.Class = this.mainClass
+            method.classHighLevel = this.mainClass
             method.descriptor = "()V"
             method.code = new cg.AttributeCode()
             this.BuildFunction.buildFunction(this.mainClass , null , method , v)
@@ -308,7 +294,7 @@ public class BuildPackage {
         trigger.accessFlags |= cg.AccMethodFinal
         trigger.accessFlags |= cg.AccMethodPublic
         trigger.name = this.mainClass.newMethodName("triggerPackageInitMethod")
-        trigger.Class = this.mainClass
+        trigger.classHighLevel = this.mainClass
         trigger.descriptor = "()V"
         trigger.code = new cg.AttributeCode()
         trigger.code.codes = [cg.OP_return]
@@ -418,7 +404,7 @@ public class BuildPackage {
                 method.attributeLucyMethodDescriptor = new cg.AttributeLucyMethodDescriptor()
                 method.attributeLucyMethodDescriptor.descriptor = LucyMethodSignature.encode(vv.Function.Type)
             }
-            method.Class = c
+            method.classHighLevel = c
             method.descriptor = Descriptor.methodDescriptor(vv.Function.Type)
             method.isConstruction = name == specialMethodInit
             if vv.isAbstract() == false {
@@ -453,7 +439,7 @@ public class BuildPackage {
             var functionClass cg.ClassHighLevel
             // low case and no low case will goto into main.class 
             if f.name == ast.MainFunctionName ||
-                (common.onWinows() && f.name.toLowerCase() == ast.MainFunctionName) {
+                (common.onWindows() && f.name.toLowerCase() == ast.MainFunctionName) {
                 functionClass = this.mainClass
                 this.mainClass.insertSourceFile(f.pos.filename)
             } else {
@@ -469,7 +455,7 @@ public class BuildPackage {
                 this.putClass(functionClass)
             }
             method := new cg.MethodHighLevel()
-            method.Class = functionClass
+            method.classHighLevel = functionClass
             method.name = f.name
             if f.name == ast.MainFunctionName {
                 method.descriptor = "([Ljava/lang/String;)V"
@@ -499,7 +485,7 @@ public class BuildPackage {
             if f.isBuildIn || f.templateFunction != null {
                 continue
             }
-            this.BuildFunction.buildFunction(ms[k].Class , null , ms[k] , f)
+            this.BuildFunction.buildFunction(ms[k].classHighLevel , null , ms[k] , f)
         }
     }
 

@@ -5,7 +5,7 @@ import "lucy/jvm/cg"
 
 class MultiValueAutoVar {
     localVarOffset char
-
+    
     fn MultiValueAutoVar(c cg.ClassHighLevel , code cg.AttributeCode , state StackMapState) {
         this.super()
         this.localVarOffset = code.maxLocals

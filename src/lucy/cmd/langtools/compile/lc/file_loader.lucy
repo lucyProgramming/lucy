@@ -572,7 +572,7 @@ public class FileLoader implements ast.loadImport {
             }
             function.entrance = new cg.MethodHighLevel()
             function.entrance.name = function.name
-            function.entrance.Class = mainClass
+            function.entrance.classHighLevel = mainClass
             function.entrance.descriptor = function.jvmDescriptor
             function.isGlobal = true
             pack.block.functions[name] = function
@@ -720,7 +720,7 @@ public class FileLoader implements ast.loadImport {
             }
             function.entrance = new cg.MethodHighLevel()
             function.entrance.name = function.name
-            function.entrance.Class = cc
+            function.entrance.classHighLevel = cc
             function.entrance.descriptor = function.jvmDescriptor
             function.isGlobal = true
             fs.append(function)

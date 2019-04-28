@@ -44,7 +44,7 @@ class BuildExpressionFunction {
                 method.accessFlags |= cg.AccMethodVarargs
             }
             function.entrance = method
-            method.Class = c
+            method.classHighLevel = c
             method.descriptor = Descriptor.methodDescriptor(function.Type)
             method.code = new cg.AttributeCode()
             this.bp.BuildFunction.buildFunction(c , null , method , function)
@@ -69,7 +69,7 @@ class BuildExpressionFunction {
             method.accessFlags |= cg.AccMethodVarargs
         }
         method.descriptor = Descriptor.methodDescriptor(function.Type)
-        method.Class = closureClass
+        method.classHighLevel = closureClass
         function.entrance = method
         closureClass.appendMethod(method)
         //new a object to hold this closure function
@@ -99,7 +99,7 @@ class BuildExpressionFunction {
             if v.beenCapturedAsLeftValue > 0 {
                 meta := closure.getMeta(v.Type.Type)
                 field.descriptor = "L" + meta.className + ";"
-                if context.function.closure.closureVariableExist(v) {
+                if context.theFunction.closure.closureVariableExist(v) {
                     // I Know c object at offset 0
                     copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , char(0)))
                     if 3 > maxStack {
@@ -121,7 +121,7 @@ class BuildExpressionFunction {
 
             } else {
                 field.descriptor = Descriptor.typeDescriptor(v.Type)
-                if context.function.closure.closureVariableExist(v) {
+                if context.theFunction.closure.closureVariableExist(v) {
                     // I Know c object at offset 0
                     copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , char(0)))
                     if 3 > maxStack {
@@ -158,10 +158,10 @@ class BuildExpressionFunction {
             filed.accessFlags |= cg.AccFieldPublic
             filed.accessFlags |= cg.AccFieldSynthetic
             filed.name = v.name
-            filed.descriptor = "L" + v.entrance.Class.name + ";"
+            filed.descriptor = "L" + v.entrance.classHighLevel.name + ";"
             closureClass.fields[v.name] = filed
             copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , function.closureVariableOffSet))
-            if context.function.closure.closureFunctionExist(v) {
+            if context.theFunction.closure.closureFunctionExist(v) {
                 // I Know this at 0 offset
                 copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , char(0)))
                 if 3 > maxStack {
@@ -200,7 +200,7 @@ class BuildExpressionFunction {
             code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         code.codes[code.codeLength] = cg.OP_ldc_w
-        c.insertClassConst(function.entrance.Class.name,
+        c.insertClassConst(function.entrance.classHighLevel.name,
             code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         code.codes[code.codeLength] = cg.OP_ldc_w
@@ -229,12 +229,12 @@ class BuildExpressionFunction {
             maxStack = 4
         }
         if function.isClosureFunction {
-            if context.function.closure.closureFunctionExist(function) {
+            if context.theFunction.closure.closureFunctionExist(function) {
                 copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , char(0)))
                 code.codes[code.codeLength] = cg.OP_getfield
                 c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(c.name,
                         function.name,
-                        "L" + function.entrance.Class.name + ";") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+                        "L" + function.entrance.classHighLevel.name + ";") , code.codes[code.codeLength + 1 : code.codeLength + 3])
                 code.codeLength += 3
             } else {
                 copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , function.closureVariableOffSet))

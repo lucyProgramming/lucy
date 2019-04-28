@@ -26,9 +26,9 @@ public class Package {
 	/*
 		for lucy tool goto definition
 	*/
-	private locatedDefinitionPos    Pos
-	public  locatedDefinitionBaseOn Object
-	public  loadLucyPackages        []Package
+	private locatedDefinitionPos       Pos
+	public  locatedDefinitionPosBaseOn Object
+	public  loadLucyPackages           []Package
 
 	/*
 		for usage 
@@ -46,32 +46,68 @@ public class Package {
 
 	public fn Package(
 		name string,
-		disableCheckUnuse bool,
+		disableCheckUnUse bool,
 		loader loadImport) {
 		this.super()
-		this.disableCheckUnUse = disableCheckUnuse
+		this.disableCheckUnUse = disableCheckUnUse
 		this.name = name
 		this.matchLine = -1
 		this.loader = loader
-
 	}
 
-	public fn setLocationDefinition(x Object) {
-		this.locatedDefinitionPos = getPos(x)
+	static fn getPos(x Object) -> (pos Pos) {
+		if t , ok := x.(Constant) ; ok {
+			return t.pos
+		}
+		if t , ok := x.(Class) ; ok {
+			return t.pos
+		}
+		if t , ok := x.(Variable) ; ok {
+			return t.pos
+		}
+		if t , ok := x.(Function) ; ok {
+			return t.pos
+		}
+		if t , ok := x.(ClassField) ; ok {
+			return t.pos
+		}
+		if t , ok := x.(ClassMethod) ; ok {
+			return t.Function.pos
+		}
+		if t , ok := x.(Enum) ; ok {
+			return t.pos
+		}
+		if t , ok := x.(EnumName) ; ok {
+			return t.pos
+		}
+		if t , ok := x.(TypeAlias) ; ok {
+			return t.pos
+		}
+		if t , ok := x.(Import) ; ok {
+			return t.pos
+		}
+		if t , ok := x.(Type) ; ok {
+			return t.pos
+		}
+		if t , ok := x.(StatementLabel) ; ok {
+			return t.pos
+		}
+	}
+
+	public fn setLocatedDefinitionPos(x Object) {
+		assert(this.locatedDefinitionPos == null , this.locatedDefinitionPosBaseOn == null)
+		this.locatedDefinitionPos = .getPos(x)
 		if this.locatedDefinitionPos == null {
 			if f , ok := x.(Function) ; ok && f.isBuildIn {
 				printf("build in function[%s] has no body,it is implemented directly code generator\n" , f.name)
 			} else {
 				printf("cannot get pos from '%s'\n" , x.toString())
 			}
-			// if t , ok := x.(ArrayMapBuildInMethod) ; ok {
-
-			// }
 		}
-		this.locatedDefinitionBaseOn = x
+		this.locatedDefinitionPosBaseOn = x
 	}
 
-	public fn getLocationDefinition() -> (ret Pos = this.locatedDefinitionPos){}
+	public fn getLocatedDefinitionPos() -> (ret Pos = this.locatedDefinitionPos){}
 
 	public fn matchFileAndLine(file string , name string , startLine int , endLine int) -> (need bool) {
 		if this.matchFile == null || this.matchFile == "" {
@@ -320,7 +356,7 @@ public class Package {
 	public fn typeCheck(nodes []TopNode) -> (es []error = []error{}) {
 		this.block.inheritedAttribute.p = this
 		this.block.isPackageBlock = true
-		this.block.Package = this
+		this.block.package = this
 		this.errors = []error{}
 		if this.nErrors2Stop <= 5 {
 			this.nErrors2Stop = 10
@@ -346,7 +382,7 @@ public class Package {
 		}
 		for _ , v := range this.block.typeAliases {
 			if v.alias.locateDefinition {
-				this.setLocationDefinition(v.alias)
+				this.setLocatedDefinitionPos(v.alias)
 				return this.errors
 			}
 			if v.alias.findUsage {
@@ -361,7 +397,7 @@ public class Package {
 
 		for _ , v := range this.block.functions {
 			if v.locateDefinition {
-				this.setLocationDefinition(v)
+				this.setLocatedDefinitionPos(v)
 				return this.errors
 			}
 			if v.findUsage {
@@ -387,7 +423,7 @@ public class Package {
 				return
 			}
 			if v.locateDefinition {
-				this.setLocationDefinition(v)
+				this.setLocatedDefinitionPos(v)
 				return this.errors
 			}
 			v.name = this.name + "/" + v.name

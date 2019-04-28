@@ -177,7 +177,7 @@ public class Function implements TopNodeInterface {
         isAbstract bool) {
         var err error
         if this.locateDefinition {
-            this.block.inheritedAttribute.p.setLocationDefinition(this)
+            this.block.inheritedAttribute.p.setLocatedDefinitionPos(this)
             return
         }
         for k , v := range this.Type.parameterList {
@@ -185,7 +185,7 @@ public class Function implements TopNodeInterface {
                 v.name = ""
             }
             if v.locateDefinition {
-                this.block.inheritedAttribute.p.setLocationDefinition(v)
+                this.block.inheritedAttribute.p.setLocatedDefinitionPos(v)
                 return
             }
             if v.findUsage {
@@ -269,7 +269,7 @@ public class Function implements TopNodeInterface {
                     v.name = ""
                 }
                 if v.locateDefinition {
-                    this.block.inheritedAttribute.p.setLocationDefinition(v)
+                    this.block.inheritedAttribute.p.setLocatedDefinitionPos(v)
                     return
                 }
                 if v.findUsage {

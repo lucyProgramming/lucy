@@ -75,7 +75,7 @@ class ExpressionCheckVarAssign {
                 identifier.Variable = variable
                 assign.ifDeclaredBefore[k] = true
                 if identifier.locateDefinition {
-                    block.inheritedAttribute.p.setLocationDefinition(variable)
+                    block.inheritedAttribute.p.setLocatedDefinitionPos(variable)
                     return
                 }
             } else {
@@ -87,7 +87,7 @@ class ExpressionCheckVarAssign {
                 vd.name = identifier.name
                 vd.pos = v.pos
                 if identifier.locateDefinition {
-                    block.inheritedAttribute.p.setLocationDefinition(vd)
+                    block.inheritedAttribute.p.setLocatedDefinitionPos(vd)
                     return
                 }
                 if variableType == null {

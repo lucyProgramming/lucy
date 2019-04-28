@@ -4,48 +4,49 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
-class BuildExpressionStrcat {
-    
+class BuildExpressionStringCat {
+	eb BuildExpression
 
-    eb BuildExpression
-    
-    fn BuildExpressionStrcat(eb BuildExpression){
-        this.super()
-        this.eb = eb
-    }
+	fn BuildExpressionStringCat(eb BuildExpression) {
+		this.super()
+		this.eb = eb
+	}
 
-    
-    fn buildStrCat(
-        c cg.ClassHighLevel,
-        code cg.AttributeCode,
-        e ast.Expression,
-        context Context,
-        state StackMapState) -> (maxStack char) {
-        stackLength := len(state.stacks)
-        defer {
-            state.popStack(len(state.stacks) - stackLength)
-        }
-        bin := e.data.(ast.ExpressionBinary)
-        maxStack = this.eb.build(c, code, bin.left, context, state)
-        if t := this.eb.BuildExpressionConversion.stackTop2String(c, code, bin.left.value, context, state); t > maxStack {
-            maxStack = t
-        }
-        state.pushStack(c, state.newObjectVariableType(javaStringClass))
-        stack := this.eb.build(c, code, bin.right, context, state)
-        if t := char(1) + stack; t > maxStack {
-            maxStack = char(t)
-        }
-        if t := char(1) + this.eb.BuildExpressionConversion.stackTop2String(c, code,
-            bin.right.value, context, state); t > maxStack {
-            maxStack = t
-        }
-        code.codes[code.codeLength] = cg.OP_invokevirtual
-        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-            javaStringClass,
-            `concat`,
-           "(Ljava/lang/String;)Ljava/lang/String;"
-        ), code.codes[code.codeLength+1:code.codeLength+3])
-        code.codeLength += 3
-        return
-    }
+	fn buildStrCat(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		stackLength := len(state.stacks)
+		defer {
+			state.popStack(len(state.stacks) - stackLength)
+		}
+		bin := e.data.(ast.ExpressionBinary)
+		maxStack = this.eb.build(c , code , bin.left , context , state)
+		if t := this.eb.BuildExpressionConversion.stackTop2String(c , code , bin.left.value , context , state) ; t > maxStack {
+			maxStack = t
+		}
+		state.pushStack(c , state.newObjectVariableType(javaStringClass))
+		stack := this.eb.build(c , code , bin.right , context , state)
+		if t := char(1) + stack ; t > maxStack {
+			maxStack = char(t)
+		}
+		if t := char(1) + this.eb.BuildExpressionConversion.stackTop2String(
+			c,
+			code,
+			bin.right.value,
+			context,
+			state) ; t > maxStack {
+			maxStack = t
+		}
+		code.codes[code.codeLength] = cg.OP_invokevirtual
+		c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+				javaStringClass,
+				`concat`,
+				"(Ljava/lang/String;)Ljava/lang/String;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+		code.codeLength += 3
+		return
+	}
 }
+

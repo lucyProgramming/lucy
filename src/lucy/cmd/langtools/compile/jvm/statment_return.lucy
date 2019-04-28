@@ -20,7 +20,7 @@ class BuildReturn {
         statementReturn ast.StatementReturn,
         context Context,
         state StackMapState) -> (maxStack char) {
-        if context.function.Type.voidReturn() {
+        if context.theFunction.Type.voidReturn() {
             if statementReturn.defers != null && len(statementReturn.defers) > 0 {
                 stack := this.buildDefersForReturn(c , code , context , state , statementReturn)
                 if stack > maxStack {
@@ -31,7 +31,7 @@ class BuildReturn {
             code.codeLength++
             return
         }
-        if len(context.function.Type.returnList) == 1 {
+        if len(context.theFunction.Type.returnList) == 1 {
             if len(statementReturn.expressions) > 0 {
                 maxStack = this.eb.build(c , code , statementReturn.expressions[0] , context , state)
             }
@@ -39,7 +39,7 @@ class BuildReturn {
             if len(statementReturn.defers) > 0 {
                 //return value  is on stack,  store to local var
                 if len(statementReturn.expressions) > 0 {
-                    this.eb.storeLocalVar(c , code , context.function.Type.returnList[0])
+                    this.eb.storeLocalVar(c , code , context.theFunction.Type.returnList[0])
                 }
                 stack := this.buildDefersForReturn(c , code , context , state , statementReturn)
                 if stack > maxStack {
@@ -47,14 +47,14 @@ class BuildReturn {
                 }
                 //restore the stack
                 if len(statementReturn.expressions) > 0 {
-                    this.eb.loadLocalVar(c , code , context.function.Type.returnList[0])
+                    this.eb.loadLocalVar(c , code , context.theFunction.Type.returnList[0])
                 }
             }
             // in this case,load local var is not under exception handle,should be ok
             if len(statementReturn.expressions) == 0 {
-                this.eb.loadLocalVar(c , code , context.function.Type.returnList[0])
+                this.eb.loadLocalVar(c , code , context.theFunction.Type.returnList[0])
             }
-            switch context.function.Type.returnList[0].Type.Type {
+            switch context.theFunction.Type.returnList[0].Type.Type {
                 case ast.VariableTypeBool,
                     ast.VariableTypeByte,
                     ast.VariableTypeShort,
@@ -90,7 +90,7 @@ class BuildReturn {
             //store a simple var,should be no exception
             if len(statementReturn.expressions) > 0 {
                 copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject,
-                    context.multiValueVarOffset))
+                    context.multiValueReturnVarOffset))
             }
             stack := this.buildDefersForReturn(c , code , context , state , statementReturn)
             if stack > maxStack {
@@ -100,7 +100,7 @@ class BuildReturn {
             if len(statementReturn.expressions) > 0 {
                 copyOPs(code,
                     loadLocalVariableOps(ast.VariableTypeObject,
-                    context.multiValueVarOffset))
+                    context.multiValueReturnVarOffset))
             }
         }
         // return value is on stack
@@ -118,13 +118,13 @@ class BuildReturn {
 
     fn buildReturnFromReturnVars(c cg.ClassHighLevel,
         code cg.AttributeCode , context Context) -> (maxStack char) {
-        if context.function.Type.voidReturn() {
+        if context.theFunction.Type.voidReturn() {
             return
         }
-        if len(context.function.Type.returnList) == 1 {
-            this.eb.loadLocalVar(c , code , context.function.Type.returnList[0])
-            maxStack = jvmSlotSize(context.function.Type.returnList[0].Type)
-            switch context.function.Type.returnList[0].Type.Type {
+        if len(context.theFunction.Type.returnList) == 1 {
+            this.eb.loadLocalVar(c , code , context.theFunction.Type.returnList[0])
+            maxStack = jvmSlotSize(context.theFunction.Type.returnList[0].Type)
+            switch context.theFunction.Type.returnList[0].Type.Type {
                 case ast.VariableTypeBool,
                     ast.VariableTypeByte,
                     ast.VariableTypeShort,
@@ -146,13 +146,13 @@ class BuildReturn {
             return
         }
         //multi returns
-        loadInt(c , code , int(len(context.function.Type.returnList)))
+        loadInt(c , code , int(len(context.theFunction.Type.returnList)))
         code.codes[code.codeLength] = cg.OP_anewarray
         c.insertClassConst(javaRootClass , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         maxStack = 1 // max stack is
         index := int(0)
-        for _ , v := range context.function.Type.returnList {
+        for _ , v := range context.theFunction.Type.returnList {
             currentStack := char(1)
             code.codes[code.codeLength] = cg.OP_dup
             code.codeLength++
@@ -213,10 +213,10 @@ class BuildReturn {
                 context.exceptionVarOffset)) // this code will make_node_objects stack is empty
             state.popStack(1)
             // build block
-            context.Defer = statementReturn.defers[index]
+            context.statementDefer = statementReturn.defers[index]
             this.bb.buildBlock(c , code , statementReturn.defers[index].block , context , state)
             from.addTop(state)
-            context.Defer = null
+            context.statementDefer = null
             statementReturn.defers[index].resetLabels()
             //if need throw
             copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , context.exceptionVarOffset))
@@ -241,9 +241,9 @@ class BuildReturn {
                 code.codeLength++
             } else {
                 //exception that have been handled
-                if len(statementReturn.expressions) > 0 && len(context.function.Type.returnList) > 1 {
+                if len(statementReturn.expressions) > 0 && len(context.theFunction.Type.returnList) > 1 {
                     //load when function have multi returns if read to end
-                    copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , context.multiValueVarOffset))
+                    copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , context.multiValueReturnVarOffset))
                     exit := new cg.Exit(cg.OP_ifnonnull , code)
                     this.buildReturnFromReturnVars(c , code , context)
                     context.MakeStackMap(code , state , code.codeLength)
