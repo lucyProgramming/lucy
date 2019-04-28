@@ -169,13 +169,13 @@ public class RunLucyPackage {
         destinationDir := lucyPath + "/class/" + packageName
         bs , err := os.readFile(destinationDir + "/maintain.json")
         if err != null {
+            panic(err)
             return
         }
         meta = new common.PackageMeta()
         _ , err = json.decode(javaArray2Lucy(bs) , meta)
         if err != null {
-            print(err)
-            err = null
+            panic(err)
             return
         }
         compiledFrom := new map{string -> common.FileMeta}()
@@ -184,7 +184,6 @@ public class RunLucyPackage {
         }
 
         // new or add
-
         for _ , v := range fisM {
             if v := compiledFrom[v.name] ; v == null {
                 return
@@ -202,15 +201,8 @@ public class RunLucyPackage {
         }
         // if class file is missing
         {
-            fis := new io.File(destinationDir).list()
-            fisM := new map{string -> bool}()
-            for _ , v := range fis {
-                if v.endsWith(".class") {
-                    fisM[v] = true
-                }
-            }
             for _ , v := range meta.classes {
-                if fisM.keyExist(v) == false {
+                if false == new io.File(destinationDir + "/" + v).isFile() {
                     return
                 }
             }
@@ -369,7 +361,6 @@ public class RunLucyPackage {
             lucyPath = common.findPackageInWhichDirectory(this.lucyPath , packageName)
         }
         meta , needBuild , lucyFiles := this.needCompile(lucyPath , packageName)
-
         if needBuild == false {
             for k , v := range meta.imports {
                 i := (new ImportStack()).fromLast(importStack)
@@ -497,5 +488,4 @@ public class RunLucyPackage {
         return
     }
 }
-
 
