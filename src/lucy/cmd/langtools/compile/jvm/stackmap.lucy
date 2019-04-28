@@ -51,8 +51,8 @@ class StackMapState {
     fn newObjectVariableType(name string) -> (ret ast.Type) {
         ret = new ast.Type()
         ret.Type = ast.VariableTypeObject
-        ret.Class = new ast.Class()
-        ret.Class.name = name
+        ret.theClass = new ast.Class()
+        ret.theClass.name = name
         return ret
     }
 
@@ -97,13 +97,13 @@ class StackMapState {
             case ast.VariableTypeString:
                 ret.verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(javaStringClass))
             case ast.VariableTypeObject:
-                ret.verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(t.Class.name))
+                ret.verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(t.theClass.name))
             case ast.VariableTypeFunction:
                 ret.verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(javaMethodHandleClass))
             case ast.VariableTypeMap:
                 ret.verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(mapClass))
             case ast.VariableTypeArray:
-                meta := ArrayMetas[t.array.Type]
+                meta := ArrayMetas[t.theArray.Type]
                 ret.verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(meta.className))
             case ast.VariableTypeJavaArray:
                 d := Descriptor.typeDescriptor(t)

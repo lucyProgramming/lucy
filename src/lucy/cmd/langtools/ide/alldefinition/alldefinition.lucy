@@ -82,8 +82,8 @@ class AllDefinition {
         for name , v := range p.block.typeAliases {
             item := new ide.Definition()
             item.Type = "typealias"
-            item.pos = v.alias.pos
-            item.name = v.alias.name
+            item.pos = v.theAlias.pos
+            item.name = v.theAlias.name
             items.append(item)
         }
         return copy(new ide.Definition[](len(items)) , items)

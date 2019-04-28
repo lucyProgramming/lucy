@@ -41,7 +41,7 @@ class BuildExpressionCallArgs {
         }
         if vArgs.noArgs {
             loadInt(c , code , 0)
-            newArrayBaseOnType(c , code , vArgs.Type.array)
+            newArrayBaseOnType(c , code , vArgs.Type.theArray)
             if t := char(1) + currentStack ; t > maxStack {
                 maxStack = t
             }
@@ -53,10 +53,10 @@ class BuildExpressionCallArgs {
                 }
             } else {
                 loadInt(c , code , int(vArgs.length))
-                newArrayBaseOnType(c , code , vArgs.Type.array)
+                newArrayBaseOnType(c , code , vArgs.Type.theArray)
                 state.pushStack(c , vArgs.Type)
                 currentStack++
-                op := storeArrayElementOp(vArgs.Type.array.Type)
+                op := storeArrayElementOp(vArgs.Type.theArray.Type)
                 index := int(0)
                 for _ , e := range vArgs.expressions {
                     code.codes[code.codeLength] = cg.OP_dup

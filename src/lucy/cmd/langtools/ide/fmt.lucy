@@ -1182,7 +1182,7 @@ public class Fmt {
 						format += "}"
 					}
 				} else {
-					format += sprintf("map{%s -> %s}{" , m.Type.Map.K.typeName() , m.Type.Map.V.typeName())
+					format += sprintf("map{%s -> %s}{" , m.Type.theMap.K.typeName() , m.Type.theMap.V.typeName())
 					if m.containsLf() {
 						format += "\n"
 						format += indent + this.indentIncremental

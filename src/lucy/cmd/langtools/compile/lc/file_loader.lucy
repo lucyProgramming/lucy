@@ -356,13 +356,13 @@ public class FileLoader implements ast.loadImport {
                     panic(err)
                 }
                 if f.Type.Type == ast.VariableTypeFunction && d.methodAccessFlag & cg.AccMethodVarargs != 0 {
-                    if f.Type.functionType.parameterList[len(f.Type.functionType.parameterList) - 1].Type.Type !=
+                    if f.Type.theFunctionType.parameterList[len(f.Type.theFunctionType.parameterList) - 1].Type.Type !=
                         ast.VariableTypeJavaArray {
                         panic("not a java array")
                     }
-                    f.Type.functionType.vArgs = f.Type.functionType.parameterList[len(f.Type.functionType.parameterList) - 1]
-                    f.Type.functionType.vArgs.Type.isVariableArgs = true
-                    f.Type.functionType.parameterList = f.Type.functionType.parameterList[:len(f.Type.functionType.parameterList) - 1]
+                    f.Type.theFunctionType.vArgs = f.Type.theFunctionType.parameterList[len(f.Type.theFunctionType.parameterList) - 1]
+                    f.Type.theFunctionType.vArgs.Type.isVariableArgs = true
+                    f.Type.theFunctionType.parameterList = f.Type.theFunctionType.parameterList[:len(f.Type.theFunctionType.parameterList) - 1]
                 }
             }
             if f.Type.Type == ast.VariableTypeEnum {
@@ -509,15 +509,15 @@ public class FileLoader implements ast.loadImport {
                         panic(err)
                     }
                     if vd.Type.Type == ast.VariableTypeFunction && d.methodAccessFlag & cg.AccMethodVarargs != 0 {
-                        if vd.Type.functionType.parameterList[len(vd.Type.functionType.parameterList) - 1].Type.Type !=
+                        if vd.Type.theFunctionType.parameterList[len(vd.Type.theFunctionType.parameterList) - 1].Type.Type !=
                             ast.VariableTypeJavaArray {
                             panic("not a java array")
                         }
-                        vd.Type.functionType.vArgs =
-                            vd.Type.functionType.parameterList[len(vd.Type.functionType.parameterList) - 1]
-                        vd.Type.functionType.vArgs.Type.isVariableArgs = true
-                        vd.Type.functionType.parameterList =
-                            vd.Type.functionType.parameterList[:len(vd.Type.functionType.parameterList) - 1]
+                        vd.Type.theFunctionType.vArgs =
+                            vd.Type.theFunctionType.parameterList[len(vd.Type.theFunctionType.parameterList) - 1]
+                        vd.Type.theFunctionType.vArgs.Type.isVariableArgs = true
+                        vd.Type.theFunctionType.parameterList =
+                            vd.Type.theFunctionType.parameterList[:len(vd.Type.theFunctionType.parameterList) - 1]
                     }
                 }
                 if typ.Type == ast.VariableTypeEnum {
@@ -590,7 +590,7 @@ public class FileLoader implements ast.loadImport {
             alias := new ast.TypeAlias()
             alias.name = name
             alias.comment = attr.comment
-            typ.alias = alias
+            typ.theAlias = alias
             pack.block.typeAliases[name] = typ
             if typ.Type == ast.VariableTypeEnum {
                 loadEnumVariableType(this , typ)

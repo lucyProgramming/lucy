@@ -1,131 +1,127 @@
 // all rights reserved , check the LICENSE file
 
-
-
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 import "lucy/binary"
 
-
 class BuildExpressionAssert {
-    
-    eb BuildExpression
-    
-    fn BuildExpressionAssert(eb BuildExpression){
-        this.super()
-        this.eb = eb
-    }
-    
-    fn buildAssert(
-        c cg.ClassHighLevel,
-        code cg.AttributeCode,
-        e ast.Expression,
-        context Context,
-        state StackMapState) -> (maxStack char) {
-        assertion := e.data.(ast.ExpressionTypeAssert)
-        if assertion.multiValueContext {
-            maxStack = this.eb.build(c, code, assertion.Expression, context, state)
-            code.codes[code.codeLength] = cg.OP_dup
-            code.codeLength++
-            code.codes[code.codeLength] = cg.OP_instanceof
-            code.codeLength++
-            insertTypeAssertClass(c, code, assertion.Type)
-            code.codes[code.codeLength] = cg.OP_dup
-            code.codeLength++
-            {
-                state.pushStack(c, assertion.Expression.value)
-                state.pushStack(c, typeInt)
-                context.MakeStackMap(code, state, code.codeLength+7)
-                state.popStack(2)
-                state.pushStack(c, typeInt )
-                state.pushStack(c, assertion.Expression.value)
-                context.MakeStackMap(code, state, code.codeLength+11)
-                state.popStack(2)
-            }
-            code.codes[code.codeLength] = cg.OP_ifeq
-            binary.BigEndian.putChar(code.codes[code.codeLength+1:code.codeLength+3], char(7))
-            code.codes[code.codeLength+3] = cg.OP_swap
-            code.codes[code.codeLength+4] = cg.OP_goto
-            binary.BigEndian.putChar(code.codes[code.codeLength+5:code.codeLength+7], char(7))
-            code.codes[code.codeLength+7] = cg.OP_pop
-            code.codes[code.codeLength+8] = cg.OP_pop
-            code.codes[code.codeLength+9] = cg.OP_iconst_0
-            code.codes[code.codeLength+10] = cg.OP_aconst_null
-            code.codeLength += 11
-            loadInt(c, code, 2)
-            code.codes[code.codeLength] = cg.OP_anewarray
-            c.insertClassConst(javaRootClass, code.codes[code.codeLength+1:code.codeLength+3])
-            code.codeLength += 3
+	eb BuildExpression
 
-            // store object
-            code.codes[code.codeLength] = cg.OP_dup_x1
-            code.codeLength++
-            code.codes[code.codeLength] = cg.OP_swap
-            code.codeLength++
-            code.codes[code.codeLength] = cg.OP_iconst_0
-            code.codeLength++
-            code.codes[code.codeLength] = cg.OP_swap
-            code.codeLength++
-            if 5 > maxStack {
-                maxStack = 5
-            }
-            code.codes[code.codeLength] = cg.OP_checkcast // convince the jvm
-            code.codeLength++
-            insertTypeAssertClass(c, code, assertion.Type)
+	fn BuildExpressionAssert(eb BuildExpression) {
+		this.super()
+		this.eb = eb
+	}
 
-            code.codes[code.codeLength] = cg.OP_aastore
-            code.codeLength++
+	fn buildAssert(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		assertion := e.data.(ast.ExpressionTypeAssert)
+		if assertion.multiValueContext {
+			maxStack = this.eb.build(c , code , assertion.Expression , context , state)
+			code.codes[code.codeLength] = cg.OP_dup
+			code.codeLength++
+			code.codes[code.codeLength] = cg.OP_instanceof
+			code.codeLength++
+			insertTypeAssertClass(c , code , assertion.Type)
+			code.codes[code.codeLength] = cg.OP_dup
+			code.codeLength++
+			{
+				state.pushStack(c , assertion.Expression.value)
+				state.pushStack(c , typeInt)
+				context.MakeStackMap(code , state , code.codeLength + 7)
+				state.popStack(2)
+				state.pushStack(c , typeInt)
+				state.pushStack(c , assertion.Expression.value)
+				context.MakeStackMap(code , state , code.codeLength + 11)
+				state.popStack(2)
+			}
+			code.codes[code.codeLength] = cg.OP_ifeq
+			binary.BigEndian.putChar(code.codes[code.codeLength + 1 : code.codeLength + 3] , char(7))
+			code.codes[code.codeLength + 3] = cg.OP_swap
+			code.codes[code.codeLength + 4] = cg.OP_goto
+			binary.BigEndian.putChar(code.codes[code.codeLength + 5 : code.codeLength + 7] , char(7))
+			code.codes[code.codeLength + 7] = cg.OP_pop
+			code.codes[code.codeLength + 8] = cg.OP_pop
+			code.codes[code.codeLength + 9] = cg.OP_iconst_0
+			code.codes[code.codeLength + 10] = cg.OP_aconst_null
+			code.codeLength += 11
+			loadInt(c , code , 2)
+			code.codes[code.codeLength] = cg.OP_anewarray
+			c.insertClassConst(javaRootClass , code.codes[code.codeLength + 1 : code.codeLength + 3])
+			code.codeLength += 3
 
-            // store if ok
-            code.codes[code.codeLength] = cg.OP_dup_x1
-            code.codeLength++
-            code.codes[code.codeLength] = cg.OP_swap
-            code.codeLength++
-            TypeConverterAndPrimitivePacker.packPrimitives(c, code, typeBool)
-            code.codes[code.codeLength] = cg.OP_iconst_1
-            code.codeLength++
-            code.codes[code.codeLength] = cg.OP_swap
-            code.codeLength++
-            code.codes[code.codeLength] = cg.OP_aastore
-            code.codeLength++
-        } else {
-            maxStack = this.eb.build(c, code, assertion.Expression, context, state)
-            if  assertion.isType {
-                return maxStack
-            }
-            code.codes[code.codeLength] = cg.OP_dup
-            code.codeLength++
-            code.codes[code.codeLength] = cg.OP_instanceof
-            code.codeLength++
-            insertTypeAssertClass(c, code, assertion.Type)
-            exit := new cg.Exit(cg.OP_ifne, code)
-            code.codes[code.codeLength] = cg.OP_pop
-            code.codeLength++
-            code.codes[code.codeLength] = cg.OP_new
-            c.insertClassConst(javaExceptionClass, code.codes[code.codeLength+1:code.codeLength+3])
-            code.codes[code.codeLength+3] = cg.OP_dup
-            code.codeLength += 4
-            code.codes[code.codeLength] = cg.OP_ldc_w
-            c.insertStringConst("not a instance of class", code.codes[code.codeLength+1:code.codeLength+3])
-            code.codeLength += 3
-            if 3 > maxStack {
-                maxStack = 3
-            }
-            c.insertMethodCall(code, cg.OP_invokespecial, javaExceptionClass,
-                specialMethodInit, "(Ljava/lang/String;)V")
-            code.codes[code.codeLength] = cg.OP_athrow
-            code.codeLength++
-            writeExits([]cg.Exit{exit}, code.codeLength)
-            state.pushStack(c, assertion.Expression.value)
-            defer state.popStack(1)
-            context.MakeStackMap(code, state, code.codeLength)
-            code.codes[code.codeLength] = cg.OP_checkcast // convince the jvm
-            code.codeLength++
-            insertTypeAssertClass(c, code, assertion.Type)
-        }
+			// store object
+			code.codes[code.codeLength] = cg.OP_dup_x1
+			code.codeLength++
+			code.codes[code.codeLength] = cg.OP_swap
+			code.codeLength++
+			code.codes[code.codeLength] = cg.OP_iconst_0
+			code.codeLength++
+			code.codes[code.codeLength] = cg.OP_swap
+			code.codeLength++
+			if 5 > maxStack {
+				maxStack = 5
+			}
+			code.codes[code.codeLength] = cg.OP_checkcast // convince the jvm
+			code.codeLength++
+			insertTypeAssertClass(c , code , assertion.Type)
 
-        return
-    }
+			code.codes[code.codeLength] = cg.OP_aastore
+			code.codeLength++
 
+			// store if ok
+			code.codes[code.codeLength] = cg.OP_dup_x1
+			code.codeLength++
+			code.codes[code.codeLength] = cg.OP_swap
+			code.codeLength++
+			TypeConverterAndPrimitivePacker.packPrimitives(c , code , typeBool)
+			code.codes[code.codeLength] = cg.OP_iconst_1
+			code.codeLength++
+			code.codes[code.codeLength] = cg.OP_swap
+			code.codeLength++
+			code.codes[code.codeLength] = cg.OP_aastore
+			code.codeLength++
+		} else {
+			maxStack = this.eb.build(c , code , assertion.Expression , context , state)
+			if assertion.isType {
+				return maxStack
+			}
+			code.codes[code.codeLength] = cg.OP_dup
+			code.codeLength++
+			code.codes[code.codeLength] = cg.OP_instanceof
+			code.codeLength++
+			insertTypeAssertClass(c , code , assertion.Type)
+			exit := new cg.Exit(cg.OP_ifne , code)
+			code.codes[code.codeLength] = cg.OP_pop
+			code.codeLength++
+			code.codes[code.codeLength] = cg.OP_new
+			c.insertClassConst(javaExceptionClass , code.codes[code.codeLength + 1 : code.codeLength + 3])
+			code.codes[code.codeLength + 3] = cg.OP_dup
+			code.codeLength += 4
+			code.codes[code.codeLength] = cg.OP_ldc_w
+			c.insertStringConst("not a instance of class" , code.codes[code.codeLength + 1 : code.codeLength + 3])
+			code.codeLength += 3
+			if 3 > maxStack {
+				maxStack = 3
+			}
+			c.insertMethodCall(code , cg.OP_invokespecial , javaExceptionClass,
+				specialMethodInit , "(Ljava/lang/String;)V")
+			code.codes[code.codeLength] = cg.OP_athrow
+			code.codeLength++
+			writeExits([]cg.Exit{exit} , code.codeLength)
+			state.pushStack(c , assertion.Expression.value)
+			defer state.popStack(1)
+			context.MakeStackMap(code , state , code.codeLength)
+			code.codes[code.codeLength] = cg.OP_checkcast // convince the jvm
+			code.codeLength++
+			insertTypeAssertClass(c , code , assertion.Type)
+		}
+
+		return
+	}
 
 }
+

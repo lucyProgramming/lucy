@@ -124,8 +124,8 @@ class BuildExpressionIndex {
             maxStack = t
         }
         currentStack = 2 // mapref kref
-        if index.Expression.value.Map.K.isPointer() == false {
-            TypeConverterAndPrimitivePacker.packPrimitives(c, code, index.Expression.value.Map.K)
+        if index.Expression.value.theMap.K.isPointer() == false {
+            TypeConverterAndPrimitivePacker.packPrimitives(c, code, index.Expression.value.theMap.K)
         }
         code.codes[code.codeLength] = cg.OP_invokevirtual
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
@@ -135,10 +135,10 @@ class BuildExpressionIndex {
         ), code.codes[code.codeLength+1:code.codeLength+3])
         code.codeLength += 3
         state.popStack(1)
-        if index.Expression.value.Map.V.Type == ast.VariableTypeEnum {
-            TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, index.Expression.value.Map.V)
-        } else if index.Expression.value.Map.V.isPointer() {
-            TypeConverterAndPrimitivePacker.castPointer(c, code, index.Expression.value.Map.V)
+        if index.Expression.value.theMap.V.Type == ast.VariableTypeEnum {
+            TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, index.Expression.value.theMap.V)
+        } else if index.Expression.value.theMap.V.isPointer() {
+            TypeConverterAndPrimitivePacker.castPointer(c, code, index.Expression.value.theMap.V)
         } else {
             code.codes[code.codeLength] = cg.OP_dup // increment the stack
             code.codeLength++
@@ -146,7 +146,7 @@ class BuildExpressionIndex {
                 maxStack = 2
             }
             noNullExit := new cg.Exit(cg.OP_ifnonnull, code)
-            switch index.Expression.value.Map.V.Type {
+            switch index.Expression.value.theMap.V.Type {
             case ast.VariableTypeBool,
                 ast.VariableTypeByte,
                 ast.VariableTypeShort,
@@ -173,7 +173,7 @@ class BuildExpressionIndex {
             context.MakeStackMap(code, state, code.codeLength)
             state.popStack(1) // pop java_root_class ref
             writeExits([]cg.Exit{noNullExit}, code.codeLength)
-            TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, index.Expression.value.Map.V)
+            TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, index.Expression.value.theMap.V)
             writeExits([]cg.Exit{nullExit}, code.codeLength)
             state.pushStack(c, e.value)
             context.MakeStackMap(code, state, code.codeLength)

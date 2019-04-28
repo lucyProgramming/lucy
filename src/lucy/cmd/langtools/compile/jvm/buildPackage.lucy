@@ -198,8 +198,8 @@ public class BuildPackage {
         for name , v := range this.Package.block.typeAliases {
             t := new cg.AttributeLucyTypeAlias()
             t.alias = LucyTypeAlias.encode(name , v)
-            if v.alias != null {
-                t.comment = v.alias.comment
+            if v.theAlias != null {
+                t.comment = v.theAlias.comment
             }
             this.mainClass.Class.TypeAlias[i] = t
             i++
@@ -220,7 +220,7 @@ public class BuildPackage {
             if LucyFieldSignature.need(v.Type) {
                 f.attributeLucyFieldDescriptor = new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.encode(v.Type) , char(0))
                 if v.Type.Type == ast.VariableTypeFunction {
-                    if v.Type.functionType.vArgs != null {
+                    if v.Type.theFunctionType.vArgs != null {
                         f.attributeLucyFieldDescriptor.methodAccessFlag |=
                             cg.AccMethodVarargs
                     }

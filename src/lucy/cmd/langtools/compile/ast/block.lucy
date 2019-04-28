@@ -121,14 +121,14 @@ public class Block implements TopNodeInterface {
 		}
 		if this.typeAliases != null {
 			if t := this.typeAliases[name] ; t != null {
-				if t.alias != null && t.alias.findUsage {
+				if t.theAlias != null && t.theAlias.findUsage {
 					u := new Usage()
 					u.Type = "declaration"
 					u.pos = pos
-					t.alias.findUsageInstances.append(u)
+					t.theAlias.findUsageInstances.append(u)
 				}
-				if t.alias != null {
-					t.alias.used = true
+				if t.theAlias != null {
+					t.theAlias.used = true
 				}
 				return t , true
 			}
@@ -201,11 +201,11 @@ public class Block implements TopNodeInterface {
 			}
 			if bb.typeAliases != null {
 				if t := bb.typeAliases[name] ; t != null {
-					if t.alias.findUsageInstances != null {
+					if t.theAlias.findUsageInstances != null {
 						u := new Usage()
 						u.Type = "declaration"
 						u.pos = pos
-						t.alias.findUsageInstances.append(u)
+						t.theAlias.findUsageInstances.append(u)
 					}
 					return t
 				}
@@ -544,7 +544,6 @@ public class Block implements TopNodeInterface {
 					return err
 				}
 			}
-
 			return null
 		}
 		if en , ok := d.(EnumName) ; ok {

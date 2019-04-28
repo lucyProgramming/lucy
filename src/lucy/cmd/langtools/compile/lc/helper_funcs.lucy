@@ -31,13 +31,13 @@ fn loadEnumForFunction(loader ast.loadImport , f ast.Function) {
 }
 
 fn loadEnumVariableType(loader ast.loadImport , v ast.Type) {
-    t , err := loader.loadImport(v.Enum.name)
+    t , err := loader.loadImport(v.theEnum.name)
     if err != null {
         panic(err)
     }
     if tt , ok := t.(ast.Enum) ; ok && tt != null {
-        v.Enum = tt
+        v.theEnum = tt
     } else {
-        panic(sprintf("'%s' is not a enum" , v.Enum.name))
+        panic(sprintf("'%s' is not a enum" , v.theEnum.name))
     }
 }

@@ -17,7 +17,7 @@ public class TypeAlias implements TopNodeInterface {
             s += this.comment
         }
         tt := this.Type.cloneType()
-        tt.alias = null
+        tt.theAlias = null
         s += sprintf("typealias %s@%s" , this.name , tt.typeString())
     }
 

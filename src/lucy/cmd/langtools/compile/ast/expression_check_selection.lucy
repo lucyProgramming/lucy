@@ -19,7 +19,7 @@ class ExpressionCheckSelection {
                                 e.pos.errMsgPrefix() , Super , object.typeString())))
                     return
                 }
-                access , err := object.Class.getFieldOrMethod(block , e.pos , selection.name , new map{string -> bool}() , false , object.Class.name)
+                access , err := object.theClass.getFieldOrMethod(block , e.pos , selection.name , new map{string -> bool}() , false , object.theClass.name)
                 if err != null {
                     errs.append(err)
                     return
@@ -38,7 +38,7 @@ class ExpressionCheckSelection {
                     selection.method = method
                     result := new Type()
                     result.Type = VariableTypeFunction
-                    result.functionType = method.Function.Type
+                    result.theFunctionType = method.Function.Type
                     result.pos = e.pos
                     if selection.locateDefinition {
                         block.inheritedAttribute.p.setLocatedDefinitionPos(method)
@@ -47,7 +47,7 @@ class ExpressionCheckSelection {
                     return result
                 }
             case VariableTypePackage:
-                d , ok := object.Package.block.nameExists(selection.name , e.pos)
+                d , ok := object.thePackage.block.nameExists(selection.name , e.pos)
                 if selection.locateDefinition {
                     block.inheritedAttribute.p.setLocatedDefinitionPos(d)
                     return
@@ -61,7 +61,7 @@ class ExpressionCheckSelection {
                 if v , ok := d.(Variable) ; ok {
                     result := v.Type.cloneType()
                     result.pos = e.pos
-                    if v.isPublic() == false && object.Package.isSame(block.inheritedAttribute.p) == false {
+                    if v.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.p) == false {
                         err := new error(sprintf("%s variable '%s' is not public",
                                 e.pos.errMsgPrefix() , selection.name))
                         errs.append(err)
@@ -73,7 +73,7 @@ class ExpressionCheckSelection {
                     e.fromConst(c) //
                     result := c.Type.cloneType()
                     result.pos = e.pos
-                    if c.isPublic() == false && object.Package.isSame(block.inheritedAttribute.p) == false {
+                    if c.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.p) == false {
                         err := new error(sprintf("%s const '%s' is not public",
                                 e.pos.errMsgPrefix() , selection.name))
                         errs.append(err)
@@ -84,8 +84,8 @@ class ExpressionCheckSelection {
                     result := new Type()
                     result.pos = e.pos
                     result.Type = VariableTypeClass
-                    result.Class = c
-                    if c.isPublic() == false && object.Package.isSame(block.inheritedAttribute.p) == false {
+                    result.theClass = c
+                    if c.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.p) == false {
                         err := new error(sprintf("%s class '%s' is not public",
                                 e.pos.errMsgPrefix() , selection.name))
                         errs.append(err)
@@ -93,21 +93,21 @@ class ExpressionCheckSelection {
                     return result
                 }
                 if n , ok := d.(EnumName) ; ok {
-                    if n.Enum.isPublic() == false && object.Package.isSame(block.inheritedAttribute.p) == false {
+                    if n.Enum.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.p) == false {
                         err := new error(sprintf("%s enum '%s' is not public",
                                 e.pos.errMsgPrefix() , selection.name))
                         errs.append(err)
                     }
                     result := new Type()
                     result.pos = e.pos
-                    result.Enum = n.Enum
-                    result.enumName = n
+                    result.theEnum = n.Enum
+                    result.theEnumName = n
                     result.Type = VariableTypeEnum
                     selection.packageEnumName = n
                     return result
                 }
                 if f , ok := d.(Function) ; ok {
-                    if f.isPublic() == false && object.Package.isSame(block.inheritedAttribute.p) == false {
+                    if f.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.p) == false {
                         err := new error(sprintf("%s function '%s' is not public",
                                 e.pos.errMsgPrefix() , selection.name))
                         errs.append(err)
@@ -126,7 +126,7 @@ class ExpressionCheckSelection {
                     result := new Type()
                     result.pos = e.pos
                     result.Type = VariableTypeFunction
-                    result.functionType = f.Type
+                    result.theFunctionType = f.Type
                     selection.packageFunction = f
                     return result
                 }
@@ -142,25 +142,25 @@ class ExpressionCheckSelection {
                                     object.pos.errMsgPrefix())))
                         return object
                     }
-                    if object.Class.name == JavaRootClass {
+                    if object.theClass.name == JavaRootClass {
                         errs.append(new error(sprintf("%s '%s' is root class",
                                     object.pos.errMsgPrefix() , JavaRootClass)))
                         return object
                     }
-                    err := object.Class.loadSuperClass(block , e.pos)
+                    err := object.theClass.loadSuperClass(block , e.pos)
                     if err != null {
                         errs.append(err)
                         return object
                     }
-                    if object.Class.superClass == null {
+                    if object.theClass.superClass == null {
                         return object
                     }
                     result := object.cloneType()
                     result.pos = e.pos
-                    result.Class = result.Class.superClass
+                    result.theClass = result.theClass.superClass
                     return result
                 }
-                fieldOrMethod , err := object.Class.getFieldOrMethod(block , e.pos , selection.name , new map{string -> bool}() , false , object.Class.name)
+                fieldOrMethod , err := object.theClass.getFieldOrMethod(block , e.pos , selection.name , new map{string -> bool}() , false , object.theClass.name)
                 if err != null {
                     errs.append(err)
                     return null
@@ -171,7 +171,7 @@ class ExpressionCheckSelection {
                         errs.append(err)
                     }
                     if selection.locateDefinition {
-                        if object.Class.loadFromOutSide == false {
+                        if object.theClass.loadFromOutSide == false {
                             block.inheritedAttribute.p.setLocatedDefinitionPos(field)
                             return
                         } else {
@@ -189,7 +189,7 @@ class ExpressionCheckSelection {
                         errs.append(err)
                     }
                     if selection.locateDefinition {
-                        if object.Class.loadFromOutSide == false {
+                        if object.theClass.loadFromOutSide == false {
                             block.inheritedAttribute.p.setLocatedDefinitionPos(field)
                             return
                         }
@@ -197,7 +197,7 @@ class ExpressionCheckSelection {
                     selection.method = method
                     result := new Type()
                     result.Type = VariableTypeFunction
-                    result.functionType = method.Function.Type
+                    result.theFunctionType = method.Function.Type
                     result.pos = e.pos
                     return result
                 }
@@ -221,13 +221,13 @@ class ExpressionCheckSelection {
             case VariableTypeArray:
                 block.inheritedAttribute.p.autoCompletionItems = AutoCompletionItem.getArrayAutoCompletionItem(object)
             case VariableTypeDynamicSelector:
-                ExpressionCheckSelection.autoCompletionForDynamicSelector(object.Class , block)
+                ExpressionCheckSelection.autoCompletionForDynamicSelector(object.theClass , block)
             case VariableTypePackage:
-                ExpressionCheckSelection.autoCompletionForPackage(object.Package , block)
+                ExpressionCheckSelection.autoCompletionForPackage(object.thePackage , block)
             case VariableTypeObject:
-                ExpressionCheckSelection.autoCompletionForObject(object.Class , block , isThis)
+                ExpressionCheckSelection.autoCompletionForObject(object.theClass , block , isThis)
             case VariableTypeClass:
-                ExpressionCheckSelection.autoCompletionClass(object.Class , block)
+                ExpressionCheckSelection.autoCompletionClass(object.theClass , block)
         }
     }
 

@@ -363,7 +363,7 @@ public class Expression implements TopNodeInterface {
                     this.value = new Type()
                     this.value.Type = VariableTypeDynamicSelector
                     this.value.pos = this.pos
-                    this.value.Class = block.inheritedAttribute.Class
+                    this.value.theClass = block.inheritedAttribute.Class
                     returnValueTypes = [this.value]
                 }
 
@@ -598,7 +598,7 @@ public class Expression implements TopNodeInterface {
                 returnValueTypes[0] = new Type()
                 returnValueTypes[0].Type = VariableTypeFunction
                 returnValueTypes[0].pos = this.pos
-                returnValueTypes[0].functionType = f.Type
+                returnValueTypes[0].theFunctionType = f.Type
                 this.value = returnValueTypes[0]
             case ExpressionTypeList:
                 errs.append(new error(sprintf("%s cannot have expression '%s' at this scope," +
@@ -608,7 +608,7 @@ public class Expression implements TopNodeInterface {
                 returnValueTypes[0] = new Type()
                 returnValueTypes[0].Type = VariableTypePackage
                 returnValueTypes[0].pos = this.pos
-                returnValueTypes[0].Package = block.inheritedAttribute.p
+                returnValueTypes[0].thePackage = block.inheritedAttribute.p
                 this.value = returnValueTypes[0]
             case ExpressionTypeParenthesis:
                 ee := this.data.(Expression) // override
@@ -672,9 +672,9 @@ public class Expression implements TopNodeInterface {
                 return new error(sprintf("%s method '%s' is static" , this.pos.errMsgPrefix() , method.Function.name))
             }
             if false == this.isIdentifier(ThisPointerName) {
-                if this.value.Class.loadFromOutSide {
-                    if this.value.Class.isPublic() == false {
-                        return new error(sprintf("%s class '%s' is not public" , this.pos.errMsgPrefix() , this.value.Class.name))
+                if this.value.theClass.loadFromOutSide {
+                    if this.value.theClass.isPublic() == false {
+                        return new error(sprintf("%s class '%s' is not public" , this.pos.errMsgPrefix() , this.value.theClass.name))
                     }
                     if method.isPublic() == false {
                         return new error(sprintf("%s method '%s' is not public" , this.pos.errMsgPrefix() , method.Function.name))
@@ -690,10 +690,10 @@ public class Expression implements TopNodeInterface {
             if method.isStatic() == false {
                 return new error(sprintf("%s method '%s' is a instance method" , this.pos.errMsgPrefix() , method.Function.name))
             }
-            if this.value.Class != block.inheritedAttribute.Class {
-                if this.value.Class.loadFromOutSide {
-                    if this.value.Class.isPublic() == false {
-                        return new error(sprintf("%s class '%s' is not public" , this.pos.errMsgPrefix() , this.value.Class.name))
+            if this.value.theClass != block.inheritedAttribute.Class {
+                if this.value.theClass.loadFromOutSide {
+                    if this.value.theClass.isPublic() == false {
+                        return new error(sprintf("%s class '%s' is not public" , this.pos.errMsgPrefix() , this.value.theClass.name))
 
                     }
                     if method.isPublic() == false {
@@ -717,9 +717,9 @@ public class Expression implements TopNodeInterface {
                 return new error(sprintf("%s field '%s' is static" , this.pos.errMsgPrefix() , field.name))
             }
             if false == this.isIdentifier(ThisPointerName) {
-                if this.value.Class.loadFromOutSide {
-                    if this.value.Class.isPublic() == false {
-                        return new error(sprintf("%s class '%s' is not public" , this.pos.errMsgPrefix() , this.value.Class.name))
+                if this.value.theClass.loadFromOutSide {
+                    if this.value.theClass.isPublic() == false {
+                        return new error(sprintf("%s class '%s' is not public" , this.pos.errMsgPrefix() , this.value.theClass.name))
                     }
                     if field.isPublic() == false {
                         return new error(sprintf("%s field '%s' is not public" , this.pos.errMsgPrefix() , field.name))
@@ -735,10 +735,10 @@ public class Expression implements TopNodeInterface {
             if field.isStatic() == false {
                 return new error(sprintf("%s field '%s' is not static" , this.pos.errMsgPrefix() , field.name))
             }
-            if this.value.Class != block.inheritedAttribute.Class {
-                if this.value.Class.loadFromOutSide {
-                    if this.value.Class.isPublic() == false {
-                        return new error(sprintf("%s class '%s' is not public" , this.pos.errMsgPrefix() , this.value.Class.name))
+            if this.value.theClass != block.inheritedAttribute.Class {
+                if this.value.theClass.loadFromOutSide {
+                    if this.value.theClass.isPublic() == false {
+                        return new error(sprintf("%s class '%s' is not public" , this.pos.errMsgPrefix() , this.value.theClass.name))
                     }
                     if field.isPublic() == false {
                         return new error(sprintf("%s field '%s' is not public" , this.pos.errMsgPrefix() , field.name))

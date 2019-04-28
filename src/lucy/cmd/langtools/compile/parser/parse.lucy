@@ -87,7 +87,7 @@ class Parser {
 					this.next(lfIsToken)
 				} else {
 					this.tops.append(new ast.TopNode(new ast.Line()))
-					this.next(lfIsToken)
+					this.next(lfNotToken)
 				}
 
 			} else {

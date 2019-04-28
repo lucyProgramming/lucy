@@ -45,20 +45,20 @@ public class Descriptor {
             case ast.VariableTypeDouble:
                 return "D"
             case ast.VariableTypeArray:
-                meta := ArrayMetas[typ.array.Type] // combination type
+                meta := ArrayMetas[typ.theArray.Type] // combination type
                 return "L" + meta.className + ";"
             case ast.VariableTypeString:
                 return "Ljava/lang/String;"
             case ast.VariableTypeVoid:
                 return "V"
             case ast.VariableTypeObject:
-                return "L" + typ.Class.name + ";"
+                return "L" + typ.theClass.name + ";"
             case ast.VariableTypeMap:
                 return "L" + mapClass + ";"
             case ast.VariableTypeFunction:
                 return "L" + javaMethodHandleClass + ";"
             case ast.VariableTypeJavaArray:
-                return "[" + .typeDescriptor(typ.array)
+                return "[" + .typeDescriptor(typ.theArray)
             default:
         }
     }
@@ -69,9 +69,9 @@ public class Descriptor {
         } else if t.Type == ast.VariableTypeMap {
             return mapClass
         } else if t.Type == ast.VariableTypeObject {
-            return t.Class.name
+            return t.theClass.name
         } else if t.Type == ast.VariableTypeArray {
-            meta := ArrayMetas[t.array.Type]
+            meta := ArrayMetas[t.theArray.Type]
             return meta.className
         } else if t.Type == ast.VariableTypeFunction {
             return javaMethodHandleClass
@@ -132,11 +132,11 @@ public class Descriptor {
                 index := common.Bytes.indexByte(bs , ';') // end token
                 t = new ast.Type()
                 t.Type = ast.VariableTypeObject
-                t.Class = new ast.Class()
-                t.Class.name = string(bs[:index])
+                t.theClass = new ast.Class()
+                t.theClass.name = string(bs[:index])
                 bs = bs[index + 1:] // skip ;
-                t.Class.notImportedYet = true
-                if t.Class.name == javaStringClass {
+                t.theClass.notImportedYet = true
+                if t.theClass.name == javaStringClass {
                     t.Type = ast.VariableTypeString
                 }
                 return bs , t , null
@@ -147,7 +147,7 @@ public class Descriptor {
                 t = new ast.Type()
                 if err == null {
                     t.Type = ast.VariableTypeJavaArray
-                    t.array = array
+                    t.theArray = array
                 }
                 return bs , t , err
         }

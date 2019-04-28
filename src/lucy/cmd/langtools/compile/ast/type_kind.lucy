@@ -1,7 +1,5 @@
 // all rights reserved , check the LICENSE file
 
-
-
 public enum VariableTypeKind {
 	VariableTypeBool,
 	VariableTypeByte,

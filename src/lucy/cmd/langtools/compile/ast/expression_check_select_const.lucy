@@ -13,13 +13,13 @@ class ExpressionSelectConst {
                         object.pos.errMsgPrefix() , object.typeString())))
             return
         }
-        if object.Class.block.constants == null ||
-            object.Class.block.constants[selection.name] == null {
+        if object.theClass.block.constants == null ||
+            object.theClass.block.constants[selection.name] == null {
             errs.append(new error(sprintf("%s const '%s' not found",
                         e.pos.errMsgPrefix() , selection.name)))
             return
         }
-        c := object.Class.block.constants[selection.name]
+        c := object.theClass.block.constants[selection.name]
         e.fromConst(c)
         valueType = c.Type.cloneType()
         valueType.pos = e.pos

@@ -38,7 +38,7 @@ class BuildinFunctionSprintf {
         }
         objectArray := new ast.Type()
         objectArray.Type = ast.VariableTypeJavaArray
-        objectArray.array = state.newObjectVariableType(javaRootClass)
+        objectArray.theArray = state.newObjectVariableType(javaRootClass)
         state.pushStack(c, objectArray)
         index := int(0)
         for _, v := range call.args {

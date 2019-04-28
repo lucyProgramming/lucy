@@ -32,7 +32,7 @@ class TypeParser extends ParserFather {
                 ret = new ast.Type()
                 ret.pos = pos
                 ret.Type = ast.VariableTypeArray
-                ret.array = array
+                ret.theArray = array
             case lex.TokenBool:
                 ret = new ast.Type()
                 ret.Type = ast.VariableTypeBool
@@ -120,7 +120,7 @@ class TypeParser extends ParserFather {
                         m.V.Type = ast.VariableTypeBool
                         ret = new ast.Type()
                         ret.Type = ast.VariableTypeMap
-                        ret.Map = m
+                        ret.theMap = m
                         ret.pos = pos
                         return ret , null
                     }
@@ -147,7 +147,7 @@ class TypeParser extends ParserFather {
                 m.V = v
                 ret = new ast.Type()
                 ret.Type = ast.VariableTypeMap
-                ret.Map = m
+                ret.theMap = m
                 ret.pos = pos
 
             case lex.TokenFn:
@@ -160,7 +160,7 @@ class TypeParser extends ParserFather {
                 ret = new ast.Type()
                 ret.Type = ast.VariableTypeFunction
                 ret.pos = pos
-                ret.functionType = ft
+                ret.theFunctionType = ft
             case lex.TokenGlobal:
                 this.next(lfIsToken)
                 this.parser.unExpectNewLineAndSkip()
@@ -194,7 +194,7 @@ class TypeParser extends ParserFather {
             newRet := new ast.Type()
             newRet.pos = this.parser.mkPos()
             newRet.Type = ast.VariableTypeJavaArray
-            newRet.array = ret
+            newRet.theArray = ret
             newRet.isVariableArgs = true
             this.next(lfIsToken) // skip ...
             ret = newRet
@@ -211,7 +211,7 @@ class TypeParser extends ParserFather {
             newRet := new ast.Type()
             newRet.pos = this.parser.mkPos()
             newRet.Type = ast.VariableTypeJavaArray
-            newRet.array = ret
+            newRet.theArray = ret
             ret = newRet
             this.next(lfIsToken) // skip ]
         }

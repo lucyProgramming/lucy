@@ -63,7 +63,7 @@ class ExpressionArrayParser extends ParserFather {
             data.Type = new ast.Type()
             data.Type.Type = ast.VariableTypeArray
             data.Type.pos = pos
-            data.Type.array = array
+            data.Type.theArray = array
             data.Expression = e
             ret.data = data
             this.next(lfIsToken) // skip )
@@ -74,7 +74,7 @@ class ExpressionArrayParser extends ParserFather {
         if array != null {
             arr.Type = new ast.Type()
             arr.Type.Type = ast.VariableTypeArray
-            arr.Type.array = array
+            arr.Type.theArray = array
             arr.Type.pos = array.pos
         }
         /*

@@ -1,94 +1,89 @@
 // all rights reserved , check the LICENSE file
 
-
-
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/common"
 
 public class LucyFieldSignature {
+	static fn need(variableType ast.Type) -> (need bool) {
+		return variableType.Type == ast.VariableTypeMap ||
+				variableType.Type == ast.VariableTypeArray ||
+				variableType.Type == ast.VariableTypeEnum ||
+				variableType.Type == ast.VariableTypeFunction
+	}
 
+	static fn encode(variableType ast.Type) -> (d string) {
+		if variableType.Type == ast.VariableTypeMap {
+			d = "M" // start token of map
+			d += .encode(variableType.theMap.K)
+			d += .encode(variableType.theMap.V)
+			return d
+		}
+		if variableType.Type == ast.VariableTypeEnum {
+			d = "E"
+			d += variableType.theEnum.name + ";"
+			return d
+		}
+		if variableType.Type == ast.VariableTypeArray {
+			d = "]"
+			d += .encode(variableType.theArray)
+			return d
+		}
+		if variableType.Type == ast.VariableTypeFunction {
+			d = LucyMethodSignature.encode(variableType.theFunctionType)
+			return d
+		}
+		return Descriptor.typeDescriptor(variableType)
+	}
 
-    static fn need(variableType ast.Type)->(need bool)  {
-        return variableType.Type == ast.VariableTypeMap ||
-            variableType.Type == ast.VariableTypeArray ||
-            variableType.Type == ast.VariableTypeEnum ||
-            variableType.Type == ast.VariableTypeFunction
-    }
-
-    static fn encode(variableType ast.Type) -> (d string) {
-        if variableType.Type == ast.VariableTypeMap {
-            d = "M" // start token of map
-            d += .encode(variableType.Map.K)
-            d += .encode(variableType.Map.V)
-            return d
-        }
-        if variableType.Type == ast.VariableTypeEnum {
-            d = "E"
-            d += variableType.Enum.name + ";"
-            return d
-        }
-        if variableType.Type == ast.VariableTypeArray {
-            d = "]"
-            d += .encode(variableType.array)
-            return d
-        }
-        if variableType.Type == ast.VariableTypeFunction {
-            d = LucyMethodSignature.encode(variableType.functionType)
-            return d
-        }
-        return Descriptor.typeDescriptor(variableType)
-    }
-
-    public static fn decode(bs []byte) -> (bsSliced []byte,t ast.Type,err  error) {
-        if bs[0] == 'M' {
-            bs = bs[1:]
-            var kt ast.Type
-            bs, kt, err = .decode(bs)
-            if err != null {
-                return bs, null, err
-            }
-            var vt ast.Type
-            bs, vt, err = .decode(bs)
-            if err != null {
-                return bs, null, err
-            }
-            m := new ast.Type()
-            m.Type = ast.VariableTypeMap
-            m.Map = new ast.Map()
-            m.Map.K = kt
-            m.Map.V = vt
-            return bs, m, null
-        }
-        if bs[0] == 'E' {
-            bs = bs[1:]
-            a := new ast.Type()
-            a.Type = ast.VariableTypeEnum
-            index := common.Bytes.indexByte(bs, ';')
-            a.Enum = new ast.Enum ()
-            a.Enum.name = string(bs[:index])
-            bs = bs[index+1:]
-            return bs, a, null
-        }
-        if bs[0] == '(' {
-            a := new ast.Type()
-            a.Type = ast.VariableTypeFunction
-            a.functionType = new ast.FunctionType()
-            bs, err = LucyMethodSignature.decode(a.functionType, bs)
-            if err != null {
-                return bs, null, err
-            }
-            return bs, a, null
-        }
-        if bs[0] == ']' {
-            bs = bs[1:]
-            a := new ast.Type()
-            a.Type = ast.VariableTypeArray
-            bs, a.array, err = .decode(bs)
-            return bs, a, err
-        }
-        return Descriptor.ParseType(bs)
-    }
-
+	public static fn decode(bs []byte) -> (bsSliced []byte , t ast.Type , err error) {
+		if bs[0] == 'M' {
+			bs = bs[1:]
+			var kt ast.Type
+			bs , kt , err = .decode(bs)
+			if err != null {
+				return bs , null , err
+			}
+			var vt ast.Type
+			bs , vt , err = .decode(bs)
+			if err != null {
+				return bs , null , err
+			}
+			m := new ast.Type()
+			m.Type = ast.VariableTypeMap
+			m.theMap = new ast.Map()
+			m.theMap.K = kt
+			m.theMap.V = vt
+			return bs , m , null
+		}
+		if bs[0] == 'E' {
+			bs = bs[1:]
+			a := new ast.Type()
+			a.Type = ast.VariableTypeEnum
+			index := common.Bytes.indexByte(bs , ';')
+			a.theEnum = new ast.Enum()
+			a.theEnum.name = string(bs[:index])
+			bs = bs[index + 1:]
+			return bs , a , null
+		}
+		if bs[0] == '(' {
+			a := new ast.Type()
+			a.Type = ast.VariableTypeFunction
+			a.theFunctionType = new ast.FunctionType()
+			bs , err = LucyMethodSignature.decode(a.theFunctionType , bs)
+			if err != null {
+				return bs , null , err
+			}
+			return bs , a , null
+		}
+		if bs[0] == ']' {
+			bs = bs[1:]
+			a := new ast.Type()
+			a.Type = ast.VariableTypeArray
+			bs , a.theArray , err = .decode(bs)
+			return bs , a , err
+		}
+		return Descriptor.ParseType(bs)
+	}
 
 }
 

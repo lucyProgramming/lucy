@@ -1,14 +1,13 @@
 // all rights reserved , check the LICENSE file
 
- import "lucy/binary"
+import "lucy/binary"
 
 public class AttributeLucyClassConst {
-	
 	public constants []LucyClassConst
-	
-	public static fn fromBs(c Class, bs []byte) -> (cs AttributeLucyClassConst){
+
+	public static fn fromBs(c Class , bs []byte) -> (cs AttributeLucyClassConst) {
 		cs = new AttributeLucyClassConst()
-	    cs.constants = []LucyClassConst{}
+		cs.constants = []LucyClassConst{}
 		for len(bs) > 0 {
 			constant := new LucyClassConst()
 			constant.name = string(c.constPools[binary.BigEndian.getChar(bs)].info)
@@ -18,30 +17,28 @@ public class AttributeLucyClassConst {
 			cs.constants.append(constant)
 		}
 	}
-	
-	fn toAttributeInfo(c Class) -> (ret AttributeInfo)   {
+
+	fn toAttributeInfo(c Class) -> (ret AttributeInfo) {
 		if this == null || len(this.constants) == 0 {
 			return null
 		}
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const(AttributeNameLucyClassConst)
-		ret.info = new []byte(len(this.constants)*6)
-		for k, v := range this.constants {
-			b := ret.info[k*6:]
-			binary.BigEndian.putChar(b, c.insertUtf8Const(v.name))
-			binary.BigEndian.putChar(b[2:], c.insertUtf8Const(v.descriptor))
-			binary.BigEndian.putChar(b[4:], v.valueIndex)
+		ret.info = new []byte(len(this.constants) * 6)
+		for k , v := range this.constants {
+			b := ret.info[k * 6:]
+			binary.BigEndian.putChar(b , c.insertUtf8Const(v.name))
+			binary.BigEndian.putChar(b[2:] , c.insertUtf8Const(v.descriptor))
+			binary.BigEndian.putChar(b[4:] , v.valueIndex)
 		}
 		ret.attributeLength = (len(ret.info))
 		return ret
-	}	
+	}
 }
-
 
 public class LucyClassConst {
 	public name       string
 	public descriptor string
 	public valueIndex char
 }
-
 

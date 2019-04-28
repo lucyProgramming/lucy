@@ -30,9 +30,9 @@ class ExpressionCheckMethodCall {
 		}
 		switch object.Type {
 			case VariableTypePackage:
-				return .checkMethodCallExpressionOnPackage(e , block , errs , object.Package)
+				return .checkMethodCallExpressionOnPackage(e , block , errs , object.thePackage)
 			case VariableTypeMap:
-				return .checkMethodCallExpressionOnMap(e , block , errs , object.Map)
+				return .checkMethodCallExpressionOnMap(e , block , errs , object.theMap)
 			case VariableTypeArray:
 				return .checkMethodCallExpressionOnArray(e , block , errs , object)
 			case VariableTypeJavaArray:
@@ -85,7 +85,7 @@ class ExpressionCheckMethodCall {
 					if call.locateDefinition &&
 						block.inheritedAttribute.p.getLocatedDefinitionPos() == null &&
 						block.inheritedAttribute.p.locatedDefinitionPosBaseOn == null {
-						x := object.Class.getMethodOrFieldHandleByName(block , call.name)
+						x := object.theClass.getMethodOrFieldHandleByName(block , call.name)
 						block.inheritedAttribute.p.setLocatedDefinitionPos(x)
 					}
 				}
@@ -93,30 +93,30 @@ class ExpressionCheckMethodCall {
 					errs.append(new error(sprintf("%s cannot call '%s'" , e.pos.errMsgPrefix() , call.name)))
 					return
 				}
-				call.Class = object.Class
+				call.Class = object.theClass
 				errsLength := len(errs)
 				callArgTypes := checkExpressions(block , call.args , errs , true)
 				if len(errs) > errsLength {
-					return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
+					return .returnValuesForFailCall(object.theClass , block , call.name , e.pos)
 				}
-				if object.Class.isInterface() {
+				if object.theClass.isInterface() {
 					if object.Type == VariableTypeClass {
 						errs.append(new error(sprintf("%s cannot method call on interface '%s'",
-									e.pos.errMsgPrefix() , object.Class.name)))
+									e.pos.errMsgPrefix() , object.theClass.name)))
 
-						return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
+						return .returnValuesForFailCall(object.theClass , block , call.name , e.pos)
 					}
 					if call.locateDefinition {
-						m , _ := object.Class.getFieldOrMethod(block,
-							e.pos , call.name , new map{string -> bool}() , false , object.Class.name)
+						m , _ := object.theClass.getFieldOrMethod(block,
+							e.pos , call.name , new map{string -> bool}() , false , object.theClass.name)
 						block.inheritedAttribute.p.setLocatedDefinitionPos(m)
 						return
 					}
 					ms , matched , err :=
-						object.Class.accessInterfaceObjectMethod(block , e.pos , errs , new map{string -> bool}() , call.name , call , callArgTypes , false , object.Class.name)
+						object.theClass.accessInterfaceObjectMethod(block , e.pos , errs , new map{string -> bool}() , call.name , call , callArgTypes , false , object.theClass.name)
 					if err != null {
 						errs.append(err)
-						return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
+						return .returnValuesForFailCall(object.theClass , block , call.name , e.pos)
 					}
 					if matched {
 						if call.locateDefinition {
@@ -134,15 +134,15 @@ class ExpressionCheckMethodCall {
 						return ms[0].Function.Type.mkCallReturnTypes(e.pos)
 					}
 					errs.append(methodsNotMatchError(e.pos , call.name , ms , callArgTypes))
-					return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
+					return .returnValuesForFailCall(object.theClass , block , call.name , e.pos)
 				}
 				if len(call.parameterTypes) > 0 {
 					errs.append(new error(sprintf("%s method call expect no parameter types",
 								errMsgPrefix(e.pos))))
 				}
 				fieldMethodHandler := []ClassField{null}
-				ms , matched , err := object.Class.accessMethod(block , e.pos , errs , new map{string -> bool}() , call , callArgTypes,
-					false , object.Class.name , fieldMethodHandler)
+				ms , matched , err := object.theClass.accessMethod(block , e.pos , errs , new map{string -> bool}() , call , callArgTypes,
+					false , object.theClass.name , fieldMethodHandler)
 				if err != null {
 					errs.append(err)
 					if len(ms) > 0 {
@@ -159,7 +159,7 @@ class ExpressionCheckMethodCall {
 					if call.locateDefinition {
 						block.inheritedAttribute.p.setLocatedDefinitionPos(fieldMethodHandler[0])
 					}
-					return fieldMethodHandler[0].Type.functionType.mkCallReturnTypes(e.pos)
+					return fieldMethodHandler[0].Type.theFunctionType.mkCallReturnTypes(e.pos)
 				}
 				if matched {
 					m := ms[0]
@@ -191,8 +191,8 @@ class ExpressionCheckMethodCall {
 		when x.(type) {
 			case ClassField:
 				t := x.(ClassField)
-				if t.Type.functionType != null {
-					return t.Type.functionType.mkCallReturnTypes(pos)
+				if t.Type.theFunctionType != null {
+					return t.Type.theFunctionType.mkCallReturnTypes(pos)
 				}
 			case ClassMethod:
 				t := x.(ClassMethod)
@@ -223,17 +223,17 @@ class ExpressionCheckMethodCall {
 						e.pos.errMsgPrefix())))
 			return
 		}
-		if object.Class.loadFromOutSide {
-			err := object.Class.loadSuperClass(block , e.pos)
+		if object.theClass.loadFromOutSide {
+			err := object.theClass.loadSuperClass(block , e.pos)
 			if err != null {
 				errs.append(err)
 				return
 			}
-			if object.Class.superClass == null {
+			if object.theClass.superClass == null {
 				return
 			}
 		} else {
-			if object.Class.superClass == null {
+			if object.theClass.superClass == null {
 				return
 			}
 		}
@@ -243,7 +243,7 @@ class ExpressionCheckMethodCall {
 		if len(errs) > errsLength {
 			return
 		}
-		ms , matched , err := object.Class.superClass.accessConstructionMethod(block , e.pos , errs,
+		ms , matched , err := object.theClass.superClass.accessConstructionMethod(block , e.pos , errs,
 			null , call , callArgsTypes)
 		if err != null {
 			errs.append(new error(sprintf("%s %s" , e.pos.errMsgPrefix() , err.getMessage())))
@@ -252,7 +252,7 @@ class ExpressionCheckMethodCall {
 		if matched {
 			m := ms[0]
 			if call.locateDefinition {
-				if object.Class.loadFromOutSide == false {
+				if object.theClass.loadFromOutSide == false {
 					block.inheritedAttribute.p.setLocatedDefinitionPos(m)
 					return
 				} else {
@@ -260,12 +260,12 @@ class ExpressionCheckMethodCall {
 				}
 
 			}
-			if err := object.Class.superClass.constructionMethodAccessAble(e.pos , m) ; err != null {
+			if err := object.theClass.superClass.constructionMethodAccessAble(e.pos , m) ; err != null {
 				errs.append(err)
 			}
 			call.name = "<init>"
 			call.method = m
-			call.Class = object.Class.superClass
+			call.Class = object.theClass.superClass
 			block.statements[0].isCallFatherConstructionStatement = true
 			block.inheritedAttribute.Function.callFatherConstructionExpression = e
 			return
@@ -284,17 +284,17 @@ class ExpressionCheckMethodCall {
 		errsLength := len(errs)
 		callArgTypes := checkExpressions(block , call.args , errs , true)
 		if len(errs) > errsLength {
-			return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
+			return .returnValuesForFailCall(object.theClass , block , call.name , e.pos)
 		}
-		ms , matched , err := object.Class.accessMethod(block , e.pos , errs , new map{string -> bool}() , call , callArgTypes , false , object.Class.name , fieldMethodHandler)
+		ms , matched , err := object.theClass.accessMethod(block , e.pos , errs , new map{string -> bool}() , call , callArgTypes , false , object.theClass.name , fieldMethodHandler)
 		if err != null {
 			errs.append(err)
-			return .returnValuesForFailCall(object.Class , block , call.name , e.pos)
+			return .returnValuesForFailCall(object.theClass , block , call.name , e.pos)
 		}
 		if matched {
 			if fieldMethodHandler[0] != null {
 				if call.locateDefinition {
-					if object.Class.loadFromOutSide == false {
+					if object.theClass.loadFromOutSide == false {
 						block.inheritedAttribute.p.setLocatedDefinitionPos(fieldMethodHandler[0])
 						return
 					} else {
@@ -303,12 +303,12 @@ class ExpressionCheckMethodCall {
 
 				}
 				call.fieldMethodHandler = fieldMethodHandler[0]
-				return fieldMethodHandler[0].Type.functionType.mkCallReturnTypes(e.pos)
+				return fieldMethodHandler[0].Type.theFunctionType.mkCallReturnTypes(e.pos)
 			} else {
 				method := ms[0]
 				call.method = method
 				if call.locateDefinition {
-					if object.Class.loadFromOutSide == false {
+					if object.theClass.loadFromOutSide == false {
 						block.inheritedAttribute.p.setLocatedDefinitionPos(method)
 						return
 					} else {
@@ -428,13 +428,13 @@ class ExpressionCheckMethodCall {
 				errs.append(new error(sprintf("%s variable '%s' cannot be a template fucntion",
 							errMsgPrefix(call.parameterTypes[0].pos) , call.name)))
 			}
-			ret := v.Type.functionType.mkCallReturnTypes(e.pos)
+			ret := v.Type.theFunctionType.mkCallReturnTypes(e.pos)
 			errsLength := len(errs)
 			callArgsTypes := checkExpressions(block , call.args , errs , true)
 			if len(errs) > errsLength {
 				return ret
 			}
-			vArgs , err := v.Type.functionType.fitArgs(block , e.pos , call.args , callArgsTypes , null)
+			vArgs , err := v.Type.theFunctionType.fitArgs(block , e.pos , call.args , callArgsTypes , null)
 			if err != null {
 				errs.append(err)
 			}
@@ -459,7 +459,7 @@ class ExpressionCheckMethodCall {
 			conversion.Type = new Type()
 			conversion.Type.Type = VariableTypeObject
 			conversion.Type.pos = e.pos
-			conversion.Type.Class = c
+			conversion.Type.theClass = c
 			e.Type = ExpressionTypeCheckCast
 			if len(call.args) >= 1 {
 				conversion.Expression = call.args[0]
@@ -540,9 +540,9 @@ class ExpressionCheckMethodCall {
 						continue
 					}
 					if call.name == common.ArrayMethodAppend {
-						if array.array.assignAble(block , errs , t) == false {
+						if array.theArray.assignAble(block , errs , t) == false {
 							errs.append(new error(sprintf("%s cannot use '%s' as '%s' to call method '%s'",
-										t.pos.errMsgPrefix() , t.typeString() , array.array.typeString() , call.name)))
+										t.pos.errMsgPrefix() , t.typeString() , array.theArray.typeString() , call.name)))
 						}
 					} else {
 						if array.assignAble(block , errs , t) == false {
@@ -564,8 +564,8 @@ class ExpressionCheckMethodCall {
 				result := new Type()
 				result.Type = VariableTypeJavaArray
 				result.pos = e.pos
-				result.array = array.array.cloneType()
-				result.array.pos = e.pos
+				result.theArray = array.theArray.cloneType()
+				result.theArray.pos = e.pos
 				if len(call.args) > 0 {
 					errs.append(new error(sprintf("%s too many argument to call,method '%s' expect no arguments",
 								call.args[0].pos.errMsgPrefix() , call.name)))

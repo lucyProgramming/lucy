@@ -3,71 +3,70 @@
 import "lucy/jvm/cg"
 
 public class Variable {
-    public isBuildIn                bool
-    public isGlobal                 bool
-    public isFunctionParameter      bool
-    public isReturn                 bool
-    public beenCapturedAsLeftValue  int
-    public beenCapturedAsRightValue int
-    public used                     bool       // use as right value
-    public accessFlags              char       // public private or protected
-    public pos                      Pos
-    public defaultValueExpression   Expression
-    public name                     string
-    public Type                     Type
-    public localValOffset           char       // offset in stack frame
-    public jvmDescriptor            string     // jvm
-    public comment                  string
-    public crlf                     bool       // contains crlf  
-    public globalVarClassName       string
-    public locateDefinition         bool
-    public findUsage                bool
-    public findUsageInstances       []Usage
+	public isBuildIn                bool
+	public isGlobal                 bool
+	public isFunctionParameter      bool
+	public isReturn                 bool
+	public beenCapturedAsLeftValue  int
+	public beenCapturedAsRightValue int
+	public used                     bool       // use as right value
+	public accessFlags              char       // public private or protected
+	public pos                      Pos
+	public defaultValueExpression   Expression
+	public name                     string
+	public Type                     Type
+	public localValOffset           char       // offset in stack frame
+	public jvmDescriptor            string     // jvm
+	public comment                  string
+	public crlf                     bool       // contains crlf  
+	public globalVarClassName       string
+	public locateDefinition         bool
+	public findUsage                bool
+	public findUsageInstances       []Usage
 
-    public startPc char
+	public startPc char
 
-    /*
+	/*
 		a // this is a inline comment
 	*/
-    public inlineComment string //   in
+	public inlineComment string //   in
 
-    public containsLf bool // contains "\n"
+	public containsLf bool // contains "\n"
 
-    public fn containsLfOrInlineComment() -> (contains bool) {
-        return this.containsLf || this.inlineComment != null
-    }
+	public fn containsLfOrInlineComment() -> (contains bool) {
+		return this.containsLf || this.inlineComment != null
+	}
 
-    public fn isPublic() -> (is bool) {
-        return this.accessFlags &
-                cg.AccFieldPublic != 0
-    }
-    // copy to v
-    fn cp(v Variable) {
-        v.isBuildIn = this.isBuildIn
-        v.isGlobal = this.isGlobal
-        v.isFunctionParameter = this.isFunctionParameter
-        v.isReturn = this.isReturn
-        v.name = this.name
-        v.Type = this.Type.cloneType()
-        v.comment = this.comment
-        v.locateDefinition = this.locateDefinition
-        v.findUsage = this.findUsage
-    }
+	public fn isPublic() -> (is bool) {
+		return this.accessFlags &
+				cg.AccFieldPublic != 0
+	}
+	// copy to v
+	fn copyThis2Another(another Variable) {
+		another.isBuildIn = this.isBuildIn
+		another.isGlobal = this.isGlobal
+		another.isFunctionParameter = this.isFunctionParameter
+		another.isReturn = this.isReturn
+		another.name = this.name
+		another.Type = this.Type.cloneType()
+		another.comment = this.comment
+		another.locateDefinition = this.locateDefinition
+		another.findUsage = this.findUsage
+	}
 
-    fn reduceFindUsageInstances(block Block) {
-        if this.findUsage == false {
-            return
-        }
-        this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
-        block.inheritedAttribute.p.findUsage = this.findUsageInstances
-    }
+	fn reduceFindUsageInstances(block Block) {
+		if this.findUsage == false {
+			return
+		}
+		this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
+		block.inheritedAttribute.p.findUsage = this.findUsageInstances
+	}
 
-    public fn mkDescription() -> (s string = "") {
-        if this.comment != null {
-            s += this.comment
-        }
-        s += sprintf("var %s %s" , this.name , this.Type.typeString())
-    }
+	public fn mkDescription() -> (s string = "") {
+		if this.comment != null {
+			s += this.comment
+		}
+		s += sprintf("var %s %s" , this.name , this.Type.typeString())
+	}
 }
-
 

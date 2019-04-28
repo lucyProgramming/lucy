@@ -13,501 +13,500 @@ public const AccClassAnnotation char = 0x2000 // 标识注解类型
 public const AccClassEnum char = 0x4000 // 标识枚举类型
 
 public class Class {
-           writer                  io.OutputStream
-           magic                   int                      //0xCAFEBABE
-    public minorVersion            char
-    public majorVersion            char
-    public constPools              []ConstPool
-    public accessFlags             char
-    public thisClass               char
-    public superClass              char
-    public interfaces              []char
-    public fields                  []FieldInfo
-    public methods                 []MethodInfo
-    public attributes              []AttributeInfo
-    public attributeGroupedByName  AttributeGroupedByName
-    public TypeAlias               []AttributeLucyTypeAlias
-    public attributeLucyEnum       AttributeLucyEnum
-    public attributeLucyClassConst AttributeLucyClassConst
-    public attributeInnerClasses   AttributeInnerClasses
-    //const caches
-    public utf8Constants               map{string -> ConstPool}
-    public intConstants                map{int -> ConstPool}
-    public longConstants               map{long -> ConstPool}
-    public floatConstants              map{float -> ConstPool}
-    public doubleConstants             map{double -> ConstPool}
-    public classConstants              map{string -> ConstPool}
-    public stringConstants             map{string -> ConstPool}
-    public fieldRefConstants           map{string -> ConstPool}
-    public nameAndTypeConstants        map{string -> ConstPool}
-    public methodrefConstants          map{string -> ConstPool}
-    public interfaceMethodrefConstants map{string -> ConstPool}
-    public methodTypeConstants         map{string -> ConstPool}
-    public attributeGlobalFunction     AttributeGlobalFunction
+	       writer                  io.OutputStream
+	       magic                   int                      //0xCAFEBABE
+	public minorVersion            char
+	public majorVersion            char
+	public constPools              []ConstPool
+	public accessFlags             char
+	public thisClass               char
+	public superClass              char
+	public interfaces              []char
+	public fields                  []FieldInfo
+	public methods                 []MethodInfo
+	public attributes              []AttributeInfo
+	public attributeGroupedByName  AttributeGroupedByName
+	public TypeAlias               []AttributeLucyTypeAlias
+	public attributeLucyEnum       AttributeLucyEnum
+	public attributeLucyClassConst AttributeLucyClassConst
+	public attributeInnerClasses   AttributeInnerClasses
+	//const caches
+	public utf8Constants               map{string -> ConstPool}
+	public intConstants                map{int -> ConstPool}
+	public longConstants               map{long -> ConstPool}
+	public floatConstants              map{float -> ConstPool}
+	public doubleConstants             map{double -> ConstPool}
+	public classConstants              map{string -> ConstPool}
+	public stringConstants             map{string -> ConstPool}
+	public fieldRefConstants           map{string -> ConstPool}
+	public nameAndTypeConstants        map{string -> ConstPool}
+	public methodrefConstants          map{string -> ConstPool}
+	public interfaceMethodrefConstants map{string -> ConstPool}
+	public methodTypeConstants         map{string -> ConstPool}
+	public attributeGlobalFunction     AttributeGlobalFunction
 
-    public fn isSynthetic() -> (is bool) {
-        return (this.accessFlags & AccClassSynthetic) != 0
-    }
+	public fn isSynthetic() -> (is bool) {
+		return (this.accessFlags & AccClassSynthetic) != 0
+	}
 
-    public fn insertMethodTypeConst(n ConstantInfoMethodTypeHighLevel) -> (index char) {
-        if this.methodTypeConstants == null {
-            this.methodTypeConstants = new map{string -> ConstPool}()
-        }
-        if len(this.constPools) == 0 {
-            this.constPools = []ConstPool{null}
-        }
-        if con := this.methodTypeConstants[n.toString()] ; con != null {
-            return con.selfIndex
-        }
-        info := new ConstantInfoMethodType(this.insertUtf8Const(n.descriptor)).ToConstPool()
-        info.selfIndex = this.currentConstPoolLength()
-        this.constPools.append(info)
-        this.methodTypeConstants[n.toString()] = info
-        return info.selfIndex
-    }
+	public fn insertMethodTypeConst(n ConstantInfoMethodTypeHighLevel) -> (index char) {
+		if this.methodTypeConstants == null {
+			this.methodTypeConstants = new map{string -> ConstPool}()
+		}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
+		}
+		if con := this.methodTypeConstants[n.toString()] ; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoMethodType(this.insertUtf8Const(n.descriptor)).ToConstPool()
+		info.selfIndex = this.currentConstPoolLength()
+		this.constPools.append(info)
+		this.methodTypeConstants[n.toString()] = info
+		return info.selfIndex
+	}
 
-    public fn insertInterfaceMethodrefConst(n ConstantInfoInterfaceMethodrefHighLevel) -> (index char) {
-        if this.interfaceMethodrefConstants == null {
-            this.interfaceMethodrefConstants = new map{string -> ConstPool}()
-        }
-        if len(this.constPools) == 0 {
-            this.constPools = []ConstPool{null}
-        }
-        if con := this.interfaceMethodrefConstants[n.toString()] ; con != null {
-            return con.selfIndex
-        }
-        info := new ConstantInfoInterfaceMethodref(
-            this.insertClassConst(n.className),
-            this.insertNameAndType(new ConstantInfoNameAndTypeHighLevel(n.method , n.descriptor))).ToConstPool()
-        info.selfIndex = this.currentConstPoolLength()
-        this.constPools.append(info)
-        this.interfaceMethodrefConstants[n.toString()] = info
-        return info.selfIndex
-    }
+	public fn insertInterfaceMethodrefConst(n ConstantInfoInterfaceMethodrefHighLevel) -> (index char) {
+		if this.interfaceMethodrefConstants == null {
+			this.interfaceMethodrefConstants = new map{string -> ConstPool}()
+		}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
+		}
+		if con := this.interfaceMethodrefConstants[n.toString()] ; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoInterfaceMethodref(
+			this.insertClassConst(n.className),
+			this.insertNameAndType(new ConstantInfoNameAndTypeHighLevel(n.method , n.descriptor))).ToConstPool()
+		info.selfIndex = this.currentConstPoolLength()
+		this.constPools.append(info)
+		this.interfaceMethodrefConstants[n.toString()] = info
+		return info.selfIndex
+	}
 
-    public fn insertMethodrefConst(n ConstantInfoMethodrefHighLevel) -> (index char) {
-        if this.methodrefConstants == null {
-            this.methodrefConstants = new map{string -> ConstPool}()
-        }
-        if len(this.constPools) == 0 {
-            this.constPools = []ConstPool{null}
-        }
-        if con := this.methodrefConstants[n.toString()] ; con != null {
-            return con.selfIndex
-        }
-        info := new ConstantInfoMethodref(
-            this.insertClassConst(n.className),
-            this.insertNameAndType(new ConstantInfoNameAndTypeHighLevel(
-                    n.method,
-                    n.descriptor))).ToConstPool()
-        info.selfIndex = this.currentConstPoolLength()
-        this.constPools.append(info)
-        this.methodrefConstants[n.toString()] = info
-        return info.selfIndex
-    }
+	public fn insertMethodrefConst(n ConstantInfoMethodrefHighLevel) -> (index char) {
+		if this.methodrefConstants == null {
+			this.methodrefConstants = new map{string -> ConstPool}()
+		}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
+		}
+		if con := this.methodrefConstants[n.toString()] ; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoMethodref(
+			this.insertClassConst(n.className),
+			this.insertNameAndType(new ConstantInfoNameAndTypeHighLevel(
+					n.method,
+					n.descriptor))).ToConstPool()
+		info.selfIndex = this.currentConstPoolLength()
+		this.constPools.append(info)
+		this.methodrefConstants[n.toString()] = info
+		return info.selfIndex
+	}
 
-    public fn insertNameAndType(n ConstantInfoNameAndTypeHighLevel) -> (index char) {
-        if this.nameAndTypeConstants == null {
-            this.nameAndTypeConstants = new map{string -> ConstPool}()
-        }
-        if len(this.constPools) == 0 {
-            this.constPools = []ConstPool{null}
-        }
-        if con := this.nameAndTypeConstants[n.toString()] ; con != null {
-            return con.selfIndex
-        }
-        info := new ConstantInfoNameAndType(
-            this.insertUtf8Const(n.name),
-            this.insertUtf8Const(n.descriptor)).ToConstPool()
-        info.selfIndex = this.currentConstPoolLength()
-        this.constPools.append(info)
-        this.nameAndTypeConstants[n.toString()] = info
-        return info.selfIndex
-    }
-    public fn insertFieldRefConst(f ConstantInfoFieldrefHighLevel) -> (index char) {
-        if this.fieldRefConstants == null {
-            this.fieldRefConstants = new map{string -> ConstPool}()
-        }
-        if len(this.constPools) == 0 {
-            this.constPools = []ConstPool{null}
-        }
-        if con := this.fieldRefConstants[f.toString()] ; con != null {
-            return con.selfIndex
-        }
-        info := new ConstantInfoFieldref(
-            this.insertClassConst(f.className),
-            this.insertNameAndType(new ConstantInfoNameAndTypeHighLevel(f.field , f.descriptor))).ToConstPool()
-        info.selfIndex = this.currentConstPoolLength()
-        this.constPools.append(info)
-        this.fieldRefConstants[f.toString()] = info
-        return info.selfIndex
-    }
+	public fn insertNameAndType(n ConstantInfoNameAndTypeHighLevel) -> (index char) {
+		if this.nameAndTypeConstants == null {
+			this.nameAndTypeConstants = new map{string -> ConstPool}()
+		}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
+		}
+		if con := this.nameAndTypeConstants[n.toString()] ; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoNameAndType(
+			this.insertUtf8Const(n.name),
+			this.insertUtf8Const(n.descriptor)).ToConstPool()
+		info.selfIndex = this.currentConstPoolLength()
+		this.constPools.append(info)
+		this.nameAndTypeConstants[n.toString()] = info
+		return info.selfIndex
+	}
+	public fn insertFieldRefConst(f ConstantInfoFieldrefHighLevel) -> (index char) {
+		if this.fieldRefConstants == null {
+			this.fieldRefConstants = new map{string -> ConstPool}()
+		}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
+		}
+		if con := this.fieldRefConstants[f.toString()] ; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoFieldref(
+			this.insertClassConst(f.className),
+			this.insertNameAndType(new ConstantInfoNameAndTypeHighLevel(f.field , f.descriptor))).ToConstPool()
+		info.selfIndex = this.currentConstPoolLength()
+		this.constPools.append(info)
+		this.fieldRefConstants[f.toString()] = info
+		return info.selfIndex
+	}
 
-    public fn insertUtf8Const(s string) -> (index char) {
-        if s == null {
-            s = ""
-        }
-        if this.utf8Constants == null {
-            this.utf8Constants = new map{string -> ConstPool}()
-        }
-        if len(this.constPools) == 0 {
-            this.constPools = []ConstPool{null}
-        }
-        if con := this.utf8Constants[s] ; con != null {
-            return con.selfIndex
-        }
-        info := (new ConstantInfoUtf8(s)).ToConstPool()
-        info.selfIndex = this.currentConstPoolLength()
-        this.constPools.append(info)
-        this.utf8Constants[s] = info
-        return info.selfIndex
-    }
+	public fn insertUtf8Const(s string) -> (index char) {
+		if s == null {
+			s = ""
+		}
+		if this.utf8Constants == null {
+			this.utf8Constants = new map{string -> ConstPool}()
+		}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
+		}
+		if con := this.utf8Constants[s] ; con != null {
+			return con.selfIndex
+		}
+		info := (new ConstantInfoUtf8(s)).ToConstPool()
+		info.selfIndex = this.currentConstPoolLength()
+		this.constPools.append(info)
+		this.utf8Constants[s] = info
+		return info.selfIndex
+	}
 
-    public fn insertIntConst(i int) -> (index char) {
-        if this.intConstants == null {
-            this.intConstants = new map{int -> ConstPool}()
-        }
-        if len(this.constPools) == 0 {
-            this.constPools = []ConstPool{null}
-        }
-        if con := this.intConstants[i] ; con != null {
-            return con.selfIndex
-        }
-        info := new ConstantInfoInteger(i).ToConstPool()
-        info.selfIndex = this.currentConstPoolLength()
-        this.constPools.append(info)
-        this.intConstants[i] = info
-        return info.selfIndex
-    }
-    public fn insertLongConst(i long) -> (index char) {
-        if this.longConstants == null {
-            this.longConstants = new map{long -> ConstPool}()
-        }
-        if len(this.constPools) == 0 {
-            this.constPools = []ConstPool{null}
-        }
-        if con := this.longConstants[i] ; con != null {
-            return con.selfIndex
-        }
-        info := new ConstantInfoLong(i).ToConstPool()
-        info.selfIndex = this.currentConstPoolLength()
-        this.constPools.append(info , null)
-        this.longConstants[i] = info
-        return info.selfIndex
-    }
+	public fn insertIntConst(i int) -> (index char) {
+		if this.intConstants == null {
+			this.intConstants = new map{int -> ConstPool}()
+		}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
+		}
+		if con := this.intConstants[i] ; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoInteger(i).ToConstPool()
+		info.selfIndex = this.currentConstPoolLength()
+		this.constPools.append(info)
+		this.intConstants[i] = info
+		return info.selfIndex
+	}
+	public fn insertLongConst(i long) -> (index char) {
+		if this.longConstants == null {
+			this.longConstants = new map{long -> ConstPool}()
+		}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
+		}
+		if con := this.longConstants[i] ; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoLong(i).ToConstPool()
+		info.selfIndex = this.currentConstPoolLength()
+		this.constPools.append(info , null)
+		this.longConstants[i] = info
+		return info.selfIndex
+	}
 
-    public fn insertFloatConst(f float) -> (index char) {
-        if this.floatConstants == null {
-            this.floatConstants = new map{float -> ConstPool}()
-        }
-        if len(this.constPools) == 0 {
-            this.constPools = []ConstPool{null}
-        }
-        if con := this.floatConstants[f] ; con != null {
-            return con.selfIndex
-        }
-        info := new ConstantInfoFloat(f).ToConstPool()
-        info.selfIndex = this.currentConstPoolLength()
-        this.constPools.append(info)
-        this.floatConstants[f] = info
-        return info.selfIndex
-    }
+	public fn insertFloatConst(f float) -> (index char) {
+		if this.floatConstants == null {
+			this.floatConstants = new map{float -> ConstPool}()
+		}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
+		}
+		if con := this.floatConstants[f] ; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoFloat(f).ToConstPool()
+		info.selfIndex = this.currentConstPoolLength()
+		this.constPools.append(info)
+		this.floatConstants[f] = info
+		return info.selfIndex
+	}
 
-    public fn insertDoubleConst(f double) -> (index char) {
-        if this.doubleConstants == null {
-            this.doubleConstants = new map{double -> ConstPool}()
-        }
-        if len(this.constPools) == 0 {
-            this.constPools = []ConstPool{null}
-        }
-        if con := this.doubleConstants[f] ; con != null {
-            return con.selfIndex
-        }
-        info := (new ConstantInfoDouble(f)).ToConstPool()
-        info.selfIndex = this.currentConstPoolLength()
-        this.constPools.append(info , null)
-        this.doubleConstants[f] = info
-        return info.selfIndex
-    }
+	public fn insertDoubleConst(f double) -> (index char) {
+		if this.doubleConstants == null {
+			this.doubleConstants = new map{double -> ConstPool}()
+		}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
+		}
+		if con := this.doubleConstants[f] ; con != null {
+			return con.selfIndex
+		}
+		info := (new ConstantInfoDouble(f)).ToConstPool()
+		info.selfIndex = this.currentConstPoolLength()
+		this.constPools.append(info , null)
+		this.doubleConstants[f] = info
+		return info.selfIndex
+	}
 
-    public fn insertClassConst(name string) -> (index char) {
-        if this.classConstants == null {
-            this.classConstants = new map{string -> ConstPool}()
-        }
-        if len(this.constPools) == 0 {
-            this.constPools = []ConstPool{null}
-        }
-        if con := this.classConstants[name] ; con != null {
-            return con.selfIndex
-        }
-        info := new ConstantInfoClass(this.insertUtf8Const(name)).ToConstPool()
-        info.selfIndex = this.currentConstPoolLength()
-        this.constPools.append(info)
-        this.classConstants[name] = info
-        return info.selfIndex
-    }
+	public fn insertClassConst(name string) -> (index char) {
+		if this.classConstants == null {
+			this.classConstants = new map{string -> ConstPool}()
+		}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
+		}
+		if con := this.classConstants[name] ; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoClass(this.insertUtf8Const(name)).ToConstPool()
+		info.selfIndex = this.currentConstPoolLength()
+		this.constPools.append(info)
+		this.classConstants[name] = info
+		return info.selfIndex
+	}
 
-    public fn insertStringConst(s string) -> (index char) {
-        if s == null {
-            panic("insert null string to const pool")
-        }
-        if this.stringConstants == null {
-            this.stringConstants = new map{string -> ConstPool}()
-        }
-        if len(this.constPools) == 0 {
-            this.constPools = []ConstPool{null}
-        }
-        if con := this.stringConstants[s] ; con != null {
-            return con.selfIndex
-        }
-        info := new ConstantInfoString(this.insertUtf8Const(s)).ToConstPool()
-        info.selfIndex = this.currentConstPoolLength()
-        this.constPools.append(info)
-        this.stringConstants[s] = info
-        return info.selfIndex
-    }
+	public fn insertStringConst(s string) -> (index char) {
+		if s == null {
+			panic("insert null string to const pool")
+		}
+		if this.stringConstants == null {
+			this.stringConstants = new map{string -> ConstPool}()
+		}
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null}
+		}
+		if con := this.stringConstants[s] ; con != null {
+			return con.selfIndex
+		}
+		info := new ConstantInfoString(this.insertUtf8Const(s)).ToConstPool()
+		info.selfIndex = this.currentConstPoolLength()
+		this.constPools.append(info)
+		this.stringConstants[s] = info
+		return info.selfIndex
+	}
 
-    fn fromHighLevel(high ClassHighLevel , majorVersion char , minorVersion char) {
-        this.majorVersion = majorVersion
-        this.minorVersion = minorVersion
-        if len(this.constPools) == 0 {
-            this.constPools = []ConstPool{null} // jvm const pool index begin at 1
-        }
-        this.accessFlags = high.accessFlags
-        this.thisClass = this.insertClassConst(high.name)
-        this.superClass = this.insertClassConst(high.superClass)
-        this.interfaces = []char{}
-        for _ , i := range high.interfaces {
-            inter := (new ConstantInfoClass(this.insertUtf8Const(i))).ToConstPool()
-            index := this.currentConstPoolLength()
-            this.interfaces.append(index)
-            this.constPools.append(inter)
-        }
-        this.fields = []FieldInfo{}
-        for _ , f := range high.fields {
-            field := new FieldInfo()
-            field.accessFlags = f.accessFlags
-            field.nameIndex = this.insertUtf8Const(f.name)
-            field.attributes = []AttributeInfo{}
-            if f.attributeConstantValue != null {
-                field.attributes.append(f.attributeConstantValue.toAttributeInfo(this))
-            }
-            field.descriptorIndex = this.insertUtf8Const(f.descriptor)
-            if f.attributeLucyFieldDescriptor != null {
-                field.attributes.append(f.attributeLucyFieldDescriptor.toAttributeInfo(this))
-            }
-            if f.attributeLucyConst != null {
-                field.attributes.append(f.attributeLucyConst.toAttributeInfo(this))
-            }
-            this.fields.append(field)
-        }
-        this.methods = []MethodInfo{}
-        for _ , ms := range high.methods {
-            for _ , m := range ms {
-                info := new MethodInfo()
-                info.accessFlags = m.accessFlags
-                info.nameIndex = this.insertUtf8Const(m.name)
-                info.descriptorIndex = this.insertUtf8Const(m.descriptor)
-                info.attributes = []AttributeInfo{}
-                if m.code != null {
-                    info.attributes.append(m.code.toAttributeInfo(this))
-                }
-                if m.attributeLucyMethodDescriptor != null {
-                    info.attributes.append(m.attributeLucyMethodDescriptor.toAttributeInfo(this))
-                }
-                if m.attributeTriggerPackageInitMethod != null {
-                    info.attributes.append(m.attributeTriggerPackageInitMethod.toAttributeInfo(this)) 
-                }
-                if m.attributeDefaultParameters != null {
-                    info.attributes.append(m.attributeDefaultParameters.toAttributeInfo(this))
-                }
-                if m.attributeMethodParameters != null {
-                    t := m.attributeMethodParameters.toAttributeInfo(this)
-                    if t != null {
-                        info.attributes.append(t)
-                    }
-                }
-                if m.attributeLucyReturnListNames != null {
-                    t := m.attributeLucyReturnListNames.toAttributeInfo(this , AttributeNameLucyReturnListNames)
-                    if t != null {
-                        info.attributes.append(t)
-                    }
-                }
-                this.methods.append(info)
-            }
-        }
-        if this.attributes == null {
-            this.attributes = []AttributeInfo{}
-        }
-        //source file
-        this.attributes.append(new AttributeSourceFile(high.getSourceFile()).toAttributeInfo(this))
-        for _ , v := range this.TypeAlias {
-            this.attributes.append(v.toAttributeInfo(this))
-        }
-        if this.attributeLucyEnum != null {
-            this.attributes.append(this.attributeLucyEnum.toAttributeInfo(this))
-        }
-        if this.attributeLucyClassConst != null {
-            this.attributes.append(this.attributeLucyClassConst.toAttributeInfo(this))
-        }
-        if this.attributeInnerClasses != null {
-            if a := this.attributeInnerClasses.toAttributeInfo(this) ; a != null {
-                this.attributes.append(a)
-            }
-        }
-        for _ , v := range high.templateFunctions {
-            this.attributes.append(v.toAttributeInfo(this))
-        }
-        if this.attributeGlobalFunction != null {
-            this.attributes.append(this.attributeGlobalFunction.toAttributeInfo(this))
-        }
-        this.ifConstPoolOverMaxSize()
-        return
-    }
+	fn fromHighLevel(high ClassHighLevel , majorVersion char , minorVersion char) {
+		this.majorVersion = majorVersion
+		this.minorVersion = minorVersion
+		if len(this.constPools) == 0 {
+			this.constPools = []ConstPool{null} // jvm const pool index begin at 1
+		}
+		this.accessFlags = high.accessFlags
+		this.thisClass = this.insertClassConst(high.name)
+		this.superClass = this.insertClassConst(high.superClass)
+		this.interfaces = []char{}
+		for _ , i := range high.interfaces {
+			inter := (new ConstantInfoClass(this.insertUtf8Const(i))).ToConstPool()
+			index := this.currentConstPoolLength()
+			this.interfaces.append(index)
+			this.constPools.append(inter)
+		}
+		this.fields = []FieldInfo{}
+		for _ , f := range high.fields {
+			field := new FieldInfo()
+			field.accessFlags = f.accessFlags
+			field.nameIndex = this.insertUtf8Const(f.name)
+			field.attributes = []AttributeInfo{}
+			if f.attributeConstantValue != null {
+				field.attributes.append(f.attributeConstantValue.toAttributeInfo(this))
+			}
+			field.descriptorIndex = this.insertUtf8Const(f.descriptor)
+			if f.attributeLucyFieldDescriptor != null {
+				field.attributes.append(f.attributeLucyFieldDescriptor.toAttributeInfo(this))
+			}
+			if f.attributeLucyConst != null {
+				field.attributes.append(f.attributeLucyConst.toAttributeInfo(this))
+			}
+			this.fields.append(field)
+		}
+		this.methods = []MethodInfo{}
+		for _ , ms := range high.methods {
+			for _ , m := range ms {
+				info := new MethodInfo()
+				info.accessFlags = m.accessFlags
+				info.nameIndex = this.insertUtf8Const(m.name)
+				info.descriptorIndex = this.insertUtf8Const(m.descriptor)
+				info.attributes = []AttributeInfo{}
+				if m.code != null {
+					info.attributes.append(m.code.toAttributeInfo(this))
+				}
+				if m.attributeLucyMethodDescriptor != null {
+					info.attributes.append(m.attributeLucyMethodDescriptor.toAttributeInfo(this))
+				}
+				if m.attributeTriggerPackageInitMethod != null {
+					info.attributes.append(m.attributeTriggerPackageInitMethod.toAttributeInfo(this))
+				}
+				if m.attributeDefaultParameters != null {
+					info.attributes.append(m.attributeDefaultParameters.toAttributeInfo(this))
+				}
+				if m.attributeMethodParameters != null {
+					t := m.attributeMethodParameters.toAttributeInfo(this)
+					if t != null {
+						info.attributes.append(t)
+					}
+				}
+				if m.attributeLucyReturnListNames != null {
+					t := m.attributeLucyReturnListNames.toAttributeInfo(this , AttributeNameLucyReturnListNames)
+					if t != null {
+						info.attributes.append(t)
+					}
+				}
+				this.methods.append(info)
+			}
+		}
+		if this.attributes == null {
+			this.attributes = []AttributeInfo{}
+		}
+		//source file
+		this.attributes.append(new AttributeSourceFile(high.getSourceFile()).toAttributeInfo(this))
+		for _ , v := range this.TypeAlias {
+			this.attributes.append(v.toAttributeInfo(this))
+		}
+		if this.attributeLucyEnum != null {
+			this.attributes.append(this.attributeLucyEnum.toAttributeInfo(this))
+		}
+		if this.attributeLucyClassConst != null {
+			this.attributes.append(this.attributeLucyClassConst.toAttributeInfo(this))
+		}
+		if this.attributeInnerClasses != null {
+			if a := this.attributeInnerClasses.toAttributeInfo(this) ; a != null {
+				this.attributes.append(a)
+			}
+		}
+		for _ , v := range high.templateFunctions {
+			this.attributes.append(v.toAttributeInfo(this))
+		}
+		if this.attributeGlobalFunction != null {
+			this.attributes.append(this.attributeGlobalFunction.toAttributeInfo(this))
+		}
+		this.ifConstPoolOverMaxSize()
+		return
+	}
 
-    fn currentConstPoolLength() -> (length char) {
-        return char(len(this.constPools))
-    }
-    fn ifConstPoolOverMaxSize() {
-        if len(this.constPools) > ConstantPoolMaxSize {
-            panic(sprintf("const pool max size is:%d" , ConstantPoolMaxSize))
-        }
-    }
+	fn currentConstPoolLength() -> (length char) {
+		return char(len(this.constPools))
+	}
+	fn ifConstPoolOverMaxSize() {
+		if len(this.constPools) > ConstantPoolMaxSize {
+			panic(sprintf("const pool max size is:%d" , ConstantPoolMaxSize))
+		}
+	}
 
-    public fn isInnerClass() -> (is bool) {
-        if len(this.attributeGroupedByName[AttributeNameInnerClasses]) == 0 {
-            return
-        }
-        innerClass := this.attributeGroupedByName[AttributeNameInnerClasses][0]
-        var attr = new AttributeInnerClasses()
-        thisClassName := string(this.constPools[binary.BigEndian.getChar(this.constPools[this.thisClass].info)].info)
-        attr.fromBs(this , innerClass.info)
-        for _ , v := range attr.classes {
-            if thisClassName == v.innerClass {
-                return true
-            }
-        }
-        return
-    }
+	public fn isInnerClass() -> (is bool) {
+		if len(this.attributeGroupedByName[AttributeNameInnerClasses]) == 0 {
+			return
+		}
+		innerClass := this.attributeGroupedByName[AttributeNameInnerClasses][0]
+		var attr = new AttributeInnerClasses()
+		thisClassName := string(this.constPools[binary.BigEndian.getChar(this.constPools[this.thisClass].info)].info)
+		attr.fromBs(this , innerClass.info)
+		for _ , v := range attr.classes {
+			if thisClassName == v.innerClass {
+				return true
+			}
+		}
+		return
+	}
 
-    public fn outPut(writer io.FileOutputStream) {
-        this.writer = writer
-        {
-            //magic number
-            bs := new byte[](4)
-            bs[0] = byte(0xca)
-            bs[1] = byte(0xfe)
-            bs[2] = byte(0xba)
-            bs[3] = byte(0xbe)
-            writer.write(bs)
-        }
+	public fn outPut(writer io.FileOutputStream) {
+		this.writer = writer
+		{
+			//magic number
+			bs := new byte[](4)
+			bs[0] = byte(0xca)
+			bs[1] = byte(0xfe)
+			bs[2] = byte(0xba)
+			bs[3] = byte(0xbe)
+			writer.write(bs)
+		}
 
-        // minor version
-        bs2 := new []byte(2)
-        binary.BigEndian.putChar(bs2 , char(this.minorVersion))
-        writer.write(bs2.getUnderlyingArray())
-        // major version
-        binary.BigEndian.putChar(bs2 , char(this.majorVersion))
-        writer.write(bs2.getUnderlyingArray())
-        //const pool
-        binary.BigEndian.putChar(bs2 , this.currentConstPoolLength())
-        writer.write(bs2.getUnderlyingArray())
-        for _ , v := range this.constPools {
-            if v == null {
-                continue
-            }
-            writer.write(int(v.tag))
-            writer.write(v.info.getUnderlyingArray() , v.info.start() , v.info.size())
-        }
-        //access flag
-        binary.BigEndian.putChar(bs2 , char(this.accessFlags))
-        writer.write(bs2.getUnderlyingArray())
+		// minor version
+		bs2 := new []byte(2)
+		binary.BigEndian.putChar(bs2 , char(this.minorVersion))
+		writer.write(bs2.getUnderlyingArray())
+		// major version
+		binary.BigEndian.putChar(bs2 , char(this.majorVersion))
+		writer.write(bs2.getUnderlyingArray())
+		//const pool
+		binary.BigEndian.putChar(bs2 , this.currentConstPoolLength())
+		writer.write(bs2.getUnderlyingArray())
+		for _ , v := range this.constPools {
+			if v == null {
+				continue
+			}
+			writer.write(int(v.tag))
+			writer.write(v.info.getUnderlyingArray() , v.info.start() , v.info.size())
+		}
+		//access flag
+		binary.BigEndian.putChar(bs2 , char(this.accessFlags))
+		writer.write(bs2.getUnderlyingArray())
 
-        binary.BigEndian.putChar(bs2 , this.thisClass)
-        //this class
-        writer.write(bs2.getUnderlyingArray())
+		binary.BigEndian.putChar(bs2 , this.thisClass)
+		//this class
+		writer.write(bs2.getUnderlyingArray())
 
-        //super Class
-        binary.BigEndian.putChar(bs2 , this.superClass)
-        writer.write(bs2.getUnderlyingArray())
+		//super Class
+		binary.BigEndian.putChar(bs2 , this.superClass)
+		writer.write(bs2.getUnderlyingArray())
 
-        // interface
-        binary.BigEndian.putChar(bs2 , char(len(this.interfaces)))
-        writer.write(bs2.getUnderlyingArray())
+		// interface
+		binary.BigEndian.putChar(bs2 , char(len(this.interfaces)))
+		writer.write(bs2.getUnderlyingArray())
 
-        for _ , v := range this.interfaces {
-            binary.BigEndian.putChar(bs2 , char(v))
-            writer.write(bs2.getUnderlyingArray())
-        }
-        this.writeFields()
-        //methods
-        this.writeMethods()
-        // attribute
-        this.writeAttributeInfo(this.attributes)
-    }
+		for _ , v := range this.interfaces {
+			binary.BigEndian.putChar(bs2 , char(v))
+			writer.write(bs2.getUnderlyingArray())
+		}
+		this.writeFields()
+		//methods
+		this.writeMethods()
+		// attribute
+		this.writeAttributeInfo(this.attributes)
+	}
 
-    fn writeMethods() {
-        bs2 := new []byte(2)
-        binary.BigEndian.putChar(bs2 , char(len(this.methods)))
-        this.writer.write(bs2.getUnderlyingArray())
-        for _ , v := range this.methods {
-            binary.BigEndian.putChar(bs2 , char(v.accessFlags))
-            this.writer.write(bs2.getUnderlyingArray())
-            binary.BigEndian.putChar(bs2 , v.nameIndex)
-            this.writer.write(bs2.getUnderlyingArray())
-            binary.BigEndian.putChar(bs2 , v.descriptorIndex)
-            this.writer.write(bs2.getUnderlyingArray())
-            this.writeAttributeInfo(v.attributes)
-        }
-    }
+	fn writeMethods() {
+		bs2 := new []byte(2)
+		binary.BigEndian.putChar(bs2 , char(len(this.methods)))
+		this.writer.write(bs2.getUnderlyingArray())
+		for _ , v := range this.methods {
+			binary.BigEndian.putChar(bs2 , char(v.accessFlags))
+			this.writer.write(bs2.getUnderlyingArray())
+			binary.BigEndian.putChar(bs2 , v.nameIndex)
+			this.writer.write(bs2.getUnderlyingArray())
+			binary.BigEndian.putChar(bs2 , v.descriptorIndex)
+			this.writer.write(bs2.getUnderlyingArray())
+			this.writeAttributeInfo(v.attributes)
+		}
+	}
 
-    fn writeFields() {
-        bs2 := new []byte(2)
-        binary.BigEndian.putChar(bs2 , char(len(this.fields)))
-        this.writer.write(bs2.getUnderlyingArray())
-        for _ , v := range this.fields {
-            binary.BigEndian.putChar(bs2 , char(v.accessFlags))
-            this.writer.write(bs2.getUnderlyingArray())
-            binary.BigEndian.putChar(bs2 , v.nameIndex)
-            this.writer.write(bs2.getUnderlyingArray())
-            binary.BigEndian.putChar(bs2 , v.descriptorIndex)
-            this.writer.write(bs2.getUnderlyingArray())
-            this.writeAttributeInfo(v.attributes)
-        }
-    }
+	fn writeFields() {
+		bs2 := new []byte(2)
+		binary.BigEndian.putChar(bs2 , char(len(this.fields)))
+		this.writer.write(bs2.getUnderlyingArray())
+		for _ , v := range this.fields {
+			binary.BigEndian.putChar(bs2 , char(v.accessFlags))
+			this.writer.write(bs2.getUnderlyingArray())
+			binary.BigEndian.putChar(bs2 , v.nameIndex)
+			this.writer.write(bs2.getUnderlyingArray())
+			binary.BigEndian.putChar(bs2 , v.descriptorIndex)
+			this.writer.write(bs2.getUnderlyingArray())
+			this.writeAttributeInfo(v.attributes)
+		}
+	}
 
-    fn writeAttributeInfo(attrs []AttributeInfo) {
-        bs2 := new []byte(2)
-        binary.BigEndian.putChar(bs2 , char(len(attrs)))
-        this.writer.write(bs2.getUnderlyingArray())
-        bs4 := new []byte(4)
-        for _ , v := range attrs {
-            binary.BigEndian.putChar(bs2 , v.nameIndex)
-            this.writer.write(bs2.getUnderlyingArray())
-            binary.BigEndian.putInt(bs4 , v.attributeLength)
-            this.writer.write(bs4.getUnderlyingArray())
-            if v.attributeLength > 0 {
-                this.writer.write(v.info.getUnderlyingArray() , v.info.start() , v.info.size())
-            }
-        }
-    }
-    public fn getAttributeByName(name string) -> (attrs []AttributeInfo) {
-        return getAttributeByName(this.attributeGroupedByName , name)
-    }
+	fn writeAttributeInfo(attrs []AttributeInfo) {
+		bs2 := new []byte(2)
+		binary.BigEndian.putChar(bs2 , char(len(attrs)))
+		this.writer.write(bs2.getUnderlyingArray())
+		bs4 := new []byte(4)
+		for _ , v := range attrs {
+			binary.BigEndian.putChar(bs2 , v.nameIndex)
+			this.writer.write(bs2.getUnderlyingArray())
+			binary.BigEndian.putInt(bs4 , v.attributeLength)
+			this.writer.write(bs4.getUnderlyingArray())
+			if v.attributeLength > 0 {
+				this.writer.write(v.info.getUnderlyingArray() , v.info.start() , v.info.size())
+			}
+		}
+	}
+	public fn getAttributeByName(name string) -> (attrs []AttributeInfo) {
+		return getAttributeByName(this.attributeGroupedByName , name)
+	}
 
-    public fn getName() -> (name string) {
-        t := this.constPools[this.thisClass]
-        nameIndex := binary.BigEndian.getChar(t.info)
-        return string(this.constPools[nameIndex].info)
-    }
-    public fn getInterfacesName() -> (names []string) {
-        names = new []string(len(this.interfaces))
-        for k , v := range this.interfaces {
-            t := this.constPools[v]
-            nameIndex := binary.BigEndian.getChar(t.info)
-            names[k] = string(this.constPools[nameIndex].info)
-        }
-    }
+	public fn getName() -> (name string) {
+		t := this.constPools[this.thisClass]
+		nameIndex := binary.BigEndian.getChar(t.info)
+		return string(this.constPools[nameIndex].info)
+	}
+	public fn getInterfacesName() -> (names []string) {
+		names = new []string(len(this.interfaces))
+		for k , v := range this.interfaces {
+			t := this.constPools[v]
+			nameIndex := binary.BigEndian.getChar(t.info)
+			names[k] = string(this.constPools[nameIndex].info)
+		}
+	}
 }
-
 

@@ -34,9 +34,9 @@ fn registerBuildInFunctions() {
         c.Type.returnList[0].name = "e"
         c.Type.returnList[0].Type = new Type()
         c.Type.returnList[0].Type.Type = VariableTypeObject
-        c.Type.returnList[0].Type.Class = new Class()
-        c.Type.returnList[0].Type.Class.name = DefaultExceptionClass
-        c.Type.returnList[0].Type.Class.notImportedYet = true
+        c.Type.returnList[0].Type.theClass = new Class()
+        c.Type.returnList[0].Type.theClass.name = DefaultExceptionClass
+        c.Type.returnList[0].Type.theClass.notImportedYet = true
         c.buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error , args []Type , pos Pos) {
             if len(e.parameterTypes) > 0 {
                 errs.append(new error(sprintf("%s buildin function expect no typed parameter" , e.parameterTypes[0].pos.errMsgPrefix())))
@@ -56,13 +56,13 @@ fn registerBuildInFunctions() {
                         errs.append(new error(sprintf("%s load exception class failed,err:%s" , pos.errMsgPrefix() , err.getMessage())))
                         return
                     }
-                    f.Type.returnList[0].Type.Class = c
+                    f.Type.returnList[0].Type.theClass = c
                     err = block.inheritedAttribute.Defer.registerExceptionClass(c)
                     if err != null {
                         errs.append(new error(sprintf("%s %s" , pos.errMsgPrefix() , err.getMessage())))
                     }
                 } else {
-                    f.Type.returnList[0].Type.Class = block.inheritedAttribute.Defer.exceptionClass
+                    f.Type.returnList[0].Type.theClass = block.inheritedAttribute.Defer.exceptionClass
                 }
 
                 return
@@ -108,7 +108,7 @@ fn registerBuildInFunctions() {
             meta := new BuildInFunctionPanicMeta()
             e.buildInFunctionMeta = meta
             if args[0].Type == VariableTypeObject {
-                meta.argThrowable , _ = args[0].Class.haveSuperClass(block , new map{string -> bool}() , args[0].pos , JavaThrowableClass)
+                meta.argThrowable , _ = args[0].theClass.haveSuperClass(block , new map{string -> bool}() , args[0].pos , JavaThrowableClass)
             }
         }
 

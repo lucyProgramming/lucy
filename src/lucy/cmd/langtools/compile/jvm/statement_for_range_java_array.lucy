@@ -86,7 +86,7 @@ class BuildForRangeJavaArray {
                 copyOPs(code,
                     storeLocalVariableOps(ast.VariableTypeObject , attr.identifierValue.Variable.localValOffset))
                 forState.appendLocals(c,
-                    forState.newObjectVariableType(closure.getMeta(attr.rangeOn.value.array.Type).className))
+                    forState.newObjectVariableType(closure.getMeta(attr.rangeOn.value.theArray.Type).className))
             }
             if attr.identifierKey != null &&
                 attr.identifierKey.Variable.beenCapturedAsLeftValue > 0 {
@@ -133,7 +133,7 @@ class BuildForRangeJavaArray {
                 maxStack = 2
             }
             // load value
-            switch attr.rangeOn.value.array.Type {
+            switch attr.rangeOn.value.theArray.Type {
                 case ast.VariableTypeBool , ast.VariableTypeByte:
                     code.codes[code.codeLength] = cg.OP_baload
                 case ast.VariableTypeShort:
@@ -155,13 +155,13 @@ class BuildForRangeJavaArray {
             code.codeLength++
             // v
             autoVar.V = code.maxLocals
-            code.maxLocals += jvmSlotSize(attr.rangeOn.value.array)
+            code.maxLocals += jvmSlotSize(attr.rangeOn.value.theArray)
             //store to v tmp
             copyOPs(code,
-                storeLocalVariableOps(attr.rangeOn.value.array.Type,
+                storeLocalVariableOps(attr.rangeOn.value.theArray.Type,
                     autoVar.V))
 
-            blockState.appendLocals(c , attr.rangeOn.value.array)
+            blockState.appendLocals(c , attr.rangeOn.value.theArray)
         }
         //current stack is 0
         if s.condition.Type == ast.ExpressionTypeVarAssign {
@@ -169,7 +169,7 @@ class BuildForRangeJavaArray {
                 if attr.identifierValue.Variable.beenCapturedAsLeftValue > 0 {
                     copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , attr.identifierValue.Variable.localValOffset))
                     copyOPs(code,
-                        loadLocalVariableOps(attr.rangeOn.value.array.Type,
+                        loadLocalVariableOps(attr.rangeOn.value.theArray.Type,
                             autoVar.V))
                     this.eb.storeLocalVar(c , code , attr.identifierValue.Variable)
                 } else {
@@ -198,9 +198,9 @@ class BuildForRangeJavaArray {
                     maxStack = stack
                 }
                 //load v
-                copyOPs(code , loadLocalVariableOps(attr.rangeOn.value.array.Type,
+                copyOPs(code , loadLocalVariableOps(attr.rangeOn.value.theArray.Type,
                         autoVar.V))
-                if t := remainStack + jvmSlotSize(attr.rangeOn.value.array) ; t > maxStack {
+                if t := remainStack + jvmSlotSize(attr.rangeOn.value.theArray) ; t > maxStack {
                     maxStack = t
                 }
                 copyOPs(code , ops)

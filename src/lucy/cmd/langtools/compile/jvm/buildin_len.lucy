@@ -39,7 +39,7 @@ class BuildinFunctionLen {
             code.codes[code.codeLength] = cg.OP_arraylength
             code.codeLength++
         } else if a0.value.Type == ast.VariableTypeArray {
-            meta := ArrayMetas[a0.value.array.Type]
+            meta := ArrayMetas[a0.value.theArray.Type]
             code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
                     "size",

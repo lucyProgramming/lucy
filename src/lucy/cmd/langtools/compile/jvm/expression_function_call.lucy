@@ -28,12 +28,12 @@ class BuildExpressionFunctionCall {
         code.codes[code.codeLength] = cg.OP_invokevirtual
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandle",
             methodHandleInvokeMethodName,
-            Descriptor.methodDescriptor(call.Expression.value.functionType)) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+            Descriptor.methodDescriptor(call.Expression.value.theFunctionType)) , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
         if t := popCallResult(
             code,
             e,
-            call.Expression.value.functionType) ; t > maxStack {
+            call.Expression.value.theFunctionType) ; t > maxStack {
             maxStack = t
         }
         return

@@ -162,8 +162,8 @@ class BuildFunction {
                 // String[] java style
                 t := new ast.Type()
                 t.Type = ast.VariableTypeJavaArray
-                t.array = new ast.Type()
-                t.array.Type = ast.VariableTypeString
+                t.theArray = new ast.Type()
+                t.theArray.Type = ast.VariableTypeString
                 state.appendLocals(c , t)
             }
 

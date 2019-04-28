@@ -90,7 +90,7 @@ fn nameTemplateFunction(function ast.Function) -> (s string = function.name) {
         }
         switch v.Type.Type {
             case ast.VariableTypeObject:
-                s += sprintf("$%s" , common.getBaseName(v.Type.Class.name))
+                s += sprintf("$%s" , common.getBaseName(v.Type.theClass.name))
             case ast.VariableTypeMap:
                 s += "_map"
             case ast.VariableTypeArray:
@@ -98,7 +98,7 @@ fn nameTemplateFunction(function ast.Function) -> (s string = function.name) {
             case ast.VariableTypeJavaArray:
                 s += "_java_array"
             case ast.VariableTypeEnum:
-                s += sprintf("$%s" , common.getBaseName(v.Type.Enum.name))
+                s += sprintf("$%s" , common.getBaseName(v.Type.theEnum.name))
         }
     }
     return s
@@ -110,9 +110,9 @@ fn insertTypeAssertClass(c cg.ClassHighLevel , code cg.AttributeCode , t ast.Typ
     } else if t.Type == ast.VariableTypeMap {
         c.insertClassConst(mapClass , code.codes[code.codeLength : code.codeLength + 2])
     } else if t.Type == ast.VariableTypeObject {
-        c.insertClassConst(t.Class.name , code.codes[code.codeLength : code.codeLength + 2])
+        c.insertClassConst(t.theClass.name , code.codes[code.codeLength : code.codeLength + 2])
     } else if t.Type == ast.VariableTypeArray {
-        meta := ArrayMetas[t.array.Type]
+        meta := ArrayMetas[t.theArray.Type]
         c.insertClassConst(meta.className , code.codes[code.codeLength : code.codeLength + 2])
     } else {
         c.insertClassConst(Descriptor.typeDescriptor(t) , code.codes[code.codeLength : code.codeLength + 2])
@@ -168,16 +168,16 @@ fn newArrayBaseOnType(c cg.ClassHighLevel , code cg.AttributeCode , typ ast.Type
             code.codeLength += 3
         case ast.VariableTypeObject:
             code.codes[code.codeLength] = cg.OP_anewarray
-            c.insertClassConst(typ.Class.name , code.codes[code.codeLength + 1 : code.codeLength + 3])
+            c.insertClassConst(typ.theClass.name , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
         case ast.VariableTypeArray:
             code.codes[code.codeLength] = cg.OP_anewarray
-            meta := ArrayMetas[typ.array.Type]
+            meta := ArrayMetas[typ.theArray.Type]
             c.insertClassConst(meta.className , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
         case ast.VariableTypeJavaArray:
             code.codes[code.codeLength] = cg.OP_anewarray
-            c.insertClassConst(Descriptor.typeDescriptor(typ.array),
+            c.insertClassConst(Descriptor.typeDescriptor(typ.theArray),
                 code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
         default:

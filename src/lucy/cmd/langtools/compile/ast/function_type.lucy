@@ -48,18 +48,18 @@ public class FunctionType {
         ret.parameterList = new []Variable(len(this.parameterList))
         for k , v := range this.parameterList {
             p := new Variable()
-            v.cp(p)
+            v.copyThis2Another(p)
             ret.parameterList[k] = p
         }
         if this.vArgs != null {
             p := new Variable()
-            this.vArgs.cp(p)
+            this.vArgs.copyThis2Another(p)
             ret.vArgs = p
         }
         ret.returnList = new []Variable(len(this.returnList))
         for k , v := range this.returnList {
             p := new Variable()
-            v.cp(p)
+            v.copyThis2Another(p)
             ret.returnList[k] = p
         }
         return
@@ -338,7 +338,7 @@ public class FunctionType {
                     vArgs.packArray2VArgs = true
                     continue
                 }
-                if false == v.Type.array.assignAble(block , errs , t) {
+                if false == v.Type.theArray.assignAble(block , errs , t) {
                     err = new error(sprintf("%s cannot use '%s' as '%s'",
                             errMsgPrefix(t.pos),
                             t.typeString() , v.Type.typeString()))

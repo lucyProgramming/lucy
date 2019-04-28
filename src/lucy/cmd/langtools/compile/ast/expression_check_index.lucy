@@ -31,20 +31,20 @@ class ExpressionCheckIndex {
                     }
 
                 }
-                valueType = on.array.cloneType()
+                valueType = on.theArray.cloneType()
                 valueType.pos = e.pos
                 return
             case VariableTypeMap:
-                valueType = on.Map.V.cloneType()
+                valueType = on.theMap.V.cloneType()
                 valueType.pos = e.pos
                 indexType , es := index.index.checkSingleValueContextExpression(block)
                 errs.appendAll(es)
                 if indexType == null {
                     return
                 }
-                if on.Map.K.assignAble(block , errs , indexType) == false {
+                if on.theMap.K.assignAble(block , errs , indexType) == false {
                     errs.append(new error(sprintf("%s cannot use '%s' as '%s' for index",
-                                index.index.pos.errMsgPrefix() , indexType.typeString() , on.Map.K.typeString())))
+                                index.index.pos.errMsgPrefix() , indexType.typeString() , on.theMap.K.typeString())))
                 }
                 return
             case VariableTypeString:

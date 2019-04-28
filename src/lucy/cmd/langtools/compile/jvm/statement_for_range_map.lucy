@@ -81,7 +81,7 @@ class BuildForRangeMap {
             forState.appendLocals(c , typeInt)
             t := new ast.Type()
             t.Type = ast.VariableTypeJavaArray
-            t.array = forState.newObjectVariableType(javaRootClass)
+            t.theArray = forState.newObjectVariableType(javaRootClass)
             autoVar.KeySets = code.maxLocals
             code.maxLocals++
             forState.appendLocals(c , t)
@@ -168,16 +168,16 @@ class BuildForRangeMap {
                     "get",
                     "(Ljava/lang/Object;)Ljava/lang/Object;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
-            if attr.rangeOn.value.Map.V.isPointer() == false {
-                TypeConverterAndPrimitivePacker.unPackPrimitives(c , code , attr.rangeOn.value.Map.V)
+            if attr.rangeOn.value.theMap.V.isPointer() == false {
+                TypeConverterAndPrimitivePacker.unPackPrimitives(c , code , attr.rangeOn.value.theMap.V)
             } else {
-                TypeConverterAndPrimitivePacker.castPointer(c , code , attr.rangeOn.value.Map.V)
+                TypeConverterAndPrimitivePacker.castPointer(c , code , attr.rangeOn.value.theMap.V)
             }
             autoVar.V = code.maxLocals
-            code.maxLocals += jvmSlotSize(attr.rangeOn.value.Map.V)
+            code.maxLocals += jvmSlotSize(attr.rangeOn.value.theMap.V)
             //store to V
-            copyOPs(code , storeLocalVariableOps(attr.rangeOn.value.Map.V.Type , autoVar.V))
-            blockState.appendLocals(c , attr.rangeOn.value.Map.V)
+            copyOPs(code , storeLocalVariableOps(attr.rangeOn.value.theMap.V.Type , autoVar.V))
+            blockState.appendLocals(c , attr.rangeOn.value.theMap.V)
         }
         // store to k,if need
         if attr.identifierKey != null || attr.expressionKey != null {
@@ -187,15 +187,15 @@ class BuildForRangeMap {
             copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , autoVar.KeySetsK))
             code.codes[code.codeLength] = cg.OP_aaload
             code.codeLength++
-            if attr.rangeOn.value.Map.K.isPointer() == false {
-                TypeConverterAndPrimitivePacker.unPackPrimitives(c , code , attr.rangeOn.value.Map.K)
+            if attr.rangeOn.value.theMap.K.isPointer() == false {
+                TypeConverterAndPrimitivePacker.unPackPrimitives(c , code , attr.rangeOn.value.theMap.K)
             } else {
-                TypeConverterAndPrimitivePacker.castPointer(c , code , attr.rangeOn.value.Map.K)
+                TypeConverterAndPrimitivePacker.castPointer(c , code , attr.rangeOn.value.theMap.K)
             }
             autoVar.K = code.maxLocals
-            code.maxLocals += jvmSlotSize(attr.rangeOn.value.Map.K)
-            copyOPs(code , storeLocalVariableOps(attr.rangeOn.value.Map.K.Type , autoVar.K))
-            blockState.appendLocals(c , attr.rangeOn.value.Map.K)
+            code.maxLocals += jvmSlotSize(attr.rangeOn.value.theMap.K)
+            copyOPs(code , storeLocalVariableOps(attr.rangeOn.value.theMap.K.Type , autoVar.K))
+            blockState.appendLocals(c , attr.rangeOn.value.theMap.K)
         }
         // store k and v into user defined variable
         //store v in real v
@@ -232,8 +232,8 @@ class BuildForRangeMap {
                     maxStack = stack
                 }
                 copyOPs(code,
-                    loadLocalVariableOps(attr.rangeOn.value.Map.V.Type , autoVar.V))
-                if t := remainStack + jvmSlotSize(attr.rangeOn.value.Map.V) ; t > maxStack {
+                    loadLocalVariableOps(attr.rangeOn.value.theMap.V.Type , autoVar.V))
+                if t := remainStack + jvmSlotSize(attr.rangeOn.value.theMap.V) ; t > maxStack {
                     maxStack = t
                 }
                 copyOPs(code , op)
@@ -247,8 +247,8 @@ class BuildForRangeMap {
                     maxStack = stack
                 }
                 copyOPs(code,
-                    loadLocalVariableOps(attr.rangeOn.value.Map.K.Type , autoVar.K))
-                if t := remainStack + jvmSlotSize(attr.rangeOn.value.Map.K) ; t > maxStack {
+                    loadLocalVariableOps(attr.rangeOn.value.theMap.K.Type , autoVar.K))
+                if t := remainStack + jvmSlotSize(attr.rangeOn.value.theMap.K) ; t > maxStack {
                     maxStack = t
                 }
                 copyOPs(code , op)

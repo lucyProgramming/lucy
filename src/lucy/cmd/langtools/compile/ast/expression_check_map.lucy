@@ -22,8 +22,8 @@ class ExpressionCheckMap {
             m.Type.pos = e.pos
             m.Type.Type = VariableTypeMap
         }
-        if m.Type.Map == null {
-            m.Type.Map = new Map()
+        if m.Type.theMap == null {
+            m.Type.theMap = new Map()
         }
         longMap := new map{long -> Pos}()
         doubleMap := new map{double -> Pos}()
@@ -37,12 +37,12 @@ class ExpressionCheckMap {
                     errs.append(err)
                     continue
                 }
-                if noType && m.Type.Map.K == null {
+                if noType && m.Type.theMap.K == null {
                     if err := kType.isTyped() ; err != null {
                         errs.append(err)
                     } else {
-                        m.Type.Map.K = kType
-                        mapK = m.Type.Map.K
+                        m.Type.theMap.K = kType
+                        mapK = m.Type.theMap.K
                     }
 
                 }
@@ -61,9 +61,9 @@ class ExpressionCheckMap {
                     }
                 }
             }
-            if m.Type.Map.K != null &&
+            if m.Type.theMap.K != null &&
                 v.key.isLiteral() &&
-                m.Type.Map.K.Type == v.key.value.Type {
+                m.Type.theMap.K.Type == v.key.value.Type {
                 fn errMsg(pos Pos , first Pos , which string) -> (err error) {
                     errMsg := sprintf("%s  '%s' duplicate key,first declared at:\n",
                         pos.errMsgPrefix() , which)
@@ -71,7 +71,7 @@ class ExpressionCheckMap {
                     return new error(errMsg)
                 }
 
-                switch m.Type.Map.K.Type {
+                switch m.Type.theMap.K.Type {
                     case VariableTypeByte,
                         VariableTypeChar,
                         VariableTypeShort,
@@ -114,12 +114,12 @@ class ExpressionCheckMap {
                 errs.append(err)
                 continue
             }
-            if noType && m.Type.Map.V == null {
+            if noType && m.Type.theMap.V == null {
                 if err := vType.isTyped() ; err != null {
                     errs.append(err)
                 } else {
-                    m.Type.Map.V = vType
-                    mapV = m.Type.Map.V
+                    m.Type.theMap.V = vType
+                    mapV = m.Type.theMap.V
                 }
 
             }
@@ -139,15 +139,15 @@ class ExpressionCheckMap {
             }
         }
 
-        if m.Type.Map.K == null {
-            m.Type.Map.K = new Type()
-            m.Type.Map.K.Type = VariableTypeVoid
-            m.Type.Map.K.pos = e.pos
+        if m.Type.theMap.K == null {
+            m.Type.theMap.K = new Type()
+            m.Type.theMap.K.Type = VariableTypeVoid
+            m.Type.theMap.K.pos = e.pos
         }
-        if m.Type.Map.V == null {
-            m.Type.Map.V = new Type()
-            m.Type.Map.V.Type = VariableTypeVoid
-            m.Type.Map.V.pos = e.pos
+        if m.Type.theMap.V == null {
+            m.Type.theMap.V = new Type()
+            m.Type.theMap.V.Type = VariableTypeVoid
+            m.Type.theMap.V.pos = e.pos
         }
         return m.Type
     }

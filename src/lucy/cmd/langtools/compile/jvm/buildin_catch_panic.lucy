@@ -27,7 +27,7 @@ class BuildinFunctionCatchPanic {
                 maxStack = this.eb.build(c, code, call.args[0], context, state)
             } else {
                 code.codes[code.codeLength] = cg.OP_new
-                className := call.args[0].value.Class.name
+                className := call.args[0].value.theClass.name
                 c.insertClassConst(className, code.codes[code.codeLength+1:code.codeLength+3])
                 code.codes[code.codeLength+3] = cg.OP_dup
                 code.codeLength += 4

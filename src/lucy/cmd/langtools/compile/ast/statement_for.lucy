@@ -56,9 +56,9 @@ public class StatementFor {
             conversion.Type = new Type()
             conversion.Type.Type = VariableTypeJavaArray
             conversion.Type.pos = rangeOn.pos
-            conversion.Type.array = new Type()
-            conversion.Type.array.Type = VariableTypeByte
-            conversion.Type.array.pos = rangeOn.pos
+            conversion.Type.theArray = new Type()
+            conversion.Type.theArray.Type = VariableTypeByte
+            conversion.Type.theArray.pos = rangeOn.pos
             conversion.Expression = rangeExpression
             bs := new Expression()
             bs.Type = ExpressionTypeCheckCast
@@ -134,9 +134,9 @@ public class StatementFor {
                 }
                 if rangeOn.Type == VariableTypeArray ||
                     rangeOn.Type == VariableTypeJavaArray {
-                    vd.Type = rangeOn.array.cloneType()
+                    vd.Type = rangeOn.theArray.cloneType()
                 } else {
-                    vd.Type = rangeOn.Map.V.cloneType()
+                    vd.Type = rangeOn.theMap.V.cloneType()
                 }
 
                 vd.name = identifierV.name
@@ -161,7 +161,7 @@ public class StatementFor {
                     vt = new Type()
                     vt.Type = VariableTypeInt
                 } else {
-                    vt = rangeOn.Map.K.cloneType()
+                    vt = rangeOn.theMap.K.cloneType()
                     vt.pos = rangeOn.pos
                 }
 
@@ -227,10 +227,10 @@ public class StatementFor {
                 kType = new Type()
                 kType.Type = VariableTypeInt
 
-                vType = rangeOn.array
+                vType = rangeOn.theArray
             } else {
-                kType = rangeOn.Map.K
-                vType = rangeOn.Map.V
+                kType = rangeOn.theMap.K
+                vType = rangeOn.theMap.V
             }
 
             if receiverKType != null {

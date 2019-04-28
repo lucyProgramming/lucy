@@ -76,7 +76,7 @@ class ExpressionCheckLeftValue {
 						e.pos.errMsgPrefix(), Super, object.typeString())))
 					return 
 				}
-				field, err := object.Class.getField(block , e.pos, selection.name, new map{string->bool}(), false , object.Class.name)
+				field, err := object.theClass.getField(block , e.pos, selection.name, new map{string->bool}(), false , object.theClass.name)
 				if err != null {
 					errs.append(err)
 				}
@@ -94,7 +94,7 @@ class ExpressionCheckLeftValue {
 				return result
 			case VariableTypeObject,
 				VariableTypeClass:
-				field, err := object.Class.getField(block , e.pos, selection.name,new map{string->bool}(), false , object.Class.name)
+				field, err := object.theClass.getField(block , e.pos, selection.name,new map{string->bool}(), false , object.theClass.name)
 				if err != null {
 					errs.append(err)
 				}
@@ -115,17 +115,17 @@ class ExpressionCheckLeftValue {
 				}
 				return null
 			case VariableTypePackage:
-				variable, exists := object.Package.block.nameExists(selection.name , e.pos)
+				variable, exists := object.thePackage.block.nameExists(selection.name , e.pos)
 				if exists == false {
 					errs.append(new error(sprintf("%s '%s.%s' not found",
-						e.pos.errMsgPrefix(), object.Package.name, selection.name)))
+						e.pos.errMsgPrefix(), object.thePackage.name, selection.name)))
 					return null
 				}
 				if v ,ok := variable.(Variable) ; ok {
 				    if v.isPublic() == false &&
-                        object.Package.isSame(block.inheritedAttribute.p) == false {
+                        object.thePackage.isSame(block.inheritedAttribute.p) == false {
                         errs.append(new error(sprintf("%s '%s.%s' is private",
-                            e.pos.errMsgPrefix(), object.Package.name, selection.name)))
+                            e.pos.errMsgPrefix(), object.thePackage.name, selection.name)))
                     }
 					if selection.locateDefinition {
 						block.inheritedAttribute.p.setLocatedDefinitionPos(v)
@@ -157,13 +157,13 @@ class ExpressionCheckLeftValue {
 	static fn autoCompletion(object Type , block Block) {
         switch object.Type {
         case VariableTypeDynamicSelector:
-            .autoCompletionForDynamicSelector(object.Class , block)
+            .autoCompletionForDynamicSelector(object.theClass , block)
         case VariableTypePackage:
-            .autoCompletionForPackage(object.Package , block )
+            .autoCompletionForPackage(object.thePackage , block )
         case VariableTypeObject:
-            .autoCompletionForObject(object.Class , block)
+            .autoCompletionForObject(object.theClass , block)
         case VariableTypeClass:
-            .autoCompletionClass(object.Class , block)
+            .autoCompletionClass(object.theClass , block)
         }
     }
     

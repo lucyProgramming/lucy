@@ -56,7 +56,7 @@ class ExpressionCheckIdentifier {
                 result := new Type()
                 result.Type = VariableTypeClass
                 result.pos = e.pos
-                result.Class = block.inheritedAttribute.Class
+                result.theClass = block.inheritedAttribute.Class
                 return result , null
         }
         isCaptureVar := [false]
@@ -97,7 +97,7 @@ class ExpressionCheckIdentifier {
             }
             result := new Type()
             result.Type = VariableTypeFunction
-            result.functionType = f.Type
+            result.theFunctionType = f.Type
             result.pos = e.pos
             identifier.Function = f
             return result , null
@@ -162,7 +162,7 @@ class ExpressionCheckIdentifier {
             result := new Type()
             result.Type = VariableTypeClass
             result.pos = e.pos
-            result.Class = c
+            result.theClass = c
             return result , null
         }
         if enumName , ok := d.(EnumName) ; ok {
@@ -180,8 +180,8 @@ class ExpressionCheckIdentifier {
             result := new Type()
             result.pos = enumName.pos
             result.Type = VariableTypeEnum
-            result.enumName = enumName
-            result.Enum = enumName.Enum
+            result.theEnumName = enumName
+            result.theEnum = enumName.Enum
             identifier.enumName = enumName
             return result , null
         }
@@ -202,10 +202,10 @@ class ExpressionCheckIdentifier {
         valueType = new Type()
         valueType.pos = e.pos
         if pp , ok := p.(Package) ; ok {
-            valueType.Package = pp
+            valueType.thePackage = pp
             valueType.Type = VariableTypePackage
         } else {
-            valueType.Class = p.(Class)
+            valueType.theClass = p.(Class)
             valueType.Type = VariableTypeClass
         }
     }

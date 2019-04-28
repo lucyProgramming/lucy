@@ -4,17 +4,17 @@ import "java/lang/Runnable"
 import "java/lang/Thread"
 
 public final class Run implements Runnable {
-    private f fn ()
-    public fn Run(f fn ()) {
+    private theFn fn ()
+    public fn Run(theFn fn ()) {
         this.super()
-        this.f = f
+        this.theFn = theFn
     }
     public fn run() {
-        this.f()
+        this.theFn()
     }
-    public static fn runFn(f fn ()) {
-        r := new Run(f)
-        new Thread(r).start()
+    public static fn runFn(theFn fn ()) {
+        run := new Run(theFn)
+        new Thread(run).start()
     }
 }
 

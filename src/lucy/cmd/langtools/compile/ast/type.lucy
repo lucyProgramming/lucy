@@ -9,15 +9,15 @@ public class Type {
 	public resolved                bool
 	public pos                     Pos
 	public name                    string
-	public array                   Type
-	public Class                   Class
-	public Enum                    Enum
-	public enumName                EnumName         // indicate a const
-	public Function                Function
-	public functionType            FunctionType
-	public Map                     Map
-	public Package                 Package
-	public alias                   TypeAlias
+	public theArray                Type
+	public theClass                Class
+	public theEnum                 Enum
+	public theEnumName             EnumName         // indicate a const
+	public theFunction             Function
+	public theFunctionType         FunctionType
+	public theMap                  Map
+	public thePackage              Package
+	public theAlias                TypeAlias
 	public locateDefinition        bool
 	public locatePackageDefinition bool
 	public packagePos              Pos
@@ -35,21 +35,21 @@ public class Type {
 		return this.containsLf || this.inlineComment != null
 	}
 	// copy to t 
-	fn cp(t Type) {
-		t.Type = this.Type
-		t.isBuildIn = this.isBuildIn
-		t.isVariableArgs = this.isVariableArgs
-		t.pos = this.pos
-		t.name = this.name
-		t.array = this.array
-		t.Class = this.Class
-		t.Enum = this.Enum
-		t.enumName = this.enumName
-		t.Function = this.Function
-		t.functionType = this.functionType
-		t.Map = this.Map
-		t.Package = this.Package
-		t.alias = this.alias
+	fn copyThis2Another(another Type) {
+		another.Type = this.Type
+		another.isBuildIn = this.isBuildIn
+		another.isVariableArgs = this.isVariableArgs
+		another.pos = this.pos
+		another.name = this.name
+		another.theArray = this.theArray
+		another.theClass = this.theClass
+		another.theEnum = this.theEnum
+		another.theEnumName = this.theEnumName
+		another.theFunction = this.theFunction
+		another.theFunctionType = this.theFunctionType
+		another.theMap = this.theMap
+		another.thePackage = this.thePackage
+		another.theAlias = this.theAlias
 	}
 	fn validForTypeAssertOrConversion() -> (valid bool) {
 		if this.isPointer() == false {
@@ -62,12 +62,12 @@ public class Type {
 			return true
 		}
 		if this.Type == VariableTypeArray &&
-			this.array.isPrimitive() {
+			this.theArray.isPrimitive() {
 			return true
 		}
 		if this.Type == VariableTypeJavaArray {
-			if this.array.isPointer() {
-				return this.array.validForTypeAssertOrConversion()
+			if this.theArray.isPointer() {
+				return this.theArray.validForTypeAssertOrConversion()
 			} else {
 				return true
 			}
@@ -109,7 +109,7 @@ public class Type {
 				e.doubleValue = double(0)
 			case VariableTypeEnum:
 				e.Type = ExpressionTypeInt
-				e.longValue = long(this.Enum.defaultValue)
+				e.longValue = long(this.theEnum.defaultValue)
 			default:
 				e.Type = ExpressionTypeNull
 		}
@@ -133,10 +133,10 @@ public class Type {
 		switch this.Type {
 			case VariableTypePackage:
 				return new error(sprintf("%s use package '%s' without selector",
-							this.pos.errMsgPrefix() , this.Package.name))
+							this.pos.errMsgPrefix() , this.thePackage.name))
 			case VariableTypeClass:
 				return new error(sprintf("%s use class '%s' without selector",
-							this.pos.errMsgPrefix() , this.Class.name))
+							this.pos.errMsgPrefix() , this.theClass.name))
 			default:
 				return new error(sprintf("%s '%s' is not right value valid",
 							this.pos.errMsgPrefix() , this.typeString()))
@@ -175,29 +175,29 @@ public class Type {
 		cloned.pos = this.pos
 		cloned.packagePos = this.packagePos
 		cloned.name = this.name
-		cloned.Class = this.Class
-		cloned.Enum = this.Enum
+		cloned.theClass = this.theClass
+		cloned.theEnum = this.theEnum
 		cloned.locateDefinition = this.locateDefinition
 		cloned.locatePackageDefinition = this.locatePackageDefinition
 		cloned.findUsage = this.findUsage
 		cloned.getHover = this.getHover
-		cloned.enumName = this.enumName
-		cloned.Function = this.Function
-		cloned.Package = this.Package
-		cloned.alias = this.alias
+		cloned.theEnumName = this.theEnumName
+		cloned.theFunction = this.theFunction
+		cloned.thePackage = this.thePackage
+		cloned.theAlias = this.theAlias
 		cloned.autoCompletion = this.autoCompletion
 
 		if cloned.Type == VariableTypeArray ||
 			cloned.Type == VariableTypeJavaArray {
-			cloned.array = this.array.cloneType()
+			cloned.theArray = this.theArray.cloneType()
 		}
 		if cloned.Type == VariableTypeMap {
-			cloned.Map = new Map()
-			cloned.Map.K = this.Map.K.cloneType()
-			cloned.Map.V = this.Map.V.cloneType()
+			cloned.theMap = new Map()
+			cloned.theMap.K = this.theMap.K.cloneType()
+			cloned.theMap.V = this.theMap.V.cloneType()
 		}
 		if this.Type == VariableTypeFunction {
-			cloned.functionType = this.functionType.cloneFunctionType()
+			cloned.theFunctionType = this.theFunctionType.cloneFunctionType()
 		}
 	}
 
@@ -220,7 +220,7 @@ public class Type {
 				if this.locateDefinition {
 					block.inheritedAttribute.p.setLocatedDefinitionPos(block.inheritedAttribute.Function.parameterTypes[this.name])
 				}
-				block.inheritedAttribute.Function.parameterTypes[this.name].cp(this)
+				block.inheritedAttribute.Function.parameterTypes[this.name].copyThis2Another(this)
 				this.pos = pos // keep pos
 				return null
 			case VariableTypeName:
@@ -233,25 +233,25 @@ public class Type {
 				}
 				return this.makeTypeFrom(block , d)
 			case VariableTypeArray , VariableTypeJavaArray:
-				return this.array.resolve(block)
+				return this.theArray.resolve(block)
 			case VariableTypeMap:
-				if this.Map.K != null {
-					err = this.Map.K.resolve(block)
+				if this.theMap.K != null {
+					err = this.theMap.K.resolve(block)
 					if err != null {
 						return err
 					}
 				}
-				if this.Map.V != null {
-					return this.Map.V.resolve(block)
+				if this.theMap.V != null {
+					return this.theMap.V.resolve(block)
 				}
 			case VariableTypeFunction:
-				for _ , v := range this.functionType.parameterList {
+				for _ , v := range this.theFunctionType.parameterList {
 					if err = v.Type.resolve(block) ; err != null {
 						return err
 					}
 				}
 
-				for _ , v := range this.functionType.returnList {
+				for _ , v := range this.theFunctionType.returnList {
 					if err = v.Type.resolve(block) ; err != null {
 						return err
 					}
@@ -286,8 +286,8 @@ public class Type {
 				if t , ok := d.(Type) ; ok &&
 					t.isBuildIn == false {
 					_ , loadFromImport = shouldAccessFromImports(block , this.name , this.pos , t.pos)
-					if loadFromImport && t.alias != null {
-						t.alias.reduceFindUsageInstances(block)
+					if loadFromImport && t.theAlias != null {
+						t.theAlias.reduceFindUsageInstances(block)
 					}
 				}
 				if t , ok := d.(Enum) ; ok &&
@@ -415,24 +415,24 @@ public class Type {
 				block.inheritedAttribute.p.setLocatedDefinitionPos(c)
 			}
 			this.Type = VariableTypeObject
-			this.Class = c
+			this.theClass = c
 			return err
 		}
 		if t , ok := d.(Type) ; ok {
 			pos := this.pos
-			alias := this.alias
+			alias := this.theAlias
 			resolved := this.resolved
-			t.cp(this)
+			t.copyThis2Another(this)
 			if this.locateDefinition {
-				if t.alias == null {
+				if t.theAlias == null {
 					block.inheritedAttribute.p.setLocatedDefinitionPos(t)
 				} else {
-					block.inheritedAttribute.p.setLocatedDefinitionPos(t.alias)
+					block.inheritedAttribute.p.setLocatedDefinitionPos(t.theAlias)
 				}
 
 			}
 			this.pos = pos
-			this.alias = alias
+			this.theAlias = alias
 			this.resolved = resolved
 			return null
 		}
@@ -446,7 +446,7 @@ public class Type {
 				return
 			}
 			this.Type = VariableTypeEnum
-			this.Enum = dd
+			this.theEnum = dd
 			return null
 		}
 		return new error(sprintf("%s name '%s' is not a type",
@@ -514,23 +514,23 @@ public class Type {
 				return prefix + this.name
 			case VariableTypeMap:
 				ret = prefix + "map{"
-				ret += this.Map.K.typeName()
+				ret += this.theMap.K.typeName()
 				ret += " -> "
-				ret += this.Map.V.typeName()
+				ret += this.theMap.V.typeName()
 				ret += "}"
 				return ret
 			case VariableTypeArray:
-				return this.array.typeName(prefix + "[]")
+				return this.theArray.typeName(prefix + "[]")
 			case VariableTypeJavaArray:
 				if this.isVariableArgs {
-					ret = prefix + this.array.typeName() + "..."
+					ret = prefix + this.theArray.typeName() + "..."
 					return ret
 				} else {
-					ret = prefix + this.array.typeName() + "[]"
+					ret = prefix + this.theArray.typeName() + "[]"
 					return ret
 				}
 			case VariableTypeFunction:
-				ret = prefix + "fn" + this.functionType.typeName()
+				ret = prefix + "fn" + this.theFunctionType.typeName()
 				return
 			case VariableTypeEnum:
 				ret = prefix + this.name
@@ -576,42 +576,42 @@ public class Type {
 			case VariableTypeString:
 				return prefix + "string"
 			case VariableTypeObject:
-				return prefix + "object@" + this.Class.name
+				return prefix + "object@" + this.theClass.name
 			case VariableTypeMap:
 				ret = prefix + "map{"
-				ret += this.Map.K.typeString()
+				ret += this.theMap.K.typeString()
 				ret += " -> "
-				ret += this.Map.V.typeString()
+				ret += this.theMap.V.typeString()
 				ret += "}"
 				return ret
 			case VariableTypeArray:
-				return this.array.typeString(prefix + "[]")
+				return this.theArray.typeString(prefix + "[]")
 			case VariableTypeJavaArray:
 				if this.isVariableArgs {
-					ret = prefix + this.array.typeString() + "..."
+					ret = prefix + this.theArray.typeString() + "..."
 					return ret
 				} else {
-					ret = prefix + this.array.typeString() + "[]"
+					ret = prefix + this.theArray.typeString() + "[]"
 					return ret
 				}
 
 			case VariableTypeFunction:
-				ret = prefix + "fn " + this.functionType.typeString()
+				ret = prefix + "fn " + this.theFunctionType.typeString()
 				return
 			case VariableTypeEnum:
-				ret = prefix + "enum(" + this.Enum.name + ")"
+				ret = prefix + "enum(" + this.theEnum.name + ")"
 			case VariableTypeClass:
-				ret = prefix + sprintf("class@%s" , this.Class.name)
+				ret = prefix + sprintf("class@%s" , this.theClass.name)
 			case VariableTypeName:
 				ret = prefix + this.name // resolve wrong, but typeString is ok to return
 			case VariableTypeTemplate:
 				ret = prefix + this.name
 			case VariableTypeDynamicSelector:
-				ret = prefix + "dynamicSelector@" + this.Class.name
+				ret = prefix + "dynamicSelector@" + this.theClass.name
 			case VariableTypeVoid:
 				ret = prefix + "void"
 			case VariableTypePackage:
-				ret = prefix + "package@" + this.Package.name
+				ret = prefix + "package@" + this.thePackage.name
 			case VariableTypeNull:
 				ret = prefix + "null"
 			case VariableTypeGlobal:
@@ -630,12 +630,12 @@ public class Type {
 		}
 		if this.Type == VariableTypeArray ||
 			this.Type == VariableTypeJavaArray {
-			return this.array.getParameterType(ft)
+			return this.theArray.getParameterType(ft)
 		}
 		if this.Type == VariableTypeMap {
 			pts = []string{}
-			pts.appendAll(this.Map.K.getParameterType(ft))
-			pts.appendAll(this.Map.V.getParameterType(ft))
+			pts.appendAll(this.theMap.K.getParameterType(ft))
+			pts.appendAll(this.theMap.V.getParameterType(ft))
 			return
 		}
 		return null
@@ -651,14 +651,14 @@ public class Type {
 		}
 		if this.Type == VariableTypeArray ||
 			this.Type == VariableTypeJavaArray {
-			return this.array.canBeBindWithParameterTypes(parameterTypes)
+			return this.theArray.canBeBindWithParameterTypes(parameterTypes)
 		}
 		if this.Type == VariableTypeMap {
-			err = this.Map.K.canBeBindWithParameterTypes(parameterTypes)
+			err = this.theMap.K.canBeBindWithParameterTypes(parameterTypes)
 			if err != null {
 				return err
 			}
-			return this.Map.V.canBeBindWithParameterTypes(parameterTypes)
+			return this.theMap.V.canBeBindWithParameterTypes(parameterTypes)
 		}
 		return null
 	}
@@ -673,19 +673,19 @@ public class Type {
 				panic(sprintf("typed parameter '%s' not found" , this.name))
 			}
 			//TODO ::
-			parameterTypes[this.name].cp(this)
+			parameterTypes[this.name].copyThis2Another(this)
 			return
 		}
 		if this.Type == VariableTypeArray || this.Type == VariableTypeJavaArray {
-			this.array.bindWithParameterTypes(ft , parameterTypes)
+			this.theArray.bindWithParameterTypes(ft , parameterTypes)
 			return
 		}
 		if this.Type == VariableTypeMap {
-			if len(this.Map.K.getParameterType(ft)) > 0 {
-				this.Map.K.bindWithParameterTypes(ft , parameterTypes)
+			if len(this.theMap.K.getParameterType(ft)) > 0 {
+				this.theMap.K.bindWithParameterTypes(ft , parameterTypes)
 			}
-			if len(this.Map.V.getParameterType(ft)) > 0 {
-				this.Map.V.bindWithParameterTypes(ft , parameterTypes)
+			if len(this.theMap.V.getParameterType(ft)) > 0 {
+				this.theMap.V.bindWithParameterTypes(ft , parameterTypes)
 				return
 			}
 		}
@@ -707,20 +707,20 @@ public class Type {
 			return null
 		}
 		if this.Type == VariableTypeArray && bind.Type == VariableTypeArray {
-			return this.array.canBeBindWithType(ft , mkParameterTypes , bind.array)
+			return this.theArray.canBeBindWithType(ft , mkParameterTypes , bind.theArray)
 		}
 		if this.Type == VariableTypeJavaArray && bind.Type == VariableTypeJavaArray {
-			return this.array.canBeBindWithType(ft , mkParameterTypes , bind.array)
+			return this.theArray.canBeBindWithType(ft , mkParameterTypes , bind.theArray)
 		}
 		if this.Type == VariableTypeMap && bind.Type == VariableTypeMap {
-			if len(this.Map.K.getParameterType(ft)) > 0 {
-				err = this.Map.K.canBeBindWithType(ft , mkParameterTypes , bind.Map.K)
+			if len(this.theMap.K.getParameterType(ft)) > 0 {
+				err = this.theMap.K.canBeBindWithType(ft , mkParameterTypes , bind.theMap.K)
 				if err != null {
 					return err
 				}
 			}
-			if len(this.Map.V.getParameterType(ft)) > 0 {
-				return this.Map.V.canBeBindWithType(ft , mkParameterTypes , bind.Map.V)
+			if len(this.theMap.V.getParameterType(ft)) > 0 {
+				return this.theMap.V.canBeBindWithType(ft , mkParameterTypes , bind.theMap.V)
 			}
 		}
 		return new error(sprintf("cannot bind '%s' to '%s'" , bind.typeString() , this.typeString()))
@@ -746,66 +746,66 @@ public class Type {
 			return true
 		}
 		if leftValue.Type == VariableTypeObject &&
-			leftValue.Class.name == JavaRootClass &&
+			leftValue.theClass.name == JavaRootClass &&
 			rightValue.isPointer() {
 			return true
 		}
 		if leftValue.Type == VariableTypeArray &&
 			rightValue.Type == VariableTypeArray {
-			return leftValue.array.assignAble(block , errs , rightValue.array)
+			return leftValue.theArray.assignAble(block , errs , rightValue.theArray)
 		}
 		if leftValue.Type == VariableTypeJavaArray &&
 			rightValue.Type == VariableTypeJavaArray {
 			if leftValue.isVariableArgs != rightValue.isVariableArgs {
 				return false
 			}
-			return leftValue.array.assignAble(block , errs , rightValue.array)
+			return leftValue.theArray.assignAble(block , errs , rightValue.theArray)
 		}
 		if leftValue.Type == VariableTypeEnum && rightValue.Type == VariableTypeEnum {
-			return leftValue.Enum.name == rightValue.Enum.name // same enum
+			return leftValue.theEnum.name == rightValue.theEnum.name // same enum
 		}
 		if leftValue.Type == VariableTypeMap && rightValue.Type == VariableTypeMap {
-			return leftValue.Map.K.assignAble(block , errs , rightValue.Map.K) &&
-					leftValue.Map.V.assignAble(block , errs , rightValue.Map.V)
+			return leftValue.theMap.K.assignAble(block , errs , rightValue.theMap.K) &&
+					leftValue.theMap.V.assignAble(block , errs , rightValue.theMap.V)
 		}
 		if leftValue.Type == VariableTypeFunction &&
 			rightValue.Type == VariableTypeFunction {
-			return leftValue.functionType.equal(rightValue.functionType)
+			return leftValue.theFunctionType.equal(rightValue.theFunctionType)
 		}
 		if leftValue.Type == VariableTypeString {
 			leftValue = new Type()
 			leftValue.Type = VariableTypeObject
-			leftValue.Class = new Class()
-			leftValue.Class.name = JavaStringClassName
-			leftValue.Class.notImportedYet = true
+			leftValue.theClass = new Class()
+			leftValue.theClass.name = JavaStringClassName
+			leftValue.theClass.notImportedYet = true
 		}
 		if rightValue.Type == VariableTypeString {
 			rightValue = new Type()
 			rightValue.Type = VariableTypeObject
-			rightValue.Class = new Class()
-			rightValue.Class.name = JavaStringClassName
-			rightValue.Class.notImportedYet = true
+			rightValue.theClass = new Class()
+			rightValue.theClass.name = JavaStringClassName
+			rightValue.theClass.notImportedYet = true
 		}
 		if leftValue.Type == VariableTypeObject && rightValue.Type == VariableTypeObject {
-			if leftValue.Class.name == rightValue.Class.name {
+			if leftValue.theClass.name == rightValue.theClass.name {
 				return true
 			}
-			if err := leftValue.Class.loadSelf(block , rightValue.pos) ; err != null {
+			if err := leftValue.theClass.loadSelf(block , rightValue.pos) ; err != null {
 				errs.append(err)
 				return false
 			}
-			if err := rightValue.Class.loadSelf(block , rightValue.pos) ; err != null {
+			if err := rightValue.theClass.loadSelf(block , rightValue.pos) ; err != null {
 				errs.append(err)
 				return false
 			}
-			if leftValue.Class.isInterface() {
-				i , err := rightValue.Class.implementedInterface(block , new map{string -> bool}() , leftValue.pos , leftValue.Class.name)
+			if leftValue.theClass.isInterface() {
+				i , err := rightValue.theClass.implementedInterface(block , new map{string -> bool}() , leftValue.pos , leftValue.theClass.name)
 				if err != null {
 					errs.append(err)
 				}
 				return i
 			} else {
-				has , err := rightValue.Class.haveSuperClass(block , new map{string -> bool}() , rightValue.pos , leftValue.Class.name)
+				has , err := rightValue.theClass.haveSuperClass(block , new map{string -> bool}() , rightValue.pos , leftValue.theClass.name)
 				if err != null {
 					errs.append(err)
 				}
@@ -835,20 +835,20 @@ public class Type {
 				leftValue.isVariableArgs != compareTo.isVariableArgs {
 				return false
 			}
-			return leftValue.array.equal(compareTo.array)
+			return leftValue.theArray.equal(compareTo.theArray)
 		}
 		if leftValue.Type == VariableTypeMap {
-			return leftValue.Map.K.equal(compareTo.Map.K) &&
-					leftValue.Map.V.equal(compareTo.Map.V)
+			return leftValue.theMap.K.equal(compareTo.theMap.K) &&
+					leftValue.theMap.V.equal(compareTo.theMap.V)
 		}
 		if leftValue.Type == VariableTypeEnum {
-			return leftValue.Enum.name == compareTo.Enum.name
+			return leftValue.theEnum.name == compareTo.theEnum.name
 		}
 		if leftValue.Type == VariableTypeObject {
-			return leftValue.Class.name == compareTo.Class.name
+			return leftValue.theClass.name == compareTo.theClass.name
 		}
 		if leftValue.Type == VariableTypeFunction {
-			return leftValue.functionType.equal(compareTo.functionType)
+			return leftValue.theFunctionType.equal(compareTo.theFunctionType)
 		}
 		return false
 	}
@@ -859,7 +859,7 @@ public class Type {
 		if this.Type != VariableTypeObject {
 			return false
 		}
-		return this.Class != null && this.Class.name == JavaStringClassName
+		return this.theClass != null && this.theClass.name == JavaStringClassName
 	}
 }
 

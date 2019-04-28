@@ -3,9 +3,8 @@
 import "java/lang/Object"
 
 public interface loadImport {
-    public fn loadImport(importName string) -> (Object , error)
+	public fn loadImport(importName string) -> (Object , error)
 }
-
 
 public const MagicIdentifierFile = "__FILE__"
 public const MagicIdentifierLine = "__LINE__"
@@ -24,51 +23,47 @@ public const SpecialMethodInit = "<init>"
 public const ClassInitMethod = "<clinit>"
 
 fn isMagicIdentifier(name string) -> (is bool) {
-    return name == MagicIdentifierFile ||
-            name == MagicIdentifierLine ||
-            name == MagicIdentifierTime ||
-            name == MagicIdentifierClass
+	return name == MagicIdentifierFile ||
+			name == MagicIdentifierLine ||
+			name == MagicIdentifierTime ||
+			name == MagicIdentifierClass
 }
 
 var buildInFunctionsMap = new map{string -> Function}()
 
-public var parseFunctionHandler fn (bs []byte , pos Pos)->( f Function,es []error)
+public var parseFunctionHandler fn(bs []byte , pos Pos) -> (f Function,es []error)
 
 var javaStringClass Class
 public var LucyBytesType Type // []byte
 public var JavaBytesType Type // byte[]
 
 {
+	// []byte
+	LucyBytesType = new Type()
+	LucyBytesType.Type = VariableTypeArray
+	LucyBytesType.theArray = new Type()
+	LucyBytesType.theArray.Type = VariableTypeByte
 
-    // []byte
-    LucyBytesType = new Type()
-    LucyBytesType.Type = VariableTypeArray
-    LucyBytesType.array = new Type()
-    LucyBytesType.array.Type = VariableTypeByte
-
-    //byte[]
-    JavaBytesType = new Type()
-    JavaBytesType.Type = VariableTypeJavaArray
-    JavaBytesType.array = new Type()
-    JavaBytesType.array.Type = VariableTypeByte
-
-
-
+	//byte[]
+	JavaBytesType = new Type()
+	JavaBytesType.Type = VariableTypeJavaArray
+	JavaBytesType.theArray = new Type()
+	JavaBytesType.theArray.Type = VariableTypeByte
 }
 
 fn loadJavaStringClass(block Block , pos Pos) -> (err error) {
-    if javaStringClass != null {
-        return null
-    }
-    c , err := block.inheritedAttribute.p.loader.loadImport(JavaStringClassName)
-    if err != null {
-        return err
-    }
-    if cc , ok := c.(Class) ; ok && cc != null {
-        javaStringClass = cc
-        return null
-    } else {
-        panic("loaded java string class is not a class")
-    }
+	if javaStringClass != null {
+		return null
+	}
+	c , err := block.inheritedAttribute.p.loader.loadImport(JavaStringClassName)
+	if err != null {
+		return err
+	}
+	if cc , ok := c.(Class) ; ok && cc != null {
+		javaStringClass = cc
+		return null
+	} else {
+		panic("loaded java string class is not a class")
+	}
 }
 

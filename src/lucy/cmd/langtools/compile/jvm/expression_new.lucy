@@ -33,7 +33,7 @@ class BuildExpressionNew {
         //new object
         n := e.data.(ast.ExpressionNew)
         code.codes[code.codeLength] = cg.OP_new
-        c.insertClassConst(n.Type.Class.name , code.codes[code.codeLength + 1 : code.codeLength + 3])
+        c.insertClassConst(n.Type.theClass.name , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codes[code.codeLength + 3] = cg.OP_dup
         t := new cg.StackMapVerificationTypeInfo()
         t.verify = new cg.StackMapUninitializedVariableInfo(char(code.codeLength))
@@ -51,7 +51,7 @@ class BuildExpressionNew {
         if d == null || d == "" {
             d = Descriptor.methodDescriptor(n.construction.Function.Type)
         }
-        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(n.Type.Class.name,
+        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(n.Type.theClass.name,
                 specialMethodInit,
                 d) , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codeLength += 3
@@ -88,7 +88,7 @@ class BuildExpressionNew {
             t := e.value
             for t.Type == ast.VariableTypeJavaArray {
                 dimensions++
-                t = t.array
+                t = t.theArray
             }
         }
 
@@ -106,13 +106,13 @@ class BuildExpressionNew {
         c.insertClassConst(Descriptor.typeDescriptor(e.value) , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codes[code.codeLength + 3] = dimensions
         code.codeLength += 4
-        if e.value.array.Type == ast.VariableTypeEnum {
+        if e.value.theArray.Type == ast.VariableTypeEnum {
             state.pushStack(c , e.value)
             defer {
                 state.popStack(1)
             }
 
-            if t := char(3) + setEnumArray(c , code , state , context , e.value.array.Enum) ; t > maxStack {
+            if t := char(3) + setEnumArray(c , code , state , context , e.value.theArray.theEnum) ; t > maxStack {
                 maxStack = t
             }
         }
@@ -126,7 +126,7 @@ class BuildExpressionNew {
         state StackMapState) -> (maxStack char) {
         //new
         n := e.data.(ast.ExpressionNew)
-        meta := ArrayMetas[e.value.array.Type]
+        meta := ArrayMetas[e.value.theArray.Type]
         code.codes[code.codeLength] = cg.OP_new
         c.insertClassConst(meta.className , code.codes[code.codeLength + 1 : code.codeLength + 3])
         code.codes[code.codeLength + 3] = cg.OP_dup
@@ -145,14 +145,14 @@ class BuildExpressionNew {
         if t := char(2) + stack ; t > maxStack {
             maxStack = t
         }
-        newArrayBaseOnType(c , code , e.value.array)
-        if e.value.array.Type == ast.VariableTypeEnum {
+        newArrayBaseOnType(c , code , e.value.theArray)
+        if e.value.theArray.Type == ast.VariableTypeEnum {
             t := new ast.Type()
             t.Type = ast.VariableTypeJavaArray
-            t.array = e.value.array
+            t.theArray = e.value.theArray
             state.pushStack(c , t)
 
-            if t := char(3) + setEnumArray(c , code , state , context , e.value.array.Enum) ; t > maxStack {
+            if t := char(3) + setEnumArray(c , code , state , context , e.value.theArray.theEnum) ; t > maxStack {
                 maxStack = t
             }
             state.popStack(1)

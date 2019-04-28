@@ -66,7 +66,7 @@ class BuildExpressionSlice {
             state.popStack(len(state.stacks) - stackLength)
         }
 
-        meta := ArrayMetas[e.value.array.Type]
+        meta := ArrayMetas[e.value.theArray.Type]
         maxStack = this.eb.build(c , code , slice.on , context , state)
         state.pushStack(c , slice.on.value)
         if slice.end != null {

@@ -292,7 +292,7 @@ public class Package {
 			}
 			if t , ok := v.node.(TypeAlias) ; ok {
 				err := this.block.insert(t.name , t.pos , t.Type)
-				t.Type.alias = t
+				t.Type.theAlias = t
 				if err != null {
 					errs.append(err)
 				}
@@ -381,17 +381,17 @@ public class Package {
 			return this.errors
 		}
 		for _ , v := range this.block.typeAliases {
-			if v.alias.locateDefinition {
-				this.setLocatedDefinitionPos(v.alias)
+			if v.theAlias.locateDefinition {
+				this.setLocatedDefinitionPos(v.theAlias)
 				return this.errors
 			}
-			if v.alias.findUsage {
+			if v.theAlias.findUsage {
 				u := new Usage()
 				u.Type = "declaration"
-				u.pos = v.alias.pos
-				v.alias.findUsageInstances = [u]
+				u.pos = v.theAlias.pos
+				v.theAlias.findUsageInstances = [u]
 				this.findUsageIsGlobal = true
-				this.findUsage = v.alias.findUsageInstances
+				this.findUsage = v.theAlias.findUsageInstances
 			}
 		}
 
@@ -458,7 +458,7 @@ public class Package {
 				defineMainOK := false
 				if len(v.Type.parameterList) == 1 {
 					defineMainOK = v.Type.parameterList[0].Type.Type == VariableTypeArray &&
-						v.Type.parameterList[0].Type.array.Type == VariableTypeString
+						v.Type.parameterList[0].Type.theArray.Type == VariableTypeString
 				}
 				if defineMainOK == false {
 					this.errors.append(new error(sprintf("%s function '%s' expect declared as 'main(args []string)'",

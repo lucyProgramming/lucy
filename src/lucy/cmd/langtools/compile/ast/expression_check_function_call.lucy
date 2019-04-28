@@ -112,7 +112,7 @@ class ExpressionCheckFunctionCall {
                 typeConversion := new ExpressionTypeConversion()
                 typeConversion.Type = new Type()
                 typeConversion.Type.Type = VariableTypeObject
-                typeConversion.Type.Class = d.(Class)
+                typeConversion.Type.theClass = d.(Class)
                 typeConversion.Type.pos = e.pos
                 if len(call.args) != 1 {
                     errs.append(new error(sprintf("%s cast type expect 1 argument",
@@ -141,9 +141,9 @@ class ExpressionCheckFunctionCall {
                 call.Expression.value = new Type()
                 call.Expression.value.Type = VariableTypeFunction
                 call.Expression.value.pos = e.pos
-                call.Expression.value.functionType = v.Type.functionType
+                call.Expression.value.theFunctionType = v.Type.theFunctionType
                 identifier.Variable = v
-                return .checkFunctionPointerCall(e , block , errs , v.Type.functionType , call)
+                return .checkFunctionPointerCall(e , block , errs , v.Type.theFunctionType , call)
             }
             errs.append(new error(sprintf("%s cannot make_node_objects call on '%s'",
                         call.Expression.pos.errMsgPrefix() , block.identifierIsWhat(d))))
@@ -171,7 +171,7 @@ class ExpressionCheckFunctionCall {
             call.Function = call.Expression.data.(Function)
             call.Expression.isStatementExpression = true
         }
-        return .checkFunctionPointerCall(e , block , errs , functionPointer.functionType , call)
+        return .checkFunctionPointerCall(e , block , errs , functionPointer.theFunctionType , call)
     }
 
     static fn checkFunctionPointerCall(e Expression , block Block , errs []error,

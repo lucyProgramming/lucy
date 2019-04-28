@@ -29,24 +29,24 @@ class ExpressionCheckNew {
                         no.Type.pos.errMsgPrefix() , no.Type.typeString())))
             return
         }
-        err = no.Type.Class.loadSelf(block , e.pos)
+        err = no.Type.theClass.loadSelf(block , e.pos)
         if err != null {
             errs.append(err)
             return
         }
-        if no.Type.Class.isInterface() {
+        if no.Type.theClass.isInterface() {
             errs.append(new error(sprintf("%s '%s' is interface",
-                        errMsgPrefix(no.Type.pos) , no.Type.Class.name)))
+                        errMsgPrefix(no.Type.pos) , no.Type.theClass.name)))
             return
         }
-        if no.Type.Class.isAbstract() {
+        if no.Type.theClass.isAbstract() {
             errs.append(new error(sprintf("%s '%s' is abstract",
-                        errMsgPrefix(no.Type.pos) , no.Type.Class.name)))
+                        errMsgPrefix(no.Type.pos) , no.Type.theClass.name)))
             return
         }
-        if no.Type.Class.findUsage {
+        if no.Type.theClass.findUsage {
             // type must resolved 
-            correctLastUsageType("instaniation" , no.Type.Class.findUsageInstances)
+            correctLastUsageType("instaniation" , no.Type.theClass.findUsageInstances)
             // set to ok 
         }
         valueType = no.Type.cloneType()
@@ -60,14 +60,14 @@ class ExpressionCheckNew {
         if no.args == null {
             no.args = []Expression{}
         }
-        ms , matched , err := no.Type.Class.accessConstructionMethod(block , e.pos , errs , no , null , callArgTypes)
+        ms , matched , err := no.Type.theClass.accessConstructionMethod(block , e.pos , errs , no , null , callArgTypes)
         if err != null {
             errs.append(err)
             return
         }
         if matched {
             m := ms[0]
-            if err := no.Type.Class.constructionMethodAccessAble(e.pos , m) ; err != null {
+            if err := no.Type.theClass.constructionMethodAccessAble(e.pos , m) ; err != null {
                 errs.append(err)
             }
             no.construction = m

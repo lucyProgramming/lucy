@@ -81,16 +81,16 @@ public class StatementSwitch {
                     continue
                 }
                 if conditionType.Type == VariableTypeEnum {
-                    if t.enumName == null {
+                    if t.theEnumName == null {
                         errs.append(new error(sprintf("%s enum value is not literal",
                                     errMsgPrefix(e.pos))))
                         continue
                     } else {
                         if e.value.Type == VariableTypePackage &&
                             (enumPackageName == null || enumPackageName == "") {
-                            enumPackageName = e.value.Package.name
+                            enumPackageName = e.value.thePackage.name
                         }
-                        enumName = t.enumName.name
+                        enumName = t.theEnumName.name
                         valueValid = true
                     }
 
@@ -169,15 +169,15 @@ public class StatementSwitch {
         }
 
         if conditionType.Type == VariableTypeEnum &&
-            len(enumNamesMap) < len(conditionType.Enum.enums) &&
+            len(enumNamesMap) < len(conditionType.theEnum.enums) &&
             this.defaultBlock == null &&
             containsBool == false {
             //some enum are missing, not allow
             errMsg := sprintf("%s switch for enum '%s' is not complete\n",
-                this.endPos.errMsgPrefix() , conditionType.Enum.name)
+                this.endPos.errMsgPrefix() , conditionType.theEnum.name)
             errMsg += "\tyou can use 'default:' or give missing enums,which are:\n"
             var i = 0
-            for _ , v := range conditionType.Enum.enums {
+            for _ , v := range conditionType.theEnum.enums {
                 ok := enumNamesMap.keyExist(v.name)
                 if ok {
                     //handled
@@ -193,7 +193,7 @@ public class StatementSwitch {
 
             }
 
-            if i > (len(conditionType.Enum.enums) / 2 + len(conditionType.Enum.enums) % 2) {
+            if i > (len(conditionType.theEnum.enums) / 2 + len(conditionType.theEnum.enums) % 2) {
                 errs.append(new error(errMsg))
             }
         }
