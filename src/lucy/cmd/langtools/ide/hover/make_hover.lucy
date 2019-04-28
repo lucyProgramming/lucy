@@ -44,6 +44,9 @@ class MakeHover {
             case ast.StatementLabel:
                 t := this.from.(ast.StatementLabel)
                 s = t.mkDescription()
+            case ast.ArrayMapBuildInMethod:
+                t := this.from.(ast.ArrayMapBuildInMethod)
+                s = t.mkDescription()
             default:
                 s = sprintf("'%s' un handled" , this.from.getClass().toString())
         }

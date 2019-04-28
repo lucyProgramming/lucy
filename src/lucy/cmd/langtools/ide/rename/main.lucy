@@ -11,7 +11,7 @@ public fn renameFn(filename string , bs []byte , to string , pos int) {
         return
     }
     if storePackage[0] == null ||
-        storePackage[0].locateDefinitionBaseOn == null {
+        storePackage[0].locatedDefinitionBaseOn == null {
         return
     }
     if len(bs) == 0 {
@@ -22,7 +22,7 @@ public fn renameFn(filename string , bs []byte , to string , pos int) {
         bs = javaArray2Lucy(t)
     }
     new ReName(usages,
-        storePackage[0].locateDefinitionBaseOn,
+        storePackage[0].locatedDefinitionBaseOn,
         filename,
         to,
         bs).rename()

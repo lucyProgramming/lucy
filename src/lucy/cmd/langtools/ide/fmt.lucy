@@ -435,7 +435,7 @@ public class Fmt {
 		for k , f := range e.fmts {
 			if t , ok := f.(ast.Comment) ; ok {
 				if t.isMulti {
-					format += indent + this.indentIncremental + sprintf("/*%s*/" , t.comment)
+					format += indent + this.indentIncremental + sprintf("/*%s*/" , t.comment) + "\n"
 				} else {
 					format += indent + this.indentIncremental + "//" + t.comment
 				}
@@ -522,7 +522,7 @@ public class Fmt {
 			case ast.StatementTypeWhen:
 				format += this.formatWhen(indent , s.StatementWhen)
 			case ast.StatementTypeLabel:
-				format += indent[:len(indent) - 4] + s.StatementLabel.name + ":\n"
+				format += indent[:len(indent) - len(this.indentIncremental)] + s.StatementLabel.name + ":\n"
 			case ast.StatementTypeGoTo:
 				format += this.formatGoto(indent , s.StatementGoTo , s.inlineComment)
 			case ast.StatementTypeDefer:

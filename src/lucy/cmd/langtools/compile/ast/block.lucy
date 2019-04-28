@@ -321,7 +321,7 @@ public class Block implements TopNodeInterface {
 
     fn checkUnUsed() -> (es []error) {
         es = []error{}
-        if this.inheritedAttribute.p.disableCheckUnuse {
+        if this.inheritedAttribute.p.disableCheckUnUse {
             return es
         }
         for _ , v := range this.constants {

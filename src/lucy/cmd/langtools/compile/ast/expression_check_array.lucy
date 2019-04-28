@@ -1,69 +1,69 @@
 // all rights reserved , check the LICENSE file
 
+
 class ExprssionCheckArray {
-    /*
+	/*
 		in array type must equal
 	*/
-    static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
-        arr := e.data.(ExpressionArray)
-        if arr.Type == null && len(arr.expressions) == 0 {
-            errs.append(
-                new error(
-                    sprintf("%s array literal has no type and no expression, cannot inference it`s type ",
-                        errMsgPrefix(e.pos))))
-            return
-        }
-        var noType = true
-        if arr.Type != null {
-            noType = false
-            err := arr.Type.resolve(block)
-            if err != null {
-                errs.append(err)
-                return
-            }
-        }
-        for _ , v := range arr.expressions {
-            eType , es := v.checkSingleValueContextExpression(block)
-            errs.appendAll(es)
-            if eType == null {
-                continue
-            }
-            if arr.Type != null &&
-                noType == false {
-                convertExpressionToNeed(block , v , arr.Type.array , eType)
-                eType = v.value
-            }
-            if noType && arr.Type == null {
-                if err := eType.isTyped() ; err == null {
-                    arr.Type = new Type()
-                    arr.Type.Type = VariableTypeArray
-                    arr.Type.array = eType.cloneType()
-                    arr.Type.pos = e.pos
-                } else {
-                    errs.append(err)
-                }
+	static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
+		arr := e.data.(ExpressionArray)
+		if arr.Type == null && len(arr.expressions) == 0 {
+			errs.append(
+				new error(
+					sprintf("%s array literal has no type and no expression, cannot inference it`s type ",
+						errMsgPrefix(e.pos))))
+			return
+		}
+		var noType = true
+		if arr.Type != null {
+			noType = false
+			err := arr.Type.resolve(block)
+			if err != null {
+				errs.append(err)
+				return
+			}
+		}
+		for _ , v := range arr.expressions {
+			eType , es := v.checkSingleValueContextExpression(block)
+			errs.appendAll(es)
+			if eType == null {
+				continue
+			}
+			if arr.Type != null &&
+				noType == false {
+				convertExpressionToNeed(block , v , arr.Type.array , eType)
+				eType = v.value
+			}
+			if noType && arr.Type == null {
+				if err := eType.isTyped() ; err == null {
+					arr.Type = new Type()
+					arr.Type.Type = VariableTypeArray
+					arr.Type.array = eType.cloneType()
+					arr.Type.pos = e.pos
+				} else {
+					errs.append(err)
+				}
 
-            }
-            if arr.Type != null {
-                if arr.Type.array.assignAble(block , errs , eType) == false {
-                    if noType {
-                        errs.append(new error(sprintf("%s array literal mix up '%s' and '%s'",
-                                    errMsgPrefix(eType.pos) , arr.Type.array.typeString() , eType.typeString())))
-                    } else {
-                        errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-                                    errMsgPrefix(eType.pos) , eType.typeString() , arr.Type.array.typeString())))
-                    }
+			}
+			if arr.Type != null {
+				if arr.Type.array.assignAble(block , errs , eType) == false {
+					if noType {
+						errs.append(new error(sprintf("%s array literal mix up '%s' and '%s'",
+									errMsgPrefix(eType.pos) , arr.Type.array.typeString() , eType.typeString())))
+					} else {
+						errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
+									errMsgPrefix(eType.pos) , eType.typeString() , arr.Type.array.typeString())))
+					}
 
-                }
-            }
-        }
+				}
+			}
+		}
 
-        if arr.Type == null {
-            return
-        }
-        valueType = arr.Type.cloneType()
-        valueType.pos = e.pos
-    }
+		if arr.Type == null {
+			return
+		}
+		valueType = arr.Type.cloneType()
+		valueType.pos = e.pos
+	}
 }
-
 

@@ -4,330 +4,331 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
 class ExpressionParser extends ParserFather {
-    ExpressionArrayParser    ExpressionArrayParser   
-    ExpressionBinaryParser   ExpressionBinaryParser  
-    ExpressionQuestionParser ExpressionQuestionParser
-    ExpressionSuffix         ExpressionSuffix        
+	ExpressionArrayParser    ExpressionArrayParser
+	ExpressionBinaryParser   ExpressionBinaryParser
+	ExpressionQuestionParser ExpressionQuestionParser
+	ExpressionSuffix         ExpressionSuffix
 
-    fn ExpressionParser(parser Parser) {
-        this.super(parser)
-        this.ExpressionArrayParser = new ExpressionArrayParser(parser , this)
-        this.ExpressionBinaryParser = new ExpressionBinaryParser(parser , this)
-        this.ExpressionQuestionParser = new ExpressionQuestionParser(parser , this)
-        this.ExpressionSuffix = new ExpressionSuffix(parser , this)
-    }
+	fn ExpressionParser(parser Parser) {
+		this.super(parser)
+		this.ExpressionArrayParser = new ExpressionArrayParser(parser , this)
+		this.ExpressionBinaryParser = new ExpressionBinaryParser(parser , this)
+		this.ExpressionQuestionParser = new ExpressionQuestionParser(parser , this)
+		this.ExpressionSuffix = new ExpressionSuffix(parser , this)
+	}
 
-    fn parseExpressions(endTokens lex.TokenKind...) -> (es []ast.Expression = []ast.Expression{} , err error) {
-        for this.parser.token.Type != lex.TokenEof {
-            if this.parser.token.Type == lex.TokenComment ||
-                this.parser.token.Type == lex.TokenMultiLineComment {
-                this.next(lfIsToken)
-                continue
-            }
-            var e ast.Expression
-            e , _ = this.parseExpression(false)
-            if e == null {
-                return es , err
-            }
-            es.append(e)
-            if this.parser.token.Type != lex.TokenComma {
-                if this.looksLikeExpression() {
-                    /*
+	fn parseExpressions(endTokens lex.TokenKind...) -> (es []ast.Expression = []ast.Expression{} , err error) {
+		for this.parser.token.Type != lex.TokenEof {
+			if this.parser.token.Type == lex.TokenComment ||
+				this.parser.token.Type == lex.TokenMultiLineComment {
+				this.next(lfIsToken)
+				continue
+			}
+			var e ast.Expression
+			e , _ = this.parseExpression(false)
+			if e == null {
+				return es , err
+			}
+			es.append(e)
+			if this.parser.token.Type != lex.TokenComma {
+				if this.looksLikeExpression() {
+					/*
 						missing comma
 						a(1 2)
 					*/
-                    this.parser.errs.append(new error(sprintf("%s missing comma",
-                        this.parser.errMsgPrefix())))
-                    continue
-                }
-                break
-            }
-            //==
-            commnaPos := this.parser.mkPos()
-            this.next(lfIsToken)
-            // skip = :=
-            if this.parser.token.Type == lex.TokenLf {
-                e.containsLf = true
-                this.next(lfNotToken)
-            } else if this.parser.token.Type == lex.TokenComment {
-                e.inlineComment = this.parser.token.stringValue
-                this.next(lfNotToken)
-            } else {
-                //nothing
-            }
-            for this.parser.token.Type == lex.TokenComma {
-                this.parser.errs.append(new error(sprintf("%s missing expression" , this.parser.errMsgPrefix())))
-                this.next(lfNotToken) // skip ,
-            }
+					this.parser.errs.append(new error(sprintf("%s missing comma",
+								this.parser.errMsgPrefix())))
+					continue
+				}
+				break
+			}
+			//==
+			commnaPos := this.parser.mkPos()
+			this.next(lfIsToken)
+			// skip = :=
+			if this.parser.token.Type == lex.TokenLf {
+				e.containsLf = true
+				this.next(lfNotToken)
+			} else if this.parser.token.Type == lex.TokenComment {
+				e.inlineComment = this.parser.token.stringValue
+				this.next(lfNotToken)
+			} else {
+				//nothing
+			}
+			for this.parser.token.Type == lex.TokenComma {
+				this.parser.errs.append(new error(sprintf("%s missing expression" , this.parser.errMsgPrefix())))
+				this.next(lfNotToken) // skip ,
+			}
 
-            for _ , v := range endTokens {
-                if v == this.parser.token.Type {
-                    // found end token
-                    this.parser.errs.append(new error(sprintf("%s extra comma" , this.parser.errMsgPrefix(commnaPos))))
-                    goto end
-                }
-            }
-        }
-    end:
-        return es , null
-    }
+			for _ , v := range endTokens {
+				if v == this.parser.token.Type {
+					// found end token
+					this.parser.errs.append(new error(sprintf("%s extra comma" , this.parser.errMsgPrefix(commnaPos))))
+					goto end
+				}
+			}
+		}
+	end:
+		return es , null
+	}
 
-    /*
+	/*
 		parse assign expression
 	*/
-    fn parseExpression(statementLevel bool) -> (e ast.Expression , err error) {
-        left , err := this.ExpressionQuestionParser.parseQuestionExpression() //
-        if err != null {
-            return null , err
-        }
-        for this.parser.token.Type == lex.TokenComma && statementLevel { //          read more
-            this.next(lfNotToken) //  skip comma
+	fn parseExpression(statementLevel bool) -> (e ast.Expression , err error) {
+		left , err := this.ExpressionQuestionParser.parseQuestionExpression() //
+		if err != null {
+			return null , err
+		}
+		for this.parser.token.Type == lex.TokenComma && statementLevel { //           read more
+			this.next(lfNotToken) //  skip comma
 
-            var left2 ast.Expression
-            left2 , _ = this.ExpressionQuestionParser.parseQuestionExpression() //
-            if left2 == null {
-                break 
-            }
-            if left.Type == ast.ExpressionTypeList {
-                left.data.([]ast.Expression).append(left2)
-            } else {
-                newExpression := new ast.Expression()
-                newExpression.Type = ast.ExpressionTypeList
-                newExpression.pos = left.pos
-                newExpression.op = "list"
-                list := []ast.Expression{left , left2}
-                newExpression.data = list
-                left = newExpression
-            }
-        }
-        switch this.parser.token.Type {
-            case lex.TokenAssign:
-                return this.parseEquationRight(left , ast.ExpressionTypeAssign , true)
-            case lex.TokenVarAssign:
-                return this.parseEquationRight(left , ast.ExpressionTypeVarAssign , true)
-            case lex.TokenAddAssign:
-                return this.parseEquationRight(left , ast.ExpressionTypePlusAssign , false)
-            case lex.TokenSubAssign:
-                return this.parseEquationRight(left , ast.ExpressionTypeMinusAssign , false)
-            case lex.TokenMulAssign:
-                return this.parseEquationRight(left , ast.ExpressionTypeMulAssign , false)
-            case lex.TokenDivAssign:
-                return this.parseEquationRight(left , ast.ExpressionTypeDivAssign , false)
-            case lex.TokenModAssign:
-                return this.parseEquationRight(left , ast.ExpressionTypeModAssign , false)
-            case lex.TokenLshAssign:
-                return this.parseEquationRight(left , ast.ExpressionTypeLshAssign , false)
-            case lex.TokenRshAssign:
-                return this.parseEquationRight(left , ast.ExpressionTypeRshAssign , false)
-            case lex.TokenAndAssign:
-                return this.parseEquationRight(left , ast.ExpressionTypeAndAssign , false)
-            case lex.TokenOrAssign:
-                return this.parseEquationRight(left , ast.ExpressionTypeOrAssign , false)
-            case lex.TokenXorAssign:
-                return this.parseEquationRight(left , ast.ExpressionTypeXorAssign , false)
-        }
+			var left2 ast.Expression
+			left2 , _ = this.ExpressionQuestionParser.parseQuestionExpression() //
+			if left2 == null {
+				break
+			}
+			if left.Type == ast.ExpressionTypeList {
+				left.data.([]ast.Expression).append(left2)
+			} else {
+				newExpression := new ast.Expression()
+				newExpression.Type = ast.ExpressionTypeList
+				newExpression.pos = left.pos
+				newExpression.op = "list"
+				list := []ast.Expression{left , left2}
+				newExpression.data = list
+				left = newExpression
+			}
+		}
+		switch this.parser.token.Type {
+			case lex.TokenAssign:
+				return this.parseEquationRight(left , ast.ExpressionTypeAssign , true)
+			case lex.TokenVarAssign:
+				return this.parseEquationRight(left , ast.ExpressionTypeVarAssign , true)
+			case lex.TokenAddAssign:
+				return this.parseEquationRight(left , ast.ExpressionTypePlusAssign , false)
+			case lex.TokenSubAssign:
+				return this.parseEquationRight(left , ast.ExpressionTypeMinusAssign , false)
+			case lex.TokenMulAssign:
+				return this.parseEquationRight(left , ast.ExpressionTypeMulAssign , false)
+			case lex.TokenDivAssign:
+				return this.parseEquationRight(left , ast.ExpressionTypeDivAssign , false)
+			case lex.TokenModAssign:
+				return this.parseEquationRight(left , ast.ExpressionTypeModAssign , false)
+			case lex.TokenLshAssign:
+				return this.parseEquationRight(left , ast.ExpressionTypeLshAssign , false)
+			case lex.TokenRshAssign:
+				return this.parseEquationRight(left , ast.ExpressionTypeRshAssign , false)
+			case lex.TokenAndAssign:
+				return this.parseEquationRight(left , ast.ExpressionTypeAndAssign , false)
+			case lex.TokenOrAssign:
+				return this.parseEquationRight(left , ast.ExpressionTypeOrAssign , false)
+			case lex.TokenXorAssign:
+				return this.parseEquationRight(left , ast.ExpressionTypeXorAssign , false)
+		}
+		return left , null
+	}
 
-        return left , null
-    }
+	fn parseEquationRight(
+		left ast.Expression,
+		expressionType ast.ExpressionTypeKind,
+		isMulti bool) -> (
+		e ast.Expression,
+		err error) {
+		pos := this.parser.mkPos()
+		opName := this.parser.token.description
+		bin := new ast.ExpressionBinary()
+		result := new ast.Expression()
+		result.Type = expressionType
+		result.op = opName
+		result.data = bin
+		bin.left = left
+		result.pos = pos
+		if this.parser.token.autoCompletion {
+			right := new ast.Expression()
+			right.Type = ast.ExpressionTypeAutoCompletion
+			right.op = "autoCompletion"
+			right.pos = this.parser.mkPos()
+			if isMulti {
+				list := new ast.Expression()
+				list.op = "list"
+				list.pos = this.parser.mkPos()
+				list.Type = ast.ExpressionTypeList
+				list.data = [right]
+				bin.right = list
+			} else {
+				bin.right = right
+			}
+			this.next(lfIsToken)
+			return result , null
+		}
+		this.next(lfIsToken)
+		// skip = :=
+		if this.parser.token.Type == lex.TokenLf {
+			bin.containsLf = true
+			this.next(lfNotToken)
+		} else if this.parser.token.Type == lex.TokenComment {
+			bin.inlineComment = this.parser.token.stringValue
+			this.next(lfNotToken)
+		} else {
+			//nothing
+		}
+		if isMulti {
+			var es []ast.Expression
+			es , err = this.parseExpressions(lex.TokenSemicolon)
+			if es == null {
+				return left , err
+			}
+			bin.right = new ast.Expression()
+			bin.right.Type = ast.ExpressionTypeList
+			bin.right.data = es
+		} else {
+			bin.right , _ = this.parseExpression(false)
+		}
 
-    fn parseEquationRight(left ast.Expression , expressionType ast.ExpressionTypeKind , isMulti bool) -> (e ast.Expression , err error) {
-        pos := this.parser.mkPos()
-        opName := this.parser.token.description
-        bin := new ast.ExpressionBinary()
-        result := new ast.Expression()
-        result.Type = expressionType
-        result.op = opName
-        result.data = bin
-        bin.left = left
-        result.pos = pos
-        if this.parser.token.autoCompletion {
-            right := new ast.Expression()
-            right.Type = ast.ExpressionTypeAutoCompletion
-            right.op = "autoCompletion"
-            right.pos = this.parser.mkPos()
-            if isMulti {
-                list := new ast.Expression()
-                list.op = "list"
-                list.pos = this.parser.mkPos()
-                list.Type = ast.ExpressionTypeList
-                list.data = [right]
-                bin.right = list
-            } else {
-                bin.right = right
-            }
+		return result , err
+	}
 
-            this.next(lfIsToken)
-            return result , null
-        }
-        this.next(lfIsToken)
-        // skip = :=
-        if this.parser.token.Type == lex.TokenLf {
-            bin.containsLf = true
-            this.next(lfNotToken)
-        } else if this.parser.token.Type == lex.TokenComment {
-            bin.inlineComment = this.parser.token.stringValue
-            this.next(lfNotToken)
-        } else {
-            //nothing
-        }
+	fn parseTypeConversionExpression() -> (e ast.Expression , err error) {
+		to , err := this.parser.parseType()
+		if to == null {
+			return null , err
+		}
+		pos := this.parser.mkPos()
+		this.parser.unExpectNewLineAndSkip()
+		if this.parser.token.Type != lex.TokenLp {
+			err = new error(sprintf("%s not '(' after a type",
+					this.parser.errMsgPrefix()))
+			this.parser.errs.append(err)
+			return null , err
+		}
+		this.next(lfNotToken) // skip (
+		on , err := this.parseExpression(false)
+		if on == null {
+			return on , err
+		}
+		this.parser.ifTokenIsLfThenSkip(true)
+		if this.parser.token.Type != lex.TokenRp {
+			err = new error(sprintf("%s '(' and ')' not match" , this.parser.errMsgPrefix()))
+			this.parser.errs.append(err)
+		} else {
+			this.next(lfIsToken) // skip )
+		}
 
-        if isMulti {
-            var es []ast.Expression
-            es , err = this.parseExpressions(lex.TokenSemicolon)
-            if es == null {
-                return left , err
-            }
-            bin.right = new ast.Expression()
-            bin.right.Type = ast.ExpressionTypeList
-            bin.right.data = es
-        } else {
-            bin.right , _ = this.parseExpression(false)
-        }
+		e = new ast.Expression()
+		e.Type = ast.ExpressionTypeCheckCast
+		e.pos = pos
+		t := new ast.ExpressionTypeConversion()
+		t.Type = to
+		t.Expression = on
+		e.data = t
+	}
 
-        return result , err
-    }
+	fn looksLikeExpression() -> (looksLike bool) {
+		return this.parser.token.Type == lex.TokenIdentifier ||
+				this.parser.token.Type == lex.TokenTrue ||
+				this.parser.token.Type == lex.TokenFalse ||
+				this.parser.token.Type == lex.TokenGlobal ||
+				this.parser.token.Type == lex.TokenLiteralByte ||
+				this.parser.token.Type == lex.TokenLiteralShort ||
+				this.parser.token.Type == lex.TokenLiteralInt ||
+				this.parser.token.Type == lex.TokenLiteralLong ||
+				this.parser.token.Type == lex.TokenLiteralFloat ||
+				this.parser.token.Type == lex.TokenLiteralDouble ||
+				this.parser.token.Type == lex.TokenLiteralString ||
+				this.parser.token.Type == lex.TokenNull ||
+				this.parser.token.Type == lex.TokenLp ||
+				this.parser.token.Type == lex.TokenIncrement ||
+				this.parser.token.Type == lex.TokenDecrement ||
+				this.parser.token.Type == lex.TokenNot ||
+				this.parser.token.Type == lex.TokenBitNot ||
+				this.parser.token.Type == lex.TokenSub ||
+				this.parser.token.Type == lex.TokenFn ||
+				this.parser.token.Type == lex.TokenNew ||
+				this.parser.token.Type == lex.TokenLb ||
+				this.parser.token.Type == lex.TokenSelection
+	}
 
-    fn parseTypeConversionExpression() -> (e ast.Expression , err error) {
-        to , err := this.parser.parseType()
-        if to == null {
-            return null , err
-        }
-        pos := this.parser.mkPos()
-        this.parser.unExpectNewLineAndSkip()
-        if this.parser.token.Type != lex.TokenLp {
-            err = new error(sprintf("%s not '(' after a type",
-                this.parser.errMsgPrefix()))
-            this.parser.errs.append(err)
-            return null , err
-        }
-        this.next(lfNotToken) // skip (
-        on , err := this.parseExpression(false)
-        if on == null {
-            return on , err
-        }
-        this.parser.ifTokenIsLfThenSkip(true)
-        if this.parser.token.Type != lex.TokenRp {
-            err = new error(sprintf("%s '(' and ')' not match" , this.parser.errMsgPrefix()))
-            this.parser.errs.append(err)
-        } else {
-            this.next(lfIsToken) // skip )
-        }
+	fn parseMapExpression() -> (e ast.Expression , err error) {
+		var typ ast.Type
+		if this.parser.token.Type == lex.TokenMap {
+			typ , err = this.parser.parseType()
+			if typ == null {
+				return null , err
+			}
+			this.parser.ifTokenIsLfThenSkip(true)
+		}
+		if this.parser.token.Type != lex.TokenLc {
+			err = new error(sprintf("%s expect '{',but '%s'" , this.parser.errMsgPrefix() , this.parser.token.description))
+			this.parser.errs.append(err)
+			return null , err
+		}
+		this.next(lfNotToken) // skip {
+		e = new ast.Expression()
+		e.Type = ast.ExpressionTypeMap
+		e.op = "mapLiteral"
+		m := new ast.ExpressionMap()
+		m.Type = typ
+		e.data = m
+		for this.parser.token.Type != lex.TokenEof &&
+			this.parser.token.Type != lex.TokenRc {
+			// key
+			var k ast.Expression
+			k , _ = this.parseExpression(false)
+			if k == null {
+				return
+			}
+			this.parser.unExpectNewLineAndSkip()
+			// arrow
+			if this.parser.token.Type != lex.TokenArrow {
+				err = new error(sprintf("%s expect '->',but '%s'",
+						this.parser.errMsgPrefix() , this.parser.token.description))
+				this.parser.errs.append(err)
+				return
+			}
+			this.next(lfNotToken) // skip ->
+			// value
+			var v ast.Expression
+			v , _ = this.parseExpression(false)
+			if v == null {
+				return
+			}
+			t := new ast.ExpressionKV()
+			t.key = k
+			t.value = v
 
-        e = new ast.Expression()
-        e.Type = ast.ExpressionTypeCheckCast
-        e.pos = pos
-        t := new ast.ExpressionTypeConversion()
-        t.Type = to
-        t.Expression = on
-        e.data = t
-    }
+			if m.keyValuePairs == null {
+				m.keyValuePairs = [t]
+			} else {
+				m.keyValuePairs.append(t)
+			}
 
-    fn looksLikeExpression() -> (looksLike bool) {
-        return this.parser.token.Type == lex.TokenIdentifier ||
-            this.parser.token.Type == lex.TokenTrue ||
-            this.parser.token.Type == lex.TokenFalse ||
-            this.parser.token.Type == lex.TokenGlobal ||
-            this.parser.token.Type == lex.TokenLiteralByte ||
-            this.parser.token.Type == lex.TokenLiteralShort ||
-            this.parser.token.Type == lex.TokenLiteralInt ||
-            this.parser.token.Type == lex.TokenLiteralLong ||
-            this.parser.token.Type == lex.TokenLiteralFloat ||
-            this.parser.token.Type == lex.TokenLiteralDouble ||
-            this.parser.token.Type == lex.TokenLiteralString ||
-            this.parser.token.Type == lex.TokenNull ||
-            this.parser.token.Type == lex.TokenLp ||
-            this.parser.token.Type == lex.TokenIncrement ||
-            this.parser.token.Type == lex.TokenDecrement ||
-            this.parser.token.Type == lex.TokenNot ||
-            this.parser.token.Type == lex.TokenBitNot ||
-            this.parser.token.Type == lex.TokenSub ||
-            this.parser.token.Type == lex.TokenFn ||
-            this.parser.token.Type == lex.TokenNew ||
-            this.parser.token.Type == lex.TokenLb ||
-            this.parser.token.Type == lex.TokenSelection
-    }
+			if this.parser.token.Type == lex.TokenComma {
+				// read next  key value pair
+				this.next(lfIsToken)
+				if this.parser.token.Type == lex.TokenLf {
+					t.containsLf = true
+					this.next(lfNotToken)
+				} else if this.parser.token.Type == lex.TokenComment {
+					t.inlineComment = this.parser.token.stringValue
+					this.next(lfNotToken)
+				}
+			} else {
+				break
+			}
 
-    fn parseMapExpression() -> (e ast.Expression , err error) {
-        var typ ast.Type
-        if this.parser.token.Type == lex.TokenMap {
-            typ , err = this.parser.parseType()
-            if typ == null {
-                return null , err
-            }
-            this.parser.ifTokenIsLfThenSkip(true)
-        }
-        if this.parser.token.Type != lex.TokenLc {
-            err = new error(sprintf("%s expect '{',but '%s'" , this.parser.errMsgPrefix() , this.parser.token.description))
-            this.parser.errs.append(err)
-            return null , err
-        }
-        this.next(lfNotToken) // skip {
-        e = new ast.Expression()
-        e.Type = ast.ExpressionTypeMap
-        e.op = "mapLiteral"
-        m := new ast.ExpressionMap()
-        m.Type = typ
-        e.data = m
-        for this.parser.token.Type != lex.TokenEof &&
-                this.parser.token.Type != lex.TokenRc {
-            // key
-            var k ast.Expression
-            k , _ = this.parseExpression(false)
-            if k == null {
-                return
-            }
-            this.parser.unExpectNewLineAndSkip()
-            // arrow
-            if this.parser.token.Type != lex.TokenArrow {
-                err = new error(sprintf("%s expect '->',but '%s'",
-                    this.parser.errMsgPrefix() , this.parser.token.description))
-                this.parser.errs.append(err)
-                return
-            }
-            this.next(lfNotToken) // skip ->
-            // value
-            var v ast.Expression
-            v , _ = this.parseExpression(false)
-            if v == null {
-                return
-            }
-            t := new ast.ExpressionKV()
-            t.key = k
-            t.value = v
+		}
 
-            if m.keyValuePairs == null {
-                m.keyValuePairs = [t]
-            } else {
-                m.keyValuePairs.append(t)
-            }
-
-            if this.parser.token.Type == lex.TokenComma {
-                // read next  key value pair
-                this.next(lfIsToken)
-                if this.parser.token.Type == lex.TokenLf {
-                    t.containsLf = true
-                    this.next(lfNotToken)
-                } else if this.parser.token.Type == lex.TokenComment {
-                    t.inlineComment = this.parser.token.stringValue
-                    this.next(lfNotToken)
-                }
-            } else {
-                break
-            }
-
-        }
-
-        this.parser.ifTokenIsLfThenSkip(true)
-        if this.parser.token.Type != lex.TokenRc {
-            err = new error(sprintf("%s expect '}',but '%s'",
-                this.parser.errMsgPrefix() , this.parser.token.description))
-            this.parser.errs.append(err)
-            this.parser.consume(untilRc)
-        }
-        e.pos = this.parser.mkPos()
-        this.next(lfIsToken) // skip }
-    }
+		this.parser.ifTokenIsLfThenSkip(true)
+		if this.parser.token.Type != lex.TokenRc {
+			err = new error(sprintf("%s expect '}',but '%s'",
+					this.parser.errMsgPrefix() , this.parser.token.description))
+			this.parser.errs.append(err)
+			this.parser.consume(untilRc)
+		}
+		e.pos = this.parser.mkPos()
+		this.next(lfIsToken) // skip }
+	}
 
 }
-
 

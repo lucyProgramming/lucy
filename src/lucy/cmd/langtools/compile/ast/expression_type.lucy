@@ -3,230 +3,246 @@
 import "java/lang/Object"
 
 public enum ExpressionTypeKind {
-    ExpressionTypeNull,    // null
-    ExpressionTypeBool,    // true or false
-    ExpressionTypeByte,    // 'a' or 97b
-    ExpressionTypeShort,    // 100s
-    ExpressionTypeChar,    // '\u0000'
-    ExpressionTypeInt,    // 100
-    ExpressionTypeLong,    // 100L
-    ExpressionTypeFloat,    // 1.0
-    ExpressionTypeDouble,    // 1.0d
-    ExpressionTypeString,    // "hello world"
-    ExpressionTypeArray,    // []bool{false,true}
-    ExpressionTypeLogicalOr,    // a || b
-    ExpressionTypeLogicalAnd,    // a && b
-    ExpressionTypeOr,    // a | b
-    ExpressionTypeAnd,    // a & b
-    ExpressionTypeXor,    // a ^b
-    ExpressionTypeLsh,    // a << b
-    ExpressionTypeRsh,    // a >> b
-    ExpressionTypeAdd,    // a + b
-    ExpressionTypeSub,    // a - b
-    ExpressionTypeMul,    // a * b
-    ExpressionTypeDiv,    // a / b
-    ExpressionTypeMod,    // a % b
-    ExpressionTypeAssign,    // a = b
-    ExpressionTypeVarAssign,    // a := b
-    ExpressionTypePlusAssign,    // a += b
-    ExpressionTypeMinusAssign,    // a -= b
-    ExpressionTypeMulAssign,    // a *= b
-    ExpressionTypeDivAssign,    // a /= b
-    ExpressionTypeModAssign,    // a %= b
-    ExpressionTypeAndAssign,    // a &= b
-    ExpressionTypeOrAssign,    // a |= b
-    ExpressionTypeXorAssign,    // a ^= b
-    ExpressionTypeLshAssign,    // a <<= b
-    ExpressionTypeRshAssign,    // a >>= b
-    ExpressionTypeEq,    // a == b
-    ExpressionTypeNe,    // a != b
-    ExpressionTypeGe,    // a >= b
-    ExpressionTypeGt,    // a > b
-    ExpressionTypeLe,    // a <= b
-    ExpressionTypeLt,    // a < b
-    ExpressionTypeIndex,    // a["b"]
-    ExpressionTypeSelection,    // a.b
-    ExpressionTypeSelectionConst,    // ::
-    ExpressionTypeMethodCall,    // a.b()
-    ExpressionTypeFunctionCall,    // a()
-    ExpressionTypeIncrement,    // a++
-    ExpressionTypeDecrement,    // a--
-    ExpressionTypePrefixIncrement,    // ++ a
-    ExpressionTypePrefixDecrement,    // -- a
-    ExpressionTypeNegative,    // -a
-    ExpressionTypeNot,    // !a
-    ExpressionTypeBitwiseNot,    // ~a
-    ExpressionTypeIdentifier,    // a
-    ExpressionTypeNew,    // new []int(10)
-    ExpressionTypeList,    // a,b := "hello","world"
-    ExpressionTypeFunctionLiteral,    // fn() { print("hello world"); }
-    ExpressionTypeVar,    // var a,b int
-    ExpressionTypeConst,    // const a = "hello world"
-    ExpressionTypeCheckCast,    // []byte(str)
-    ExpressionTypeRange,    // for range
-    ExpressionTypeSlice,    // arr[0:2]
-    ExpressionTypeMap,    // map literal
-    ExpressionTypeTypeAssert,    // a.(Object)
-    ExpressionTypeQuestion,    // true ? a : b
-    ExpressionTypeGlobal,    // global.XXX
-    ExpressionTypeParenthesis,    // ( a )
-    ExpressionTypeVArgs,    // a ...
-    ExpressionTypeDot,    // .
-    ExpressionTypeAutoCompletion    //auto completion 
+	ExpressionTypeNull,	// null
+	ExpressionTypeBool,	// true or false
+	ExpressionTypeByte,	// 'a' or 97b
+	ExpressionTypeShort,	// 100s
+	ExpressionTypeChar,	// '\u0000'
+	ExpressionTypeInt,	// 100
+	ExpressionTypeLong,	// 100L
+	ExpressionTypeFloat,	// 1.0
+	ExpressionTypeDouble,	// 1.0d
+	ExpressionTypeString,	// "hello world"
+	ExpressionTypeArray,	// []bool{false,true}
+	ExpressionTypeLogicalOr,	// a || b
+	ExpressionTypeLogicalAnd,	// a && b
+	ExpressionTypeOr,	// a | b
+	ExpressionTypeAnd,	// a & b
+	ExpressionTypeXor,	// a ^b
+	ExpressionTypeLsh,	// a << b
+	ExpressionTypeRsh,	// a >> b
+	ExpressionTypeAdd,	// a + b
+	ExpressionTypeSub,	// a - b
+	ExpressionTypeMul,	// a * b
+	ExpressionTypeDiv,	// a / b
+	ExpressionTypeMod,	// a % b
+	ExpressionTypeAssign,	// a = b
+	ExpressionTypeVarAssign,	// a := b
+	ExpressionTypePlusAssign,	// a += b
+	ExpressionTypeMinusAssign,	// a -= b
+	ExpressionTypeMulAssign,	// a *= b
+	ExpressionTypeDivAssign,	// a /= b
+	ExpressionTypeModAssign,	// a %= b
+	ExpressionTypeAndAssign,	// a &= b
+	ExpressionTypeOrAssign,	// a |= b
+	ExpressionTypeXorAssign,	// a ^= b
+	ExpressionTypeLshAssign,	// a <<= b
+	ExpressionTypeRshAssign,	// a >>= b
+	ExpressionTypeEq,	// a == b
+	ExpressionTypeNe,	// a != b
+	ExpressionTypeGe,	// a >= b
+	ExpressionTypeGt,	// a > b
+	ExpressionTypeLe,	// a <= b
+	ExpressionTypeLt,	// a < b
+	ExpressionTypeIndex,	// a["b"]
+	ExpressionTypeSelection,	// a.b
+	ExpressionTypeSelectionConst,	// ::
+	ExpressionTypeMethodCall,	// a.b()
+	ExpressionTypeFunctionCall,	// a()
+	ExpressionTypeIncrement,	// a++
+	ExpressionTypeDecrement,	// a--
+	ExpressionTypePrefixIncrement,	// ++ a
+	ExpressionTypePrefixDecrement,	// -- a
+	ExpressionTypeNegative,	// -a
+	ExpressionTypeNot,	// !a
+	ExpressionTypeBitwiseNot,	// ~a
+	ExpressionTypeIdentifier,	// a
+	ExpressionTypeNew,	// new []int(10)
+	ExpressionTypeList,	// a,b := "hello","world"
+	ExpressionTypeFunctionLiteral,	// fn() { print("hello world"); }
+	ExpressionTypeVar,	// var a,b int
+	ExpressionTypeConst,	// const a = "hello world"
+	ExpressionTypeCheckCast,	// []byte(str)
+	ExpressionTypeRange,	// for range
+	ExpressionTypeSlice,	// arr[0:2]
+	ExpressionTypeMap,	// map literal
+	ExpressionTypeTypeAssert,	// a.(Object)
+	ExpressionTypeQuestion,	// true ? a : b
+	ExpressionTypeGlobal,	// global.XXX
+	ExpressionTypeParenthesis,	// ( a )
+	ExpressionTypeVArgs,	// a ...
+	ExpressionTypeDot,	/* .  */
+	ExpressionTypeAutoCompletion	//auto completion 
 }
 public class ExpressionTypeAssert extends ExpressionTypeConversion {
-    public multiValueContext bool
-    public isType            bool // a.(type)  type is a key word , value is good enough 
+	public multiValueContext bool
+	public isType            bool // a.(type)  type is a key word , value is good enough 
 }
+
 public class ExpressionQuestion {
-    public selection Expression
-    public True      Expression
-    public False     Expression
+	public selection Expression
+	public True      Expression
+	public False     Expression
 }
+
 public class ExpressionSlice {
-    public on          Expression
-    public start , end Expression
+	public on          Expression
+	public start , end Expression
 }
+
 public class ExpressionFunctionCall {
-    public buildInFunctionMeta      Object                   // for build in function only
-    public Expression               Expression
-    public args                     []Expression
-    public vArgs                    CallVariableLengthArgs
-    public Function                 Function
-    public parameterTypes           []Type                   // for template function
-    public templateFunctionCallPair TemplateFunctionInstance
-    // call(LF
-    public lpContainsLf bool
-    // call(// inline comment 
-    public lpInlineComment string
+	public buildInFunctionMeta      Object                   // for build in function only
+	public Expression               Expression
+	public args                     []Expression
+	public vArgs                    CallVariableLengthArgs
+	public Function                 Function
+	public parameterTypes           []Type                   // for template function
+	public templateFunctionCallPair TemplateFunctionInstance
+	// call(LF
+	public lpContainsLf bool
+	// call(// inline comment 
+	public lpInlineComment string
 }
+
 public class ExpressionMethodCall {
-    public Class              Class                  // for object or class
-    public Expression         Expression
-    public args               []Expression
-    public vArgs              CallVariableLengthArgs
-    public name               string
-    public method             ClassMethod
-    public fieldMethodHandler ClassField
-    /*
+	public Class              Class                  // for object or class
+	public Expression         Expression
+	public args               []Expression
+	public vArgs              CallVariableLengthArgs
+	public name               string
+	public method             ClassMethod
+	public fieldMethodHandler ClassField
+	/*
 		unSupport !!!!!!
 	*/
-    public parameterTypes                []Type
-    public packageFunction               Function
-    public packageGlobalVariableFunction Variable
-    public locateDefinition              bool
-    public getHover                      bool
-    public findUsage                     bool
-    public rename                        bool
-    public autoCompletion                bool
-    // call(LF
-    public lpContainsLf bool
-    // call(// inline comment 
-    public lpInlineComment string
+	public parameterTypes                []Type
+	public packageFunction               Function
+	public packageGlobalVariableFunction Variable
+	public locateDefinition              bool
+	public getHover                      bool
+	public findUsage                     bool
+	public rename                        bool
+	public autoCompletion                bool
+	// call(LF
+	public lpContainsLf bool
+	// call(// inline comment 
+	public lpInlineComment string
 }
+
 public class ExpressionVar {
-    public Type       Type
-    public variables  []Variable
-    public initValues []Expression
+	public Type       Type
+	public variables  []Variable
+	public initValues []Expression
 }
+
 public class ExpressionVarAssign {
-    public lefts            []Expression
-    public initValues       []Expression
-    public ifDeclaredBefore []bool       // used for colon assign
+	public lefts            []Expression
+	public initValues       []Expression
+	public ifDeclaredBefore []bool       // used for colon assign
 }
+
 public class ExpressionTypeConversion {
-    public Type       Type
-    public Expression Expression
+	public Type       Type
+	public Expression Expression
 }
+
 public class ExpressionIdentifier {
-    public name             string
-    public Variable         Variable
-    public Function         Function
-    public enumName         EnumName
-    public comment          string
-    public locateDefinition bool
-    public autoCompletion   bool
-    public getHover         bool
-    public findUsage        bool
-    public rename           bool
+	public name             string
+	public Variable         Variable
+	public Function         Function
+	public enumName         EnumName
+	public comment          string
+	public locateDefinition bool
+	public autoCompletion   bool
+	public getHover         bool
+	public findUsage        bool
+	public rename           bool
 }
+
 public class ExpressionIndex {
-    public Expression Expression
-    public index      Expression
+	public Expression Expression
+	public index      Expression
 }
+
 public class ExpressionSelection {
-    public Expression       Expression
-    public name             string
-    public field            ClassField  // expression is class or object
-    public method           ClassMethod // pack to method handle
-    public packageFunction  Function    // expression is package , pack function to method handle
-    public packageVariable  Variable    // expression is package , get package variable
-    public packageEnumName  EnumName    // expression is package , get enumName
-    public locateDefinition bool
-    public getHover         bool
-    public findUsage        bool
-    public rename           bool
-    /*
+	public Expression       Expression
+	public name             string
+	public field            ClassField  // expression is class or object
+	public method           ClassMethod // pack to method handle
+	public packageFunction  Function    // expression is package , pack function to method handle
+	public packageVariable  Variable    // expression is package , get package variable
+	public packageEnumName  EnumName    // expression is package , get enumName
+	public locateDefinition bool
+	public getHover         bool
+	public findUsage        bool
+	public rename           bool
+	/*
 		a // this is a inline comment
 	*/
-    public inlineComment  string //   in
-    public containsLf     bool   // contains "\n"
-    public autoCompletion bool
+	public inlineComment  string //   in
+	public containsLf     bool   // contains "\n"
+	public autoCompletion bool
 }
+
 public class ExpressionNew {
-    public Type         Type
-    public args         []Expression
-    public construction ClassMethod
-    public vArgs        CallVariableLengthArgs
-    // call(LF
-    public lpContainsLf bool
-    // call(// inline comment 
-    public lpInlineComment string
-    // public fn containsLfOrInlineComment() -> (contains bool) {
-    //     return this.lpContainsLf || this.lpInlineComment != null
-    // }
+	public Type         Type
+	public args         []Expression
+	public construction ClassMethod
+	public vArgs        CallVariableLengthArgs
+	// call(LF
+	public lpContainsLf bool
+	// call(// inline comment 
+	public lpInlineComment string
+	// public fn containsLfOrInlineComment() -> (contains bool) {
+	//     return this.lpContainsLf || this.lpInlineComment != null
+	// }
 }
+
 public class ExpressionMap {
-    public Type          Type
-    public keyValuePairs []ExpressionKV
+	public Type          Type
+	public keyValuePairs []ExpressionKV
 
-    public fn containsLf() -> (contains bool) {
-        for k , v := range this.keyValuePairs {
-            if v.containsLfOrInlineComment() {
-                contains = true
-                return
-            }
-        }
+	public fn containsLf() -> (contains bool) {
+		for k , v := range this.keyValuePairs {
+			if v.containsLfOrInlineComment() {
+				contains = true
+				return
+			}
+		}
 
-    }
+	}
 }
+
 public class ExpressionKV {
-    public key   Expression
-    public value Expression
-    /*
+	public key   Expression
+	public value Expression
+	/*
 		a // this is a inline comment
 	*/
-    public inlineComment string //   in
+	public inlineComment string //   in
 
-    public containsLf bool // contains "\n"
+	public containsLf bool // contains "\n"
 
-    public fn containsLfOrInlineComment() -> (contains bool) {
-        return this.containsLf || this.inlineComment != null
-    }
+	public fn containsLfOrInlineComment() -> (contains bool) {
+		return this.containsLf || this.inlineComment != null
+	}
 }
+
 /*
 	for some general purpose
 */
 public class ExpressionBinary {
-    public left  Expression
-    public right Expression
-    /*
+	public left  Expression
+	public right Expression
+	/*
 		a // this is a inline comment
 	*/
-    public inlineComment string //   in
-    public containsLf    bool   // contains "\n"
+	public inlineComment string //   in
+	public containsLf    bool   // contains "\n"
 }
+
 public class ExpressionArray {
-    public Type        Type
-    public expressions []Expression
+	public Type        Type
+	public expressions []Expression
 }
+
