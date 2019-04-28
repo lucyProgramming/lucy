@@ -3,1251 +3,1251 @@
 import "lucy/cmd/langtools/compile/ast"
 
 public class Fmt {
-    indentIncremental string
-    public fn Fmt(indentIncrement string = "    ") {
-        this.super()
-        this.indentIncremental = indentIncrement
-    }
-    public fn fmt(nodes []ast.TopNode) -> (format string = "") {
-        for k , n := range nodes {
-            if t , ok := n.node.(ast.Comment) ; ok {
-                if t.isMulti {
-                    format += sprintf("/*%s*/" , t.comment)
-                } else {
-                    format += "//" + t.comment // contains \n
-                }
-                continue
-            }
-            if t , ok := n.node.(ast.Block) ; ok &&
-                t.isCompilerAuto == false {
-                format += "{\n"
-                format += this.formatBlock(this.indentIncremental , t)
-                format += "}\n"
-                continue
-            }
-            if t , ok := n.node.(ast.Function) ; ok {
-                if t.isPublic() {
-                    format += "public " + this.formatFunction("" , t , false) + "\n"
-                } else {
-                    format += this.formatFunction("" , t , false) + "\n"
-                }
-                continue
-            }
-            if t , ok := n.node.(ast.Enum) ; ok {
-                format += this.formatEnum("" , t)
-                continue
-            }
-            if t , ok := n.node.(ast.Class) ; ok {
-                format += this.formatClass("" , t)
-                continue
-            }
-            if t , ok := n.node.(ast.Constant) ; ok {
-                format += this.formatConstant("" , t)
-                continue
-            }
-            if t , ok := n.node.(ast.Line) ; ok {
-                format += "\n"
-                continue
-            }
-            if t , ok := n.node.(ast.Import) ; ok {
-                format += this.formatImport("" , t) + "\n"
-                index := k + 1
-                if index < len(nodes) {
-                    _ , ok1 := nodes[index].node.(ast.Import)
-                    _ , ok2 := nodes[index].node.(ast.Line)
-                    if ok1 == false && ok2 == false {
-                        format += "\n"
-                    }
-                }
-                continue
-            }
-            if t , ok := n.node.(ast.Expression) ; ok {
-                if t.inlineComment != null {
-                    format += this.formatExpression("" , t) + " //" + t.inlineComment
-                } else {
-                    format += this.formatExpression("" , t) + "\n"
-                }
-                continue
-            }
-            if t , ok := n.node.(ast.TypeAlias) ; ok {
-                format += this.formatTypealias("" , t) + "\n"
-                continue
-            }
-            panic(n.node.getClass().toString() + " not handle")
-        }
-    }
+	indentIncremental string
+	public fn Fmt(indentIncrement string = "\t") {
+		this.super()
+		this.indentIncremental = indentIncrement
+	}
+	public fn fmt(nodes []ast.TopNode) -> (format string = "") {
+		for k , n := range nodes {
+			if t , ok := n.node.(ast.Comment) ; ok {
+				if t.isMulti {
+					format += sprintf("/*%s*/" , t.comment)
+				} else {
+					format += "//" + t.comment // contains \n
+				}
+				continue
+			}
+			if t , ok := n.node.(ast.Block) ; ok &&
+				t.isCompilerAuto == false {
+				format += "{\n"
+				format += this.formatBlock(this.indentIncremental , t)
+				format += "}\n"
+				continue
+			}
+			if t , ok := n.node.(ast.Function) ; ok {
+				if t.isPublic() {
+					format += "public " + this.formatFunction("" , t , false) + "\n"
+				} else {
+					format += this.formatFunction("" , t , false) + "\n"
+				}
+				continue
+			}
+			if t , ok := n.node.(ast.Enum) ; ok {
+				format += this.formatEnum("" , t)
+				continue
+			}
+			if t , ok := n.node.(ast.Class) ; ok {
+				format += this.formatClass("" , t)
+				continue
+			}
+			if t , ok := n.node.(ast.Constant) ; ok {
+				format += this.formatConstant("" , t)
+				continue
+			}
+			if t , ok := n.node.(ast.Line) ; ok {
+				format += "\n"
+				continue
+			}
+			if t , ok := n.node.(ast.Import) ; ok {
+				format += this.formatImport("" , t) + "\n"
+				index := k + 1
+				if index < len(nodes) {
+					_ , ok1 := nodes[index].node.(ast.Import)
+					_ , ok2 := nodes[index].node.(ast.Line)
+					if ok1 == false && ok2 == false {
+						format += "\n"
+					}
+				}
+				continue
+			}
+			if t , ok := n.node.(ast.Expression) ; ok {
+				if t.inlineComment != null {
+					format += this.formatExpression("" , t) + " //" + t.inlineComment
+				} else {
+					format += this.formatExpression("" , t) + "\n"
+				}
+				continue
+			}
+			if t , ok := n.node.(ast.TypeAlias) ; ok {
+				format += this.formatTypealias("" , t) + "\n"
+				continue
+			}
+			panic(n.node.getClass().toString() + " not handle")
+		}
+	}
 
-    fn formatConstant(indent string , c ast.Constant) -> (format string = "") {
-        format = indent
-        if c.isPublic() {
-            format += "public "
-        }
-        format += "const " + c.name
-        if c.Type != null {
-            format += " " + c.Type.typeName()
-        }
-        format +=
-            " = " + this.formatExpression(indent + this.indentIncremental , c.defaultValueExpression)
-        if c.inlineComment != null {
-            format += " //" + c.inlineComment
-        } else {
-            format += "\n"
-        }
-    }
-    fn formatFunction(indent string , f ast.Function , isAbstract bool) -> (format string = "") {
-        format += "fn "
-        if f.name != null && f.name != "" {
-            format += f.name
-        }
-        if len(f.Type.templateNames) > 0 {
-            format += " <"
-            for k , v := range f.Type.templateNames {
-                format += v.name
-                if k != len(f.Type.templateNames) - 1 {
-                    format += " , "
-                }
-            }
-            format += "> "
-        }
-        format += "("
-        if f.Type.lpContainsLf {
-            format += "\n"
-            format += indent + this.indentIncremental
-        }
-        if f.Type.lpContainsInlineComment != null {
-            format += " // " + f.Type.lpContainsInlineComment
-            format += indent + this.indentIncremental
-        }
-        for k , v := range f.Type.parameterList {
-            if v.name != null && v.name != "" {
-                format += v.name + " "
-            }
-            format += v.Type.typeName()
-            if v.defaultValueExpression != null && v.defaultValueExpression.isCompilerAuto == false {
-                format += " = "
-                format += this.formatExpression(indent + this.indentIncremental , v.defaultValueExpression)
-            }
-            if k != len(f.Type.parameterList) - 1 || f.Type.vArgs != null {
-                if v.containsLfOrInlineComment() == false {
-                    format += " , "
-                } else {
-                    format += ","
-                }
+	fn formatConstant(indent string , c ast.Constant) -> (format string = "") {
+		format = indent
+		if c.isPublic() {
+			format += "public "
+		}
+		format += "const " + c.name
+		if c.Type != null {
+			format += " " + c.Type.typeName()
+		}
+		format +=
+			" = " + this.formatExpression(indent + this.indentIncremental , c.defaultValueExpression)
+		if c.inlineComment != null {
+			format += " //" + c.inlineComment
+		} else {
+			format += "\n"
+		}
+	}
+	fn formatFunction(indent string , f ast.Function , isAbstract bool) -> (format string = "") {
+		format += "fn "
+		if f.name != null && f.name != "" {
+			format += f.name
+		}
+		if len(f.Type.templateNames) > 0 {
+			format += " <"
+			for k , v := range f.Type.templateNames {
+				format += v.name
+				if k != len(f.Type.templateNames) - 1 {
+					format += " , "
+				}
+			}
+			format += "> "
+		}
+		format += "("
+		if f.Type.lpContainsLf {
+			format += "\n"
+			format += indent + this.indentIncremental
+		}
+		if f.Type.lpContainsInlineComment != null {
+			format += " // " + f.Type.lpContainsInlineComment
+			format += indent + this.indentIncremental
+		}
+		for k , v := range f.Type.parameterList {
+			if v.name != null && v.name != "" {
+				format += v.name + " "
+			}
+			format += v.Type.typeName()
+			if v.defaultValueExpression != null && v.defaultValueExpression.isCompilerAuto == false {
+				format += " = "
+				format += this.formatExpression(indent + this.indentIncremental , v.defaultValueExpression)
+			}
+			if k != len(f.Type.parameterList) - 1 || f.Type.vArgs != null {
+				if v.containsLfOrInlineComment() == false {
+					format += " , "
+				} else {
+					format += ","
+				}
 
-            }
-            if v.containsLf {
-                format += "\n"
-                format += indent + this.indentIncremental
-            }
-            if v.inlineComment != null {
-                format += " // " + v.inlineComment
-                format += indent + this.indentIncremental
-            }
-        }
+			}
+			if v.containsLf {
+				format += "\n"
+				format += indent + this.indentIncremental
+			}
+			if v.inlineComment != null {
+				format += " // " + v.inlineComment
+				format += indent + this.indentIncremental
+			}
+		}
 
-        if f.Type.vArgs != null {
-            if f.Type.vArgs.name != null && f.Type.vArgs.name != "" {
-                format += f.Type.vArgs.name + " "
-            }
-            format += f.Type.vArgs.Type.typeName()
-        }
-        format += ")"
-        if f.Type.voidReturn() == false {
-            format += " -> ("
-            if f.Type.returnLpContainsLf {
-                format += "\n"
-                format += indent + this.indentIncremental
-            }
-            if f.Type.returnLpContainsInlineComment != null {
-                format += "// " + f.Type.returnLpContainsInlineComment
-                format += indent + this.indentIncremental
-            }
-            for k , v := range f.Type.returnList {
-                if v.name != null && v.name != "" {
-                    format += v.name + " "
-                }
-                format += v.Type.typeName()
-                if v.defaultValueExpression != null && v.defaultValueExpression.isCompilerAuto == false {
-                    format += " = "
-                    format += this.formatExpression(indent + this.indentIncremental , v.defaultValueExpression)
-                }
-                if k != len(f.Type.returnList) - 1 {
-                    if v.containsLfOrInlineComment() == false {
-                        format += " , "
-                    } else {
-                        format += ","
-                    }
-                }
-                if v.containsLf {
-                    format += "\n"
-                    format += indent + this.indentIncremental
-                }
-                if v.inlineComment != null {
-                    format += "// " + v.inlineComment
-                    format += indent + this.indentIncremental
-                }
-            }
+		if f.Type.vArgs != null {
+			if f.Type.vArgs.name != null && f.Type.vArgs.name != "" {
+				format += f.Type.vArgs.name + " "
+			}
+			format += f.Type.vArgs.Type.typeName()
+		}
+		format += ")"
+		if f.Type.voidReturn() == false {
+			format += " -> ("
+			if f.Type.returnLpContainsLf {
+				format += "\n"
+				format += indent + this.indentIncremental
+			}
+			if f.Type.returnLpContainsInlineComment != null {
+				format += "// " + f.Type.returnLpContainsInlineComment
+				format += indent + this.indentIncremental
+			}
+			for k , v := range f.Type.returnList {
+				if v.name != null && v.name != "" {
+					format += v.name + " "
+				}
+				format += v.Type.typeName()
+				if v.defaultValueExpression != null && v.defaultValueExpression.isCompilerAuto == false {
+					format += " = "
+					format += this.formatExpression(indent + this.indentIncremental , v.defaultValueExpression)
+				}
+				if k != len(f.Type.returnList) - 1 {
+					if v.containsLfOrInlineComment() == false {
+						format += " , "
+					} else {
+						format += ","
+					}
+				}
+				if v.containsLf {
+					format += "\n"
+					format += indent + this.indentIncremental
+				}
+				if v.inlineComment != null {
+					format += "// " + v.inlineComment
+					format += indent + this.indentIncremental
+				}
+			}
 
-            format += ")"
-        }
-        if isAbstract {
-            return
-        }
-        if len(f.block.statements) > 0 {
-            format += " {\n"
-            format += this.formatBlock(indent + this.indentIncremental , f.block)
-            format += indent + "}"
-        } else {
-            format += "{}"
-        }
+			format += ")"
+		}
+		if isAbstract {
+			return
+		}
+		if len(f.block.statements) > 0 {
+			format += " {\n"
+			format += this.formatBlock(indent + this.indentIncremental , f.block)
+			format += indent + "}"
+		} else {
+			format += "{}"
+		}
 
-    }
-    fn formatClass(indent string , c ast.Class) -> (format string = "") {
-        format = indent
-        if c.isPublic() {
-            format += "public "
-        }
-        if c.isFinal() {
-            format += "final "
-        }
-        if c.isAbstract() && c.isInterface() == false {
-            format += "abstract "
-        }
-        if c.isInterface() {
-            format += "interface "
-        } else {
-            format += "class "
-        }
-        if len(c.fmts) == 0 &&
-            c.superClassName == null &&
-            len(c.interfaceNames) == 0 {
-            format += c.name + "{}\n\n"
-            return
-        }
-        format += c.name
-        if c.superClassName != null {
-            format += " extends " + c.superClassName.name
-        }
-        if len(c.interfaceNames) > 0 {
-            format += " implements "
-            for k , v := range c.interfaceNames {
-                format += v.name
-                if k != len(c.interfaceNames) - 1 {
-                    if v.containsLfOrInlineComment() == false {
-                        format += " , "
-                    } else {
-                        format += ","
-                    }
-                    if v.containsLf {
-                        format += "\n"
-                        format += this.indentIncremental + indent
-                    } else if v.inlineComment != null {
-                        format += "//" + v.inlineComment
-                        format += this.indentIncremental + indent
-                    }
-                }
-            }
-        }
-        format += " {\n"
-        for k := 0 ; k < len(c.fmts) ; k++ {
-            f := c.fmts[k]
-            if t , ok := f.(ast.Comment) ; ok {
-                if t.isMulti {
-                    format += indent + this.indentIncremental + sprintf("/*%s*/" , t.comment)
-                } else {
-                    format += indent + this.indentIncremental + "//" + t.comment
-                }
-                continue
-            }
-            if t , ok := f.(ast.Line) ; ok {
-                format += "\n"
-                continue
-            }
-            if t , ok := f.(ast.Constant) ; ok {
-                format += this.formatConstant(indent + this.indentIncremental , t)
-                continue
-            }
-            if field , ok := f.(ast.ClassFieldDeclaration) ; ok {
-                fields := []ast.ClassFieldDeclaration{}
-                {
-                    t , ok := c.fmts[k].(ast.ClassFieldDeclaration)
-                    for ok {
-                        fields.append(t)
-                        k++
-                        if k >= len(c.fmts) {
-                            break
-                        }
-                        t , ok = c.fmts[k].(ast.ClassFieldDeclaration)
-                    }
-                    k--
-                }
-                maxName , maxAccessRange , maxTypeName , hasFinal , hasStatic :=
-                    this.getFieldDeclarationGroupMeta(fields)
+	}
+	fn formatClass(indent string , c ast.Class) -> (format string = "") {
+		format = indent
+		if c.isPublic() {
+			format += "public "
+		}
+		if c.isFinal() {
+			format += "final "
+		}
+		if c.isAbstract() && c.isInterface() == false {
+			format += "abstract "
+		}
+		if c.isInterface() {
+			format += "interface "
+		} else {
+			format += "class "
+		}
+		if len(c.fmts) == 0 &&
+			c.superClassName == null &&
+			len(c.interfaceNames) == 0 {
+			format += c.name + "{}\n\n"
+			return
+		}
+		format += c.name
+		if c.superClassName != null {
+			format += " extends " + c.superClassName.name
+		}
+		if len(c.interfaceNames) > 0 {
+			format += " implements "
+			for k , v := range c.interfaceNames {
+				format += v.name
+				if k != len(c.interfaceNames) - 1 {
+					if v.containsLfOrInlineComment() == false {
+						format += " , "
+					} else {
+						format += ","
+					}
+					if v.containsLf {
+						format += "\n"
+						format += this.indentIncremental + indent
+					} else if v.inlineComment != null {
+						format += "//" + v.inlineComment
+						format += this.indentIncremental + indent
+					}
+				}
+			}
+		}
+		format += " {\n"
+		for k := 0 ; k < len(c.fmts) ; k++ {
+			f := c.fmts[k]
+			if t , ok := f.(ast.Comment) ; ok {
+				if t.isMulti {
+					format += indent + this.indentIncremental + sprintf("/*%s*/" , t.comment)
+				} else {
+					format += indent + this.indentIncremental + "//" + t.comment
+				}
+				continue
+			}
+			if t , ok := f.(ast.Line) ; ok {
+				format += "\n"
+				continue
+			}
+			if t , ok := f.(ast.Constant) ; ok {
+				format += this.formatConstant(indent + this.indentIncremental , t)
+				continue
+			}
+			if field , ok := f.(ast.ClassFieldDeclaration) ; ok {
+				fields := []ast.ClassFieldDeclaration{}
+				{
+					t , ok := c.fmts[k].(ast.ClassFieldDeclaration)
+					for ok {
+						fields.append(t)
+						k++
+						if k >= len(c.fmts) {
+							break
+						}
+						t , ok = c.fmts[k].(ast.ClassFieldDeclaration)
+					}
+					k--
+				}
+				maxName , maxAccessRange , maxTypeName , hasFinal , hasStatic :=
+					this.getFieldDeclarationGroupMeta(fields)
 
-                for k , f := range fields {
-                    d := indent + this.indentIncremental
-                    if maxAccessRange != "" {
-                        accessControl := this.getFieldAccessControlString(f)
-                        d += accessControl
-                        if len(accessControl) < len(maxAccessRange) {
-                            d += this.mkSpacing(len(maxAccessRange) - len(accessControl))
-                        }
-                        d += " "
-                    }
-                    if hasFinal {
-                        if f.fields[0].isFinal() {
-                            d += "final "
-                        } else {
-                            d += "      "
-                        }
-                    }
-                    if hasStatic {
-                        if f.fields[0].isStatic() {
-                            d += "static "
-                        } else {
-                            d += "       "
-                        }
+				for k , f := range fields {
+					d := indent + this.indentIncremental
+					if maxAccessRange != "" {
+						accessControl := this.getFieldAccessControlString(f)
+						d += accessControl
+						if len(accessControl) < len(maxAccessRange) {
+							d += this.mkSpacing(len(maxAccessRange) - len(accessControl))
+						}
+						d += " "
+					}
+					if hasFinal {
+						if f.fields[0].isFinal() {
+							d += "final "
+						} else {
+							d += "      "
+						}
+					}
+					if hasStatic {
+						if f.fields[0].isStatic() {
+							d += "static "
+						} else {
+							d += "       "
+						}
 
-                    }
-                    name := ""
-                    for k , v := range f.nameList {
-                        name += v.name
-                        if k != len(f.nameList) - 1 {
-                            name += " , "
-                        }
-                    }
-                    d += name
-                    if t := len(maxName) - len(name) ; t > 0 {
-                        d += this.mkSpacing(t)
-                    }
-                    d += " "
-                    d += f.fields[0].Type.typeName()
-                    if len(f.initValues) > 0 {
-                        d += " = "
-                        list := new ast.Expression()
-                        list.Type = ast.ExpressionTypeList
-                        list.data = f.initValues
-                        d += this.formatExpression(this.mkSpacing(len(d)) , list)
-                    } else {
-                        if t := len(maxTypeName) - len(f.fields[0].Type.typeName()) ; t > 0 &&
-                            f.inlineComment != null {
-                            d += this.mkSpacing(t)
-                        }
-                    }
-                    if f.inlineComment != null {
-                        d += " //" + f.inlineComment
-                    } else {
-                        d += "\n"
-                    }
-                    format += d
-                }
-                continue
-            }
-            // must be a method 
-            method := f.(ast.ClassMethod)
-            m := indent + this.indentIncremental
-            if method.isPublic() {
-                m += "public "
-            }
-            if method.isPrivate() {
-                m += "private "
-            }
-            if method.isProtected() {
-                m += "protected "
-            }
-            if method.isFinal() {
-                m += "final "
-            }
-            if method.isStatic() {
-                m += "static "
-            }
-            if method.isAbstract() && c.isInterface() == false {
-                m += "abstract "
-            }
-            if method.Function.name == "<init>" {
-                method.Function.name = c.name
-            }
-            m += this.formatFunction(indent + this.indentIncremental , method.Function , method.isAbstract())
-            format += m + "\n"
-        }
-        format += indent + "}\n\n"
-    }
+					}
+					name := ""
+					for k , v := range f.nameList {
+						name += v.name
+						if k != len(f.nameList) - 1 {
+							name += " , "
+						}
+					}
+					d += name
+					if t := len(maxName) - len(name) ; t > 0 {
+						d += this.mkSpacing(t)
+					}
+					d += " "
+					d += f.fields[0].Type.typeName()
+					if len(f.initValues) > 0 {
+						d += " = "
+						list := new ast.Expression()
+						list.Type = ast.ExpressionTypeList
+						list.data = f.initValues
+						d += this.formatExpression(this.mkSpacing(len(d)) , list)
+					} else {
+						if t := len(maxTypeName) - len(f.fields[0].Type.typeName()) ; t > 0 &&
+							f.inlineComment != null {
+							d += this.mkSpacing(t)
+						}
+					}
+					if f.inlineComment != null {
+						d += " //" + f.inlineComment
+					} else {
+						d += "\n"
+					}
+					format += d
+				}
+				continue
+			}
+			// must be a method 
+			method := f.(ast.ClassMethod)
+			m := indent + this.indentIncremental
+			if method.isPublic() {
+				m += "public "
+			}
+			if method.isPrivate() {
+				m += "private "
+			}
+			if method.isProtected() {
+				m += "protected "
+			}
+			if method.isFinal() {
+				m += "final "
+			}
+			if method.isStatic() {
+				m += "static "
+			}
+			if method.isAbstract() && c.isInterface() == false {
+				m += "abstract "
+			}
+			if method.Function.name == "<init>" {
+				method.Function.name = c.name
+			}
+			m += this.formatFunction(indent + this.indentIncremental , method.Function , method.isAbstract())
+			format += m + "\n"
+		}
+		format += indent + "}\n\n"
+	}
 
-    fn mkSpacing(length int) -> (s string = "") {
-        for i := 0 ; i < length ; i++ {
-            s += " "
-        }
-    }
+	fn mkSpacing(length int) -> (s string = "") {
+		for i := 0 ; i < length ; i++ {
+			s += " "
+		}
+	}
 
-    fn getFieldAccessControlString(f ast.ClassFieldDeclaration) -> (access string = "") {
-        if f.fields[0].isPublic() {
-            access = "public"
-        }
-        if f.fields[0].isProtected() {
-            access = "protected"
-        }
-        if f.fields[0].isPrivate() {
-            access = "private"
-        }
-    }
-    fn getFieldDeclarationGroupMeta(fs []ast.ClassFieldDeclaration) -> (maxName string = "",
-        maxAccessRange string = "" , maxTypeName string = "" , hasFinal bool , hasStatic bool) {
-        for f := range fs {
-            if f.fields[0].isPublic() {
-                maxAccessRange = maxAccessRange == ""?"public":maxAccessRange
-            }
-            if f.fields[0].isPrivate() {
-                maxAccessRange = maxAccessRange == "" || maxAccessRange == "public"?"private":maxAccessRange
-            }
-            if f.fields[0].isProtected() {
-                maxAccessRange = "protected"
-            }
-            if f.fields[0].isFinal() {
-                hasFinal = true
-            }
-            if f.fields[0].isStatic() {
-                hasStatic = true
-            }
-            if typeName := f.fields[0].Type.typeName() ; len(typeName) > len(maxTypeName) {
-                maxTypeName = typeName
-            }
-            if name := this.getFieldDeclarationName(f) ; len(name) > len(maxName) {
-                maxName = name
-            }
-        }
+	fn getFieldAccessControlString(f ast.ClassFieldDeclaration) -> (access string = "") {
+		if f.fields[0].isPublic() {
+			access = "public"
+		}
+		if f.fields[0].isProtected() {
+			access = "protected"
+		}
+		if f.fields[0].isPrivate() {
+			access = "private"
+		}
+	}
+	fn getFieldDeclarationGroupMeta(fs []ast.ClassFieldDeclaration) -> (maxName string = "",
+		maxAccessRange string = "" , maxTypeName string = "" , hasFinal bool , hasStatic bool) {
+		for f := range fs {
+			if f.fields[0].isPublic() {
+				maxAccessRange = maxAccessRange == ""?"public":maxAccessRange
+			}
+			if f.fields[0].isPrivate() {
+				maxAccessRange = maxAccessRange == "" || maxAccessRange == "public"?"private":maxAccessRange
+			}
+			if f.fields[0].isProtected() {
+				maxAccessRange = "protected"
+			}
+			if f.fields[0].isFinal() {
+				hasFinal = true
+			}
+			if f.fields[0].isStatic() {
+				hasStatic = true
+			}
+			if typeName := f.fields[0].Type.typeName() ; len(typeName) > len(maxTypeName) {
+				maxTypeName = typeName
+			}
+			if name := this.getFieldDeclarationName(f) ; len(name) > len(maxName) {
+				maxName = name
+			}
+		}
 
-    }
-    fn getFieldDeclarationName(f ast.ClassFieldDeclaration) -> (name string = "") {
-        for kk , ff := range f.nameList {
-            name += ff.name
-            if kk != len(f.nameList) - 1 {
-                name += " , "
-            }
-        }
+	}
+	fn getFieldDeclarationName(f ast.ClassFieldDeclaration) -> (name string = "") {
+		for kk , ff := range f.nameList {
+			name += ff.name
+			if kk != len(f.nameList) - 1 {
+				name += " , "
+			}
+		}
 
-    }
-    fn formatEnum(indent string , e ast.Enum) -> (format string = "") {
-        format = indent
-        if e.isPublic() {
-            format += "public "
-        }
-        format += "enum " + e.name + " {\n"
-        for k , f := range e.fmts {
-            if t , ok := f.(ast.Comment) ; ok {
-                if t.isMulti {
-                    format += indent + this.indentIncremental + sprintf("/*%s*/" , t.comment)
-                } else {
-                    format += indent + this.indentIncremental + "//" + t.comment + "\n"
-                }
-                continue
-            }
-            if t , ok := f.(ast.Line) ; ok {
-                format += "\n"
-                continue
-            }
-            v := f.(ast.EnumName)
-            format += this.indentIncremental + v.name
-            if v.noNeed != null {
-                format += " " + this.formatExpression(indent , v.noNeed)
-            }
-            isLast := true
-            for en := range e.fmts[k + 1:] {
-                _ , ok := en.(ast.EnumName)
-                if ok {
-                    isLast = false
-                    break
-                }
-            }
-            if isLast == false {
-                format += ","
-            }
-            if v.containsLf {
-                format += "\n"
-            } else if v.inlineComment != null {
-                format += "    //" + v.inlineComment
-            }
-        }
+	}
+	fn formatEnum(indent string , e ast.Enum) -> (format string = "") {
+		format = indent
+		if e.isPublic() {
+			format += "public "
+		}
+		format += "enum " + e.name + " {\n"
+		for k , f := range e.fmts {
+			if t , ok := f.(ast.Comment) ; ok {
+				if t.isMulti {
+					format += indent + this.indentIncremental + sprintf("/*%s*/" , t.comment)
+				} else {
+					format += indent + this.indentIncremental + "//" + t.comment + "\n"
+				}
+				continue
+			}
+			if t , ok := f.(ast.Line) ; ok {
+				format += "\n"
+				continue
+			}
+			v := f.(ast.EnumName)
+			format += this.indentIncremental + v.name
+			if v.noNeed != null {
+				format += " " + this.formatExpression(indent , v.noNeed)
+			}
+			isLast := true
+			for en := range e.fmts[k + 1:] {
+				_ , ok := en.(ast.EnumName)
+				if ok {
+					isLast = false
+					break
+				}
+			}
+			if isLast == false {
+				format += ","
+			}
+			if v.containsLf {
+				format += "\n"
+			} else if v.inlineComment != null {
+				format += "    //" + v.inlineComment
+			}
+		}
 
-        format += indent + "}\n"
-    }
-    fn formatImport(indent string , i ast.Import) -> (format string = "") {
-        format = indent
-        format += "import \"" + i.Import + "\""
-        if i.alias != null {
-            format += " as " + i.alias
-        }
-    }
-    // block can have no "{}"
-    fn formatBlock(indent string , block ast.Block) -> (format string = "") {
-        for s := range block.statements {
-            format += this.formatStatement(indent , s , false)
-        }
+		format += indent + "}\n"
+	}
+	fn formatImport(indent string , i ast.Import) -> (format string = "") {
+		format = indent
+		format += "import \"" + i.Import + "\""
+		if i.alias != null {
+			format += " as " + i.alias
+		}
+	}
+	// block can have no "{}"
+	fn formatBlock(indent string , block ast.Block) -> (format string = "") {
+		for s := range block.statements {
+			format += this.formatStatement(indent , s , false)
+		}
 
-    }
-    fn formatStatement(indent string , s ast.Statement , noIndent bool) -> (format string = "") {
-        switch s.Type {
-            case ast.StatementTypeExpression:
-                if noIndent == false {
-                    format += indent
-                }
-                if s.inlineComment == null {
-                    format += this.formatExpression(indent , s.Expression) + "\n"
-                } else {
-                    format += this.formatExpression(indent , s.Expression) + " //" + s.inlineComment
-                }
-            case ast.StatementTypeIf:
-                format += this.formatIf(indent , s.statementIf)
-            case ast.StatementTypeBlock:
-                format += indent + "{\n"
-                format += this.formatBlock(indent + this.indentIncremental , s.block)
-                format += indent + "}\n"
-            case ast.StatementTypeFor:
-                format += this.formatFor(indent , s.StatementFor)
-            case ast.StatementTypeContinue:
-                if s.inlineComment == null {
-                    format += indent + "continue" + "\n"
-                } else {
-                    format += indent + "continue " + " //" + s.inlineComment
-                }
-            case ast.StatementTypeReturn:
-                format += this.formatReturn(indent , s.StatementReturn , s.inlineComment)
-            case ast.StatementTypeBreak:
-                if s.inlineComment == null {
-                    format += indent + "break" + "\n"
-                } else {
-                    format += indent + "break" + " //" + s.inlineComment
-                }
-            case ast.StatementTypeSwitch:
-                format += this.formatSwitch(indent , s.StatementSwitch)
-            case ast.StatementTypeWhen:
-                format += this.formatWhen(indent , s.StatementWhen)
-            case ast.StatementTypeLabel:
-                format += indent[:len(indent) - 4] + s.StatementLabel.name + ":\n"
-            case ast.StatementTypeGoTo:
-                format += this.formatGoto(indent , s.StatementGoTo , s.inlineComment)
-            case ast.StatementTypeDefer:
-                format += this.formatDefer(indent , s.Defer)
-            case ast.StatementTypeClass:
-                format += this.formatClass(indent , s.Class)
-            case ast.StatementTypeEnum:
-                format += this.formatEnum(indent , s.Enum)
-            case ast.StatementTypeNop:
-                //nothing
-            case ast.StatementTypeImport:
-                format += this.formatImport(indent , s.Import) + "\n"
-            case ast.StatementTypeTypeAlias:
-                format += this.formatTypealias(indent , s.TypeAlias)
-            case ast.StatementTypeEmptyLine:
-                format += "\n"
-            case ast.StatementTypeComment:
-                format += indent + "//" + s.comment
-            case ast.StatementTypeCommentMultiLine:
-                format += indent + sprintf("/*%s*/" , s.comment)
-        }
+	}
+	fn formatStatement(indent string , s ast.Statement , noIndent bool) -> (format string = "") {
+		switch s.Type {
+			case ast.StatementTypeExpression:
+				if noIndent == false {
+					format += indent
+				}
+				if s.inlineComment == null {
+					format += this.formatExpression(indent , s.Expression) + "\n"
+				} else {
+					format += this.formatExpression(indent , s.Expression) + " //" + s.inlineComment
+				}
+			case ast.StatementTypeIf:
+				format += this.formatIf(indent , s.statementIf)
+			case ast.StatementTypeBlock:
+				format += indent + "{\n"
+				format += this.formatBlock(indent + this.indentIncremental , s.block)
+				format += indent + "}\n"
+			case ast.StatementTypeFor:
+				format += this.formatFor(indent , s.StatementFor)
+			case ast.StatementTypeContinue:
+				if s.inlineComment == null {
+					format += indent + "continue" + "\n"
+				} else {
+					format += indent + "continue " + " //" + s.inlineComment
+				}
+			case ast.StatementTypeReturn:
+				format += this.formatReturn(indent , s.StatementReturn , s.inlineComment)
+			case ast.StatementTypeBreak:
+				if s.inlineComment == null {
+					format += indent + "break" + "\n"
+				} else {
+					format += indent + "break" + " //" + s.inlineComment
+				}
+			case ast.StatementTypeSwitch:
+				format += this.formatSwitch(indent , s.StatementSwitch)
+			case ast.StatementTypeWhen:
+				format += this.formatWhen(indent , s.StatementWhen)
+			case ast.StatementTypeLabel:
+				format += indent[:len(indent) - 4] + s.StatementLabel.name + ":\n"
+			case ast.StatementTypeGoTo:
+				format += this.formatGoto(indent , s.StatementGoTo , s.inlineComment)
+			case ast.StatementTypeDefer:
+				format += this.formatDefer(indent , s.Defer)
+			case ast.StatementTypeClass:
+				format += this.formatClass(indent , s.Class)
+			case ast.StatementTypeEnum:
+				format += this.formatEnum(indent , s.Enum)
+			case ast.StatementTypeNop:
+				//nothing
+			case ast.StatementTypeImport:
+				format += this.formatImport(indent , s.Import) + "\n"
+			case ast.StatementTypeTypeAlias:
+				format += this.formatTypealias(indent , s.TypeAlias)
+			case ast.StatementTypeEmptyLine:
+				format += "\n"
+			case ast.StatementTypeComment:
+				format += indent + "//" + s.comment
+			case ast.StatementTypeCommentMultiLine:
+				format += indent + sprintf("/*%s*/" , s.comment)
+		}
 
-    }
-    fn formatTypealias(indent string , a ast.TypeAlias) -> (format string = "") {
-        format = indent
-        format += sprintf("typealias %s = %s\n" , a.name , a.Type.typeName())
-    }
-    fn formatDefer(indent string , d ast.StatementDefer) -> (format string = "") {
-        format = indent
-        if d.onlyOneStatement {
-            format += "defer "
-            format += this.formatStatement(indent + this.indentIncremental , d.block.statements[0] , true)
-        } else {
-            format += "defer {\n"
-            format += this.formatBlock(indent + this.indentIncremental , d.block)
-            format += indent + "}\n"
-        }
+	}
+	fn formatTypealias(indent string , a ast.TypeAlias) -> (format string = "") {
+		format = indent
+		format += sprintf("typealias %s = %s\n" , a.name , a.Type.typeName())
+	}
+	fn formatDefer(indent string , d ast.StatementDefer) -> (format string = "") {
+		format = indent
+		if d.onlyOneStatement {
+			format += "defer "
+			format += this.formatStatement(indent + this.indentIncremental , d.block.statements[0] , true)
+		} else {
+			format += "defer {\n"
+			format += this.formatBlock(indent + this.indentIncremental , d.block)
+			format += indent + "}\n"
+		}
 
-    }
-    fn formatIf(indent string , s ast.StatementIf) -> (format string = "") {
-        format = indent
-        format += "if "
-        for v := range s.prefixExpressions {
-            format += this.formatExpression(indent , v)
-            format += " ; "
-        }
+	}
+	fn formatIf(indent string , s ast.StatementIf) -> (format string = "") {
+		format = indent
+		format += "if "
+		for v := range s.prefixExpressions {
+			format += this.formatExpression(indent , v)
+			format += " ; "
+		}
 
-        format += this.formatExpression(indent , s.condition)
-        format += " {\n"
-        format += this.formatBlock(indent + this.indentIncremental , s.block)
-        if len(s.elseIfList) == 0 && s.Else == null {
-            format += indent + "}\n"
-        } else {
-            format += indent + "}"
-        }
+		format += this.formatExpression(indent , s.condition)
+		format += " {\n"
+		format += this.formatBlock(indent + this.indentIncremental , s.block)
+		if len(s.elseIfList) == 0 && s.Else == null {
+			format += indent + "}\n"
+		} else {
+			format += indent + "}"
+		}
 
-        for k , v := range s.elseIfList {
-            format += " else if " + this.formatExpression(indent , v.condition) + " {\n"
-            format += this.formatBlock(indent + this.indentIncremental , v.block)
-            if k == len(s.elseIfList) - 1 && s.Else == null {
-                format += indent + "}\n"
-            } else {
-                format += indent + "}"
-            }
+		for k , v := range s.elseIfList {
+			format += " else if " + this.formatExpression(indent , v.condition) + " {\n"
+			format += this.formatBlock(indent + this.indentIncremental , v.block)
+			if k == len(s.elseIfList) - 1 && s.Else == null {
+				format += indent + "}\n"
+			} else {
+				format += indent + "}"
+			}
 
-        }
+		}
 
-        if s.Else != null {
-            format += " else {\n"
-            format += this.formatBlock(indent + this.indentIncremental , s.Else)
-            format += indent + "}\n"
-        }
-    }
-    fn formatGoto(indent string , s ast.StatementGoTo , inlineComment string) -> (format string = "") {
-        format = indent
-        if inlineComment == null {
-            format += "goto " + s.labelName + "\n"
-        } else {
-            format += "goto " + s.labelName + " //" + inlineComment
-        }
+		if s.Else != null {
+			format += " else {\n"
+			format += this.formatBlock(indent + this.indentIncremental , s.Else)
+			format += indent + "}\n"
+		}
+	}
+	fn formatGoto(indent string , s ast.StatementGoTo , inlineComment string) -> (format string = "") {
+		format = indent
+		if inlineComment == null {
+			format += "goto " + s.labelName + "\n"
+		} else {
+			format += "goto " + s.labelName + " //" + inlineComment
+		}
 
-    }
-    fn formatFor(indent string , s ast.StatementFor) -> (format string = "") {
-        format = indent
-        format += "for "
-        if s.Init == null &&
-            s.condition == null &&
-            s.increment == null {
-            if s.inlineComment == null {
-                format += "{\n"
-            } else {
-                format += "{ // " + s.inlineComment
-            }
+	}
+	fn formatFor(indent string , s ast.StatementFor) -> (format string = "") {
+		format = indent
+		format += "for "
+		if s.Init == null &&
+			s.condition == null &&
+			s.increment == null {
+			if s.inlineComment == null {
+				format += "{\n"
+			} else {
+				format += "{ // " + s.inlineComment
+			}
 
-        } else if s.Init == null && s.condition != null && s.increment == null {
-            format += this.formatExpression(indent , s.condition) + " "
-            if s.inlineComment == null {
-                format += "{\n"
-            } else {
-                format += "{ // " + s.inlineComment
-            }
+		} else if s.Init == null && s.condition != null && s.increment == null {
+			format += this.formatExpression(indent , s.condition) + " "
+			if s.inlineComment == null {
+				format += "{\n"
+			} else {
+				format += "{ // " + s.inlineComment
+			}
 
-        } else {
-            if s.Init != null {
-                format += this.formatExpression(indent , s.Init) + " ; "
-            }
-            if s.condition != null {
-                format += this.formatExpression(indent , s.condition) + " ; "
-            }
-            if s.increment != null {
-                format += this.formatExpression(indent , s.increment) + " "
-            }
-            if s.inlineComment == null {
-                format += "{\n"
-            } else {
-                format += "{ // " + s.inlineComment
-            }
-        }
-        format += this.formatBlock(indent + this.indentIncremental , s.block)
-        format += indent + "}\n"
-    }
-    fn formatSwitch(indent string , s ast.StatementSwitch) -> (format string = "") {
-        format = indent
-        format += "switch "
+		} else {
+			if s.Init != null {
+				format += this.formatExpression(indent , s.Init) + " ; "
+			}
+			if s.condition != null {
+				format += this.formatExpression(indent , s.condition) + " ; "
+			}
+			if s.increment != null {
+				format += this.formatExpression(indent , s.increment) + " "
+			}
+			if s.inlineComment == null {
+				format += "{\n"
+			} else {
+				format += "{ // " + s.inlineComment
+			}
+		}
+		format += this.formatBlock(indent + this.indentIncremental , s.block)
+		format += indent + "}\n"
+	}
+	fn formatSwitch(indent string , s ast.StatementSwitch) -> (format string = "") {
+		format = indent
+		format += "switch "
 
-        if len(s.prefixExpressions) > 0 {
-            for v := range s.prefixExpressions {
-                format += this.formatExpression(indent , v)
-                format += " ; "
-                if v.containsLf {
-                    format += "\n"
-                    format += this.indentIncremental + indent
-                } else if v.inlineComment != null {
-                    format += " //" + v.inlineComment
-                    format += this.indentIncremental + indent
-                }
-            }
+		if len(s.prefixExpressions) > 0 {
+			for v := range s.prefixExpressions {
+				format += this.formatExpression(indent , v)
+				format += " ; "
+				if v.containsLf {
+					format += "\n"
+					format += this.indentIncremental + indent
+				} else if v.inlineComment != null {
+					format += " //" + v.inlineComment
+					format += this.indentIncremental + indent
+				}
+			}
 
-        }
-        format += this.formatExpression(indent , s.condition)
-        format += " {\n"
-        for c := range s.cases {
-            format += indent + this.indentIncremental + "case "
-            for k , e := range c.matches {
-                format += this.formatExpression(indent , e)
-                if k != len(c.matches) - 1 {
-                    if e.containsLfOrInlineComment() == false {
-                        format += " , "
-                    } else {
-                        format += ","
-                    }
+		}
+		format += this.formatExpression(indent , s.condition)
+		format += " {\n"
+		for c := range s.cases {
+			format += indent + this.indentIncremental + "case "
+			for k , e := range c.matches {
+				format += this.formatExpression(indent , e)
+				if k != len(c.matches) - 1 {
+					if e.containsLfOrInlineComment() == false {
+						format += " , "
+					} else {
+						format += ","
+					}
 
-                }
-                if e.containsLf {
-                    format += "\n"
-                    format += indent + this.indentIncremental + this.indentIncremental
-                } else if e.inlineComment != null {
-                    format += " //" + e.inlineComment
-                    format += indent + this.indentIncremental + this.indentIncremental
-                }
-            }
+				}
+				if e.containsLf {
+					format += "\n"
+					format += indent + this.indentIncremental + this.indentIncremental
+				} else if e.inlineComment != null {
+					format += " //" + e.inlineComment
+					format += indent + this.indentIncremental + this.indentIncremental
+				}
+			}
 
-            format += ":\n"
-            if c.block != null {
-                format += this.formatBlock(indent + this.indentIncremental + this.indentIncremental , c.block)
-            }
-        }
+			format += ":\n"
+			if c.block != null {
+				format += this.formatBlock(indent + this.indentIncremental + this.indentIncremental , c.block)
+			}
+		}
 
-        if s.defaultBlock != null {
-            format += indent + this.indentIncremental + "default:\n"
-            format += this.formatBlock(indent + this.indentIncremental + this.indentIncremental , s.defaultBlock)
-        }
-        format += indent + "}\n"
-    }
-    fn formatWhen(indent string , w ast.StatementWhen) -> (format string = "") {
-        format = indent
-        if len(w.prefixExpressions) > 0 {
-            for k , v := range w.prefixExpressions {
-                format += this.formatExpression(indent + this.indentIncremental + indent , v)
-                if k != len(w.prefixExpressions) - 1 {
-                    if v.containsLfOrInlineComment() == false {
-                        format += " , "
-                    } else {
-                        format += ","
-                    }
+		if s.defaultBlock != null {
+			format += indent + this.indentIncremental + "default:\n"
+			format += this.formatBlock(indent + this.indentIncremental + this.indentIncremental , s.defaultBlock)
+		}
+		format += indent + "}\n"
+	}
+	fn formatWhen(indent string , w ast.StatementWhen) -> (format string = "") {
+		format = indent
+		if len(w.prefixExpressions) > 0 {
+			for k , v := range w.prefixExpressions {
+				format += this.formatExpression(indent + this.indentIncremental + indent , v)
+				if k != len(w.prefixExpressions) - 1 {
+					if v.containsLfOrInlineComment() == false {
+						format += " , "
+					} else {
+						format += ","
+					}
 
-                    if v.containsLf {
-                        format += "\n"
-                        format += indent + this.indentIncremental
-                    } else if v.inlineComment != null {
-                        format += " //" + v.inlineComment
-                        format += indent + this.indentIncremental
-                    }
-                }
-            }
+					if v.containsLf {
+						format += "\n"
+						format += indent + this.indentIncremental
+					} else if v.inlineComment != null {
+						format += " //" + v.inlineComment
+						format += indent + this.indentIncremental
+					}
+				}
+			}
 
-            format += " ; "
-        }
-        if w.typeExpression == null {
-            format += "when " + w.condition.typeName() + " {\n"
-        } else {
-            format += "when " +
-                this.formatExpression(indent + this.indentIncremental , w.typeExpression) + " {\n"
-        }
+			format += " ; "
+		}
+		if w.typeExpression == null {
+			format += "when " + w.condition.typeName() + " {\n"
+		} else {
+			format += "when " +
+				this.formatExpression(indent + this.indentIncremental , w.typeExpression) + " {\n"
+		}
 
-        for _ , c := range w.cases {
-            d := indent + this.indentIncremental + "case "
-            for k , v := range c.matches {
-                d += v.typeName()
-                if k != len(c.matches) - 1 {
-                    if v.containsLfOrInlineComment() == false {
-                        d += " , "
-                    } else {
-                        d += ","
-                    }
+		for _ , c := range w.cases {
+			d := indent + this.indentIncremental + "case "
+			for k , v := range c.matches {
+				d += v.typeName()
+				if k != len(c.matches) - 1 {
+					if v.containsLfOrInlineComment() == false {
+						d += " , "
+					} else {
+						d += ","
+					}
 
-                }
-                if v.containsLf {
-                    d += "\n"
-                    d += indent + this.indentIncremental
-                } else if v.inlineComment != null {
-                    d += " //" + v.inlineComment
-                    d += indent + this.indentIncremental
-                }
-            }
-            d += ":\n"
-            if c.block != null {
-                d += this.formatBlock(indent + this.indentIncremental + this.indentIncremental , c.block)
-            }
-            format += d
-        }
-        if w.defaultBlock != null {
-            format += indent + this.indentIncremental + "default:\n"
-            format += this.formatBlock(indent + this.indentIncremental + this.indentIncremental , w.defaultBlock)
-        }
-        format += indent + "}\n"
-    }
-    fn formatReturn(indent string , s ast.StatementReturn , inlineComment string) -> (format string = "") {
-        format = indent
-        format += "return"
-        if inlineComment != null || len(s.expressions) > 0 {
-            format += " "
-        }
-        for k , v := range s.expressions {
-            format += this.formatExpression(indent + this.indentIncremental , v)
-            if k != len(s.expressions) - 1 {
-                if v.containsLfOrInlineComment() == false {
-                    format += " , "
-                } else {
-                    format += ","
-                }
-            }
-            if v.containsLf {
-                format += "\n"
-                format += indent + this.indentIncremental
-                indent += this.indentIncremental
-            } else if v.inlineComment != null {
-                format += "//" + v.inlineComment
-                format += indent + this.indentIncremental
-                indent += this.indentIncremental
-            }
-        }
-        if inlineComment == null {
-            format += "\n"
-        } else {
-            format += " //" + inlineComment
-        }
-    }
-    fn formatExpression(indent string , e ast.Expression) -> (format string = "") {
-        switch e.Type {
-            case ast.ExpressionTypeNull:
-                format = "null"
-            case ast.ExpressionTypeBool:
-                return "" + e.boolValue
-            case ast.ExpressionTypeByte,
-                ast.ExpressionTypeShort,
-                ast.ExpressionTypeChar,
-                ast.ExpressionTypeInt,
-                ast.ExpressionTypeLong,
-                ast.ExpressionTypeFloat,
-                ast.ExpressionTypeDouble,
-                ast.ExpressionTypeString:
-                return e.literalRaw
-            case ast.ExpressionTypeArray:
-                array := e.data.(ast.ExpressionArray)
-                if array.Type != null {
-                    format = array.Type.typeName() + "{"
-                    for k , v := range array.expressions {
-                        format += this.formatExpression(indent + this.indentIncremental , v)
-                        if k != len(array.expressions) - 1 {
-                            if v.containsLfOrInlineComment() == false {
-                                format += " , "
-                            } else {
-                                format += ","
-                            }
-                        }
-                    }
-                    format += "}"
-                } else {
-                    format = "["
-                    for k , v := range array.expressions {
-                        format += this.formatExpression(indent + this.indentIncremental , v)
-                        if k != len(array.expressions) - 1 {
-                            if v.containsLfOrInlineComment() == false {
-                                format += " , "
-                            } else {
-                                format += ","
-                            }
-                        }
-                    }
-                    format += "]"
-                }
-            case ast.ExpressionTypeLogicalOr,
-                ast.ExpressionTypeLogicalAnd,
-                ast.ExpressionTypeOr,
-                ast.ExpressionTypeAnd,
-                ast.ExpressionTypeXor,
-                ast.ExpressionTypeLsh,
-                ast.ExpressionTypeRsh,
-                ast.ExpressionTypeAdd,
-                ast.ExpressionTypeSub,
-                ast.ExpressionTypeMul,
-                ast.ExpressionTypeDiv,
-                ast.ExpressionTypeMod:
-                bin := e.data.(ast.ExpressionBinary)
-                if bin.containsLf {
-                    format = this.formatExpression(indent , bin.left) + " " + e.op + "\n"
-                    format += indent + this.indentIncremental +
-                        this.formatExpression(indent + this.indentIncremental , bin.right)
-                } else if bin.inlineComment != null {
-                    format = this.formatExpression(indent , bin.left) + " " + e.op + " //" + bin.inlineComment
-                    format += indent + this.indentIncremental + this.formatExpression(indent + this.indentIncremental , bin.right)
-                } else {
-                    format = this.formatExpression(indent , bin.left) + " " +
-                        e.op + " " + this.formatExpression(indent , bin.right)
-                }
-            case ast.ExpressionTypeVarAssign,
-                ast.ExpressionTypeAssign,
-                ast.ExpressionTypePlusAssign,
-                ast.ExpressionTypeMinusAssign,
-                ast.ExpressionTypeMulAssign,
-                ast.ExpressionTypeDivAssign,
-                ast.ExpressionTypeModAssign,
-                ast.ExpressionTypeAndAssign,
-                ast.ExpressionTypeOrAssign,
-                ast.ExpressionTypeXorAssign,
-                ast.ExpressionTypeLshAssign,
-                ast.ExpressionTypeRshAssign,
-                ast.ExpressionTypeEq,
-                ast.ExpressionTypeNe,
-                ast.ExpressionTypeGe,
-                ast.ExpressionTypeGt,
-                ast.ExpressionTypeLe,
-                ast.ExpressionTypeLt:
-                bin := e.data.(ast.ExpressionBinary)
-                if bin.containsLf {
-                    format = this.formatExpression(indent , bin.left) + " " + e.op + "\n"
-                    format += indent + this.indentIncremental + this.formatExpression(indent + this.indentIncremental , bin.right)
-                } else if bin.inlineComment != null {
-                    format = this.formatExpression(indent , bin.left) + " " + e.op + " //" + bin.inlineComment
-                    format += indent + this.indentIncremental + this.formatExpression(indent + this.indentIncremental , bin.right)
-                } else {
-                    format = this.formatExpression(indent , bin.left) + " " +
-                        e.op + " " + this.formatExpression(indent , bin.right)
-                }
+				}
+				if v.containsLf {
+					d += "\n"
+					d += indent + this.indentIncremental
+				} else if v.inlineComment != null {
+					d += " //" + v.inlineComment
+					d += indent + this.indentIncremental
+				}
+			}
+			d += ":\n"
+			if c.block != null {
+				d += this.formatBlock(indent + this.indentIncremental + this.indentIncremental , c.block)
+			}
+			format += d
+		}
+		if w.defaultBlock != null {
+			format += indent + this.indentIncremental + "default:\n"
+			format += this.formatBlock(indent + this.indentIncremental + this.indentIncremental , w.defaultBlock)
+		}
+		format += indent + "}\n"
+	}
+	fn formatReturn(indent string , s ast.StatementReturn , inlineComment string) -> (format string = "") {
+		format = indent
+		format += "return"
+		if inlineComment != null || len(s.expressions) > 0 {
+			format += " "
+		}
+		for k , v := range s.expressions {
+			format += this.formatExpression(indent + this.indentIncremental , v)
+			if k != len(s.expressions) - 1 {
+				if v.containsLfOrInlineComment() == false {
+					format += " , "
+				} else {
+					format += ","
+				}
+			}
+			if v.containsLf {
+				format += "\n"
+				format += indent + this.indentIncremental
+				indent += this.indentIncremental
+			} else if v.inlineComment != null {
+				format += "//" + v.inlineComment
+				format += indent + this.indentIncremental
+				indent += this.indentIncremental
+			}
+		}
+		if inlineComment == null {
+			format += "\n"
+		} else {
+			format += " //" + inlineComment
+		}
+	}
+	fn formatExpression(indent string , e ast.Expression) -> (format string = "") {
+		switch e.Type {
+			case ast.ExpressionTypeNull:
+				format = "null"
+			case ast.ExpressionTypeBool:
+				return "" + e.boolValue
+			case ast.ExpressionTypeByte,
+				ast.ExpressionTypeShort,
+				ast.ExpressionTypeChar,
+				ast.ExpressionTypeInt,
+				ast.ExpressionTypeLong,
+				ast.ExpressionTypeFloat,
+				ast.ExpressionTypeDouble,
+				ast.ExpressionTypeString:
+				return e.literalRaw
+			case ast.ExpressionTypeArray:
+				array := e.data.(ast.ExpressionArray)
+				if array.Type != null {
+					format = array.Type.typeName() + "{"
+					for k , v := range array.expressions {
+						format += this.formatExpression(indent + this.indentIncremental , v)
+						if k != len(array.expressions) - 1 {
+							if v.containsLfOrInlineComment() == false {
+								format += " , "
+							} else {
+								format += ","
+							}
+						}
+					}
+					format += "}"
+				} else {
+					format = "["
+					for k , v := range array.expressions {
+						format += this.formatExpression(indent + this.indentIncremental , v)
+						if k != len(array.expressions) - 1 {
+							if v.containsLfOrInlineComment() == false {
+								format += " , "
+							} else {
+								format += ","
+							}
+						}
+					}
+					format += "]"
+				}
+			case ast.ExpressionTypeLogicalOr,
+				ast.ExpressionTypeLogicalAnd,
+				ast.ExpressionTypeOr,
+				ast.ExpressionTypeAnd,
+				ast.ExpressionTypeXor,
+				ast.ExpressionTypeLsh,
+				ast.ExpressionTypeRsh,
+				ast.ExpressionTypeAdd,
+				ast.ExpressionTypeSub,
+				ast.ExpressionTypeMul,
+				ast.ExpressionTypeDiv,
+				ast.ExpressionTypeMod:
+				bin := e.data.(ast.ExpressionBinary)
+				if bin.containsLf {
+					format = this.formatExpression(indent , bin.left) + " " + e.op + "\n"
+					format += indent + this.indentIncremental +
+						this.formatExpression(indent + this.indentIncremental , bin.right)
+				} else if bin.inlineComment != null {
+					format = this.formatExpression(indent , bin.left) + " " + e.op + " //" + bin.inlineComment
+					format += indent + this.indentIncremental + this.formatExpression(indent + this.indentIncremental , bin.right)
+				} else {
+					format = this.formatExpression(indent , bin.left) + " " +
+						e.op + " " + this.formatExpression(indent , bin.right)
+				}
+			case ast.ExpressionTypeVarAssign,
+				ast.ExpressionTypeAssign,
+				ast.ExpressionTypePlusAssign,
+				ast.ExpressionTypeMinusAssign,
+				ast.ExpressionTypeMulAssign,
+				ast.ExpressionTypeDivAssign,
+				ast.ExpressionTypeModAssign,
+				ast.ExpressionTypeAndAssign,
+				ast.ExpressionTypeOrAssign,
+				ast.ExpressionTypeXorAssign,
+				ast.ExpressionTypeLshAssign,
+				ast.ExpressionTypeRshAssign,
+				ast.ExpressionTypeEq,
+				ast.ExpressionTypeNe,
+				ast.ExpressionTypeGe,
+				ast.ExpressionTypeGt,
+				ast.ExpressionTypeLe,
+				ast.ExpressionTypeLt:
+				bin := e.data.(ast.ExpressionBinary)
+				if bin.containsLf {
+					format = this.formatExpression(indent , bin.left) + " " + e.op + "\n"
+					format += indent + this.indentIncremental + this.formatExpression(indent + this.indentIncremental , bin.right)
+				} else if bin.inlineComment != null {
+					format = this.formatExpression(indent , bin.left) + " " + e.op + " //" + bin.inlineComment
+					format += indent + this.indentIncremental + this.formatExpression(indent + this.indentIncremental , bin.right)
+				} else {
+					format = this.formatExpression(indent , bin.left) + " " +
+						e.op + " " + this.formatExpression(indent , bin.right)
+				}
 
-            case ast.ExpressionTypeIndex:
-                index := e.data.(ast.ExpressionIndex)
-                format = this.formatExpression(indent , index.Expression) + "["
-                format += this.formatExpression(indent + this.indentIncremental , index.index)
-                format += "]"
-            case ast.ExpressionTypeSelection:
-                selection := e.data.(ast.ExpressionSelection)
-                if selection.Expression.Type == ast.ExpressionTypeDot {
-                    format = "." + selection.name
-                } else {
-                    format = this.formatExpression(indent , selection.Expression) + "."
-                    if selection.containsLf {
-                        format += "\n"
-                        format += indent + this.indentIncremental + selection.name
-                    } else if selection.inlineComment != null {
-                        format += " //" + selection.inlineComment
-                        format += indent + this.indentIncremental + selection.name
-                    } else {
-                        format += selection.name
-                    }
-                }
-            case ast.ExpressionTypeSelectionConst:
-                selection := e.data.(ast.ExpressionSelection)
-                format = this.formatExpression(indent , selection.Expression) + "."
-                if selection.containsLf {
-                    format += "\n"
-                    format += indent + this.indentIncremental + selection.name
-                } else if selection.inlineComment != null {
-                    format += " //" + selection.inlineComment
-                    format += indent + this.indentIncremental + selection.name
-                } else {
-                    format += selection.name
-                }
+			case ast.ExpressionTypeIndex:
+				index := e.data.(ast.ExpressionIndex)
+				format = this.formatExpression(indent , index.Expression) + "["
+				format += this.formatExpression(indent + this.indentIncremental , index.index)
+				format += "]"
+			case ast.ExpressionTypeSelection:
+				selection := e.data.(ast.ExpressionSelection)
+				if selection.Expression.Type == ast.ExpressionTypeDot {
+					format = "." + selection.name
+				} else {
+					format = this.formatExpression(indent , selection.Expression) + "."
+					if selection.containsLf {
+						format += "\n"
+						format += indent + this.indentIncremental + selection.name
+					} else if selection.inlineComment != null {
+						format += " //" + selection.inlineComment
+						format += indent + this.indentIncremental + selection.name
+					} else {
+						format += selection.name
+					}
+				}
+			case ast.ExpressionTypeSelectionConst:
+				selection := e.data.(ast.ExpressionSelection)
+				format = this.formatExpression(indent , selection.Expression) + "."
+				if selection.containsLf {
+					format += "\n"
+					format += indent + this.indentIncremental + selection.name
+				} else if selection.inlineComment != null {
+					format += " //" + selection.inlineComment
+					format += indent + this.indentIncremental + selection.name
+				} else {
+					format += selection.name
+				}
 
-            case ast.ExpressionTypeMethodCall:
-                call := e.data.(ast.ExpressionMethodCall)
-                if call.Expression.Type == ast.ExpressionTypeDot {
-                    format += "." + call.name + "("
-                } else {
-                    if call.Expression.containsLf {
-                        format += this.formatExpression(indent , call.Expression) +
-                            ".\n" +
-                            indent +
-                            this.indentIncremental +
-                            call.name + "("
-                        indent += this.indentIncremental
-                    } else if call.Expression.inlineComment != null {
-                        format += this.formatExpression(indent , call.Expression) +
-                            ". //" + call.Expression.inlineComment +
-                            indent +
-                            this.indentIncremental +
-                            call.name + "("
-                        indent += this.indentIncremental
-                    } else {
-                        format += this.formatExpression(indent , call.Expression) + "." + call.name + "("
-                    }
-                }
-                if call.lpContainsLf {
-                    format += "\n"
-                    format += this.indentIncremental + indent
-                } else if call.lpInlineComment != null {
-                    format += " //" + call.lpInlineComment
-                    format += this.indentIncremental + indent
-                }
-                for k , v := range call.args {
-                    format += this.formatExpression(indent + this.indentIncremental , v)
-                    if k != len(call.args) - 1 {
-                        if v.containsLfOrInlineComment() == false {
-                            format += " , "
-                        } else {
-                            format += ","
-                        }
+			case ast.ExpressionTypeMethodCall:
+				call := e.data.(ast.ExpressionMethodCall)
+				if call.Expression.Type == ast.ExpressionTypeDot {
+					format += "." + call.name + "("
+				} else {
+					if call.Expression.containsLf {
+						format += this.formatExpression(indent , call.Expression) +
+							".\n" +
+							indent +
+							this.indentIncremental +
+							call.name + "("
+						indent += this.indentIncremental
+					} else if call.Expression.inlineComment != null {
+						format += this.formatExpression(indent , call.Expression) +
+							". //" + call.Expression.inlineComment +
+							indent +
+							this.indentIncremental +
+							call.name + "("
+						indent += this.indentIncremental
+					} else {
+						format += this.formatExpression(indent , call.Expression) + "." + call.name + "("
+					}
+				}
+				if call.lpContainsLf {
+					format += "\n"
+					format += this.indentIncremental + indent
+				} else if call.lpInlineComment != null {
+					format += " //" + call.lpInlineComment
+					format += this.indentIncremental + indent
+				}
+				for k , v := range call.args {
+					format += this.formatExpression(indent + this.indentIncremental , v)
+					if k != len(call.args) - 1 {
+						if v.containsLfOrInlineComment() == false {
+							format += " , "
+						} else {
+							format += ","
+						}
 
-                    }
-                    if v.containsLf {
-                        format += "\n"
-                        format += this.indentIncremental + indent
-                    } else if v.inlineComment != null {
-                        format += " //" + v.inlineComment
-                        format += this.indentIncremental + indent
-                    }
-                }
+					}
+					if v.containsLf {
+						format += "\n"
+						format += this.indentIncremental + indent
+					} else if v.inlineComment != null {
+						format += " //" + v.inlineComment
+						format += this.indentIncremental + indent
+					}
+				}
 
-                format += ")"
-            case ast.ExpressionTypeFunctionCall:
-                call := e.data.(ast.ExpressionFunctionCall)
-                format += this.formatExpression(indent , call.Expression) + "("
-                if call.lpContainsLf {
-                    format += "\n"
-                    format += this.indentIncremental + indent
-                } else if call.lpInlineComment != null {
-                    format += " //" + call.lpInlineComment
-                    format += this.indentIncremental + indent
-                }
-                for k , v := range call.args {
-                    format += this.formatExpression(indent + this.indentIncremental , v)
-                    if k != len(call.args) - 1 {
-                        if v.containsLfOrInlineComment() == false {
-                            format += " , "
-                        } else {
-                            format += ","
-                        }
-                        if v.containsLf {
-                            format += "\n"
-                            format += this.indentIncremental + indent
-                        } else if v.inlineComment != null {
-                            format += " //" + v.inlineComment
-                            format += this.indentIncremental + indent
-                        }
-                    }
-                }
+				format += ")"
+			case ast.ExpressionTypeFunctionCall:
+				call := e.data.(ast.ExpressionFunctionCall)
+				format += this.formatExpression(indent , call.Expression) + "("
+				if call.lpContainsLf {
+					format += "\n"
+					format += this.indentIncremental + indent
+				} else if call.lpInlineComment != null {
+					format += " //" + call.lpInlineComment
+					format += this.indentIncremental + indent
+				}
+				for k , v := range call.args {
+					format += this.formatExpression(indent + this.indentIncremental , v)
+					if k != len(call.args) - 1 {
+						if v.containsLfOrInlineComment() == false {
+							format += " , "
+						} else {
+							format += ","
+						}
+						if v.containsLf {
+							format += "\n"
+							format += this.indentIncremental + indent
+						} else if v.inlineComment != null {
+							format += " //" + v.inlineComment
+							format += this.indentIncremental + indent
+						}
+					}
+				}
 
-                format += ")"
-            case ast.ExpressionTypeIncrement:
-                format += this.formatExpression(indent , e.data.(ast.Expression)) + "++"
-            case ast.ExpressionTypeDecrement:
-                format += this.formatExpression(indent , e.data.(ast.Expression)) + "--"
-            case ast.ExpressionTypePrefixIncrement:
-                format += "++" + this.formatExpression(indent , e.data.(ast.Expression))
-            case ast.ExpressionTypePrefixDecrement:
-                format += "--" + this.formatExpression(indent , e.data.(ast.Expression))
-            case ast.ExpressionTypeNegative,
-                ast.ExpressionTypeNot,
-                ast.ExpressionTypeBitwiseNot:
-                format += e.op + this.formatExpression(indent , e.data.(ast.Expression))
-            case ast.ExpressionTypeIdentifier:
-                format = e.data.(ast.ExpressionIdentifier).name
-            case ast.ExpressionTypeNew:
-                n := e.data.(ast.ExpressionNew)
-                format += "new " + n.Type.typeName() + "("
-                if n.lpContainsLf {
-                    format += "\n"
-                    format += this.indentIncremental + indent
-                } else if n.lpInlineComment != null {
-                    format += " //" + n.lpInlineComment
-                    format += this.indentIncremental + indent
-                }
-                for k , v := range n.args {
-                    format += this.formatExpression(indent + this.indentIncremental , v)
-                    if k != len(n.args) - 1 {
-                        if v.containsLfOrInlineComment() == false {
-                            format += " , "
-                        } else {
-                            format += ","
-                        }
-                    }
-                    if v.containsLf {
-                        format += "\n"
-                        format += this.indentIncremental + indent
-                    } else if v.inlineComment != null {
-                        format += " //" + v.inlineComment
-                        format += this.indentIncremental + indent
-                    }
-                }
-                format += ")"
-            case ast.ExpressionTypeList:
-                list := e.data.([]ast.Expression)
-                for k , v := range list {
-                    format += this.formatExpression(indent , v)
-                    if k != len(list) - 1 {
-                        format += " , "
-                    }
-                    if v.containsLf {
-                        format += "\n"
-                        format += this.indentIncremental + indent
-                    } else if v.inlineComment != null {
-                        format += " //" + v.inlineComment
-                        format += this.indentIncremental + indent
-                    }
-                }
+				format += ")"
+			case ast.ExpressionTypeIncrement:
+				format += this.formatExpression(indent , e.data.(ast.Expression)) + "++"
+			case ast.ExpressionTypeDecrement:
+				format += this.formatExpression(indent , e.data.(ast.Expression)) + "--"
+			case ast.ExpressionTypePrefixIncrement:
+				format += "++" + this.formatExpression(indent , e.data.(ast.Expression))
+			case ast.ExpressionTypePrefixDecrement:
+				format += "--" + this.formatExpression(indent , e.data.(ast.Expression))
+			case ast.ExpressionTypeNegative,
+				ast.ExpressionTypeNot,
+				ast.ExpressionTypeBitwiseNot:
+				format += e.op + this.formatExpression(indent , e.data.(ast.Expression))
+			case ast.ExpressionTypeIdentifier:
+				format = e.data.(ast.ExpressionIdentifier).name
+			case ast.ExpressionTypeNew:
+				n := e.data.(ast.ExpressionNew)
+				format += "new " + n.Type.typeName() + "("
+				if n.lpContainsLf {
+					format += "\n"
+					format += this.indentIncremental + indent
+				} else if n.lpInlineComment != null {
+					format += " //" + n.lpInlineComment
+					format += this.indentIncremental + indent
+				}
+				for k , v := range n.args {
+					format += this.formatExpression(indent + this.indentIncremental , v)
+					if k != len(n.args) - 1 {
+						if v.containsLfOrInlineComment() == false {
+							format += " , "
+						} else {
+							format += ","
+						}
+					}
+					if v.containsLf {
+						format += "\n"
+						format += this.indentIncremental + indent
+					} else if v.inlineComment != null {
+						format += " //" + v.inlineComment
+						format += this.indentIncremental + indent
+					}
+				}
+				format += ")"
+			case ast.ExpressionTypeList:
+				list := e.data.([]ast.Expression)
+				for k , v := range list {
+					format += this.formatExpression(indent , v)
+					if k != len(list) - 1 {
+						format += " , "
+					}
+					if v.containsLf {
+						format += "\n"
+						format += this.indentIncremental + indent
+					} else if v.inlineComment != null {
+						format += " //" + v.inlineComment
+						format += this.indentIncremental + indent
+					}
+				}
 
-            case ast.ExpressionTypeFunctionLiteral:
-                format = this.formatFunction(indent , e.data.(ast.Function) , false)
-            case ast.ExpressionTypeVar:
-                vs := e.data.(ast.ExpressionVar)
-                if e.isPublic {
-                    format += "public "
-                }
-                format += "var "
-                for k , v := range vs.variables {
-                    format += v.name
-                    if k != len(vs.variables) - 1 {
-                        if v.containsLfOrInlineComment() == false {
-                            format += " , "
-                        } else {
-                            format += ","
-                        }
-                    }
-                    if v.containsLf {
-                        format += "\n"
-                        format += this.indentIncremental + indent
-                    } else if v.inlineComment != null {
-                        format += " //" + v.inlineComment
-                        format += this.indentIncremental + indent
-                    }
-                }
+			case ast.ExpressionTypeFunctionLiteral:
+				format = this.formatFunction(indent , e.data.(ast.Function) , false)
+			case ast.ExpressionTypeVar:
+				vs := e.data.(ast.ExpressionVar)
+				if e.isPublic {
+					format += "public "
+				}
+				format += "var "
+				for k , v := range vs.variables {
+					format += v.name
+					if k != len(vs.variables) - 1 {
+						if v.containsLfOrInlineComment() == false {
+							format += " , "
+						} else {
+							format += ","
+						}
+					}
+					if v.containsLf {
+						format += "\n"
+						format += this.indentIncremental + indent
+					} else if v.inlineComment != null {
+						format += " //" + v.inlineComment
+						format += this.indentIncremental + indent
+					}
+				}
 
-                if vs.Type != null {
-                    format += " " + vs.Type.typeName()
-                }
-                if len(vs.initValues) > 0 {
-                    format += " = "
-                    for k , v := range vs.initValues {
-                        format += this.formatExpression(indent + this.indentIncremental , v)
-                        if k != len(vs.initValues) - 1 {
-                            if v.containsLfOrInlineComment() == false {
-                                format += " , "
-                            } else {
-                                format += ","
-                            }
-                        }
-                        if v.containsLf {
-                            format += "\n"
-                            format += this.indentIncremental + indent
-                        } else if v.inlineComment != null {
-                            format += " //" + v.inlineComment
-                            format += this.indentIncremental + indent
-                        }
-                    }
+				if vs.Type != null {
+					format += " " + vs.Type.typeName()
+				}
+				if len(vs.initValues) > 0 {
+					format += " = "
+					for k , v := range vs.initValues {
+						format += this.formatExpression(indent + this.indentIncremental , v)
+						if k != len(vs.initValues) - 1 {
+							if v.containsLfOrInlineComment() == false {
+								format += " , "
+							} else {
+								format += ","
+							}
+						}
+						if v.containsLf {
+							format += "\n"
+							format += this.indentIncremental + indent
+						} else if v.inlineComment != null {
+							format += " //" + v.inlineComment
+							format += this.indentIncremental + indent
+						}
+					}
 
-                }
-            case ast.ExpressionTypeConst:
-                cs := e.data.([]ast.Constant)
-                for v := range cs {
-                    t := indent + "const " + v.name + " "
-                    if v.Type != null {
-                        t += v.Type.typeName() + " "
-                    }
-                    t += "="
-                    t += this.formatExpression(indent , v.defaultValueExpression) + "\n"
-                    format += t
-                }
-            case ast.ExpressionTypeCheckCast:
-                c := e.data.(ast.ExpressionTypeConversion)
-                format += c.Type.typeName() + "("
-                format += this.formatExpression(indent + this.indentIncremental , c.Expression)
-                format += ")"
-            case ast.ExpressionTypeRange:
-                format = "range " + this.formatExpression(indent + this.indentIncremental , e.data.(ast.Expression))
-            case ast.ExpressionTypeSlice:
-                s := e.data.(ast.ExpressionSlice)
-                format += this.formatExpression(indent , s.on) + "["
-                if s.start != null {
-                    format += this.formatExpression(indent + this.indentIncremental , s.start)
-                }
-                if s.end != null && s.start != null {
-                    format += " : "
-                } else {
-                    format += ":"
-                }
-                if s.end != null {
-                    format += this.formatExpression(indent + this.indentIncremental , s.end)
-                }
-                format += "]"
-            case ast.ExpressionTypeMap:
-                m := e.data.(ast.ExpressionMap)
-                if m.Type == null {
-                    format += "{"
-                    if m.containsLf() {
-                        format += "\n"
-                        format += indent + this.indentIncremental
-                    }
-                    for k , v := range m.keyValuePairs {
-                        format += this.formatExpression(indent + this.indentIncremental , v.key) + " -> "
-                        format += this.formatExpression(indent + this.indentIncremental , v.value)
-                        if k != len(m.keyValuePairs) - 1 {
-                            if v.containsLfOrInlineComment() == false {
-                                format += " , "
-                            } else {
-                                format += ","
-                            }
+				}
+			case ast.ExpressionTypeConst:
+				cs := e.data.([]ast.Constant)
+				for v := range cs {
+					t := indent + "const " + v.name + " "
+					if v.Type != null {
+						t += v.Type.typeName() + " "
+					}
+					t += "="
+					t += this.formatExpression(indent , v.defaultValueExpression) + "\n"
+					format += t
+				}
+			case ast.ExpressionTypeCheckCast:
+				c := e.data.(ast.ExpressionTypeConversion)
+				format += c.Type.typeName() + "("
+				format += this.formatExpression(indent + this.indentIncremental , c.Expression)
+				format += ")"
+			case ast.ExpressionTypeRange:
+				format = "range " + this.formatExpression(indent + this.indentIncremental , e.data.(ast.Expression))
+			case ast.ExpressionTypeSlice:
+				s := e.data.(ast.ExpressionSlice)
+				format += this.formatExpression(indent , s.on) + "["
+				if s.start != null {
+					format += this.formatExpression(indent + this.indentIncremental , s.start)
+				}
+				if s.end != null && s.start != null {
+					format += " : "
+				} else {
+					format += ":"
+				}
+				if s.end != null {
+					format += this.formatExpression(indent + this.indentIncremental , s.end)
+				}
+				format += "]"
+			case ast.ExpressionTypeMap:
+				m := e.data.(ast.ExpressionMap)
+				if m.Type == null {
+					format += "{"
+					if m.containsLf() {
+						format += "\n"
+						format += indent + this.indentIncremental
+					}
+					for k , v := range m.keyValuePairs {
+						format += this.formatExpression(indent + this.indentIncremental , v.key) + " -> "
+						format += this.formatExpression(indent + this.indentIncremental , v.value)
+						if k != len(m.keyValuePairs) - 1 {
+							if v.containsLfOrInlineComment() == false {
+								format += " , "
+							} else {
+								format += ","
+							}
 
-                            if v.containsLf {
-                                format += "\n"
-                                format += indent + this.indentIncremental
-                            } else if v.inlineComment != null {
-                                format += "//" + v.inlineComment
-                                format += indent + this.indentIncremental
-                            }
-                        } else {
-                            if m.containsLf() {
-                                format += "\n"
-                            }
-                        }
+							if v.containsLf {
+								format += "\n"
+								format += indent + this.indentIncremental
+							} else if v.inlineComment != null {
+								format += "//" + v.inlineComment
+								format += indent + this.indentIncremental
+							}
+						} else {
+							if m.containsLf() {
+								format += "\n"
+							}
+						}
 
-                    }
+					}
 
-                    if m.containsLf() {
-                        format += indent + "}"
-                    } else {
-                        format += "}"
-                    }
-                } else {
-                    format += sprintf("map{%s -> %s}{" , m.Type.Map.K.typeName() , m.Type.Map.V.typeName())
-                    if m.containsLf() {
-                        format += "\n"
-                        format += indent + this.indentIncremental
-                    }
-                    for k , v := range m.keyValuePairs {
-                        format += this.formatExpression(indent + this.indentIncremental , v.key) + " -> "
-                        format += this.formatExpression(indent + this.indentIncremental , v.value)
-                        if k != len(m.keyValuePairs) - 1 {
-                            if v.containsLfOrInlineComment() == false {
-                                format += " , "
-                            } else {
-                                format += ","
-                            }
+					if m.containsLf() {
+						format += indent + "}"
+					} else {
+						format += "}"
+					}
+				} else {
+					format += sprintf("map{%s -> %s}{" , m.Type.Map.K.typeName() , m.Type.Map.V.typeName())
+					if m.containsLf() {
+						format += "\n"
+						format += indent + this.indentIncremental
+					}
+					for k , v := range m.keyValuePairs {
+						format += this.formatExpression(indent + this.indentIncremental , v.key) + " -> "
+						format += this.formatExpression(indent + this.indentIncremental , v.value)
+						if k != len(m.keyValuePairs) - 1 {
+							if v.containsLfOrInlineComment() == false {
+								format += " , "
+							} else {
+								format += ","
+							}
 
-                            if v.containsLf {
-                                format += "\n"
-                                format += indent + this.indentIncremental
-                            } else if v.inlineComment != null {
-                                format += "//" + v.inlineComment
-                                format += indent + this.indentIncremental
-                            }
-                        } else {
-                            if m.containsLf() {
-                                format += "\n"
-                            }
-                        }
+							if v.containsLf {
+								format += "\n"
+								format += indent + this.indentIncremental
+							} else if v.inlineComment != null {
+								format += "//" + v.inlineComment
+								format += indent + this.indentIncremental
+							}
+						} else {
+							if m.containsLf() {
+								format += "\n"
+							}
+						}
 
-                    }
-                    format += "}"
-                }
-            case ast.ExpressionTypeTypeAssert:
-                a := e.data.(ast.ExpressionTypeAssert)
-                format += this.formatExpression(indent , a.Expression) + ".("
-                if a.isType {
-                    format += "type"
-                } else {
-                    format += a.Type.typeName()
-                }
-                format += ")"
-            case ast.ExpressionTypeQuestion:
-                q := e.data.(ast.ExpressionQuestion)
-                format += this.formatExpression(indent + this.indentIncremental , q.selection)
-                format += "?"
-                format += this.formatExpression(indent + this.indentIncremental , q.True)
-                format += ":"
-                format += this.formatExpression(indent + this.indentIncremental , q.False)
-            case ast.ExpressionTypeGlobal:
-                return "global"
-            case ast.ExpressionTypeParenthesis:
-                return "(" + this.formatExpression(indent + this.indentIncremental , e.data.(ast.Expression)) + ")"
-            case ast.ExpressionTypeVArgs:
-                return this.formatExpression(indent + this.indentIncremental , e.data.(ast.Expression)) + "..."
-            case ast.ExpressionTypeDot:
-                return "."
-            case ast.ExpressionTypeAutoCompletion:
-        }
+					}
+					format += "}"
+				}
+			case ast.ExpressionTypeTypeAssert:
+				a := e.data.(ast.ExpressionTypeAssert)
+				format += this.formatExpression(indent , a.Expression) + ".("
+				if a.isType {
+					format += "type"
+				} else {
+					format += a.Type.typeName()
+				}
+				format += ")"
+			case ast.ExpressionTypeQuestion:
+				q := e.data.(ast.ExpressionQuestion)
+				format += this.formatExpression(indent + this.indentIncremental , q.selection)
+				format += "?"
+				format += this.formatExpression(indent + this.indentIncremental , q.True)
+				format += ":"
+				format += this.formatExpression(indent + this.indentIncremental , q.False)
+			case ast.ExpressionTypeGlobal:
+				return "global"
+			case ast.ExpressionTypeParenthesis:
+				return "(" + this.formatExpression(indent + this.indentIncremental , e.data.(ast.Expression)) + ")"
+			case ast.ExpressionTypeVArgs:
+				return this.formatExpression(indent + this.indentIncremental , e.data.(ast.Expression)) + "..."
+			case ast.ExpressionTypeDot:
+				return "."
+			case ast.ExpressionTypeAutoCompletion:
+		}
 
-    }
-    fn getStringMaxWideLength(s string) -> (length int) {
-        t := s.split("\n")
-        for v := range t {
-            if len(v) > length {
-                length = len(v)
-            }
-        }
-    }
+	}
+	fn getStringMaxWideLength(s string) -> (length int) {
+		t := s.split("\n")
+		for v := range t {
+			if len(v) > length {
+				length = len(v)
+			}
+		}
+	}
 }
 

@@ -415,7 +415,7 @@ public class RunLucyPackage {
         for k , v := range lucyFiles {
             files[k] = v.realpathName
         }
-        hasMain , _ , compiledFileNames := lc.Main2(
+        hasMain , _ , compiledClassFiles := lc.MainFn(
             destinationDir,
             files,
             this.lucyPath,
@@ -436,7 +436,7 @@ public class RunLucyPackage {
         }
         {
             m := new map{string -> bool}()
-            for v := range compiledFileNames {
+            for v := range compiledClassFiles {
                 m[v] = true
             }
             fis := new io.File(destinationDir).listFiles()
@@ -457,7 +457,7 @@ public class RunLucyPackage {
             meta.imports[k].name = is[k]
             meta.imports[k].linkTime = importsMetas[k].compileTime
         }
-        meta.classes = copy(new string[](len(compiledFileNames)) , compiledFileNames)
+        meta.classes = copy(new string[](len(compiledClassFiles)) , compiledClassFiles)
         meta.hasMain = hasMain
         bs , err := json.encode(meta , "\t")
         if err != null {
@@ -477,7 +477,6 @@ public class RunLucyPackage {
             for v := range meta.classes {
                 classFileMap[v] = true
             }
-
             list := new io.File(destinationDir).list()
             for v := range list {
                 if classFileMap.keyExist(v) == false {

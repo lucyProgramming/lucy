@@ -4,10 +4,10 @@ import "lucy/os/flag"
 
 class Flags {
     file   flag.StringOption
-    line   flag.IntOption   
-    column flag.IntOption   
-    parser flag.FlagParser  
-
+    line   flag.IntOption
+    column flag.IntOption
+    parser flag.FlagParser
+    
     fn Flags() {
         this.super()
         this.parser = new flag.FlagParser()
@@ -44,5 +44,4 @@ class Flags {
         }
     }
 }
-
 

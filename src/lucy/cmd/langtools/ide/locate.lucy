@@ -67,7 +67,6 @@ public fn locateDir(dir string) -> (lucyPath string , packageName string) {
                 break
             }
         }
-
         if prefixNotMatch {
             continue
         }
@@ -82,7 +81,6 @@ public fn locateDir(dir string) -> (lucyPath string , packageName string) {
                 packageName += "/"
             }
         }
-
         containsLucyFiles := false
         if fs := new io.File(path + "/src/" + packageName).listFiles() ; len(fs) > 0 {
             for f := range fs {
@@ -91,14 +89,12 @@ public fn locateDir(dir string) -> (lucyPath string , packageName string) {
                     break
                 }
             }
-
         }
         if containsLucyFiles == false {
             continue
         }
         lucyPaths2.append(path)
     }
-
     if len(lucyPaths2) == 0 {
         panic("directory not found in LUCYPATH")
     }

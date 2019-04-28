@@ -10,7 +10,7 @@ import "java/lang/System"
 class FileCacher {
     caches             map{string -> LucyFile}
     maxSize            int                     // max cache cache number
-    printFileCacheInfo bool                   
+    printFileCacheInfo bool
 
     fn FileCacher(maxSize int , printFileCacheInfo bool) {
         this.super()
@@ -27,7 +27,6 @@ class FileCacher {
                 firstUnuseFilename = k
                 break
             }
-
             for k , v := range this.caches {
                 if v.lastUse < firstUnuse {
                     firstUnuse = v.lastUse
@@ -79,5 +78,4 @@ class FileCacher {
         f.lastUse = int(System.currentTimeMillis() / 1000L)
     }
 }
-
 

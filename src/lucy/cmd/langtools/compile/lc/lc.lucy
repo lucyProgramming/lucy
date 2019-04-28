@@ -6,7 +6,7 @@ import "lucy/cmd/langtools/compile/parser"
 import "lucy/os"
 import "lucy/encoding/json"
 
-public fn Main2(
+public fn MainFn(
     destinationDir string,
     files []string,
     lucyPath []string,
@@ -15,7 +15,7 @@ public fn Main2(
     onlyImport bool,
     disableCheckUnUse bool,
     packageName string,
-    printError bool) -> (hasMain bool , es []error , compiledFileNames []string) {
+    printError bool) -> (hasMain bool , es []error , compiledClassFiles []string) {
     var compiler = new Compiler()
     if len(files) == 0 {
         return false , [new error("no file specified")] , null
@@ -91,7 +91,7 @@ public class Compiler {
         classPath []string) -> (
         hasMain bool,
         es []error,
-        compiledFileNames []string) {
+        compiledClassFiles []string) {
         this.lucyPath = lucyPath
         this.classPath = classPath
         this.files = files
@@ -172,7 +172,7 @@ public class Compiler {
         }
         this.buildPackage.make(p , this.destinationDir)
         hasMain = p.hasMain()
-        compiledFileNames = this.buildPackage.getCompiledClassFileNames()
+        compiledClassFiles = this.buildPackage.getCompiledClassFileNames()
     }
 }
 
