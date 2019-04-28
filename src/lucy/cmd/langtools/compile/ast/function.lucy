@@ -302,7 +302,7 @@ public class Function implements TopNodeInterface {
                     continue
                 }
                 if checkReturnVarExpression == false {
-                    // eval expression later
+                    // evaluate expression later
                     continue
                 }
                 if v.defaultValueExpression == null {

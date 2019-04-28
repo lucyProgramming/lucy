@@ -585,7 +585,7 @@ public class MakeNodesObjects {
                     ret["parameterTypes"] = t
                 }
                 return ret
-            case ast.ExpressionTypeincrement:
+            case ast.ExpressionTypeIncrement:
                 ret := new map{string -> Object}()
                 ret["op"] = e.op
                 ret["on"] = this.makeExpression(e.data.(ast.Expression))
@@ -595,7 +595,7 @@ public class MakeNodesObjects {
                 ret["op"] = e.op
                 ret["on"] = this.makeExpression(e.data.(ast.Expression))
                 return ret
-            case ast.ExpressionTypePrefixincrement:
+            case ast.ExpressionTypePrefixIncrement:
                 ret := new map{string -> Object}()
                 ret["op"] = e.op
                 ret["on"] = this.makeExpression(e.data.(ast.Expression))

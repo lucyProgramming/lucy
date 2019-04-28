@@ -23,7 +23,7 @@ public class StatementWhen {
 
     fn checkWhenType(block Block) -> (errs []error = []error{}) {
         this.initExpressionBlock.inherit(block)
-        condtitionType , es := this.typeExpression.checkSingleValueContextExpression(block)
+        conditionType , es := this.typeExpression.checkSingleValueContextExpression(block)
         errs.appendAll(es)
         typeChecked := []Type{}
         fn typeExist(typeChecked []Type , t Type) -> (exists Type) {
@@ -36,12 +36,12 @@ public class StatementWhen {
         if this.typeExpression.Type != ExpressionTypeTypeAssert ||
             this.typeExpression.data.(ExpressionTypeAssert).isType == false {
             errs.append(new error(sprintf("%s expression is not a XXX.(type)",
-                        condtitionType.pos.errMsgPrefix())))
+                        conditionType.pos.errMsgPrefix())))
         }
-        if condtitionType != null {
-            if condtitionType.isPointer() == false {
+        if conditionType != null {
+            if conditionType.isPointer() == false {
                 errs.append(new error(sprintf("%s is not a pointer at all",
-                            condtitionType.pos.errMsgPrefix())))
+                            conditionType.pos.errMsgPrefix())))
             }
             for v := range this.cases {
                 for _ , match := range v.matches {
@@ -56,16 +56,16 @@ public class StatementWhen {
                         errs.append(new error(errMsg))
                         continue
                     }
-                    if condtitionType.assignAble(block , errs , match ) == false {
+                    if conditionType.assignAble(block , errs , match ) == false {
                         errs.append(
                             new error(
                                 sprintf("%s '%s' is not sub class of '%s'",
-                                    match.pos.errMsgPrefix() , match.typeString() , condtitionType.typeString())))
+                                    match.pos.errMsgPrefix() , match.typeString() , conditionType.typeString())))
                         continue
                     }
                     if match.validForTypeAssertOrConversion() == false {
                         errs.append(new error(sprintf("%s '%s' is not valid for type assert",
-                                    match.typeString() , condtitionType.typeString())))
+                                    match.typeString() , conditionType.typeString())))
                         continue
                     }
                 }
@@ -94,7 +94,7 @@ public class StatementWhen {
             return
         }
         if len(this.condition.getParameterType(block.inheritedAttribute.Function.Type)) == 0 {
-            errs.append(new error(sprintf("%s '%s' constains no parameter type",
+            errs.append(new error(sprintf("%s '%s' contains no parameter type",
                         this.condition.pos.errMsgPrefix() , this.condition.typeString())))
         }
         if err := this.condition.resolve(block) ; err != null {

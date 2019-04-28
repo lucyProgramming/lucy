@@ -246,11 +246,11 @@ fn setEnumArray(c cg.ClassHighLevel , code cg.AttributeCode,
     if e.defaultValue == 0 {
         return
     }
-    class autoVar {
+    class AutoVar {
         k      char
         length char
     }
-    var a autoVar = new autoVar()
+    var a = new AutoVar()
     a.k = code.maxLocals
     a.length = code.maxLocals + 1
     code.maxLocals += 2

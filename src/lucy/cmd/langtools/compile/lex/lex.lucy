@@ -480,7 +480,7 @@ public class Lexer {
                     for i := 0 ; i < n ; i++ {
                         c , eof = this.getChar()
                         if eof {
-                            err = new error("unexcepted EOF")
+                            err = new error("unexpected EOF")
                             break
                         }
                         if this.isHex(c) == false {
@@ -542,11 +542,11 @@ public class Lexer {
             bs.append(c)
         }
         if eof {
-            return string(bs) , new error("unexpect EOF")
+            return string(bs) , new error("unexpected EOF")
         }
         c , eof = this.getChar()
         if eof {
-            return string(bs) , new error("unexpect EOF")
+            return string(bs) , new error("unexpected EOF")
         }
         if eof || c == '/' {
             return string(bs[:len(bs) - 1]) , null
@@ -769,7 +769,7 @@ public class Lexer {
             case '+':
                 c , eof = this.getChar()
                 if c == '+' {
-                    token.Type = Tokenincrement
+                    token.Type = TokenIncrement
                     token.description = "++"
                 } else if c == '=' {
                     token.Type = TokenAddAssign

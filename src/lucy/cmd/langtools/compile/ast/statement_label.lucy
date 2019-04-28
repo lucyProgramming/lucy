@@ -17,7 +17,7 @@ public class StatementLabel {
     public locateDefinition    bool
 
     public fn mkDescription() ->(d string) {
-        d = sprintf("lable:%s" , this.name)
+        d = sprintf("label:%s" , this.name)
     }
 
     /*
@@ -59,7 +59,7 @@ public class StatementLabel {
 		*/
         errMsg := sprintf("%s cannot jump over variable definition:\n" , from.errMsgPrefix())
         for _ , v := range ss {
-            errMsg += sprintf("\t%s constains variable definition\n" , v.pos.errMsgPrefix())
+            errMsg += sprintf("\t%s contains variable definition\n" , v.pos.errMsgPrefix())
         }
 
         return new error(errMsg)

@@ -151,7 +151,7 @@ class ExpressionSuffix extends ParserFather {
                 newExpression.op = "(" + prefix.op + ")"
                 prefix = newExpression
                 this.next(lfIsToken)
-            case lex.Tokenincrement:
+            case lex.TokenIncrement:
                 pos := this.parser.mkPos()
                 this.next(lfIsToken) // skip ++
                 prefix , err = this.parseSuffixExpression()
@@ -161,7 +161,7 @@ class ExpressionSuffix extends ParserFather {
                 newE := new ast.Expression()
                 newE.pos = pos
                 newE.op = "++()"
-                newE.Type = ast.ExpressionTypePrefixincrement
+                newE.Type = ast.ExpressionTypePrefixIncrement
                 newE.data = prefix
                 prefix = newE
             case lex.TokenDecrement:
@@ -365,7 +365,7 @@ class ExpressionSuffix extends ParserFather {
                 return null , err
         }
 
-        for this.parser.token.Type == lex.Tokenincrement ||
+        for this.parser.token.Type == lex.TokenIncrement ||
                 this.parser.token.Type == lex.TokenDecrement ||
                 this.parser.token.Type == lex.TokenLp ||
                 this.parser.token.Type == lex.TokenLb ||
@@ -381,12 +381,12 @@ class ExpressionSuffix extends ParserFather {
                     newExpression.pos = this.parser.mkPos()
                     this.next(lfIsToken)
                     return newExpression , null
-                case lex.Tokenincrement,
+                case lex.TokenIncrement,
                     lex.TokenDecrement:
                     newExpression := new ast.Expression()
-                    if this.parser.token.Type == lex.Tokenincrement {
+                    if this.parser.token.Type == lex.TokenIncrement {
                         newExpression.op = "()++"
-                        newExpression.Type = ast.ExpressionTypeincrement
+                        newExpression.Type = ast.ExpressionTypeIncrement
                     } else {
                         newExpression.op = "()--"
                         newExpression.Type = ast.ExpressionTypeDecrement

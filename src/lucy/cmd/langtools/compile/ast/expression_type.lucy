@@ -49,9 +49,9 @@ public enum ExpressionTypeKind {
     ExpressionTypeSelectionConst,    // ::
     ExpressionTypeMethodCall,    // a.b()
     ExpressionTypeFunctionCall,    // a()
-    ExpressionTypeincrement,    // a++
+    ExpressionTypeIncrement,    // a++
     ExpressionTypeDecrement,    // a--
-    ExpressionTypePrefixincrement,    // ++ a
+    ExpressionTypePrefixIncrement,    // ++ a
     ExpressionTypePrefixDecrement,    // -- a
     ExpressionTypeNegative,    // -a
     ExpressionTypeNot,    // !a
@@ -99,10 +99,6 @@ public class ExpressionFunctionCall {
     public lpContainsLf bool
     // call(// inline comment 
     public lpInlineComment string
-    // public fn lpContainsLfOrInlineComment() -> (constains bool) {
-    //     return this.lpContainsLf || this.lpInlineComment != null
-    // }
-
 }
 public class ExpressionMethodCall {
     public Class              Class                  // for object or class
@@ -127,9 +123,6 @@ public class ExpressionMethodCall {
     public lpContainsLf bool
     // call(// inline comment 
     public lpInlineComment string
-    // public fn containsLfOrInlineComment() -> (constains bool) {
-    //     return this.lpContainsLf || this.lpInlineComment != null
-    // }
 }
 public class ExpressionVar {
     public Type       Type
@@ -177,7 +170,7 @@ public class ExpressionSelection {
 		a // this is a inline comment
 	*/
     public inlineComment  string //   in
-    public containsLf     bool   // constains "\n"
+    public containsLf     bool   // contains "\n"
     public autoCompletion bool
 }
 public class ExpressionNew {
@@ -189,7 +182,7 @@ public class ExpressionNew {
     public lpContainsLf bool
     // call(// inline comment 
     public lpInlineComment string
-    // public fn containsLfOrInlineComment() -> (constains bool) {
+    // public fn containsLfOrInlineComment() -> (contains bool) {
     //     return this.lpContainsLf || this.lpInlineComment != null
     // }
 }
@@ -215,9 +208,9 @@ public class ExpressionKV {
 	*/
     public inlineComment string //   in
 
-    public containsLf bool // constains "\n"
+    public containsLf bool // contains "\n"
 
-    public fn containsLfOrInlineComment() -> (constains bool) {
+    public fn containsLfOrInlineComment() -> (contains bool) {
         return this.containsLf || this.inlineComment != null
     }
 }
@@ -231,7 +224,7 @@ public class ExpressionBinary {
 		a // this is a inline comment
 	*/
     public inlineComment string //   in
-    public containsLf    bool   // constains "\n"
+    public containsLf    bool   // contains "\n"
 }
 public class ExpressionArray {
     public Type        Type

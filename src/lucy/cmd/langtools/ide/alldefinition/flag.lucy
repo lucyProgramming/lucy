@@ -14,12 +14,12 @@ class Flags {
     }
 
     fn parseArgs(args []string) -> (dir string) {
-        nodefine , err := this.parser.parse(args)
+        noDefine , err := this.parser.parse(args)
         if err != null {
             panic(err)
         }
-        if len(nodefine) > 0 {
-            print("args provides but not used:" + nodefine)
+        if len(noDefine) > 0 {
+            print("args provides but not used:" + noDefine)
             printUsageAndExit(1)
         }
         if this.dir.getValue() == "" {

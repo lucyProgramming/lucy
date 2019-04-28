@@ -439,7 +439,6 @@ public class Fmt {
                 } else {
                     format += indent + this.indentIncremental + "//" + t.comment + "\n"
                 }
-
                 continue
             }
             if t , ok := f.(ast.Line) ; ok {
@@ -459,7 +458,6 @@ public class Fmt {
                     break
                 }
             }
-
             if isLast == false {
                 format += ","
             }
@@ -1004,11 +1002,11 @@ public class Fmt {
                 }
 
                 format += ")"
-            case ast.ExpressionTypeincrement:
+            case ast.ExpressionTypeIncrement:
                 format += this.formatExpression(indent , e.data.(ast.Expression)) + "++"
             case ast.ExpressionTypeDecrement:
                 format += this.formatExpression(indent , e.data.(ast.Expression)) + "--"
-            case ast.ExpressionTypePrefixincrement:
+            case ast.ExpressionTypePrefixIncrement:
                 format += "++" + this.formatExpression(indent , e.data.(ast.Expression))
             case ast.ExpressionTypePrefixDecrement:
                 format += "--" + this.formatExpression(indent , e.data.(ast.Expression))
@@ -1115,7 +1113,7 @@ public class Fmt {
             case ast.ExpressionTypeConst:
                 cs := e.data.([]ast.Constant)
                 for v := range cs {
-                    t := indent + "cosnt " + v.name + " "
+                    t := indent + "const " + v.name + " "
                     if v.Type != null {
                         t += v.Type.typeName() + " "
                     }

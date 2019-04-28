@@ -36,7 +36,7 @@ class Parser {
     BlockParser            BlockParser     
     TypeParser             TypeParser      
     EnumParser             EnumParser      
-    tokenStackForLookback  []lex.Token      // token stack for look back 
+    tokenStackForLookBack  []lex.Token      // token stack for look back 
 
     /*
 		call before parse source file
@@ -132,18 +132,18 @@ class Parser {
                     this.next(lfNotToken)
                     continue
                 case lex.TokenIdentifier:
-                    idenfierToken := this.token
+                    identifierToken := this.token
                     this.next(lfIsToken)
                     if this.token.Type == lex.TokenLp {
                         // looks like a function 
                         f := new lex.Token()
                         f.Type = lex.TokenFn
-                        this.tokenStackForLookback = [f , idenfierToken , this.token]
-                        this.errs.append(new error(sprintf("%s missing 'fn'" , this.errMsgPrefix(this.mkPos(idenfierToken)))))
+                        this.tokenStackForLookBack = [f , identifierToken , this.token]
+                        this.errs.append(new error(sprintf("%s missing 'fn'" , this.errMsgPrefix(this.mkPos(identifierToken)))))
                         this.next(lfIsToken) // restore 
                         continue
                     } else {
-                        this.tokenStackForLookback = [idenfierToken , this.token]
+                        this.tokenStackForLookBack = [identifierToken , this.token]
                         this.next(lfIsToken) // restore 
                         e , _ := this.ExpressionParser.parseExpression(true)
                         if e != null {
@@ -542,9 +542,9 @@ class Parser {
             this.consumeFoundValidToken = false
             return
         }
-        if len(this.tokenStackForLookback) > 0 {
-            this.token = this.tokenStackForLookback[0]
-            this.tokenStackForLookback = this.tokenStackForLookback[1:]
+        if len(this.tokenStackForLookBack) > 0 {
+            this.token = this.tokenStackForLookBack[0]
+            this.tokenStackForLookBack = this.tokenStackForLookBack[1:]
             return
         }
         var err error
@@ -733,7 +733,7 @@ class Parser {
         if len(names) == 1 &&
             this.token.Type == lex.TokenSelection {
             // XXX.
-            this.tokenStackForLookback = [token , this.token]
+            this.tokenStackForLookBack = [token , this.token]
             this.next(lfIsToken) // restore the stack 
             var t ast.Type
             t , err = this.parseType()

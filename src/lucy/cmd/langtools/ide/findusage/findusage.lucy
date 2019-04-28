@@ -36,14 +36,14 @@ class FindUsage {
         result = p.findUsage
         /*
             set this package to cache 
-            when another trying to load this pacakge could use the cache and the "findUsage" has created in memory
+            when another trying to load this package could use the cache and the "findUsage" has created in memory
         */
         loader.setCache(this.packageName , p)
 
         if p.findUsageIsGlobal {
             if this.scope != null && this.scope != "" {
-                lucyPath , pacakgenName := ide.locateDir(this.scope)
-                this.searchDir(pacakgenName , lucyPath + "/src/" + pacakgenName)
+                lucyPath , packageName := ide.locateDir(this.scope)
+                this.searchDir(packageName , lucyPath + "/src/" + packageName)
             } else {
                 this.searchLucyPath()
             }

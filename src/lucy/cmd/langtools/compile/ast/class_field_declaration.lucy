@@ -10,7 +10,7 @@ public class ClassFieldDeclaration {
 	  */
     public inlineComment string //   in
 
-     //public containsLf bool    // constains "\n"
+     //public containsLf bool    // contains "\n"
 }
 
 

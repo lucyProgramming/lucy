@@ -145,21 +145,21 @@ public class Block implements TopNodeInterface {
         outer := this
         for {
             if outer.labels != null {
-                if lable := outer.labels[name] ; lable != null {
-                    if lable.findUsage {
+                if label = outer.labels[name] ; label != null {
+                    if label.findUsage {
                         u := new Usage()
                         u.Type = "value read"
                         u.pos = pos
-                        if lable.findUsageInstances == null {
-                            lable.findUsageInstances = [u]
-                            this.inheritedAttribute.p.findUsage = lable.findUsageInstances
+                        if label.findUsageInstances == null {
+                            label.findUsageInstances = [u]
+                            this.inheritedAttribute.p.findUsage = label.findUsageInstances
                         } else {
-                            lable.findUsageInstances.append(u)
+                            label.findUsageInstances.append(u)
                         }
 
                     }
-                    lable.used++
-                    return lable
+                    label.used++
+                    return label
                 }
             }
             if outer.isFunctionBlock {

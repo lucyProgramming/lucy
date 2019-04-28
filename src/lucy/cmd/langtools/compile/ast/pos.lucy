@@ -39,7 +39,7 @@ public class NameWithPos {
 	*/
     public inlineComment string //   in
 
-    public containsLf bool // constains "\n"
+    public containsLf bool // contains "\n"
 
     public fn NameWithPos(name string , Pos Pos) {
         this.super()
@@ -47,7 +47,7 @@ public class NameWithPos {
         this.pos = Pos
     }
 
-    public fn containsLfOrInlineComment() -> (constains bool) {
+    public fn containsLfOrInlineComment() -> (contains bool) {
         return this.containsLf || this.inlineComment != null
     }
 }

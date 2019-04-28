@@ -27,7 +27,7 @@ public class Constant implements TopNodeInterface {
 	*/
     public inlineComment string //   in
 
-    public containsLf bool // constains "\n"
+    public containsLf bool // contains "\n"
 
     public fn isPublic() -> (is bool) {
         return this.accessFlags & cg.AccFieldPublic != 0

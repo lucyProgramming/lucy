@@ -21,7 +21,7 @@ public class ClassField {
 	*/
     public inlineComment string //   in
 
-    public containsLf bool // constains "\n"
+    public containsLf bool // contains "\n"
 
     public fn isStatic() -> (is bool) {
         return (this.accessFlags & cg.AccFieldStatic) != 0
@@ -41,7 +41,7 @@ public class ClassField {
     public fn isFinal() -> (is bool) {
         return (this.accessFlags & cg.AccFieldFinal) != 0
     }
-    public fn ableAccessFromSubClass() -> (accessable bool) {
+    public fn ableAccessFromSubClass() -> (accessAble bool) {
         return this.isPublic() ||
             this.isProtected()
     }

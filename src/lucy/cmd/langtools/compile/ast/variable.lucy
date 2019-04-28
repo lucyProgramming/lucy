@@ -18,7 +18,7 @@ public class Variable {
     public localValOffset           char       // offset in stack frame
     public jvmDescriptor            string     // jvm
     public comment                  string
-    public crlf                     bool       // constains crlf  
+    public crlf                     bool       // contains crlf  
     public globalVarClassName       string
     public locateDefinition         bool
     public findUsage                bool
@@ -31,9 +31,9 @@ public class Variable {
 	*/
     public inlineComment string //   in
 
-    public containsLf bool // constains "\n"
+    public containsLf bool // contains "\n"
 
-    public fn containsLfOrInlineComment() -> (constains bool) {
+    public fn containsLfOrInlineComment() -> (contains bool) {
         return this.containsLf || this.inlineComment != null
     }
 

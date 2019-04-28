@@ -210,7 +210,7 @@ class BlockParser extends ParserFather {
                     }
                 case lex.TokenReturn:
                     if isGlobal {
-                        this.parser.errs.append(new error(sprintf("%s 'return' cannot used in packge init block",
+                        this.parser.errs.append(new error(sprintf("%s 'return' cannot used in package init block",
                             this.parser.errMsgPrefix())))
                     }
                     st := new ast.StatementReturn()
@@ -449,9 +449,9 @@ class BlockParser extends ParserFather {
         }
         if e.Type == ast.ExpressionTypeIdentifier &&
             this.parser.token.Type == lex.TokenColon {
-            //lable found , good...
+            //label found , good...
             if isDefer {
-                this.parser.errs.append(new error(sprintf("%s defer mixup with statement lable has no meaning",
+                this.parser.errs.append(new error(sprintf("%s defer mixup with statement label has no meaning",
                     this.parser.errMsgPrefix())))
             }
             isLabel = true

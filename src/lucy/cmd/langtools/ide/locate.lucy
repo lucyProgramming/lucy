@@ -3,7 +3,7 @@
 import "lucy/cmd/langtools/common"
 import "java/io"
 
-public fn locateLucyFile(file string) -> (lucyPath string , pacakgenName string) {
+public fn locateLucyFile(file string) -> (lucyPath string , packageName string) {
     lucyPaths := common.getLucyPath()
     eles := common.getPathElements(file)
     lucyPaths2 := []string{}
@@ -23,24 +23,23 @@ public fn locateLucyFile(file string) -> (lucyPath string , pacakgenName string)
             continue
         }
         tt := eles[len(t) + 1 : len(eles) - 1]
-        pacakgenName = ""
+        packageName = ""
         for kk , vv := range tt {
-            pacakgenName += vv
+            packageName += vv
             if kk != len(tt) - 1 {
-                pacakgenName += "/"
+                packageName += "/"
             }
         }
-
-        constainsLucyFiles := false
-        if fs := new io.File(path + "/src/" + pacakgenName).listFiles() ; len(fs) > 0 {
+        containsLucyFiles := false
+        if fs := new io.File(path + "/src/" + packageName).listFiles() ; len(fs) > 0 {
             for f := range fs {
                 if f.isFile() && f.getName().endsWith(".lucy") {
-                    constainsLucyFiles = true
+                    containsLucyFiles = true
                     break
                 }
             }
         }
-        if constainsLucyFiles == false {
+        if containsLucyFiles == false {
             continue
         }
         lucyPaths2.append(path)
@@ -55,7 +54,7 @@ public fn locateLucyFile(file string) -> (lucyPath string , pacakgenName string)
     lucyPath = lucyPaths2[0]
 }
 
-public fn locateDir(dir string) -> (lucyPath string , pacakgenName string) {
+public fn locateDir(dir string) -> (lucyPath string , packageName string) {
     lucyPaths := common.getLucyPath()
     eles := common.getPathElements(dir)
     lucyPaths2 := []string{}
@@ -76,25 +75,25 @@ public fn locateDir(dir string) -> (lucyPath string , pacakgenName string) {
             continue
         }
         tt := eles[len(t) + 1 : len(eles)]
-        pacakgenName = ""
+        packageName = ""
         for kk , vv := range tt {
-            pacakgenName += vv
+            packageName += vv
             if kk != len(tt) - 1 {
-                pacakgenName += "/"
+                packageName += "/"
             }
         }
 
-        constainsLucyFiles := false
-        if fs := new io.File(path + "/src/" + pacakgenName).listFiles() ; len(fs) > 0 {
+        containsLucyFiles := false
+        if fs := new io.File(path + "/src/" + packageName).listFiles() ; len(fs) > 0 {
             for f := range fs {
                 if f.isFile() && f.getName().endsWith(".lucy") {
-                    constainsLucyFiles = true
+                    containsLucyFiles = true
                     break
                 }
             }
 
         }
-        if constainsLucyFiles == false {
+        if containsLucyFiles == false {
             continue
         }
         lucyPaths2.append(path)

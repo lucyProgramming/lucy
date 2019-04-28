@@ -51,16 +51,16 @@ public class FileLoader implements ast.loadImport {
         }
     }
 
-    public fn importExistsInJarFile(jarfile string , importName string) -> (exists Resource) {
-        zipfile := new zip.ZipFile(jarfile)
+    public fn importExistsInJarFile(jarFile string , importName string) -> (exists Resource) {
+        zipFile := new zip.ZipFile(jarFile)
         defer {
-            zipfile.close()
+            zipFile.close()
         }
-        entries := zipfile.entries()
+        entries := zipFile.entries()
         for entries.hasMoreElements() {
             entry := entries.nextElement().(zip.ZipEntry)
             if entry.getName() == importName + "/" && entry.isDirectory() {
-                exists = new Resource(ResourceKindJavaPackage , jarfile , importName)
+                exists = new Resource(ResourceKindJavaPackage , jarFile , importName)
                 for entries.hasMoreElements() {
                     entry := entries.nextElement().(zip.ZipEntry)
                     if entry.isDirectory() {
@@ -71,26 +71,26 @@ public class FileLoader implements ast.loadImport {
                     }
                     if exists.loadFromJar == null {
                         exists.loadFromJar = [entry]
-                        exists.loadFromJarBs = [this.readBsFromZip(zipfile , entry)]
+                        exists.loadFromJarBs = [this.readBsFromZip(zipFile , entry)]
                     } else {
                         exists.loadFromJar.append(entry)
-                        exists.loadFromJarBs.append(this.readBsFromZip(zipfile , entry))
+                        exists.loadFromJarBs.append(this.readBsFromZip(zipFile , entry))
                     }
                 }
                 return
             }
             if entry.getName() == importName + ".class" && entry.isDirectory() == false {
-                exists = new Resource(ResourceKindJavaClass , jarfile , importName)
+                exists = new Resource(ResourceKindJavaClass , jarFile , importName)
                 exists.loadFromJar = [entry]
-                exists.loadFromJarBs = [this.readBsFromZip(zipfile , entry)]
+                exists.loadFromJarBs = [this.readBsFromZip(zipFile , entry)]
                 return
             }
         }
     }
 
-    public fn readBsFromZip(zipfile zip.ZipFile , entry zip.ZipEntry) -> (bs []byte) {
+    public fn readBsFromZip(zipFile zip.ZipFile , entry zip.ZipEntry) -> (bs []byte) {
         bs = []byte{}
-        s := zipfile.getInputStream(entry)
+        s := zipFile.getInputStream(entry)
         defer s.close()
         buff := new byte[](1024)
         for {
@@ -464,8 +464,8 @@ public class FileLoader implements ast.loadImport {
     }
 
     fn loadLucyMainClass(pack ast.Package , c cg.Class) {
-        maincClass := new cg.ClassHighLevel(char(0) , char(0))
-        maincClass.name = pack.name + "/main"
+        mainClass := new cg.ClassHighLevel(char(0) , char(0))
+        mainClass.name = pack.name + "/main"
         pack.block.variables = new map{string -> ast.Variable}()
         pack.block.constants = new map{string -> ast.Constant}()
         pack.block.functions = new map{string -> ast.Function}()
@@ -572,7 +572,7 @@ public class FileLoader implements ast.loadImport {
             }
             function.entrance = new cg.MethodHighLevel()
             function.entrance.name = function.name
-            function.entrance.Class = maincClass
+            function.entrance.Class = mainClass
             function.entrance.descriptor = function.jvmDescriptor
             function.isGlobal = true
             pack.block.functions[name] = function

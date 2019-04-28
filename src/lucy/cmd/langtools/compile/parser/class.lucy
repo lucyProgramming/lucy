@@ -256,7 +256,7 @@ class ClassParser extends ParserFather {
                 case lex.TokenFn:
                     if isAbstract &&
                         (classDefinition.isAbstract() == false) {
-                        this.parser.errs.append(new error(sprintf("%s cannot have abstact method is non-abstract class",
+                        this.parser.errs.append(new error(sprintf("%s cannot have abstract method is non-abstract class",
                                     this.parser.errMsgPrefix())))
                     }
                     var f ast.Function
@@ -375,18 +375,18 @@ class ClassParser extends ParserFather {
             classDefinition.fields[f.name] = f
             return
         }
-        idenfierToken := this.parser.token
-        idenfierPos := this.parser.mkPos(this.parser.lastToken)
+        identifierToken := this.parser.token
+        identifierPos := this.parser.mkPos(this.parser.lastToken)
         names , err := this.parser.parseNameList()
         if err != null {
             return err
         }
         if this.parser.token.Type == lex.TokenLp &&
             len(names) == 1 {
-            this.parser.errs.append(new error(sprintf("%s missing 'fn'" , this.parser.errMsgPrefix(idenfierPos))))
+            this.parser.errs.append(new error(sprintf("%s missing 'fn'" , this.parser.errMsgPrefix(identifierPos))))
             t := new lex.Token()
             t.Type = lex.TokenFn
-            this.parser.tokenStackForLookback = [t , idenfierToken , this.parser.token]
+            this.parser.tokenStackForLookBack = [t , identifierToken , this.parser.token]
             this.next(lfIsToken) // restore fn 
             return
         }

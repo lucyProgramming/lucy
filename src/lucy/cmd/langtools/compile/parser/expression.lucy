@@ -236,7 +236,7 @@ class ExpressionParser extends ParserFather {
             this.parser.token.Type == lex.TokenLiteralString ||
             this.parser.token.Type == lex.TokenNull ||
             this.parser.token.Type == lex.TokenLp ||
-            this.parser.token.Type == lex.Tokenincrement ||
+            this.parser.token.Type == lex.TokenIncrement ||
             this.parser.token.Type == lex.TokenDecrement ||
             this.parser.token.Type == lex.TokenNot ||
             this.parser.token.Type == lex.TokenBitNot ||

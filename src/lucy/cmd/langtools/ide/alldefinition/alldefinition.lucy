@@ -22,7 +22,7 @@ class AllDefinition {
         this.packageName = packageName
         this.printErr = printErr
     }
-    fn getAllDefinition() -> (alldefinition ide.Definition[]) {
+    fn getAllDefinition() -> (allDefinition ide.Definition[]) {
         nodes , errs := ide.parseAst(this.lucyFiles)
         if this.printErr {
             for v := range errs {

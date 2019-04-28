@@ -29,9 +29,9 @@ public class Type {
 	*/
     public inlineComment string //   in
 
-    public containsLf bool // constains "\n"
+    public containsLf bool // contains "\n"
 
-    public fn containsLfOrInlineComment() -> (constains bool) {
+    public fn containsLfOrInlineComment() -> (contains bool) {
         return this.containsLf || this.inlineComment != null
     }
     // copy to t 
@@ -388,7 +388,7 @@ public class Type {
                 return null , new error(sprintf("%s '%s' is not a package",
                             errMsgPrefix(this.pos) , packageName))
             }
-            return null , new error("FLASE ERROR") // it's ok 
+            return null , new error("FALSE ERROR") // it's ok 
         }
         if pp , ok := p.(Package) ; ok {
             var exists bool

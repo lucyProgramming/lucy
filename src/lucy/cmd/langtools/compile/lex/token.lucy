@@ -72,7 +72,7 @@ public enum TokenKind {
     TokenMul,    // *
     TokenDiv,    // a/c
     TokenMod,    // a%b
-    Tokenincrement,    // a++
+    TokenIncrement,    // a++
     TokenDecrement,    // a--
     TokenSelection,    // a.do()
     TokenVar,    // var a
@@ -138,7 +138,7 @@ public enum TokenKind {
     TokenComment,    //
     TokenMultiLineComment,    //
     TokenType,    //type
-    TokenAutoCompletion,    // special token for aotocompletion 
+    TokenAutoCompletion,    // special token for auto completion 
     TokenEof    // end of file
 }
 
