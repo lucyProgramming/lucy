@@ -29,7 +29,7 @@ class BuildExpressionNew {
 		defer {
 			state.popStack(len(state.stacks) - stackLength)
 		}
-
+		
 		//new object
 		n := e.data.(ast.ExpressionNew)
 		code.codes[code.codeLength] = cg.OP_new

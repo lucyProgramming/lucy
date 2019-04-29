@@ -1,57 +1,56 @@
 // all rights reserved , check the LICENSE file
 
 public class StatementReturn {
-    public defers        []StatementDefer
-    public expressions   []Expression    
-    public pos           Pos             
-    public inlineComment string          
+	public statementDefers []StatementDefer
+	public expressions     []Expression
+	public pos             Pos
+	public inlineComment   string
 
-    fn mkDefers(b Block) {
-        if b == null {
-            return
-        }
-        if b.isFunctionBlock == false {
-            this.mkDefers(b.outer) // recursive
-        }
-        if b.defers != null {
-            this.defers.appendAll(b.defers)
-        }
-    }
+	fn mkDefers(b Block) {
+		if b == null {
+			return
+		}
+		if b.isFunctionBlock == false {
+			this.mkDefers(b.outer) // recursive
+		}
+		if b.defers != null {
+			this.statementDefers.appendAll(b.defers)
+		}
+	}
 
-    fn check(b Block) -> (errs []error = []error{}) {
-        if b.inheritedAttribute.statementDefer != null {
-            return []error{new error(sprintf("%s cannot has 'return' in 'defer'",
-                    this.pos.errMsgPrefix()))}
-        }
-        this.defers = []StatementDefer{}
-        this.mkDefers(b)
-        if len(this.expressions) == 0 {
-            return errs
-        }
-        returnValueTypes := checkExpressions(b , this.expressions , errs , false)
-        rs := b.inheritedAttribute.function.Type.returnList
-        pos := this.expressions[len(this.expressions) - 1].pos
-        if len(returnValueTypes) < len(rs) {
-            errs.append(new error(sprintf("%s too few arguments to return" , pos.errMsgPrefix())))
-        } else if len(returnValueTypes) > len(rs) {
-            errs.append(new error(sprintf("%s too many arguments to return" , pos.errMsgPrefix())))
-        }
-        convertExpressionsToNeeds(b,
-            this.expressions,
-            b.inheritedAttribute.function.Type.mkCallReturnTypes(this.expressions[0].pos),
-            returnValueTypes)
-        for k , v := range rs {
-            if k < len(returnValueTypes) && returnValueTypes[k] != null {
-                if false == v.Type.assignAble(b , errs , returnValueTypes[k]) {
-                    errs.append(new error(sprintf("%s cannot use '%s' as '%s' to return",
-                        returnValueTypes[k].pos.errMsgPrefix(),
-                        returnValueTypes[k].typeString(),
-                        v.Type.typeString())))
-                }
-            }
-        }
-        return errs
-    }
+	fn check(b Block) -> (errs []error = []error{}) {
+		if b.inheritedAttribute.statementDefer != null {
+			return []error{new error(sprintf("%s cannot has 'return' in 'defer'",
+							this.pos.errMsgPrefix()))}
+		}
+		this.statementDefers = []StatementDefer{}
+		this.mkDefers(b)
+		if len(this.expressions) == 0 {
+			return errs
+		}
+		returnValueTypes := checkExpressions(b , this.expressions , errs , false)
+		rs := b.inheritedAttribute.function.Type.returnList
+		pos := this.expressions[len(this.expressions) - 1].pos
+		if len(returnValueTypes) < len(rs) {
+			errs.append(new error(sprintf("%s too few arguments to return" , pos.errMsgPrefix())))
+		} else if len(returnValueTypes) > len(rs) {
+			errs.append(new error(sprintf("%s too many arguments to return" , pos.errMsgPrefix())))
+		}
+		convertExpressionsToNeeds(b,
+			this.expressions,
+			b.inheritedAttribute.function.Type.mkCallReturnTypes(this.expressions[0].pos),
+			returnValueTypes)
+		for k , v := range rs {
+			if k < len(returnValueTypes) && returnValueTypes[k] != null {
+				if false == v.Type.assignAble(b , errs , returnValueTypes[k]) {
+					errs.append(new error(sprintf("%s cannot use '%s' as '%s' to return",
+								returnValueTypes[k].pos.errMsgPrefix(),
+								returnValueTypes[k].typeString(),
+								v.Type.typeString())))
+				}
+			}
+		}
+		return errs
+	}
 }
-
 

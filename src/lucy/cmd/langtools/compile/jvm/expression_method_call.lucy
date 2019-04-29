@@ -58,9 +58,6 @@ class BuildExpressionMethodCall {
 				maxStack = this.buildExpression.build(c , code , call.methodCallOn , context , state)
 				// object ref
 				state.pushStack(c , call.methodCallOn.value)
-				defer {
-					state.popStack(1)
-				}
 				if call.name == ast.SpecialMethodInit {
 					state.popStack(1)
 					v := new cg.StackMapUninitializedThisVariableInfo() // make_node_objects it right
@@ -81,13 +78,16 @@ class BuildExpressionMethodCall {
 							call.name,
 							call.method.Function.jvmDescriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
 					code.codeLength += 3
+					state.popStack(1)
 					return
 				}
 				if call.theStaticMethodCallClass.isInterface() {
 					code.codes[code.codeLength] = cg.OP_invokeinterface
-					c.insertInterfaceMethodrefConst(new cg.ConstantInfoInterfaceMethodrefHighLevel(call.theStaticMethodCallClass.name,
+					c.insertInterfaceMethodrefConst(
+						new cg.ConstantInfoInterfaceMethodrefHighLevel(call.theStaticMethodCallClass.name,
 							call.name,
-							call.method.Function.jvmDescriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+							call.method.Function.jvmDescriptor),
+						code.codes[code.codeLength + 1 : code.codeLength + 3])
 					code.codes[code.codeLength + 3] = interfaceMethodArgsCount(call.method.Function.Type)
 					code.codes[code.codeLength + 4] = 0b
 					code.codeLength += 5
@@ -98,7 +98,7 @@ class BuildExpressionMethodCall {
 							call.method.Function.jvmDescriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
 					code.codeLength += 3
 				}
-
+				state.popStack(1)
 				if t := popCallResult(code , e , call.method.Function.Type) ; t > maxStack {
 					maxStack = t
 				}
@@ -276,9 +276,7 @@ class BuildExpressionMethodCall {
 				maxStack = t
 			}
 		}
-
 		return
 	}
-
 }
 

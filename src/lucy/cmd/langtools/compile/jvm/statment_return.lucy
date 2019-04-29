@@ -21,7 +21,7 @@ class BuildReturn {
 		context Context,
 		state StackMapState) -> (maxStack char) {
 		if context.theFunction.Type.voidReturn() {
-			if statementReturn.defers != null && len(statementReturn.defers) > 0 {
+			if statementReturn.statementDefers != null && len(statementReturn.statementDefers) > 0 {
 				stack := this.buildDefersForReturn(c , code , context , state , statementReturn)
 				if stack > maxStack {
 					maxStack = stack
@@ -36,7 +36,7 @@ class BuildReturn {
 				maxStack = this.buildExpression.build(c , code , statementReturn.expressions[0] , context , state)
 			}
 			// execute defer first
-			if len(statementReturn.defers) > 0 {
+			if len(statementReturn.statementDefers) > 0 {
 				//return value  is on stack,  store to local var
 				if len(statementReturn.expressions) > 0 {
 					this.buildExpression.storeLocalVar(c , code , context.theFunction.Type.returnList[0])
@@ -85,7 +85,7 @@ class BuildReturn {
 			}
 
 		}
-		if len(statementReturn.defers) > 0 {
+		if len(statementReturn.statementDefers) > 0 {
 			//store a simple var,should be no exception
 			if len(statementReturn.expressions) > 0 {
 				copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject,
@@ -180,7 +180,7 @@ class BuildReturn {
 	fn buildDefersForReturn(c cg.ClassHighLevel , code cg.AttributeCode,
 		context Context , from StackMapState,
 		statementReturn ast.StatementReturn) -> (maxStack char) {
-		if len(statementReturn.defers) == 0 {
+		if len(statementReturn.statementDefers) == 0 {
 			return
 		}
 		code.codes[code.codeLength] = cg.OP_aconst_null
@@ -188,21 +188,21 @@ class BuildReturn {
 		if 1 > maxStack {
 			maxStack = 1
 		}
-		index := len(statementReturn.defers) - 1
+		index := len(statementReturn.statementDefers) - 1
 		for index >= 0 { //    build defer,cannot have return statement is defer
-			state := statementReturn.defers[index].stackMapState.(StackMapState)
+			state := statementReturn.statementDefers[index].stackMapState.(StackMapState)
 			state = new StackMapState(state) // clone
 			state.addTop(from)
 			state.pushStack(c , state.newObjectVariableType(throwableClass))
 			context.MakeStackMap(code , state , code.codeLength)
 			e := new cg.ExceptionTable()
-			e.startPc = char(statementReturn.defers[index].startPc)
+			e.startPc = char(statementReturn.statementDefers[index].startPc)
 			e.endPc = char(code.codeLength)
 			e.handlerPc = char(code.codeLength)
-			if statementReturn.defers[index].exceptionClass == null {
+			if statementReturn.statementDefers[index].exceptionClass == null {
 				e.catchType = c.theClass.insertClassConst(ast.DefaultExceptionClass)
 			} else {
-				e.catchType = c.theClass.insertClassConst(statementReturn.defers[index].exceptionClass.name) // custom c
+				e.catchType = c.theClass.insertClassConst(statementReturn.statementDefers[index].exceptionClass.name) // custom c
 			}
 
 			code.appendException(e)
@@ -211,11 +211,11 @@ class BuildReturn {
 					context.exceptionVarOffset)) // this code will make_node_objects stack is empty
 			state.popStack(1)
 			// build block
-			context.statementDefer = statementReturn.defers[index]
-			this.buildBlock.buildBlock(c , code , statementReturn.defers[index].block , context , state)
+			context.statementDefer = statementReturn.statementDefers[index]
+			this.buildBlock.buildBlock(c , code , statementReturn.statementDefers[index].block , context , state)
 			from.addTop(state)
 			context.statementDefer = null
-			statementReturn.defers[index].resetLabels()
+			statementReturn.statementDefers[index].resetLabels()
 			//if need throw
 			copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , context.exceptionVarOffset))
 			code.codes[code.codeLength] = cg.OP_dup
