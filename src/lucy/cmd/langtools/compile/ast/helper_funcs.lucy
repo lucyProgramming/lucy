@@ -74,14 +74,14 @@ fn mkVoidType(pos Pos) -> (voidType Type = new Type()) {
 fn shouldAccessFromImports(block Block , name string , from Pos , alreadyHave Pos) -> (i Import , should bool) {
 	//print(name, from, alreadyHave)
 	if from.filename != alreadyHave.filename {
-		i = block.inheritedAttribute.p.getImport(from.filename , name)
+		i = block.inheritedAttribute.thePackageBeenCompiling.getImport(from.filename , name)
 		if i != null {
 			return i , true
 		} else {
 			return null , false
 		}
 	}
-	i = block.inheritedAttribute.p.getImport(from.filename , name)
+	i = block.inheritedAttribute.thePackageBeenCompiling.getImport(from.filename , name)
 	if i == null {
 		return null , false
 	}
@@ -142,7 +142,7 @@ fn searchBuildIns(name string , lucyBuildInPackage Package) -> (t Object) {
 
 fn checkConst(block Block , c Constant , errs []error) -> (err error) {
 	if c.locateDefinition {
-		block.inheritedAttribute.p.setLocatedDefinitionPos(c)
+		block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(c)
 		return
 	}
 	if c.findUsage {
@@ -150,8 +150,8 @@ fn checkConst(block Block , c Constant , errs []error) -> (err error) {
 		u.Type = "declaration"
 		u.pos = c.pos
 		c.findUsageInstances = [u]
-		block.inheritedAttribute.p.findUsageIsGlobal = c.isGlobal
-		block.inheritedAttribute.p.findUsage = c.findUsageInstances
+		block.inheritedAttribute.thePackageBeenCompiling.findUsageIsGlobal = c.isGlobal
+		block.inheritedAttribute.thePackageBeenCompiling.findUsage = c.findUsageInstances
 	}
 	if c.Type != null {
 		c.mkDefaultValue()
@@ -259,7 +259,6 @@ fn convertExpressionsToNeeds(block Block , expressions []Expression , needs []Ty
 			eval[k].pos = pos
 		}
 	}
-
 	return
 }
 
@@ -338,8 +337,8 @@ fn searchRightValueForAutoCompletionItems(pos Pos , block Block) -> (items []Aut
 				names[name] = true
 			}
 
-			if b.isPackageBlock && (b.package.name != "lucy/lang" || b.package == block.inheritedAttribute.p) {
-				s := block.inheritedAttribute.p.getSourceFile(pos.filename)
+			if b.isPackageBlock && (b.package.name != "lucy/lang" || b.package == block.inheritedAttribute.thePackageBeenCompiling) {
+				s := block.inheritedAttribute.thePackageBeenCompiling.getSourceFile(pos.filename)
 				if s != null {
 					for name , _ := range s.imports {
 						item := new AutoCompletionItem()
@@ -413,8 +412,8 @@ fn searchTypeForAutoCompletionItems(pos Pos , block Block) -> (items []AutoCompl
 				names[name] = true
 			}
 
-			if b.isPackageBlock && (b.package.name != "lucy/lang" || b.package == block.inheritedAttribute.p) {
-				s := block.inheritedAttribute.p.getSourceFile(pos.filename)
+			if b.isPackageBlock && (b.package.name != "lucy/lang" || b.package == block.inheritedAttribute.thePackageBeenCompiling) {
+				s := block.inheritedAttribute.thePackageBeenCompiling.getSourceFile(pos.filename)
 				if s != null {
 					for name , _ := range s.imports {
 						item := new AutoCompletionItem()
@@ -455,8 +454,8 @@ fn searchLeftValueForAutoCompletionItems(block Block , pos Pos) -> (items []Auto
 				names[name] = true
 			}
 
-			if b.isPackageBlock && (b.package.name != "lucy/lang" || b.package == block.inheritedAttribute.p) {
-				s := block.inheritedAttribute.p.getSourceFile(pos.filename)
+			if b.isPackageBlock && (b.package.name != "lucy/lang" || b.package == block.inheritedAttribute.thePackageBeenCompiling) {
+				s := block.inheritedAttribute.thePackageBeenCompiling.getSourceFile(pos.filename)
 				if s != null {
 					for name , _ := range s.imports {
 						item := new AutoCompletionItem()
@@ -464,7 +463,6 @@ fn searchLeftValueForAutoCompletionItems(block Block , pos Pos) -> (items []Auto
 						item.name = name
 						items.append(item)
 					}
-
 				}
 			}
 		})
@@ -482,35 +480,33 @@ fn checkFormat(formatLiteral string , pos Pos , args []Type) -> (err error) {
 			err = new error(sprintf("%s %s" , pos.errMsgPrefix() , e.getMessage()))
 		}
 	}
-	falseArgs := new Object[](len(args))
+	mockArgs := new Object[](len(args))
 	for k , v := range args {
 		switch v.Type {
 			case VariableTypeBool:
-				falseArgs[k] = Boolean.valueOf(true)
+				mockArgs[k] = Boolean.valueOf(true)
 			case VariableTypeByte:
-				falseArgs[k] = Byte.valueOf(0b)
+				mockArgs[k] = Byte.valueOf(0b)
 			case VariableTypeShort:
-				falseArgs[k] = Short.valueOf(0s)
+				mockArgs[k] = Short.valueOf(0s)
 			case VariableTypeChar:
-				falseArgs[k] = Character.valueOf(char(0))
+				mockArgs[k] = Character.valueOf(char(0))
 			case VariableTypeInt:
-				falseArgs[k] = Integer.valueOf(0)
+				mockArgs[k] = Integer.valueOf(0)
 			case VariableTypeLong:
-				falseArgs[k] = Long.valueOf(0l)
+				mockArgs[k] = Long.valueOf(0l)
 			case VariableTypeFloat:
-				falseArgs[k] = Float.valueOf(0f)
+				mockArgs[k] = Float.valueOf(0f)
 			case VariableTypeDouble:
-				falseArgs[k] = Double.valueOf(0d)
+				mockArgs[k] = Double.valueOf(0d)
 			case VariableTypeEnum:
-				falseArgs[k] = Integer.valueOf(0)
+				mockArgs[k] = Integer.valueOf(0)
 			case VariableTypeString:
-				falseArgs[k] = ""
+				mockArgs[k] = ""
 			default:
-				falseArgs[k] = null
+				mockArgs[k] = null
 		}
-
 	}
-
-	String.format(formatLiteral , falseArgs...)
+	String.format(formatLiteral , mockArgs...)
 }
 

@@ -268,7 +268,7 @@ public class RunLucyPackage {
         foundInLucyPath := fn (name string) -> (found []string = []string{}) {
             for _ , v := range that.lucyPath {
                 if d := v + "/src/" + name ; new io.File(d).isDirectory() &&
-                    common.haveFileType(d , ".lucy") {
+                    common.dirHaveFileType(d , ".lucy") {
                     found.append(v)
                 }
             }

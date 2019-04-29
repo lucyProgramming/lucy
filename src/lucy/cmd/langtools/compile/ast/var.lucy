@@ -2,7 +2,7 @@
 
 import "java/lang/Object"
 
-public interface loadImport {
+public interface ImportLoader {
 	public fn loadImport(importName string) -> (Object , error)
 }
 
@@ -55,7 +55,7 @@ fn loadJavaStringClass(block Block , pos Pos) -> (err error) {
 	if javaStringClass != null {
 		return null
 	}
-	c , err := block.inheritedAttribute.p.loader.loadImport(JavaStringClassName)
+	c , err := block.inheritedAttribute.thePackageBeenCompiling.loader.loadImport(JavaStringClassName)
 	if err != null {
 		return err
 	}

@@ -13,784 +13,782 @@ import "lucy/cmd/langtools/common" as langtoolsCommon
 
 // import "lucy/cmd/langtools/compile/parser"
 
-
 /*
 	load from file implementation
 */
-public class FileLoader implements ast.loadImport {
-    public lucyPath , classPath []string
-    public caches               map{string -> Object}
-    // class loaded from CLASSPATH
-    static javaImports map{string -> Object} = new map{string -> Object}()
+public class Loader implements ast.ImportLoader {
+	public lucyPath , classPath []string
+	public caches               map{string -> Object}
+	// class loaded from CLASSPATH
+	static javaImports map{string -> Object} = new map{string -> Object}()
 
-    public fn FileLoader(lucyPath []string , classPath []string) {
-        this.super()
-        this.lucyPath = lucyPath
-        this.classPath = classPath
-        this.caches = new map{string -> Object}()
-    }
+	public fn Loader(lucyPath []string , classPath []string) {
+		this.super()
+		this.lucyPath = lucyPath
+		this.classPath = classPath
+		this.caches = new map{string -> Object}()
+	}
 
-    public fn cacheJavaImports(name string , i Object) {
-        .javaImports[name] = i
-    }
+	public fn cacheJavaImports(name string , i Object) {
+		.javaImports[name] = i
+	}
 
-    public fn setCache(name string , cache Object) {
-        if this.caches == null {
-            this.caches = new map{string -> Object}()
-        }
-        this.caches[name] = cache
-    }
+	public fn setCache(name string , cache Object) {
+		if this.caches == null {
+			this.caches = new map{string -> Object}()
+		}
+		this.caches[name] = cache
+	}
 
-    public fn getCache(name string) -> (cache Object) {
-        cache = this.caches[name]
-        if cache != null {
-            return
-        }
-        if cache = .javaImports[name] ; cache != null {
-            // print("hit java cache" , name)
-        }
-    }
+	public fn getCache(name string) -> (cache Object) {
+		cache = this.caches[name]
+		if cache != null {
+			return
+		}
+		if cache = .javaImports[name] ; cache != null {
+			// print("hit java cache" , name)
+		}
+	}
 
-    public fn importExistsInJarFile(jarFile string , importName string) -> (exists Resource) {
-        zipFile := new zip.ZipFile(jarFile)
-        defer {
-            zipFile.close()
-        }
-        entries := zipFile.entries()
-        for entries.hasMoreElements() {
-            entry := entries.nextElement().(zip.ZipEntry)
-            if entry.getName() == importName + "/" && entry.isDirectory() {
-                exists = new Resource(ResourceKindJavaPackage , jarFile , importName)
-                for entries.hasMoreElements() {
-                    entry := entries.nextElement().(zip.ZipEntry)
-                    if entry.isDirectory() {
-                        break
-                    }
-                    if entry.getName().endsWith(".class") == false {
-                        continue
-                    }
-                    if exists.loadFromJar == null {
-                        exists.loadFromJar = [entry]
-                        exists.loadFromJarBs = [this.readBsFromZip(zipFile , entry)]
-                    } else {
-                        exists.loadFromJar.append(entry)
-                        exists.loadFromJarBs.append(this.readBsFromZip(zipFile , entry))
-                    }
-                }
-                return
-            }
-            if entry.getName() == importName + ".class" && entry.isDirectory() == false {
-                exists = new Resource(ResourceKindJavaClass , jarFile , importName)
-                exists.loadFromJar = [entry]
-                exists.loadFromJarBs = [this.readBsFromZip(zipFile , entry)]
-                return
-            }
-        }
-    }
+	public fn importExistsInJarFile(jarFile string , importName string) -> (exists Resource) {
+		zipFile := new zip.ZipFile(jarFile)
+		defer {
+			zipFile.close()
+		}
+		entries := zipFile.entries()
+		for entries.hasMoreElements() {
+			entry := entries.nextElement().(zip.ZipEntry)
+			if entry.getName() == importName + "/" && entry.isDirectory() {
+				exists = new Resource(ResourceKindJavaPackage , jarFile , importName)
+				for entries.hasMoreElements() {
+					entry := entries.nextElement().(zip.ZipEntry)
+					if entry.isDirectory() {
+						break
+					}
+					if entry.getName().endsWith(".class") == false {
+						continue
+					}
+					if exists.loadFromJar == null {
+						exists.loadFromJar = [entry]
+						exists.loadFromJarBs = [this.readBsFromZip(zipFile , entry)]
+					} else {
+						exists.loadFromJar.append(entry)
+						exists.loadFromJarBs.append(this.readBsFromZip(zipFile , entry))
+					}
+				}
+				return
+			}
+			if entry.getName() == importName + ".class" && entry.isDirectory() == false {
+				exists = new Resource(ResourceKindJavaClass , jarFile , importName)
+				exists.loadFromJar = [entry]
+				exists.loadFromJarBs = [this.readBsFromZip(zipFile , entry)]
+				return
+			}
+		}
+	}
 
-    public fn readBsFromZip(zipFile zip.ZipFile , entry zip.ZipEntry) -> (bs []byte) {
-        bs = []byte{}
-        s := zipFile.getInputStream(entry)
-        defer s.close()
-        buff := new byte[](1024)
-        for {
-            n := s.read(buff)
-            if n == -1 {
-                break
-            }
-            bs.appendAll(javaArray2Lucy(buff , 0 , n))
-        }
-    }
+	public fn readBsFromZip(zipFile zip.ZipFile , entry zip.ZipEntry) -> (bs []byte) {
+		bs = []byte{}
+		s := zipFile.getInputStream(entry)
+		defer s.close()
+		buff := new byte[](1024)
+		for {
+			n := s.read(buff)
+			if n == -1 {
+				break
+			}
+			bs.appendAll(javaArray2Lucy(buff , 0 , n))
+		}
+	}
 
-    public fn loadImport(importName string) -> (x Object , err error) {
-        /*
+	public fn loadImport(importName string) -> (x Object , err error) {
+		/*
             e := catch()
             if err == null && e != null{
                 err =  e
             }
         }*/
-        if x = this.getCache(importName) ; x != null {
-            return
-        }
-        realPaths := []Resource{}
-        foundInLucy := false
-        for _ , v := range this.lucyPath {
-            if p := v + "/class/" + importName ; new io.File(p).isDirectory() && langtoolsCommon.haveFileType(p , ".class") {
-                realPaths.append(new Resource(ResourceKindLucyPackage,
-                        p,
-                        importName))
-                foundInLucy = true
-                continue
-            }
-            if p := v + "/class/" + importName + ".class" ; new io.File(p).isFile() {
-                realPaths.append(new Resource(ResourceKindLucyClass,
-                        p,
-                        importName))
-                foundInLucy = true
-                continue
-            }
-        }
-        if foundInLucy == false {
-            for _ , v := range this.classPath {
-                if p := v + "/" + importName ; new io.File(p).isDirectory() && langtoolsCommon.haveFileType(p , ".class") {
-                    realPaths.append(new Resource(ResourceKindJavaPackage,
-                            p,
-                            importName))
-                }
-                if p := v + "/" + importName + ".class" ; new io.File(p).isFile() {
-                    realPaths.append(new Resource(ResourceKindJavaClass,
-                            p,
-                            importName))
-                }
-            }
-            //
-            for _ , v := range this.classPath {
-                fis := new io.File(v).listFiles()
-                for f := range fis {
-                    if f.isFile() && f.getName().endsWith(".jar") {
-                        e := this.importExistsInJarFile(v + "/" + f.getName() , importName)
-                        if null != e {
-                            realPaths.append(e)
-                        }
-                    }
-                }
-            }
-        }
-        if len(realPaths) == 0 {
-            return null , new error(sprintf("resource '%s' not found" , importName))
-        }
-        realPathMap := new map{string -> []Resource}()
-        for _ , v := range realPaths {
-            if realPathMap.keyExist(v.realPath) {
-                realPathMap[v.realPath].append(v)
-            } else {
-                realPathMap[v.realPath] = []Resource{v}
-            }
-        }
-        if len(realPathMap) > 1 {
-            errMsg := "not 1 resource named '" + importName + "' present:\n"
-            for _ , v := range realPathMap {
-                switch v[0].kind {
-                    case ResourceKindJavaClass:
-                        errMsg += sprintf("\t in '%s' is a java class\n" , v[0].realPath)
-                    case ResourceKindJavaPackage:
-                        errMsg += sprintf("\t in '%s' is a java package\n" , v[0].realPath)
-                    case ResourceKindLucyClass:
-                        errMsg += sprintf("\t in '%s' is a lucy class\n" , v[0].realPath)
-                    case ResourceKindLucyPackage:
-                        errMsg += sprintf("\t in '%s' is a lucy package\n" , v[0].realPath)
-                }
-            }
-            return null , new error(errMsg)
-        }
-        if realPaths[0].kind == ResourceKindLucyClass {
-            if common.getBaseName(realPaths[0].realPath) == MainClassName {
-                return null , new error(sprintf("%s is special class for global variable and other things" , MainClassName))
-            }
-        }
-        if realPaths[0].kind == ResourceKindJavaClass {
-            c := this.loadClass(realPaths[0])
-            if cc , ok := c.(ast.Class) ; ok {
-                this.setCache(cc.name , cc)
-            }
-            return c , null
-        } else if realPaths[0].kind == ResourceKindLucyClass {
-            t := this.loadClass(realPaths[0])
-            if tt , ok := t.(ast.Class) ; ok {
-                this.setCache(tt.name , tt)
-            }
-            return t , null
-        } else if realPaths[0].kind == ResourceKindJavaPackage {
-            p := this.loadJavaPackage(realPaths[0])
-            if p != null {
-                p.javaPackage = new ast.JavaPackage()
-                this.cacheJavaImports(p.name , p)
-            }
-            return p , null
-        } else {
-            p := this.loadLucyPackage(realPaths[0])
-            if p != null {
-                this.setCache(p.name , p)
-            }
-            return p , null
-        }
-    }
-    /*
+		if x = this.getCache(importName) ; x != null {
+			return
+		}
+		realPaths := []Resource{}
+		foundInLucy := false
+		for _ , v := range this.lucyPath {
+			if p := v + "/class/" + importName ; new io.File(p).isDirectory() && langtoolsCommon.dirHaveFileType(p , ".class") {
+				realPaths.append(new Resource(ResourceKindLucyPackage,
+						p,
+						importName))
+				foundInLucy = true
+				continue
+			}
+			if p := v + "/class/" + importName + ".class" ; new io.File(p).isFile() {
+				realPaths.append(new Resource(ResourceKindLucyClass,
+						p,
+						importName))
+				foundInLucy = true
+				continue
+			}
+		}
+		if foundInLucy == false {
+			for _ , v := range this.classPath {
+				if p := v + "/" + importName ; new io.File(p).isDirectory() && langtoolsCommon.dirHaveFileType(p , ".class") {
+					realPaths.append(new Resource(ResourceKindJavaPackage,
+							p,
+							importName))
+				}
+				if p := v + "/" + importName + ".class" ; new io.File(p).isFile() {
+					realPaths.append(new Resource(ResourceKindJavaClass,
+							p,
+							importName))
+				}
+			}
+			//
+			for _ , v := range this.classPath {
+				fis := new io.File(v).listFiles()
+				for f := range fis {
+					if f.isFile() && f.getName().endsWith(".jar") {
+						e := this.importExistsInJarFile(v + "/" + f.getName() , importName)
+						if null != e {
+							realPaths.append(e)
+						}
+					}
+				}
+			}
+		}
+		if len(realPaths) == 0 {
+			return null , new error(sprintf("resource '%s' not found" , importName))
+		}
+		realPathMap := new map{string -> []Resource}()
+		for _ , v := range realPaths {
+			if realPathMap.keyExist(v.realPath) {
+				realPathMap[v.realPath].append(v)
+			} else {
+				realPathMap[v.realPath] = []Resource{v}
+			}
+		}
+		if len(realPathMap) > 1 {
+			errMsg := "not 1 resource named '" + importName + "' present:\n"
+			for _ , v := range realPathMap {
+				switch v[0].kind {
+					case ResourceKindJavaClass:
+						errMsg += sprintf("\t in '%s' is a java class\n" , v[0].realPath)
+					case ResourceKindJavaPackage:
+						errMsg += sprintf("\t in '%s' is a java package\n" , v[0].realPath)
+					case ResourceKindLucyClass:
+						errMsg += sprintf("\t in '%s' is a lucy class\n" , v[0].realPath)
+					case ResourceKindLucyPackage:
+						errMsg += sprintf("\t in '%s' is a lucy package\n" , v[0].realPath)
+				}
+			}
+			return null , new error(errMsg)
+		}
+		if realPaths[0].kind == ResourceKindLucyClass {
+			if common.getBaseName(realPaths[0].realPath) == MainClassName {
+				return null , new error(sprintf("%s is special class for global variable and other things" , MainClassName))
+			}
+		}
+		if realPaths[0].kind == ResourceKindJavaClass {
+			c := this.loadClass(realPaths[0])
+			if cc , ok := c.(ast.Class) ; ok {
+				this.setCache(cc.name , cc)
+			}
+			return c , null
+		} else if realPaths[0].kind == ResourceKindLucyClass {
+			t := this.loadClass(realPaths[0])
+			if tt , ok := t.(ast.Class) ; ok {
+				this.setCache(tt.name , tt)
+			}
+			return t , null
+		} else if realPaths[0].kind == ResourceKindJavaPackage {
+			p := this.loadJavaPackage(realPaths[0])
+			if p != null {
+				p.javaPackage = new ast.JavaPackage()
+				this.cacheJavaImports(p.name , p)
+			}
+			return p , null
+		} else {
+			p := this.loadLucyPackage(realPaths[0])
+			if p != null {
+				this.setCache(p.name , p)
+			}
+			return p , null
+		}
+	}
+	/*
         lucy and java have no difference
     */
-    fn loadInterfaces(astClass ast.Class , c cg.Class) {
-        astClass.interfaces = new []ast.Class(len(c.interfaces))
-        for k , v := range c.interfaces {
-            i := new ast.Class()
-            i.name = string(c.constPools[binary.BigEndian.getChar(c.constPools[v].info)].info)
-            i.notImportedYet = true
-            astClass.interfaces[k] = i
-        }
-    }
+	fn loadInterfaces(astClass ast.Class , c cg.Class) {
+		astClass.interfaces = new []ast.Class(len(c.interfaces))
+		for k , v := range c.interfaces {
+			i := new ast.Class()
+			i.name = string(c.constPools[binary.BigEndian.getChar(c.constPools[v].info)].info)
+			i.notImportedYet = true
+			astClass.interfaces[k] = i
+		}
+	}
 
-    public fn loadAsJava(c cg.Class) -> (astClass ast.Class) {
-        if c.isSynthetic() {
-            return
-        }
-        if c.isInnerClass() {
-            return
-        }
-        //name
-        if t := cg.getAttributeByName(c.attributeGroupedByName , cg.AttributeNameSignature) ; t != null && len(t) > 0 {
-            //TODO:: support signature???
-        }
-        astClass = new ast.Class()
-        {
-            nameIndex := binary.BigEndian.getChar(c.constPools[c.thisClass].info)
-            astClass.name = string(c.constPools[nameIndex].info)
-            if astClass.name != ast.JavaRootClass {
-                nameIndex = binary.BigEndian.getChar(c.constPools[c.superClass].info)
-                astClass.superClass = new ast.Class()
-                astClass.superClass.notImportedYet = true
-                astClass.superClass.name = string(c.constPools[nameIndex].info)
-            }
-        }
+	public fn loadAsJava(c cg.Class) -> (astClass ast.Class) {
+		if c.isSynthetic() {
+			return
+		}
+		if c.isInnerClass() {
+			return
+		}
+		//name
+		if t := cg.getAttributeByName(c.attributeGroupedByName , cg.AttributeNameSignature) ; t != null && len(t) > 0 {
+			//TODO:: support signature???
+		}
+		astClass = new ast.Class()
+		{
+			nameIndex := binary.BigEndian.getChar(c.constPools[c.thisClass].info)
+			astClass.name = string(c.constPools[nameIndex].info)
+			if astClass.name != ast.JavaRootClass {
+				nameIndex = binary.BigEndian.getChar(c.constPools[c.superClass].info)
+				astClass.superClass = new ast.Class()
+				astClass.superClass.notImportedYet = true
+				astClass.superClass.name = string(c.constPools[nameIndex].info)
+			}
+		}
 
-        this.loadInterfaces(astClass , c)
-        astClass.accessFlags = c.accessFlags
-        astClass.isJava = true // class compiled from java
-        astClass.fields = new map{string -> ast.ClassField}()
-        astClass.loadFromOutSide = true
-        for _ , v := range c.fields {
-            f := new ast.ClassField()
-            f.accessFlags = v.accessFlags
-            f.jvmDescriptor = string(c.constPools[v.descriptorIndex].info)
-            f.name = string(c.constPools[v.nameIndex].info)
-            _ , f.Type , err := jvm.Descriptor.ParseType(c.constPools[v.descriptorIndex].info)
-            if err != null {
-                panic(err)
-            }
-            astClass.fields[f.name] = f
-        }
-        astClass.methods = new map{string -> []ast.ClassMethod}()
-        for _ , v := range c.methods {
-            m := new ast.ClassMethod()
-            m.Function = new ast.Function()
-            m.Function.name = string(c.constPools[v.nameIndex].info)
-            m.Function.jvmDescriptor = string(c.constPools[v.descriptorIndex].info)
-            m.Function.accessFlags = v.accessFlags
-            m.Function.Type , err := jvm.Descriptor.ParseFunctionType([]byte(m.Function.jvmDescriptor))
-            if err != null {
-                panic(err)
-            }
-            if t := v.getAttributeByName(cg.AttributeNameMethodParameters) ; t != null && len(t) > 0 {
-                parseMethodParameter(c , t[0].info , m.Function)
-            }
-            if (v.accessFlags & cg.AccMethodVarargs) != 0 {
-                m.Function.Type.vArgs = m.Function.Type.parameterList[len(m.Function.Type.parameterList) - 1]
-                if m.Function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
-                    panic("variable args is not array")
-                }
-                m.Function.Type.vArgs.Type.isVariableArgs = true
-                m.Function.Type.parameterList = m.Function.Type.parameterList[:len(m.Function.Type.parameterList) - 1]
-            }
-            if astClass.methods[m.Function.name] == null {
-                astClass.methods[m.Function.name] = []ast.ClassMethod{m}
-            } else {
-                astClass.methods[m.Function.name].append(m)
-            }
-        }
-    }
+		this.loadInterfaces(astClass , c)
+		astClass.accessFlags = c.accessFlags
+		astClass.isJava = true // class compiled from java
+		astClass.fields = new map{string -> ast.ClassField}()
+		astClass.loadFromOutSide = true
+		for _ , v := range c.fields {
+			f := new ast.ClassField()
+			f.accessFlags = v.accessFlags
+			f.jvmDescriptor = string(c.constPools[v.descriptorIndex].info)
+			f.name = string(c.constPools[v.nameIndex].info)
+			_ , f.Type , err := jvm.Descriptor.ParseType(c.constPools[v.descriptorIndex].info)
+			if err != null {
+				panic(err)
+			}
+			astClass.fields[f.name] = f
+		}
+		astClass.methods = new map{string -> []ast.ClassMethod}()
+		for _ , v := range c.methods {
+			m := new ast.ClassMethod()
+			m.Function = new ast.Function()
+			m.Function.name = string(c.constPools[v.nameIndex].info)
+			m.Function.jvmDescriptor = string(c.constPools[v.descriptorIndex].info)
+			m.Function.accessFlags = v.accessFlags
+			m.Function.Type , err := jvm.Descriptor.ParseFunctionType([]byte(m.Function.jvmDescriptor))
+			if err != null {
+				panic(err)
+			}
+			if t := v.getAttributeByName(cg.AttributeNameMethodParameters) ; t != null && len(t) > 0 {
+				parseMethodParameter(c , t[0].info , m.Function)
+			}
+			if (v.accessFlags & cg.AccMethodVarargs) != 0 {
+				m.Function.Type.vArgs = m.Function.Type.parameterList[len(m.Function.Type.parameterList) - 1]
+				if m.Function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
+					panic("variable args is not array")
+				}
+				m.Function.Type.vArgs.Type.isVariableArgs = true
+				m.Function.Type.parameterList = m.Function.Type.parameterList[:len(m.Function.Type.parameterList) - 1]
+			}
+			if astClass.methods[m.Function.name] == null {
+				astClass.methods[m.Function.name] = []ast.ClassMethod{m}
+			} else {
+				astClass.methods[m.Function.name].append(m)
+			}
+		}
+	}
 
-    fn loadAsLucy(c cg.Class) -> (astClass ast.Class) {
-        if c.isSynthetic() {
-            return
-        }
-        if c.isInnerClass() {
-            return
-        }
-        //name
-        astClass = new ast.Class()
-        {
-            nameIndex := binary.BigEndian.getChar(c.constPools[c.thisClass].info)
-            astClass.name = string(c.constPools[nameIndex].info)
-            if astClass.name != ast.JavaRootClass {
-                nameIndex = binary.BigEndian.getChar(c.constPools[c.superClass].info)
-                astClass.superClass = new ast.Class()
-                astClass.superClass.notImportedYet = true
-                astClass.superClass.name = string(c.constPools[nameIndex].info)
-            }
-        }
+	fn loadAsLucy(c cg.Class) -> (astClass ast.Class) {
+		if c.isSynthetic() {
+			return
+		}
+		if c.isInnerClass() {
+			return
+		}
+		//name
+		astClass = new ast.Class()
+		{
+			nameIndex := binary.BigEndian.getChar(c.constPools[c.thisClass].info)
+			astClass.name = string(c.constPools[nameIndex].info)
+			if astClass.name != ast.JavaRootClass {
+				nameIndex = binary.BigEndian.getChar(c.constPools[c.superClass].info)
+				astClass.superClass = new ast.Class()
+				astClass.superClass.notImportedYet = true
+				astClass.superClass.name = string(c.constPools[nameIndex].info)
+			}
+		}
 
-        this.loadInterfaces(astClass , c)
-        astClass.accessFlags = c.accessFlags
-        astClass.loadFromOutSide = true
-        astClass.fields = new map{string -> ast.ClassField}()
-        if t := cg.getAttributeByName(c.attributeGroupedByName , cg.AttributeNameLucyClassConst) ; len(t) > 0 {
-            attr := cg.AttributeLucyClassConst.fromBs(c , t[0].info)
-            var t ast.Type
-            var err error
-            for _ , v := range attr.constants {
-                _ , t , err = jvm.LucyFieldSignature.decode([]byte(v.descriptor))
-                if err != null {
-                    panic(err)
-                }
-                constant := new ast.Constant()
-                constant.name = v.name
-                constant.Type = t
-                constant.boolValue , constant.longValue , constant.doubleValue , constant.stringValue =
-                    this.loadConst(c , v.valueIndex , t)
-                if astClass.block.constants == null {
-                    astClass.block.constants = new map{string -> ast.Constant}()
-                }
-                astClass.block.constants[v.name] = constant
-            }
-        }
-        for _ , v := range c.fields {
-            f := new ast.ClassField()
-            f.name = string(c.constPools[v.nameIndex].info)
-            f.jvmDescriptor = string(c.constPools[v.descriptorIndex].info)
-            _ , f.Type , err := jvm.Descriptor.ParseType(c.constPools[v.descriptorIndex].info)
-            if err != null {
-                panic(err)
-            }
-            if t := cg.getAttributeByName(v.attributeGroupedByName , cg.AttributeNameLucyFieldDescriptor) ; t != null && len(t) > 0 {
-                d := cg.AttributeLucyFieldDescriptor.fromBs(c , t[0].info)
-                _ , f.Type , err = jvm.LucyFieldSignature.decode([]byte(d.descriptor))
-                if err != null {
-                    panic(err)
-                }
-                if f.Type.Type == ast.VariableTypeFunction && d.methodAccessFlag & cg.AccMethodVarargs != 0 {
-                    if f.Type.theFunctionType.parameterList[len(f.Type.theFunctionType.parameterList) - 1].Type.Type !=
-                        ast.VariableTypeJavaArray {
-                        panic("not a java array")
-                    }
-                    f.Type.theFunctionType.vArgs = f.Type.theFunctionType.parameterList[len(f.Type.theFunctionType.parameterList) - 1]
-                    f.Type.theFunctionType.vArgs.Type.isVariableArgs = true
-                    f.Type.theFunctionType.parameterList = f.Type.theFunctionType.parameterList[:len(f.Type.theFunctionType.parameterList) - 1]
-                }
-            }
-            if f.Type.Type == ast.VariableTypeEnum {
-                loadEnumVariableType(this , f.Type)
-            }
-            f.accessFlags = v.accessFlags
-            astClass.fields[f.name] = f
-        }
-        astClass.methods = new map{string -> []ast.ClassMethod}()
-        for _ , v := range c.methods {
-            m := new ast.ClassMethod()
-            m.Function = new ast.Function()
-            m.Function.name = string(c.constPools[v.nameIndex].info)
-            m.Function.Type , err := jvm.Descriptor.ParseFunctionType(c.constPools[v.descriptorIndex].info)
-            if err != null {
-                panic(err)
-            }
-            m.Function.accessFlags = v.accessFlags
-            m.Function.jvmDescriptor = string(c.constPools[v.descriptorIndex].info)
-            if t := v.getAttributeByName(cg.AttributeNameLucyMethodDescriptor) ; t != null && len(t) > 0 {
-                index := binary.BigEndian.getChar(t[0].info)
-                _ , err = jvm.LucyMethodSignature.decode(m.Function.Type , c.constPools[index].info)
-                if err != null {
-                    panic(err)
-                }
-            }
-            if t := v.getAttributeByName(cg.AttributeNameLucyDefaultParameters) ; t != null && len(t) > 0 {
-                dp := new cg.AttributeDefaultParameters()
-                dp.fromBytes(t[0].info)
-                jvm.DefaultValueParse.decode(c , m.Function , dp)
-            }
-            if t := v.getAttributeByName(cg.AttributeNameMethodParameters) ; t != null && len(t) > 0 {
-                parseMethodParameter(c , t[0].info , m.Function)
-            }
-            if t := v.getAttributeByName(cg.AttributeNameLucyReturnListNames) ; t != null && len(t) > 0 {
-                parseReturnListNames(c , t[0].info , m.Function)
-            }
-            loadEnumForFunction(this , m.Function)
-            if (v.accessFlags & cg.AccMethodVarargs) != 0 {
-                m.Function.Type.vArgs = m.Function.Type.parameterList[len(m.Function.Type.parameterList) - 1]
-                if m.Function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
-                    panic("variable args is not array")
-                }
-                m.Function.Type.vArgs.Type.isVariableArgs = true
-                m.Function.Type.parameterList = m.Function.Type.parameterList[:len(m.Function.Type.parameterList) - 1]
-            }
-            if astClass.methods[m.Function.name] == null {
-                astClass.methods[m.Function.name] = []ast.ClassMethod{m}
-            } else {
-                astClass.methods[m.Function.name].append(m)
-            }
-        }
-        return astClass
-    }
+		this.loadInterfaces(astClass , c)
+		astClass.accessFlags = c.accessFlags
+		astClass.loadFromOutSide = true
+		astClass.fields = new map{string -> ast.ClassField}()
+		if t := cg.getAttributeByName(c.attributeGroupedByName , cg.AttributeNameLucyClassConst) ; len(t) > 0 {
+			attr := cg.AttributeLucyClassConst.fromBs(c , t[0].info)
+			var t ast.Type
+			var err error
+			for _ , v := range attr.constants {
+				_ , t , err = jvm.LucyFieldSignature.decode([]byte(v.descriptor))
+				if err != null {
+					panic(err)
+				}
+				constant := new ast.Constant()
+				constant.name = v.name
+				constant.Type = t
+				constant.boolValue , constant.longValue , constant.doubleValue , constant.stringValue =
+					this.loadConst(c , v.valueIndex , t)
+				if astClass.block.constants == null {
+					astClass.block.constants = new map{string -> ast.Constant}()
+				}
+				astClass.block.constants[v.name] = constant
+			}
+		}
+		for _ , v := range c.fields {
+			f := new ast.ClassField()
+			f.name = string(c.constPools[v.nameIndex].info)
+			f.jvmDescriptor = string(c.constPools[v.descriptorIndex].info)
+			_ , f.Type , err := jvm.Descriptor.ParseType(c.constPools[v.descriptorIndex].info)
+			if err != null {
+				panic(err)
+			}
+			if t := cg.getAttributeByName(v.attributeGroupedByName , cg.AttributeNameLucyFieldDescriptor) ; t != null && len(t) > 0 {
+				d := cg.AttributeLucyFieldDescriptor.fromBs(c , t[0].info)
+				_ , f.Type , err = jvm.LucyFieldSignature.decode([]byte(d.descriptor))
+				if err != null {
+					panic(err)
+				}
+				if f.Type.Type == ast.VariableTypeFunction && d.methodAccessFlag & cg.AccMethodVarargs != 0 {
+					if f.Type.theFunctionType.parameterList[len(f.Type.theFunctionType.parameterList) - 1].Type.Type !=
+						ast.VariableTypeJavaArray {
+						panic("not a java array")
+					}
+					f.Type.theFunctionType.vArgs = f.Type.theFunctionType.parameterList[len(f.Type.theFunctionType.parameterList) - 1]
+					f.Type.theFunctionType.vArgs.Type.isVariableArgs = true
+					f.Type.theFunctionType.parameterList = f.Type.theFunctionType.parameterList[:len(f.Type.theFunctionType.parameterList) - 1]
+				}
+			}
+			if f.Type.Type == ast.VariableTypeEnum {
+				loadEnumVariableType(this , f.Type)
+			}
+			f.accessFlags = v.accessFlags
+			astClass.fields[f.name] = f
+		}
+		astClass.methods = new map{string -> []ast.ClassMethod}()
+		for _ , v := range c.methods {
+			m := new ast.ClassMethod()
+			m.Function = new ast.Function()
+			m.Function.name = string(c.constPools[v.nameIndex].info)
+			m.Function.Type , err := jvm.Descriptor.ParseFunctionType(c.constPools[v.descriptorIndex].info)
+			if err != null {
+				panic(err)
+			}
+			m.Function.accessFlags = v.accessFlags
+			m.Function.jvmDescriptor = string(c.constPools[v.descriptorIndex].info)
+			if t := v.getAttributeByName(cg.AttributeNameLucyMethodDescriptor) ; t != null && len(t) > 0 {
+				index := binary.BigEndian.getChar(t[0].info)
+				_ , err = jvm.LucyMethodSignature.decode(m.Function.Type , c.constPools[index].info)
+				if err != null {
+					panic(err)
+				}
+			}
+			if t := v.getAttributeByName(cg.AttributeNameLucyDefaultParameters) ; t != null && len(t) > 0 {
+				dp := new cg.AttributeDefaultParameters()
+				dp.fromBytes(t[0].info)
+				jvm.DefaultValueParse.decode(c , m.Function , dp)
+			}
+			if t := v.getAttributeByName(cg.AttributeNameMethodParameters) ; t != null && len(t) > 0 {
+				parseMethodParameter(c , t[0].info , m.Function)
+			}
+			if t := v.getAttributeByName(cg.AttributeNameLucyReturnListNames) ; t != null && len(t) > 0 {
+				parseReturnListNames(c , t[0].info , m.Function)
+			}
+			loadEnumForFunction(this , m.Function)
+			if (v.accessFlags & cg.AccMethodVarargs) != 0 {
+				m.Function.Type.vArgs = m.Function.Type.parameterList[len(m.Function.Type.parameterList) - 1]
+				if m.Function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
+					panic("variable args is not array")
+				}
+				m.Function.Type.vArgs.Type.isVariableArgs = true
+				m.Function.Type.parameterList = m.Function.Type.parameterList[:len(m.Function.Type.parameterList) - 1]
+			}
+			if astClass.methods[m.Function.name] == null {
+				astClass.methods[m.Function.name] = []ast.ClassMethod{m}
+			} else {
+				astClass.methods[m.Function.name].append(m)
+			}
+		}
+		return astClass
+	}
 
-    fn loadLucyEnum(c cg.Class) -> (e ast.Enum) {
-        e = new ast.Enum()
-        {
-            nameIndex := binary.BigEndian.getChar(c.constPools[c.thisClass].info)
-            e.name = string(c.constPools[nameIndex].info)
-        }
-        e.loadFromOutSide = true
-        e.accessFlags = c.accessFlags
-        e.enums = []ast.EnumName{}
-        for _ , v := range c.fields {
-            en := new ast.EnumName()
-            name := string(c.constPools[v.nameIndex].info)
-            en.name = name
-            en.Enum = e
-            constValue := v.attributeGroupedByName[cg.AttributeNameConstValue][0] // must have this attribute
-            en.value = int(binary.BigEndian.getInt(c.constPools[binary.BigEndian.getChar(constValue.info)].info))
-            e.enums.append(en)
-        }
-        return e
-    }
+	fn loadLucyEnum(c cg.Class) -> (e ast.Enum) {
+		e = new ast.Enum()
+		{
+			nameIndex := binary.BigEndian.getChar(c.constPools[c.thisClass].info)
+			e.name = string(c.constPools[nameIndex].info)
+		}
+		e.loadFromOutSide = true
+		e.accessFlags = c.accessFlags
+		e.enums = []ast.EnumName{}
+		for _ , v := range c.fields {
+			en := new ast.EnumName()
+			name := string(c.constPools[v.nameIndex].info)
+			en.name = name
+			en.Enum = e
+			constValue := v.attributeGroupedByName[cg.AttributeNameConstValue][0] // must have this attribute
+			en.value = int(binary.BigEndian.getInt(c.constPools[binary.BigEndian.getChar(constValue.info)].info))
+			e.enums.append(en)
+		}
+		return e
+	}
 
-    fn loadConst(c cg.Class , nameIndex char , t ast.Type) -> (boolValue bool , longValue long , doubleValue double , stringValue string) {
-        switch t.Type {
-            case ast.VariableTypeBool:
-                boolValue = binary.BigEndian.getInt(c.constPools[nameIndex].info) != 0
-                return
-            case ast.VariableTypeByte,
-                ast.VariableTypeShort,
-                ast.VariableTypeChar,
-                ast.VariableTypeInt:
-                longValue = long(binary.BigEndian.getInt(c.constPools[nameIndex].info))
-                return
-            case ast.VariableTypeLong:
-                longValue = long(binary.BigEndian.getLong(c.constPools[nameIndex].info))
-                return
-            case ast.VariableTypeFloat , ast.VariableTypeDouble:
-                doubleValue = double(binary.BigEndian.getLong(c.constPools[nameIndex].info))
-                return
-            case ast.VariableTypeString:
-                valueIndex := binary.BigEndian.getChar(c.constPools[nameIndex].info)
-                stringValue = string(c.constPools[valueIndex].info)
-                return
-        }
-    }
+	fn loadConst(c cg.Class , nameIndex char , t ast.Type) -> (boolValue bool , longValue long , doubleValue double , stringValue string) {
+		switch t.Type {
+			case ast.VariableTypeBool:
+				boolValue = binary.BigEndian.getInt(c.constPools[nameIndex].info) != 0
+				return
+			case ast.VariableTypeByte,
+				ast.VariableTypeShort,
+				ast.VariableTypeChar,
+				ast.VariableTypeInt:
+				longValue = long(binary.BigEndian.getInt(c.constPools[nameIndex].info))
+				return
+			case ast.VariableTypeLong:
+				longValue = long(binary.BigEndian.getLong(c.constPools[nameIndex].info))
+				return
+			case ast.VariableTypeFloat , ast.VariableTypeDouble:
+				doubleValue = double(binary.BigEndian.getLong(c.constPools[nameIndex].info))
+				return
+			case ast.VariableTypeString:
+				valueIndex := binary.BigEndian.getChar(c.constPools[nameIndex].info)
+				stringValue = string(c.constPools[valueIndex].info)
+				return
+		}
+	}
 
-    fn loadLucyMainClass(pack ast.Package , c cg.Class) {
-        mainClass := new cg.ClassHighLevel(char(0) , char(0))
-        mainClass.name = pack.name + "/main"
-        pack.block.variables = new map{string -> ast.Variable}()
-        pack.block.constants = new map{string -> ast.Constant}()
-        pack.block.functions = new map{string -> ast.Function}()
-        for _ , f := range c.fields {
-            name := string(c.constPools[f.nameIndex].info)
-            constValue := f.getAttributeByName(cg.AttributeNameConstValue)
-            if len(constValue) > 1 {
-                panic(sprintf("constant value length greater than  1 at class 'main'  field '%s'" , name))
-            }
-            _ , typ , err := jvm.Descriptor.ParseType(c.constPools[f.descriptorIndex].info)
-            if err != null {
-                panic(err)
-            }
-            if len(f.getAttributeByName(cg.AttributeNameLucyConst)) > 0 {
-                //const
-                constant := new ast.Constant()
-                constant.name = name
-                constant.accessFlags = f.accessFlags
-                constant.Type = typ
-                _ , constant.Type , err = jvm.Descriptor.ParseType(c.constPools[f.descriptorIndex].info)
-                if err != null {
-                    panic(err)
-                }
-                valueIndex := binary.BigEndian.getChar(constValue[0].info)
-                constant.boolValue , constant.longValue , constant.doubleValue , constant.stringValue =
-                    this.loadConst(c , valueIndex , constant.Type)
-                pack.block.constants[name] = constant
-            } else {
-                //global vars
-                vd := new ast.Variable()
-                vd.name = name
-                vd.accessFlags = f.accessFlags
-                vd.jvmDescriptor = string(c.constPools[f.descriptorIndex].info)
-                vd.Type = typ
-                vd.isGlobal = true
-                pack.block.variables[name] = vd
-                if t := f.getAttributeByName(cg.AttributeNameLucyFieldDescriptor) ; t != null && len(t) > 0 {
-                    d := cg.AttributeLucyFieldDescriptor.fromBs(c , t[0].info)
-                    _ , vd.Type , err = jvm.LucyFieldSignature.decode([]byte(d.descriptor))
-                    if err != null {
-                        panic(err)
-                    }
-                    if vd.Type.Type == ast.VariableTypeFunction && d.methodAccessFlag & cg.AccMethodVarargs != 0 {
-                        if vd.Type.theFunctionType.parameterList[len(vd.Type.theFunctionType.parameterList) - 1].Type.Type !=
-                            ast.VariableTypeJavaArray {
-                            panic("not a java array")
-                        }
-                        vd.Type.theFunctionType.vArgs =
-                            vd.Type.theFunctionType.parameterList[len(vd.Type.theFunctionType.parameterList) - 1]
-                        vd.Type.theFunctionType.vArgs.Type.isVariableArgs = true
-                        vd.Type.theFunctionType.parameterList =
-                            vd.Type.theFunctionType.parameterList[:len(vd.Type.theFunctionType.parameterList) - 1]
-                    }
-                }
-                if typ.Type == ast.VariableTypeEnum {
-                    loadEnumVariableType(this , typ)
-                }
-            }
-        }
-        for _ , m := range c.methods {
-            name := string(c.constPools[m.nameIndex].info)
-            if name == ast.MainFunctionName  || name == ast.SpecialMethodInit || name  == ast.ClassInitMethod{
-                // this is main function
-                continue
-            }
-            if t := m.getAttributeByName(cg.AttributeNameLucyTriggerPackageInitMethod) ; len(t) > 0 {
-                pack.packageInitMethod = name
-                continue
-            }
-            function := new ast.Function()
-            function.name = name
-            function.accessFlags = m.accessFlags
-            function.jvmDescriptor = string(c.constPools[m.descriptorIndex].info)
-            function.Type , err := jvm.Descriptor.ParseFunctionType(c.constPools[m.descriptorIndex].info)
-            if err != null {
-                panic(err)
-            }
-            if t := m.getAttributeByName(cg.AttributeNameLucyMethodDescriptor) ; t != null && len(t) > 0 {
-                index := binary.BigEndian.getChar(t[0].info)
-                _ , err := jvm.LucyMethodSignature.decode(function.Type , c.constPools[index].info)
-                if err != null {
-                    panic(err)
-                }
-            }
-            loadEnumForFunction(this , function)
-            if t := m.getAttributeByName(cg.AttributeNameMethodParameters) ; t != null && len(t) > 0 {
-                parseMethodParameter(c , t[0].info , function)
-            }
-            if t := m.getAttributeByName(cg.AttributeNameLucyReturnListNames) ; t != null && len(t) > 0 {
-                parseReturnListNames(c , t[0].info , function)
-            }
-            if t := m.getAttributeByName(cg.AttributeNameLucyDefaultParameters) ; t != null && len(t) > 0 {
-                dp := new cg.AttributeDefaultParameters()
-                dp.fromBytes(t[0].info)
-                jvm.DefaultValueParse.decode(c , function , dp)
-            }
-            if (function.accessFlags & cg.AccMethodVarargs) != 0 {
-                function.Type.vArgs = function.Type.parameterList[len(function.Type.parameterList) - 1]
-                if function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
-                    panic("variable args is not array")
-                }
-                function.Type.vArgs.Type.isVariableArgs = true
-                function.Type.parameterList = function.Type.parameterList[:len(function.Type.parameterList) - 1]
-            }
-            function.entrance = new cg.MethodHighLevel()
-            function.entrance.name = function.name
-            function.entrance.classHighLevel = mainClass
-            function.entrance.descriptor = function.jvmDescriptor
-            function.isGlobal = true
-            pack.block.functions[name] = function
-        }
+	fn loadLucyMainClass(pack ast.Package , c cg.Class) {
+		mainClass := new cg.ClassHighLevel(char(0) , char(0))
+		mainClass.name = pack.name + "/main"
+		pack.block.variables = new map{string -> ast.Variable}()
+		pack.block.constants = new map{string -> ast.Constant}()
+		pack.block.functions = new map{string -> ast.Function}()
+		for _ , f := range c.fields {
+			name := string(c.constPools[f.nameIndex].info)
+			constValue := f.getAttributeByName(cg.AttributeNameConstValue)
+			if len(constValue) > 1 {
+				panic(sprintf("constant value length greater than  1 at class 'main'  field '%s'" , name))
+			}
+			_ , typ , err := jvm.Descriptor.ParseType(c.constPools[f.descriptorIndex].info)
+			if err != null {
+				panic(err)
+			}
+			if len(f.getAttributeByName(cg.AttributeNameLucyConst)) > 0 {
+				//const
+				constant := new ast.Constant()
+				constant.name = name
+				constant.accessFlags = f.accessFlags
+				constant.Type = typ
+				_ , constant.Type , err = jvm.Descriptor.ParseType(c.constPools[f.descriptorIndex].info)
+				if err != null {
+					panic(err)
+				}
+				valueIndex := binary.BigEndian.getChar(constValue[0].info)
+				constant.boolValue , constant.longValue , constant.doubleValue , constant.stringValue =
+					this.loadConst(c , valueIndex , constant.Type)
+				pack.block.constants[name] = constant
+			} else {
+				//global vars
+				vd := new ast.Variable()
+				vd.name = name
+				vd.accessFlags = f.accessFlags
+				vd.jvmDescriptor = string(c.constPools[f.descriptorIndex].info)
+				vd.Type = typ
+				vd.isGlobal = true
+				pack.block.variables[name] = vd
+				if t := f.getAttributeByName(cg.AttributeNameLucyFieldDescriptor) ; t != null && len(t) > 0 {
+					d := cg.AttributeLucyFieldDescriptor.fromBs(c , t[0].info)
+					_ , vd.Type , err = jvm.LucyFieldSignature.decode([]byte(d.descriptor))
+					if err != null {
+						panic(err)
+					}
+					if vd.Type.Type == ast.VariableTypeFunction && d.methodAccessFlag & cg.AccMethodVarargs != 0 {
+						if vd.Type.theFunctionType.parameterList[len(vd.Type.theFunctionType.parameterList) - 1].Type.Type !=
+							ast.VariableTypeJavaArray {
+							panic("not a java array")
+						}
+						vd.Type.theFunctionType.vArgs =
+							vd.Type.theFunctionType.parameterList[len(vd.Type.theFunctionType.parameterList) - 1]
+						vd.Type.theFunctionType.vArgs.Type.isVariableArgs = true
+						vd.Type.theFunctionType.parameterList =
+							vd.Type.theFunctionType.parameterList[:len(vd.Type.theFunctionType.parameterList) - 1]
+					}
+				}
+				if typ.Type == ast.VariableTypeEnum {
+					loadEnumVariableType(this , typ)
+				}
+			}
+		}
+		for _ , m := range c.methods {
+			name := string(c.constPools[m.nameIndex].info)
+			if name == ast.MainFunctionName || name == ast.SpecialMethodInit || name == ast.ClassInitMethod {
+				// this is main function
+				continue
+			}
+			if t := m.getAttributeByName(cg.AttributeNameLucyTriggerPackageInitMethod) ; len(t) > 0 {
+				pack.packageInitMethod = name
+				continue
+			}
+			function := new ast.Function()
+			function.name = name
+			function.accessFlags = m.accessFlags
+			function.jvmDescriptor = string(c.constPools[m.descriptorIndex].info)
+			function.Type , err := jvm.Descriptor.ParseFunctionType(c.constPools[m.descriptorIndex].info)
+			if err != null {
+				panic(err)
+			}
+			if t := m.getAttributeByName(cg.AttributeNameLucyMethodDescriptor) ; t != null && len(t) > 0 {
+				index := binary.BigEndian.getChar(t[0].info)
+				_ , err := jvm.LucyMethodSignature.decode(function.Type , c.constPools[index].info)
+				if err != null {
+					panic(err)
+				}
+			}
+			loadEnumForFunction(this , function)
+			if t := m.getAttributeByName(cg.AttributeNameMethodParameters) ; t != null && len(t) > 0 {
+				parseMethodParameter(c , t[0].info , function)
+			}
+			if t := m.getAttributeByName(cg.AttributeNameLucyReturnListNames) ; t != null && len(t) > 0 {
+				parseReturnListNames(c , t[0].info , function)
+			}
+			if t := m.getAttributeByName(cg.AttributeNameLucyDefaultParameters) ; t != null && len(t) > 0 {
+				dp := new cg.AttributeDefaultParameters()
+				dp.fromBytes(t[0].info)
+				jvm.DefaultValueParse.decode(c , function , dp)
+			}
+			if (function.accessFlags & cg.AccMethodVarargs) != 0 {
+				function.Type.vArgs = function.Type.parameterList[len(function.Type.parameterList) - 1]
+				if function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
+					panic("variable args is not array")
+				}
+				function.Type.vArgs.Type.isVariableArgs = true
+				function.Type.parameterList = function.Type.parameterList[:len(function.Type.parameterList) - 1]
+			}
+			function.entrance = new cg.MethodHighLevel()
+			function.entrance.name = function.name
+			function.entrance.classHighLevel = mainClass
+			function.entrance.descriptor = function.jvmDescriptor
+			function.isGlobal = true
+			pack.block.functions[name] = function
+		}
 
-        if pack.block.typeAliases == null {
-            pack.block.typeAliases = new map{string -> ast.Type}()
-        }
-        for _ , v := range c.getAttributeByName(cg.AttributeNameLucyTypeAlias) {
-            attr := cg.AttributeLucyTypeAlias.fromBs(c , v.info)
-            name , typ , err := jvm.LucyTypeAlias.decode([]byte(attr.alias))
-            if err != null {
-                panic(err)
-            }
-            alias := new ast.TypeAlias()
-            alias.name = name
-            alias.comment = attr.comment
-            typ.theAlias = alias
-            pack.block.typeAliases[name] = typ
-            if typ.Type == ast.VariableTypeEnum {
-                loadEnumVariableType(this , typ)
-            }
-        }
-        for _ , v := range c.getAttributeByName(cg.AttributeNameLucyTemplateFunction) {
-            attr := new cg.AttributeTemplateFunction()
-            attr.fromBytes(c , v.info)
-            pos := new ast.Pos()
-            pos.filename = attr.filename
-            pos.endLine = int(attr.startLine)
-            pos.endColumnOffset = int(attr.startColumn)
-            f , es := ast.parseFunctionHandler([]byte(attr.code) , pos)
-            if len(es) > 0 {
-                panic(es[0])
-            }
-            f.sourceCode = []byte(attr.code)
-            f.accessFlags = attr.accessFlags
-            f.templateFunction = new ast.TemplateFunction()
-            pack.block.functions[attr.name] = f
-        }
-    }
+		if pack.block.typeAliases == null {
+			pack.block.typeAliases = new map{string -> ast.Type}()
+		}
+		for _ , v := range c.getAttributeByName(cg.AttributeNameLucyTypeAlias) {
+			attr := cg.AttributeLucyTypeAlias.fromBs(c , v.info)
+			name , typ , err := jvm.LucyTypeAlias.decode([]byte(attr.alias))
+			if err != null {
+				panic(err)
+			}
+			alias := new ast.TypeAlias()
+			alias.name = name
+			alias.comment = attr.comment
+			typ.theAlias = alias
+			pack.block.typeAliases[name] = typ
+			if typ.Type == ast.VariableTypeEnum {
+				loadEnumVariableType(this , typ)
+			}
+		}
+		for _ , v := range c.getAttributeByName(cg.AttributeNameLucyTemplateFunction) {
+			attr := new cg.AttributeTemplateFunction()
+			attr.fromBytes(c , v.info)
+			pos := new ast.Pos()
+			pos.filename = attr.filename
+			pos.endLine = int(attr.startLine)
+			pos.endColumnOffset = int(attr.startColumn)
+			f , es := ast.parseFunctionHandler([]byte(attr.code) , pos)
+			if len(es) > 0 {
+				panic(es[0])
+			}
+			f.sourceCode = []byte(attr.code)
+			f.accessFlags = attr.accessFlags
+			f.templateFunction = new ast.TemplateFunction()
+			pack.block.functions[attr.name] = f
+		}
+	}
 
-    fn loadLucyPackage(r Resource) -> (p ast.Package) {
-        fis := new io.File(r.realPath).list()
-        fisM := new map{string -> bool}()
-        for _ , v := range fis {
-            if v.endsWith(".class") {
-                fisM[v] = true
-            }
-        }
-        if false == fisM.keyExist(MainClassName) {
-            panic(sprintf("main class not found"))
-        }
-        bs , _ := os.readFile(r.realPath + "/" + MainClassName)
-        c := (new cg.ClassDecoder(javaArray2Lucy(bs))).decode()
-        p = new ast.Package(r.name , true , null)
-        this.loadLucyMainClass(p , c)
-        fisM.remove(MainClassName)
-        fn mkEnums(e ast.Enum) {
-            if p.block.enums == null {
-                p.block.enums = new map{string -> ast.Enum}()
-            }
-            if p.block.enumNames == null {
-                p.block.enumNames = new map{string -> ast.EnumName}()
-            }
-            p.block.enums[common.getBaseName(e.name)] = e
-            for _ , v := range e.enums {
-                p.block.enumNames[v.name] = v
-            }
-        }
-        for name , _ := range fisM {
-            b , _ := os.readFile(r.realPath + "/" + name)
-            classFile := new cg.ClassDecoder(javaArray2Lucy(b)).decode()
-            if len(classFile.getAttributeByName(cg.AttributeNameLucyEnum)) > 0 {
-                e := this.loadLucyEnum(classFile)
-                mkEnums(e)
-                continue
-            }
-            if t := classFile.getAttributeByName(cg.AttributeNameLucyGlobalFunction) ; len(t) > 0 {
-                fs := this.loadLucyGlobalFunction(classFile)
-                if p.block.functions == null {
-                    p.block.functions = new map{string -> ast.Function}()
-                }
-                for f := range fs {
-                    p.block.functions[f.name] = f
-                }
-                continue
-            }
-            c := this.loadAsLucy(classFile)
-            if c != null {
-                if p.block.classes == null {
-                    p.block.classes = new map{string -> ast.Class}()
-                }
-                this.caches[c.name] = c
-                p.block.classes[common.getBaseName(common.getBaseName(c.name))] = c
-            }
-        }
-    }
+	fn loadLucyPackage(r Resource) -> (p ast.Package) {
+		fis := new io.File(r.realPath).list()
+		fisM := new map{string -> bool}()
+		for _ , v := range fis {
+			if v.endsWith(".class") {
+				fisM[v] = true
+			}
+		}
+		if false == fisM.keyExist(MainClassName) {
+			panic(sprintf("main class not found"))
+		}
+		bs , _ := os.readFile(r.realPath + "/" + MainClassName)
+		c := (new cg.ClassDecoder(javaArray2Lucy(bs))).decode()
+		p = new ast.Package(r.name , true , null)
+		this.loadLucyMainClass(p , c)
+		fisM.remove(MainClassName)
+		fn mkEnums(e ast.Enum) {
+			if p.block.enums == null {
+				p.block.enums = new map{string -> ast.Enum}()
+			}
+			if p.block.enumNames == null {
+				p.block.enumNames = new map{string -> ast.EnumName}()
+			}
+			p.block.enums[common.getBaseName(e.name)] = e
+			for _ , v := range e.enums {
+				p.block.enumNames[v.name] = v
+			}
+		}
+		for name , _ := range fisM {
+			b , _ := os.readFile(r.realPath + "/" + name)
+			classFile := new cg.ClassDecoder(javaArray2Lucy(b)).decode()
+			if len(classFile.getAttributeByName(cg.AttributeNameLucyEnum)) > 0 {
+				e := this.loadLucyEnum(classFile)
+				mkEnums(e)
+				continue
+			}
+			if t := classFile.getAttributeByName(cg.AttributeNameLucyGlobalFunction) ; len(t) > 0 {
+				fs := this.loadLucyGlobalFunction(classFile)
+				if p.block.functions == null {
+					p.block.functions = new map{string -> ast.Function}()
+				}
+				for f := range fs {
+					p.block.functions[f.name] = f
+				}
+				continue
+			}
+			c := this.loadAsLucy(classFile)
+			if c != null {
+				if p.block.classes == null {
+					p.block.classes = new map{string -> ast.Class}()
+				}
+				this.caches[c.name] = c
+				p.block.classes[common.getBaseName(common.getBaseName(c.name))] = c
+			}
+		}
+	}
 
-    public fn loadLucyGlobalFunction(c cg.Class) -> (fs []ast.Function = []ast.Function{}) {
-        cc := new cg.ClassHighLevel(char(0) , char(0))
-        cc.name = c.getName()
-        for _ , m := range c.methods {
-            name := string(c.constPools[m.nameIndex].info)
-            if name == ast.MainFunctionName {
-                //this is main function
-                continue
-            }
-            if name == ast.SpecialMethodInit {
-                continue
-            }
-            function := new ast.Function()
-            function.name = name
-            function.accessFlags = m.accessFlags
-            function.jvmDescriptor = string(c.constPools[m.descriptorIndex].info)
-            function.Type , err := jvm.Descriptor.ParseFunctionType(c.constPools[m.descriptorIndex].info)
-            if err != null {
-                panic(err)
-            }
-            if t := m.getAttributeByName(cg.AttributeNameLucyMethodDescriptor) ; t != null && len(t) > 0 {
-                index := binary.BigEndian.getChar(t[0].info)
-                _ , err := jvm.LucyMethodSignature.decode(function.Type , c.constPools[index].info)
-                if err != null {
-                    panic(err)
-                }
-            }
-            loadEnumForFunction(this , function)
-            if t := m.getAttributeByName(cg.AttributeNameMethodParameters) ; t != null && len(t) > 0 {
-                parseMethodParameter(c , t[0].info , function)
-            }
-            if t := m.getAttributeByName(cg.AttributeNameLucyReturnListNames) ; t != null && len(t) > 0 {
-                parseReturnListNames(c , t[0].info , function)
-            }
-            if t := m.getAttributeByName(cg.AttributeNameLucyDefaultParameters) ; t != null && len(t) > 0 {
-                dp := new cg.AttributeDefaultParameters()
-                dp.fromBytes(t[0].info)
-                jvm.DefaultValueParse.decode(c , function , dp)
-            }
-            if (function.accessFlags & cg.AccMethodVarargs) != 0 {
-                function.Type.vArgs = function.Type.parameterList[len(function.Type.parameterList) - 1]
-                if function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
-                    panic("variable args is not array")
-                }
-                function.Type.vArgs.Type.isVariableArgs = true
-                function.Type.parameterList = function.Type.parameterList[:len(function.Type.parameterList) - 1]
-            }
-            function.entrance = new cg.MethodHighLevel()
-            function.entrance.name = function.name
-            function.entrance.classHighLevel = cc
-            function.entrance.descriptor = function.jvmDescriptor
-            function.isGlobal = true
-            fs.append(function)
-        }
-    }
+	public fn loadLucyGlobalFunction(c cg.Class) -> (fs []ast.Function = []ast.Function{}) {
+		cc := new cg.ClassHighLevel(char(0) , char(0))
+		cc.name = c.getName()
+		for _ , m := range c.methods {
+			name := string(c.constPools[m.nameIndex].info)
+			if name == ast.MainFunctionName {
+				//this is main function
+				continue
+			}
+			if name == ast.SpecialMethodInit {
+				continue
+			}
+			function := new ast.Function()
+			function.name = name
+			function.accessFlags = m.accessFlags
+			function.jvmDescriptor = string(c.constPools[m.descriptorIndex].info)
+			function.Type , err := jvm.Descriptor.ParseFunctionType(c.constPools[m.descriptorIndex].info)
+			if err != null {
+				panic(err)
+			}
+			if t := m.getAttributeByName(cg.AttributeNameLucyMethodDescriptor) ; t != null && len(t) > 0 {
+				index := binary.BigEndian.getChar(t[0].info)
+				_ , err := jvm.LucyMethodSignature.decode(function.Type , c.constPools[index].info)
+				if err != null {
+					panic(err)
+				}
+			}
+			loadEnumForFunction(this , function)
+			if t := m.getAttributeByName(cg.AttributeNameMethodParameters) ; t != null && len(t) > 0 {
+				parseMethodParameter(c , t[0].info , function)
+			}
+			if t := m.getAttributeByName(cg.AttributeNameLucyReturnListNames) ; t != null && len(t) > 0 {
+				parseReturnListNames(c , t[0].info , function)
+			}
+			if t := m.getAttributeByName(cg.AttributeNameLucyDefaultParameters) ; t != null && len(t) > 0 {
+				dp := new cg.AttributeDefaultParameters()
+				dp.fromBytes(t[0].info)
+				jvm.DefaultValueParse.decode(c , function , dp)
+			}
+			if (function.accessFlags & cg.AccMethodVarargs) != 0 {
+				function.Type.vArgs = function.Type.parameterList[len(function.Type.parameterList) - 1]
+				if function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
+					panic("variable args is not array")
+				}
+				function.Type.vArgs.Type.isVariableArgs = true
+				function.Type.parameterList = function.Type.parameterList[:len(function.Type.parameterList) - 1]
+			}
+			function.entrance = new cg.MethodHighLevel()
+			function.entrance.name = function.name
+			function.entrance.classHighLevel = cc
+			function.entrance.descriptor = function.jvmDescriptor
+			function.isGlobal = true
+			fs.append(function)
+		}
+	}
 
-    public fn loadJavaPackage(r Resource) -> (p ast.Package) {
-        p = new ast.Package(r.name , true , null)
-        p.block.classes = new map{string -> ast.Class}()
-        if len(r.loadFromJar) == 0 {
-            fis := new io.File(r.realPath).list()
-            for _ , v := range fis {
-                if v.endsWith(".class") == false {
-                    continue
-                }
-                bs , err := os.readFile(r.realPath + "/" + v)
-                if err != null {
-                    panic(err)
-                }
-                c := new cg.ClassDecoder(javaArray2Lucy(bs)).decode()
-                cc := this.loadAsJava(c)
-                if cc != null {
-                    if p.block.classes == null {
-                        p.block.classes = new map{string -> ast.Class}()
-                    }
-                    this.cacheJavaImports(cc.name , cc)
-                    p.block.classes[common.getBaseName(cc.name)] = cc
-                }
-            }
-        } else {
-            for k , v := range r.loadFromJar {
-                if v.getName().endsWith(".class") == false {
-                    continue
-                }
-                c := new cg.ClassDecoder(r.loadFromJarBs[k]).decode()
-                cc := this.loadAsJava(c)
-                if cc != null {
-                    if p.block.classes == null {
-                        p.block.classes = new map{string -> ast.Class}()
-                    }
-                    this.cacheJavaImports(cc.name , cc)
-                    p.block.classes[common.getBaseName(cc.name)] = cc
-                }
-            }
-        }
-    }
+	public fn loadJavaPackage(r Resource) -> (p ast.Package) {
+		p = new ast.Package(r.name , true , null)
+		p.block.classes = new map{string -> ast.Class}()
+		if len(r.loadFromJar) == 0 {
+			fis := new io.File(r.realPath).list()
+			for _ , v := range fis {
+				if v.endsWith(".class") == false {
+					continue
+				}
+				bs , err := os.readFile(r.realPath + "/" + v)
+				if err != null {
+					panic(err)
+				}
+				c := new cg.ClassDecoder(javaArray2Lucy(bs)).decode()
+				cc := this.loadAsJava(c)
+				if cc != null {
+					if p.block.classes == null {
+						p.block.classes = new map{string -> ast.Class}()
+					}
+					this.cacheJavaImports(cc.name , cc)
+					p.block.classes[common.getBaseName(cc.name)] = cc
+				}
+			}
+		} else {
+			for k , v := range r.loadFromJar {
+				if v.getName().endsWith(".class") == false {
+					continue
+				}
+				c := new cg.ClassDecoder(r.loadFromJarBs[k]).decode()
+				cc := this.loadAsJava(c)
+				if cc != null {
+					if p.block.classes == null {
+						p.block.classes = new map{string -> ast.Class}()
+					}
+					this.cacheJavaImports(cc.name , cc)
+					p.block.classes[common.getBaseName(cc.name)] = cc
+				}
+			}
+		}
+	}
 
-    public fn loadClass(r Resource) -> (c Object) {
-        var bs []byte
-        var err error
-        if len(r.loadFromJar) == 0 {
-            var t byte[]
-            t , err = os.readFile(r.realPath)
-            if err != null {
-                return null
-            }
-            bs = javaArray2Lucy(t)
-        } else {
-            bs = r.loadFromJarBs[0]
-        }
-        cc := (new cg.ClassDecoder(bs)).decode()
-        if r.kind == ResourceKindLucyClass {
-            if t := cc.getAttributeByName(cg.AttributeNameLucyEnum) ; len(t) > 0 {
-                return this.loadLucyEnum(cc)
-            } else {
-                return this.loadAsLucy(cc)
-            }
-        }
-        return this.loadAsJava(cc)
-    }
+	public fn loadClass(r Resource) -> (c Object) {
+		var bs []byte
+		var err error
+		if len(r.loadFromJar) == 0 {
+			var t byte[]
+			t , err = os.readFile(r.realPath)
+			if err != null {
+				return null
+			}
+			bs = javaArray2Lucy(t)
+		} else {
+			bs = r.loadFromJarBs[0]
+		}
+		cc := (new cg.ClassDecoder(bs)).decode()
+		if r.kind == ResourceKindLucyClass {
+			if t := cc.getAttributeByName(cg.AttributeNameLucyEnum) ; len(t) > 0 {
+				return this.loadLucyEnum(cc)
+			} else {
+				return this.loadAsLucy(cc)
+			}
+		}
+		return this.loadAsJava(cc)
+	}
 }
-
 

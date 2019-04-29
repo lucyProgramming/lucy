@@ -464,7 +464,7 @@ class ExpressionSuffix extends ParserFather {
 							newExpression.op = "index"
 							newExpression.Type = ast.ExpressionTypeIndex
 							index := new ast.ExpressionIndex()
-							index.Expression = prefix
+							index.indexOn = prefix
 							index.index = e
 							newExpression.data = index
 							prefix = newExpression
@@ -525,7 +525,7 @@ class ExpressionSuffix extends ParserFather {
 						newExpression.Type = ast.ExpressionTypeSelection
 						selection := new ast.ExpressionSelection()
 						selection.autoCompletion = true
-						selection.Expression = prefix
+						selection.selectionOn = prefix
 						newExpression.data = selection
 						prefix = newExpression
 						return prefix , null
@@ -551,7 +551,7 @@ class ExpressionSuffix extends ParserFather {
 						selection.getHover = this.parser.token.getHover
 						selection.rename = this.parser.token.rename
 						selection.autoCompletion = autoCompletion || this.parser.token.autoCompletion
-						selection.Expression = prefix
+						selection.selectionOn = prefix
 						selection.name = this.parser.token.stringValue
 						selection.containsLf = containsLf
 						selection.inlineComment = inlineComment
@@ -584,9 +584,9 @@ class ExpressionSuffix extends ParserFather {
 						newExpression.op = "assert"
 						newExpression.Type = ast.ExpressionTypeTypeAssert
 						typeAssert := new ast.ExpressionTypeAssert()
-						typeAssert.Type = typ
+						typeAssert.to = typ
 						typeAssert.isType = isType
-						typeAssert.Expression = prefix
+						typeAssert.value = prefix
 						newExpression.data = typeAssert
 						prefix = newExpression
 						this.next(lfIsToken) // skip  )
@@ -671,11 +671,11 @@ class ExpressionSuffix extends ParserFather {
 			call.locateDefinition = selection.locateDefinition
 			call.findUsage = selection.findUsage
 			call.getHover = selection.getHover
-			call.Expression = selection.Expression
+			call.methodCallOn = selection.selectionOn
 			call.autoCompletion = selection.autoCompletion
 			call.args = args
-			call.Expression.containsLf = selection.containsLf
-			call.Expression.inlineComment = selection.inlineComment
+			call.methodCallOn.containsLf = selection.containsLf
+			call.methodCallOn.inlineComment = selection.inlineComment
 			call.lpContainsLf = lpContainsLf
 			call.lpInlineComment = lpInlineComment
 			result.pos = on.pos
@@ -684,7 +684,7 @@ class ExpressionSuffix extends ParserFather {
 			result.Type = ast.ExpressionTypeFunctionCall
 			result.op = "functionCall"
 			call := new ast.ExpressionFunctionCall()
-			call.Expression = on
+			call.functionCallOn = on
 			call.args = args
 			call.lpContainsLf = lpContainsLf
 			call.lpInlineComment = lpInlineComment

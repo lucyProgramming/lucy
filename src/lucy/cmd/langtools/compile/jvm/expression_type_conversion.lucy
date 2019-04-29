@@ -24,7 +24,7 @@ class BuildExpressionTypeConversion {
 		conversion := e.data.(ast.ExpressionTypeConversion)
 		currentStack := char(0)
 		// []byte("aaaaaaaaaaaa")
-		if conversion.Type.equal(ast.LucyBytesType) {
+		if conversion.to.equal(ast.LucyBytesType) {
 			currentStack = char(2)
 			meta := ArrayMetas[ast.VariableTypeByte]
 			code.codes[code.codeLength] = cg.OP_new
@@ -37,9 +37,9 @@ class BuildExpressionTypeConversion {
 		}
 		// string(byte[])
 		// string ([]byte)
-		if (conversion.Type.Type == ast.VariableTypeString &&
-				conversion.Expression.value.equal(ast.LucyBytesType)) ||
-			(conversion.Type.Type == ast.VariableTypeString && conversion.Expression.value.equal(ast.JavaBytesType)) {
+		if (conversion.to.Type == ast.VariableTypeString &&
+				conversion.value.value.equal(ast.LucyBytesType)) ||
+			(conversion.to.Type == ast.VariableTypeString && conversion.value.value.equal(ast.JavaBytesType)) {
 			currentStack = char(2)
 			code.codes[code.codeLength] = cg.OP_new
 			c.insertClassConst(javaStringClass , code.codes[code.codeLength + 1 : code.codeLength + 3])
@@ -49,33 +49,33 @@ class BuildExpressionTypeConversion {
 			state.stacks.append(t , t)
 			code.codeLength += 4
 		}
-		stack := this.eb.build(c , code , conversion.Expression , context , state)
+		stack := this.eb.build(c , code , conversion.value , context , state)
 		maxStack = currentStack + stack
 		if e.value.isNumber() {
-			this.eb.BuildExpressionConversion.numberTypeConverter(code , conversion.Expression.value.Type , conversion.Type.Type)
-			if t := jvmSlotSize(conversion.Type) ; t > maxStack {
+			this.eb.BuildExpressionConversion.numberTypeConverter(code , conversion.value.value.Type , conversion.to.Type)
+			if t := jvmSlotSize(conversion.to) ; t > maxStack {
 				maxStack = t
 			}
 			return
 		}
 		// int(enum)
-		if conversion.Type.Type == ast.VariableTypeInt &&
-			conversion.Expression.value.Type == ast.VariableTypeEnum {
+		if conversion.to.Type == ast.VariableTypeInt &&
+			conversion.value.value.Type == ast.VariableTypeEnum {
 			return
 		}
 		// enum(int)
-		if conversion.Type.Type == ast.VariableTypeEnum &&
-			conversion.Expression.value.Type == ast.VariableTypeInt {
+		if conversion.to.Type == ast.VariableTypeEnum &&
+			conversion.value.value.Type == ast.VariableTypeInt {
 			code.codes[code.codeLength] = cg.OP_dup
 			code.codeLength++
-			loadInt(c , code , conversion.Type.theEnum.defaultValue)
+			loadInt(c , code , conversion.to.theEnum.defaultValue)
 			wrongExit := new cg.Exit(cg.OP_if_icmplt , code)
 			code.codes[code.codeLength] = cg.OP_dup
 			code.codeLength++
-			loadInt(c , code , conversion.Type.theEnum.enums[len(conversion.Type.theEnum.enums) - 1].value)
+			loadInt(c , code , conversion.to.theEnum.enums[len(conversion.to.theEnum.enums) - 1].value)
 			wrongExit2 := new cg.Exit(cg.OP_if_icmpgt , code)
 			okExit := new cg.Exit(cg.OP_goto , code)
-			state.pushStack(c , conversion.Expression.value)
+			state.pushStack(c , conversion.value.value)
 			defer state.popStack(1)
 			context.MakeStackMap(code , state , code.codeLength)
 			writeExits([]cg.Exit{wrongExit , wrongExit2} , code.codeLength)
@@ -105,8 +105,8 @@ class BuildExpressionTypeConversion {
 			return
 		}
 		//[]byte("hello world")
-		if conversion.Type.equal(ast.LucyBytesType) &&
-			conversion.Expression.value.Type == ast.VariableTypeString {
+		if conversion.to.equal(ast.LucyBytesType) &&
+			conversion.value.value.Type == ast.VariableTypeString {
 			//stack top must be a string
 			code.codes[code.codeLength] = cg.OP_ldc_w
 			c.insertStringConst("utf-8" , code.codes[code.codeLength + 1 : code.codeLength + 3])
@@ -131,8 +131,8 @@ class BuildExpressionTypeConversion {
 			return
 		}
 		// byte[]("hello world")
-		if conversion.Type.equal(ast.JavaBytesType) &&
-			conversion.Expression.value.Type == ast.VariableTypeString {
+		if conversion.to.equal(ast.JavaBytesType) &&
+			conversion.value.value.Type == ast.VariableTypeString {
 			code.codes[code.codeLength++] = cg.OP_ldc_w
 			c.insertStringConst("utf-8" , code.codes[code.codeLength : code.codeLength + 2])
 			code.codeLength += 2
@@ -149,8 +149,8 @@ class BuildExpressionTypeConversion {
 			return
 		}
 		//string(['h','e'])
-		if conversion.Type.Type == ast.VariableTypeString &&
-			conversion.Expression.value.equal(ast.LucyBytesType) {
+		if conversion.to.Type == ast.VariableTypeString &&
+			conversion.value.value.equal(ast.LucyBytesType) {
 			class AutoVar {
 				start  char
 				length char
@@ -208,8 +208,8 @@ class BuildExpressionTypeConversion {
 			return
 		}
 		// string(byte[])
-		if conversion.Type.Type == ast.VariableTypeString &&
-			conversion.Expression.value.equal(ast.JavaBytesType) {
+		if conversion.to.Type == ast.VariableTypeString &&
+			conversion.value.value.equal(ast.JavaBytesType) {
 			code.codes[code.codeLength++] = cg.OP_ldc_w
 			c.insertStringConst("utf-8" , code.codes[code.codeLength : code.codeLength + 2])
 			code.codeLength += 2
@@ -225,7 +225,7 @@ class BuildExpressionTypeConversion {
 			code.codeLength += 3
 			return
 		}
-		if conversion.Type.Type == ast.VariableTypeString {
+		if conversion.to.Type == ast.VariableTypeString {
 			code.codes[code.codeLength] = cg.OP_checkcast
 			c.insertClassConst(javaStringClass , code.codes[code.codeLength + 1 : code.codeLength + 3])
 			code.codeLength += 3
@@ -234,7 +234,7 @@ class BuildExpressionTypeConversion {
 		// objects
 		code.codes[code.codeLength] = cg.OP_checkcast
 		code.codeLength++
-		insertTypeAssertClass(c , code , conversion.Type)
+		insertTypeAssertClass(c , code , conversion.to)
 		return
 	}
 

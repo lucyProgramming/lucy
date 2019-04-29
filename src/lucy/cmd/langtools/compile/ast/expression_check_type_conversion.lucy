@@ -3,9 +3,9 @@
 class ExpressionCheckTypeConversion {
     static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
         conversion := e.data.(ExpressionTypeConversion)
-        on , es := conversion.Expression.checkSingleValueContextExpression(block)
+        on , es := conversion.value.checkSingleValueContextExpression(block)
         errs.appendAll(es)
-        valueType = conversion.Type.cloneType()
+        valueType = conversion.to.cloneType()
         valueType.pos = e.pos
         if on == null {
             return
@@ -14,56 +14,56 @@ class ExpressionCheckTypeConversion {
             errs.append(err)
             return
         }
-        err := conversion.Type.resolve(block)
+        err := conversion.to.resolve(block)
         if err != null {
             errs.append(err)
             return
         }
-        if on.isNumber() && conversion.Type.isNumber() {
-            if conversion.Expression.isLiteral() {
-                conversion.Expression.convertToNumberType(conversion.Type.Type)
-                e.Type = conversion.Expression.Type
-                e.longValue = conversion.Expression.longValue
-                e.doubleValue = conversion.Expression.doubleValue
-                e.value = conversion.Expression.value
+        if on.isNumber() && conversion.to.isNumber() {
+            if conversion.value.isLiteral() {
+                conversion.value.convertToNumberType(conversion.to.Type)
+                e.Type = conversion.value.Type
+                e.longValue = conversion.value.longValue
+                e.doubleValue = conversion.value.doubleValue
+                e.value = conversion.value.value
             }
             return
         }
         // string([]byte)
-        if conversion.Type.Type == VariableTypeString &&
+        if conversion.to.Type == VariableTypeString &&
             on.equal(LucyBytesType) {
             return
         }
         // string(byte[])
-        if conversion.Type.Type == VariableTypeString &&
+        if conversion.to.Type == VariableTypeString &&
             on.equal(JavaBytesType) {
             return
         }
         // int(enum)
-        if conversion.Type.Type == VariableTypeInt &&
+        if conversion.to.Type == VariableTypeInt &&
             on.Type == VariableTypeEnum {
             return
         }
         // enum(int)
-        if conversion.Type.Type == VariableTypeEnum &&
+        if conversion.to.Type == VariableTypeEnum &&
             on.Type == VariableTypeInt {
             return
         }
         // []byte("hello world")
-        if conversion.Type.equal(LucyBytesType) &&
+        if conversion.to.equal(LucyBytesType) &&
             on.Type == VariableTypeString {
             return
         }
         // byte[]("hello world")
-        if conversion.Type.equal(JavaBytesType) &&
+        if conversion.to.equal(JavaBytesType) &&
             on.Type == VariableTypeString {
             return
         }
-        if conversion.Type.validForTypeAssertOrConversion() && on.isPointer() {
+        if conversion.to.validForTypeAssertOrConversion() && on.isPointer() {
             return
         }
         errs.append(new error(sprintf("%s cannot convert '%s' to '%s'",
-                    on.pos.errMsgPrefix() , on.typeString() , conversion.Type.typeString())))
+                    on.pos.errMsgPrefix() , on.typeString() , conversion.to.typeString())))
         return
     }
 }

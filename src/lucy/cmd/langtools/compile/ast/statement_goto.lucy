@@ -12,7 +12,7 @@ public class StatementGoTo {
 
     fn checkStatementGoTo(block Block) -> (err error) {
         if this.autoCompletion {
-            block.inheritedAttribute.p.autoCompletionItems = searchLableForAutoCompletionItems(block)
+            block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = searchLableForAutoCompletionItems(block)
             return
         }
         label := block.searchLabel(this.labelName , this.pos)
@@ -21,7 +21,7 @@ public class StatementGoTo {
                         this.pos.errMsgPrefix() , this.labelName))
         }
         if this.locateDefinition {
-            block.inheritedAttribute.p.setLocatedDefinitionPos(label)
+            block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(label)
             return
         }
         this.statementLabel = label

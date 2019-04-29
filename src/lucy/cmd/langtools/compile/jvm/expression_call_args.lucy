@@ -15,7 +15,7 @@ class BuildExpressionCallArgs {
         c cg.ClassHighLevel,
         code cg.AttributeCode,
         args []ast.Expression,
-        vArgs ast.CallVariableLengthArgs,
+        vArgs ast.CallVariableLengthArg,
         context Context,
         state StackMapState) -> (maxStack char) {
         currentStack := char(0)
@@ -23,7 +23,6 @@ class BuildExpressionCallArgs {
         defer {
             state.popStack(len(state.stacks) - stackLength) // let`s pop
         }
-
         if vArgs != null {
             args = args[:vArgs.start]
         }
@@ -35,7 +34,6 @@ class BuildExpressionCallArgs {
             currentStack += jvmSlotSize(e.value)
             state.pushStack(c , e.value)
         }
-
         if vArgs == null {
             return
         }

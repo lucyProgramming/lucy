@@ -253,8 +253,11 @@ public class FunctionType {
 	}
 
 	public fn voidReturn() -> (is bool) {
-		return len(this.returnList) == 0 ||
-				this.returnList[0].Type.Type == VariableTypeVoid
+		is = len(this.returnList) == 0 ||
+			this.returnList[0].Type.Type == VariableTypeVoid
+		if is {
+			assert(len(this.returnList) < 2)
+		}
 	}
 
 	fn mkCallReturnTypes(pos Pos) -> (valueTypes []Type) {
@@ -294,9 +297,9 @@ public class FunctionType {
 		from Pos,
 		args []Expression,
 		callArgsTypes []Type,
-		f Function) -> (vArgs CallVariableLengthArgs , err error) {
+		f Function) -> (vArgs CallVariableLengthArg , err error) {
 		if this.vArgs != null {
-			vArgs = new CallVariableLengthArgs()
+			vArgs = new CallVariableLengthArg()
 			vArgs.noArgs = true
 			vArgs.Type = this.vArgs.Type
 			vArgs.start = len(this.parameterList)

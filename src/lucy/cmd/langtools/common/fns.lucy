@@ -37,8 +37,8 @@ public fn validIdentifier(identifier string) -> (valid bool) {
     valid = true
 }
 
-public fn haveFileType(dir string , suffix string) -> (have bool) {
-    files := new io.File(dir).listFiles()
+public fn dirHaveFileType(theDir string , suffix string) -> (have bool) {
+    files := new io.File(theDir).listFiles()
     for f := range files {
         if f.isFile() && f.getName().endsWith(suffix) {
             return true

@@ -26,7 +26,7 @@ public class TypeAlias implements TopNodeInterface {
             return
         }
         this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
-        block.inheritedAttribute.p.findUsage = this.findUsageInstances
+        block.inheritedAttribute.thePackageBeenCompiling.findUsage = this.findUsageInstances
     }
 }
 

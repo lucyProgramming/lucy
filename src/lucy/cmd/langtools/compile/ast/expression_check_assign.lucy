@@ -72,7 +72,7 @@ class ExpressionCheckAssign {
                 vd.pos = valueTypes[k].pos
                 vd.Type = valueTypes[k]
                 vd.used = true
-                identifier.Variable = vd
+                identifier.variable = vd
                 //error should not be handle this time
                 block.insert(identifier.name , vd.pos , vd)
                 continue
@@ -103,8 +103,8 @@ class ExpressionCheckAssign {
                 if t.name == UnderScore {
                     return voidReturn
                 } else {
-                    if null != t.Variable {
-                        t.Variable.used = true
+                    if null != t.variable {
+                        t.variable.used = true
                     }
                 }
             }

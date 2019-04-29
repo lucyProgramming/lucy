@@ -19,7 +19,7 @@ public class StatementReturn {
     }
 
     fn check(b Block) -> (errs []error = []error{}) {
-        if b.inheritedAttribute.Defer != null {
+        if b.inheritedAttribute.statementDefer != null {
             return []error{new error(sprintf("%s cannot has 'return' in 'defer'",
                     this.pos.errMsgPrefix()))}
         }
@@ -29,7 +29,7 @@ public class StatementReturn {
             return errs
         }
         returnValueTypes := checkExpressions(b , this.expressions , errs , false)
-        rs := b.inheritedAttribute.Function.Type.returnList
+        rs := b.inheritedAttribute.function.Type.returnList
         pos := this.expressions[len(this.expressions) - 1].pos
         if len(returnValueTypes) < len(rs) {
             errs.append(new error(sprintf("%s too few arguments to return" , pos.errMsgPrefix())))
@@ -38,7 +38,7 @@ public class StatementReturn {
         }
         convertExpressionsToNeeds(b,
             this.expressions,
-            b.inheritedAttribute.Function.Type.mkCallReturnTypes(this.expressions[0].pos),
+            b.inheritedAttribute.function.Type.mkCallReturnTypes(this.expressions[0].pos),
             returnValueTypes)
         for k , v := range rs {
             if k < len(returnValueTypes) && returnValueTypes[k] != null {

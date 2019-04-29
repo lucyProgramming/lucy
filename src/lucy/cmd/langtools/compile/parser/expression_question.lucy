@@ -30,7 +30,7 @@ class ExpressionQuestionParser extends ParserFather {
         if True == null {
             return newExpression , err
         }
-        question.True = True
+        question.theTrue = True
         this.parser.unExpectNewLineAndSkip()
         if this.parser.token.Type != lex.TokenColon {
             err = new error(sprintf("%s expect ':' ,but '%s'",
@@ -40,7 +40,7 @@ class ExpressionQuestionParser extends ParserFather {
         }
         this.next(lfNotToken) // skip :
         False , err := this.ep.ExpressionBinaryParser.parseLogicalOrExpression()
-        question.False = False
+        question.theFalse = False
         return newExpression , null
     }
 

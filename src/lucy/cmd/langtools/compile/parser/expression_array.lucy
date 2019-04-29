@@ -60,11 +60,11 @@ class ExpressionArrayParser extends ParserFather {
             ret.pos = pos
             ret.Type = ast.ExpressionTypeCheckCast
             data := new ast.ExpressionTypeConversion()
-            data.Type = new ast.Type()
-            data.Type.Type = ast.VariableTypeArray
-            data.Type.pos = pos
-            data.Type.theArray = array
-            data.Expression = e
+            data.to = new ast.Type()
+            data.to.Type = ast.VariableTypeArray
+            data.to.pos = pos
+            data.to.theArray = array
+            data.value = e
             ret.data = data
             this.next(lfIsToken) // skip )
             return ret , null

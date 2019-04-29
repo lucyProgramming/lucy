@@ -34,16 +34,16 @@ class BuildinFunctionCall {
         context Context,
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionFunctionCall)
-        if call.Function.loadedFromCorePackage {
+        if call.function.loadedFromCorePackage {
             maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
             code.codes[code.codeLength] = cg.OP_invokestatic
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.Function.entrance.classHighLevel.name,
-                    call.Function.name,
-                    call.Function.entrance.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.function.entrance.classHighLevel.name,
+                    call.function.name,
+                    call.function.entrance.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
             code.codeLength += 3
             if e.isStatementExpression {
-                if call.Function.Type.voidReturn() == false {
-                    if len(call.Function.Type.returnList) > 1 {
+                if call.function.Type.voidReturn() == false {
+                    if len(call.function.Type.returnList) > 1 {
                         code.codes[code.codeLength] = cg.OP_pop
                         code.codeLength++
                     } else {
@@ -61,7 +61,7 @@ class BuildinFunctionCall {
             }
             return
         }
-        switch call.Function.name {
+        switch call.function.name {
             case common.BuildInFunctionPrint:
                 return this.BuildinFunctionPrint.mkBuildInPrint(c , code , e , context , state)
             case common.BuildInFunctionPanic:
@@ -82,7 +82,7 @@ class BuildinFunctionCall {
             case common.BuildInFunctionAssert:
                 return this.BuildinFunctionAssert.build(c , code , e , context , state)
             default:
-                panic("unknown  buildIn function:" + call.Function.name)
+                panic("unknown  buildIn function:" + call.function.name)
         }
 
         return

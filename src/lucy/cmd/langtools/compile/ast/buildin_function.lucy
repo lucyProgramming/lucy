@@ -41,7 +41,7 @@ fn registerBuildInFunctions() {
             if len(e.parameterTypes) > 0 {
                 errs.append(new error(sprintf("%s buildin function expect no typed parameter" , e.parameterTypes[0].pos.errMsgPrefix())))
             }
-            if block.inheritedAttribute.Defer == null {
+            if block.inheritedAttribute.statementDefer == null {
                 errs.append(new error(sprintf("%s buildin function '%s' only allow in defer block" , pos.errMsgPrefix() , common.BuildInFunctionCatch)))
                 return
             }
@@ -50,19 +50,19 @@ fn registerBuildInFunctions() {
                 return
             }
             if len(e.args) == 0 {
-                if block.inheritedAttribute.Defer.exceptionClass == null {
-                    c , err := block.inheritedAttribute.p.loadClass(DefaultExceptionClass)
+                if block.inheritedAttribute.statementDefer.exceptionClass == null {
+                    c , err := block.inheritedAttribute.thePackageBeenCompiling.loadClass(DefaultExceptionClass)
                     if err != null {
                         errs.append(new error(sprintf("%s load exception class failed,err:%s" , pos.errMsgPrefix() , err.getMessage())))
                         return
                     }
                     f.Type.returnList[0].Type.theClass = c
-                    err = block.inheritedAttribute.Defer.registerExceptionClass(c)
+                    err = block.inheritedAttribute.statementDefer.registerExceptionClass(c)
                     if err != null {
                         errs.append(new error(sprintf("%s %s" , pos.errMsgPrefix() , err.getMessage())))
                     }
                 } else {
-                    f.Type.returnList[0].Type.theClass = block.inheritedAttribute.Defer.exceptionClass
+                    f.Type.returnList[0].Type.theClass = block.inheritedAttribute.statementDefer.exceptionClass
                 }
 
                 return
@@ -71,7 +71,7 @@ fn registerBuildInFunctions() {
                 errs.append(new error(sprintf("%s build function '%s' expect string argument" , errMsgPrefix(args[0].pos) , common.BuildInFunctionCatch)))
             }
             className := e.args[0].stringValue
-            c , err := block.inheritedAttribute.p.loadClass(className)
+            c , err := block.inheritedAttribute.thePackageBeenCompiling.loadClass(className)
             if err != null {
                 errs.append(new error(sprintf("%s %s" , e.args[0].pos.errMsgPrefix() , err.getMessage())))
                 return
@@ -81,7 +81,7 @@ fn registerBuildInFunctions() {
                 errs.append(new error(sprintf("%s '%s' does't have super class '%s'" , e.args[0].pos.errMsgPrefix() , className , JavaThrowableClass)))
                 return
             }
-            err = block.inheritedAttribute.Defer.registerExceptionClass(c)
+            err = block.inheritedAttribute.statementDefer.registerExceptionClass(c)
             if err != null {
                 errs.append(new error(sprintf("%s %s" , args[0].pos.errMsgPrefix() , err.getMessage())))
             }

@@ -6,7 +6,7 @@ class ExpressionCheckIdentifier {
     static fn check(e Expression , block Block) -> (valueType Type , err error) {
         identifier := e.data.(ExpressionIdentifier)
         if identifier.autoCompletion {
-            block.inheritedAttribute.p.autoCompletionItems =
+            block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems =
                 searchRightValueForAutoCompletionItems(e.pos , block)
             return
         }
@@ -21,7 +21,7 @@ class ExpressionCheckIdentifier {
                 e.Type = ExpressionTypeString
                 e.stringValue = e.pos.filename
                 if identifier.locateDefinition {
-                    block.inheritedAttribute.p.setLocatedDefinitionPos(e)
+                    block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(e)
                     return
                 }
                 result , _ := e.checkSingleValueContextExpression(block)
@@ -31,7 +31,7 @@ class ExpressionCheckIdentifier {
                 e.longValue = long(e.pos.startLine)
                 result , _ := e.checkSingleValueContextExpression(block)
                 if identifier.locateDefinition {
-                    block.inheritedAttribute.p.setLocatedDefinitionPos(e)
+                    block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(e)
                     return
                 }
                 return result , null
@@ -40,23 +40,23 @@ class ExpressionCheckIdentifier {
                 e.longValue = new Date().getTime()
                 result , _ := e.checkSingleValueContextExpression(block)
                 if identifier.locateDefinition {
-                    block.inheritedAttribute.p.setLocatedDefinitionPos(e)
+                    block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(e)
                     return
                 }
                 return result , null
             case MagicIdentifierClass:
-                if block.inheritedAttribute.Class == null {
+                if block.inheritedAttribute.theClass == null {
                     return null,
                         new error(sprintf("%s '%s' must in class scope" , e.pos.errMsgPrefix() , identifier.name))
                 }
                 if identifier.locateDefinition {
-                    block.inheritedAttribute.p.setLocatedDefinitionPos(e)
+                    block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(e)
                     return
                 }
                 result := new Type()
                 result.Type = VariableTypeClass
                 result.pos = e.pos
-                result.theClass = block.inheritedAttribute.Class
+                result.theClass = block.inheritedAttribute.theClass
                 return result , null
         }
         isCaptureVar := [false]
@@ -65,7 +65,7 @@ class ExpressionCheckIdentifier {
             return null , err
         }
         if d == null {
-            i := block.inheritedAttribute.p.getImport(e.pos.filename , identifier.name)
+            i := block.inheritedAttribute.thePackageBeenCompiling.getImport(e.pos.filename , identifier.name)
             if i != null {
                 return .checkIdentifierThroughImports(block , identifier , e , i)
             }
@@ -92,14 +92,14 @@ class ExpressionCheckIdentifier {
                 return .checkIdentifierThroughImports(block , identifier , e , it)
             }
             if identifier.locateDefinition {
-                block.inheritedAttribute.p.setLocatedDefinitionPos(f)
+                block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(f)
                 return
             }
             result := new Type()
             result.Type = VariableTypeFunction
             result.theFunctionType = f.Type
             result.pos = e.pos
-            identifier.Function = f
+            identifier.function = f
             return result , null
         }
         if t , ok := d.(Variable) ; ok {
@@ -114,7 +114,7 @@ class ExpressionCheckIdentifier {
                 t.beenCapturedAsRightValue++
             }
             if identifier.locateDefinition {
-                block.inheritedAttribute.p.setLocatedDefinitionPos(t)
+                block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(t)
                 return
             }
             if t.findUsageInstances != null {
@@ -123,7 +123,7 @@ class ExpressionCheckIdentifier {
             t.used = true
             result := t.Type.cloneType()
             result.pos = e.pos
-            identifier.Variable = t
+            identifier.variable = t
             return result , null
         }
         if t , ok := d.(Constant) ; ok {
@@ -135,7 +135,7 @@ class ExpressionCheckIdentifier {
                 }
             }
             if identifier.locateDefinition {
-                block.inheritedAttribute.p.setLocatedDefinitionPos(t)
+                block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(t)
                 return
             }
             t.used++
@@ -153,7 +153,7 @@ class ExpressionCheckIdentifier {
                 }
             }
             if identifier.locateDefinition {
-                block.inheritedAttribute.p.setLocatedDefinitionPos(c)
+                block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(c)
                 return
             }
             if c.findUsageInstances != null {
@@ -174,7 +174,7 @@ class ExpressionCheckIdentifier {
                 }
             }
             if identifier.locateDefinition {
-                block.inheritedAttribute.p.setLocatedDefinitionPos(enumName)
+                block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(enumName)
                 return
             }
             result := new Type()
@@ -190,13 +190,13 @@ class ExpressionCheckIdentifier {
     }
 
     static fn checkIdentifierThroughImports(block Block , identifier ExpressionIdentifier , e Expression , it Import) -> (valueType Type , err error) {
-        p , err := block.inheritedAttribute.p.load(it.Import)
+        p , err := block.inheritedAttribute.thePackageBeenCompiling.load(it.Import)
         if err != null {
             return null , new error(sprintf("%s %s" , e.pos.errMsgPrefix() , err.getMessage()))
         }
         it.mkUsed(e.pos)
         if identifier.locateDefinition {
-            block.inheritedAttribute.p.setLocatedDefinitionPos(it)
+            block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(it)
             return
         }
         valueType = new Type()

@@ -76,7 +76,7 @@ class BuildExpressionMap {
         context Context,
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionMethodCall)
-        maxStack = this.eb.build(c , code , call.Expression , context , state)
+        maxStack = this.eb.build(c , code , call.methodCallOn , context , state)
         stackLength := len(state.stacks)
         defer {
             state.popStack(len(state.stacks) - stackLength)

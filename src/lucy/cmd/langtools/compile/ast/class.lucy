@@ -79,7 +79,7 @@ public class Class implements TopNodeInterface {
 	fn haveStaticCodes() -> (is bool) {
 		return len(this.staticBlocks) > 0
 	}
-	
+
 	public fn isInterface() -> (is bool) {
 		return this.accessFlags & cg.AccClassInterface != 0
 	}
@@ -98,7 +98,7 @@ public class Class implements TopNodeInterface {
 			return null
 		}
 		this.notImportedYet = false
-		load , err := block.inheritedAttribute.p.loadClass(this.name)
+		load , err := block.inheritedAttribute.thePackageBeenCompiling.loadClass(this.name)
 		if err != null {
 			return new error(sprintf("%s %s" , pos.errMsgPrefix() , err.getMessage()))
 		}
@@ -148,7 +148,7 @@ public class Class implements TopNodeInterface {
 				t2 := new ExpressionIdentifier()
 				t.data = t2
 				t2.name = ThisPointerName
-				call.Expression = t
+				call.methodCallOn = t
 			}
 
 			e.data = call
@@ -195,7 +195,7 @@ public class Class implements TopNodeInterface {
 			this.methods = new map{string -> []ClassMethod}()
 		}
 		f.block.inherit(this.block)
-		f.block.inheritedAttribute.Function = f
+		f.block.inheritedAttribute.function = f
 		f.block.inheritedAttribute.classMethod = method
 		this.methods[f.name] = []ClassMethod{method}
 	}
@@ -212,11 +212,11 @@ public class Class implements TopNodeInterface {
 							errMsgPrefix(v.pos))))
 			}
 			if v.locateDefinition {
-				this.block.inheritedAttribute.p.setLocatedDefinitionPos(v)
+				this.block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(v)
 				return
 			}
 			if v.autoCompletion {
-				this.block.inheritedAttribute.p.autoCompletionItems =
+				this.block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems =
 					AutoCompletionItem.getFieldDefaultAutoCompletionItem()
 				return
 			}
@@ -225,8 +225,8 @@ public class Class implements TopNodeInterface {
 				u.Type = "declaration"
 				u.pos = v.pos
 				v.findUsageInstances = [u]
-				this.block.inheritedAttribute.p.findUsage = v.findUsageInstances
-				this.block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal
+				this.block.inheritedAttribute.thePackageBeenCompiling.findUsage = v.findUsageInstances
+				this.block.inheritedAttribute.thePackageBeenCompiling.findUsageIsGlobal = this.isGlobal
 			}
 			err = v.Type.resolve(this.block)
 			if err != null {
@@ -237,7 +237,7 @@ public class Class implements TopNodeInterface {
 		for _ , ms := range this.methods {
 			for _ , m := range ms {
 				if m.locateDefinition {
-					this.block.inheritedAttribute.p.setLocatedDefinitionPos(m)
+					this.block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(m)
 					return
 				}
 				if m.findUsage {
@@ -245,8 +245,8 @@ public class Class implements TopNodeInterface {
 					u.Type = "declaration"
 					u.pos = m.Function.pos
 					m.findUsageInstances = [u]
-					this.block.inheritedAttribute.p.findUsage = m.findUsageInstances
-					this.block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal
+					this.block.inheritedAttribute.thePackageBeenCompiling.findUsage = m.findUsageInstances
+					this.block.inheritedAttribute.thePackageBeenCompiling.findUsageIsGlobal = this.isGlobal
 				}
 				if m.isAbstract() {
 					for _ , v := range m.Function.Type.parameterList {
@@ -265,7 +265,7 @@ public class Class implements TopNodeInterface {
 
 				}
 				m.Function.block.inherit(this.block)
-				m.Function.block.inheritedAttribute.Function = m.Function
+				m.Function.block.inheritedAttribute.function = m.Function
 				m.Function.block.inheritedAttribute.classMethod = m
 				m.Function.checkParametersAndReturns(errs , false , m.isAbstract())
 				if len(m.Function.Type.templateNames) > 0 {
@@ -301,7 +301,7 @@ public class Class implements TopNodeInterface {
 		this.resolveFatherCalled = true
 		if this.superClassName == null {
 			superClassName := ""
-			if this.block.inheritedAttribute.p.name == common.CorePackage {
+			if this.block.inheritedAttribute.thePackageBeenCompiling.name == common.CorePackage {
 				superClassName = JavaRootClass
 			} else {
 				if this.isInterface() {
@@ -523,7 +523,7 @@ public class Class implements TopNodeInterface {
 		if this.superClassName == null {
 			this.superClassName = new NameWithPos(JavaRootClass , this.pos)
 		}
-		c , err := block.inheritedAttribute.p.loadClass(this.superClassName.name)
+		c , err := block.inheritedAttribute.thePackageBeenCompiling.loadClass(this.superClassName.name)
 		if err != null {
 			err = new error(sprintf("%s %s" , pos.errMsgPrefix() , err.getMessage()))
 			return err
@@ -554,7 +554,7 @@ public class Class implements TopNodeInterface {
 			return
 		}
 		for _ , v := range this.methods[SpecialMethodInit] {
-			var vArgs CallVariableLengthArgs
+			var vArgs CallVariableLengthArg
 			vArgs , err = v.Function.Type.fitArgs(block , pos , args , callArgs , v.Function)
 			if err == null {
 				if newCase != null {
@@ -938,7 +938,7 @@ public class Class implements TopNodeInterface {
 
 	fn check(father Block) -> (errs []error = []error{}) {
 		this.block.inherit(father)
-		this.block.inheritedAttribute.Class = this
+		this.block.inheritedAttribute.theClass = this
 		errs.appendAll(this.checkPhase1())
 		errs.appendAll(this.checkPhase2())
 		return errs
@@ -976,7 +976,7 @@ public class Class implements TopNodeInterface {
 
 	fn checkPhase2() -> (errs []error = []error{}) {
 		errs.appendAll(this.checkFields())
-		if this.block.inheritedAttribute.p.shouldStop(errs) {
+		if this.block.inheritedAttribute.thePackageBeenCompiling.shouldStop(errs) {
 			return errs
 		}
 		this.mkClassInitMethod()
@@ -1010,39 +1010,39 @@ public class Class implements TopNodeInterface {
 		}
 
 		errs.appendAll(this.checkMethods())
-		if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+		if this.block.inheritedAttribute.thePackageBeenCompiling.locateDefinitionOrAutoCompletionFetched() {
 			return errs
 		}
 		errs.appendAll(this.checkIfOverrideFinal())
-		if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+		if this.block.inheritedAttribute.thePackageBeenCompiling.locateDefinitionOrAutoCompletionFetched() {
 			return errs
 		}
 		errs.appendAll(this.resolveInterfaces())
-		if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+		if this.block.inheritedAttribute.thePackageBeenCompiling.locateDefinitionOrAutoCompletionFetched() {
 			return errs
 		}
 		if this.isInterface() {
 			errs.appendAll(this.checkOverrideInterfaceMethod())
 		}
-		if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+		if this.block.inheritedAttribute.thePackageBeenCompiling.locateDefinitionOrAutoCompletionFetched() {
 			return errs
 		}
 		if this.isAbstract() {
 			errs.appendAll(this.checkOverrideAbstractMethod())
 		}
-		if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+		if this.block.inheritedAttribute.thePackageBeenCompiling.locateDefinitionOrAutoCompletionFetched() {
 			return errs
 		}
 		if this.hierarchyOk {
 			errs.appendAll(this.suitableForInterfaces())
 		}
-		if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+		if this.block.inheritedAttribute.thePackageBeenCompiling.locateDefinitionOrAutoCompletionFetched() {
 			return errs
 		}
 		if this.superClass != null && this.hierarchyOk {
 			errs.appendAll(this.suitableSubClassForAbstract(this.superClass))
 		}
-		if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+		if this.block.inheritedAttribute.thePackageBeenCompiling.locateDefinitionOrAutoCompletionFetched() {
 			return errs
 		}
 		return errs
@@ -1379,7 +1379,7 @@ public class Class implements TopNodeInterface {
 		staticFieldAssignStatements := []Statement{}
 		for _ , v := range this.fields {
 			if v.locateDefinition {
-				this.block.inheritedAttribute.p.setLocatedDefinitionPos(v)
+				this.block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(v)
 				return
 			}
 			if v.defaultValueExpression != null {
@@ -1409,11 +1409,11 @@ public class Class implements TopNodeInterface {
 				bin := new ExpressionBinary()
 				bin.right = v.defaultValueExpression
 				selection := new ExpressionSelection()
-				selection.Expression = new Expression()
-				selection.Expression.op = "selection"
-				selection.Expression.value = new Type()
-				selection.Expression.value.Type = VariableTypeClass
-				selection.Expression.value.theClass = this
+				selection.selectionOn = new Expression()
+				selection.selectionOn.op = "selection"
+				selection.selectionOn.value = new Type()
+				selection.selectionOn.value.Type = VariableTypeClass
+				selection.selectionOn.value.theClass = this
 				selection.name = v.name
 				selection.field = v
 				left := new Expression()
@@ -1460,11 +1460,11 @@ public class Class implements TopNodeInterface {
 			return errs
 		}
 		for name , methods := range this.methods {
-			if this.block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+			if this.block.inheritedAttribute.thePackageBeenCompiling.locateDefinitionOrAutoCompletionFetched() {
 				return errs
 			}
 			for _ , method := range methods {
-				if this.block.inheritedAttribute.p.matchFileAndLine(method.Function.pos.filename,
+				if this.block.inheritedAttribute.thePackageBeenCompiling.matchFileAndLine(method.Function.pos.filename,
 					method.Function.name , method.Function.startLine , method.Function.endLine) == false {
 					continue
 				}
@@ -1542,7 +1542,7 @@ public class Class implements TopNodeInterface {
 			return
 		}
 		this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
-		block.inheritedAttribute.p.findUsage = this.findUsageInstances
+		block.inheritedAttribute.thePackageBeenCompiling.findUsage = this.findUsageInstances
 	}
 }
 

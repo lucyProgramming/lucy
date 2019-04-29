@@ -72,10 +72,10 @@ class ExpressionCheckVar {
                     continue
                 }
                 if e.isGlobal {
-                    err = block.inheritedAttribute.p.block.insert(v.name , v.pos , v)
+                    err = block.inheritedAttribute.thePackageBeenCompiling.block.insert(v.name , v.pos , v)
                 } else {
-                    if block.inheritedAttribute.Function != null {
-                        if err := block.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(v) ; err != null {
+                    if block.inheritedAttribute.function != null {
+                        if err := block.inheritedAttribute.function.Type.reDefineParameterOrReturnVar(v) ; err != null {
                             errs.append(err)
                         }
                     }
@@ -93,10 +93,10 @@ class ExpressionCheckVar {
             for k , v := range ev.variables {
                 var err error
                 if e.isGlobal {
-                    err = block.inheritedAttribute.p.block.insert(v.name , v.pos , v)
+                    err = block.inheritedAttribute.thePackageBeenCompiling.block.insert(v.name , v.pos , v)
                 } else {
-                    if block.inheritedAttribute.Function != null {
-                        if err := block.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(v) ; err != null {
+                    if block.inheritedAttribute.function != null {
+                        if err := block.inheritedAttribute.function.Type.reDefineParameterOrReturnVar(v) ; err != null {
                             errs.append(err)
                         }
                     }
@@ -127,7 +127,7 @@ class ExpressionCheckVar {
         }
         for _ , v := range ev.variables {
             if v.locateDefinition {
-                block.inheritedAttribute.p.setLocatedDefinitionPos(v)
+                block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(v)
                 return
             }
             if v.findUsage {
@@ -135,8 +135,8 @@ class ExpressionCheckVar {
                 u.Type = "declaration"
                 u.pos = v.pos
                 v.findUsageInstances = [u]
-                block.inheritedAttribute.p.findUsage = v.findUsageInstances
-                block.inheritedAttribute.p.findUsageIsGlobal = e.isGlobal
+                block.inheritedAttribute.thePackageBeenCompiling.findUsage = v.findUsageInstances
+                block.inheritedAttribute.thePackageBeenCompiling.findUsageIsGlobal = e.isGlobal
             }
         }
 

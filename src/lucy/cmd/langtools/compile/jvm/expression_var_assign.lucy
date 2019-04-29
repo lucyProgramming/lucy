@@ -22,7 +22,7 @@ class BuildExpressionVarAssign {
             state.popStack(len(state.stacks) - stackLength)
         }
         if len(vs.lefts) == 1 {
-            v := vs.lefts[0].data.(ast.ExpressionIdentifier).Variable
+            v := vs.lefts[0].data.(ast.ExpressionIdentifier).variable
             currentStack := char(0)
             if v.beenCapturedAsLeftValue > 0 {
                 closure.createClosureVar(c , code , v.Type)
@@ -77,7 +77,7 @@ class BuildExpressionVarAssign {
             if identifier.name == ast.UnderScore {
                 continue
             }
-            variable := identifier.Variable
+            variable := identifier.variable
             if variable.isGlobal {
                 stack := autoVar.unPack(c , code , k , variable.Type)
                 if stack > maxStack {

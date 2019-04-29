@@ -1,6 +1,6 @@
 // all rights reserved , check the LICENSE file
 
-public class CallVariableLengthArgs {
+public class CallVariableLengthArg {
     public expressions []Expression
     public length      int         
     /*

@@ -17,7 +17,7 @@ class SourceFile {
 
     fn insertImport(block Block , i Import) -> (err error) {
         if i.locateDefinition {
-            block.inheritedAttribute.p.setLocatedDefinitionPos(i)
+            block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(i)
             return
         }
         if this.imports == null {

@@ -22,23 +22,23 @@ class BuildExpressionIndex {
         context Context,
         state StackMapState) -> (maxStack char) {
         index := e.data.(ast.ExpressionIndex)
-        if index.Expression.value.Type == ast.VariableTypeMap {
+        if index.indexOn.value.Type == ast.VariableTypeMap {
             return this.buildMapIndex(c, code, e, context, state)
         }
-        if index.Expression.value.Type == ast.VariableTypeString {
+        if index.indexOn.value.Type == ast.VariableTypeString {
             return this.buildStringIndex(c, code, e, context, state)
         }
         stackLength := len(state.stacks)
         defer {
             state.popStack(len(state.stacks) - stackLength)
         }
-        maxStack = this.eb.build(c, code, index.Expression, context, state)
-        state.pushStack(c, index.Expression.value)
+        maxStack = this.eb.build(c, code, index.indexOn, context, state)
+        state.pushStack(c, index.indexOn.value)
         stack := this.eb.build(c, code, index.index, context, state)
         if t := stack + 1; t > maxStack {
             maxStack = t
         }
-        if index.Expression.value.Type == ast.VariableTypeArray {
+        if index.indexOn.value.Type == ast.VariableTypeArray {
             meta := ArrayMetas[e.value.Type]
             code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
@@ -86,7 +86,7 @@ class BuildExpressionIndex {
             state.popStack(len(state.stacks) - length)
         }
         index := e.data.(ast.ExpressionIndex)
-        maxStack = this.eb.build(c, code, index.Expression, context, state)
+        maxStack = this.eb.build(c, code, index.indexOn, context, state)
         code.codes[code.codeLength] = cg.OP_invokevirtual
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
             javaStringClass,
@@ -115,17 +115,17 @@ class BuildExpressionIndex {
             state.popStack(len(state.stacks) - length)
         }
         index := e.data.(ast.ExpressionIndex)
-        maxStack = this.eb.build(c, code, index.Expression, context, state)
+        maxStack = this.eb.build(c, code, index.indexOn, context, state)
         currentStack := char(1)
         //build index
-        state.pushStack(c, index.Expression.value)
+        state.pushStack(c, index.indexOn.value)
         stack := this.eb.build(c, code, index.index, context, state)
         if t := currentStack + stack; t > maxStack {
             maxStack = t
         }
         currentStack = 2 // mapref kref
-        if index.Expression.value.theMap.K.isPointer() == false {
-            TypeConverterAndPrimitivePacker.packPrimitives(c, code, index.Expression.value.theMap.K)
+        if index.indexOn.value.theMap.K.isPointer() == false {
+            TypeConverterAndPrimitivePacker.packPrimitives(c, code, index.indexOn.value.theMap.K)
         }
         code.codes[code.codeLength] = cg.OP_invokevirtual
         c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
@@ -135,10 +135,10 @@ class BuildExpressionIndex {
         ), code.codes[code.codeLength+1:code.codeLength+3])
         code.codeLength += 3
         state.popStack(1)
-        if index.Expression.value.theMap.V.Type == ast.VariableTypeEnum {
-            TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, index.Expression.value.theMap.V)
-        } else if index.Expression.value.theMap.V.isPointer() {
-            TypeConverterAndPrimitivePacker.castPointer(c, code, index.Expression.value.theMap.V)
+        if index.indexOn.value.theMap.V.Type == ast.VariableTypeEnum {
+            TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, index.indexOn.value.theMap.V)
+        } else if index.indexOn.value.theMap.V.isPointer() {
+            TypeConverterAndPrimitivePacker.castPointer(c, code, index.indexOn.value.theMap.V)
         } else {
             code.codes[code.codeLength] = cg.OP_dup // increment the stack
             code.codeLength++
@@ -146,7 +146,7 @@ class BuildExpressionIndex {
                 maxStack = 2
             }
             noNullExit := new cg.Exit(cg.OP_ifnonnull, code)
-            switch index.Expression.value.theMap.V.Type {
+            switch index.indexOn.value.theMap.V.Type {
             case ast.VariableTypeBool,
                 ast.VariableTypeByte,
                 ast.VariableTypeShort,
@@ -173,7 +173,7 @@ class BuildExpressionIndex {
             context.MakeStackMap(code, state, code.codeLength)
             state.popStack(1) // pop java_root_class ref
             writeExits([]cg.Exit{noNullExit}, code.codeLength)
-            TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, index.Expression.value.theMap.V)
+            TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, index.indexOn.value.theMap.V)
             writeExits([]cg.Exit{nullExit}, code.codeLength)
             state.pushStack(c, e.value)
             context.MakeStackMap(code, state, code.codeLength)

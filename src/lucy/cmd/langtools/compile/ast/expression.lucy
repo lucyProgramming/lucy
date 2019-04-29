@@ -113,12 +113,12 @@ public class Expression implements TopNodeInterface {
 
     fn convertTo(to Type) {
         c := new ExpressionTypeConversion()
-        c.Expression = new Expression()
-        c.Expression.op = this.op
-        c.Expression.value = this.value
-        c.Expression.Type = this.Type
-        c.Expression.data = this.data
-        c.Type = to
+        c.value = new Expression()
+        c.value.op = this.op
+        c.value.value = this.value
+        c.value.Type = this.Type
+        c.value.data = this.data
+        c.to = to
         this.value = to
         this.Type = ExpressionTypeCheckCast
         this.isCompilerAuto = true
@@ -350,20 +350,20 @@ public class Expression implements TopNodeInterface {
         }
         switch this.Type {
             case ExpressionTypeAutoCompletion:
-                block.inheritedAttribute.p.autoCompletionItems = searchRightValueForAutoCompletionItems(this.pos , block)
+                block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = searchRightValueForAutoCompletionItems(this.pos , block)
             case ExpressionTypeNull:
                 this.value = new Type()
                 this.value.Type = VariableTypeNull
                 this.value.pos = this.pos
                 returnValueTypes = [this.value]
             case ExpressionTypeDot:
-                if block.inheritedAttribute.Class == null {
+                if block.inheritedAttribute.theClass == null {
                     errs = []error{new error(sprintf("%s '%s' must in class scope" , this.pos.errMsgPrefix() , this.op))}
                 } else {
                     this.value = new Type()
                     this.value.Type = VariableTypeDynamicSelector
                     this.value.pos = this.pos
-                    this.value.theClass = block.inheritedAttribute.Class
+                    this.value.theClass = block.inheritedAttribute.theClass
                     returnValueTypes = [this.value]
                 }
 
@@ -569,10 +569,10 @@ public class Expression implements TopNodeInterface {
                 }
             case ExpressionTypeFunctionLiteral:
                 f := this.data.(Function)
-                if block.inheritedAttribute.p.statementLevelFunctions == null {
-                    block.inheritedAttribute.p.statementLevelFunctions = [f]
+                if block.inheritedAttribute.thePackageBeenCompiling.statementLevelFunctions == null {
+                    block.inheritedAttribute.thePackageBeenCompiling.statementLevelFunctions = [f]
                 } else {
-                    block.inheritedAttribute.p.statementLevelFunctions.append(f)
+                    block.inheritedAttribute.thePackageBeenCompiling.statementLevelFunctions.append(f)
                 }
 
                 if this.isStatementExpression {
@@ -582,7 +582,7 @@ public class Expression implements TopNodeInterface {
                     }
                 }
                 if f.locateDefinition {
-                    block.inheritedAttribute.p.setLocatedDefinitionPos(f)
+                    block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(f)
                     return
                 }
                 if f.findUsage {
@@ -590,7 +590,7 @@ public class Expression implements TopNodeInterface {
                     u.Type = "declaration"
                     u.pos = f.pos
                     f.findUsageInstances = [u]
-                    block.inheritedAttribute.p.findUsage = f.findUsageInstances
+                    block.inheritedAttribute.thePackageBeenCompiling.findUsage = f.findUsageInstances
                 }
                 es := f.check(block)
                 errs.appendAll(es)
@@ -608,7 +608,7 @@ public class Expression implements TopNodeInterface {
                 returnValueTypes[0] = new Type()
                 returnValueTypes[0].Type = VariableTypePackage
                 returnValueTypes[0].pos = this.pos
-                returnValueTypes[0].thePackage = block.inheritedAttribute.p
+                returnValueTypes[0].thePackage = block.inheritedAttribute.thePackageBeenCompiling
                 this.value = returnValueTypes[0]
             case ExpressionTypeParenthesis:
                 ee := this.data.(Expression) // override
@@ -661,7 +661,6 @@ public class Expression implements TopNodeInterface {
             } else {
                 es.append(err)
             }
-
         }
         return ret , es
     }
@@ -690,7 +689,7 @@ public class Expression implements TopNodeInterface {
             if method.isStatic() == false {
                 return new error(sprintf("%s method '%s' is a instance method" , this.pos.errMsgPrefix() , method.Function.name))
             }
-            if this.value.theClass != block.inheritedAttribute.Class {
+            if this.value.theClass != block.inheritedAttribute.theClass {
                 if this.value.theClass.loadFromOutSide {
                     if this.value.theClass.isPublic() == false {
                         return new error(sprintf("%s class '%s' is not public" , this.pos.errMsgPrefix() , this.value.theClass.name))
@@ -735,7 +734,7 @@ public class Expression implements TopNodeInterface {
             if field.isStatic() == false {
                 return new error(sprintf("%s field '%s' is not static" , this.pos.errMsgPrefix() , field.name))
             }
-            if this.value.theClass != block.inheritedAttribute.Class {
+            if this.value.theClass != block.inheritedAttribute.theClass {
                 if this.value.theClass.loadFromOutSide {
                     if this.value.theClass.isPublic() == false {
                         return new error(sprintf("%s class '%s' is not public" , this.pos.errMsgPrefix() , this.value.theClass.name))

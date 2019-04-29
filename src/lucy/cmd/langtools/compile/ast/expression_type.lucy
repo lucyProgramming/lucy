@@ -81,8 +81,8 @@ public class ExpressionTypeAssert extends ExpressionTypeConversion {
 
 public class ExpressionQuestion {
 	public selection Expression
-	public True      Expression
-	public False     Expression
+	public theTrue   Expression
+	public theFalse  Expression
 }
 
 public class ExpressionSlice {
@@ -92,10 +92,10 @@ public class ExpressionSlice {
 
 public class ExpressionFunctionCall {
 	public buildInFunctionMeta      Object                   // for build in function only
-	public Expression               Expression
+	public functionCallOn           Expression
 	public args                     []Expression
-	public vArgs                    CallVariableLengthArgs
-	public Function                 Function
+	public vArgs                    CallVariableLengthArg
+	public function                 Function
 	public parameterTypes           []Type                   // for template function
 	public templateFunctionCallPair TemplateFunctionInstance
 	// call(LF
@@ -105,13 +105,13 @@ public class ExpressionFunctionCall {
 }
 
 public class ExpressionMethodCall {
-	public Class              Class                  // for object or class
-	public Expression         Expression
-	public args               []Expression
-	public vArgs              CallVariableLengthArgs
-	public name               string
-	public method             ClassMethod
-	public fieldMethodHandler ClassField
+	public theStaticMethodCallClass Class                  // for object or class
+	public methodCallOn             Expression
+	public args                     []Expression
+	public vArgs                    CallVariableLengthArg
+	public name                     string
+	public method                   ClassMethod
+	public fieldMethodHandler       ClassField
 	/*
 		unSupport !!!!!!
 	*/
@@ -142,14 +142,14 @@ public class ExpressionVarAssign {
 }
 
 public class ExpressionTypeConversion {
-	public Type       Type
-	public Expression Expression
+	public to    Type
+	public value Expression
 }
 
 public class ExpressionIdentifier {
 	public name             string
-	public Variable         Variable
-	public Function         Function
+	public variable         Variable
+	public function         Function
 	public enumName         EnumName
 	public comment          string
 	public locateDefinition bool
@@ -160,12 +160,12 @@ public class ExpressionIdentifier {
 }
 
 public class ExpressionIndex {
-	public Expression Expression
-	public index      Expression
+	public indexOn Expression
+	public index   Expression
 }
 
 public class ExpressionSelection {
-	public Expression       Expression
+	public selectionOn      Expression
 	public name             string
 	public field            ClassField  // expression is class or object
 	public method           ClassMethod // pack to method handle
@@ -188,7 +188,7 @@ public class ExpressionNew {
 	public Type         Type
 	public args         []Expression
 	public construction ClassMethod
-	public vArgs        CallVariableLengthArgs
+	public vArgs        CallVariableLengthArg
 	// call(LF
 	public lpContainsLf bool
 	// call(// inline comment 

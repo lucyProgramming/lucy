@@ -219,8 +219,8 @@ class ExpressionParser extends ParserFather {
 		e.Type = ast.ExpressionTypeCheckCast
 		e.pos = pos
 		t := new ast.ExpressionTypeConversion()
-		t.Type = to
-		t.Expression = on
+		t.to = to
+		t.value = on
 		e.data = t
 	}
 

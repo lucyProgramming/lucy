@@ -21,7 +21,7 @@ public class Package {
 	public matchFile          string
 	public matchLine          int
 	public printFileMatchInfo bool
-	public loader             loadImport
+	public loader             ImportLoader
 
 	/*
 		for lucy tool goto definition
@@ -47,7 +47,7 @@ public class Package {
 	public fn Package(
 		name string,
 		disableCheckUnUse bool,
-		loader loadImport) {
+		loader ImportLoader) {
 		this.super()
 		this.disableCheckUnUse = disableCheckUnUse
 		this.name = name
@@ -354,7 +354,7 @@ public class Package {
 	}
 
 	public fn typeCheck(nodes []TopNode) -> (es []error = []error{}) {
-		this.block.inheritedAttribute.p = this
+		this.block.inheritedAttribute.thePackageBeenCompiling = this
 		this.block.isPackageBlock = true
 		this.block.package = this
 		this.errors = []error{}
@@ -452,7 +452,7 @@ public class Package {
 				continue
 			}
 			v.block.inherit(this.block)
-			v.block.inheritedAttribute.Function = v
+			v.block.inheritedAttribute.function = v
 			v.checkParametersAndReturns(this.errors , false , false)
 			if v.isGlobalMain() {
 				defineMainOK := false
@@ -479,9 +479,9 @@ public class Package {
 
 		for _ , v := range this.block.classes {
 			v.block.inherit(this.block)
-			assert(v.block.inheritedAttribute.p != null)
+			assert(v.block.inheritedAttribute.thePackageBeenCompiling != null)
 			this.errors.appendAll(v.block.checkConstants())
-			v.block.inheritedAttribute.Class = v
+			v.block.inheritedAttribute.theClass = v
 			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors
 			}
@@ -503,7 +503,7 @@ public class Package {
 		}
 
 		for _ , v := range this.block.classes {
-			assert(v.block.inheritedAttribute.p != null)
+			assert(v.block.inheritedAttribute.thePackageBeenCompiling != null)
 			es = v.checkPhase1()
 			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors

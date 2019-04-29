@@ -891,15 +891,15 @@ public class Fmt {
 
 			case ast.ExpressionTypeIndex:
 				index := e.data.(ast.ExpressionIndex)
-				format = this.formatExpression(indent , index.Expression) + "["
+				format = this.formatExpression(indent , index.indexOn) + "["
 				format += this.formatExpression(indent + this.indentIncremental , index.index)
 				format += "]"
 			case ast.ExpressionTypeSelection:
 				selection := e.data.(ast.ExpressionSelection)
-				if selection.Expression.Type == ast.ExpressionTypeDot {
+				if selection.selectionOn.Type == ast.ExpressionTypeDot {
 					format = "." + selection.name
 				} else {
-					format = this.formatExpression(indent , selection.Expression) + "."
+					format = this.formatExpression(indent , selection.selectionOn) + "."
 					if selection.containsLf {
 						format += "\n"
 						format += indent + this.indentIncremental + selection.name
@@ -912,7 +912,7 @@ public class Fmt {
 				}
 			case ast.ExpressionTypeSelectionConst:
 				selection := e.data.(ast.ExpressionSelection)
-				format = this.formatExpression(indent , selection.Expression) + "."
+				format = this.formatExpression(indent , selection.selectionOn) + "."
 				if selection.containsLf {
 					format += "\n"
 					format += indent + this.indentIncremental + selection.name
@@ -925,25 +925,25 @@ public class Fmt {
 
 			case ast.ExpressionTypeMethodCall:
 				call := e.data.(ast.ExpressionMethodCall)
-				if call.Expression.Type == ast.ExpressionTypeDot {
+				if call.methodCallOn.Type == ast.ExpressionTypeDot {
 					format += "." + call.name + "("
 				} else {
-					if call.Expression.containsLf {
-						format += this.formatExpression(indent , call.Expression) +
+					if call.methodCallOn.containsLf {
+						format += this.formatExpression(indent , call.methodCallOn) +
 							".\n" +
 							indent +
 							this.indentIncremental +
 							call.name + "("
 						indent += this.indentIncremental
-					} else if call.Expression.inlineComment != null {
-						format += this.formatExpression(indent , call.Expression) +
-							". //" + call.Expression.inlineComment +
+					} else if call.methodCallOn.inlineComment != null {
+						format += this.formatExpression(indent , call.methodCallOn) +
+							". //" + call.methodCallOn.inlineComment +
 							indent +
 							this.indentIncremental +
 							call.name + "("
 						indent += this.indentIncremental
 					} else {
-						format += this.formatExpression(indent , call.Expression) + "." + call.name + "("
+						format += this.formatExpression(indent , call.methodCallOn) + "." + call.name + "("
 					}
 				}
 				if call.lpContainsLf {
@@ -975,7 +975,7 @@ public class Fmt {
 				format += ")"
 			case ast.ExpressionTypeFunctionCall:
 				call := e.data.(ast.ExpressionFunctionCall)
-				format += this.formatExpression(indent , call.Expression) + "("
+				format += this.formatExpression(indent , call.functionCallOn) + "("
 				if call.lpContainsLf {
 					format += "\n"
 					format += this.indentIncremental + indent
@@ -1123,8 +1123,8 @@ public class Fmt {
 				}
 			case ast.ExpressionTypeCheckCast:
 				c := e.data.(ast.ExpressionTypeConversion)
-				format += c.Type.typeName() + "("
-				format += this.formatExpression(indent + this.indentIncremental , c.Expression)
+				format += c.to.typeName() + "("
+				format += this.formatExpression(indent + this.indentIncremental , c.value)
 				format += ")"
 			case ast.ExpressionTypeRange:
 				format = "range " + this.formatExpression(indent + this.indentIncremental , e.data.(ast.Expression))
@@ -1215,20 +1215,20 @@ public class Fmt {
 				}
 			case ast.ExpressionTypeTypeAssert:
 				a := e.data.(ast.ExpressionTypeAssert)
-				format += this.formatExpression(indent , a.Expression) + ".("
+				format += this.formatExpression(indent , a.value) + ".("
 				if a.isType {
 					format += "type"
 				} else {
-					format += a.Type.typeName()
+					format += a.to.typeName()
 				}
 				format += ")"
 			case ast.ExpressionTypeQuestion:
 				q := e.data.(ast.ExpressionQuestion)
 				format += this.formatExpression(indent + this.indentIncremental , q.selection)
 				format += "?"
-				format += this.formatExpression(indent + this.indentIncremental , q.True)
+				format += this.formatExpression(indent + this.indentIncremental , q.theTrue)
 				format += ":"
-				format += this.formatExpression(indent + this.indentIncremental , q.False)
+				format += this.formatExpression(indent + this.indentIncremental , q.theFalse)
 			case ast.ExpressionTypeGlobal:
 				return "global"
 			case ast.ExpressionTypeParenthesis:

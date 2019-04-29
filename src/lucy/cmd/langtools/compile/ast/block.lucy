@@ -150,7 +150,7 @@ public class Block implements TopNodeInterface {
 						u.pos = pos
 						if label.findUsageInstances == null {
 							label.findUsageInstances = [u]
-							this.inheritedAttribute.p.findUsage = label.findUsageInstances
+							this.inheritedAttribute.thePackageBeenCompiling.findUsage = label.findUsageInstances
 						} else {
 							label.findUsageInstances.append(u)
 						}
@@ -244,8 +244,8 @@ public class Block implements TopNodeInterface {
 			}
 		}
 		if this.isFunctionBlock &&
-			len(this.inheritedAttribute.Function.parameterTypes) > 0 {
-			return searchBuildIns(name , this.inheritedAttribute.p.lucyBuildInPackage) , null
+			len(this.inheritedAttribute.function.parameterTypes) > 0 {
+			return searchBuildIns(name , this.inheritedAttribute.thePackageBeenCompiling.lucyBuildInPackage) , null
 		}
 		if this.isFunctionBlock &&
 			name == ThisPointerName {
@@ -262,8 +262,8 @@ public class Block implements TopNodeInterface {
 			if v , ok := t.(Variable) ; ok {
 				if v.isGlobal == false {
 					if this.isFunctionBlock &&
-						this.inheritedAttribute.Function.isGlobal == false {
-						this.inheritedAttribute.Function.closure.insertVar(from , v)
+						this.inheritedAttribute.function.isGlobal == false {
+						this.inheritedAttribute.function.closure.insertVar(from , v)
 						isCaptureVar[0] = true
 					}
 					//cannot search variable from class body
@@ -300,26 +300,26 @@ public class Block implements TopNodeInterface {
 		this.inheritedAttribute.forBreak = father.inheritedAttribute.forBreak
 		this.inheritedAttribute.statementOffset = father.inheritedAttribute.statementOffset
 		this.inheritedAttribute.isConstructionMethod = father.inheritedAttribute.isConstructionMethod
-		this.inheritedAttribute.forStatement = father.inheritedAttribute.forStatement
-		this.inheritedAttribute.Function = father.inheritedAttribute.Function
-		this.inheritedAttribute.Class = father.inheritedAttribute.Class
-		this.inheritedAttribute.Defer = father.inheritedAttribute.Defer
+		this.inheritedAttribute.statementFor = father.inheritedAttribute.statementFor
+		this.inheritedAttribute.function = father.inheritedAttribute.function
+		this.inheritedAttribute.theClass = father.inheritedAttribute.theClass
+		this.inheritedAttribute.statementDefer = father.inheritedAttribute.statementDefer
 		this.inheritedAttribute.classMethod = father.inheritedAttribute.classMethod
 		this.inheritedAttribute.classAndFunctionNames = father.inheritedAttribute.classAndFunctionNames
-		this.inheritedAttribute.p = father.inheritedAttribute.p
+		this.inheritedAttribute.thePackageBeenCompiling = father.inheritedAttribute.thePackageBeenCompiling
 		if this.isFunctionBlock || this.isClassBlock {
 			this.inheritedAttribute.forBreak = null
-			this.inheritedAttribute.forStatement = null
+			this.inheritedAttribute.statementFor = null
 			this.inheritedAttribute.statementOffset = 0
 			this.inheritedAttribute.isConstructionMethod = false
 			this.inheritedAttribute.classMethod = null
-			this.inheritedAttribute.Defer = null
+			this.inheritedAttribute.statementDefer = null
 		}
 	}
 
 	fn checkUnUsed() -> (es []error) {
 		es = []error{}
-		if this.inheritedAttribute.p.disableCheckUnUse {
+		if this.inheritedAttribute.thePackageBeenCompiling.disableCheckUnUse {
 			return es
 		}
 		for _ , v := range this.constants {
@@ -383,10 +383,10 @@ public class Block implements TopNodeInterface {
 			}
 			this.inheritedAttribute.statementOffset = k
 			errs.appendAll(s.check(this))
-			if this.inheritedAttribute.p.shouldStop(errs) {
+			if this.inheritedAttribute.thePackageBeenCompiling.shouldStop(errs) {
 				return errs
 			}
-			if this.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+			if this.inheritedAttribute.thePackageBeenCompiling.locateDefinitionOrAutoCompletionFetched() {
 				return errs
 			}
 		}

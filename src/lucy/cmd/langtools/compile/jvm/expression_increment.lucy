@@ -18,19 +18,19 @@ class BuildExpressionIncrement {
         // identifier  and not captured and type`s int
         if identifier , ok := increment.data.(ast.ExpressionIdentifier) ; ok &&
             increment.Type == ast.ExpressionTypeIdentifier &&
-            identifier.Variable.beenCapturedAsLeftValue == 0 &&
-            identifier.Variable.Type.Type == ast.VariableTypeInt &&
-            identifier.Variable.isGlobal == false {
+            identifier.variable.beenCapturedAsLeftValue == 0 &&
+            identifier.variable.Type.Type == ast.VariableTypeInt &&
+            identifier.variable.isGlobal == false {
             if e.isStatementExpression == false {
                 if e.Type == ast.ExpressionTypeIncrement || e.Type == ast.ExpressionTypeDecrement {
-                    copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , identifier.Variable.localValOffset)) // load to stack top
+                    copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , identifier.variable.localValOffset)) // load to stack top
                     maxStack = 1
                 }
             }
-            if identifier.Variable.localValOffset > 255 {
+            if identifier.variable.localValOffset > 255 {
                 code.codes[code.codeLength] = cg.OP_wide
                 code.codes[code.codeLength + 1] = cg.OP_iinc
-                binary.BigEndian.putChar(code.codes[code.codeLength + 2:] , identifier.Variable.localValOffset)
+                binary.BigEndian.putChar(code.codes[code.codeLength + 2:] , identifier.variable.localValOffset)
                 if e.isIncrement() {
                     binary.BigEndian.putChar(code.codes[code.codeLength + 4:] , char(1))
                 } else {
@@ -39,7 +39,7 @@ class BuildExpressionIncrement {
                 code.codeLength += 6
             } else {
                 code.codes[code.codeLength] = cg.OP_iinc
-                code.codes[code.codeLength + 1] = byte(identifier.Variable.localValOffset)
+                code.codes[code.codeLength + 1] = byte(identifier.variable.localValOffset)
                 if e.isIncrement() {
                     code.codes[code.codeLength + 2] = 1
                 } else {
@@ -49,7 +49,7 @@ class BuildExpressionIncrement {
             }
             if e.isStatementExpression == false {
                 if e.Type == ast.ExpressionTypePrefixIncrement || e.Type == ast.ExpressionTypePrefixDecrement {
-                    copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , identifier.Variable.localValOffset)) // load to stack top
+                    copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , identifier.variable.localValOffset)) // load to stack top
                     maxStack = 1
                 }
             }

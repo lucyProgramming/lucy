@@ -89,7 +89,7 @@ public fn findPackageInWhichDirectory(
     ps := []string{}
     for _ , v := range lucyPath {
         if p := v + "/src/" + packageName ; true == new io.File(p).isDirectory() &&
-            haveFileType(p , ".lucy") {
+            dirHaveFileType(p , ".lucy") {
             ps.append(v)
         }
     }

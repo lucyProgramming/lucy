@@ -93,7 +93,7 @@ public class StatementWhen {
         if this.condition == null {
             return
         }
-        if len(this.condition.getParameterType(block.inheritedAttribute.Function.Type)) == 0 {
+        if len(this.condition.getParameterType(block.inheritedAttribute.function.Type)) == 0 {
             errs.append(new error(sprintf("%s '%s' contains no parameter type",
                         this.condition.pos.errMsgPrefix() , this.condition.typeString())))
         }

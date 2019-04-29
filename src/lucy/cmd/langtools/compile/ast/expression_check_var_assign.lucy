@@ -72,10 +72,10 @@ class ExpressionCheckVarAssign {
                                     variableType.typeString())))
                     }
                 }
-                identifier.Variable = variable
+                identifier.variable = variable
                 assign.ifDeclaredBefore[k] = true
                 if identifier.locateDefinition {
-                    block.inheritedAttribute.p.setLocatedDefinitionPos(variable)
+                    block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(variable)
                     return
                 }
             } else {
@@ -87,7 +87,7 @@ class ExpressionCheckVarAssign {
                 vd.name = identifier.name
                 vd.pos = v.pos
                 if identifier.locateDefinition {
-                    block.inheritedAttribute.p.setLocatedDefinitionPos(vd)
+                    block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(vd)
                     return
                 }
                 if variableType == null {
@@ -99,8 +99,8 @@ class ExpressionCheckVarAssign {
                     u.Type = "declaration"
                     u.pos = vd.pos
                     vd.findUsageInstances = [u]
-                    block.inheritedAttribute.p.findUsage = vd.findUsageInstances
-                    block.inheritedAttribute.p.findUsageIsGlobal = e.isGlobal
+                    block.inheritedAttribute.thePackageBeenCompiling.findUsage = vd.findUsageInstances
+                    block.inheritedAttribute.thePackageBeenCompiling.findUsageIsGlobal = e.isGlobal
                 }
                 vd.comment = identifier.comment
                 vd.Type = variableType.cloneType()
@@ -109,11 +109,11 @@ class ExpressionCheckVarAssign {
                     errs.append(err)
                 }
                 if e.isGlobal {
-                    err = block.inheritedAttribute.p.block.insert(vd.name , v.pos , vd)
+                    err = block.inheritedAttribute.thePackageBeenCompiling.block.insert(vd.name , v.pos , vd)
                     vd.isGlobal = true
                 } else {
-                    if block.inheritedAttribute.Function != null {
-                        if err := block.inheritedAttribute.Function.Type.
+                    if block.inheritedAttribute.function != null {
+                        if err := block.inheritedAttribute.function.Type.
                             reDefineParameterOrReturnVar(vd) ; err != null {
                             errs.append(err)
                         }
@@ -121,7 +121,7 @@ class ExpressionCheckVarAssign {
                     err = block.insert(vd.name , v.pos , vd)
                 }
 
-                identifier.Variable = vd
+                identifier.variable = vd
                 if err != null {
                     errs.append(err)
                     continue

@@ -132,7 +132,7 @@ public class Function implements TopNodeInterface {
 
     fn check(b Block) -> (errs []error = []error{}) {
         this.block.inherit(b)
-        this.block.inheritedAttribute.Function = this
+        this.block.inheritedAttribute.function = this
         this.checkParametersAndReturns(errs , true , false)
         if this.templateFunction == null {
             this.checkBlock(errs)
@@ -177,7 +177,7 @@ public class Function implements TopNodeInterface {
         isAbstract bool) {
         var err error
         if this.locateDefinition {
-            this.block.inheritedAttribute.p.setLocatedDefinitionPos(this)
+            this.block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(this)
             return
         }
         for k , v := range this.Type.parameterList {
@@ -185,7 +185,7 @@ public class Function implements TopNodeInterface {
                 v.name = ""
             }
             if v.locateDefinition {
-                this.block.inheritedAttribute.p.setLocatedDefinitionPos(v)
+                this.block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(v)
                 return
             }
             if v.findUsage {
@@ -193,7 +193,7 @@ public class Function implements TopNodeInterface {
                 u.Type = "declaration"
                 u.pos = v.pos
                 v.findUsageInstances = [u]
-                this.block.inheritedAttribute.p.findUsage = v.findUsageInstances
+                this.block.inheritedAttribute.thePackageBeenCompiling.findUsage = v.findUsageInstances
             }
             v.isFunctionParameter = true
             if len(v.Type.getParameterType(this.Type)) > 0 {
@@ -269,7 +269,7 @@ public class Function implements TopNodeInterface {
                     v.name = ""
                 }
                 if v.locateDefinition {
-                    this.block.inheritedAttribute.p.setLocatedDefinitionPos(v)
+                    this.block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(v)
                     return
                 }
                 if v.findUsage {
@@ -277,7 +277,7 @@ public class Function implements TopNodeInterface {
                     usage.Type = "declaration"
                     usage.pos = v.pos
                     v.findUsageInstances = [usage]
-                    this.block.inheritedAttribute.p.findUsage = v.findUsageInstances
+                    this.block.inheritedAttribute.thePackageBeenCompiling.findUsage = v.findUsageInstances
                 }
                 v.isReturn = true
                 if len(v.Type.getParameterType(this.Type)) > 0 {
@@ -360,7 +360,7 @@ public class Function implements TopNodeInterface {
             return
         }
         this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
-        block.inheritedAttribute.p.findUsage = this.findUsageInstances
+        block.inheritedAttribute.thePackageBeenCompiling.findUsage = this.findUsageInstances
     }
 }
 

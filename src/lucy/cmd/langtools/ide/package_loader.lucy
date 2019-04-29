@@ -6,7 +6,7 @@ import "java/lang/Object"
 import "lucy/cmd/langtools/common"
 import "java/io"
 
-public class PackageLoader extends lc.FileLoader {
+public class PackageLoader extends lc.Loader {
 	public onlyAnalyzeGlobals bool
 	public errors             []error
 
@@ -22,7 +22,7 @@ public class PackageLoader extends lc.FileLoader {
 		foundInLucy := false
 		for _ , v := range this.lucyPath {
 			if p := v + "/src/" + importName ; new io.File(p).isDirectory() &&
-				common.haveFileType(p , ".lucy") {
+				common.dirHaveFileType(p , ".lucy") {
 				realPaths.append(new lc.Resource(
 						lc.ResourceKindLucyPackage,
 						p,
@@ -33,7 +33,7 @@ public class PackageLoader extends lc.FileLoader {
 		}
 		if foundInLucy == false {
 			for _ , v := range this.classPath {
-				if p := v + "/" + importName ; new io.File(p).isDirectory() && common.haveFileType(p , ".class") {
+				if p := v + "/" + importName ; new io.File(p).isDirectory() && common.dirHaveFileType(p , ".class") {
 					realPaths.append(new lc.Resource(
 							lc.ResourceKindJavaPackage,
 							p,

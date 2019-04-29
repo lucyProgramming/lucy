@@ -3,7 +3,7 @@
 class ExpressionCheckTypeAssert {
     static fn check(e Expression , block Block , errs []error) -> (valueTypes []Type) {
         assertion := e.data.(ExpressionTypeAssert)
-        object , es := assertion.Expression.checkSingleValueContextExpression(block)
+        object , es := assertion.value.checkSingleValueContextExpression(block)
         errs.appendAll(es)
         if object == null {
             return
@@ -20,32 +20,32 @@ class ExpressionCheckTypeAssert {
                         errMsgPrefix(object.pos))))
             return
         }
-        err := assertion.Type.resolve(block)
+        err := assertion.to.resolve(block)
         if err != null {
             errs.append(err)
         } else {
-            if object.assignAble(block , errs , assertion.Type) == false {
+            if object.assignAble(block , errs , assertion.to) == false {
                 errs.append(
                     new error(
                         sprintf("%s '%s' is not sub class of '%s'",
-                            assertion.Type.pos.errMsgPrefix() , assertion.Type.typeString() , object.typeString())))
+                            assertion.to.pos.errMsgPrefix() , assertion.to.typeString() , object.typeString())))
             }
-            if assertion.Type.validForTypeAssertOrConversion() == false {
+            if assertion.to.validForTypeAssertOrConversion() == false {
                 errs.append(new error(sprintf("%s cannot use '%s' for type assertion",
-                            errMsgPrefix(assertion.Type.pos) , assertion.Type.typeString())))
+                            errMsgPrefix(assertion.to.pos) , assertion.to.typeString())))
             }
         }
         if len(e.lefts) > 1 {
             assertion.multiValueContext = true
             valueTypes = new []Type(2)
-            valueTypes[0] = assertion.Type.cloneType()
+            valueTypes[0] = assertion.to.cloneType()
             valueTypes[0].pos = e.pos
             valueTypes[1] = new Type()
             valueTypes[1].pos = e.pos
             valueTypes[1].Type = VariableTypeBool // if  assert is ok
         } else {
             valueTypes = new []Type(1)
-            valueTypes[0] = assertion.Type.cloneType()
+            valueTypes[0] = assertion.to.cloneType()
             valueTypes[0].pos = e.pos
         }
 

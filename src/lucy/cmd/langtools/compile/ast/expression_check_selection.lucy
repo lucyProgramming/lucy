@@ -3,13 +3,13 @@
 class ExpressionCheckSelection {
     static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
         selection := e.data.(ExpressionSelection)
-        object , es := selection.Expression.checkSingleValueContextExpression(block)
+        object , es := selection.selectionOn.checkSingleValueContextExpression(block)
         errs.appendAll(es)
         if object == null {
             return
         }
         if selection.autoCompletion {
-            ExpressionCheckSelection.autoCompletion(object , block , selection.Expression.isIdentifier(ThisPointerName))
+            ExpressionCheckSelection.autoCompletion(object , block , selection.selectionOn.isIdentifier(ThisPointerName))
             return
         }
         switch object.Type {
@@ -29,7 +29,7 @@ class ExpressionCheckSelection {
                     result := field.Type.cloneType()
                     result.pos = e.pos
                     if selection.locateDefinition {
-                        block.inheritedAttribute.p.setLocatedDefinitionPos(field)
+                        block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(field)
                         return
                     }
                     return result
@@ -41,7 +41,7 @@ class ExpressionCheckSelection {
                     result.theFunctionType = method.Function.Type
                     result.pos = e.pos
                     if selection.locateDefinition {
-                        block.inheritedAttribute.p.setLocatedDefinitionPos(method)
+                        block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(method)
                         return
                     }
                     return result
@@ -49,7 +49,7 @@ class ExpressionCheckSelection {
             case VariableTypePackage:
                 d , ok := object.thePackage.block.nameExists(selection.name , e.pos)
                 if selection.locateDefinition {
-                    block.inheritedAttribute.p.setLocatedDefinitionPos(d)
+                    block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(d)
                     return
                 }
                 if ok == false {
@@ -61,7 +61,7 @@ class ExpressionCheckSelection {
                 if v , ok := d.(Variable) ; ok {
                     result := v.Type.cloneType()
                     result.pos = e.pos
-                    if v.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.p) == false {
+                    if v.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
                         err := new error(sprintf("%s variable '%s' is not public",
                                 e.pos.errMsgPrefix() , selection.name))
                         errs.append(err)
@@ -73,7 +73,7 @@ class ExpressionCheckSelection {
                     e.fromConst(c) //
                     result := c.Type.cloneType()
                     result.pos = e.pos
-                    if c.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.p) == false {
+                    if c.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
                         err := new error(sprintf("%s const '%s' is not public",
                                 e.pos.errMsgPrefix() , selection.name))
                         errs.append(err)
@@ -85,7 +85,7 @@ class ExpressionCheckSelection {
                     result.pos = e.pos
                     result.Type = VariableTypeClass
                     result.theClass = c
-                    if c.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.p) == false {
+                    if c.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
                         err := new error(sprintf("%s class '%s' is not public",
                                 e.pos.errMsgPrefix() , selection.name))
                         errs.append(err)
@@ -93,7 +93,7 @@ class ExpressionCheckSelection {
                     return result
                 }
                 if n , ok := d.(EnumName) ; ok {
-                    if n.Enum.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.p) == false {
+                    if n.Enum.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
                         err := new error(sprintf("%s enum '%s' is not public",
                                 e.pos.errMsgPrefix() , selection.name))
                         errs.append(err)
@@ -107,7 +107,7 @@ class ExpressionCheckSelection {
                     return result
                 }
                 if f , ok := d.(Function) ; ok {
-                    if f.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.p) == false {
+                    if f.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
                         err := new error(sprintf("%s function '%s' is not public",
                                 e.pos.errMsgPrefix() , selection.name))
                         errs.append(err)
@@ -166,13 +166,13 @@ class ExpressionCheckSelection {
                     return null
                 }
                 if field , ok := fieldOrMethod.(ClassField) ; ok {
-                    err := selection.Expression.fieldAccessAble(block , field)
+                    err := selection.selectionOn.fieldAccessAble(block , field)
                     if err != null {
                         errs.append(err)
                     }
                     if selection.locateDefinition {
                         if object.theClass.loadFromOutSide == false {
-                            block.inheritedAttribute.p.setLocatedDefinitionPos(field)
+                            block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(field)
                             return
                         } else {
                             //TODO :: locateDefinition
@@ -184,13 +184,13 @@ class ExpressionCheckSelection {
                     return result
                 } else {
                     method := fieldOrMethod.(ClassMethod)
-                    err := selection.Expression.methodAccessAble(block , method)
+                    err := selection.selectionOn.methodAccessAble(block , method)
                     if err != null {
                         errs.append(err)
                     }
                     if selection.locateDefinition {
                         if object.theClass.loadFromOutSide == false {
-                            block.inheritedAttribute.p.setLocatedDefinitionPos(field)
+                            block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(field)
                             return
                         }
                     }
@@ -215,11 +215,11 @@ class ExpressionCheckSelection {
             case VariableTypeString:
                 ExpressionCheckSelection.autoCompletionForString(block , object.pos)
             case VariableTypeMap:
-                block.inheritedAttribute.p.autoCompletionItems = AutoCompletionItem.getMapAutoCompletionItem(object)
+                block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = AutoCompletionItem.getMapAutoCompletionItem(object)
             case VariableTypeJavaArray:
-                block.inheritedAttribute.p.autoCompletionItems = AutoCompletionItem.getJavaArrayBasicAutoCompletionItem()
+                block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = AutoCompletionItem.getJavaArrayBasicAutoCompletionItem()
             case VariableTypeArray:
-                block.inheritedAttribute.p.autoCompletionItems = AutoCompletionItem.getArrayAutoCompletionItem(object)
+                block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = AutoCompletionItem.getArrayAutoCompletionItem(object)
             case VariableTypeDynamicSelector:
                 ExpressionCheckSelection.autoCompletionForDynamicSelector(object.theClass , block)
             case VariableTypePackage:
@@ -275,7 +275,7 @@ class ExpressionCheckSelection {
             item.name = name
             items.append(item)
         }
-        block.inheritedAttribute.p.autoCompletionItems = items
+        block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
     }
 
     static fn autoCompletionForDynamicSelector(object Class , block Block) {
@@ -349,7 +349,7 @@ class ExpressionCheckSelection {
             object = object.superClass
             accessFromSub = true
         }
-        block.inheritedAttribute.p.autoCompletionItems = items
+        block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
     }
 
     static fn autoCompletionForObject(
@@ -459,7 +459,7 @@ class ExpressionCheckSelection {
             object = object.superClass
             accessFromSub = true
         }
-        block.inheritedAttribute.p.autoCompletionItems = items
+        block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
     }
 
     static fn autoCompletionClass(c Class , block Block) {
@@ -567,7 +567,7 @@ class ExpressionCheckSelection {
             c = c.superClass
             accessFromSub = true
         }
-        block.inheritedAttribute.p.autoCompletionItems = items
+        block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
     }
 }
 

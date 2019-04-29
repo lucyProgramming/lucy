@@ -6,19 +6,19 @@ class ExpressionCheckFunctionCall {
         if call.args == null {
             call.args = []Expression{}
         }
-        if call.Expression.Type == ExpressionTypeIdentifier {
-            identifier := call.Expression.data.(ExpressionIdentifier)
+        if call.functionCallOn.Type == ExpressionTypeIdentifier {
+            identifier := call.functionCallOn.data.(ExpressionIdentifier)
             isCaptureVar := [false]
             //TODO:: try from import , must be cast types.
-            d , err := block.searchIdentifier(call.Expression.pos , identifier.name , isCaptureVar)
+            d , err := block.searchIdentifier(call.functionCallOn.pos , identifier.name , isCaptureVar)
             if err != null {
                 errs.append(err)
                 return null
             }
             if d == null {
-                i := block.inheritedAttribute.p.getImport(e.pos.filename , identifier.name)
+                i := block.inheritedAttribute.thePackageBeenCompiling.getImport(e.pos.filename , identifier.name)
                 if i != null {
-                    d , err = block.inheritedAttribute.p.load(i.Import)
+                    d , err = block.inheritedAttribute.thePackageBeenCompiling.load(i.Import)
                     if err != null {
                         errs.append(err)
                     }
@@ -73,11 +73,11 @@ class ExpressionCheckFunctionCall {
 
             if d == null {
                 errs.append(new error(sprintf("%s '%s' not found",
-                            call.Expression.pos.errMsgPrefix() , identifier.name)))
+                            call.functionCallOn.pos.errMsgPrefix() , identifier.name)))
                 return null
             }
             if identifier.locateDefinition {
-                block.inheritedAttribute.p.setLocatedDefinitionPos(d)
+                block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(d)
                 return
             }
             if f , ok := d.(Function) ; ok {
@@ -88,19 +88,19 @@ class ExpressionCheckFunctionCall {
                     t.err = errMsg
                     errs.append(t)
                 }
-                call.Function = f
+                call.function = f
                 return .checkFunctionCall(e , block , errs , f , call)
             }
             if t , ok := d.(Type) ; ok {
                 typeConversion := new ExpressionTypeConversion()
-                typeConversion.Type = d.(Type)
+                typeConversion.to = d.(Type)
                 if len(call.args) != 1 {
                     errs.append(new error(sprintf("%s cast type expect 1 argument",
                                 e.pos.errMsgPrefix())))
                     return null
                 }
                 e.Type = ExpressionTypeCheckCast
-                typeConversion.Expression = call.args[0]
+                typeConversion.value = call.args[0]
                 e.data = typeConversion
                 ret := ExpressionCheckTypeConversion.check(e , block , errs)
                 if ret == null {
@@ -110,17 +110,17 @@ class ExpressionCheckFunctionCall {
             }
             if c , ok := d.(Class) ; ok {
                 typeConversion := new ExpressionTypeConversion()
-                typeConversion.Type = new Type()
-                typeConversion.Type.Type = VariableTypeObject
-                typeConversion.Type.theClass = d.(Class)
-                typeConversion.Type.pos = e.pos
+                typeConversion.to = new Type()
+                typeConversion.to.Type = VariableTypeObject
+                typeConversion.to.theClass = d.(Class)
+                typeConversion.to.pos = e.pos
                 if len(call.args) != 1 {
                     errs.append(new error(sprintf("%s cast type expect 1 argument",
                                 e.pos.errMsgPrefix())))
                     return null
                 }
                 e.Type = ExpressionTypeCheckCast
-                typeConversion.Expression = call.args[0]
+                typeConversion.value = call.args[0]
                 e.data = typeConversion
                 ret := ExpressionCheckTypeConversion.check(e , block , errs)
                 if ret == null {
@@ -135,22 +135,22 @@ class ExpressionCheckFunctionCall {
                 v.used = true
                 if v.Type.Type != VariableTypeFunction {
                     errs.append(new error(sprintf("%s '%s' is not a function , but '%s' ",
-                                call.Expression.pos.errMsgPrefix() , v.name , v.Type.typeString())))
+                                call.functionCallOn.pos.errMsgPrefix() , v.name , v.Type.typeString())))
                     return null
                 }
-                call.Expression.value = new Type()
-                call.Expression.value.Type = VariableTypeFunction
-                call.Expression.value.pos = e.pos
-                call.Expression.value.theFunctionType = v.Type.theFunctionType
-                identifier.Variable = v
+                call.functionCallOn.value = new Type()
+                call.functionCallOn.value.Type = VariableTypeFunction
+                call.functionCallOn.value.pos = e.pos
+                call.functionCallOn.value.theFunctionType = v.Type.theFunctionType
+                identifier.variable = v
                 return .checkFunctionPointerCall(e , block , errs , v.Type.theFunctionType , call)
             }
             errs.append(new error(sprintf("%s cannot make_node_objects call on '%s'",
-                        call.Expression.pos.errMsgPrefix() , block.identifierIsWhat(d))))
+                        call.functionCallOn.pos.errMsgPrefix() , block.identifierIsWhat(d))))
             return null
 
         }
-        functionPointer , es := call.Expression.checkSingleValueContextExpression(block)
+        functionPointer , es := call.functionCallOn.checkSingleValueContextExpression(block)
         errs.appendAll(es)
         if functionPointer == null {
             return null
@@ -158,18 +158,18 @@ class ExpressionCheckFunctionCall {
         if functionPointer.Type != VariableTypeFunction {
             errs.append(new error(sprintf("%s '%s' is not a function , but '%s'",
                         e.pos.errMsgPrefix(),
-                        call.Expression.op , functionPointer.typeString())))
+                        call.functionCallOn.op , functionPointer.typeString())))
             return null
         }
-        if call.Expression.Type == ExpressionTypeFunctionLiteral {
+        if call.functionCallOn.Type == ExpressionTypeFunctionLiteral {
             /*
 				fn() {
 
 				}()
 				no name function is statement too
 			*/
-            call.Function = call.Expression.data.(Function)
-            call.Expression.isStatementExpression = true
+            call.function = call.functionCallOn.data.(Function)
+            call.functionCallOn.isStatementExpression = true
         }
         return .checkFunctionPointerCall(e , block , errs , functionPointer.theFunctionType , call)
     }
@@ -333,12 +333,12 @@ class ExpressionCheckFunctionCall {
             }
 
             //check this function
-            cloneFunction.block.inherit(block.inheritedAttribute.p.block)
+            cloneFunction.block.inherit(block.inheritedAttribute.thePackageBeenCompiling.block)
             if cloneFunction.block.functions == null {
                 cloneFunction.block.functions = new map{string -> Function}()
             }
             cloneFunction.block.functions[cloneFunction.name] = cloneFunction
-            cloneFunction.block.inheritedAttribute.Function = cloneFunction
+            cloneFunction.block.inheritedAttribute.function = cloneFunction
             cloneFunction.checkParametersAndReturns(errs , true , false)
             cloneFunction.checkBlock(errs)
         }

@@ -7,7 +7,7 @@ class ExpressionCheckLeftValue {
 		case ExpressionTypeIdentifier:
 			identifier := e.data.(ExpressionIdentifier)
 			if identifier.autoCompletion {
-				block.inheritedAttribute.p.autoCompletionItems = searchLeftValueForAutoCompletionItems(block , e.pos)
+				block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = searchLeftValueForAutoCompletionItems(block , e.pos)
 				return 
 			}
 			if identifier.name == UnderScore {
@@ -35,7 +35,7 @@ class ExpressionCheckLeftValue {
                     v.beenCapturedAsLeftValue++
                 }
 				if identifier.locateDefinition {
-					block.inheritedAttribute.p.setLocatedDefinitionPos(v)
+					block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(v)
 					return 
 				}
 				if v.findUsageInstances != null {
@@ -45,8 +45,8 @@ class ExpressionCheckLeftValue {
                 // if no variable not change,after been captured, right value should ok too
                 v.beenCapturedAsLeftValue += v.beenCapturedAsRightValue
                 v.beenCapturedAsRightValue = 0
-                identifier.Variable = v
-                result = identifier.Variable.Type.cloneType()
+                identifier.variable = v
+                result = identifier.variable.Type.cloneType()
                 result.pos = e.pos
                 e.value = result
                 return
@@ -60,7 +60,7 @@ class ExpressionCheckLeftValue {
 			return
 		case ExpressionTypeSelection:
 			selection := e.data.(ExpressionSelection)
-			object, es := selection.Expression.checkSingleValueContextExpression(block)
+			object, es := selection.selectionOn.checkSingleValueContextExpression(block)
 			errs.appendAll(es)
 			if object == null {
 				return 
@@ -84,7 +84,7 @@ class ExpressionCheckLeftValue {
 					return 
 				}
 				if selection.locateDefinition {
-					block.inheritedAttribute.p.setLocatedDefinitionPos(field)
+					block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(field)
 					return 
 				}
 				selection.field = field
@@ -101,10 +101,10 @@ class ExpressionCheckLeftValue {
 				selection.field = field
 				if field != null {
 					if selection.locateDefinition {
-						block.inheritedAttribute.p.setLocatedDefinitionPos(field)
+						block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(field)
 						return 
 					}
-					err := selection.Expression.fieldAccessAble(block, field)
+					err := selection.selectionOn.fieldAccessAble(block, field)
 					if err != null {
 						errs.append(err)
 					}
@@ -123,12 +123,12 @@ class ExpressionCheckLeftValue {
 				}
 				if v ,ok := variable.(Variable) ; ok {
 				    if v.isPublic() == false &&
-                        object.thePackage.isSame(block.inheritedAttribute.p) == false {
+                        object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
                         errs.append(new error(sprintf("%s '%s.%s' is private",
                             e.pos.errMsgPrefix(), object.thePackage.name, selection.name)))
                     }
 					if selection.locateDefinition {
-						block.inheritedAttribute.p.setLocatedDefinitionPos(v)
+						block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(v)
 						return 
 					}
                     selection.packageVariable = v
@@ -175,7 +175,7 @@ class ExpressionCheckLeftValue {
             item.name = name
             items.append(item)
         }
-        block.inheritedAttribute.p.autoCompletionItems = items
+        block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
     } 
     
     static fn autoCompletionForDynamicSelector(object Class , block Block) {
@@ -204,7 +204,7 @@ class ExpressionCheckLeftValue {
             object = object.superClass 
             accessFromSub = true    
         }
-        block.inheritedAttribute.p.autoCompletionItems = items
+        block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
     } 
     
     static fn autoCompletionForObject(object Class , block Block) {
@@ -233,7 +233,7 @@ class ExpressionCheckLeftValue {
             object = object.superClass 
             accessFromSub = true
         }
-        block.inheritedAttribute.p.autoCompletionItems = items
+        block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
     } 
     static fn autoCompletionClass(c Class , block Block) {
         items := []AutoCompletionItem{}
@@ -261,6 +261,6 @@ class ExpressionCheckLeftValue {
             c = c.superClass 
             accessFromSub = true    
         }
-        block.inheritedAttribute.p.autoCompletionItems = items
+        block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
     }
 }

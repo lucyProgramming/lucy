@@ -79,22 +79,22 @@ class BuildForRangeJavaArray {
         //handle captured vars
         if s.condition.Type == ast.ExpressionTypeVarAssign {
             if attr.identifierValue != null &&
-                attr.identifierValue.Variable.beenCapturedAsLeftValue > 0 {
-                closure.createClosureVar(c , code , attr.identifierValue.Variable.Type)
-                attr.identifierValue.Variable.localValOffset = code.maxLocals
+                attr.identifierValue.variable.beenCapturedAsLeftValue > 0 {
+                closure.createClosureVar(c , code , attr.identifierValue.variable.Type)
+                attr.identifierValue.variable.localValOffset = code.maxLocals
                 code.maxLocals++
                 copyOPs(code,
-                    storeLocalVariableOps(ast.VariableTypeObject , attr.identifierValue.Variable.localValOffset))
+                    storeLocalVariableOps(ast.VariableTypeObject , attr.identifierValue.variable.localValOffset))
                 forState.appendLocals(c,
                     forState.newObjectVariableType(closure.getMeta(attr.rangeOn.value.theArray.Type).className))
             }
             if attr.identifierKey != null &&
-                attr.identifierKey.Variable.beenCapturedAsLeftValue > 0 {
-                closure.createClosureVar(c , code , attr.identifierKey.Variable.Type)
-                attr.identifierKey.Variable.localValOffset = code.maxLocals
+                attr.identifierKey.variable.beenCapturedAsLeftValue > 0 {
+                closure.createClosureVar(c , code , attr.identifierKey.variable.Type)
+                attr.identifierKey.variable.localValOffset = code.maxLocals
                 code.maxLocals++
                 copyOPs(code,
-                    storeLocalVariableOps(ast.VariableTypeObject , attr.identifierKey.Variable.localValOffset))
+                    storeLocalVariableOps(ast.VariableTypeObject , attr.identifierKey.variable.localValOffset))
                 forState.appendLocals(c,
                     forState.newObjectVariableType(closure.getMeta(ast.VariableTypeInt).className))
             }
@@ -166,25 +166,25 @@ class BuildForRangeJavaArray {
         //current stack is 0
         if s.condition.Type == ast.ExpressionTypeVarAssign {
             if attr.identifierValue != null {
-                if attr.identifierValue.Variable.beenCapturedAsLeftValue > 0 {
-                    copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , attr.identifierValue.Variable.localValOffset))
+                if attr.identifierValue.variable.beenCapturedAsLeftValue > 0 {
+                    copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , attr.identifierValue.variable.localValOffset))
                     copyOPs(code,
                         loadLocalVariableOps(attr.rangeOn.value.theArray.Type,
                             autoVar.V))
-                    this.eb.storeLocalVar(c , code , attr.identifierValue.Variable)
+                    this.eb.storeLocalVar(c , code , attr.identifierValue.variable)
                 } else {
-                    attr.identifierValue.Variable.localValOffset = autoVar.V
+                    attr.identifierValue.variable.localValOffset = autoVar.V
                 }
             }
             if attr.identifierKey != null {
-                if attr.identifierKey.Variable.beenCapturedAsLeftValue > 0 {
+                if attr.identifierKey.variable.beenCapturedAsLeftValue > 0 {
                     copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject,
-                            attr.identifierKey.Variable.localValOffset))
+                            attr.identifierKey.variable.localValOffset))
                     copyOPs(code,
                         loadLocalVariableOps(ast.VariableTypeInt , autoVar.K))
-                    this.eb.storeLocalVar(c , code , attr.identifierKey.Variable)
+                    this.eb.storeLocalVar(c , code , attr.identifierKey.variable)
                 } else {
-                    attr.identifierKey.Variable.localValOffset = autoVar.K
+                    attr.identifierKey.variable.localValOffset = autoVar.K
                 }
             }
         } else {

@@ -82,20 +82,20 @@ public class Statement {
                 } else {
                     block.defers.append(this.Defer)
                 }
-                block.inheritedAttribute.Function.hasDefer = true
+                block.inheritedAttribute.function.hasDefer = true
                 this.Defer.block.inherit(block)
-                this.Defer.block.inheritedAttribute.Defer = this.Defer
+                this.Defer.block.inheritedAttribute.statementDefer = this.Defer
                 es := this.Defer.block.check()
                 return es
             case StatementTypeBlock:
                 this.block.inherit(block)
                 return this.block.check()
             case StatementTypeLabel:
-                if block.inheritedAttribute.Defer != null {
-                    if block.inheritedAttribute.Defer.labels != null {
-                        block.inheritedAttribute.Defer.labels.append(this.StatementLabel)
+                if block.inheritedAttribute.statementDefer != null {
+                    if block.inheritedAttribute.statementDefer.labels != null {
+                        block.inheritedAttribute.statementDefer.labels.append(this.StatementLabel)
                     } else {
-                        block.inheritedAttribute.Defer.labels = [this.StatementLabel]
+                        block.inheritedAttribute.statementDefer.labels = [this.StatementLabel]
                     }
                 }
                 if this.StatementLabel.findUsage {
@@ -104,20 +104,20 @@ public class Statement {
                     u.pos = this.StatementLabel.pos
                     if this.StatementLabel.findUsageInstances == null {
                         this.StatementLabel.findUsageInstances = [u]
-                        block.inheritedAttribute.p.findUsage = this.StatementLabel.findUsageInstances
+                        block.inheritedAttribute.thePackageBeenCompiling.findUsage = this.StatementLabel.findUsageInstances
                     } else {
                         this.StatementLabel.findUsageInstances.append(u)
                     }
                 }
                 if this.StatementLabel.locateDefinition {
-                    block.inheritedAttribute.p.setLocatedDefinitionPos(this.StatementLabel)
+                    block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(this.StatementLabel)
                     return
                 }
             case StatementTypeClass:
-                if block.inheritedAttribute.p.statementLevelClass == null {
-                    block.inheritedAttribute.p.statementLevelClass = []Class{this.Class}
+                if block.inheritedAttribute.thePackageBeenCompiling.statementLevelClass == null {
+                    block.inheritedAttribute.thePackageBeenCompiling.statementLevelClass = []Class{this.Class}
                 } else {
-                    block.inheritedAttribute.p.statementLevelClass.append(this.Class)
+                    block.inheritedAttribute.thePackageBeenCompiling.statementLevelClass.append(this.Class)
                 }
 
                 err := block.insert(this.Class.name , this.Class.pos , this.Class)
@@ -125,7 +125,7 @@ public class Statement {
                     errs.append(err)
                 }
                 if this.Class.locateDefinition {
-                    block.inheritedAttribute.p.setLocatedDefinitionPos(this.Class)
+                    block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(this.Class)
                     return
                 }
                 if this.Class.findUsage {
@@ -133,18 +133,18 @@ public class Statement {
                     u.Type = "declaration"
                     u.pos = this.Class.pos
                     this.Class.findUsageInstances = [u]
-                    block.inheritedAttribute.p.findUsage = this.Class.findUsageInstances
+                    block.inheritedAttribute.thePackageBeenCompiling.findUsage = this.Class.findUsageInstances
                 }
                 if this.Class.suggestExtendsOrImplements {
-                    block.inheritedAttribute.p.autoCompletionItems = new []AutoCompletionItem(2)
+                    block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = new []AutoCompletionItem(2)
                     item := new AutoCompletionItem()
                     item.Type = "keyword"
                     item.name = "extends"
-                    block.inheritedAttribute.p.autoCompletionItems[0] = item
+                    block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems[0] = item
                     item = new AutoCompletionItem()
                     item.Type = "keyword"
                     item.name = "implements"
-                    block.inheritedAttribute.p.autoCompletionItems[1] = item
+                    block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems[1] = item
                 }
                 errs.appendAll(this.Class.check(block))
                 return errs
@@ -160,7 +160,7 @@ public class Statement {
             case StatementTypeWhen:
                 return this.StatementWhen.check(block , this)
             case StatementTypeImport:
-                if block.inheritedAttribute.Function.templateClonedFunction == false {
+                if block.inheritedAttribute.function.templateClonedFunction == false {
                     errs.append(new error(sprintf("%s cannot have 'import' at this scope , non-template function",
                                 errMsgPrefix(this.Import.pos))))
                     return errs
@@ -176,12 +176,12 @@ public class Statement {
                                 errMsgPrefix(this.Import.pos))))
                     return null
                 }
-                if err := block.inheritedAttribute.p.insertImport(this.Import) ; err != null {
+                if err := block.inheritedAttribute.thePackageBeenCompiling.insertImport(this.Import) ; err != null {
                     errs.append(err)
                 }
             case StatementTypeTypeAlias:
                 if this.TypeAlias.locateDefinition {
-                    block.inheritedAttribute.p.setLocatedDefinitionPos(this.TypeAlias)
+                    block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(this.TypeAlias)
                     return
                 }
                 if this.TypeAlias.findUsage {
@@ -189,7 +189,7 @@ public class Statement {
                     u.Type = "declaration"
                     u.pos = this.TypeAlias.pos
                     this.TypeAlias.findUsageInstances = [u]
-                    block.inheritedAttribute.p.findUsage = this.TypeAlias.findUsageInstances
+                    block.inheritedAttribute.thePackageBeenCompiling.findUsage = this.TypeAlias.findUsageInstances
                 }
                 err := this.TypeAlias.Type.resolve(block)
                 if err != null {

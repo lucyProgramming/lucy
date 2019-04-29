@@ -3,7 +3,7 @@
 class ExpressionCheckIndex {
     static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
         index := e.data.(ExpressionIndex)
-        on , es := index.Expression.checkSingleValueContextExpression(block)
+        on , es := index.indexOn.checkSingleValueContextExpression(block)
         errs.appendAll(es)
         if on == null {
             return

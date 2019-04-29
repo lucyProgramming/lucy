@@ -7,15 +7,15 @@ public class StatementContinue {
     public inlineComment string          
 
     fn check(block Block) -> (errs []error) {
-        if block.inheritedAttribute.forStatement == null {
+        if block.inheritedAttribute.statementFor == null {
             return []error{new error(sprintf("%s 'continue' can`t in this scope",
                         this.pos.errMsgPrefix()))}
         }
-        if block.inheritedAttribute.Defer != null {
+        if block.inheritedAttribute.statementDefer != null {
             return []error{new error(sprintf("%s cannot has 'continue' in 'defer'",
                         this.pos.errMsgPrefix()))}
         }
-        this.statementFor = block.inheritedAttribute.forStatement
+        this.statementFor = block.inheritedAttribute.statementFor
         this.defers = []StatementDefer{}
         this.mkDefers(block)
         return null

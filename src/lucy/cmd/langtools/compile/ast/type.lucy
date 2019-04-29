@@ -208,25 +208,25 @@ public class Type {
 		this.resolved = true // single threading
 		switch this.Type {
 			case VariableTypeTemplate:
-				if block.inheritedAttribute.Function.parameterTypes == null {
+				if block.inheritedAttribute.function.parameterTypes == null {
 					return new error(sprintf("%s parameter type '%s' not in a template function",
 								errMsgPrefix(this.pos) , this.name))
 				}
-				if block.inheritedAttribute.Function.parameterTypes[this.name] == null {
+				if block.inheritedAttribute.function.parameterTypes[this.name] == null {
 					return new error(sprintf("%s parameter type '%s' not found",
 								errMsgPrefix(this.pos) , this.name))
 				}
 				pos := this.pos // keep pos
 				if this.locateDefinition {
-					block.inheritedAttribute.p.setLocatedDefinitionPos(block.inheritedAttribute.Function.parameterTypes[this.name])
+					block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(block.inheritedAttribute.function.parameterTypes[this.name])
 				}
-				block.inheritedAttribute.Function.parameterTypes[this.name].copyThis2Another(this)
+				block.inheritedAttribute.function.parameterTypes[this.name].copyThis2Another(this)
 				this.pos = pos // keep pos
 				return null
 			case VariableTypeName:
 				return this.resolveName(block)
 			case VariableTypeGlobal:
-				d , exists := block.inheritedAttribute.p.block.nameExists(this.name , this.pos)
+				d , exists := block.inheritedAttribute.thePackageBeenCompiling.block.nameExists(this.name , this.pos)
 				if exists == false {
 					return new error(sprintf("%s '%s' not found",
 								errMsgPrefix(this.pos) , this.name))
@@ -259,7 +259,7 @@ public class Type {
 
 			case this.isPrimitive():
 				if this.locateDefinition {
-					block.inheritedAttribute.p.setLocatedDefinitionPos(this)
+					block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(this)
 				}
 		}
 
@@ -270,7 +270,7 @@ public class Type {
 		var d Object
 		if this.name.indexOf(".") < 0 {
 			if this.autoCompletion {
-				block.inheritedAttribute.p.autoCompletionItems = searchTypeForAutoCompletionItems(this.pos , block)
+				block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = searchTypeForAutoCompletionItems(this.pos , block)
 				return null
 			}
 			var loadFromImport bool
@@ -324,13 +324,13 @@ public class Type {
 
 	fn getNameFromImport(block Block) -> (d Object , err error) {
 		if this.name.indexOf(".") < 0 {
-			i := block.inheritedAttribute.p.getImport(this.pos.filename , this.name)
+			i := block.inheritedAttribute.thePackageBeenCompiling.getImport(this.pos.filename , this.name)
 			if i != null {
 				if this.locateDefinition {
-					block.inheritedAttribute.p.setLocatedDefinitionPos(i)
+					block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(i)
 				}
 				i.mkUsed(this.pos)
-				return block.inheritedAttribute.p.load(i.Import)
+				return block.inheritedAttribute.thePackageBeenCompiling.load(i.Import)
 			}
 			return null , new error(sprintf("%s type named '%s' not found",
 						errMsgPrefix(this.pos) , this.name))
@@ -338,7 +338,7 @@ public class Type {
 		index := this.name.indexOf(".")
 		packageName := this.name[:index]
 		className := this.name[index + 1:]
-		i := block.inheritedAttribute.p.getImport(this.pos.filename , packageName)
+		i := block.inheritedAttribute.thePackageBeenCompiling.getImport(this.pos.filename , packageName)
 		if null == i {
 			return null , new error(sprintf("%s package '%s' not imported",
 						errMsgPrefix(this.pos) , packageName))
@@ -352,9 +352,9 @@ public class Type {
 		}
 
 		if this.locatePackageDefinition {
-			block.inheritedAttribute.p.setLocatedDefinitionPos(i)
+			block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(i)
 		}
-		p , err := block.inheritedAttribute.p.load(i.Import)
+		p , err := block.inheritedAttribute.thePackageBeenCompiling.load(i.Import)
 		if err != null {
 			return null , new error(sprintf("%s %s",
 						errMsgPrefix(this.pos) , err.getMessage()))
@@ -383,7 +383,7 @@ public class Type {
 					items.append(item)
 				}
 
-				block.inheritedAttribute.p.autoCompletionItems = items
+				block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
 			} else {
 				return null , new error(sprintf("%s '%s' is not a package",
 							errMsgPrefix(this.pos) , packageName))
@@ -412,7 +412,7 @@ public class Type {
 						errMsgPrefix(this.pos) , c.name))
 			}
 			if this.locateDefinition && c.pos != null {
-				block.inheritedAttribute.p.setLocatedDefinitionPos(c)
+				block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(c)
 			}
 			this.Type = VariableTypeObject
 			this.theClass = c
@@ -425,9 +425,9 @@ public class Type {
 			t.copyThis2Another(this)
 			if this.locateDefinition {
 				if t.theAlias == null {
-					block.inheritedAttribute.p.setLocatedDefinitionPos(t)
+					block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(t)
 				} else {
-					block.inheritedAttribute.p.setLocatedDefinitionPos(t.theAlias)
+					block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(t.theAlias)
 				}
 
 			}
@@ -438,11 +438,11 @@ public class Type {
 		}
 		if dd , ok := d.(Enum) ; ok {
 			if dd.loadFromOutSide && dd.isPublic() == false {
-				block.inheritedAttribute.p.errors.append(new error(sprintf("%s enum '%s' is not public",
+				block.inheritedAttribute.thePackageBeenCompiling.errors.append(new error(sprintf("%s enum '%s' is not public",
 							errMsgPrefix(this.pos) , dd.name)))
 			}
 			if this.locateDefinition {
-				block.inheritedAttribute.p.setLocatedDefinitionPos(dd)
+				block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(dd)
 				return
 			}
 			this.Type = VariableTypeEnum
@@ -724,6 +724,10 @@ public class Type {
 			}
 		}
 		return new error(sprintf("cannot bind '%s' to '%s'" , bind.typeString() , this.typeString()))
+	}
+
+	fn notAssignAble(block Block , errs []error , rightValue Type) -> (notAble bool) {
+		return !this.assignAble(block , errs , rightValue)
 	}
 
 	fn assignAble(block Block , errs []error , rightValue Type) -> (able bool) {

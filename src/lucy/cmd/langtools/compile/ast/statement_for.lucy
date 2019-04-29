@@ -53,20 +53,20 @@ public class StatementFor {
         if rangeOn.Type == VariableTypeString {
             // byte[]("")
             conversion := new ExpressionTypeConversion()
-            conversion.Type = new Type()
-            conversion.Type.Type = VariableTypeJavaArray
-            conversion.Type.pos = rangeOn.pos
-            conversion.Type.theArray = new Type()
-            conversion.Type.theArray.Type = VariableTypeByte
-            conversion.Type.theArray.pos = rangeOn.pos
-            conversion.Expression = rangeExpression
+            conversion.to = new Type()
+            conversion.to.Type = VariableTypeJavaArray
+            conversion.to.pos = rangeOn.pos
+            conversion.to.theArray = new Type()
+            conversion.to.theArray.Type = VariableTypeByte
+            conversion.to.theArray.pos = rangeOn.pos
+            conversion.value = rangeExpression
             bs := new Expression()
             bs.Type = ExpressionTypeCheckCast
             bs.data = conversion
             bs.pos = rangeOn.pos
-            bs.value = conversion.Type
+            bs.value = conversion.to
             rangeExpression = bs
-            rangeOn = conversion.Type
+            rangeOn = conversion.to
         }
         if rangeOn.Type != VariableTypeArray &&
             rangeOn.Type != VariableTypeJavaArray &&
@@ -122,7 +122,7 @@ public class StatementFor {
                 vd.findUsage = identifierV.findUsage
                 vd.pos = posV
                 if vd.locateDefinition {
-                    this.initExpressionBlock.inheritedAttribute.p.setLocatedDefinitionPos(vd)
+                    this.initExpressionBlock.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(vd)
                     return
                 }
                 if vd.findUsage {
@@ -130,7 +130,7 @@ public class StatementFor {
                     u.Type = "declaration"
                     u.pos = vd.pos
                     vd.findUsageInstances = [u]
-                    this.initExpressionBlock.inheritedAttribute.p.findUsage = vd.findUsageInstances
+                    this.initExpressionBlock.inheritedAttribute.thePackageBeenCompiling.findUsage = vd.findUsageInstances
                 }
                 if rangeOn.Type == VariableTypeArray ||
                     rangeOn.Type == VariableTypeJavaArray {
@@ -140,8 +140,8 @@ public class StatementFor {
                 }
 
                 vd.name = identifierV.name
-                if this.initExpressionBlock.inheritedAttribute.Function != null {
-                    if err := this.initExpressionBlock.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(vd) ; err != null {
+                if this.initExpressionBlock.inheritedAttribute.function != null {
+                    if err := this.initExpressionBlock.inheritedAttribute.function.Type.reDefineParameterOrReturnVar(vd) ; err != null {
                         errs.append(err)
                     }
                 }
@@ -149,7 +149,7 @@ public class StatementFor {
                 if err != null {
                     errs.append(err)
                 }
-                identifierV.Variable = vd
+                identifierV.variable = vd
                 this.rangeAttr.identifierValue = identifierV
             }
             if modelKv &&
@@ -171,7 +171,7 @@ public class StatementFor {
                 vd.locateDefinition = identifierK.locateDefinition
                 vd.findUsage = identifierK.findUsage
                 if vd.locateDefinition {
-                    this.initExpressionBlock.inheritedAttribute.p.setLocatedDefinitionPos(vd)
+                    this.initExpressionBlock.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(vd)
                     return
                 }
                 if vd.findUsage {
@@ -179,10 +179,10 @@ public class StatementFor {
                     u.Type = "declaration"
                     u.pos = vd.pos
                     vd.findUsageInstances = [u]
-                    this.initExpressionBlock.inheritedAttribute.p.findUsage = vd.findUsageInstances
+                    this.initExpressionBlock.inheritedAttribute.thePackageBeenCompiling.findUsage = vd.findUsageInstances
                 }
-                if this.initExpressionBlock.inheritedAttribute.Function != null {
-                    if err := this.initExpressionBlock.inheritedAttribute.Function.Type.reDefineParameterOrReturnVar(vd) ; err != null {
+                if this.initExpressionBlock.inheritedAttribute.function != null {
+                    if err := this.initExpressionBlock.inheritedAttribute.function.Type.reDefineParameterOrReturnVar(vd) ; err != null {
                         errs.append(err)
                     }
                 }
@@ -190,7 +190,7 @@ public class StatementFor {
                 if err != null {
                     errs.append(err)
                 }
-                identifierK.Variable = vd
+                identifierK.variable = vd
                 this.rangeAttr.identifierKey = identifierK
             }
         } else {
@@ -264,7 +264,7 @@ public class StatementFor {
 
     fn check(block Block) -> (errs []error = []error{}) {
         this.initExpressionBlock.inherit(block)
-        this.initExpressionBlock.inheritedAttribute.forStatement = this
+        this.initExpressionBlock.inheritedAttribute.statementFor = this
         this.initExpressionBlock.inheritedAttribute.forBreak = this
         if this.Init == null &&
             this.increment == null &&

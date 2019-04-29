@@ -153,7 +153,7 @@ public class ClassMethod {
 			return false
 		}
 		call := s.Expression.data.(ExpressionMethodCall)
-		if call.Expression.isIdentifier(ThisPointerName) == false ||
+		if call.methodCallOn.isIdentifier(ThisPointerName) == false ||
 			call.name != Super {
 			return false
 		}

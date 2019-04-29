@@ -11,7 +11,7 @@ class ExpressionCheckNew {
             errs.append(err)
             return
         }
-        if block.inheritedAttribute.p.locateDefinitionOrAutoCompletionFetched() {
+        if block.inheritedAttribute.thePackageBeenCompiling.locateDefinitionOrAutoCompletionFetched() {
             return
         }
         if no.Type.Type == VariableTypeMap {

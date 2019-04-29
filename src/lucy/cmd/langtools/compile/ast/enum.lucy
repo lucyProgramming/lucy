@@ -32,7 +32,7 @@ public class EnumName {
             return
         }
         this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
-        block.inheritedAttribute.p.findUsage = this.findUsageInstances
+        block.inheritedAttribute.thePackageBeenCompiling.findUsage = this.findUsageInstances
     }
 }
 
@@ -83,27 +83,27 @@ public class Enum implements TopNodeInterface {
 
     fn check(block Block) -> (errs []error = []error{}) {
         if this.locateDefinition {
-            block.inheritedAttribute.p.setLocatedDefinitionPos(this)
+            block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(this)
         }
         if this.findUsage {
             u := new Usage()
             u.Type = "declaration"
             u.pos = this.pos
             this.findUsageInstances = [u]
-            block.inheritedAttribute.p.findUsage = this.findUsageInstances
-            block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal
+            block.inheritedAttribute.thePackageBeenCompiling.findUsage = this.findUsageInstances
+            block.inheritedAttribute.thePackageBeenCompiling.findUsageIsGlobal = this.isGlobal
         }
         for _ , vv := range this.enums {
             if vv.locateDefinition {
-                block.inheritedAttribute.p.setLocatedDefinitionPos(vv)
+                block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(vv)
             }
             if vv.findUsage {
                 u := new Usage()
                 u.Type = "declaration"
                 u.pos = vv.pos
                 vv.findUsageInstances = [u]
-                block.inheritedAttribute.p.findUsage = vv.findUsageInstances
-                block.inheritedAttribute.p.findUsageIsGlobal = this.isGlobal
+                block.inheritedAttribute.thePackageBeenCompiling.findUsage = vv.findUsageInstances
+                block.inheritedAttribute.thePackageBeenCompiling.findUsageIsGlobal = this.isGlobal
             }
         }
         var initV int = 0
@@ -141,7 +141,7 @@ public class Enum implements TopNodeInterface {
             return
         }
         this.findUsageInstances = this.findUsageInstances[:len(this.findUsageInstances) - 1]
-        block.inheritedAttribute.p.findUsage = this.findUsageInstances
+        block.inheritedAttribute.thePackageBeenCompiling.findUsage = this.findUsageInstances
     }
 }
 

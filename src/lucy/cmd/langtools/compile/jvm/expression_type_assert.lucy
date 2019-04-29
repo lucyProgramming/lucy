@@ -20,21 +20,21 @@ class BuildExpressionAssert {
 		state StackMapState) -> (maxStack char) {
 		assertion := e.data.(ast.ExpressionTypeAssert)
 		if assertion.multiValueContext {
-			maxStack = this.eb.build(c , code , assertion.Expression , context , state)
+			maxStack = this.eb.build(c , code , assertion.value , context , state)
 			code.codes[code.codeLength] = cg.OP_dup
 			code.codeLength++
 			code.codes[code.codeLength] = cg.OP_instanceof
 			code.codeLength++
-			insertTypeAssertClass(c , code , assertion.Type)
+			insertTypeAssertClass(c , code , assertion.to)
 			code.codes[code.codeLength] = cg.OP_dup
 			code.codeLength++
 			{
-				state.pushStack(c , assertion.Expression.value)
+				state.pushStack(c , assertion.value.value)
 				state.pushStack(c , typeInt)
 				context.MakeStackMap(code , state , code.codeLength + 7)
 				state.popStack(2)
 				state.pushStack(c , typeInt)
-				state.pushStack(c , assertion.Expression.value)
+				state.pushStack(c , assertion.value.value)
 				context.MakeStackMap(code , state , code.codeLength + 11)
 				state.popStack(2)
 			}
@@ -67,7 +67,7 @@ class BuildExpressionAssert {
 			}
 			code.codes[code.codeLength] = cg.OP_checkcast // convince the jvm
 			code.codeLength++
-			insertTypeAssertClass(c , code , assertion.Type)
+			insertTypeAssertClass(c , code , assertion.to)
 
 			code.codes[code.codeLength] = cg.OP_aastore
 			code.codeLength++
@@ -85,7 +85,7 @@ class BuildExpressionAssert {
 			code.codes[code.codeLength] = cg.OP_aastore
 			code.codeLength++
 		} else {
-			maxStack = this.eb.build(c , code , assertion.Expression , context , state)
+			maxStack = this.eb.build(c , code , assertion.value , context , state)
 			if assertion.isType {
 				return maxStack
 			}
@@ -93,7 +93,7 @@ class BuildExpressionAssert {
 			code.codeLength++
 			code.codes[code.codeLength] = cg.OP_instanceof
 			code.codeLength++
-			insertTypeAssertClass(c , code , assertion.Type)
+			insertTypeAssertClass(c , code , assertion.to)
 			exit := new cg.Exit(cg.OP_ifne , code)
 			code.codes[code.codeLength] = cg.OP_pop
 			code.codeLength++
@@ -112,12 +112,12 @@ class BuildExpressionAssert {
 			code.codes[code.codeLength] = cg.OP_athrow
 			code.codeLength++
 			writeExits([]cg.Exit{exit} , code.codeLength)
-			state.pushStack(c , assertion.Expression.value)
+			state.pushStack(c , assertion.value.value)
 			defer state.popStack(1)
 			context.MakeStackMap(code , state , code.codeLength)
 			code.codes[code.codeLength] = cg.OP_checkcast // convince the jvm
 			code.codeLength++
-			insertTypeAssertClass(c , code , assertion.Type)
+			insertTypeAssertClass(c , code , assertion.to)
 		}
 
 		return

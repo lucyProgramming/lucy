@@ -19,35 +19,35 @@ class  BuildExpressionIdentifier {
 		e ast.Expression,
 		context Context) -> (maxStack char) {
 		identifier := e.data.(ast.ExpressionIdentifier)
-		maxStack = jvmSlotSize(identifier.Variable.Type)
-		if context.theFunction.closure.closureVariableExist(identifier.Variable) {
-			if identifier.Variable.beenCapturedAsLeftValue > 0 {
+		maxStack = jvmSlotSize(identifier.variable.Type)
+		if context.theFunction.closure.closureVariableExist(identifier.variable) {
+			if identifier.variable.beenCapturedAsLeftValue > 0 {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, char(0)))
-				meta := closure.getMeta(identifier.Variable.Type.Type)
+				meta := closure.getMeta(identifier.variable.Type.Type)
 				code.codes[code.codeLength] = cg.OP_getfield
 				c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					c.name,
-					identifier.Variable.name,
+					identifier.variable.name,
 					"L" + meta.className + ";"
 				), code.codes[code.codeLength+1:code.codeLength+3])
 				code.codeLength += 3
-				closure.unPack(c, code, identifier.Variable.Type)
+				closure.unPack(c, code, identifier.variable.Type)
 			} else {
 				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, char(0)))
 				code.codes[code.codeLength] = cg.OP_getfield
 				c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 					c.name,
-					identifier.Variable.name,
-					Descriptor.typeDescriptor(identifier.Variable.Type)
+					identifier.variable.name,
+					Descriptor.typeDescriptor(identifier.variable.Type)
 				), code.codes[code.codeLength+1:code.codeLength+3])
 				code.codeLength += 3
 			}
 		} else {
-			if identifier.Variable.beenCapturedAsLeftValue > 0 {
-				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, identifier.Variable.localValOffset))
-				closure.unPack(c, code, identifier.Variable.Type)
+			if identifier.variable.beenCapturedAsLeftValue > 0 {
+				copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, identifier.variable.localValOffset))
+				closure.unPack(c, code, identifier.variable.Type)
 			} else {
-				copyOPs(code, loadLocalVariableOps(e.value.Type, identifier.Variable.localValOffset))
+				copyOPs(code, loadLocalVariableOps(e.value.Type, identifier.variable.localValOffset))
 			}
 		}
 		return
@@ -67,23 +67,23 @@ class  BuildExpressionIdentifier {
 			loadInt(c, code, identifier.enumName.value)
 			maxStack = char(1)
 			return
-		case identifier.Function != null:
-			return this.eb.BuildExpressionFunction.packFunction2MethodHandle(c, code, identifier.Function, context)
-		case identifier.Variable.isGlobal:
+		case identifier.function != null:
+			return this.eb.BuildExpressionFunction.packFunction2MethodHandle(c, code, identifier.function, context)
+		case identifier.variable.isGlobal:
 			code.codes[code.codeLength] = cg.OP_getstatic
 			c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
 				this.eb.bp.mainClass.name,
 				identifier.name,
-				Descriptor.typeDescriptor(identifier.Variable.Type)
+				Descriptor.typeDescriptor(identifier.variable.Type)
 			), code.codes[code.codeLength+1:code.codeLength+3])
 			code.codeLength += 3
-			maxStack = jvmSlotSize(identifier.Variable.Type)
+			maxStack = jvmSlotSize(identifier.variable.Type)
 			return
-		case identifier.Variable.beenCapturedAsLeftValue+identifier.Variable.beenCapturedAsRightValue > 0:
+		case identifier.variable.beenCapturedAsLeftValue+identifier.variable.beenCapturedAsRightValue > 0:
 			return this.buildCapturedIdentifier(c, code, e, context)
 		default:
 			maxStack = jvmSlotSize(e.value)
-			copyOPs(code, loadLocalVariableOps(e.value.Type, identifier.Variable.localValOffset))
+			copyOPs(code, loadLocalVariableOps(e.value.Type, identifier.variable.localValOffset))
 			return
 		}
 	}	

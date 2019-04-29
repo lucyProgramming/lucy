@@ -41,10 +41,10 @@ public class NameWithPos {
 
     public containsLf bool // contains "\n"
 
-    public fn NameWithPos(name string , Pos Pos) {
+    public fn NameWithPos(name string , pos Pos) {
         this.super()
         this.name = name
-        this.pos = Pos
+        this.pos = pos
     }
 
     public fn containsLfOrInlineComment() -> (contains bool) {

@@ -3,7 +3,7 @@
 class ExpressionSelectConst {
     static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
         selection := e.data.(ExpressionSelection)
-        object , es := selection.Expression.checkSingleValueContextExpression(block)
+        object , es := selection.selectionOn.checkSingleValueContextExpression(block)
         errs.appendAll(es)
         if object == null {
             return

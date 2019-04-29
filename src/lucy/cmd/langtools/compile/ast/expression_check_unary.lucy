@@ -58,8 +58,8 @@ class ExpressionCheckUnary {
 				special case
 				fn1(a++)
 			*/
-            if t := on.data.(ExpressionIdentifier) ; t.Variable != null {
-                t.Variable.used = true
+            if t := on.data.(ExpressionIdentifier) ; t.variable != null {
+                t.variable.used = true
             }
         }
         if false == increment.isNumber() {

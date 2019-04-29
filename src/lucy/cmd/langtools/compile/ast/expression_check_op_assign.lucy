@@ -44,8 +44,8 @@ class ExpressionCheckOpAssign {
 				print(a += 1)
 			*/
             t := bin.left.data.(ExpressionIdentifier)
-            if t.Variable != null {
-                t.Variable.used = true
+            if t.variable != null {
+                t.variable.used = true
             }
         }
         convertExpressionToNeed(block , bin.right , left , right)

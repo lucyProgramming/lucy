@@ -51,10 +51,10 @@ public class StatementLabel {
 			if false {
 				if true {
 					// jump over variable definition not allow
-					goto some ;
+					goto some 
 				}
 			}
-			a := false ;
+			a := false 
 			some:
 		*/
         errMsg := sprintf("%s cannot jump over variable definition:\n" , from.errMsgPrefix())

@@ -78,7 +78,7 @@ class BuildExpressionArray {
         context Context,
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionMethodCall)
-        maxStack = this.eb.build(c , code , call.Expression , context , state)
+        maxStack = this.eb.build(c , code , call.methodCallOn , context , state)
         switch call.name {
             case common.ArrayMethodSize:
                 code.codes[code.codeLength] = cg.OP_arraylength
@@ -105,14 +105,14 @@ class BuildExpressionArray {
         }
 
         call := e.data.(ast.ExpressionMethodCall)
-        maxStack = this.eb.build(c , code , call.Expression , context , state)
-        state.pushStack(c , call.Expression.value)
+        maxStack = this.eb.build(c , code , call.methodCallOn , context , state)
+        state.pushStack(c , call.methodCallOn.value)
         switch call.name {
             case common.ArrayMethodSize,
                 common.ArrayMethodStart,
                 common.ArrayMethodCap,
                 common.ArrayMethodEnd:
-                meta := ArrayMetas[call.Expression.value.theArray.Type]
+                meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
                 code.codes[code.codeLength] = cg.OP_invokevirtual
                 c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
                     call.name,
@@ -123,13 +123,13 @@ class BuildExpressionArray {
                     code.codeLength++
                 }
             case common.ArrayMethodAppend:
-                meta := ArrayMetas[call.Expression.value.theArray.Type]
+                meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
                 for k , v := range call.args {
                     currentStack := char(1)
                     if k != len(call.args) - 1 {
                         code.codes[code.codeLength] = cg.OP_dup
                         code.codeLength++
-                        state.pushStack(c , call.Expression.value)
+                        state.pushStack(c , call.methodCallOn.value)
                         currentStack++
                     }
                     stack := this.eb.build(c , code , v , context , state)
@@ -147,13 +147,13 @@ class BuildExpressionArray {
                 }
 
             case common.ArrayMethodAppendAll:
-                meta := ArrayMetas[call.Expression.value.theArray.Type]
+                meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
                 for k , v := range call.args {
                     currentStack := char(1)
                     if k != len(call.args) - 1 {
                         code.codes[code.codeLength] = cg.OP_dup
                         code.codeLength++
-                        state.pushStack(c , call.Expression.value)
+                        state.pushStack(c , call.methodCallOn.value)
                         currentStack++
                     }
                     stack := this.eb.build(c , code , v , context , state)
@@ -172,14 +172,14 @@ class BuildExpressionArray {
                 }
 
             case common.ArrayMethodSetReadOnly:
-                meta := ArrayMetas[call.Expression.value.theArray.Type]
+                meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
                 stack := this.eb.build(c , code , call.args[0] , context , state)
                 if t := char(1) + stack ; t > maxStack {
                     maxStack = t
                 }
                 c.insertMethodCall(code , cg.OP_invokevirtual , meta.className , common.ArrayMethodSetReadOnly , "(Z)V")
             case common.ArrayMethodGetUnderlyingArray:
-                meta := ArrayMetas[call.Expression.value.theArray.Type]
+                meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
                 code.codes[code.codeLength] = cg.OP_getfield
                 c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(meta.className,
                     "elements",

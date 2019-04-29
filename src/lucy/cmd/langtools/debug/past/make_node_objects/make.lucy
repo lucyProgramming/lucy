@@ -523,21 +523,21 @@ public class MakeNodesObjects {
                 index := e.data.(ast.ExpressionIndex)
                 ret := new map{string -> Object}()
                 ret["op"] = e.op
-                ret["on"] = this.makeExpression(index.Expression)
+                ret["on"] = this.makeExpression(index.indexOn)
                 ret["index"] = this.makeExpression(index.index)
                 return ret
             case ast.ExpressionTypeSelection:
                 selection := e.data.(ast.ExpressionSelection)
                 ret := new map{string -> Object}()
                 ret["op"] = e.op
-                ret["on"] = this.makeExpression(selection.Expression)
+                ret["on"] = this.makeExpression(selection.selectionOn)
                 ret["index"] = selection.name
                 return ret
             case ast.ExpressionTypeSelectionConst:
                 selection := e.data.(ast.ExpressionSelection)
                 ret := new map{string -> Object}()
                 ret["op"] = e.op
-                ret["on"] = this.makeExpression(selection.Expression)
+                ret["on"] = this.makeExpression(selection.selectionOn)
                 ret["index"] = selection.name
                 return ret
             case ast.ExpressionTypeMethodCall:
@@ -545,7 +545,7 @@ public class MakeNodesObjects {
                 ret := new map{string -> Object}()
                 ret["op"] = e.op
                 ret["name"] = call.name
-                ret["on"] = this.makeExpression(call.Expression)
+                ret["on"] = this.makeExpression(call.methodCallOn)
                 if len(call.args) > 0 {
                     var t Object[] = new Object[](len(call.args))
                     for k , v := range call.args {
@@ -567,7 +567,7 @@ public class MakeNodesObjects {
                 call := e.data.(ast.ExpressionFunctionCall)
                 ret := new map{string -> Object}()
                 ret["op"] = e.op
-                ret["on"] = this.makeExpression(call.Expression)
+                ret["on"] = this.makeExpression(call.functionCallOn)
                 if len(call.args) > 0 {
                     var t Object[] = new Object[](len(call.args))
                     for k , v := range call.args {
@@ -696,8 +696,8 @@ public class MakeNodesObjects {
                 ret := new map{string -> Object}()
                 ret["op"] = e.op
                 cast := e.data.(ast.ExpressionTypeConversion)
-                ret["expression"] = this.makeExpression(cast.Expression)
-                ret["type"] = cast.Type.typeString()
+                ret["expression"] = this.makeExpression(cast.value)
+                ret["type"] = cast.to.typeString()
                 return ret
             case ast.ExpressionTypeRange:
                 ret := new map{string -> Object}()
@@ -739,16 +739,16 @@ public class MakeNodesObjects {
                 ret := new map{string -> Object}()
                 ret["op"] = e.op
                 cast := e.data.(ast.ExpressionTypeAssert)
-                ret["expression"] = this.makeExpression(cast.Expression)
-                ret["type"] = cast.Type.typeString()
+                ret["expression"] = this.makeExpression(cast.value)
+                ret["type"] = cast.to.typeString()
                 return ret
             case ast.ExpressionTypeQuestion:
                 ret := new map{string -> Object}()
                 ret["op"] = e.op
                 q := e.data.(ast.ExpressionQuestion)
                 ret["selection"] = this.makeExpression(q.selection)
-                ret["true"] = this.makeExpression(q.True)
-                ret["false"] = this.makeExpression(q.False)
+                ret["true"] = this.makeExpression(q.theTrue)
+                ret["false"] = this.makeExpression(q.theFalse)
                 return ret
             case ast.ExpressionTypeGlobal:
                 return e.op // should be "global"

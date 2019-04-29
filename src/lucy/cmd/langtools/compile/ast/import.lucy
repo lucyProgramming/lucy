@@ -3,53 +3,52 @@
 import "lucy/cmd/langtools/compile/common" as common
 
 public class Import implements TopNodeInterface {
-    public accessName         string 
-    public Import             string  // full name
-    public pos                Pos    
-    public used               int   
-    public alias              string 
-    public aliasPos           Pos    
-    public locateDefinition   bool   
-    public comment            string 
-    public findUsage          bool   
-    public findUsageInstances []Usage
+	public accessName         string
+	public Import             string  // full name
+	public pos                Pos
+	public used               int
+	public alias              string
+	public aliasPos           Pos
+	public locateDefinition   bool
+	public comment            string
+	public findUsage          bool
+	public findUsageInstances []Usage
 
-    fn mkUsed(pos Pos) {
-        this.used++
-        if this.findUsage == false {
-            return
-        }
-        u := new Usage()
-        u.Type = "value read"
-        u.pos = pos
-        this.findUsageInstances.append(u)
-    }
+	fn mkUsed(pos Pos) {
+		this.used++
+		if this.findUsage == false {
+			return
+		}
+		u := new Usage()
+		u.Type = "value read"
+		u.pos = pos
+		this.findUsageInstances.append(u)
+	}
 
-    public fn mkDescription() -> (s string = "") {
-        if this.comment != null {
-            s += this.comment
-        }
-        s += sprintf("import \"%s\"" , this.Import)
-        if this.alias != null {
-            s += " as " + this.alias
-        }
-    }
-    /*
+	public fn mkDescription() -> (s string = "") {
+		if this.comment != null {
+			s += this.comment
+		}
+		s += sprintf("import \"%s\"" , this.Import)
+		if this.alias != null {
+			s += " as " + this.alias
+		}
+	}
+	/*
 		import "github.com/lucy" should access by lucy.doSomething()
 		import "github.com/std" as std2 should access by std2.doSomething()
 	*/
-    public fn mkAccessName() -> (err error) {
-        if this.accessName != null && this.accessName != "" {
-            this.alias = this.accessName
-            return
-        }
-        if false == packageNameIsValid(this.Import) {
-            return new error(sprintf("%s '%s' is not a valid name",
-                this.pos.errMsgPrefix() , this.Import))
-        }
-        this.accessName = common.getBaseName(this.Import)
-    }
+	public fn mkAccessName() -> (err error) {
+		if this.accessName != null && this.accessName != "" {
+			this.alias = this.accessName
+			return
+		}
+		if false == packageNameIsValid(this.Import) {
+			return new error(sprintf("%s '%s' is not a valid name",
+						this.pos.errMsgPrefix() , this.Import))
+		}
+		this.accessName = common.getBaseName(this.Import)
+	}
 
 }
-
 
