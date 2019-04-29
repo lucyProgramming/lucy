@@ -7,11 +7,11 @@ import "lucy/jvm/cg"
 
 class BuildinFunctionCatchPanic {
     
-    eb BuildExpression
+    buildExpression BuildExpression
 
     fn BuildinFunctionCatchPanic(eb BuildExpression){
         this.super()
-        this.eb = eb
+        this.buildExpression = eb
     }
     
     fn mkBuildInPanic(
@@ -24,7 +24,7 @@ class BuildinFunctionCatchPanic {
         meta := call.buildInFunctionMeta.(ast.BuildInFunctionPanicMeta)
         if meta.argThrowable {
             if call.args[0].Type == ast.ExpressionTypeNew { // not new expression
-                maxStack = this.eb.build(c, code, call.args[0], context, state)
+                maxStack = this.buildExpression.build(c, code, call.args[0], context, state)
             } else {
                 code.codes[code.codeLength] = cg.OP_new
                 className := call.args[0].value.theClass.name
@@ -38,7 +38,7 @@ class BuildinFunctionCatchPanic {
                     state.stacks.append(verificationTypeInfo)
                     state.stacks.append(verificationTypeInfo)
                 }
-                stack := this.eb.build(c, code, call.args[0], context, state)
+                stack := this.buildExpression.build(c, code, call.args[0], context, state)
                 state.popStack(2)
                 maxStack = char(2) + stack
                 code.codes[code.codeLength] = cg.OP_invokespecial
@@ -57,11 +57,11 @@ class BuildinFunctionCatchPanic {
             state.stacks.append(verificationTypeInfo)
             state.stacks.append(verificationTypeInfo)
             
-            stack := this.eb.build(c, code, call.args[0], context, state)
+            stack := this.buildExpression.build(c, code, call.args[0], context, state)
             if t := char(2) + stack; t > maxStack {
                 maxStack = t
             }
-            if t := char(2) + this.eb.BuildExpressionConversion.stackTop2String(c, code, call.args[0].value, context, state); t > maxStack {
+            if t := char(2) + this.buildExpression.buildExpressionConversion.stackTop2String(c, code, call.args[0].value, context, state); t > maxStack {
                 maxStack = t
             }
             code.codes[code.codeLength] = cg.OP_invokespecial

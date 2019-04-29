@@ -5,11 +5,11 @@ import "lucy/jvm/cg"
 import "lucy/binary"
 
 class BuildExpressionAssert {
-	eb BuildExpression
+	buildExpression BuildExpression
 
 	fn BuildExpressionAssert(eb BuildExpression) {
 		this.super()
-		this.eb = eb
+		this.buildExpression = eb
 	}
 
 	fn buildAssert(
@@ -20,7 +20,7 @@ class BuildExpressionAssert {
 		state StackMapState) -> (maxStack char) {
 		assertion := e.data.(ast.ExpressionTypeAssert)
 		if assertion.multiValueContext {
-			maxStack = this.eb.build(c , code , assertion.value , context , state)
+			maxStack = this.buildExpression.build(c , code , assertion.value , context , state)
 			code.codes[code.codeLength] = cg.OP_dup
 			code.codeLength++
 			code.codes[code.codeLength] = cg.OP_instanceof
@@ -85,7 +85,7 @@ class BuildExpressionAssert {
 			code.codes[code.codeLength] = cg.OP_aastore
 			code.codeLength++
 		} else {
-			maxStack = this.eb.build(c , code , assertion.value , context , state)
+			maxStack = this.buildExpression.build(c , code , assertion.value , context , state)
 			if assertion.isType {
 				return maxStack
 			}

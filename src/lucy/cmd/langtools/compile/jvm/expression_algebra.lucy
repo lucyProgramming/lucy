@@ -4,11 +4,11 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildExpressionArithmetic {
-	eb BuildExpression
+	buildExpression BuildExpression
 
 	fn BuildExpressionArithmetic(eb BuildExpression) {
 		this.super()
-		this.eb = eb
+		this.buildExpression = eb
 	}
 
 	fn buildArithmetic(
@@ -26,9 +26,9 @@ class BuildExpressionArithmetic {
 		if e.Type == ast.ExpressionTypeOr ||
 			e.Type == ast.ExpressionTypeAnd ||
 			e.Type == ast.ExpressionTypeXor {
-			maxStack = this.eb.build(c , code , bin.left , context , state)
+			maxStack = this.buildExpression.build(c , code , bin.left , context , state)
 			state.pushStack(c , bin.left.value)
-			stack := this.eb.build(c , code , bin.right , context , state)
+			stack := this.buildExpression.build(c , code , bin.right , context , state)
 			if t := stack + jvmSlotSize(bin.left.value) ; t > maxStack {
 				maxStack = t
 			}
@@ -64,11 +64,11 @@ class BuildExpressionArithmetic {
 			//handle string first
 			if bin.left.value.Type == ast.VariableTypeString ||
 				bin.right.value.Type == ast.VariableTypeString {
-				return this.eb.BuildExpressionStrcat.buildStrCat(c , code , e , context , state)
+				return this.buildExpression.buildExpressionStrcat.buildStrCat(c , code , e , context , state)
 			}
-			maxStack = this.eb.build(c , code , bin.left , context , state)
+			maxStack = this.buildExpression.build(c , code , bin.left , context , state)
 			state.pushStack(c , e.value)
-			stack := this.eb.build(c , code , bin.right , context , state)
+			stack := this.buildExpression.build(c , code , bin.right , context , state)
 			if t := jvmSlotSize(bin.left.value) + stack ; t > maxStack {
 				maxStack = t
 			}
@@ -205,9 +205,9 @@ class BuildExpressionArithmetic {
 		}
 		if e.Type == ast.ExpressionTypeLsh ||
 			e.Type == ast.ExpressionTypeRsh {
-			maxStack = this.eb.build(c , code , bin.left , context , state)
+			maxStack = this.buildExpression.build(c , code , bin.left , context , state)
 			state.pushStack(c , bin.left.value)
-			stack := this.eb.build(c , code , bin.right , context , state)
+			stack := this.buildExpression.build(c , code , bin.right , context , state)
 			if t := stack + jvmSlotSize(bin.left.value) ; t > maxStack {
 				maxStack = t
 			}

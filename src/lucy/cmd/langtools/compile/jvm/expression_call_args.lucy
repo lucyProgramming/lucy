@@ -4,11 +4,11 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildExpressionCallArgs {
-    eb BuildExpression
+    buildExpression BuildExpression
 
     fn BuildExpressionCallArgs(eb BuildExpression) {
         this.super()
-        this.eb = eb
+        this.buildExpression = eb
     }
 
     fn buildCallArgs(
@@ -27,7 +27,7 @@ class BuildExpressionCallArgs {
             args = args[:vArgs.start]
         }
         for _ , e := range args {
-            stack := this.eb.build(c , code , e , context , state)
+            stack := this.buildExpression.build(c , code , e , context , state)
             if t := stack + currentStack ; t > maxStack {
                 maxStack = t
             }
@@ -45,7 +45,7 @@ class BuildExpressionCallArgs {
             }
         } else {
             if vArgs.packArray2VArgs {
-                stack := this.eb.build(c , code , vArgs.expressions[0] , context , state)
+                stack := this.buildExpression.build(c , code , vArgs.expressions[0] , context , state)
                 if t := currentStack + stack ; t > maxStack {
                     maxStack = t
                 }
@@ -63,7 +63,7 @@ class BuildExpressionCallArgs {
                     loadInt(c , code , index)
                     state.pushStack(c , typeInt)
                     currentStack += 2
-                    stack := this.eb.build(c , code , e , context , state)
+                    stack := this.buildExpression.build(c , code , e , context , state)
                     if t := currentStack + stack ; t > maxStack {
                         maxStack = t
                     }

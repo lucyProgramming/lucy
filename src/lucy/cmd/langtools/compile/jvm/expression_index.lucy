@@ -1,186 +1,179 @@
 // all rights reserved , check the LICENSE file
 
-
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildExpressionIndex {
-    
-    
-    eb BuildExpression
-    
-    fn BuildExpressionIndex(eb BuildExpression){
-        this.super()
-        this.eb = eb
-    }
+	buildExpression BuildExpression
 
+	fn BuildExpressionIndex(eb BuildExpression) {
+		this.super()
+		this.buildExpression = eb
+	}
 
-    fn buildIndex(
-        c cg.ClassHighLevel,
-        code cg.AttributeCode,
-        e ast.Expression,
-        context Context,
-        state StackMapState) -> (maxStack char) {
-        index := e.data.(ast.ExpressionIndex)
-        if index.indexOn.value.Type == ast.VariableTypeMap {
-            return this.buildMapIndex(c, code, e, context, state)
-        }
-        if index.indexOn.value.Type == ast.VariableTypeString {
-            return this.buildStringIndex(c, code, e, context, state)
-        }
-        stackLength := len(state.stacks)
-        defer {
-            state.popStack(len(state.stacks) - stackLength)
-        }
-        maxStack = this.eb.build(c, code, index.indexOn, context, state)
-        state.pushStack(c, index.indexOn.value)
-        stack := this.eb.build(c, code, index.index, context, state)
-        if t := stack + 1; t > maxStack {
-            maxStack = t
-        }
-        if index.indexOn.value.Type == ast.VariableTypeArray {
-            meta := ArrayMetas[e.value.Type]
-            code.codes[code.codeLength] = cg.OP_invokevirtual
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-                meta.className,
-                "get",
-               meta.getMethodDescription
-            ), code.codes[code.codeLength+1:code.codeLength+3])
-            code.codeLength += 3
-            if e.value.isPointer() && e.value.Type != ast.VariableTypeString {
-                TypeConverterAndPrimitivePacker.castPointer(c, code, e.value)
-            }
-        } else {
-            switch e.value.Type {
-            case ast.VariableTypeBool,
-                ast.VariableTypeByte:
-                code.codes[code.codeLength] = cg.OP_baload
-            case ast.VariableTypeShort:
-                code.codes[code.codeLength] = cg.OP_saload
-            case ast.VariableTypeChar:
-                code.codes[code.codeLength] = cg.OP_caload
-            case ast.VariableTypeEnum ,ast.VariableTypeInt:
-                code.codes[code.codeLength] = cg.OP_iaload
-            case ast.VariableTypeLong:
-                code.codes[code.codeLength] = cg.OP_laload
-            case ast.VariableTypeFloat:
-                code.codes[code.codeLength] = cg.OP_faload
-            case ast.VariableTypeDouble:
-                code.codes[code.codeLength] = cg.OP_daload
-            default:
-                code.codes[code.codeLength] = cg.OP_aaload
-            }
-            code.codeLength++
-        }
-        return
-    }
+	fn buildIndex(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		index := e.data.(ast.ExpressionIndex)
+		if index.indexOn.value.Type == ast.VariableTypeMap {
+			return this.buildMapIndex(c , code , e , context , state)
+		}
+		if index.indexOn.value.Type == ast.VariableTypeString {
+			return this.buildStringIndex(c , code , e , context , state)
+		}
+		stackLength := len(state.stacks)
+		defer {
+			state.popStack(len(state.stacks) - stackLength)
+		}
+		maxStack = this.buildExpression.build(c , code , index.indexOn , context , state)
+		state.pushStack(c , index.indexOn.value)
+		stack := this.buildExpression.build(c , code , index.index , context , state)
+		if t := stack + 1 ; t > maxStack {
+			maxStack = t
+		}
+		if index.indexOn.value.Type == ast.VariableTypeArray {
+			meta := ArrayMetas[e.value.Type]
+			code.codes[code.codeLength] = cg.OP_invokevirtual
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+					meta.className,
+					"get",
+					meta.getMethodDescription) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+			code.codeLength += 3
+			if e.value.isPointer() && e.value.Type != ast.VariableTypeString {
+				TypeConverterAndPrimitivePacker.castPointer(c , code , e.value)
+			}
+		} else {
+			switch e.value.Type {
+				case ast.VariableTypeBool,
+					ast.VariableTypeByte:
+					code.codes[code.codeLength] = cg.OP_baload
+				case ast.VariableTypeShort:
+					code.codes[code.codeLength] = cg.OP_saload
+				case ast.VariableTypeChar:
+					code.codes[code.codeLength] = cg.OP_caload
+				case ast.VariableTypeEnum , ast.VariableTypeInt:
+					code.codes[code.codeLength] = cg.OP_iaload
+				case ast.VariableTypeLong:
+					code.codes[code.codeLength] = cg.OP_laload
+				case ast.VariableTypeFloat:
+					code.codes[code.codeLength] = cg.OP_faload
+				case ast.VariableTypeDouble:
+					code.codes[code.codeLength] = cg.OP_daload
+				default:
+					code.codes[code.codeLength] = cg.OP_aaload
+			}
+			code.codeLength++
+		}
+		return
+	}
 
-    fn buildStringIndex(
-        c cg.ClassHighLevel,
-        code cg.AttributeCode,
-        e ast.Expression,
-        context Context,
-        state StackMapState) -> (maxStack char) {
-        length := len(state.stacks)
-        defer  {
-            state.popStack(len(state.stacks) - length)
-        }
-        index := e.data.(ast.ExpressionIndex)
-        maxStack = this.eb.build(c, code, index.indexOn, context, state)
-        code.codes[code.codeLength] = cg.OP_invokevirtual
-        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-            javaStringClass,
-            "getBytes",
-            "()[B"
-        ), code.codes[code.codeLength+1:code.codeLength+3])
-        code.codeLength += 3
-        state.pushStack(c, state.newObjectVariableType("[B"))
-        stack := this.eb.build(c, code, index.index, context, state)
-        if t := char(1) + stack; t > maxStack {
-            maxStack = t
-        }
-        code.codes[code.codeLength] = cg.OP_baload
-        code.codeLength++
-        return
-    }
+	fn buildStringIndex(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		length := len(state.stacks)
+		defer {
+			state.popStack(len(state.stacks) - length)
+		}
+		index := e.data.(ast.ExpressionIndex)
+		maxStack = this.buildExpression.build(c , code , index.indexOn , context , state)
+		code.codes[code.codeLength] = cg.OP_invokevirtual
+		c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+				javaStringClass,
+				"getBytes",
+				"()[B") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+		code.codeLength += 3
+		state.pushStack(c , state.newObjectVariableType("[B"))
+		stack := this.buildExpression.build(c , code , index.index , context , state)
+		if t := char(1) + stack ; t > maxStack {
+			maxStack = t
+		}
+		code.codes[code.codeLength] = cg.OP_baload
+		code.codeLength++
+		return
+	}
 
-    fn buildMapIndex(
-        c cg.ClassHighLevel,
-        code cg.AttributeCode,
-        e ast.Expression,
-        context Context,
-        state StackMapState) -> (maxStack char) {
-        length := len(state.stacks)
-        defer   {
-            state.popStack(len(state.stacks) - length)
-        }
-        index := e.data.(ast.ExpressionIndex)
-        maxStack = this.eb.build(c, code, index.indexOn, context, state)
-        currentStack := char(1)
-        //build index
-        state.pushStack(c, index.indexOn.value)
-        stack := this.eb.build(c, code, index.index, context, state)
-        if t := currentStack + stack; t > maxStack {
-            maxStack = t
-        }
-        currentStack = 2 // mapref kref
-        if index.indexOn.value.theMap.K.isPointer() == false {
-            TypeConverterAndPrimitivePacker.packPrimitives(c, code, index.indexOn.value.theMap.K)
-        }
-        code.codes[code.codeLength] = cg.OP_invokevirtual
-        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
-            mapClass,
-            "get",
-            "(Ljava/lang/Object;)Ljava/lang/Object;"
-        ), code.codes[code.codeLength+1:code.codeLength+3])
-        code.codeLength += 3
-        state.popStack(1)
-        if index.indexOn.value.theMap.V.Type == ast.VariableTypeEnum {
-            TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, index.indexOn.value.theMap.V)
-        } else if index.indexOn.value.theMap.V.isPointer() {
-            TypeConverterAndPrimitivePacker.castPointer(c, code, index.indexOn.value.theMap.V)
-        } else {
-            code.codes[code.codeLength] = cg.OP_dup // increment the stack
-            code.codeLength++
-            if 2 > maxStack { // stack is  ... valueObjectRef valueObjectRef
-                maxStack = 2
-            }
-            noNullExit := new cg.Exit(cg.OP_ifnonnull, code)
-            switch index.indexOn.value.theMap.V.Type {
-            case ast.VariableTypeBool,
-                ast.VariableTypeByte,
-                ast.VariableTypeShort,
-                ast.VariableTypeChar,
-                ast.VariableTypeInt:
-                code.codes[code.codeLength] = cg.OP_pop
-                code.codes[code.codeLength+1] = cg.OP_iconst_0
-                code.codeLength += 2
-            case ast.VariableTypeLong:
-                code.codes[code.codeLength] = cg.OP_pop
-                code.codes[code.codeLength+1] = cg.OP_lconst_0
-                code.codeLength += 2
-            case ast.VariableTypeFloat:
-                code.codes[code.codeLength] = cg.OP_pop
-                code.codes[code.codeLength+1] = cg.OP_fconst_0
-                code.codeLength += 2
-            case ast.VariableTypeDouble:
-                code.codes[code.codeLength] = cg.OP_pop
-                code.codes[code.codeLength+1] = cg.OP_dconst_0
-                code.codeLength += 2
-            }
-            nullExit := new cg.Exit(cg.OP_goto, code)
-            state.pushStack(c, state.newObjectVariableType(javaRootClass))
-            context.MakeStackMap(code, state, code.codeLength)
-            state.popStack(1) // pop java_root_class ref
-            writeExits([]cg.Exit{noNullExit}, code.codeLength)
-            TypeConverterAndPrimitivePacker.unPackPrimitives(c, code, index.indexOn.value.theMap.V)
-            writeExits([]cg.Exit{nullExit}, code.codeLength)
-            state.pushStack(c, e.value)
-            context.MakeStackMap(code, state, code.codeLength)
-            state.popStack(1)
-        }
-        return
-    }
-
+	fn buildMapIndex(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		length := len(state.stacks)
+		defer {
+			state.popStack(len(state.stacks) - length)
+		}
+		index := e.data.(ast.ExpressionIndex)
+		maxStack = this.buildExpression.build(c , code , index.indexOn , context , state)
+		currentStack := char(1)
+		//build index
+		state.pushStack(c , index.indexOn.value)
+		stack := this.buildExpression.build(c , code , index.index , context , state)
+		if t := currentStack + stack ; t > maxStack {
+			maxStack = t
+		}
+		currentStack = 2 // mapref kref
+		if index.indexOn.value.theMap.K.isPointer() == false {
+			TypeConverterAndPrimitivePacker.packPrimitives(c , code , index.indexOn.value.theMap.K)
+		}
+		code.codes[code.codeLength] = cg.OP_invokevirtual
+		c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(
+				mapClass,
+				"get",
+				"(Ljava/lang/Object;)Ljava/lang/Object;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+		code.codeLength += 3
+		state.popStack(1)
+		if index.indexOn.value.theMap.V.Type == ast.VariableTypeEnum {
+			TypeConverterAndPrimitivePacker.unPackPrimitives(c , code , index.indexOn.value.theMap.V)
+		} else if index.indexOn.value.theMap.V.isPointer() {
+			TypeConverterAndPrimitivePacker.castPointer(c , code , index.indexOn.value.theMap.V)
+		} else {
+			code.codes[code.codeLength] = cg.OP_dup // increment the stack
+			code.codeLength++
+			if 2 > maxStack {
+				maxStack = 2
+			}
+			noNullExit := new cg.Exit(cg.OP_ifnonnull , code)
+			switch index.indexOn.value.theMap.V.Type {
+				case ast.VariableTypeBool,
+					ast.VariableTypeByte,
+					ast.VariableTypeShort,
+					ast.VariableTypeChar,
+					ast.VariableTypeInt:
+					code.codes[code.codeLength] = cg.OP_pop
+					code.codes[code.codeLength + 1] = cg.OP_iconst_0
+					code.codeLength += 2
+				case ast.VariableTypeLong:
+					code.codes[code.codeLength] = cg.OP_pop
+					code.codes[code.codeLength + 1] = cg.OP_lconst_0
+					code.codeLength += 2
+				case ast.VariableTypeFloat:
+					code.codes[code.codeLength] = cg.OP_pop
+					code.codes[code.codeLength + 1] = cg.OP_fconst_0
+					code.codeLength += 2
+				case ast.VariableTypeDouble:
+					code.codes[code.codeLength] = cg.OP_pop
+					code.codes[code.codeLength + 1] = cg.OP_dconst_0
+					code.codeLength += 2
+			}
+			nullExit := new cg.Exit(cg.OP_goto , code)
+			state.pushStack(c , state.newObjectVariableType(javaRootClass))
+			context.MakeStackMap(code , state , code.codeLength)
+			state.popStack(1) // pop java_root_class ref
+			writeExits([]cg.Exit{noNullExit} , code.codeLength)
+			TypeConverterAndPrimitivePacker.unPackPrimitives(c , code , index.indexOn.value.theMap.V)
+			writeExits([]cg.Exit{nullExit} , code.codeLength)
+			state.pushStack(c , e.value)
+			context.MakeStackMap(code , state , code.codeLength)
+			state.popStack(1)
+		}
+		return
+	}
 
 }
+

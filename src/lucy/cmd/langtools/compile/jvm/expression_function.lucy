@@ -4,251 +4,250 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildExpressionFunction {
-    eb BuildExpression
-    bp BuildPackage   
+	buildExpression BuildExpression
+	buildPacakge    BuildPackage
 
-    fn BuildExpressionFunction(eb BuildExpression , bp BuildPackage) {
-        this.super()
-        this.eb = eb
-        this.bp = bp
-    }
+	fn BuildExpressionFunction(eb BuildExpression , bp BuildPackage) {
+		this.super()
+		this.buildExpression = eb
+		this.buildPacakge = bp
+	}
 
-    fn buildFunctionExpression(
-        c cg.ClassHighLevel,
-        code cg.AttributeCode,
-        e ast.Expression,
-        context Context,
-        state StackMapState) -> (maxStack char) {
-        function := e.data.(ast.Function)
-        defer {
-            if e.isStatementExpression == false {
-                stack := this.packFunction2MethodHandle(c , code , function , context)
-                if stack > maxStack {
-                    maxStack = stack
-                }
-            }
-        }
+	fn buildFunctionExpression(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		function := e.data.(ast.Function)
+		defer {
+			if e.isStatementExpression == false {
+				stack := this.packFunction2MethodHandle(c , code , function , context)
+				if stack > maxStack {
+					maxStack = stack
+				}
+			}
+		}
 
-        if function.name == null || function.name == "" {
-            function.name = function.nameLiteralFunction()
-        }
-        if function.isClosureFunction == false {
-            function.name = c.newMethodName(function.name) // new a function name
-            method := new cg.MethodHighLevel()
-            method.name = function.name
-            method.accessFlags |= cg.AccMethodFinal
-            method.accessFlags |= cg.AccMethodPrivate
-            method.accessFlags |= cg.AccMethodStatic
-            method.accessFlags |= cg.AccMethodBridge
-            if function.Type.vArgs != null {
-                method.accessFlags |= cg.AccMethodVarargs
-            }
-            function.entrance = method
-            method.classHighLevel = c
-            method.descriptor = Descriptor.methodDescriptor(function.Type)
-            method.code = new cg.AttributeCode()
-            this.bp.BuildFunction.buildFunction(c , null , method , function)
-            c.appendMethod(method)
-            return
-        }
-        // function have captured vars
-        className := this.bp.newClassName("closureFunction$" + function.name)
-        closureClass := new cg.ClassHighLevel(this.eb.bp.majorVersion , this.eb.bp.minorVersion)
-        closureClass.name = className
-        closureClass.superClass = ast.LucyRootClass
-        closureClass.accessFlags = 0
-        closureClass.accessFlags |= cg.AccClassSynthetic
-        closureClass.accessFlags |= cg.AccClassFinal
-        this.bp.mkClassDefaultConstruction(closureClass)
-        this.bp.putClass(closureClass)
-        method := new cg.MethodHighLevel()
-        method.name = function.name
-        method.accessFlags |= cg.AccMethodFinal
-        method.accessFlags |= cg.AccMethodBridge
-        if function.Type.vArgs != null {
-            method.accessFlags |= cg.AccMethodVarargs
-        }
-        method.descriptor = Descriptor.methodDescriptor(function.Type)
-        method.classHighLevel = closureClass
-        function.entrance = method
-        closureClass.appendMethod(method)
-        //new a object to hold this closure function
-        code.codes[code.codeLength] = cg.OP_new
-        c.insertClassConst(closureClass.name , code.codes[code.codeLength + 1 : code.codeLength + 3])
-        code.codes[code.codeLength + 3] = cg.OP_dup
-        code.codeLength += 4
-        maxStack = 2 // maxStack is 2 right now
-        code.codes[code.codeLength] = cg.OP_invokespecial
-        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(className,
-                specialMethodInit,
-                "()V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
-        code.codeLength += 3
-        // store  to,wait for call
-        function.closureVariableOffSet = code.maxLocals
-        code.maxLocals++
-        state.appendLocals(c , state.newObjectVariableType(className))
-        copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject , function.closureVariableOffSet))
-        //set filed
-        closureClass.fields = new map{string -> cg.FieldHighLevel}()
-        for v , _ := range function.closure.variables {
-            field := new cg.FieldHighLevel()
-            field.accessFlags |= cg.AccFieldSynthetic
-            field.name = v.name
-            closureClass.fields[v.name] = field
-            copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , function.closureVariableOffSet))
-            if v.beenCapturedAsLeftValue > 0 {
-                meta := closure.getMeta(v.Type.Type)
-                field.descriptor = "L" + meta.className + ";"
-                if context.theFunction.closure.closureVariableExist(v) {
-                    // I Know c object at offset 0
-                    copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , char(0)))
-                    if 3 > maxStack {
-                        maxStack = 3
-                    }
-                    code.codes[code.codeLength] = cg.OP_getfield
-                    c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(c.name,
-                            v.name,
-                            field.descriptor),
-                        code.codes[code.codeLength + 1 : code.codeLength + 3])
-                    code.codeLength += 3
-                } else {
-                    copyOPs(code,
-                        loadLocalVariableOps(ast.VariableTypeObject , v.localValOffset))
-                    if 3 > maxStack {
-                        maxStack = 3
-                    }
-                }
+		if function.name == null || function.name == "" {
+			function.name = function.nameLiteralFunction()
+		}
+		if function.isClosureFunction == false {
+			function.name = c.newMethodName(function.name) // new a function name
+			method := new cg.MethodHighLevel()
+			method.name = function.name
+			method.accessFlags |= cg.AccMethodFinal
+			method.accessFlags |= cg.AccMethodPrivate
+			method.accessFlags |= cg.AccMethodStatic
+			method.accessFlags |= cg.AccMethodBridge
+			if function.Type.vArgs != null {
+				method.accessFlags |= cg.AccMethodVarargs
+			}
+			function.entrance = method
+			method.classHighLevel = c
+			method.descriptor = Descriptor.methodDescriptor(function.Type)
+			method.code = new cg.AttributeCode()
+			this.buildPacakge.BuildFunction.buildFunction(c , null , method , function)
+			c.appendMethod(method)
+			return
+		}
+		// function have captured vars
+		className := this.buildPacakge.newClassName("closureFunction$" + function.name)
+		closureClass := new cg.ClassHighLevel(this.buildExpression.bp.majorVersion , this.buildExpression.bp.minorVersion)
+		closureClass.name = className
+		closureClass.superClass = ast.LucyRootClass
+		closureClass.accessFlags = 0
+		closureClass.accessFlags |= cg.AccClassSynthetic
+		closureClass.accessFlags |= cg.AccClassFinal
+		this.buildPacakge.mkClassDefaultConstruction(closureClass)
+		this.buildPacakge.putClass(closureClass)
+		method := new cg.MethodHighLevel()
+		method.name = function.name
+		method.accessFlags |= cg.AccMethodFinal
+		method.accessFlags |= cg.AccMethodBridge
+		if function.Type.vArgs != null {
+			method.accessFlags |= cg.AccMethodVarargs
+		}
+		method.descriptor = Descriptor.methodDescriptor(function.Type)
+		method.classHighLevel = closureClass
+		function.entrance = method
+		closureClass.appendMethod(method)
+		//new a object to hold this closure function
+		code.codes[code.codeLength] = cg.OP_new
+		c.insertClassConst(closureClass.name , code.codes[code.codeLength + 1 : code.codeLength + 3])
+		code.codes[code.codeLength + 3] = cg.OP_dup
+		code.codeLength += 4
+		maxStack = 2 // maxStack is 2 right now
+		code.codes[code.codeLength] = cg.OP_invokespecial
+		c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(className,
+				specialMethodInit,
+				"()V") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+		code.codeLength += 3
+		// store  to,wait for call
+		function.closureVariableOffSet = code.maxLocals
+		code.maxLocals++
+		state.appendLocals(c , state.newObjectVariableType(className))
+		copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject , function.closureVariableOffSet))
+		//set filed
+		closureClass.fields = new map{string -> cg.FieldHighLevel}()
+		for v , _ := range function.closure.variables {
+			field := new cg.FieldHighLevel()
+			field.accessFlags |= cg.AccFieldSynthetic
+			field.name = v.name
+			closureClass.fields[v.name] = field
+			copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , function.closureVariableOffSet))
+			if v.beenCapturedAsLeftValue > 0 {
+				meta := closure.getMeta(v.Type.Type)
+				field.descriptor = "L" + meta.className + ";"
+				if context.theFunction.closure.closureVariableExist(v) {
+					// I Know c object at offset 0
+					copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , char(0)))
+					if 3 > maxStack {
+						maxStack = 3
+					}
+					code.codes[code.codeLength] = cg.OP_getfield
+					c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(c.name,
+							v.name,
+							field.descriptor),
+						code.codes[code.codeLength + 1 : code.codeLength + 3])
+					code.codeLength += 3
+				} else {
+					copyOPs(code,
+						loadLocalVariableOps(ast.VariableTypeObject , v.localValOffset))
+					if 3 > maxStack {
+						maxStack = 3
+					}
+				}
 
-            } else {
-                field.descriptor = Descriptor.typeDescriptor(v.Type)
-                if context.theFunction.closure.closureVariableExist(v) {
-                    // I Know c object at offset 0
-                    copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , char(0)))
-                    if 3 > maxStack {
-                        maxStack = 3
-                    }
-                    code.codes[code.codeLength] = cg.OP_getfield
-                    c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(c.name,
-                            v.name,
-                            field.descriptor),
-                        code.codes[code.codeLength + 1 : code.codeLength + 3])
-                    code.codeLength += 3
-                } else {
-                    copyOPs(code , loadLocalVariableOps(v.Type.Type , v.localValOffset))
-                    if 3 > maxStack {
-                        maxStack = 3
-                    }
-                }
+			} else {
+				field.descriptor = Descriptor.typeDescriptor(v.Type)
+				if context.theFunction.closure.closureVariableExist(v) {
+					// I Know c object at offset 0
+					copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , char(0)))
+					if 3 > maxStack {
+						maxStack = 3
+					}
+					code.codes[code.codeLength] = cg.OP_getfield
+					c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(c.name,
+							v.name,
+							field.descriptor),
+						code.codes[code.codeLength + 1 : code.codeLength + 3])
+					code.codeLength += 3
+				} else {
+					copyOPs(code , loadLocalVariableOps(v.Type.Type , v.localValOffset))
+					if 3 > maxStack {
+						maxStack = 3
+					}
+				}
 
-            }
+			}
 
-            code.codes[code.codeLength] = cg.OP_putfield
-            c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(className,
-                    v.name,
-                    field.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
-            code.codeLength += 3
+			code.codes[code.codeLength] = cg.OP_putfield
+			c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(className,
+					v.name,
+					field.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+			code.codeLength += 3
 
-        }
+		}
 
-        for v , _ := range function.closure.functions {
-            if v.isClosureFunction == false {
-                continue
-            }
-            filed := new cg.FieldHighLevel()
-            filed.accessFlags |= cg.AccFieldPublic
-            filed.accessFlags |= cg.AccFieldSynthetic
-            filed.name = v.name
-            filed.descriptor = "L" + v.entrance.classHighLevel.name + ";"
-            closureClass.fields[v.name] = filed
-            copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , function.closureVariableOffSet))
-            if context.theFunction.closure.closureFunctionExist(v) {
-                // I Know this at 0 offset
-                copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , char(0)))
-                if 3 > maxStack {
-                    maxStack = 3
-                }
-                code.codes[code.codeLength] = cg.OP_getfield
-                c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(c.name,
-                        v.name,
-                        filed.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
-                code.codeLength += 3
-            } else {
-                copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , v.closureVariableOffSet))
-                if 3 > maxStack {
-                    maxStack = 3
-                }
-            }
+		for v , _ := range function.closure.functions {
+			if v.isClosureFunction == false {
+				continue
+			}
+			filed := new cg.FieldHighLevel()
+			filed.accessFlags |= cg.AccFieldPublic
+			filed.accessFlags |= cg.AccFieldSynthetic
+			filed.name = v.name
+			filed.descriptor = "L" + v.entrance.classHighLevel.name + ";"
+			closureClass.fields[v.name] = filed
+			copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , function.closureVariableOffSet))
+			if context.theFunction.closure.closureFunctionExist(v) {
+				// I Know this at 0 offset
+				copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , char(0)))
+				if 3 > maxStack {
+					maxStack = 3
+				}
+				code.codes[code.codeLength] = cg.OP_getfield
+				c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(c.name,
+						v.name,
+						filed.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+				code.codeLength += 3
+			} else {
+				copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , v.closureVariableOffSet))
+				if 3 > maxStack {
+					maxStack = 3
+				}
+			}
 
-            code.codes[code.codeLength] = cg.OP_putfield
-            c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(className,
-                    v.name,
-                    filed.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
-            code.codeLength += 3
-        }
+			code.codes[code.codeLength] = cg.OP_putfield
+			c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(className,
+					v.name,
+					filed.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+			code.codeLength += 3
+		}
 
-        method.code = new cg.AttributeCode()
-        // build function
-        this.bp.BuildFunction.buildFunction(closureClass , null , method , function)
-        return
-    }
-    fn packFunction2MethodHandle(c cg.ClassHighLevel , code cg.AttributeCode,
-        function ast.Function , context Context) -> (maxStack char) {
-        code.codes[code.codeLength] = cg.OP_invokestatic
-        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandles",
-                "lookup",
-                "()Ljava/lang/invoke/MethodHandles$Lookup;"),
-            code.codes[code.codeLength + 1 : code.codeLength + 3])
-        code.codeLength += 3
-        code.codes[code.codeLength] = cg.OP_ldc_w
-        c.insertClassConst(function.entrance.classHighLevel.name,
-            code.codes[code.codeLength + 1 : code.codeLength + 3])
-        code.codeLength += 3
-        code.codes[code.codeLength] = cg.OP_ldc_w
-        c.insertStringConst(function.entrance.name,
-            code.codes[code.codeLength + 1 : code.codeLength + 3])
-        code.codeLength += 3
-        code.codes[code.codeLength] = cg.OP_ldc_w
-        c.insertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(function.entrance.descriptor),
-            code.codes[code.codeLength + 1 : code.codeLength + 3])
-        code.codeLength += 3
-        code.codes[code.codeLength] = cg.OP_invokevirtual
-        if function.isClosureFunction {
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandles$Lookup",
-                    "findVirtual",
-                    "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;"),
-                code.codes[code.codeLength + 1 : code.codeLength + 3])
-        } else {
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandles$Lookup",
-                    "findStatic",
-                    "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;"),
-                code.codes[code.codeLength + 1 : code.codeLength + 3])
-        }
+		method.code = new cg.AttributeCode()
+		// build function
+		this.buildPacakge.BuildFunction.buildFunction(closureClass , null , method , function)
+		return
+	}
+	fn packFunction2MethodHandle(c cg.ClassHighLevel , code cg.AttributeCode,
+		function ast.Function , context Context) -> (maxStack char) {
+		code.codes[code.codeLength] = cg.OP_invokestatic
+		c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandles",
+				"lookup",
+				"()Ljava/lang/invoke/MethodHandles$Lookup;"),
+			code.codes[code.codeLength + 1 : code.codeLength + 3])
+		code.codeLength += 3
+		code.codes[code.codeLength] = cg.OP_ldc_w
+		c.insertClassConst(function.entrance.classHighLevel.name,
+			code.codes[code.codeLength + 1 : code.codeLength + 3])
+		code.codeLength += 3
+		code.codes[code.codeLength] = cg.OP_ldc_w
+		c.insertStringConst(function.entrance.name,
+			code.codes[code.codeLength + 1 : code.codeLength + 3])
+		code.codeLength += 3
+		code.codes[code.codeLength] = cg.OP_ldc_w
+		c.insertMethodTypeConst(new cg.ConstantInfoMethodTypeHighLevel(function.entrance.descriptor),
+			code.codes[code.codeLength + 1 : code.codeLength + 3])
+		code.codeLength += 3
+		code.codes[code.codeLength] = cg.OP_invokevirtual
+		if function.isClosureFunction {
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandles$Lookup",
+					"findVirtual",
+					"(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;"),
+				code.codes[code.codeLength + 1 : code.codeLength + 3])
+		} else {
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandles$Lookup",
+					"findStatic",
+					"(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/MethodHandle;"),
+				code.codes[code.codeLength + 1 : code.codeLength + 3])
+		}
 
-        code.codeLength += 3
-        if 4 > maxStack {
-            maxStack = 4
-        }
-        if function.isClosureFunction {
-            if context.theFunction.closure.closureFunctionExist(function) {
-                copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , char(0)))
-                code.codes[code.codeLength] = cg.OP_getfield
-                c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(c.name,
-                        function.name,
-                        "L" + function.entrance.classHighLevel.name + ";") , code.codes[code.codeLength + 1 : code.codeLength + 3])
-                code.codeLength += 3
-            } else {
-                copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , function.closureVariableOffSet))
-            }
+		code.codeLength += 3
+		if 4 > maxStack {
+			maxStack = 4
+		}
+		if function.isClosureFunction {
+			if context.theFunction.closure.closureFunctionExist(function) {
+				copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , char(0)))
+				code.codes[code.codeLength] = cg.OP_getfield
+				c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(c.name,
+						function.name,
+						"L" + function.entrance.classHighLevel.name + ";") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+				code.codeLength += 3
+			} else {
+				copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , function.closureVariableOffSet))
+			}
 
-            code.codes[code.codeLength] = cg.OP_invokevirtual
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandle",
-                    "bindTo",
-                    "(Ljava/lang/Object;)Ljava/lang/invoke/MethodHandle;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
-            code.codeLength += 3
-        }
-        return
-    }
+			code.codes[code.codeLength] = cg.OP_invokevirtual
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandle",
+					"bindTo",
+					"(Ljava/lang/Object;)Ljava/lang/invoke/MethodHandle;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+			code.codeLength += 3
+		}
+		return
+	}
 
 }
-
 

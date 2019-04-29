@@ -21,7 +21,7 @@ class BuildExpressionFunctionCall {
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionFunctionCall)
         maxStack = this.eb.build(c , code , call.functionCallOn , context , state)
-        stack := this.eb.BuildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
+        stack := this.eb.buildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
         if t := char(1) + stack ; t > maxStack {
             maxStack = t
         }
@@ -49,7 +49,7 @@ class BuildExpressionFunctionCall {
             return this.buildFunctionPointerCall(c , code , e , context , state)
         }
         if call.function.templateFunction != null {
-            return this.eb.BuildTemplateFunctionCall.buildTemplateFunctionCall(c , code , e , context , state)
+            return this.eb.buildTemplateFunctionCall.buildTemplateFunctionCall(c , code , e , context , state)
         }
         if call.function.isBuildIn {
             return this.bfc.mkBuildInFunctionCall(c , code , e , context , state)
@@ -59,7 +59,7 @@ class BuildExpressionFunctionCall {
             maxStack = this.eb.build(c , code , call.functionCallOn , context , state)
         }
         if call.function.isClosureFunction == false {
-            maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
+            maxStack = this.eb.buildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
             code.codes[code.codeLength] = cg.OP_invokestatic
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.function.entrance.classHighLevel.name,
                 call.function.entrance.name,
@@ -83,7 +83,7 @@ class BuildExpressionFunctionCall {
                 state.popStack(1)
             }
 
-            stack := this.eb.BuildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
+            stack := this.eb.buildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
             if t := char(1) + stack ; t > maxStack {
                 maxStack = t
             }

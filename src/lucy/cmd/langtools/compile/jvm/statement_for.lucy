@@ -37,7 +37,7 @@ class BuildFor {
         forState := new StackMapState(state)
         defer {
             state.addTop(forState)
-            insertLocalVariables2Code(c.Class , code , s.initExpressionBlock.variables)
+            insertLocalVariables2Code(c.theClass , code , s.initExpressionBlock.variables)
         }
         //init
         if s.Init != null {

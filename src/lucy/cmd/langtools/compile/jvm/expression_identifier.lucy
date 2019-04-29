@@ -6,11 +6,11 @@ import "lucy/jvm/cg"
 class  BuildExpressionIdentifier {
 	
 
-	eb BuildExpression
+	buildExpression BuildExpression
     
     fn BuildExpressionIdentifier(eb BuildExpression){
         this.super()
-        this.eb = eb
+        this.buildExpression = eb
     }
 
 	fn  buildCapturedIdentifier(
@@ -68,11 +68,11 @@ class  BuildExpressionIdentifier {
 			maxStack = char(1)
 			return
 		case identifier.function != null:
-			return this.eb.BuildExpressionFunction.packFunction2MethodHandle(c, code, identifier.function, context)
+			return this.buildExpression.buildExpressionFunction.packFunction2MethodHandle(c, code, identifier.function, context)
 		case identifier.variable.isGlobal:
 			code.codes[code.codeLength] = cg.OP_getstatic
 			c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-				this.eb.bp.mainClass.name,
+				this.buildExpression.bp.mainClass.name,
 				identifier.name,
 				Descriptor.typeDescriptor(identifier.variable.Type)
 			), code.codes[code.codeLength+1:code.codeLength+3])

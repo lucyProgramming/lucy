@@ -5,11 +5,11 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildExpressionStringCat {
-	eb BuildExpression
+	buildExpression BuildExpression
 
 	fn BuildExpressionStringCat(eb BuildExpression) {
 		this.super()
-		this.eb = eb
+		this.buildExpression = eb
 	}
 
 	fn buildStrCat(
@@ -23,16 +23,16 @@ class BuildExpressionStringCat {
 			state.popStack(len(state.stacks) - stackLength)
 		}
 		bin := e.data.(ast.ExpressionBinary)
-		maxStack = this.eb.build(c , code , bin.left , context , state)
-		if t := this.eb.BuildExpressionConversion.stackTop2String(c , code , bin.left.value , context , state) ; t > maxStack {
+		maxStack = this.buildExpression.build(c , code , bin.left , context , state)
+		if t := this.buildExpression.buildExpressionConversion.stackTop2String(c , code , bin.left.value , context , state) ; t > maxStack {
 			maxStack = t
 		}
 		state.pushStack(c , state.newObjectVariableType(javaStringClass))
-		stack := this.eb.build(c , code , bin.right , context , state)
+		stack := this.buildExpression.build(c , code , bin.right , context , state)
 		if t := char(1) + stack ; t > maxStack {
 			maxStack = char(t)
 		}
-		if t := char(1) + this.eb.BuildExpressionConversion.stackTop2String(
+		if t := char(1) + this.buildExpression.buildExpressionConversion.stackTop2String(
 			c,
 			code,
 			bin.right.value,

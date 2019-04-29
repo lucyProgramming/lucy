@@ -35,7 +35,7 @@ class BuildBlock {
         b ast.Block,
         context Context,
         state StackMapState) {
-        defer this.insertLocalVariables2Code(c.Class , code , b)
+        defer this.insertLocalVariables2Code(c.theClass , code , b)
         notToHere := false
         for _ , s := range b.statements {
             if notToHere == true && s.Type == ast.StatementTypeLabel {
@@ -226,22 +226,22 @@ class BuildBlock {
                 innerClass.innerClass = s.Class.name
                 innerClass.outerClass = c.name
                 innerClass.name = oldName
-                if c.Class.attributeInnerClasses == null {
-                    c.Class.attributeInnerClasses = new cg.AttributeInnerClasses()
+                if c.theClass.attributeInnerClasses == null {
+                    c.theClass.attributeInnerClasses = new cg.AttributeInnerClasses()
                 }
-                if c.Class.attributeInnerClasses.classes == null {
-                    c.Class.attributeInnerClasses.classes = []cg.InnerClass{}
+                if c.theClass.attributeInnerClasses.classes == null {
+                    c.theClass.attributeInnerClasses.classes = []cg.InnerClass{}
                 }
-                c.Class.attributeInnerClasses.classes.append(innerClass)
+                c.theClass.attributeInnerClasses.classes.append(innerClass)
                 t := this.bp.buildClass(s.Class)
                 this.bp.putClass(t)
-                if t.Class.attributeInnerClasses == null {
-                    t.Class.attributeInnerClasses = new cg.AttributeInnerClasses()
+                if t.theClass.attributeInnerClasses == null {
+                    t.theClass.attributeInnerClasses = new cg.AttributeInnerClasses()
                 }
-                if t.Class.attributeInnerClasses.classes == null {
-                    t.Class.attributeInnerClasses.classes = []cg.InnerClass{innerClass}
+                if t.theClass.attributeInnerClasses.classes == null {
+                    t.theClass.attributeInnerClasses.classes = []cg.InnerClass{innerClass}
                 } else {
-                    t.Class.attributeInnerClasses.classes.append(innerClass)
+                    t.theClass.attributeInnerClasses.classes.append(innerClass)
                 }
             case ast.StatementTypeNop:
                 // nop
@@ -270,9 +270,9 @@ class BuildBlock {
             e.endPc = char(code.codeLength)
             e.handlerPc = char(code.codeLength)
             if ds[index].exceptionClass == null {
-                e.catchType = c.Class.insertClassConst(ast.DefaultExceptionClass)
+                e.catchType = c.theClass.insertClassConst(ast.DefaultExceptionClass)
             } else {
-                e.catchType = c.Class.insertClassConst(ds[index].exceptionClass.name) // custom c
+                e.catchType = c.theClass.insertClassConst(ds[index].exceptionClass.name) // custom c
             }
             code.appendException(e)
             //expect exception on stack

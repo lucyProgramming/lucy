@@ -5,11 +5,11 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildinFunctionPrintf {
-    eb BuildExpression
+    buildExpression BuildExpression
 
     fn BuildinFunctionPrintf(eb BuildExpression) {
         this.super()
-        this.eb = eb
+        this.buildExpression = eb
     }
 
     /*
@@ -35,7 +35,7 @@ class BuildinFunctionPrintf {
         code.codeLength += 3
         maxStack = 1
         state.pushStack(c , state.newObjectVariableType(javaPrintStreamClass))
-        stack := this.eb.build(c , code , meta.format , context , state)
+        stack := this.buildExpression.build(c , code , meta.format , context , state)
         if t := char(1) + stack ; t > maxStack {
             maxStack = t
         }
@@ -61,7 +61,7 @@ class BuildinFunctionPrintf {
             currentStack += 2
             state.pushStack(c , objectArray)
             state.pushStack(c , typeInt)
-            stack := this.eb.build(c , code , v , context , state)
+            stack := this.buildExpression.build(c , code , v , context , state)
             state.popStack(2)
             if t := currentStack + stack ; t > maxStack {
                 maxStack = t

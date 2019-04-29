@@ -4,107 +4,110 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildExpressionSlice {
-    eb BuildExpression
+	buildExpression BuildExpression
 
-    fn BuildExpressionSlice(eb BuildExpression) {
-        this.super()
-        this.eb = eb
-    }
+	fn BuildExpressionSlice(eb BuildExpression) {
+		this.super()
+		this.buildExpression = eb
+	}
 
-    fn buildStringSlice(
-        c cg.ClassHighLevel,
-        code cg.AttributeCode,
-        e ast.Expression,
-        context Context,
-        state StackMapState) -> (maxStack char) {
-        stackLength := len(state.stacks)
-        defer {
-            state.popStack(len(state.stacks) - stackLength)
-        }
+	fn buildStringSlice(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		stackLength := len(state.stacks)
+		defer {
+			state.popStack(len(state.stacks) - stackLength)
+		}
 
-        slice := e.data.(ast.ExpressionSlice)
-        maxStack = this.eb.build(c , code , slice.on , context , state)
-        state.pushStack(c , state.newObjectVariableType(javaStringClass))
-        // build start
-        stack := this.eb.build(c , code , slice.start , context , state)
-        if t := char(1) + stack ; t > maxStack {
-            maxStack = t
-        }
-        if slice.end != null {
-            state.pushStack(c , slice.start.value)
-            stack = this.eb.build(c , code , slice.end , context , state)
-            if t := char(2) + stack ; t > maxStack {
-                maxStack = t
-            }
-            code.codes[code.codeLength] = cg.OP_invokevirtual
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaStringClass,
-                    "substring",
-                    "(II)Ljava/lang/String;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
-            code.codeLength += 3
-        } else {
-            code.codes[code.codeLength] = cg.OP_invokevirtual
-            c.insertMethodRefConst(
-                new cg.ConstantInfoMethodrefHighLevel(
-                    javaStringClass,
-                    "substring",
-                    "(I)Ljava/lang/String;"),
-                code.codes[code.codeLength + 1 : code.codeLength + 3])
-            code.codeLength += 3
-        }
+		slice := e.data.(ast.ExpressionSlice)
+		maxStack = this.buildExpression.build(c , code , slice.on , context , state)
+		state.pushStack(c , state.newObjectVariableType(javaStringClass))
+		// build start
+		stack := this.buildExpression.build(c , code , slice.start , context , state)
+		if t := char(1) + stack ; t > maxStack {
+			maxStack = t
+		}
+		if slice.end != null {
+			state.pushStack(c , slice.start.value)
+			stack = this.buildExpression.build(c , code , slice.end , context , state)
+			if t := char(2) + stack ; t > maxStack {
+				maxStack = t
+			}
+			code.codes[code.codeLength] = cg.OP_invokevirtual
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaStringClass,
+					"substring",
+					"(II)Ljava/lang/String;") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+			code.codeLength += 3
+		} else {
+			code.codes[code.codeLength] = cg.OP_invokevirtual
+			c.insertMethodRefConst(
+				new cg.ConstantInfoMethodrefHighLevel(
+					javaStringClass,
+					"substring",
+					"(I)Ljava/lang/String;"),
+				code.codes[code.codeLength + 1 : code.codeLength + 3])
+			code.codeLength += 3
+		}
 
-        return
-    }
+		return
+	}
 
-    fn buildSlice(c cg.ClassHighLevel , code cg.AttributeCode,
-        e ast.Expression , context Context , state StackMapState) -> (maxStack char) {
-        slice := e.data.(ast.ExpressionSlice)
-        if slice.on.value.Type == ast.VariableTypeString {
-            return this.buildStringSlice(c , code , e , context , state)
-        }
-        stackLength := len(state.stacks)
-        defer {
-            state.popStack(len(state.stacks) - stackLength)
-        }
+	fn buildSlice(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		slice := e.data.(ast.ExpressionSlice)
+		if slice.on.value.Type == ast.VariableTypeString {
+			return this.buildStringSlice(c , code , e , context , state)
+		}
+		stackLength := len(state.stacks)
+		defer {
+			state.popStack(len(state.stacks) - stackLength)
+		}
 
-        meta := ArrayMetas[e.value.theArray.Type]
-        maxStack = this.eb.build(c , code , slice.on , context , state)
-        state.pushStack(c , slice.on.value)
-        if slice.end != null {
-            // build start
-            stack := this.eb.build(c , code , slice.start , context , state)
-            if t := char(1) + stack ; t > maxStack {
-                maxStack = t
-            }
-            state.pushStack(c , slice.start.value)
-            stack = this.eb.build(c , code , slice.end , context , state)
-            if t := char(3) + stack ; t > maxStack {
-                maxStack = t
-            }
-        } else {
-            code.codes[code.codeLength] = cg.OP_dup
-            code.codeLength++
-            code.codes[code.codeLength] = cg.OP_invokevirtual
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
-                    "size",
-                    "()I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
-            code.codeLength += 3
-            state.pushStack(c , slice.start.value)
-            stack := this.eb.build(c , code , slice.start , context , state)
-            if t := char(2) + stack ; t > maxStack {
-                maxStack = t
-            }
-            code.codes[code.codeLength] = cg.OP_swap
-            code.codeLength++
-        }
+		meta := ArrayMetas[e.value.theArray.Type]
+		maxStack = this.buildExpression.build(c , code , slice.on , context , state)
+		state.pushStack(c , slice.on.value)
+		if slice.end != null {
+			// build start
+			stack := this.buildExpression.build(c , code , slice.start , context , state)
+			if t := char(1) + stack ; t > maxStack {
+				maxStack = t
+			}
+			state.pushStack(c , slice.start.value)
+			stack = this.buildExpression.build(c , code , slice.end , context , state)
+			if t := char(3) + stack ; t > maxStack {
+				maxStack = t
+			}
+		} else {
+			code.codes[code.codeLength] = cg.OP_dup
+			code.codeLength++
+			code.codes[code.codeLength] = cg.OP_invokevirtual
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
+					"size",
+					"()I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+			code.codeLength += 3
+			state.pushStack(c , slice.start.value)
+			stack := this.buildExpression.build(c , code , slice.start , context , state)
+			if t := char(2) + stack ; t > maxStack {
+				maxStack = t
+			}
+			code.codes[code.codeLength] = cg.OP_swap
+			code.codeLength++
+		}
 
-        code.codes[code.codeLength] = cg.OP_invokevirtual
-        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
-                "slice",
-                meta.sliceDescriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
-        code.codeLength += 3
-        return
-    }
+		code.codes[code.codeLength] = cg.OP_invokevirtual
+		c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
+				"slice",
+				meta.sliceDescriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+		code.codeLength += 3
+		return
+	}
 
 }
-
 

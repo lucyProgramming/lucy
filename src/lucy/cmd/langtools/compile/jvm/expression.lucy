@@ -5,64 +5,64 @@ import "lucy/jvm/cg"
 
 class BuildExpression {
 	bp                            BuildPackage
-	BuildExpressionArithmetic     BuildExpressionArithmetic
-	BuildExpressionArray          BuildExpressionArray
-	BuildExpressionAssign         BuildExpressionAssign
-	BuildExpressionCallArgs       BuildExpressionCallArgs
-	BuildExpressionConversion     BuildExpressionConversion
-	BuildExpressionFunction       BuildExpressionFunction
-	BuildExpressionFunctionCall   BuildExpressionFunctionCall
-	BuildExpressionIdentifier     BuildExpressionIdentifier
-	BuildExpressionIncrement      BuildExpressionIncrement
-	BuildExpressionIndex          BuildExpressionIndex
-	BuildExpressionLeftValue      BuildExpressionLeftValue
-	BuildExpressionLogical        BuildExpressionLogical
-	BuildExpressionMap            BuildExpressionMap
-	BuildExpressionMethodCall     BuildExpressionMethodCall
-	BuildExpressionNew            BuildExpressionNew
-	BuildExpressionOpAssign       BuildExpressionOpAssign
-	BuildExpressionQuestion       BuildExpressionQuestion
-	BuildExpressionRelation       BuildExpressionRelation
-	BuildExpressionSelection      BuildExpressionSelection
-	BuildExpressionSlice          BuildExpressionSlice
-	BuildExpressionStrcat         BuildExpressionStringCat
-	BuildExpressionAssert         BuildExpressionAssert
-	BuildExpressionTypeConversion BuildExpressionTypeConversion
-	BuildExpressionUnary          BuildExpressionUnary
-	BuildExpressionVar            BuildExpressionVar
-	BuildExpressionVarAssign      BuildExpressionVarAssign
-	BuildTemplateFunctionCall     BuildTemplateFunctionCall
+	buildExpressionArithmetic     BuildExpressionArithmetic
+	buildExpressionArray          BuildExpressionArray
+	buildExpressionAssign         BuildExpressionAssign
+	buildExpressionCallArgs       BuildExpressionCallArgs
+	buildExpressionConversion     BuildExpressionConversion
+	buildExpressionFunction       BuildExpressionFunction
+	buildExpressionFunctionCall   BuildExpressionFunctionCall
+	buildExpressionIdentifier     BuildExpressionIdentifier
+	buildExpressionIncrement      BuildExpressionIncrement
+	buildExpressionIndex          BuildExpressionIndex
+	buildExpressionLeftValue      BuildExpressionLeftValue
+	buildExpressionLogical        BuildExpressionLogical
+	buildExpressionMap            BuildExpressionMap
+	buildExpressionMethodCall     BuildExpressionMethodCall
+	buildExpressionNew            BuildExpressionNew
+	buildExpressionOpAssign       BuildExpressionOpAssign
+	buildExpressionQuestion       BuildExpressionQuestion
+	buildExpressionRelation       BuildExpressionRelation
+	buildExpressionSelection      BuildExpressionSelection
+	buildExpressionSlice          BuildExpressionSlice
+	buildExpressionStrcat         BuildExpressionStringCat
+	buildExpressionAssert         BuildExpressionAssert
+	buildExpressionTypeConversion BuildExpressionTypeConversion
+	buildExpressionUnary          BuildExpressionUnary
+	buildExpressionVar            BuildExpressionVar
+	buildExpressionVarAssign      BuildExpressionVarAssign
+	buildTemplateFunctionCall     BuildTemplateFunctionCall
 
 	fn BuildExpression(bp BuildPackage) {
 		this.super()
 		this.bp = bp
-		this.BuildExpressionArithmetic = new BuildExpressionArithmetic(this)
-		this.BuildExpressionArray = new BuildExpressionArray(this)
-		this.BuildExpressionAssign = new BuildExpressionAssign(this)
-		this.BuildExpressionCallArgs = new BuildExpressionCallArgs(this)
-		this.BuildExpressionConversion = new BuildExpressionConversion(this)
-		this.BuildExpressionFunction = new BuildExpressionFunction(this , bp)
-		this.BuildExpressionFunctionCall = new BuildExpressionFunctionCall(this)
-		this.BuildExpressionIdentifier = new BuildExpressionIdentifier(this)
-		this.BuildExpressionIncrement = new BuildExpressionIncrement(this)
-		this.BuildExpressionIndex = new BuildExpressionIndex(this)
-		this.BuildExpressionLeftValue = new BuildExpressionLeftValue(this)
-		this.BuildExpressionLogical = new BuildExpressionLogical(this)
-		this.BuildExpressionMap = new BuildExpressionMap(this)
-		this.BuildExpressionMethodCall = new BuildExpressionMethodCall(this)
-		this.BuildExpressionNew = new BuildExpressionNew(this)
-		this.BuildExpressionOpAssign = new BuildExpressionOpAssign(this)
-		this.BuildExpressionQuestion = new BuildExpressionQuestion(this)
-		this.BuildExpressionRelation = new BuildExpressionRelation(this)
-		this.BuildExpressionSelection = new BuildExpressionSelection(this)
-		this.BuildExpressionSlice = new BuildExpressionSlice(this)
-		this.BuildExpressionStrcat = new BuildExpressionStringCat(this)
-		this.BuildExpressionAssert = new BuildExpressionAssert(this)
-		this.BuildExpressionTypeConversion = new BuildExpressionTypeConversion(this)
-		this.BuildExpressionUnary = new BuildExpressionUnary(this)
-		this.BuildExpressionVar = new BuildExpressionVar(this)
-		this.BuildExpressionVarAssign = new BuildExpressionVarAssign(this)
-		this.BuildTemplateFunctionCall = new BuildTemplateFunctionCall(this , bp)
+		this.buildExpressionArithmetic = new BuildExpressionArithmetic(this)
+		this.buildExpressionArray = new BuildExpressionArray(this)
+		this.buildExpressionAssign = new BuildExpressionAssign(this)
+		this.buildExpressionCallArgs = new BuildExpressionCallArgs(this)
+		this.buildExpressionConversion = new BuildExpressionConversion(this)
+		this.buildExpressionFunction = new BuildExpressionFunction(this , bp)
+		this.buildExpressionFunctionCall = new BuildExpressionFunctionCall(this)
+		this.buildExpressionIdentifier = new BuildExpressionIdentifier(this)
+		this.buildExpressionIncrement = new BuildExpressionIncrement(this)
+		this.buildExpressionIndex = new BuildExpressionIndex(this)
+		this.buildExpressionLeftValue = new BuildExpressionLeftValue(this)
+		this.buildExpressionLogical = new BuildExpressionLogical(this)
+		this.buildExpressionMap = new BuildExpressionMap(this)
+		this.buildExpressionMethodCall = new BuildExpressionMethodCall(this)
+		this.buildExpressionNew = new BuildExpressionNew(this)
+		this.buildExpressionOpAssign = new BuildExpressionOpAssign(this)
+		this.buildExpressionQuestion = new BuildExpressionQuestion(this)
+		this.buildExpressionRelation = new BuildExpressionRelation(this)
+		this.buildExpressionSelection = new BuildExpressionSelection(this)
+		this.buildExpressionSlice = new BuildExpressionSlice(this)
+		this.buildExpressionStrcat = new BuildExpressionStringCat(this)
+		this.buildExpressionAssert = new BuildExpressionAssert(this)
+		this.buildExpressionTypeConversion = new BuildExpressionTypeConversion(this)
+		this.buildExpressionUnary = new BuildExpressionUnary(this)
+		this.buildExpressionVar = new BuildExpressionVar(this)
+		this.buildExpressionVarAssign = new BuildExpressionVarAssign(this)
+		this.buildTemplateFunctionCall = new BuildTemplateFunctionCall(this , bp)
 	}
 
 	fn build(
@@ -152,63 +152,63 @@ class BuildExpression {
 				maxStack = 1
 				//binary expression
 			case ast.ExpressionTypeLogicalOr , ast.ExpressionTypeLogicalAnd:
-				maxStack = this.BuildExpressionLogical.buildLogical(c , code , e , context , state)
+				maxStack = this.buildExpressionLogical.buildLogical(c , code , e , context , state)
 			case ast.ExpressionTypeOr , ast.ExpressionTypeAnd , ast.ExpressionTypeXor,
 				ast.ExpressionTypeLsh , ast.ExpressionTypeRsh , ast.ExpressionTypeAdd , ast.ExpressionTypeSub,
 				ast.ExpressionTypeMul , ast.ExpressionTypeDiv , ast.ExpressionTypeMod:
-				maxStack = this.BuildExpressionArithmetic.buildArithmetic(c , code , e , context , state)
+				maxStack = this.buildExpressionArithmetic.buildArithmetic(c , code , e , context , state)
 			case ast.ExpressionTypeAssign:
-				maxStack = this.BuildExpressionAssign.buildAssign(c , code , e , context , state)
+				maxStack = this.buildExpressionAssign.buildAssign(c , code , e , context , state)
 			case ast.ExpressionTypeVarAssign:
-				maxStack = this.BuildExpressionVarAssign.buildVarAssign(c , code , e , context , state)
+				maxStack = this.buildExpressionVarAssign.buildVarAssign(c , code , e , context , state)
 			case ast.ExpressionTypePlusAssign , ast.ExpressionTypeMinusAssign , ast.ExpressionTypeMulAssign,
 				ast.ExpressionTypeDivAssign , ast.ExpressionTypeModAssign , ast.ExpressionTypeAndAssign,
 				ast.ExpressionTypeOrAssign , ast.ExpressionTypeLshAssign , ast.ExpressionTypeRshAssign,
 				ast.ExpressionTypeXorAssign:
-				maxStack = this.BuildExpressionOpAssign.buildOpAssign(c , code , e , context , state)
+				maxStack = this.buildExpressionOpAssign.buildOpAssign(c , code , e , context , state)
 			case ast.ExpressionTypeEq , ast.ExpressionTypeNe , ast.ExpressionTypeGe,
 				ast.ExpressionTypeGt , ast.ExpressionTypeLe , ast.ExpressionTypeLt:
-				maxStack = this.BuildExpressionRelation.buildRelations(c , code , e , context , state)
+				maxStack = this.buildExpressionRelation.buildRelations(c , code , e , context , state)
 			case ast.ExpressionTypeIndex:
-				maxStack = this.BuildExpressionIndex.buildIndex(c , code , e , context , state)
+				maxStack = this.buildExpressionIndex.buildIndex(c , code , e , context , state)
 			case ast.ExpressionTypeSelection:
-				maxStack = this.BuildExpressionSelection.buildSelection(c , code , e , context , state)
+				maxStack = this.buildExpressionSelection.buildSelection(c , code , e , context , state)
 			case ast.ExpressionTypeMethodCall:
-				maxStack = this.BuildExpressionMethodCall.buildMethodCall(c , code , e , context , state)
+				maxStack = this.buildExpressionMethodCall.buildMethodCall(c , code , e , context , state)
 			case ast.ExpressionTypeFunctionCall:
-				maxStack = this.BuildExpressionFunctionCall.buildFunctionCall(c , code , e , context , state)
+				maxStack = this.buildExpressionFunctionCall.buildFunctionCall(c , code , e , context , state)
 				//
 			case ast.ExpressionTypeIncrement , ast.ExpressionTypeDecrement,
 				ast.ExpressionTypePrefixIncrement , ast.ExpressionTypePrefixDecrement:
-				maxStack = this.BuildExpressionIncrement.buildSelfIncrement(c , code , e , context , state)
+				maxStack = this.buildExpressionIncrement.buildSelfIncrement(c , code , e , context , state)
 				//
 			case ast.ExpressionTypeBitwiseNot , ast.ExpressionTypeNegative , ast.ExpressionTypeNot:
-				maxStack = this.BuildExpressionUnary.buildUnary(c , code , e , context , state)
+				maxStack = this.buildExpressionUnary.buildUnary(c , code , e , context , state)
 				//
 			case ast.ExpressionTypeIdentifier:
-				maxStack = this.BuildExpressionIdentifier.buildIdentifier(c , code , e , context)
+				maxStack = this.buildExpressionIdentifier.buildIdentifier(c , code , e , context)
 			case ast.ExpressionTypeNew:
-				maxStack = this.BuildExpressionNew.buildNew(c , code , e , context , state)
+				maxStack = this.buildExpressionNew.buildNew(c , code , e , context , state)
 			case ast.ExpressionTypeFunctionLiteral:
-				maxStack = this.BuildExpressionFunction.buildFunctionExpression(c , code , e , context , state)
+				maxStack = this.buildExpressionFunction.buildFunctionExpression(c , code , e , context , state)
 			case ast.ExpressionTypeCheckCast:
-				maxStack = this.BuildExpressionTypeConversion.buildTypeConversion(c , code , e , context , state)
+				maxStack = this.buildExpressionTypeConversion.buildTypeConversion(c , code , e , context , state)
 			case ast.ExpressionTypeConst:
 				/*
              analyse at ast stage
             */
 			case ast.ExpressionTypeSlice:
-				maxStack = this.BuildExpressionSlice.buildSlice(c , code , e , context , state)
+				maxStack = this.buildExpressionSlice.buildSlice(c , code , e , context , state)
 			case ast.ExpressionTypeArray:
-				maxStack = this.BuildExpressionArray.buildArray(c , code , e , context , state)
+				maxStack = this.buildExpressionArray.buildArray(c , code , e , context , state)
 			case ast.ExpressionTypeMap:
-				maxStack = this.BuildExpressionMap.buildMapLiteral(c , code , e , context , state)
+				maxStack = this.buildExpressionMap.buildMapLiteral(c , code , e , context , state)
 			case ast.ExpressionTypeVar:
-				maxStack = this.BuildExpressionVar.buildVar(c , code , e , context , state)
+				maxStack = this.buildExpressionVar.buildVar(c , code , e , context , state)
 			case ast.ExpressionTypeTypeAssert:
-				maxStack = this.BuildExpressionAssert.buildAssert(c , code , e , context , state)
+				maxStack = this.buildExpressionAssert.buildAssert(c , code , e , context , state)
 			case ast.ExpressionTypeQuestion:
-				maxStack = this.BuildExpressionQuestion.buildQuestion(c , code , e , context , state)
+				maxStack = this.buildExpressionQuestion.buildQuestion(c , code , e , context , state)
 			case ast.ExpressionTypeVArgs:
 				maxStack = this.build(c , code , e.data.(ast.Expression) , context , state)
 			case ast.ExpressionTypeParenthesis:

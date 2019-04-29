@@ -139,7 +139,7 @@ public class BuildPackage {
         c.accessFlags = e.accessFlags
         c.superClass = ast.JavaRootClass
         c.fields = new map{string -> cg.FieldHighLevel}()
-        c.Class.attributeLucyEnum = new cg.AttributeLucyEnum()
+        c.theClass.attributeLucyEnum = new cg.AttributeLucyEnum()
         for _ , v := range e.enums {
             field := new cg.FieldHighLevel()
             if e.accessFlags & cg.AccClassPublic != 0 {
@@ -150,7 +150,7 @@ public class BuildPackage {
             field.name = v.name
             field.descriptor = "I"
             field.attributeConstantValue = new cg.AttributeConstantValue()
-            field.attributeConstantValue.index = c.Class.insertIntConst(v.value)
+            field.attributeConstantValue.index = c.theClass.insertIntConst(v.value)
             c.fields[v.name] = field
         }
         return c
@@ -170,20 +170,20 @@ public class BuildPackage {
             switch v.Type.Type {
                 case ast.VariableTypeBool:
                     if v.boolValue {
-                        f.attributeConstantValue.index = this.mainClass.Class.insertIntConst(1)
+                        f.attributeConstantValue.index = this.mainClass.theClass.insertIntConst(1)
                     } else {
-                        f.attributeConstantValue.index = this.mainClass.Class.insertIntConst(0)
+                        f.attributeConstantValue.index = this.mainClass.theClass.insertIntConst(0)
                     }
                 case ast.VariableTypeLong:
-                    f.attributeConstantValue.index = this.mainClass.Class.insertLongConst(v.longValue)
+                    f.attributeConstantValue.index = this.mainClass.theClass.insertLongConst(v.longValue)
                 case v.Type.isInteger():
-                    f.attributeConstantValue.index = this.mainClass.Class.insertIntConst(int(v.longValue))
+                    f.attributeConstantValue.index = this.mainClass.theClass.insertIntConst(int(v.longValue))
                 case ast.VariableTypeFloat:
-                    f.attributeConstantValue.index = this.mainClass.Class.insertFloatConst(float(v.doubleValue))
+                    f.attributeConstantValue.index = this.mainClass.theClass.insertFloatConst(float(v.doubleValue))
                 case ast.VariableTypeDouble:
-                    f.attributeConstantValue.index = this.mainClass.Class.insertDoubleConst(v.doubleValue)
+                    f.attributeConstantValue.index = this.mainClass.theClass.insertDoubleConst(v.doubleValue)
                 case ast.VariableTypeString:
-                    f.attributeConstantValue.index = this.mainClass.Class.insertStringConst(v.stringValue)
+                    f.attributeConstantValue.index = this.mainClass.theClass.insertStringConst(v.stringValue)
             }
 
             f.attributeLucyConst = new cg.AttributeLucyConst()
@@ -193,7 +193,7 @@ public class BuildPackage {
 
     }
     fn mkGlobalTypeAlias() {
-        this.mainClass.Class.TypeAlias = new []cg.AttributeLucyTypeAlias(len(this.Package.block.typeAliases))
+        this.mainClass.theClass.TypeAlias = new []cg.AttributeLucyTypeAlias(len(this.Package.block.typeAliases))
         var i = 0
         for name , v := range this.Package.block.typeAliases {
             t := new cg.AttributeLucyTypeAlias()
@@ -201,7 +201,7 @@ public class BuildPackage {
             if v.theAlias != null {
                 t.comment = v.theAlias.comment
             }
-            this.mainClass.Class.TypeAlias[i] = t
+            this.mainClass.theClass.TypeAlias[i] = t
             i++
             this.mainClass.insertSourceFile(v.pos.filename)
         }
@@ -324,27 +324,27 @@ public class BuildPackage {
                 switch v.Type.Type {
                     case ast.VariableTypeBool:
                         if v.boolValue {
-                            cos.valueIndex = c.Class.insertIntConst(1)
+                            cos.valueIndex = c.theClass.insertIntConst(1)
                         } else {
-                            cos.valueIndex = c.Class.insertIntConst(0)
+                            cos.valueIndex = c.theClass.insertIntConst(0)
                         }
 
                     case ast.VariableTypeLong:
-                        cos.valueIndex = c.Class.insertLongConst(v.longValue)
+                        cos.valueIndex = c.theClass.insertLongConst(v.longValue)
                     case v.Type.isInteger():
-                        cos.valueIndex = c.Class.insertIntConst(int(v.longValue))
+                        cos.valueIndex = c.theClass.insertIntConst(int(v.longValue))
                     case ast.VariableTypeFloat:
-                        cos.valueIndex = c.Class.insertFloatConst(float(v.doubleValue))
+                        cos.valueIndex = c.theClass.insertFloatConst(float(v.doubleValue))
                     case ast.VariableTypeDouble:
-                        cos.valueIndex = c.Class.insertDoubleConst(v.doubleValue)
+                        cos.valueIndex = c.theClass.insertDoubleConst(v.doubleValue)
                     case ast.VariableTypeString:
-                        cos.valueIndex = c.Class.insertStringConst(v.stringValue)
+                        cos.valueIndex = c.theClass.insertStringConst(v.stringValue)
                 }
 
                 attr.constants.append(cos)
             }
 
-            c.Class.attributeLucyClassConst = attr
+            c.theClass.attributeLucyClassConst = attr
         }
         c.fields = new map{string -> cg.FieldHighLevel}()
         c.methods = new map{string -> []cg.MethodHighLevel}()
@@ -364,20 +364,20 @@ public class BuildPackage {
                 switch v.Type.Type {
                     case ast.VariableTypeBool:
                         if v.defaultValueExpression.boolValue {
-                            f.attributeConstantValue.index = c.Class.insertIntConst(1)
+                            f.attributeConstantValue.index = c.theClass.insertIntConst(1)
                         } else {
-                            f.attributeConstantValue.index = c.Class.insertIntConst(0)
+                            f.attributeConstantValue.index = c.theClass.insertIntConst(0)
                         }
                     case ast.VariableTypeLong:
-                        f.attributeConstantValue.index = c.Class.insertLongConst(v.defaultValueExpression.longValue)
+                        f.attributeConstantValue.index = c.theClass.insertLongConst(v.defaultValueExpression.longValue)
                     case v.Type.isInteger():
-                        f.attributeConstantValue.index = c.Class.insertIntConst(int(v.defaultValueExpression.longValue))
+                        f.attributeConstantValue.index = c.theClass.insertIntConst(int(v.defaultValueExpression.longValue))
                     case ast.VariableTypeFloat:
-                        f.attributeConstantValue.index = c.Class.insertFloatConst(float(v.defaultValueExpression.doubleValue))
+                        f.attributeConstantValue.index = c.theClass.insertFloatConst(float(v.defaultValueExpression.doubleValue))
                     case ast.VariableTypeDouble:
-                        f.attributeConstantValue.index = c.Class.insertDoubleConst(v.defaultValueExpression.doubleValue)
+                        f.attributeConstantValue.index = c.theClass.insertDoubleConst(v.defaultValueExpression.doubleValue)
                     case ast.VariableTypeString:
-                        f.attributeConstantValue.index = c.Class.insertStringConst(v.defaultValueExpression.stringValue)
+                        f.attributeConstantValue.index = c.theClass.insertStringConst(v.defaultValueExpression.stringValue)
                 }
 
             }
@@ -450,7 +450,7 @@ public class BuildPackage {
                 functionClass.accessFlags |= cg.AccClassPublic
                 functionClass.accessFlags |= cg.AccClassFinal
                 functionClass.accessFlags |= cg.AccClassSynthetic
-                functionClass.Class.attributeGlobalFunction = new cg.AttributeGlobalFunction()
+                functionClass.theClass.attributeGlobalFunction = new cg.AttributeGlobalFunction()
                 functionClass.insertSourceFile(f.pos.filename)
                 this.putClass(functionClass)
             }

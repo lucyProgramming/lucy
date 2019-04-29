@@ -4,11 +4,11 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildExpressionUnary {
-	eb BuildExpression
+	buildExpression BuildExpression
 
 	fn BuildExpressionUnary(eb BuildExpression) {
 		this.super()
-		this.eb = eb
+		this.buildExpression = eb
 	}
 
 	fn buildUnary(
@@ -19,7 +19,7 @@ class BuildExpressionUnary {
 		state StackMapState) -> (maxStack char) {
 		if e.Type == ast.ExpressionTypeNegative {
 			ee := e.data.(ast.Expression)
-			maxStack = this.eb.build(c , code , ee , context , state)
+			maxStack = this.buildExpression.build(c , code , ee , context , state)
 			switch e.value.Type {
 				case ast.VariableTypeByte,
 					ast.VariableTypeShort,
@@ -39,7 +39,7 @@ class BuildExpressionUnary {
 		}
 		if e.Type == ast.ExpressionTypeBitwiseNot {
 			ee := e.data.(ast.Expression)
-			maxStack = this.eb.build(c , code , ee , context , state)
+			maxStack = this.buildExpression.build(c , code , ee , context , state)
 			if t := jvmSlotSize(ee.value) * 2 ; t > maxStack {
 				maxStack = t
 			}
@@ -83,7 +83,7 @@ class BuildExpressionUnary {
 		}
 		if e.Type == ast.ExpressionTypeNot {
 			ee := e.data.(ast.Expression)
-			maxStack = this.eb.build(c , code , ee , context , state)
+			maxStack = this.buildExpression.build(c , code , ee , context , state)
 			exit := new cg.Exit(cg.OP_ifeq , code)
 			code.codes[code.codeLength] = cg.OP_iconst_0
 			code.codeLength++

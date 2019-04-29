@@ -3,7 +3,7 @@
 import "lucy/binary"
 
 public class ClassHighLevel {
-	public Class Class
+	public theClass Class
 	/*
 		one class file can be compile form multi source file
 	*/
@@ -23,7 +23,7 @@ public class ClassHighLevel {
 		majorVersion char,
 		minorVersion char) {
 		this.super()
-		this.Class = new Class()
+		this.theClass = new Class()
 		this.majorVersion = majorVersion
 		this.minorVersion = minorVersion
 	}
@@ -38,7 +38,7 @@ public class ClassHighLevel {
 
 	public fn insertMethodRefConst(mr ConstantInfoMethodrefHighLevel,
 		location []byte) {
-		binary.BigEndian.putChar(location , this.Class.insertMethodrefConst(mr))
+		binary.BigEndian.putChar(location , this.theClass.insertMethodrefConst(mr))
 	}
 
 	public fn insertMethodCall(
@@ -76,7 +76,7 @@ public class ClassHighLevel {
 	}
 
 	public fn insertStringConst(s string , location []byte) {
-		binary.BigEndian.putChar(location , this.Class.insertStringConst(s))
+		binary.BigEndian.putChar(location , this.theClass.insertStringConst(s))
 	}
 
 	public fn appendMethod(ms MethodHighLevel...) {
@@ -100,43 +100,43 @@ public class ClassHighLevel {
 		constant ConstantInfoInterfaceMethodrefHighLevel,
 		location []byte) {
 		binary.BigEndian.putChar(location,
-			this.Class.insertInterfaceMethodrefConst(constant))
+			this.theClass.insertInterfaceMethodrefConst(constant))
 	}
 
 	public fn insertMethodTypeConst(constant ConstantInfoMethodTypeHighLevel,
 		location []byte) {
 		binary.BigEndian.putChar(location,
-			this.Class.insertMethodTypeConst(constant))
+			this.theClass.insertMethodTypeConst(constant))
 	}
 
 	public fn insertFieldRefConst(constant ConstantInfoFieldrefHighLevel,
 		location []byte) {
 		binary.BigEndian.putChar(location,
-			this.Class.insertFieldRefConst(constant))
+			this.theClass.insertFieldRefConst(constant))
 	}
 
 	public fn insertClassConst(className string , location []byte) {
 		binary.BigEndian.putChar(location,
-			this.Class.insertClassConst(className))
+			this.theClass.insertClassConst(className))
 	}
 	public fn insertIntConst(i int , location []byte) {
 		binary.BigEndian.putChar(location,
-			this.Class.insertIntConst(i))
+			this.theClass.insertIntConst(i))
 	}
 
 	public fn insertLongConst(value long , location []byte) {
 		binary.BigEndian.putChar(location,
-			this.Class.insertLongConst(value))
+			this.theClass.insertLongConst(value))
 	}
 
 	public fn insertFloatConst(value float , location []byte) {
 		binary.BigEndian.putChar(location,
-			this.Class.insertFloatConst(value))
+			this.theClass.insertFloatConst(value))
 	}
 
 	public fn insertDoubleConst(value double , location []byte) {
 		binary.BigEndian.putChar(location,
-			this.Class.insertDoubleConst(value))
+			this.theClass.insertDoubleConst(value))
 	}
 
 	/*
@@ -183,8 +183,8 @@ public class ClassHighLevel {
 		return s
 	}
 	public fn toLow() -> (c Class) {
-		this.Class.fromHighLevel(this , this.majorVersion , this.minorVersion)
-		return this.Class
+		this.theClass.fromHighLevel(this , this.majorVersion , this.minorVersion)
+		return this.theClass
 	}
 }
 

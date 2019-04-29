@@ -48,7 +48,7 @@ class BuildForRangeMap {
         forState := new StackMapState(state)
         defer {
             state.addTop(forState)
-            insertLocalVariables2Code(c.Class , code , s.initExpressionBlock.variables)
+            insertLocalVariables2Code(c.theClass , code , s.initExpressionBlock.variables)
         }
         //keySets
         code.codes[code.codeLength] = cg.OP_dup
@@ -227,7 +227,7 @@ class BuildForRangeMap {
             if attr.expressionValue != null {
                 stackLength := len(blockState.stacks)
                 stack , remainStack , op , _ :=
-                    this.eb.BuildExpressionLeftValue.getLeftValue(c , code , attr.expressionValue , context , blockState)
+                    this.eb.buildExpressionLeftValue.getLeftValue(c , code , attr.expressionValue , context , blockState)
                 if stack > maxStack {
                     maxStack = stack
                 }
@@ -242,7 +242,7 @@ class BuildForRangeMap {
             if attr.expressionKey != null {
                 stackLength := len(blockState.stacks)
                 stack , remainStack , op , _ :=
-                    this.eb.BuildExpressionLeftValue.getLeftValue(c , code , attr.expressionKey , context , blockState)
+                    this.eb.buildExpressionLeftValue.getLeftValue(c , code , attr.expressionKey , context , blockState)
                 if stack > maxStack {
                     maxStack = stack
                 }

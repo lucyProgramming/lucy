@@ -4,11 +4,11 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildExpressionAssign {
-    eb BuildExpression
+    buildExpression BuildExpression
 
     fn BuildExpressionAssign(eb BuildExpression) {
         this.super()
-        this.eb = eb
+        this.buildExpression = eb
     }
 
     fn buildExpressionAssign(
@@ -31,9 +31,9 @@ class BuildExpressionAssign {
         var leftValueKind LeftValueKind
         if left.isIdentifier(ast.UnderScore) == false {
             maxStack , remainStack , op , leftValueKind =
-                this.eb.BuildExpressionLeftValue.getLeftValue(c , code , left , context , state)
+                this.buildExpression.buildExpressionLeftValue.getLeftValue(c , code , left , context , state)
         }
-        stack := this.eb.build(c , code , right , context , state)
+        stack := this.buildExpression.build(c , code , right , context , state)
         if t := remainStack + stack ; t > maxStack {
             maxStack = t
         }
@@ -48,7 +48,7 @@ class BuildExpressionAssign {
         } else {
             currentStack := remainStack + jvmSlotSize(left.value)
             if e.isStatementExpression == false {
-                currentStack += this.eb.dupStackLeaveValueBelow(code , leftValueKind , left.value)
+                currentStack += this.buildExpression.dupStackLeaveValueBelow(code , leftValueKind , left.value)
                 if currentStack > maxStack {
                     maxStack = currentStack
                 }
@@ -72,9 +72,9 @@ class BuildExpressionAssign {
             return this.buildExpressionAssign(c , code , e , context , state)
         }
         if values := bin.right.unPackList() ; len(values) == 1 {
-            maxStack = this.eb.build(c , code , values[0] , context , state)
+            maxStack = this.buildExpression.build(c , code , values[0] , context , state)
         } else {
-            maxStack = this.eb.buildExpressions(c , code , values , context , state)
+            maxStack = this.buildExpression.buildExpressions(c , code , values , context , state)
         }
 
         autoVar := new MultiValueAutoVar(c , code , state)
@@ -84,7 +84,7 @@ class BuildExpressionAssign {
             }
             stackLength := len(state.stacks)
             stack , remainStack , op , _ :=
-                this.eb.BuildExpressionLeftValue.getLeftValue(c , code , v , context , state)
+                this.buildExpression.buildExpressionLeftValue.getLeftValue(c , code , v , context , state)
             if stack > maxStack {
                 maxStack = stack
             }

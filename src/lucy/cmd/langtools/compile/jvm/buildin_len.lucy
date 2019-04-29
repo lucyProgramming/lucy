@@ -5,11 +5,11 @@ import "lucy/jvm/cg"
 import "lucy/binary"
 
 class BuildinFunctionLen {
-    eb BuildExpression
+    buildExpression BuildExpression
 
     fn BuildinFunctionLen(eb BuildExpression) {
         this.super()
-        this.eb = eb
+        this.buildExpression = eb
     }
 
     fn buildLen(
@@ -20,7 +20,7 @@ class BuildinFunctionLen {
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionFunctionCall)
         a0 := call.args[0]
-        maxStack = this.eb.build(c , code , a0 , context , state)
+        maxStack = this.buildExpression.build(c , code , a0 , context , state)
         code.codes[code.codeLength] = cg.OP_dup
         code.codeLength++
         if 2 > maxStack {

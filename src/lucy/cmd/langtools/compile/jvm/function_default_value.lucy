@@ -15,24 +15,24 @@ public class DefaultValueParse {
             switch f.Type.parameterList[i].defaultValueExpression.Type {
                 case ast.ExpressionTypeBool:
                     if f.Type.parameterList[i].defaultValueExpression.boolValue {
-                        dp.constants.append(c.Class.insertIntConst(1))
+                        dp.constants.append(c.theClass.insertIntConst(1))
                     } else {
-                        dp.constants.append(c.Class.insertIntConst(0))
+                        dp.constants.append(c.theClass.insertIntConst(0))
                     }
                 case ast.ExpressionTypeByte,
                     ast.ExpressionTypeShort,
                     ast.ExpressionTypeChar,
                     ast.ExpressionTypeInt:
                     t := f.Type.parameterList[i].defaultValueExpression.longValue
-                    dp.constants.append(c.Class.insertIntConst(int(t)))
+                    dp.constants.append(c.theClass.insertIntConst(int(t)))
                 case ast.ExpressionTypeLong:
-                    dp.constants.append(c.Class.insertLongConst(f.Type.parameterList[i].defaultValueExpression.longValue))
+                    dp.constants.append(c.theClass.insertLongConst(f.Type.parameterList[i].defaultValueExpression.longValue))
                 case ast.ExpressionTypeFloat:
-                    dp.constants.append(c.Class.insertFloatConst(float(f.Type.parameterList[i].defaultValueExpression.doubleValue)))
+                    dp.constants.append(c.theClass.insertFloatConst(float(f.Type.parameterList[i].defaultValueExpression.doubleValue)))
                 case ast.ExpressionTypeDouble:
-                    dp.constants.append(c.Class.insertDoubleConst(f.Type.parameterList[i].defaultValueExpression.doubleValue))
+                    dp.constants.append(c.theClass.insertDoubleConst(f.Type.parameterList[i].defaultValueExpression.doubleValue))
                 case ast.ExpressionTypeString:
-                    dp.constants.append(c.Class.insertStringConst(f.Type.parameterList[i].defaultValueExpression.stringValue))
+                    dp.constants.append(c.theClass.insertStringConst(f.Type.parameterList[i].defaultValueExpression.stringValue))
             }
         }
     }

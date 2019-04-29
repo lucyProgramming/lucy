@@ -4,11 +4,11 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildinFunctionAssert {
-    eb BuildExpression
+    buildExpression BuildExpression
 
     fn BuildinFunctionAssert(eb BuildExpression) {
         this.super()
-        this.eb = eb
+        this.buildExpression = eb
     }
 
     fn build(
@@ -33,7 +33,7 @@ class BuildinFunctionAssert {
         copyOPs(code , storeLocalVariableOps(ast.VariableTypeInt , stepOffset))
         exits := []cg.Exit{}
         for _ , a := range call.args {
-            stack := this.eb.build(c , code , a , context , state)
+            stack := this.buildExpression.build(c , code , a , context , state)
             if stack > maxStack {
                 maxStack = stack
             }

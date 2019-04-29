@@ -4,11 +4,11 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildinFunctionBlackHole {
-    eb BuildExpression
+    buildExpression BuildExpression
 
     fn BuildinFunctionBlackHole(eb BuildExpression) {
         this.super()
-        this.eb = eb
+        this.buildExpression = eb
     }
 
     fn mkBuildInBlackHole(
@@ -19,7 +19,7 @@ class BuildinFunctionBlackHole {
         state StackMapState) -> (maxStack char) {
         call := e.data.(ast.ExpressionFunctionCall)
         for _ , v := range call.args {
-            stack := this.eb.build(c , code , v , context , state)
+            stack := this.buildExpression.build(c , code , v , context , state)
             if stack > maxStack {
                 maxStack = stack
             }

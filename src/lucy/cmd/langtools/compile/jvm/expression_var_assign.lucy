@@ -4,10 +4,10 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildExpressionVarAssign {
-    eb BuildExpression
+    buildExpression BuildExpression
     fn BuildExpressionVarAssign(eb BuildExpression) {
         this.super()
-        this.eb = eb
+        this.buildExpression = eb
     }
 
     fn buildVarAssign(
@@ -33,15 +33,15 @@ class BuildExpressionVarAssign {
                 state.pushStack(c , obj)
                 state.pushStack(c , obj)
             }
-            stack := this.eb.build(c , code , vs.initValues[0] , context , state)
+            stack := this.buildExpression.build(c , code , vs.initValues[0] , context , state)
             if t := currentStack + stack ; t > maxStack {
                 maxStack = t
             }
             if v.isGlobal {
-                this.eb.storeGlobalVariable(c , code , v)
+                this.buildExpression.storeGlobalVariable(c , code , v)
             } else {
                 v.localValOffset = code.maxLocals
-                this.eb.storeLocalVar(c , code , v)
+                this.buildExpression.storeLocalVar(c , code , v)
                 if v.beenCapturedAsLeftValue > 0 {
                     code.maxLocals++
                     copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject , v.localValOffset))
@@ -55,14 +55,14 @@ class BuildExpressionVarAssign {
             return
         }
         if len(vs.initValues) == 1 {
-            maxStack = this.eb.build(c , code , vs.initValues[0] , context , state)
+            maxStack = this.buildExpression.build(c , code , vs.initValues[0] , context , state)
         } else {
-            maxStack = this.eb.buildExpressions(c , code , vs.initValues , context , state)
+            maxStack = this.buildExpression.buildExpressions(c , code , vs.initValues , context , state)
         }
         autoVar := new MultiValueAutoVar(c , code , state)
         for k , v := range vs.lefts {
             if v.Type != ast.ExpressionTypeIdentifier {
-                stack , remainStack , ops , _ := this.eb.BuildExpressionLeftValue.getLeftValue(c , code , v , context , state)
+                stack , remainStack , ops , _ := this.buildExpression.buildExpressionLeftValue.getLeftValue(c , code , v , context , state)
                 if stack > maxStack {
                     maxStack = stack
                 }
@@ -83,7 +83,7 @@ class BuildExpressionVarAssign {
                 if stack > maxStack {
                     maxStack = stack
                 }
-                this.eb.storeGlobalVariable(c , code , variable)
+                this.buildExpression.storeGlobalVariable(c , code , variable)
                 continue
             }
             //this variable not been captured,also not declared here
@@ -100,7 +100,7 @@ class BuildExpressionVarAssign {
                         maxStack = stack
                     }
                 }
-                this.eb.storeLocalVar(c , code , variable)
+                this.buildExpression.storeLocalVar(c , code , variable)
             } else {
                 variable.localValOffset = code.maxLocals
                 currentStack := char(0)
@@ -125,7 +125,7 @@ class BuildExpressionVarAssign {
                 if t := currentStack + autoVar.unPack(c , code , k , variable.Type) ; t > maxStack {
                     maxStack = t
                 }
-                this.eb.storeLocalVar(c , code , variable)
+                this.buildExpression.storeLocalVar(c , code , variable)
             }
             variable.startPc = char(code.codeLength)
         }

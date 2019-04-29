@@ -4,103 +4,102 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildWhen {
-    eb BuildExpression
-    bb BuildBlock     
+	buildExpression BuildExpression
+	buildBlock      BuildBlock
 
-    fn BuildWhen(eb BuildExpression , bb BuildBlock) {
-        this.super()
-        this.eb = eb
-        this.bb = bb
-    }
+	fn BuildWhen(eb BuildExpression , bb BuildBlock) {
+		this.super()
+		this.buildExpression = eb
+		this.buildBlock = bb
+	}
 
-    fn buildWhenStatement(
-        c cg.ClassHighLevel,
-        code cg.AttributeCode,
-        s ast.StatementWhen,
-        context Context,
-        state StackMapState) -> (maxStack char) {
-        for _ , v := range s.prefixExpressions {
-            stack := this.eb.build(c , code , v , context , state)
-            if stack > maxStack {
-                maxStack = stack
-            }
-        }
-        defer insertLocalVariables2Code(c.Class , code , s.initExpressionBlock.variables)
-        stack := this.eb.build(c , code , s.typeExpression , context , state)
-        if stack > maxStack {
-            maxStack = stack
-        }
-        //value is on stack
-        var notMatch cg.Exit
-        size := jvmSlotSize(s.typeExpression.value)
-        currentStack := size
-        state.pushStack(c , s.typeExpression.value)
-        for _ , ca := range s.cases {
-            if notMatch != null {
-                writeExits([]cg.Exit{notMatch} , code.codeLength)
-                context.MakeStackMap(code , state , code.codeLength)
-            }
-            matches := []cg.Exit{}
-            for _ , match := range ca.matches {
-                currentStack = size
-                // mk stack ready
-                if size == 1 {
-                    code.codes[code.codeLength] = cg.OP_dup
-                } else {
-                    code.codes[code.codeLength] = cg.OP_dup2
-                }
+	fn buildWhenStatement(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		s ast.StatementWhen,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		for _ , v := range s.prefixExpressions {
+			stack := this.buildExpression.build(c , code , v , context , state)
+			if stack > maxStack {
+				maxStack = stack
+			}
+		}
+		defer insertLocalVariables2Code(c.theClass , code , s.initExpressionBlock.variables)
+		stack := this.buildExpression.build(c , code , s.typeExpression , context , state)
+		if stack > maxStack {
+			maxStack = stack
+		}
+		//value is on stack
+		var notMatch cg.Exit
+		size := jvmSlotSize(s.typeExpression.value)
+		currentStack := size
+		state.pushStack(c , s.typeExpression.value)
+		for _ , ca := range s.cases {
+			if notMatch != null {
+				writeExits([]cg.Exit{notMatch} , code.codeLength)
+				context.MakeStackMap(code , state , code.codeLength)
+			}
+			matches := []cg.Exit{}
+			for _ , match := range ca.matches {
+				currentStack = size
+				// mk stack ready
+				if size == 1 {
+					code.codes[code.codeLength] = cg.OP_dup
+				} else {
+					code.codes[code.codeLength] = cg.OP_dup2
+				}
 
-                if t := currentStack + size ; t > maxStack {
-                    maxStack = t
-                }
-                code.codeLength++
-                code.codes[code.codeLength++] = cg.OP_instanceof
-                insertTypeAssertClass(c , code , match)
-                matches.append(new cg.Exit(cg.OP_ifne , code))
-            }
+				if t := currentStack + size ; t > maxStack {
+					maxStack = t
+				}
+				code.codeLength++
+				code.codes[code.codeLength++] = cg.OP_instanceof
+				insertTypeAssertClass(c , code , match)
+				matches.append(new cg.Exit(cg.OP_ifne , code))
+			}
 
-            // should be goto next,here is no match
-            notMatch = new cg.Exit(cg.OP_goto , code)
-            // if match goto here
-            writeExits(matches , code.codeLength)
-            //before block,pop off stack
-            context.MakeStackMap(code , state , code.codeLength)
-            if size == 1 {
-                code.codes[code.codeLength] = cg.OP_pop
-            } else {
-                code.codes[code.codeLength] = cg.OP_pop2
-            }
+			// should be goto next,here is no match
+			notMatch = new cg.Exit(cg.OP_goto , code)
+			// if match goto here
+			writeExits(matches , code.codeLength)
+			//before block,pop off stack
+			context.MakeStackMap(code , state , code.codeLength)
+			if size == 1 {
+				code.codes[code.codeLength] = cg.OP_pop
+			} else {
+				code.codes[code.codeLength] = cg.OP_pop2
+			}
 
-            code.codeLength++
-            //block is here
-            if ca.block != null {
-                ss := new StackMapState(state)
-                this.bb.buildBlock(c , code , ca.block , context , ss)
-                state.addTop(ss)
-            }
-            if ca.block == null || ca.block.notExecuteToLastStatement == false {
-                s.exits.append(new cg.Exit(cg.OP_goto , code)) // matched,goto switch outside
-            }
-        }
+			code.codeLength++
+			//block is here
+			if ca.block != null {
+				ss := new StackMapState(state)
+				this.buildBlock.buildBlock(c , code , ca.block , context , ss)
+				state.addTop(ss)
+			}
+			if ca.block == null || ca.block.notExecuteToLastStatement == false {
+				s.exits.append(new cg.Exit(cg.OP_goto , code)) // matched,goto switch outside
+			}
+		}
 
-        writeExits([]cg.Exit{notMatch} , code.codeLength)
-        context.MakeStackMap(code , state , code.codeLength)
-        if size == 1 {
-            code.codes[code.codeLength] = cg.OP_pop
-        } else {
-            code.codes[code.codeLength] = cg.OP_pop2
-        }
+		writeExits([]cg.Exit{notMatch} , code.codeLength)
+		context.MakeStackMap(code , state , code.codeLength)
+		if size == 1 {
+			code.codes[code.codeLength] = cg.OP_pop
+		} else {
+			code.codes[code.codeLength] = cg.OP_pop2
+		}
 
-        code.codeLength++
-        state.popStack(1)
-        if s.defaultBlock != null {
-            ss := new StackMapState(state)
-            this.bb.buildBlock(c , code , s.defaultBlock , context , ss)
-            state.addTop(ss)
-        }
-        return
-    }
+		code.codeLength++
+		state.popStack(1)
+		if s.defaultBlock != null {
+			ss := new StackMapState(state)
+			this.buildBlock.buildBlock(c , code , s.defaultBlock , context , ss)
+			state.addTop(ss)
+		}
+		return
+	}
 
 }
-
 

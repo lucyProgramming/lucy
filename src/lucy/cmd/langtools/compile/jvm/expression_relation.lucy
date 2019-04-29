@@ -4,11 +4,11 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildExpressionRelation {
-    eb BuildExpression
+    buildExpression BuildExpression
 
     fn BuildExpressionRelation(eb BuildExpression) {
         this.super()
-        this.eb = eb
+        this.buildExpression = eb
     }
 
     fn buildRelations(
@@ -25,9 +25,9 @@ class BuildExpressionRelation {
 
         if bin.left.value.isNumber() ||
             bin.left.value.Type == ast.VariableTypeEnum {
-            maxStack = this.eb.build(c , code , bin.left , context , state)
+            maxStack = this.buildExpression.build(c , code , bin.left , context , state)
             state.pushStack(c , bin.left.value)
-            stack := this.eb.build(c , code , bin.right , context , state)
+            stack := this.buildExpression.build(c , code , bin.right , context , state)
             if t := jvmSlotSize(bin.left.value) + stack ; t > maxStack {
                 maxStack = t
             }
@@ -98,9 +98,9 @@ class BuildExpressionRelation {
         }
         if bin.left.value.Type == ast.VariableTypeBool ||
             bin.right.value.Type == ast.VariableTypeBool {
-            maxStack = this.eb.build(c , code , bin.left , context , state)
+            maxStack = this.buildExpression.build(c , code , bin.left , context , state)
             state.pushStack(c , bin.left.value)
-            stack := this.eb.build(c , code , bin.right , context , state)
+            stack := this.buildExpression.build(c , code , bin.right , context , state)
             if t := jvmSlotSize(bin.left.value) + stack ; t > maxStack {
                 maxStack = t
             }
@@ -137,7 +137,7 @@ class BuildExpressionRelation {
                 notNullExpression = bin.right
             }
 
-            maxStack = this.eb.build(c , code , notNullExpression , context , state)
+            maxStack = this.buildExpression.build(c , code , notNullExpression , context , state)
             var exit cg.Exit
             if e.Type == ast.ExpressionTypeEq {
                 exit = new cg.Exit(cg.OP_ifnull , code)
@@ -163,9 +163,9 @@ class BuildExpressionRelation {
         }
         //string compare
         if bin.left.value.Type == ast.VariableTypeString {
-            maxStack = this.eb.build(c , code , bin.left , context , state)
+            maxStack = this.buildExpression.build(c , code , bin.left , context , state)
             state.pushStack(c , bin.left.value)
-            stack := this.eb.build(c , code , bin.right , context , state)
+            stack := this.buildExpression.build(c , code , bin.right , context , state)
             code.codes[code.codeLength] = cg.OP_invokevirtual
             c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaStringClass,
                     "compareTo",
@@ -208,12 +208,12 @@ class BuildExpressionRelation {
             return
         }
         if bin.left.value.isPointer() && bin.right.value.isPointer() {
-            stack := this.eb.build(c , code , bin.left , context , state)
+            stack := this.buildExpression.build(c , code , bin.left , context , state)
             if stack > maxStack {
                 maxStack = stack
             }
             state.pushStack(c , bin.left.value)
-            stack = this.eb.build(c , code , bin.right , context , state)
+            stack = this.buildExpression.build(c , code , bin.right , context , state)
             if t := stack + 1 ; t > maxStack {
                 maxStack = t
             }

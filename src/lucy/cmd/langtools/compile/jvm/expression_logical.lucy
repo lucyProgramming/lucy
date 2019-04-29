@@ -6,11 +6,11 @@ import "lucy/jvm/cg"
 
 class BuildExpressionLogical {
     
-    eb BuildExpression
+    buildExpression BuildExpression
     
     fn BuildExpressionLogical(eb BuildExpression){
         this.super()
-        this.eb = eb
+        this.buildExpression = eb
     }
     
     fn buildLogical(
@@ -20,7 +20,7 @@ class BuildExpressionLogical {
         context Context,
         state StackMapState) -> (maxStack char) {
         bin := e.data.(ast.ExpressionBinary)
-        maxStack = this.eb.build(c, code, bin.left, context, state)
+        maxStack = this.buildExpression.build(c, code, bin.left, context, state)
         code.codes[code.codeLength] = cg.OP_dup
         code.codeLength++
         if 2 > maxStack { // dup increment stack
@@ -34,7 +34,7 @@ class BuildExpressionLogical {
         }
         code.codes[code.codeLength] = cg.OP_pop
         code.codeLength++
-        stack := this.eb.build(c, code, bin.right, context, state)
+        stack := this.buildExpression.build(c, code, bin.right, context, state)
         if stack > maxStack {
             maxStack = stack
         }

@@ -43,9 +43,7 @@ class StackMapState {
             } else {
                 this.locals.append(verify)
             }
-
         }
-
     }
 
     fn newObjectVariableType(name string) -> (ret ast.Type) {
@@ -95,19 +93,19 @@ class StackMapState {
             case ast.VariableTypeNull:
                 ret.verify = new cg.StackMapNullVariableInfo()
             case ast.VariableTypeString:
-                ret.verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(javaStringClass))
+                ret.verify = new cg.StackMapObjectVariableInfo(c.theClass.insertClassConst(javaStringClass))
             case ast.VariableTypeObject:
-                ret.verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(t.theClass.name))
+                ret.verify = new cg.StackMapObjectVariableInfo(c.theClass.insertClassConst(t.theClass.name))
             case ast.VariableTypeFunction:
-                ret.verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(javaMethodHandleClass))
+                ret.verify = new cg.StackMapObjectVariableInfo(c.theClass.insertClassConst(javaMethodHandleClass))
             case ast.VariableTypeMap:
-                ret.verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(mapClass))
+                ret.verify = new cg.StackMapObjectVariableInfo(c.theClass.insertClassConst(mapClass))
             case ast.VariableTypeArray:
                 meta := ArrayMetas[t.theArray.Type]
-                ret.verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(meta.className))
+                ret.verify = new cg.StackMapObjectVariableInfo(c.theClass.insertClassConst(meta.className))
             case ast.VariableTypeJavaArray:
                 d := Descriptor.typeDescriptor(t)
-                ret.verify = new cg.StackMapObjectVariableInfo(c.Class.insertClassConst(d))
+                ret.verify = new cg.StackMapObjectVariableInfo(c.theClass.insertClassConst(d))
             case ast.VariableTypeVoid:
                 // handle at ast
             case ast.VariableTypeName:

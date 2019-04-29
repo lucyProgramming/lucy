@@ -6,11 +6,11 @@ import "lucy/jvm/cg"
  
 class BuildinFunctionSprintf {
     
-    eb BuildExpression
+    buildExpression BuildExpression
     
     fn BuildinFunctionSprintf(eb BuildExpression){
         this.super()
-        this.eb = eb
+        this.buildExpression = eb
     }
     
     fn buildSprintf(
@@ -26,7 +26,7 @@ class BuildinFunctionSprintf {
         // format,must be string
         call := e.data.(ast.ExpressionFunctionCall)
         meta := call.buildInFunctionMeta.(ast.BuildInFunctionSprintfMeta)
-        maxStack = this.eb.build(c, code, meta.format, context, state)
+        maxStack = this.buildExpression.build(c, code, meta.format, context, state)
         state.pushStack(c, state.newObjectVariableType(javaStringClass))
         loadInt(c, code, int(meta.argsLength))
         code.codes[code.codeLength] = cg.OP_anewarray
@@ -49,7 +49,7 @@ class BuildinFunctionSprintf {
             currentStack += 2
             state.pushStack(c, objectArray)
             state.pushStack(c, typeInt)
-            stack := this.eb.build(c, code, v, context, state)
+            stack := this.buildExpression.build(c, code, v, context, state)
             if t := currentStack + stack; t > maxStack {
                 maxStack = t
             }

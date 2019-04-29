@@ -4,11 +4,11 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildExpressionTypeConversion {
-	eb BuildExpression
+	buildExpression BuildExpression
 
 	fn BuildExpressionTypeConversion(eb BuildExpression) {
 		this.super()
-		this.eb = eb
+		this.buildExpression = eb
 	}
 
 	fn buildTypeConversion(
@@ -49,10 +49,10 @@ class BuildExpressionTypeConversion {
 			state.stacks.append(t , t)
 			code.codeLength += 4
 		}
-		stack := this.eb.build(c , code , conversion.value , context , state)
+		stack := this.buildExpression.build(c , code , conversion.value , context , state)
 		maxStack = currentStack + stack
 		if e.value.isNumber() {
-			this.eb.BuildExpressionConversion.numberTypeConverter(code , conversion.value.value.Type , conversion.to.Type)
+			this.buildExpression.buildExpressionConversion.numberTypeConverter(code , conversion.value.value.Type , conversion.to.Type)
 			if t := jvmSlotSize(conversion.to) ; t > maxStack {
 				maxStack = t
 			}

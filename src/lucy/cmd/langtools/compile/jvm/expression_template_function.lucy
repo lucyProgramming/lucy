@@ -4,82 +4,81 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildTemplateFunctionCall {
-    eb BuildExpression
-    bp BuildPackage   
+	buildExpression BuildExpression
+	buildPacakage   BuildPackage
 
-    fn BuildTemplateFunctionCall(eb BuildExpression , bp BuildPackage) {
-        this.super()
-        this.eb = eb
-        this.bp = bp
-    }
+	fn BuildTemplateFunctionCall(eb BuildExpression , bp BuildPackage) {
+		this.super()
+		this.buildExpression = eb
+		this.buildPacakage = bp
+	}
 
-    fn buildTemplateFunctionCall(
-        c cg.ClassHighLevel,
-        code cg.AttributeCode,
-        e ast.Expression,
-        context Context,
-        state StackMapState) -> (maxStack char) {
-        call := e.data.(ast.ExpressionFunctionCall)
-        if call.function.templateFunction.Class == null {
-            // new a class 
-            className := this.bp.newClassName(call.function.name)
-            templateFunctionClass := new cg.ClassHighLevel(this.bp.majorVersion , this.bp.minorVersion)
-            templateFunctionClass.accessFlags |= cg.AccClassSynthetic
-            templateFunctionClass.name = className
-            call.function.templateFunction.Class = templateFunctionClass
-            call.function.templateFunction.Class.superClass = ast.JavaRootClass
-            this.bp.mkClassDefaultConstruction(templateFunctionClass) 
-            this.bp.putClass(templateFunctionClass)
-            templateFunctionClass.insertSourceFile(call.function.pos.filename)
-        }
-        if call.templateFunctionCallPair.entrance == null {
-            method := new cg.MethodHighLevel()
-            method.classHighLevel = call.function.templateFunction.Class
-            method.name = call.function.templateFunction.Class.
-                newMethodName(nameTemplateFunction(call.templateFunctionCallPair.Function))
-            method.accessFlags |= cg.AccClassPublic
-            method.accessFlags |= cg.AccClassFinal
-            method.accessFlags |= cg.AccMethodStatic
-            method.accessFlags |= cg.AccMethodBridge
-            if call.templateFunctionCallPair.Function.Type.vArgs != null {
-                method.accessFlags |= cg.AccMethodVarargs
-            }
-            method.descriptor = Descriptor.methodDescriptor(call.templateFunctionCallPair.Function.Type)
-            method.code = new cg.AttributeCode()
-            call.function.templateFunction.Class.appendMethod(method)
-            call.templateFunctionCallPair.Function.entrance = method
-            //build function
-            this.bp.BuildFunction.buildFunction(call.function.templateFunction.Class , null , method , call.templateFunctionCallPair.Function)
-            call.templateFunctionCallPair.entrance = method
-        }
-        maxStack = this.eb.BuildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
-        code.codes[code.codeLength] = cg.OP_invokestatic
-        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.templateFunctionCallPair.entrance.classHighLevel.name,
-                call.templateFunctionCallPair.entrance.name,
-                call.templateFunctionCallPair.entrance.descriptor),
-            code.codes[code.codeLength + 1 : code.codeLength + 3])
-        code.codeLength += 3
-        if e.isStatementExpression {
-            if call.templateFunctionCallPair.Function.Type.voidReturn() == false {
-                if len(call.templateFunctionCallPair.Function.Type.returnList) > 1 {
-                    code.codes[code.codeLength] = cg.OP_pop
-                    code.codeLength++
-                } else {
-                    if jvmSlotSize(e.value) == 1 {
-                        code.codes[code.codeLength] = cg.OP_pop
-                        code.codeLength++
-                    } else {
-                        code.codes[code.codeLength] = cg.OP_pop2
-                        code.codeLength++
-                    }
+	fn buildTemplateFunctionCall(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		call := e.data.(ast.ExpressionFunctionCall)
+		if call.function.templateFunction.Class == null {
+			// new a class 
+			className := this.buildPacakage.newClassName(call.function.name)
+			templateFunctionClass := new cg.ClassHighLevel(this.buildPacakage.majorVersion , this.buildPacakage.minorVersion)
+			templateFunctionClass.accessFlags |= cg.AccClassSynthetic
+			templateFunctionClass.name = className
+			call.function.templateFunction.Class = templateFunctionClass
+			call.function.templateFunction.Class.superClass = ast.JavaRootClass
+			this.buildPacakage.mkClassDefaultConstruction(templateFunctionClass)
+			this.buildPacakage.putClass(templateFunctionClass)
+			templateFunctionClass.insertSourceFile(call.function.pos.filename)
+		}
+		if call.templateFunctionCallPair.entrance == null {
+			method := new cg.MethodHighLevel()
+			method.classHighLevel = call.function.templateFunction.Class
+			method.name = call.function.templateFunction.Class.
+				newMethodName(nameTemplateFunction(call.templateFunctionCallPair.Function))
+			method.accessFlags |= cg.AccClassPublic
+			method.accessFlags |= cg.AccClassFinal
+			method.accessFlags |= cg.AccMethodStatic
+			method.accessFlags |= cg.AccMethodBridge
+			if call.templateFunctionCallPair.Function.Type.vArgs != null {
+				method.accessFlags |= cg.AccMethodVarargs
+			}
+			method.descriptor = Descriptor.methodDescriptor(call.templateFunctionCallPair.Function.Type)
+			method.code = new cg.AttributeCode()
+			call.function.templateFunction.Class.appendMethod(method)
+			call.templateFunctionCallPair.Function.entrance = method
+			//build function
+			this.buildPacakage.BuildFunction.buildFunction(call.function.templateFunction.Class , null , method , call.templateFunctionCallPair.Function)
+			call.templateFunctionCallPair.entrance = method
+		}
+		maxStack = this.buildExpression.buildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
+		code.codes[code.codeLength] = cg.OP_invokestatic
+		c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.templateFunctionCallPair.entrance.classHighLevel.name,
+				call.templateFunctionCallPair.entrance.name,
+				call.templateFunctionCallPair.entrance.descriptor),
+			code.codes[code.codeLength + 1 : code.codeLength + 3])
+		code.codeLength += 3
+		if e.isStatementExpression {
+			if call.templateFunctionCallPair.Function.Type.voidReturn() == false {
+				if len(call.templateFunctionCallPair.Function.Type.returnList) > 1 {
+					code.codes[code.codeLength] = cg.OP_pop
+					code.codeLength++
+				} else {
+					if jvmSlotSize(e.value) == 1 {
+						code.codes[code.codeLength] = cg.OP_pop
+						code.codeLength++
+					} else {
+						code.codes[code.codeLength] = cg.OP_pop2
+						code.codeLength++
+					}
 
-                }
+				}
 
-            }
-        }
-        return
-    }
+			}
+		}
+		return
+	}
 
 }
-
 
