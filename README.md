@@ -8,3 +8,5 @@ lucy is jvm programming language write in lucy at all.
 
 ## 不支持unicode标识符
 lucy不支持unicode标识符，标识符必须是英文.
+
+## 点击链接加入群聊【Lucy编程语言】：https://jq.qq.com/?_wv=1027&k=5lsT6qF
