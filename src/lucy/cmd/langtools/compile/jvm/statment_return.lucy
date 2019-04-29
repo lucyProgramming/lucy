@@ -71,7 +71,6 @@ class BuildReturn {
 				default:
 					code.codes[code.codeLength] = cg.OP_areturn
 			}
-
 			code.codeLength++
 			return
 		}
@@ -141,7 +140,6 @@ class BuildReturn {
 				default:
 					code.codes[code.codeLength] = cg.OP_areturn
 			}
-
 			code.codeLength++
 			return
 		}
@@ -173,7 +171,7 @@ class BuildReturn {
 			code.codeLength += 2
 			index++
 		}
-
+		
 		code.codes[code.codeLength] = cg.OP_areturn
 		code.codeLength++
 		return

@@ -51,6 +51,11 @@ public class Type {
 		another.thePackage = this.thePackage
 		another.theAlias = this.theAlias
 	}
+
+	public fn isIntegerNotTheLong() -> (is bool){
+		return this.isInteger() && this.Type != VariableTypeLong 
+	}
+
 	fn validForTypeAssertOrConversion() -> (valid bool) {
 		if this.isPointer() == false {
 			return false
