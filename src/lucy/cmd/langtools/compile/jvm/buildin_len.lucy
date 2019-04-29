@@ -33,7 +33,7 @@ class BuildinFunctionLen {
         code.codeLength += 5
         noNullExit := (new cg.Exit(cg.OP_goto , code))
         state.pushStack(c , a0.value)
-        context.MakeStackMap(code , state , code.codeLength)
+        context.makeStackMapForCode(code , state , code.codeLength)
         state.popStack(1)
         if a0.value.Type == ast.VariableTypeJavaArray {
             code.codes[code.codeLength] = cg.OP_arraylength
@@ -60,7 +60,7 @@ class BuildinFunctionLen {
         }
         writeExits([]cg.Exit{noNullExit} , code.codeLength)
         state.pushStack(c , typeInt)
-        context.MakeStackMap(code , state , code.codeLength)
+        context.makeStackMapForCode(code , state , code.codeLength)
         state.popStack(1)
         if e.isStatementExpression {
             code.codes[code.codeLength] = cg.OP_pop

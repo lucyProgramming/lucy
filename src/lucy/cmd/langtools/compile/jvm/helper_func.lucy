@@ -265,7 +265,7 @@ fn setEnumArray(c cg.ClassHighLevel , code cg.AttributeCode,
 	copyOPs(code , storeLocalVariableOps(ast.VariableTypeInt , a.k))
 	state.appendLocals(c , typeInt)
 	state.appendLocals(c , typeInt)
-	context.MakeStackMap(code , state , code.codeLength)
+	context.makeStackMapForCode(code , state , code.codeLength)
 	offset := code.codeLength
 	copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , a.k))
 	copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , a.length))
@@ -283,7 +283,7 @@ fn setEnumArray(c cg.ClassHighLevel , code cg.AttributeCode,
 	code.codeLength += 3
 	jumpTo(code , offset)
 	writeExits([]cg.Exit{exit} , code.codeLength)
-	context.MakeStackMap(code , state , code.codeLength)
+	context.makeStackMapForCode(code , state , code.codeLength)
 	return
 }
 

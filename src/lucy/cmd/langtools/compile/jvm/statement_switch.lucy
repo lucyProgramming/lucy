@@ -46,9 +46,9 @@ class BuildSwitch {
 							"(Ljava/lang/String;)I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
 					code.codeLength += 3
 				default:
-					context.MakeStackMap(code , state , code.codeLength + 7)
+					context.makeStackMapForCode(code , state , code.codeLength + 7)
 					state.pushStack(c , typeBool)
-					context.MakeStackMap(code , state , code.codeLength + 8)
+					context.makeStackMapForCode(code , state , code.codeLength + 8)
 					state.popStack(1)
 					code.codes[code.codeLength] = cg.OP_if_acmpeq
 					binary.BigEndian.putChar(code.codes[code.codeLength + 1 : code.codeLength + 3] , char(7))
@@ -78,7 +78,7 @@ class BuildSwitch {
 		for _ , ca := range s.cases {
 			if notMatch != null {
 				writeExits([]cg.Exit{notMatch} , code.codeLength)
-				context.MakeStackMap(code , state , code.codeLength)
+				context.makeStackMapForCode(code , state , code.codeLength)
 			}
 			matches := []cg.Exit{}
 			for _ , ee := range ca.matches {
@@ -117,7 +117,7 @@ class BuildSwitch {
 			// if match goto here
 			writeExits(matches , code.codeLength)
 			//before block,pop off stack
-			context.MakeStackMap(code , state , code.codeLength)
+			context.makeStackMapForCode(code , state , code.codeLength)
 			if size == 1 {
 				code.codes[code.codeLength] = cg.OP_pop
 			} else {
@@ -137,7 +137,7 @@ class BuildSwitch {
 		}
 
 		writeExits([]cg.Exit{notMatch} , code.codeLength)
-		context.MakeStackMap(code , state , code.codeLength)
+		context.makeStackMapForCode(code , state , code.codeLength)
 		if size == 1 {
 			code.codes[code.codeLength] = cg.OP_pop
 		} else {

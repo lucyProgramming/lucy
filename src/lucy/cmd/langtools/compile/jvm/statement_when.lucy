@@ -38,7 +38,7 @@ class BuildWhen {
 		for _ , ca := range s.cases {
 			if notMatch != null {
 				writeExits([]cg.Exit{notMatch} , code.codeLength)
-				context.MakeStackMap(code , state , code.codeLength)
+				context.makeStackMapForCode(code , state , code.codeLength)
 			}
 			matches := []cg.Exit{}
 			for _ , match := range ca.matches {
@@ -64,7 +64,7 @@ class BuildWhen {
 			// if match goto here
 			writeExits(matches , code.codeLength)
 			//before block,pop off stack
-			context.MakeStackMap(code , state , code.codeLength)
+			context.makeStackMapForCode(code , state , code.codeLength)
 			if size == 1 {
 				code.codes[code.codeLength] = cg.OP_pop
 			} else {
@@ -84,7 +84,7 @@ class BuildWhen {
 		}
 
 		writeExits([]cg.Exit{notMatch} , code.codeLength)
-		context.MakeStackMap(code , state , code.codeLength)
+		context.makeStackMapForCode(code , state , code.codeLength)
 		if size == 1 {
 			code.codes[code.codeLength] = cg.OP_pop
 		} else {

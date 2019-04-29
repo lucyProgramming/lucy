@@ -56,7 +56,7 @@ class BuildFor {
             firstTimeExit = new cg.Exit(cg.OP_goto , code) // goto body
         }
         s.continueCodeOffset = code.codeLength
-        context.MakeStackMap(code , forState , code.codeLength)
+        context.makeStackMapForCode(code , forState , code.codeLength)
         if s.increment != null {
             stack := this.eb.build(c , code , s.increment , context , forState)
             if stack > maxStack {
@@ -72,7 +72,7 @@ class BuildFor {
         }
         if firstTimeExit != null {
             writeExits([]cg.Exit{firstTimeExit} , code.codeLength)
-            context.MakeStackMap(code , forState , code.codeLength)
+            context.makeStackMapForCode(code , forState , code.codeLength)
         }
         this.bb.buildBlock(c , code , s.block , context , forState)
         if s.block.notExecuteToLastStatement == false {

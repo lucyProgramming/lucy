@@ -49,7 +49,7 @@ class BuildTemplateFunctionCall {
 			call.function.templateFunction.Class.appendMethod(method)
 			call.templateFunctionCallPair.Function.entrance = method
 			//build function
-			this.buildPacakage.BuildFunction.buildFunction(call.function.templateFunction.Class , null , method , call.templateFunctionCallPair.Function)
+			this.buildPacakage.buildFunction.buildFunction(call.function.templateFunction.Class , null , method , call.templateFunctionCallPair.Function)
 			call.templateFunctionCallPair.entrance = method
 		}
 		maxStack = this.buildExpression.buildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)

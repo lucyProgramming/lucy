@@ -43,7 +43,7 @@ class BuildForRangeMap {
         s.exits.append(new cg.Exit(cg.OP_goto , code))
         writeExits([]cg.Exit{noNullExit} , code.codeLength)
         state.pushStack(c , attr.rangeOn.value)
-        context.MakeStackMap(code , state , code.codeLength)
+        context.makeStackMapForCode(code , state , code.codeLength)
         state.popStack(1)
         forState := new StackMapState(state)
         defer {
@@ -126,7 +126,7 @@ class BuildForRangeMap {
             }
         }
         s.continueCodeOffset = code.codeLength
-        context.MakeStackMap(code , forState , code.codeLength)
+        context.makeStackMapForCode(code , forState , code.codeLength)
         blockState := new StackMapState(forState)
         if autoVar.KeySetsK > 255 {
             code.codes[code.codeLength] = cg.OP_wide

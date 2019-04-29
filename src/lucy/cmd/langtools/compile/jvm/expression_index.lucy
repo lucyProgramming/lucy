@@ -163,13 +163,13 @@ class BuildExpressionIndex {
 			}
 			nullExit := new cg.Exit(cg.OP_goto , code)
 			state.pushStack(c , state.newObjectVariableType(javaRootClass))
-			context.MakeStackMap(code , state , code.codeLength)
+			context.makeStackMapForCode(code , state , code.codeLength)
 			state.popStack(1) // pop java_root_class ref
 			writeExits([]cg.Exit{noNullExit} , code.codeLength)
 			TypeConverterAndPrimitivePacker.unPackPrimitives(c , code , index.indexOn.value.theMap.V)
 			writeExits([]cg.Exit{nullExit} , code.codeLength)
 			state.pushStack(c , e.value)
-			context.MakeStackMap(code , state , code.codeLength)
+			context.makeStackMapForCode(code , state , code.codeLength)
 			state.popStack(1)
 		}
 		return

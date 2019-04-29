@@ -16,16 +16,16 @@ class Context {
 	lastStackMapOffset        int
 	stackMapOffsets           []int
 
-	fn MakeStackMap(
-		code cg.AttributeCode,
+	fn makeStackMapForCode(
+		theCode cg.AttributeCode,
 		state StackMapState,
 		offset int) {
-		if code.attributeStackMap == null {
-			code.attributeStackMap = new cg.AttributeStackMap()
+		if theCode.attributeStackMap == null {
+			theCode.attributeStackMap = new cg.AttributeStackMap()
 		}
 		if this.lastStackMapOffset == offset {
-			code.attributeStackMap.StackMaps =
-				code.attributeStackMap.StackMaps[0 : len(code.attributeStackMap.StackMaps) - 1]
+			theCode.attributeStackMap.StackMaps =
+				theCode.attributeStackMap.StackMaps[0 : len(theCode.attributeStackMap.StackMaps) - 1]
 			this.stackMapOffsets = this.stackMapOffsets[0 : len(this.stackMapOffsets) - 1]
 			this.lastStackMapState = null
 			if len(this.stackMapOffsets) > 0 {
@@ -68,19 +68,19 @@ class Context {
 					same frame or same frame extended
 				*/
 				if delta <= 63 {
-					code.attributeStackMap.append(new cg.StackMapSameFrame(byte(delta)))
+					theCode.attributeStackMap.append(new cg.StackMapSameFrame(byte(delta)))
 				} else {
-					code.attributeStackMap.append(new cg.StackMapSameFrameExtended(251b , delta))
+					theCode.attributeStackMap.append(new cg.StackMapSameFrameExtended(251b , delta))
 				}
 
 				return
 			}
 			if len(this.lastStackMapStateLocals) == len(state.locals) && len(state.stacks) == 1 {
 				if delta <= 64 {
-					code.attributeStackMap.append(new cg.StackMapSameLocals1StackItemFrame(byte(delta + 64),
+					theCode.attributeStackMap.append(new cg.StackMapSameLocals1StackItemFrame(byte(delta + 64),
 							state.stacks[0]))
 				} else {
-					code.attributeStackMap.append(new cg.StackMapSameLocals1StackItemFrameExtended(247b,
+					theCode.attributeStackMap.append(new cg.StackMapSameLocals1StackItemFrameExtended(247b,
 							delta,
 							state.stacks[0]))
 				}
@@ -93,7 +93,7 @@ class Context {
 					locals := new []cg.StackMapVerificationTypeInfo(num)
 					appendFrame := new cg.StackMapAppendFrame(byte(num + 251) , delta , locals)
 					copy(locals , state.locals[len(state.locals) - num:])
-					code.attributeStackMap.append(appendFrame)
+					theCode.attributeStackMap.append(appendFrame)
 					return
 				}
 			}
@@ -104,7 +104,7 @@ class Context {
 		stacks := new []cg.StackMapVerificationTypeInfo(len(state.stacks))
 		copy(stacks , state.stacks)
 		fullFrame := new cg.StackMapFullFrame(255b , delta , locals , stacks)
-		code.attributeStackMap.append(fullFrame)
+		theCode.attributeStackMap.append(fullFrame)
 		return
 	}
 

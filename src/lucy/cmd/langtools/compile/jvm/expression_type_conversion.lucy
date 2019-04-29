@@ -77,7 +77,7 @@ class BuildExpressionTypeConversion {
 			okExit := new cg.Exit(cg.OP_goto , code)
 			state.pushStack(c , conversion.value.value)
 			defer state.popStack(1)
-			context.MakeStackMap(code , state , code.codeLength)
+			context.makeStackMapForCode(code , state , code.codeLength)
 			writeExits([]cg.Exit{wrongExit , wrongExit2} , code.codeLength)
 			code.codes[code.codeLength] = cg.OP_pop
 			code.codeLength++
@@ -100,7 +100,7 @@ class BuildExpressionTypeConversion {
 			code.codeLength += 3
 			code.codes[code.codeLength] = cg.OP_athrow
 			code.codeLength++
-			context.MakeStackMap(code , state , code.codeLength)
+			context.makeStackMapForCode(code , state , code.codeLength)
 			writeExits([]cg.Exit{okExit} , code.codeLength)
 			return
 		}

@@ -40,7 +40,7 @@ class BuildExpressionLogical {
         }
         state.pushStack(c, e.value)
         writeExits([]cg.Exit{exit}, code.codeLength)
-        context.MakeStackMap(code, state, code.codeLength)
+        context.makeStackMapForCode(code, state, code.codeLength)
         state.popStack(1)
         return
     }

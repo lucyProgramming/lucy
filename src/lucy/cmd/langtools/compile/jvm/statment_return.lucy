@@ -194,7 +194,7 @@ class BuildReturn {
 			state = new StackMapState(state) // clone
 			state.addTop(from)
 			state.pushStack(c , state.newObjectVariableType(throwableClass))
-			context.MakeStackMap(code , state , code.codeLength)
+			context.makeStackMapForCode(code , state , code.codeLength)
 			e := new cg.ExceptionTable()
 			e.startPc = char(statementReturn.statementDefers[index].startPc)
 			e.endPc = char(code.codeLength)
@@ -224,8 +224,8 @@ class BuildReturn {
 				maxStack = 2
 			}
 			state.pushStack(c , state.newObjectVariableType(throwableClass))
-			context.MakeStackMap(code , state , code.codeLength + 6)
-			context.MakeStackMap(code , state , code.codeLength + 7)
+			context.makeStackMapForCode(code , state , code.codeLength + 6)
+			context.makeStackMapForCode(code , state , code.codeLength + 7)
 			state.popStack(1)
 			code.codes[code.codeLength] = cg.OP_ifnonnull
 			binary.BigEndian.putChar(code.codes[code.codeLength + 1 : code.codeLength + 3] , char(6))
@@ -244,7 +244,7 @@ class BuildReturn {
 					copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , context.multiValueReturnVarOffset))
 					exit := new cg.Exit(cg.OP_ifnonnull , code)
 					this.buildReturnFromReturnVars(c , code , context)
-					context.MakeStackMap(code , state , code.codeLength)
+					context.makeStackMapForCode(code , state , code.codeLength)
 					writeExits([]cg.Exit{exit} , code.codeLength)
 				}
 			}

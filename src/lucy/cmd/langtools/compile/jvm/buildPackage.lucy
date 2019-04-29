@@ -7,526 +7,524 @@ import "lucy/cmd/langtools/compile/common"
 import "java/io"
 
 public class BuildPackage {
-    Package         ast.Package
-    classes         map{string -> cg.ClassHighLevel}
-    mainClass       cg.ClassHighLevel
-    BuildExpression BuildExpression
-    BuildBlock      BuildBlock
-    BuildFunction   BuildFunction
-    dir             string
-    majorVersion    char
-    minorVersion    char
+	thePackage      ast.Package
+	classes         map{string -> cg.ClassHighLevel}
+	mainClass       cg.ClassHighLevel
+	buildExpression BuildExpression
+	buildBlock      BuildBlock
+	buildFunction   BuildFunction
+	destinationDir  string
+	majorVersion    char
+	minorVersion    char
 
-    public fn BuildPackage(majorVersion char,
-        minorVersion char) {
-        this.super()
-        this.BuildExpression = new BuildExpression(this)
-        this.BuildBlock = new BuildBlock(this.BuildExpression , this)
-        this.BuildFunction = new BuildFunction(this.BuildExpression , this.BuildBlock)
-        this.majorVersion = majorVersion
-        this.minorVersion = minorVersion
-    }
+	public fn BuildPackage(majorVersion char,
+		minorVersion char) {
+		this.super()
+		this.buildExpression = new BuildExpression(this)
+		this.buildBlock = new BuildBlock(this.buildExpression , this)
+		this.buildFunction = new BuildFunction(this.buildExpression , this.buildBlock)
+		this.majorVersion = majorVersion
+		this.minorVersion = minorVersion
+	}
 
-    public fn getCompiledClassFileNames() -> (cs []string = ["main.class"]) {
-        for v := range this.classes {
-            cs.append(common.getBaseName(v.name) + ".class")
-        }
-    }
+	public fn getCompiledClassFileNames() -> (cs []string = ["main.class"]) {
+		for v := range this.classes {
+			cs.append(common.getBaseName(v.name) + ".class")
+		}
+	}
 
-    public fn make(p ast.Package , dir string) {
-        this.Package = p
-        this.dir = dir
-        mainClass := new cg.ClassHighLevel(this.majorVersion , this.minorVersion)
-        this.mainClass = mainClass
-        mainClass.accessFlags |= cg.AccClassPublic
-        mainClass.accessFlags |= cg.AccClassFinal
-        mainClass.accessFlags |= cg.AccClassSynthetic
-        mainClass.superClass = ast.JavaRootClass
-        mainClass.name = p.name + "/main"
-        mainClass.fields = new map{string -> cg.FieldHighLevel}()
-        this.mkClassDefaultConstruction(this.mainClass)
-        this.classes = new map{string -> cg.ClassHighLevel}()
-        this.mkGlobalConstants()
-        this.mkGlobalTypeAlias()
-        this.mkGlobalVariables()
-        this.mkGlobalFunctions()
-        this.mkInitFunctions()
-        for _ , v := range p.block.classes {
-            this.putClass(this.buildClass(v))
-        }
-        for _ , v := range p.block.enums {
-            this.putClass(this.mkEnum(v))
-        }
-        this.dumpClass()
-    }
+	public fn make(p ast.Package , dir string) {
+		this.thePackage = p
+		this.destinationDir = dir
+		mainClass := new cg.ClassHighLevel(this.majorVersion , this.minorVersion)
+		this.mainClass = mainClass
+		mainClass.accessFlags |= cg.AccClassPublic
+		mainClass.accessFlags |= cg.AccClassFinal
+		mainClass.accessFlags |= cg.AccClassSynthetic
+		mainClass.superClass = ast.JavaRootClass
+		mainClass.name = p.name + "/main"
+		mainClass.fields = new map{string -> cg.FieldHighLevel}()
+		this.mkClassDefaultConstruction(this.mainClass)
+		this.classes = new map{string -> cg.ClassHighLevel}()
+		this.mkGlobalConstants()
+		this.mkGlobalTypeAlias()
+		this.mkGlobalVariables()
+		this.mkGlobalFunctions()
+		this.mkInitFunctions()
+		for _ , v := range p.block.classes {
+			this.putClass(this.buildClass(v))
+		}
+		for _ , v := range p.block.enums {
+			this.putClass(this.mkEnum(v))
+		}
+		this.dumpClass()
+	}
 
-    fn newClassName(prefix string) -> (autoName string) {
-        for i := 0 ; i < 65536 ; i++ {
-            if i == 0 {
-                //use prefix only
-                autoName = prefix
-            } else {
-                autoName = sprintf("%s$%d" , prefix , i)
-            }
-            if _ , exists := this.Package.block.nameExists(autoName , null) ; exists {
-                continue
-            }
-            autoName = this.Package.name + "/" + autoName
-            if this.classes != null && this.classes[autoName] != null {
-                continue
-            } else {
-                if this.checkClassFileAlreadyExist(autoName) {
-                    //
-                    continue
-                }
-                return autoName
-            }
-        }
-        panic("new class name overflow") // impossible
-    }
+	fn newClassName(prefix string) -> (autoName string) {
+		for i := 0 ; i < 65536 ; i++ {
+			if i == 0 {
+				//use prefix only
+				autoName = prefix
+			} else {
+				autoName = sprintf("%s$%d" , prefix , i)
+			}
+			if _ , exists := this.thePackage.block.nameExists(autoName , null) ; exists {
+				continue
+			}
+			autoName = this.thePackage.name + "/" + autoName
+			if this.classes != null && this.classes[autoName] != null {
+				continue
+			} else {
+				if this.checkClassFileAlreadyExist(autoName) {
+					//
+					continue
+				}
+				return autoName
+			}
+		}
+		panic("new class name overflow") // impossible
+	}
 
-    //on windows Array.class == array.class filesystem is not case sensitve
-    fn checkClassFileAlreadyExist(name string) -> (exist bool) {
-        // not a windows system 
-        if common.onWindows() == false {
-            return 
-        }
-        for k , _ := range this.classes {
-            if k.toLowerCase() == name {
-                return true
-            }
-        }
-        //
-        for k , _ := range this.Package.block.classes {
-            if k.toLowerCase() == name {
-                return true
-            }
-        }
-    }
+	//on windows Array.class == array.class filesystem is not case sensitve
+	fn checkClassFileAlreadyExist(name string) -> (exist bool) {
+		// not a windows system 
+		if common.onWindows() == false {
+			return
+		}
+		for k , _ := range this.classes {
+			if k.toLowerCase() == name {
+				return true
+			}
+		}
+		//
+		for k , _ := range this.thePackage.block.classes {
+			if k.toLowerCase() == name {
+				return true
+			}
+		}
+	}
 
+	fn putClass(c cg.ClassHighLevel) {
+		if c.name == null ||
+			c.name == "" {
+			panic("missing name")
+		}
+		name := c.name
+		if name == this.mainClass.name {
+			panic("cannot have main class`s name")
+		}
+		if this.classes == null {
+			this.classes = new map{string -> cg.ClassHighLevel}()
+		}
+		if this.classes.keyExist(name) {
+			panic(sprintf("name:'%s' already been token" , name))
+		}
+		if common.onWindows() {
+			for k , _ := range this.classes {
+				if k.toLowerCase() == c.name.toLowerCase() {
+					msg := sprintf("on windows class file '%s.class' == '%s.class'\n" , k , c.name)
+					msg += "https://github.com/lucyProgramming/lucy/issues/1"
+					panic(msg)
+				}
+			}
+		}
+		this.classes[name] = c
+	}
 
-    fn putClass(c cg.ClassHighLevel) {
-        if c.name == null ||
-            c.name == "" {
-            panic("missing name")
-        }
-        name := c.name
-        if name == this.mainClass.name {
-            panic("cannot have main class`s name")
-        }
-        if this.classes == null {
-            this.classes = new map{string -> cg.ClassHighLevel}()
-        }
-        if this.classes.keyExist(name) {
-            panic(sprintf("name:'%s' already been token" , name))
-        }
-        if common.onWindows() {
-            for k , _ := range this.classes {
-                if k.toLowerCase() == c.name.toLowerCase() {
-                    msg := sprintf("on windows class file '%s.class' == '%s.class'\n" , k , c.name)
-                    msg += "https://github.com/lucyProgramming/lucy/issues/1"
-                    panic(msg)
-                }
-            }
-        }
-        this.classes[name] = c
-    }
+	fn mkEnum(e ast.Enum) -> (c cg.ClassHighLevel) {
+		c = new cg.ClassHighLevel(this.majorVersion , this.minorVersion)
+		c.name = e.name
+		c.insertSourceFile(e.pos.filename)
+		c.accessFlags = e.accessFlags
+		c.superClass = ast.JavaRootClass
+		c.fields = new map{string -> cg.FieldHighLevel}()
+		c.theClass.attributeLucyEnum = new cg.AttributeLucyEnum()
+		for _ , v := range e.enums {
+			field := new cg.FieldHighLevel()
+			if e.accessFlags & cg.AccClassPublic != 0 {
+				field.accessFlags |= cg.AccFieldPublic
+			} else {
+				field.accessFlags |= cg.AccFieldPrivate
+			}
+			field.name = v.name
+			field.descriptor = "I"
+			field.attributeConstantValue = new cg.AttributeConstantValue()
+			field.attributeConstantValue.index = c.theClass.insertIntConst(v.value)
+			c.fields[v.name] = field
+		}
+		return c
+	}
 
-    fn mkEnum(e ast.Enum) -> (c cg.ClassHighLevel) {
-        c = new cg.ClassHighLevel(this.majorVersion , this.minorVersion)
-        c.name = e.name
-        c.insertSourceFile(e.pos.filename)
-        c.accessFlags = e.accessFlags
-        c.superClass = ast.JavaRootClass
-        c.fields = new map{string -> cg.FieldHighLevel}()
-        c.theClass.attributeLucyEnum = new cg.AttributeLucyEnum()
-        for _ , v := range e.enums {
-            field := new cg.FieldHighLevel()
-            if e.accessFlags & cg.AccClassPublic != 0 {
-                field.accessFlags |= cg.AccFieldPublic
-            } else {
-                field.accessFlags |= cg.AccFieldPrivate
-            }
-            field.name = v.name
-            field.descriptor = "I"
-            field.attributeConstantValue = new cg.AttributeConstantValue()
-            field.attributeConstantValue.index = c.theClass.insertIntConst(v.value)
-            c.fields[v.name] = field
-        }
-        return c
-    }
+	fn mkGlobalConstants() {
+		for k , v := range this.thePackage.block.constants {
+			f := new cg.FieldHighLevel()
+			f.accessFlags |= cg.AccFieldStatic
+			f.accessFlags |= cg.AccFieldFinal
+			if v.accessFlags & cg.AccFieldPublic != 0 {
+				f.accessFlags |= cg.AccFieldPublic
+			}
+			this.mainClass.insertSourceFile(v.pos.filename)
+			f.name = v.name
+			f.attributeConstantValue = new cg.AttributeConstantValue()
+			switch v.Type.Type {
+				case ast.VariableTypeBool:
+					if v.boolValue {
+						f.attributeConstantValue.index = this.mainClass.theClass.insertIntConst(1)
+					} else {
+						f.attributeConstantValue.index = this.mainClass.theClass.insertIntConst(0)
+					}
+				case ast.VariableTypeLong:
+					f.attributeConstantValue.index = this.mainClass.theClass.insertLongConst(v.longValue)
+				case v.Type.isInteger():
+					f.attributeConstantValue.index = this.mainClass.theClass.insertIntConst(int(v.longValue))
+				case ast.VariableTypeFloat:
+					f.attributeConstantValue.index = this.mainClass.theClass.insertFloatConst(float(v.doubleValue))
+				case ast.VariableTypeDouble:
+					f.attributeConstantValue.index = this.mainClass.theClass.insertDoubleConst(v.doubleValue)
+				case ast.VariableTypeString:
+					f.attributeConstantValue.index = this.mainClass.theClass.insertStringConst(v.stringValue)
+			}
 
-    fn mkGlobalConstants() {
-        for k , v := range this.Package.block.constants {
-            f := new cg.FieldHighLevel()
-            f.accessFlags |= cg.AccFieldStatic
-            f.accessFlags |= cg.AccFieldFinal
-            if v.accessFlags & cg.AccFieldPublic != 0 {
-                f.accessFlags |= cg.AccFieldPublic
-            }
-            this.mainClass.insertSourceFile(v.pos.filename)
-            f.name = v.name
-            f.attributeConstantValue = new cg.AttributeConstantValue()
-            switch v.Type.Type {
-                case ast.VariableTypeBool:
-                    if v.boolValue {
-                        f.attributeConstantValue.index = this.mainClass.theClass.insertIntConst(1)
-                    } else {
-                        f.attributeConstantValue.index = this.mainClass.theClass.insertIntConst(0)
-                    }
-                case ast.VariableTypeLong:
-                    f.attributeConstantValue.index = this.mainClass.theClass.insertLongConst(v.longValue)
-                case v.Type.isInteger():
-                    f.attributeConstantValue.index = this.mainClass.theClass.insertIntConst(int(v.longValue))
-                case ast.VariableTypeFloat:
-                    f.attributeConstantValue.index = this.mainClass.theClass.insertFloatConst(float(v.doubleValue))
-                case ast.VariableTypeDouble:
-                    f.attributeConstantValue.index = this.mainClass.theClass.insertDoubleConst(v.doubleValue)
-                case ast.VariableTypeString:
-                    f.attributeConstantValue.index = this.mainClass.theClass.insertStringConst(v.stringValue)
-            }
+			f.attributeLucyConst = new cg.AttributeLucyConst()
+			f.descriptor = Descriptor.typeDescriptor(v.Type)
+			this.mainClass.fields[k] = f
+		}
 
-            f.attributeLucyConst = new cg.AttributeLucyConst()
-            f.descriptor = Descriptor.typeDescriptor(v.Type)
-            this.mainClass.fields[k] = f
-        }
+	}
+	fn mkGlobalTypeAlias() {
+		this.mainClass.theClass.TypeAlias = new []cg.AttributeLucyTypeAlias(len(this.thePackage.block.typeAliases))
+		var i = 0
+		for name , v := range this.thePackage.block.typeAliases {
+			t := new cg.AttributeLucyTypeAlias()
+			t.alias = LucyTypeAlias.encode(name , v)
+			if v.theAlias != null {
+				t.comment = v.theAlias.comment
+			}
+			this.mainClass.theClass.TypeAlias[i] = t
+			i++
+			this.mainClass.insertSourceFile(v.pos.filename)
+		}
 
-    }
-    fn mkGlobalTypeAlias() {
-        this.mainClass.theClass.TypeAlias = new []cg.AttributeLucyTypeAlias(len(this.Package.block.typeAliases))
-        var i = 0
-        for name , v := range this.Package.block.typeAliases {
-            t := new cg.AttributeLucyTypeAlias()
-            t.alias = LucyTypeAlias.encode(name , v)
-            if v.theAlias != null {
-                t.comment = v.theAlias.comment
-            }
-            this.mainClass.theClass.TypeAlias[i] = t
-            i++
-            this.mainClass.insertSourceFile(v.pos.filename)
-        }
+	}
 
-    }
+	fn mkGlobalVariables() {
+		for k , v := range this.thePackage.block.variables {
+			f := new cg.FieldHighLevel()
+			f.accessFlags |= cg.AccFieldStatic
+			f.descriptor = Descriptor.typeDescriptor(v.Type)
+			if v.accessFlags & cg.AccFieldPublic != 0 {
+				f.accessFlags |= cg.AccFieldPublic
+			}
+			f.accessFlags |= cg.AccFieldVolatile
+			if LucyFieldSignature.need(v.Type) {
+				f.attributeLucyFieldDescriptor = new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.encode(v.Type) , char(0))
+				if v.Type.Type == ast.VariableTypeFunction {
+					if v.Type.theFunctionType.vArgs != null {
+						f.attributeLucyFieldDescriptor.methodAccessFlag |=
+							cg.AccMethodVarargs
+					}
+				}
+			}
+			v.globalVarClassName = this.mainClass.name
+			f.name = v.name
+			this.mainClass.fields[k] = f
+			this.mainClass.insertSourceFile(v.pos.filename)
+		}
+	}
 
-    fn mkGlobalVariables() {
-        for k , v := range this.Package.block.variables {
-            f := new cg.FieldHighLevel()
-            f.accessFlags |= cg.AccFieldStatic
-            f.descriptor = Descriptor.typeDescriptor(v.Type)
-            if v.accessFlags & cg.AccFieldPublic != 0 {
-                f.accessFlags |= cg.AccFieldPublic
-            }
-            f.accessFlags |= cg.AccFieldVolatile
-            if LucyFieldSignature.need(v.Type) {
-                f.attributeLucyFieldDescriptor = new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.encode(v.Type) , char(0))
-                if v.Type.Type == ast.VariableTypeFunction {
-                    if v.Type.theFunctionType.vArgs != null {
-                        f.attributeLucyFieldDescriptor.methodAccessFlag |=
-                            cg.AccMethodVarargs
-                    }
-                }
-            }
-            v.globalVarClassName = this.mainClass.name
-            f.name = v.name
-            this.mainClass.fields[k] = f
-            this.mainClass.insertSourceFile(v.pos.filename)
-        }
-    }
+	fn mkInitFunctions() {
+		if len(this.thePackage.initFunctions) == 0 &&
+			false == this.thePackage.loadPackageContainsPackageInitMethod() {
+			return
+		}
+		blockMethods := []cg.MethodHighLevel{}
+		for _ , v := range this.thePackage.initFunctions {
+			method := new cg.MethodHighLevel()
+			blockMethods.append(method)
+			method.accessFlags |= cg.AccMethodStatic
+			method.accessFlags |= cg.AccMethodFinal
+			method.accessFlags |= cg.AccMethodPrivate
+			method.name = this.mainClass.newMethodName("block")
+			method.classHighLevel = this.mainClass
+			method.descriptor = "()V"
+			method.code = new cg.AttributeCode()
+			this.buildFunction.buildFunction(this.mainClass , null , method , v)
+			this.mainClass.appendMethod(method)
+			this.mainClass.insertSourceFile(v.pos.filename)
+		}
+		method := new cg.MethodHighLevel()
+		method.accessFlags |= cg.AccMethodStatic
+		method.name = "<clinit>"
+		method.descriptor = "()V"
+		codes := new []byte(65536)
+		codeLength := int(0)
+		method.code = new cg.AttributeCode()
+		for v := range this.thePackage.loadLucyPackages {
+			name := v.packageInitMethod
+			if name == null || name == "" {
+				continue
+			}
+			codes[codeLength] = cg.OP_invokestatic
+			this.mainClass.insertMethodRefConst(
+				new cg.ConstantInfoMethodrefHighLevel(v.name + "/main",
+					name,
+					"()V") , codes[codeLength + 1 : codeLength + 3])
+			codeLength += 3
+		}
+		for _ , v := range blockMethods {
+			codes[codeLength] = cg.OP_invokestatic
+			this.mainClass.insertMethodRefConst(
+				new cg.ConstantInfoMethodrefHighLevel(this.mainClass.name,
+					v.name,
+					"()V") , codes[codeLength + 1 : codeLength + 3])
+			codeLength += 3
+		}
+		codes[codeLength] = cg.OP_return
+		codeLength++
+		codes = codes[0 : codeLength]
+		method.code.codes = codes
+		method.code.codeLength = codeLength
+		this.mainClass.appendMethod(method)
 
-    fn mkInitFunctions() {
-        if len(this.Package.initFunctions) == 0 &&
-            false == this.Package.loadPackageContainsPackageInitMethod() {
-            return
-        }
-        blockMethods := []cg.MethodHighLevel{}
-        for _ , v := range this.Package.initFunctions {
-            method := new cg.MethodHighLevel()
-            blockMethods.append(method)
-            method.accessFlags |= cg.AccMethodStatic
-            method.accessFlags |= cg.AccMethodFinal
-            method.accessFlags |= cg.AccMethodPrivate
-            method.name = this.mainClass.newMethodName("block")
-            method.classHighLevel = this.mainClass
-            method.descriptor = "()V"
-            method.code = new cg.AttributeCode()
-            this.BuildFunction.buildFunction(this.mainClass , null , method , v)
-            this.mainClass.appendMethod(method)
-            this.mainClass.insertSourceFile(v.pos.filename)
-        }
-        method := new cg.MethodHighLevel()
-        method.accessFlags |= cg.AccMethodStatic
-        method.name = "<clinit>"
-        method.descriptor = "()V"
-        codes := new []byte(65536)
-        codeLength := int(0)
-        method.code = new cg.AttributeCode()
-        for v := range this.Package.loadLucyPackages {
-            name := v.packageInitMethod
-            if name == null || name == "" {
-                continue
-            }
-            codes[codeLength] = cg.OP_invokestatic
-            this.mainClass.insertMethodRefConst(
-                new cg.ConstantInfoMethodrefHighLevel(v.name + "/main",
-                    name,
-                    "()V") , codes[codeLength + 1 : codeLength + 3])
-            codeLength += 3
-        }
-        for _ , v := range blockMethods {
-            codes[codeLength] = cg.OP_invokestatic
-            this.mainClass.insertMethodRefConst(
-                new cg.ConstantInfoMethodrefHighLevel(this.mainClass.name,
-                    v.name,
-                    "()V") , codes[codeLength + 1 : codeLength + 3])
-            codeLength += 3
-        }
-        codes[codeLength] = cg.OP_return
-        codeLength++
-        codes = codes[0 : codeLength]
-        method.code.codes = codes
-        method.code.codeLength = codeLength
-        this.mainClass.appendMethod(method)
+		// trigger method 
+		trigger := new cg.MethodHighLevel()
+		blockMethods.append(method)
+		trigger.accessFlags |= cg.AccMethodStatic
+		trigger.accessFlags |= cg.AccMethodFinal
+		trigger.accessFlags |= cg.AccMethodPublic
+		trigger.name = this.mainClass.newMethodName("triggerPackageInitMethod")
+		trigger.classHighLevel = this.mainClass
+		trigger.descriptor = "()V"
+		trigger.code = new cg.AttributeCode()
+		trigger.code.codes = [cg.OP_return]
+		trigger.code.codeLength = 1
+		trigger.attributeTriggerPackageInitMethod = new cg.AttributeTriggerPackageInitMethod()
+		this.mainClass.appendMethod(trigger)
+	}
 
-        // trigger method 
-        trigger := new cg.MethodHighLevel()
-        blockMethods.append(method)
-        trigger.accessFlags |= cg.AccMethodStatic
-        trigger.accessFlags |= cg.AccMethodFinal
-        trigger.accessFlags |= cg.AccMethodPublic
-        trigger.name = this.mainClass.newMethodName("triggerPackageInitMethod")
-        trigger.classHighLevel = this.mainClass
-        trigger.descriptor = "()V"
-        trigger.code = new cg.AttributeCode()
-        trigger.code.codes = [cg.OP_return]
-        trigger.code.codeLength = 1
-        trigger.attributeTriggerPackageInitMethod = new cg.AttributeTriggerPackageInitMethod()
-        this.mainClass.appendMethod(trigger)
-    }
+	fn buildClass(astClass ast.Class) -> (c cg.ClassHighLevel) {
+		c = new cg.ClassHighLevel(this.majorVersion , this.minorVersion)
+		c.name = astClass.name
+		c.insertSourceFile(astClass.pos.filename)
+		c.accessFlags = astClass.accessFlags
+		if astClass.superClass != null {
+			c.superClass = astClass.superClass.name
+		} else {
+			c.superClass = astClass.superClassName.name
+		}
 
-    fn buildClass(astClass ast.Class) -> (c cg.ClassHighLevel) {
-        c = new cg.ClassHighLevel(this.majorVersion , this.minorVersion)
-        c.name = astClass.name
-        c.insertSourceFile(astClass.pos.filename)
-        c.accessFlags = astClass.accessFlags
-        if astClass.superClass != null {
-            c.superClass = astClass.superClass.name
-        } else {
-            c.superClass = astClass.superClassName.name
-        }
+		if len(astClass.block.constants) > 0 {
+			attr := new cg.AttributeLucyClassConst()
+			attr.constants = []cg.LucyClassConst{}
+			for _ , v := range astClass.block.constants {
+				cos := new cg.LucyClassConst()
+				cos.name = v.name
+				cos.descriptor = Descriptor.typeDescriptor(v.Type)
+				switch v.Type.Type {
+					case ast.VariableTypeBool:
+						if v.boolValue {
+							cos.valueIndex = c.theClass.insertIntConst(1)
+						} else {
+							cos.valueIndex = c.theClass.insertIntConst(0)
+						}
 
-        if len(astClass.block.constants) > 0 {
-            attr := new cg.AttributeLucyClassConst()
-            attr.constants = []cg.LucyClassConst{}
-            for _ , v := range astClass.block.constants {
-                cos := new cg.LucyClassConst()
-                cos.name = v.name
-                cos.descriptor = Descriptor.typeDescriptor(v.Type)
-                switch v.Type.Type {
-                    case ast.VariableTypeBool:
-                        if v.boolValue {
-                            cos.valueIndex = c.theClass.insertIntConst(1)
-                        } else {
-                            cos.valueIndex = c.theClass.insertIntConst(0)
-                        }
+					case ast.VariableTypeLong:
+						cos.valueIndex = c.theClass.insertLongConst(v.longValue)
+					case v.Type.isInteger():
+						cos.valueIndex = c.theClass.insertIntConst(int(v.longValue))
+					case ast.VariableTypeFloat:
+						cos.valueIndex = c.theClass.insertFloatConst(float(v.doubleValue))
+					case ast.VariableTypeDouble:
+						cos.valueIndex = c.theClass.insertDoubleConst(v.doubleValue)
+					case ast.VariableTypeString:
+						cos.valueIndex = c.theClass.insertStringConst(v.stringValue)
+				}
 
-                    case ast.VariableTypeLong:
-                        cos.valueIndex = c.theClass.insertLongConst(v.longValue)
-                    case v.Type.isInteger():
-                        cos.valueIndex = c.theClass.insertIntConst(int(v.longValue))
-                    case ast.VariableTypeFloat:
-                        cos.valueIndex = c.theClass.insertFloatConst(float(v.doubleValue))
-                    case ast.VariableTypeDouble:
-                        cos.valueIndex = c.theClass.insertDoubleConst(v.doubleValue)
-                    case ast.VariableTypeString:
-                        cos.valueIndex = c.theClass.insertStringConst(v.stringValue)
-                }
+				attr.constants.append(cos)
+			}
 
-                attr.constants.append(cos)
-            }
+			c.theClass.attributeLucyClassConst = attr
+		}
+		c.fields = new map{string -> cg.FieldHighLevel}()
+		c.methods = new map{string -> []cg.MethodHighLevel}()
+		c.interfaces = new []string(len(astClass.interfaces))
+		for k , v := range astClass.interfaces {
+			c.interfaces[k] = v.name
+		}
 
-            c.theClass.attributeLucyClassConst = attr
-        }
-        c.fields = new map{string -> cg.FieldHighLevel}()
-        c.methods = new map{string -> []cg.MethodHighLevel}()
-        c.interfaces = new []string(len(astClass.interfaces))
-        for k , v := range astClass.interfaces {
-            c.interfaces[k] = v.name
-        }
+		for _ , v := range astClass.fields {
+			f := new cg.FieldHighLevel()
+			f.name = v.name
+			f.accessFlags = v.accessFlags
+			if v.isStatic() &&
+				v.defaultValueExpression != null &&
+				v.defaultValueExpression.isLiteral() {
+				f.attributeConstantValue = new cg.AttributeConstantValue()
+				switch v.Type.Type {
+					case ast.VariableTypeBool:
+						if v.defaultValueExpression.boolValue {
+							f.attributeConstantValue.index = c.theClass.insertIntConst(1)
+						} else {
+							f.attributeConstantValue.index = c.theClass.insertIntConst(0)
+						}
+					case ast.VariableTypeLong:
+						f.attributeConstantValue.index = c.theClass.insertLongConst(v.defaultValueExpression.longValue)
+					case v.Type.isInteger():
+						f.attributeConstantValue.index = c.theClass.insertIntConst(int(v.defaultValueExpression.longValue))
+					case ast.VariableTypeFloat:
+						f.attributeConstantValue.index = c.theClass.insertFloatConst(float(v.defaultValueExpression.doubleValue))
+					case ast.VariableTypeDouble:
+						f.attributeConstantValue.index = c.theClass.insertDoubleConst(v.defaultValueExpression.doubleValue)
+					case ast.VariableTypeString:
+						f.attributeConstantValue.index = c.theClass.insertStringConst(v.defaultValueExpression.stringValue)
+				}
 
-        for _ , v := range astClass.fields {
-            f := new cg.FieldHighLevel()
-            f.name = v.name
-            f.accessFlags = v.accessFlags
-            if v.isStatic() &&
-                v.defaultValueExpression != null &&
-                v.defaultValueExpression.isLiteral() {
-                f.attributeConstantValue = new cg.AttributeConstantValue()
-                switch v.Type.Type {
-                    case ast.VariableTypeBool:
-                        if v.defaultValueExpression.boolValue {
-                            f.attributeConstantValue.index = c.theClass.insertIntConst(1)
-                        } else {
-                            f.attributeConstantValue.index = c.theClass.insertIntConst(0)
-                        }
-                    case ast.VariableTypeLong:
-                        f.attributeConstantValue.index = c.theClass.insertLongConst(v.defaultValueExpression.longValue)
-                    case v.Type.isInteger():
-                        f.attributeConstantValue.index = c.theClass.insertIntConst(int(v.defaultValueExpression.longValue))
-                    case ast.VariableTypeFloat:
-                        f.attributeConstantValue.index = c.theClass.insertFloatConst(float(v.defaultValueExpression.doubleValue))
-                    case ast.VariableTypeDouble:
-                        f.attributeConstantValue.index = c.theClass.insertDoubleConst(v.defaultValueExpression.doubleValue)
-                    case ast.VariableTypeString:
-                        f.attributeConstantValue.index = c.theClass.insertStringConst(v.defaultValueExpression.stringValue)
-                }
+			}
+			f.descriptor = Descriptor.typeDescriptor(v.Type)
+			if LucyFieldSignature.need(v.Type) {
+				t := new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.encode(v.Type) , char(0))
+				f.attributeLucyFieldDescriptor = t
+			}
+			c.fields[v.name] = f
+		}
 
-            }
-            f.descriptor = Descriptor.typeDescriptor(v.Type)
-            if LucyFieldSignature.need(v.Type) {
-                t := new cg.AttributeLucyFieldDescriptor(LucyFieldSignature.encode(v.Type) , char(0))
-                f.attributeLucyFieldDescriptor = t
-            }
-            c.fields[v.name] = f
-        }
+		for name , v := range astClass.methods {
+			vv := v[0]
+			method := new cg.MethodHighLevel()
+			method.name = name
+			method.accessFlags = vv.Function.accessFlags
+			if vv.Function.Type.vArgs != null {
+				method.accessFlags |= cg.AccMethodVarargs
+			}
+			if vv.isCompilerAuto {
+				method.accessFlags |= cg.AccMethodSynthetic
+			}
+			if LucyMethodSignature.need(vv.Function.Type) {
+				method.attributeLucyMethodDescriptor = new cg.AttributeLucyMethodDescriptor()
+				method.attributeLucyMethodDescriptor.descriptor = LucyMethodSignature.encode(vv.Function.Type)
+			}
+			method.classHighLevel = c
+			method.descriptor = Descriptor.methodDescriptor(vv.Function.Type)
+			method.isConstruction = name == specialMethodInit
+			if vv.isAbstract() == false {
+				method.code = new cg.AttributeCode()
+				this.buildFunction.buildFunction(c , astClass , method , vv.Function)
+			}
+			c.appendMethod(method)
+		}
+	}
 
-        for name , v := range astClass.methods {
-            vv := v[0]
-            method := new cg.MethodHighLevel()
-            method.name = name
-            method.accessFlags = vv.Function.accessFlags
-            if vv.Function.Type.vArgs != null {
-                method.accessFlags |= cg.AccMethodVarargs
-            }
-            if vv.isCompilerAuto {
-                method.accessFlags |= cg.AccMethodSynthetic
-            }
-            if LucyMethodSignature.need(vv.Function.Type) {
-                method.attributeLucyMethodDescriptor = new cg.AttributeLucyMethodDescriptor()
-                method.attributeLucyMethodDescriptor.descriptor = LucyMethodSignature.encode(vv.Function.Type)
-            }
-            method.classHighLevel = c
-            method.descriptor = Descriptor.methodDescriptor(vv.Function.Type)
-            method.isConstruction = name == specialMethodInit
-            if vv.isAbstract() == false {
-                method.code = new cg.AttributeCode()
-                this.BuildFunction.buildFunction(c , astClass , method , vv.Function)
-            }
-            c.appendMethod(method)
-        }
-    }
+	fn mkGlobalFunctions() {
+		ms := new map{string -> cg.MethodHighLevel}()
+		for k , f := range this.thePackage.block.functions { //              first round
+			if f.templateFunction != null {
+				t := new cg.AttributeTemplateFunction()
+				t.name = f.name
+				t.filename = f.pos.filename
+				t.accessFlags = f.accessFlags
+				t.startLine = char(f.pos.endLine)
+				t.startColumn = char(f.pos.endColumnOffset)
+				t.code = string(f.sourceCode)
+				if this.mainClass.templateFunctions == null {
+					this.mainClass.templateFunctions = [t]
+				} else {
+					this.mainClass.templateFunctions.append(t)
+				}
+				continue
+			}
+			if f.isBuildIn {
+				continue
+			}
+			var functionClass cg.ClassHighLevel
+			// low case and no low case will goto into main.class 
+			if f.name == ast.MainFunctionName ||
+				(common.onWindows() && f.name.toLowerCase() == ast.MainFunctionName) {
+				functionClass = this.mainClass
+				this.mainClass.insertSourceFile(f.pos.filename)
+			} else {
+				functionClass = new cg.ClassHighLevel(this.majorVersion , this.minorVersion)
+				functionClass.name = this.thePackage.name + "/" + f.name // not
+				functionClass.superClass = ast.LucyRootClass
+				this.mkClassDefaultConstruction(functionClass)
+				functionClass.accessFlags |= cg.AccClassPublic
+				functionClass.accessFlags |= cg.AccClassFinal
+				functionClass.accessFlags |= cg.AccClassSynthetic
+				functionClass.theClass.attributeGlobalFunction = new cg.AttributeGlobalFunction()
+				functionClass.insertSourceFile(f.pos.filename)
+				this.putClass(functionClass)
+			}
+			method := new cg.MethodHighLevel()
+			method.classHighLevel = functionClass
+			method.name = f.name
+			if f.name == ast.MainFunctionName {
+				method.descriptor = "([Ljava/lang/String;)V"
+			} else {
+				method.descriptor = Descriptor.methodDescriptor(f.Type)
+			}
+			method.accessFlags = 0
+			method.accessFlags |= cg.AccMethodStatic
+			if f.accessFlags & cg.AccMethodPublic != 0 ||
+				f.name == ast.MainFunctionName {
+				method.accessFlags |= cg.AccMethodPublic
+			}
+			if LucyMethodSignature.need(f.Type) {
+				method.attributeLucyMethodDescriptor = new cg.AttributeLucyMethodDescriptor()
+				method.attributeLucyMethodDescriptor.descriptor = LucyMethodSignature.encode(f.Type)
+			}
+			if f.Type.vArgs != null {
+				method.accessFlags |= cg.AccMethodVarargs
+			}
+			ms[k] = method
+			f.entrance = method
+			method.code = new cg.AttributeCode()
+			functionClass.appendMethod(method)
+		}
 
-    fn mkGlobalFunctions() {
-        ms := new map{string -> cg.MethodHighLevel}()
-        for k , f := range this.Package.block.functions { //           first round
-            if f.templateFunction != null {
-                t := new cg.AttributeTemplateFunction()
-                t.name = f.name
-                t.filename = f.pos.filename
-                t.accessFlags = f.accessFlags
-                t.startLine = char(f.pos.endLine)
-                t.startColumn = char(f.pos.endColumnOffset)
-                t.code = string(f.sourceCode)
-                if this.mainClass.templateFunctions == null {
-                    this.mainClass.templateFunctions = [t]
-                } else {
-                    this.mainClass.templateFunctions.append(t)
-                }
-                continue
-            }
-            if f.isBuildIn {
-                continue
-            }
-            var functionClass cg.ClassHighLevel
-            // low case and no low case will goto into main.class 
-            if f.name == ast.MainFunctionName ||
-                (common.onWindows() && f.name.toLowerCase() == ast.MainFunctionName) {
-                functionClass = this.mainClass
-                this.mainClass.insertSourceFile(f.pos.filename)
-            } else {
-                functionClass = new cg.ClassHighLevel(this.majorVersion , this.minorVersion)
-                functionClass.name = this.Package.name + "/" + f.name // not
-                functionClass.superClass = ast.LucyRootClass
-                this.mkClassDefaultConstruction(functionClass)
-                functionClass.accessFlags |= cg.AccClassPublic
-                functionClass.accessFlags |= cg.AccClassFinal
-                functionClass.accessFlags |= cg.AccClassSynthetic
-                functionClass.theClass.attributeGlobalFunction = new cg.AttributeGlobalFunction()
-                functionClass.insertSourceFile(f.pos.filename)
-                this.putClass(functionClass)
-            }
-            method := new cg.MethodHighLevel()
-            method.classHighLevel = functionClass
-            method.name = f.name
-            if f.name == ast.MainFunctionName {
-                method.descriptor = "([Ljava/lang/String;)V"
-            } else {
-                method.descriptor = Descriptor.methodDescriptor(f.Type)
-            }
-            method.accessFlags = 0
-            method.accessFlags |= cg.AccMethodStatic
-            if f.accessFlags & cg.AccMethodPublic != 0 ||
-                f.name == ast.MainFunctionName {
-                method.accessFlags |= cg.AccMethodPublic
-            }
-            if LucyMethodSignature.need(f.Type) {
-                method.attributeLucyMethodDescriptor = new cg.AttributeLucyMethodDescriptor()
-                method.attributeLucyMethodDescriptor.descriptor = LucyMethodSignature.encode(f.Type)
-            }
-            if f.Type.vArgs != null {
-                method.accessFlags |= cg.AccMethodVarargs
-            }
-            ms[k] = method
-            f.entrance = method
-            method.code = new cg.AttributeCode()
-            functionClass.appendMethod(method)
-        }
+		for k , f := range this.thePackage.block.functions {
+			if f.isBuildIn || f.templateFunction != null {
+				continue
+			}
+			this.buildFunction.buildFunction(ms[k].classHighLevel , null , ms[k] , f)
+		}
+	}
 
-        for k , f := range this.Package.block.functions {
-            if f.isBuildIn || f.templateFunction != null {
-                continue
-            }
-            this.BuildFunction.buildFunction(ms[k].classHighLevel , null , ms[k] , f)
-        }
-    }
+	fn dumpClass() {
+		//dump main c
+		f := new io.FileOutputStream(this.destinationDir + "/main.class" , false)
+		defer {
+			f.close()
+		}
+		this.mainClass.toLow().outPut(f)
+		for _ , c := range this.classes {
+			f := new io.FileOutputStream(this.destinationDir + "/" + common.getBaseName(c.name) + ".class" , false)
+			defer {
+				f.close()
+			}
+			c.toLow().outPut(f)
+		}
+	}
 
-    fn dumpClass() {
-        //dump main c
-        f := new io.FileOutputStream(this.dir + "/main.class" , false)
-        defer {
-            f.close()
-        }
-        this.mainClass.toLow().outPut(f)
-        for _ , c := range this.classes {
-            f := new io.FileOutputStream(this.dir + "/" + common.getBaseName(c.name) + ".class" , false)
-            defer {
-                f.close()
-            }
-            c.toLow().outPut(f)
-        }
-    }
-
-    /*
+	/*
         make_node_objects a default construction
     */
-    fn mkClassDefaultConstruction(c cg.ClassHighLevel) {
-        method := new cg.MethodHighLevel()
-        method.name = specialMethodInit
-        method.descriptor = "()V"
-        method.accessFlags |= cg.AccMethodPublic
-        method.code = new cg.AttributeCode()
-        method.code.codes = new []byte(5)
-        method.code.codeLength = 5
-        method.code.maxLocals = 1
-        method.code.codes[0] = cg.OP_aload_0
-        method.code.codes[1] = cg.OP_invokespecial
-        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(c.superClass,
-                specialMethodInit,
-                "()V") , method.code.codes[2 : 4])
-        method.code.maxStack = 1
-        method.code.codes[4] = cg.OP_return
-        c.appendMethod(method)
-    }
+	fn mkClassDefaultConstruction(c cg.ClassHighLevel) {
+		method := new cg.MethodHighLevel()
+		method.name = specialMethodInit
+		method.descriptor = "()V"
+		method.accessFlags |= cg.AccMethodPublic
+		method.code = new cg.AttributeCode()
+		method.code.codes = new []byte(5)
+		method.code.codeLength = 5
+		method.code.maxLocals = 1
+		method.code.codes[0] = cg.OP_aload_0
+		method.code.codes[1] = cg.OP_invokespecial
+		c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(c.superClass,
+				specialMethodInit,
+				"()V") , method.code.codes[2 : 4])
+		method.code.maxStack = 1
+		method.code.codes[4] = cg.OP_return
+		c.appendMethod(method)
+	}
 
 }
-
 

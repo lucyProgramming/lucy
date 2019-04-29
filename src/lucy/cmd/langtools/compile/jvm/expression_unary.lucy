@@ -88,7 +88,7 @@ class BuildExpressionUnary {
 			code.codes[code.codeLength] = cg.OP_iconst_0
 			code.codeLength++
 			exit2 := new cg.Exit(cg.OP_goto , code)
-			context.MakeStackMap(code , state , code.codeLength)
+			context.makeStackMapForCode(code , state , code.codeLength)
 			writeExits([]cg.Exit{exit} , code.codeLength)
 			code.codes[code.codeLength] = cg.OP_iconst_1
 			code.codeLength++
@@ -97,7 +97,7 @@ class BuildExpressionUnary {
 				state.popStack(1)
 			}
 			writeExits([]cg.Exit{exit2} , code.codeLength)
-			context.MakeStackMap(code , state , code.codeLength)
+			context.makeStackMapForCode(code , state , code.codeLength)
 		}
 		return
 	}

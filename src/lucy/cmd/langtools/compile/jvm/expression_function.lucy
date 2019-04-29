@@ -47,7 +47,7 @@ class BuildExpressionFunction {
 			method.classHighLevel = c
 			method.descriptor = Descriptor.methodDescriptor(function.Type)
 			method.code = new cg.AttributeCode()
-			this.buildPacakge.BuildFunction.buildFunction(c , null , method , function)
+			this.buildPacakge.buildFunction.buildFunction(c , null , method , function)
 			c.appendMethod(method)
 			return
 		}
@@ -188,7 +188,7 @@ class BuildExpressionFunction {
 
 		method.code = new cg.AttributeCode()
 		// build function
-		this.buildPacakge.BuildFunction.buildFunction(closureClass , null , method , function)
+		this.buildPacakge.buildFunction.buildFunction(closureClass , null , method , function)
 		return
 	}
 	fn packFunction2MethodHandle(c cg.ClassHighLevel , code cg.AttributeCode,

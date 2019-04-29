@@ -138,7 +138,7 @@ class BuildBlock {
                 maxStack = this.BuildWhen.buildWhenStatement(c , code , s.StatementWhen , context , state)
                 if len(s.StatementWhen.exits) > 0 {
                     writeExits(s.StatementWhen.exits , code.codeLength)
-                    context.MakeStackMap(code , state , code.codeLength)
+                    context.makeStackMapForCode(code , state , code.codeLength)
                 }
             case ast.StatementTypeExpression:
                 maxStack = this.eb.build(c , code , s.Expression , context , state)
@@ -147,7 +147,7 @@ class BuildBlock {
                 maxStack = this.BuildIf.buildIfStatement(c , code , s.statementIf , context , state)
                 if len(s.statementIf.exits) > 0 {
                     writeExits(s.statementIf.exits , code.codeLength)
-                    context.MakeStackMap(code , state , code.codeLength)
+                    context.makeStackMapForCode(code , state , code.codeLength)
                 }
             case ast.StatementTypeBlock:
                 blockState := new StackMapState(state)
@@ -156,13 +156,13 @@ class BuildBlock {
                 state.addTop(blockState)
                 if len(s.block.exits) > 0 {
                     writeExits(s.statementIf.exits , code.codeLength)
-                    context.MakeStackMap(code , state , code.codeLength)
+                    context.makeStackMapForCode(code , state , code.codeLength)
                 }
             case ast.StatementTypeFor:
                 s.StatementFor.exits = []cg.Exit{} //could compile multi times
                 maxStack = this.BuildFor.buildForStatement(c , code , s.StatementFor , context , state)
                 writeExits(s.StatementFor.exits , code.codeLength)
-                context.MakeStackMap(code , state , code.codeLength)
+                context.makeStackMapForCode(code , state , code.codeLength)
             case ast.StatementTypeContinue:
                 this.buildDefers(c , code , context , s.StatementContinue.defers , state)
                 jumpTo(code , s.StatementContinue.statementFor.continueCodeOffset)
@@ -188,7 +188,7 @@ class BuildBlock {
                         code.codeLength++
                     }
                     writeExits(s.StatementSwitch.exits , code.codeLength)
-                    context.MakeStackMap(code , state , code.codeLength)
+                    context.makeStackMapForCode(code , state , code.codeLength)
                 }
             case ast.StatementTypeGoTo:
                 this.buildDefers(c , code , context , s.StatementGoTo.defers , state)
@@ -208,7 +208,7 @@ class BuildBlock {
                 if len(s.StatementLabel.exits) > 0 {
                     writeExits(s.StatementLabel.exits , code.codeLength) // back patch
                 }
-                context.MakeStackMap(code , state , code.codeLength)
+                context.makeStackMapForCode(code , state , code.codeLength)
             case ast.StatementTypeDefer:
                 s.Defer.startPc = code.codeLength
                 s.Defer.stackMapState = (new StackMapState(state))
@@ -264,7 +264,7 @@ class BuildBlock {
             state = (new StackMapState(state))
             state.addTop(from)
             state.pushStack(c , state.newObjectVariableType(throwableClass))
-            context.MakeStackMap(code , state , code.codeLength)
+            context.makeStackMapForCode(code , state , code.codeLength)
             e := new cg.ExceptionTable()
             e.startPc = char(ds[index].startPc)
             e.endPc = char(code.codeLength)
@@ -291,8 +291,8 @@ class BuildBlock {
             code.codes[code.codeLength] = cg.OP_dup
             code.codeLength++
             state.pushStack(c , state.newObjectVariableType(throwableClass))
-            context.MakeStackMap(code , state , code.codeLength + 6)
-            context.MakeStackMap(code , state , code.codeLength + 7)
+            context.makeStackMapForCode(code , state , code.codeLength + 6)
+            context.makeStackMapForCode(code , state , code.codeLength + 7)
             state.popStack(1)
             code.codes[code.codeLength] = cg.OP_ifnonnull
             binary.BigEndian.putChar(code.codes[code.codeLength + 1 : code.codeLength + 3] , char(6))

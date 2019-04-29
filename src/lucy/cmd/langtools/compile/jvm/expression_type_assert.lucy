@@ -31,11 +31,11 @@ class BuildExpressionAssert {
 			{
 				state.pushStack(c , assertion.value.value)
 				state.pushStack(c , typeInt)
-				context.MakeStackMap(code , state , code.codeLength + 7)
+				context.makeStackMapForCode(code , state , code.codeLength + 7)
 				state.popStack(2)
 				state.pushStack(c , typeInt)
 				state.pushStack(c , assertion.value.value)
-				context.MakeStackMap(code , state , code.codeLength + 11)
+				context.makeStackMapForCode(code , state , code.codeLength + 11)
 				state.popStack(2)
 			}
 			code.codes[code.codeLength] = cg.OP_ifeq
@@ -114,7 +114,7 @@ class BuildExpressionAssert {
 			writeExits([]cg.Exit{exit} , code.codeLength)
 			state.pushStack(c , assertion.value.value)
 			defer state.popStack(1)
-			context.MakeStackMap(code , state , code.codeLength)
+			context.makeStackMapForCode(code , state , code.codeLength)
 			code.codes[code.codeLength] = cg.OP_checkcast // convince the jvm
 			code.codeLength++
 			insertTypeAssertClass(c , code , assertion.to)

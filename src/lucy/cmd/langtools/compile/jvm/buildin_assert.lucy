@@ -45,7 +45,7 @@ class BuildinFunctionAssert {
         }
 
         writeExits(exits , code.codeLength)
-        context.MakeStackMap(code , state , code.codeLength)
+        context.makeStackMapForCode(code , state , code.codeLength)
         copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , lengthOffset))
         copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , stepOffset))
         okExit := (new cg.Exit(cg.OP_if_icmpeq , code))
@@ -88,7 +88,7 @@ class BuildinFunctionAssert {
         code.codes[code.codeLength] = cg.OP_athrow
         code.codeLength++
         writeExits([]cg.Exit{okExit} , code.codeLength)
-        context.MakeStackMap(code , state , code.codeLength)
+        context.makeStackMapForCode(code , state , code.codeLength)
         return
     }
 

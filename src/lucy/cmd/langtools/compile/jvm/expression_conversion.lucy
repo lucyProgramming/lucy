@@ -249,10 +249,10 @@ class BuildExpressionConversion {
                 {
 
                     state.pushStack(c , typ)
-                    context.MakeStackMap(code , state , code.codeLength + 10)
+                    context.makeStackMapForCode(code , state , code.codeLength + 10)
                     state.popStack(1)
                     state.pushStack(c , typeString)
-                    context.MakeStackMap(code , state , code.codeLength + 13)
+                    context.makeStackMapForCode(code , state , code.codeLength + 13)
                     state.popStack(1)
                 }
 
