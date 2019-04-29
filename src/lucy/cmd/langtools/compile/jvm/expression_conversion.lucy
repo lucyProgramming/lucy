@@ -61,9 +61,7 @@ class BuildExpressionConversion {
                 code.codes[code.codeLength] = cg.OP_d2i
                 code.codes[code.codeLength + 1] = cg.OP_i2s
                 code.codeLength += 2
-
         }
-
     }
 
     fn stackTop2Char(code cg.AttributeCode , on ast.VariableTypeKind) {
@@ -92,9 +90,7 @@ class BuildExpressionConversion {
                 code.codeLength++
                 code.codes[code.codeLength] = cg.OP_i2c
                 code.codeLength++
-
         }
-
     }
     fn stackTop2Int(code cg.AttributeCode , on ast.VariableTypeKind) {
         switch on {
@@ -115,9 +111,7 @@ class BuildExpressionConversion {
             case ast.VariableTypeDouble:
                 code.codes[code.codeLength] = cg.OP_d2i
                 code.codeLength++
-
         }
-
     }
 
     fn stackTop2Float(code cg.AttributeCode , on ast.VariableTypeKind) {

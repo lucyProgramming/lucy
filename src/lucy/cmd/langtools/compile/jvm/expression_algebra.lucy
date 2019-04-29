@@ -221,7 +221,6 @@ class BuildExpressionArithmetic {
 						code.codes[code.codeLength] = cg.OP_ishr
 						code.codeLength++
 					}
-
 				case ast.VariableTypeShort:
 					if e.Type == ast.ExpressionTypeLsh {
 						code.codes[code.codeLength] = cg.OP_ishl
@@ -231,7 +230,6 @@ class BuildExpressionArithmetic {
 						code.codes[code.codeLength] = cg.OP_ishr
 						code.codeLength++
 					}
-
 				case ast.VariableTypeChar:
 					if e.Type == ast.ExpressionTypeLsh {
 						code.codes[code.codeLength] = cg.OP_ishl
@@ -241,14 +239,12 @@ class BuildExpressionArithmetic {
 						code.codes[code.codeLength] = cg.OP_ishr
 						code.codeLength++
 					}
-
 				case ast.VariableTypeInt:
 					if e.Type == ast.ExpressionTypeLsh {
 						code.codes[code.codeLength] = cg.OP_ishl
 					} else {
 						code.codes[code.codeLength] = cg.OP_ishr
 					}
-
 					code.codeLength++
 				case ast.VariableTypeLong:
 					if e.Type == ast.ExpressionTypeLsh {
@@ -256,7 +252,6 @@ class BuildExpressionArithmetic {
 					} else {
 						code.codes[code.codeLength] = cg.OP_lshr
 					}
-
 					code.codeLength++
 			}
 

@@ -191,10 +191,14 @@ class BuildExpressionFunction {
 		this.buildPacakge.buildFunction.buildFunction(closureClass , null , method , function)
 		return
 	}
-	fn packFunction2MethodHandle(c cg.ClassHighLevel , code cg.AttributeCode,
-		function ast.Function , context Context) -> (maxStack char) {
+	fn packFunction2MethodHandle(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		function ast.Function,
+		context Context) -> (maxStack char) {
 		code.codes[code.codeLength] = cg.OP_invokestatic
-		c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandles",
+		c.insertMethodRefConst(
+			new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandles",
 				"lookup",
 				"()Ljava/lang/invoke/MethodHandles$Lookup;"),
 			code.codes[code.codeLength + 1 : code.codeLength + 3])

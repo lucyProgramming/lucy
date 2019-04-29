@@ -5,175 +5,177 @@ import "lucy/jvm/cg"
 import "lucy/binary"
 
 class BuildExpressionIncrement {
-    buildExpression BuildExpression
+	buildExpression BuildExpression
 
-    fn BuildExpressionIncrement(eb BuildExpression) {
-        this.super()
-        this.buildExpression = eb
-    }
+	fn BuildExpressionIncrement(eb BuildExpression) {
+		this.super()
+		this.buildExpression = eb
+	}
 
-    fn buildSelfIncrement(c cg.ClassHighLevel , code cg.AttributeCode,
-        e ast.Expression , context Context , state StackMapState) -> (maxStack char) {
-        increment := e.data.(ast.Expression)
-        // identifier  and not captured and type`s int
-        if identifier , ok := increment.data.(ast.ExpressionIdentifier) ; ok &&
-            increment.Type == ast.ExpressionTypeIdentifier &&
-            identifier.variable.beenCapturedAsLeftValue == 0 &&
-            identifier.variable.Type.Type == ast.VariableTypeInt &&
-            identifier.variable.isGlobal == false {
-            if e.isStatementExpression == false {
-                if e.Type == ast.ExpressionTypeIncrement || e.Type == ast.ExpressionTypeDecrement {
-                    copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , identifier.variable.localValOffset)) // load to stack top
-                    maxStack = 1
-                }
-            }
-            if identifier.variable.localValOffset > 255 {
-                code.codes[code.codeLength] = cg.OP_wide
-                code.codes[code.codeLength + 1] = cg.OP_iinc
-                binary.BigEndian.putChar(code.codes[code.codeLength + 2:] , identifier.variable.localValOffset)
-                if e.isIncrement() {
-                    binary.BigEndian.putChar(code.codes[code.codeLength + 4:] , char(1))
-                } else {
-                    binary.BigEndian.putChar(code.codes[code.codeLength + 4:] , char(-1))
-                }
-                code.codeLength += 6
-            } else {
-                code.codes[code.codeLength] = cg.OP_iinc
-                code.codes[code.codeLength + 1] = byte(identifier.variable.localValOffset)
-                if e.isIncrement() {
-                    code.codes[code.codeLength + 2] = 1
-                } else {
-                    code.codes[code.codeLength + 2] = -1
-                }
-                code.codeLength += 3
-            }
-            if e.isStatementExpression == false {
-                if e.Type == ast.ExpressionTypePrefixIncrement || e.Type == ast.ExpressionTypePrefixDecrement {
-                    copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , identifier.variable.localValOffset)) // load to stack top
-                    maxStack = 1
-                }
-            }
-            return
-        }
-        stackLength := len(state.stacks)
-        defer {
-            state.popStack(len(state.stacks) - stackLength)
-        }
-
-        maxStack , remainStack , op , leftValueKind :=
-            this.buildExpression.buildExpressionLeftValue.getLeftValue(c , code , increment , context , state)
-        /*
+	fn buildSelfIncrement(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		increment := e.data.(ast.Expression)
+		// identifier  and not captured and type`s int
+		if identifier , ok := increment.data.(ast.ExpressionIdentifier) ; ok &&
+			increment.Type == ast.ExpressionTypeIdentifier &&
+			identifier.variable.beenCapturedAsLeftValue == 0 &&
+			identifier.variable.Type.Type == ast.VariableTypeInt &&
+			identifier.variable.isGlobal == false {
+			if e.isStatementExpression == false {
+				if e.Type == ast.ExpressionTypeIncrement || e.Type == ast.ExpressionTypeDecrement {
+					copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , identifier.variable.localValOffset)) // load to stack top
+					maxStack = 1
+				}
+			}
+			if identifier.variable.localValOffset > 255 {
+				code.codes[code.codeLength] = cg.OP_wide
+				code.codes[code.codeLength + 1] = cg.OP_iinc
+				binary.BigEndian.putChar(code.codes[code.codeLength + 2:] , identifier.variable.localValOffset)
+				if e.isIncrement() {
+					binary.BigEndian.putChar(code.codes[code.codeLength + 4:] , char(1))
+				} else {
+					binary.BigEndian.putChar(code.codes[code.codeLength + 4:] , char(-1))
+				}
+				code.codeLength += 6
+			} else {
+				code.codes[code.codeLength] = cg.OP_iinc
+				code.codes[code.codeLength + 1] = byte(identifier.variable.localValOffset)
+				if e.isIncrement() {
+					code.codes[code.codeLength + 2] = 1
+				} else {
+					code.codes[code.codeLength + 2] = -1
+				}
+				code.codeLength += 3
+			}
+			if e.isStatementExpression == false {
+				if e.Type == ast.ExpressionTypePrefixIncrement || e.Type == ast.ExpressionTypePrefixDecrement {
+					copyOPs(code , loadLocalVariableOps(ast.VariableTypeInt , identifier.variable.localValOffset)) // load to stack top
+					maxStack = 1
+				}
+			}
+			return
+		}
+		stackLength := len(state.stacks)
+		defer {
+			state.popStack(len(state.stacks) - stackLength)
+		}
+		maxStack , remainStack , op , leftValueKind :=
+			this.buildExpression.buildExpressionLeftValue.getLeftValue(c , code , increment , context , state)
+		/*
 			left value must can be used as right value
 		*/
-        stack := this.buildExpression.build(c , code , increment , context , state) // load it`s value
-        if t := stack + remainStack ; t > maxStack {
-            maxStack = t
-        }
-        currentStack := jvmSlotSize(e.value) + remainStack
-        if e.isStatementExpression == false {
-            if e.Type == ast.ExpressionTypeIncrement || e.Type == ast.ExpressionTypeDecrement {
-                currentStack += this.buildExpression.dupStackLeaveValueBelow(code , leftValueKind , e.value)
-                if currentStack > maxStack {
-                    maxStack = currentStack
-                }
-            }
-        }
-        if t := currentStack + jvmSlotSize(e.value) ; t > maxStack {
-            //
-            maxStack = t
-        }
-        switch e.value.Type {
-            case ast.VariableTypeByte:
-                if e.isIncrement() {
-                    code.codes[code.codeLength] = cg.OP_iconst_1
-                } else {
-                    code.codes[code.codeLength] = cg.OP_iconst_m1
-                }
+		stack := this.buildExpression.build(c , code , increment , context , state) // load it`s value
+		if t := stack + remainStack ; t > maxStack {
+			maxStack = t
+		}
+		currentStack := jvmSlotSize(e.value) + remainStack
+		if e.isStatementExpression == false {
+			if e.Type == ast.ExpressionTypeIncrement || e.Type == ast.ExpressionTypeDecrement {
+				currentStack += this.buildExpression.dupStackLeaveValueBelow(code , leftValueKind , e.value)
+				if currentStack > maxStack {
+					maxStack = currentStack
+				}
+			}
+		}
+		if t := currentStack + jvmSlotSize(e.value) ; t > maxStack {
+			//
+			maxStack = t
+		}
+		switch e.value.Type {
+			case ast.VariableTypeByte:
+				if e.isIncrement() {
+					code.codes[code.codeLength] = cg.OP_iconst_1
+				} else {
+					code.codes[code.codeLength] = cg.OP_iconst_m1
+				}
 
-                code.codes[code.codeLength + 1] = cg.OP_iadd
-                code.codes[code.codeLength + 2] = cg.OP_i2b
-                code.codeLength += 3
-            case ast.VariableTypeShort:
-                if e.isIncrement() {
-                    code.codes[code.codeLength] = cg.OP_iconst_1
-                } else {
-                    code.codes[code.codeLength] = cg.OP_iconst_m1
-                }
+				code.codes[code.codeLength + 1] = cg.OP_iadd
+				code.codes[code.codeLength + 2] = cg.OP_i2b
+				code.codeLength += 3
+			case ast.VariableTypeShort:
+				if e.isIncrement() {
+					code.codes[code.codeLength] = cg.OP_iconst_1
+				} else {
+					code.codes[code.codeLength] = cg.OP_iconst_m1
+				}
 
-                code.codes[code.codeLength + 1] = cg.OP_iadd
-                code.codes[code.codeLength + 2] = cg.OP_i2s
-                code.codeLength += 3
-            case ast.VariableTypeChar:
-                if e.isIncrement() {
-                    code.codes[code.codeLength] = cg.OP_iconst_1
-                } else {
-                    code.codes[code.codeLength] = cg.OP_iconst_m1
-                }
+				code.codes[code.codeLength + 1] = cg.OP_iadd
+				code.codes[code.codeLength + 2] = cg.OP_i2s
+				code.codeLength += 3
+			case ast.VariableTypeChar:
+				if e.isIncrement() {
+					code.codes[code.codeLength] = cg.OP_iconst_1
+				} else {
+					code.codes[code.codeLength] = cg.OP_iconst_m1
+				}
 
-                code.codes[code.codeLength + 1] = cg.OP_iadd
-                code.codes[code.codeLength + 2] = cg.OP_i2c
-                code.codeLength += 3
-            case ast.VariableTypeInt:
-                if e.isIncrement() {
-                    code.codes[code.codeLength] = cg.OP_iconst_1
-                } else {
-                    code.codes[code.codeLength] = cg.OP_iconst_m1
-                }
+				code.codes[code.codeLength + 1] = cg.OP_iadd
+				code.codes[code.codeLength + 2] = cg.OP_i2c
+				code.codeLength += 3
+			case ast.VariableTypeInt:
+				if e.isIncrement() {
+					code.codes[code.codeLength] = cg.OP_iconst_1
+				} else {
+					code.codes[code.codeLength] = cg.OP_iconst_m1
+				}
 
-                code.codes[code.codeLength + 1] = cg.OP_iadd
-                code.codeLength += 2
-            case ast.VariableTypeLong:
-                if e.isIncrement() {
-                    code.codes[code.codeLength] = cg.OP_lconst_1
-                    code.codeLength++
-                } else {
-                    code.codes[code.codeLength] = cg.OP_ldc2_w
-                    c.insertLongConst(-1L , code.codes[code.codeLength + 1 : code.codeLength + 3])
-                    code.codeLength += 3
-                }
+				code.codes[code.codeLength + 1] = cg.OP_iadd
+				code.codeLength += 2
+			case ast.VariableTypeLong:
+				if e.isIncrement() {
+					code.codes[code.codeLength] = cg.OP_lconst_1
+					code.codeLength++
+				} else {
+					code.codes[code.codeLength] = cg.OP_ldc2_w
+					c.insertLongConst(-1L , code.codes[code.codeLength + 1 : code.codeLength + 3])
+					code.codeLength += 3
+				}
 
-                code.codes[code.codeLength] = cg.OP_ladd
-                code.codeLength++
-            case ast.VariableTypeFloat:
-                if e.isIncrement() {
-                    code.codes[code.codeLength] = cg.OP_fconst_1
-                    code.codeLength++
-                } else {
-                    code.codes[code.codeLength] = cg.OP_ldc_w
-                    c.insertFloatConst(-1f , code.codes[code.codeLength + 1 : code.codeLength + 3])
-                    code.codeLength += 3
-                }
+				code.codes[code.codeLength] = cg.OP_ladd
+				code.codeLength++
+			case ast.VariableTypeFloat:
+				if e.isIncrement() {
+					code.codes[code.codeLength] = cg.OP_fconst_1
+					code.codeLength++
+				} else {
+					code.codes[code.codeLength] = cg.OP_ldc_w
+					c.insertFloatConst(-1f , code.codes[code.codeLength + 1 : code.codeLength + 3])
+					code.codeLength += 3
+				}
 
-                code.codes[code.codeLength] = cg.OP_fadd
-                code.codeLength++
-            case ast.VariableTypeDouble:
-                if e.isIncrement() {
-                    code.codes[code.codeLength] = cg.OP_dconst_1
-                    code.codeLength++
-                } else {
-                    code.codes[code.codeLength] = cg.OP_ldc2_w
-                    c.insertDoubleConst(-1d , code.codes[code.codeLength + 1 : code.codeLength + 3])
-                    code.codeLength += 3
-                }
+				code.codes[code.codeLength] = cg.OP_fadd
+				code.codeLength++
+			case ast.VariableTypeDouble:
+				if e.isIncrement() {
+					code.codes[code.codeLength] = cg.OP_dconst_1
+					code.codeLength++
+				} else {
+					code.codes[code.codeLength] = cg.OP_ldc2_w
+					c.insertDoubleConst(-1d , code.codes[code.codeLength + 1 : code.codeLength + 3])
+					code.codeLength += 3
+				}
 
-                code.codes[code.codeLength] = cg.OP_dadd
-                code.codeLength++
-        }
+				code.codes[code.codeLength] = cg.OP_dadd
+				code.codeLength++
+		}
 
-        if e.isStatementExpression == false {
-            if e.Type == ast.ExpressionTypePrefixIncrement ||
-                e.Type == ast.ExpressionTypePrefixDecrement {
-                currentStack += this.buildExpression.dupStackLeaveValueBelow(code , leftValueKind , e.value)
-                if currentStack > maxStack {
-                    maxStack = currentStack
-                }
-            }
-        }
-        //copy op
-        copyOPs(code , op)
-        return
-    }
+		if e.isStatementExpression == false {
+			if e.Type == ast.ExpressionTypePrefixIncrement ||
+				e.Type == ast.ExpressionTypePrefixDecrement {
+				currentStack += this.buildExpression.dupStackLeaveValueBelow(code , leftValueKind , e.value)
+				if currentStack > maxStack {
+					maxStack = currentStack
+				}
+			}
+		}
+		//copy op
+		copyOPs(code , op)
+		return
+	}
 
 }
-
 

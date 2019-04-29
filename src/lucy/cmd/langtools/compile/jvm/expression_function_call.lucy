@@ -4,102 +4,100 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildExpressionFunctionCall {
-    eb  BuildExpression    
-    bfc BuildinFunctionCall
+	buildExpression     BuildExpression
+	buildinFunctionCall BuildinFunctionCall
 
-    fn BuildExpressionFunctionCall(eb BuildExpression) {
-        this.super()
-        this.eb = eb
-        this.bfc = new BuildinFunctionCall(eb)
-    }
+	fn BuildExpressionFunctionCall(eb BuildExpression) {
+		this.super()
+		this.buildExpression = eb
+		this.buildinFunctionCall = new BuildinFunctionCall(eb)
+	}
 
-    fn buildFunctionPointerCall(
-        c cg.ClassHighLevel,
-        code cg.AttributeCode,
-        e ast.Expression,
-        context Context,
-        state StackMapState) -> (maxStack char) {
-        call := e.data.(ast.ExpressionFunctionCall)
-        maxStack = this.eb.build(c , code , call.functionCallOn , context , state)
-        stack := this.eb.buildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
-        if t := char(1) + stack ; t > maxStack {
-            maxStack = t
-        }
-        code.codes[code.codeLength] = cg.OP_invokevirtual
-        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandle",
-            methodHandleInvokeMethodName,
-            Descriptor.methodDescriptor(call.functionCallOn.value.theFunctionType)) , code.codes[code.codeLength + 1 : code.codeLength + 3])
-        code.codeLength += 3
-        if t := popCallResult(
-            code,
-            e,
-            call.functionCallOn.value.theFunctionType) ; t > maxStack {
-            maxStack = t
-        }
-        return
-    }
-    fn buildFunctionCall(
-        c cg.ClassHighLevel,
-        code cg.AttributeCode,
-        e ast.Expression,
-        context Context,
-        state StackMapState) -> (maxStack char) {
-        call := e.data.(ast.ExpressionFunctionCall)
-        if call.function == null {
-            return this.buildFunctionPointerCall(c , code , e , context , state)
-        }
-        if call.function.templateFunction != null {
-            return this.eb.buildTemplateFunctionCall.buildTemplateFunctionCall(c , code , e , context , state)
-        }
-        if call.function.isBuildIn {
-            return this.bfc.mkBuildInFunctionCall(c , code , e , context , state)
-        }
-        if call.functionCallOn != null &&
-            call.functionCallOn.Type == ast.ExpressionTypeFunctionLiteral {
-            maxStack = this.eb.build(c , code , call.functionCallOn , context , state)
-        }
-        if call.function.isClosureFunction == false {
-            maxStack = this.eb.buildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
-            code.codes[code.codeLength] = cg.OP_invokestatic
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.function.entrance.classHighLevel.name,
-                call.function.entrance.name,
-                call.function.entrance.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
-            code.codeLength += 3
-        } else {
-            //closure function call
-            if context.theFunction.closure.closureFunctionExist(call.function) {
-                copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , char(0)))
-                code.codes[code.codeLength] = cg.OP_getfield
-                c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(c.name,
-                    call.function.name,
-                    "L" + call.function.entrance.classHighLevel.name + ";") , code.codes[code.codeLength + 1 : code.codeLength + 3])
-                code.codeLength += 3
-            } else {
-                copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , call.function.closureVariableOffSet))
-            }
+	fn buildFunctionPointerCall(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		call := e.data.(ast.ExpressionFunctionCall)
+		maxStack = this.buildExpression.build(c , code , call.functionCallOn , context , state)
+		stack := this.buildExpression.buildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
+		if t := char(1) + stack ; t > maxStack {
+			maxStack = t
+		}
+		code.codes[code.codeLength] = cg.OP_invokevirtual
+		c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel("java/lang/invoke/MethodHandle",
+				methodHandleInvokeMethodName,
+				Descriptor.methodDescriptor(call.functionCallOn.value.theFunctionType)) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+		code.codeLength += 3
+		if t := popCallResult(
+			code,
+			e,
+			call.functionCallOn.value.theFunctionType) ; t > maxStack {
+			maxStack = t
+		}
+		return
+	}
+	fn buildFunctionCall(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		call := e.data.(ast.ExpressionFunctionCall)
+		if call.function == null {
+			return this.buildFunctionPointerCall(c , code , e , context , state)
+		}
+		if call.function.templateFunction != null {
+			return this.buildExpression.buildTemplateFunctionCall.buildTemplateFunctionCall(c , code , e , context , state)
+		}
+		if call.function.isBuildIn {
+			return this.buildinFunctionCall.mkBuildInFunctionCall(c , code , e , context , state)
+		}
+		if call.functionCallOn != null &&
+			call.functionCallOn.Type == ast.ExpressionTypeFunctionLiteral {
+			maxStack = this.buildExpression.build(c , code , call.functionCallOn , context , state)
+		}
+		if call.function.isClosureFunction == false {
+			maxStack = this.buildExpression.buildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
+			code.codes[code.codeLength] = cg.OP_invokestatic
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.function.entrance.classHighLevel.name,
+					call.function.entrance.name,
+					call.function.entrance.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+			code.codeLength += 3
+		} else {
+			//closure function call
+			if context.theFunction.closure.closureFunctionExist(call.function) {
+				copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , char(0)))
+				code.codes[code.codeLength] = cg.OP_getfield
+				c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(c.name,
+						call.function.name,
+						"L" + call.function.entrance.classHighLevel.name + ";") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+				code.codeLength += 3
+			} else {
+				copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , call.function.closureVariableOffSet))
+			}
 
-            state.pushStack(c , state.newObjectVariableType(call.function.entrance.classHighLevel.name))
-            defer {
-                state.popStack(1)
-            }
+			state.pushStack(c , state.newObjectVariableType(call.function.entrance.classHighLevel.name))
+			defer {
+				state.popStack(1)
+			}
 
-            stack := this.eb.buildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
-            if t := char(1) + stack ; t > maxStack {
-                maxStack = t
-            }
-            code.codes[code.codeLength] = cg.OP_invokevirtual
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.function.entrance.classHighLevel.name,
-                call.function.name,
-                call.function.entrance.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
-            code.codeLength += 3
-        }
-
-        if t := popCallResult(code , e , call.function.Type) ; t > maxStack {
-            maxStack = t
-        }
-        return
-    }
+			stack := this.buildExpression.buildExpressionCallArgs.buildCallArgs(c , code , call.args , call.vArgs , context , state)
+			if t := char(1) + stack ; t > maxStack {
+				maxStack = t
+			}
+			code.codes[code.codeLength] = cg.OP_invokevirtual
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(call.function.entrance.classHighLevel.name,
+					call.function.name,
+					call.function.entrance.descriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+			code.codeLength += 3
+		}
+		if t := popCallResult(code , e , call.function.Type) ; t > maxStack {
+			maxStack = t
+		}
+		return
+	}
 
 }
-
 

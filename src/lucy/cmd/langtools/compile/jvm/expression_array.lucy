@@ -5,198 +5,196 @@ import "lucy/jvm/cg"
 import "lucy/cmd/langtools/compile/common"
 
 class BuildExpressionArray {
-    buildExpression BuildExpression
+	buildExpression BuildExpression
 
-    fn BuildExpressionArray(eb BuildExpression) {
-        this.super()
-        this.buildExpression = eb
-    }
+	fn BuildExpressionArray(eb BuildExpression) {
+		this.super()
+		this.buildExpression = eb
+	}
 
-    fn buildArray(
-        c cg.ClassHighLevel,
-        code cg.AttributeCode,
-        e ast.Expression,
-        context Context,
-        state StackMapState) -> (maxStack char) {
-        length := len(state.stacks)
-        defer {
-            state.popStack(len(state.stacks) - length)
-        }
+	fn buildArray(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		length := len(state.stacks)
+		defer {
+			state.popStack(len(state.stacks) - length)
+		}
 
-        arr := e.data.(ast.ExpressionArray)
-        //	new array
-        meta := ArrayMetas[e.value.theArray.Type]
-        code.codes[code.codeLength] = cg.OP_new
-        c.insertClassConst(meta.className , code.codes[code.codeLength + 1 : code.codeLength + 3])
-        code.codes[code.codeLength + 3] = cg.OP_dup
-        code.codeLength += 4
-        {
+		arr := e.data.(ast.ExpressionArray)
+		//	new array
+		meta := ArrayMetas[e.value.theArray.Type]
+		code.codes[code.codeLength] = cg.OP_new
+		c.insertClassConst(meta.className , code.codes[code.codeLength + 1 : code.codeLength + 3])
+		code.codes[code.codeLength + 3] = cg.OP_dup
+		code.codeLength += 4
+		{
+			verify := new cg.StackMapVerificationTypeInfo()
+			unInit := new cg.StackMapUninitializedVariableInfo(char(code.codeLength - 4))
+			verify.verify = unInit
+			state.stacks.append(verify , verify)
+		}
 
-            verify := new cg.StackMapVerificationTypeInfo()
-            unInit := new cg.StackMapUninitializedVariableInfo(char(code.codeLength - 4))
-            verify.verify = unInit
-            state.stacks.append(verify , verify)
-        }
+		loadInt(c , code , int(len(arr.expressions)))
+		newArrayBaseOnType(c , code , e.value.theArray)
+		arrayObject := new ast.Type()
+		arrayObject.Type = ast.VariableTypeJavaArray
+		arrayObject.theArray = e.value.theArray
+		state.pushStack(c , arrayObject)
+		maxStack = 3
+		storeOP := storeArrayElementOp(e.value.theArray.Type)
+		var index int = 0
+		for _ , v := range arr.expressions {
+			code.codes[code.codeLength] = cg.OP_dup
+			code.codeLength++
+			loadInt(c , code , index) // load index
+			state.pushStack(c , arrayObject)
+			state.pushStack(c , typeInt)
+			stack := this.buildExpression.build(c , code , v , context , state)
+			state.popStack(2)
+			if t := char(5) + stack ; t > maxStack {
+				maxStack = t
+			}
+			code.codes[code.codeLength] = storeOP
+			code.codeLength++
+			index++
+		}
 
-        loadInt(c , code , int(len(arr.expressions)))
-        newArrayBaseOnType(c , code , e.value.theArray)
-        arrayObject := new ast.Type()
-        arrayObject.Type = ast.VariableTypeJavaArray
-        arrayObject.theArray = e.value.theArray
-        state.pushStack(c , arrayObject)
-        maxStack = 3
-        storeOP := storeArrayElementOp(e.value.theArray.Type)
-        var index int = 0
-        for _ , v := range arr.expressions {
-            code.codes[code.codeLength] = cg.OP_dup
-            code.codeLength++
-            loadInt(c , code , index) // load index
-            state.pushStack(c , arrayObject)
-            state.pushStack(c , typeInt)
-            stack := this.buildExpression.build(c , code , v , context , state)
-            state.popStack(2)
-            if t := char(5) + stack ; t > maxStack {
-                maxStack = t
-            }
-            code.codes[code.codeLength] = storeOP
-            code.codeLength++
-            index++
-        }
+		code.codes[code.codeLength] = cg.OP_invokespecial
+		c.insertMethodRefConst(
+			new cg.ConstantInfoMethodrefHighLevel(meta.className,
+				specialMethodInit,
+				meta.constructorFuncDescriptor),
+			code.codes[code.codeLength + 1 : code.codeLength + 3])
+		code.codeLength += 3
+		return
+	}
 
-        code.codes[code.codeLength] = cg.OP_invokespecial
-        c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
-            specialMethodInit,
-            meta.constructorFuncDescriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
-        code.codeLength += 3
-        return
-    }
+	fn buildMethodCallJavaOnArray(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		call := e.data.(ast.ExpressionMethodCall)
+		maxStack = this.buildExpression.build(c , code , call.methodCallOn , context , state)
+		switch call.name {
+			case common.ArrayMethodSize:
+				code.codes[code.codeLength] = cg.OP_arraylength
+				code.codeLength++
+				if e.isStatementExpression {
+					code.codes[code.codeLength] = cg.OP_pop
+					code.codeLength++
+				}
+		}
+		return
+	}
 
-    fn buildMethodCallJavaOnArray(
-        c cg.ClassHighLevel,
-        code cg.AttributeCode,
-        e ast.Expression,
-        context Context,
-        state StackMapState) -> (maxStack char) {
-        call := e.data.(ast.ExpressionMethodCall)
-        maxStack = this.buildExpression.build(c , code , call.methodCallOn , context , state)
-        switch call.name {
-            case common.ArrayMethodSize:
-                code.codes[code.codeLength] = cg.OP_arraylength
-                code.codeLength++
-                if e.isStatementExpression {
-                    code.codes[code.codeLength] = cg.OP_pop
-                    code.codeLength++
-                }
-        }
+	fn buildMethodCallOnArray(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
+		length := len(state.stacks)
+		defer {
+			state.popStack(len(state.stacks) - length) // ref type
+		}
 
-        return
-    }
+		call := e.data.(ast.ExpressionMethodCall)
+		maxStack = this.buildExpression.build(c , code , call.methodCallOn , context , state)
+		state.pushStack(c , call.methodCallOn.value)
+		switch call.name {
+			case common.ArrayMethodSize,
+				common.ArrayMethodStart,
+				common.ArrayMethodCap,
+				common.ArrayMethodEnd:
+				meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
+				code.codes[code.codeLength] = cg.OP_invokevirtual
+				c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
+						call.name,
+						"()I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
+				code.codeLength += 3
+				if e.isStatementExpression {
+					code.codes[code.codeLength] = cg.OP_pop
+					code.codeLength++
+				}
+			case common.ArrayMethodAppend:
+				meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
+				for k , v := range call.args {
+					currentStack := char(1)
+					if k != len(call.args) - 1 {
+						code.codes[code.codeLength] = cg.OP_dup
+						code.codeLength++
+						state.pushStack(c , call.methodCallOn.value)
+						currentStack++
+					}
+					stack := this.buildExpression.build(c , code , v , context , state)
+					if t := stack + currentStack ; t > maxStack {
+						maxStack = t
+					}
+					code.codes[code.codeLength] = cg.OP_invokevirtual
+					c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
+							"append",
+							meta.appendDescriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+					code.codeLength += 3
+					if k != len(call.args) - 1 {
+						state.popStack(1)
+					}
+				}
 
-    fn buildMethodCallOnArray(
-        c cg.ClassHighLevel,
-        code cg.AttributeCode,
-        e ast.Expression,
-        context Context,
-        state StackMapState) -> (maxStack char) {
-        length := len(state.stacks)
-        defer {
+			case common.ArrayMethodAppendAll:
+				meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
+				for k , v := range call.args {
+					currentStack := char(1)
+					if k != len(call.args) - 1 {
+						code.codes[code.codeLength] = cg.OP_dup
+						code.codeLength++
+						state.pushStack(c , call.methodCallOn.value)
+						currentStack++
+					}
+					stack := this.buildExpression.build(c , code , v , context , state)
+					if t := stack + currentStack ; t > maxStack {
+						maxStack = t
+					}
+					//get elements field
+					code.codes[code.codeLength] = cg.OP_invokevirtual
+					c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
+							"append",
+							meta.appendAllDescriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
+					code.codeLength += 3
+					if k != len(call.args) - 1 {
+						state.popStack(1)
+					}
+				}
 
-            state.popStack(len(state.stacks) - length) // ref type
-        }
+			case common.ArrayMethodSetReadOnly:
+				meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
+				stack := this.buildExpression.build(c , code , call.args[0] , context , state)
+				if t := char(1) + stack ; t > maxStack {
+					maxStack = t
+				}
+				c.insertMethodCall(code , cg.OP_invokevirtual , meta.className , common.ArrayMethodSetReadOnly , "(Z)V")
+			case common.ArrayMethodGetUnderlyingArray:
+				meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
+				code.codes[code.codeLength] = cg.OP_getfield
+				c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(meta.className,
+						"elements",
+						meta.elementsFieldDescriptor),
+					code.codes[code.codeLength + 1 : code.codeLength + 3])
+				code.codeLength += 3
+				if meta.elementsFieldDescriptor != Descriptor.typeDescriptor(e.value) {
+					TypeConverterAndPrimitivePacker.castPointer(c , code , e.value)
+				}
+				if e.isStatementExpression {
+					code.codes[code.codeLength] = cg.OP_pop
+					code.codeLength++
+				}
+		}
 
-        call := e.data.(ast.ExpressionMethodCall)
-        maxStack = this.buildExpression.build(c , code , call.methodCallOn , context , state)
-        state.pushStack(c , call.methodCallOn.value)
-        switch call.name {
-            case common.ArrayMethodSize,
-                common.ArrayMethodStart,
-                common.ArrayMethodCap,
-                common.ArrayMethodEnd:
-                meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
-                code.codes[code.codeLength] = cg.OP_invokevirtual
-                c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
-                    call.name,
-                    "()I") , code.codes[code.codeLength + 1 : code.codeLength + 3])
-                code.codeLength += 3
-                if e.isStatementExpression {
-                    code.codes[code.codeLength] = cg.OP_pop
-                    code.codeLength++
-                }
-            case common.ArrayMethodAppend:
-                meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
-                for k , v := range call.args {
-                    currentStack := char(1)
-                    if k != len(call.args) - 1 {
-                        code.codes[code.codeLength] = cg.OP_dup
-                        code.codeLength++
-                        state.pushStack(c , call.methodCallOn.value)
-                        currentStack++
-                    }
-                    stack := this.buildExpression.build(c , code , v , context , state)
-                    if t := stack + currentStack ; t > maxStack {
-                        maxStack = t
-                    }
-                    code.codes[code.codeLength] = cg.OP_invokevirtual
-                    c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
-                        "append",
-                        meta.appendDescriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
-                    code.codeLength += 3
-                    if k != len(call.args) - 1 {
-                        state.popStack(1)
-                    }
-                }
-
-            case common.ArrayMethodAppendAll:
-                meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
-                for k , v := range call.args {
-                    currentStack := char(1)
-                    if k != len(call.args) - 1 {
-                        code.codes[code.codeLength] = cg.OP_dup
-                        code.codeLength++
-                        state.pushStack(c , call.methodCallOn.value)
-                        currentStack++
-                    }
-                    stack := this.buildExpression.build(c , code , v , context , state)
-                    if t := stack + currentStack ; t > maxStack {
-                        maxStack = t
-                    }
-                    //get elements field
-                    code.codes[code.codeLength] = cg.OP_invokevirtual
-                    c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(meta.className,
-                        "append",
-                        meta.appendAllDescriptor) , code.codes[code.codeLength + 1 : code.codeLength + 3])
-                    code.codeLength += 3
-                    if k != len(call.args) - 1 {
-                        state.popStack(1)
-                    }
-                }
-
-            case common.ArrayMethodSetReadOnly:
-                meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
-                stack := this.buildExpression.build(c , code , call.args[0] , context , state)
-                if t := char(1) + stack ; t > maxStack {
-                    maxStack = t
-                }
-                c.insertMethodCall(code , cg.OP_invokevirtual , meta.className , common.ArrayMethodSetReadOnly , "(Z)V")
-            case common.ArrayMethodGetUnderlyingArray:
-                meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
-                code.codes[code.codeLength] = cg.OP_getfield
-                c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(meta.className,
-                    "elements",
-                    meta.elementsFieldDescriptor),
-                    code.codes[code.codeLength + 1 : code.codeLength + 3])
-                code.codeLength += 3
-                if meta.elementsFieldDescriptor != Descriptor.typeDescriptor(e.value) {
-                    TypeConverterAndPrimitivePacker.castPointer(c , code , e.value)
-                }
-                if e.isStatementExpression {
-                    code.codes[code.codeLength] = cg.OP_pop
-                    code.codeLength++
-                }
-        }
-
-        return
-    }
+		return
+	}
 }
-
 

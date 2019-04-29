@@ -153,21 +153,38 @@ class BuildExpression {
 				//binary expression
 			case ast.ExpressionTypeLogicalOr , ast.ExpressionTypeLogicalAnd:
 				maxStack = this.buildExpressionLogical.buildLogical(c , code , e , context , state)
-			case ast.ExpressionTypeOr , ast.ExpressionTypeAnd , ast.ExpressionTypeXor,
-				ast.ExpressionTypeLsh , ast.ExpressionTypeRsh , ast.ExpressionTypeAdd , ast.ExpressionTypeSub,
-				ast.ExpressionTypeMul , ast.ExpressionTypeDiv , ast.ExpressionTypeMod:
+			case ast.ExpressionTypeOr,
+				ast.ExpressionTypeAnd,
+				ast.ExpressionTypeXor,
+				ast.ExpressionTypeLsh,
+				ast.ExpressionTypeRsh,
+				ast.ExpressionTypeAdd,
+				ast.ExpressionTypeSub,
+				ast.ExpressionTypeMul,
+				ast.ExpressionTypeDiv,
+				ast.ExpressionTypeMod:
 				maxStack = this.buildExpressionArithmetic.buildArithmetic(c , code , e , context , state)
 			case ast.ExpressionTypeAssign:
 				maxStack = this.buildExpressionAssign.buildAssign(c , code , e , context , state)
 			case ast.ExpressionTypeVarAssign:
 				maxStack = this.buildExpressionVarAssign.buildVarAssign(c , code , e , context , state)
-			case ast.ExpressionTypePlusAssign , ast.ExpressionTypeMinusAssign , ast.ExpressionTypeMulAssign,
-				ast.ExpressionTypeDivAssign , ast.ExpressionTypeModAssign , ast.ExpressionTypeAndAssign,
-				ast.ExpressionTypeOrAssign , ast.ExpressionTypeLshAssign , ast.ExpressionTypeRshAssign,
+			case ast.ExpressionTypePlusAssign,
+				ast.ExpressionTypeMinusAssign,
+				ast.ExpressionTypeMulAssign,
+				ast.ExpressionTypeDivAssign,
+				ast.ExpressionTypeModAssign,
+				ast.ExpressionTypeAndAssign,
+				ast.ExpressionTypeOrAssign,
+				ast.ExpressionTypeLshAssign,
+				ast.ExpressionTypeRshAssign,
 				ast.ExpressionTypeXorAssign:
 				maxStack = this.buildExpressionOpAssign.buildOpAssign(c , code , e , context , state)
-			case ast.ExpressionTypeEq , ast.ExpressionTypeNe , ast.ExpressionTypeGe,
-				ast.ExpressionTypeGt , ast.ExpressionTypeLe , ast.ExpressionTypeLt:
+			case ast.ExpressionTypeEq,
+				ast.ExpressionTypeNe,
+				ast.ExpressionTypeGe,
+				ast.ExpressionTypeGt,
+				ast.ExpressionTypeLe,
+				ast.ExpressionTypeLt:
 				maxStack = this.buildExpressionRelation.buildRelations(c , code , e , context , state)
 			case ast.ExpressionTypeIndex:
 				maxStack = this.buildExpressionIndex.buildIndex(c , code , e , context , state)
@@ -195,8 +212,8 @@ class BuildExpression {
 				maxStack = this.buildExpressionTypeConversion.buildTypeConversion(c , code , e , context , state)
 			case ast.ExpressionTypeConst:
 				/*
-             analyse at ast stage
-            */
+             		analyse at ast stage
+            	*/
 			case ast.ExpressionTypeSlice:
 				maxStack = this.buildExpressionSlice.buildSlice(c , code , e , context , state)
 			case ast.ExpressionTypeArray:
