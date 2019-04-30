@@ -1,6 +1,6 @@
 //represent a array or a map build in method 
 public class ArrayMapBuildInMethod {
-	Type   string  // array or map right now
+	Type   string // array or map right now
 	method string
 	pos    Pos    // not defined
 
@@ -8,7 +8,7 @@ public class ArrayMapBuildInMethod {
 		method string) {
 		this.super()
 		this.Type = Type
-		this.method = method 
+		this.method = method
 	}
 
 	public fn mkDescription() -> (s string) {

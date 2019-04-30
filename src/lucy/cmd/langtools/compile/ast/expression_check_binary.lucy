@@ -1,196 +1,195 @@
 // all rights reserved , check the LICENSE file
 
 class ExpressionCheckBinary {
-    static fn check(e Expression , block Block , errs []error) -> (result Type) {
-        bin := e.data.(ExpressionBinary)
-        var left , right Type
-        var es []error
-        if bin.left != null {
-            left , es = bin.left.checkSingleValueContextExpression(block)
-            errs.appendAll(es)
-        }
-        if bin.right != null {
-            right , es = bin.right.checkSingleValueContextExpression(block)
-            errs.appendAll(es)
-        }
-        if left != null {
-            if err := left.rightValueValid() ; err != null {
-                errs.append(err)
-                return 
-            }
-        }
-        if right != null {
-            if err := right.rightValueValid() ; err != null {
-                errs.append(err)
-                return 
-            }
-        }
-        // &&  ||
-        if e.Type == ExpressionTypeLogicalOr ||
-            e.Type == ExpressionTypeLogicalAnd {
-            result = new Type()
-            result.Type = VariableTypeBool
-            result.pos = e.pos
-            if left == null || right == null {
-                return
-            }
-            if left.Type != VariableTypeBool ||
-                right.Type != VariableTypeBool {
-                errs.append(e.binaryWrongOpErr())
-            }
-            return
-        }
-        // & |
-        if e.Type == ExpressionTypeOr ||
-            ExpressionTypeAnd == e.Type ||
-            ExpressionTypeXor == e.Type {
-            if left == null || right == null {
-                if left != null && left.isNumber() {
-                    result = left.cloneType()
-                    result.pos = e.pos
-                    return
-                }
-                if right != null && right.isNumber() {
-                    result = right.cloneType()
-                    result.pos = e.pos
-                    return
-                }
-                return null
-            }
-            if left.isInteger() == false || left.assignAble(block , errs , right) == false {
-                errs.append(e.binaryWrongOpErr())
-            }
-            result = left.cloneType()
-            result.pos = e.pos
-            return
-        }
-        if e.Type == ExpressionTypeLsh ||
-            e.Type == ExpressionTypeRsh {
-            if left == null || right == null {
-                if left != null && left.isNumber() {
-                    result = left.cloneType()
-                    result.pos = e.pos
-                    return
-                }
-                return null
-            }
-            if false == left.isInteger() ||
-                right.isInteger() == false {
-                errs.append(e.binaryWrongOpErr())
-            }
-            if right.Type == VariableTypeLong {
-                bin.right.convertToNumberType(VariableTypeInt)
-            }
-            result = left.cloneType()
-            result.pos = e.pos
-            return result
-        }
-        if e.Type == ExpressionTypeEq ||
-            e.Type == ExpressionTypeNe ||
-            e.Type == ExpressionTypeGe ||
-            e.Type == ExpressionTypeGt ||
-            e.Type == ExpressionTypeLe ||
-            e.Type == ExpressionTypeLt {
-            result = new Type()
-            result.Type = VariableTypeBool
-            result.pos = e.pos
-            if left == null || right == null {
-                return
-            }
-            //number
-            switch left.Type {
-                case VariableTypeBool:
-                    if right.Type != VariableTypeBool || e.isEqOrNe() == false {
-                        errs.append(e.binaryWrongOpErr())
-                    }
-                case VariableTypeEnum:
-                    if left.assignAble(block , errs , right) == false {
-                        errs.append(e.binaryWrongOpErr())
-                    }
-                case left.isNumber():
-                    if (left.isInteger() && right.isInteger()) ||
-                        (left.isFloat() && right.isFloat()) {
-                        if left.assignAble(block , errs , right) == false {
-                            if left.Type < right.Type {
-                                bin.left.convertToNumberType(right.Type)
+	static fn check(e Expression , block Block , errs []error) -> (result Type) {
+		bin := e.data.(ExpressionBinary)
+		var left , right Type
+		var es []error
+		if bin.left != null {
+			left , es = bin.left.checkSingleValueContextExpression(block)
+			errs.appendAll(es)
+		}
+		if bin.right != null {
+			right , es = bin.right.checkSingleValueContextExpression(block)
+			errs.appendAll(es)
+		}
+		if left != null {
+			if err := left.rightValueValid() ; err != null {
+				errs.append(err)
+				return
+			}
+		}
+		if right != null {
+			if err := right.rightValueValid() ; err != null {
+				errs.append(err)
+				return
+			}
+		}
+		// &&  ||
+		if e.Type == ExpressionTypeLogicalOr ||
+			e.Type == ExpressionTypeLogicalAnd {
+			result = new Type()
+			result.Type = VariableTypeBool
+			result.pos = e.pos
+			if left == null || right == null {
+				return
+			}
+			if left.Type != VariableTypeBool ||
+				right.Type != VariableTypeBool {
+				errs.append(e.binaryWrongOpErr())
+			}
+			return
+		}
+		// & |
+		if e.Type == ExpressionTypeOr ||
+			ExpressionTypeAnd == e.Type ||
+			ExpressionTypeXor == e.Type {
+			if left == null || right == null {
+				if left != null && left.isNumber() {
+					result = left.cloneType()
+					result.pos = e.pos
+					return
+				}
+				if right != null && right.isNumber() {
+					result = right.cloneType()
+					result.pos = e.pos
+					return
+				}
+				return null
+			}
+			if left.isInteger() == false || left.assignAble(block , errs , right) == false {
+				errs.append(e.binaryWrongOpErr())
+			}
+			result = left.cloneType()
+			result.pos = e.pos
+			return
+		}
+		if e.Type == ExpressionTypeLsh ||
+			e.Type == ExpressionTypeRsh {
+			if left == null || right == null {
+				if left != null && left.isNumber() {
+					result = left.cloneType()
+					result.pos = e.pos
+					return
+				}
+				return null
+			}
+			if false == left.isInteger() ||
+				right.isInteger() == false {
+				errs.append(e.binaryWrongOpErr())
+			}
+			if right.Type == VariableTypeLong {
+				bin.right.convertToNumberType(VariableTypeInt)
+			}
+			result = left.cloneType()
+			result.pos = e.pos
+			return result
+		}
+		if e.Type == ExpressionTypeEq ||
+			e.Type == ExpressionTypeNe ||
+			e.Type == ExpressionTypeGe ||
+			e.Type == ExpressionTypeGt ||
+			e.Type == ExpressionTypeLe ||
+			e.Type == ExpressionTypeLt {
+			result = new Type()
+			result.Type = VariableTypeBool
+			result.pos = e.pos
+			if left == null || right == null {
+				return
+			}
+			//number
+			switch left.Type {
+				case VariableTypeBool:
+					if right.Type != VariableTypeBool || e.isEqOrNe() == false {
+						errs.append(e.binaryWrongOpErr())
+					}
+				case VariableTypeEnum:
+					if left.assignAble(block , errs , right) == false {
+						errs.append(e.binaryWrongOpErr())
+					}
+				case left.isNumber():
+					if (left.isInteger() && right.isInteger()) ||
+						(left.isFloat() && right.isFloat()) {
+						if left.assignAble(block , errs , right) == false {
+							if left.Type < right.Type {
+								bin.left.convertToNumberType(right.Type)
 
-                            } else {
-                                bin.right.convertToNumberType(left.Type)
-                            }
+							} else {
+								bin.right.convertToNumberType(left.Type)
+							}
 
-                        }
-                    } else {
-                        errs.append(e.binaryWrongOpErr())
-                    }
+						}
+					} else {
+						errs.append(e.binaryWrongOpErr())
+					}
 
-                case VariableTypeString:
-                    if left.assignAble(block , errs , right) == false {
-                        errs.append(e.binaryWrongOpErr())
-                    }
-                case VariableTypeNull:
-                    if right.isPointer() == false || e.isEqOrNe() == false {
-                        errs.append(e.binaryWrongOpErr())
-                    }
-                case left.isPointer():
-                    if left.assignAble(block , errs , right) == false || e.isEqOrNe() == false {
-                        errs.append(e.binaryWrongOpErr())
-                    }
-                default:
-                    errs.append(e.binaryWrongOpErr())
-            }
+				case VariableTypeString:
+					if left.assignAble(block , errs , right) == false {
+						errs.append(e.binaryWrongOpErr())
+					}
+				case VariableTypeNull:
+					if right.isPointer() == false || e.isEqOrNe() == false {
+						errs.append(e.binaryWrongOpErr())
+					}
+				case left.isPointer():
+					if left.assignAble(block , errs , right) == false || e.isEqOrNe() == false {
+						errs.append(e.binaryWrongOpErr())
+					}
+				default:
+					errs.append(e.binaryWrongOpErr())
+			}
 
-            return result
-        }
-        // + - * / %
-        if e.Type == ExpressionTypeAdd ||
-            e.Type == ExpressionTypeSub ||
-            e.Type == ExpressionTypeMul ||
-            e.Type == ExpressionTypeDiv ||
-            e.Type == ExpressionTypeMod {
-            if left == null || right == null {
-                if left != null {
-                    result = left.cloneType()
-                    result.pos = e.pos
-                    return
-                }
-                if right != null {
-                    result = right.cloneType()
-                    result.pos = e.pos
-                    return
-                }
-                return null
-            }
-            //check string first
-            if left.Type == VariableTypeString ||
-                right.Type == VariableTypeString {
-                if e.Type != ExpressionTypeAdd {
-                    errs.append(e.binaryWrongOpErr())
-                }
-                result = new Type()
-                result.Type = VariableTypeString
-                result.pos = e.pos
-                return result
-            }
-            if (left.isInteger() && right.isInteger()) ||
-                (left.isFloat() && right.isFloat()) {
-                if left.assignAble(block , errs , right) == false {
-                    if left.Type < right.Type {
-                        bin.left.convertToNumberType(right.Type)
-                    } else {
-                        bin.right.convertToNumberType(left.Type)
-                    }
+			return result
+		}
+		// + - * / %
+		if e.Type == ExpressionTypeAdd ||
+			e.Type == ExpressionTypeSub ||
+			e.Type == ExpressionTypeMul ||
+			e.Type == ExpressionTypeDiv ||
+			e.Type == ExpressionTypeMod {
+			if left == null || right == null {
+				if left != null {
+					result = left.cloneType()
+					result.pos = e.pos
+					return
+				}
+				if right != null {
+					result = right.cloneType()
+					result.pos = e.pos
+					return
+				}
+				return null
+			}
+			//check string first
+			if left.Type == VariableTypeString ||
+				right.Type == VariableTypeString {
+				if e.Type != ExpressionTypeAdd {
+					errs.append(e.binaryWrongOpErr())
+				}
+				result = new Type()
+				result.Type = VariableTypeString
+				result.pos = e.pos
+				return result
+			}
+			if (left.isInteger() && right.isInteger()) ||
+				(left.isFloat() && right.isFloat()) {
+				if left.assignAble(block , errs , right) == false {
+					if left.Type < right.Type {
+						bin.left.convertToNumberType(right.Type)
+					} else {
+						bin.right.convertToNumberType(left.Type)
+					}
 
-                }
-            } else {
-                errs.append(e.binaryWrongOpErr())
-            }
+				}
+			} else {
+				errs.append(e.binaryWrongOpErr())
+			}
 
-            result = left.cloneType()
-            result.pos = e.pos
-            return result
-        }
-        return
-    }
+			result = left.cloneType()
+			result.pos = e.pos
+			return result
+		}
+		return
+	}
 }
-
 

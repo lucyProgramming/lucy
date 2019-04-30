@@ -1,109 +1,106 @@
 // all rights reserved , check the LICENSE file
 
-
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
-
 class BuildinFunctionCatchPanic {
-    
-    buildExpression BuildExpression
+	buildExpression BuildExpression
 
-    fn BuildinFunctionCatchPanic(eb BuildExpression){
-        this.super()
-        this.buildExpression = eb
-    }
-    
-    fn mkBuildInPanic(
-        c cg.ClassHighLevel,
-        code cg.AttributeCode,
-        e ast.Expression,
-        context Context,
-        state StackMapState) -> (maxStack char) {
-        call := e.data.(ast.ExpressionFunctionCall)
-        meta := call.buildInFunctionMeta.(ast.BuildInFunctionPanicMeta)
-        if meta.argThrowable {
-            if call.args[0].Type == ast.ExpressionTypeNew { // not new expression
-                maxStack = this.buildExpression.build(c, code, call.args[0], context, state)
-            } else {
-                code.codes[code.codeLength] = cg.OP_new
-                className := call.args[0].value.theClass.name
-                c.insertClassConst(className, code.codes[code.codeLength+1:code.codeLength+3])
-                code.codes[code.codeLength+3] = cg.OP_dup
-                code.codeLength += 4
-                {
-                    verificationTypeInfo := new cg.StackMapVerificationTypeInfo()
-                    uninitializedVariableInfo := new cg.StackMapUninitializedVariableInfo(char(code.codeLength - 4))
-                    verificationTypeInfo.verify = uninitializedVariableInfo
-                    state.stacks.append(verificationTypeInfo)
-                    state.stacks.append(verificationTypeInfo)
-                }
-                stack := this.buildExpression.build(c, code, call.args[0], context, state)
-                state.popStack(2)
-                maxStack = char(2) + stack
-                code.codes[code.codeLength] = cg.OP_invokespecial
-                c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(  className,  specialMethodInit ,"(Ljava/lang/Throwable;)V"),
-                 code.codes[code.codeLength+1:code.codeLength+3])
-                code.codeLength += 3
-            }
-        } else {
-            code.codes[code.codeLength] = cg.OP_new
-            c.insertClassConst(javaExceptionClass, code.codes[code.codeLength+1:code.codeLength+3])
-            code.codes[code.codeLength+3] = cg.OP_dup
-            code.codeLength += 4
-            verificationTypeInfo := new cg.StackMapVerificationTypeInfo()
-            uninitializedVariableInfo := new cg.StackMapUninitializedVariableInfo(char(code.codeLength - 4))
-            verificationTypeInfo.verify = uninitializedVariableInfo
-            state.stacks.append(verificationTypeInfo)
-            state.stacks.append(verificationTypeInfo)
-            
-            stack := this.buildExpression.build(c, code, call.args[0], context, state)
-            if t := char(2) + stack; t > maxStack {
-                maxStack = t
-            }
-            if t := char(2) + this.buildExpression.buildExpressionConversion.stackTop2String(c, code, call.args[0].value, context, state); t > maxStack {
-                maxStack = t
-            }
-            code.codes[code.codeLength] = cg.OP_invokespecial
-            c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel( javaExceptionClass, specialMethodInit, "(Ljava/lang/String;)V"),
-                code.codes[code.codeLength+1:code.codeLength+3])
-            code.codeLength += 3
-            state.popStack(2)
-        }
-        code.codes[code.codeLength] = cg.OP_athrow
-        code.codeLength++
-        context.makeStackMapForCode(code, state, code.codeLength)
-        return
-    }
+	fn BuildinFunctionCatchPanic(eb BuildExpression) {
+		this.super()
+		this.buildExpression = eb
+	}
 
-    fn mkBuildInCatch(c cg.ClassHighLevel, code cg.AttributeCode,
-        e ast.Expression, context Context) -> (maxStack char) {
-        if e.isStatementExpression { // statement call
-            maxStack = 1
-            code.codes[code.codeLength] = cg.OP_aconst_null
-            code.codeLength++
-            copyOPs(code,
-                storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset))
-        } else {
-            maxStack = 2
-            //load to stack
-            copyOPs(code, loadLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)) // load
-            //set 2 null
-            code.codes[code.codeLength] = cg.OP_aconst_null
-            code.codeLength++
-            copyOPs(code, storeLocalVariableOps(ast.VariableTypeObject, context.exceptionVarOffset)) // store
-            //check cast
-            code.codes[code.codeLength] = cg.OP_checkcast
-            if context.statementDefer.exceptionClass != null {
-                c.insertClassConst(context.statementDefer.exceptionClass.name, code.codes[code.codeLength+1:code.codeLength+3])
-            } else {
-                c.insertClassConst(ast.DefaultExceptionClass, code.codes[code.codeLength+1:code.codeLength+3])
-            }
-            code.codeLength += 3
-        }
-        return
-    }
+	fn mkBuildInPanic(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context,
+		state StackMapState) -> (
+		maxStack char) {
+		call := e.data.(ast.ExpressionFunctionCall)
+		meta := call.buildInFunctionMeta.(ast.BuildInFunctionPanicMeta)
+		if meta.argThrowable {
+			if call.args[0].Type == ast.ExpressionTypeNew {
+				maxStack = this.buildExpression.build(c , code , call.args[0] , context , state)
+			} else {
+				code.codes[code.codeLength] = cg.OP_new
+				className := call.args[0].value.theClass.name
+				c.insertClassConst(className , code.codes[code.codeLength + 1 : code.codeLength + 3])
+				code.codes[code.codeLength + 3] = cg.OP_dup
+				code.codeLength += 4
+				{
+					verificationTypeInfo := new cg.StackMapVerificationTypeInfo()
+					uninitializedVariableInfo := new cg.StackMapUninitializedVariableInfo(char(code.codeLength - 4))
+					verificationTypeInfo.verify = uninitializedVariableInfo
+					state.stacks.append(verificationTypeInfo)
+					state.stacks.append(verificationTypeInfo)
+				}
+				stack := this.buildExpression.build(c , code , call.args[0] , context , state)
+				state.popStack(2)
+				maxStack = char(2) + stack
+				code.codes[code.codeLength] = cg.OP_invokespecial
+				c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(className , specialMethodInit , "(Ljava/lang/Throwable;)V"),
+					code.codes[code.codeLength + 1 : code.codeLength + 3])
+				code.codeLength += 3
+			}
+		} else {
+			code.codes[code.codeLength] = cg.OP_new
+			c.insertClassConst(javaExceptionClass , code.codes[code.codeLength + 1 : code.codeLength + 3])
+			code.codes[code.codeLength + 3] = cg.OP_dup
+			code.codeLength += 4
+			verificationTypeInfo := new cg.StackMapVerificationTypeInfo()
+			uninitializedVariableInfo := new cg.StackMapUninitializedVariableInfo(char(code.codeLength - 4))
+			verificationTypeInfo.verify = uninitializedVariableInfo
+			state.stacks.append(verificationTypeInfo)
+			state.stacks.append(verificationTypeInfo)
 
+			stack := this.buildExpression.build(c , code , call.args[0] , context , state)
+			if t := char(2) + stack ; t > maxStack {
+				maxStack = t
+			}
+			if t := char(2) + this.buildExpression.buildExpressionConversion.stackTop2String(c , code , call.args[0].value , context , state) ; t > maxStack {
+				maxStack = t
+			}
+			code.codes[code.codeLength] = cg.OP_invokespecial
+			c.insertMethodRefConst(new cg.ConstantInfoMethodrefHighLevel(javaExceptionClass , specialMethodInit , "(Ljava/lang/String;)V"),
+				code.codes[code.codeLength + 1 : code.codeLength + 3])
+			code.codeLength += 3
+			state.popStack(2)
+		}
+		code.codes[code.codeLength] = cg.OP_athrow
+		code.codeLength++
+		context.makeStackMapForCode(code , state , code.codeLength)
+		return
+	}
 
+	fn mkBuildInCatch(c cg.ClassHighLevel , code cg.AttributeCode,
+		e ast.Expression , context Context) -> (maxStack char) {
+		if e.isStatementExpression {
+			maxStack = 1
+			code.codes[code.codeLength] = cg.OP_aconst_null
+			code.codeLength++
+			copyOPs(code,
+				storeLocalVariableOps(ast.VariableTypeObject , context.exceptionVarOffset))
+		} else {
+			maxStack = 2
+			//load to stack
+			copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , context.exceptionVarOffset)) // load
+			//set 2 null
+			code.codes[code.codeLength] = cg.OP_aconst_null
+			code.codeLength++
+			copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject , context.exceptionVarOffset)) // store
+			//check cast
+			code.codes[code.codeLength] = cg.OP_checkcast
+			if context.statementDefer.exceptionClass != null {
+				c.insertClassConst(context.statementDefer.exceptionClass.name , code.codes[code.codeLength + 1 : code.codeLength + 3])
+			} else {
+				c.insertClassConst(ast.DefaultExceptionClass , code.codes[code.codeLength + 1 : code.codeLength + 3])
+			}
+			code.codeLength += 3
+		}
+		return
+	}
 
 }
+

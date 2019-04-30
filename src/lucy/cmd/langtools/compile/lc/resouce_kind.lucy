@@ -3,40 +3,37 @@
 import "java/util/zip"
 
 public enum ResourceKind {
-    ResourceKindJavaClass,
-    ResourceKindJavaPackage,
-    ResourceKindLucyClass,
-    ResourceKindLucyPackage
+	ResourceKindJavaClass,
+	ResourceKindJavaPackage,
+	ResourceKindLucyClass,
+	ResourceKindLucyPackage
 }
-
-
 public class Resource {
-    public kind          ResourceKind
-    public realPath      string
-    public name          string
-           loadFromJar   []zip.ZipEntry
-           loadFromJarBs [][]byte
+	public kind          ResourceKind
+	public realPath      string
+	public name          string
+	       loadFromJar   []zip.ZipEntry
+	       loadFromJarBs [][]byte
 
-    public fn Resource(kind ResourceKind , realPath string , name string) {
-        this.super()
-        this.kind = kind
-        this.realPath = realPath
-        this.name = name
-    }
-    public fn toString() -> (s string) {
-        kindString := ""
-        switch this.kind {
-            case ResourceKindJavaClass:
-                kindString = "java class"
-            case ResourceKindJavaPackage:
-                kindString = "java package"
-            case ResourceKindLucyClass:
-                kindString = "lucy package"
-            case ResourceKindLucyPackage:
-                kindString = "lucy package"
-        }
-        return sprintf("load '%s' as '%s' from '%s'" , this.name , kindString , this.realPath)
-    }
+	public fn Resource(kind ResourceKind , realPath string , name string) {
+		this.super()
+		this.kind = kind
+		this.realPath = realPath
+		this.name = name
+	}
+	public fn toString() -> (s string) {
+		kindString := ""
+		switch this.kind {
+			case ResourceKindJavaClass:
+				kindString = "java class"
+			case ResourceKindJavaPackage:
+				kindString = "java package"
+			case ResourceKindLucyClass:
+				kindString = "lucy package"
+			case ResourceKindLucyPackage:
+				kindString = "lucy package"
+		}
+		return sprintf("load '%s' as '%s' from '%s'" , this.name , kindString , this.realPath)
+	}
 }
-
 

@@ -5,7 +5,6 @@
     this tool is use for parse a lucy file ".lucy" and print token list for debugging
 */
 
-
 import "lucy/cmd/langtools/compile/lex"
 import "lucy/os"
 

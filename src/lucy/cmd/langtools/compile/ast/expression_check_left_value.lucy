@@ -1,266 +1,265 @@
 // all rights reserved , check the LICENSE file
 
 class ExpressionCheckLeftValue {
-	
-	static fn getLeftValue(e Expression, block Block, errs []error) -> (result Type) {
+	static fn getLeftValue(e Expression , block Block , errs []error) -> (result Type) {
 		switch e.Type {
-		case ExpressionTypeIdentifier:
-			identifier := e.data.(ExpressionIdentifier)
-			if identifier.autoCompletion {
-				block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = searchLeftValueForAutoCompletionItems(block , e.pos)
-				return 
-			}
-			if identifier.name == UnderScore {
-				errs.append(new error(sprintf("%s cannot use '%s' as left value",
-					e.pos.errMsgPrefix(), identifier.name)))
-				return 
-			}
-			if identifier.name == ThisPointerName {
-				errs.append(new error(sprintf("%s '%s' cannot be used as left value",
-					e.pos.errMsgPrefix(), ThisPointerName)))
-			}
-			isCaptureVar := [false]
-			d, err := block.searchIdentifier(e.pos, identifier.name, isCaptureVar)
-			if err != null {
-				errs.append(err)
-				return 
-			}
-			if d == null {
-				errs.append(new error(sprintf("%s '%s' not found",
-					e.pos.errMsgPrefix(), identifier.name)))
-				return 
-			}
-			if v ,ok := d.(Variable) ; ok {
-                if isCaptureVar[0] {
-                    v.beenCapturedAsLeftValue++
-                }
-				if identifier.locateDefinition {
-					block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(v)
-					return 
+			case ExpressionTypeIdentifier:
+				identifier := e.data.(ExpressionIdentifier)
+				if identifier.autoCompletion {
+					block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = searchLeftValueForAutoCompletionItems(block , e.pos)
+					return
 				}
-				if v.findUsageInstances != null {
-					correctLastUsageType("value write" , v.findUsageInstances)
+				if identifier.name == UnderScore {
+					errs.append(new error(sprintf("%s cannot use '%s' as left value",
+								e.pos.errMsgPrefix() , identifier.name)))
+					return
 				}
-                // variable is modifying , capture right value should not be ok
-                // if no variable not change,after been captured, right value should ok too
-                v.beenCapturedAsLeftValue += v.beenCapturedAsRightValue
-                v.beenCapturedAsRightValue = 0
-                identifier.variable = v
-                result = identifier.variable.Type.cloneType()
-                result.pos = e.pos
-                e.value = result
-                return
-			}
-            errs.append(new error(sprintf("%s identifier '%s' is '%s' , cannot be used as left value",
-                e.pos.errMsgPrefix(), identifier.name, block.identifierIsWhat(d))))
-            return
-		case ExpressionTypeIndex:
-			result = ExpressionCheckIndex.check(e , block, errs)
-			e.value = result
-			return
-		case ExpressionTypeSelection:
-			selection := e.data.(ExpressionSelection)
-			object, es := selection.selectionOn.checkSingleValueContextExpression(block)
-			errs.appendAll(es)
-			if object == null {
-				return 
-			}
-			if selection.autoCompletion {
-				ExpressionCheckLeftValue.autoCompletion(object , block )
-				return 
-			}
-			switch object.Type {
-			case VariableTypeDynamicSelector:
-				if selection.name == Super {
-					errs.append(new error(sprintf("%s access '%s' at '%s' not allow",
-						e.pos.errMsgPrefix(), Super, object.typeString())))
-					return 
+				if identifier.name == ThisPointerName {
+					errs.append(new error(sprintf("%s '%s' cannot be used as left value",
+								e.pos.errMsgPrefix() , ThisPointerName)))
 				}
-				field, err := object.theClass.getField(block , e.pos, selection.name, new map{string->bool}(), false , object.theClass.name)
+				isCaptureVar := [false]
+				d , err := block.searchIdentifier(e.pos , identifier.name , isCaptureVar)
 				if err != null {
 					errs.append(err)
+					return
 				}
-				if field == null {
-					return 
+				if d == null {
+					errs.append(new error(sprintf("%s '%s' not found",
+								e.pos.errMsgPrefix() , identifier.name)))
+					return
 				}
-				if selection.locateDefinition {
-					block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(field)
-					return 
-				}
-				selection.field = field
-				result = field.Type.cloneType()
-				result.pos = e.pos
-				e.value = result
-				return result
-			case VariableTypeObject,
-				VariableTypeClass:
-				field, err := object.theClass.getField(block , e.pos, selection.name,new map{string->bool}(), false , object.theClass.name)
-				if err != null {
-					errs.append(err)
-				}
-				selection.field = field
-				if field != null {
-					if selection.locateDefinition {
-						block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(field)
-						return 
+				if v , ok := d.(Variable) ; ok {
+					if isCaptureVar[0] {
+						v.beenCapturedAsLeftValue++
 					}
-					err := selection.selectionOn.fieldAccessAble(block, field)
-					if err != null {
-						errs.append(err)
+					if identifier.locateDefinition {
+						block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(v)
+						return
 					}
-					result = field.Type.cloneType()
+					if v.findUsageInstances != null {
+						correctLastUsageType("value write" , v.findUsageInstances)
+					}
+					// variable is modifying , capture right value should not be ok
+					// if no variable not change,after been captured, right value should ok too
+					v.beenCapturedAsLeftValue += v.beenCapturedAsRightValue
+					v.beenCapturedAsRightValue = 0
+					identifier.variable = v
+					result = identifier.variable.Type.cloneType()
 					result.pos = e.pos
 					e.value = result
-					return 
+					return
 				}
-				return null
-			case VariableTypePackage:
-				variable, exists := object.thePackage.block.nameExists(selection.name , e.pos)
-				if exists == false {
-					errs.append(new error(sprintf("%s '%s.%s' not found",
-						e.pos.errMsgPrefix(), object.thePackage.name, selection.name)))
-					return null
+				errs.append(new error(sprintf("%s identifier '%s' is '%s' , cannot be used as left value",
+							e.pos.errMsgPrefix() , identifier.name , block.identifierIsWhat(d))))
+				return
+			case ExpressionTypeIndex:
+				result = ExpressionCheckIndex.check(e , block , errs)
+				e.value = result
+				return
+			case ExpressionTypeSelection:
+				selection := e.data.(ExpressionSelection)
+				object , es := selection.selectionOn.checkSingleValueContextExpression(block)
+				errs.appendAll(es)
+				if object == null {
+					return
 				}
-				if v ,ok := variable.(Variable) ; ok {
-				    if v.isPublic() == false &&
-                        object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
-                        errs.append(new error(sprintf("%s '%s.%s' is private",
-                            e.pos.errMsgPrefix(), object.thePackage.name, selection.name)))
-                    }
-					if selection.locateDefinition {
-						block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(v)
-						return 
-					}
-                    selection.packageVariable = v
-                    result = v.Type.cloneType()
-                    result.pos = e.pos
-                    e.value = result
-                    return result
+				if selection.autoCompletion {
+					ExpressionCheckLeftValue.autoCompletion(object , block)
+					return
 				}
-                errs.append(new error(sprintf("%s '%s' is not variable",
-                    e.pos.errMsgPrefix(), selection.name)))
-                return 
-
+				switch object.Type {
+					case VariableTypeDynamicSelector:
+						if selection.name == Super {
+							errs.append(new error(sprintf("%s access '%s' at '%s' not allow",
+										e.pos.errMsgPrefix() , Super , object.typeString())))
+							return
+						}
+						field , err := object.theClass.getField(block , e.pos , selection.name , new map{string -> bool}() , false , object.theClass.name)
+						if err != null {
+							errs.append(err)
+						}
+						if field == null {
+							return
+						}
+						if selection.locateDefinition {
+							block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(field)
+							return
+						}
+						selection.field = field
+						result = field.Type.cloneType()
+						result.pos = e.pos
+						e.value = result
+						return result
+					case VariableTypeObject,
+						VariableTypeClass:
+						field , err := object.theClass.getField(block , e.pos , selection.name , new map{string -> bool}() , false , object.theClass.name)
+						if err != null {
+							errs.append(err)
+						}
+						selection.field = field
+						if field != null {
+							if selection.locateDefinition {
+								block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(field)
+								return
+							}
+							err := selection.selectionOn.fieldAccessAble(block , field)
+							if err != null {
+								errs.append(err)
+							}
+							result = field.Type.cloneType()
+							result.pos = e.pos
+							e.value = result
+							return
+						}
+						return null
+					case VariableTypePackage:
+						variable , exists := object.thePackage.block.nameExists(selection.name , e.pos)
+						if exists == false {
+							errs.append(new error(sprintf("%s '%s.%s' not found",
+										e.pos.errMsgPrefix() , object.thePackage.name , selection.name)))
+							return null
+						}
+						if v , ok := variable.(Variable) ; ok {
+							if v.isPublic() == false &&
+								object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
+								errs.append(new error(sprintf("%s '%s.%s' is private",
+											e.pos.errMsgPrefix() , object.thePackage.name , selection.name)))
+							}
+							if selection.locateDefinition {
+								block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(v)
+								return
+							}
+							selection.packageVariable = v
+							result = v.Type.cloneType()
+							result.pos = e.pos
+							e.value = result
+							return result
+						}
+						errs.append(new error(sprintf("%s '%s' is not variable",
+									e.pos.errMsgPrefix() , selection.name)))
+						return
+					default:
+						errs.append(new error(sprintf("%s cannot access '%s' on '%s'",
+									e.pos.errMsgPrefix() , selection.name , object.typeString())))
+						return
+				}
 			default:
-				errs.append(new error(sprintf("%s cannot access '%s' on '%s'",
-					e.pos.errMsgPrefix(), selection.name, object.typeString())))
-				return 
-			}
-		default:
-			errs.append(new error(sprintf("%s '%s' cannot be used as left value",
-				e.pos.errMsgPrefix(),
-				e.op)))
-			return 
+				errs.append(new error(sprintf("%s '%s' cannot be used as left value",
+							e.pos.errMsgPrefix(),
+							e.op)))
+				return
 		}
 	}
 
 	static fn autoCompletion(object Type , block Block) {
-        switch object.Type {
-        case VariableTypeDynamicSelector:
-            .autoCompletionForDynamicSelector(object.theClass , block)
-        case VariableTypePackage:
-            .autoCompletionForPackage(object.thePackage , block )
-        case VariableTypeObject:
-            .autoCompletionForObject(object.theClass , block)
-        case VariableTypeClass:
-            .autoCompletionClass(object.theClass , block)
-        }
-    }
-    
-    static fn autoCompletionForPackage(p Package , block Block) {
-        items := []AutoCompletionItem{}
-        for name , _ := range p.block.variables {
-            item := new AutoCompletionItem()
-            item.Type = "variable"
-            item.name = name
-            items.append(item)
-        }
-        block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
-    } 
-    
-    static fn autoCompletionForDynamicSelector(object Class , block Block) {
-        items := []AutoCompletionItem{}
-        accessFromSub := false 
-        // in this case must be lucy class 
-        m := new map{string->bool} ()
-        for object != null {
+		switch object.Type {
+			case VariableTypeDynamicSelector:
+				.autoCompletionForDynamicSelector(object.theClass , block)
+			case VariableTypePackage:
+				.autoCompletionForPackage(object.thePackage , block)
+			case VariableTypeObject:
+				.autoCompletionForObject(object.theClass , block)
+			case VariableTypeClass:
+				.autoCompletionClass(object.theClass , block)
+		}
+	}
+
+	static fn autoCompletionForPackage(p Package , block Block) {
+		items := []AutoCompletionItem{}
+		for name , _ := range p.block.variables {
+			item := new AutoCompletionItem()
+			item.Type = "variable"
+			item.name = name
+			items.append(item)
+		}
+		block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
+	}
+
+	static fn autoCompletionForDynamicSelector(object Class , block Block) {
+		items := []AutoCompletionItem{}
+		accessFromSub := false
+		// in this case must be lucy class 
+		m := new map{string -> bool}()
+		for object != null {
 			for v := range object.fields {
 				if m.keyExist(v.name) {
-					continue  
+					continue
 				}
 				if accessFromSub && v.ableAccessFromSubClass() == false {
 					continue
 				}
 				item := new AutoCompletionItem()
 				item.Type = "field"
-				item.name =  v.name
-				item.description = v.mkDescription() 
+				item.name = v.name
+				item.description = v.mkDescription()
 				items.append(item)
 			}
-            object.loadSuperClass(block , new Pos()) 
-            if object.superClass == null {
-                break
-            }
-            object = object.superClass 
-            accessFromSub = true    
-        }
-        block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
-    } 
-    
-    static fn autoCompletionForObject(object Class , block Block) {
-        items := []AutoCompletionItem{}
-        accessFromSub := false 
-        // in this case must be lucy class 
-        m := new map{string->bool} ()
-        for object != null {
+			object.loadSuperClass(block , new Pos())
+			if object.superClass == null {
+				break
+			}
+			object = object.superClass
+			accessFromSub = true
+		}
+		block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
+	}
+
+	static fn autoCompletionForObject(object Class , block Block) {
+		items := []AutoCompletionItem{}
+		accessFromSub := false
+		// in this case must be lucy class 
+		m := new map{string -> bool}()
+		for object != null {
 			for v := range object.fields {
 				if m.keyExist(v.name) {
-					continue  
+					continue
 				}
 				if accessFromSub && v.ableAccessFromSubClass() == false {
 					continue
 				}
 				item := new AutoCompletionItem()
 				item.Type = "field"
-				item.description = v.mkDescription() 
-				item.name =  v.name
+				item.description = v.mkDescription()
+				item.name = v.name
 				items.append(item)
-			} 
-            object.loadSuperClass(block , new Pos()) 
-            if object.superClass == null {
-                break
-            }
-            object = object.superClass 
-            accessFromSub = true
-        }
-        block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
-    } 
-    static fn autoCompletionClass(c Class , block Block) {
-        items := []AutoCompletionItem{}
-        accessFromSub := false 
-        // in this case must be lucy class 
-        m := new map{string->bool} ()
-        for c != null {
+			}
+			object.loadSuperClass(block , new Pos())
+			if object.superClass == null {
+				break
+			}
+			object = object.superClass
+			accessFromSub = true
+		}
+		block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
+	}
+	static fn autoCompletionClass(c Class , block Block) {
+		items := []AutoCompletionItem{}
+		accessFromSub := false
+		// in this case must be lucy class 
+		m := new map{string -> bool}()
+		for c != null {
 			for v := range c.fields {
 				if m.keyExist(v.name) {
-					continue  
+					continue
 				}
 				if accessFromSub && v.ableAccessFromSubClass() == false {
 					continue
 				}
 				item := new AutoCompletionItem()
 				item.Type = "field"
-				item.description = v.mkDescription() 
-				item.name =  v.name
+				item.description = v.mkDescription()
+				item.name = v.name
 				items.append(item)
 			}
-            c.loadSuperClass(block, new Pos()) 
-            if c.superClass == null {
-                break
-            }
-            c = c.superClass 
-            accessFromSub = true    
-        }
-        block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
-    }
+			c.loadSuperClass(block , new Pos())
+			if c.superClass == null {
+				break
+			}
+			c = c.superClass
+			accessFromSub = true
+		}
+		block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
+	}
 }
+

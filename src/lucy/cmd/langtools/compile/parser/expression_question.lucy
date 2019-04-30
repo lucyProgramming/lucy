@@ -4,46 +4,45 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/compile/lex"
 
 class ExpressionQuestionParser extends ParserFather {
-    ep ExpressionParser
-    fn ExpressionQuestionParser(parser Parser , ep ExpressionParser) {
-        this.super(parser)
-        this.ep = ep
-    }
+	ep ExpressionParser
+	fn ExpressionQuestionParser(parser Parser , ep ExpressionParser) {
+		this.super(parser)
+		this.ep = ep
+	}
 
-    fn parseQuestionExpression() -> (e ast.Expression , err error) {
-        left , err := this.ep.ExpressionBinaryParser.parseLogicalOrExpression()
-        if err != null {
-            return left , err
-        }
-        if this.parser.token.Type != lex.TokenQuestion {
-            return left , null
-        }
-        newExpression := new ast.Expression()
-        newExpression.op = "question"
-        newExpression.pos = this.parser.mkPos()
-        newExpression.Type = ast.ExpressionTypeQuestion
-        question := new ast.ExpressionQuestion()
-        newExpression.data = question
-        question.selection = left
-        this.next(lfNotToken) // skip ?
-        True , err := this.ep.ExpressionBinaryParser.parseLogicalOrExpression()
-        if True == null {
-            return newExpression , err
-        }
-        question.theTrue = True
-        this.parser.unExpectNewLineAndSkip()
-        if this.parser.token.Type != lex.TokenColon {
-            err = new error(sprintf("%s expect ':' ,but '%s'",
-                this.parser.errMsgPrefix() , this.parser.token.description))
-            this.parser.errs.append(err)
-            return newExpression , null //return has no big deal 
-        }
-        this.next(lfNotToken) // skip :
-        False , err := this.ep.ExpressionBinaryParser.parseLogicalOrExpression()
-        question.theFalse = False
-        return newExpression , null
-    }
+	fn parseQuestionExpression() -> (e ast.Expression , err error) {
+		left , err := this.ep.ExpressionBinaryParser.parseLogicalOrExpression()
+		if err != null {
+			return left , err
+		}
+		if this.parser.token.Type != lex.TokenQuestion {
+			return left , null
+		}
+		newExpression := new ast.Expression()
+		newExpression.op = "question"
+		newExpression.pos = this.parser.mkPos()
+		newExpression.Type = ast.ExpressionTypeQuestion
+		question := new ast.ExpressionQuestion()
+		newExpression.data = question
+		question.selection = left
+		this.next(lfNotToken) // skip ?
+		True , err := this.ep.ExpressionBinaryParser.parseLogicalOrExpression()
+		if True == null {
+			return newExpression , err
+		}
+		question.theTrue = True
+		this.parser.unExpectNewLineAndSkip()
+		if this.parser.token.Type != lex.TokenColon {
+			err = new error(sprintf("%s expect ':' ,but '%s'",
+					this.parser.errMsgPrefix() , this.parser.token.description))
+			this.parser.errs.append(err)
+			return newExpression , null //return has no big deal 
+		}
+		this.next(lfNotToken) // skip :
+		False , err := this.ep.ExpressionBinaryParser.parseLogicalOrExpression()
+		question.theFalse = False
+		return newExpression , null
+	}
 
 }
-
 

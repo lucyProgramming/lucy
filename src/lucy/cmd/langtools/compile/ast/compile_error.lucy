@@ -1,14 +1,13 @@
 // all rights reserved , check the LICENSE file
 
 public class CompileError extends error {
-    // pos of this error 
-    // public startPos Pos
-    public pos Pos
-    public err string
-    public fn CompileError(msg string) {
-        this.super(msg)
-    }
+	// pos of this error 
+	// public startPos Pos
+	public pos Pos
+	public err string
+	public fn CompileError(msg string) {
+		this.super(msg)
+	}
 
 }
-
 

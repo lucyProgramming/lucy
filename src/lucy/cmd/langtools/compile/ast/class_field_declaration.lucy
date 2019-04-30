@@ -1,16 +1,15 @@
 // all rights reserved , check the LICENSE file
 
 public class ClassFieldDeclaration {
-    public nameList   []NameWithPos
-    public Type       Type         
-    public initValues []Expression 
-    public fields     []ClassField 
-    /*
+	public nameList   []NameWithPos
+	public Type       Type
+	public initValues []Expression
+	public fields     []ClassField
+	/*
 		a // this is a inline comment
 	  */
-    public inlineComment string //   in
+	public inlineComment string //   in
 
-     //public containsLf bool    // contains "\n"
+	//public containsLf bool    // contains "\n"
 }
-
 

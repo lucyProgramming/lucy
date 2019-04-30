@@ -1,617 +1,616 @@
 // all rights reserved , check the LICENSE file
 
 public class AutoCompletionItem {
-    public Type               string
-    public name               string
-    public functionDefinition string // used by function
-    public suggest            string // used by function
-    public variableType       string
-    public description        string
-
-    private static arrayDefaultAutoCompletionItem     []AutoCompletionItem
-    private static javaArrayDefaultAutoCompletionItem []AutoCompletionItem
-    private static typeDefaultAutoCompletionItem      []AutoCompletionItem
-
-    private static fieldDefaultAutoCompletionItem []AutoCompletionItem
-
-    private static topDefaultAutoCompletionItem []AutoCompletionItem
-
-    private static buildFunctionAutoCompletionItems []AutoCompletionItem
-    private static keywordAutoCompletionItems       []AutoCompletionItem
-
-    static fn getKeywordAutoCompletionItems() -> (items []AutoCompletionItem) {
-        if len(AutoCompletionItem.keywordAutoCompletionItems) > 0 {
-            return AutoCompletionItem.keywordAutoCompletionItems
-        }
-        AutoCompletionItem.keywordAutoCompletionItems = []AutoCompletionItem{}
-        items = AutoCompletionItem.keywordAutoCompletionItems
-
-        item := new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "fn"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "enum"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "const"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "if"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "else"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "for"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "break"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "continue"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "return"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "null"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "bool"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "true"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "false"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "pass"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "var"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "new"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "switch"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "case"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "default"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "import"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "as"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "class"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "static"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "public"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "protected"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "private"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "interface"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "byte"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "short"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "char"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "int"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "float"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "double"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "long"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "string"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "defer"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "typealias"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "extends"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "implements"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "goto"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "range"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "map"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "volatile"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "synchronized"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "final"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "global"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "abstract"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "when"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "type"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = MagicIdentifierFile
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = MagicIdentifierLine
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = MagicIdentifierTime
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = MagicIdentifierClass
-        items.append(item)
-    }
-
-    static fn getBuildFunctionAutoCompletionItems() -> (items []AutoCompletionItem) {
-        if len(AutoCompletionItem.buildFunctionAutoCompletionItems) > 0 {
-            return AutoCompletionItem.buildFunctionAutoCompletionItems
-        }
-        AutoCompletionItem.buildFunctionAutoCompletionItems = []AutoCompletionItem{}
-        items = AutoCompletionItem.buildFunctionAutoCompletionItems
-
-        item := new AutoCompletionItem()
-        item.Type = "function"
-        item.name = "panic"
-        item.suggest = "panic(err)"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "function"
-        item.name = "catch"
-        item.suggest = "catch()"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "function"
-        item.name = "print"
-        item.suggest = "print(args , ...)"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "function"
-        item.name = "printf"
-        item.suggest = "printf(format , args , ...)"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "function"
-        item.name = "sprintf"
-        item.suggest = "sprintf(format , args , ...)"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "function"
-        item.name = "len"
-        item.suggest = "len(who)"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "function"
-        item.name = "blackHole"
-        item.suggest = "blackHole(args , ...)"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "function"
-        item.name = "assert"
-        item.suggest = "assert(args , ...)"
-        items.append(item)
-
-    }
-
-    static fn getTopDefaultAutoCompletionItem() -> (items []AutoCompletionItem) {
-        if len(AutoCompletionItem.topDefaultAutoCompletionItem) > 0 {
-            return AutoCompletionItem.topDefaultAutoCompletionItem
-        }
-        AutoCompletionItem.topDefaultAutoCompletionItem = []AutoCompletionItem{}
-        items = AutoCompletionItem.topDefaultAutoCompletionItem
-
-        item := new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "public"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "final"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "abstract"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "fn"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "class"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "interface"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "var"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "enum"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "const"
-        items.append(item)
-    }
-
-    static fn getFieldDefaultAutoCompletionItem() -> (items []AutoCompletionItem) {
-        if len(AutoCompletionItem.fieldDefaultAutoCompletionItem) > 0 {
-            return AutoCompletionItem.fieldDefaultAutoCompletionItem
-        }
-        AutoCompletionItem.fieldDefaultAutoCompletionItem = []AutoCompletionItem{}
-        items = AutoCompletionItem.fieldDefaultAutoCompletionItem
-        item := new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "static"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "public"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "protected"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "private"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "volatile"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "synchronized"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "final"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "abstract"
-        items.append(item)
-    }
-
-    static fn getTypeAutoCompletionItem() -> (items []AutoCompletionItem) {
-        if len(AutoCompletionItem.typeDefaultAutoCompletionItem) > 0 {
-            return AutoCompletionItem.typeDefaultAutoCompletionItem
-        }
-        AutoCompletionItem.typeDefaultAutoCompletionItem = []AutoCompletionItem{}
-        items = AutoCompletionItem.typeDefaultAutoCompletionItem
-
-        item := new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "bool"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "byte"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "short"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "char"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "int"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "long"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "float"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "double"
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "keyword"
-        item.name = "string"
-        items.append(item)
-
-    }
-
-    static fn getJavaArrayBasicAutoCompletionItem() -> (items []AutoCompletionItem) {
-        if len(AutoCompletionItem.javaArrayDefaultAutoCompletionItem) > 0 {
-            return AutoCompletionItem.javaArrayDefaultAutoCompletionItem
-        }
-        AutoCompletionItem.javaArrayDefaultAutoCompletionItem = []AutoCompletionItem{}
-        items = AutoCompletionItem.javaArrayDefaultAutoCompletionItem
-        //size
-        item := new AutoCompletionItem()
-        item.Type = "method"
-        item.name = "size"
-        item.suggest = "size()"
-        item.description = "size() -> (int)"
-        items.append(item)
-    }
-
-    static fn getArrayBasicAutoCompletionItem() -> (items []AutoCompletionItem) {
-        if len(AutoCompletionItem.arrayDefaultAutoCompletionItem) > 0 {
-            return AutoCompletionItem.arrayDefaultAutoCompletionItem
-        }
-        AutoCompletionItem.arrayDefaultAutoCompletionItem = []AutoCompletionItem{}
-        items = AutoCompletionItem.arrayDefaultAutoCompletionItem
-        //size
-        item := new AutoCompletionItem()
-        item.Type = "method"
-        item.name = "size"
-        item.suggest = "size()"
-        item.description = "size() -> (int)"
-        items.append(item)
-
-        //start
-        item = new AutoCompletionItem()
-        item.Type = "method"
-        item.name = "start"
-        item.suggest = "start()"
-        item.description = "start() -> (int)"
-        items.append(item)
-        // end
-        item = new AutoCompletionItem()
-        item.Type = "method"
-        item.name = "end"
-        item.suggest = "end()"
-        item.description = "end() -> (int)"
-        items.append(item)
-        // cap 
-        item = new AutoCompletionItem()
-        item.Type = "method"
-        item.name = "cap"
-        item.suggest = "cap()"
-        item.description = "cap() -> (int)"
-        items.append(item)
-        // 
-        return items
-    }
-
-    static fn getMapAutoCompletionItem(m Type) -> (items []AutoCompletionItem = []AutoCompletionItem{}) {
-        //size
-        item := new AutoCompletionItem()
-        item.Type = "method"
-        item.name = "size"
-        item.suggest = "size()"
-        item.description = "size() -> (int)"
-        items.append(item)
-
-        //remove    
-        item = new AutoCompletionItem()
-        item.Type = "method"
-        item.name = "remove"
-        item.suggest = sprintf("remove(key, ...)")
-        items.append(item)
-
-        //removeAll
-        item = new AutoCompletionItem()
-        item.Type = "method"
-        item.name = "removeAll"
-        item.suggest = "removeAll()"
-        items.append(item)
-
-        //keyExist
-        item = new AutoCompletionItem()
-        item.Type = "method"
-        item.name = "keyExist"
-        item.suggest = sprintf("keyExist(key)")
-        items.append(item)
-    }
-
-    static fn getArrayAutoCompletionItem(t Type) -> (items []AutoCompletionItem) {
-        items = AutoCompletionItem.getArrayBasicAutoCompletionItem()
-        items = copy(new []AutoCompletionItem(len(items)) , items)
-        if t.Type != VariableTypeArray {
-            panic("not a array at all")
-        }
-        item := new AutoCompletionItem()
-        item.Type = "method"
-        item.name = "append"
-        item.suggest = sprintf("append(element , ...)")
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "method"
-        item.name = "appendAll"
-        item.suggest = sprintf("appendAll(elements , ...)")
-        items.append(item)
-
-        item = new AutoCompletionItem()
-        item.Type = "method"
-        item.name = "getUnderlyingArray"
-        item.suggest = sprintf("getUnderlyingArray()")
-        items.append(item)
-    }
+	public Type               string
+	public name               string
+	public functionDefinition string // used by function
+	public suggest            string // used by function
+	public variableType       string
+	public description        string
+
+	private static arrayDefaultAutoCompletionItem     []AutoCompletionItem
+	private static javaArrayDefaultAutoCompletionItem []AutoCompletionItem
+	private static typeDefaultAutoCompletionItem      []AutoCompletionItem
+
+	private static fieldDefaultAutoCompletionItem []AutoCompletionItem
+
+	private static topDefaultAutoCompletionItem []AutoCompletionItem
+
+	private static buildFunctionAutoCompletionItems []AutoCompletionItem
+	private static keywordAutoCompletionItems       []AutoCompletionItem
+
+	static fn getKeywordAutoCompletionItems() -> (items []AutoCompletionItem) {
+		if len(AutoCompletionItem.keywordAutoCompletionItems) > 0 {
+			return AutoCompletionItem.keywordAutoCompletionItems
+		}
+		AutoCompletionItem.keywordAutoCompletionItems = []AutoCompletionItem{}
+		items = AutoCompletionItem.keywordAutoCompletionItems
+
+		item := new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "fn"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "enum"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "const"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "if"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "else"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "for"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "break"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "continue"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "return"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "null"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "bool"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "true"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "false"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "pass"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "var"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "new"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "switch"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "case"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "default"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "import"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "as"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "class"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "static"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "public"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "protected"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "private"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "interface"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "byte"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "short"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "char"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "int"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "float"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "double"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "long"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "string"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "defer"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "typealias"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "extends"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "implements"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "goto"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "range"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "map"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "volatile"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "synchronized"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "final"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "global"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "abstract"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "when"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "type"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = MagicIdentifierFile
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = MagicIdentifierLine
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = MagicIdentifierTime
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = MagicIdentifierClass
+		items.append(item)
+	}
+
+	static fn getBuildFunctionAutoCompletionItems() -> (items []AutoCompletionItem) {
+		if len(AutoCompletionItem.buildFunctionAutoCompletionItems) > 0 {
+			return AutoCompletionItem.buildFunctionAutoCompletionItems
+		}
+		AutoCompletionItem.buildFunctionAutoCompletionItems = []AutoCompletionItem{}
+		items = AutoCompletionItem.buildFunctionAutoCompletionItems
+
+		item := new AutoCompletionItem()
+		item.Type = "function"
+		item.name = "panic"
+		item.suggest = "panic(err)"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "function"
+		item.name = "catch"
+		item.suggest = "catch()"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "function"
+		item.name = "print"
+		item.suggest = "print(args , ...)"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "function"
+		item.name = "printf"
+		item.suggest = "printf(format , args , ...)"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "function"
+		item.name = "sprintf"
+		item.suggest = "sprintf(format , args , ...)"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "function"
+		item.name = "len"
+		item.suggest = "len(who)"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "function"
+		item.name = "blackHole"
+		item.suggest = "blackHole(args , ...)"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "function"
+		item.name = "assert"
+		item.suggest = "assert(args , ...)"
+		items.append(item)
+
+	}
+
+	static fn getTopDefaultAutoCompletionItem() -> (items []AutoCompletionItem) {
+		if len(AutoCompletionItem.topDefaultAutoCompletionItem) > 0 {
+			return AutoCompletionItem.topDefaultAutoCompletionItem
+		}
+		AutoCompletionItem.topDefaultAutoCompletionItem = []AutoCompletionItem{}
+		items = AutoCompletionItem.topDefaultAutoCompletionItem
+
+		item := new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "public"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "final"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "abstract"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "fn"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "class"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "interface"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "var"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "enum"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "const"
+		items.append(item)
+	}
+
+	static fn getFieldDefaultAutoCompletionItem() -> (items []AutoCompletionItem) {
+		if len(AutoCompletionItem.fieldDefaultAutoCompletionItem) > 0 {
+			return AutoCompletionItem.fieldDefaultAutoCompletionItem
+		}
+		AutoCompletionItem.fieldDefaultAutoCompletionItem = []AutoCompletionItem{}
+		items = AutoCompletionItem.fieldDefaultAutoCompletionItem
+		item := new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "static"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "public"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "protected"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "private"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "volatile"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "synchronized"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "final"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "abstract"
+		items.append(item)
+	}
+
+	static fn getTypeAutoCompletionItem() -> (items []AutoCompletionItem) {
+		if len(AutoCompletionItem.typeDefaultAutoCompletionItem) > 0 {
+			return AutoCompletionItem.typeDefaultAutoCompletionItem
+		}
+		AutoCompletionItem.typeDefaultAutoCompletionItem = []AutoCompletionItem{}
+		items = AutoCompletionItem.typeDefaultAutoCompletionItem
+
+		item := new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "bool"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "byte"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "short"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "char"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "int"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "long"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "float"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "double"
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "string"
+		items.append(item)
+
+	}
+
+	static fn getJavaArrayBasicAutoCompletionItem() -> (items []AutoCompletionItem) {
+		if len(AutoCompletionItem.javaArrayDefaultAutoCompletionItem) > 0 {
+			return AutoCompletionItem.javaArrayDefaultAutoCompletionItem
+		}
+		AutoCompletionItem.javaArrayDefaultAutoCompletionItem = []AutoCompletionItem{}
+		items = AutoCompletionItem.javaArrayDefaultAutoCompletionItem
+		//size
+		item := new AutoCompletionItem()
+		item.Type = "method"
+		item.name = "size"
+		item.suggest = "size()"
+		item.description = "size() -> (int)"
+		items.append(item)
+	}
+
+	static fn getArrayBasicAutoCompletionItem() -> (items []AutoCompletionItem) {
+		if len(AutoCompletionItem.arrayDefaultAutoCompletionItem) > 0 {
+			return AutoCompletionItem.arrayDefaultAutoCompletionItem
+		}
+		AutoCompletionItem.arrayDefaultAutoCompletionItem = []AutoCompletionItem{}
+		items = AutoCompletionItem.arrayDefaultAutoCompletionItem
+		//size
+		item := new AutoCompletionItem()
+		item.Type = "method"
+		item.name = "size"
+		item.suggest = "size()"
+		item.description = "size() -> (int)"
+		items.append(item)
+
+		//start
+		item = new AutoCompletionItem()
+		item.Type = "method"
+		item.name = "start"
+		item.suggest = "start()"
+		item.description = "start() -> (int)"
+		items.append(item)
+		// end
+		item = new AutoCompletionItem()
+		item.Type = "method"
+		item.name = "end"
+		item.suggest = "end()"
+		item.description = "end() -> (int)"
+		items.append(item)
+		// cap 
+		item = new AutoCompletionItem()
+		item.Type = "method"
+		item.name = "cap"
+		item.suggest = "cap()"
+		item.description = "cap() -> (int)"
+		items.append(item)
+		// 
+		return items
+	}
+
+	static fn getMapAutoCompletionItem(m Type) -> (items []AutoCompletionItem = []AutoCompletionItem{}) {
+		//size
+		item := new AutoCompletionItem()
+		item.Type = "method"
+		item.name = "size"
+		item.suggest = "size()"
+		item.description = "size() -> (int)"
+		items.append(item)
+
+		//remove    
+		item = new AutoCompletionItem()
+		item.Type = "method"
+		item.name = "remove"
+		item.suggest = sprintf("remove(key, ...)")
+		items.append(item)
+
+		//removeAll
+		item = new AutoCompletionItem()
+		item.Type = "method"
+		item.name = "removeAll"
+		item.suggest = "removeAll()"
+		items.append(item)
+
+		//keyExist
+		item = new AutoCompletionItem()
+		item.Type = "method"
+		item.name = "keyExist"
+		item.suggest = sprintf("keyExist(key)")
+		items.append(item)
+	}
+
+	static fn getArrayAutoCompletionItem(t Type) -> (items []AutoCompletionItem) {
+		items = AutoCompletionItem.getArrayBasicAutoCompletionItem()
+		items = copy(new []AutoCompletionItem(len(items)) , items)
+		if t.Type != VariableTypeArray {
+			panic("not a array at all")
+		}
+		item := new AutoCompletionItem()
+		item.Type = "method"
+		item.name = "append"
+		item.suggest = sprintf("append(element , ...)")
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "method"
+		item.name = "appendAll"
+		item.suggest = sprintf("appendAll(elements , ...)")
+		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "method"
+		item.name = "getUnderlyingArray"
+		item.suggest = sprintf("getUnderlyingArray()")
+		items.append(item)
+	}
 }
-
 

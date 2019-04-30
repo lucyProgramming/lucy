@@ -16,467 +16,462 @@ import "java/lang/String"
 import "java/lang/reflect/Array"
 
 enum JsonSyntaxTreeType {
-    JsonSyntaxTreeTypeArray,
-    JsonSyntaxTreeTypeObject,
-    JsonSyntaxTreeTypeNumber,
-    JsonSyntaxTreeTypeBool,
-    JsonSyntaxTreeTypeString,
-    JsonSyntaxTreeTypeNull
+	JsonSyntaxTreeTypeArray,
+	JsonSyntaxTreeTypeObject,
+	JsonSyntaxTreeTypeNumber,
+	JsonSyntaxTreeTypeBool,
+	JsonSyntaxTreeTypeString,
+	JsonSyntaxTreeTypeNull
 }
-
-
 class JsonSyntaxTreeNode {
-    Type          JsonSyntaxTreeType
-    boolValue     bool
-    numberValue   Number                            // number value
-    stringValue   string
-    arrayElements []JsonSyntaxTreeNode
-    object        map{string -> JsonSyntaxTreeNode}
-    fn nodeType() -> (name string) {
-        switch this.Type {
-            case JsonSyntaxTreeTypeArray:
-                return "array"
-            case JsonSyntaxTreeTypeObject:
-                return "object"
-            case JsonSyntaxTreeTypeNumber:
-                return "number"
-            case JsonSyntaxTreeTypeBool:
-                return "bool"
-            case JsonSyntaxTreeTypeString:
-                return "string"
-            case JsonSyntaxTreeTypeNull:
-                return "null"
-        }
-    }
+	Type          JsonSyntaxTreeType
+	boolValue     bool
+	numberValue   Number
+	stringValue   string
+	arrayElements []JsonSyntaxTreeNode
+	object        map{string -> JsonSyntaxTreeNode}
+	fn nodeType() -> (name string) {
+		switch this.Type {
+			case JsonSyntaxTreeTypeArray:
+				return "array"
+			case JsonSyntaxTreeTypeObject:
+				return "object"
+			case JsonSyntaxTreeTypeNumber:
+				return "number"
+			case JsonSyntaxTreeTypeBool:
+				return "bool"
+			case JsonSyntaxTreeTypeString:
+				return "string"
+			case JsonSyntaxTreeTypeNull:
+				return "null"
+		}
+	}
 }
-
 
 public class Decoder {
-    x      Object
-    bs     []byte
-    offset int
-    tree   JsonSyntaxTreeNode
+	x      Object
+	bs     []byte
+	offset int
+	tree   JsonSyntaxTreeNode
 
-    public fn Decoder(x Object , bs []byte) {
-        this.super()
-        this.x = x
-        this.bs = bs
-    }
+	public fn Decoder(x Object , bs []byte) {
+		this.super()
+		this.x = x
+		this.bs = bs
+	}
 
-    public fn decode() -> (x2 Object) {
-        this.tree = this.parseJsonSyntaxTree()
-        return this.decodeFromTree(this.tree , this.x)
-    }
+	public fn decode() -> (x2 Object) {
+		this.tree = this.parseJsonSyntaxTree()
+		return this.decodeFromTree(this.tree , this.x)
+	}
 
-    private fn decodeFromTree(tree JsonSyntaxTreeNode , x Object) -> (x2 Object) {
-        c := x.getClass()
-        if c.isArray() {
-            return this.decodeArrayFromTree(tree , x , c)
-        }
-        return this.decodeObjectFromTree(tree , x , c)
-    }
+	private fn decodeFromTree(tree JsonSyntaxTreeNode , x Object) -> (x2 Object) {
+		c := x.getClass()
+		if c.isArray() {
+			return this.decodeArrayFromTree(tree , x , c)
+		}
+		return this.decodeObjectFromTree(tree , x , c)
+	}
 
-    static fn decodePrimitives(c Class , tree JsonSyntaxTreeNode) -> (x Object) {
-        if typeName := c.getName() ; typeName == "boolean" {
-            if tree.Type != JsonSyntaxTreeTypeBool {
-                panic(sprintf("cannot decode '%s' to 'bool'" , tree.nodeType()))
-            }
-            return Boolean.valueOf(tree.boolValue)
-        } else {
-            if tree.Type != JsonSyntaxTreeTypeNumber {
-                panic(sprintf("cannot decode '%s' to '%s'" , tree.nodeType() , typeName))
-            }
-            switch typeName {
-                case "byte":
-                    longValue := tree.numberValue.getLong()
-                    if longValue > long(Byte.MAX_VALUE) {
-                        panic(sprintf("%d exceeds byte max value" , longValue))
-                    }
-                    return Byte.valueOf(byte(longValue))
-                case "short":
-                    longValue := tree.numberValue.getLong()
-                    if longValue > long(Short.MAX_VALUE) {
-                        panic(sprintf("%d exceeds short max value" , longValue))
-                    }
-                    return Short.valueOf(short(longValue))
-                case "char":
-                    longValue := tree.numberValue.getLong()
-                    if longValue > long(Character.MAX_VALUE) {
-                        panic(sprintf("%d exceeds character max value" , longValue))
-                    }
-                    return Character.valueOf(char(longValue))
-                case "int":
-                    longValue := tree.numberValue.getLong()
-                    if longValue > long(Integer.MAX_VALUE) {
-                        panic(sprintf("%d exceeds integer max value" , longValue))
+	static fn decodePrimitives(c Class , tree JsonSyntaxTreeNode) -> (x Object) {
+		if typeName := c.getName() ; typeName == "boolean" {
+			if tree.Type != JsonSyntaxTreeTypeBool {
+				panic(sprintf("cannot decode '%s' to 'bool'" , tree.nodeType()))
+			}
+			return Boolean.valueOf(tree.boolValue)
+		} else {
+			if tree.Type != JsonSyntaxTreeTypeNumber {
+				panic(sprintf("cannot decode '%s' to '%s'" , tree.nodeType() , typeName))
+			}
+			switch typeName {
+				case "byte":
+					longValue := tree.numberValue.getLong()
+					if longValue > long(Byte.MAX_VALUE) {
+						panic(sprintf("%d exceeds byte max value" , longValue))
+					}
+					return Byte.valueOf(byte(longValue))
+				case "short":
+					longValue := tree.numberValue.getLong()
+					if longValue > long(Short.MAX_VALUE) {
+						panic(sprintf("%d exceeds short max value" , longValue))
+					}
+					return Short.valueOf(short(longValue))
+				case "char":
+					longValue := tree.numberValue.getLong()
+					if longValue > long(Character.MAX_VALUE) {
+						panic(sprintf("%d exceeds character max value" , longValue))
+					}
+					return Character.valueOf(char(longValue))
+				case "int":
+					longValue := tree.numberValue.getLong()
+					if longValue > long(Integer.MAX_VALUE) {
+						panic(sprintf("%d exceeds integer max value" , longValue))
+					}
+					return Integer.valueOf(int(longValue))
+				case "long":
+					longValue := tree.numberValue.getLong()
+					return Long.valueOf(longValue)
+				case "float":
+					doubleValue := tree.numberValue.getDouble()
+					if doubleValue > double(Float.MAX_VALUE) {
+						panic(sprintf("%f exceeds byte max value" , doubleValue))
 
-                    }
-                    return Integer.valueOf(int(longValue))
-                case "long":
-                    longValue := tree.numberValue.getLong()
-                    return Long.valueOf(longValue)
-                case "float":
-                    doubleValue := tree.numberValue.getDouble()
-                    if doubleValue > double(Float.MAX_VALUE) {
-                        panic(sprintf("%f exceeds byte max value" , doubleValue))
+					}
+					return Float.valueOf(float(doubleValue))
+				case "double":
+					doubleValue := tree.numberValue.getDouble()
+					return Double.valueOf(doubleValue)
+				default:
+					panic(sprintf("not a primitive type , but '%s'" , typeName)) // not a primitive type , panic 
+			}
+		}
 
-                    }
-                    return Float.valueOf(float(doubleValue))
-                case "double":
-                    doubleValue := tree.numberValue.getDouble()
-                    return Double.valueOf(doubleValue)
-                default:
-                    panic(sprintf("not a primitive type , but '%s'" , typeName)) // not a primitive type , panic 
-            }
-        }
+	}
 
-    }
+	private fn decodeObjectFromTree(tree JsonSyntaxTreeNode , x Object , c Class) -> (x2 Object) {
+		if tree.Type == JsonSyntaxTreeTypeNull {
+			return null
+		}
+		if tree.Type == JsonSyntaxTreeTypeString {
+			return tree.stringValue
+		}
+		if tree.Type != JsonSyntaxTreeTypeObject {
+			panic(sprintf("cannot decode '%s' to 'object'" , tree.nodeType()))
+		}
+		x2 = x
+		fs := c.getFields()
+		for f := range fs {
+			if tree.object == null ||
+				false == tree.object.keyExist(f.getName()) {
+				continue
+			}
+			cc := f.getType()
+			if (cc.isPrimitive()) {
+				tree2 := tree.object[f.getName()]
+				obj := .decodePrimitives(cc , tree2)
+				f.set(x , obj)
+				continue
+			}
+			if cc.isArray() {
+				t := this.decodeArrayFromTree(tree.object[f.getName()] , f.get(x) , cc)
+				f.set(x , t)
+				continue
+			}
+			t := this.decodeObjectFromTree(tree.object[f.getName()] , f.get(x) , cc)
+			f.set(x , t)
+		}
+	}
 
-    private fn decodeObjectFromTree(tree JsonSyntaxTreeNode , x Object , c Class) -> (x2 Object) {
-        if tree.Type == JsonSyntaxTreeTypeNull {
-            return null
-        }
-        if tree.Type == JsonSyntaxTreeTypeString {
-            return tree.stringValue
-        }
-        if tree.Type != JsonSyntaxTreeTypeObject {
-            panic(sprintf("cannot decode '%s' to 'object'" , tree.nodeType()))
-        }
-        x2 = x
-        fs := c.getFields()
-        for f := range fs {
-            if tree.object == null ||
-                false == tree.object.keyExist(f.getName()) {
-                continue
-            }
-            cc := f.getType()
-            if (cc.isPrimitive()) {
-                tree2 := tree.object[f.getName()]
-                obj := .decodePrimitives(cc , tree2)
-                f.set(x , obj)
-                continue
-            }
-            if cc.isArray() {
-                t := this.decodeArrayFromTree(tree.object[f.getName()] , f.get(x) , cc)
-                f.set(x , t)
-                continue
-            }
-            t := this.decodeObjectFromTree(tree.object[f.getName()] , f.get(x) , cc)
-            f.set(x , t)
-        }
-    }
+	private fn decodeArrayFromTree(tree JsonSyntaxTreeNode , x Object , c Class) -> (x2 Object) {
+		componentClass := c.getComponentType()
+		if tree.Type == JsonSyntaxTreeTypeNull {
+			x2 = Array.newInstance(componentClass , 0)
+			return
+		}
+		if tree.Type != JsonSyntaxTreeTypeArray {
+			panic(sprintf("cannot decode '%s' to 'array'" , tree.nodeType()))
+		}
+		x2 = Array.newInstance(componentClass , tree.arrayElements.size())
+		for k , v := range tree.arrayElements {
+			if componentClass.isPrimitive() {
+				t := .decodePrimitives(componentClass , v)
+				Array.set(x2 , k , t)
+			} else {
+				t := componentClass.newInstance()
+				t2 := this.decodeFromTree(v , t)
+				Array.set(x2 , k , t2)
+			}
+		}
+		return x2
+	}
 
-    private fn decodeArrayFromTree(tree JsonSyntaxTreeNode , x Object , c Class) -> (x2 Object) {
-        componentClass := c.getComponentType()
-        if tree.Type == JsonSyntaxTreeTypeNull {
-            x2 = Array.newInstance(componentClass , 0)
-            return
-        }
-        if tree.Type != JsonSyntaxTreeTypeArray {
-            panic(sprintf("cannot decode '%s' to 'array'" , tree.nodeType()))
-        }
-        x2 = Array.newInstance(componentClass , tree.arrayElements.size())
-        for k , v := range tree.arrayElements {
-            if componentClass.isPrimitive() {
-                t := .decodePrimitives(componentClass , v)
-                Array.set(x2 , k , t)
-            } else {
-                t := componentClass.newInstance()
-                t2 := this.decodeFromTree(v , t)
-                Array.set(x2 , k , t2)
-            }
-        }
-        return x2
-    }
+	private fn skipWhiteSpace() {
+		b := this.bs[this.offset] //read current 
+		inFor := false
+		for b == ' ' || b == '\t' || b == '\n' || b == '\r' || b == '\f' || b == '\v' {
+			inFor = true
+			b = this.bs[this.offset++]
+		}
+		if inFor {
+			this.offset-- // 
+		}
+	}
 
-    private fn skipWhiteSpace() {
-        b := this.bs[this.offset] //read current 
-        inFor := false
-        for b == ' ' || b == '\t' || b == '\n' || b == '\r' || b == '\f' || b == '\v' {
-            inFor = true
-            b = this.bs[this.offset++]
-        }
-        if inFor {
-            this.offset-- // 
-        }
-    }
+	private fn parseJsonSyntaxTree() -> (n JsonSyntaxTreeNode) {
+		this.skipWhiteSpace()
+		b := this.bs[this.offset]
+		switch b {
+			case '"':
+				s := this.parseString()
+				n = new JsonSyntaxTreeNode()
+				n.Type = JsonSyntaxTreeTypeString
+				n.stringValue = s
+				return
+			case '[':
+				return this.parseArray()
+			case '{':
+				return this.parseObject()
+			case 't' , 'f':
+				var isTrue = b == 't'
+				if isTrue {
+					this.parseTrue()
+				} else {
+					this.parseFalse()
+				}
+				n = new JsonSyntaxTreeNode()
+				n.Type = JsonSyntaxTreeTypeBool
+				n.boolValue = isTrue
+				return
+			case 'n':
+				this.parseNull()
+				n = new JsonSyntaxTreeNode()
+				n.Type = JsonSyntaxTreeTypeNull
+				return
+			default:
+				if .isDigit(b) == false && b != '-' {
+					panic(sprintf("malformed json format:'%s'" , this.getErrMsg()))
+				}
+				number := this.parseNumber()
+				n = new JsonSyntaxTreeNode()
+				n.Type = JsonSyntaxTreeTypeNumber
+				n.numberValue = number
+				return
+		}
+	}
 
-    private fn parseJsonSyntaxTree() -> (n JsonSyntaxTreeNode) {
-        this.skipWhiteSpace()
-        b := this.bs[this.offset]
-        switch b {
-            case '"':
-                s := this.parseString()
-                n = new JsonSyntaxTreeNode()
-                n.Type = JsonSyntaxTreeTypeString
-                n.stringValue = s
-                return
-            case '[':
-                return this.parseArray()
-            case '{':
-                return this.parseObject()
-            case 't' , 'f':
-                var isTrue = b == 't'
-                if isTrue {
-                    this.parseTrue()
-                } else {
-                    this.parseFalse()
-                }
-                n = new JsonSyntaxTreeNode()
-                n.Type = JsonSyntaxTreeTypeBool
-                n.boolValue = isTrue
-                return
-            case 'n':
-                this.parseNull()
-                n = new JsonSyntaxTreeNode()
-                n.Type = JsonSyntaxTreeTypeNull
-                return
-            default:
-                if .isDigit(b) == false && b != '-' {
-                    panic(sprintf("malformed json format:'%s'" , this.getErrMsg()))
-                }
-                number := this.parseNumber()
-                n = new JsonSyntaxTreeNode()
-                n.Type = JsonSyntaxTreeTypeNumber
-                n.numberValue = number
-                return
-        }
-    }
+	private fn parseArray() -> (n JsonSyntaxTreeNode) {
+		n = new JsonSyntaxTreeNode()
+		n.Type = JsonSyntaxTreeTypeArray
+		n.arrayElements = []JsonSyntaxTreeNode{}
+		this.offset++ // skip [ 
+		this.skipWhiteSpace()
+		b := this.bs[this.offset]
+		for b != ']' {
+			value := this.parseJsonSyntaxTree()
+			n.arrayElements.append(value)
+			this.skipWhiteSpace()
+			b = this.bs[this.offset]
+			if b == ',' {
+				this.offset++
+			} else if b == ']' {
+				break
+			} else {
+				panic(sprintf("expect ']' or ',' but '%s'" , this.getErrMsg()))
+			}
+		}
+		if b != ']' {
+			panic("'[' and ']' not match")
+		}
+		this.offset++ // skip [
+		return n
+	}
 
-    private fn parseArray() -> (n JsonSyntaxTreeNode) {
-        n = new JsonSyntaxTreeNode()
-        n.Type = JsonSyntaxTreeTypeArray
-        n.arrayElements = []JsonSyntaxTreeNode{}
-        this.offset++ // skip [ 
-        this.skipWhiteSpace()
-        b := this.bs[this.offset]
-        for b != ']' {
-            value := this.parseJsonSyntaxTree()
-            n.arrayElements.append(value)
-            this.skipWhiteSpace()
-            b = this.bs[this.offset]
-            if b == ',' {
-                this.offset++
-            } else if b == ']' {
-                break
-            } else {
-                panic(sprintf("expect ']' or ',' but '%s'" , this.getErrMsg()))
-            }
-        }
-        if b != ']' {
-            panic("'[' and ']' not match")
-        }
-        this.offset++ // skip [
-        return n
-    }
+	private fn parseObject() -> (n JsonSyntaxTreeNode) {
+		this.offset++ // skip { 
+		b := this.bs[this.offset]
+		n = new JsonSyntaxTreeNode()
+		n.Type = JsonSyntaxTreeTypeObject
+		n.object = new map{string -> JsonSyntaxTreeNode}()
+		for b != '}' {
+			k := this.parseJsonSyntaxTree()
+			if k.Type != JsonSyntaxTreeTypeString {
+				panic("expect string for object key , but:" + k.nodeType())
+			}
+			this.skipWhiteSpace()
+			b = this.bs[this.offset]
+			if b != ':' {
+				panic("expect colon, but :" + this.getErrMsg())
+			}
+			this.offset++
+			v := this.parseJsonSyntaxTree()
+			n.object[k.stringValue] = v
+			this.skipWhiteSpace()
+			b = this.bs[this.offset]
+			if b == ',' {
+				this.offset++
+			} else if b == '}' {
+				//nothing to do 
+				break
+			} else {
+				panic(sprintf("expect '}' or ',' but '%s'" , this.getErrMsg()))
+			}
+		}
+		if b != '}' {
+			panic("expect '}' , but " + string(this.bs[this.offset:]))
+		}
+		this.offset++ // skip } 
+		return
+	}
 
-    private fn parseObject() -> (n JsonSyntaxTreeNode) {
-        this.offset++ // skip { 
-        b := this.bs[this.offset]
-        n = new JsonSyntaxTreeNode()
-        n.Type = JsonSyntaxTreeTypeObject
-        n.object = new map{string -> JsonSyntaxTreeNode}()
-        for b != '}' {
-            k := this.parseJsonSyntaxTree()
-            if k.Type != JsonSyntaxTreeTypeString {
-                panic("expect string for object key , but:" + k.nodeType())
-            }
-            this.skipWhiteSpace()
-            b = this.bs[this.offset]
-            if b != ':' {
-                panic("expect colon, but :" + this.getErrMsg())
-            }
-            this.offset++
-            v := this.parseJsonSyntaxTree()
-            n.object[k.stringValue] = v
-            this.skipWhiteSpace()
-            b = this.bs[this.offset]
-            if b == ',' {
-                this.offset++
-            } else if b == '}' {
-                //nothing to do 
-                break
-            } else {
-                panic(sprintf("expect '}' or ',' but '%s'" , this.getErrMsg()))
-            }
-        }
-        if b != '}' {
-            panic("expect '}' , but " + string(this.bs[this.offset:]))
-        }
-        this.offset++ // skip } 
-        return
-    }
+	private fn parseString() -> (s string) {
+		this.offset++ // skip "
+		b := this.bs[this.offset++]
+		bs := []byte{}
+		for b != '\"' {
+			if b != '\\' {
+				bs.append(b)
+				b = this.bs[this.offset++]
+				continue
+			}
+			b = this.bs[this.offset++]
+			switch b {
+				case '\"':
+					bs.append('\"')
+					b = this.bs[this.offset++]
+				case '\\':
+					bs.append('\\')
+					b = this.bs[this.offset++]
+				case '/':
+					bs.append('/')
+					b = this.bs[this.offset++]
+				case 'b':
+					bs.append('\b')
+					b = this.bs[this.offset++]
+				case 'f':
+					bs.append('\f')
+					b = this.bs[this.offset++]
+				case 'n':
+					bs.append('\n')
+					b = this.bs[this.offset++]
+				case 'r':
+					bs.append('\r')
+					b = this.bs[this.offset++]
+				case 't':
+					bs.append('\t')
+					b = this.bs[this.offset++]
+				case 'u':
+					var c char
+					for i := 0 ; i < 4 ; i++ {
+						if b = this.bs[this.offset++] ; .isHex(b) == false {
+							panic(new error("expect hex number"))
+						}
+						c = (c << 4) | char(.hexByte2Int(b))
+					}
+					t := new char[](1)
+					t[0] = c
+					for v := range new String(t).getBytes("utf-8") {
+						bs.append(v)
+					}
+					b = this.bs[this.offset++]
+			}
+		}
+		s = string(bs)
+	}
 
-    private fn parseString() -> (s string) {
-        this.offset++ // skip "
-        b := this.bs[this.offset++]
-        bs := []byte{}
-        for b != '\"' {
-            if b != '\\' {
-                bs.append(b)
-                b = this.bs[this.offset++]
-                continue
-            }
-            b = this.bs[this.offset++]
-            switch b {
-                case '\"':
-                    bs.append('\"')
-                    b = this.bs[this.offset++]
-                case '\\':
-                    bs.append('\\')
-                    b = this.bs[this.offset++]
-                case '/':
-                    bs.append('/')
-                    b = this.bs[this.offset++]
-                case 'b':
-                    bs.append('\b')
-                    b = this.bs[this.offset++]
-                case 'f':
-                    bs.append('\f')
-                    b = this.bs[this.offset++]
-                case 'n':
-                    bs.append('\n')
-                    b = this.bs[this.offset++]
-                case 'r':
-                    bs.append('\r')
-                    b = this.bs[this.offset++]
-                case 't':
-                    bs.append('\t')
-                    b = this.bs[this.offset++]
-                case 'u':
-                    var c char
-                    for i := 0 ; i < 4 ; i++ {
-                        if b = this.bs[this.offset++] ; .isHex(b) == false {
-                            panic(new error("expect hex number"))
-                        }
-                        c = (c << 4) | char(.hexByte2Int(b))
-                    }
-                    t := new char[](1)
-                    t[0] = c
-                    for v := range new String(t).getBytes("utf-8") {
-                        bs.append(v)
-                    }
-                    b = this.bs[this.offset++]
-            }
-        }
-        s = string(bs)
-    }
+	// no check 
+	private static fn hexByte2Int(b byte) -> (v int) {
+		switch b {
+			case b >= 'a' && b <= 'f':
+				return int(b - 'a') + 10
+			case b >= 'A' && b <= 'F':
+				return int(b - 'A') + 10
+			default:
+				return int(b - '0')
+		}
+	}
 
-    // no check 
-    private static fn hexByte2Int(b byte) -> (v int) {
-        switch b {
-            case b >= 'a' && b <= 'f':
-                return int(b - 'a') + 10
-            case b >= 'A' && b <= 'F':
-                return int(b - 'A') + 10
-            default:
-                return int(b - '0')
-        }
-    }
+	// 
+	private fn parseTrue() {
+		this.offset++ // skip 't' 
+		if this.bs[this.offset++] != 'r' ||
+			this.bs[this.offset++] != 'u' ||
+			this.bs[this.offset++] != 'e' {
+			panic("wrong true")
+		}
+	}
 
-    // 
-    private fn parseTrue() {
-        this.offset++ // skip 't' 
-        if this.bs[this.offset++] != 'r' ||
-            this.bs[this.offset++] != 'u' ||
-            this.bs[this.offset++] != 'e' {
-            panic("wrong true")
-        }
-    }
+	private fn parseNull() {
+		this.offset++ // skip 'n' 
+		if this.bs[this.offset++] != 'u' ||
+			this.bs[this.offset++] != 'l' ||
+			this.bs[this.offset++] != 'l' {
+			panic("wrong null")
+		}
+	}
 
-    private fn parseNull() {
-        this.offset++ // skip 'n' 
-        if this.bs[this.offset++] != 'u' ||
-            this.bs[this.offset++] != 'l' ||
-            this.bs[this.offset++] != 'l' {
-            panic("wrong null")
-        }
-    }
+	private fn parseFalse() {
+		this.offset++ // skip 'f' 
+		if this.bs[this.offset++] != 'a' ||
+			this.bs[this.offset++] != 'l' ||
+			this.bs[this.offset++] != 's' ||
+			this.bs[this.offset++] != 'e' {
+			panic("wrong false")
+		}
+	}
 
-    private fn parseFalse() {
-        this.offset++ // skip 'f' 
-        if this.bs[this.offset++] != 'a' ||
-            this.bs[this.offset++] != 'l' ||
-            this.bs[this.offset++] != 's' ||
-            this.bs[this.offset++] != 'e' {
-            panic("wrong false")
-        }
-    }
+	private static fn isDigit(b byte) -> (is bool) {
+		is = b >= '0' && b <= '9'
+	}
+	private static fn isHex(b byte) -> (is bool) {
+		is = .isDigit(b) ||
+			(b >= 'a' && b <= 'f') ||
+			(b >= 'A' && b <= 'Z')
+	}
 
-    private static fn isDigit(b byte) -> (is bool) {
-        is = b >= '0' && b <= '9'
-    }
-    private static fn isHex(b byte) -> (is bool) {
-        is = .isDigit(b) ||
-            (b >= 'a' && b <= 'f') ||
-            (b >= 'A' && b <= 'Z')
-    }
+	private fn parseNumber() -> (n Number) {
+		n = new Number()
+		b := this.bs[this.offset]
+		if b == '-' {
+			n.isNegative = true
+			this.offset++
+			b = this.bs[this.offset]
+			if false == .isDigit(b) {
+				panic("expect number after '-'")
+			}
+		}
+		if b == '0' {
+			n.integerPart.append(b)
+		} else {
+			n.integerPart.append(b)
+			this.offset++
+			b = this.bs[this.offset++]
+			for .isDigit(b) {
+				n.integerPart.append(b)
+				b = this.bs[this.offset++]
+			}
+			this.offset--
+		}
+		b = this.bs[this.offset]
+		if b == '.' {
+			this.offset++
+			n.isFloat = true
+			b = this.bs[this.offset]
+			if .isDigit(b) == false {
+				panic("expect number after '.'")
+			}
+			for .isDigit(b) {
+				n.floatPart.append(b)
+				b = this.bs[++this.offset]
+			}
+		}
+		b = this.bs[this.offset]
+		if b == 'e' || b == 'E' {
+			this.offset++ // skip e 
+			b = this.bs[this.offset]
+			if b == '+' {
+				this.offset++ // skip + 
+			} else if b == '-' {
+				this.offset++ // skip - 
+				n.eIsNegative = true
+			}
+			b = this.bs[this.offset]
+			if false == .isDigit(b) {
+				panic("expect number after 'e' or 'E' ," + this.getErrMsg())
+			}
+			for .isDigit(b) {
+				n.e.append(b)
+				b = this.bs[++this.offset]
+			}
+		}
+	}
 
-    private fn parseNumber() -> (n Number) {
-        n = new Number()
-        b := this.bs[this.offset]
-        if b == '-' {
-            n.isNegative = true
-            this.offset++
-            b = this.bs[this.offset]
-            if false == .isDigit(b) {
-                panic("expect number after '-'")
-            }
-        }
-        if b == '0' {
-            n.integerPart.append(b)
-        } else {
-            n.integerPart.append(b)
-            this.offset++
-            b = this.bs[this.offset++]
-            for .isDigit(b) {
-                n.integerPart.append(b)
-                b = this.bs[this.offset++]
-            }
-            this.offset--
-        }
-        b = this.bs[this.offset]
-        if b == '.' {
-            this.offset++
-            n.isFloat = true
-            b = this.bs[this.offset]
-            if .isDigit(b) == false {
-                panic("expect number after '.'")
-            }
-            for .isDigit(b) {
-                n.floatPart.append(b)
-                b = this.bs[++this.offset]
-            }
-        }
-        b = this.bs[this.offset]
-        if b == 'e' || b == 'E' {
-            this.offset++ // skip e 
-            b = this.bs[this.offset]
-            if b == '+' {
-                this.offset++ // skip + 
-            } else if b == '-' {
-                this.offset++ // skip - 
-                n.eIsNegative = true
-            }
-            b = this.bs[this.offset]
-            if false == .isDigit(b) {
-                panic("expect number after 'e' or 'E' ," + this.getErrMsg())
-            }
-            for .isDigit(b) {
-                n.e.append(b)
-                b = this.bs[++this.offset]
-            }
-        }
-    }
-
-    private fn getErrMsg() -> (msg string) {
-        end := this.bs.size()
-        size := 20
-        if this.bs.size() - this.offset > size {
-            end = this.offset + size
-        }
-        return string(this.bs[this.offset : end])
-    }
+	private fn getErrMsg() -> (msg string) {
+		end := this.bs.size()
+		size := 20
+		if this.bs.size() - this.offset > size {
+			end = this.offset + size
+		}
+		return string(this.bs[this.offset : end])
+	}
 }
-
 

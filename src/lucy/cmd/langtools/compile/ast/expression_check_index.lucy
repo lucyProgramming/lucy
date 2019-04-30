@@ -1,78 +1,77 @@
 // all rights reserved , check the LICENSE file
 
 class ExpressionCheckIndex {
-    static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
-        index := e.data.(ExpressionIndex)
-        on , es := index.indexOn.checkSingleValueContextExpression(block)
-        errs.appendAll(es)
-        if on == null {
-            return
-        }
-        switch on.Type {
-            case VariableTypeArray,
-                VariableTypeJavaArray:
-                indexType , es := index.index.checkSingleValueContextExpression(block)
-                errs.appendAll(es)
-                if indexType != null {
-                    if indexType.isInteger() {
-                        if indexType.Type == VariableTypeLong {
-                            index.index.convertToNumberType(VariableTypeInt) //  convert to int
-                        }
-                        if index.index.isLiteral() {
-                            indexValue := index.index.getLongValue()
-                            if indexValue < 0 {
-                                errs.append(new error(sprintf("%s index '%d' is negative",
-                                            index.index.pos.errMsgPrefix() , indexValue)))
-                            }
-                        }
-                    } else {
-                        errs.append(new error(sprintf("%s only integer can be used as index,but '%s'",
-                                    index.index.pos.errMsgPrefix() , indexType.typeString())))
-                    }
+	static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
+		index := e.data.(ExpressionIndex)
+		on , es := index.indexOn.checkSingleValueContextExpression(block)
+		errs.appendAll(es)
+		if on == null {
+			return
+		}
+		switch on.Type {
+			case VariableTypeArray,
+				VariableTypeJavaArray:
+				indexType , es := index.index.checkSingleValueContextExpression(block)
+				errs.appendAll(es)
+				if indexType != null {
+					if indexType.isInteger() {
+						if indexType.Type == VariableTypeLong {
+							index.index.convertToNumberType(VariableTypeInt) //  convert to int
+						}
+						if index.index.isLiteral() {
+							indexValue := index.index.getLongValue()
+							if indexValue < 0 {
+								errs.append(new error(sprintf("%s index '%d' is negative",
+											index.index.pos.errMsgPrefix() , indexValue)))
+							}
+						}
+					} else {
+						errs.append(new error(sprintf("%s only integer can be used as index,but '%s'",
+									index.index.pos.errMsgPrefix() , indexType.typeString())))
+					}
 
-                }
-                valueType = on.theArray.cloneType()
-                valueType.pos = e.pos
-                return
-            case VariableTypeMap:
-                valueType = on.theMap.V.cloneType()
-                valueType.pos = e.pos
-                indexType , es := index.index.checkSingleValueContextExpression(block)
-                errs.appendAll(es)
-                if indexType == null {
-                    return
-                }
-                if on.theMap.K.assignAble(block , errs , indexType) == false {
-                    errs.append(new error(sprintf("%s cannot use '%s' as '%s' for index",
-                                index.index.pos.errMsgPrefix() , indexType.typeString() , on.theMap.K.typeString())))
-                }
-                return
-            case VariableTypeString:
-                indexType , es := index.index.checkSingleValueContextExpression(block)
-                errs.appendAll(es)
-                if indexType != null {
-                    if indexType.isInteger() {
-                        if indexType.Type == VariableTypeLong {
-                            index.index.convertToNumberType(VariableTypeInt) //  convert to int
-                        }
-                    } else {
-                        errs.append(new error(sprintf("%s only integer can be used as index,but '%s'",
-                                    index.index.pos.errMsgPrefix() , indexType.typeString())))
-                    }
+				}
+				valueType = on.theArray.cloneType()
+				valueType.pos = e.pos
+				return
+			case VariableTypeMap:
+				valueType = on.theMap.V.cloneType()
+				valueType.pos = e.pos
+				indexType , es := index.index.checkSingleValueContextExpression(block)
+				errs.appendAll(es)
+				if indexType == null {
+					return
+				}
+				if on.theMap.K.assignAble(block , errs , indexType) == false {
+					errs.append(new error(sprintf("%s cannot use '%s' as '%s' for index",
+								index.index.pos.errMsgPrefix() , indexType.typeString() , on.theMap.K.typeString())))
+				}
+				return
+			case VariableTypeString:
+				indexType , es := index.index.checkSingleValueContextExpression(block)
+				errs.appendAll(es)
+				if indexType != null {
+					if indexType.isInteger() {
+						if indexType.Type == VariableTypeLong {
+							index.index.convertToNumberType(VariableTypeInt) //  convert to int
+						}
+					} else {
+						errs.append(new error(sprintf("%s only integer can be used as index,but '%s'",
+									index.index.pos.errMsgPrefix() , indexType.typeString())))
+					}
 
-                }
-                valueType = new Type()
-                valueType.Type = VariableTypeByte
-                valueType.pos = e.pos
-                return
-            default:
-                errs.append(new error(sprintf("%s cannot index '%s'",
-                            on.pos.errMsgPrefix() , on.typeString())))
-                return
-        }
+				}
+				valueType = new Type()
+				valueType.Type = VariableTypeByte
+				valueType.pos = e.pos
+				return
+			default:
+				errs.append(new error(sprintf("%s cannot index '%s'",
+							on.pos.errMsgPrefix() , on.typeString())))
+				return
+		}
 
-    }
+	}
 
 }
-
 

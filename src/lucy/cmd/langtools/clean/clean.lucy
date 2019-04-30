@@ -46,7 +46,6 @@ final class Clean {
 				new File(dir + "/" + name).delete()
 			}
 		}
-
 	}
 }
 

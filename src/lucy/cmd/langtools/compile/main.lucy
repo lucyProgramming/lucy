@@ -1,7 +1,7 @@
 // all rights reserved , check the LICENSE file
 
 fn main(args []string) {
-    panic("not in use")
+	panic("not in use")
 }
 
 // import "lucy/cmd/langtools/compile/lc"

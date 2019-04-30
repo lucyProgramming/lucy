@@ -3,120 +3,115 @@
 import "lucy/cmd/langtools/compile/common"
 
 {
-
-    registerBuildInFunctions()
-
+	registerBuildInFunctions()
 
 }
 
 fn registerBuildInFunctions() {
-    {
+	{
+		//print
+		buildInFunctionsMap[common.BuildInFunctionPrint] = new Function()
+		buildInFunctionsMap[common.BuildInFunctionPrint].Type = new FunctionType()
+		buildInFunctionsMap[common.BuildInFunctionPrint].buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error , args []Type , pos Pos) {
+			if len(e.parameterTypes) > 0 {
+				msg := sprintf("%s buildin function expect no typed parameter" , e.parameterTypes[0].pos.errMsgPrefix())
+				errs.append(new error(msg))
+			}
+		}
 
-        //print
-        buildInFunctionsMap[common.BuildInFunctionPrint] = new Function()
-        buildInFunctionsMap[common.BuildInFunctionPrint].Type = new FunctionType()
-        buildInFunctionsMap[common.BuildInFunctionPrint].buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error , args []Type , pos Pos) {
-            if len(e.parameterTypes) > 0 {
-                msg := sprintf("%s buildin function expect no typed parameter" , e.parameterTypes[0].pos.errMsgPrefix())
-                errs.append(new error(msg))
-            }
-        }
+	}
 
-    }
+	{
+		//catch
+		c := new Function()
+		buildInFunctionsMap[common.BuildInFunctionCatch] = c
+		c.Type.returnList = new []Variable(1)
+		c.Type.returnList[0] = new Variable()
+		c.Type.returnList[0].name = "e"
+		c.Type.returnList[0].Type = new Type()
+		c.Type.returnList[0].Type.Type = VariableTypeObject
+		c.Type.returnList[0].Type.theClass = new Class()
+		c.Type.returnList[0].Type.theClass.name = DefaultExceptionClass
+		c.Type.returnList[0].Type.theClass.notImportedYet = true
+		c.buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error , args []Type , pos Pos) {
+			if len(e.parameterTypes) > 0 {
+				errs.append(new error(sprintf("%s buildin function expect no typed parameter" , e.parameterTypes[0].pos.errMsgPrefix())))
+			}
+			if block.inheritedAttribute.statementDefer == null {
+				errs.append(new error(sprintf("%s buildin function '%s' only allow in defer block" , pos.errMsgPrefix() , common.BuildInFunctionCatch)))
+				return
+			}
+			if len(e.args) > 1 {
+				errs.append(new error(sprintf("%s build function '%s' expect at most 1 argument" , e.args[1].pos.errMsgPrefix() , common.BuildInFunctionCatch)))
+				return
+			}
+			if len(e.args) == 0 {
+				if block.inheritedAttribute.statementDefer.exceptionClass == null {
+					c , err := block.inheritedAttribute.thePackageBeenCompiling.loadClass(DefaultExceptionClass)
+					if err != null {
+						errs.append(new error(sprintf("%s load exception class failed,err:%s" , pos.errMsgPrefix() , err.getMessage())))
+						return
+					}
+					f.Type.returnList[0].Type.theClass = c
+					err = block.inheritedAttribute.statementDefer.registerExceptionClass(c)
+					if err != null {
+						errs.append(new error(sprintf("%s %s" , pos.errMsgPrefix() , err.getMessage())))
+					}
+				} else {
+					f.Type.returnList[0].Type.theClass = block.inheritedAttribute.statementDefer.exceptionClass
+				}
 
-    {
+				return
+			}
+			if e.args[0].Type != ExpressionTypeString {
+				errs.append(new error(sprintf("%s build function '%s' expect string argument" , errMsgPrefix(args[0].pos) , common.BuildInFunctionCatch)))
+			}
+			className := e.args[0].stringValue
+			c , err := block.inheritedAttribute.thePackageBeenCompiling.loadClass(className)
+			if err != null {
+				errs.append(new error(sprintf("%s %s" , e.args[0].pos.errMsgPrefix() , err.getMessage())))
+				return
+			}
+			have , _ := c.haveSuperClass(block , new map{string -> bool}() , e.args[0].pos , JavaThrowableClass)
+			if have == false {
+				errs.append(new error(sprintf("%s '%s' does't have super class '%s'" , e.args[0].pos.errMsgPrefix() , className , JavaThrowableClass)))
+				return
+			}
+			err = block.inheritedAttribute.statementDefer.registerExceptionClass(c)
+			if err != null {
+				errs.append(new error(sprintf("%s %s" , args[0].pos.errMsgPrefix() , err.getMessage())))
+			}
+		}
 
-        //catch
-        c := new Function()
-        buildInFunctionsMap[common.BuildInFunctionCatch] = c
-        c.Type.returnList = new []Variable(1)
-        c.Type.returnList[0] = new Variable()
-        c.Type.returnList[0].name = "e"
-        c.Type.returnList[0].Type = new Type()
-        c.Type.returnList[0].Type.Type = VariableTypeObject
-        c.Type.returnList[0].Type.theClass = new Class()
-        c.Type.returnList[0].Type.theClass.name = DefaultExceptionClass
-        c.Type.returnList[0].Type.theClass.notImportedYet = true
-        c.buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error , args []Type , pos Pos) {
-            if len(e.parameterTypes) > 0 {
-                errs.append(new error(sprintf("%s buildin function expect no typed parameter" , e.parameterTypes[0].pos.errMsgPrefix())))
-            }
-            if block.inheritedAttribute.statementDefer == null {
-                errs.append(new error(sprintf("%s buildin function '%s' only allow in defer block" , pos.errMsgPrefix() , common.BuildInFunctionCatch)))
-                return
-            }
-            if len(e.args) > 1 {
-                errs.append(new error(sprintf("%s build function '%s' expect at most 1 argument" , e.args[1].pos.errMsgPrefix() , common.BuildInFunctionCatch)))
-                return
-            }
-            if len(e.args) == 0 {
-                if block.inheritedAttribute.statementDefer.exceptionClass == null {
-                    c , err := block.inheritedAttribute.thePackageBeenCompiling.loadClass(DefaultExceptionClass)
-                    if err != null {
-                        errs.append(new error(sprintf("%s load exception class failed,err:%s" , pos.errMsgPrefix() , err.getMessage())))
-                        return
-                    }
-                    f.Type.returnList[0].Type.theClass = c
-                    err = block.inheritedAttribute.statementDefer.registerExceptionClass(c)
-                    if err != null {
-                        errs.append(new error(sprintf("%s %s" , pos.errMsgPrefix() , err.getMessage())))
-                    }
-                } else {
-                    f.Type.returnList[0].Type.theClass = block.inheritedAttribute.statementDefer.exceptionClass
-                }
+	}
 
-                return
-            }
-            if e.args[0].Type != ExpressionTypeString {
-                errs.append(new error(sprintf("%s build function '%s' expect string argument" , errMsgPrefix(args[0].pos) , common.BuildInFunctionCatch)))
-            }
-            className := e.args[0].stringValue
-            c , err := block.inheritedAttribute.thePackageBeenCompiling.loadClass(className)
-            if err != null {
-                errs.append(new error(sprintf("%s %s" , e.args[0].pos.errMsgPrefix() , err.getMessage())))
-                return
-            }
-            have , _ := c.haveSuperClass(block , new map{string -> bool}() , e.args[0].pos , JavaThrowableClass)
-            if have == false {
-                errs.append(new error(sprintf("%s '%s' does't have super class '%s'" , e.args[0].pos.errMsgPrefix() , className , JavaThrowableClass)))
-                return
-            }
-            err = block.inheritedAttribute.statementDefer.registerExceptionClass(c)
-            if err != null {
-                errs.append(new error(sprintf("%s %s" , args[0].pos.errMsgPrefix() , err.getMessage())))
-            }
-        }
+	{
+		//panic
+		buildInFunctionsMap[common.BuildInFunctionPanic] = new Function()
+		buildInFunctionsMap[common.BuildInFunctionPanic].buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall,
+			block Block , errs []error , args []Type , pos Pos) {
+			if len(e.parameterTypes) > 0 {
+				errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefix(e.parameterTypes[0].pos))))
+			}
+			if len(args) != 1 {
+				errs.append(new error(sprintf("%s buildin function 'panic' expect one argument" , errMsgPrefix(pos))))
+				return
+			}
+			if len(args) == 0 || args[0] == null {
+				return
+			}
+			meta := new BuildInFunctionPanicMeta()
+			e.buildInFunctionMeta = meta
+			if args[0].Type == VariableTypeObject {
+				meta.argThrowable , _ = args[0].theClass.haveSuperClass(block , new map{string -> bool}() , args[0].pos , JavaThrowableClass)
+			}
+		}
 
-    }
+		buildInFunctionsMap[common.BuildInFunctionPanic].isBuildIn = true
 
-    {
+	}
 
-        //panic
-        buildInFunctionsMap[common.BuildInFunctionPanic] = new Function()
-        buildInFunctionsMap[common.BuildInFunctionPanic].buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , 
-            block Block , errs []error , args []Type , pos Pos) {
-            if len(e.parameterTypes) > 0 {
-                errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefix(e.parameterTypes[0].pos))))
-            }
-            if len(args) != 1 {
-                errs.append(new error(sprintf("%s buildin function 'panic' expect one argument" , errMsgPrefix(pos))))
-                return
-            }
-            if len(args) == 0 || args[0] == null {
-                return
-            }
-            meta := new BuildInFunctionPanicMeta()
-            e.buildInFunctionMeta = meta
-            if args[0].Type == VariableTypeObject {
-                meta.argThrowable , _ = args[0].theClass.haveSuperClass(block , new map{string -> bool}() , args[0].pos , JavaThrowableClass)
-            }
-        }
-
-        buildInFunctionsMap[common.BuildInFunctionPanic].isBuildIn = true
-
-    }
-
-    /*
+	/*
 	{
 		buildInFunctionsMap[common.BuildInFunctionMonitorEnter] = &Function{
 			buildInFunctionChecker: monitorChecker,
@@ -128,200 +123,193 @@ fn registerBuildInFunctions() {
 		}
 	}
 	*/
-    {
+	{
+		// len
+		buildInFunctionsMap[common.BuildInFunctionLen] = new Function()
+		buildInFunctionsMap[common.BuildInFunctionLen].buildInFunctionChecker = fn (
+			f Function,
+			e ExpressionFunctionCall,
+			block Block,
+			errs []error,
+			args []Type,
+			pos Pos) {
+			if len(e.parameterTypes) > 0 {
+				errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefix(e.parameterTypes[0].pos))))
+			}
+			if len(args) != 1 {
+				errs.append(new error(sprintf("%s expect one argument" , errMsgPrefix(pos))))
+				return
+			}
+			if args[0] == null {
+				return
+			}
+			if args[0].Type != VariableTypeArray && args[0].Type != VariableTypeJavaArray &&
+				args[0].Type != VariableTypeMap && args[0].Type != VariableTypeString {
+				errs.append(new error(sprintf("%s len expect 'array' or 'map' or 'string' argument" , errMsgPrefix(pos))))
+				return
+			}
+		}
 
-        // len
-        buildInFunctionsMap[common.BuildInFunctionLen] = new Function()
-        buildInFunctionsMap[common.BuildInFunctionLen].buildInFunctionChecker = fn (
-            f Function , 
-            e ExpressionFunctionCall , 
-            block Block , 
-            errs []error , 
-            args []Type , 
-            pos Pos) {
-            if len(e.parameterTypes) > 0 {
-                errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefix(e.parameterTypes[0].pos))))
-            }
-            if len(args) != 1 {
-                errs.append(new error(sprintf("%s expect one argument" , errMsgPrefix(pos))))
-                return
-            }
-            if args[0] == null {
-                return
-            }
-            if args[0].Type != VariableTypeArray && args[0].Type != VariableTypeJavaArray &&
-                args[0].Type != VariableTypeMap && args[0].Type != VariableTypeString {
-                errs.append(new error(sprintf("%s len expect 'array' or 'map' or 'string' argument" , errMsgPrefix(pos))))
-                return
-            }
-        }
+		buildInFunctionsMap[common.BuildInFunctionLen].isBuildIn = true
+		Len := buildInFunctionsMap[common.BuildInFunctionLen]
+		Len.Type.returnList = new []Variable(1)
+		Len.Type.returnList[0] = new Variable()
+		Len.Type.returnList[0].Type = new Type()
+		Len.Type.returnList[0].Type.Type = VariableTypeInt
+	}
 
-        buildInFunctionsMap[common.BuildInFunctionLen].isBuildIn = true
-        Len := buildInFunctionsMap[common.BuildInFunctionLen]
-        Len.Type.returnList = new []Variable(1)
-        Len.Type.returnList[0] = new Variable()
-        Len.Type.returnList[0].Type = new Type()
-        Len.Type.returnList[0].Type.Type = VariableTypeInt
-    }
+	{
+		// sprintf
+		s := new Function()
+		buildInFunctionsMap[common.BuildInFunctionSprintf] = s
+		s.Type.returnList = new []Variable(1)
+		s.Type.returnList[0] = new Variable()
+		s.Type.returnList[0].name = "format"
+		s.Type.returnList[0].Type = new Type()
+		s.Type.returnList[0].Type.Type = VariableTypeString
+		s.buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error,
+			args []Type , pos Pos) {
+			if len(e.parameterTypes) > 0 {
+				errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefix(e.parameterTypes[0].pos))))
+			}
+			if len(args) == 0 {
+				err := new error(sprintf("%s '%s' expect one argument at lease" , pos.errMsgPrefix() , common.BuildInFunctionSprintf))
+				errs.append(err)
+				return
+			}
+			if args[0] == null {
+				return
+			}
+			if args[0].Type != VariableTypeString {
+				err := new error(sprintf("%s '%s' first argument must be string" , pos.errMsgPrefix() , common.BuildInFunctionSprintf))
+				errs.append(err)
+				return
+			}
+			_ , err := e.args[0].mustBeOneValueContext(e.args[0].multiValues)
+			if err != null {
+				errs.append(err)
+				return
+			}
+			meta := new BuildInFunctionSprintfMeta()
+			e.buildInFunctionMeta = meta
+			meta.format = e.args[0]
+			meta.argsLength = len(args) - 1
+			e.args = e.args[1:]
+			if meta.format.Type == ExpressionTypeString {
+				if err := checkFormat(meta.format.stringValue , meta.format.pos , args[1:]) ; err != null {
+					errs.append(err)
+				}
+			}
+		}
 
-    {
+	}
 
-        // sprintf
-        s := new Function()
-        buildInFunctionsMap[common.BuildInFunctionSprintf] = s
-        s.Type.returnList = new []Variable(1)
-        s.Type.returnList[0] = new Variable()
-        s.Type.returnList[0].name = "format"
-        s.Type.returnList[0].Type = new Type()
-        s.Type.returnList[0].Type.Type = VariableTypeString
-        s.buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error , 
-            args []Type , pos Pos) {
-            if len(e.parameterTypes) > 0 {
-                errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefix(e.parameterTypes[0].pos))))
-            }
-            if len(args) == 0 {
-                err := new error(sprintf("%s '%s' expect one argument at lease" , pos.errMsgPrefix() , common.BuildInFunctionSprintf))
-                errs.append(err)
-                return
-            }
-            if args[0] == null {
-                return
-            }
-            if args[0].Type != VariableTypeString {
-                err := new error(sprintf("%s '%s' first argument must be string" , pos.errMsgPrefix() , common.BuildInFunctionSprintf))
-                errs.append(err)
-                return
-            }
-            _ , err := e.args[0].mustBeOneValueContext(e.args[0].multiValues)
-            if err != null {
-                errs.append(err)
-                return
-            }
-            meta := new BuildInFunctionSprintfMeta()
-            e.buildInFunctionMeta = meta
-            meta.format = e.args[0]
-            meta.argsLength = len(args) - 1
-            e.args = e.args[1:]
-            if meta.format.Type == ExpressionTypeString {
-                if err := checkFormat(meta.format.stringValue , meta.format.pos , args[1:]) ; err != null {
-                    errs.append(err)
-                }
-            }
-        }
+	{
+		// assert
+		a := new Function()
+		buildInFunctionsMap[common.BuildInFunctionAssert] = a
+		a.buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error,
+			args []Type , pos Pos) {
+			if len(e.parameterTypes) > 0 {
+				errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefix(e.parameterTypes[0].pos))))
+			}
+			if len(args) == 0 {
+				err := new error(sprintf("%s '%s' expect one argument at lease" , pos.errMsgPrefix() , common.BuildInFunctionAssert))
+				errs.append(err)
+				return
+			}
+			for _ , a := range args {
+				if a == null {
+					continue
+				}
+				if a.Type != VariableTypeBool {
+					err := new error(sprintf("%s not a bool expression" , errMsgPrefix(pos)))
+					errs.append(err)
+				}
+			}
 
-    }
+		}
 
-    {
+	}
 
-        // assert
-        a := new Function()
-        buildInFunctionsMap[common.BuildInFunctionAssert] = a
-        a.buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error , 
-            args []Type , pos Pos) {
-            if len(e.parameterTypes) > 0 {
-                errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefix(e.parameterTypes[0].pos))))
-            }
-            if len(args) == 0 {
-                err := new error(sprintf("%s '%s' expect one argument at lease" , pos.errMsgPrefix() , common.BuildInFunctionAssert))
-                errs.append(err)
-                return
-            }
-            for _ , a := range args {
-                if a == null {
-                    continue
-                }
-                if a.Type != VariableTypeBool {
-                    err := new error(sprintf("%s not a bool expression" , errMsgPrefix(pos)))
-                    errs.append(err)
-                }
-            }
+	{
+		// printf
+		buildInFunctionsMap[common.BuildInFunctionPrintf] = new Function()
+		buildInFunctionsMap[common.BuildInFunctionPrintf].buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error , args []Type , pos Pos) {
+			if len(e.parameterTypes) > 0 {
+				errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefix(e.parameterTypes[0].pos))))
+			}
+			meta := new BuildInFunctionPrintfMeta()
+			e.buildInFunctionMeta = meta
+			if len(args) == 0 {
+				err := new error(sprintf("%s '%s' expect one argument at least" , pos.errMsgPrefix() , common.BuildInFunctionPrintf))
+				errs.append(err)
+				return
+			}
+			if args[0] == null {
+				return
+			}
+			if len(args) == 0 {
+				err := new error(sprintf("%s missing format argument" , errMsgPrefix(pos)))
+				errs.append(err)
+				return
+			}
+			if args[0] == null {
+				return
+			}
+			if args[0].Type != VariableTypeString {
+				err := new error(sprintf("%s format must be string" , errMsgPrefix(pos)))
+				errs.append(err)
+				return
+			}
+			_ , err := e.args[0].mustBeOneValueContext(e.args[0].multiValues)
+			if err != null {
+				errs.append(err)
+				return
+			}
+			meta.format = e.args[0]
+			e.args = e.args[1:]
+			meta.argsLength = len(args)
+			if meta.format.Type == ExpressionTypeString {
+				if err := checkFormat(meta.format.stringValue , meta.format.pos , args[1:]) ; err != null {
+					errs.append(err)
+				}
+			}
+		}
 
-        }
+	}
 
-    }
+	buildInFunctionsMap[common.BuildInFunctionBlockHole] = new Function()
+	buildInFunctionsMap[common.BuildInFunctionBlockHole].buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error,
+		args []Type , pos Pos){}
 
-    {
-
-        // printf
-        buildInFunctionsMap[common.BuildInFunctionPrintf] = new Function()
-        buildInFunctionsMap[common.BuildInFunctionPrintf].buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error , args []Type , pos Pos) {
-            if len(e.parameterTypes) > 0 {
-                errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefix(e.parameterTypes[0].pos))))
-            }
-            meta := new BuildInFunctionPrintfMeta()
-            e.buildInFunctionMeta = meta
-            if len(args) == 0 {
-                err := new error(sprintf("%s '%s' expect one argument at least" , pos.errMsgPrefix() , common.BuildInFunctionPrintf))
-                errs.append(err)
-                return
-            }
-            if args[0] == null {
-                return
-            }
-            if len(args) == 0 {
-                err := new error(sprintf("%s missing format argument" , errMsgPrefix(pos)))
-                errs.append(err)
-                return
-            }
-            if args[0] == null {
-                return
-            }
-            if args[0].Type != VariableTypeString {
-                err := new error(sprintf("%s format must be string" , errMsgPrefix(pos)))
-                errs.append(err)
-                return
-            }
-            _ , err := e.args[0].mustBeOneValueContext(e.args[0].multiValues)
-            if err != null {
-                errs.append(err)
-                return
-            }
-            meta.format = e.args[0]
-            e.args = e.args[1:]
-            meta.argsLength = len(args)
-            if meta.format.Type == ExpressionTypeString {
-                if err := checkFormat(meta.format.stringValue , meta.format.pos , args[1:]) ; err != null {
-                    errs.append(err)
-                }
-            }
-        }
-
-    }
-
-    buildInFunctionsMap[common.BuildInFunctionBlockHole] = new Function()
-    buildInFunctionsMap[common.BuildInFunctionBlockHole].buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error , 
-        args []Type , pos Pos) {
-    }
-
-
-    for k , v := range buildInFunctionsMap {
-        v.name = k
-        v.isBuildIn = true
-    }
+	for k , v := range buildInFunctionsMap {
+		v.name = k
+		v.isBuildIn = true
+	}
 
 }
-
 
 /*
 fn monitorChecker(f Function, e ExpressionFunctionCall, block Block, errs []error,
 	args []Type, pos Pos) {
 	if len(e.parameterTypes) > 0 {
-		*rs = append(*rs, new error(sprintf("%s buildin function expect no typed parameter",
+		*s = append(*s, new error(sprintf("%s buildin function expect no typed parameter",
 			errMsgPrefix(e.parameterTypes[0].pos)))
 	}
 	if len(e.args) == 0 {
-		*rs = append(*rs, new error(sprintf("%s expect one argument", errMsgPrefix(pos)))
+		*s = append(*s, new error(sprintf("%s expect one argument", errMsgPrefix(pos)))
 		return
 	}
 	if len(e.args) > 1 {
-		*rs = append(*rs, new error(sprintf("%s only expect one argument", errMsgPrefix(e.args[1].pos)))
+		*s = append(*s, new error(sprintf("%s only expect one argument", errMsgPrefix(e.args[1].pos)))
 		return
 	}
 	if args[0] == null {
 		return
 	}
 	if args[0].isPointer() == false {
-		*rs = append(*rs, new error(sprintf("%s '%s' is not valid type to call",
+		*s = append(*s, new error(sprintf("%s '%s' is not valid type to call",
 			errMsgPrefix(args[0].pos), args[0].typeString()))
 		return
 	}

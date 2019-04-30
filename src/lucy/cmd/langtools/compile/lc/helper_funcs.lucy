@@ -4,40 +4,40 @@ import "lucy/jvm/cg"
 import "lucy/cmd/langtools/compile/ast"
 
 fn parseMethodParameter(c cg.Class , bs []byte , f ast.Function) {
-    a := cg.AttributeMethodParameters.fromBs(c , bs)
-    for k , v := range a.parameters {
-        f.Type.parameterList[k].name = v.name
-    }
+	a := cg.AttributeMethodParameters.fromBs(c , bs)
+	for k , v := range a.parameters {
+		f.Type.parameterList[k].name = v.name
+	}
 }
 
 fn parseReturnListNames(c cg.Class , bs []byte , f ast.Function) {
-    a := cg.AttributeMethodParameters.fromBs(c , bs)
-    for k , v := range a.parameters {
-        f.Type.returnList[k].name = v.name
-    }
+	a := cg.AttributeMethodParameters.fromBs(c , bs)
+	for k , v := range a.parameters {
+		f.Type.returnList[k].name = v.name
+	}
 }
 
 fn loadEnumForFunction(loader ast.ImportLoader , f ast.Function) {
-    for _ , v := range f.Type.parameterList {
-        if v.Type.Type == ast.VariableTypeEnum {
-            loadEnumVariableType(loader , v.Type)
-        }
-    }
-    for _ , v := range f.Type.returnList {
-        if v.Type.Type == ast.VariableTypeEnum {
-            loadEnumVariableType(loader , v.Type)
-        }
-    }
+	for _ , v := range f.Type.parameterList {
+		if v.Type.Type == ast.VariableTypeEnum {
+			loadEnumVariableType(loader , v.Type)
+		}
+	}
+	for _ , v := range f.Type.returnList {
+		if v.Type.Type == ast.VariableTypeEnum {
+			loadEnumVariableType(loader , v.Type)
+		}
+	}
 }
 
 fn loadEnumVariableType(loader ast.ImportLoader , v ast.Type) {
-    t , err := loader.loadImport(v.theEnum.name)
-    if err != null {
-        panic(err)
-    }
-    if tt , ok := t.(ast.Enum) ; ok && tt != null {
-        v.theEnum = tt
-    } else {
-        panic(sprintf("'%s' is not a enum" , v.theEnum.name))
-    }
+	t , err := loader.loadImport(v.theEnum.name)
+	if err != null {
+		panic(err)
+	}
+	if tt , ok := t.(ast.Enum) ; ok && tt != null {
+		v.theEnum = tt
+	} else {
+		panic(sprintf("'%s' is not a enum" , v.theEnum.name))
+	}
 }

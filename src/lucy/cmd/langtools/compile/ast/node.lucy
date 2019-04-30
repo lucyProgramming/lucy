@@ -1,13 +1,12 @@
 // all rights reserved , check the LICENSE file
 
-
 public class TopNode {
-    public node TopNodeInterface
+	public node TopNodeInterface
 
-    public fn TopNode(n TopNodeInterface) {
-        this.super()
-        this.node = n
-    }
+	public fn TopNode(n TopNodeInterface) {
+		this.super()
+		this.node = n
+	}
 }
 
 // this empty interface indicate TopNode 

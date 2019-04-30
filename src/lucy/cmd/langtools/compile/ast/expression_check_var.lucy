@@ -3,144 +3,143 @@
 import "lucy/jvm/cg"
 
 class ExpressionCheckVar {
-    static fn check(e Expression , block Block , errs []error) {
-        ev := e.data.(ExpressionVar)
-        if ev.Type != null {
-            if err := ev.Type.resolve(block) ; err != null {
-                errs.append(err)
-                return
-            }
-            if len(ev.variables) == 1 {
-                ev.variables[0].Type = ev.Type
-            } else {
-                for _ , v := range ev.variables {
-                    v.Type = ev.Type.cloneType()
-                }
+	static fn check(e Expression , block Block , errs []error) {
+		ev := e.data.(ExpressionVar)
+		if ev.Type != null {
+			if err := ev.Type.resolve(block) ; err != null {
+				errs.append(err)
+				return
+			}
+			if len(ev.variables) == 1 {
+				ev.variables[0].Type = ev.Type
+			} else {
+				for _ , v := range ev.variables {
+					v.Type = ev.Type.cloneType()
+				}
 
-            }
+			}
 
-        }
-        if ev.Type == null && len(ev.initValues) == 0 {
-            // looks impossible
-            errs.append(new error(sprintf("%s expression var have not type and no initValues",
-                        errMsgPrefix(e.pos))))
-            return
-        }
-        var err error
-        if len(ev.initValues) > 0 {
-            valueTypes := checkExpressions(block , ev.initValues , errs , false)
-            if ev.Type != null {
-                needs := new []Type(len(ev.variables))
-                for k , _ := range needs {
-                    needs[k] = ev.Type
-                }
+		}
+		if ev.Type == null && len(ev.initValues) == 0 {
+			// looks impossible
+			errs.append(new error(sprintf("%s expression var have not type and no initValues",
+						errMsgPrefix(e.pos))))
+			return
+		}
+		var err error
+		if len(ev.initValues) > 0 {
+			valueTypes := checkExpressions(block , ev.initValues , errs , false)
+			if ev.Type != null {
+				needs := new []Type(len(ev.variables))
+				for k , _ := range needs {
+					needs[k] = ev.Type
+				}
 
-                convertExpressionsToNeeds(block , ev.initValues , needs , valueTypes)
+				convertExpressionsToNeeds(block , ev.initValues , needs , valueTypes)
 
-            }
-            if len(ev.variables) > len(valueTypes) {
-                pos := ev.initValues[len(ev.initValues) - 1].pos // last Pos
-                errs.append(new error(sprintf("%s too few values , assign %d values to %d destinations",
-                            pos.errMsgPrefix(),
-                            len(valueTypes),
-                            len(ev.variables))))
-            } else if len(ev.variables) < len(valueTypes) {
-                pos := getExtraExpressionPos(ev.initValues , len(ev.variables))
-                errs.append(new error(sprintf("%s too many values , assign %d values to %d destinations",
-                            pos.errMsgPrefix(),
-                            len(valueTypes),
-                            len(ev.variables))))
-            }
-            for k , v := range ev.variables {
-                if k < len(valueTypes) && valueTypes[k] != null {
-                    if v.Type != null {
-                        if v.Type.assignAble(block , errs , valueTypes[k]) == false {
-                            err = new error(sprintf("%s cannot assign  '%s' to '%s'",
-                                    errMsgPrefix(valueTypes[k].pos),
-                                    valueTypes[k].typeString(),
-                                    v.Type.typeString()))
-                            errs.append(err)
-                            continue
-                        }
-                    } else {
-                        v.Type = valueTypes[k].cloneType()
-                        v.Type.pos = v.pos
-                    }
+			}
+			if len(ev.variables) > len(valueTypes) {
+				pos := ev.initValues[len(ev.initValues) - 1].pos // last Pos
+				errs.append(new error(sprintf("%s too few values , assign %d values to %d destinations",
+							pos.errMsgPrefix(),
+							len(valueTypes),
+							len(ev.variables))))
+			} else if len(ev.variables) < len(valueTypes) {
+				pos := getExtraExpressionPos(ev.initValues , len(ev.variables))
+				errs.append(new error(sprintf("%s too many values , assign %d values to %d destinations",
+							pos.errMsgPrefix(),
+							len(valueTypes),
+							len(ev.variables))))
+			}
+			for k , v := range ev.variables {
+				if k < len(valueTypes) && valueTypes[k] != null {
+					if v.Type != null {
+						if v.Type.assignAble(block , errs , valueTypes[k]) == false {
+							err = new error(sprintf("%s cannot assign  '%s' to '%s'",
+									errMsgPrefix(valueTypes[k].pos),
+									valueTypes[k].typeString(),
+									v.Type.typeString()))
+							errs.append(err)
+							continue
+						}
+					} else {
+						v.Type = valueTypes[k].cloneType()
+						v.Type.pos = v.pos
+					}
 
-                }
-                if v.Type == null {
-                    continue
-                }
-                if e.isGlobal {
-                    err = block.inheritedAttribute.thePackageBeenCompiling.block.insert(v.name , v.pos , v)
-                } else {
-                    if block.inheritedAttribute.function != null {
-                        if err := block.inheritedAttribute.function.Type.reDefineParameterOrReturnVar(v) ; err != null {
-                            errs.append(err)
-                        }
-                    }
-                    err = block.insert(v.name , v.pos , v)
-                }
+				}
+				if v.Type == null {
+					continue
+				}
+				if e.isGlobal {
+					err = block.inheritedAttribute.thePackageBeenCompiling.block.insert(v.name , v.pos , v)
+				} else {
+					if block.inheritedAttribute.function != null {
+						if err := block.inheritedAttribute.function.Type.reDefineParameterOrReturnVar(v) ; err != null {
+							errs.append(err)
+						}
+					}
+					err = block.insert(v.name , v.pos , v)
+				}
 
-                if err != null {
-                    errs.append(err)
-                    continue
-                }
-            }
+				if err != null {
+					errs.append(err)
+					continue
+				}
+			}
 
-        } else {
-            ev.initValues = new []Expression(len(ev.variables))
-            for k , v := range ev.variables {
-                var err error
-                if e.isGlobal {
-                    err = block.inheritedAttribute.thePackageBeenCompiling.block.insert(v.name , v.pos , v)
-                } else {
-                    if block.inheritedAttribute.function != null {
-                        if err := block.inheritedAttribute.function.Type.reDefineParameterOrReturnVar(v) ; err != null {
-                            errs.append(err)
-                        }
-                    }
-                    err = block.insert(v.name , v.pos , v)
-                }
+		} else {
+			ev.initValues = new []Expression(len(ev.variables))
+			for k , v := range ev.variables {
+				var err error
+				if e.isGlobal {
+					err = block.inheritedAttribute.thePackageBeenCompiling.block.insert(v.name , v.pos , v)
+				} else {
+					if block.inheritedAttribute.function != null {
+						if err := block.inheritedAttribute.function.Type.reDefineParameterOrReturnVar(v) ; err != null {
+							errs.append(err)
+						}
+					}
+					err = block.insert(v.name , v.pos , v)
+				}
 
-                if err != null {
-                    errs.append(err)
-                    continue
-                }
-                ev.initValues[k] = v.Type.mkDefaultValueExpression()
+				if err != null {
+					errs.append(err)
+					continue
+				}
+				ev.initValues[k] = v.Type.mkDefaultValueExpression()
 
-            }
+			}
 
-        }
+		}
 
-        if e.isGlobal {
-            for _ , v := range ev.variables {
-                v.isGlobal = true
-            }
+		if e.isGlobal {
+			for _ , v := range ev.variables {
+				v.isGlobal = true
+			}
 
-            if e.isPublic {
-                for _ , v := range ev.variables {
-                    v.accessFlags |= cg.AccFieldPublic
-                }
+			if e.isPublic {
+				for _ , v := range ev.variables {
+					v.accessFlags |= cg.AccFieldPublic
+				}
 
-            }
-        }
-        for _ , v := range ev.variables {
-            if v.locateDefinition {
-                block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(v)
-                return
-            }
-            if v.findUsage {
-                u := new Usage()
-                u.Type = "declaration"
-                u.pos = v.pos
-                v.findUsageInstances = [u]
-                block.inheritedAttribute.thePackageBeenCompiling.findUsage = v.findUsageInstances
-                block.inheritedAttribute.thePackageBeenCompiling.findUsageIsGlobal = e.isGlobal
-            }
-        }
+			}
+		}
+		for _ , v := range ev.variables {
+			if v.locateDefinition {
+				block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(v)
+				return
+			}
+			if v.findUsage {
+				u := new Usage()
+				u.Type = "declaration"
+				u.pos = v.pos
+				v.findUsageInstances = [u]
+				block.inheritedAttribute.thePackageBeenCompiling.findUsage = v.findUsageInstances
+				block.inheritedAttribute.thePackageBeenCompiling.findUsageIsGlobal = e.isGlobal
+			}
+		}
 
-    }
+	}
 }
-
 

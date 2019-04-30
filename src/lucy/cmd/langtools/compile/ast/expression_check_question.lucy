@@ -1,54 +1,53 @@
 // all rights reserved , check the LICENSE file
 
 class ExpressionCheckQuestion {
-    static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
-        question := e.data.(ExpressionQuestion)
-        condition , es := question.selection.checkSingleValueContextExpression(block)
-        errs.appendAll(es)
-        if condition != null {
-            if condition.Type != VariableTypeBool {
-                errs.append(new error(sprintf("%s not a bool expression",
-                            condition.pos.errMsgPrefix())))
-            }
-            if err := question.selection.canBeUsedAsCondition() ; err != null {
-                errs.append(err)
-            }
-        }
-        var tType Type
-        if question.theTrue != null {
-            tType , es = question.theTrue.checkSingleValueContextExpression(block)
-            errs.appendAll(es)
-            if tType == null {
-                return
-            }
-            if err := tType.rightValueValid() ; err != null {
-                errs.append(err)
-                return
-            }
-            if err := tType.isTyped() ; err != null {
-                errs.append(err)
-                return
-            }
-        }
-        if tType != null {
-            valueType = tType.cloneType()
-            valueType.pos = e.pos
-        }
-        if question.theFalse != null {
-            fType , es := question.theFalse.checkSingleValueContextExpression(block)
-            errs.appendAll(es)
-            if tType != null &&
-                fType != null &&
-                tType.assignAble(block , errs , fType) == false {
-                errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-                            fType.pos.errMsgPrefix() , fType.typeString() , tType.typeString())))
-            }
-            if valueType == null && fType != null {
-                valueType = fType.cloneType()
-                valueType.pos = e.pos
-            }
-        }
-    }
+	static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
+		question := e.data.(ExpressionQuestion)
+		condition , es := question.selection.checkSingleValueContextExpression(block)
+		errs.appendAll(es)
+		if condition != null {
+			if condition.Type != VariableTypeBool {
+				errs.append(new error(sprintf("%s not a bool expression",
+							condition.pos.errMsgPrefix())))
+			}
+			if err := question.selection.canBeUsedAsCondition() ; err != null {
+				errs.append(err)
+			}
+		}
+		var tType Type
+		if question.theTrue != null {
+			tType , es = question.theTrue.checkSingleValueContextExpression(block)
+			errs.appendAll(es)
+			if tType == null {
+				return
+			}
+			if err := tType.rightValueValid() ; err != null {
+				errs.append(err)
+				return
+			}
+			if err := tType.isTyped() ; err != null {
+				errs.append(err)
+				return
+			}
+		}
+		if tType != null {
+			valueType = tType.cloneType()
+			valueType.pos = e.pos
+		}
+		if question.theFalse != null {
+			fType , es := question.theFalse.checkSingleValueContextExpression(block)
+			errs.appendAll(es)
+			if tType != null &&
+				fType != null &&
+				tType.assignAble(block , errs , fType) == false {
+				errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
+							fType.pos.errMsgPrefix() , fType.typeString() , tType.typeString())))
+			}
+			if valueType == null && fType != null {
+				valueType = fType.cloneType()
+				valueType.pos = e.pos
+			}
+		}
+	}
 }
-
 

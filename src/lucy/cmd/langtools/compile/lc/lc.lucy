@@ -7,173 +7,172 @@ import "lucy/os"
 import "lucy/encoding/json"
 
 public fn MainFn(
-    destinationDir string,
-    files []string,
-    lucyPath []string,
-    classPath []string,
-    ifErrExit bool,
-    onlyImport bool,
-    disableCheckUnUse bool,
-    packageName string,
-    printError bool) -> (hasMain bool , es []error , compiledClassFiles []string) {
-    var compiler = new Compiler()
-    if len(files) == 0 {
-        return false , [new error("no file specified")] , null
-    }
-    compiler.onlyImport = onlyImport
-    compiler.packageName = packageName
-    compiler.disableCheckUnUse = disableCheckUnUse
-    compiler.destinationDir = destinationDir
-    compiler.ifErrExit = ifErrExit
-    compiler.printError = printError
-    return compiler.compile(files , lucyPath , classPath)
+	destinationDir string,
+	files []string,
+	lucyPath []string,
+	classPath []string,
+	ifErrExit bool,
+	onlyImport bool,
+	disableCheckUnUse bool,
+	packageName string,
+	printError bool) -> (hasMain bool , es []error , compiledClassFiles []string) {
+	var compiler = new Compiler()
+	if len(files) == 0 {
+		return false , [new error("no file specified")] , null
+	}
+	compiler.onlyImport = onlyImport
+	compiler.packageName = packageName
+	compiler.disableCheckUnUse = disableCheckUnUse
+	compiler.destinationDir = destinationDir
+	compiler.ifErrExit = ifErrExit
+	compiler.printError = printError
+	return compiler.compile(files , lucyPath , classPath)
 }
 
 public class Compiler {
-    tops              []ast.TopNode
-    files             []string
-    errs              []error
-    nErrs2StopCompile int
-    lucyPath          []string
-    classPath         []string
-    buildPackage      jvm.BuildPackage = new jvm.BuildPackage(char(52) , char(0))
-    destinationDir    string
-    onlyImport        bool
-    packageName       string
-    disableCheckUnUse bool
+	tops              []ast.TopNode
+	files             []string
+	errs              []error
+	nErrs2StopCompile int
+	lucyPath          []string
+	classPath         []string
+	buildPackage      jvm.BuildPackage = new jvm.BuildPackage(char(52) , char(0))
+	destinationDir    string
+	onlyImport        bool
+	packageName       string
+	disableCheckUnUse bool
 
-    ifErrExit  bool
-    printError bool
+	ifErrExit  bool
+	printError bool
 
-    fn Compiler() {
-        this.super()
-        this.errs = []error{}
-        this.nErrs2StopCompile = 10
-        this.tops = []ast.TopNode{}
-    }
+	fn Compiler() {
+		this.super()
+		this.errs = []error{}
+		this.nErrs2StopCompile = 10
+		this.tops = []ast.TopNode{}
+	}
 
-    fn shouldExit() {
-        if len(this.errs) > this.nErrs2StopCompile {
-            this.exit()
-        }
-    }
+	fn shouldExit() {
+		if len(this.errs) > this.nErrs2StopCompile {
+			this.exit()
+		}
+	}
 
-    fn exit() {
-        code := 0
-        if len(this.errs) > 0 {
-            code = 2
-        }
-        if this.printError {
-            for _ , v := range this.errs {
-                os.stderr.println(v.getMessage())
-            }
-        }
-        if this.ifErrExit {
-            os.exit(code)
-        }
-    }
+	fn exit() {
+		code := 0
+		if len(this.errs) > 0 {
+			code = 2
+		}
+		if this.printError {
+			for _ , v := range this.errs {
+				os.stderr.println(v.getMessage())
+			}
+		}
+		if this.ifErrExit {
+			os.exit(code)
+		}
+	}
 
-    fn dumpImports() {
-        if len(this.errs) > 0 {
-            this.exit()
-        }
-        is := new string[](len(this.tops))
-        for k , v := range this.tops {
-            is[k] = v.node.(ast.Import).Import
-        }
-        bs , _ := json.encode(is)
-        print(string(bs))
-    }
+	fn dumpImports() {
+		if len(this.errs) > 0 {
+			this.exit()
+		}
+		is := new string[](len(this.tops))
+		for k , v := range this.tops {
+			is[k] = v.node.(ast.Import).Import
+		}
+		bs , _ := json.encode(is)
+		print(string(bs))
+	}
 
-    fn compile(
-        files []string,
-        lucyPath []string,
-        classPath []string) -> (
-        hasMainFn bool,
-        es []error,
-        compiledClassFiles []string) {
-        this.lucyPath = lucyPath
-        this.classPath = classPath
-        this.files = files
-        for _ , v := range this.files {
-            b , err := os.readFile(v)
-            if err != null {
-                this.errs.append(err)
-                continue
-            }
-            bs := javaArray2Lucy(b)
-            //UTF-16 (BE)
-            if len(bs) >= 2 &&
-                bs[0] == 0xfe &&
-                bs[1] == 0xff {
-                printf("file:%s looks like UTF-16(BE) file\n" , v)
-                os.exit(2)
-            }
-            //UTF-16 (LE)
-            if len(bs) >= 2 &&
-                bs[0] == 0xff &&
-                bs[1] == 0xfe {
-                printf("file:%s looks like UTF-16(LE) file\n" , v)
-                os.exit(2)
-            }
-            //UTF-32 (LE)
-            if len(bs) >= 4 &&
-                bs[0] == 0x0 &&
-                bs[1] == 0x0 &&
-                bs[2] == 0xfe &&
-                bs[3] == 0xff {
-                printf("file:%s looks like UTF-32(LE) file\n" , v)
-                os.exit(2)
-            }
-            //UTF-32 (BE)
-            if len(bs) >= 4 &&
-                bs[0] == 0xff &&
-                bs[1] == 0xfe &&
-                bs[2] == 0x0 &&
-                bs[3] == 0x0 {
-                printf("file:%s looks like UTF-32(BE) file\n" , v)
-                os.exit(2)
-            }
-            if len(bs) >= 3 &&
-                bs[0] == 0xef &&
-                bs[1] == 0xbb &&
-                bs[2] == 0xbf {
-                // utf8 bom
-                bs = bs[3:]
-            }
-            this.errs.appendAll(
-                parser.parse(
-                    this.tops,
-                    v,
-                    bs,
-                    this.onlyImport,
-                    this.nErrs2StopCompile,
-                    -1,
-                    -1,
-                    -1,
-                    -1))
-            this.shouldExit()
-        }
-        // parse import only
-        if this.onlyImport {
-            this.dumpImports()
-            return
-        }
-        if t := this.packageName ; t == null ||
-            t == "" {
-            print("package name not specified")
-            os.exit(1)
-        }
-        var loader = new Loader(lucyPath , classPath)
-        p := new ast.Package(this.packageName , this.disableCheckUnUse , loader)
-        this.errs.appendAll(p.typeCheck(this.tops))
-        if len(this.errs) > 0 {
-            this.exit()
-        }
-        this.buildPackage.make(p , this.destinationDir)
-        hasMainFn = p.hasMain()
-        compiledClassFiles = this.buildPackage.getCompiledClassFileNames()
-    }
+	fn compile(
+		files []string,
+		lucyPath []string,
+		classPath []string) -> (
+		hasMainFn bool,
+		es []error,
+		compiledClassFiles []string) {
+		this.lucyPath = lucyPath
+		this.classPath = classPath
+		this.files = files
+		for _ , v := range this.files {
+			b , err := os.readFile(v)
+			if err != null {
+				this.errs.append(err)
+				continue
+			}
+			bs := javaArray2Lucy(b)
+			//UTF-16 (BE)
+			if len(bs) >= 2 &&
+				bs[0] == 0xfe &&
+				bs[1] == 0xff {
+				printf("file:%s looks like UTF-16(BE) file\n" , v)
+				os.exit(2)
+			}
+			//UTF-16 (LE)
+			if len(bs) >= 2 &&
+				bs[0] == 0xff &&
+				bs[1] == 0xfe {
+				printf("file:%s looks like UTF-16(LE) file\n" , v)
+				os.exit(2)
+			}
+			//UTF-32 (LE)
+			if len(bs) >= 4 &&
+				bs[0] == 0x0 &&
+				bs[1] == 0x0 &&
+				bs[2] == 0xfe &&
+				bs[3] == 0xff {
+				printf("file:%s looks like UTF-32(LE) file\n" , v)
+				os.exit(2)
+			}
+			//UTF-32 (BE)
+			if len(bs) >= 4 &&
+				bs[0] == 0xff &&
+				bs[1] == 0xfe &&
+				bs[2] == 0x0 &&
+				bs[3] == 0x0 {
+				printf("file:%s looks like UTF-32(BE) file\n" , v)
+				os.exit(2)
+			}
+			if len(bs) >= 3 &&
+				bs[0] == 0xef &&
+				bs[1] == 0xbb &&
+				bs[2] == 0xbf {
+				// utf8 bom
+				bs = bs[3:]
+			}
+			this.errs.appendAll(
+				parser.parse(
+					this.tops,
+					v,
+					bs,
+					this.onlyImport,
+					this.nErrs2StopCompile,
+					-1,
+					-1,
+					-1,
+					-1))
+			this.shouldExit()
+		}
+		// parse import only
+		if this.onlyImport {
+			this.dumpImports()
+			return
+		}
+		if t := this.packageName ; t == null ||
+			t == "" {
+			print("package name not specified")
+			os.exit(1)
+		}
+		var loader = new Loader(lucyPath , classPath)
+		p := new ast.Package(this.packageName , this.disableCheckUnUse , loader)
+		this.errs.appendAll(p.typeCheck(this.tops))
+		if len(this.errs) > 0 {
+			this.exit()
+		}
+		this.buildPackage.make(p , this.destinationDir)
+		hasMainFn = p.hasMain()
+		compiledClassFiles = this.buildPackage.getCompiledClassFileNames()
+	}
 }
-
 

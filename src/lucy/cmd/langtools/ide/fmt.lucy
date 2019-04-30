@@ -467,8 +467,7 @@ public class Fmt {
 				format += "    //" + v.inlineComment
 			}
 		}
-
-		format += indent + "}\n"
+		format += indent + "}\n\n"
 	}
 	fn formatImport(indent string , i ast.Import) -> (format string = "") {
 		format = indent
