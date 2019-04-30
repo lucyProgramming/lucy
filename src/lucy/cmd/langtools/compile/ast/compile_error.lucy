@@ -8,6 +8,5 @@ public class CompileError extends error {
 	public fn CompileError(msg string) {
 		this.super(msg)
 	}
-
 }
 

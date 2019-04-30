@@ -4,7 +4,12 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/cmd/langtools/ide/findusage"
 import "lucy/os"
 
-public fn renameFn(filename string , bs []byte , to string , pos int) {
+
+public fn renameFn(
+	filename string,
+	bs []byte,
+	to string,
+	pos int) {
 	storePackage := []ast.Package{null}
 	usages := findusage.findUsage2(filename , pos , null , storePackage , bs)
 	if len(usage) == 0 {

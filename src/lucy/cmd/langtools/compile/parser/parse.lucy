@@ -317,7 +317,7 @@ class Parser {
 							}
 						}
 					} else {
-						this.errs.append(new error(sprintf("%s token '%s' is not except",
+						this.errs.append(new error(sprintf("%s token '%s' is not expect",
 									this.errMsgPrefix() , this.token.description)))
 						this.next(lfNotToken)
 					}
@@ -698,6 +698,7 @@ class Parser {
 		}
 		ret.comment = comment.comment
 		if this.token.Type == lex.TokenComment {
+			ret.inlineComment = this.token.stringValue 
 			this.next(lfIsToken)
 		}
 		return ret , err

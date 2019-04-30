@@ -170,13 +170,13 @@ class BuildExpressionArray {
 					}
 				}
 
-			case common.ArrayMethodSetReadOnly:
-				meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
-				stack := this.buildExpression.build(c , code , call.args[0] , context , state)
-				if t := char(1) + stack ; t > maxStack {
-					maxStack = t
-				}
-				c.insertMethodCall(code , cg.OP_invokevirtual , meta.className , common.ArrayMethodSetReadOnly , "(Z)V")
+			// case common.ArrayMethodSetReadOnly:
+			// 	meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
+			// 	stack := this.buildExpression.build(c , code , call.args[0] , context , state)
+			// 	if t := char(1) + stack ; t > maxStack {
+			// 		maxStack = t
+			// 	}
+			// 	c.insertMethodCall(code , cg.OP_invokevirtual , meta.className , common.ArrayMethodSetReadOnly , "(Z)V")
 			case common.ArrayMethodGetUnderlyingArray:
 				meta := ArrayMetas[call.methodCallOn.value.theArray.Type]
 				code.codes[code.codeLength] = cg.OP_getfield

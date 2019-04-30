@@ -17,7 +17,7 @@ public final class BoolOption extends Option {
     protected fn parse(s string) {
         this.boolValue = !this.boolDefaultValue
     }
-    // if flag is nerver parse then panic
+    // if flag is never parse then panic
     public fn getValue() -> (b bool = this.boolValue){}
 }
 

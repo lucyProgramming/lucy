@@ -46,7 +46,7 @@ class ExpressionCheckNew {
 		}
 		if no.Type.theClass.findUsage {
 			// type must resolved 
-			correctLastUsageType("instaniation" , no.Type.theClass.findUsageInstances)
+			correctLastUsageType("instantiation" , no.Type.theClass.findUsageInstances)
 			// set to ok 
 		}
 		valueType = no.Type.cloneType()

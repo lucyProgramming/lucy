@@ -4,18 +4,18 @@ import "lucy/binary"
  
 
 class AttributeSourceFile {
-	filepath string
+	filePath string
 	
-	fn AttributeSourceFile(filepath string){
+	fn AttributeSourceFile(filePath string){
         this.super()
-        this.filepath = filepath
+        this.filePath = filePath
 	}
 	fn toAttributeInfo(c Class) -> (ret AttributeInfo) {
 		ret = new AttributeInfo()
 		ret.nameIndex = c.insertUtf8Const(AttributeNameSourceFile)
 		ret.attributeLength = 2
 		ret.info = new []byte(2)
-		binary.BigEndian.putChar(ret.info, c.insertUtf8Const(this.filepath))
+		binary.BigEndian.putChar(ret.info, c.insertUtf8Const(this.filePath))
 		return ret
 	}
 }

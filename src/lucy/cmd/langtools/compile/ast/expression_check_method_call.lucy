@@ -212,14 +212,14 @@ class ExpressionCheckMethodCall {
 		object Type) {
 		call := e.data.(ExpressionMethodCall)
 		if call.methodCallOn.isIdentifier(ThisPointerName) == false {
-			errs.append(new error(sprintf("%s call father`s constuction must use 'thi.super()'",
+			errs.append(new error(sprintf("%s call father`s construction must use 'thi.super()'",
 						e.pos.errMsgPrefix())))
 			return
 		}
 		if block.inheritedAttribute.isConstructionMethod == false ||
 			block.isFunctionBlock == false ||
 			block.inheritedAttribute.statementOffset != 0 {
-			errs.append(new error(sprintf("%s call father`s constuction on must first statement of a constructon method",
+			errs.append(new error(sprintf("%s call father`s construction on must first statement of a construction method",
 						e.pos.errMsgPrefix())))
 			return
 		}
@@ -425,7 +425,7 @@ class ExpressionCheckMethodCall {
 			}
 			call := e.data.(ExpressionMethodCall)
 			if len(call.parameterTypes) > 0 {
-				errs.append(new error(sprintf("%s variable '%s' cannot be a template fucntion",
+				errs.append(new error(sprintf("%s variable '%s' cannot be a template function",
 							errMsgPrefix(call.parameterTypes[0].pos) , call.name)))
 			}
 			ret := v.Type.theFunctionType.mkCallReturnTypes(e.pos)
@@ -520,7 +520,7 @@ class ExpressionCheckMethodCall {
 					block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(x)
 				}
 				if len(call.args) > 0 {
-					errs.append(new error(sprintf("%s too mamy argument to call,method '%s' expect no arguments",
+					errs.append(new error(sprintf("%s too many argument to call,method '%s' expect no arguments",
 								call.args[0].pos.errMsgPrefix() , call.name)))
 				}
 				return []Type{result}
@@ -571,25 +571,25 @@ class ExpressionCheckMethodCall {
 								call.args[0].pos.errMsgPrefix() , call.name)))
 				}
 				return []Type{result}
-			case common.ArrayMethodSetReadOnly:
-				if len(call.args) == 0 {
-					errs.append(new error(sprintf("%s too few arguments to call %s,expect one argument",
-								e.pos.errMsgPrefix() , call.name)))
-				} else {
-					checkExpressions(block , call.args , errs , true)
-					if call.args[0].value != null && call.args[0].value.Type != VariableTypeBool {
-						errs.append(new error(sprintf("%s expect bool argument",
-									e.pos.errMsgPrefix())))
-					}
-					if len(call.args) > 1 {
-						errs.append(new error(sprintf("%s too few arguments to call %s,expect one argument",
-									e.pos.errMsgPrefix() , call.name)))
-					}
-				}
-				result := new Type()
-				result.Type = VariableTypeVoid
-				result.pos = e.pos
-				return [result]
+			// case common.ArrayMethodSetReadOnly:
+			// 	if len(call.args) == 0 {
+			// 		errs.append(new error(sprintf("%s too few arguments to call %s,expect one argument",
+			// 					e.pos.errMsgPrefix() , call.name)))
+			// 	} else {
+			// 		checkExpressions(block , call.args , errs , true)
+			// 		if call.args[0].value != null && call.args[0].value.Type != VariableTypeBool {
+			// 			errs.append(new error(sprintf("%s expect bool argument",
+			// 						e.pos.errMsgPrefix())))
+			// 		}
+			// 		if len(call.args) > 1 {
+			// 			errs.append(new error(sprintf("%s too few arguments to call %s,expect one argument",
+			// 						e.pos.errMsgPrefix() , call.name)))
+			// 		}
+			// 	}
+			// 	result := new Type()
+			// 	result.Type = VariableTypeVoid
+			// 	result.pos = e.pos
+			// 	return [result]
 			default:
 				errs.append(new error(sprintf("%s unkown call '%s' on array" , e.pos.errMsgPrefix() , call.name)))
 		}

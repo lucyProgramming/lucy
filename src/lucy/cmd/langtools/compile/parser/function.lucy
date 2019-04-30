@@ -53,7 +53,7 @@ class FunctionParser extends ParserFather {
 		}
 		this.parser.ifTokenIsLfThenSkip(true)
 		if this.parser.token.Type != lex.TokenLc {
-			err = new error(sprintf("%s except '{' but '%s'" , this.parser.errMsgPrefix() , this.parser.token.description))
+			err = new error(sprintf("%s expect '{' but '%s'" , this.parser.errMsgPrefix() , this.parser.token.description))
 			this.parser.errs.append(err)
 			return f , null
 		}

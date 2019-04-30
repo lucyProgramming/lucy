@@ -116,7 +116,7 @@ class EnumParser extends ParserFather {
 					comment.reset()
 					// case lex.TokenComma:
 				default:
-					this.parser.errs.append(new error(sprintf("%s token '%s' is not except",
+					this.parser.errs.append(new error(sprintf("%s token '%s' is not expect",
 								this.parser.errMsgPrefix() , this.parser.token.description)))
 					this.next(lfNotToken)
 					comment.reset()

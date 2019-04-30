@@ -8,7 +8,7 @@ public const ArrayMethodEnd = "end"
 public const ArrayMethodGetUnderlyingArray = "getUnderlyingArray"
 public const ArrayMethodAppend = "append"
 public const ArrayMethodAppendAll = "appendAll"
-public const ArrayMethodSetReadOnly = "setReadOnly"
+// public const ArrayMethodSetReadOnly = "setReadOnly"
 
 // map
 public const MapMethodRemove = "remove"

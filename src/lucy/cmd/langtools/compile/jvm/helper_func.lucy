@@ -6,7 +6,7 @@ import "lucy/jvm/cg"
 
 fn writeExits(es []cg.Exit , to int) {
 	for _ , e := range es {
-		e.write(to)
+		e.to(to)
 	}
 }
 

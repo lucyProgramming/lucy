@@ -138,7 +138,6 @@ class BuildExpressionArithmetic {
 							code.codes[code.codeLength] = cg.OP_irem
 							code.codeLength++
 					}
-
 				case ast.VariableTypeInt:
 					switch e.Type {
 						case ast.ExpressionTypeAdd:
@@ -152,7 +151,6 @@ class BuildExpressionArithmetic {
 						case ast.ExpressionTypeMod:
 							code.codes[code.codeLength] = cg.OP_irem
 					}
-
 					code.codeLength++
 				case ast.VariableTypeFloat:
 					switch e.Type {

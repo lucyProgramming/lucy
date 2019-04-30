@@ -450,7 +450,7 @@ public class Class implements TopNodeInterface {
 		block Block,
 		classChecked map{string -> bool},
 		pos Pos,
-		superclassName string) -> (have bool , err error) {
+		superClassName string) -> (have bool , err error) {
 		err = this.loadSelf(block , pos)
 		if err != null {
 			return
@@ -459,7 +459,7 @@ public class Class implements TopNodeInterface {
 			return
 		}
 		classChecked[this.name] = true
-		if this.name == superclassName {
+		if this.name == superClassName {
 			return true , null
 		}
 		if this.name == JavaRootClass {
@@ -472,7 +472,7 @@ public class Class implements TopNodeInterface {
 		if this.superClass == null {
 			return
 		}
-		return this.superClass.haveSuperClass(block , classChecked , pos , superclassName) // check father is implements
+		return this.superClass.haveSuperClass(block , classChecked , pos , superClassName) // check father is implements
 	}
 
 	fn implementedInterface(block Block , classChecked map{string -> bool} , pos Pos , inter string) -> (implemented bool , err error) {
@@ -1427,11 +1427,11 @@ public class Class implements TopNodeInterface {
 				e.data = bin
 				e.isStatementExpression = true
 				e.op = "assign"
-				statemment := new Statement()
-				statemment.Type = StatementTypeExpression
-				statemment.Expression = e
-				statemment.isStaticFieldDefaultValue = true
-				staticFieldAssignStatements.append(statemment)
+				statement := new Statement()
+				statement.Type = StatementTypeExpression
+				statement.Expression = e
+				statement.isStaticFieldDefaultValue = true
+				staticFieldAssignStatements.append(statement)
 
 			}
 		}

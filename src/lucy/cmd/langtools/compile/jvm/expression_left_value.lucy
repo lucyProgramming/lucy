@@ -87,7 +87,9 @@ class BuildExpressionLeftValue {
 		e ast.Expression,
 		context Context,
 		state StackMapState) -> (
-		maxStack char , remainStack char , ops []byte,
+		maxStack char,
+		remainStack char,
+		ops []byte,
 		leftValueType LeftValueKind) {
 		switch e.Type {
 			case ast.ExpressionTypeIdentifier:
@@ -160,7 +162,6 @@ class BuildExpressionLeftValue {
 						default:
 							ops = []byte{cg.OP_aastore}
 					}
-
 					return
 				}
 
@@ -199,9 +200,11 @@ class BuildExpressionLeftValue {
 							selection.field.jvmDescriptor == "" {
 							selection.field.jvmDescriptor = Descriptor.typeDescriptor(selection.field.Type)
 						}
-						c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(selection.selectionOn.value.theClass.name,
+						c.insertFieldRefConst(
+							new cg.ConstantInfoFieldrefHighLevel(selection.selectionOn.value.theClass.name,
 								selection.name,
-								selection.field.jvmDescriptor) , ops[1 : 3])
+								selection.field.jvmDescriptor),
+							ops[1 : 3])
 					default:
 						ops = new []byte(3)
 						if selection.field.jvmDescriptor == null ||

@@ -3,10 +3,10 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
-class BuildinFunctionAssert {
+class BuildInFunctionAssert {
     buildExpression BuildExpression
 
-    fn BuildinFunctionAssert(eb BuildExpression) {
+    fn BuildInFunctionAssert(eb BuildExpression) {
         this.super()
         this.buildExpression = eb
     }

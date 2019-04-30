@@ -41,7 +41,6 @@ class BuildExpressionAssign {
 			} else {
 				code.codes[code.codeLength] = cg.OP_pop2
 			}
-
 			code.codeLength++
 		} else {
 			currentStack := remainStack + jvmSlotSize(left.value)

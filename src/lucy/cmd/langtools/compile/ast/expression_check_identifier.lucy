@@ -76,14 +76,14 @@ class ExpressionCheckIdentifier {
         if f , ok := d.(Function) ; ok {
             if f.isGlobalMain() {
                 // not allow
-                return null , new error(sprintf("%s fucntion is global main" , errMsgPrefix(e.pos)))
+                return null , new error(sprintf("%s function is global main" , errMsgPrefix(e.pos)))
             }
             if f.isBuildIn {
-                return null , new error(sprintf("%s fucntion '%s' is buildin",
+                return null , new error(sprintf("%s function '%s' is buildin",
                             e.pos.errMsgPrefix() , f.name))
             }
             if f.templateFunction != null {
-                return null , new error(sprintf("%s fucntion '%s' a template function",
+                return null , new error(sprintf("%s function '%s' a template function",
                             e.pos.errMsgPrefix() , f.name))
             }
             it , should := shouldAccessFromImports(block , identifier.name , e.pos , f.pos)

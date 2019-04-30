@@ -8,11 +8,11 @@ class BuildFunction {
 	buildBlock      BuildBlock
 
 	fn BuildFunction(
-		eb BuildExpression,
-		bb BuildBlock) {
+		buildExpression BuildExpression,
+		buildBlock BuildBlock) {
 		this.super()
-		this.buildExpression = eb
-		this.buildBlock = bb
+		this.buildExpression = buildExpression
+		this.buildBlock = buildBlock
 	}
 
 	fn mkParametersOffset(
@@ -20,7 +20,7 @@ class BuildFunction {
 		code cg.AttributeCode,
 		f ast.Function,
 		state StackMapState) {
-		for _ , v := range f.Type.parameterList { //     insert into locals
+		for _ , v := range f.Type.parameterList { //      insert into locals
 			v.localValOffset = code.maxLocals
 			code.maxLocals += jvmSlotSize(v.Type)
 			state.appendLocals(c , v.Type)
@@ -139,7 +139,6 @@ class BuildFunction {
 				method.code.maxLocals = 1
 				state.appendLocals(c , state.newObjectVariableType(c.name))
 			}
-
 		}
 		if f.isGlobalMain() {
 			code := method.code
@@ -259,8 +258,6 @@ class BuildFunction {
 					Descriptor.typeDescriptor(v.Type)) , code.codes[code.codeLength + 1 : code.codeLength + 3])
 			code.codeLength += 3
 		}
-
 	}
-
 }
 

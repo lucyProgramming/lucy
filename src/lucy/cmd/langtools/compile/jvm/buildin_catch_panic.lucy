@@ -3,10 +3,10 @@
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
-class BuildinFunctionCatchPanic {
+class BuildInFunctionCatchPanic {
 	buildExpression BuildExpression
 
-	fn BuildinFunctionCatchPanic(eb BuildExpression) {
+	fn BuildInFunctionCatchPanic(eb BuildExpression) {
 		this.super()
 		this.buildExpression = eb
 	}

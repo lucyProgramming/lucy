@@ -6,8 +6,8 @@ import "lucy/cmd/langtools/compile/common" as common
 
 class BuildinFunctionCall {
     eb                        BuildExpression
-    BuildinFunctionAssert     BuildinFunctionAssert
-    BuildinFunctionCatchPanic BuildinFunctionCatchPanic
+    BuildinFunctionAssert     BuildInFunctionAssert
+    BuildinFunctionCatchPanic BuildInFunctionCatchPanic
     BuildinFunctionLen        BuildinFunctionLen
     BuildinFunctionPrint      BuildinFunctionPrint
     BuildinFunctionPrintf     BuildinFunctionPrintf
@@ -17,13 +17,13 @@ class BuildinFunctionCall {
     fn BuildinFunctionCall(eb BuildExpression) {
         this.super()
         this.eb = eb
-        this.BuildinFunctionAssert = new BuildinFunctionAssert(eb)
-        this.BuildinFunctionCatchPanic = new BuildinFunctionCatchPanic(eb)
+        this.BuildinFunctionAssert = new BuildInFunctionAssert(eb)
+        this.BuildinFunctionCatchPanic = new BuildInFunctionCatchPanic(eb)
         this.BuildinFunctionLen = new BuildinFunctionLen(eb)
         this.BuildinFunctionPrint = new BuildinFunctionPrint(eb)
         this.BuildinFunctionPrintf = new BuildinFunctionPrintf(eb)
         this.BuildinFunctionSprintf = new BuildinFunctionSprintf(eb)
-        this.BuildinFunctionAssert = new BuildinFunctionAssert(eb)
+        this.BuildinFunctionAssert = new BuildInFunctionAssert(eb)
         this.BuildinFunctionBlackHole = new BuildinFunctionBlackHole(eb)
     }
 

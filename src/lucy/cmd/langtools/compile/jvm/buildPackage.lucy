@@ -221,7 +221,7 @@ public class BuildPackage {
 				if v.Type.Type == ast.VariableTypeFunction {
 					if v.Type.theFunctionType.vArgs != null {
 						f.attributeLucyFieldDescriptor.methodAccessFlag |=
-							cg.AccMethodVarargs
+							cg.AccMethodVarArgs
 					}
 				}
 			}
@@ -394,7 +394,7 @@ public class BuildPackage {
 			method.name = name
 			method.accessFlags = vv.Function.accessFlags
 			if vv.Function.Type.vArgs != null {
-				method.accessFlags |= cg.AccMethodVarargs
+				method.accessFlags |= cg.AccMethodVarArgs
 			}
 			if vv.isCompilerAuto {
 				method.accessFlags |= cg.AccMethodSynthetic
@@ -472,7 +472,7 @@ public class BuildPackage {
 				method.attributeLucyMethodDescriptor.descriptor = LucyMethodSignature.encode(f.Type)
 			}
 			if f.Type.vArgs != null {
-				method.accessFlags |= cg.AccMethodVarargs
+				method.accessFlags |= cg.AccMethodVarArgs
 			}
 			ms[k] = method
 			f.entrance = method

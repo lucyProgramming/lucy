@@ -70,7 +70,7 @@ public class Fmt {
 				continue
 			}
 			if t , ok := n.node.(ast.TypeAlias) ; ok {
-				format += this.formatTypealias("" , t) + "\n"
+				format += this.formatTypeAlias("" , t)
 				continue
 			}
 			panic(n.node.getClass().toString() + " not handle")
@@ -535,7 +535,7 @@ public class Fmt {
 			case ast.StatementTypeImport:
 				format += this.formatImport(indent , s.Import) + "\n"
 			case ast.StatementTypeTypeAlias:
-				format += this.formatTypealias(indent , s.TypeAlias)
+				format += this.formatTypeAlias(indent , s.TypeAlias)
 			case ast.StatementTypeEmptyLine:
 				format += "\n"
 			case ast.StatementTypeComment:
@@ -545,9 +545,14 @@ public class Fmt {
 		}
 
 	}
-	fn formatTypealias(indent string , a ast.TypeAlias) -> (format string = "") {
+	fn formatTypeAlias(indent string , a ast.TypeAlias) -> (format string = "") {
 		format = indent
-		format += sprintf("typealias %s = %s\n" , a.name , a.Type.typeName())
+		format += sprintf("typealias %s = %s" , a.name , a.Type.typeName())
+		if a.inlineComment != null && a.inlineComment != "" {
+			format += " //" + a.inlineComment
+		}
+		format += "\n"
+
 	}
 	fn formatDefer(indent string , d ast.StatementDefer) -> (format string = "") {
 		format = indent
@@ -1233,7 +1238,6 @@ public class Fmt {
 			case ast.ExpressionTypeDot:
 				return "."
 			case ast.ExpressionTypeAutoCompletion:
-			
 		}
 
 	}

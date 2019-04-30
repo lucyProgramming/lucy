@@ -1,20 +1,19 @@
 // all rights reserved , check the LICENSE file
 
 public class AttributeInfo {
-    public nameIndex       char
-           attributeLength int
-    public info            []byte
+	public nameIndex       char
+	       attributeLength int
+	public info            []byte
 }
-
 
 typealias AttributeGroupedByName = map{string -> []AttributeInfo}
 
 
 public fn getAttributeByName(
-    a AttributeGroupedByName,
-    name string) -> (attrs []AttributeInfo) {
-    if a == null {
-        return
-    }
-    return a[name]
+	a AttributeGroupedByName,
+	name string) -> (attrs []AttributeInfo) {
+	if a == null {
+		return
+	}
+	return a[name]
 }

@@ -43,7 +43,7 @@ class ExpressionParser extends ParserFather {
 				break
 			}
 			//==
-			commnaPos := this.parser.mkPos()
+			commaPos := this.parser.mkPos()
 			this.next(lfIsToken)
 			// skip = :=
 			if this.parser.token.Type == lex.TokenLf {
@@ -63,7 +63,7 @@ class ExpressionParser extends ParserFather {
 			for _ , v := range endTokens {
 				if v == this.parser.token.Type {
 					// found end token
-					this.parser.errs.append(new error(sprintf("%s extra comma" , this.parser.errMsgPrefix(commnaPos))))
+					this.parser.errs.append(new error(sprintf("%s extra comma" , this.parser.errMsgPrefix(commaPos))))
 					goto end
 				}
 			}

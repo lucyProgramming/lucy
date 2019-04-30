@@ -280,7 +280,7 @@ public class Loader implements ast.ImportLoader {
 			if t := v.getAttributeByName(cg.AttributeNameMethodParameters) ; t != null && len(t) > 0 {
 				parseMethodParameter(c , t[0].info , m.Function)
 			}
-			if (v.accessFlags & cg.AccMethodVarargs) != 0 {
+			if (v.accessFlags & cg.AccMethodVarArgs) != 0 {
 				m.Function.Type.vArgs = m.Function.Type.parameterList[len(m.Function.Type.parameterList) - 1]
 				if m.Function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
 					panic("variable args is not array")
@@ -354,7 +354,7 @@ public class Loader implements ast.ImportLoader {
 				if err != null {
 					panic(err)
 				}
-				if f.Type.Type == ast.VariableTypeFunction && d.methodAccessFlag & cg.AccMethodVarargs != 0 {
+				if f.Type.Type == ast.VariableTypeFunction && d.methodAccessFlag & cg.AccMethodVarArgs != 0 {
 					if f.Type.theFunctionType.parameterList[len(f.Type.theFunctionType.parameterList) - 1].Type.Type !=
 						ast.VariableTypeJavaArray {
 						panic("not a java array")
@@ -400,7 +400,7 @@ public class Loader implements ast.ImportLoader {
 				parseReturnListNames(c , t[0].info , m.Function)
 			}
 			loadEnumForFunction(this , m.Function)
-			if (v.accessFlags & cg.AccMethodVarargs) != 0 {
+			if (v.accessFlags & cg.AccMethodVarArgs) != 0 {
 				m.Function.Type.vArgs = m.Function.Type.parameterList[len(m.Function.Type.parameterList) - 1]
 				if m.Function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
 					panic("variable args is not array")
@@ -507,7 +507,7 @@ public class Loader implements ast.ImportLoader {
 					if err != null {
 						panic(err)
 					}
-					if vd.Type.Type == ast.VariableTypeFunction && d.methodAccessFlag & cg.AccMethodVarargs != 0 {
+					if vd.Type.Type == ast.VariableTypeFunction && d.methodAccessFlag & cg.AccMethodVarArgs != 0 {
 						if vd.Type.theFunctionType.parameterList[len(vd.Type.theFunctionType.parameterList) - 1].Type.Type !=
 							ast.VariableTypeJavaArray {
 							panic("not a java array")
@@ -561,7 +561,7 @@ public class Loader implements ast.ImportLoader {
 				dp.fromBytes(t[0].info)
 				jvm.DefaultValueParse.decode(c , function , dp)
 			}
-			if (function.accessFlags & cg.AccMethodVarargs) != 0 {
+			if (function.accessFlags & cg.AccMethodVarArgs) != 0 {
 				function.Type.vArgs = function.Type.parameterList[len(function.Type.parameterList) - 1]
 				if function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
 					panic("variable args is not array")
@@ -709,7 +709,7 @@ public class Loader implements ast.ImportLoader {
 				dp.fromBytes(t[0].info)
 				jvm.DefaultValueParse.decode(c , function , dp)
 			}
-			if (function.accessFlags & cg.AccMethodVarargs) != 0 {
+			if (function.accessFlags & cg.AccMethodVarArgs) != 0 {
 				function.Type.vArgs = function.Type.parameterList[len(function.Type.parameterList) - 1]
 				if function.Type.vArgs.Type.Type != ast.VariableTypeJavaArray {
 					panic("variable args is not array")

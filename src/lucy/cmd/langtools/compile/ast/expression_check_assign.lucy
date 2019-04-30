@@ -37,13 +37,13 @@ class ExpressionCheckAssign {
 			} else {
 				pos = e.pos
 			}
-			errs.append(new error(sprintf("%s cannot assign %d value to %d detinations",
+			errs.append(new error(sprintf("%s cannot assign %d value to %d destinations",
 						pos.errMsgPrefix(),
 						len(valueTypes),
 						len(lefts))))
 		} else if len(lefts) < len(valueTypes) {
 			pos := getExtraExpressionPos(values , len(lefts))
-			errs.append(new error(sprintf("%s cannot assign %d value to %d detinations",
+			errs.append(new error(sprintf("%s cannot assign %d value to %d destinations",
 						pos.errMsgPrefix(),
 						len(valueTypes),
 						len(lefts))))

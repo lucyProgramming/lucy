@@ -26,9 +26,7 @@ class BuildExpressionNew {
 				return this.buildNewMap(c , code , e , context)
 		}
 		stackLength := len(state.stacks)
-		defer {
-			state.popStack(len(state.stacks) - stackLength)
-		}
+		defer state.popStack(len(state.stacks) - stackLength)
 		
 		//new object
 		n := e.data.(ast.ExpressionNew)

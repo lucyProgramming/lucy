@@ -1,6 +1,6 @@
 // all rights reserved , check the LICENSE file
 
-class ExprssionCheckArray {
+class ExpressionCheckArray {
 	/*
 		in array type must equal
 	*/

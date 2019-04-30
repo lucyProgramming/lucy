@@ -147,9 +147,9 @@ public class RunLucyPackage {
         for _ , v := range fis {
             if v.getName().endsWith(".lucy") {
                 t := new LucyFile()
-                t.realpathName = v.getAbsolutePath()
+                t.realPathName = v.getAbsolutePath()
                 t.name = v.getName()
-                tt , e := os.readFile(t.realpathName)
+                tt , e := os.readFile(t.realPathName)
                 if e != null {
                     panic(e)
                 }
@@ -186,7 +186,7 @@ public class RunLucyPackage {
             if v := compiledFrom[v.name] ; v == null {
                 return
             }
-            if (new io.File(v.realpathName).lastModified() / 1000L) > (compiledFrom[v.name].lastModify) {
+            if (new io.File(v.realPathName).lastModified() / 1000L) > (compiledFrom[v.name].lastModify) {
                 return
             }
         }
@@ -211,7 +211,7 @@ public class RunLucyPackage {
     fn parseImports(files []LucyFile) -> (imports []string = []string{}) {
         importNodes := []ast.TopNode{}
         for _ , v := range files {
-            parser.parse(importNodes , v.realpathName , v.bs , true , 10 , -1 , -1 , -1 , -1)
+            parser.parse(importNodes , v.realPathName , v.bs , true , 10 , -1 , -1 , -1 , -1)
         }
 
         m := new map{string -> bool}()
@@ -245,11 +245,11 @@ public class RunLucyPackage {
                     if f.isFile() == false || f.getName().endsWith(".jar") == false {
                         continue
                     }
-                    zipfile := new zip.ZipFile(v + "/" + f.getName())
+                    zipFile := new zip.ZipFile(v + "/" + f.getName())
                     defer {
-                        zipfile.close()
+                        zipFile.close()
                     }
-                    entries := zipfile.entries()
+                    entries := zipFile.entries()
                     for entries.hasMoreElements() {
                         entry := entries.nextElement().(zip.ZipEntry)
                         if entry.getName() == name + "/" && entry.isDirectory() {
@@ -411,7 +411,7 @@ public class RunLucyPackage {
         }
         files := new []string(len(lucyFiles))
         for k , v := range lucyFiles {
-            files[k] = v.realpathName
+            files[k] = v.realPathName
         }
         hasMain , _ , compiledClassFiles := lc.MainFn(
             destinationDir,
@@ -423,13 +423,13 @@ public class RunLucyPackage {
             false,
             packageName,
             true)
-        // make_node_objects maitain.json
+        // make_node_objects maintain.json
         meta = new common.PackageMeta()
         meta.compiledFrom = new common.FileMeta[](len(lucyFiles))
         for k , v := range lucyFiles {
             t := new common.FileMeta()
             t.name = v.name
-            t.lastModify = new io.File(v.realpathName).lastModified() / 1000L
+            t.lastModify = new io.File(v.realPathName).lastModified() / 1000L
             meta.compiledFrom[k] = t
         }
         {
@@ -470,7 +470,7 @@ public class RunLucyPackage {
         needBuild = true
 
         {
-            //verything is done delete old class files
+            //veryThing is done delete old class files
             classFileMap := new map{string -> bool}()
             for v := range meta.classes {
                 classFileMap[v] = true

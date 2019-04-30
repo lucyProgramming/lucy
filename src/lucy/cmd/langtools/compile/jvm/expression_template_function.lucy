@@ -42,7 +42,7 @@ class BuildTemplateFunctionCall {
 			method.accessFlags |= cg.AccMethodStatic
 			method.accessFlags |= cg.AccMethodBridge
 			if call.templateFunctionCallPair.Function.Type.vArgs != null {
-				method.accessFlags |= cg.AccMethodVarargs
+				method.accessFlags |= cg.AccMethodVarArgs
 			}
 			method.descriptor = Descriptor.methodDescriptor(call.templateFunctionCallPair.Function.Type)
 			method.code = new cg.AttributeCode()

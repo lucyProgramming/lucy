@@ -359,7 +359,7 @@ class ExpressionSuffix extends ParserFather {
 				this.parser.unExpectNewLineAndSkip()
 				return this.parseSuffixExpression()
 			default:
-				err = new error(sprintf("%s unkown begining of a expression, token:'%s'",
+				err = new error(sprintf("%s unknown beginning of a expression, token:'%s'",
 						this.parser.errMsgPrefix() , this.parser.token.description))
 				this.parser.errs.append(err)
 				return null , err
@@ -495,7 +495,7 @@ class ExpressionSuffix extends ParserFather {
 					// 	selection.inlineComment = inlineComment 
 					// 	if this.parser.token.Type != lex.TokenIdentifier {
 					// 		this.parser.errs.append(
-					// 			new error(sprintf("%s expect idnetifier , but '%s'",
+					// 			new error(sprintf("%s expect identifier , but '%s'",
 					// 				this.parser.errMsgPrefix(), this.parser.token.description)))
 					// 		constName = compileAutoName()
 					// 	} else {
@@ -649,7 +649,7 @@ class ExpressionSuffix extends ParserFather {
 			}
 			this.parser.ifTokenIsLfThenSkip(true)
 			if this.parser.token.Type != lex.TokenRp {
-				err = new error(sprintf("%s except ')' ,but '%s'",
+				err = new error(sprintf("%s expect ')' ,but '%s'",
 						this.parser.errMsgPrefix(pos),
 						this.parser.token.description))
 				this.parser.errs.append(err)
