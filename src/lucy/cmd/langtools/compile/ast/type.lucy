@@ -52,8 +52,9 @@ public class Type {
 		another.theAlias = this.theAlias
 	}
 
-	public fn isIntegerNotTheLong() -> (is bool){
-		return this.isInteger() && this.Type != VariableTypeLong 
+	public fn isIntegerButNotTheLong() -> (is bool) {
+		return this.isInteger() &&
+				this.Type != VariableTypeLong
 	}
 
 	fn validForTypeAssertOrConversion() -> (valid bool) {
@@ -556,7 +557,6 @@ public class Type {
 			case VariableTypeGlobal:
 				ret = prefix + this.name
 		}
-
 	}
 
 	public fn typeString(prefix string = "") -> (ret string) {

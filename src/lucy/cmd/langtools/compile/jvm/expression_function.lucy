@@ -53,7 +53,7 @@ class BuildExpressionFunction {
 		}
 		// function have captured vars
 		className := this.buildPacakge.newClassName("closureFunction$" + function.name)
-		closureClass := new cg.ClassHighLevel(this.buildExpression.bp.majorVersion , this.buildExpression.bp.minorVersion)
+		closureClass := new cg.ClassHighLevel(this.buildExpression.buildPackage.majorVersion , this.buildExpression.buildPackage.minorVersion)
 		closureClass.name = className
 		closureClass.superClass = ast.LucyRootClass
 		closureClass.accessFlags = 0

@@ -2,7 +2,7 @@
 
 import "java/lang/Object"
 
-public class Expression implements TopNodeInterface {
+public class Expression implements TopNodeInterface , ExpressionNodeInterface  {
     public Type ExpressionTypeKind
     /*
 		only for global variable definition

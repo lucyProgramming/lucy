@@ -2,7 +2,7 @@
 
 import "lucy/jvm/cg"
 
-public class Constant implements TopNodeInterface {
+public class Constant implements TopNodeInterface , ExpressionNodeInterface {
 	public isGlobal               bool
 	public isBuildIn              bool
 	public used                   int

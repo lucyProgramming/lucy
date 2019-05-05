@@ -59,7 +59,7 @@ class FunctionParser extends ParserFather {
 		}
 		f.block = new ast.Block()
 		f.block.isFunctionBlock = true
-		f.block.Fn = f
+		f.block.function = f
 		f.block.pos = this.parser.mkPos()
 		this.next(lfNotToken) // skip {
 		this.parser.BlockParser.parseStatementList(f.block , false)

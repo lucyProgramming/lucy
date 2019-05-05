@@ -2,16 +2,22 @@
 
 public class TopNode {
 	public node TopNodeInterface
-
+	
 	public fn TopNode(n TopNodeInterface) {
 		this.super()
 		this.node = n
 	}
 }
 
-// this empty interface indicate TopNode 
-// the class can be use as TopNodeInterface will implements this interface
+// this empty interface indicate a TopNode 
+// the class can be use as TopNode will implements this interface
 // so the type checker can check TopNode must be subclass in lucy "assertion expression" or "when type statement"
 // this is more safe
 public interface TopNodeInterface{}
 
+
+// this empty interface indicate an ExpressionNode 
+// the class can be use as ExpressionNode will implements this interface
+// so the type checker can check ExpressionNode must be subclass in lucy "assertion expression" or "when type statement"
+// this is more safe
+public interface ExpressionNodeInterface{}

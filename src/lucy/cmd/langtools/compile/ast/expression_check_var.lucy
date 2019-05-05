@@ -16,9 +16,7 @@ class ExpressionCheckVar {
 				for _ , v := range ev.variables {
 					v.Type = ev.Type.cloneType()
 				}
-
 			}
-
 		}
 		if ev.Type == null && len(ev.initValues) == 0 {
 			// looks impossible
@@ -34,9 +32,7 @@ class ExpressionCheckVar {
 				for k , _ := range needs {
 					needs[k] = ev.Type
 				}
-
 				convertExpressionsToNeeds(block , ev.initValues , needs , valueTypes)
-
 			}
 			if len(ev.variables) > len(valueTypes) {
 				pos := ev.initValues[len(ev.initValues) - 1].pos // last Pos
@@ -60,13 +56,11 @@ class ExpressionCheckVar {
 									valueTypes[k].typeString(),
 									v.Type.typeString()))
 							errs.append(err)
-							continue
 						}
 					} else {
 						v.Type = valueTypes[k].cloneType()
 						v.Type.pos = v.pos
 					}
-
 				}
 				if v.Type == null {
 					continue
@@ -81,7 +75,6 @@ class ExpressionCheckVar {
 					}
 					err = block.insert(v.name , v.pos , v)
 				}
-
 				if err != null {
 					errs.append(err)
 					continue

@@ -131,7 +131,7 @@ public class Class implements TopNodeInterface {
 		m.Function.pos = this.pos
 		m.Function.block = new Block()
 		m.Function.block.isFunctionBlock = true
-		m.Function.block.Fn = m.Function
+		m.Function.block.function = m.Function
 		m.Function.name = SpecialMethodInit
 		{
 			e := new Expression()
@@ -190,7 +190,7 @@ public class Class implements TopNodeInterface {
 		f.accessFlags |= cg.AccMethodBridge
 		f.name = ClassInitMethod
 		f.block.isFunctionBlock = true
-		f.block.Fn = method.Function
+		f.block.function = method.Function
 		if this.methods == null {
 			this.methods = new map{string -> []ClassMethod}()
 		}

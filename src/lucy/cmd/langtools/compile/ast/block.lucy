@@ -11,7 +11,7 @@ public class Block implements TopNodeInterface {
 	public notExecuteToLastStatement bool
 	public defers                    []StatementDefer
 	public isFunctionBlock           bool                          // function block
-	public Fn                        Function
+	public function                  Function
 	public isClassBlock              bool                          // class block
 	       isPackageBlock            bool
 	       package                   Package                       // when isPackageBlock is true this field should not be null
@@ -210,8 +210,8 @@ public class Block implements TopNodeInterface {
 					return t
 				}
 			}
-			if bb.isFunctionBlock && bb.Fn.parameterTypes != null {
-				if t := bb.Fn.parameterTypes[name] ; t != null {
+			if bb.isFunctionBlock && bb.function.parameterTypes != null {
+				if t := bb.function.parameterTypes[name] ; t != null {
 					return t
 				}
 			}
@@ -236,9 +236,9 @@ public class Block implements TopNodeInterface {
 		if x , _ = this.nameExists(name , from) ; x != null {
 			return x , null
 		}
-		if this.isFunctionBlock && this.Fn != null {
-			if this.Fn.parameterTypes != null {
-				if t := this.Fn.parameterTypes[name] ; t != null {
+		if this.isFunctionBlock && this.function != null {
+			if this.function.parameterTypes != null {
+				if t := this.function.parameterTypes[name] ; t != null {
 					return t , null
 				}
 			}
@@ -278,7 +278,7 @@ public class Block implements TopNodeInterface {
 						this.Class.closure.insertFunction(from , f)
 					}
 					if this.isFunctionBlock {
-						this.Fn.closure.insertFunction(from , f)
+						this.function.closure.insertFunction(from , f)
 					}
 				}
 			}

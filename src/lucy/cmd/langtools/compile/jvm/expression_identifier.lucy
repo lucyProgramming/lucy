@@ -72,7 +72,7 @@ class  BuildExpressionIdentifier {
 		case identifier.variable.isGlobal:
 			code.codes[code.codeLength] = cg.OP_getstatic
 			c.insertFieldRefConst(new cg.ConstantInfoFieldrefHighLevel(
-				this.buildExpression.bp.mainClass.name,
+				this.buildExpression.buildPackage.mainClass.name,
 				identifier.name,
 				Descriptor.typeDescriptor(identifier.variable.Type)
 			), code.codes[code.codeLength+1:code.codeLength+3])

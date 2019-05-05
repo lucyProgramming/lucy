@@ -4,7 +4,7 @@ import "lucy/cmd/langtools/compile/ast"
 import "lucy/jvm/cg"
 
 class BuildExpression {
-	bp                            BuildPackage
+	buildPackage                  BuildPackage
 	buildExpressionArithmetic     BuildExpressionArithmetic
 	buildExpressionArray          BuildExpressionArray
 	buildExpressionAssign         BuildExpressionAssign
@@ -33,15 +33,15 @@ class BuildExpression {
 	buildExpressionVarAssign      BuildExpressionVarAssign
 	buildTemplateFunctionCall     BuildTemplateFunctionCall
 
-	fn BuildExpression(bp BuildPackage) {
+	fn BuildExpression(buildPackage BuildPackage) {
 		this.super()
-		this.bp = bp
+		this.buildPackage = buildPackage
 		this.buildExpressionArithmetic = new BuildExpressionArithmetic(this)
 		this.buildExpressionArray = new BuildExpressionArray(this)
 		this.buildExpressionAssign = new BuildExpressionAssign(this)
 		this.buildExpressionCallArgs = new BuildExpressionCallArgs(this)
 		this.buildExpressionConversion = new BuildExpressionConversion(this)
-		this.buildExpressionFunction = new BuildExpressionFunction(this , bp)
+		this.buildExpressionFunction = new BuildExpressionFunction(this , buildPackage)
 		this.buildExpressionFunctionCall = new BuildExpressionFunctionCall(this)
 		this.buildExpressionIdentifier = new BuildExpressionIdentifier(this)
 		this.buildExpressionIncrement = new BuildExpressionIncrement(this)
@@ -62,7 +62,7 @@ class BuildExpression {
 		this.buildExpressionUnary = new BuildExpressionUnary(this)
 		this.buildExpressionVar = new BuildExpressionVar(this)
 		this.buildExpressionVarAssign = new BuildExpressionVarAssign(this)
-		this.buildTemplateFunctionCall = new BuildTemplateFunctionCall(this , bp)
+		this.buildTemplateFunctionCall = new BuildTemplateFunctionCall(this , buildPackage)
 	}
 
 	fn build(
@@ -261,7 +261,6 @@ class BuildExpression {
 		defer {
 			state.popStack(1)
 		}
-
 		index := int(0)
 		for _ , v := range es {
 			currentStack := char(1)
@@ -289,7 +288,6 @@ class BuildExpression {
 					code.codeLength += 2
 					index++
 				}
-
 				continue
 			}
 			code.codes[code.codeLength] = cg.OP_dup

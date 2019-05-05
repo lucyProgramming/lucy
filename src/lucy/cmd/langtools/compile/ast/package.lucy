@@ -221,7 +221,7 @@ public class Package {
 		for k , b := range bs {
 			b.isFunctionBlock = true
 			f := new Function()
-			b.Fn = f
+			b.function = f
 			f.pos = b.pos
 			f.block = b
 			this.initFunctions[k] = f
