@@ -85,9 +85,12 @@ public class StatementSwitch {
 									errMsgPrefix(e.pos))))
 						continue
 					} else {
-						if e.value.Type == VariableTypePackage &&
+						if e.Type == ExpressionTypeSelection &&
 							(enumPackageName == null || enumPackageName == "") {
-							enumPackageName = e.value.thePackage.name
+							sel := e.data.(ExpressionSelection)
+							if sel.selectionOn.value.Type == VariableTypePackage {
+								enumPackageName = sel.selectionOn.data.(ExpressionIdentifier).name 
+							}
 						}
 						enumName = t.theEnumName.name
 						valueValid = true
