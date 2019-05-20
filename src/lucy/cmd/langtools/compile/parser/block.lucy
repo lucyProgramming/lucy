@@ -114,11 +114,11 @@ class BlockParser extends ParserFather {
                     statement := new ast.Statement()
                     statement.Type = ast.StatementTypeExpression
                     statement.pos = this.parser.mkPos()
-                    statement.Expression = new ast.Expression()
-                    statement.Expression.Type = ast.ExpressionTypeVar
-                    statement.Expression.data = vs
-                    statement.Expression.pos = pos
-                    statement.Expression.op = "var"
+                    statement.expression = new ast.Expression()
+                    statement.expression.Type = ast.ExpressionTypeVar
+                    statement.expression.data = vs
+                    statement.expression.pos = pos
+                    statement.expression.op = "var"
                     block.statements.append(statement)
                     this.parser.validStatementEnding()
                     if this.parser.token.Type == lex.TokenComment {
@@ -144,7 +144,7 @@ class BlockParser extends ParserFather {
                     if null != statementFor {
                         t := new ast.Statement()
                         t.Type = ast.StatementTypeFor
-                        t.StatementFor = statementFor
+                        t.statementFor = statementFor
                         t.pos = pos
                         block.statements.append(t)
                     }
@@ -160,7 +160,7 @@ class BlockParser extends ParserFather {
                     if statement != null {
                         t := new ast.Statement()
                         t.Type = ast.StatementTypeSwitch
-                        t.StatementSwitch = statement
+                        t.statementSwitch = statement
                         t.pos = pos
                         block.statements.append(t)
                     }
@@ -170,7 +170,7 @@ class BlockParser extends ParserFather {
                     if statement != null {
                         t := new ast.Statement()
                         t.Type = ast.StatementTypeWhen
-                        t.StatementWhen = statement
+                        t.statementWhen = statement
                         t.pos = pos
                         block.statements.append(t)
                     }
@@ -193,7 +193,7 @@ class BlockParser extends ParserFather {
                         t.data = cs
                         t.pos = pos
                         t.op = "const"
-                        statement.Expression = t
+                        statement.expression = t
                     }
 
                     block.statements.append(statement)
@@ -218,7 +218,7 @@ class BlockParser extends ParserFather {
                     this.next(lfIsToken) // skip return key workd
                     statement := new ast.Statement()
                     statement.Type = ast.StatementTypeReturn
-                    statement.StatementReturn = st
+                    statement.statementReturn = st
                     statement.pos = st.pos
                     block.statements.append(statement)
                     if this.parser.token.Type == lex.TokenRc {
@@ -269,7 +269,7 @@ class BlockParser extends ParserFather {
 
                             t := new ast.Statement()
                             t.Type = ast.StatementTypeDefer
-                            t.Defer = d
+                            t.statementDefer = d
                             t.pos = pos
                             block.statements.append(t)
                         }
@@ -295,8 +295,8 @@ class BlockParser extends ParserFather {
                     statement.Type = ast.StatementTypeReturn
                     statement.pos = pos
                     statement.Type = ast.StatementTypeReturn
-                    statement.StatementReturn = new ast.StatementReturn()
-                    statement.StatementReturn.pos = pos
+                    statement.statementReturn = new ast.StatementReturn()
+                    statement.statementReturn.pos = pos
                     block.statements.append(statement)
                     if this.parser.token.Type == lex.TokenComment {
                         statement.inlineComment = this.parser.token.stringValue
@@ -312,8 +312,8 @@ class BlockParser extends ParserFather {
                     c := new ast.Statement()
                     c.Type = ast.StatementTypeContinue
                     c.pos = pos
-                    c.StatementContinue = new ast.StatementContinue()
-                    c.StatementContinue.pos = pos
+                    c.statementContinue = new ast.StatementContinue()
+                    c.statementContinue.pos = pos
                     block.statements.append(c)
                     if this.parser.token.Type == lex.TokenComment {
                         c.inlineComment = this.parser.token.stringValue
@@ -329,8 +329,8 @@ class BlockParser extends ParserFather {
                     b := new ast.Statement()
                     b.Type = ast.StatementTypeBreak
                     b.pos = pos
-                    b.StatementBreak = new ast.StatementBreak()
-                    b.StatementBreak.pos = pos
+                    b.statementBreak = new ast.StatementBreak()
+                    b.statementBreak.pos = pos
                     block.statements.append(b)
                     if this.parser.token.Type == lex.TokenComment {
                         b.inlineComment = this.parser.token.stringValue
@@ -358,7 +358,7 @@ class BlockParser extends ParserFather {
                     g := new ast.Statement()
                     g.Type = ast.StatementTypeGoTo
                     g.pos = pos
-                    g.StatementGoTo = statementGoto
+                    g.statementGoTo = statementGoto
                     block.statements.append(g)
                     this.next(lfIsToken)
                     this.parser.validStatementEnding()
@@ -376,7 +376,7 @@ class BlockParser extends ParserFather {
                         statement := new ast.Statement()
                         statement.pos = pos
                         statement.Type = ast.StatementTypeTypeAlias
-                        statement.TypeAlias = alias
+                        statement.typeAlias = alias
                         block.statements.append(statement)
                         this.parser.validStatementEnding()
                         if this.parser.token.Type == lex.TokenComment {
@@ -401,7 +401,7 @@ class BlockParser extends ParserFather {
                             c.finalPos = finalPos
                         }
                         statement.Type = ast.StatementTypeClass
-                        statement.Class = c
+                        statement.theClass = c
                         block.statements.append(statement)
                     }
                     this.parser.ifTokenIsLfThenSkip(false)
@@ -412,7 +412,7 @@ class BlockParser extends ParserFather {
                         s := new ast.Statement()
                         s.pos = pos
                         s.Type = ast.StatementTypeEnum
-                        s.Enum = e
+                        s.theEnum = e
                         block.statements.append(s)
                     }
                     this.parser.ifTokenIsLfThenSkip(false)
@@ -422,7 +422,7 @@ class BlockParser extends ParserFather {
                     for _ , t := range ims {
                         s := new ast.Statement()
                         s.Type = ast.StatementTypeImport
-                        s.Import = t
+                        s.theImport = t
                         s.pos = pos
                         block.statements.append(s)
                     }
@@ -467,7 +467,7 @@ class BlockParser extends ParserFather {
             statement.pos = pos
             statement.Type = ast.StatementTypeLabel
             label := new ast.StatementLabel()
-            statement.StatementLabel = label
+            statement.statementLabel = label
             block.statements.append(statement)
             label.pos = e.pos
             label.codeOffset = -1
@@ -499,7 +499,7 @@ class BlockParser extends ParserFather {
 
                     t := new ast.Statement()
                     t.Type = ast.StatementTypeExpression
-                    t.Expression = e
+                    t.expression = e
                     t.pos = pos
                     d.block.statements = [t]
                 }
@@ -508,7 +508,7 @@ class BlockParser extends ParserFather {
 
                     t := new ast.Statement()
                     t.Type = ast.StatementTypeDefer
-                    t.Defer = d
+                    t.statementDefer = d
                     t.inlineComment = inlineComment
                     block.statements.append(t)
                 }
@@ -516,7 +516,7 @@ class BlockParser extends ParserFather {
             } else {
                 t := new ast.Statement()
                 t.Type = ast.StatementTypeExpression
-                t.Expression = e
+                t.expression = e
                 t.inlineComment = inlineComment
                 t.pos = pos
                 block.statements.append(t)

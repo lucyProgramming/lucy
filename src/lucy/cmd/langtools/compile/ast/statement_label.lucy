@@ -37,7 +37,7 @@ public class StatementLabel {
     fn ready(block Block , from Pos) -> (err error) {
         ss := []Statement{}
         for _ , v := range this.block.statements {
-            if v.StatementLabel == this {
+            if v.statementLabel == this {
                 break
             }
             if v.isVariableDefinition() && v.checked == false {

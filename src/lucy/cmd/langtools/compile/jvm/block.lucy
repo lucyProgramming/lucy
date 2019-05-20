@@ -38,7 +38,7 @@ class BuildBlock {
 		notToHere := false
 		for _ , s := range b.statements {
 			if notToHere == true && s.Type == ast.StatementTypeLabel {
-				notToHere = len(s.StatementLabel.exits) == 0
+				notToHere = len(s.statementLabel.exits) == 0
 				//continue compile block from this label statement
 			}
 			if notToHere {
@@ -81,9 +81,9 @@ class BuildBlock {
 				notToHere = t
 				continue
 			}
-			if s.Type == ast.StatementTypeSwitch && s.StatementSwitch.defaultBlock != null {
-				t := s.StatementSwitch.defaultBlock.notExecuteToLastStatement
-				for _ , v := range s.StatementSwitch.cases {
+			if s.Type == ast.StatementTypeSwitch && s.statementSwitch.defaultBlock != null {
+				t := s.statementSwitch.defaultBlock.notExecuteToLastStatement
+				for _ , v := range s.statementSwitch.cases {
 					if v.block != null {
 						t = t && v.block.notExecuteToLastStatement
 					} else {
@@ -92,7 +92,7 @@ class BuildBlock {
 						break
 					}
 				}
-				t = t && s.StatementSwitch.defaultBlock.notExecuteToLastStatement
+				t = t && s.statementSwitch.defaultBlock.notExecuteToLastStatement
 				notToHere = t
 				continue
 			}
@@ -133,14 +133,14 @@ class BuildBlock {
 				//TODO::build 
 			case ast.StatementTypeWhen:
 				//type on a template name already handled at ast stage
-				s.StatementWhen.exits = []cg.Exit{} //could compile multi times
-				maxStack = this.buildWhen.buildWhenStatement(c , code , s.StatementWhen , context , state)
-				if len(s.StatementWhen.exits) > 0 {
-					writeExits(s.StatementWhen.exits , code.codeLength)
+				s.statementWhen.exits = []cg.Exit{} //could compile multi times
+				maxStack = this.buildWhen.buildWhenStatement(c , code , s.statementWhen , context , state)
+				if len(s.statementWhen.exits) > 0 {
+					writeExits(s.statementWhen.exits , code.codeLength)
 					context.makeStackMapForCode(code , state , code.codeLength)
 				}
 			case ast.StatementTypeExpression:
-				maxStack = this.buildExpression.build(c , code , s.Expression , context , state)
+				maxStack = this.buildExpression.build(c , code , s.expression , context , state)
 			case ast.StatementTypeIf:
 				s.statementIf.exits = []cg.Exit{} //could compile multi times
 				maxStack = this.buildIf.buildIfStatement(c , code , s.statementIf , context , state)
@@ -158,71 +158,71 @@ class BuildBlock {
 					context.makeStackMapForCode(code , state , code.codeLength)
 				}
 			case ast.StatementTypeFor:
-				s.StatementFor.exits = []cg.Exit{} //could compile multi times
-				maxStack = this.buildFor.buildForStatement(c , code , s.StatementFor , context , state)
-				writeExits(s.StatementFor.exits , code.codeLength)
+				s.statementFor.exits = []cg.Exit{} //could compile multi times
+				maxStack = this.buildFor.buildForStatement(c , code , s.statementFor , context , state)
+				writeExits(s.statementFor.exits , code.codeLength)
 				context.makeStackMapForCode(code , state , code.codeLength)
 			case ast.StatementTypeContinue:
-				this.buildDefers(c , code , context , s.StatementContinue.defers , state)
-				jumpTo(code , s.StatementContinue.statementFor.continueCodeOffset)
+				this.buildDefers(c , code , context , s.statementContinue.defers , state)
+				jumpTo(code , s.statementContinue.statementFor.continueCodeOffset)
 			case ast.StatementTypeBreak:
-				this.buildDefers(c , code , context , s.StatementBreak.defers , state)
+				this.buildDefers(c , code , context , s.statementBreak.defers , state)
 				exit := new cg.Exit(cg.OP_goto , code)
-				if s.StatementBreak.statementFor != null {
-					s.StatementBreak.statementFor.exits.append(exit)
-				} else if s.StatementBreak.statementSwitch != null {
-					s.StatementBreak.statementSwitch.exits.append(exit)
+				if s.statementBreak.statementFor != null {
+					s.statementBreak.statementFor.exits.append(exit)
+				} else if s.statementBreak.statementSwitch != null {
+					s.statementBreak.statementSwitch.exits.append(exit)
 				} else {
-					s.StatementBreak.switchTemplateBlock.exits.append(exit)
+					s.statementBreak.switchTemplateBlock.exits.append(exit)
 				}
 			case ast.StatementTypeReturn:
 				maxStack = this.buildReturn.buildReturnStatement(c , code,
-					s.StatementReturn , context , state)
+					s.statementReturn , context , state)
 			case ast.StatementTypeSwitch:
-				s.StatementSwitch.exits = []cg.Exit{} //could compile multi times
-				maxStack = this.buildSwitch.buildSwitchStatement(c , code , s.StatementSwitch , context , state)
-				if len(s.StatementSwitch.exits) > 0 {
+				s.statementSwitch.exits = []cg.Exit{} //could compile multi times
+				maxStack = this.buildSwitch.buildSwitchStatement(c , code , s.statementSwitch , context , state)
+				if len(s.statementSwitch.exits) > 0 {
 					if code.codeLength == context.lastStackMapOffset {
 						code.codes[code.codeLength] = cg.OP_nop
 						code.codeLength++
 					}
-					writeExits(s.StatementSwitch.exits , code.codeLength)
+					writeExits(s.statementSwitch.exits , code.codeLength)
 					context.makeStackMapForCode(code , state , code.codeLength)
 				}
 			case ast.StatementTypeGoTo:
-				this.buildDefers(c , code , context , s.StatementGoTo.defers , state)
-				if s.StatementGoTo.statementLabel.codeOffsetGenerated {
-					jumpTo(code , s.StatementGoTo.statementLabel.codeOffset)
+				this.buildDefers(c , code , context , s.statementGoTo.defers , state)
+				if s.statementGoTo.statementLabel.codeOffsetGenerated {
+					jumpTo(code , s.statementGoTo.statementLabel.codeOffset)
 				} else {
 					exit := new cg.Exit(cg.OP_goto , code)
-					if s.StatementGoTo.statementLabel.exits == null {
-						s.StatementGoTo.statementLabel.exits = [exit]
+					if s.statementGoTo.statementLabel.exits == null {
+						s.statementGoTo.statementLabel.exits = [exit]
 					} else {
-						s.StatementGoTo.statementLabel.exits.append(exit)
+						s.statementGoTo.statementLabel.exits.append(exit)
 					}
 				}
 			case ast.StatementTypeLabel:
-				s.StatementLabel.codeOffsetGenerated = true
-				s.StatementLabel.codeOffset = code.codeLength
-				if len(s.StatementLabel.exits) > 0 {
-					writeExits(s.StatementLabel.exits , code.codeLength) // back patch
+				s.statementLabel.codeOffsetGenerated = true
+				s.statementLabel.codeOffset = code.codeLength
+				if len(s.statementLabel.exits) > 0 {
+					writeExits(s.statementLabel.exits , code.codeLength) // back patch
 				}
 				context.makeStackMapForCode(code , state , code.codeLength)
 			case ast.StatementTypeDefer:
-				s.Defer.startPc = code.codeLength
-				s.Defer.stackMapState = (new StackMapState(state))
+				s.statementDefer.startPc = code.codeLength
+				s.statementDefer.stackMapState = (new StackMapState(state))
 			case ast.StatementTypeClass:
-				oldName := s.Class.name
+				oldName := s.theClass.name
 				var name string
 				if block.inheritedAttribute.classAndFunctionNames == null ||
 					block.inheritedAttribute.classAndFunctionNames == "" {
-					name = s.Class.name
+					name = s.theClass.name
 				} else {
-					name = block.inheritedAttribute.classAndFunctionNames + "$" + s.Class.name
+					name = block.inheritedAttribute.classAndFunctionNames + "$" + s.theClass.name
 				}
-				s.Class.name = this.buildPackage.newClassName(name)
+				s.theClass.name = this.buildPackage.newClassName(name)
 				innerClass := new cg.InnerClass()
-				innerClass.innerClass = s.Class.name
+				innerClass.innerClass = s.theClass.name
 				innerClass.outerClass = c.name
 				innerClass.name = oldName
 				if c.theClass.attributeInnerClasses == null {
@@ -232,7 +232,7 @@ class BuildBlock {
 					c.theClass.attributeInnerClasses.classes = []cg.InnerClass{}
 				}
 				c.theClass.attributeInnerClasses.classes.append(innerClass)
-				t := this.buildPackage.buildClass(s.Class)
+				t := this.buildPackage.buildClass(s.theClass)
 				this.buildPackage.putClass(t)
 				if t.theClass.attributeInnerClasses == null {
 					t.theClass.attributeInnerClasses = new cg.AttributeInnerClasses()

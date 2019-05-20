@@ -12,7 +12,7 @@ public class StatementGoTo {
 
     fn checkStatementGoTo(block Block) -> (err error) {
         if this.autoCompletion {
-            block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = searchLableForAutoCompletionItems(block)
+            block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = searchLabelForAutoCompletionItems(block)
             return
         }
         label := block.searchLabel(this.labelName , this.pos)

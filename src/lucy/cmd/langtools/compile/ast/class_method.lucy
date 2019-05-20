@@ -148,11 +148,11 @@ public class ClassMethod {
 		if s.Type != StatementTypeExpression {
 			return false
 		}
-		e := s.Expression
+		e := s.expression
 		if e.Type != ExpressionTypeMethodCall {
 			return false
 		}
-		call := s.Expression.data.(ExpressionMethodCall)
+		call := s.expression.data.(ExpressionMethodCall)
 		if call.methodCallOn.isIdentifier(ThisPointerName) == false ||
 			call.name != Super {
 			return false

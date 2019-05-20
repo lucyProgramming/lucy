@@ -490,9 +490,9 @@ public class Fmt {
 					format += indent
 				}
 				if s.inlineComment == null {
-					format += this.formatExpression(indent , s.Expression) + "\n"
+					format += this.formatExpression(indent , s.expression) + "\n"
 				} else {
-					format += this.formatExpression(indent , s.Expression) + " //" + s.inlineComment
+					format += this.formatExpression(indent , s.expression) + " //" + s.inlineComment
 				}
 			case ast.StatementTypeIf:
 				format += this.formatIf(indent , s.statementIf)
@@ -501,7 +501,7 @@ public class Fmt {
 				format += this.formatBlock(indent + this.indentIncremental , s.block)
 				format += indent + "}\n"
 			case ast.StatementTypeFor:
-				format += this.formatFor(indent , s.StatementFor)
+				format += this.formatFor(indent , s.statementFor)
 			case ast.StatementTypeContinue:
 				if s.inlineComment == null {
 					format += indent + "continue" + "\n"
@@ -509,7 +509,7 @@ public class Fmt {
 					format += indent + "continue " + " //" + s.inlineComment
 				}
 			case ast.StatementTypeReturn:
-				format += this.formatReturn(indent , s.StatementReturn , s.inlineComment)
+				format += this.formatReturn(indent , s.statementReturn , s.inlineComment)
 			case ast.StatementTypeBreak:
 				if s.inlineComment == null {
 					format += indent + "break" + "\n"
@@ -517,25 +517,25 @@ public class Fmt {
 					format += indent + "break" + " //" + s.inlineComment
 				}
 			case ast.StatementTypeSwitch:
-				format += this.formatSwitch(indent , s.StatementSwitch)
+				format += this.formatSwitch(indent , s.statementSwitch)
 			case ast.StatementTypeWhen:
-				format += this.formatWhen(indent , s.StatementWhen)
+				format += this.formatWhen(indent , s.statementWhen)
 			case ast.StatementTypeLabel:
-				format += indent[:len(indent) - len(this.indentIncremental)] + s.StatementLabel.name + ":\n"
+				format += indent[:len(indent) - len(this.indentIncremental)] + s.statementLabel.name + ":\n"
 			case ast.StatementTypeGoTo:
-				format += this.formatGoto(indent , s.StatementGoTo , s.inlineComment)
+				format += this.formatGoto(indent , s.statementGoTo , s.inlineComment)
 			case ast.StatementTypeDefer:
-				format += this.formatDefer(indent , s.Defer)
+				format += this.formatDefer(indent , s.statementDefer)
 			case ast.StatementTypeClass:
-				format += this.formatClass(indent , s.Class)
+				format += this.formatClass(indent , s.theClass)
 			case ast.StatementTypeEnum:
-				format += this.formatEnum(indent , s.Enum)
+				format += this.formatEnum(indent , s.theEnum)
 			case ast.StatementTypeNop:
 				//nothing
 			case ast.StatementTypeImport:
-				format += this.formatImport(indent , s.Import) + "\n"
+				format += this.formatImport(indent , s.theImport) + "\n"
 			case ast.StatementTypeTypeAlias:
-				format += this.formatTypeAlias(indent , s.TypeAlias)
+				format += this.formatTypeAlias(indent , s.typeAlias)
 			case ast.StatementTypeEmptyLine:
 				format += "\n"
 			case ast.StatementTypeComment:

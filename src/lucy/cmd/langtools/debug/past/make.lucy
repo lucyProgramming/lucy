@@ -366,26 +366,26 @@ public class MakeNodesObjects {
 	fn makeStatement(s ast.Statement) -> (x Object) {
 		switch s.Type {
 			case ast.StatementTypeExpression:
-				return {sprintf("statementExpression@%d" , s.pos.endLine) -> this.makeExpression(s.Expression)}
+				return {sprintf("statementExpression@%d" , s.pos.endLine) -> this.makeExpression(s.expression)}
 			case ast.StatementTypeIf:
 				return this.makeStatementIf(s.statementIf)
 			case ast.StatementTypeBlock:
 				return {"block" -> this.makeBlock(s.block)}
 			case ast.StatementTypeFor:
-				return this.makeStatementFor(s.StatementFor)
+				return this.makeStatementFor(s.statementFor)
 			case ast.StatementTypeContinue:
 				return sprintf("continue@%d" , s.pos.endLine)
 			case ast.StatementTypeReturn:
-				if len(s.StatementReturn.expressions) == 0 {
+				if len(s.statementReturn.expressions) == 0 {
 					return sprintf("return@%d" , s.pos.endLine)
 				} else {
 					key := sprintf("return@%d" , s.pos.endLine)
 					ret := new map{string -> Object}()
-					if len(s.StatementReturn.expressions) == 1 {
-						ret[key] = this.makeExpression(s.StatementReturn.expressions[0])
+					if len(s.statementReturn.expressions) == 1 {
+						ret[key] = this.makeExpression(s.statementReturn.expressions[0])
 					} else {
-						var t Object[] = new Object[](len(s.StatementReturn.expressions))
-						for k , v := range s.StatementReturn.expressions {
+						var t Object[] = new Object[](len(s.statementReturn.expressions))
+						for k , v := range s.statementReturn.expressions {
 							t[k] = this.makeExpression(v)
 						}
 
@@ -398,25 +398,25 @@ public class MakeNodesObjects {
 			case ast.StatementTypeBreak:
 				return sprintf("break@%d" , s.pos.endLine)
 			case ast.StatementTypeSwitch:
-				return this.makeStatementSwitch(s.StatementSwitch)
+				return this.makeStatementSwitch(s.statementSwitch)
 			case ast.StatementTypeWhen:
-				return this.makeStatementWhen(s.StatementWhen)
+				return this.makeStatementWhen(s.statementWhen)
 			case ast.StatementTypeLabel:
-				return this.makeStatementLabel(s.StatementLabel)
+				return this.makeStatementLabel(s.statementLabel)
 			case ast.StatementTypeGoTo:
-				return this.makeStatementGoto(s.StatementGoTo)
+				return this.makeStatementGoto(s.statementGoTo)
 			case ast.StatementTypeDefer:
-				return this.makeStatementDefer(s.Defer)
+				return this.makeStatementDefer(s.statementDefer)
 			case ast.StatementTypeClass:
-				return this.makeClass(s.Class)
+				return this.makeClass(s.theClass)
 			case ast.StatementTypeEnum:
-				return this.makeEnum(s.Enum)
+				return this.makeEnum(s.theEnum)
 			case ast.StatementTypeNop:
 				return sprintf("nop")
 			case ast.StatementTypeImport:
-				return this.makeImport(s.Import)
+				return this.makeImport(s.theImport)
 			case ast.StatementTypeTypeAlias:
-				return this.makeTypeAlias(s.TypeAlias)
+				return this.makeTypeAlias(s.typeAlias)
 			default:
 		}
 

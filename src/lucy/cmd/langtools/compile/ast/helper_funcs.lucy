@@ -354,7 +354,7 @@ fn searchRightValueForAutoCompletionItems(pos Pos , block Block) -> (items []Aut
 	items.appendAll(AutoCompletionItem.getBuildFunctionAutoCompletionItems())
 }
 
-fn searchLableForAutoCompletionItems(block Block) -> (items []AutoCompletionItem = []AutoCompletionItem{}) {
+fn searchLabelForAutoCompletionItems(block Block) -> (items []AutoCompletionItem = []AutoCompletionItem{}) {
 	names := new map{string -> bool}()
 	isFunctionBlock := false
 	block.walk(fn (b Block) {

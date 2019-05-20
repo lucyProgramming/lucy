@@ -337,7 +337,7 @@ public class Package {
 			for k , v := range expressions {
 				s[k] = new Statement()
 				s[k].Type = StatementTypeExpression
-				s[k].Expression = v
+				s[k].expression = v
 				s[k].pos = v.pos
 			}
 
