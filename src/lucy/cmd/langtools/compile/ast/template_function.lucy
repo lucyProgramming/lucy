@@ -3,49 +3,47 @@
 import "lucy/jvm/cg"
 
 public class TemplateFunctionInstance {
-           parameterTypes []Type            
-    public entrance       cg.MethodHighLevel
-    public Function       Function          
+	       parameterTypes []Type
+	public entrance       cg.MethodHighLevel
+	public function       Function
 }
-
 
 public class TemplateFunction {
-    instances []TemplateFunctionInstance
-    public Class     cg.ClassHighLevel     
-        
-    fn instanceExists(parameterTypes []Type) -> (instance TemplateFunctionInstance) {
-        fn equal(instance TemplateFunctionInstance) -> (isEqual bool) {
-            if len(instance.parameterTypes) != len(parameterTypes) {
-                return
-            }
-            for k , tType := range parameterTypes {
-                if tType.equal(instance.parameterTypes[k]) == false {
-                    //not equal
-                    return
-                }
-            }
-            isEqual = true
-        }
-        for _ , v := range this.instances {
-            if equal(v) {
-                return v
-            }
-        }
-        return null
-    }
-    fn insert(parameterTypes []Type) -> (template TemplateFunctionInstance) {
-        if template = this.instanceExists(parameterTypes) ; template != null {
-            return
-        }
-        template = new TemplateFunctionInstance()
-        template.parameterTypes = parameterTypes
-        if this.instances == null {
-            this.instances = [template]
-        } else {
-            this.instances.append(template)
-        }
-        return template
-    }
-}
+	       instances []TemplateFunctionInstance
+	public Class     cg.ClassHighLevel
 
+	fn instanceExists(parameterTypes []Type) -> (instance TemplateFunctionInstance) {
+		fn equal(instance TemplateFunctionInstance) -> (isEqual bool) {
+			if len(instance.parameterTypes) != len(parameterTypes) {
+				return
+			}
+			for k , tType := range parameterTypes {
+				if tType.equal(instance.parameterTypes[k]) == false {
+					//not equal
+					return
+				}
+			}
+			isEqual = true
+		}
+		for _ , v := range this.instances {
+			if equal(v) {
+				return v
+			}
+		}
+		return null
+	}
+	fn insert(parameterTypes []Type) -> (template TemplateFunctionInstance) {
+		if template = this.instanceExists(parameterTypes) ; template != null {
+			return
+		}
+		template = new TemplateFunctionInstance()
+		template.parameterTypes = parameterTypes
+		if this.instances == null {
+			this.instances = [template]
+		} else {
+			this.instances.append(template)
+		}
+		return template
+	}
+}
 

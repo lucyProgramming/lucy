@@ -1,574 +1,576 @@
 // all rights reserved , check the LICENSE file
 
 class ExpressionCheckSelection {
-    static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
-        selection := e.data.(ExpressionSelection)
-        object , es := selection.selectionOn.checkSingleValueContextExpression(block)
-        errs.appendAll(es)
-        if object == null {
-            return
-        }
-        if selection.autoCompletion {
-            ExpressionCheckSelection.autoCompletion(object , block , selection.selectionOn.isIdentifier(ThisPointerName))
-            return
-        }
-        switch object.Type {
-            case VariableTypeDynamicSelector:
-                if selection.name == Super {
-                    errs.append(new error(sprintf("%s access '%s' at '%s' not allow",
-                                e.pos.errMsgPrefix() , Super , object.typeString())))
-                    return
-                }
-                access , err := object.theClass.getFieldOrMethod(block , e.pos , selection.name , new map{string -> bool}() , false , object.theClass.name)
-                if err != null {
-                    errs.append(err)
-                    return
-                }
-                if field , ok := access.(ClassField) ; ok {
-                    selection.field = field
-                    result := field.Type.cloneType()
-                    result.pos = e.pos
-                    if selection.locateDefinition {
-                        block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(field)
-                        return
-                    }
-                    return result
-                } else {
-                    method := access.(ClassMethod)
-                    selection.method = method
-                    result := new Type()
-                    result.Type = VariableTypeFunction
-                    result.theFunctionType = method.Function.Type
-                    result.pos = e.pos
-                    if selection.locateDefinition {
-                        block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(method)
-                        return
-                    }
-                    return result
-                }
-            case VariableTypePackage:
-                d , ok := object.thePackage.block.nameExists(selection.name , e.pos)
-                if selection.locateDefinition {
-                    block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(d)
-                    return
-                }
-                if ok == false {
-                    err := new error(sprintf("%s '%s' not found",
-                            e.pos.errMsgPrefix() , selection.name))
-                    errs.append(err)
-                    return null
-                }
-                if v , ok := d.(Variable) ; ok {
-                    result := v.Type.cloneType()
-                    result.pos = e.pos
-                    if v.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
-                        err := new error(sprintf("%s variable '%s' is not public",
-                                e.pos.errMsgPrefix() , selection.name))
-                        errs.append(err)
-                    }
-                    selection.packageVariable = v
-                    return result
-                }
-                if c , ok := d.(Constant) ; ok {
-                    e.fromConst(c) //
-                    result := c.Type.cloneType()
-                    result.pos = e.pos
-                    if c.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
-                        err := new error(sprintf("%s const '%s' is not public",
-                                e.pos.errMsgPrefix() , selection.name))
-                        errs.append(err)
-                    }
-                    return result
-                }
-                if c , ok := d.(Class) ; ok {
-                    result := new Type()
-                    result.pos = e.pos
-                    result.Type = VariableTypeClass
-                    result.theClass = c
-                    if c.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
-                        err := new error(sprintf("%s class '%s' is not public",
-                                e.pos.errMsgPrefix() , selection.name))
-                        errs.append(err)
-                    }
-                    return result
-                }
-                if n , ok := d.(EnumName) ; ok {
-                    if n.Enum.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
-                        err := new error(sprintf("%s enum '%s' is not public",
-                                e.pos.errMsgPrefix() , selection.name))
-                        errs.append(err)
-                    }
-                    result := new Type()
-                    result.pos = e.pos
-                    result.theEnum = n.Enum
-                    result.theEnumName = n
-                    result.Type = VariableTypeEnum
-                    selection.packageEnumName = n
-                    return result
-                }
-                if f , ok := d.(Function) ; ok {
-                    if f.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
-                        err := new error(sprintf("%s function '%s' is not public",
-                                e.pos.errMsgPrefix() , selection.name))
-                        errs.append(err)
-                    }
-                    if f.templateFunction != null {
-                        err := new error(sprintf("%s function '%s' is a template function",
-                                e.pos.errMsgPrefix() , selection.name))
-                        errs.append(err)
-                        return null
-                    }
-                    if selection.name == MainFunctionName {
-                        err := new error(sprintf("%s function '%s' is a a special entrance",
-                                e.pos.errMsgPrefix() , selection.name))
-                        errs.append(err)
-                    }
-                    result := new Type()
-                    result.pos = e.pos
-                    result.Type = VariableTypeFunction
-                    result.theFunctionType = f.Type
-                    selection.packageFunction = f
-                    return result
-                }
-                err := new error(sprintf("%s name '%s' cannot be used as right value",
-                        e.pos.errMsgPrefix() , selection.name))
-                errs.append(err)
-                return null
-            case VariableTypeObject,
-                VariableTypeClass:
-                if selection.name == Super {
-                    if object.Type == VariableTypeClass {
-                        errs.append(new error(sprintf("%s cannot access class`s super",
-                                    object.pos.errMsgPrefix())))
-                        return object
-                    }
-                    if object.theClass.name == JavaRootClass {
-                        errs.append(new error(sprintf("%s '%s' is root class",
-                                    object.pos.errMsgPrefix() , JavaRootClass)))
-                        return object
-                    }
-                    err := object.theClass.loadSuperClass(block , e.pos)
-                    if err != null {
-                        errs.append(err)
-                        return object
-                    }
-                    if object.theClass.superClass == null {
-                        return object
-                    }
-                    result := object.cloneType()
-                    result.pos = e.pos
-                    result.theClass = result.theClass.superClass
-                    return result
-                }
-                fieldOrMethod , err := object.theClass.getFieldOrMethod(block , e.pos , selection.name , new map{string -> bool}() , false , object.theClass.name)
-                if err != null {
-                    errs.append(err)
-                    return null
-                }
-                if field , ok := fieldOrMethod.(ClassField) ; ok {
-                    err := selection.selectionOn.fieldAccessAble(block , field)
-                    if err != null {
-                        errs.append(err)
-                    }
-                    if selection.locateDefinition {
-                        if object.theClass.loadFromOutSide == false {
-                            block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(field)
-                            return
-                        } else {
-                            //TODO :: locateDefinition
-                        }
-                    }
-                    result := field.Type.cloneType()
-                    result.pos = e.pos
-                    selection.field = field
-                    return result
-                } else {
-                    method := fieldOrMethod.(ClassMethod)
-                    err := selection.selectionOn.methodAccessAble(block , method)
-                    if err != null {
-                        errs.append(err)
-                    }
-                    if selection.locateDefinition {
-                        if object.theClass.loadFromOutSide == false {
-                            block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(field)
-                            return
-                        }
-                    }
-                    selection.method = method
-                    result := new Type()
-                    result.Type = VariableTypeFunction
-                    result.theFunctionType = method.Function.Type
-                    result.pos = e.pos
-                    return result
-                }
+	static fn check(e Expression , block Block , errs []error) -> (valueType Type) {
+		selection := e.data.(ExpressionSelection)
+		object , es := selection.selectionOn.checkSingleValueContextExpression(block)
+		errs.appendAll(es)
+		if object == null {
+			return
+		}
+		if selection.autoCompletion {
+			ExpressionCheckSelection.autoCompletion(object , block , selection.selectionOn.isIdentifier(ThisPointerName))
+			return
+		}
+		switch object.Type {
+			case VariableTypeDynamicSelector:
+				if selection.name == Super {
+					errs.append(new error(sprintf("%s access '%s' at '%s' not allow",
+								e.pos.errMsgPrefix() , Super , object.typeString())))
+					return
+				}
+				access , err := object.theClass.getFieldOrMethod(block , e.pos , selection.name , new map{string -> bool}() , false , object.theClass.name)
+				if err != null {
+					errs.append(err)
+					return
+				}
+				if field , ok := access.(ClassField) ; ok {
+					selection.field = field
+					result := field.Type.cloneType()
+					result.pos = e.pos
+					if selection.locateDefinition {
+						block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(field)
+						return
+					}
+					return result
+				} else {
+					method := access.(ClassMethod)
+					selection.method = method
+					result := new Type()
+					result.Type = VariableTypeFunction
+					result.theFunctionType = method.Function.Type
+					result.pos = e.pos
+					if selection.locateDefinition {
+						block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(method)
+						return
+					}
+					return result
+				}
+			case VariableTypePackage:
+				d , ok := object.thePackage.block.nameExists(selection.name , e.pos)
+				if selection.locateDefinition {
+					block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(d)
+					return
+				}
+				if ok == false {
+					err := new error(sprintf("%s '%s' not found",
+							e.pos.errMsgPrefix() , selection.name))
+					errs.append(err)
+					return null
+				}
+				if v , ok := d.(Variable) ; ok {
+					result := v.Type.cloneType()
+					result.pos = e.pos
+					if v.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
+						err := new error(sprintf("%s variable '%s' is not public",
+								e.pos.errMsgPrefix() , selection.name))
+						errs.append(err)
+					}
+					selection.packageVariable = v
+					return result
+				}
+				if c , ok := d.(Constant) ; ok {
+					e.fromConst(c) //
+					result := c.Type.cloneType()
+					result.pos = e.pos
+					if c.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
+						err := new error(sprintf("%s const '%s' is not public",
+								e.pos.errMsgPrefix() , selection.name))
+						errs.append(err)
+					}
+					return result
+				}
+				if c , ok := d.(Class) ; ok {
+					result := new Type()
+					result.pos = e.pos
+					result.Type = VariableTypeClass
+					result.theClass = c
+					if c.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
+						err := new error(sprintf("%s class '%s' is not public",
+								e.pos.errMsgPrefix() , selection.name))
+						errs.append(err)
+					}
+					return result
+				}
+				if n , ok := d.(EnumName) ; ok {
+					if n.Enum.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
+						err := new error(sprintf("%s enum '%s' is not public",
+								e.pos.errMsgPrefix() , selection.name))
+						errs.append(err)
+					}
+					result := new Type()
+					result.pos = e.pos
+					result.theEnum = n.Enum
+					result.theEnumName = n
+					result.Type = VariableTypeEnum
+					selection.packageEnumName = n
+					return result
+				}
+				if f , ok := d.(Function) ; ok {
+					if f.isPublic() == false && object.thePackage.isSame(block.inheritedAttribute.thePackageBeenCompiling) == false {
+						err := new error(sprintf("%s function '%s' is not public",
+								e.pos.errMsgPrefix() , selection.name))
+						errs.append(err)
+					}
+					if f.templateFunction != null {
+						err := new error(sprintf("%s function '%s' is a template function",
+								e.pos.errMsgPrefix() , selection.name))
+						errs.append(err)
+						return null
+					}
+					if selection.name == MainFunctionName {
+						err := new error(sprintf("%s function '%s' is a a special entrance",
+								e.pos.errMsgPrefix() , selection.name))
+						errs.append(err)
+					}
+					result := new Type()
+					result.pos = e.pos
+					result.Type = VariableTypeFunction
+					result.theFunctionType = f.Type
+					selection.packageFunction = f
+					return result
+				}
+				err := new error(sprintf("%s name '%s' cannot be used as right value",
+						e.pos.errMsgPrefix() , selection.name))
+				errs.append(err)
+				return null
+			case VariableTypeObject,
+				VariableTypeClass:
+				if selection.name == Super {
+					if object.Type == VariableTypeClass {
+						errs.append(new error(sprintf("%s cannot access class`s super",
+									object.pos.errMsgPrefix())))
+						return object
+					}
+					if object.theClass.name == JavaRootClass {
+						errs.append(new error(sprintf("%s '%s' is root class",
+									object.pos.errMsgPrefix() , JavaRootClass)))
+						return object
+					}
+					err := object.theClass.loadSuperClass(block , e.pos)
+					if err != null {
+						errs.append(err)
+						return object
+					}
+					if object.theClass.superClass == null {
+						return object
+					}
+					result := object.cloneType()
+					result.pos = e.pos
+					result.theClass = result.theClass.superClass
+					return result
+				}
+				fieldOrMethod , err := object.theClass.getFieldOrMethod(block , e.pos , selection.name , new map{string -> bool}() , false , object.theClass.name)
+				if err != null {
+					errs.append(err)
+					return null
+				}
+				if field , ok := fieldOrMethod.(ClassField) ; ok {
+					err := selection.selectionOn.fieldAccessAble(block , field)
+					if err != null {
+						errs.append(err)
+					}
+					if selection.locateDefinition {
+						if object.theClass.loadFromOutSide == false {
+							block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(field)
+							return
+						} else {
+							//TODO :: locateDefinition
+						}
+					}
+					result := field.Type.cloneType()
+					result.pos = e.pos
+					selection.field = field
+					return result
+				} else {
+					method := fieldOrMethod.(ClassMethod)
+					err := selection.selectionOn.methodAccessAble(block , method)
+					if err != null {
+						errs.append(err)
+					}
+					if selection.locateDefinition {
+						if object.theClass.loadFromOutSide == false {
+							block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(field)
+							return
+						}
+					}
+					selection.method = method
+					result := new Type()
+					result.Type = VariableTypeFunction
+					result.theFunctionType = method.Function.Type
+					result.pos = e.pos
+					return result
+				}
 
-            default:
-                errs.append(new error(sprintf("%s cannot access '%s' on '%s'",
-                            e.pos.errMsgPrefix() , selection.name , object.typeString())))
-                return null
-        }
-        return null
-    }
+			default:
+				errs.append(new error(sprintf("%s cannot access '%s' on '%s'",
+							e.pos.errMsgPrefix() , selection.name , object.typeString())))
+				return null
+		}
+		return null
+	}
 
-    static fn autoCompletion(object Type , block Block , isThis bool) {
-        switch object.Type {
-            case VariableTypeString:
-                ExpressionCheckSelection.autoCompletionForString(block , object.pos)
-            case VariableTypeMap:
-                block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = AutoCompletionItem.getMapAutoCompletionItem(object)
-            case VariableTypeJavaArray:
-                block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = AutoCompletionItem.getJavaArrayBasicAutoCompletionItem()
-            case VariableTypeArray:
-                block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = AutoCompletionItem.getArrayAutoCompletionItem(object)
-            case VariableTypeDynamicSelector:
-                ExpressionCheckSelection.autoCompletionForDynamicSelector(object.theClass , block)
-            case VariableTypePackage:
-                ExpressionCheckSelection.autoCompletionForPackage(object.thePackage , block)
-            case VariableTypeObject:
-                ExpressionCheckSelection.autoCompletionForObject(object.theClass , block , isThis)
-            case VariableTypeClass:
-                ExpressionCheckSelection.autoCompletionClass(object.theClass , block)
-        }
-    }
+	static fn autoCompletion(object Type , block Block , isThis bool) {
+		switch object.Type {
+			case VariableTypeString:
+				ExpressionCheckSelection.autoCompletionForString(block , object.pos)
+			case VariableTypeMap:
+				block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems =
+					AutoCompletionItem.getMapAutoCompletionItem(object)
+			case VariableTypeJavaArray:
+				block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems =
+					AutoCompletionItem.getJavaArrayBasicAutoCompletionItem()
+			case VariableTypeArray:
+				block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems =
+					AutoCompletionItem.getArrayAutoCompletionItem(object)
+			case VariableTypeDynamicSelector:
+				ExpressionCheckSelection.autoCompletionForDynamicSelector(object.theClass , block)
+			case VariableTypePackage:
+				ExpressionCheckSelection.autoCompletionForPackage(object.thePackage , block)
+			case VariableTypeObject:
+				ExpressionCheckSelection.autoCompletionForObject(object.theClass , block , isThis)
+			case VariableTypeClass:
+				ExpressionCheckSelection.autoCompletionClass(object.theClass , block)
+		}
+	}
 
-    static fn autoCompletionForString(block Block , pos Pos) {
-        if err := loadJavaStringClass(block , pos) ; err != null {
-            return
-        }
-        ExpressionCheckSelection.autoCompletionForObject(javaStringClass , block , false)
-    }
+	static fn autoCompletionForString(block Block , pos Pos) {
+		if err := loadJavaStringClass(block , pos) ; err != null {
+			return
+		}
+		ExpressionCheckSelection.autoCompletionForObject(javaStringClass , block , false)
+	}
 
-    static fn autoCompletionForPackage(p Package , block Block) {
-        items := []AutoCompletionItem{}
-        for name , _ := range p.block.constants {
-            item := new AutoCompletionItem()
-            item.Type = "constant"
-            item.name = name
-            items.append(item)
-        }
-        for name , _ := range p.block.variables {
-            item := new AutoCompletionItem()
-            item.Type = "variable"
-            item.name = name
-            items.append(item)
-        }
-        for name , v := range p.block.functions {
-            if name == MainFunctionName {
-                continue  // main function for 
-            }
-            item := new AutoCompletionItem()
-            item.Type = "function"
-            item.name = name
-            item.suggest = v.mkSuggestForAutoCompletion()
-            item.description = v.readableMsg(true)
-            items.append(item)
-        }
-        for name , _ := range p.block.classes {
-            item := new AutoCompletionItem()
-            item.Type = "class"
-            item.name = name
-            items.append(item)
-        }
-        for name , _ := range p.block.enumNames {
-            item := new AutoCompletionItem()
-            item.Type = "enumItem"
-            item.name = name
-            items.append(item)
-        }
-        block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
-    }
+	static fn autoCompletionForPackage(p Package , block Block) {
+		items := []AutoCompletionItem{}
+		for name , _ := range p.block.constants {
+			item := new AutoCompletionItem()
+			item.Type = "constant"
+			item.name = name
+			items.append(item)
+		}
+		for name , _ := range p.block.variables {
+			item := new AutoCompletionItem()
+			item.Type = "variable"
+			item.name = name
+			items.append(item)
+		}
+		for name , v := range p.block.functions {
+			if name == MainFunctionName {
+				continue  // main function for 
+			}
+			item := new AutoCompletionItem()
+			item.Type = "function"
+			item.name = name
+			item.suggest = v.mkSuggestForAutoCompletion()
+			item.description = v.readableMsg(true)
+			items.append(item)
+		}
+		for name , _ := range p.block.classes {
+			item := new AutoCompletionItem()
+			item.Type = "class"
+			item.name = name
+			items.append(item)
+		}
+		for name , _ := range p.block.enumNames {
+			item := new AutoCompletionItem()
+			item.Type = "enumItem"
+			item.name = name
+			items.append(item)
+		}
+		block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
+	}
 
-    static fn autoCompletionForDynamicSelector(object Class , block Block) {
-        items := []AutoCompletionItem{}
-        accessFromSub := false
-        // in this case must be lucy class 
-        m := new map{string -> bool}()
-        for object != null {
-            if object.isJava == false {
-                for v := range object.fields {
-                    if m.keyExist(v.name) {
-                        continue
-                    }
-                    if accessFromSub && v.ableAccessFromSubClass() == false {
-                        continue
-                    }
-                    item := new AutoCompletionItem()
-                    item.Type = "field"
-                    item.description = v.mkDescription()
-                    item.name = v.name
-                    items.append(item)
-                }
-                for methods := range object.methods {
-                    method := methods[0]
-                    if m.keyExist(method.Function.name) {
-                        continue
-                    }
-                    if accessFromSub && method.ableAccessFromSubClass() == false {
-                        continue
-                    }
-                    item := new AutoCompletionItem()
-                    item.Type = "method"
+	static fn autoCompletionForDynamicSelector(object Class , block Block) {
+		items := []AutoCompletionItem{}
+		accessFromSub := false
+		// in this case must be lucy class 
+		m := new map{string -> bool}()
+		for object != null {
+			if object.isJava == false {
+				for v := range object.fields {
+					if m.keyExist(v.name) {
+						continue
+					}
+					if accessFromSub && v.ableAccessFromSubClass() == false {
+						continue
+					}
+					item := new AutoCompletionItem()
+					item.Type = "field"
+					item.description = v.mkDescription()
+					item.name = v.name
+					items.append(item)
+				}
+				for methods := range object.methods {
+					method := methods[0]
+					if m.keyExist(method.Function.name) {
+						continue
+					}
+					if accessFromSub && method.ableAccessFromSubClass() == false {
+						continue
+					}
+					item := new AutoCompletionItem()
+					item.Type = "method"
 
-                    item.description = method.mkDescription()
-                    item.name = method.Function.name
-                    item.suggest = method.Function.mkSuggestForAutoCompletion()
-                    items.append(item)
-                }
-            } else {
-                for v := range object.fields {
-                    if m.keyExist(v.name) {
-                        continue
-                    }
-                    if accessFromSub && v.ableAccessFromSubClass() == false {
-                        continue
-                    }
-                    item := new AutoCompletionItem()
-                    item.Type = "field"
-                    item.description = v.mkDescription()
-                    item.name = v.name
-                    items.append(item)
-                }
-                for methods := range object.methods {
-                    for method := range methods {
-                        if accessFromSub && method.ableAccessFromSubClass() == false {
-                            continue
-                        }
-                        item := new AutoCompletionItem()
-                        item.Type = "method"
-                        item.description = method.mkDescription()
-                        item.name = method.Function.name
-                        item.suggest = method.Function.mkSuggestForAutoCompletion()
-                        items.append(item)
-                    }
-                }
-            }
-            object.loadSuperClass(block , new Pos())
-            if object.superClass == null {
-                break
-            }
-            object = object.superClass
-            accessFromSub = true
-        }
-        block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
-    }
+					item.description = method.mkDescription()
+					item.name = method.Function.name
+					item.suggest = method.Function.mkSuggestForAutoCompletion()
+					items.append(item)
+				}
+			} else {
+				for v := range object.fields {
+					if m.keyExist(v.name) {
+						continue
+					}
+					if accessFromSub && v.ableAccessFromSubClass() == false {
+						continue
+					}
+					item := new AutoCompletionItem()
+					item.Type = "field"
+					item.description = v.mkDescription()
+					item.name = v.name
+					items.append(item)
+				}
+				for methods := range object.methods {
+					for method := range methods {
+						if accessFromSub && method.ableAccessFromSubClass() == false {
+							continue
+						}
+						item := new AutoCompletionItem()
+						item.Type = "method"
+						item.description = method.mkDescription()
+						item.name = method.Function.name
+						item.suggest = method.Function.mkSuggestForAutoCompletion()
+						items.append(item)
+					}
+				}
+			}
+			object.loadSuperClass(block , new Pos())
+			if object.superClass == null {
+				break
+			}
+			object = object.superClass
+			accessFromSub = true
+		}
+		block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
+	}
 
-    static fn autoCompletionForObject(
-        object Class,
-        block Block,
-        isThis bool) {
-        if err := object.loadSelf(block , new Pos()) ; err != null {
-            return
-        }
-        items := []AutoCompletionItem{}
-        accessFromSub := false
-        classHandled := new map{string -> bool}()
-        // in this case must be lucy class 
-        m := new map{string -> bool}()
-        for object != null {
-            if classHandled.keyExist(object.name) {
-                break
-            }
-            classHandled[object.name] = true
-            if object.isJava == false {
-                for v := range object.fields {
-                    if m.keyExist(v.name) {
-                        continue
-                    }
-                    if v.isStatic() {
-                        continue
-                    }
-                    if accessFromSub && v.ableAccessFromSubClass() == false {
-                        continue
-                    }
-                    item := new AutoCompletionItem()
-                    item.Type = "field"
-                    item.description = v.mkDescription()
-                    item.name = v.name
-                    items.append(item)
-                }
-                for methods := range object.methods {
-                    method := methods[0]
-                    if m.keyExist(method.Function.name) {
-                        continue
-                    }
-                    if method.isStatic() {
-                        continue
-                    }
-                    if method.Function.name == ClassInitMethod || method.Function.name == SpecialMethodInit {
-                        continue
-                    }
-                    if accessFromSub && method.ableAccessFromSubClass() == false {
-                        continue
-                    }
-                    item := new AutoCompletionItem()
-                    if method.Function.name == SpecialMethodInit {
-                        item.Type = "constructor"
-                    } else {
-                        item.Type = "method"
-                    }
-                    item.name = method.Function.name
-                    item.suggest = method.Function.mkSuggestForAutoCompletion()
-                    item.description = method.mkDescription()
-                    items.append(item)
-                }
-            } else {
-                for v := range object.fields {
-                    if m.keyExist(v.name) {
-                        continue
-                    }
-                    if v.isStatic() {
-                        continue
-                    }
-                    if accessFromSub && v.ableAccessFromSubClass() == false {
-                        continue
-                    }
-                    item := new AutoCompletionItem()
-                    item.Type = "field"
-                    item.description = v.mkDescription()
-                    item.name = v.name
-                    items.append(item)
-                }
-                for methods := range object.methods {
-                    for method := range methods {
-                        if method.isStatic() {
-                            continue
-                        }
-                        if method.Function.name == ClassInitMethod || method.Function.name == SpecialMethodInit {
-                            continue
-                        }
-                        if accessFromSub && method.ableAccessFromSubClass() == false {
-                            continue
-                        }
-                        item := new AutoCompletionItem()
-                        if method.Function.name == SpecialMethodInit {
-                            item.Type = "constructor"
-                        } else {
-                            item.Type = "method"
-                        }
-                        item.name = method.Function.name
-                        item.suggest = method.Function.mkSuggestForAutoCompletion()
-                        item.description = method.mkDescription()
-                        items.append(item)
-                    }
-                }
-            }
-            object.loadSuperClass(block , new Pos())
-            if object.superClass == null {
-                break
-            }
-            object = object.superClass
-            accessFromSub = true
-        }
-        block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
-    }
+	static fn autoCompletionForObject(
+		object Class,
+		block Block,
+		isThis bool) {
+		if err := object.loadSelf(block , new Pos()) ; err != null {
+			return
+		}
+		items := []AutoCompletionItem{}
+		accessFromSub := false
+		classHandled := new map{string -> bool}()
+		// in this case must be lucy class 
+		m := new map{string -> bool}()
+		for object != null {
+			if classHandled.keyExist(object.name) {
+				break
+			}
+			classHandled[object.name] = true
+			if object.isJava == false {
+				for v := range object.fields {
+					if m.keyExist(v.name) {
+						continue
+					}
+					if v.isStatic() {
+						continue
+					}
+					if accessFromSub && v.ableAccessFromSubClass() == false {
+						continue
+					}
+					item := new AutoCompletionItem()
+					item.Type = "field"
+					item.description = v.mkDescription()
+					item.name = v.name
+					items.append(item)
+				}
+				for methods := range object.methods {
+					method := methods[0]
+					if m.keyExist(method.Function.name) {
+						continue
+					}
+					if method.isStatic() {
+						continue
+					}
+					if method.Function.name == ClassInitMethod || method.Function.name == SpecialMethodInit {
+						continue
+					}
+					if accessFromSub && method.ableAccessFromSubClass() == false {
+						continue
+					}
+					item := new AutoCompletionItem()
+					if method.Function.name == SpecialMethodInit {
+						item.Type = "constructor"
+					} else {
+						item.Type = "method"
+					}
+					item.name = method.Function.name
+					item.suggest = method.Function.mkSuggestForAutoCompletion()
+					item.description = method.mkDescription()
+					items.append(item)
+				}
+			} else {
+				for v := range object.fields {
+					if m.keyExist(v.name) {
+						continue
+					}
+					if v.isStatic() {
+						continue
+					}
+					if accessFromSub && v.ableAccessFromSubClass() == false {
+						continue
+					}
+					item := new AutoCompletionItem()
+					item.Type = "field"
+					item.description = v.mkDescription()
+					item.name = v.name
+					items.append(item)
+				}
+				for methods := range object.methods {
+					for method := range methods {
+						if method.isStatic() {
+							continue
+						}
+						if method.Function.name == ClassInitMethod || method.Function.name == SpecialMethodInit {
+							continue
+						}
+						if accessFromSub && method.ableAccessFromSubClass() == false {
+							continue
+						}
+						item := new AutoCompletionItem()
+						if method.Function.name == SpecialMethodInit {
+							item.Type = "constructor"
+						} else {
+							item.Type = "method"
+						}
+						item.name = method.Function.name
+						item.suggest = method.Function.mkSuggestForAutoCompletion()
+						item.description = method.mkDescription()
+						items.append(item)
+					}
+				}
+			}
+			object.loadSuperClass(block , new Pos())
+			if object.superClass == null {
+				break
+			}
+			object = object.superClass
+			accessFromSub = true
+		}
+		block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
+	}
 
-    static fn autoCompletionClass(c Class , block Block) {
-        if err := c.loadSelf(block , new Pos()) ; err != null {
-            return
-        }
-        items := []AutoCompletionItem{}
-        accessFromSub := false
-        classHandled := new map{string -> bool}()
-        // in this case must be lucy class 
-        m := new map{string -> bool}()
-        for c != null {
-            if classHandled.keyExist(c.name) {
-                break
-            }
-            classHandled[c.name] = true
-            if c.isJava == false {
-                for v := range c.fields {
-                    if m.keyExist(v.name) {
-                        continue
-                    }
-                    if v.isStatic() == false {
-                        continue
-                    }
-                    if accessFromSub && v.ableAccessFromSubClass() == false {
-                        continue
-                    }
-                    item := new AutoCompletionItem()
-                    item.Type = "field"
-                    item.description = v.mkDescription()
-                    item.name = v.name
-                    items.append(item)
-                }
-                for methods := range c.methods {
-                    method := methods[0]
-                    if m.keyExist(method.Function.name) {
-                        continue
-                    }
-                    if method.Function.name == ClassInitMethod || method.Function.name == SpecialMethodInit {
-                        continue
-                    }
-                    if method.isStatic() == false {
-                        continue
-                    }
-                    if accessFromSub &&
-                        method.ableAccessFromSubClass() == false {
-                        continue
-                    }
-                    item := new AutoCompletionItem()
-                    if method.Function.name == SpecialMethodInit {
-                        item.Type = "constructor"
-                    } else {
-                        item.Type = "method"
-                    }
-                    item.name = method.Function.name
-                    item.suggest = method.Function.mkSuggestForAutoCompletion()
-                    item.description = method.mkDescription()
-                    items.append(item)
-                }
-            } else {
-                for v := range c.fields {
-                    if m.keyExist(v.name) {
-                        continue
-                    }
-                    if v.isStatic() {
-                        continue
-                    }
-                    if accessFromSub && v.ableAccessFromSubClass() == false {
-                        continue
-                    }
-                    item := new AutoCompletionItem()
-                    item.Type = "field"
-                    item.description = v.mkDescription()
-                    item.name = v.name
-                    items.append(item)
-                }
-                for methods := range c.methods {
-                    for method := range methods {
-                        if method.isStatic() == false {
-                            continue
-                        }
-                        if method.Function.name == ClassInitMethod || method.Function.name == SpecialMethodInit {
-                            continue
-                        }
-                        if accessFromSub && method.ableAccessFromSubClass() == false {
-                            continue
-                        }
-                        item := new AutoCompletionItem()
-                        if method.Function.name == SpecialMethodInit {
-                            item.Type = "constructor"
-                        } else {
-                            item.Type = "method"
-                        }
-                        item.name = method.Function.name
-                        item.suggest = method.Function.mkSuggestForAutoCompletion()
-                        item.description = method.mkDescription()
-                        items.append(item)
-                    }
-                }
-            }
-            c.loadSuperClass(block , new Pos())
-            if c.superClass == null {
-                break
-            }
-            c = c.superClass
-            accessFromSub = true
-        }
-        block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
-    }
+	static fn autoCompletionClass(c Class , block Block) {
+		if err := c.loadSelf(block , new Pos()) ; err != null {
+			return
+		}
+		items := []AutoCompletionItem{}
+		accessFromSub := false
+		classHandled := new map{string -> bool}()
+		// in this case must be lucy class 
+		m := new map{string -> bool}()
+		for c != null {
+			if classHandled.keyExist(c.name) {
+				break
+			}
+			classHandled[c.name] = true
+			if c.isJava == false {
+				for v := range c.fields {
+					if m.keyExist(v.name) {
+						continue
+					}
+					if v.isStatic() == false {
+						continue
+					}
+					if accessFromSub && v.ableAccessFromSubClass() == false {
+						continue
+					}
+					item := new AutoCompletionItem()
+					item.Type = "field"
+					item.description = v.mkDescription()
+					item.name = v.name
+					items.append(item)
+				}
+				for methods := range c.methods {
+					method := methods[0]
+					if m.keyExist(method.Function.name) {
+						continue
+					}
+					if method.Function.name == ClassInitMethod || method.Function.name == SpecialMethodInit {
+						continue
+					}
+					if method.isStatic() == false {
+						continue
+					}
+					if accessFromSub &&
+						method.ableAccessFromSubClass() == false {
+						continue
+					}
+					item := new AutoCompletionItem()
+					if method.Function.name == SpecialMethodInit {
+						item.Type = "constructor"
+					} else {
+						item.Type = "method"
+					}
+					item.name = method.Function.name
+					item.suggest = method.Function.mkSuggestForAutoCompletion()
+					item.description = method.mkDescription()
+					items.append(item)
+				}
+			} else {
+				for v := range c.fields {
+					if m.keyExist(v.name) {
+						continue
+					}
+					if v.isStatic() {
+						continue
+					}
+					if accessFromSub && v.ableAccessFromSubClass() == false {
+						continue
+					}
+					item := new AutoCompletionItem()
+					item.Type = "field"
+					item.description = v.mkDescription()
+					item.name = v.name
+					items.append(item)
+				}
+				for methods := range c.methods {
+					for method := range methods {
+						if method.isStatic() == false {
+							continue
+						}
+						if method.Function.name == ClassInitMethod || method.Function.name == SpecialMethodInit {
+							continue
+						}
+						if accessFromSub && method.ableAccessFromSubClass() == false {
+							continue
+						}
+						item := new AutoCompletionItem()
+						if method.Function.name == SpecialMethodInit {
+							item.Type = "constructor"
+						} else {
+							item.Type = "method"
+						}
+						item.name = method.Function.name
+						item.suggest = method.Function.mkSuggestForAutoCompletion()
+						item.description = method.mkDescription()
+						items.append(item)
+					}
+				}
+			}
+			c.loadSuperClass(block , new Pos())
+			if c.superClass == null {
+				break
+			}
+			c = c.superClass
+			accessFromSub = true
+		}
+		block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
+	}
 }
-
 

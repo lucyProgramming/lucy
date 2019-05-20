@@ -3,7 +3,6 @@
 import "lucy/jvm/cg"
 
 public class ClassField {
-	public Class                  Class
 	public defaultValueExpression Expression
 	public name                   string
 	public Type                   Type

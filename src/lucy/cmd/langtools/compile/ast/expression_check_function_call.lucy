@@ -304,7 +304,7 @@ class ExpressionCheckFunctionCall {
         }
 
         call.templateFunctionCallPair = f.templateFunction.insert(parameterTypeArray)
-        if call.templateFunctionCallPair.Function == null {
+        if call.templateFunctionCallPair.function == null {
             cloneFunction , es := f.cloneFunction()
             if len(es) > 0 {
                 errs.appendAll(es)
@@ -312,7 +312,7 @@ class ExpressionCheckFunctionCall {
             }
             cloneFunction.used++
             cloneFunction.templateFunction = null
-            call.templateFunctionCallPair.Function = cloneFunction
+            call.templateFunctionCallPair.function = cloneFunction
             cloneFunction.parameterTypes = parameterTypes
             for k , v := range parameterTypes {
                 v.pos = f.Type.templateNamesMap[k] // keep Pos
@@ -342,7 +342,7 @@ class ExpressionCheckFunctionCall {
             cloneFunction.checkParametersAndReturns(errs , true , false)
             cloneFunction.checkBlock(errs)
         }
-        ret = call.templateFunctionCallPair.Function
+        ret = call.templateFunctionCallPair.function
         // when all ok ,ret is not a template function any more
         if len(tps) > 0 {
             errs.append(new error(sprintf("%s to many parameter type to call template function",
