@@ -276,7 +276,7 @@ class BuildBlock {
 			code.appendException(e)
 			//expect exception on stack
 			copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject,
-					context.exceptionVarOffset)) // this code will make_node_objects stack is empty
+					ds[index].exceptionLocalVarOffset)) // this code will make_node_objects stack is empty
 			state.popStack(1)
 			// build block
 			context.statementDefer = ds[index]
@@ -286,7 +286,7 @@ class BuildBlock {
 			ds[index].resetLabels()
 
 			//if need throw
-			copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , context.exceptionVarOffset))
+			copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , ds[index].exceptionLocalVarOffset))
 			code.codes[code.codeLength] = cg.OP_dup
 			code.codeLength++
 			state.pushStack(c , state.newObjectVariableType(throwableClass))

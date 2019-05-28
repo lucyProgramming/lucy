@@ -74,22 +74,27 @@ class BuildInFunctionCatchPanic {
 		return
 	}
 
-	fn mkBuildInCatch(c cg.ClassHighLevel , code cg.AttributeCode,
-		e ast.Expression , context Context) -> (maxStack char) {
+	fn mkBuildInCatch(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		e ast.Expression,
+		context Context) -> (maxStack char) {
+		call := e.data.(ast.ExpressionFunctionCall)
+		meta := call.buildInFunctionMeta.(ast.BuildInFunctionCatchMeta)
 		if e.isStatementExpression {
 			maxStack = 1
 			code.codes[code.codeLength] = cg.OP_aconst_null
 			code.codeLength++
 			copyOPs(code,
-				storeLocalVariableOps(ast.VariableTypeObject , context.exceptionVarOffset))
+				storeLocalVariableOps(ast.VariableTypeObject , meta.theDefer.exceptionLocalVarOffset))
 		} else {
 			maxStack = 2
 			//load to stack
-			copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , context.exceptionVarOffset)) // load
+			copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , meta.theDefer.exceptionLocalVarOffset)) // load
 			//set 2 null
 			code.codes[code.codeLength] = cg.OP_aconst_null
 			code.codeLength++
-			copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject , context.exceptionVarOffset)) // store
+			copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject , meta.theDefer.exceptionLocalVarOffset)) // store
 			//check cast
 			code.codes[code.codeLength] = cg.OP_checkcast
 			if context.statementDefer.exceptionClass != null {

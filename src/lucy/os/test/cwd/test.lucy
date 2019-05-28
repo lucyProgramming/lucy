@@ -3,9 +3,9 @@
 import "lucy/os"
 
 fn main(args []string) {
-    print("working directory:" , os.getCwd())
-    for k , v := range os.getEnvs() {
-        print(k , "=" , v)
-    }
-
+	print("working directory:" , os.getCwd())
+	for k , v := range os.getEnvs() {
+		print(k , "=" , v)
+	}
 }
+

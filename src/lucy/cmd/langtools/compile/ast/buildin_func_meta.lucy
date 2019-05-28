@@ -14,3 +14,7 @@ public class BuildInFunctionPanicMeta {
 	public argThrowable bool
 }
 
+public class BuildInFunctionCatchMeta {
+	public theDefer StatementDefer
+}
+

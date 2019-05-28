@@ -209,7 +209,7 @@ class BuildReturn {
 			code.appendException(e)
 			//expect exception on stack
 			copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject,
-					context.exceptionVarOffset)) // this code will make_node_objects stack is empty
+					statementReturn.statementDefers[index].exceptionLocalVarOffset)) // this code will make_node_objects stack is empty
 			state.popStack(1)
 			// build defer block
 			context.statementDefer = statementReturn.statementDefers[index]
@@ -218,7 +218,7 @@ class BuildReturn {
 			context.statementDefer = null
 			statementReturn.statementDefers[index].resetLabels()
 			//if need throw
-			copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , context.exceptionVarOffset))
+			copyOPs(code , loadLocalVariableOps(ast.VariableTypeObject , statementReturn.statementDefers[index].exceptionLocalVarOffset))
 			code.codes[code.codeLength] = cg.OP_dup
 			code.codeLength++
 			if 2 > maxStack {

@@ -82,7 +82,11 @@ public class Statement {
 				} else {
 					block.defers.append(this.statementDefer)
 				}
-				block.inheritedAttribute.function.hasDefer = true
+				if block.inheritedAttribute.function.theDefers == null {
+					block.inheritedAttribute.function.theDefers = [this.statementDefer]
+				} else {
+					block.inheritedAttribute.function.theDefers.append(this.statementDefer)
+				}
 				this.statementDefer.block.inherit(block)
 				this.statementDefer.block.inheritedAttribute.statementDefer = this.statementDefer
 				es := this.statementDefer.block.check()

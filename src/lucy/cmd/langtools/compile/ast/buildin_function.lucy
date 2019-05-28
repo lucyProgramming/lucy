@@ -41,6 +41,12 @@ fn registerBuildInFunctions() {
 				errs.append(new error(sprintf("%s buildin function '%s' only allow in defer block" , pos.errMsgPrefix() , common.BuildInFunctionCatch)))
 				return
 			}
+			{
+				t := new BuildInFunctionCatchMeta()
+				t.theDefer = block.inheritedAttribute.statementDefer
+				e.buildInFunctionMeta = t
+			}
+
 			if len(e.args) > 1 {
 				errs.append(new error(sprintf("%s build function '%s' expect at most 1 argument" , e.args[1].pos.errMsgPrefix() , common.BuildInFunctionCatch)))
 				return
@@ -294,22 +300,22 @@ fn registerBuildInFunctions() {
 fn monitorChecker(f Function, e ExpressionFunctionCall, block Block, errs []error,
 	args []Type, pos Pos) {
 	if len(e.parameterTypes) > 0 {
-		*s = append(*s, new error(sprintf("%s buildin function expect no typed parameter",
+		* = append(*, new error(sprintf("%s buildin function expect no typed parameter",
 			errMsgPrefix(e.parameterTypes[0].pos)))
 	}
 	if len(e.args) == 0 {
-		*s = append(*s, new error(sprintf("%s expect one argument", errMsgPrefix(pos)))
+		* = append(*, new error(sprintf("%s expect one argument", errMsgPrefix(pos)))
 		return
 	}
 	if len(e.args) > 1 {
-		*s = append(*s, new error(sprintf("%s only expect one argument", errMsgPrefix(e.args[1].pos)))
+		* = append(*, new error(sprintf("%s only expect one argument", errMsgPrefix(e.args[1].pos)))
 		return
 	}
 	if args[0] == null {
 		return
 	}
 	if args[0].isPointer() == false {
-		*s = append(*s, new error(sprintf("%s '%s' is not valid type to call",
+		* = append(*, new error(sprintf("%s '%s' is not valid type to call",
 			errMsgPrefix(args[0].pos), args[0].typeString()))
 		return
 	}

@@ -3,74 +3,72 @@
 import "lucy/jvm/cg"
 
 public class StatementIf {
-    public prefixExpressions   []Expression     
-    public condition           Expression       
-    public pos                 Pos              
-    public initExpressionBlock Block = new Block()
-    public block               Block            
-    public elseIfList          []StatementElseIf
-    public Else                Block            
-    public exits               []cg.Exit        
-    public inlineComment       string           
-    public elseInlineComment   string           
+	public prefixExpressions   []Expression
+	public condition           Expression
+	public pos                 Pos
+	public initExpressionBlock Block = new Block()
+	public block               Block
+	public elseIfList          []StatementElseIf
+	public Else                Block
+	public exits               []cg.Exit
+	public inlineComment       string
+	public elseInlineComment   string
 
-    fn check(father Block) -> (errs []error = []error{}) {
-        this.initExpressionBlock.inherit(father)
-        for _ , v := range this.prefixExpressions {
-            v.isStatementExpression = true
-            _ , es := v.check(this.initExpressionBlock)
-            errs.appendAll(es)
-            if err := v.canBeUsedAsStatement() ; err != null {
-                errs.append(err)
-            }
-        }
-        if this.condition != null {
-            conditionType , es := this.condition.checkSingleValueContextExpression(this.initExpressionBlock)
-            errs.appendAll(es)
-            if conditionType != null &&
-                conditionType.Type != VariableTypeBool {
-                errs.append(new error(sprintf("%s condition is not a bool expression",
-                            this.condition.pos.errMsgPrefix())))
-            }
-            if err := this.condition.canBeUsedAsCondition() ; err != null {
-                errs.append(err)
-            }
-        }
-        if this.block != null {
-            this.block.inherit(this.initExpressionBlock)
-            errs.appendAll(this.block.check())
-        }
-        for _ , v := range this.elseIfList {
-            if v.condition != null {
-                conditionType , es := v.condition.checkSingleValueContextExpression(this.initExpressionBlock)
-                errs.appendAll(es)
-                if err := v.condition.canBeUsedAsCondition() ; err != null {
-                    errs.append(err)
-                }
-                if conditionType != null &&
-                    conditionType.Type != VariableTypeBool {
-                    errs.append(new error(sprintf("%s condition is not a bool expression",
-                                conditionType.pos.errMsgPrefix())))
-                }
-                if v.block != null {
-                    v.block.inherit(this.initExpressionBlock)
-                    errs.appendAll(v.block.check())
-                }
-            }
-        }
-        if this.Else != null {
-            this.Else.inherit(this.initExpressionBlock)
-            errs.appendAll(this.Else.check())
-        }
-        return errs
-    }
+	fn check(father Block) -> (errs []error = []error{}) {
+		this.initExpressionBlock.inherit(father)
+		for _ , v := range this.prefixExpressions {
+			v.isStatementExpression = true
+			_ , es := v.check(this.initExpressionBlock)
+			errs.appendAll(es)
+			if err := v.canBeUsedAsStatement() ; err != null {
+				errs.append(err)
+			}
+		}
+		if this.condition != null {
+			conditionType , es := this.condition.checkSingleValueContextExpression(this.initExpressionBlock)
+			errs.appendAll(es)
+			if conditionType != null &&
+				conditionType.Type != VariableTypeBool {
+				errs.append(new error(sprintf("%s condition is not a bool expression",
+							this.condition.pos.errMsgPrefix())))
+			}
+			if err := this.condition.canBeUsedAsCondition() ; err != null {
+				errs.append(err)
+			}
+		}
+		if this.block != null {
+			this.block.inherit(this.initExpressionBlock)
+			errs.appendAll(this.block.check())
+		}
+		for _ , v := range this.elseIfList {
+			if v.condition != null {
+				conditionType , es := v.condition.checkSingleValueContextExpression(this.initExpressionBlock)
+				errs.appendAll(es)
+				if err := v.condition.canBeUsedAsCondition() ; err != null {
+					errs.append(err)
+				}
+				if conditionType != null &&
+					conditionType.Type != VariableTypeBool {
+					errs.append(new error(sprintf("%s condition is not a bool expression",
+								conditionType.pos.errMsgPrefix())))
+				}
+				if v.block != null {
+					v.block.inherit(this.initExpressionBlock)
+					errs.appendAll(v.block.check())
+				}
+			}
+		}
+		if this.Else != null {
+			this.Else.inherit(this.initExpressionBlock)
+			errs.appendAll(this.Else.check())
+		}
+		return errs
+	}
 }
-
 
 public class StatementElseIf {
-    public condition     Expression
-    public block         Block     
-    public inlineComment string    
+	public condition     Expression
+	public block         Block
+	public inlineComment string
 }
-
 

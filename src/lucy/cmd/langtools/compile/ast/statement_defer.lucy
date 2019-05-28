@@ -3,14 +3,15 @@
 import "java/lang/Object"
 
 public class StatementDefer {
-	public pos              Pos
-	public labels           []StatementLabel
-	public startPc          int              // for jvm
-	public stackMapState    Object           // jvm.StackMapState because import cycle is forbid
-	public block            Block = new Block()
-	public exceptionClass   Class
-	public inlineComment    string
-	public onlyOneStatement bool
+	public pos                     Pos
+	public labels                  []StatementLabel
+	public startPc                 int              // for jvm
+	public stackMapState           Object           // jvm.StackMapState because import cycle is forbid
+	public block                   Block = new Block()
+	public exceptionClass          Class
+	public inlineComment           string
+	public onlyOneStatement        bool
+	public exceptionLocalVarOffset char
 
 	public fn resetLabels() {
 		for _ , v := range this.labels {

@@ -20,7 +20,6 @@ public class Function implements TopNodeInterface , ExpressionNodeInterface {
 	public jvmDescriptor                    string
 	public closureVariableOffSet            char                   // for closure
 	public sourceCode                       []byte                 // source code for template function
-	public hasDefer                         bool
 	public haveDefaultValue                 bool
 	public defaultValueStartAt              int
 	public isGlobal                         bool
@@ -36,6 +35,7 @@ public class Function implements TopNodeInterface , ExpressionNodeInterface {
 	       findUsageInstances               []Usage
 	public startLine                        int
 	public endLine                          int
+	public theDefers                        []StatementDefer
 
 	public fn isPublic() -> (is bool) {
 		return this.accessFlags & cg.AccMethodPublic != 0

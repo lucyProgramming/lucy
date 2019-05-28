@@ -20,7 +20,7 @@ class BuildFunction {
 		code cg.AttributeCode,
 		f ast.Function,
 		state StackMapState) {
-		for _ , v := range f.Type.parameterList { //      insert into locals
+		for _ , v := range f.Type.parameterList { //         insert into locals
 			v.localValOffset = code.maxLocals
 			code.maxLocals += jvmSlotSize(v.Type)
 			state.appendLocals(c , v.Type)
@@ -214,12 +214,12 @@ class BuildFunction {
 				method.code.maxStack = t
 			}
 		}
-		if f.hasDefer {
-			context.exceptionVarOffset = method.code.maxLocals
+		for v := range f.theDefers {
+			v.exceptionLocalVarOffset = method.code.maxLocals
 			method.code.maxLocals++
 			method.code.codes[method.code.codeLength] = cg.OP_aconst_null
 			method.code.codeLength++
-			copyOPs(method.code , storeLocalVariableOps(ast.VariableTypeObject , context.exceptionVarOffset))
+			copyOPs(method.code , storeLocalVariableOps(ast.VariableTypeObject , v.exceptionLocalVarOffset))
 			state.appendLocals(c , state.newObjectVariableType(ast.JavaThrowableClass))
 		}
 		this.buildBlock.buildBlock(c , method.code , f.block , context , state)
