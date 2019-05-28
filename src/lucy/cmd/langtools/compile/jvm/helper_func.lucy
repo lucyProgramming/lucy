@@ -73,7 +73,7 @@ fn interfaceMethodArgsCount(functionType ast.FunctionType) -> (count byte) {
 	}
 }
 
-fn jvmSlotSize(typ ast.Type) -> (size char) {	
+fn jvmSlotSize(typ ast.Type) -> (size char) {
 	if typ.Type == ast.VariableTypeDouble ||
 		typ.Type == ast.VariableTypeLong {
 		return 2

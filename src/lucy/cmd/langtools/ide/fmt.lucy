@@ -471,7 +471,7 @@ public class Fmt {
 	}
 	fn formatImport(indent string , i ast.Import) -> (format string = "") {
 		format = indent
-		format += "import \"" + i.Import + "\""
+		format += "import \"" + i.theImport + "\""
 		if i.alias != null {
 			format += " as " + i.alias
 		}

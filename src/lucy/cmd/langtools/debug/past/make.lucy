@@ -58,7 +58,7 @@ public class MakeNodesObjects {
 	}
 	fn makeImport(i ast.Import) -> (x string) {
 		s := sprintf("import@%d" , i.pos.endLine)
-		s += sprintf(" '%s'" , i.Import)
+		s += sprintf(" '%s'" , i.theImport)
 		if i.alias != null && i.alias != "" {
 			s += sprintf(" as '%s'" , i.accessName)
 		}

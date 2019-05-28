@@ -177,13 +177,13 @@ public class StatementSwitch {
 			//some enum are missing, not allow
 			errMsg := sprintf("%s switch for enum '%s' is not complete\n",
 				this.endPos.errMsgPrefix() , conditionType.theEnum.name)
-			errMsg += "\tyou can use 'default:' or give missing enums,which are:\n"
-			var i = 0
+			errMsg += "\tyou can use 'default:' or give missing enum items , which are:\n"
+			var handled = 0
 			for _ , v := range conditionType.theEnum.enums {
 				ok := enumNamesMap.keyExist(v.name)
 				if ok {
 					//handled
-					i++
+					handled++
 					continue
 				}
 				if enumPackageName == null ||
@@ -192,10 +192,8 @@ public class StatementSwitch {
 				} else {
 					errMsg += sprintf("\t\tcase %s.%s:\n" , enumPackageName , v.name)
 				}
-
 			}
-
-			if i > (len(conditionType.theEnum.enums) / 2 + len(conditionType.theEnum.enums) % 2) {
+			if handled > (len(conditionType.theEnum.enums) / 2 + len(conditionType.theEnum.enums) % 2) {
 				errs.append(new error(errMsg))
 			}
 		}
@@ -212,13 +210,11 @@ public class StatementSwitch {
 			v.block.inheritedAttribute.forBreak = this
 			errs.appendAll(v.block.check())
 		}
-
 		if this.defaultBlock != null {
 			this.defaultBlock.inherit(this.initExpressionBlock)
 			this.defaultBlock.inheritedAttribute.forBreak = this
 			errs.appendAll(this.defaultBlock.check())
 		}
 	}
-
 }
 

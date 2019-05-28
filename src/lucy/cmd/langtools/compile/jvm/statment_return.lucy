@@ -19,7 +19,8 @@ class BuildReturn {
 		code cg.AttributeCode,
 		statementReturn ast.StatementReturn,
 		context Context,
-		state StackMapState) -> (maxStack char) {
+		state StackMapState) -> (
+		maxStack char) {
 		if context.theFunction.Type.voidReturn() {
 			if statementReturn.statementDefers != null && len(statementReturn.statementDefers) > 0 {
 				stack := this.buildDefersForReturn(c , code , context , state , statementReturn)
@@ -171,28 +172,29 @@ class BuildReturn {
 			code.codeLength += 2
 			index++
 		}
-		
+
 		code.codes[code.codeLength] = cg.OP_areturn
 		code.codeLength++
 		return
 	}
 
-	fn buildDefersForReturn(c cg.ClassHighLevel , code cg.AttributeCode,
-		context Context , from StackMapState,
+	fn buildDefersForReturn(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		context Context,
+		from StackMapState,
 		statementReturn ast.StatementReturn) -> (maxStack char) {
 		if len(statementReturn.statementDefers) == 0 {
 			return
 		}
 		code.codes[code.codeLength] = cg.OP_aconst_null
 		code.codeLength++
-		if 1 > maxStack {
-			maxStack = 1
-		}
+		maxStack = 1
 		index := len(statementReturn.statementDefers) - 1
-		for index >= 0 { //    build defer,cannot have return statement is defer
+		for index >= 0 { //build defer,cannot have return statement is defer
 			state := statementReturn.statementDefers[index].stackMapState.(StackMapState)
 			state = new StackMapState(state) // clone
-			state.addTop(from)
+			state.addTop(from) // state cannot access a lot of variables
 			state.pushStack(c , state.newObjectVariableType(throwableClass))
 			context.makeStackMapForCode(code , state , code.codeLength)
 			e := new cg.ExceptionTable()
@@ -204,16 +206,15 @@ class BuildReturn {
 			} else {
 				e.catchType = c.theClass.insertClassConst(statementReturn.statementDefers[index].exceptionClass.name) // custom c
 			}
-
 			code.appendException(e)
 			//expect exception on stack
 			copyOPs(code , storeLocalVariableOps(ast.VariableTypeObject,
 					context.exceptionVarOffset)) // this code will make_node_objects stack is empty
 			state.popStack(1)
-			// build block
+			// build defer block
 			context.statementDefer = statementReturn.statementDefers[index]
 			this.buildBlock.buildBlock(c , code , statementReturn.statementDefers[index].block , context , state)
-			from.addTop(state)
+			from.addTop(state)  // the variable that "from" cannot access 
 			context.statementDefer = null
 			statementReturn.statementDefers[index].resetLabels()
 			//if need throw
@@ -248,12 +249,9 @@ class BuildReturn {
 					writeExits([]cg.Exit{exit} , code.codeLength)
 				}
 			}
-
 			index--
 		}
-
 		return
 	}
-
 }
 

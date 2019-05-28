@@ -599,7 +599,7 @@ public class Package {
 		for _ , v := range this.files {
 			for _ , i := range v.imports {
 				if i.used == 0 {
-					errMsg := sprintf("%s' imported not used" , i.Import)
+					errMsg := sprintf("%s' imported not used" , i.theImport)
 					t := new CompileError(sprintf("%s %s" , errMsgPrefix(i.pos) , errMsg))
 					t.pos = i.pos
 					t.err = errMsg
@@ -634,15 +634,15 @@ public class Package {
 
 	// fn insertSouceFiles(filenames []string) {
 
-	public fn getDirtyFiles() -> (files map{string -> bool}) {
-		files = new map{string -> bool}()
-		for f := range this.files {
-			if f.isDirty {
-				files[f.filename] = true
-			}
-		}
+	// public fn getDirtyFiles() -> (files map{string -> bool}) {
+	// 	files = new map{string -> bool}()
+	// 	for f := range this.files {
+	// 		if f.isDirty {
+	// 			files[f.filename] = true
+	// 		}
+	// 	}
 
-	}
+	// }
 
 	fn load(resource string) -> (x Object , err error) {
 		if resource == null || resource == "" {

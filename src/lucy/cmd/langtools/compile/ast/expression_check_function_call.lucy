@@ -18,7 +18,7 @@ class ExpressionCheckFunctionCall {
             if d == null {
                 i := block.inheritedAttribute.thePackageBeenCompiling.getImport(e.pos.filename , identifier.name)
                 if i != null {
-                    d , err = block.inheritedAttribute.thePackageBeenCompiling.load(i.Import)
+                    d , err = block.inheritedAttribute.thePackageBeenCompiling.load(i.theImport)
                     if err != null {
                         errs.append(err)
                     }

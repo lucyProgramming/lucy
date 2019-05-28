@@ -190,7 +190,7 @@ class ExpressionCheckIdentifier {
     }
 
     static fn checkIdentifierThroughImports(block Block , identifier ExpressionIdentifier , e Expression , it Import) -> (valueType Type , err error) {
-        p , err := block.inheritedAttribute.thePackageBeenCompiling.load(it.Import)
+        p , err := block.inheritedAttribute.thePackageBeenCompiling.load(it.theImport)
         if err != null {
             return null , new error(sprintf("%s %s" , e.pos.errMsgPrefix() , err.getMessage()))
         }

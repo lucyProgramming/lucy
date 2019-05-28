@@ -79,7 +79,7 @@ public class Compiler {
 		}
 		is := new string[](len(this.tops))
 		for k , v := range this.tops {
-			is[k] = v.node.(ast.Import).Import
+			is[k] = v.node.(ast.Import).theImport
 		}
 		bs , _ := json.encode(is)
 		print(string(bs))

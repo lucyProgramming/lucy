@@ -95,15 +95,12 @@ class ExpressionCheckVar {
 					}
 					err = block.insert(v.name , v.pos , v)
 				}
-
 				if err != null {
 					errs.append(err)
 					continue
 				}
 				ev.initValues[k] = v.Type.mkDefaultValueExpression()
-
 			}
-
 		}
 
 		if e.isGlobal {

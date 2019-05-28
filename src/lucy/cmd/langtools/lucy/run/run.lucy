@@ -217,11 +217,11 @@ public class RunLucyPackage {
         m := new map{string -> bool}()
         for _ , v := range importNodes {
             name := v.node.(ast.Import)
-            if m.keyExist(name.Import) {
+            if m.keyExist(name.theImport) {
                 continue
             }
-            m[name.Import] = true
-            imports.append(name.Import)
+            m[name.theImport] = true
+            imports.append(name.theImport)
         }
 
         return this.javaPackageFilter(imports)

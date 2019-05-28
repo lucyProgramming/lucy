@@ -237,8 +237,12 @@ class BuildExpression {
 		return
 	}
 
-	fn buildExpressions(c cg.ClassHighLevel , code cg.AttributeCode,
-		es []ast.Expression , context Context , state StackMapState) -> (maxStack char) {
+	fn buildExpressions(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		es []ast.Expression,
+		context Context,
+		state StackMapState) -> (maxStack char) {
 		length := 0
 		for _ , e := range es {
 			if e.haveMultiValue() {
@@ -246,9 +250,7 @@ class BuildExpression {
 			} else {
 				length++
 			}
-
 		}
-
 		loadInt(c , code , int(length))
 		code.codes[code.codeLength] = cg.OP_anewarray
 		c.insertClassConst(javaRootClass , code.codes[code.codeLength + 1 : code.codeLength + 3])

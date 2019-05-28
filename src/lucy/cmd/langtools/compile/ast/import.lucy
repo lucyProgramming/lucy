@@ -4,7 +4,7 @@ import "lucy/cmd/langtools/compile/common" as common
 
 public class Import implements TopNodeInterface {
 	public accessName         string
-	public Import             string  // full name
+	public theImport          string  // full name
 	public pos                Pos
 	public used               int
 	public alias              string
@@ -29,7 +29,7 @@ public class Import implements TopNodeInterface {
 		if this.comment != null {
 			s += this.comment
 		}
-		s += sprintf("import \"%s\"" , this.Import)
+		s += sprintf("import \"%s\"" , this.theImport)
 		if this.alias != null {
 			s += " as " + this.alias
 		}
@@ -43,11 +43,11 @@ public class Import implements TopNodeInterface {
 			this.alias = this.accessName
 			return
 		}
-		if false == packageNameIsValid(this.Import) {
+		if false == packageNameIsValid(this.theImport) {
 			return new error(sprintf("%s '%s' is not a valid name",
-						this.pos.errMsgPrefix() , this.Import))
+						this.pos.errMsgPrefix() , this.theImport))
 		}
-		this.accessName = common.getBaseName(this.Import)
+		this.accessName = common.getBaseName(this.theImport)
 	}
 
 }

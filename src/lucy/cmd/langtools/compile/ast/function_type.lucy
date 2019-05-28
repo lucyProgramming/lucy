@@ -12,10 +12,10 @@ public class FunctionType {
 	public returnLpContainsLf            bool
 	public returnLpContainsInlineComment string
 
-	fn reDefineParameterOrReturnVar(reDefine Variable) -> (err error) {
-		if v := this.searchName(reDefine.name) ; v != null {
+	fn reDefineParameterOrReturnVar(createVariable Variable) -> (err error) {
+		if v := this.searchName(createVariable.name) ; v != null {
 			errMsg := sprintf("%s reDefine parameter or return variable '%s',first declared at:\n",
-				reDefine.pos.errMsgPrefix() , v.name)
+				createVariable.pos.errMsgPrefix() , v.name)
 			errMsg += sprintf("\t%s" , v.pos.errMsgPrefix())
 			return new error(errMsg)
 		}
@@ -105,6 +105,7 @@ public class FunctionType {
 		}
 		return s
 	}
+
 	fn typeString(needFormat bool...) -> (s string = "") {
 		if len(this.templateNames) > 0 {
 			s += "<"
@@ -260,27 +261,26 @@ public class FunctionType {
 		}
 	}
 
-	fn mkCallReturnTypes(pos Pos) -> (valueTypes []Type) {
+	fn mkCallReturnTypes(callPos Pos) -> (valueTypes []Type) {
 		if len(this.returnList) == 0 {
 			t := new Type()
 			t.Type = VariableTypeVoid // means no return ;
-			t.pos = pos
+			t.pos = callPos
 			return []Type{t}
 		}
 		ret := new []Type(len(this.returnList))
 		for k , v := range this.returnList {
 			ret[k] = v.Type.cloneType()
-			ret[k].pos = pos
+			ret[k].pos = callPos
 		}
 		return ret
 	}
 
-	fn getParameterTypes() -> (patameterTypes []Type) {
-		ret := new []Type(len(this.parameterList))
+	fn getParameterTypes() -> (parameterTypes []Type) {
+		parameterTypes = new []Type(len(this.parameterList))
 		for k , v := range this.parameterList {
-			ret[k] = v.Type
+			parameterTypes[k] = v.Type
 		}
-		return ret
 	}
 
 	fn callArgsHasNoNil(ts []Type) -> (is bool) {
@@ -387,7 +387,7 @@ public class FunctionType {
 			}
 		}
 	}
-
+	
 	private fn parameterCount() -> (count int) {
 		count = len(this.parameterList)
 		if this.vArgs != null {

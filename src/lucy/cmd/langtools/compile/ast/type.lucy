@@ -336,7 +336,7 @@ public class Type {
 					block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(i)
 				}
 				i.mkUsed(this.pos)
-				return block.inheritedAttribute.thePackageBeenCompiling.load(i.Import)
+				return block.inheritedAttribute.thePackageBeenCompiling.load(i.theImport)
 			}
 			return null , new error(sprintf("%s type named '%s' not found",
 						errMsgPrefix(this.pos) , this.name))
@@ -360,7 +360,7 @@ public class Type {
 		if this.locatePackageDefinition {
 			block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(i)
 		}
-		p , err := block.inheritedAttribute.thePackageBeenCompiling.load(i.Import)
+		p , err := block.inheritedAttribute.thePackageBeenCompiling.load(i.theImport)
 		if err != null {
 			return null , new error(sprintf("%s %s",
 						errMsgPrefix(this.pos) , err.getMessage()))
