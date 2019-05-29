@@ -3,175 +3,172 @@
 import "lucy/jvm/cg"
 
 public class StatementWhenCase {
-    public matches       []Type
-    public block         Block
-    public inlineComment string
+	public matches       []Type
+	public block         Block
+	public inlineComment string
 }
-
 
 public class StatementWhen {
-    public pos                 Pos
-    public condition           Type
-    public typeExpression      Expression
-    public prefixExpressions   []Expression        // not support now 
-    public cases               []StatementWhenCase
-    public defaultBlock        Block
-    public inlineComment       string
-    public elseInlineComment   string
-    public initExpressionBlock Block = new Block()
-    public exits               []cg.Exit
+	public pos                 Pos
+	public condition           Type
+	public typeExpression      Expression
+	public prefixExpressions   []Expression        // not support now 
+	public cases               []StatementWhenCase
+	public defaultBlock        Block
+	public inlineComment       string
+	public elseInlineComment   string
+	public initExpressionBlock Block = new Block()
+	public exits               []cg.Exit
 
-    fn checkWhenType(block Block) -> (errs []error = []error{}) {
-        this.initExpressionBlock.inherit(block)
-        conditionType , es := this.typeExpression.checkSingleValueContextExpression(block)
-        errs.appendAll(es)
-        typeChecked := []Type{}
-        fn typeExist(typeChecked []Type , t Type) -> (exists Type) {
-            for v := range typeChecked {
-                if v.equals(t) {
-                    return v
-                }
-            }
-        }
-        if this.typeExpression.Type != ExpressionTypeTypeAssert ||
-            this.typeExpression.data.(ExpressionTypeAssert).isType == false {
-            errs.append(new error(sprintf("%s expression is not a XXX.(type)",
-                        conditionType.pos.errMsgPrefix())))
-        }
-        if conditionType != null {
-            if conditionType.isPointer() == false {
-                errs.append(new error(sprintf("%s is not a pointer at all",
-                            conditionType.pos.errMsgPrefix())))
-            }
-            for v := range this.cases {
-                for _ , match := range v.matches {
-                    if err := match.resolve(this.initExpressionBlock) ; err != null {
-                        errs.append(err)
-                        continue
-                    }
-                    if t := typeExist(typeChecked , match) ; t != null {
-                        errMsg := sprintf("%s type  '%s' alreay declared,first at:\n",
-                            match.pos.errMsgPrefix() , t.typeString())
-                        errMsg += sprintf("\t%s" , t.pos.errMsgPrefix())
-                        errs.append(new error(errMsg))
-                        continue
-                    }
-                    if conditionType.assignAble(block , errs , match ) == false {
-                        errs.append(
-                            new error(
-                                sprintf("%s '%s' is not sub class of '%s'",
-                                    match.pos.errMsgPrefix() , match.typeString() , conditionType.typeString())))
-                        continue
-                    }
-                    if match.validForTypeAssertOrConversion() == false {
-                        errs.append(new error(sprintf("%s '%s' is not valid for type assert",
-                                    match.typeString() , conditionType.typeString())))
-                        continue
-                    }
-                }
-            }
-        }
-        for v := range this.cases {
-            if v.block != null {
-                v.block.inherit(this.initExpressionBlock)
-                errs.appendAll(v.block.check())
-            }
-        }
-        if this.defaultBlock != null {
-            this.defaultBlock.inherit(this.initExpressionBlock)
-            errs.appendAll(this.defaultBlock.check())
-        }
-    }
+	fn checkWhenType(block Block) -> (errs []error = []error{}) {
+		this.initExpressionBlock.inherit(block)
+		conditionType , es := this.typeExpression.checkSingleValueContextExpression(block)
+		errs.appendAll(es)
+		typeChecked := []Type{}
+		fn typeExist(typeChecked []Type , t Type) -> (exists Type) {
+			for v := range typeChecked {
+				if v.equals(t) {
+					return v
+				}
+			}
+		}
+		if this.typeExpression.Type != ExpressionTypeTypeAssert ||
+			this.typeExpression.data.(ExpressionTypeAssert).isType == false {
+			errs.append(new error(sprintf("%s expression is not a XXX.(type)",
+						conditionType.pos.errMsgPrefix())))
+		}
+		if conditionType != null {
+			if conditionType.isPointer() == false {
+				errs.append(new error(sprintf("%s is not a pointer at all",
+							conditionType.pos.errMsgPrefix())))
+			}
+			for v := range this.cases {
+				for _ , match := range v.matches {
+					if err := match.resolve(this.initExpressionBlock) ; err != null {
+						errs.append(err)
+						continue
+					}
+					if t := typeExist(typeChecked , match) ; t != null {
+						errMsg := sprintf("%s type  '%s' alreay declared,first at:\n",
+							match.pos.errMsgPrefix() , t.typeString())
+						errMsg += sprintf("\t%s" , t.pos.errMsgPrefix())
+						errs.append(new error(errMsg))
+						continue
+					}
+					if conditionType.assignAble(block , errs , match) == false {
+						errs.append(
+							new error(
+								sprintf("%s '%s' is not sub class of '%s'",
+									match.pos.errMsgPrefix() , match.typeString() , conditionType.typeString())))
+						continue
+					}
+					if match.validForTypeAssertOrConversion() == false {
+						errs.append(new error(sprintf("%s '%s' is not valid for type assert",
+									match.typeString() , conditionType.typeString())))
+						continue
+					}
+				}
+			}
+		}
+		for v := range this.cases {
+			if v.block != null {
+				v.block.inherit(this.initExpressionBlock)
+				errs.appendAll(v.block.check())
+			}
+		}
+		if this.defaultBlock != null {
+			this.defaultBlock.inherit(this.initExpressionBlock)
+			errs.appendAll(this.defaultBlock.check())
+		}
+	}
 
-    /*
+	/*
 		switchStatement will be override
 	*/
-    fn check(block Block , switchStatement Statement) -> (errs []error = []error{}) {
-        if this.typeExpression != null {
-            return this.checkWhenType(block)
-        }
-        if this.condition == null {
-            return
-        }
-        if len(this.condition.getParameterType(block.inheritedAttribute.function.Type)) == 0 {
-            errs.append(new error(sprintf("%s '%s' contains no parameter type",
-                        this.condition.pos.errMsgPrefix() , this.condition.typeString())))
-        }
-        if err := this.condition.resolve(block) ; err != null {
-            errs.append(err)
-            return
-        }
-        var match Type
-        var matchBlock Block
-        typesChecked := []Type{}
-        checkExists := fn (ts []Type , t Type) -> (exists Type) {
-            for _ , v := range ts {
-                if v.equal(t) {
-                    return v
-                }
-            }
-            return null
-        }
-        for _ , t := range this.cases {
-            for _ , tt := range t.matches {
-                if err := tt.resolve(block) ; err != null {
-                    errs.append(err)
-                    continue
-                }
-                if exist := checkExists(typesChecked , tt) ; exist != null {
-                    errMsg := sprintf("%s match '%s' already exist,first declared at:\n",
-                        errMsgPrefix(tt.pos) , tt.typeString())
-                    errMsg += sprintf("\t %s" , errMsgPrefix(exist.pos))
-                    errs.append(new error(errMsg))
-                    return
-                }
-                typesChecked.append(tt)
-                if this.condition.equal(tt) == false {
-                    //no match here
-                    continue
-                }
-                // found
-                if match == null {
-                    match = tt
-                    matchBlock = t.block
-                }
-            }
+	fn check(block Block , switchStatement Statement) -> (errs []error = []error{}) {
+		if this.typeExpression != null {
+			return this.checkWhenType(block)
+		}
+		if this.condition == null {
+			return
+		}
+		if len(this.condition.getParameterType(block.inheritedAttribute.function.Type)) == 0 {
+			errs.append(new error(sprintf("%s '%s' contains no parameter type",
+						this.condition.pos.errMsgPrefix() , this.condition.typeString())))
+		}
+		if err := this.condition.resolve(block) ; err != null {
+			errs.append(err)
+			return
+		}
+		var match Type
+		var matchBlock Block
+		typesChecked := []Type{}
+		checkExists := fn (ts []Type , t Type) -> (exists Type) {
+			for _ , v := range ts {
+				if v.equal(t) {
+					return v
+				}
+			}
+			return null
+		}
+		for _ , t := range this.cases {
+			for _ , tt := range t.matches {
+				if err := tt.resolve(block) ; err != null {
+					errs.append(err)
+					continue
+				}
+				if exist := checkExists(typesChecked , tt) ; exist != null {
+					errMsg := sprintf("%s match '%s' already exist,first declared at:\n",
+						errMsgPrefix(tt.pos) , tt.typeString())
+					errMsg += sprintf("\t %s" , errMsgPrefix(exist.pos))
+					errs.append(new error(errMsg))
+					return
+				}
+				typesChecked.append(tt)
+				if this.condition.equal(tt) == false {
+					//no match here
+					continue
+				}
+				// found
+				if match == null {
+					match = tt
+					matchBlock = t.block
+				}
+			}
 
-        }
+		}
 
-        if len(errs) > 0 {
-            return errs
-        }
-        if match == null {
-            if this.defaultBlock == null {
-                errs.append(new error(sprintf("%s condition resolve as '%s' has no match and no 'default block'",
-                            errMsgPrefix(this.condition.pos) , this.condition.typeString())))
-            } else {
-                switchStatement.Type = StatementTypeBlock
-                switchStatement.block = this.defaultBlock
-                switchStatement.block.inherit(block)
-                switchStatement.block.isWhenBlock = true
-                switchStatement.block.inheritedAttribute.forBreak = switchStatement.block
-                errs.appendAll(switchStatement.block.check())
-            }
+		if len(errs) > 0 {
+			return errs
+		}
+		if match == null {
+			if this.defaultBlock == null {
+				errs.append(new error(sprintf("%s condition resolve as '%s' has no match and no 'default block'",
+							errMsgPrefix(this.condition.pos) , this.condition.typeString())))
+			} else {
+				switchStatement.Type = StatementTypeBlock
+				switchStatement.block = this.defaultBlock
+				switchStatement.block.inherit(block)
+				switchStatement.block.isWhenBlock = true
+				switchStatement.block.inheritedAttribute.forBreak = switchStatement.block
+				errs.appendAll(switchStatement.block.check())
+			}
+			return
+		}
+		// let`s reWrite
+		if matchBlock == null {
+			switchStatement.Type = StatementTypeNop
+			return errs
+		} else {
+			switchStatement.Type = StatementTypeBlock
+			switchStatement.block = matchBlock
+			switchStatement.block.inherit(block)
+			switchStatement.block.isWhenBlock = true
+			switchStatement.block.inheritedAttribute.forBreak = switchStatement.block
+			errs.appendAll(switchStatement.block.check())
+			return
+		}
 
-            return
-        }
-        // let`s reWrite
-        if matchBlock == null {
-            switchStatement.Type = StatementTypeNop
-            return errs
-        } else {
-            switchStatement.Type = StatementTypeBlock
-            switchStatement.block = matchBlock
-            switchStatement.block.inherit(block)
-            switchStatement.block.isWhenBlock = true
-            switchStatement.block.inheritedAttribute.forBreak = switchStatement.block
-            errs.appendAll(switchStatement.block.check())
-            return
-        }
-
-    }
+	}
 }
-
 

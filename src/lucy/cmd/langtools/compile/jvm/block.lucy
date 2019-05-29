@@ -192,8 +192,10 @@ class BuildBlock {
 			case ast.StatementTypeGoTo:
 				this.buildDefers(c , code , context , s.statementGoTo.defers , state)
 				if s.statementGoTo.statementLabel.codeOffsetGenerated {
+					//jump back 
 					jumpTo(code , s.statementGoTo.statementLabel.codeOffset)
 				} else {
+					// jump forward
 					exit := new cg.Exit(cg.OP_goto , code)
 					if s.statementGoTo.statementLabel.exits == null {
 						s.statementGoTo.statementLabel.exits = [exit]
@@ -250,15 +252,19 @@ class BuildBlock {
 		return
 	}
 
-	fn buildDefers(c cg.ClassHighLevel,
-		code cg.AttributeCode , context Context , ds []ast.StatementDefer , from StackMapState) {
+	fn buildDefers(
+		c cg.ClassHighLevel,
+		code cg.AttributeCode,
+		context Context,
+		ds []ast.StatementDefer,
+		from StackMapState) {
 		if len(ds) == 0 {
 			return
 		}
 		code.codes[code.codeLength] = cg.OP_aconst_null
 		code.codeLength++
 		index := len(ds) - 1
-		for index >= 0 { //       build defer,cannot have return statement is defer
+		for index >= 0 { //         build defer,cannot have return statement is defer
 			state := ds[index].stackMapState.(StackMapState)
 			state = (new StackMapState(state))
 			state.addTop(from)

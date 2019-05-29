@@ -1,47 +1,46 @@
 // all rights reserved , check the LICENSE file
 
 public class StatementGoTo {
-    public defers           []StatementDefer
-    public labelName        string
-    public statementLabel   StatementLabel
-    public pos              Pos
-    public locateDefinition bool
-    public findUsage        bool
-    public inlineComment    string
-    public autoCompletion   bool
+	public defers           []StatementDefer
+	public labelName        string
+	public statementLabel   StatementLabel
+	public pos              Pos
+	public locateDefinition bool
+	public findUsage        bool
+	public inlineComment    string
+	public autoCompletion   bool
 
-    fn checkStatementGoTo(block Block) -> (err error) {
-        if this.autoCompletion {
-            block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = searchLabelForAutoCompletionItems(block)
-            return
-        }
-        label := block.searchLabel(this.labelName , this.pos)
-        if label == null {
-            return new error(sprintf("%s label named '%s' not found",
-                        this.pos.errMsgPrefix() , this.labelName))
-        }
-        if this.locateDefinition {
-            block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(label)
-            return
-        }
-        this.statementLabel = label
-        this.defers = []StatementDefer{}
-        this.mkDefers(block)
-        return this.statementLabel.ready(block , this.pos)
-    }
+	fn checkStatementGoTo(block Block) -> (err error) {
+		if this.autoCompletion {
+			block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = searchLabelForAutoCompletionItems(block)
+			return
+		}
+		label := block.searchLabel(this.labelName , this.pos)
+		if label == null {
+			return new error(sprintf("%s label named '%s' not found",
+						this.pos.errMsgPrefix() , this.labelName))
+		}
+		if this.locateDefinition {
+			block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(label)
+			return
+		}
+		this.statementLabel = label
+		this.defers = []StatementDefer{}
+		this.mkDefers(block)
+		return this.statementLabel.ready(block , this.pos)
+	}
 
-    fn mkDefers(currentBlock Block) {
-        bs := []Block{}
-        for this.statementLabel.block != currentBlock {
-            bs.append(currentBlock)
-            currentBlock = currentBlock.outer
-        }
-        for _ , b := range bs {
-            if b.defers != null {
-                this.defers.appendAll(b.defers)
-            }
-        }
-    }
+	fn mkDefers(currentBlock Block) {
+		bs := []Block{}
+		for this.statementLabel.block != currentBlock {
+			bs.append(currentBlock)
+			currentBlock = currentBlock.outer
+		}
+		for _ , b := range bs {
+			if b.defers != null {
+				this.defers.appendAll(b.defers)
+			}
+		}
+	}
 }
-
 

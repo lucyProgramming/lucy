@@ -63,7 +63,7 @@ fn loadJavaStringClass(block Block , pos Pos) -> (err error) {
 		javaStringClass = cc
 		return null
 	} else {
-		panic("loaded java string class is not a class")
+		panic(sprintf("loaded '%s' is not a class" , JavaStringClassName))
 	}
 }
 

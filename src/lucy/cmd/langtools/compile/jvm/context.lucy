@@ -5,7 +5,6 @@ import "lucy/jvm/cg"
 
 class Context {
 	theFunction               ast.Function
-	// exceptionVarOffset        char
 	multiValueReturnVarOffset char
 	currentSourceFile         string
 	currentLineNumber         int

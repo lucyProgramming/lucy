@@ -83,7 +83,7 @@ public class StatementFor {
         if bin.left.Type == ExpressionTypeList {
             lefts = bin.left.data.([]Expression)
         } else {
-            lefts = []Expression{bin.left}
+            lefts = [bin.left]
         }
 
         if len(lefts) > 2 {
@@ -115,7 +115,6 @@ public class StatementFor {
                 identifierV = lefts[0].data.(ExpressionIdentifier)
                 posV = lefts[0].pos
             }
-
             if identifierV.name != UnderScore {
                 vd := new Variable()
                 vd.locateDefinition = identifierV.locateDefinition
@@ -206,7 +205,6 @@ public class StatementFor {
                     this.rangeAttr.expressionValue = lefts[0]
                 }
             }
-
             var receiverKType Type
             if this.rangeAttr.expressionKey != null {
                 receiverKType = this.rangeAttr.expressionKey.getLeftValue(this.initExpressionBlock , errs)
