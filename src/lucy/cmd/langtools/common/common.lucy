@@ -6,123 +6,127 @@ import "java/io"
 import "java/nio/file/FileSystems"
 
 public fn getLucyRoot() -> (path string) {
-    envs := os.getEnvs()
-    if envs.keyExist("LUCYROOT") == false {
-        panic("env variable LUCYROOT is not set")
-    }
-    path = envs["LUCYROOT"]
+	envs := os.getEnvs()
+	if envs.keyExist("LUCYROOT") == false {
+		panic("env variable LUCYROOT is not set")
+	}
+	path = envs["LUCYROOT"]
 }
 
 public fn getLucyPath() -> (paths []string) {
-    envs := os.getEnvs()
-    if envs.keyExist("LUCYROOT") == false {
-        panic("env variable LUCYROOT is not set")
-    }
-    ps := {envs["LUCYROOT"] -> true}
-    lucyPath := envs["LUCYPATH"]
-    osName := System.getProperty("os.name").toLowerCase()
-    if osName.startsWith("windows") {
-        for v := range lucyPath.split(";") {
-            ps[v] = true
-        }
-    } else {
-        for v := range lucyPath.split(":") {
-            ps[v] = true
-        }
-    }
-    paths = new []string(0)
-    for k , _ := range ps {
-        found := false
-        p := FileSystems.getDefault().getPath(k).normalize()
-        for vv := range paths {
-            if p.compareTo(FileSystems.getDefault().getPath(vv).normalize()) == 0 {
-                found = true
-                break
-            }
-        }
-        if found == false {
-            paths.append(p.toString())
-        }
-    }
-    if len(paths) == 0 {
-        paths = [FileSystems.getDefault().getPath(os.getCwd()).normalize().toString()]
-    } else {
-        p := FileSystems.getDefault().getPath(os.getCwd()).normalize()
-        found := false
-        for v := range paths {
-            if p.compareTo(FileSystems.getDefault().getPath(v).normalize()) == 0 {
-                found = true
-                break
-            }
-        }
-        if found == false {
-            paths.append(p.toString())
-        }
-    }
+	envs := os.getEnvs()
+	if envs.keyExist("LUCYROOT") == false {
+		panic("env variable LUCYROOT is not set")
+	}
+	ps := {envs["LUCYROOT"] -> true}
+	lucyPath := envs["LUCYPATH"]
+	osName := System.getProperty("os.name").toLowerCase()
+	if osName.startsWith("windows") {
+		for v := range lucyPath.split(";") {
+			ps[v] = true
+		}
+	} else {
+		for v := range lucyPath.split(":") {
+			ps[v] = true
+		}
+	}
+	paths = new []string(0)
+	for k , _ := range ps {
+		found := false
+		p := FileSystems.getDefault().getPath(k).normalize()
+		for vv := range paths {
+			if p.compareTo(FileSystems.getDefault().getPath(vv).normalize()) == 0 {
+				found = true
+				break
+			}
+		}
+		if found == false {
+			paths.append(p.toString())
+		}
+	}
+	if len(paths) == 0 {
+		paths = [FileSystems.getDefault().getPath(os.getCwd()).normalize().toString()]
+	} else {
+		p := FileSystems.getDefault().getPath(os.getCwd()).normalize()
+		found := false
+		for v := range paths {
+			if p.compareTo(FileSystems.getDefault().getPath(v).normalize()) == 0 {
+				found = true
+				break
+			}
+		}
+		if found == false {
+			paths.append(p.toString())
+		}
+	}
 }
 
 public fn getClassPath() -> (paths []string) {
-    envs := os.getEnvs()
-    classPath := envs["CLASSPATH"]
-    osName := System.getProperty("os.name").toLowerCase()
-    ps := new map{string -> bool}()
-    if osName.startsWith("windows") {
-        for v := range classPath.split(";") {
-            ps[v] = true
-        }
-    } else {
-        for v := range classPath.split(":") {
-            ps[v] = true
-        }
-    }
-    paths = new []string(ps.size())
-    i := 0
-    for k , _ := range ps {
-        paths[i] = k
-        i++
-    }
+	envs := os.getEnvs()
+	classPath := envs["CLASSPATH"]
+	osName := System.getProperty("os.name").toLowerCase()
+	ps := new map{string -> bool}()
+	if osName.startsWith("windows") {
+		for v := range classPath.split(";") {
+			ps[v] = true
+		}
+	} else {
+		for v := range classPath.split(":") {
+			ps[v] = true
+		}
+	}
+	paths = new []string(ps.size())
+	i := 0
+	for k , _ := range ps {
+		paths[i] = k
+		i++
+	}
 }
 
 public fn findPackageInWhichDirectory(
-    lucyPath []string,
-    packageName string) -> (which string) {
-    ps := []string{}
-    for _ , v := range lucyPath {
-        if p := v + "/src/" + packageName ; true == new io.File(p).isDirectory() &&
-            dirHaveFileType(p , ".lucy") {
-            ps.append(v)
-        }
-    }
-    if ps.size() == 0 {
-        panic(sprintf("package '%s' not found" , packageName))
-    }
-    if ps.size() > 1 {
-        errMsg := sprintf("more than 1 package named '%s'" , packageName)
-        panic(errMsg)
-    }
-    which = ps[0]
+	lucyPath []string,
+	packageName string) -> (
+	which string) {
+	ps := []string{}
+	for _ , v := range lucyPath {
+		if p := v + "/src/" + packageName ; true == new io.File(p).isDirectory() &&
+			dirHaveFileType(p , ".lucy") {
+			ps.append(v)
+		}
+	}
+	if ps.size() == 0 {
+		panic(sprintf("package '%s' not found" , packageName))
+	}
+	if ps.size() > 1 {
+		errMsg := sprintf("more than 1 package named '%s'" , packageName)
+		panic(errMsg)
+	}
+	which = ps[0]
 }
 
-public fn getLucyRootAndLucyPath() -> (lucyRoot string , lucyPath []string , err error) {
-    defer {
-        err = catch()
-    }
-    lucyRoot = getLucyRoot()
-    lucyPath = getLucyPath()
+public fn getLucyRootAndLucyPath() -> (
+	lucyRoot string,
+	lucyPath []string,
+	err error) {
+	defer {
+		err = catch()
+	}
+	lucyRoot = getLucyRoot()
+	lucyPath = getLucyPath()
 }
 
 //FIXME in windows case is not sensitive
-// d:\lucypath == D:\lucypath
+// "d:\lucypath" == "D:\lucypath"
 public fn getPathElements(path string) -> (elements []string) {
-    fileSystem := FileSystems.getDefault()
-    t := fileSystem.getPath(path)
-    elements = new []string(t.getNameCount())
-    for i := 0 ; i < t.getNameCount() ; i++ {
-        elements[i] = t.getName(i).toString()
-    }
+	fileSystem := FileSystems.getDefault()
+	t := fileSystem.getPath(path)
+	elements = new []string(t.getNameCount())
+	for i := 0 ; i < t.getNameCount() ; i++ {
+		elements[i] = t.getName(i).toString()
+	}
 }
 
-public fn twoPathEqual(p1 string , p2 string) -> (equal bool) {
-    return FileSystems.getDefault().getPath(p1).normalize().
-            compareTo(FileSystems.getDefault().getPath(p2).normalize()) == 0
+public fn pathEqual(p1 string , p2 string) -> (equal bool) {
+	return FileSystems.getDefault().getPath(p1).normalize().
+			compareTo(FileSystems.getDefault().getPath(p2).normalize()) == 0
 }

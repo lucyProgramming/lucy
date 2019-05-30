@@ -10,12 +10,19 @@ public fn parse(
 	bs []byte,
 	onlyParseImport bool,
 	nErrors2Stop int,
-	locateDefinition int,
-	getHover int,
-	findUsage int,
-	autoCompletion int) -> (errs []error) {
+	locateDefinition lex.posLineAndColumn,
+	getHover lex.posLineAndColumn,
+	findUsage lex.posLineAndColumn,
+	autoCompletion lex.posLineAndColumn) -> (errs []error) {
 	p := new Parser(bs , tops , filename , onlyParseImport , nErrors2Stop)
-	p.lexer = new lex.Lexer(bs , 0 , 0 , locateDefinition , getHover , findUsage , autoCompletion)
+	p.lexer = new lex.Lexer(
+		bs,
+		0,
+		0,
+		locateDefinition,
+		getHover,
+		findUsage,
+		autoCompletion)
 	errs = p.parse()
 }
 
@@ -36,7 +43,7 @@ class Parser {
 	BlockParser            BlockParser
 	TypeParser             TypeParser
 	EnumParser             EnumParser
-	tokenStackForLookBack  []lex.Token      // token stack for look back 
+	tokenStackForTraceBack []lex.Token      // token stack for look back 
 
 	/*
 		call before parse source file
@@ -138,12 +145,12 @@ class Parser {
 						// looks like a function 
 						f := new lex.Token()
 						f.Type = lex.TokenFn
-						this.tokenStackForLookBack = [f , identifierToken , this.token]
+						this.tokenStackForTraceBack = [f , identifierToken , this.token]
 						this.errs.append(new error(sprintf("%s missing 'fn'" , this.errMsgPrefix(this.mkPos(identifierToken)))))
 						this.next(lfIsToken) // restore 
 						continue
 					} else {
-						this.tokenStackForLookBack = [identifierToken , this.token]
+						this.tokenStackForTraceBack = [identifierToken , this.token]
 						this.next(lfIsToken) // restore 
 						e , _ := this.ExpressionParser.parseExpression(true)
 						if e != null {
@@ -542,9 +549,9 @@ class Parser {
 			this.consumeFoundValidToken = false
 			return
 		}
-		if len(this.tokenStackForLookBack) > 0 {
-			this.token = this.tokenStackForLookBack[0]
-			this.tokenStackForLookBack = this.tokenStackForLookBack[1:]
+		if len(this.tokenStackForTraceBack) > 0 {
+			this.token = this.tokenStackForTraceBack[0]
+			this.tokenStackForTraceBack = this.tokenStackForTraceBack[1:]
 			return
 		}
 		var err error
@@ -698,7 +705,7 @@ class Parser {
 		}
 		ret.comment = comment.comment
 		if this.token.Type == lex.TokenComment {
-			ret.inlineComment = this.token.stringValue 
+			ret.inlineComment = this.token.stringValue
 			this.next(lfIsToken)
 		}
 		return ret , err
@@ -734,7 +741,7 @@ class Parser {
 		if len(names) == 1 &&
 			this.token.Type == lex.TokenSelection {
 			// XXX.
-			this.tokenStackForLookBack = [token , this.token]
+			this.tokenStackForTraceBack = [token , this.token]
 			this.next(lfIsToken) // restore the stack 
 			var t ast.Type
 			t , err = this.parseType()

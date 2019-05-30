@@ -50,8 +50,8 @@ class ExpressionCheckLeftValue {
 					e.value = result
 					return
 				}
-				errs.append(new error(sprintf("%s identifier '%s' is '%s' , cannot be used as left value",
-							e.pos.errMsgPrefix() , identifier.name , block.identifierIsWhat(d))))
+				errs.append(new error(sprintf("%s identifier '%s' cannot be used as left value",
+							e.pos.errMsgPrefix() , identifier.name)))
 				return
 			case ExpressionTypeIndex:
 				result = ExpressionCheckIndex.check(e , block , errs)

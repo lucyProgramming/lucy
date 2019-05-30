@@ -116,7 +116,7 @@ public class Package {
 			}
 			return true
 		}
-		need = langtoolsCommon.twoPathEqual(this.matchFile , file)
+		need = langtoolsCommon.pathEqual(this.matchFile , file)
 		if need == false {
 			if this.printFileMatchInfo {
 				printf("file '%s' '%s' not match\n" , this.matchFile , file)
@@ -315,7 +315,6 @@ public class Package {
 						errs.append(err)
 					}
 				}
-
 			}
 			if t , ok := v.node.(Expression) ; ok {
 				if t.Type == ExpressionTypeVar ||
@@ -504,7 +503,7 @@ public class Package {
 
 		for _ , v := range this.block.classes {
 			assert(v.block.inheritedAttribute.thePackageBeenCompiling != null)
-			es = v.checkPhase1()
+			es.appendAll(v.checkPhase1())
 			if this.locateDefinitionOrAutoCompletionFetched() {
 				return this.errors
 			}

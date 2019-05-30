@@ -3,13 +3,13 @@
 import "java/io"
 
 public fn ioCopy(out io.OutputStream , in io.InputStream) {
-    bs := new byte[](4 << 10)
-    var n int
-    for n != -1 {
-        n = in.read(bs)
-        if n == -1 {
-            break
-        }
-        out.write(bs , 0 , n)
-    }
+	bs := new byte[](4 << 10)
+	var n int
+	for n != -1 {
+		n = in.read(bs)
+		if n == -1 {
+			break
+		}
+		out.write(bs , 0 , n)
+	}
 }

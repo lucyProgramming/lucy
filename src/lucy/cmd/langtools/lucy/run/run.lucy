@@ -312,7 +312,7 @@ public class RunLucyPackage {
             v += "/class/"
             found := false
             for vv := range cp {
-                if common.twoPathEqual(vv , v) {
+                if common.pathEqual(vv , v) {
                     found = true
                     break
                 }

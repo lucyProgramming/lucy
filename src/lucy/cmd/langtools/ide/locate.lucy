@@ -3,6 +3,8 @@
 import "lucy/cmd/langtools/common"
 import "java/io"
 
+
+
 public fn locateLucyFile(file string) -> (lucyPath string , packageName string) {
 	lucyPaths := common.getLucyPath()
 	eles := common.getPathElements(file)

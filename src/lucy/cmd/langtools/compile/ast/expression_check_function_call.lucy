@@ -146,7 +146,7 @@ class ExpressionCheckFunctionCall {
                 return .checkFunctionPointerCall(e , block , errs , v.Type.theFunctionType , call)
             }
             errs.append(new error(sprintf("%s cannot make_node_objects call on '%s'",
-                        call.functionCallOn.pos.errMsgPrefix() , block.identifierIsWhat(d))))
+                        call.functionCallOn.pos.errMsgPrefix() , identifier.name)))
             return null
 
         }

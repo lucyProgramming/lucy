@@ -132,7 +132,8 @@ public class Loader implements ast.ImportLoader {
 		if foundInLucy == false {
 			for _ , v := range this.classPath {
 				if p := v + "/" + importName ; new io.File(p).isDirectory() && langtoolsCommon.dirHaveFileType(p , ".class") {
-					realPaths.append(new Resource(ResourceKindJavaPackage,
+					realPaths.append(
+						new Resource(ResourceKindJavaPackage,
 							p,
 							importName))
 				}
@@ -303,7 +304,7 @@ public class Loader implements ast.ImportLoader {
 		if c.isInnerClass() {
 			return
 		}
-		//name
+		// name
 		astClass = new ast.Class()
 		{
 			nameIndex := binary.BigEndian.getChar(c.constPools[c.thisClass].info)
@@ -438,26 +439,30 @@ public class Loader implements ast.ImportLoader {
 		return e
 	}
 
-	fn loadConst(c cg.Class , nameIndex char , t ast.Type) -> (boolValue bool , longValue long , doubleValue double , stringValue string) {
+	fn loadConst(c cg.Class , valueIndex char , t ast.Type) -> (
+		boolValue bool,
+		longValue long,
+		doubleValue double,
+		stringValue string) {
 		switch t.Type {
 			case ast.VariableTypeBool:
-				boolValue = binary.BigEndian.getInt(c.constPools[nameIndex].info) != 0
+				boolValue = binary.BigEndian.getInt(c.constPools[valueIndex].info) != 0
 				return
 			case ast.VariableTypeByte,
 				ast.VariableTypeShort,
 				ast.VariableTypeChar,
 				ast.VariableTypeInt:
-				longValue = long(binary.BigEndian.getInt(c.constPools[nameIndex].info))
+				longValue = long(binary.BigEndian.getInt(c.constPools[valueIndex].info))
 				return
 			case ast.VariableTypeLong:
-				longValue = long(binary.BigEndian.getLong(c.constPools[nameIndex].info))
+				longValue = long(binary.BigEndian.getLong(c.constPools[valueIndex].info))
 				return
 			case ast.VariableTypeFloat , ast.VariableTypeDouble:
-				doubleValue = double(binary.BigEndian.getLong(c.constPools[nameIndex].info))
+				doubleValue = double(binary.BigEndian.getLong(c.constPools[valueIndex].info))
 				return
 			case ast.VariableTypeString:
-				valueIndex := binary.BigEndian.getChar(c.constPools[nameIndex].info)
-				stringValue = string(c.constPools[valueIndex].info)
+				index := binary.BigEndian.getChar(c.constPools[valueIndex].info)
+				stringValue = string(c.constPools[index].info)
 				return
 		}
 	}

@@ -400,6 +400,11 @@ public class AutoCompletionItem {
 		item.Type = "keyword"
 		item.name = "const"
 		items.append(item)
+
+		item = new AutoCompletionItem()
+		item.Type = "keyword"
+		item.name = "typealias"
+		items.append(item)
 	}
 
 	static fn getFieldDefaultAutoCompletionItem() -> (items []AutoCompletionItem) {

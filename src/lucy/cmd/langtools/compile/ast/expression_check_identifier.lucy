@@ -185,8 +185,8 @@ class ExpressionCheckIdentifier {
             identifier.enumName = enumName
             return result , null
         }
-        err = new error(sprintf("%s identifier '%s' is not a expression , but '%s'",
-                e.pos.errMsgPrefix() , identifier.name , block.identifierIsWhat(d)))
+        err = new error(sprintf("%s identifier '%s' is not a expression",
+                e.pos.errMsgPrefix() , identifier.name ))
     }
 
     static fn checkIdentifierThroughImports(block Block , identifier ExpressionIdentifier , e Expression , it Import) -> (valueType Type , err error) {

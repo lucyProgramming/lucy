@@ -141,6 +141,7 @@ public enum TokenKind {
 	TokenEof	// end of file
 
 }
+
 var keywordsMap = {
 		"fn" -> TokenFn,
 		"enum" -> TokenEnum,
@@ -192,3 +193,5 @@ var keywordsMap = {
 		"when" -> TokenWhen,
 		"type" -> TokenType
 	}
+
+typealias posLineAndColumn = int

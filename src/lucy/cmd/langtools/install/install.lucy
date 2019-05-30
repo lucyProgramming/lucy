@@ -2,6 +2,7 @@
 
 import "java/io"
 import "lucy/cmd/langtools/lucy/run"
+import "lucy/cmd/langtools/common"
 
 class Install {
 	dir         string
@@ -33,17 +34,13 @@ class Install {
 	fn installDir(dir string , packageName string) {
 		f := new io.File(dir)
 		fs := f.listFiles()
-		hasLucyFile := false
 		for f := range fs {
 			if f.isDirectory() {
 				this.installDir(dir + "/" + f.getName() , packageName + "/" + f.getName())
 				continue
 			}
-			if f.getName().endsWith(".lucy") {
-				hasLucyFile = true
-			}
 		}
-		if false == hasLucyFile {
+		if common.dirHaveFileType(dir , ".lucy") == false {
 			return
 		}
 		if this.verbose {

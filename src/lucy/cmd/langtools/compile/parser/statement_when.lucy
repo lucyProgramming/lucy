@@ -22,7 +22,7 @@ class StatementWhenParser extends ParserFather {
 			idenfierToken := this.parser.token
 			this.parser.next(lfIsToken)
 			thisToken := this.parser.token
-			this.parser.tokenStackForLookBack = [idenfierToken , thisToken] // restore on stack
+			this.parser.tokenStackForTraceBack = [idenfierToken , thisToken] // restore on stack
 			this.parser.next(lfIsToken) // restore idenfierToken token
 			if thisToken.Type == lex.TokenLc {
 				condition , err = this.parser.parseType()

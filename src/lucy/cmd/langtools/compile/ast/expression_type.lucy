@@ -74,6 +74,7 @@ public enum ExpressionTypeKind {
 	ExpressionTypeDot,	/* .  */
 	ExpressionTypeAutoCompletion	//auto completion 
 }
+
 public class ExpressionTypeAssert extends ExpressionTypeConversion {
 	public multiValueContext bool
 	public isType            bool // a.(type)  type is a key word , value is good enough 
@@ -85,12 +86,12 @@ public class ExpressionQuestion implements ExpressionNodeInterface {
 	public theFalse  Expression
 }
 
-public class ExpressionSlice implements ExpressionNodeInterface{
+public class ExpressionSlice implements ExpressionNodeInterface {
 	public on          Expression
 	public start , end Expression
 }
 
-public class ExpressionFunctionCall implements ExpressionNodeInterface{
+public class ExpressionFunctionCall implements ExpressionNodeInterface {
 	public buildInFunctionMeta      Object                   // for build in function only
 	public functionCallOn           Expression
 	public args                     []Expression
@@ -104,8 +105,8 @@ public class ExpressionFunctionCall implements ExpressionNodeInterface{
 	public lpInlineComment string
 }
 
-public class ExpressionMethodCall implements ExpressionNodeInterface{
-	public theStaticMethodCallClass Class                  // for object or class
+public class ExpressionMethodCall implements ExpressionNodeInterface {
+	public theStaticMethodCallClass Class                 // for object or class
 	public methodCallOn             Expression
 	public args                     []Expression
 	public vArgs                    CallVariableLengthArg
@@ -129,13 +130,13 @@ public class ExpressionMethodCall implements ExpressionNodeInterface{
 	public lpInlineComment string
 }
 
-public class ExpressionVar implements ExpressionNodeInterface{
+public class ExpressionVar implements ExpressionNodeInterface {
 	public Type       Type
 	public variables  []Variable
 	public initValues []Expression
 }
 
-public class ExpressionVarAssign implements ExpressionNodeInterface{
+public class ExpressionVarAssign implements ExpressionNodeInterface {
 	public lefts            []Expression
 	public initValues       []Expression
 	public ifDeclaredBefore []bool       // used for colon assign
@@ -146,7 +147,7 @@ public class ExpressionTypeConversion implements ExpressionNodeInterface {
 	public value Expression
 }
 
-public class ExpressionIdentifier implements ExpressionNodeInterface{
+public class ExpressionIdentifier implements ExpressionNodeInterface {
 	public name             string
 	public variable         Variable
 	public function         Function
@@ -159,12 +160,12 @@ public class ExpressionIdentifier implements ExpressionNodeInterface{
 	public rename           bool
 }
 
-public class ExpressionIndex implements ExpressionNodeInterface{
+public class ExpressionIndex implements ExpressionNodeInterface {
 	public indexOn Expression
 	public index   Expression
 }
 
-public class ExpressionSelection implements ExpressionNodeInterface{
+public class ExpressionSelection implements ExpressionNodeInterface {
 	public selectionOn      Expression
 	public name             string
 	public field            ClassField  // expression is class or object
@@ -184,7 +185,7 @@ public class ExpressionSelection implements ExpressionNodeInterface{
 	public autoCompletion bool
 }
 
-public class ExpressionNew implements ExpressionNodeInterface{
+public class ExpressionNew implements ExpressionNodeInterface {
 	public Type         Type
 	public args         []Expression
 	public construction ClassMethod

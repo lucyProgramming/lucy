@@ -1,6 +1,3 @@
 // all rights reserved , check the LICENSE file
 
-
-fn main(args []string) {
-   
-}
+fn main(args []string){}

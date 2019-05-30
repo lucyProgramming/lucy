@@ -386,7 +386,7 @@ class ClassParser extends ParserFather {
 			this.parser.errs.append(new error(sprintf("%s missing 'fn'" , this.parser.errMsgPrefix(identifierPos))))
 			t := new lex.Token()
 			t.Type = lex.TokenFn
-			this.parser.tokenStackForLookBack = [t , identifierToken , this.parser.token]
+			this.parser.tokenStackForTraceBack = [t , identifierToken , this.parser.token]
 			this.next(lfIsToken) // restore fn 
 			return
 		}

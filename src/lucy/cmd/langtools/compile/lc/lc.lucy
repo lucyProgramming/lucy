@@ -15,7 +15,10 @@ public fn MainFn(
 	onlyImport bool,
 	disableCheckUnUse bool,
 	packageName string,
-	printError bool) -> (hasMain bool , es []error , compiledClassFiles []string) {
+	printError bool) -> (
+	hasMain bool,
+	es []error,
+	compiledClassFiles []string) {
 	var compiler = new Compiler()
 	if len(files) == 0 {
 		return false , [new error("no file specified")] , null

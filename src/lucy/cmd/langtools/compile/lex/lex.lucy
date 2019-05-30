@@ -8,20 +8,21 @@ public class Lexer {
 	lastLine         int
 	line             int
 	offset , end     int
-	locateDefinition int
-	getHover         int
-	findUsage        int
-	autoCompletion   int
+	locateDefinition posLineAndColumn
+	getHover         posLineAndColumn
+	findUsage        posLineAndColumn
+	autoCompletion   posLineAndColumn
 	columnOffset     int
 	lastColumnOffset int
 
-	public fn Lexer(bs []byte,
+	public fn Lexer(
+		bs []byte,
 		startLine int,
 		endColumnOffset int,
-		locateDefinition int,
-		getHover int,
-		findUsage int,
-		autoCompletion int) {
+		locateDefinition posLineAndColumn,
+		getHover posLineAndColumn,
+		findUsage posLineAndColumn,
+		autoCompletion posLineAndColumn) {
 		this.super()
 		this.bs = bs
 		this.end = len(bs)
@@ -276,13 +277,11 @@ public class Lexer {
 					err = new error(sprintf("constant %d exceeds max int" , longValue))
 				}
 			}
-
 		}
-
 		return
 	}
 	//store line and column in a int 
-	fn getLineAndColumnFromPos(pos int) -> (line int , column int) {
+	fn getLineAndColumnFromPos(pos posLineAndColumn) -> (line int , column int) {
 		line = pos >> 16
 		column = int(char(pos))
 	}
@@ -605,7 +604,7 @@ public class Lexer {
 		}
 		for c == ' ' ||
 			c == '\t' ||
-			c == '\r' { //       skip empty
+			c == '\r' { //          skip empty
 			c , eof = this.getChar()
 		}
 		if eof {

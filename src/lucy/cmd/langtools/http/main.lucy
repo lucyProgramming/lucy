@@ -9,24 +9,23 @@ import "lucy/cmd/langtools/http/ide"
 import "lucy/cmd/langtools/http/doc"
 
 public fn http(args []string) {
-    host , port := new Flags().parseArgs(args)
-    printf("listen on %s:%s\n" , host , port)
-    server := HttpServer.create(new InetSocketAddress(host , port) , 0)
-    server.createContext("/exit" , new ExitHandler())
-    ide.registerHandlers("/ide" , server)
-    doc.registerHandlers("/doc" , server)
-    server.start()
+	host , port := new Flags().parseArgs(args)
+	printf("listen on %s:%s\n" , host , port)
+	server := HttpServer.create(new InetSocketAddress(host , port) , 0)
+	server.createContext("/exit" , new ExitHandler())
+	ide.registerHandlers("/ide" , server)
+	doc.registerHandlers("/doc" , server)
+	server.start()
 }
 
 fn main(args []string) {
-    http(args)
+	http(args)
 }
 
 class ExitHandler implements HttpHandler {
-    public fn handle(exchange HttpExchange) {
-        print("system is going to shut down")
-        os.exit(0)
-    }
+	public fn handle(exchange HttpExchange) {
+		print("system is going to shut down")
+		os.exit(0)
+	}
 }
-
 

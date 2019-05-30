@@ -221,13 +221,13 @@ public class Block implements TopNodeInterface {
 		return null
 	}
 
-	fn identifierIsWhat(x Object) -> (w string) {
-		if x == null {
-			w = "null"
-			return
-		}
-		return x.getClass().getName()
-	}
+	// fn identifierIsWhat(x Object) -> (what string) {
+	// 	if x == null {
+	// 		what = "null"
+	// 		return
+	// 	}
+	// 	return x.getClass().getName()
+	// }
 
 	/*
         search identifier
