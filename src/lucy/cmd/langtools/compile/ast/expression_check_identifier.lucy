@@ -3,212 +3,212 @@
 import "java/util/Date"
 
 class ExpressionCheckIdentifier {
-    static fn check(e Expression , block Block) -> (valueType Type , err error) {
-        identifier := e.data.(ExpressionIdentifier)
-        if identifier.autoCompletion {
-            block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems =
-                searchRightValueForAutoCompletionItems(e.pos , block)
-            return
-        }
-        if identifier.name == UnderScore {
-            //_ is not valid
-            return null , new error(sprintf("%s '%s' is not a valid name",
-                        e.pos.errMsgPrefix() , identifier.name))
-        }
-        //handle magic identifier
-        switch identifier.name {
-            case MagicIdentifierFile:
-                e.Type = ExpressionTypeString
-                e.stringValue = e.pos.filename
-                if identifier.locateDefinition {
-                    block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(e)
-                    return
-                }
-                result , _ := e.checkSingleValueContextExpression(block)
-                return result , null
-            case MagicIdentifierLine:
-                e.Type = ExpressionTypeInt
-                e.longValue = long(e.pos.startLine)
-                result , _ := e.checkSingleValueContextExpression(block)
-                if identifier.locateDefinition {
-                    block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(e)
-                    return
-                }
-                return result , null
-            case MagicIdentifierTime:
-                e.Type = ExpressionTypeLong
-                e.longValue = new Date().getTime()
-                result , _ := e.checkSingleValueContextExpression(block)
-                if identifier.locateDefinition {
-                    block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(e)
-                    return
-                }
-                return result , null
-            case MagicIdentifierClass:
-                if block.inheritedAttribute.theClass == null {
-                    return null,
-                        new error(sprintf("%s '%s' must in class scope" , e.pos.errMsgPrefix() , identifier.name))
-                }
-                if identifier.locateDefinition {
-                    block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(e)
-                    return
-                }
-                result := new Type()
-                result.Type = VariableTypeClass
-                result.pos = e.pos
-                result.theClass = block.inheritedAttribute.theClass
-                return result , null
-        }
-        isCaptureVar := [false]
-        d , err := block.searchIdentifier(e.pos , identifier.name , isCaptureVar)
-        if err != null {
-            return null , err
-        }
-        if d == null {
-            i := block.inheritedAttribute.thePackageBeenCompiling.getImport(e.pos.filename , identifier.name)
-            if i != null {
-                return .checkIdentifierThroughImports(block , identifier , e , i)
-            }
-        }
-        if d == null {
-            return null , new error(sprintf("%s '%s' not found" , e.pos.errMsgPrefix() , identifier.name))
-        }
-        if f , ok := d.(Function) ; ok {
-            if f.isGlobalMain() {
-                // not allow
-                return null , new error(sprintf("%s function is global main" , errMsgPrefix(e.pos)))
-            }
-            if f.isBuildIn {
-                return null , new error(sprintf("%s function '%s' is buildin",
-                            e.pos.errMsgPrefix() , f.name))
-            }
-            if f.templateFunction != null {
-                return null , new error(sprintf("%s function '%s' a template function",
-                            e.pos.errMsgPrefix() , f.name))
-            }
-            it , should := shouldAccessFromImports(block , identifier.name , e.pos , f.pos)
-            if should {
-                f.reduceFindUsageInstances(block)
-                return .checkIdentifierThroughImports(block , identifier , e , it)
-            }
-            if identifier.locateDefinition {
-                block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(f)
-                return
-            }
-            result := new Type()
-            result.Type = VariableTypeFunction
-            result.theFunctionType = f.Type
-            result.pos = e.pos
-            identifier.function = f
-            return result , null
-        }
-        if t , ok := d.(Variable) ; ok {
-            if t.isBuildIn == false {
-                i , should := shouldAccessFromImports(block , identifier.name , e.pos , t.pos)
-                if should {
-                    t.reduceFindUsageInstances(block)
-                    return .checkIdentifierThroughImports(block , identifier , e , i)
-                }
-            }
-            if isCaptureVar[0] {
-                t.beenCapturedAsRightValue++
-            }
-            if identifier.locateDefinition {
-                block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(t)
-                return
-            }
-            if t.findUsageInstances != null {
-                correctLastUsageType("value read" , t.findUsageInstances)
-            }
-            t.used = true
-            result := t.Type.cloneType()
-            result.pos = e.pos
-            identifier.variable = t
-            return result , null
-        }
-        if t , ok := d.(Constant) ; ok {
-            if t.isBuildIn == false {
-                i , should := shouldAccessFromImports(block , identifier.name , e.pos , t.pos)
-                if should {
-                    t.reduceFindUsageInstances(block)
-                    return .checkIdentifierThroughImports(block , identifier , e , i)
-                }
-            }
-            if identifier.locateDefinition {
-                block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(t)
-                return
-            }
-            t.used++
-            e.fromConst(t)
-            result := t.Type.cloneType()
-            result.pos = e.pos
-            return result , null
-        }
-        if c , ok := d.(Class) ; ok {
-            if c.isBuildIn == false {
-                i , should := shouldAccessFromImports(block , identifier.name , e.pos , c.pos)
-                if should {
-                    c.reduceFindUsageInstances(block)
-                    return .checkIdentifierThroughImports(block , identifier , e , i)
-                }
-            }
-            if identifier.locateDefinition {
-                block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(c)
-                return
-            }
-            if c.findUsageInstances != null {
-                correctLastUsageType("value read" , c.findUsageInstances)
-            }
-            result := new Type()
-            result.Type = VariableTypeClass
-            result.pos = e.pos
-            result.theClass = c
-            return result , null
-        }
-        if enumName , ok := d.(EnumName) ; ok {
-            if enumName.Enum.isBuildIn == false {
-                i , should := shouldAccessFromImports(block , identifier.name , e.pos , enumName.pos)
-                if should {
-                    enumName.reduceFindUsageInstances(block)
-                    return .checkIdentifierThroughImports(block , identifier , e , i)
-                }
-            }
-            if identifier.locateDefinition {
-                block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(enumName)
-                return
-            }
-            result := new Type()
-            result.pos = enumName.pos
-            result.Type = VariableTypeEnum
-            result.theEnumName = enumName
-            result.theEnum = enumName.Enum
-            identifier.enumName = enumName
-            return result , null
-        }
-        err = new error(sprintf("%s identifier '%s' is not a expression",
-                e.pos.errMsgPrefix() , identifier.name ))
-    }
+	static fn check(e Expression , block Block) -> (valueType Type , err error) {
+		identifier := e.data.(ExpressionIdentifier)
+		if identifier.autoCompletion {
+			block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems =
+				searchRightValueForAutoCompletionItems(e.pos , block)
+			return
+		}
+		if identifier.name == UnderScore {
+			//_ is not valid
+			return null , new error(sprintf("%s '%s' is not a valid name",
+						e.pos.errMsgPrefix() , identifier.name))
+		}
+		//handle magic identifier
+		switch identifier.name {
+			case MagicIdentifierFile:
+				e.Type = ExpressionTypeString
+				e.stringValue = e.pos.filename
+				if identifier.locateDefinition {
+					block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(e)
+					return
+				}
+				result , _ := e.checkSingleValueContextExpression(block)
+				return result , null
+			case MagicIdentifierLine:
+				e.Type = ExpressionTypeInt
+				e.longValue = long(e.pos.startLine)
+				result , _ := e.checkSingleValueContextExpression(block)
+				if identifier.locateDefinition {
+					block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(e)
+					return
+				}
+				return result , null
+			case MagicIdentifierTime:
+				e.Type = ExpressionTypeLong
+				e.longValue = new Date().getTime()
+				result , _ := e.checkSingleValueContextExpression(block)
+				if identifier.locateDefinition {
+					block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(e)
+					return
+				}
+				return result , null
+			case MagicIdentifierClass:
+				if block.inheritedAttribute.theClass == null {
+					return null,
+						new error(sprintf("%s '%s' must in class scope" , e.pos.errMsgPrefix() , identifier.name))
+				}
+				if identifier.locateDefinition {
+					block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(e)
+					return
+				}
+				result := new Type()
+				result.Type = VariableTypeClass
+				result.pos = e.pos
+				result.theClass = block.inheritedAttribute.theClass
+				return result , null
+		}
+		isCaptureVar := [false]
+		d , err := block.searchIdentifier(e.pos , identifier.name , isCaptureVar)
+		if err != null {
+			return null , err
+		}
+		if d == null {
+			i := block.inheritedAttribute.thePackageBeenCompiling.getImport(e.pos.filename , identifier.name)
+			if i != null {
+				return .checkIdentifierThroughImports(block , identifier , e , i)
+			}
+		}
+		if d == null {
+			return null , new error(sprintf("%s '%s' not found" , e.pos.errMsgPrefix() , identifier.name))
+		}
+		if f , ok := d.(Function) ; ok {
+			if f.isGlobalMain() {
+				// not allow
+				return null , new error(sprintf("%s function is global main" , errMsgPrefix(e.pos)))
+			}
+			if f.isBuildIn {
+				return null,
+					new error(sprintf("%s function '%s' is buildin",
+								e.pos.errMsgPrefix() , f.name))
+			}
+			if f.templateFunction != null {
+				return null , new error(sprintf("%s function '%s' a template function",
+							e.pos.errMsgPrefix() , f.name))
+			}
+			it , should := shouldAccessFromImports(block , identifier.name , e.pos , f.pos)
+			if should {
+				f.reduceFindUsageInstances(block)
+				return .checkIdentifierThroughImports(block , identifier , e , it)
+			}
+			if identifier.locateDefinition {
+				block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(f)
+				return
+			}
+			result := new Type()
+			result.Type = VariableTypeFunction
+			result.theFunctionType = f.Type
+			result.pos = e.pos
+			identifier.function = f
+			return result , null
+		}
+		if t , ok := d.(Variable) ; ok {
+			if t.isBuildIn == false {
+				i , should := shouldAccessFromImports(block , identifier.name , e.pos , t.pos)
+				if should {
+					t.reduceFindUsageInstances(block)
+					return .checkIdentifierThroughImports(block , identifier , e , i)
+				}
+			}
+			if isCaptureVar[0] {
+				t.beenCapturedAsRightValue++
+			}
+			if identifier.locateDefinition {
+				block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(t)
+				return
+			}
+			if t.findUsageInstances != null {
+				correctLastUsageType("value read" , t.findUsageInstances)
+			}
+			t.used = true
+			result := t.Type.cloneType()
+			result.pos = e.pos
+			identifier.variable = t
+			return result , null
+		}
+		if t , ok := d.(Constant) ; ok {
+			if t.isBuildIn == false {
+				i , should := shouldAccessFromImports(block , identifier.name , e.pos , t.pos)
+				if should {
+					t.reduceFindUsageInstances(block)
+					return .checkIdentifierThroughImports(block , identifier , e , i)
+				}
+			}
+			if identifier.locateDefinition {
+				block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(t)
+				return
+			}
+			t.used++
+			e.fromConst(t)
+			result := t.Type.cloneType()
+			result.pos = e.pos
+			return result , null
+		}
+		if c , ok := d.(Class) ; ok {
+			if c.isBuildIn == false {
+				i , should := shouldAccessFromImports(block , identifier.name , e.pos , c.pos)
+				if should {
+					c.reduceFindUsageInstances(block)
+					return .checkIdentifierThroughImports(block , identifier , e , i)
+				}
+			}
+			if identifier.locateDefinition {
+				block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(c)
+				return
+			}
+			if c.findUsageInstances != null {
+				correctLastUsageType("value read" , c.findUsageInstances)
+			}
+			result := new Type()
+			result.Type = VariableTypeClass
+			result.pos = e.pos
+			result.theClass = c
+			return result , null
+		}
+		if enumName , ok := d.(EnumName) ; ok {
+			if enumName.Enum.isBuildIn == false {
+				i , should := shouldAccessFromImports(block , identifier.name , e.pos , enumName.pos)
+				if should {
+					enumName.reduceFindUsageInstances(block)
+					return .checkIdentifierThroughImports(block , identifier , e , i)
+				}
+			}
+			if identifier.locateDefinition {
+				block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(enumName)
+				return
+			}
+			result := new Type()
+			result.pos = enumName.pos
+			result.Type = VariableTypeEnum
+			result.theEnumName = enumName
+			result.theEnum = enumName.Enum
+			identifier.enumName = enumName
+			return result , null
+		}
+		err = new error(sprintf("%s identifier '%s' is not a expression",
+				e.pos.errMsgPrefix() , identifier.name))
+	}
 
-    static fn checkIdentifierThroughImports(block Block , identifier ExpressionIdentifier , e Expression , it Import) -> (valueType Type , err error) {
-        p , err := block.inheritedAttribute.thePackageBeenCompiling.load(it.theImport)
-        if err != null {
-            return null , new error(sprintf("%s %s" , e.pos.errMsgPrefix() , err.getMessage()))
-        }
-        it.mkUsed(e.pos)
-        if identifier.locateDefinition {
-            block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(it)
-            return
-        }
-        valueType = new Type()
-        valueType.pos = e.pos
-        if pp , ok := p.(Package) ; ok {
-            valueType.thePackage = pp
-            valueType.Type = VariableTypePackage
-        } else {
-            valueType.theClass = p.(Class)
-            valueType.Type = VariableTypeClass
-        }
-    }
+	static fn checkIdentifierThroughImports(block Block , identifier ExpressionIdentifier , e Expression , it Import) -> (valueType Type , err error) {
+		p , err := block.inheritedAttribute.thePackageBeenCompiling.load(it.theImport)
+		if err != null {
+			return null , new error(sprintf("%s %s" , e.pos.errMsgPrefix() , err.getMessage()))
+		}
+		it.mkUsed(e.pos)
+		if identifier.locateDefinition {
+			block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(it)
+			return
+		}
+		valueType = new Type()
+		valueType.pos = e.pos
+		if pp , ok := p.(Package) ; ok {
+			valueType.thePackage = pp
+			valueType.Type = VariableTypePackage
+		} else {
+			valueType.theClass = p.(Class)
+			valueType.Type = VariableTypeClass
+		}
+	}
 }
-
 

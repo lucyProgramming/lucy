@@ -605,9 +605,7 @@ public class Package {
 					errs.append(t)
 				}
 			}
-
 		}
-
 		return errs
 	}
 
@@ -628,20 +626,15 @@ public class Package {
 			x = new SourceFile(i.pos.filename)
 			this.files[i.pos.filename] = x
 		}
-		return x.insertImport(this.block , i)
+		err = x.insertImport(this.block , i)
+		if err != null {
+			return err
+		}
+		_ , e := this.loader.loadImport(i.theImport)
+		if e != null {
+			err = new error(sprintf("%s %s" , i.pos.errMsgPrefix() , e.getMessage()))
+		}
 	}
-
-	// fn insertSouceFiles(filenames []string) {
-
-	// public fn getDirtyFiles() -> (files map{string -> bool}) {
-	// 	files = new map{string -> bool}()
-	// 	for f := range this.files {
-	// 		if f.isDirty {
-	// 			files[f.filename] = true
-	// 		}
-	// 	}
-
-	// }
 
 	fn load(resource string) -> (x Object , err error) {
 		if resource == null || resource == "" {
