@@ -8,7 +8,6 @@ public class AttributeInfo {
 
 typealias AttributeGroupedByName = map{string -> []AttributeInfo}
 
-
 public fn getAttributeByName(
 	a AttributeGroupedByName,
 	name string) -> (attrs []AttributeInfo) {

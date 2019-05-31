@@ -1,34 +1,36 @@
 // all rights reserved , check the LICENSE file
 
-import "lucy/cmd/langtools/ide/gotodefinition"
+import "lucy/cmd/langtools/ide/gotodefinition" as gotoDefinition
 import "lucy/cmd/langtools/compile/ast"
 import "lucy/os"
 
-public fn getHover (file string , pos int , bs []byte) ->(s string = "") {
-    if len(bs) == 0 {
-        // read the file 
-        t,_ := os.readFile(file)
-        bs = javaArray2Lucy(t)
-    }
-    storePackage := []ast.Package{null}
-    gotodefinition.findDefinitionFn(file , pos , bs , storePackage)
-    if storePackage[0] == null || 
-        storePackage[0].locatedDefinitionPosBaseOn == null {
-        return 
-    }
-    return new MakeHover(storePackage[0].locatedDefinitionPosBaseOn).make()
+public fn getHover(
+	file string,
+	pos int,
+	bs []byte) -> (s string = "") {
+	if len(bs) == 0 {
+		// read the file 
+		t , _ := os.readFile(file)
+		bs = javaArray2Lucy(t)
+	}
+	storePackage := []ast.Package{null}
+	gotoDefinition.findDefinitionFn(file , pos , bs , storePackage)
+	if storePackage[0] == null ||
+		storePackage[0].locatedDefinitionPosBaseOn == null {
+		return
+	}
+	return new MakeHover(storePackage[0].locatedDefinitionPosBaseOn).make()
 }
-
 
 fn main(args []string) {
 	file , bufferFile , pos := new Flags().parseArgs(args)
-    var bs []byte 
-    if bufferFile != null && bufferFile != "" {
-        t , err := os.readFile(bufferFile)
-        if null != err {
-            panic(err)
-        }
-        bs = javaArray2Lucy(t)
-    }
-    print(getHover(file , pos , bs))
+	var bs []byte
+	if bufferFile != null && bufferFile != "" {
+		t , err := os.readFile(bufferFile)
+		if null != err {
+			panic(err)
+		}
+		bs = javaArray2Lucy(t)
+	}
+	print(getHover(file , pos , bs))
 }

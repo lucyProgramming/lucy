@@ -24,16 +24,16 @@ class FindUsage implements HttpHandler {
         }
 
         uri := exchange.getRequestURI()
-        paramters := g.parseQuery(uri.getQuery())
-        file := paramters["file"]
+        parameters := g.parseQuery(uri.getQuery())
+        file := parameters["file"]
         if file == null || file == "" {
             bs := byte[]("file not provide")
             exchange.sendResponseHeaders(400 , long(len(bs)))
             os.write(bs)
             return
         }
-        line := Integer.parseInt(paramters["line"])
-        column := Integer.parseInt(paramters["column"])
+        line := Integer.parseInt(parameters["line"])
+        column := Integer.parseInt(parameters["column"])
         usages := findusage.findUsage2(file , (line << 16) | int(char(column)) , "" , null , null)
         bs := new json.Encoder(usages , "" , "\t").encode()
         exchange.sendResponseHeaders(200 , long(len(bs)))

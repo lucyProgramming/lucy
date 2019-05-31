@@ -32,7 +32,6 @@ public fn findUsage2(
 	result = sortUsages(
 		new FindUsage(lucyFiles,
 			packageName,
-			true,
 			common.getLucyPath(),
 			scope).find())
 }

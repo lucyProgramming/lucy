@@ -22,8 +22,8 @@ class AllDefinition implements HttpHandler {
             exchange.close()
         }
         uri := exchange.getRequestURI()
-        paramters := g.parseQuery(uri.getQuery())
-        dir := paramters["dir"]
+        parameters := g.parseQuery(uri.getQuery())
+        dir := parameters["dir"]
         if dir == null || dir == "" {
             bs := byte[]("dir not provide")
             exchange.sendResponseHeaders(400 , long(len(bs)))

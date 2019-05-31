@@ -23,7 +23,6 @@ public fn findDefinitionFn(file string , pos int , bs []byte , storePackage []as
     result = new FindDefinition(
         lucyFiles,
         packageName,
-        true,
         searchFile,
         pos >> 16,
         storePackage).find()

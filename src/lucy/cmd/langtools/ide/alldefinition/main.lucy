@@ -11,7 +11,7 @@ public fn getAllDefinition(dir string) -> (result ide.Definition[]) {
         os.exit(1)
     }
     lucyPath , packageName := ide.locateDir(dir)
-    result = new AllDefinition(ide.readLucyFiles(lucyFileNames) , packageName , lucyPath , true).getAllDefinition()
+    result = new AllDefinition(ide.readLucyFiles(lucyFileNames) , packageName , lucyPath).getAllDefinition()
 }
 
 fn main(args []string) {

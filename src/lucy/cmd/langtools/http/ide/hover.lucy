@@ -8,40 +8,38 @@ import "java/lang/Integer"
 import "java/lang/System"
 
 class GetHover implements HttpHandler {
-    public fn handle(exchange HttpExchange) {
-        os := exchange.getResponseBody()
-        now := System.currentTimeMillis()
-        defer {
-            CallStatus.collect(callStatus , "hover" , System.currentTimeMillis() - now)
-            e := catch()
-            if e != null {
-                exchange.sendResponseHeaders(500 , 0L)
-                os.write(byte[]("internal error"))
-                e.printStackTrace()
-            }
-            exchange.close()
-        }
+	public fn handle(exchange HttpExchange) {
+		os := exchange.getResponseBody()
+		now := System.currentTimeMillis()
+		defer {
+			CallStatus.collect(callStatus , "hover" , System.currentTimeMillis() - now)
+			e := catch()
+			if e != null {
+				exchange.sendResponseHeaders(500 , 0L)
+				os.write(byte[]("internal error"))
+				e.printStackTrace()
+			}
+			exchange.close()
+		}
 
-        bs := g.readBodyBytes(exchange.getRequestBody())
-        uri := exchange.getRequestURI()
-        paramters := g.parseQuery(uri.getQuery())
-        file := paramters["file"]
-        if file == null || file == "" {
-            bs := byte[]("file not provide")
-            exchange.sendResponseHeaders(400 , long(len(bs)))
-            os.write(bs)
-            return
-        }
-        line := Integer.parseInt(paramters["line"])
-        column := Integer.parseInt(paramters["column"])
-        s := hover.getHover(file , (line << 16) | int(char(column)) , bs)
-        bs = []byte(s)
-        header := exchange.getResponseHeaders()
-        header.set("Content-Type" , "Content-Type: text/html; charset=utf-8")
-        exchange.sendResponseHeaders(200 , long(len(bs)))
-        print(string(bs))
-        os.write(copy(new byte[](len(bs)) , bs))
-    }
+		bs := g.readBodyBytes(exchange.getRequestBody())
+		uri := exchange.getRequestURI()
+		parameters := g.parseQuery(uri.getQuery())
+		file := parameters["file"]
+		if file == null || file == "" {
+			bs := byte[]("file not provide")
+			exchange.sendResponseHeaders(400 , long(len(bs)))
+			os.write(bs)
+			return
+		}
+		line := Integer.parseInt(parameters["line"])
+		column := Integer.parseInt(parameters["column"])
+		s := hover.getHover(file , (line << 16) | int(char(column)) , bs)
+		bs = []byte(s)
+		header := exchange.getResponseHeaders()
+		header.set("Content-Type" , "Content-Type: text/html; charset=utf-8")
+		exchange.sendResponseHeaders(200 , long(len(bs)))
+		os.write(copy(new byte[](len(bs)) , bs))
+	}
 }
-
 

@@ -2,13 +2,11 @@
 
 import "lucy/cmd/langtools/ide"
 import "lucy/cmd/langtools/compile/ast"
-import "lucy/os"
 import "lucy/cmd/langtools/common"
 
 class FindDefinition {
     lucyFiles    []ide.LucyFile
-    packageName  string        
-    printErr     bool          
+    packageName  string              
     searchFile   string        
     matchLine    int           
     storePackage []ast.Package 
@@ -16,14 +14,12 @@ class FindDefinition {
     fn FindDefinition(
         lucyFiles []ide.LucyFile,
         packageName string,
-        printErr bool,
         searchFile string,
         matchLine int,
         storePackage []ast.Package) {
         this.super()
         this.lucyFiles = lucyFiles
         this.packageName = packageName
-        this.printErr = printErr
         this.searchFile = searchFile
         this.matchLine = matchLine
         this.storePackage = storePackage
@@ -49,13 +45,9 @@ class FindDefinition {
                 this.matchLine,
                 loader)
         }
+        blackHole(es)
         if p == null {
             return
-        }
-        if this.printErr {
-            for v := range es {
-                os.stderr.println(v.getMessage())
-            }
         }
         if null != this.storePackage {
             this.storePackage[0] = p

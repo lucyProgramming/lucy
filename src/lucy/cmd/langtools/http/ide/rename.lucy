@@ -24,15 +24,15 @@ class Rename implements HttpHandler {
         }
 
         uri := exchange.getRequestURI()
-        paramters := g.parseQuery(uri.getQuery())
-        filename := paramters["filename"]
+        parameters := g.parseQuery(uri.getQuery())
+        filename := parameters["filename"]
         if filename == null || filename == "" {
             bs := byte[]("filename not provide")
             exchange.sendResponseHeaders(400 , long(len(bs)))
             os.write(bs)
             return
         }
-        to := paramters["to"]
+        to := parameters["to"]
         if to == null || to == "" {
             bs := byte[]("rename to not provide")
             exchange.sendResponseHeaders(400 , long(len(bs)))
@@ -45,8 +45,8 @@ class Rename implements HttpHandler {
             os.write(bs)
             return
         }
-        line := Integer.parseInt(paramters["line"])
-        column := Integer.parseInt(paramters["column"])
+        line := Integer.parseInt(parameters["line"])
+        column := Integer.parseInt(parameters["column"])
         rename.renameFn(filename,
             g.readBodyBytes(exchange.getRequestBody()),
             to,

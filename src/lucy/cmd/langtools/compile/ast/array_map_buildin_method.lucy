@@ -4,7 +4,8 @@ public class ArrayMapBuildInMethod {
 	method string
 	pos    Pos    // not defined
 
-	fn ArrayMapBuildInMethod(Type string,
+	fn ArrayMapBuildInMethod(
+		Type string,
 		method string) {
 		this.super()
 		this.Type = Type

@@ -24,8 +24,8 @@ class Fmt implements HttpHandler {
             exchange.close()
         }
         uri := exchange.getRequestURI()
-        paramters := g.parseQuery(uri.getQuery())
-        file := paramters["file"]
+        parameters := g.parseQuery(uri.getQuery())
+        file := parameters["file"]
         if file == null || file == "" {
             bs := byte[]("file not provide")
             exchange.sendResponseHeaders(400 , long(len(bs)))

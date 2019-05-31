@@ -26,16 +26,16 @@ class AutoCompletion implements HttpHandler {
         }
 
         uri := exchange.getRequestURI()
-        paramters := g.parseQuery(uri.getQuery())
-        file := paramters["file"]
+        parameters := g.parseQuery(uri.getQuery())
+        file := parameters["file"]
         if file == null || file == "" {
             bs := byte[]("file not provide")
             exchange.sendResponseHeaders(400 , long(len(bs)))
             os.write(bs)
             return
         }
-        line := Integer.parseInt(paramters["line"])
-        column := Integer.parseInt(paramters["column"])
+        line := Integer.parseInt(parameters["line"])
+        column := Integer.parseInt(parameters["column"])
         bs := g.readBodyBytes(exchange.getRequestBody())
         if len(bs) == 0 {
             bs := byte[]("zero length bs")

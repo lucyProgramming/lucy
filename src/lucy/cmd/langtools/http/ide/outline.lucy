@@ -23,8 +23,8 @@ class OutLine implements HttpHandler {
             exchange.close()
         }
         uri := exchange.getRequestURI()
-        paramters := g.parseQuery(uri.getQuery())
-        filename := paramters["filename"]
+        parameters := g.parseQuery(uri.getQuery())
+        filename := parameters["filename"]
         if filename == null || filename == "" {
             bs := byte[]("dir not provide")
             exchange.sendResponseHeaders(400 , long(len(bs)))

@@ -7,8 +7,8 @@ import "lucy/os"
 import "lucy/encoding/json"
 
 public fn diagnose(filename string , bs []byte) -> (result map{string -> Error[]}) {
-	lucypath , packageName := ide.locateLucyFile(filename)
-	lucyFiles := ide.readLucyFiles(ide.getLucyFiles(lucypath + "/src/" + packageName))
+	lucyPath , packageName := ide.locateLucyFile(filename)
+	lucyFiles := ide.readLucyFiles(ide.getLucyFiles(lucyPath + "/src/" + packageName))
 	if len(bs) > 0 {
 		fileSystem := FileSystems.getDefault()
 		file := fileSystem.getPath(filename).getFileName().toString()
