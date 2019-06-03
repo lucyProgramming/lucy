@@ -3,7 +3,7 @@
 import "lucy/os"
 
 const usage = `
-    -o                 the outout file name
+    -o                 the output file name
     -manifest          the optional jar manifest file 
     -v                 verbose
 `

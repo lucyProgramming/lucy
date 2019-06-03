@@ -31,7 +31,7 @@ class Flags {
         }
         packageName = noUse[0]
         noUse = noUse[1:]
-        if len(noUse) > 1 {
+        if len(noUse) > 0 {
             panic("flag defined but not used:" + noUse)
             printUsageAndExit(1)
         }

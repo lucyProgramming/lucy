@@ -10,147 +10,153 @@ import "java/util/jar"
 import "java/util/zip"
 
 class Pack {
-    packageName            string
-    lucyPath               []string
-    outputFile             string
-    packageClsssFileCopied map{string -> bool}
-    lucyRoot               string
-    manifestFile           string
-    jarFile                jar.JarOutputStream
-    verbose                bool
+	packageName            string
+	lucyPath               []string
+	outputFile             string
+	packageClassFileCopied map{string -> bool}
+	lucyRoot               string
+	manifestFile           string
+	jarFile                jar.JarOutputStream
+	verbose                bool
 
-    fn Pack(
-        packageName string,
-        outputFile string,
-        manifestFile string,
-        verbose bool) {
-        this.super()
-        this.manifestFile = manifestFile
-        this.packageName = packageName
-        this.lucyRoot = common.getLucyRoot()
-        this.lucyPath = common.getLucyPath()
-        this.outputFile = outputFile
-        this.verbose = verbose
-        this.packageClsssFileCopied = new map{string -> bool}()
-    }
+	fn Pack(
+		packageName string,
+		outputFile string,
+		manifestFile string,
+		verbose bool) {
+		this.super()
+		this.manifestFile = manifestFile
+		this.packageName = packageName
+		this.lucyRoot = common.getLucyRoot()
+		this.lucyPath = common.getLucyPath()
+		this.outputFile = outputFile
+		this.verbose = verbose
+		this.packageClassFileCopied = new map{string -> bool}()
+	}
 
-    fn pack() {
-        if this.manifestFile == null ||
-            this.manifestFile == "" {
-            printf("warn: no manifest file provide!!\n")
-        }
-        // build the packge 
-        if err := new run.RunLucyPackage().
-            run("pack" , ["-build" , this.packageName]) ; err != null {
-            panic(err)
-        }
-        outputFileStream := new io.FileOutputStream(this.outputFile)
-        defer outputFileStream.close()
-        var manifestFileStream io.FileInputStream
-        if this.manifestFile != null && this.manifestFile != "" {
-            if this.verbose {
-                printf("manifest:%s\n" , this.manifestFile)
-            }
-            manifestFileStream = new io.FileInputStream(this.manifestFile)
-        }
-        defer {
-            if manifestFileStream != null {
-                manifestFileStream.close()
-            }
-        }
-        if this.manifestFile != null && this.manifestFile != "" {
-            manifest := new jar.Manifest(manifestFileStream)
-            this.jarFile = new jar.JarOutputStream(outputFileStream , manifest)
-        } else {
-            this.jarFile = new jar.JarOutputStream(outputFileStream)
-        }
-        // the core package must be dumped 
-        this.dumpPackageClassFiles("lucy/lang")
-        this.dumpLib(this.lucyRoot + "/lib/lucy" , "lucy")
-        this.dumpPackageClassFiles(this.packageName)
-        this.jarFile.flush()
-        this.jarFile.finish()
-    }
+	fn pack() {
+		if this.manifestFile == null ||
+			this.manifestFile == "" {
+			printf("warn: no manifest file provide!!\n")
+		}
+		// build the package  
+		if err := new run.RunLucyPackage().
+			run("pack",
+				["-build" , this.packageName]) ; err != null {
+			panic(err)
+		}
+		outputFileStream := new io.FileOutputStream(this.outputFile)
+		defer outputFileStream.close()
+		var manifestFileStream io.FileInputStream
+		if this.manifestFile != null && this.manifestFile != "" {
+			if this.verbose {
+				printf("manifest:%s\n" , this.manifestFile)
+			}
+			manifestFileStream = new io.FileInputStream(this.manifestFile)
+		}
+		defer {
+			if manifestFileStream != null {
+				manifestFileStream.close()
+			}
+		}
+		if this.manifestFile != null && this.manifestFile != "" {
+			manifest := new jar.Manifest(manifestFileStream)
+			this.jarFile = new jar.JarOutputStream(outputFileStream , manifest)
+		} else {
+			this.jarFile = new jar.JarOutputStream(outputFileStream)
+		}
+		// the core package must be dumped 
+		this.dumpPackageClassFiles("lucy/lang")
+		this.dumpLib(this.lucyRoot + "/lib/lucy" , "lucy")
+		this.dumpPackageClassFiles(this.packageName)
+		this.jarFile.flush()
+		this.jarFile.finish()
+	}
 
-    fn dumpLib(src string , packageName string) {
-        fis := new io.File(src).listFiles()
-        directoryEntryWrited := false
-        for v := range fis {
-            if v.isDirectory() {
-                this.dumpLib(src + "/" + v.getName() , packageName + "/" + v.getName())
-                continue
-            }
-            // not a class file
-            if v.getName().endsWith(".class") == false {
-                continue
-            }
-            if directoryEntryWrited == false {
-                zipEntry := new zip.ZipEntry(packageName + "/")
-                this.jarFile.putNextEntry(zipEntry)
-                directoryEntryWrited = true
-            }
-            if this.verbose {
-                print("create entry:" , src + "/" + v.getName())
-            }
-            t , err := os.readFile(src + "/" + v.getName())
-            if err != null {
-                panic(err)
-            }
-            zipEntry := new zip.ZipEntry(packageName + "/" + v.getName())
-            this.jarFile.putNextEntry(zipEntry)
-            this.jarFile.write(t)
-        }
-    }
+	fn dumpLib(src string , packageName string) {
+		fis := new io.File(src).listFiles()
+		directoryEntryWrote := false
+		for v := range fis {
+			if v.isDirectory() {
+				this.dumpLib(src + "/" + v.getName() , packageName + "/" + v.getName())
+				continue
+			}
+			// not a class file
+			if v.getName().endsWith(".class") == false {
+				continue
+			}
+			if directoryEntryWrote == false {
+				zipEntry := new zip.ZipEntry(packageName + "/")
+				this.jarFile.putNextEntry(zipEntry)
+				directoryEntryWrote = true
+			}
+			if this.verbose {
+				print("create entry:" , src + "/" + v.getName())
+			}
+			t , err := os.readFile(src + "/" + v.getName())
+			if err != null {
+				panic(err)
+			}
+			zipEntry := new zip.ZipEntry(packageName + "/" + v.getName())
+			this.jarFile.putNextEntry(zipEntry)
+			this.jarFile.write(t)
+		}
+	}
 
-    //dump package files 
-    fn dumpPackageClassFiles(packageName string) {
-        var dir string
-        if packageName == "lucy/lang" {
-            dir = this.lucyRoot + "/class/" + packageName
-        } else {
-            dir = common.findPackageInWhichDirectory(this.lucyPath , this.packageName) +
-                "/class/" + packageName
-        }
-        meta := this.readMaintain(dir)
-        for v := range meta.imports {
-            if this.packageClsssFileCopied.keyExist(v.name) {
-                continue
-            }
-            this.dumpPackageClassFiles(v.name)
-            this.packageClsssFileCopied[v.name] = true
-        }
-        // copy class files
-        fis := new io.File(dir).listFiles()
-        zipEntry := new zip.ZipEntry(packageName + "/")
-        this.jarFile.putNextEntry(zipEntry)
-        for v := range fis {
-            if v.isFile() == false ||
-                v.getName().endsWith(".class") == false {
-                continue
-            }
-            t , err := os.readFile(dir + "/" + v.getName())
-            if this.verbose {
-                print("create entry:" , dir + "/" + v.getName())
-            }
-            if err != null {
-                panic(err)
-            }
-            zipEntry := new zip.ZipEntry(packageName + "/" + v.getName())
-            this.jarFile.putNextEntry(zipEntry)
-            this.jarFile.write(t)
-        }
-    }
+	//dump package files 
+	fn dumpPackageClassFiles(packageName string) {
+		var dir string
+		if packageName == "lucy/lang" {
+			dir = this.lucyRoot + "/class/" + packageName
+		} else {
+			dir = common.findPackageInWhichDirectory(
+				this.lucyPath,
+				this.packageName) +
+				"/class/" +
+				packageName
+		}
+		meta := this.readMaintain(dir)
+		for v := range meta.imports {
+			if this.packageClassFileCopied.keyExist(v.name) {
+				continue
+			}
+			this.dumpPackageClassFiles(v.name)
+			this.packageClassFileCopied[v.name] = true
+		}
+		// copy class files
+		fis := new io.File(dir).listFiles()
+		zipEntry := new zip.ZipEntry(packageName + "/")
+		if this.verbose {
+			print("create entry:" , packageName + "/")
+		}
+		this.jarFile.putNextEntry(zipEntry)
+		for v := range fis {
+			if v.isFile() == false ||
+				v.getName().endsWith(".class") == false {
+				continue
+			}
+			t , err := os.readFile(dir + "/" + v.getName())
+			if this.verbose {
+				print("create entry:" , dir + "/" + v.getName())
+			}
+			if err != null {
+				panic(err)
+			}
+			zipEntry := new zip.ZipEntry(packageName + "/" + v.getName())
+			this.jarFile.putNextEntry(zipEntry)
+			this.jarFile.write(t)
+		}
+	}
 
-    fn readMaintain(dir string) -> (meta common.PackageMeta) {
-        t , err := os.readFile(dir + "/maintain.json")
-        if err != null {
-            print(dir + "/maintain.json")
-            panic(err)
-        }
-        bs := javaArray2Lucy(t)
-        meta = new common.PackageMeta()
-        new json.Decoder(meta , bs).decode()
-    }
+	fn readMaintain(dir string) -> (meta common.PackageMeta) {
+		t , err := os.readFile(dir + "/maintain.json")
+		if err != null {
+			print(dir + "/maintain.json")
+			panic(err)
+		}
+		bs := javaArray2Lucy(t)
+		meta = new common.PackageMeta()
+		new json.Decoder(meta , bs).decode()
+	}
 }
-
 
