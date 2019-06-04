@@ -85,7 +85,7 @@ class ExpressionCheckAssign {
 			}
 			if false == leftTypes[k].assignAble(block , errs , valueTypes[k]) {
 				errs.append(new error(sprintf("%s cannot assign '%s' to '%s'",
-							errMsgPrefix(valueTypes[k].pos),
+							errMsgPrefixDeprecated(valueTypes[k].pos),
 							valueTypes[k].typeString() , leftTypes[k].typeString())))
 			}
 		}

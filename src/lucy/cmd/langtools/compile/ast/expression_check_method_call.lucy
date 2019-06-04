@@ -138,7 +138,7 @@ class ExpressionCheckMethodCall {
 				}
 				if len(call.parameterTypes) > 0 {
 					errs.append(new error(sprintf("%s method call expect no parameter types",
-								errMsgPrefix(e.pos))))
+								errMsgPrefixDeprecated(e.pos))))
 				}
 				fieldMethodHandler := []ClassField{null}
 				ms , matched , err := object.theClass.accessMethod(block , e.pos , errs , new map{string -> bool}() , call , callArgTypes,
@@ -426,7 +426,7 @@ class ExpressionCheckMethodCall {
 			call := e.data.(ExpressionMethodCall)
 			if len(call.parameterTypes) > 0 {
 				errs.append(new error(sprintf("%s variable '%s' cannot be a template function",
-							errMsgPrefix(call.parameterTypes[0].pos) , call.name)))
+							errMsgPrefixDeprecated(call.parameterTypes[0].pos) , call.name)))
 			}
 			ret := v.Type.theFunctionType.mkCallReturnTypes(e.pos)
 			errsLength := len(errs)

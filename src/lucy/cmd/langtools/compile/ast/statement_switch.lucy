@@ -82,7 +82,7 @@ public class StatementSwitch {
 				if conditionType.Type == VariableTypeEnum {
 					if t.theEnumName == null {
 						errs.append(new error(sprintf("%s enum value is not literal",
-									errMsgPrefix(e.pos))))
+									errMsgPrefixDeprecated(e.pos))))
 						continue
 					} else {
 						if e.Type == ExpressionTypeSelection &&
@@ -115,7 +115,7 @@ public class StatementSwitch {
 						valueValid = true
 					} else {
 						errs.append(new error(sprintf("%s expression is not literal",
-									errMsgPrefix(e.pos))))
+									errMsgPrefixDeprecated(e.pos))))
 						continue
 					}
 

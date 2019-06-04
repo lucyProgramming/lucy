@@ -119,8 +119,8 @@ public class StatementWhen {
 				}
 				if exist := checkExists(typesChecked , tt) ; exist != null {
 					errMsg := sprintf("%s match '%s' already exist,first declared at:\n",
-						errMsgPrefix(tt.pos) , tt.typeString())
-					errMsg += sprintf("\t %s" , errMsgPrefix(exist.pos))
+						errMsgPrefixDeprecated(tt.pos) , tt.typeString())
+					errMsg += sprintf("\t %s" , errMsgPrefixDeprecated(exist.pos))
 					errs.append(new error(errMsg))
 					return
 				}
@@ -144,7 +144,7 @@ public class StatementWhen {
 		if match == null {
 			if this.defaultBlock == null {
 				errs.append(new error(sprintf("%s condition resolve as '%s' has no match and no 'default block'",
-							errMsgPrefix(this.condition.pos) , this.condition.typeString())))
+							errMsgPrefixDeprecated(this.condition.pos) , this.condition.typeString())))
 			} else {
 				switchStatement.Type = StatementTypeBlock
 				switchStatement.block = this.defaultBlock

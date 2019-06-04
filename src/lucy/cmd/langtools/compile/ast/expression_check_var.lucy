@@ -21,7 +21,7 @@ class ExpressionCheckVar {
 		if ev.Type == null && len(ev.initValues) == 0 {
 			// looks impossible
 			errs.append(new error(sprintf("%s expression var have not type and no initValues",
-						errMsgPrefix(e.pos))))
+						errMsgPrefixDeprecated(e.pos))))
 			return
 		}
 		var err error
@@ -52,7 +52,7 @@ class ExpressionCheckVar {
 					if v.Type != null {
 						if v.Type.assignAble(block , errs , valueTypes[k]) == false {
 							err = new error(sprintf("%s cannot assign  '%s' to '%s'",
-									errMsgPrefix(valueTypes[k].pos),
+									errMsgPrefixDeprecated(valueTypes[k].pos),
 									valueTypes[k].typeString(),
 									v.Type.typeString()))
 							errs.append(err)

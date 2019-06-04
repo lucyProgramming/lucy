@@ -127,11 +127,11 @@ class ExpressionCheckMap {
                 if mapV.assignAble(block , errs , vType) == false {
                     if noType {
                         errs.append(new error(sprintf("%s mix '%s' and '%s' for map key",
-                                    errMsgPrefix(v.value.pos),
+                                    errMsgPrefixDeprecated(v.value.pos),
                                     vType.typeString() , mapV.typeString())))
                     } else {
                         errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-                                    errMsgPrefix(v.value.pos),
+                                    errMsgPrefixDeprecated(v.value.pos),
                                     vType.typeString() , mapV.typeString())))
                     }
 

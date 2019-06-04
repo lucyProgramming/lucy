@@ -15,7 +15,7 @@ class ExpressionConstFold {
             if ee.isInteger() == false {
                 is = false
                 err = new error(sprintf("%s cannot apply '~' on a non-integer expression",
-                        errMsgPrefix(e.pos)))
+                        errMsgPrefixDeprecated(e.pos)))
                 return
             }
             e.Type = ee.Type
@@ -33,7 +33,7 @@ class ExpressionConstFold {
             if ee.Type != ExpressionTypeBool {
                 is = false
                 err = new error(sprintf("%s cannot apply '!' on a non-bool expression",
-                        errMsgPrefix(e.pos)))
+                        errMsgPrefixDeprecated(e.pos)))
                 return
             }
             e.Type = ExpressionTypeBool
@@ -50,7 +50,7 @@ class ExpressionConstFold {
             if ee.isNumber() == false {
                 is = false
                 err = new error(sprintf("%s cannot apply '-' on a '%s'",
-                        errMsgPrefix(e.pos) , e.op))
+                        errMsgPrefixDeprecated(e.pos) , e.op))
                 return
             }
             e.Type = ee.Type

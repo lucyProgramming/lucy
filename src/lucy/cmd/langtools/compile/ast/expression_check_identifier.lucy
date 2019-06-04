@@ -76,7 +76,7 @@ class ExpressionCheckIdentifier {
 		if f , ok := d.(Function) ; ok {
 			if f.isGlobalMain() {
 				// not allow
-				return null , new error(sprintf("%s function is global main" , errMsgPrefix(e.pos)))
+				return null , new error(sprintf("%s function is global main" , errMsgPrefixDeprecated(e.pos)))
 			}
 			if f.isBuildIn {
 				return null,

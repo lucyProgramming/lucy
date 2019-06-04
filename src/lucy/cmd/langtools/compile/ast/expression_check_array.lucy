@@ -10,7 +10,7 @@ class ExpressionCheckArray {
 			errs.append(
 				new error(
 					sprintf("%s array literal has no type and no expression, cannot inference it`s type ",
-						errMsgPrefix(e.pos))))
+						errMsgPrefixDeprecated(e.pos))))
 			return
 		}
 		var noType = true
@@ -48,10 +48,10 @@ class ExpressionCheckArray {
 				if arr.Type.theArray.assignAble(block , errs , eType) == false {
 					if noType {
 						errs.append(new error(sprintf("%s array literal mix up '%s' and '%s'",
-									errMsgPrefix(eType.pos) , arr.Type.theArray.typeString() , eType.typeString())))
+									errMsgPrefixDeprecated(eType.pos) , arr.Type.theArray.typeString() , eType.typeString())))
 					} else {
 						errs.append(new error(sprintf("%s cannot use '%s' as '%s'",
-									errMsgPrefix(eType.pos) , eType.typeString() , arr.Type.theArray.typeString())))
+									errMsgPrefixDeprecated(eType.pos) , eType.typeString() , arr.Type.theArray.typeString())))
 					}
 
 				}

@@ -312,7 +312,7 @@ public class FunctionType {
 		errs := []error{}
 		if len(callArgsTypes) > len(this.parameterList) {
 			if this.vArgs == null {
-				errMsg := sprintf("%s too many paramaters to call\n" , errMsgPrefix(from))
+				errMsg := sprintf("%s too many paramaters to call\n" , errMsgPrefixDeprecated(from))
 				if haveAndWant != null {
 					errMsg += haveAndWant
 				}
@@ -327,14 +327,14 @@ public class FunctionType {
 				if t.isVariableArgs {
 					if len(callArgsTypes[len(this.parameterList):]) > 1 {
 						errMsg := sprintf("%s too many argument to call\n",
-							errMsgPrefix(t.pos))
+							errMsgPrefixDeprecated(t.pos))
 						errMsg += haveAndWant
 						err = new error(sprintf(errMsg))
 						return
 					}
 					if false == v.Type.assignAble(block , errs , t) {
 						err = new error(sprintf("%s cannot use '%s' as '%s'",
-								errMsgPrefix(t.pos),
+								errMsgPrefixDeprecated(t.pos),
 								t.typeString() , v.Type.typeString()))
 						return
 					}
@@ -343,7 +343,7 @@ public class FunctionType {
 				}
 				if false == v.Type.theArray.assignAble(block , errs , t) {
 					err = new error(sprintf("%s cannot use '%s' as '%s'",
-							errMsgPrefix(t.pos),
+							errMsgPrefixDeprecated(t.pos),
 							t.typeString() , v.Type.typeString()))
 					return
 				}
@@ -365,7 +365,7 @@ public class FunctionType {
 
 				}
 			} else {
-				errMsg := sprintf("%s too few paramaters to call\n" , errMsgPrefix(from))
+				errMsg := sprintf("%s too few paramaters to call\n" , errMsgPrefixDeprecated(from))
 				if haveAndWant != null {
 					errMsg += haveAndWant
 				}
@@ -380,7 +380,7 @@ public class FunctionType {
 				}
 				//TODO :: convert or not ???
 				errMsg := sprintf("%s cannot use '%s' as '%s'",
-					errMsgPrefix(callArgsTypes[k].pos),
+					errMsgPrefixDeprecated(callArgsTypes[k].pos),
 					callArgsTypes[k].typeString() , v.Type.typeString())
 				err = new error(sprintf(errMsg))
 				return

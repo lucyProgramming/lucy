@@ -554,7 +554,7 @@ public class Expression implements TopNodeInterface , ExpressionNodeInterface  {
                 }
                 this.value = tt
             case ExpressionTypeRange:
-                errs.append(new error(sprintf("%s range is only work with 'for' statement" , errMsgPrefix(this.pos))))
+                errs.append(new error(sprintf("%s range is only work with 'for' statement" , errMsgPrefixDeprecated(this.pos))))
             case ExpressionTypeSlice:
                 tt := ExpressionCheckSlice.check(this , block , errs)
                 this.value = tt
@@ -632,7 +632,7 @@ public class Expression implements TopNodeInterface , ExpressionNodeInterface  {
                     errs.append(
                         new error(
                             sprintf("%s cannot pack non java array to variable-length arguments",
-                                errMsgPrefix(this.pos))))
+                                errMsgPrefixDeprecated(this.pos))))
                     return
                 }
                 t.isVariableArgs = true
@@ -647,7 +647,7 @@ public class Expression implements TopNodeInterface , ExpressionNodeInterface  {
             return null , null // no-type,no error
         }
         if len(ts) > 1 {
-            err = new error(sprintf("%s multi value in single value context" , errMsgPrefix(this.pos)))
+            err = new error(sprintf("%s multi value in single value context" , errMsgPrefixDeprecated(this.pos)))
         }
         return ts[0] , err
     }

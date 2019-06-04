@@ -209,7 +209,7 @@ public class Class implements TopNodeInterface {
 		for _ , v := range this.fields {
 			if v.name == Super {
 				errs.append(new error(sprintf("%s 'super' not allow for field name",
-							errMsgPrefix(v.pos))))
+							errMsgPrefixDeprecated(v.pos))))
 			}
 			if v.locateDefinition {
 				this.block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(v)
@@ -252,14 +252,14 @@ public class Class implements TopNodeInterface {
 					for _ , v := range m.Function.Type.parameterList {
 						if v.defaultValueExpression != null {
 							errs.append(new error(sprintf("%s abstract method parameter '%s' cannot have default value '%s'",
-										errMsgPrefix(v.pos) , v.name , v.defaultValueExpression.op)))
+										errMsgPrefixDeprecated(v.pos) , v.name , v.defaultValueExpression.op)))
 						}
 					}
 
 					for _ , v := range m.Function.Type.returnList {
 						if v.defaultValueExpression != null {
 							errs.append(new error(sprintf("%s abstract method return variable '%s' cannot have default value '%s'",
-										errMsgPrefix(v.pos) , v.name , v.defaultValueExpression.op)))
+										errMsgPrefixDeprecated(v.pos) , v.name , v.defaultValueExpression.op)))
 						}
 					}
 
@@ -270,7 +270,7 @@ public class Class implements TopNodeInterface {
 				m.Function.checkParametersAndReturns(errs , false , m.isAbstract())
 				if len(m.Function.Type.templateNames) > 0 {
 					errs.append(new error(sprintf("%s cannot use template for method",
-								errMsgPrefix(m.Function.pos))))
+								errMsgPrefixDeprecated(m.Function.pos))))
 				}
 				if m.isStatic() == false {
 					if m.Function.block.variables == null {
@@ -351,7 +351,7 @@ public class Class implements TopNodeInterface {
 			if this.isInterface() {
 				if this.superClass.name != JavaRootClass {
 					err = new error(sprintf("%s interface`s super-class must be '%s'",
-							errMsgPrefix(this.superClassName.pos) , JavaRootClass))
+							errMsgPrefixDeprecated(this.superClassName.pos) , JavaRootClass))
 					return err
 				}
 			}
@@ -383,7 +383,7 @@ public class Class implements TopNodeInterface {
 			}
 			if t.Type != VariableTypeObject {
 				errs.append(new error(sprintf("%s '%s' is not a object , but '%s'",
-							errMsgPrefix(i.pos) , i.name , t.typeString())))
+							errMsgPrefixDeprecated(i.pos) , i.name , t.typeString())))
 				continue
 			}
 			if t.theClass.findUsageInstances != null {
@@ -392,7 +392,7 @@ public class Class implements TopNodeInterface {
 			}
 			if t.theClass.isInterface() == false {
 				errs.append(new error(sprintf("%s '%s' is not a interface",
-							errMsgPrefix(i.pos) , i.name)))
+							errMsgPrefixDeprecated(i.pos) , i.name)))
 				continue
 			}
 			this.interfaces.append(t.theClass)
@@ -517,7 +517,7 @@ public class Class implements TopNodeInterface {
 		}
 		this.loadSuperClassCalled = true
 		if this.name == JavaRootClass {
-			err = new error(sprintf("%s root class already" , errMsgPrefix(pos)))
+			err = new error(sprintf("%s root class already" , errMsgPrefixDeprecated(pos)))
 			return err
 		}
 		if this.superClassName == null {
@@ -985,13 +985,13 @@ public class Class implements TopNodeInterface {
 				f := this.fields[name]
 				if f.pos.endLine < ms[0].Function.pos.endLine {
 					errMsg := sprintf("%s method named '%s' already declared as field,at:\n",
-						errMsgPrefix(ms[0].Function.pos) , name)
-					errMsg += sprintf("\t%s" , errMsgPrefix(f.pos))
+						errMsgPrefixDeprecated(ms[0].Function.pos) , name)
+					errMsg += sprintf("\t%s" , errMsgPrefixDeprecated(f.pos))
 					errs.append(new error(errMsg))
 				} else {
 					errMsg := sprintf("%s field named '%s' already declared as method,at:\n",
-						errMsgPrefix(f.pos) , name)
-					errMsg += sprintf("\t%s" , errMsgPrefix(ms[0].Function.pos))
+						errMsgPrefixDeprecated(f.pos) , name)
+					errMsg += sprintf("\t%s" , errMsgPrefixDeprecated(ms[0].Function.pos))
 					errs.append(new error(errMsg))
 				}
 
@@ -999,10 +999,10 @@ public class Class implements TopNodeInterface {
 			}
 			if len(ms) > 1 {
 				errMsg := sprintf("%s class method named '%s' has declared %d times,which are:\n",
-					errMsgPrefix(ms[0].Function.pos),
+					errMsgPrefixDeprecated(ms[0].Function.pos),
 					ms[0].Function.name , len(ms))
 				for _ , v := range ms {
-					errMsg += sprintf("\t%s\n" , errMsgPrefix(v.Function.pos))
+					errMsg += sprintf("\t%s\n" , errMsgPrefixDeprecated(v.Function.pos))
 				}
 
 				errs.append(new error(errMsg))
@@ -1082,7 +1082,7 @@ public class Class implements TopNodeInterface {
 						pos = nameMatch[0].Function.pos
 					}
 					if nameMatch[0] != null {
-						errMsg := sprintf("%s method is suitable for abstract super class\n" , errMsgPrefix(pos))
+						errMsg := sprintf("%s method is suitable for abstract super class\n" , errMsgPrefixDeprecated(pos))
 						errMsg += sprintf("\t have %s\n" , nameMatch[0].Function.readableMsg())
 						errMsg += sprintf("\t want %s\n" , m.Function.readableMsg())
 						errs.append(new error(errMsg))
@@ -1159,7 +1159,7 @@ public class Class implements TopNodeInterface {
 			}
 			if exist != null {
 				errs.append(new error(sprintf("%s method '%s' override '%s'",
-							errMsgPrefix(v[0].Function.pos) , name , exist.name)))
+							errMsgPrefixDeprecated(v[0].Function.pos) , name , exist.name)))
 			}
 		}
 
@@ -1178,7 +1178,7 @@ public class Class implements TopNodeInterface {
 
 			if exist != null {
 				errs.append(new error(sprintf("%s method '%s' override '%s'",
-							errMsgPrefix(v[0].Function.pos) , name , exist.name)))
+							errMsgPrefixDeprecated(v[0].Function.pos) , name , exist.name)))
 			}
 		}
 
@@ -1299,7 +1299,7 @@ public class Class implements TopNodeInterface {
 					f2.theFunctionType = v.Function.Type
 					if f1.equal(f2) {
 						errs.append(new error(sprintf("%s override final method '%s'",
-									errMsgPrefix(m.Function.pos) , name)))
+									errMsgPrefixDeprecated(m.Function.pos) , name)))
 					}
 				}
 
@@ -1316,7 +1316,7 @@ public class Class implements TopNodeInterface {
 				ff := this.superClass.fields[name]
 				if ff.isFinal() {
 					errs.append(new error(sprintf("%s override final field '%s'",
-								errMsgPrefix(f.pos) , name)))
+								errMsgPrefixDeprecated(f.pos) , name)))
 				}
 			}
 
@@ -1371,7 +1371,7 @@ public class Class implements TopNodeInterface {
 		if this.isInterface() {
 			for _ , v := range this.fields {
 				errs.append(new error(sprintf("%s interface '%s' expect no field named '%s'",
-							errMsgPrefix(v.pos) , this.name , v.name)))
+							errMsgPrefixDeprecated(v.pos) , this.name , v.name)))
 			}
 
 			return errs
@@ -1474,7 +1474,7 @@ public class Class implements TopNodeInterface {
 				} else {
 					if this.isInterface() {
 						errs.append(new error(sprintf("%s interface method cannot have implementation",
-									errMsgPrefix(method.Function.pos))))
+									errMsgPrefixDeprecated(method.Function.pos))))
 						continue
 					}
 					errs.appendAll(method.Function.checkReturnVarExpression())
@@ -1482,12 +1482,12 @@ public class Class implements TopNodeInterface {
 					if isConstruction {
 						if method.isFirstStatementCallFatherConstruction() == false {
 							errs.append(new error(sprintf("%s construction method should call father construction method first, 'this.super()'",
-										errMsgPrefix(method.Function.pos))))
+										errMsgPrefixDeprecated(method.Function.pos))))
 						}
 					}
 					if isConstruction && method.Function.Type.voidReturn() == false {
 						errs.append(new error(sprintf("%s construction method expect no return values",
-									errMsgPrefix(method.Function.Type.parameterList[0].pos))))
+									errMsgPrefixDeprecated(method.Function.Type.parameterList[0].pos))))
 					}
 					method.Function.block.inheritedAttribute.isConstructionMethod = isConstruction
 					method.Function.checkBlock(errs)
@@ -1503,11 +1503,11 @@ public class Class implements TopNodeInterface {
 	fn checkModifierOk() -> (errs []error = []error{}) {
 		if this.isInterface() && this.isFinal() {
 			errs.append(new error(sprintf("%s interface '%s' cannot be final",
-						errMsgPrefix(this.finalPos) , this.name)))
+						errMsgPrefixDeprecated(this.finalPos) , this.name)))
 		}
 		if this.isAbstract() && this.isFinal() {
 			errs.append(new error(sprintf("%s abstract class '%s' cannot be final",
-						errMsgPrefix(this.finalPos) , this.name)))
+						errMsgPrefixDeprecated(this.finalPos) , this.name)))
 		}
 		return errs
 	}

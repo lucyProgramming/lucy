@@ -33,7 +33,7 @@ fn checkExpressions(
 		} else {
 			if len(ts) > 1 && singleValueContext {
 				errs.append(new error(sprintf("%s multi value in single value context",
-							errMsgPrefix(v.pos))))
+							errMsgPrefixDeprecated(v.pos))))
 			}
 			for _ , t := range ts {
 				if t == null {
@@ -157,7 +157,7 @@ fn checkConst(block Block , c Constant , errs []error) -> (err error) {
 		c.mkDefaultValue()
 	}
 	if c.defaultValueExpression == null {
-		err = new error(sprintf("%s const have no expression" , errMsgPrefix(c.pos)))
+		err = new error(sprintf("%s const have no expression" , errMsgPrefixDeprecated(c.pos)))
 		return err
 	}
 	is , err := c.defaultValueExpression.constantFold(errs)

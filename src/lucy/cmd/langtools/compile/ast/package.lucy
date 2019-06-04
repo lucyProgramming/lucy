@@ -95,7 +95,8 @@ public class Package {
 	}
 
 	public fn setLocatedDefinitionPos(x Object) {
-		assert(this.locatedDefinitionPos == null , this.locatedDefinitionPosBaseOn == null)
+		assert(this.locatedDefinitionPos == null,
+			this.locatedDefinitionPosBaseOn == null)
 		this.locatedDefinitionPos = .getPos(x)
 		if this.locatedDefinitionPos == null {
 			if f , ok := x.(Function) ; ok && f.isBuildIn {
@@ -461,7 +462,7 @@ public class Package {
 				}
 				if defineMainOK == false {
 					this.errors.append(new error(sprintf("%s function '%s' expect declared as 'main(args []string)'",
-								errMsgPrefix(v.pos) , MainFunctionName)))
+								errMsgPrefixDeprecated(v.pos) , MainFunctionName)))
 				}
 			}
 			if this.shouldStop(null) {
@@ -599,7 +600,7 @@ public class Package {
 			for _ , i := range v.imports {
 				if i.used == 0 {
 					errMsg := sprintf("%s' imported not used" , i.theImport)
-					t := new CompileError(sprintf("%s %s" , errMsgPrefix(i.pos) , errMsg))
+					t := new CompileError(sprintf("%s %s" , errMsgPrefixDeprecated(i.pos) , errMsg))
 					t.pos = i.pos
 					t.err = errMsg
 					errs.append(t)

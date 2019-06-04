@@ -7,7 +7,7 @@ class ExpressionCheckOpAssign {
             list := bin.left.data.([]Expression)
             if len(list) > 1 {
                 errs.append(new error(sprintf("%s expect 1 expression on left",
-                            errMsgPrefix(e.pos))))
+                            errMsgPrefixDeprecated(e.pos))))
             }
             bin.left = list[0]
         }

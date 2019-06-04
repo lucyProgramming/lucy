@@ -70,7 +70,7 @@ fn registerBuildInFunctions() {
 				return
 			}
 			if e.args[0].Type != ExpressionTypeString {
-				errs.append(new error(sprintf("%s build function '%s' expect string argument" , errMsgPrefix(args[0].pos) , common.BuildInFunctionCatch)))
+				errs.append(new error(sprintf("%s build function '%s' expect string argument" , errMsgPrefixDeprecated(args[0].pos) , common.BuildInFunctionCatch)))
 			}
 			className := e.args[0].stringValue
 			c , err := block.inheritedAttribute.thePackageBeenCompiling.loadClass(className)
@@ -97,10 +97,10 @@ fn registerBuildInFunctions() {
 		buildInFunctionsMap[common.BuildInFunctionPanic].buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall,
 			block Block , errs []error , args []Type , pos Pos) {
 			if len(e.parameterTypes) > 0 {
-				errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefix(e.parameterTypes[0].pos))))
+				errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefixDeprecated(e.parameterTypes[0].pos))))
 			}
 			if len(args) != 1 {
-				errs.append(new error(sprintf("%s buildin function 'panic' expect one argument" , errMsgPrefix(pos))))
+				errs.append(new error(sprintf("%s buildin function 'panic' expect one argument" , errMsgPrefixDeprecated(pos))))
 				return
 			}
 			if len(args) == 0 || args[0] == null {
@@ -140,10 +140,10 @@ fn registerBuildInFunctions() {
 			args []Type,
 			pos Pos) {
 			if len(e.parameterTypes) > 0 {
-				errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefix(e.parameterTypes[0].pos))))
+				errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefixDeprecated(e.parameterTypes[0].pos))))
 			}
 			if len(args) != 1 {
-				errs.append(new error(sprintf("%s expect one argument" , errMsgPrefix(pos))))
+				errs.append(new error(sprintf("%s expect one argument" , errMsgPrefixDeprecated(pos))))
 				return
 			}
 			if args[0] == null {
@@ -151,7 +151,7 @@ fn registerBuildInFunctions() {
 			}
 			if args[0].Type != VariableTypeArray && args[0].Type != VariableTypeJavaArray &&
 				args[0].Type != VariableTypeMap && args[0].Type != VariableTypeString {
-				errs.append(new error(sprintf("%s len expect 'array' or 'map' or 'string' argument" , errMsgPrefix(pos))))
+				errs.append(new error(sprintf("%s len expect 'array' or 'map' or 'string' argument" , errMsgPrefixDeprecated(pos))))
 				return
 			}
 		}
@@ -176,7 +176,7 @@ fn registerBuildInFunctions() {
 		s.buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error,
 			args []Type , pos Pos) {
 			if len(e.parameterTypes) > 0 {
-				errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefix(e.parameterTypes[0].pos))))
+				errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefixDeprecated(e.parameterTypes[0].pos))))
 			}
 			if len(args) == 0 {
 				err := new error(sprintf("%s '%s' expect one argument at lease" , pos.errMsgPrefix() , common.BuildInFunctionSprintf))
@@ -217,7 +217,7 @@ fn registerBuildInFunctions() {
 		a.buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error,
 			args []Type , pos Pos) {
 			if len(e.parameterTypes) > 0 {
-				errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefix(e.parameterTypes[0].pos))))
+				errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefixDeprecated(e.parameterTypes[0].pos))))
 			}
 			if len(args) == 0 {
 				err := new error(sprintf("%s '%s' expect one argument at lease" , pos.errMsgPrefix() , common.BuildInFunctionAssert))
@@ -229,7 +229,7 @@ fn registerBuildInFunctions() {
 					continue
 				}
 				if a.Type != VariableTypeBool {
-					err := new error(sprintf("%s not a bool expression" , errMsgPrefix(pos)))
+					err := new error(sprintf("%s not a bool expression" , errMsgPrefixDeprecated(pos)))
 					errs.append(err)
 				}
 			}
@@ -243,7 +243,7 @@ fn registerBuildInFunctions() {
 		buildInFunctionsMap[common.BuildInFunctionPrintf] = new Function()
 		buildInFunctionsMap[common.BuildInFunctionPrintf].buildInFunctionChecker = fn (f Function , e ExpressionFunctionCall , block Block , errs []error , args []Type , pos Pos) {
 			if len(e.parameterTypes) > 0 {
-				errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefix(e.parameterTypes[0].pos))))
+				errs.append(new error(sprintf("%s buildin function expect no typed parameter" , errMsgPrefixDeprecated(e.parameterTypes[0].pos))))
 			}
 			meta := new BuildInFunctionPrintfMeta()
 			e.buildInFunctionMeta = meta
@@ -256,7 +256,7 @@ fn registerBuildInFunctions() {
 				return
 			}
 			if len(args) == 0 {
-				err := new error(sprintf("%s missing format argument" , errMsgPrefix(pos)))
+				err := new error(sprintf("%s missing format argument" , errMsgPrefixDeprecated(pos)))
 				errs.append(err)
 				return
 			}
@@ -264,7 +264,7 @@ fn registerBuildInFunctions() {
 				return
 			}
 			if args[0].Type != VariableTypeString {
-				err := new error(sprintf("%s format must be string" , errMsgPrefix(pos)))
+				err := new error(sprintf("%s format must be string" , errMsgPrefixDeprecated(pos)))
 				errs.append(err)
 				return
 			}

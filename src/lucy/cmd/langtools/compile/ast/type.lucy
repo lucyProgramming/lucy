@@ -216,11 +216,11 @@ public class Type {
 			case VariableTypeTemplate:
 				if block.inheritedAttribute.function.parameterTypes == null {
 					return new error(sprintf("%s parameter type '%s' not in a template function",
-								errMsgPrefix(this.pos) , this.name))
+								errMsgPrefixDeprecated(this.pos) , this.name))
 				}
 				if block.inheritedAttribute.function.parameterTypes[this.name] == null {
 					return new error(sprintf("%s parameter type '%s' not found",
-								errMsgPrefix(this.pos) , this.name))
+								errMsgPrefixDeprecated(this.pos) , this.name))
 				}
 				pos := this.pos // keep pos
 				if this.locateDefinition {
@@ -235,7 +235,7 @@ public class Type {
 				d , exists := block.inheritedAttribute.thePackageBeenCompiling.block.nameExists(this.name , this.pos)
 				if exists == false {
 					return new error(sprintf("%s '%s' not found",
-								errMsgPrefix(this.pos) , this.name))
+								errMsgPrefixDeprecated(this.pos) , this.name))
 				}
 				return this.makeTypeFrom(block , d)
 			case VariableTypeArray , VariableTypeJavaArray:
@@ -319,7 +319,7 @@ public class Type {
 			}
 		}
 		if d == null {
-			return new error(sprintf("%s type named '%s' not found" , errMsgPrefix(this.pos) , this.name))
+			return new error(sprintf("%s type named '%s' not found" , errMsgPrefixDeprecated(this.pos) , this.name))
 		}
 		err = this.makeTypeFrom(block , d)
 		if err != null {
@@ -339,7 +339,7 @@ public class Type {
 				return block.inheritedAttribute.thePackageBeenCompiling.load(i.theImport)
 			}
 			return null , new error(sprintf("%s type named '%s' not found",
-						errMsgPrefix(this.pos) , this.name))
+						errMsgPrefixDeprecated(this.pos) , this.name))
 		}
 		index := this.name.indexOf(".")
 		packageName := this.name[:index]
@@ -347,7 +347,7 @@ public class Type {
 		i := block.inheritedAttribute.thePackageBeenCompiling.getImport(this.pos.filename , packageName)
 		if null == i {
 			return null , new error(sprintf("%s package '%s' not imported",
-						errMsgPrefix(this.pos) , packageName))
+						errMsgPrefixDeprecated(this.pos) , packageName))
 		}
 		{
 			pos := this.pos
@@ -363,7 +363,7 @@ public class Type {
 		p , err := block.inheritedAttribute.thePackageBeenCompiling.load(i.theImport)
 		if err != null {
 			return null , new error(sprintf("%s %s",
-						errMsgPrefix(this.pos) , err.getMessage()))
+						errMsgPrefixDeprecated(this.pos) , err.getMessage()))
 		}
 		if this.autoCompletion {
 			items := []AutoCompletionItem{}
@@ -392,7 +392,7 @@ public class Type {
 				block.inheritedAttribute.thePackageBeenCompiling.autoCompletionItems = items
 			} else {
 				return null , new error(sprintf("%s '%s' is not a package",
-							errMsgPrefix(this.pos) , packageName))
+							errMsgPrefixDeprecated(this.pos) , packageName))
 			}
 			return null , new error("FALSE ERROR") // it's ok 
 		}
@@ -402,12 +402,12 @@ public class Type {
 			d , exists = pp.block.nameExists(className , this.pos)
 			if exists == false {
 				err = new error(sprintf("%s '%s' not found",
-						errMsgPrefix(this.pos) , className))
+						errMsgPrefixDeprecated(this.pos) , className))
 			}
 			return d , err
 		} else {
 			return null , new error(sprintf("%s '%s' is not a package",
-						errMsgPrefix(this.pos) , packageName))
+						errMsgPrefixDeprecated(this.pos) , packageName))
 		}
 	}
 
@@ -415,7 +415,7 @@ public class Type {
 		if c , ok := d.(Class) ; ok {
 			if c.loadFromOutSide && c.isPublic() == false {
 				err = new error(sprintf("%s class '%s' is not public",
-						errMsgPrefix(this.pos) , c.name))
+						errMsgPrefixDeprecated(this.pos) , c.name))
 			}
 			if this.locateDefinition && c.pos != null {
 				block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(c)
@@ -445,7 +445,7 @@ public class Type {
 		if dd , ok := d.(Enum) ; ok {
 			if dd.loadFromOutSide && dd.isPublic() == false {
 				block.inheritedAttribute.thePackageBeenCompiling.errors.append(new error(sprintf("%s enum '%s' is not public",
-							errMsgPrefix(this.pos) , dd.name)))
+							errMsgPrefixDeprecated(this.pos) , dd.name)))
 			}
 			if this.locateDefinition {
 				block.inheritedAttribute.thePackageBeenCompiling.setLocatedDefinitionPos(dd)
@@ -456,7 +456,7 @@ public class Type {
 			return null
 		}
 		return new error(sprintf("%s name '%s' is not a type",
-					errMsgPrefix(this.pos) , this.name))
+					errMsgPrefixDeprecated(this.pos) , this.name))
 	}
 
 	public fn isNumber() -> (is bool) {

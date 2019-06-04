@@ -17,7 +17,7 @@ class ExpressionCheckTypeAssert {
         }
         if object.isPointer() == false {
             errs.append(new error(sprintf("%s expression is not pointer",
-                        errMsgPrefix(object.pos))))
+                        errMsgPrefixDeprecated(object.pos))))
             return
         }
         err := assertion.to.resolve(block)
@@ -32,7 +32,7 @@ class ExpressionCheckTypeAssert {
             }
             if assertion.to.validForTypeAssertOrConversion() == false {
                 errs.append(new error(sprintf("%s cannot use '%s' for type assertion",
-                            errMsgPrefix(assertion.to.pos) , assertion.to.typeString())))
+                            errMsgPrefixDeprecated(assertion.to.pos) , assertion.to.typeString())))
             }
         }
         if len(e.lefts) > 1 {

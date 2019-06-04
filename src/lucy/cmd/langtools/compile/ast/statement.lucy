@@ -166,7 +166,7 @@ public class Statement {
 			case StatementTypeImport:
 				if block.inheritedAttribute.function.templateClonedFunction == false {
 					errs.append(new error(sprintf("%s cannot have 'import' at this scope , non-template function",
-								errMsgPrefix(this.theImport.pos))))
+								errMsgPrefixDeprecated(this.theImport.pos))))
 					return errs
 				}
 				err := this.theImport.mkAccessName()
@@ -177,7 +177,7 @@ public class Statement {
 				if this.theImport.accessName != null &&
 					this.theImport.accessName == UnderScore {
 					errs.append(new error(sprintf("%s import at block scope , must be used",
-								errMsgPrefix(this.theImport.pos))))
+								errMsgPrefixDeprecated(this.theImport.pos))))
 					return null
 				}
 				if err := block.inheritedAttribute.thePackageBeenCompiling.insertImport(this.theImport) ; err != null {

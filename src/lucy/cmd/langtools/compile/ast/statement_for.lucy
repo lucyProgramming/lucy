@@ -37,7 +37,7 @@ public class StatementFor {
             t := bin.right.data.([]Expression)
             if len(t) > 1 {
                 errs.append(new error(sprintf("%s for range statement only allow one argument on the right",
-                            errMsgPrefix(t[1].pos))))
+                            errMsgPrefixDeprecated(t[1].pos))))
             }
             rangeExpression = t[0].data.(Expression)
         }
@@ -72,7 +72,7 @@ public class StatementFor {
             rangeOn.Type != VariableTypeJavaArray &&
             rangeOn.Type != VariableTypeMap {
             errs.append(new error(sprintf("%s cannot range on '%s'",
-                        errMsgPrefix(rangeExpression.pos) , rangeOn.typeString())))
+                        errMsgPrefixDeprecated(rangeExpression.pos) , rangeOn.typeString())))
             if this.block != null {
                 this.block.inherit(this.initExpressionBlock)
                 errs.appendAll(this.block.check())
@@ -88,7 +88,7 @@ public class StatementFor {
 
         if len(lefts) > 2 {
             errs.append(new error(sprintf("%s cannot have more than 2 expressions on the left",
-                        errMsgPrefix(lefts[2].pos))))
+                        errMsgPrefixDeprecated(lefts[2].pos))))
             lefts = lefts[0 : 2]
         }
         modelKv := len(lefts) == 2
@@ -99,7 +99,7 @@ public class StatementFor {
             for _ , v := range lefts {
                 if v.Type != ExpressionTypeIdentifier {
                     errs.append(new error(sprintf("%s not a identifier on left",
-                                errMsgPrefix(v.pos))))
+                                errMsgPrefixDeprecated(v.pos))))
                 }
             }
 
@@ -234,7 +234,7 @@ public class StatementFor {
             if receiverKType != null {
                 if receiverKType.assignAble(this.initExpressionBlock , errs , kType) == false {
                     err = new error(sprintf("%s cannot use '%s' as '%s' for index",
-                            errMsgPrefix(this.rangeAttr.expressionKey.pos),
+                            errMsgPrefixDeprecated(this.rangeAttr.expressionKey.pos),
                             receiverKType.typeString() , kType.typeString()))
                     errs.append(err)
                     goto checkBlock
@@ -243,7 +243,7 @@ public class StatementFor {
             if receiverVType != null {
                 if receiverVType.assignAble(this.initExpressionBlock , errs , vType) == false {
                     err = new error(sprintf("%s cannot use '%s' as '%s' for value destination",
-                            errMsgPrefix(this.rangeAttr.expressionKey.pos),
+                            errMsgPrefixDeprecated(this.rangeAttr.expressionKey.pos),
                             receiverKType.typeString() , kType.typeString()))
                     errs.append(err)
                     goto checkBlock
@@ -287,7 +287,7 @@ public class StatementFor {
             errs.appendAll(es)
             if t != null && t.Type != VariableTypeBool {
                 errs.append(new error(sprintf("%s condition must be bool expression,but %s",
-                            errMsgPrefix(this.condition.pos) , t.typeString())))
+                            errMsgPrefixDeprecated(this.condition.pos) , t.typeString())))
             }
         }
         if this.increment != null {

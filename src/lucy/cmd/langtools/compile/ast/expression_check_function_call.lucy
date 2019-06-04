@@ -236,7 +236,7 @@ class ExpressionCheckFunctionCall {
             } else {
                 if len(call.parameterTypes) > 0 {
                     errs.append(new error(sprintf("%s function is not a template function",
-                                errMsgPrefix(e.pos))))
+                                errMsgPrefixDeprecated(e.pos))))
                 }
                 var err error
                 call.vArgs , err = f.Type.fitArgs(block , e.pos , call.args , callArgsTypes , f)
@@ -266,7 +266,7 @@ class ExpressionCheckFunctionCall {
             }
             if err := v.Type.canBeBindWithType(f.Type , parameterTypes , argTypes[k]) ; err != null {
                 errs.append(new error(sprintf("%s %s",
-                            errMsgPrefix(argTypes[k].pos) , err.getMessage())))
+                            errMsgPrefixDeprecated(argTypes[k].pos) , err.getMessage())))
                 return
             }
             t := v.Type.cloneType()
@@ -294,7 +294,7 @@ class ExpressionCheckFunctionCall {
             }
             if err := v.Type.canBeBindWithType(f.Type , parameterTypes , tps[0]) ; err != null {
                 errs.append(new error(sprintf("%s %s",
-                            errMsgPrefix(tps[0].pos) , err.getMessage())))
+                            errMsgPrefixDeprecated(tps[0].pos) , err.getMessage())))
                 return null
             }
             t := v.Type.cloneType()
@@ -346,7 +346,7 @@ class ExpressionCheckFunctionCall {
         // when all ok ,ret is not a template function any more
         if len(tps) > 0 {
             errs.append(new error(sprintf("%s to many parameter type to call template function",
-                        errMsgPrefix(e.pos))))
+                        errMsgPrefixDeprecated(e.pos))))
         }
         return ret
     }

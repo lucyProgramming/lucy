@@ -36,12 +36,12 @@ class ExpressionCheckNew {
 		}
 		if no.Type.theClass.isInterface() {
 			errs.append(new error(sprintf("%s '%s' is interface",
-						errMsgPrefix(no.Type.pos) , no.Type.theClass.name)))
+						errMsgPrefixDeprecated(no.Type.pos) , no.Type.theClass.name)))
 			return
 		}
 		if no.Type.theClass.isAbstract() {
 			errs.append(new error(sprintf("%s '%s' is abstract",
-						errMsgPrefix(no.Type.pos) , no.Type.theClass.name)))
+						errMsgPrefixDeprecated(no.Type.pos) , no.Type.theClass.name)))
 			return
 		}
 		if no.Type.theClass.findUsage {
@@ -81,7 +81,7 @@ class ExpressionCheckNew {
 		errs []error) -> (valueType Type) {
 		if len(newMap.args) > 0 {
 			errs.append(new error(sprintf("%s new 'map' expect no arguments",
-						errMsgPrefix(newMap.args[0].pos))))
+						errMsgPrefixDeprecated(newMap.args[0].pos))))
 			checkExpressions(block , newMap.args , errs , true)
 		}
 		ret := newMap.Type.cloneType()
@@ -100,7 +100,7 @@ class ExpressionCheckNew {
 		ret.pos = e.pos
 		if len(newArray.args) != 1 {
 			errs.append(new error(sprintf("%s new array expect at least 1 argument",
-						errMsgPrefix(e.pos))))
+						errMsgPrefixDeprecated(e.pos))))
 			return ret
 		}
 		amount , es := newArray.args[0].checkSingleValueContextExpression(block)
@@ -112,7 +112,7 @@ class ExpressionCheckNew {
 		}
 		if amount.isInteger() == false {
 			errs.append(new error(sprintf("%s argument must be 'int',but '%s'",
-						errMsgPrefix(amount.pos) , amount.typeString())))
+						errMsgPrefixDeprecated(amount.pos) , amount.typeString())))
 		} else {
 			if amount.Type == VariableTypeLong {
 				newArray.args[0].convertToNumberType(VariableTypeLong)
@@ -120,7 +120,7 @@ class ExpressionCheckNew {
 			if newArray.args[0].isLiteral() {
 				if a := newArray.args[0].getLongValue() ; a < 0 {
 					errs.append(new error(sprintf("%s '%d' is negative ",
-								errMsgPrefix(amount.pos) , a)))
+								errMsgPrefixDeprecated(amount.pos) , a)))
 				}
 			}
 		}
