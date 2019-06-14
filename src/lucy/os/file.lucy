@@ -2,14 +2,14 @@
 
 import "java/io"
 
-public fn readFile(filepath string) -> (bs byte[] , err error) {
+public fn readFile(filePath string) -> (bs byte[] , err error) {
     defer {
         e := catch()
         if e != null {
             err = e
         }
     }
-    f := new io.File(filepath)
+    f := new io.File(filePath)
     if f.exists() == false {
         err = new error("file not exits")
         return
@@ -30,7 +30,7 @@ public fn readFile(filepath string) -> (bs byte[] , err error) {
     stream.read(bs)
 }
 
-public fn writeFile(filepath string , bs byte[] , start int = 0 , length int = -1) -> (err error) {
+public fn writeFile(filePath string , bs byte[] , start int = 0 , length int = -1) -> (err error) {
     defer {
         e := catch()
         if e != null {
@@ -40,7 +40,7 @@ public fn writeFile(filepath string , bs byte[] , start int = 0 , length int = -
     if length == -1 {
         length = bs.size()
     }
-    f := new io.File(filepath)
+    f := new io.File(filePath)
     if f.isDirectory() {
         err = new error("file is a directory")
         return

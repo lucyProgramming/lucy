@@ -34,9 +34,7 @@ public final class FloatOption extends Option {
                 value = value * 10.0 + float(b - '0')
             } else {
                 panic(sprintf("'%s' format float wrong" , s))
-
             }
-
         }
 
         if b == '.' {
@@ -51,10 +49,8 @@ public final class FloatOption extends Option {
                     panic(sprintf("'%s' format float wrong" , s))
 
                 }
-
                 index--
             }
-
             value += t
         }
         if isNegative {
