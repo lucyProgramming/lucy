@@ -1350,7 +1350,7 @@ public class Class implements TopNodeInterface {
 				}
 			} else {
 				pos := this.pos
-				if nameMatch != null && nameMatch[0].Function.pos != null {
+				if nameMatch[0] != null && nameMatch[0].Function != null && nameMatch[0].Function.pos != null {
 					pos = nameMatch[0].Function.pos
 				}
 				errs.append(new error(sprintf("%s missing implementation method '%s' define on interface '%s'",

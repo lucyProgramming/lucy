@@ -63,11 +63,23 @@ public class Loader implements ast.ImportLoader {
 				for entries.hasMoreElements() {
 					entry := entries.nextElement().(zip.ZipEntry)
 					if entry.isDirectory() {
-						break
+						if entry.getName().startsWith(importName) == false {
+							break
+						} else {
+							continue
+						}
 					}
 					if entry.getName().endsWith(".class") == false {
 						continue
 					}
+					//TODO:: 
+					// java/lang/annotation/Annotation.class is not belong to java/lang 
+					if len(langtoolsCommon.getPathElements(entry.getName())) !=
+						len(langtoolsCommon.getPathElements(importName + "/" + "a.class")) {
+							// a.class is pseudo class file for the case 
+							continue 
+					}
+					// print(entry.getName())
 					if exists.loadFromJar == null {
 						exists.loadFromJar = [entry]
 						exists.loadFromJarBs = [this.readBsFromZip(zipFile , entry)]
@@ -746,6 +758,7 @@ public class Loader implements ast.ImportLoader {
 				}
 				c := new cg.ClassDecoder(javaArray2Lucy(bs)).decode()
 				cc := this.loadAsJava(c)
+
 				if cc != null {
 					if p.block.classes == null {
 						p.block.classes = new map{string -> ast.Class}()
@@ -761,6 +774,7 @@ public class Loader implements ast.ImportLoader {
 				}
 				c := new cg.ClassDecoder(r.loadFromJarBs[k]).decode()
 				cc := this.loadAsJava(c)
+
 				if cc != null {
 					if p.block.classes == null {
 						p.block.classes = new map{string -> ast.Class}()
